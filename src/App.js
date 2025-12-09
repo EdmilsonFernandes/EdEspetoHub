@@ -10,10 +10,9 @@ import {
   FileText,
   LogOut
 } from 'lucide-react';
-import { signInWithPopup, onAuthStateChanged, signOut } from 'firebase/auth';
-import { auth, googleProvider } from './config/firebase';
 import { productService } from './services/productService';
 import { orderService } from './services/orderService';
+import { authService } from './services/authService';
 import { MenuView } from './components/Client/MenuView';
 import { CartView } from './components/Client/CartView';
 import { SuccessView } from './components/Client/SuccessView';
@@ -33,13 +32,20 @@ function App() {
   const [adminTab, setAdminTab] = useState('dashboard');
   const [cart, setCart] = useState({});
   const [customer, setCustomer] = useState(initialCustomer);
+  const [loginForm, setLoginForm] = useState({ username: '', password: '' });
+  const [loginError, setLoginError] = useState('');
 
   useEffect(() => {
-    const unsubAuth = onAuthStateChanged(auth, setUser);
+    const savedSession = localStorage.getItem('adminSession');
+    if (savedSession) {
+      const parsedSession = JSON.parse(savedSession);
+      setUser(parsedSession);
+      setView('admin');
+    }
+
     const unsubProd = productService.subscribe(setProducts);
     const unsubOrders = orderService.subscribeAll(setOrders);
     return () => {
-      unsubAuth();
       unsubProd();
       unsubOrders();
     };
@@ -91,17 +97,25 @@ function App() {
     setView('success');
   };
 
-  const handleLogin = async () => {
+  const handleLogin = async (event) => {
+    event?.preventDefault();
+    setLoginError('');
+
     try {
-      await signInWithPopup(auth, googleProvider);
+      const session = await authService.login(loginForm.username, loginForm.password);
+      const sessionData = { ...session, username: loginForm.username };
+      localStorage.setItem('adminSession', JSON.stringify(sessionData));
+      setUser(sessionData);
       setView('admin');
     } catch (error) {
-      alert('Erro ao logar: ' + error.message);
+      setLoginError(error.message || 'Falha ao autenticar');
     }
   };
 
   const logout = () => {
-    signOut(auth);
+    localStorage.removeItem('adminSession');
+    setUser(null);
+    setLoginForm({ username: '', password: '' });
     setView('menu');
   };
 
@@ -152,11 +166,11 @@ function App() {
           <div className="p-4 border-t border-gray-800">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-sm font-bold">
-                {user.displayName?.[0] || 'U'}
+                {user.name?.[0]?.toUpperCase() || user.username?.[0]?.toUpperCase() || 'U'}
               </div>
               <div className="overflow-hidden">
-                <p className="text-sm font-bold truncate">{user.displayName}</p>
-                <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                <p className="text-sm font-bold truncate">{user.name || 'Administrador'}</p>
+                <p className="text-xs text-gray-500 truncate">{user.username || 'admin'}</p>
               </div>
             </div>
             <button
@@ -203,9 +217,17 @@ function App() {
                   </thead>
                   <tbody className="divide-y">
                     {orders.map((order) => (
-                      <tr key={order.id}>
+                    <tr key={order.id}>
                         <td className="p-3 text-gray-500">
-                          {order.createdAt ? new Date(order.createdAt.seconds * 1000).toLocaleString() : order.dateString}
+                          {
+                            order.createdAt?.seconds
+                              ? new Date(order.createdAt.seconds * 1000).toLocaleString()
+                              : order.createdAt
+                                ? new Date(order.createdAt).toLocaleString()
+                                : order.timestamp
+                                  ? new Date(order.timestamp).toLocaleString()
+                                  : order.dateString
+                          }
                         </td>
                         <td className="p-3 font-medium">{order.name}</td>
                         <td className="p-3 uppercase text-xs font-bold">{order.type}</td>
@@ -248,7 +270,13 @@ function App() {
             </div>
           </div>
           <div className="flex items-center gap-3 text-gray-400">
-            <button onClick={handleLogin} className="hover:text-red-600 transition-colors">
+            <button
+              onClick={() => {
+                setView('login');
+                setLoginError('');
+              }}
+              className="hover:text-red-600 transition-colors"
+            >
               <User size={20} />
             </button>
             <button onClick={() => setView('grill')} className="hover:text-red-600 transition-colors">
@@ -259,6 +287,60 @@ function App() {
       </header>
 
       <main className="max-w-lg mx-auto p-4">
+        {view === 'login' && (
+          <form onSubmit={handleLogin} className="bg-white rounded-xl shadow-sm p-6 space-y-4">
+            <div>
+              <h2 className="text-lg font-bold text-gray-800">Acesso do administrador</h2>
+              <p className="text-sm text-gray-500">Use usuário e senha definidos no banco (PGUSER/PGPASSWORD).</p>
+            </div>
+
+            {loginError && <div className="text-sm text-red-600 bg-red-50 border border-red-100 p-3 rounded-lg">{loginError}</div>}
+
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700" htmlFor="username">
+                Usuário
+              </label>
+              <input
+                id="username"
+                type="text"
+                value={loginForm.username}
+                onChange={(e) => setLoginForm((prev) => ({ ...prev, username: e.target.value }))}
+                className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-red-500 focus:outline-none"
+                placeholder="postgres"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700" htmlFor="password">
+                Senha
+              </label>
+              <input
+                id="password"
+                type="password"
+                value={loginForm.password}
+                onChange={(e) => setLoginForm((prev) => ({ ...prev, password: e.target.value }))}
+                className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-red-500 focus:outline-none"
+                placeholder="senha do banco"
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                type="submit"
+                className="flex-1 bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700 transition-colors"
+              >
+                Entrar
+              </button>
+              <button
+                type="button"
+                onClick={() => setView('menu')}
+                className="flex-1 border border-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+              >
+                Cancelar
+              </button>
+            </div>
+          </form>
+        )}
         {view === 'menu' && <MenuView products={products} cart={cart} onUpdateCart={updateCart} onProceed={() => setView('cart')} />}
         {view === 'cart' && (
           <CartView
