@@ -9,14 +9,15 @@ const normalizeOrder = (order) => ({
 
 export const orderService = {
     async save(orderData) {
-        await apiClient.post("/orders", orderData);
+        await apiClient.post("/api/orders", orderData);
     },
+
     subscribeAll(callback) {
         let cancelled = false;
 
         const load = async () => {
             try {
-                const data = await apiClient.get("/orders");
+                const data = await apiClient.get("/api/orders");
                 if (!cancelled) {
                     callback(data.map(normalizeOrder));
                 }
@@ -33,10 +34,12 @@ export const orderService = {
             clearInterval(interval);
         };
     },
+
     async fetchQueue() {
-        const data = await apiClient.get("/orders/queue");
+        const data = await apiClient.get("/api/orders/queue");
         return data.map(normalizeOrder);
     },
+
     subscribeRecent(callback) {
         let cancelled = false;
 
@@ -55,7 +58,8 @@ export const orderService = {
             clearInterval(interval);
         };
     },
+
     async updateStatus(id, status) {
-        await apiClient.patch(`/orders/${id}/status`, { status });
+        await apiClient.patch(`/api/orders/${id}/status`, { status });
     },
 };

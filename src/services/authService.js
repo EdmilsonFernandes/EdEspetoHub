@@ -2,7 +2,7 @@ import { apiClient } from "../config/apiClient";
 
 export const authService = {
     async login(username, password) {
-        const response = await apiClient.post("/login", {
+        const response = await apiClient.post("/api/login", {
             username,
             password,
         });
