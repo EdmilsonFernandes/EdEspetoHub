@@ -15,9 +15,13 @@ export const orderService = {
     let cancelled = false;
 
     const load = async () => {
-      const data = await apiClient.get('/api/orders');
-      if (!cancelled) {
-        callback(data.map(normalizeOrder));
+      try {
+        const data = await apiClient.get('/api/orders');
+        if (!cancelled) {
+          callback(data.map(normalizeOrder));
+        }
+      } catch (error) {
+        console.error('Erro ao carregar pedidos', error);
       }
     };
 

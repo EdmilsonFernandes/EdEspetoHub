@@ -29,6 +29,20 @@ app.get('/api/products', async (_, res) => {
   res.json(result.rows);
 });
 
+app.post('/api/login', (req, res) => {
+  const { username, password } = req.body || {};
+
+  const validUser = process.env.ADMIN_USER || process.env.PGUSER || 'postgres';
+  const validPassword = process.env.ADMIN_PASSWORD || process.env.PGPASSWORD || 'postgres';
+
+  if (username === validUser && password === validPassword) {
+    res.json({ token: 'ok', name: 'Administrador' });
+    return;
+  }
+
+  res.status(401).json({ message: 'Credenciais inválidas' });
+});
+
 app.post('/api/products', async (req, res) => {
   const { name, price, category, description, active = true } = req.body;
   const query =

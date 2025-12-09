@@ -1,4 +1,20 @@
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:4000';
+const resolveBaseUrl = () => {
+  if (process.env.REACT_APP_API_BASE_URL) {
+    return process.env.REACT_APP_API_BASE_URL;
+  }
+
+  if (typeof window === 'undefined') {
+    return 'http://localhost:4000';
+  }
+
+  if (window.location.port && window.location.port !== '3000') {
+    return `${window.location.origin}`;
+  }
+
+  return 'http://localhost:4000';
+};
+
+const API_BASE_URL = resolveBaseUrl();
 
 const defaultHeaders = {
   'Content-Type': 'application/json'
@@ -12,31 +28,35 @@ const handleResponse = async (response) => {
   return response.json();
 };
 
+const request = async (path, options) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}${path}`, options);
+    return await handleResponse(response);
+  } catch (error) {
+    console.error('Erro ao comunicar com a API', error);
+    throw new Error('Não foi possível conectar à API. Verifique se o servidor está ativo.');
+  }
+};
+
 export const apiClient = {
-  get: async (path) => handleResponse(await fetch(`${API_BASE_URL}${path}`)),
+  get: async (path) => request(path),
   post: async (path, body) =>
-    handleResponse(
-      await fetch(`${API_BASE_URL}${path}`, {
-        method: 'POST',
-        headers: defaultHeaders,
-        body: JSON.stringify(body)
-      })
-    ),
+    request(path, {
+      method: 'POST',
+      headers: defaultHeaders,
+      body: JSON.stringify(body)
+    }),
   put: async (path, body) =>
-    handleResponse(
-      await fetch(`${API_BASE_URL}${path}`, {
-        method: 'PUT',
-        headers: defaultHeaders,
-        body: JSON.stringify(body)
-      })
-    ),
+    request(path, {
+      method: 'PUT',
+      headers: defaultHeaders,
+      body: JSON.stringify(body)
+    }),
   patch: async (path, body) =>
-    handleResponse(
-      await fetch(`${API_BASE_URL}${path}`, {
-        method: 'PATCH',
-        headers: defaultHeaders,
-        body: JSON.stringify(body)
-      })
-    ),
-  delete: async (path) => handleResponse(await fetch(`${API_BASE_URL}${path}`, { method: 'DELETE' }))
+    request(path, {
+      method: 'PATCH',
+      headers: defaultHeaders,
+      body: JSON.stringify(body)
+    }),
+  delete: async (path) => request(path, { method: 'DELETE' })
 };
