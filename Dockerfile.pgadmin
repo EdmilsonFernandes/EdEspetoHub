@@ -1,0 +1,9 @@
+# Custom pgAdmin image to run alongside the application in EC2
+FROM dpage/pgadmin4:8.13
+
+# Default credentials can be overridden at runtime with environment variables
+ENV PGADMIN_DEFAULT_EMAIL=admin@example.com \
+    PGADMIN_DEFAULT_PASSWORD=changeMe \
+    PGADMIN_CONFIG_SERVER_MODE=False
+
+EXPOSE 80
