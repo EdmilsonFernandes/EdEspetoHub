@@ -1,50 +1,57 @@
-import {
-  addDoc,
-  collection,
-  doc,
-  getDocs,
-  onSnapshot,
-  orderBy,
-  query,
-  serverTimestamp,
-  updateDoc,
-  where
-} from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { apiClient } from '../config/apiClient';
 
-const collectionRef = collection(db, 'orders');
+const POLLING_INTERVAL = 4000;
+
+const normalizeOrder = (order) => ({
+  ...order,
+  id: order.id ?? order.order_id ?? order.orderId
+});
 
 export const orderService = {
   async save(orderData) {
-    await addDoc(collectionRef, {
-      ...orderData,
-      createdAt: serverTimestamp(),
-      dateString: new Date().toLocaleDateString('pt-BR'),
-      timestamp: Date.now()
-    });
+    await apiClient.post('/api/orders', orderData);
   },
   subscribeAll(callback) {
-    const q = query(collectionRef, orderBy('createdAt', 'desc'));
-    return onSnapshot(q, (snap) => callback(snap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }))));
+    let cancelled = false;
+
+    const load = async () => {
+      const data = await apiClient.get('/api/orders');
+      if (!cancelled) {
+        callback(data.map(normalizeOrder));
+      }
+    };
+
+    load();
+    const interval = setInterval(load, POLLING_INTERVAL);
+
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   },
   async fetchQueue() {
-    const queueQuery = query(
-      collectionRef,
-      where('status', 'in', ['pending', 'preparing']),
-      orderBy('createdAt', 'asc')
-    );
-    const snapshot = await getDocs(queueQuery);
-    return snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
+    const data = await apiClient.get('/api/orders/queue');
+    return data.map(normalizeOrder);
   },
   subscribeRecent(callback) {
-    const q = query(
-      collectionRef,
-      where('status', 'in', ['pending', 'preparing']),
-      orderBy('createdAt', 'asc')
-    );
-    return onSnapshot(q, (snap) => callback(snap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }))));
+    let cancelled = false;
+
+    const load = async () => {
+      const data = await this.fetchQueue();
+      if (!cancelled) {
+        callback(data);
+      }
+    };
+
+    load();
+    const interval = setInterval(load, POLLING_INTERVAL);
+
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   },
   async updateStatus(id, status) {
-    await updateDoc(doc(db, 'orders', id), { status });
+    await apiClient.patch(`/api/orders/${id}/status`, { status });
   }
 };

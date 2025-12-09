@@ -1,39 +1,39 @@
-import {
-  addDoc,
-  collection,
-  deleteDoc,
-  doc,
-  onSnapshot,
-  orderBy,
-  query,
-  serverTimestamp,
-  updateDoc
-} from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { apiClient } from '../config/apiClient';
 
-const collectionRef = collection(db, 'products');
+const POLLING_INTERVAL = 4000;
+
+const normalizeProduct = (product) => ({
+  ...product,
+  id: product.id ?? product.product_id ?? product.productId
+});
 
 export const productService = {
   async save(product) {
     if (product.id) {
-      const ref = doc(db, 'products', product.id);
-      await updateDoc(ref, { ...product });
+      await apiClient.put(`/api/products/${product.id}`, product);
     } else {
-      await addDoc(collectionRef, {
-        ...product,
-        active: true,
-        createdAt: serverTimestamp()
-      });
+      await apiClient.post('/api/products', product);
     }
   },
   async delete(id) {
-    await deleteDoc(doc(db, 'products', id));
+    await apiClient.delete(`/api/products/${id}`);
   },
   subscribe(callback) {
-    const q = query(collectionRef, orderBy('category'), orderBy('name'));
-    return onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
-      callback(data);
-    });
+    let cancelled = false;
+
+    const load = async () => {
+      const data = await apiClient.get('/api/products');
+      if (!cancelled) {
+        callback(data.map(normalizeProduct));
+      }
+    };
+
+    load();
+    const interval = setInterval(load, POLLING_INTERVAL);
+
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   }
 };
