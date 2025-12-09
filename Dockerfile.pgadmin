@@ -2,8 +2,8 @@
 FROM dpage/pgadmin4:8.13
 
 # Default credentials can be overridden at runtime with environment variables
-ENV PGADMIN_DEFAULT_EMAIL=admin@example.com \
-    PGADMIN_DEFAULT_PASSWORD=changeMe \
+ENV PGADMIN_DEFAULT_EMAIL=admindatony@datony.com \
+    PGADMIN_DEFAULT_PASSWORD=Datony20025#! \
     PGADMIN_CONFIG_SERVER_MODE=False
 
 EXPOSE 80

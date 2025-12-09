@@ -64,18 +64,24 @@ docker run --rm -p 4000:4000 \
 
 ### pgAdmin
 
-O arquivo `Dockerfile.pgadmin` usa a imagem oficial do pgAdmin e define credenciais padrão (alteráveis em runtime). Monte um volume para persistir dados e substitua as credenciais conforme necessário:
+
+O arquivo `Dockerfile.pgadmin` usa a imagem oficial do pgAdmin e define credenciais padrão (alteráveis em runtime). Monte um volume para persistir dados e substitua as credenciais conforme necessário (padrão: `admindatony@datony.com` / `Datony20025#!`):
 
 ```bash
 docker build -f Dockerfile.pgadmin -t espetinho-pgadmin .
 docker run --rm -p 5050:80 \
-  -e PGADMIN_DEFAULT_EMAIL=admin@example.com \
-  -e PGADMIN_DEFAULT_PASSWORD=minha-senha \
+  -e PGADMIN_DEFAULT_EMAIL=admindatony@datony.com \
+  -e PGADMIN_DEFAULT_PASSWORD=Datony20025#! \
   -v pgadmin-data:/var/lib/pgadmin \
   espetinho-pgadmin
 ```
 
 Ao subir ambas as imagens em uma instância EC2, exponha as portas desejadas (por exemplo, `80` para a aplicação e `5050` para o pgAdmin) e configure as variáveis de ambiente do pgAdmin com valores seguros.
+
+
+## Workspace do VS Code
+
+Incluímos o diretório `.vscode/` com recomendações e configurações de identação consistentes (2 espaços, final de linha LF, remoção de espaços em branco e nova linha final). O VS Code aplicará formatação automática ao salvar arquivos JavaScript/JSON/Markdown quando o Prettier estiver instalado (extensão recomendada em `.vscode/extensions.json`).
 
 ## Scripts adicionais
 
