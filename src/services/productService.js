@@ -22,9 +22,13 @@ export const productService = {
     let cancelled = false;
 
     const load = async () => {
-      const data = await apiClient.get('/api/products');
-      if (!cancelled) {
-        callback(data.map(normalizeProduct));
+      try {
+        const data = await apiClient.get('/api/products');
+        if (!cancelled) {
+          callback(data.map(normalizeProduct));
+        }
+      } catch (error) {
+        console.error('Erro ao carregar produtos', error);
       }
     };
 
