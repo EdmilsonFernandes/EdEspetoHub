@@ -64,6 +64,7 @@ docker run --rm -p 4000:4000 \
 
 ### pgAdmin
 
+
 O arquivo `Dockerfile.pgadmin` usa a imagem oficial do pgAdmin e define credenciais padrão (alteráveis em runtime). Monte um volume para persistir dados e substitua as credenciais conforme necessário (padrão: `admindatony@datony.com` / `Datony20025#!`):
 
 ```bash
@@ -76,6 +77,7 @@ docker run --rm -p 5050:80 \
 ```
 
 Ao subir ambas as imagens em uma instância EC2, exponha as portas desejadas (por exemplo, `80` para a aplicação e `5050` para o pgAdmin) e configure as variáveis de ambiente do pgAdmin com valores seguros.
+
 
 ## Workspace do VS Code
 
