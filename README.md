@@ -5,45 +5,38 @@ Aplicação web para pedidos e gestão do restaurante de espetinhos Datony. O pr
 -   **Loja do cliente**: montagem e edição do pedido, envio para WhatsApp e pagamento via chave Pix.
 -   **Painel interno**: dashboard com métricas, CRUD de produtos, fila do churrasqueiro (atualização a cada 5s) e histórico de pedidos.
 
-## Como executar
+## Execução local
+
+### Front-end React
 
 ```bash
 npm install
 npm start
 ```
 
-### Variáveis de ambiente do front-end
-
-Configure a URL da API que fala com o PostgreSQL via variáveis de ambiente do React:
+Variáveis de ambiente do React (arquivo `.env` na raiz):
 
 ```bash
 REACT_APP_API_BASE_URL=http://localhost:4000
 ```
 
-## Conteinerização
+### API Node + PostgreSQL (local)
 
-### Aplicação React
+1. Instale dependências e carregue o schema (opcional) no PostgreSQL local:
 
-O repositório inclui um `Dockerfile` multi-stage que constrói a aplicação e a serve via **nginx**. Para gerar a imagem e executá-la na porta 80:
+    ```bash
+    cd server
+    npm install
+    psql -h localhost -U postgres -d espetinho -f schema.sql
+    ```
 
-```bash
-docker build -t espetinho-app .
-docker run --rm -p 80:80 espetinho-app
-```
+2. Exponha as variáveis padrão do `pg` e inicie a API:
 
-### API Node + PostgreSQL
+    ```bash
+    PGHOST=localhost PGUSER=postgres PGPASSWORD=postgres PGDATABASE=espetinho npm start
+    ```
 
-O diretório `server/` contém uma API Express que conversa diretamente com o PostgreSQL (via `pg`). Execute a migração básica
-com o script `server/schema.sql` e exponha as credenciais do banco via variáveis padrão (`PGHOST`, `PGPORT`, `PGDATABASE`,
-`PGUSER`, `PGPASSWORD`). Para subir a API localmente:
-
-```bash
-cd server
-npm install
-PGHOST=localhost PGUSER=postgres PGPASSWORD=postgres PGDATABASE=espetinho npm start
-```
-
-Endpoints principais:
+Principais endpoints:
 
 -   `GET products` – lista produtos.
 -   `POST products` – cria produto `{ name, price, category, description?, active? }`.
@@ -53,7 +46,29 @@ Endpoints principais:
 -   `POST orders` – cria pedido `{ name, phone, address, table, type, items, total, status?, payment? }`.
 -   `PATCH orders/:id/status` – atualiza status.
 
-Para containerizar a API e conectar ao banco em EC2, use o `Dockerfile.api`:
+### pgAdmin (local)
+
+Instale pgAdmin localmente ou utilize a imagem oficial. Para conectar ao banco local, crie um novo servidor no pgAdmin com:
+
+-   **Host**: `localhost`
+-   **Porta**: `5432`
+-   **Usuário**: `postgres`
+-   **Senha**: a que você definiu
+
+## Conteinerização
+
+### Aplicação React (Docker)
+
+O repositório inclui um `Dockerfile` multi-stage que constrói a aplicação e a serve via **nginx**. Para gerar a imagem e executá-la na porta 80:
+
+```bash
+docker build -t espetinho-app .
+docker run --rm -p 80:80 espetinho-app
+```
+
+### API Node + PostgreSQL (Docker)
+
+Use o `Dockerfile.api` para empacotar a API. Você pode apontar para um banco externo ou para um container do PostgreSQL:
 
 ```bash
 docker build -f Dockerfile.api -t espetinho-api .
@@ -62,9 +77,23 @@ docker run --rm -p 4000:4000 \
   espetinho-api
 ```
 
-### pgAdmin
+Caso queira tudo em containers, suba também um PostgreSQL oficial (exemplo com senha `postgres`):
 
 O arquivo `Dockerfile.pgadmin` usa a imagem oficial do pgAdmin e define credenciais padrão (alteráveis em runtime). Monte um volume para persistir dados e substitua as credenciais conforme necessário (padrão: `admindatony@datony.com` / `Datony20025#!`):
+
+```bash
+docker run --name espetinho-db -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=espetinho -p 5432:5432 -d postgres:16
+
+# Popular schema opcionalmente
+docker exec -i espetinho-db psql -U postgres -d espetinho < server/schema.sql
+
+# API apontando para o container do banco
+docker run --rm -p 4000:4000 --link espetinho-db \
+  -e PGHOST=espetinho-db -e PGUSER=postgres -e PGPASSWORD=postgres -e PGDATABASE=espetinho \
+  espetinho-api
+```
+
+### pgAdmin (Docker)
 
 ```bash
 docker build -f Dockerfile.pgadmin -t espetinho-pgadmin .
@@ -76,6 +105,7 @@ docker run --rm -p 5050:80 \
 ```
 
 Ao subir ambas as imagens em uma instância EC2, exponha as portas desejadas (por exemplo, `80` para a aplicação e `5050` para o pgAdmin) e configure as variáveis de ambiente do pgAdmin com valores seguros.
+Para conectar o pgAdmin ao PostgreSQL containerizado, adicione um novo servidor com host `espetinho-db`, porta `5432`, usuário `postgres` e senha `postgres` (ou os valores que você tiver configurado). Em produção, exponha apenas as portas necessárias (por exemplo, `80` para a aplicação e `5050` para o pgAdmin) e altere as credenciais padrão.
 
 ## Workspace do VS Code
 
