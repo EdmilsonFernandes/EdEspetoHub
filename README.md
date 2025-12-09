@@ -2,8 +2,8 @@
 
 Aplicação web para pedidos e gestão do restaurante de espetinhos Datony. O projeto traz duas experiências principais:
 
-- **Loja do cliente**: montagem e edição do pedido, envio para WhatsApp e pagamento via chave Pix.
-- **Painel interno**: dashboard com métricas, CRUD de produtos, fila do churrasqueiro (atualização a cada 5s) e histórico de pedidos.
+-   **Loja do cliente**: montagem e edição do pedido, envio para WhatsApp e pagamento via chave Pix.
+-   **Painel interno**: dashboard com métricas, CRUD de produtos, fila do churrasqueiro (atualização a cada 5s) e histórico de pedidos.
 
 ## Como executar
 
@@ -45,13 +45,13 @@ PGHOST=localhost PGUSER=postgres PGPASSWORD=postgres PGDATABASE=espetinho npm st
 
 Endpoints principais:
 
-- `GET /api/products` – lista produtos.
-- `POST /api/products` – cria produto `{ name, price, category, description?, active? }`.
-- `PUT /api/products/:id` e `DELETE /api/products/:id` – edita ou remove.
-- `GET /api/orders` – lista pedidos.
-- `GET /api/orders/queue` – fila pendente/preparando.
-- `POST /api/orders` – cria pedido `{ name, phone, address, table, type, items, total, status?, payment? }`.
-- `PATCH /api/orders/:id/status` – atualiza status.
+-   `GET products` – lista produtos.
+-   `POST products` – cria produto `{ name, price, category, description?, active? }`.
+-   `PUT products/:id` e `DELETE products/:id` – edita ou remove.
+-   `GET orders` – lista pedidos.
+-   `GET orders/queue` – fila pendente/preparando.
+-   `POST orders` – cria pedido `{ name, phone, address, table, type, items, total, status?, payment? }`.
+-   `PATCH orders/:id/status` – atualiza status.
 
 Para containerizar a API e conectar ao banco em EC2, use o `Dockerfile.api`:
 
@@ -63,7 +63,6 @@ docker run --rm -p 4000:4000 \
 ```
 
 ### pgAdmin
-
 
 O arquivo `Dockerfile.pgadmin` usa a imagem oficial do pgAdmin e define credenciais padrão (alteráveis em runtime). Monte um volume para persistir dados e substitua as credenciais conforme necessário (padrão: `admindatony@datony.com` / `Datony20025#!`):
 
@@ -78,23 +77,23 @@ docker run --rm -p 5050:80 \
 
 Ao subir ambas as imagens em uma instância EC2, exponha as portas desejadas (por exemplo, `80` para a aplicação e `5050` para o pgAdmin) e configure as variáveis de ambiente do pgAdmin com valores seguros.
 
-
 ## Workspace do VS Code
 
 Incluímos o diretório `.vscode/` com recomendações e configurações de identação consistentes (2 espaços, final de linha LF, remoção de espaços em branco e nova linha final). O VS Code aplicará formatação automática ao salvar arquivos JavaScript/JSON/Markdown quando o Prettier estiver instalado (extensão recomendada em `.vscode/extensions.json`).
 
 ## Scripts adicionais
 
-- `npm run build` – gera a versão de produção.
-- `npm test` – executa a suíte de testes padrão do Create React App.
+-   `npm run build` – gera a versão de produção.
+-   `npm test` – executa a suíte de testes padrão do Create React App.
 
 ## Tecnologias
 
-- React (Create React App)
-- Tailwind CSS via CDN
-- Firebase Auth + Firestore
-- Lucide React
-- Recharts
+-   React (Create React App)
+-   Tailwind CSS via CDN
+-   Firebase Auth + Firestore
+-   Lucide React
+-   Recharts
 
 ## Contribuição
-- Os arquivos de texto são normalizados via `.gitattributes` para evitar que o repositório seja tratado como binário durante a criação do PR.
+
+-   Os arquivos de texto são normalizados via `.gitattributes` para evitar que o repositório seja tratado como binário durante a criação do PR.
