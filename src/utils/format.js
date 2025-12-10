@@ -21,6 +21,7 @@ export const formatDuration = (milliseconds) => {
   return `${seconds}s`;
 };
 
+
 export const formatOrderType = (type) => {
   const map = {
     delivery: 'Entrega',
@@ -40,3 +41,4 @@ export const formatOrderStatus = (status) => {
 
   return map[status] || 'Indefinido';
 };
+
