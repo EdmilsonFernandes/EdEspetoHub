@@ -71,3 +71,4 @@ export const formatPhoneInput = (value = '', defaultAreaCode = '12') => {
 
   return `(${ddd}) `;
 };
+

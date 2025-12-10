@@ -90,6 +90,7 @@ export const GrillQueue = () => {
     [currentTime, queue]
   );
 
+
   const sortedQueue = useMemo(
     () =>
       [...queue].sort((a, b) => {
@@ -114,8 +115,10 @@ export const GrillQueue = () => {
           <RefreshCcw size={16} /> Atualizar
         </button>
       </div>
+
       <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
         {sortedQueue.map((order, index) => (
+
           <div key={order.id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
             <div className="flex justify-between items-start">
               <div>
@@ -125,6 +128,7 @@ export const GrillQueue = () => {
                 <p className="text-sm text-gray-500">{formatDateTime(order.createdAt)}</p>
                 <h3 className="text-lg font-bold text-gray-800">{order.name || 'Cliente'}</h3>
                 <p className="text-xs text-gray-500 uppercase">{formatOrderType(order.type)}</p>
+
                 <p className="text-xs text-gray-500 uppercase mt-1">
                   Pagamento: {formatPaymentMethod(order.payment)}
                 </p>
@@ -143,6 +147,11 @@ export const GrillQueue = () => {
                 <Clock size={14} className="text-red-500" />
                 <span className="tabular-nums text-base">{elapsedTime[order.id] || '0s'}</span>
               </div>
+
+            <div className="mt-2 text-sm font-semibold text-gray-700 flex items-center gap-2">
+              <Clock size={14} className="text-red-500" />
+              <span>{elapsedTime[order.id] || '0s'}</span>
+
             </div>
 
             <div className="mt-4 space-y-2">

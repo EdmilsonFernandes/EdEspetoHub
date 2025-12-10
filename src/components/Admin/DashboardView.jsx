@@ -130,6 +130,7 @@ export const DashboardView = ({ orders, customers = [] }) => {
       </div>
 
       <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+
         <div className="flex items-center justify-between mb-4 gap-3">
           <div>
             <h4 className="font-bold text-gray-700">Clientes</h4>
@@ -161,6 +162,21 @@ export const DashboardView = ({ orders, customers = [] }) => {
               <div className="text-center text-gray-400 py-6 text-sm">Nenhum cliente registrado ainda.</div>
             )}
           </div>
+
+        <div className="flex items-center justify-between mb-4">
+          <h4 className="font-bold text-gray-700">Clientes</h4>
+          <span className="text-sm text-gray-500">{customers.length} cadastrados</span>
+        </div>
+        <div className="max-h-72 overflow-y-auto divide-y">
+          {customers.map((customer) => (
+            <div key={customer.id || customer.name} className="py-2 flex justify-between text-sm text-gray-700">
+              <span className="font-semibold">{customer.name}</span>
+              <span className="text-gray-500">{customer.phone}</span>
+            </div>
+          ))}
+          {customers.length === 0 && (
+            <div className="text-center text-gray-400 py-6 text-sm">Nenhum cliente registrado ainda.</div>
+          )}
         </div>
       </div>
     </div>

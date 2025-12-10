@@ -34,6 +34,26 @@ const PaymentSummary = ({ paymentMethod, pixKey, phone }) => {
             Copiar chave Pix
           </button>
         )}
+const PaymentSummary = ({ paymentMethod }) => {
+  if (paymentMethod === 'pix') {
+    return (
+      <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 w-full mb-8">
+        <div className="flex flex-col items-center gap-3 mb-4">
+          <div className="p-3 bg-gray-50 rounded-full">
+            <QrCode size={24} className="text-gray-700" />
+          </div>
+          <span className="font-bold text-gray-700">Chave Pix (Copia e Cola)</span>
+        </div>
+        <div className="bg-gray-50 p-4 rounded-xl font-mono text-xs text-gray-500 break-all select-all border border-gray-200">
+          {PIX_KEY_MOCK}
+        </div>
+        <button
+          onClick={() => navigator.clipboard.writeText(PIX_KEY_MOCK)}
+          className="w-full mt-4 py-3 bg-gray-800 text-white rounded-xl font-bold text-sm hover:bg-gray-900 transition-colors"
+        >
+          Copiar Código Pix
+        </button>
+
       </div>
     );
   }
@@ -50,6 +70,7 @@ const PaymentSummary = ({ paymentMethod, pixKey, phone }) => {
 };
 
 export const SuccessView = ({ orderType, paymentMethod, onNewOrder, pixKey, phone }) => (
+
   <div className="flex flex-col items-center justify-center min-h-[80vh] text-center px-6 animate-in zoom-in">
     <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-6 text-green-600 shadow-sm">
       <CheckCircle size={48} />
@@ -68,6 +89,7 @@ export const SuccessView = ({ orderType, paymentMethod, onNewOrder, pixKey, phon
       className="flex items-center gap-2 text-white bg-red-600 font-bold px-6 py-3 rounded-xl transition-colors hover:bg-red-700"
     >
       <ArrowLeft size={18} /> Voltar para os pedidos
+
     </button>
   </div>
 );

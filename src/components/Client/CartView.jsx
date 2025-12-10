@@ -1,6 +1,8 @@
 import React, { useMemo } from 'react';
 import { ChevronLeft, Bike, Home, UtensilsCrossed, Send, WalletCards, CreditCard } from 'lucide-react';
+
 import { formatCurrency, formatPhoneInput } from '../../utils/format';
+
 
 export const CartView = ({
   cart,
@@ -12,12 +14,16 @@ export const CartView = ({
   onCheckout,
   onBack,
 }) => {
+
+
+
   const cartItems = Object.values(cart);
   const total = cartItems.reduce((acc, item) => acc + item.price * item.qty, 0);
   const isPickup = customer.type === 'pickup';
   const isDelivery = customer.type === 'delivery';
   const isPix = paymentMethod === 'pix';
   const actionLabel = useMemo(() => {
+
     if (isDelivery) return 'Finalizar pedido para entrega';
     if (isPickup) return 'Finalizar pedido para retirada';
     if (isPix) return 'Finalizar pedido (Pix)';
@@ -28,6 +34,12 @@ export const CartView = ({
     const formatted = formatPhoneInput(nextValue);
     onChangeCustomer({ ...customer, phone: formatted });
   };
+
+    if (isPix) return 'Finalizar e gerar Pix';
+    if (isDelivery) return 'Finalizar pedido para entrega';
+    if (isPickup) return 'Finalizar pedido para retirada';
+    return 'Finalizar pedido na mesa';
+  }, [isDelivery, isPickup, isPix]);
 
   return (
     <div className="animate-in slide-in-from-right">
@@ -127,6 +139,7 @@ export const CartView = ({
 
         <div className="mt-3 text-xs text-gray-500 bg-gray-50 border border-gray-100 rounded-lg p-3 leading-relaxed">
           {isPix && 'O QR Code do Pix aparecerá após finalizar o pedido.'}
+          {isPix && 'Pagamento via Pix será gerado para facilitar o registro.'}
           {!isPix && isDelivery && 'Você finaliza o pedido agora e paga na entrega ou conforme combinado.'}
           {!isPix && !isDelivery &&
             'Pedido será direcionado para atendimento, pague no local conforme a forma selecionada.'}

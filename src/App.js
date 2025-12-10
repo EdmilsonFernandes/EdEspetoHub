@@ -32,6 +32,13 @@ import './index.css';
 
 const DEFAULT_AREA_CODE = '12';
 const initialCustomer = { name: '', phone: formatPhoneInput('', DEFAULT_AREA_CODE), address: '', table: '', type: 'delivery' };
+
+} from './utils/format';
+
+import './index.css';
+
+const initialCustomer = { name: '', phone: '', address: '', table: '', type: 'delivery' };
+
 const defaultPaymentMethod = 'debito';
 const WHATSAPP_NUMBER = process.env.REACT_APP_WHATSAPP_NUMBER || '5512996797210';
 const PIX_KEY = process.env.REACT_APP_PIX_KEY || '';
@@ -96,9 +103,13 @@ function App() {
     );
 
     const phoneFromMatch = !nextCustomer.phone && matchedCustomer?.phone ? matchedCustomer.phone : nextCustomer.phone;
+
     const formattedPhone = formatPhoneInput(phoneFromMatch, DEFAULT_AREA_CODE);
 
     setCustomer({ ...nextCustomer, phone: formattedPhone });
+
+    setCustomer({ ...nextCustomer, phone: phoneFromMatch });
+
   };
 
   const checkout = async () => {
@@ -114,9 +125,11 @@ function App() {
 
     const isPickup = customer.type === 'pickup';
     const payment = paymentMethod;
+
     const sanitizedPhone = customer.phone.replace(/\D/g, '');
     const sanitizedPhoneKey = sanitizedPhone.length >= 10 ? `+55${sanitizedPhone}` : '';
     const pixKey = PIX_KEY || sanitizedPhoneKey;
+
 
     const order = {
       ...customer,
@@ -146,6 +159,12 @@ function App() {
         '------------------',
         `💰 *TOTAL: ${formatCurrency(cartTotal)}*`,
         payment === 'pix' && pixKey ? `💳 Pagamento via PIX: ${pixKey}` : ''
+
+        payment === 'pix'
+          ? PIX_KEY
+            ? `💳 Pagamento via PIX: ${PIX_KEY}`
+            : '💳 Gerar Pix para retirada na loja'
+          : ''
       ].filter(Boolean);
 
       const encodedMessage = encodeURIComponent(messageLines.join('\n'));
@@ -155,6 +174,7 @@ function App() {
     setCart({});
     setCustomer(initialCustomer);
     setPaymentMethod(defaultPaymentMethod);
+
     setLastOrder({
       type: customer.type,
       payment,
@@ -321,9 +341,14 @@ function App() {
                     <tr key={order.id}>
                         <td className="p-3 text-gray-500">{formatOrderDate(order)}</td>
                         <td className="p-3 font-medium">{order.name}</td>
+
                         <td className="p-3 text-gray-600">{order.phone}</td>
                         <td className="p-3 uppercase text-xs font-bold">{formatOrderType(order.type)}</td>
                         <td className="p-3 uppercase text-xs font-bold text-gray-600">{formatPaymentMethod(order.payment)}</td>
+                        <td className="p-3 uppercase text-xs font-bold">{formatOrderType(order.type)}</td>
+
+                        <td className="p-3 uppercase text-xs font-bold text-gray-600">{formatPaymentMethod(order.payment)}</td>
+
                         <td className="p-3 font-bold text-green-600">{formatCurrency(order.total || 0)}</td>
                         <td className="p-3">
                           <span
@@ -471,6 +496,7 @@ function App() {
             pixKey={lastOrder?.pixKey}
             phone={lastOrder?.phone}
             onNewOrder={() => setView('menu')}
+
           />
         )}
         {view === 'grill' && (
