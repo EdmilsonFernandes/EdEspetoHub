@@ -1,160 +1,133 @@
-import React, { useMemo, useState } from 'react';
-import { Plus, Minus, Image as ImageIcon, SlidersHorizontal } from 'lucide-react';
-import { formatCurrency } from '../../utils/format';
+import React, { useMemo } from "react";
+import { Plus } from "lucide-react";
+import { formatCurrency } from "../../utils/format";
 
-export const MenuView = ({ products, cart, onUpdateCart, onProceed }) => {
-  const [selectedCategory, setSelectedCategory] = useState('Espetos');
+// =======================================
+// HEADER PREMIUM COM LOGO OFICIAL
+// =======================================
+const Header = () => {
+  return (
+    <div className="w-full bg-white shadow-md px-4 py-4 flex items-center gap-4 sticky top-0 z-50 border-b border-gray-100">
 
-  const categories = useMemo(() => {
-    const unique = new Set();
+      {/* LOGO OFICIAL */}
+      <div className="w-14 h-14 rounded-full overflow-hidden border border-red-600 shadow-sm bg-white">
+        <img
+          src="/logo-datony.svg"
+          alt="Espetinho Datony"
+          className="w-full h-full object-cover"
+        />
+      </div>
+
+      {/* Nome + Insta */}
+      <div className="flex-1 leading-tight">
+        <h1 className="text-xl font-bold text-gray-900">Espetinho Datony</h1>
+
+        <a
+          href="https://instagram.com/espetinhodatony"
+          target="_blank"
+          className="text-red-600 text-sm font-semibold hover:underline"
+        >
+          @espetinhodatony
+        </a>
+      </div>
+
+      {/* STATUS */}
+      <div className="px-3 py-1 rounded-full bg-green-100 text-green-700 text-sm font-bold shadow-sm">
+        Aberto
+      </div>
+    </div>
+  );
+};
+
+// =======================================
+// MENU ORGANIZADO POR CATEGORIA (COM FOTOS)
+// =======================================
+export const MenuView = ({ products, cart, onUpdateCart }) => {
+
+  const grouped = useMemo(() => {
+    const map = {};
     products.forEach((item) => {
-      if (!item.category) return;
-      const label = item.category.charAt(0).toUpperCase() + item.category.slice(1);
-      unique.add(label);
+      const cat = item.category || "Outros";
+      if (!map[cat]) map[cat] = [];
+      map[cat].push(item);
     });
 
-    const ordered = ['Espetos', 'Produtos'];
-    const others = Array.from(unique).filter((cat) => !ordered.includes(cat));
-    return ['Todos', ...ordered, ...others];
+    // Ordenação Z -> A
+    const sortedMap = {};
+    Object.keys(map)
+      .sort((a, b) => b.localeCompare(a)) // O segredo está aqui: b comparado com a
+      .forEach((key) => {
+        sortedMap[key] = map[key];
+      });
+
+    return sortedMap;
   }, [products]);
-
-  const sortedProducts = useMemo(() => {
-    const espetos = [];
-    const others = [];
-
-    products.forEach((item) => {
-      if (item.category?.toLowerCase().includes('espeto')) {
-        espetos.push(item);
-      } else {
-        others.push(item);
-      }
-    });
-
-    return [...espetos, ...others];
-  }, [products]);
-
-  const filteredProducts = useMemo(() => {
-    if (selectedCategory === 'Todos') return sortedProducts;
-
-    if (selectedCategory === 'Espetos') {
-      return sortedProducts.filter((item) => item.category?.toLowerCase().includes('espeto'));
-    }
-
-    if (selectedCategory === 'Produtos') {
-      return sortedProducts.filter((item) => !item.category?.toLowerCase().includes('espeto'));
-    }
-
-    return sortedProducts.filter(
-      (item) => item.category && item.category.toLowerCase() === selectedCategory.toLowerCase()
-    );
-  }, [selectedCategory, sortedProducts]);
 
   return (
-    <div className="animate-in fade-in space-y-4">
-      <div className="flex items-center justify-between gap-2 overflow-x-auto pb-3 no-scrollbar">
-        <div className="flex gap-2">
-          {categories.map((category) => {
-            const isActive = category === selectedCategory;
-            return (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-colors ${
-                  isActive
-                    ? 'bg-red-600 text-white shadow-md shadow-red-200'
-                    : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300'
-                }`}
-              >
-                {category}
-              </button>
-            );
-          })}
-        </div>
-        <div className="flex items-center gap-1 text-xs text-gray-400">
-          <SlidersHorizontal size={16} />
-          Filtros
-        </div>
-      </div>
+    <div className="bg-gray-50 min-h-screen">
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {filteredProducts.map((item) => (
-          <div
-            key={item.id}
-            className="bg-white p-3 rounded-xl shadow-sm border border-gray-100 flex gap-3 transition-all active:scale-[0.99] hover:shadow-md"
-          >
-            <div className="w-24 h-24 bg-gray-100 rounded-lg flex-shrink-0 overflow-hidden">
-              {item.imageUrl ? (
-                <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-gray-300">
-                  <ImageIcon size={24} />
-                </div>
-              )}
+      <Header />
+
+      <div className="space-y-10 p-4">
+
+        {Object.keys(grouped).map((category) => (
+          <div key={category} className="space-y-3">
+
+            {/* Título da categoria */}
+            <div className="px-4 py-2 bg-red-50 border-l-4 border-red-600 rounded">
+              <h2 className="text-red-700 font-bold text-lg capitalize tracking-wide">
+                {category}
+              </h2>
             </div>
 
-            <div className="flex-1 flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-between gap-2">
-                  <h3 className="font-bold text-gray-800 line-clamp-1">{item.name}</h3>
-                  {item.category && (
-                    <span className="text-[10px] uppercase tracking-wide font-bold text-red-500 bg-red-50 px-2 py-1 rounded-full">
-                      {item.category}
-                    </span>
-                  )}
-                </div>
-                <p className="text-xs text-gray-500 mt-1 line-clamp-2 leading-relaxed">{item.desc}</p>
-              </div>
-              <div className="flex justify-between items-end mt-2 gap-2">
-                <span className="font-bold text-gray-900 text-lg">{formatCurrency(item.price)}</span>
+            {/* Lista de itens */}
+            <div className="space-y-4">
+              {grouped[category].map((item) => (
+                <div
+                  key={item.id}
+                  className="bg-white rounded-xl shadow-sm border border-gray-100 p-3 flex gap-4 items-center hover:shadow-md active:scale-[0.99] transition cursor-pointer"
+                >
 
-                {cart[item.id] ? (
-                  <div className="flex items-center bg-gray-100 rounded-lg p-1 gap-2 shadow-inner">
-                    <button
-                      onClick={() => onUpdateCart(item, -1)}
-                      className="w-7 h-7 flex items-center justify-center bg-white rounded text-red-600 shadow-sm"
-                    >
-                      <Minus size={14} />
-                    </button>
-                    <span className="font-bold text-sm min-w-[20px] text-center">{cart[item.id].qty}</span>
-                    <button
-                      onClick={() => onUpdateCart(item, 1)}
-                      className="w-7 h-7 flex items-center justify-center bg-green-600 rounded text-white shadow-sm"
-                    >
-                      <Plus size={14} />
-                    </button>
+                  {/* Foto do prato */}
+                  <div className="w-24 h-24 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-200 shadow-sm">
+                    {item.imageUrl ? (
+                      <img
+                        src={item.imageUrl}
+                        alt={item.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+                        sem foto
+                      </div>
+                    )}
                   </div>
-                ) : (
+
+                  {/* Nome e preço */}
+                  <div className="flex-1">
+                    <p className="font-semibold text-gray-900 text-[15px]">
+                      {item.name}
+                    </p>
+                    <p className="text-red-600 font-bold text-lg mt-[-1px]">
+                      {formatCurrency(item.price)}
+                    </p>
+                  </div>
+
+                  {/* Botão de adicionar */}
                   <button
                     onClick={() => onUpdateCart(item, 1)}
-                    className="bg-red-50 text-red-600 px-3 py-1.5 rounded-lg text-sm font-bold hover:bg-red-100 transition-colors w-full text-center"
+                    className="w-11 h-11 rounded-full bg-red-600 text-white flex items-center justify-center hover:bg-red-700 shadow-md active:scale-95 transition"
                   >
-                    Adicionar
+                    <Plus size={20} />
                   </button>
-                )}
-              </div>
+                </div>
+              ))}
             </div>
+
           </div>
         ))}
-      </div>
 
-      {Object.keys(cart).length > 0 && (
-        <div className="fixed bottom-6 left-4 right-4 sm:left-6 sm:right-6 z-40 max-w-xl mx-auto">
-          <button
-            onClick={onProceed}
-            className="w-full bg-gray-900 text-white p-4 rounded-2xl shadow-2xl flex justify-between items-center transform hover:scale-[1.02] transition-all"
-          >
-            <div className="flex items-center gap-3">
-              <span className="bg-red-600 px-3 py-1 rounded-lg text-sm font-bold">
-                {Object.values(cart).reduce((acc, item) => acc + item.qty, 0)}
-              </span>
-              <span className="font-bold">Ver sacola</span>
-            </div>
-            <span className="font-bold text-lg">
-              {formatCurrency(Object.values(cart).reduce((acc, item) => acc + item.price * item.qty, 0))}
-            </span>
-          </button>
-        </div>
-      )}
+      </div>
     </div>
   );
 };
