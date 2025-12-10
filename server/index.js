@@ -86,35 +86,60 @@ app.get("/orders/queue", async (_, res) => {
 });
 
 app.post("/orders", async (req, res) => {
-    const {
-        name,
+    console.log("DEBUG BODY:", req.body);
+    try {
+        const {
+            name,
+            phone,
+            address,
+            table,
+            type,
+            items,
+            total,
+            status = "pending",
+            payment = "pix",
+        } = req.body;
+
+        const now = new Date();
+
+        const query = `
+      INSERT INTO orders (
+        customer_name,
         phone,
         address,
-        table,
-        type,
-        items,
-        total,
-        status = "pending",
-        payment = "pix",
-    } = req.body;
-    const now = new Date();
-    const query =
-        "INSERT INTO orders (customer_name, phone, address, table_number, type, items, total, status, payment, created_at, date_string) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING *";
-    const values = [
-        name,
-        phone,
-        address,
-        table,
+        table_number,
         type,
         items,
         total,
         status,
         payment,
-        now,
-        now.toLocaleDateString("pt-BR"),
-    ];
-    const result = await pool.query(query, values);
-    res.status(201).json(mapOrderRow(result.rows[0]));
+        created_at,
+        date_string
+      )
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+      RETURNING *;
+    `;
+
+        const values = [
+            name,
+            phone,
+            address ?? null,
+            table ?? null,
+            type,
+            JSON.stringify(items ?? []),
+            total ?? 0,
+            status,
+            payment,
+            now,
+            now.toISOString().slice(0, 10), // "2025-12-10"
+        ];
+
+        const result = await pool.query(query, values);
+        res.status(201).json(mapOrderRow(result.rows[0]));
+    } catch (err) {
+        console.error("Erro ao criar pedido:", err);
+        res.status(500).json({ error: "Erro ao criar pedido" });
+    }
 });
 
 app.patch("/orders/:id/status", async (req, res) => {
