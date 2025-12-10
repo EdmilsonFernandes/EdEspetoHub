@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { ChevronLeft, Bike, Home, UtensilsCrossed, Send, WalletCards } from 'lucide-react';
 import { formatCurrency } from '../../utils/format';
 
-export const CartView = ({ cart, customer, onChangeCustomer, onCheckout, onBack }) => {
+export const CartView = ({ cart, customer, customers = [], onChangeCustomer, onCheckout, onBack }) => {
   const cartItems = Object.values(cart);
   const total = cartItems.reduce((acc, item) => acc + item.price * item.qty, 0);
   const isPickup = customer.type === 'pickup';
@@ -29,8 +29,16 @@ export const CartView = ({ cart, customer, onChangeCustomer, onCheckout, onBack 
               value={customer.name}
               onChange={(e) => onChangeCustomer({ ...customer, name: e.target.value })}
               placeholder="Ex: João Silva"
+              list="customer-suggestions"
               className="w-full border-b-2 border-gray-100 py-3 text-lg outline-none focus:border-red-500 transition-colors placeholder:text-gray-300"
             />
+            <datalist id="customer-suggestions">
+              {customers.map((entry) => (
+                <option key={entry.id || entry.name} value={entry.name}>
+                  {entry.phone}
+                </option>
+              ))}
+            </datalist>
           </div>
           <div>
             <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">WhatsApp</label>

@@ -13,13 +13,14 @@ import {
 import { productService } from './services/productService';
 import { orderService } from './services/orderService';
 import { authService } from './services/authService';
+import { customerService } from './services/customerService';
 import { MenuView } from './components/Client/MenuView';
 import { CartView } from './components/Client/CartView';
 import { SuccessView } from './components/Client/SuccessView';
 import { DashboardView } from './components/Admin/DashboardView';
 import { ProductManager } from './components/Admin/ProductManager';
 import { GrillQueue } from './components/Admin/GrillQueue';
-import { formatCurrency } from './utils/format';
+import { formatCurrency, formatOrderStatus, formatOrderType } from './utils/format';
 import './index.css';
 
 const initialCustomer = { name: '', phone: '', address: '', table: '', type: 'delivery' };
@@ -30,6 +31,7 @@ function App() {
   const [user, setUser] = useState(null);
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
+  const [customers, setCustomers] = useState([]);
   const [view, setView] = useState('menu');
   const [adminTab, setAdminTab] = useState('dashboard');
   const [cart, setCart] = useState({});
@@ -47,6 +49,7 @@ function App() {
 
     const unsubProd = productService.subscribe(setProducts);
     const unsubOrders = orderService.subscribeAll(setOrders);
+    customerService.fetchAll().then(setCustomers).catch(() => setCustomers([]));
     return () => {
       unsubProd();
       unsubOrders();
@@ -66,6 +69,17 @@ function App() {
       }
       return { ...previous, [item.id]: { ...item, qty: nextQty } };
     });
+  };
+
+  const handleCustomerChange = (nextCustomer) => {
+    const normalizedName = nextCustomer.name?.trim().toLowerCase();
+    const matchedCustomer = customers.find(
+      (entry) => entry.name?.trim().toLowerCase() === normalizedName
+    );
+
+    const phoneFromMatch = !nextCustomer.phone && matchedCustomer?.phone ? matchedCustomer.phone : nextCustomer.phone;
+
+    setCustomer({ ...nextCustomer, phone: phoneFromMatch });
   };
 
   const checkout = async () => {
@@ -91,6 +105,7 @@ function App() {
     };
 
     await orderService.save(order);
+    customerService.fetchAll().then(setCustomers).catch(() => {});
 
     if (isPickup) {
       const itemsList = Object.values(cart)
@@ -252,7 +267,7 @@ function App() {
                           }
                         </td>
                         <td className="p-3 font-medium">{order.name}</td>
-                        <td className="p-3 uppercase text-xs font-bold">{order.type}</td>
+                        <td className="p-3 uppercase text-xs font-bold">{formatOrderType(order.type)}</td>
                         <td className="p-3 font-bold text-green-600">{formatCurrency(order.total || 0)}</td>
                         <td className="p-3">
                           <span
@@ -260,7 +275,7 @@ function App() {
                               order.status === 'pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'
                             }`}
                           >
-                            {order.status?.toUpperCase()}
+                            {formatOrderStatus(order.status)}
                           </span>
                         </td>
                       </tr>
@@ -368,7 +383,8 @@ function App() {
           <CartView
             cart={cart}
             customer={customer}
-            onChangeCustomer={setCustomer}
+            customers={customers}
+            onChangeCustomer={handleCustomerChange}
             onCheckout={checkout}
             onBack={() => setView('menu')}
           />
