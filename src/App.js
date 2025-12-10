@@ -23,7 +23,7 @@ import { formatCurrency } from './utils/format';
 import './index.css';
 
 const initialCustomer = { name: '', phone: '', address: '', table: '', type: 'delivery' };
-const WHATSAPP_NUMBER = process.env.REACT_APP_WHATSAPP_NUMBER || '5512999999999';
+const WHATSAPP_NUMBER = process.env.REACT_APP_WHATSAPP_NUMBER || '5512996797210';
 const PIX_KEY = process.env.REACT_APP_PIX_KEY || '';
 
 function App() {
