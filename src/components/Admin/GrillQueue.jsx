@@ -1,14 +1,15 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { CheckSquare, Clock, ChefHat, RefreshCcw, Plus, Minus } from 'lucide-react';
+
+import { CheckSquare, Clock, ChefHat, RefreshCcw, Plus, Minus, Hash } from 'lucide-react';
 import { orderService } from '../../services/orderService';
 import { productService } from '../../services/productService';
-
 import {
   formatCurrency,
   formatDateTime,
   formatDuration,
   formatOrderStatus,
   formatOrderType,
+  formatPaymentMethod,
 } from '../../utils/format';
 
 export const GrillQueue = () => {
@@ -105,13 +106,21 @@ export const GrillQueue = () => {
         </button>
       </div>
       <div className="grid md:grid-cols-2 gap-4">
-        {queue.map((order) => (
+        {queue.map((order, index) => (
           <div key={order.id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
             <div className="flex justify-between items-start">
               <div>
+                <div className="flex items-center gap-2 mb-1 text-xs text-gray-500 uppercase font-bold">
+                  <Hash size={12} className="text-red-500" /> Fila {String(index + 1).padStart(2, '0')}
+                </div>
                 <p className="text-sm text-gray-500">{formatDateTime(order.createdAt)}</p>
                 <h3 className="text-lg font-bold text-gray-800">{order.name || 'Cliente'}</h3>
                 <p className="text-xs text-gray-500 uppercase">{formatOrderType(order.type)}</p>
+
+                <p className="text-xs text-gray-500 uppercase mt-1">
+                  Pagamento: {formatPaymentMethod(order.payment)}
+                </p>
+
               </div>
               <span
                 className={`px-2 py-1 text-xs font-bold rounded ${

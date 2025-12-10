@@ -20,10 +20,18 @@ import { SuccessView } from './components/Client/SuccessView';
 import { DashboardView } from './components/Admin/DashboardView';
 import { ProductManager } from './components/Admin/ProductManager';
 import { GrillQueue } from './components/Admin/GrillQueue';
-import { formatCurrency, formatOrderStatus, formatOrderType } from './utils/format';
+
+import {
+  formatCurrency,
+  formatOrderStatus,
+  formatOrderType,
+  formatPaymentMethod,
+} from './utils/format';
+
 import './index.css';
 
 const initialCustomer = { name: '', phone: '', address: '', table: '', type: 'delivery' };
+const defaultPaymentMethod = 'debito';
 const WHATSAPP_NUMBER = process.env.REACT_APP_WHATSAPP_NUMBER || '5512996797210';
 const PIX_KEY = process.env.REACT_APP_PIX_KEY || '';
 
@@ -36,6 +44,8 @@ function App() {
   const [adminTab, setAdminTab] = useState('dashboard');
   const [cart, setCart] = useState({});
   const [customer, setCustomer] = useState(initialCustomer);
+  const [paymentMethod, setPaymentMethod] = useState(defaultPaymentMethod);
+  const [lastOrder, setLastOrder] = useState(null);
   const [loginForm, setLoginForm] = useState({ username: '', password: '' });
   const [loginError, setLoginError] = useState('');
 
@@ -94,7 +104,7 @@ function App() {
     }
 
     const isPickup = customer.type === 'pickup';
-    const payment = isPickup ? 'pix' : 'offline';
+    const payment = paymentMethod;
 
     const order = {
       ...customer,
@@ -117,12 +127,17 @@ function App() {
         '------------------',
         `👤 *${customer.name}* (${customer.phone})`,
         `🛒 *Tipo:* ${customer.type}`,
+        payment ? `💳 Pagamento: ${formatPaymentMethod(payment)}` : '',
         customer.address ? `📍 End: ${customer.address}` : '',
         '------------------',
         itemsList,
         '------------------',
         `💰 *TOTAL: ${formatCurrency(cartTotal)}*`,
-        PIX_KEY ? `💳 Pagamento via PIX: ${PIX_KEY}` : '💳 Gerar Pix para retirada na loja'
+        payment === 'pix'
+          ? PIX_KEY
+            ? `💳 Pagamento via PIX: ${PIX_KEY}`
+            : '💳 Gerar Pix para retirada na loja'
+          : ''
       ].filter(Boolean);
 
       const encodedMessage = encodeURIComponent(messageLines.join('\n'));
@@ -131,6 +146,8 @@ function App() {
 
     setCart({});
     setCustomer(initialCustomer);
+    setPaymentMethod(defaultPaymentMethod);
+    setLastOrder({ type: customer.type, payment });
     setView('success');
   };
 
@@ -232,7 +249,7 @@ function App() {
             </div>
           </header>
 
-          {adminTab === 'dashboard' && <DashboardView orders={orders} />}
+          {adminTab === 'dashboard' && <DashboardView orders={orders} customers={customers} />}
           {adminTab === 'products' && <ProductManager products={products} />}
           {adminTab === 'queue' && <GrillQueue />}
           {adminTab === 'reports' && (
@@ -248,6 +265,7 @@ function App() {
                       <th className="p-3">Data</th>
                       <th className="p-3">Cliente</th>
                       <th className="p-3">Tipo</th>
+                      <th className="p-3">Pagamento</th>
                       <th className="p-3">Total</th>
                       <th className="p-3">Status</th>
                     </tr>
@@ -268,6 +286,9 @@ function App() {
                         </td>
                         <td className="p-3 font-medium">{order.name}</td>
                         <td className="p-3 uppercase text-xs font-bold">{formatOrderType(order.type)}</td>
+
+                        <td className="p-3 uppercase text-xs font-bold text-gray-600">{formatPaymentMethod(order.payment)}</td>
+
                         <td className="p-3 font-bold text-green-600">{formatCurrency(order.total || 0)}</td>
                         <td className="p-3">
                           <span
@@ -378,18 +399,28 @@ function App() {
             </div>
           </form>
         )}
-        {view === 'menu' && <MenuView products={products} cart={cart} onUpdateCart={updateCart} onProceed={() => setView('cart')} />}
-        {view === 'cart' && (
-          <CartView
-            cart={cart}
-            customer={customer}
-            customers={customers}
-            onChangeCustomer={handleCustomerChange}
-            onCheckout={checkout}
-            onBack={() => setView('menu')}
+
+          {view === 'menu' && <MenuView products={products} cart={cart} onUpdateCart={updateCart} onProceed={() => setView('cart')} />}
+          {view === 'cart' && (
+            <CartView
+              cart={cart}
+              customer={customer}
+              customers={customers}
+              paymentMethod={paymentMethod}
+              onChangeCustomer={handleCustomerChange}
+              onChangePayment={setPaymentMethod}
+              onCheckout={checkout}
+              onBack={() => setView('menu')}
+            />
+          )}
+        {view === 'success' && (
+          <SuccessView
+            orderType={lastOrder?.type}
+            paymentMethod={lastOrder?.payment}
+            onNewOrder={() => setView('menu')}
+
           />
         )}
-        {view === 'success' && <SuccessView onNewOrder={() => setView('menu')} />}
         {view === 'grill' && (
           <div className="space-y-6">
             <div className="flex items-center gap-2 text-gray-700 font-semibold">
