@@ -48,20 +48,38 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/products", async (req, res) => {
-    const { name, price, category, description, active = true } = req.body;
+    const {
+        name,
+        price,
+        category,
+        description,
+        active = true,
+        imageUrl,
+    } = req.body;
+
     const query =
-        "INSERT INTO products (name, price, category, description, active) VALUES ($1, $2, $3, $4, $5) RETURNING *";
-    const values = [name, price, category, description, active];
+        "INSERT INTO products (name, price, category, description, active, image_url) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *";
+
+    const values = [name, price, category, description, active, imageUrl];
     const result = await pool.query(query, values);
     res.status(201).json(result.rows[0]);
 });
 
 app.put("/products/:id", async (req, res) => {
     const { id } = req.params;
-    const { name, price, category, description, active = true } = req.body;
+    const {
+        name,
+        price,
+        category,
+        description,
+        active = true,
+        imageUrl,
+    } = req.body;
+
     const query =
-        "UPDATE products SET name = $1, price = $2, category = $3, description = $4, active = $5 WHERE id = $6 RETURNING *";
-    const values = [name, price, category, description, active, id];
+        "UPDATE products SET name = $1, price = $2, category = $3, description = $4, active = $5, image_url = $6 WHERE id = $7 RETURNING *";
+
+    const values = [name, price, category, description, active, imageUrl, id];
     const result = await pool.query(query, values);
     res.json(result.rows[0]);
 });

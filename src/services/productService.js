@@ -5,6 +5,7 @@ const POLLING_INTERVAL = 4000;
 const normalizeProduct = (product) => ({
     ...product,
     id: product.id ?? product.product_id ?? product.productId,
+    imageUrl: product.image_url ?? product.imageUrl ?? "",
 });
 
 export const productService = {
