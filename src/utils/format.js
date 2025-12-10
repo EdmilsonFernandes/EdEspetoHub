@@ -20,3 +20,25 @@ export const formatDuration = (milliseconds) => {
   if (minutes > 0) return `${minutes}m ${seconds}s`;
   return `${seconds}s`;
 };
+
+
+export const formatOrderType = (type) => {
+  const map = {
+    delivery: 'Entrega',
+    pickup: 'Retirada',
+    table: 'Mesa',
+  };
+
+  return map[type] || 'Não informado';
+};
+
+export const formatOrderStatus = (status) => {
+  const map = {
+    pending: 'Pendente',
+    preparing: 'Preparando',
+    done: 'Finalizado',
+  };
+
+  return map[status] || 'Indefinido';
+};
+

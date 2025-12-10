@@ -20,7 +20,7 @@ import { SuccessView } from './components/Client/SuccessView';
 import { DashboardView } from './components/Admin/DashboardView';
 import { ProductManager } from './components/Admin/ProductManager';
 import { GrillQueue } from './components/Admin/GrillQueue';
-import { formatCurrency } from './utils/format';
+import { formatCurrency, formatOrderStatus, formatOrderType } from './utils/format';
 import './index.css';
 
 const initialCustomer = { name: '', phone: '', address: '', table: '', type: 'delivery' };
@@ -267,7 +267,7 @@ function App() {
                           }
                         </td>
                         <td className="p-3 font-medium">{order.name}</td>
-                        <td className="p-3 uppercase text-xs font-bold">{order.type}</td>
+                        <td className="p-3 uppercase text-xs font-bold">{formatOrderType(order.type)}</td>
                         <td className="p-3 font-bold text-green-600">{formatCurrency(order.total || 0)}</td>
                         <td className="p-3">
                           <span
@@ -275,7 +275,7 @@ function App() {
                               order.status === 'pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'
                             }`}
                           >
-                            {order.status?.toUpperCase()}
+                            {formatOrderStatus(order.status)}
                           </span>
                         </td>
                       </tr>

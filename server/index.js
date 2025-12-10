@@ -53,7 +53,8 @@ app.post("/login", (req, res) => {
     res.status(401).json({ message: "Credenciais inválidas" });
 });
 
-app.get("/customers", async (req, res) => {
+
+app.get(["/customers", "/api/customers"], async (req, res) => {
     const search = (req.query.search || "").toLowerCase();
     let query = "SELECT * FROM customers";
     const params = [];
