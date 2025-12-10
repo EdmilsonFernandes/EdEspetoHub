@@ -32,13 +32,6 @@ import './index.css';
 
 const DEFAULT_AREA_CODE = '12';
 const initialCustomer = { name: '', phone: formatPhoneInput('', DEFAULT_AREA_CODE), address: '', table: '', type: 'delivery' };
-
-} from './utils/format';
-
-import './index.css';
-
-const initialCustomer = { name: '', phone: '', address: '', table: '', type: 'delivery' };
-
 const defaultPaymentMethod = 'debito';
 const WHATSAPP_NUMBER = process.env.REACT_APP_WHATSAPP_NUMBER || '5512996797210';
 const PIX_KEY = process.env.REACT_APP_PIX_KEY || '';
@@ -158,13 +151,14 @@ function App() {
         itemsList,
         '------------------',
         `💰 *TOTAL: ${formatCurrency(cartTotal)}*`,
-        payment === 'pix' && pixKey ? `💳 Pagamento via PIX: ${pixKey}` : ''
+        payment === 'pix' && pixKey ? `💳 Pagamento via PIX: ${pixKey}` : '',
 
         payment === 'pix'
           ? PIX_KEY
             ? `💳 Pagamento via PIX: ${PIX_KEY}`
             : '💳 Gerar Pix para retirada na loja'
           : ''
+
       ].filter(Boolean);
 
       const encodedMessage = encodeURIComponent(messageLines.join('\n'));

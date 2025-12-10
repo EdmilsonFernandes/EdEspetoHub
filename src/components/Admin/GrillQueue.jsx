@@ -1,7 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { CheckSquare, Clock, ChefHat, RefreshCcw, Plus, Minus, Hash } from 'lucide-react';
-import { orderService } from '../../services/orderService';
-import { productService } from '../../services/productService';
+import React, { useEffect, useMemo, useState } from "react";
+import { CheckSquare, Clock, ChefHat, RefreshCcw, Plus, Minus, Hash } from "lucide-react";
+import { orderService } from "../../services/orderService";
+import { productService } from "../../services/productService";
 import {
   formatCurrency,
   formatDateTime,
@@ -9,7 +9,7 @@ import {
   formatOrderStatus,
   formatOrderType,
   formatPaymentMethod,
-} from '../../utils/format';
+} from "../../utils/format";
 
 export const GrillQueue = () => {
   const [queue, setQueue] = useState([]);
@@ -28,7 +28,9 @@ export const GrillQueue = () => {
   useEffect(() => {
     loadQueue();
     const interval = setInterval(loadQueue, 5000);
+
     const unsubProducts = productService.subscribe(setProducts);
+
     return () => {
       clearInterval(interval);
       unsubProducts();
@@ -47,11 +49,16 @@ export const GrillQueue = () => {
   const applyItemsChange = async (orderId, updater) => {
     const targetOrder = queue.find((entry) => entry.id === orderId);
     const updatedItems = updater(targetOrder?.items || []);
-    const sanitizedItems = updatedItems.filter((item) => item?.qty > 0);
-    const nextTotal = sanitizedItems.reduce((sum, item) => sum + (item.price || 0) * (item.qty || 0), 0);
 
-    setQueue((previous) =>
-      previous.map((order) =>
+    const sanitizedItems = updatedItems.filter((item) => item.qty > 0);
+
+    const nextTotal = sanitizedItems.reduce(
+      (sum, item) => sum + (item.price || 0) * item.qty,
+      0
+    );
+
+    setQueue((prev) =>
+      prev.map((order) =>
         order.id === orderId ? { ...order, items: sanitizedItems, total: nextTotal } : order
       )
     );
@@ -61,7 +68,9 @@ export const GrillQueue = () => {
 
   const handleQuantityChange = (orderId, itemId, delta) => {
     applyItemsChange(orderId, (items) =>
-      items.map((item) => (item.id === itemId ? { ...item, qty: Math.max(0, item.qty + delta) } : item))
+      items.map((item) =>
+        item.id === itemId ? { ...item, qty: Math.max(0, item.qty + delta) } : item
+      )
     );
   };
 
@@ -71,38 +80,39 @@ export const GrillQueue = () => {
     if (!product) return;
 
     applyItemsChange(orderId, (items) => {
-      const existingItem = items.find((item) => item.id === product.id);
-      if (existingItem) {
+      const existing = items.find((item) => item.id === product.id);
+      if (existing) {
         return items.map((item) =>
-          item.id === product.id ? { ...item, qty: item.qty + 1, price: product.price } : item
+          item.id === product.id
+            ? { ...item, qty: item.qty + 1 }
+            : item
         );
       }
+
       return [...items, { id: product.id, name: product.name, price: product.price, qty: 1 }];
     });
   };
 
   const elapsedTime = useMemo(
     () =>
-      queue.reduce((acc, order) => ({
-        ...acc,
-        [order.id]: formatDuration(order.createdAt ? currentTime - order.createdAt : 0),
-      }), {}),
+      queue.reduce(
+        (acc, order) => ({
+          ...acc,
+          [order.id]: formatDuration(order.createdAt ? currentTime - order.createdAt : 0),
+        }),
+        {}
+      ),
     [currentTime, queue]
   );
 
-
   const sortedQueue = useMemo(
-    () =>
-      [...queue].sort((a, b) => {
-        const aTime = a.createdAt || 0;
-        const bTime = b.createdAt || 0;
-        return aTime - bTime;
-      }),
+    () => [...queue].sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0)),
     [queue]
   );
 
   return (
     <div className="space-y-4">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-gray-700 font-semibold">
           <ChefHat className="text-red-500" />
@@ -116,85 +126,115 @@ export const GrillQueue = () => {
         </button>
       </div>
 
+      {/* LISTA */}
       <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
         {sortedQueue.map((order, index) => (
-
-          <div key={order.id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+          <div
+            key={order.id}
+            className="bg-white p-4 rounded-xl shadow-sm border border-gray-100"
+          >
+            {/* HEADER DO CARD */}
             <div className="flex justify-between items-start">
               <div>
                 <div className="flex items-center gap-2 mb-1 text-xs text-gray-500 uppercase font-bold">
-                  <Hash size={12} className="text-red-500" /> Fila {String(index + 1).padStart(2, '0')}
+                  <Hash size={12} className="text-red-500" /> Fila{" "}
+                  {String(index + 1).padStart(2, "0")}
                 </div>
-                <p className="text-sm text-gray-500">{formatDateTime(order.createdAt)}</p>
-                <h3 className="text-lg font-bold text-gray-800">{order.name || 'Cliente'}</h3>
-                <p className="text-xs text-gray-500 uppercase">{formatOrderType(order.type)}</p>
+
+                <p className="text-sm text-gray-500">
+                  {formatDateTime(order.createdAt)}
+                </p>
+
+                <h3 className="text-lg font-bold text-gray-800">
+                  {order.name || "Cliente"}
+                </h3>
+
+                <p className="text-xs text-gray-500 uppercase">
+                  {formatOrderType(order.type)}
+                </p>
 
                 <p className="text-xs text-gray-500 uppercase mt-1">
                   Pagamento: {formatPaymentMethod(order.payment)}
                 </p>
               </div>
+
               <span
                 className={`px-2 py-1 text-xs font-bold rounded ${
-                  order.status === 'preparing' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'
+                  order.status === "preparing"
+                    ? "bg-yellow-100 text-yellow-700"
+                    : "bg-red-100 text-red-700"
                 }`}
               >
                 {formatOrderStatus(order.status)}
               </span>
             </div>
 
+            {/* TEMPO */}
             <div className="mt-3 text-sm font-semibold text-gray-700 flex items-center gap-2">
               <div className="px-3 py-1 rounded-full bg-red-50 text-red-700 font-black flex items-center gap-2 shadow-sm">
                 <Clock size={14} className="text-red-500" />
-                <span className="tabular-nums text-base">{elapsedTime[order.id] || '0s'}</span>
+                <span className="tabular-nums text-base">
+                  {elapsedTime[order.id] || "0s"}
+                </span>
               </div>
-
-            <div className="mt-2 text-sm font-semibold text-gray-700 flex items-center gap-2">
-              <Clock size={14} className="text-red-500" />
-              <span>{elapsedTime[order.id] || '0s'}</span>
-
             </div>
 
+            {/* LISTA DE ITENS */}
             <div className="mt-4 space-y-2">
               {(order.items || []).map((item) => (
-                <div key={item.name} className="flex justify-between text-sm text-gray-700 items-center gap-3">
+                <div
+                  key={item.id}
+                  className="flex justify-between text-sm text-gray-700 items-center gap-3"
+                >
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleQuantityChange(order.id, item.id, -1)}
                       className="p-1 rounded-full bg-gray-100 hover:bg-gray-200"
-                      aria-label="Diminuir quantidade"
                     >
                       <Minus size={14} />
                     </button>
-                    <span className="font-bold text-gray-800 w-8 text-center">{item.qty}</span>
+
+                    <span className="font-bold text-gray-800 w-8 text-center">
+                      {item.qty}
+                    </span>
+
                     <button
                       onClick={() => handleQuantityChange(order.id, item.id, 1)}
                       className="p-1 rounded-full bg-gray-100 hover:bg-gray-200"
-                      aria-label="Aumentar quantidade"
                     >
                       <Plus size={14} />
                     </button>
-                    <span className="text-gray-700">{item.name}</span>
+
+                    <span>{item.name}</span>
                   </div>
-                  <span className="font-semibold">{formatCurrency(item.price * item.qty)}</span>
+
+                  <span className="font-semibold">
+                    {formatCurrency(item.price * item.qty)}
+                  </span>
                 </div>
               ))}
             </div>
 
+            {/* ADICIONAR ITEM */}
             <div className="mt-3 flex gap-2 items-center">
               <select
-                value={selectedProducts[order.id] || ''}
-                onChange={(event) =>
-                  setSelectedProducts((prev) => ({ ...prev, [order.id]: event.target.value }))
+                value={selectedProducts[order.id] || ""}
+                onChange={(e) =>
+                  setSelectedProducts((prev) => ({
+                    ...prev,
+                    [order.id]: e.target.value,
+                  }))
                 }
                 className="flex-1 border border-gray-200 rounded-lg p-2 text-sm"
               >
                 <option value="">Adicionar item...</option>
                 {products.map((product) => (
                   <option key={product.id} value={product.id}>
-                    {product.name} - {formatCurrency(product.price)}
+                    {product.name} – {formatCurrency(product.price)}
                   </option>
                 ))}
               </select>
+
               <button
                 onClick={() => handleAddItem(order.id)}
                 className="px-3 py-2 rounded-lg bg-red-50 text-red-600 text-xs font-bold flex items-center gap-1"
@@ -203,19 +243,24 @@ export const GrillQueue = () => {
               </button>
             </div>
 
+            {/* TOTAL + BOTÕES */}
             <div className="flex justify-between items-center mt-4">
-              <div className="text-gray-800 font-black">{formatCurrency(order.total || 0)}</div>
+              <div className="text-gray-800 font-black">
+                {formatCurrency(order.total || 0)}
+              </div>
+
               <div className="flex gap-2">
-                {order.status === 'pending' && (
+                {order.status === "pending" && (
                   <button
-                    onClick={() => handleAdvance(order.id, 'preparing')}
+                    onClick={() => handleAdvance(order.id, "preparing")}
                     className="px-3 py-2 rounded-lg bg-yellow-100 text-yellow-700 text-xs font-bold flex items-center gap-1"
                   >
                     <Clock size={16} /> Preparar
                   </button>
                 )}
+
                 <button
-                  onClick={() => handleAdvance(order.id, 'done')}
+                  onClick={() => handleAdvance(order.id, "done")}
                   className="px-3 py-2 rounded-lg bg-green-100 text-green-700 text-xs font-bold flex items-center gap-1"
                 >
                   <CheckSquare size={16} /> Finalizar
@@ -224,8 +269,9 @@ export const GrillQueue = () => {
             </div>
           </div>
         ))}
-        {queue.length === 0 && !loading && (
-          <div className="col-span-2 text-center text-gray-500 py-12 bg-white rounded-xl border border-dashed">
+
+        {sortedQueue.length === 0 && !loading && (
+          <div className="col-span-3 text-center text-gray-500 py-12 bg-white rounded-xl border border-dashed">
             Nenhum pedido aguardando.
           </div>
         )}
