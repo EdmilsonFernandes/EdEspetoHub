@@ -13,16 +13,26 @@ import {
 import { productService } from './services/productService';
 import { orderService } from './services/orderService';
 import { authService } from './services/authService';
+import { customerService } from './services/customerService';
 import { MenuView } from './components/Client/MenuView';
 import { CartView } from './components/Client/CartView';
 import { SuccessView } from './components/Client/SuccessView';
 import { DashboardView } from './components/Admin/DashboardView';
 import { ProductManager } from './components/Admin/ProductManager';
 import { GrillQueue } from './components/Admin/GrillQueue';
-import { formatCurrency } from './utils/format';
+import {
+  formatCurrency,
+  formatOrderStatus,
+  formatOrderType,
+  formatPaymentMethod,
+  formatPhoneInput,
+} from './utils/format';
+import { exportToCsv } from './utils/export';
 import './index.css';
 
-const initialCustomer = { name: '', phone: '', address: '', table: '', type: 'delivery' };
+const DEFAULT_AREA_CODE = '12';
+const initialCustomer = { name: '', phone: formatPhoneInput('', DEFAULT_AREA_CODE), address: '', table: '', type: 'delivery' };
+const defaultPaymentMethod = 'debito';
 const WHATSAPP_NUMBER = process.env.REACT_APP_WHATSAPP_NUMBER || '5512996797210';
 const PIX_KEY = process.env.REACT_APP_PIX_KEY || '';
 
@@ -30,12 +40,22 @@ function App() {
   const [user, setUser] = useState(null);
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
+  const [customers, setCustomers] = useState([]);
   const [view, setView] = useState('menu');
   const [adminTab, setAdminTab] = useState('dashboard');
   const [cart, setCart] = useState({});
   const [customer, setCustomer] = useState(initialCustomer);
+  const [paymentMethod, setPaymentMethod] = useState(defaultPaymentMethod);
+  const [lastOrder, setLastOrder] = useState(null);
   const [loginForm, setLoginForm] = useState({ username: '', password: '' });
   const [loginError, setLoginError] = useState('');
+
+  const formatOrderDate = (order) => {
+    if (order.createdAt?.seconds) return new Date(order.createdAt.seconds * 1000).toLocaleString('pt-BR');
+    if (order.createdAt) return new Date(order.createdAt).toLocaleString('pt-BR');
+    if (order.timestamp) return new Date(order.timestamp).toLocaleString('pt-BR');
+    return order.dateString || '';
+  };
 
   useEffect(() => {
     const savedSession = localStorage.getItem('adminSession');
@@ -47,6 +67,7 @@ function App() {
 
     const unsubProd = productService.subscribe(setProducts);
     const unsubOrders = orderService.subscribeAll(setOrders);
+    customerService.fetchAll().then(setCustomers).catch(() => setCustomers([]));
     return () => {
       unsubProd();
       unsubOrders();
@@ -68,6 +89,18 @@ function App() {
     });
   };
 
+  const handleCustomerChange = (nextCustomer) => {
+    const normalizedName = nextCustomer.name?.trim().toLowerCase();
+    const matchedCustomer = customers.find(
+      (entry) => entry.name?.trim().toLowerCase() === normalizedName
+    );
+
+    const phoneFromMatch = !nextCustomer.phone && matchedCustomer?.phone ? matchedCustomer.phone : nextCustomer.phone;
+    const formattedPhone = formatPhoneInput(phoneFromMatch, DEFAULT_AREA_CODE);
+
+    setCustomer({ ...nextCustomer, phone: formattedPhone });
+  };
+
   const checkout = async () => {
     if (!customer.name || !customer.phone) {
       alert('Preencha Nome e Telefone');
@@ -80,7 +113,10 @@ function App() {
     }
 
     const isPickup = customer.type === 'pickup';
-    const payment = isPickup ? 'pix' : 'offline';
+    const payment = paymentMethod;
+    const sanitizedPhone = customer.phone.replace(/\D/g, '');
+    const sanitizedPhoneKey = sanitizedPhone.length >= 10 ? `+55${sanitizedPhone}` : '';
+    const pixKey = PIX_KEY || sanitizedPhoneKey;
 
     const order = {
       ...customer,
@@ -91,6 +127,7 @@ function App() {
     };
 
     await orderService.save(order);
+    customerService.fetchAll().then(setCustomers).catch(() => {});
 
     if (isPickup) {
       const itemsList = Object.values(cart)
@@ -102,12 +139,13 @@ function App() {
         '------------------',
         `👤 *${customer.name}* (${customer.phone})`,
         `🛒 *Tipo:* ${customer.type}`,
+        payment ? `💳 Pagamento: ${formatPaymentMethod(payment)}` : '',
         customer.address ? `📍 End: ${customer.address}` : '',
         '------------------',
         itemsList,
         '------------------',
         `💰 *TOTAL: ${formatCurrency(cartTotal)}*`,
-        PIX_KEY ? `💳 Pagamento via PIX: ${PIX_KEY}` : '💳 Gerar Pix para retirada na loja'
+        payment === 'pix' && pixKey ? `💳 Pagamento via PIX: ${pixKey}` : ''
       ].filter(Boolean);
 
       const encodedMessage = encodeURIComponent(messageLines.join('\n'));
@@ -116,6 +154,13 @@ function App() {
 
     setCart({});
     setCustomer(initialCustomer);
+    setPaymentMethod(defaultPaymentMethod);
+    setLastOrder({
+      type: customer.type,
+      payment,
+      phone: sanitizedPhoneKey || customer.phone,
+      pixKey,
+    });
     setView('success');
   };
 
@@ -139,6 +184,30 @@ function App() {
     setUser(null);
     setLoginForm({ username: '', password: '' });
     setView('menu');
+  };
+
+  const exportOrders = () => {
+    const headers = [
+      { key: 'data', label: 'Data' },
+      { key: 'cliente', label: 'Cliente' },
+      { key: 'telefone', label: 'Telefone' },
+      { key: 'tipo', label: 'Tipo' },
+      { key: 'pagamento', label: 'Pagamento' },
+      { key: 'total', label: 'Total' },
+      { key: 'status', label: 'Status' },
+    ];
+
+    const rows = orders.map((order) => ({
+      data: formatOrderDate(order),
+      cliente: order.name,
+      telefone: order.phone,
+      tipo: formatOrderType(order.type),
+      pagamento: formatPaymentMethod(order.payment),
+      total: formatCurrency(order.total || 0),
+      status: formatOrderStatus(order.status),
+    }));
+
+    exportToCsv('relatorio-vendas', headers, rows);
   };
 
   if (view === 'admin' && user) {
@@ -217,14 +286,22 @@ function App() {
             </div>
           </header>
 
-          {adminTab === 'dashboard' && <DashboardView orders={orders} />}
+          {adminTab === 'dashboard' && <DashboardView orders={orders} customers={customers} />}
           {adminTab === 'products' && <ProductManager products={products} />}
           {adminTab === 'queue' && <GrillQueue />}
           {adminTab === 'reports' && (
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-              <div className="p-4 border-b bg-gray-50 flex justify-between">
-                <h3 className="font-bold text-gray-700">Histórico Completo</h3>
-                <span className="text-sm text-gray-500">{orders.length} pedidos</span>
+              <div className="p-4 border-b bg-gray-50 flex flex-wrap gap-3 justify-between items-center">
+                <div>
+                  <h3 className="font-bold text-gray-700">Histórico Completo</h3>
+                  <span className="text-sm text-gray-500">{orders.length} pedidos</span>
+                </div>
+                <button
+                  onClick={exportOrders}
+                  className="px-3 py-2 rounded-lg bg-green-600 text-white text-sm font-semibold hover:bg-green-700"
+                >
+                  Exportar Excel (.csv)
+                </button>
               </div>
               <div className="max-h-[600px] overflow-y-auto">
                 <table className="w-full text-left text-sm">
@@ -232,7 +309,9 @@ function App() {
                     <tr>
                       <th className="p-3">Data</th>
                       <th className="p-3">Cliente</th>
+                      <th className="p-3">Telefone</th>
                       <th className="p-3">Tipo</th>
+                      <th className="p-3">Pagamento</th>
                       <th className="p-3">Total</th>
                       <th className="p-3">Status</th>
                     </tr>
@@ -240,19 +319,11 @@ function App() {
                   <tbody className="divide-y">
                     {orders.map((order) => (
                     <tr key={order.id}>
-                        <td className="p-3 text-gray-500">
-                          {
-                            order.createdAt?.seconds
-                              ? new Date(order.createdAt.seconds * 1000).toLocaleString()
-                              : order.createdAt
-                                ? new Date(order.createdAt).toLocaleString()
-                                : order.timestamp
-                                  ? new Date(order.timestamp).toLocaleString()
-                                  : order.dateString
-                          }
-                        </td>
+                        <td className="p-3 text-gray-500">{formatOrderDate(order)}</td>
                         <td className="p-3 font-medium">{order.name}</td>
-                        <td className="p-3 uppercase text-xs font-bold">{order.type}</td>
+                        <td className="p-3 text-gray-600">{order.phone}</td>
+                        <td className="p-3 uppercase text-xs font-bold">{formatOrderType(order.type)}</td>
+                        <td className="p-3 uppercase text-xs font-bold text-gray-600">{formatPaymentMethod(order.payment)}</td>
                         <td className="p-3 font-bold text-green-600">{formatCurrency(order.total || 0)}</td>
                         <td className="p-3">
                           <span
@@ -260,7 +331,7 @@ function App() {
                               order.status === 'pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'
                             }`}
                           >
-                            {order.status?.toUpperCase()}
+                            {formatOrderStatus(order.status)}
                           </span>
                         </td>
                       </tr>
@@ -281,7 +352,7 @@ function App() {
         <div className="bg-red-900 text-white p-1 text-center text-[10px] md:text-xs font-medium uppercase tracking-wider">
           O melhor churrasco da região • Peça agora
         </div>
-        <div className="p-4 flex justify-between items-center max-w-lg mx-auto">
+        <div className="p-4 flex flex-wrap gap-3 justify-between items-center max-w-5xl mx-auto">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-yellow-400 rounded-lg flex items-center justify-center text-red-900 font-black text-xl shadow-sm">
               ED
@@ -291,7 +362,24 @@ function App() {
               <span className="text-xs text-gray-500">Espetinhos Premium</span>
             </div>
           </div>
-          <div className="flex items-center gap-3 text-gray-400">
+          <div className="hidden md:flex items-center gap-2">
+            <button
+              onClick={() => setView('grill')}
+              className="flex items-center gap-2 px-3 py-2 rounded-full bg-red-50 text-red-700 font-semibold border border-red-200 hover:bg-red-100"
+            >
+              <ChefHat size={18} /> Fila do churrasqueiro
+            </button>
+            <button
+              onClick={() => {
+                setView('login');
+                setLoginError('');
+              }}
+              className="flex items-center gap-2 px-3 py-2 rounded-full bg-gray-900 text-white font-semibold hover:bg-black/80"
+            >
+              <LayoutDashboard size={18} /> Área admin
+            </button>
+          </div>
+          <div className="flex md:hidden items-center gap-3 text-gray-400">
             <button
               onClick={() => {
                 setView('login');
@@ -308,7 +396,7 @@ function App() {
         </div>
       </header>
 
-      <main className="max-w-lg mx-auto p-4">
+      <main className="max-w-5xl mx-auto p-4">
         {view === 'login' && (
           <form onSubmit={handleLogin} className="bg-white rounded-xl shadow-sm p-6 space-y-4">
             <div>
@@ -363,17 +451,28 @@ function App() {
             </div>
           </form>
         )}
-        {view === 'menu' && <MenuView products={products} cart={cart} onUpdateCart={updateCart} onProceed={() => setView('cart')} />}
-        {view === 'cart' && (
-          <CartView
-            cart={cart}
-            customer={customer}
-            onChangeCustomer={setCustomer}
-            onCheckout={checkout}
-            onBack={() => setView('menu')}
+          {view === 'menu' && <MenuView products={products} cart={cart} onUpdateCart={updateCart} onProceed={() => setView('cart')} />}
+          {view === 'cart' && (
+            <CartView
+              cart={cart}
+              customer={customer}
+              customers={customers}
+              paymentMethod={paymentMethod}
+              onChangeCustomer={handleCustomerChange}
+              onChangePayment={setPaymentMethod}
+              onCheckout={checkout}
+              onBack={() => setView('menu')}
+            />
+          )}
+        {view === 'success' && (
+          <SuccessView
+            orderType={lastOrder?.type}
+            paymentMethod={lastOrder?.payment}
+            pixKey={lastOrder?.pixKey}
+            phone={lastOrder?.phone}
+            onNewOrder={() => setView('menu')}
           />
         )}
-        {view === 'success' && <SuccessView onNewOrder={() => setView('menu')} />}
         {view === 'grill' && (
           <div className="space-y-6">
             <div className="flex items-center gap-2 text-gray-700 font-semibold">
@@ -382,7 +481,7 @@ function App() {
             <GrillQueue />
             <button
               onClick={() => setView('menu')}
-              className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 bg-white rounded-lg border"
+              className="flex items-center gap-2 px-3 py-2 text-sm text-white bg-red-600 rounded-lg border border-red-700 hover:bg-red-700"
             >
               <ShoppingCart size={16} /> Voltar para pedidos
             </button>

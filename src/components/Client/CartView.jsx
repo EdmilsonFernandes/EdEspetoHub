@@ -1,21 +1,37 @@
 import React, { useMemo } from 'react';
-import { ChevronLeft, Bike, Home, UtensilsCrossed, Send, WalletCards } from 'lucide-react';
-import { formatCurrency } from '../../utils/format';
+import { ChevronLeft, Bike, Home, UtensilsCrossed, Send, WalletCards, CreditCard } from 'lucide-react';
+import { formatCurrency, formatPhoneInput } from '../../utils/format';
 
-export const CartView = ({ cart, customer, onChangeCustomer, onCheckout, onBack }) => {
+export const CartView = ({
+  cart,
+  customer,
+  customers = [],
+  paymentMethod,
+  onChangeCustomer,
+  onChangePayment,
+  onCheckout,
+  onBack,
+}) => {
   const cartItems = Object.values(cart);
   const total = cartItems.reduce((acc, item) => acc + item.price * item.qty, 0);
   const isPickup = customer.type === 'pickup';
   const isDelivery = customer.type === 'delivery';
+  const isPix = paymentMethod === 'pix';
   const actionLabel = useMemo(() => {
-    if (isPickup) return 'Gerar Pix e enviar pedido';
     if (isDelivery) return 'Finalizar pedido para entrega';
+    if (isPickup) return 'Finalizar pedido para retirada';
+    if (isPix) return 'Finalizar pedido (Pix)';
     return 'Finalizar pedido na mesa';
-  }, [isDelivery, isPickup]);
+  }, [isDelivery, isPickup, isPix]);
+
+  const handlePhoneChange = (nextValue) => {
+    const formatted = formatPhoneInput(nextValue);
+    onChangeCustomer({ ...customer, phone: formatted });
+  };
 
   return (
     <div className="animate-in slide-in-from-right">
-      <button onClick={onBack} className="mb-6 flex items-center text-gray-600 font-medium hover:text-red-600">
+      <button onClick={onBack} className="mb-6 flex items-center text-red-700 font-semibold hover:text-red-800">
         <ChevronLeft size={20} /> Continuar comprando
       </button>
 
@@ -29,16 +45,25 @@ export const CartView = ({ cart, customer, onChangeCustomer, onCheckout, onBack 
               value={customer.name}
               onChange={(e) => onChangeCustomer({ ...customer, name: e.target.value })}
               placeholder="Ex: João Silva"
+              list="customer-suggestions"
               className="w-full border-b-2 border-gray-100 py-3 text-lg outline-none focus:border-red-500 transition-colors placeholder:text-gray-300"
             />
+            <datalist id="customer-suggestions">
+              {customers.map((entry) => (
+                <option key={entry.id || entry.name} value={entry.name}>
+                  {entry.phone}
+                </option>
+              ))}
+            </datalist>
           </div>
           <div>
             <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">WhatsApp</label>
             <input
               type="tel"
-              value={customer.phone}
-              onChange={(e) => onChangeCustomer({ ...customer, phone: e.target.value })}
-              placeholder="(00) 00000-0000"
+              inputMode="tel"
+              value={customer.phone || formatPhoneInput('', '12')}
+              onChange={(e) => handlePhoneChange(e.target.value)}
+              placeholder="(12) 90000-0000"
               className="w-full border-b-2 border-gray-100 py-3 text-lg outline-none focus:border-red-500 transition-colors placeholder:text-gray-300"
             />
           </div>
@@ -101,9 +126,36 @@ export const CartView = ({ cart, customer, onChangeCustomer, onCheckout, onBack 
         </div>
 
         <div className="mt-3 text-xs text-gray-500 bg-gray-50 border border-gray-100 rounded-lg p-3 leading-relaxed">
-          {isPickup && 'Pagamento via Pix será gerado automaticamente e enviado junto com o pedido.'}
-          {isDelivery && 'Você finaliza o pedido agora e paga na entrega ou conforme combinado.'}
-          {!isPickup && !isDelivery && 'Pedido será direcionado para atendimento na mesa sem cobrança antecipada.'}
+          {isPix && 'O QR Code do Pix aparecerá após finalizar o pedido.'}
+          {!isPix && isDelivery && 'Você finaliza o pedido agora e paga na entrega ou conforme combinado.'}
+          {!isPix && !isDelivery &&
+            'Pedido será direcionado para atendimento, pague no local conforme a forma selecionada.'}
+        </div>
+      </div>
+
+      <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
+        <h2 className="font-bold text-gray-800 mb-4 text-lg flex items-center gap-2">
+          <CreditCard size={18} className="text-red-500" /> Forma de Pagamento
+        </h2>
+        <div className="grid grid-cols-2 gap-3">
+          {[
+            { id: 'pix', label: 'Pix', description: 'Registro rápido' },
+            { id: 'debito', label: 'Débito', description: 'Pagamento no local' },
+            { id: 'credito', label: 'Crédito', description: 'Pagamento no local' },
+          ].map((method) => (
+            <button
+              key={method.id}
+              onClick={() => onChangePayment(method.id)}
+              className={`border-2 rounded-xl p-3 text-left transition-all ${
+                paymentMethod === method.id
+                  ? 'border-red-500 bg-red-50 text-red-700'
+                  : 'border-gray-100 text-gray-500 hover:border-red-200'
+              }`}
+            >
+              <div className="font-bold">{method.label}</div>
+              <div className="text-xs text-gray-500">{method.description}</div>
+            </button>
+          ))}
         </div>
       </div>
 
