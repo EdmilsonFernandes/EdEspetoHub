@@ -7,10 +7,18 @@ export const GrillQueue = () => {
   const [queue, setQueue] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  const getOrderTimestamp = (order) => {
+    if (order.createdAt?.seconds) return order.createdAt.seconds * 1000;
+    const time = order.createdAt || order.timestamp || order.dateString;
+    const parsed = time ? new Date(time).getTime() : 0;
+    return Number.isNaN(parsed) ? 0 : parsed;
+  };
+
   const loadQueue = async () => {
     setLoading(true);
     const data = await orderService.fetchQueue();
-    setQueue(data);
+    const orderedQueue = data.sort((a, b) => getOrderTimestamp(a) - getOrderTimestamp(b));
+    setQueue(orderedQueue);
     setLoading(false);
   };
 
@@ -43,7 +51,9 @@ export const GrillQueue = () => {
           <div key={order.id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
             <div className="flex justify-between items-start">
               <div>
-                <p className="text-sm text-gray-500">{formatDateTime(order.createdAt)}</p>
+                <p className="text-xs text-gray-500 flex items-center gap-1">
+                  <Clock size={14} className="text-yellow-600" /> Recebido em {formatDateTime(order.createdAt) || '---'}
+                </p>
                 <h3 className="text-lg font-bold text-gray-800">{order.name || 'Cliente'}</h3>
                 <p className="text-xs text-gray-500 uppercase">{order.type}</p>
               </div>
