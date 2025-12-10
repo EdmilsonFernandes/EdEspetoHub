@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Plus, Minus, Image as ImageIcon, SlidersHorizontal } from 'lucide-react';
+import { Plus, Minus, CupSoda, Beef, Martini, SlidersHorizontal } from 'lucide-react';
 import { formatCurrency } from '../../utils/format';
 
 export const MenuView = ({ products, cart, onUpdateCart, onProceed }) => {
@@ -20,17 +20,20 @@ export const MenuView = ({ products, cart, onUpdateCart, onProceed }) => {
 
   const sortedProducts = useMemo(() => {
     const espetos = [];
+    const bebidas = [];
     const others = [];
 
     products.forEach((item) => {
       if (item.category?.toLowerCase().includes('espeto')) {
         espetos.push(item);
+      } else if (item.category?.toLowerCase().includes('bebida')) {
+        bebidas.push(item);
       } else {
         others.push(item);
       }
     });
 
-    return [...espetos, ...others];
+    return [...espetos, ...bebidas, ...others];
   }, [products]);
 
   const filteredProducts = useMemo(() => {
@@ -49,20 +52,50 @@ export const MenuView = ({ products, cart, onUpdateCart, onProceed }) => {
     );
   }, [selectedCategory, sortedProducts]);
 
+  const groupedProducts = useMemo(() => {
+    const groups = new Map();
+    filteredProducts.forEach((item) => {
+      const label = item.category
+        ? item.category.charAt(0).toUpperCase() + item.category.slice(1)
+        : 'Outros';
+      if (!groups.has(label)) {
+        groups.set(label, []);
+      }
+      groups.get(label).push(item);
+    });
+    return Array.from(groups.entries());
+  }, [filteredProducts]);
+
+  const groupIcon = (category) => {
+    if (category.toLowerCase().includes('espeto')) return <Beef size={18} />;
+    if (category.toLowerCase().includes('bebida')) return <Martini size={18} />;
+    return <CupSoda size={18} />;
+  };
+
   return (
-    <div className="animate-in fade-in space-y-4">
-      <div className="flex items-center justify-between gap-2 overflow-x-auto pb-3 no-scrollbar">
-        <div className="flex gap-2">
+    <div className="animate-in fade-in space-y-5">
+      <div className="bg-white rounded-2xl shadow-sm border border-red-100 p-4">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-xs text-red-500 font-semibold uppercase">Cardápio</p>
+            <h2 className="text-lg font-black text-gray-800">Escolha seus favoritos</h2>
+          </div>
+          <div className="flex items-center gap-1 text-xs text-gray-400">
+            <SlidersHorizontal size={16} />
+            Filtros
+          </div>
+        </div>
+        <div className="mt-3 flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
           {categories.map((category) => {
             const isActive = category === selectedCategory;
             return (
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-colors ${
+                className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-colors border ${
                   isActive
-                    ? 'bg-red-600 text-white shadow-md shadow-red-200'
-                    : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300'
+                    ? 'bg-red-600 text-white border-red-600 shadow-md shadow-red-200'
+                    : 'bg-red-50 text-red-700 border-red-100 hover:border-red-200'
                 }`}
               >
                 {category}
@@ -70,81 +103,75 @@ export const MenuView = ({ products, cart, onUpdateCart, onProceed }) => {
             );
           })}
         </div>
-        <div className="flex items-center gap-1 text-xs text-gray-400">
-          <SlidersHorizontal size={16} />
-          Filtros
-        </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {filteredProducts.map((item) => (
-          <div
-            key={item.id}
-            className="bg-white p-3 rounded-xl shadow-sm border border-gray-100 flex gap-3 transition-all active:scale-[0.99] hover:shadow-md"
-          >
-            <div className="w-24 h-24 bg-gray-100 rounded-lg flex-shrink-0 overflow-hidden">
-              {item.imageUrl ? (
-                <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-gray-300">
-                  <ImageIcon size={24} />
-                </div>
-              )}
+      <div className="space-y-4">
+        {groupedProducts.map(([category, items]) => (
+          <section key={category} className="space-y-2">
+            <div className="flex items-center gap-2 text-red-700 font-bold text-lg">
+              <span className="w-8 h-8 rounded-full bg-red-50 text-red-600 flex items-center justify-center">
+                {groupIcon(category)}
+              </span>
+              {category}
             </div>
-
-            <div className="flex-1 flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-between gap-2">
-                  <h3 className="font-bold text-gray-800 line-clamp-1">{item.name}</h3>
-                  {item.category && (
-                    <span className="text-[10px] uppercase tracking-wide font-bold text-red-500 bg-red-50 px-2 py-1 rounded-full">
-                      {item.category}
-                    </span>
-                  )}
-                </div>
-                <p className="text-xs text-gray-500 mt-1 line-clamp-2 leading-relaxed">{item.desc}</p>
-              </div>
-              <div className="flex justify-between items-end mt-2 gap-2">
-                <span className="font-bold text-gray-900 text-lg">{formatCurrency(item.price)}</span>
-
-                {cart[item.id] ? (
-                  <div className="flex items-center bg-gray-100 rounded-lg p-1 gap-2 shadow-inner">
-                    <button
-                      onClick={() => onUpdateCart(item, -1)}
-                      className="w-7 h-7 flex items-center justify-center bg-white rounded text-red-600 shadow-sm"
-                    >
-                      <Minus size={14} />
-                    </button>
-                    <span className="font-bold text-sm min-w-[20px] text-center">{cart[item.id].qty}</span>
-                    <button
-                      onClick={() => onUpdateCart(item, 1)}
-                      className="w-7 h-7 flex items-center justify-center bg-green-600 rounded text-white shadow-sm"
-                    >
-                      <Plus size={14} />
-                    </button>
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm divide-y">
+              {items.map((item) => (
+                <div key={item.id} className="flex items-center gap-3 p-3">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-gray-900 text-base">{item.name}</h3>
+                      {item.category && (
+                        <span className="text-[10px] px-2 py-1 rounded-full bg-gray-100 text-gray-500 uppercase">
+                          {item.category}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-500 mt-1 line-clamp-2">{item.desc || 'Feito na brasa na hora para você.'}</p>
                   </div>
-                ) : (
-                  <button
-                    onClick={() => onUpdateCart(item, 1)}
-                    className="bg-red-50 text-red-600 px-3 py-1.5 rounded-lg text-sm font-bold hover:bg-red-100 transition-colors w-full text-center"
-                  >
-                    Adicionar
-                  </button>
-                )}
-              </div>
+
+                  <div className="flex flex-col items-end gap-2 min-w-[120px]">
+                    <span className="text-sm font-extrabold text-red-600">{formatCurrency(item.price)}</span>
+                    {cart[item.id] ? (
+                      <div className="flex items-center gap-2 bg-red-50 rounded-full px-2 py-1 border border-red-100">
+                        <button
+                          onClick={() => onUpdateCart(item, -1)}
+                          className="w-8 h-8 flex items-center justify-center rounded-full bg-white text-red-600 border border-red-200"
+                        >
+                          <Minus size={14} />
+                        </button>
+                        <span className="font-bold text-sm min-w-[20px] text-center">{cart[item.id].qty}</span>
+                        <button
+                          onClick={() => onUpdateCart(item, 1)}
+                          className="w-8 h-8 flex items-center justify-center rounded-full bg-red-600 text-white shadow"
+                        >
+                          <Plus size={14} />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => onUpdateCart(item, 1)}
+                        className="w-10 h-10 rounded-full bg-red-600 text-white flex items-center justify-center shadow-md hover:bg-red-700 transition"
+                        aria-label={`Adicionar ${item.name}`}
+                      >
+                        <Plus size={18} />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
-          </div>
+          </section>
         ))}
       </div>
 
       {Object.keys(cart).length > 0 && (
-        <div className="fixed bottom-6 left-4 right-4 sm:left-6 sm:right-6 z-40 max-w-xl mx-auto">
+        <div className="fixed bottom-6 left-4 right-4 sm:left-6 sm:right-6 z-40 max-w-4xl mx-auto">
           <button
             onClick={onProceed}
-            className="w-full bg-gray-900 text-white p-4 rounded-2xl shadow-2xl flex justify-between items-center transform hover:scale-[1.02] transition-all"
+            className="w-full bg-red-600 text-white p-4 rounded-2xl shadow-xl flex justify-between items-center transform hover:scale-[1.02] transition-all"
           >
             <div className="flex items-center gap-3">
-              <span className="bg-red-600 px-3 py-1 rounded-lg text-sm font-bold">
+              <span className="bg-white/20 px-3 py-1 rounded-lg text-sm font-bold">
                 {Object.values(cart).reduce((acc, item) => acc + item.qty, 0)}
               </span>
               <span className="font-bold">Ver sacola</span>

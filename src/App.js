@@ -276,45 +276,64 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 font-sans pb-24">
-      <header className="bg-white sticky top-0 z-30 shadow-sm">
-        <div className="bg-red-900 text-white p-1 text-center text-[10px] md:text-xs font-medium uppercase tracking-wider">
-          O melhor churrasco da região • Peça agora
-        </div>
-        <div className="p-4 flex justify-between items-center max-w-lg mx-auto">
+    <div className="min-h-screen bg-[#f5f6fa] font-sans pb-28">
+      <header className="bg-gradient-to-b from-red-700 via-red-600 to-red-500 text-white pb-10 shadow-md">
+        <div className="max-w-4xl mx-auto px-4 pt-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-yellow-400 rounded-lg flex items-center justify-center text-red-900 font-black text-xl shadow-sm">
+            <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center text-xl font-black shadow-lg">
               ED
             </div>
             <div>
-              <h1 className="font-bold text-gray-800 leading-none">Datony</h1>
-              <span className="text-xs text-gray-500">Espetinhos Premium</span>
+              <p className="text-xs uppercase tracking-[0.2em] text-red-100 font-semibold">Espetinho Datony</p>
+              <h1 className="text-2xl font-black leading-tight">O melhor da região</h1>
             </div>
           </div>
-          <div className="flex items-center gap-3 text-gray-400">
+          <div className="flex items-center gap-3 text-white/80">
+            <div className="hidden sm:flex items-center gap-2 bg-white/10 px-3 py-1 rounded-full text-xs font-semibold">
+              <span className="w-2 h-2 rounded-full bg-emerald-300 animate-pulse" /> Aberto agora
+            </div>
+            <button
+              onClick={() => setView('grill')}
+              className="w-10 h-10 rounded-full bg-white/10 backdrop-blur flex items-center justify-center hover:bg-white/20 transition"
+              title="Fila do churrasqueiro"
+            >
+              <ChefHat size={20} />
+            </button>
             <button
               onClick={() => {
                 setView('login');
                 setLoginError('');
               }}
-              className="hover:text-red-600 transition-colors"
+              className="w-10 h-10 rounded-full bg-white/10 backdrop-blur flex items-center justify-center hover:bg-white/20 transition"
+              title="Área administrativa"
             >
               <User size={20} />
             </button>
-            <button onClick={() => setView('grill')} className="hover:text-red-600 transition-colors">
-              <ChefHat size={20} />
-            </button>
+          </div>
+        </div>
+
+        <div className="max-w-4xl mx-auto px-4 mt-4">
+          <div className="bg-white/10 backdrop-blur-xl rounded-2xl p-4 flex items-center justify-between border border-white/20">
+            <div>
+              <p className="text-sm text-red-100">Faça seu pedido e retire rápido</p>
+              <p className="text-lg font-bold">Espetinhos artesanais e bebidas geladas</p>
+            </div>
+            <div className="hidden md:flex gap-2">
+              <div className="px-3 py-2 rounded-xl bg-white/10 text-sm font-semibold">Pagamento na retirada</div>
+              <div className="px-3 py-2 rounded-xl bg-white/10 text-sm font-semibold">Programe pelo WhatsApp</div>
+            </div>
           </div>
         </div>
       </header>
 
-      <main className="max-w-lg mx-auto p-4">
+      <main className="max-w-4xl mx-auto px-4 -mt-8 space-y-6">
         {view === 'login' && (
-          <form onSubmit={handleLogin} className="bg-white rounded-xl shadow-sm p-6 space-y-4">
-            <div>
-              <h2 className="text-lg font-bold text-gray-800">Acesso do administrador</h2>
-              <p className="text-sm text-gray-500">Use usuário e senha definidos no banco (PGUSER/PGPASSWORD).</p>
+          <form onSubmit={handleLogin} className="bg-white rounded-2xl shadow-lg p-6 space-y-4 border border-gray-100">
+            <div className="flex items-center gap-2 text-red-600 font-bold">
+              <User size={18} />
+              <h2 className="text-lg">Acesso do administrador</h2>
             </div>
+            <p className="text-sm text-gray-500">Use usuário e senha definidos no banco (PGUSER/PGPASSWORD).</p>
 
             {loginError && <div className="text-sm text-red-600 bg-red-50 border border-red-100 p-3 rounded-lg">{loginError}</div>}
 
@@ -327,7 +346,7 @@ function App() {
                 type="text"
                 value={loginForm.username}
                 onChange={(e) => setLoginForm((prev) => ({ ...prev, username: e.target.value }))}
-                className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-red-500 focus:outline-none"
+                className="w-full border border-gray-200 rounded-lg p-3 focus:ring-2 focus:ring-red-500 focus:outline-none"
                 placeholder="postgres"
               />
             </div>
@@ -341,7 +360,7 @@ function App() {
                 type="password"
                 value={loginForm.password}
                 onChange={(e) => setLoginForm((prev) => ({ ...prev, password: e.target.value }))}
-                className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-red-500 focus:outline-none"
+                className="w-full border border-gray-200 rounded-lg p-3 focus:ring-2 focus:ring-red-500 focus:outline-none"
                 placeholder="senha do banco"
               />
             </div>
@@ -349,14 +368,14 @@ function App() {
             <div className="flex gap-3">
               <button
                 type="submit"
-                className="flex-1 bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700 transition-colors"
+                className="flex-1 bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700 transition-colors shadow"
               >
                 Entrar
               </button>
               <button
                 type="button"
                 onClick={() => setView('menu')}
-                className="flex-1 border border-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+                className="flex-1 border border-gray-200 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
               >
                 Cancelar
               </button>
@@ -391,7 +410,7 @@ function App() {
       </main>
 
       {view === 'menu' && Object.keys(cart).length > 0 && (
-        <div className="fixed bottom-6 left-6 right-6 z-40 max-w-lg mx-auto">
+        <div className="fixed bottom-6 left-4 right-4 sm:left-6 sm:right-6 z-40 max-w-4xl mx-auto">
           <button
             onClick={() => setView('cart')}
             className="w-full bg-gray-900 text-white p-4 rounded-2xl shadow-2xl flex justify-between items-center transform hover:scale-[1.02] transition-all"
