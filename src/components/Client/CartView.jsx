@@ -12,6 +12,7 @@ export const CartView = ({
   onCheckout,
   onBack,
 }) => {
+
   const cartItems = Object.values(cart);
   const total = cartItems.reduce((acc, item) => acc + item.price * item.qty, 0);
   const isPickup = customer.type === 'pickup';

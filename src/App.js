@@ -20,12 +20,14 @@ import { SuccessView } from './components/Client/SuccessView';
 import { DashboardView } from './components/Admin/DashboardView';
 import { ProductManager } from './components/Admin/ProductManager';
 import { GrillQueue } from './components/Admin/GrillQueue';
+
 import {
   formatCurrency,
   formatOrderStatus,
   formatOrderType,
   formatPaymentMethod,
 } from './utils/format';
+
 import './index.css';
 
 const initialCustomer = { name: '', phone: '', address: '', table: '', type: 'delivery' };
@@ -284,7 +286,9 @@ function App() {
                         </td>
                         <td className="p-3 font-medium">{order.name}</td>
                         <td className="p-3 uppercase text-xs font-bold">{formatOrderType(order.type)}</td>
+
                         <td className="p-3 uppercase text-xs font-bold text-gray-600">{formatPaymentMethod(order.payment)}</td>
+
                         <td className="p-3 font-bold text-green-600">{formatCurrency(order.total || 0)}</td>
                         <td className="p-3">
                           <span
@@ -395,6 +399,7 @@ function App() {
             </div>
           </form>
         )}
+
           {view === 'menu' && <MenuView products={products} cart={cart} onUpdateCart={updateCart} onProceed={() => setView('cart')} />}
           {view === 'cart' && (
             <CartView
@@ -413,6 +418,7 @@ function App() {
             orderType={lastOrder?.type}
             paymentMethod={lastOrder?.payment}
             onNewOrder={() => setView('menu')}
+
           />
         )}
         {view === 'grill' && (

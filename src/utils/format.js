@@ -50,3 +50,4 @@ export const formatPaymentMethod = (payment) => {
 
   return map[payment] || 'Não informado';
 };
+

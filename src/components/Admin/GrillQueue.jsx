@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+
 import { CheckSquare, Clock, ChefHat, RefreshCcw, Plus, Minus, Hash } from 'lucide-react';
 import { orderService } from '../../services/orderService';
 import { productService } from '../../services/productService';
@@ -115,9 +116,11 @@ export const GrillQueue = () => {
                 <p className="text-sm text-gray-500">{formatDateTime(order.createdAt)}</p>
                 <h3 className="text-lg font-bold text-gray-800">{order.name || 'Cliente'}</h3>
                 <p className="text-xs text-gray-500 uppercase">{formatOrderType(order.type)}</p>
+
                 <p className="text-xs text-gray-500 uppercase mt-1">
                   Pagamento: {formatPaymentMethod(order.payment)}
                 </p>
+
               </div>
               <span
                 className={`px-2 py-1 text-xs font-bold rounded ${
