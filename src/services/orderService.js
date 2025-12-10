@@ -62,4 +62,8 @@ export const orderService = {
     async updateStatus(id, status) {
         await apiClient.patch(`/orders/${id}/status`, { status });
     },
+
+    async updateItems(id, items, total) {
+        await apiClient.patch(`/orders/${id}`, { items, total });
+    },
 };
