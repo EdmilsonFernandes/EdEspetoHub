@@ -23,6 +23,8 @@ import { formatCurrency } from './utils/format';
 import './index.css';
 
 const initialCustomer = { name: '', phone: '', address: '', table: '', type: 'delivery' };
+const WHATSAPP_NUMBER = process.env.REACT_APP_WHATSAPP_NUMBER || '5512999999999';
+const PIX_KEY = process.env.REACT_APP_PIX_KEY || '';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -72,25 +74,45 @@ function App() {
       return;
     }
 
+    if (customer.type === 'delivery' && !customer.address) {
+      alert('Informe o endereço completo para entrega.');
+      return;
+    }
+
+    const isPickup = customer.type === 'pickup';
+    const payment = isPickup ? 'pix' : 'offline';
+
     const order = {
       ...customer,
       items: Object.values(cart),
       total: cartTotal,
       status: 'pending',
-      payment: 'pix'
+      payment
     };
 
     await orderService.save(order);
 
-    const itemsList = Object.values(cart)
-      .map((item) => `▪ ${item.qty}x ${item.name}`)
-      .join('%0A');
-    const message = `*NOVO PEDIDO - DATONY*%0A------------------%0A👤 *${customer.name}* (${customer.phone})%0A🛒 *Tipo:* ${
-      customer.type
-    }%0A${customer.type === 'delivery' ? `📍 End: ${customer.address}%0A` : ''}------------------%0A${itemsList}%0A------------------%0A💰 *TOTAL: ${formatCurrency(
-      cartTotal
-    )}*`;
-    window.open(`https://wa.me/5512999999999?text=${message}`, '_blank');
+    if (isPickup) {
+      const itemsList = Object.values(cart)
+        .map((item) => `▪ ${item.qty}x ${item.name}`)
+        .join('\n');
+
+      const messageLines = [
+        '*NOVO PEDIDO - DATONY*',
+        '------------------',
+        `👤 *${customer.name}* (${customer.phone})`,
+        `🛒 *Tipo:* ${customer.type}`,
+        customer.address ? `📍 End: ${customer.address}` : '',
+        '------------------',
+        itemsList,
+        '------------------',
+        `💰 *TOTAL: ${formatCurrency(cartTotal)}*`,
+        PIX_KEY ? `💳 Pagamento via PIX: ${PIX_KEY}` : '💳 Gerar Pix para retirada na loja'
+      ].filter(Boolean);
+
+      const encodedMessage = encodeURIComponent(messageLines.join('\n'));
+      window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`, '_blank');
+    }
 
     setCart({});
     setCustomer(initialCustomer);
