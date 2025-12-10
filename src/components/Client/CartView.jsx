@@ -1,10 +1,17 @@
-import React from 'react';
-import { ChevronLeft, Bike, Home, UtensilsCrossed, Send } from 'lucide-react';
+import React, { useMemo } from 'react';
+import { ChevronLeft, Bike, Home, UtensilsCrossed, Send, WalletCards } from 'lucide-react';
 import { formatCurrency } from '../../utils/format';
 
 export const CartView = ({ cart, customer, onChangeCustomer, onCheckout, onBack }) => {
   const cartItems = Object.values(cart);
   const total = cartItems.reduce((acc, item) => acc + item.price * item.qty, 0);
+  const isPickup = customer.type === 'pickup';
+  const isDelivery = customer.type === 'delivery';
+  const actionLabel = useMemo(() => {
+    if (isPickup) return 'Gerar Pix e enviar pedido';
+    if (isDelivery) return 'Finalizar pedido para entrega';
+    return 'Finalizar pedido na mesa';
+  }, [isDelivery, isPickup]);
 
   return (
     <div className="animate-in slide-in-from-right">
@@ -92,6 +99,12 @@ export const CartView = ({ cart, customer, onChangeCustomer, onCheckout, onBack 
           <span className="text-gray-500 font-medium">Total a Pagar</span>
           <span className="text-3xl font-black text-gray-800">{formatCurrency(total)}</span>
         </div>
+
+        <div className="mt-3 text-xs text-gray-500 bg-gray-50 border border-gray-100 rounded-lg p-3 leading-relaxed">
+          {isPickup && 'Pagamento via Pix será gerado automaticamente e enviado junto com o pedido.'}
+          {isDelivery && 'Você finaliza o pedido agora e paga na entrega ou conforme combinado.'}
+          {!isPickup && !isDelivery && 'Pedido será direcionado para atendimento na mesa sem cobrança antecipada.'}
+        </div>
       </div>
 
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-100 max-w-lg mx-auto z-40">
@@ -99,7 +112,8 @@ export const CartView = ({ cart, customer, onChangeCustomer, onCheckout, onBack 
           onClick={onCheckout}
           className="w-full bg-green-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-green-200 active:scale-95 transition-all flex items-center justify-center gap-2"
         >
-          <Send size={20} /> Finalizar Pedido no WhatsApp
+          {isPickup ? <WalletCards size={20} /> : <Send size={20} />}
+          {actionLabel}
         </button>
       </div>
     </div>
