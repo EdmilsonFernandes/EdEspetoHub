@@ -14,6 +14,7 @@ import {
   Cell
 } from 'recharts';
 import { formatCurrency } from '../../utils/format';
+import { exportToCsv } from '../../utils/export';
 
 const COLORS = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6'];
 
@@ -44,6 +45,20 @@ export const DashboardView = ({ orders, customers = [] }) => {
 
     return { totalSales, totalOrders, topProducts, chartData };
   }, [orders]);
+
+  const exportCustomers = () => {
+    const headers = [
+      { key: 'nome', label: 'Nome' },
+      { key: 'telefone', label: 'Telefone' },
+    ];
+
+    const rows = customers.map((customer) => ({
+      nome: customer.name,
+      telefone: customer.phone,
+    }));
+
+    exportToCsv('clientes', headers, rows);
+  };
 
   return (
     <div className="space-y-6 animate-in fade-in">
@@ -115,6 +130,39 @@ export const DashboardView = ({ orders, customers = [] }) => {
       </div>
 
       <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+
+        <div className="flex items-center justify-between mb-4 gap-3">
+          <div>
+            <h4 className="font-bold text-gray-700">Clientes</h4>
+            <span className="text-sm text-gray-500">{customers.length} cadastrados</span>
+          </div>
+          <button
+            onClick={exportCustomers}
+            className="px-3 py-2 rounded-lg bg-green-600 text-white text-xs font-semibold hover:bg-green-700"
+          >
+            Exportar Excel (.csv)
+          </button>
+        </div>
+        <div className="max-h-72 overflow-y-auto border border-gray-100 rounded-lg">
+          <div className="grid grid-cols-2 text-xs font-bold uppercase text-gray-500 bg-gray-50 px-3 py-2">
+            <span>Cliente</span>
+            <span>Telefone</span>
+          </div>
+          <div className="divide-y">
+            {customers.map((customer) => (
+              <div
+                key={customer.id || customer.name}
+                className="py-2 px-3 grid grid-cols-2 text-sm text-gray-700 items-center"
+              >
+                <span className="font-semibold truncate">{customer.name}</span>
+                <span className="text-gray-600">{customer.phone}</span>
+              </div>
+            ))}
+            {customers.length === 0 && (
+              <div className="text-center text-gray-400 py-6 text-sm">Nenhum cliente registrado ainda.</div>
+            )}
+          </div>
+
         <div className="flex items-center justify-between mb-4">
           <h4 className="font-bold text-gray-700">Clientes</h4>
           <span className="text-sm text-gray-500">{customers.length} cadastrados</span>

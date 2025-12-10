@@ -51,3 +51,24 @@ export const formatPaymentMethod = (payment) => {
   return map[payment] || 'Não informado';
 };
 
+export const formatPhoneInput = (value = '', defaultAreaCode = '12') => {
+  const digits = (value || '').replace(/\D/g, '');
+  const base = digits || defaultAreaCode;
+
+  const ddd = base.slice(0, 2).padEnd(2, defaultAreaCode[1] || '');
+  const number = base.slice(2, 11);
+
+  const firstPart = number.slice(0, 5);
+  const secondPart = number.slice(5, 9);
+
+  if (number.length > 5) {
+    return `(${ddd}) ${firstPart}-${secondPart}`.trim();
+  }
+
+  if (number.length > 0) {
+    return `(${ddd}) ${number}`.trim();
+  }
+
+  return `(${ddd}) `;
+};
+

@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useState } from 'react';
-
 import { CheckSquare, Clock, ChefHat, RefreshCcw, Plus, Minus, Hash } from 'lucide-react';
 import { orderService } from '../../services/orderService';
 import { productService } from '../../services/productService';
@@ -91,6 +90,17 @@ export const GrillQueue = () => {
     [currentTime, queue]
   );
 
+
+  const sortedQueue = useMemo(
+    () =>
+      [...queue].sort((a, b) => {
+        const aTime = a.createdAt || 0;
+        const bTime = b.createdAt || 0;
+        return aTime - bTime;
+      }),
+    [queue]
+  );
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -105,8 +115,10 @@ export const GrillQueue = () => {
           <RefreshCcw size={16} /> Atualizar
         </button>
       </div>
-      <div className="grid md:grid-cols-2 gap-4">
-        {queue.map((order, index) => (
+
+      <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
+        {sortedQueue.map((order, index) => (
+
           <div key={order.id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
             <div className="flex justify-between items-start">
               <div>
@@ -120,7 +132,6 @@ export const GrillQueue = () => {
                 <p className="text-xs text-gray-500 uppercase mt-1">
                   Pagamento: {formatPaymentMethod(order.payment)}
                 </p>
-
               </div>
               <span
                 className={`px-2 py-1 text-xs font-bold rounded ${
@@ -131,9 +142,16 @@ export const GrillQueue = () => {
               </span>
             </div>
 
+            <div className="mt-3 text-sm font-semibold text-gray-700 flex items-center gap-2">
+              <div className="px-3 py-1 rounded-full bg-red-50 text-red-700 font-black flex items-center gap-2 shadow-sm">
+                <Clock size={14} className="text-red-500" />
+                <span className="tabular-nums text-base">{elapsedTime[order.id] || '0s'}</span>
+              </div>
+
             <div className="mt-2 text-sm font-semibold text-gray-700 flex items-center gap-2">
               <Clock size={14} className="text-red-500" />
               <span>{elapsedTime[order.id] || '0s'}</span>
+
             </div>
 
             <div className="mt-4 space-y-2">

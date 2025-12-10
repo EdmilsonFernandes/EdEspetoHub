@@ -1,6 +1,8 @@
 import React, { useMemo } from 'react';
 import { ChevronLeft, Bike, Home, UtensilsCrossed, Send, WalletCards, CreditCard } from 'lucide-react';
-import { formatCurrency } from '../../utils/format';
+
+import { formatCurrency, formatPhoneInput } from '../../utils/format';
+
 
 export const CartView = ({
   cart,
@@ -13,12 +15,26 @@ export const CartView = ({
   onBack,
 }) => {
 
+
+
   const cartItems = Object.values(cart);
   const total = cartItems.reduce((acc, item) => acc + item.price * item.qty, 0);
   const isPickup = customer.type === 'pickup';
   const isDelivery = customer.type === 'delivery';
   const isPix = paymentMethod === 'pix';
   const actionLabel = useMemo(() => {
+
+    if (isDelivery) return 'Finalizar pedido para entrega';
+    if (isPickup) return 'Finalizar pedido para retirada';
+    if (isPix) return 'Finalizar pedido (Pix)';
+    return 'Finalizar pedido na mesa';
+  }, [isDelivery, isPickup, isPix]);
+
+  const handlePhoneChange = (nextValue) => {
+    const formatted = formatPhoneInput(nextValue);
+    onChangeCustomer({ ...customer, phone: formatted });
+  };
+
     if (isPix) return 'Finalizar e gerar Pix';
     if (isDelivery) return 'Finalizar pedido para entrega';
     if (isPickup) return 'Finalizar pedido para retirada';
@@ -27,7 +43,7 @@ export const CartView = ({
 
   return (
     <div className="animate-in slide-in-from-right">
-      <button onClick={onBack} className="mb-6 flex items-center text-gray-600 font-medium hover:text-red-600">
+      <button onClick={onBack} className="mb-6 flex items-center text-red-700 font-semibold hover:text-red-800">
         <ChevronLeft size={20} /> Continuar comprando
       </button>
 
@@ -56,9 +72,10 @@ export const CartView = ({
             <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">WhatsApp</label>
             <input
               type="tel"
-              value={customer.phone}
-              onChange={(e) => onChangeCustomer({ ...customer, phone: e.target.value })}
-              placeholder="(00) 00000-0000"
+              inputMode="tel"
+              value={customer.phone || formatPhoneInput('', '12')}
+              onChange={(e) => handlePhoneChange(e.target.value)}
+              placeholder="(12) 90000-0000"
               className="w-full border-b-2 border-gray-100 py-3 text-lg outline-none focus:border-red-500 transition-colors placeholder:text-gray-300"
             />
           </div>
@@ -121,6 +138,7 @@ export const CartView = ({
         </div>
 
         <div className="mt-3 text-xs text-gray-500 bg-gray-50 border border-gray-100 rounded-lg p-3 leading-relaxed">
+          {isPix && 'O QR Code do Pix aparecerá após finalizar o pedido.'}
           {isPix && 'Pagamento via Pix será gerado para facilitar o registro.'}
           {!isPix && isDelivery && 'Você finaliza o pedido agora e paga na entrega ou conforme combinado.'}
           {!isPix && !isDelivery &&
