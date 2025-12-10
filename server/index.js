@@ -15,13 +15,19 @@ const mapOrderRow = (row) => ({
     address: row.address,
     table: row.table_number,
     type: row.type,
-    items: row.items || [],
+    items: typeof row.items === "string" ? JSON.parse(row.items) : row.items || [],
     total: Number(row.total) || 0,
     status: row.status,
     payment: row.payment,
     createdAt: row.created_at ? new Date(row.created_at).getTime() : undefined,
     dateString: row.date_string,
     timestamp: row.created_at ? new Date(row.created_at).getTime() : undefined,
+});
+
+const mapCustomerRow = (row) => ({
+    id: row.id,
+    name: row.name,
+    phone: row.phone,
 });
 
 app.get("/products", async (_, res) => {
@@ -45,6 +51,22 @@ app.post("/login", (req, res) => {
     }
 
     res.status(401).json({ message: "Credenciais inválidas" });
+});
+
+app.get("/customers", async (req, res) => {
+    const search = (req.query.search || "").toLowerCase();
+    let query = "SELECT * FROM customers";
+    const params = [];
+
+    if (search) {
+        query += " WHERE LOWER(name) LIKE $1";
+        params.push(`%${search}%`);
+    }
+
+    query += " ORDER BY name";
+
+    const result = await pool.query(query, params);
+    res.json(result.rows.map(mapCustomerRow));
 });
 
 app.post("/products", async (req, res) => {
@@ -153,6 +175,17 @@ app.post("/orders", async (req, res) => {
         ];
 
         const result = await pool.query(query, values);
+
+        if (name) {
+            await pool.query(
+                `INSERT INTO customers (name, phone, updated_at)
+                 VALUES ($1, $2, NOW())
+                 ON CONFLICT (name)
+                 DO UPDATE SET phone = COALESCE(EXCLUDED.phone, customers.phone), updated_at = NOW();`,
+                [name, phone ?? null]
+            );
+        }
+
         res.status(201).json(mapOrderRow(result.rows[0]));
     } catch (err) {
         console.error("Erro ao criar pedido:", err);
@@ -167,6 +200,29 @@ app.patch("/orders/:id/status", async (req, res) => {
         "UPDATE orders SET status = $1 WHERE id = $2 RETURNING *",
         [status, id]
     );
+    res.json(mapOrderRow(result.rows[0]));
+});
+
+app.patch("/orders/:id", async (req, res) => {
+    const { id } = req.params;
+    const { items, total } = req.body;
+
+    if (!Array.isArray(items)) {
+        res.status(400).json({ error: "Lista de itens inválida" });
+        return;
+    }
+
+    const sanitizedItems = items.filter((item) => item && item.qty > 0);
+    const computedTotal =
+        typeof total === "number"
+            ? total
+            : sanitizedItems.reduce((sum, item) => sum + (item.price || 0) * (item.qty || 0), 0);
+
+    const result = await pool.query(
+        "UPDATE orders SET items = $1, total = $2 WHERE id = $3 RETURNING *",
+        [JSON.stringify(sanitizedItems), computedTotal, id]
+    );
+
     res.json(mapOrderRow(result.rows[0]));
 });
 

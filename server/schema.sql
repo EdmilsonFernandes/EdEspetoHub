@@ -31,6 +31,17 @@ CREATE TABLE IF NOT EXISTS orders (
 );
 
 -- ===============================
+--   TABELA DE CLIENTES
+-- ===============================
+CREATE TABLE IF NOT EXISTS customers (
+  id SERIAL PRIMARY KEY,
+  name TEXT UNIQUE,
+  phone TEXT,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ===============================
 --   POPULAR PRODUTOS (ESPETOS)
 -- ===============================
 INSERT INTO products (name, price, category, description, active, image_url) VALUES
