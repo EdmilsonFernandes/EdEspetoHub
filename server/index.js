@@ -30,15 +30,35 @@ const mapCustomerRow = (row) => ({
     phone: row.phone,
 });
 
-app.get("/products", async (_, res) => {
+const defaultOwnerId = process.env.DEFAULT_OWNER_ID || "espetinhodatony";
+
+const getOwnerId = (req) =>
+    (req.headers["x-owner-id"] || req.query.ownerId || req.body?.ownerId || "")
+        .toString()
+        .trim();
+
+const requireOwner = (req, res) => {
+    const ownerId = getOwnerId(req);
+    if (!ownerId) {
+        res.status(400).json({ error: "ownerId é obrigatório" });
+        return null;
+    }
+    return ownerId;
+};
+
+app.get("/products", async (req, res) => {
+    const ownerId = requireOwner(req, res);
+    if (!ownerId) return;
+
     const result = await pool.query(
-        "SELECT * FROM products ORDER BY category, name"
+        "SELECT * FROM products WHERE owner_id = $1 ORDER BY category, name",
+        [ownerId]
     );
     res.json(result.rows);
 });
 
 app.post("/login", (req, res) => {
-    const { username, password } = req.body || {};
+    const { username, password, espetoId } = req.body || {};
 
     const validUser =
         process.env.ADMIN_USER || process.env.PGUSER || "postgres";
@@ -46,7 +66,17 @@ app.post("/login", (req, res) => {
         process.env.ADMIN_PASSWORD || process.env.PGPASSWORD || "postgres";
 
     if (username === validUser && password === validPassword) {
-        res.json({ token: "ok", name: "Administrador" });
+        const ownerId = (espetoId || defaultOwnerId).trim();
+        if (!ownerId) {
+            res.status(400).json({ message: "Informe o ID do espeto" });
+            return;
+        }
+
+        res.json({
+            token: "ok",
+            name: process.env.ADMIN_NAME || "Administrador",
+            ownerId,
+        });
         return;
     }
 
@@ -54,12 +84,15 @@ app.post("/login", (req, res) => {
 });
 
 app.get(["/customers", "/api/customers"], async (req, res) => {
+    const ownerId = requireOwner(req, res);
+    if (!ownerId) return;
+
     const search = (req.query.search || "").toLowerCase();
-    let query = "SELECT * FROM customers";
-    const params = [];
+    let query = "SELECT * FROM customers WHERE owner_id = $1";
+    const params = [ownerId];
 
     if (search) {
-        query += " WHERE LOWER(name) LIKE $1";
+        query += " AND LOWER(name) LIKE $2";
         params.push(`%${search}%`);
     }
 
@@ -70,6 +103,9 @@ app.get(["/customers", "/api/customers"], async (req, res) => {
 });
 
 app.post("/products", async (req, res) => {
+    const ownerId = requireOwner(req, res);
+    if (!ownerId) return;
+
     const {
         name,
         price,
@@ -80,14 +116,25 @@ app.post("/products", async (req, res) => {
     } = req.body;
 
     const query =
-        "INSERT INTO products (name, price, category, description, active, image_url) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *";
+        "INSERT INTO products (owner_id, name, price, category, description, active, image_url) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *";
 
-    const values = [name, price, category, description, active, imageUrl];
+    const values = [
+        ownerId,
+        name,
+        price,
+        category,
+        description,
+        active,
+        imageUrl,
+    ];
     const result = await pool.query(query, values);
     res.status(201).json(result.rows[0]);
 });
 
 app.put("/products/:id", async (req, res) => {
+    const ownerId = requireOwner(req, res);
+    if (!ownerId) return;
+
     const { id } = req.params;
     const {
         name,
@@ -99,34 +146,70 @@ app.put("/products/:id", async (req, res) => {
     } = req.body;
 
     const query =
-        "UPDATE products SET name = $1, price = $2, category = $3, description = $4, active = $5, image_url = $6 WHERE id = $7 RETURNING *";
+        "UPDATE products SET name = $1, price = $2, category = $3, description = $4, active = $5, image_url = $6 WHERE id = $7 AND owner_id = $8 RETURNING *";
 
-    const values = [name, price, category, description, active, imageUrl, id];
+    const values = [
+        name,
+        price,
+        category,
+        description,
+        active,
+        imageUrl,
+        id,
+        ownerId,
+    ];
     const result = await pool.query(query, values);
+    if (!result.rowCount) {
+        res.status(404).json({ error: "Produto não encontrado para este espeto" });
+        return;
+    }
     res.json(result.rows[0]);
 });
 
 app.delete("/products/:id", async (req, res) => {
-    await pool.query("DELETE FROM products WHERE id = $1", [req.params.id]);
+    const ownerId = requireOwner(req, res);
+    if (!ownerId) return;
+
+    const result = await pool.query(
+        "DELETE FROM products WHERE id = $1 AND owner_id = $2",
+        [req.params.id, ownerId]
+    );
+
+    if (!result.rowCount) {
+        res.status(404).json({ error: "Produto não encontrado para este espeto" });
+        return;
+    }
+
     res.status(204).send();
 });
 
-app.get("/orders", async (_, res) => {
+app.get("/orders", async (req, res) => {
+    const ownerId = requireOwner(req, res);
+    if (!ownerId) return;
+
     const result = await pool.query(
-        "SELECT * FROM orders ORDER BY created_at DESC"
+        "SELECT * FROM orders WHERE owner_id = $1 ORDER BY created_at DESC",
+        [ownerId]
     );
     res.json(result.rows.map(mapOrderRow));
 });
 
-app.get("/orders/queue", async (_, res) => {
+app.get("/orders/queue", async (req, res) => {
+    const ownerId = requireOwner(req, res);
+    if (!ownerId) return;
+
     const result = await pool.query(
-        "SELECT * FROM orders WHERE status IN ('pending', 'preparing') ORDER BY created_at ASC"
+        "SELECT * FROM orders WHERE owner_id = $1 AND status IN ('pending', 'preparing') ORDER BY created_at ASC",
+        [ownerId]
     );
     res.json(result.rows.map(mapOrderRow));
 });
 
 app.post("/orders", async (req, res) => {
     console.log("DEBUG BODY:", req.body);
+    const ownerId = requireOwner(req, res);
+    if (!ownerId) return;
+
     try {
         const {
             name,
@@ -144,6 +227,7 @@ app.post("/orders", async (req, res) => {
 
         const query = `
       INSERT INTO orders (
+        owner_id,
         customer_name,
         phone,
         address,
@@ -156,11 +240,12 @@ app.post("/orders", async (req, res) => {
         created_at,
         date_string
       )
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
       RETURNING *;
     `;
 
         const values = [
+            ownerId,
             name,
             phone,
             address ?? null,
@@ -178,11 +263,11 @@ app.post("/orders", async (req, res) => {
 
         if (name) {
             await pool.query(
-                `INSERT INTO customers (name, phone, updated_at)
-                 VALUES ($1, $2, NOW())
-                 ON CONFLICT (name)
+                `INSERT INTO customers (owner_id, name, phone, updated_at)
+                 VALUES ($1, $2, $3, NOW())
+                 ON CONFLICT (owner_id, name)
                  DO UPDATE SET phone = COALESCE(EXCLUDED.phone, customers.phone), updated_at = NOW();`,
-                [name, phone ?? null]
+                [ownerId, name, phone ?? null]
             );
         }
 
@@ -194,16 +279,28 @@ app.post("/orders", async (req, res) => {
 });
 
 app.patch("/orders/:id/status", async (req, res) => {
+    const ownerId = requireOwner(req, res);
+    if (!ownerId) return;
+
     const { id } = req.params;
     const { status } = req.body;
     const result = await pool.query(
-        "UPDATE orders SET status = $1 WHERE id = $2 RETURNING *",
-        [status, id]
+        "UPDATE orders SET status = $1 WHERE id = $2 AND owner_id = $3 RETURNING *",
+        [status, id, ownerId]
     );
+
+    if (!result.rowCount) {
+        res.status(404).json({ error: "Pedido não encontrado para este espeto" });
+        return;
+    }
+
     res.json(mapOrderRow(result.rows[0]));
 });
 
 app.patch("/orders/:id", async (req, res) => {
+    const ownerId = requireOwner(req, res);
+    if (!ownerId) return;
+
     const { id } = req.params;
     const { items, total } = req.body;
 
@@ -219,9 +316,14 @@ app.patch("/orders/:id", async (req, res) => {
             : sanitizedItems.reduce((sum, item) => sum + (item.price || 0) * (item.qty || 0), 0);
 
     const result = await pool.query(
-        "UPDATE orders SET items = $1, total = $2 WHERE id = $3 RETURNING *",
-        [JSON.stringify(sanitizedItems), computedTotal, id]
+        "UPDATE orders SET items = $1, total = $2 WHERE id = $3 AND owner_id = $4 RETURNING *",
+        [JSON.stringify(sanitizedItems), computedTotal, id, ownerId]
     );
+
+    if (!result.rowCount) {
+        res.status(404).json({ error: "Pedido não encontrado para este espeto" });
+        return;
+    }
 
     res.json(mapOrderRow(result.rows[0]));
 });
