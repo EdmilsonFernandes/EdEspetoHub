@@ -5,34 +5,51 @@ import { formatCurrency } from "../../utils/format";
 // =======================================
 // HEADER PREMIUM COM LOGO OFICIAL
 // =======================================
-const Header = () => {
+const Header = ({ branding, instagramHandle }) => {
+  const previewInitials = branding?.brandName
+    ?.split(" ")
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
   return (
     <div className="w-full bg-white shadow-md px-4 py-4 flex items-center gap-4 sticky top-0 z-50 border-b border-gray-100">
 
       {/* LOGO OFICIAL */}
-      <div className="w-14 h-14 rounded-full overflow-hidden border border-red-600 shadow-sm bg-white">
-        <img
-          src="/logo-datony.svg"
-          alt="Espetinho Datony"
-          className="w-full h-full object-cover"
-        />
+      <div
+        className="w-14 h-14 rounded-full overflow-hidden border shadow-sm bg-white flex items-center justify-center"
+        style={{ borderColor: branding?.primaryColor, color: branding?.primaryColor, backgroundColor: '#fff' }}
+      >
+        {branding?.logoUrl ? (
+          <img
+            src={branding.logoUrl}
+            alt={branding.brandName}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <span className="font-bold text-lg">{previewInitials || "ES"}</span>
+        )}
       </div>
 
       {/* Nome + Insta */}
       <div className="flex-1 leading-tight">
-        <h1 className="text-xl font-bold text-gray-900">Espetinho Datony</h1>
+        <h1 className="text-xl font-bold text-gray-900">{branding?.brandName || "Seu Espeto"}</h1>
 
-        <a
-          href="https://instagram.com/espetinhodatony"
-          target="_blank"
-          className="text-red-600 text-sm font-semibold hover:underline"
-        >
-          @espetinhodatony
-        </a>
+        {instagramHandle && (
+          <a
+            href={`https://instagram.com/${instagramHandle.replace("@", "")}`}
+            target="_blank"
+            rel="noreferrer"
+            className="text-primary text-sm font-semibold hover:underline"
+          >
+            {instagramHandle}
+          </a>
+        )}
       </div>
 
       {/* STATUS */}
-      <div className="px-3 py-1 rounded-full bg-green-100 text-green-700 text-sm font-bold shadow-sm">
+      <div className="px-3 py-1 rounded-full accent-pill text-sm font-bold shadow-sm">
         Aberto
       </div>
     </div>
@@ -42,7 +59,7 @@ const Header = () => {
 // =======================================
 // MENU ORGANIZADO POR CATEGORIA (COM FOTOS)
 // =======================================
-export const MenuView = ({ products, cart, onUpdateCart }) => {
+export const MenuView = ({ products, cart, onUpdateCart, branding, instagramHandle }) => {
 
   const grouped = useMemo(() => {
     const map = {};
@@ -66,7 +83,7 @@ export const MenuView = ({ products, cart, onUpdateCart }) => {
   return (
     <div className="bg-gray-50 min-h-screen">
 
-      <Header />
+      <Header branding={branding} instagramHandle={instagramHandle} />
 
       <div className="space-y-10 p-4">
 
@@ -74,8 +91,11 @@ export const MenuView = ({ products, cart, onUpdateCart }) => {
           <div key={category} className="space-y-3">
 
             {/* Título da categoria */}
-            <div className="px-4 py-2 bg-red-50 border-l-4 border-red-600 rounded">
-              <h2 className="text-red-700 font-bold text-lg capitalize tracking-wide">
+            <div
+              className="px-4 py-2 rounded border-l-4"
+              style={{ borderColor: branding?.primaryColor, background: 'rgba(0,0,0,0.02)' }}
+            >
+              <h2 className="font-bold text-lg capitalize tracking-wide" style={{ color: branding?.primaryColor }}>
                 {category}
               </h2>
             </div>
@@ -108,7 +128,7 @@ export const MenuView = ({ products, cart, onUpdateCart }) => {
                     <p className="font-semibold text-gray-900 text-[15px]">
                       {item.name}
                     </p>
-                    <p className="text-red-600 font-bold text-lg mt-[-1px]">
+                    <p className="text-primary font-bold text-lg mt-[-1px]">
                       {formatCurrency(item.price)}
                     </p>
                   </div>
@@ -116,7 +136,7 @@ export const MenuView = ({ products, cart, onUpdateCart }) => {
                   {/* Botão de adicionar */}
                   <button
                     onClick={() => onUpdateCart(item, 1)}
-                    className="w-11 h-11 rounded-full bg-red-600 text-white flex items-center justify-center hover:bg-red-700 shadow-md active:scale-95 transition"
+                    className="w-11 h-11 rounded-full bg-primary text-white flex items-center justify-center hover:opacity-90 shadow-md active:scale-95 transition"
                   >
                     <Plus size={20} />
                   </button>
