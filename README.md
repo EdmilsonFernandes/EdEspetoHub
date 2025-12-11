@@ -36,6 +36,14 @@ REACT_APP_API_BASE_URL=http://localhost:4000
     PGHOST=localhost PGUSER=postgres PGPASSWORD=postgres PGDATABASE=espetinho npm start
     ```
 
+   A API valida a conexão com o PostgreSQL na inicialização e cria (ou atualiza) um administrador padrão na tabela `admin_users`.
+
+3. Credenciais de administrador e autenticação da área interna:
+
+   -   A rota `POST /login` usa apenas registros da tabela `admin_users` (não reutiliza mais as credenciais do Postgres ou do pgAdmin).
+   -   Um administrador padrão é criado para o espeto `espetinhodatony`: usuário `admin` e senha `admin123` (pode ser alterado via variáveis `ADMIN_USER`, `ADMIN_PASSWORD` e `ADMIN_NAME`).
+   -   O acesso às visões de dashboard e churrasqueiro no front-end só ocorre após login bem-sucedido.
+
 Principais endpoints:
 
 -   `GET products` – lista produtos.
@@ -45,6 +53,7 @@ Principais endpoints:
 -   `GET orders/queue` – fila pendente/preparando.
 -   `POST orders` – cria pedido `{ name, phone, address, table, type, items, total, status?, payment? }`.
 -   `PATCH orders/:id/status` – atualiza status.
+-   `POST /admin/reset` – reinicia o banco e repovoa produtos padrão. Requer `x-owner-id` e autenticação Basic com um usuário de `admin_users` (ex.: `curl -u admin:admin123 -H "x-owner-id: espetinhodatony" -X POST http://localhost:4000/admin/reset`).
 
 ### pgAdmin (local)
 
