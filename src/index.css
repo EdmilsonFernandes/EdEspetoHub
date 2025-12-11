@@ -7,6 +7,29 @@ body {
   color: #111827;
 }
 
+:root {
+  --primary-color: #b91c1c;
+  --accent-color: #111827;
+}
+
+.bg-primary {
+  background-color: var(--primary-color) !important;
+  color: #fff;
+}
+
+.text-primary {
+  color: var(--primary-color) !important;
+}
+
+.border-primary {
+  border-color: var(--primary-color) !important;
+}
+
+.accent-pill {
+  background: color-mix(in srgb, var(--primary-color) 15%, transparent);
+  color: var(--primary-color);
+}
+
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }

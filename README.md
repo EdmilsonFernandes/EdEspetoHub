@@ -46,6 +46,19 @@ Principais endpoints:
 -   `POST orders` – cria pedido `{ name, phone, address, table, type, items, total, status?, payment? }`.
 -   `PATCH orders/:id/status` – atualiza status.
 
+### Resetar o banco com os dados padrão
+
+-   As credenciais de admin usam os mesmos valores de `PGUSER`/`PGPASSWORD` (ou `ADMIN_USER`/`ADMIN_PASSWORD`). Ajuste as variáveis de ambiente se o erro de conexão indicar senha incorreta.
+-   Para restaurar as tabelas e dados de exemplo, execute:
+
+```bash
+cd server
+npm install
+npm run db:reset
+```
+
+-   Também é possível disparar o reset via API autenticada: `POST /admin/reset-database` com `{ "username": "<PGUSER>", "password": "<PGPASSWORD>" }`.
+
 ### pgAdmin (local)
 
 Instale pgAdmin localmente ou utilize a imagem oficial. Para conectar ao banco local, crie um novo servidor no pgAdmin com:

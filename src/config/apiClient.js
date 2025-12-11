@@ -20,6 +20,16 @@ const defaultHeaders = {
     "Content-Type": "application/json",
 };
 
+let currentOwnerId = null;
+
+const buildUrl = (path) => {
+    const url = new URL(path, API_BASE_URL);
+    if (currentOwnerId) {
+        url.searchParams.set("ownerId", currentOwnerId);
+    }
+    return url.toString();
+};
+
 const handleResponse = async (response) => {
     if (!response.ok) {
         const message = await response.text();
@@ -28,9 +38,38 @@ const handleResponse = async (response) => {
     return response.json();
 };
 
-const request = async (path, options) => {
+const attachOwnerToBody = (body) => {
+    if (!body || typeof body !== "string") return body;
     try {
-        const response = await fetch(`${API_BASE_URL}${path}`, options);
+        const parsed = JSON.parse(body);
+        if (currentOwnerId && !parsed.ownerId) {
+            parsed.ownerId = currentOwnerId;
+        }
+        return JSON.stringify(parsed);
+    } catch (error) {
+        return body;
+    }
+};
+
+const request = async (path, options = {}) => {
+    try {
+        const url = buildUrl(path);
+        const finalOptions = { ...options };
+
+        finalOptions.headers = {
+            ...defaultHeaders,
+            ...(options.headers || {}),
+        };
+
+        if (currentOwnerId) {
+            finalOptions.headers["x-owner-id"] = currentOwnerId;
+        }
+
+        if (finalOptions.body) {
+            finalOptions.body = attachOwnerToBody(finalOptions.body);
+        }
+
+        const response = await fetch(url, finalOptions);
         return await handleResponse(response);
     } catch (error) {
         console.error("Erro ao comunicar com a API", error);
@@ -41,6 +80,10 @@ const request = async (path, options) => {
 };
 
 export const apiClient = {
+    setOwnerId: (ownerId) => {
+        currentOwnerId = ownerId || null;
+    },
+    getOwnerId: () => currentOwnerId,
     get: async (path) => request(path),
     post: async (path, body) =>
         request(path, {

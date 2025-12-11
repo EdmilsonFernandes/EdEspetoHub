@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ShoppingCart,
   Send,
@@ -20,6 +20,8 @@ import { SuccessView } from './components/Client/SuccessView';
 import { DashboardView } from './components/Admin/DashboardView';
 import { ProductManager } from './components/Admin/ProductManager';
 import { GrillQueue } from './components/Admin/GrillQueue';
+import { BrandingSettings } from './components/Admin/BrandingSettings';
+import { apiClient } from './config/apiClient';
 import {
   formatCurrency,
   formatOrderStatus,
@@ -35,6 +37,29 @@ const initialCustomer = { name: '', phone: formatPhoneInput('', DEFAULT_AREA_COD
 const defaultPaymentMethod = 'debito';
 const WHATSAPP_NUMBER = process.env.REACT_APP_WHATSAPP_NUMBER || '5512996797210';
 const PIX_KEY = process.env.REACT_APP_PIX_KEY || '';
+const defaultBranding = {
+  brandName: 'Datony',
+  espetoId: 'espetinhodatony',
+  logoUrl: '/logo-datony.svg',
+  primaryColor: '#b91c1c',
+  accentColor: '#111827',
+  tagline: 'O melhor churrasco da região • Peça agora',
+  instagram: 'espetinhodatony',
+};
+
+const brandingStorageKey = (ownerId) => `brandingSettings:${ownerId || defaultBranding.espetoId}`;
+
+const getPersistedBranding = (ownerId = defaultBranding.espetoId) => {
+  const saved = localStorage.getItem(brandingStorageKey(ownerId));
+  if (!saved) return { ...defaultBranding, espetoId: ownerId };
+  try {
+    const parsed = JSON.parse(saved);
+    return { ...defaultBranding, espetoId: ownerId, ...parsed };
+  } catch (error) {
+    console.error('Erro ao carregar branding salvo', error);
+    return { ...defaultBranding, espetoId: ownerId };
+  }
+};
 
 function App() {
   const [user, setUser] = useState(null);
@@ -47,8 +72,29 @@ function App() {
   const [customer, setCustomer] = useState(initialCustomer);
   const [paymentMethod, setPaymentMethod] = useState(defaultPaymentMethod);
   const [lastOrder, setLastOrder] = useState(null);
-  const [loginForm, setLoginForm] = useState({ username: '', password: '' });
+  const [loginForm, setLoginForm] = useState({ username: '', password: '', espetoId: defaultBranding.espetoId });
   const [loginError, setLoginError] = useState('');
+  const [branding, setBranding] = useState(() => getPersistedBranding(defaultBranding.espetoId));
+  const [reportFilter, setReportFilter] = useState({
+    mode: 'all',
+    month: '',
+    year: new Date().getFullYear().toString(),
+    start: '',
+    end: '',
+  });
+
+  const requireAuth = useCallback(
+    (nextView) => {
+      if (user) {
+        setView(nextView);
+        return;
+      }
+
+      setLoginError('Faça login para acessar essa área protegida.');
+      setView('login');
+    },
+    [user]
+  );
 
   const formatOrderDate = (order) => {
     if (order.createdAt?.seconds) return new Date(order.createdAt.seconds * 1000).toLocaleString('pt-BR');
@@ -57,24 +103,122 @@ function App() {
     return order.dateString || '';
   };
 
+  const getOrderDateValue = useCallback((order) => {
+    if (order.createdAt?.seconds) return new Date(order.createdAt.seconds * 1000);
+    if (order.createdAt) return new Date(order.createdAt);
+    if (order.timestamp) return new Date(order.timestamp);
+    if (order.dateString) return new Date(order.dateString);
+    return null;
+  }, []);
+
   useEffect(() => {
     const savedSession = localStorage.getItem('adminSession');
+    let initialOwnerId = defaultBranding.espetoId;
+
     if (savedSession) {
       const parsedSession = JSON.parse(savedSession);
+      initialOwnerId = parsedSession.ownerId || initialOwnerId;
       setUser(parsedSession);
       setView('admin');
+      setLoginForm((prev) => ({ ...prev, espetoId: parsedSession.ownerId || prev.espetoId }));
+      setBranding(getPersistedBranding(initialOwnerId));
     }
 
+    apiClient.setOwnerId(initialOwnerId);
+
     const unsubProd = productService.subscribe(setProducts);
-    const unsubOrders = orderService.subscribeAll(setOrders);
-    customerService.fetchAll().then(setCustomers).catch(() => setCustomers([]));
     return () => {
       unsubProd();
-      unsubOrders();
     };
   }, []);
 
+  useEffect(() => {
+    if (!user) {
+      setOrders([]);
+      return undefined;
+    }
+
+    const unsubOrders = orderService.subscribeAll(setOrders);
+    return () => {
+      unsubOrders();
+    };
+  }, [user?.ownerId]);
+
+  useEffect(() => {
+    if (!user) {
+      setCustomers([]);
+      return;
+    }
+
+    customerService.fetchAll().then(setCustomers).catch(() => setCustomers([]));
+  }, [user?.ownerId]);
+
+  const resolvedOwnerId = useMemo(
+    () => user?.ownerId || branding?.espetoId || defaultBranding.espetoId,
+    [user?.ownerId, branding?.espetoId]
+  );
+
+  useEffect(() => {
+    if (!resolvedOwnerId) return;
+    apiClient.setOwnerId(resolvedOwnerId);
+    setBranding((prev) => {
+      if (prev.espetoId === resolvedOwnerId) return prev;
+      return getPersistedBranding(resolvedOwnerId);
+    });
+  }, [resolvedOwnerId]);
+
+  useEffect(() => {
+    if (!user && (view === 'admin' || view === 'grill')) {
+      setLoginError('Faça login para acessar essa área protegida.');
+      setView('login');
+    }
+  }, [user, view]);
+
+  useEffect(() => {
+    const storageKey = brandingStorageKey(branding.espetoId || resolvedOwnerId);
+    localStorage.setItem(storageKey, JSON.stringify(branding));
+    document.documentElement.style.setProperty('--primary-color', branding.primaryColor || defaultBranding.primaryColor);
+    document.documentElement.style.setProperty('--accent-color', branding.accentColor || branding.primaryColor || defaultBranding.accentColor);
+  }, [branding, resolvedOwnerId]);
+
   const cartTotal = useMemo(() => Object.values(cart).reduce((acc, item) => acc + item.price * item.qty, 0), [cart]);
+  const brandInitials = useMemo(
+    () => branding.brandName?.split(' ').map((part) => part?.[0]).join('').slice(0, 2).toUpperCase() || 'ED',
+    [branding.brandName]
+  );
+  const instagramHandle = useMemo(() => (branding.instagram ? `@${branding.instagram.replace('@', '')}` : ''), [branding.instagram]);
+
+  const filteredOrders = useMemo(() => {
+    if (!reportFilter.mode || reportFilter.mode === 'all') return orders;
+
+    return orders.filter((order) => {
+      const date = getOrderDateValue(order);
+      if (!date) return false;
+
+      if (reportFilter.mode === 'month' && reportFilter.month) {
+        const monthString = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        return monthString === reportFilter.month;
+      }
+
+      if (reportFilter.mode === 'year' && reportFilter.year) {
+        return String(date.getFullYear()) === reportFilter.year;
+      }
+
+      if (reportFilter.mode === 'range' && reportFilter.start && reportFilter.end) {
+        const startDate = new Date(reportFilter.start);
+        const endDate = new Date(reportFilter.end);
+        endDate.setHours(23, 59, 59, 999);
+        return date >= startDate && date <= endDate;
+      }
+
+      return true;
+    });
+  }, [orders, reportFilter, getOrderDateValue]);
+
+  const filteredTotal = useMemo(
+    () => filteredOrders.reduce((acc, order) => acc + (order.total || 0), 0),
+    [filteredOrders]
+  );
 
   const updateCart = (item, qty) => {
     setCart((previous) => {
@@ -183,9 +327,10 @@ function App() {
     setLoginError('');
 
     try {
-      const session = await authService.login(loginForm.username, loginForm.password);
-      const sessionData = { ...session, username: loginForm.username };
+      const session = await authService.login(loginForm.username, loginForm.password, loginForm.espetoId);
+      const sessionData = { ...session, username: loginForm.username, espetoId: loginForm.espetoId };
       localStorage.setItem('adminSession', JSON.stringify(sessionData));
+      setBranding(getPersistedBranding(sessionData.ownerId || loginForm.espetoId));
       setUser(sessionData);
       setView('admin');
     } catch (error) {
@@ -193,14 +338,24 @@ function App() {
     }
   };
 
+  const updateBranding = (updater) => {
+    setBranding((prev) => {
+      const nextState = typeof updater === 'function' ? updater(prev) : { ...prev, ...updater };
+      return nextState;
+    });
+  };
+
   const logout = () => {
     localStorage.removeItem('adminSession');
     setUser(null);
-    setLoginForm({ username: '', password: '' });
+    setLoginForm({ username: '', password: '', espetoId: defaultBranding.espetoId });
+    const fallbackBranding = getPersistedBranding(defaultBranding.espetoId);
+    apiClient.setOwnerId(fallbackBranding.espetoId);
+    setBranding(fallbackBranding);
     setView('menu');
   };
 
-  const exportOrders = () => {
+  const exportOrders = (dataset = filteredOrders) => {
     const headers = [
       { key: 'data', label: 'Data' },
       { key: 'cliente', label: 'Cliente' },
@@ -211,7 +366,7 @@ function App() {
       { key: 'status', label: 'Status' },
     ];
 
-    const rows = orders.map((order) => ({
+    const rows = dataset.map((order) => ({
       data: formatOrderDate(order),
       cliente: order.name,
       telefone: order.phone,
@@ -230,9 +385,9 @@ function App() {
         <aside className="w-64 bg-gray-900 text-white hidden md:flex flex-col">
           <div className="p-6">
             <h1 className="text-xl font-bold flex items-center gap-2">
-              <ChefHat className="text-red-500" /> Datony Admin
+              <ChefHat className="text-red-500" /> {branding.brandName || 'Admin'}
             </h1>
-            <p className="text-xs text-gray-400 mt-1">Gerenciamento Profissional</p>
+            <p className="text-xs text-gray-400 mt-1">{branding.espetoId || 'Gerenciamento Profissional'}</p>
           </div>
           <nav className="flex-1 px-4 space-y-2">
             <button
@@ -266,6 +421,14 @@ function App() {
               }`}
             >
               <FileText size={18} /> Relatório Vendas
+            </button>
+            <button
+              onClick={() => setAdminTab('branding')}
+              className={`w-full flex items-center gap-3 p-3 rounded-lg text-sm ${
+                adminTab === 'branding' ? 'bg-red-600 font-bold' : 'text-gray-400 hover:bg-gray-800'
+              }`}
+            >
+              <ChefHat size={18} /> Aparência da Loja
             </button>
           </nav>
           <div className="p-4 border-t border-gray-800">
@@ -317,6 +480,77 @@ function App() {
                   Exportar Excel (.csv)
                 </button>
               </div>
+              <div className="p-4 border-b bg-white grid md:grid-cols-4 gap-4 items-end">
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-gray-600">Filtro</label>
+                  <select
+                    value={reportFilter.mode}
+                    onChange={(e) => setReportFilter((prev) => ({ ...prev, mode: e.target.value }))}
+                    className="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary focus:outline-none"
+                  >
+                    <option value="all">Todos os pedidos</option>
+                    <option value="month">Por mês</option>
+                    <option value="year">Por ano</option>
+                    <option value="range">Intervalo específico</option>
+                  </select>
+                </div>
+
+                {reportFilter.mode === 'month' && (
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-gray-600">Mês</label>
+                    <input
+                      type="month"
+                      value={reportFilter.month}
+                      onChange={(e) => setReportFilter((prev) => ({ ...prev, month: e.target.value }))}
+                      className="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary focus:outline-none"
+                    />
+                  </div>
+                )}
+
+                {reportFilter.mode === 'year' && (
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-gray-600">Ano</label>
+                    <input
+                      type="number"
+                      min="2000"
+                      value={reportFilter.year}
+                      onChange={(e) => setReportFilter((prev) => ({ ...prev, year: e.target.value }))}
+                      className="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary focus:outline-none"
+                    />
+                  </div>
+                )}
+
+                {reportFilter.mode === 'range' && (
+                  <div className="grid grid-cols-2 gap-2 md:col-span-2">
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-gray-600">Início</label>
+                      <input
+                        type="date"
+                        value={reportFilter.start}
+                        onChange={(e) => setReportFilter((prev) => ({ ...prev, start: e.target.value }))}
+                        className="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary focus:outline-none"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-gray-600">Fim</label>
+                      <input
+                        type="date"
+                        value={reportFilter.end}
+                        onChange={(e) => setReportFilter((prev) => ({ ...prev, end: e.target.value }))}
+                        className="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <div className="md:col-span-1">
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                    <p className="text-xs text-gray-500">Total no período</p>
+                    <p className="text-xl font-bold text-gray-800">{formatCurrency(filteredTotal)}</p>
+                    <p className="text-[11px] text-gray-400">{filteredOrders.length} pedidos filtrados</p>
+                  </div>
+                </div>
+              </div>
               <div className="max-h-[600px] overflow-y-auto">
                 <table className="w-full text-left text-sm">
                   <thead className="bg-gray-50 text-gray-500 sticky top-0">
@@ -331,7 +565,7 @@ function App() {
                     </tr>
                   </thead>
                   <tbody className="divide-y">
-                    {orders.map((order) => (
+                    {filteredOrders.map((order) => (
                     <tr key={order.id}>
                         <td className="p-3 text-gray-500">{formatOrderDate(order)}</td>
                         <td className="p-3 font-medium">{order.name}</td>
@@ -339,10 +573,6 @@ function App() {
                         <td className="p-3 text-gray-600">{order.phone}</td>
                         <td className="p-3 uppercase text-xs font-bold">{formatOrderType(order.type)}</td>
                         <td className="p-3 uppercase text-xs font-bold text-gray-600">{formatPaymentMethod(order.payment)}</td>
-                        <td className="p-3 uppercase text-xs font-bold">{formatOrderType(order.type)}</td>
-
-                        <td className="p-3 uppercase text-xs font-bold text-gray-600">{formatPaymentMethod(order.payment)}</td>
-
                         <td className="p-3 font-bold text-green-600">{formatCurrency(order.total || 0)}</td>
                         <td className="p-3">
                           <span
@@ -360,6 +590,7 @@ function App() {
               </div>
             </div>
           )}
+          {adminTab === 'branding' && <BrandingSettings branding={branding} onChange={updateBranding} />}
         </main>
       </div>
     );
@@ -368,47 +599,48 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-100 font-sans pb-24">
       <header className="bg-white sticky top-0 z-30 shadow-sm">
-        <div className="bg-red-900 text-white p-1 text-center text-[10px] md:text-xs font-medium uppercase tracking-wider">
-          O melhor churrasco da região • Peça agora
+        <div
+          className="text-white p-1 text-center text-[10px] md:text-xs font-medium uppercase tracking-wider"
+          style={{ backgroundColor: branding.primaryColor }}
+        >
+          {branding.tagline}
         </div>
         <div className="p-4 flex flex-wrap gap-3 justify-between items-center max-w-5xl mx-auto">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-yellow-400 rounded-lg flex items-center justify-center text-red-900 font-black text-xl shadow-sm">
-              ED
+            <div
+              className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-black text-xl shadow-sm overflow-hidden"
+              style={{ backgroundColor: branding.primaryColor }}
+            >
+              {branding.logoUrl ? (
+                <img src={branding.logoUrl} alt={branding.brandName} className="w-full h-full object-cover" />
+              ) : (
+                brandInitials
+              )}
             </div>
             <div>
-              <h1 className="font-bold text-gray-800 leading-none">Datony</h1>
-              <span className="text-xs text-gray-500">Espetinhos Premium</span>
+              <h1 className="font-bold text-gray-800 leading-none">{branding.brandName}</h1>
+              <span className="text-xs text-gray-500">{branding.espetoId || 'Churrasco premium'}</span>
             </div>
           </div>
           <div className="hidden md:flex items-center gap-2">
             <button
-              onClick={() => setView('grill')}
-              className="flex items-center gap-2 px-3 py-2 rounded-full bg-red-50 text-red-700 font-semibold border border-red-200 hover:bg-red-100"
+              onClick={() => requireAuth('grill')}
+              className="flex items-center gap-2 px-3 py-2 rounded-full font-semibold border border-primary text-primary bg-white hover:bg-gray-50"
             >
               <ChefHat size={18} /> Fila do churrasqueiro
             </button>
             <button
-              onClick={() => {
-                setView('login');
-                setLoginError('');
-              }}
-              className="flex items-center gap-2 px-3 py-2 rounded-full bg-gray-900 text-white font-semibold hover:bg-black/80"
+              onClick={() => requireAuth('admin')}
+              className="flex items-center gap-2 px-3 py-2 rounded-full bg-primary text-white font-semibold hover:opacity-90"
             >
               <LayoutDashboard size={18} /> Área admin
             </button>
           </div>
           <div className="flex md:hidden items-center gap-3 text-gray-400">
-            <button
-              onClick={() => {
-                setView('login');
-                setLoginError('');
-              }}
-              className="hover:text-red-600 transition-colors"
-            >
+            <button onClick={() => requireAuth('admin')} className="hover:text-primary transition-colors">
               <User size={20} />
             </button>
-            <button onClick={() => setView('grill')} className="hover:text-red-600 transition-colors">
+            <button onClick={() => requireAuth('grill')} className="hover:text-primary transition-colors">
               <ChefHat size={20} />
             </button>
           </div>
@@ -453,6 +685,21 @@ function App() {
               />
             </div>
 
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700" htmlFor="espetoId">
+                ID do espeto / conta
+              </label>
+              <input
+                id="espetoId"
+                type="text"
+                value={loginForm.espetoId}
+                onChange={(e) => setLoginForm((prev) => ({ ...prev, espetoId: e.target.value }))}
+                className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-red-500 focus:outline-none"
+                placeholder="ex.: espetinhodatony"
+              />
+              <p className="text-xs text-gray-500">Usado para buscar somente produtos, clientes e pedidos da sua conta.</p>
+            </div>
+
             <div className="flex gap-3">
               <button
                 type="submit"
@@ -470,7 +717,16 @@ function App() {
             </div>
           </form>
         )}
-          {view === 'menu' && <MenuView products={products} cart={cart} onUpdateCart={updateCart} onProceed={() => setView('cart')} />}
+          {view === 'menu' && (
+          <MenuView
+            products={products}
+            cart={cart}
+            branding={branding}
+            instagramHandle={instagramHandle}
+            onUpdateCart={updateCart}
+            onProceed={() => setView('cart')}
+          />
+        )}
           {view === 'cart' && (
             <CartView
               cart={cart}
