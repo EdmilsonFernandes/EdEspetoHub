@@ -10,7 +10,8 @@ CREATE TABLE IF NOT EXISTS products (
   description TEXT,
   active BOOLEAN DEFAULT true,
   created_at TIMESTAMP DEFAULT NOW(),
-  image_url TEXT
+  image_url TEXT,
+  CONSTRAINT products_owner_name_unique UNIQUE(owner_id, name)
 );
 
 -- ===============================
@@ -43,6 +44,20 @@ CREATE TABLE IF NOT EXISTS customers (
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW(),
   CONSTRAINT customers_owner_name_unique UNIQUE(owner_id, name)
+);
+
+-- ===============================
+--   TABELA DE ADMINISTRADORES
+-- ===============================
+CREATE TABLE IF NOT EXISTS admin_users (
+  id SERIAL PRIMARY KEY,
+  owner_id TEXT NOT NULL,
+  username TEXT NOT NULL,
+  password_hash TEXT NOT NULL,
+  display_name TEXT DEFAULT 'Administrador',
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW(),
+  CONSTRAINT admin_users_owner_username_unique UNIQUE(owner_id, username)
 );
 
 -- ===============================
@@ -109,3 +124,11 @@ INSERT INTO products (owner_id, name, price, category, description, active, imag
 
 ('espetinhodatony', 'Cerveja Skol', 6.00, 'bebidas', NULL, true,
  'https://savegnagoio.vtexassets.com/arquivos/ids/451158-1200-auto?v=638610711235400000&width=1200&height=auto&aspect=true');
+
+-- ===============================
+--   ADMIN PADRÃO
+-- ===============================
+INSERT INTO admin_users (owner_id, username, password_hash, display_name)
+VALUES
+('espetinhodatony', 'admin', '$2b$10$3RhSgK5Yp5qPlWCMsFBvEOFbcGELRNy9CVfIOVa5AtwU5W1XSRFSG', 'Administrador')
+ON CONFLICT (owner_id, username) DO NOTHING;

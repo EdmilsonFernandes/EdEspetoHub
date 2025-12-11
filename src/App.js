@@ -114,11 +114,8 @@ function App() {
     apiClient.setOwnerId(initialOwnerId);
 
     const unsubProd = productService.subscribe(setProducts);
-    const unsubOrders = orderService.subscribeAll(setOrders);
-    customerService.fetchAll().then(setCustomers).catch(() => setCustomers([]));
     return () => {
       unsubProd();
-      unsubOrders();
     };
   }, []);
 
@@ -134,8 +131,23 @@ function App() {
       if (prev.espetoId === resolvedOwnerId) return prev;
       return getPersistedBranding(resolvedOwnerId);
     });
-    customerService.fetchAll().then(setCustomers).catch(() => setCustomers([]));
   }, [resolvedOwnerId]);
+
+  useEffect(() => {
+    if (!user?.ownerId) {
+      setOrders([]);
+      setCustomers([]);
+      return undefined;
+    }
+
+    apiClient.setOwnerId(user.ownerId);
+    const unsubscribe = orderService.subscribeAll(setOrders);
+    customerService.fetchAll().then(setCustomers).catch(() => setCustomers([]));
+
+    return () => {
+      unsubscribe();
+    };
+  }, [user?.ownerId]);
 
   useEffect(() => {
     const storageKey = brandingStorageKey(branding.espetoId || resolvedOwnerId);
@@ -316,6 +328,15 @@ function App() {
     apiClient.setOwnerId(fallbackBranding.espetoId);
     setBranding(fallbackBranding);
     setView('menu');
+  };
+
+  const requireAdminSession = (nextView) => {
+    if (!user) {
+      setLoginError('Faça login para acessar esta área protegida.');
+      setView('login');
+      return;
+    }
+    setView(nextView);
   };
 
   const exportOrders = (dataset = filteredOrders) => {
@@ -587,7 +608,7 @@ function App() {
           </div>
           <div className="hidden md:flex items-center gap-2">
             <button
-              onClick={() => setView('grill')}
+              onClick={() => requireAdminSession('grill')}
               className="flex items-center gap-2 px-3 py-2 rounded-full font-semibold border border-primary text-primary bg-white hover:bg-gray-50"
             >
               <ChefHat size={18} /> Fila do churrasqueiro
@@ -612,7 +633,7 @@ function App() {
             >
               <User size={20} />
             </button>
-            <button onClick={() => setView('grill')} className="hover:text-primary transition-colors">
+            <button onClick={() => requireAdminSession('grill')} className="hover:text-primary transition-colors">
               <ChefHat size={20} />
             </button>
           </div>
@@ -624,7 +645,7 @@ function App() {
           <form onSubmit={handleLogin} className="bg-white rounded-xl shadow-sm p-6 space-y-4">
             <div>
               <h2 className="text-lg font-bold text-gray-800">Acesso do administrador</h2>
-              <p className="text-sm text-gray-500">Use usuário e senha definidos no banco (PGUSER/PGPASSWORD).</p>
+              <p className="text-sm text-gray-500">Use as credenciais salvas na tabela admin_users (padrão: admin / admin123).</p>
             </div>
 
             {loginError && <div className="text-sm text-red-600 bg-red-50 border border-red-100 p-3 rounded-lg">{loginError}</div>}
@@ -653,7 +674,7 @@ function App() {
                 value={loginForm.password}
                 onChange={(e) => setLoginForm((prev) => ({ ...prev, password: e.target.value }))}
                 className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-red-500 focus:outline-none"
-                placeholder="senha do banco"
+                placeholder="senha do admin"
               />
             </div>
 
@@ -722,18 +743,30 @@ function App() {
           />
         )}
         {view === 'grill' && (
-          <div className="space-y-6">
-            <div className="flex items-center gap-2 text-gray-700 font-semibold">
-              <ChefHat className="text-red-500" /> Visão do Churrasqueiro
+          user ? (
+            <div className="space-y-6">
+              <div className="flex items-center gap-2 text-gray-700 font-semibold">
+                <ChefHat className="text-red-500" /> Visão do Churrasqueiro
+              </div>
+              <GrillQueue />
+              <button
+                onClick={() => setView('menu')}
+                className="flex items-center gap-2 px-3 py-2 text-sm text-white bg-red-600 rounded-lg border border-red-700 hover:bg-red-700"
+              >
+                <ShoppingCart size={16} /> Voltar para pedidos
+              </button>
             </div>
-            <GrillQueue />
-            <button
-              onClick={() => setView('menu')}
-              className="flex items-center gap-2 px-3 py-2 text-sm text-white bg-red-600 rounded-lg border border-red-700 hover:bg-red-700"
-            >
-              <ShoppingCart size={16} /> Voltar para pedidos
-            </button>
-          </div>
+          ) : (
+            <div className="bg-white rounded-xl shadow-sm p-6 text-center space-y-3">
+              <p className="text-gray-700 font-semibold">Faça login para acessar a visão do churrasqueiro.</p>
+              <button
+                onClick={() => setView('login')}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700"
+              >
+                Entrar agora
+              </button>
+            </div>
+          )
         )}
       </main>
 
