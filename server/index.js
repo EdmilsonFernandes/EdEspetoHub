@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import bcrypt from "bcryptjs";
 import { pool } from "./db.js";
+import slugify from "slugify";
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -32,6 +33,9 @@ const mapCustomerRow = (row) => ({
 });
 
 const defaultOwnerId = process.env.DEFAULT_OWNER_ID || "espetinhodatony";
+
+const normalizeSlug = (value) =>
+    slugify(value || "", { lower: true, strict: true, trim: true }) || defaultOwnerId;
 
 const adminDefaults = {
     username: process.env.ADMIN_USER || "admin",
@@ -77,6 +81,46 @@ const ensureAdminTable = async () => {
     `);
 };
 
+const ensureStoreTables = async () => {
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS stores (
+            id SERIAL PRIMARY KEY,
+            slug TEXT NOT NULL UNIQUE,
+            name TEXT NOT NULL,
+            phone TEXT,
+            address TEXT,
+            owner_name TEXT,
+            owner_email TEXT,
+            created_at TIMESTAMP DEFAULT NOW(),
+            updated_at TIMESTAMP DEFAULT NOW()
+        );
+
+        CREATE TABLE IF NOT EXISTS store_settings (
+            id SERIAL PRIMARY KEY,
+            store_slug TEXT NOT NULL REFERENCES stores(slug) ON DELETE CASCADE,
+            logo_url TEXT,
+            primary_color TEXT DEFAULT '#b91c1c',
+            secondary_color TEXT,
+            is_open BOOLEAN DEFAULT true,
+            updated_at TIMESTAMP DEFAULT NOW(),
+            CONSTRAINT store_settings_store_slug_unique UNIQUE(store_slug)
+        );
+
+        CREATE TABLE IF NOT EXISTS users (
+            id SERIAL PRIMARY KEY,
+            store_slug TEXT NOT NULL REFERENCES stores(slug) ON DELETE CASCADE,
+            full_name TEXT NOT NULL,
+            email TEXT NOT NULL,
+            password_hash TEXT NOT NULL,
+            phone TEXT,
+            address TEXT,
+            created_at TIMESTAMP DEFAULT NOW(),
+            updated_at TIMESTAMP DEFAULT NOW(),
+            CONSTRAINT users_store_email_unique UNIQUE(store_slug, email)
+        );
+    `);
+};
+
 const verifyConnection = async () => {
     await pool.query("SELECT 1;");
     console.log("✅ Conexão com o banco de dados estabelecida");
@@ -109,6 +153,29 @@ const ensureDefaultAdmin = async (ownerId = defaultOwnerId) => {
             [hashedPassword, adminDefaults.name, current.id]
         );
         console.log("🔁 Senha do admin padrão atualizada para", ownerId);
+    }
+};
+
+const ensureDefaultStore = async () => {
+    const slug = normalizeSlug(defaultOwnerId);
+    const existingStore = await pool.query("SELECT * FROM stores WHERE slug = $1", [slug]);
+
+    if (!existingStore.rowCount) {
+        await pool.query(
+            `INSERT INTO stores (slug, name, owner_name, owner_email)
+             VALUES ($1, $2, $3, $4)`,
+            [slug, "Espetinho Datony", "Admin Datony", "admin@espetinhodatony.com"]
+        );
+    }
+
+    const existingSettings = await pool.query("SELECT * FROM store_settings WHERE store_slug = $1", [slug]);
+    if (!existingSettings.rowCount) {
+        await pool.query(
+            `INSERT INTO store_settings (store_slug, logo_url, primary_color, secondary_color, is_open)
+             VALUES ($1, $2, '#b91c1c', '#111827', true)
+             ON CONFLICT (store_slug) DO NOTHING`,
+            [slug, "/logo-datony.svg"]
+        );
     }
 };
 
@@ -267,6 +334,17 @@ const resetDatabase = async (ownerId = defaultOwnerId) => {
     await ensureDefaultAdmin(ownerId);
 };
 
+const getStoreWithSettings = async (slug) => {
+    const storeResult = await pool.query("SELECT * FROM stores WHERE slug = $1", [slug]);
+    if (!storeResult.rowCount) return null;
+
+    const settingsResult = await pool.query("SELECT * FROM store_settings WHERE store_slug = $1", [slug]);
+    return {
+        ...storeResult.rows[0],
+        settings: settingsResult.rows[0] || {},
+    };
+};
+
 app.get("/products", async (req, res) => {
     const ownerId = requireOwner(req, res);
     if (!ownerId) return;
@@ -276,6 +354,156 @@ app.get("/products", async (req, res) => {
         [ownerId]
     );
     res.json(result.rows);
+});
+
+app.post("/stores", async (req, res) => {
+    const {
+        fullName,
+        email,
+        password,
+        phone,
+        address,
+        storeName,
+        logoUrl,
+        primaryColor,
+        secondaryColor,
+    } = req.body || {};
+
+    if (!fullName || !email || !password || !storeName) {
+        res.status(400).json({ error: "Campos obrigatórios não preenchidos" });
+        return;
+    }
+
+    const slug = normalizeSlug(storeName);
+
+    try {
+        await pool.query("BEGIN");
+
+        const passwordHash = await bcrypt.hash(password, 10);
+
+        await pool.query(
+            `INSERT INTO stores (slug, name, phone, address, owner_name, owner_email)
+             VALUES ($1, $2, $3, $4, $5, $6)
+             ON CONFLICT (slug) DO UPDATE SET
+                name = EXCLUDED.name,
+                phone = EXCLUDED.phone,
+                address = EXCLUDED.address,
+                owner_name = EXCLUDED.owner_name,
+                owner_email = EXCLUDED.owner_email,
+                updated_at = NOW()`,
+            [slug, storeName, phone || null, address || null, fullName, email]
+        );
+
+        await pool.query(
+            `INSERT INTO users (store_slug, full_name, email, password_hash, phone, address)
+             VALUES ($1, $2, $3, $4, $5, $6)
+             ON CONFLICT (store_slug, email) DO UPDATE SET
+                full_name = EXCLUDED.full_name,
+                password_hash = EXCLUDED.password_hash,
+                phone = EXCLUDED.phone,
+                address = EXCLUDED.address,
+                updated_at = NOW()`,
+            [slug, fullName, email, passwordHash, phone || null, address || null]
+        );
+
+        await pool.query(
+            `INSERT INTO admin_users (owner_id, username, password_hash, display_name)
+             VALUES ($1, $2, $3, $4)
+             ON CONFLICT (owner_id, username) DO UPDATE SET
+                password_hash = EXCLUDED.password_hash,
+                display_name = EXCLUDED.display_name,
+                updated_at = NOW()`,
+            [slug, email, passwordHash, fullName]
+        );
+
+        await pool.query(
+            `INSERT INTO store_settings (store_slug, logo_url, primary_color, secondary_color, is_open)
+             VALUES ($1, $2, $3, $4, true)
+             ON CONFLICT (store_slug) DO UPDATE SET
+                logo_url = COALESCE(EXCLUDED.logo_url, store_settings.logo_url),
+                primary_color = COALESCE(EXCLUDED.primary_color, store_settings.primary_color),
+                secondary_color = COALESCE(EXCLUDED.secondary_color, store_settings.secondary_color),
+                updated_at = NOW()`,
+            [slug, logoUrl || null, primaryColor || "#b91c1c", secondaryColor || null]
+        );
+
+        await pool.query("COMMIT");
+
+        res.status(201).json({
+            slug,
+            ownerId: slug,
+            message: "Loja criada com sucesso",
+        });
+    } catch (error) {
+        await pool.query("ROLLBACK");
+        console.error("Erro ao criar loja", error);
+        res.status(500).json({ error: "Erro ao criar loja" });
+    }
+});
+
+app.get("/stores/:slug", async (req, res) => {
+    const slug = normalizeSlug(req.params.slug);
+    const store = await getStoreWithSettings(slug);
+    if (!store) {
+        res.status(404).json({ error: "Loja não encontrada" });
+        return;
+    }
+
+    res.json(store);
+});
+
+app.put("/stores/:slug/settings", async (req, res) => {
+    const slug = normalizeSlug(req.params.slug);
+    const { name, logoUrl, primaryColor, secondaryColor, phone, address, isOpen } = req.body || {};
+
+    const store = await getStoreWithSettings(slug);
+    if (!store) {
+        res.status(404).json({ error: "Loja não encontrada" });
+        return;
+    }
+
+    await pool.query(
+        `UPDATE stores SET name = COALESCE($2, name), phone = COALESCE($3, phone), address = COALESCE($4, address), updated_at = NOW()
+         WHERE slug = $1`,
+        [slug, name, phone, address]
+    );
+
+    const result = await pool.query(
+        `INSERT INTO store_settings (store_slug, logo_url, primary_color, secondary_color, is_open)
+         VALUES ($1, $2, $3, $4, COALESCE($5, true))
+         ON CONFLICT (store_slug) DO UPDATE SET
+            logo_url = COALESCE(EXCLUDED.logo_url, store_settings.logo_url),
+            primary_color = COALESCE(EXCLUDED.primary_color, store_settings.primary_color),
+            secondary_color = COALESCE(EXCLUDED.secondary_color, store_settings.secondary_color),
+            is_open = COALESCE($5, store_settings.is_open),
+            updated_at = NOW()
+         RETURNING *`,
+        [slug, logoUrl || null, primaryColor || null, secondaryColor || null, isOpen]
+    );
+
+    res.json({ ...store, settings: result.rows[0] });
+});
+
+app.patch("/stores/:slug/status", async (req, res) => {
+    const slug = normalizeSlug(req.params.slug);
+    const { isOpen } = req.body || {};
+
+    if (typeof isOpen !== "boolean") {
+        res.status(400).json({ error: "isOpen deve ser booleano" });
+        return;
+    }
+
+    const result = await pool.query(
+        `UPDATE store_settings SET is_open = $2, updated_at = NOW() WHERE store_slug = $1 RETURNING *`,
+        [slug, isOpen]
+    );
+
+    if (!result.rowCount) {
+        res.status(404).json({ error: "Configuração não encontrada" });
+        return;
+    }
+
+    res.json(result.rows[0]);
 });
 
 app.post("/login", async (req, res) => {
@@ -568,7 +796,9 @@ app.patch("/orders/:id", async (req, res) => {
 const start = async () => {
     try {
         await verifyConnection();
+        await ensureStoreTables();
         await ensureAdminTable();
+        await ensureDefaultStore();
         await ensureDefaultAdmin();
         await seedDefaultProducts();
         app.listen(port, () => console.log(`API escutando na porta ${port}`));
