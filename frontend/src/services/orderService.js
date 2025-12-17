@@ -8,16 +8,18 @@ const normalizeOrder = (order) => ({
 });
 
 export const orderService = {
-    async save(orderData) {
-        await apiClient.post("/orders", orderData);
+    async save(orderData, storeId) {
+        const targetStore = storeId || apiClient.getOwnerId();
+        await apiClient.post(`/stores/${targetStore}/orders`, orderData);
     },
 
-    subscribeAll(callback) {
+    subscribeAll(storeId, callback) {
         let cancelled = false;
+        const targetStore = storeId || apiClient.getOwnerId();
 
         const load = async () => {
             try {
-                const data = await apiClient.get("/orders");
+                const data = await apiClient.get(`/stores/${targetStore}/orders`);
                 if (!cancelled) {
                     callback(data.map(normalizeOrder));
                 }
@@ -35,16 +37,18 @@ export const orderService = {
         };
     },
 
-    async fetchQueue() {
-        const data = await apiClient.get("/orders/queue");
+    async fetchQueue(storeId) {
+        const targetStore = storeId || apiClient.getOwnerId();
+        const data = await apiClient.get(`/stores/${targetStore}/orders`);
         return data.map(normalizeOrder);
     },
 
-    subscribeRecent(callback) {
+    subscribeRecent(storeId, callback) {
         let cancelled = false;
+        const targetStore = storeId || apiClient.getOwnerId();
 
         const load = async () => {
-            const data = await this.fetchQueue();
+            const data = await this.fetchQueue(targetStore);
             if (!cancelled) {
                 callback(data);
             }

@@ -308,7 +308,7 @@ function App() {
       payment
     };
 
-    await orderService.save(order);
+    await orderService.save(order, storeInfo?.id || storeSlug);
     customerService.fetchAll().then(setCustomers).catch(() => {});
 
     if (isPickup) {
@@ -359,12 +359,16 @@ function App() {
     setLoginError('');
 
     try {
-      const session = await authService.login(loginForm.username, loginForm.password, loginForm.espetoId);
-      const sessionData = { ...session, username: loginForm.username, espetoId: loginForm.espetoId };
+      const session = await authService.login(loginForm.username, loginForm.password);
+      const sessionData = {
+        token: session.token,
+        username: session.user?.email || loginForm.username,
+        ownerId: session.store?.slug || session.store?.id,
+      };
       localStorage.setItem('adminSession', JSON.stringify(sessionData));
-      setBranding(getPersistedBranding(sessionData.ownerId || loginForm.espetoId));
+      setBranding(getPersistedBranding(sessionData.ownerId));
       setUser(sessionData);
-      setStoreSlug(sessionData.ownerId || loginForm.espetoId);
+      setStoreSlug(session.store?.slug || sessionData.ownerId);
       setView('admin');
     } catch (error) {
       setLoginError(error.message || 'Falha ao autenticar');
@@ -385,16 +389,16 @@ function App() {
 
     try {
       const result = await storeService.create(registerForm);
-      setStoreSlug(result.slug);
+      setStoreSlug(result.store?.slug || result.slug);
       setBranding((prev) => ({
         ...prev,
-        espetoId: result.slug,
+        espetoId: result.store?.slug || result.slug,
         brandName: registerForm.storeName,
         primaryColor: registerForm.primaryColor,
         accentColor: registerForm.secondaryColor || registerForm.primaryColor,
         logoUrl: registerForm.logoUrl || prev.logoUrl,
       }));
-      setLoginForm((prev) => ({ ...prev, espetoId: result.slug, username: registerForm.email }));
+      setLoginForm((prev) => ({ ...prev, espetoId: result.store?.slug || result.slug, username: registerForm.email }));
       setRegisterForm((prev) => ({ ...prev, password: '', storeName: '', fullName: '', email: '', phone: '', address: '' }));
       setView('menu');
     } catch (error) {

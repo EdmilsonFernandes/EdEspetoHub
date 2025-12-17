@@ -18,6 +18,10 @@ export class ProductRepository {
     return this.repository.save(product);
   }
 
+  delete(id: string) {
+    return this.repository.delete(id);
+  }
+
   findByStore(store: Store) {
     return this.repository.find({ where: { store } });
   }
