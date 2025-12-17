@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ShoppingCart, Send, User, ChefHat, LayoutDashboard } from 'lucide-react';

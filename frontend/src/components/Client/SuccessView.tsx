@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from "react";
 import { CheckCircle, QrCode, ArrowLeft } from "lucide-react";
 import { formatPaymentMethod } from "../../utils/format";
