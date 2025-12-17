@@ -6,7 +6,6 @@ import { CreateUserDto } from '../dto/CreateUserDto';
 import { env } from '../config/env';
 import { StoreSettings } from '../entities/StoreSettings';
 import { slugify } from '../utils/slugify';
-import { AppDataSource } from '../config/database';
 import { PlanService } from './PlanService';
 import { SubscriptionService } from './SubscriptionService';
 
@@ -38,16 +37,17 @@ export class AuthService {
     storeSettings.primaryColor = input.primaryColor;
     storeSettings.secondaryColor = input.secondaryColor;
 
+    const savedUser = await this.userRepository.save(user);
+
     const store = this.storeRepository.create({
       name: input.storeName,
       slug,
-      owner: user,
+      owner: savedUser,
       settings: storeSettings,
     });
 
     storeSettings.store = store;
 
-    await AppDataSource.manager.save(user);
     await this.storeRepository.save(store);
 
     const plans = await this.planService.listEnabled();
@@ -56,10 +56,10 @@ export class AuthService {
       await this.subscriptionService.create({ storeId: store.id, planId: defaultPlan.id });
     }
 
-    const token = this.generateToken(user.id, store.id);
+    const token = this.generateToken(savedUser.id, store.id);
 
     return {
-      user: { id: user.id },
+      user: { id: savedUser.id },
       store: { id: store.id, name: store.name, slug: store.slug },
       token,
       redirectUrl: `/chamanoespeto/${store.slug}`,
