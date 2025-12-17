@@ -2,6 +2,7 @@ version: "3.9"
 
 services:
   frontend:
+    container_name: chamanoespeto-frontend
     build:
       context: ./frontend
       dockerfile: Dockerfile
@@ -12,11 +13,12 @@ services:
     restart: always
 
   api:
+    container_name: chamanoespeto-api
     build:
       context: ./backend
       dockerfile: Dockerfile
     environment:
-      PGHOST: postgres
+      PGHOST: postgres # ⚠️ nome do serviço, NÃO do container
       PGUSER: postgres
       PGPASSWORD: postgres
       PGDATABASE: espetinho
@@ -28,6 +30,7 @@ services:
     restart: always
 
   postgres:
+    container_name: chamanoespeto-postgres
     image: postgres:16
     environment:
       POSTGRES_PASSWORD: postgres
@@ -40,10 +43,11 @@ services:
     restart: always
 
   pgadmin:
+    container_name: chamanoespeto-pgadmin
     image: dpage/pgadmin4:8.13
     environment:
-      PGADMIN_DEFAULT_EMAIL: admindatony@datony.com
-      PGADMIN_DEFAULT_PASSWORD: Datony20025#!
+      PGADMIN_DEFAULT_EMAIL: admin@chamanoespeto.com
+      PGADMIN_DEFAULT_PASSWORD: ChamaNoEspeto20025#!
       PGADMIN_CONFIG_SERVER_MODE: "False"
     ports:
       - "5050:80"
