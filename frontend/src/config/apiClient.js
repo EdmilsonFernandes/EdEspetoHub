@@ -1,17 +1,8 @@
 const resolveBaseUrl = () => {
-    if (process.env.REACT_APP_API_BASE_URL) {
-        return process.env.REACT_APP_API_BASE_URL;
-    }
+    const base = process.env.REACT_APP_API_BASE_URL
+        || (typeof window === "undefined" ? "http://localhost:4000" : window.location.origin || "http://localhost:4000");
 
-    if (typeof window === "undefined") {
-        return "http://localhost:4000";
-    }
-
-    if (window.location.port && window.location.port !== "3000") {
-        return `${window.location.origin}`;
-    }
-
-    return "http://localhost:4000";
+    return base.endsWith("/api") ? base : `${base.replace(/\/$/, "")}/api`;
 };
 
 const API_BASE_URL = resolveBaseUrl();

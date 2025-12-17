@@ -15,6 +15,8 @@ routes.put('/stores/:id/status', StoreController.updateStatus);
 
 routes.post('/stores/:storeId/products', ProductController.create);
 routes.get('/stores/:storeId/products', ProductController.list);
+routes.put('/stores/:storeId/products/:productId', ProductController.update);
+routes.delete('/stores/:storeId/products/:productId', ProductController.remove);
 
 routes.post('/stores/:storeId/orders', OrderController.create);
 routes.get('/stores/:storeId/orders', OrderController.list);

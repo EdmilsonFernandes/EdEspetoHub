@@ -21,7 +21,7 @@ export class StoreRepository {
     return this.repository.findOne({ where: { slug }, relations: ['settings'] });
   }
 
-  findById(id: string) {
-    return this.repository.findOne({ where: { id }, relations: ['settings'] });
+  findById(identifier: string) {
+    return this.repository.findOne({ where: [{ id: identifier }, { slug: identifier }], relations: ['settings'] });
   }
 }

@@ -10,7 +10,7 @@ const toJson = async (response) => {
 
 export const storeService = {
   async create(payload) {
-    const response = await apiClient.rawPost('/stores', payload);
+    const response = await apiClient.rawPost('/auth/register', payload);
     return toJson(response);
   },
 

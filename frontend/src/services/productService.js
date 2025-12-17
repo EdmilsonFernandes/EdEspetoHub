@@ -10,21 +10,24 @@ const normalizeProduct = (product) => ({
 
 export const productService = {
     async save(product) {
+        const storeId = apiClient.getOwnerId();
         if (product.id) {
-            await apiClient.put(`/products/${product.id}`, product);
+            await apiClient.put(`/stores/${storeId}/products/${product.id}`, product);
         } else {
-            await apiClient.post("/products", product);
+            await apiClient.post(`/stores/${storeId}/products`, product);
         }
     },
     async delete(id) {
-        await apiClient.delete(`/products/${id}`);
+        const storeId = apiClient.getOwnerId();
+        await apiClient.delete(`/stores/${storeId}/products/${id}`);
     },
     subscribe(callback) {
         let cancelled = false;
+        const storeId = apiClient.getOwnerId();
 
         const load = async () => {
             try {
-                const data = await apiClient.get("/products");
+                const data = await apiClient.get(`/stores/${storeId}/products`);
                 if (!cancelled) {
                     callback(data.map(normalizeProduct));
                 }
