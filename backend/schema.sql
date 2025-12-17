@@ -72,3 +72,27 @@ CREATE TABLE IF NOT EXISTS order_items (
 CREATE INDEX IF NOT EXISTS idx_products_store ON products(store_id);
 CREATE INDEX IF NOT EXISTS idx_orders_store ON orders(store_id);
 CREATE INDEX IF NOT EXISTS idx_order_items_order ON order_items(order_id);
+
+CREATE TABLE IF NOT EXISTS plans (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL UNIQUE,
+  price NUMERIC(10,2) NOT NULL,
+  duration_days INTEGER NOT NULL,
+  enabled BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS subscriptions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+  plan_id UUID NOT NULL REFERENCES plans(id) ON DELETE CASCADE,
+  start_date TIMESTAMPTZ NOT NULL,
+  end_date TIMESTAMPTZ NOT NULL,
+  status TEXT NOT NULL,
+  auto_renew BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_subscriptions_store ON subscriptions(store_id);
+CREATE INDEX IF NOT EXISTS idx_subscriptions_plan ON subscriptions(plan_id);

@@ -6,6 +6,7 @@ import { AppDataSource } from './config/database';
 import routes from './routes';
 import { env } from './config/env';
 import { swaggerSpec } from './config/swagger';
+import { scheduleSubscriptionExpirationJob } from './jobs/subscription-expiration.job';
 
 async function bootstrap() {
   await AppDataSource.initialize();
@@ -17,6 +18,8 @@ async function bootstrap() {
   app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
   app.get('/api/docs.json', (_, res) => res.json(swaggerSpec));
   app.use('/api', routes);
+
+  scheduleSubscriptionExpirationJob();
 
   app.listen(env.port, () => {
     console.log(`API listening on port ${env.port}`);

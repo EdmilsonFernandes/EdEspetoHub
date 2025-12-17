@@ -12,6 +12,7 @@ import { User } from './User';
 import { StoreSettings } from './StoreSettings';
 import { Product } from './Product';
 import { Order } from './Order';
+import { Subscription } from './Subscription';
 
 @Entity({ name: 'stores' })
 export class Store {
@@ -39,6 +40,9 @@ export class Store {
 
   @OneToMany(() => Order, (order) => order.store)
   orders!: Order[];
+
+  @OneToMany(() => Subscription, (subscription) => subscription.store)
+  subscriptions!: Subscription[];
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;

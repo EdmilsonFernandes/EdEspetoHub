@@ -24,4 +24,8 @@ export class StoreRepository {
   findById(identifier: string) {
     return this.repository.findOne({ where: [{ id: identifier }, { slug: identifier }], relations: ['settings'] });
   }
+
+  findAll() {
+    return this.repository.find({ relations: ['settings', 'owner'] });
+  }
 }
