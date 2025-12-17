@@ -1,3 +1,47 @@
+--   TABELA DE LOJAS / TENANTS
+-- ===============================
+CREATE TABLE IF NOT EXISTS stores (
+  id SERIAL PRIMARY KEY,
+  slug TEXT NOT NULL UNIQUE,
+  name TEXT NOT NULL,
+  phone TEXT,
+  address TEXT,
+  owner_name TEXT,
+  owner_email TEXT,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ===============================
+--   CONFIGURAÇÕES DE LOJA
+-- ===============================
+CREATE TABLE IF NOT EXISTS store_settings (
+  id SERIAL PRIMARY KEY,
+  store_slug TEXT NOT NULL REFERENCES stores(slug) ON DELETE CASCADE,
+  logo_url TEXT,
+  primary_color TEXT DEFAULT '#b91c1c',
+  secondary_color TEXT,
+  is_open BOOLEAN DEFAULT true,
+  updated_at TIMESTAMP DEFAULT NOW(),
+  CONSTRAINT store_settings_store_slug_unique UNIQUE(store_slug)
+);
+
+-- ===============================
+--   DONOS/USUÁRIOS DA LOJA
+-- ===============================
+CREATE TABLE IF NOT EXISTS users (
+  id SERIAL PRIMARY KEY,
+  store_slug TEXT NOT NULL REFERENCES stores(slug) ON DELETE CASCADE,
+  full_name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  password_hash TEXT NOT NULL,
+  phone TEXT,
+  address TEXT,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW(),
+  CONSTRAINT users_store_email_unique UNIQUE(store_slug, email)
+);
+
 -- ===============================
 --   TABELA DE PRODUTOS
 -- ===============================

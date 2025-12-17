@@ -79,6 +79,29 @@ const request = async (path, options = {}) => {
     }
 };
 
+const rawRequest = async (path, options = {}) => {
+    const url = buildUrl(path);
+    const finalOptions = { ...options };
+
+    finalOptions.headers = {
+        ...defaultHeaders,
+        ...(options.headers || {}),
+    };
+
+    if (currentOwnerId) {
+        finalOptions.headers["x-owner-id"] = currentOwnerId;
+    }
+
+    if (finalOptions.body && typeof finalOptions.body === "object") {
+        finalOptions.body = JSON.stringify({
+            ...finalOptions.body,
+            ...(currentOwnerId ? { ownerId: currentOwnerId } : {}),
+        });
+    }
+
+    return fetch(url, finalOptions);
+};
+
 export const apiClient = {
     setOwnerId: (ownerId) => {
         currentOwnerId = ownerId || null;
@@ -104,4 +127,8 @@ export const apiClient = {
             body: JSON.stringify(body),
         }),
     delete: async (path) => request(path, { method: "DELETE" }),
+    rawGet: (path) => rawRequest(path, { method: "GET" }),
+    rawPost: (path, body) => rawRequest(path, { method: "POST", body }),
+    rawPut: (path, body) => rawRequest(path, { method: "PUT", body }),
+    rawPatch: (path, body) => rawRequest(path, { method: "PATCH", body }),
 };

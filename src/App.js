@@ -14,6 +14,7 @@ import { productService } from './services/productService';
 import { orderService } from './services/orderService';
 import { authService } from './services/authService';
 import { customerService } from './services/customerService';
+import { storeService } from './services/storeService';
 import { MenuView } from './components/Client/MenuView';
 import { CartView } from './components/Client/CartView';
 import { SuccessView } from './components/Client/SuccessView';
@@ -38,16 +39,25 @@ const defaultPaymentMethod = 'debito';
 const WHATSAPP_NUMBER = process.env.REACT_APP_WHATSAPP_NUMBER || '5512996797210';
 const PIX_KEY = process.env.REACT_APP_PIX_KEY || '';
 const defaultBranding = {
-  brandName: 'Datony',
-  espetoId: 'espetinhodatony',
-  logoUrl: '/logo-datony.svg',
+  brandName: 'Churras Sites',
+  espetoId: process.env.REACT_APP_DEFAULT_STORE || 'espetinhodatony',
+  logoUrl: '/logo.svg',
   primaryColor: '#b91c1c',
   accentColor: '#111827',
-  tagline: 'O melhor churrasco da região • Peça agora',
-  instagram: 'espetinhodatony',
+  tagline: 'Crie seu site de pedidos de churrasco em minutos',
+  instagram: '',
 };
 
 const brandingStorageKey = (ownerId) => `brandingSettings:${ownerId || defaultBranding.espetoId}`;
+
+const resolveStoreSlug = () => {
+  if (typeof window === 'undefined') return defaultBranding.espetoId;
+  const path = window.location.pathname.split('/').filter(Boolean);
+  if (path[0] === 'loja' || path[0] === 'store') return path[1];
+
+  const query = new URLSearchParams(window.location.search);
+  return query.get('store') || null;
+};
 
 const getPersistedBranding = (ownerId = defaultBranding.espetoId) => {
   const saved = localStorage.getItem(brandingStorageKey(ownerId));
@@ -66,7 +76,7 @@ function App() {
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
   const [customers, setCustomers] = useState([]);
-  const [view, setView] = useState('menu');
+  const [view, setView] = useState(resolveStoreSlug() ? 'menu' : 'landing');
   const [adminTab, setAdminTab] = useState('dashboard');
   const [cart, setCart] = useState({});
   const [customer, setCustomer] = useState(initialCustomer);
@@ -75,6 +85,21 @@ function App() {
   const [loginForm, setLoginForm] = useState({ username: '', password: '', espetoId: defaultBranding.espetoId });
   const [loginError, setLoginError] = useState('');
   const [branding, setBranding] = useState(() => getPersistedBranding(defaultBranding.espetoId));
+  const [storeSlug, setStoreSlug] = useState(resolveStoreSlug());
+  const [storeInfo, setStoreInfo] = useState(null);
+  const [storeError, setStoreError] = useState('');
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [registerForm, setRegisterForm] = useState({
+    fullName: '',
+    email: '',
+    password: '',
+    phone: '',
+    address: '',
+    storeName: '',
+    logoUrl: '',
+    primaryColor: '#b91c1c',
+    secondaryColor: '#111827',
+  });
   const [reportFilter, setReportFilter] = useState({
     mode: 'all',
     month: '',
@@ -100,28 +125,60 @@ function App() {
 
   useEffect(() => {
     const savedSession = localStorage.getItem('adminSession');
-    let initialOwnerId = defaultBranding.espetoId;
+    const initialOwnerId = storeSlug || defaultBranding.espetoId;
 
     if (savedSession) {
       const parsedSession = JSON.parse(savedSession);
-      initialOwnerId = parsedSession.ownerId || initialOwnerId;
       setUser(parsedSession);
       setView('admin');
       setLoginForm((prev) => ({ ...prev, espetoId: parsedSession.ownerId || prev.espetoId }));
-      setBranding(getPersistedBranding(initialOwnerId));
+      setBranding(getPersistedBranding(parsedSession.ownerId || initialOwnerId));
     }
 
-    apiClient.setOwnerId(initialOwnerId);
+    if (initialOwnerId) {
+      apiClient.setOwnerId(initialOwnerId);
+    }
 
     const unsubProd = productService.subscribe(setProducts);
     return () => {
       unsubProd();
     };
-  }, []);
+  }, [storeSlug]);
+
+  useEffect(() => {
+    if (!storeSlug) {
+      setStoreInfo(null);
+      setBranding((prev) => ({ ...defaultBranding, ...prev, espetoId: defaultBranding.espetoId }));
+      return;
+    }
+
+    setStoreError('');
+    storeService
+      .fetchBySlug(storeSlug)
+      .then((data) => {
+        setStoreInfo(data);
+        setBranding((prev) => ({
+          ...prev,
+          espetoId: data.slug,
+          brandName: data.name || prev.brandName,
+          logoUrl: data.settings?.logo_url || prev.logoUrl,
+          primaryColor: data.settings?.primary_color || prev.primaryColor,
+          accentColor: data.settings?.secondary_color || prev.accentColor,
+          instagram: data.owner_email || prev.instagram,
+        }));
+        apiClient.setOwnerId(data.slug);
+        setView((prev) => (prev === 'landing' ? 'menu' : prev));
+      })
+      .catch((error) => {
+        console.error('Erro ao carregar loja', error);
+        setStoreError('Não foi possível carregar esta loja.');
+        setView('landing');
+      });
+  }, [storeSlug]);
 
   const resolvedOwnerId = useMemo(
-    () => user?.ownerId || branding?.espetoId || defaultBranding.espetoId,
-    [user?.ownerId, branding?.espetoId]
+    () => storeSlug || user?.ownerId || branding?.espetoId || defaultBranding.espetoId,
+    [storeSlug, user?.ownerId, branding?.espetoId]
   );
 
   useEffect(() => {
@@ -307,6 +364,7 @@ function App() {
       localStorage.setItem('adminSession', JSON.stringify(sessionData));
       setBranding(getPersistedBranding(sessionData.ownerId || loginForm.espetoId));
       setUser(sessionData);
+      setStoreSlug(sessionData.ownerId || loginForm.espetoId);
       setView('admin');
     } catch (error) {
       setLoginError(error.message || 'Falha ao autenticar');
@@ -320,6 +378,37 @@ function App() {
     });
   };
 
+  const handleCreateStore = async (event) => {
+    event?.preventDefault();
+    setStoreError('');
+    setIsRegistering(true);
+
+    try {
+      const result = await storeService.create(registerForm);
+      setStoreSlug(result.slug);
+      setBranding((prev) => ({
+        ...prev,
+        espetoId: result.slug,
+        brandName: registerForm.storeName,
+        primaryColor: registerForm.primaryColor,
+        accentColor: registerForm.secondaryColor || registerForm.primaryColor,
+        logoUrl: registerForm.logoUrl || prev.logoUrl,
+      }));
+      setLoginForm((prev) => ({ ...prev, espetoId: result.slug, username: registerForm.email }));
+      setRegisterForm((prev) => ({ ...prev, password: '', storeName: '', fullName: '', email: '', phone: '', address: '' }));
+      setView('menu');
+    } catch (error) {
+      setStoreError(error.message || 'Não foi possível criar sua loja');
+    } finally {
+      setIsRegistering(false);
+    }
+  };
+
+  const goToDemoStore = () => {
+    setStoreSlug(defaultBranding.espetoId);
+    setView('menu');
+  };
+
   const logout = () => {
     localStorage.removeItem('adminSession');
     setUser(null);
@@ -327,7 +416,7 @@ function App() {
     const fallbackBranding = getPersistedBranding(defaultBranding.espetoId);
     apiClient.setOwnerId(fallbackBranding.espetoId);
     setBranding(fallbackBranding);
-    setView('menu');
+    setView(storeSlug ? 'menu' : 'landing');
   };
 
   const requireAdminSession = (nextView) => {
@@ -575,6 +664,186 @@ function App() {
             </div>
           )}
           {adminTab === 'branding' && <BrandingSettings branding={branding} onChange={updateBranding} />}
+        </main>
+      </div>
+    );
+  }
+
+  if (view === 'landing') {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <header className="bg-white shadow-sm">
+          <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-primary text-white font-black flex items-center justify-center">CS</div>
+              <div>
+                <p className="text-lg font-bold text-gray-900">Churras Sites</p>
+                <p className="text-sm text-gray-500">Plataforma multi-loja para pedidos</p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={goToDemoStore}
+                className="px-4 py-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-100"
+              >
+                Ver loja demo
+              </button>
+              <button
+                onClick={() => setView('menu')}
+                className="px-4 py-2 rounded-lg bg-primary text-white font-semibold hover:opacity-90"
+              >
+                Acessar minha loja
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <main className="max-w-6xl mx-auto px-4 py-10 grid md:grid-cols-2 gap-8 items-start">
+          <section className="space-y-6">
+            <span className="inline-flex items-center px-3 py-1 bg-primary/10 text-primary text-xs font-bold rounded-full uppercase tracking-wide">
+              Plataforma multi-loja
+            </span>
+            <h1 className="text-3xl md:text-4xl font-black text-gray-900 leading-tight">
+              Crie sites de pedidos de churrasco com logo, cores e produtos personalizados
+            </h1>
+            <p className="text-lg text-gray-600 leading-relaxed">
+              Cadastre-se, configure a identidade visual do seu espeto e publique um link exclusivo para seus clientes
+              fazerem pedidos online.
+            </p>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div className="p-4 bg-white border rounded-xl shadow-sm">
+                <p className="font-semibold text-gray-900">Identidade visual flexível</p>
+                <p className="text-sm text-gray-500">Logo, cores e slug exclusivo por loja.</p>
+              </div>
+              <div className="p-4 bg-white border rounded-xl shadow-sm">
+                <p className="font-semibold text-gray-900">Gestão completa</p>
+                <p className="text-sm text-gray-500">Produtos, status Aberto/Fechado e fila do churrasqueiro.</p>
+              </div>
+            </div>
+          </section>
+
+          <section className="bg-white border rounded-2xl shadow-sm p-6 space-y-4">
+            <div>
+              <h2 className="text-xl font-bold text-gray-900">Criar minha loja</h2>
+              <p className="text-sm text-gray-500">Preencha os dados abaixo para gerar seu site automaticamente.</p>
+            </div>
+
+            {storeError && <div className="bg-red-50 text-red-700 text-sm p-3 rounded-lg border border-red-100">{storeError}</div>}
+
+            <form className="space-y-3" onSubmit={handleCreateStore}>
+              <div className="grid md:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-sm font-semibold text-gray-700">Nome completo</label>
+                  <input
+                    required
+                    value={registerForm.fullName}
+                    onChange={(e) => setRegisterForm((prev) => ({ ...prev, fullName: e.target.value }))}
+                    className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-primary focus:outline-none"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-semibold text-gray-700">Email</label>
+                  <input
+                    required
+                    type="email"
+                    value={registerForm.email}
+                    onChange={(e) => setRegisterForm((prev) => ({ ...prev, email: e.target.value }))}
+                    className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-primary focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-sm font-semibold text-gray-700">Senha</label>
+                  <input
+                    required
+                    type="password"
+                    value={registerForm.password}
+                    onChange={(e) => setRegisterForm((prev) => ({ ...prev, password: e.target.value }))}
+                    className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-primary focus:outline-none"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-semibold text-gray-700">Telefone</label>
+                  <input
+                    value={registerForm.phone}
+                    onChange={(e) => setRegisterForm((prev) => ({ ...prev, phone: e.target.value }))}
+                    className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-primary focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-sm font-semibold text-gray-700">Endereço completo</label>
+                <input
+                  value={registerForm.address}
+                  onChange={(e) => setRegisterForm((prev) => ({ ...prev, address: e.target.value }))}
+                  className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-primary focus:outline-none"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-sm font-semibold text-gray-700">Nome da loja</label>
+                <input
+                  required
+                  value={registerForm.storeName}
+                  onChange={(e) => setRegisterForm((prev) => ({ ...prev, storeName: e.target.value }))}
+                  className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-primary focus:outline-none"
+                  placeholder="Ex.: Espetinho do João"
+                />
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-sm font-semibold text-gray-700">URL do logo</label>
+                  <input
+                    value={registerForm.logoUrl}
+                    onChange={(e) => setRegisterForm((prev) => ({ ...prev, logoUrl: e.target.value }))}
+                    className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-primary focus:outline-none"
+                    placeholder="https://..."
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-semibold text-gray-700">Cor principal</label>
+                  <input
+                    type="color"
+                    value={registerForm.primaryColor}
+                    onChange={(e) => setRegisterForm((prev) => ({ ...prev, primaryColor: e.target.value }))}
+                    className="w-full border rounded-lg p-2"
+                  />
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-sm font-semibold text-gray-700">Cor secundária</label>
+                  <input
+                    type="color"
+                    value={registerForm.secondaryColor}
+                    onChange={(e) => setRegisterForm((prev) => ({ ...prev, secondaryColor: e.target.value }))}
+                    className="w-full border rounded-lg p-2"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-semibold text-gray-700">Slug da loja</label>
+                  <input
+                    disabled
+                    value={(registerForm.storeName || '').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}
+                    className="w-full border rounded-lg p-3 bg-gray-50 text-gray-500"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isRegistering}
+                className="w-full bg-primary text-white py-3 rounded-lg font-semibold hover:opacity-90 disabled:opacity-60"
+              >
+                {isRegistering ? 'Criando sua loja...' : 'Criar minha loja agora'}
+              </button>
+            </form>
+          </section>
         </main>
       </div>
     );
