@@ -5,134 +5,134 @@ Aplicação web para pedidos e gestão do restaurante de espetinhos Datony. O pr
 -   **Loja do cliente**: montagem e edição do pedido, envio para WhatsApp e pagamento via chave Pix.
 -   **Painel interno**: dashboard com métricas, CRUD de produtos, fila do churrasqueiro (atualização a cada 5s) e histórico de pedidos.
 
-## Execução local
+## Visão geral do stack
 
-### Front-end React
+-   **Front-end**: React (Create React App) servido por nginx em produção (ver `Dockerfile`).
+-   **API**: Node.js/Express em JavaScript (pasta `server/`, Dockerfile `Dockerfile.api`).
+-   **Banco de dados**: PostgreSQL com schema em `server/schema.sql` e recursos opcionais de administração via pgAdmin.
+
+Requisitos mínimos para desenvolvimento local:
+
+-   Node.js 18+ e npm/yarn
+-   PostgreSQL 16+ (local) ou Docker
+-   Docker + Docker Compose (para execução conteinerizada)
+
+## Execução local (sem Docker)
+
+### 1. Banco de dados
+
+1. Crie um banco chamado `espetinho` e aplique o schema inicial (opcional, a API também cria tabelas on-demand):
+
+    ```bash
+    psql -h localhost -U postgres -d espetinho -f server/schema.sql
+    ```
+
+2. Variáveis de conexão usadas pelo `pg` (padrões: `postgres` / `postgres`):
+
+    ```bash
+    export PGHOST=localhost
+    export PGUSER=postgres
+    export PGPASSWORD=postgres
+    export PGDATABASE=espetinho
+    ```
+
+### 2. API (pasta `server/`)
+
+```bash
+cd server
+npm install
+npm start
+```
+
+O servidor sobe em `http://localhost:4000` e, durante a inicialização:
+
+-   valida a conexão com o PostgreSQL;
+-   cria/atualiza a tabela `admin_users`;
+-   garante um administrador padrão (`ownerId` `espetinhodatony`, usuário `admin`, senha `admin123`). Altere via variáveis `ADMIN_USER`, `ADMIN_PASSWORD` e `ADMIN_NAME` ou atualizando manualmente a tabela `admin_users` (por exemplo: `UPDATE admin_users SET password_hash = crypt('<nova_senha>', gen_salt('bf')) WHERE username='admin' AND owner_id='espetinhodatony';`).
+
+Endpoints principais:
+
+-   `POST /login` — autenticação de administradores (tabela `admin_users`).
+-   `GET products`, `POST products`, `PUT products/:id`, `DELETE products/:id` — catálogo.
+-   `GET orders`, `GET orders/queue`, `POST orders`, `PATCH orders/:id/status` — pedidos e fila.
+-   `POST /admin/reset` — reinicia o banco e repovoa produtos padrão. Requer header `x-owner-id` e Basic Auth com usuário de `admin_users` (ex.: `curl -u admin:admin123 -H "x-owner-id: espetinhodatony" -X POST http://localhost:4000/admin/reset`).
+
+### 3. Front-end React
 
 ```bash
 npm install
 npm start
 ```
 
-Variáveis de ambiente do React (arquivo `.env` na raiz):
+Crie um arquivo `.env` na raiz do projeto com o endpoint da API:
 
 ```bash
 REACT_APP_API_BASE_URL=http://localhost:4000
 ```
 
-### API Node + PostgreSQL (local)
+Com a API em execução, a loja fica acessível em `http://localhost:3000`.
 
-1. Instale dependências e carregue o schema (opcional) no PostgreSQL local:
+### 4. pgAdmin (opcional, local)
+
+-   Host: `localhost`
+-   Porta: `5432`
+-   Usuário: `postgres`
+-   Senha: a que você definiu
+
+## Execução com Docker
+
+### Subir tudo com Docker Compose
+
+```bash
+docker compose up --build
+```
+
+Serviços expostos:
+
+-   Front-end: http://localhost:8080
+-   API: http://localhost:4000
+-   PostgreSQL: porta 5432 (volume `postgres-data`)
+-   pgAdmin: http://localhost:5050
+
+Credenciais padrão do pgAdmin (pode sobrescrever via variáveis de ambiente ao subir): `admindatony@datony.com` / `Datony20025#!`.
+
+### Imagens individuais
+
+-   **Front-end**: constrói com nginx
 
     ```bash
-    cd server
-    npm install
-    psql -h localhost -U postgres -d espetinho -f schema.sql
+    docker build -t espetinho-app .
+    docker run --rm -p 80:80 espetinho-app
     ```
 
-2. Exponha as variáveis padrão do `pg` e inicie a API:
+-   **API**: utiliza `Dockerfile.api`
 
     ```bash
-    PGHOST=localhost PGUSER=postgres PGPASSWORD=postgres PGDATABASE=espetinho npm start
+    docker build -f Dockerfile.api -t espetinho-api .
+    docker run --rm -p 4000:4000 \
+      -e PGHOST=<host> -e PGUSER=<usuario> -e PGPASSWORD=<senha> -e PGDATABASE=<db> \
+      espetinho-api
     ```
 
-   A API valida a conexão com o PostgreSQL na inicialização e cria (ou atualiza) um administrador padrão na tabela `admin_users`.
+-   **PostgreSQL + schema**
 
-3. Credenciais de administrador e autenticação da área interna:
+    ```bash
+    docker run --name espetinho-db -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=espetinho -p 5432:5432 -d postgres:16
+    docker exec -i espetinho-db psql -U postgres -d espetinho < server/schema.sql
+    ```
 
-   -   A rota `POST /login` usa apenas registros da tabela `admin_users` (não reutiliza mais as credenciais do Postgres ou do pgAdmin).
-   -   Um administrador padrão é criado para o espeto `espetinhodatony`: usuário `admin` e senha `admin123` (pode ser alterado via variáveis `ADMIN_USER`, `ADMIN_PASSWORD` e `ADMIN_NAME`).
-   -   O acesso às visões de dashboard e churrasqueiro no front-end só ocorre após login bem-sucedido.
+-   **pgAdmin**
 
-Principais endpoints:
+    ```bash
+    docker build -f Dockerfile.pgadmin -t espetinho-pgadmin .
+    docker run --rm -p 5050:80 \
+      -e PGADMIN_DEFAULT_EMAIL=admindatony@datony.com \
+      -e PGADMIN_DEFAULT_PASSWORD=Datony20025#! \
+      -v pgadmin-data:/var/lib/pgadmin \
+      espetinho-pgadmin
+    ```
 
--   `GET products` – lista produtos.
--   `POST products` – cria produto `{ name, price, category, description?, active? }`.
--   `PUT products/:id` e `DELETE products/:id` – edita ou remove.
--   `GET orders` – lista pedidos.
--   `GET orders/queue` – fila pendente/preparando.
--   `POST orders` – cria pedido `{ name, phone, address, table, type, items, total, status?, payment? }`.
--   `PATCH orders/:id/status` – atualiza status.
--   `POST /admin/reset` – reinicia o banco e repovoa produtos padrão. Requer `x-owner-id` e autenticação Basic com um usuário de `admin_users` (ex.: `curl -u admin:admin123 -H "x-owner-id: espetinhodatony" -X POST http://localhost:4000/admin/reset`).
+## Notas adicionais
 
-### pgAdmin (local)
-
-Instale pgAdmin localmente ou utilize a imagem oficial. Para conectar ao banco local, crie um novo servidor no pgAdmin com:
-
--   **Host**: `localhost`
--   **Porta**: `5432`
--   **Usuário**: `postgres`
--   **Senha**: a que você definiu
-
-## Conteinerização
-
-### Aplicação React (Docker)
-
-O repositório inclui um `Dockerfile` multi-stage que constrói a aplicação e a serve via **nginx**. Para gerar a imagem e executá-la na porta 80:
-
-```bash
-docker build -t espetinho-app .
-docker run --rm -p 80:80 espetinho-app
-```
-
-### API Node + PostgreSQL (Docker)
-
-Use o `Dockerfile.api` para empacotar a API. Você pode apontar para um banco externo ou para um container do PostgreSQL:
-
-```bash
-docker build -f Dockerfile.api -t espetinho-api .
-docker run --rm -p 4000:4000 \
-  -e PGHOST=<host> -e PGUSER=<usuario> -e PGPASSWORD=<senha> -e PGDATABASE=<db> \
-  espetinho-api
-```
-
-Caso queira tudo em containers, suba também um PostgreSQL oficial (exemplo com senha `postgres`):
-
-O arquivo `Dockerfile.pgadmin` usa a imagem oficial do pgAdmin e define credenciais padrão (alteráveis em runtime). Monte um volume para persistir dados e substitua as credenciais conforme necessário (padrão: `admindatony@datony.com` / `Datony20025#!`):
-
-```bash
-docker run --name espetinho-db -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=espetinho -p 5432:5432 -d postgres:16
-
-# Popular schema opcionalmente
-docker exec -i espetinho-db psql -U postgres -d espetinho < server/schema.sql
-
-# API apontando para o container do banco
-docker run --rm -p 4000:4000 --link espetinho-db \
-  -e PGHOST=espetinho-db -e PGUSER=postgres -e PGPASSWORD=postgres -e PGDATABASE=espetinho \
-  espetinho-api
-```
-
-### pgAdmin (Docker)
-
-```bash
-docker build -f Dockerfile.pgadmin -t espetinho-pgadmin .
-docker run --rm -p 5050:80 \
-  -e PGADMIN_DEFAULT_EMAIL=admindatony@datony.com \
-  -e PGADMIN_DEFAULT_PASSWORD=Datony20025#! \
-  -v pgadmin-data:/var/lib/pgadmin \
-  espetinho-pgadmin
-```
-
-Ao subir ambas as imagens em uma instância EC2, exponha as portas desejadas (por exemplo, `80` para a aplicação e `5050` para o pgAdmin) e configure as variáveis de ambiente do pgAdmin com valores seguros.
-Para conectar o pgAdmin ao PostgreSQL containerizado, adicione um novo servidor com host `espetinho-db`, porta `5432`, usuário `postgres` e senha `postgres` (ou os valores que você tiver configurado). Em produção, exponha apenas as portas necessárias (por exemplo, `80` para a aplicação e `5050` para o pgAdmin) e altere as credenciais padrão.
-
-## Workspace do VS Code
-
-Incluímos o diretório `.vscode/` com recomendações e configurações de identação consistentes (2 espaços, final de linha LF, remoção de espaços em branco e nova linha final). O VS Code aplicará formatação automática ao salvar arquivos JavaScript/JSON/Markdown quando o Prettier estiver instalado (extensão recomendada em `.vscode/extensions.json`).
-
-## Scripts adicionais
-
--   `npm run build` – gera a versão de produção.
--   `npm test` – executa a suíte de testes padrão do Create React App.
-
-## Tecnologias
-
--   React (Create React App)
--   Tailwind CSS via CDN
--   Firebase Auth + Firestore
--   Lucide React
--   Recharts
-
-## Contribuição
-
--   Os arquivos de texto são normalizados via `.gitattributes` para evitar que o repositório seja tratado como binário durante a criação do PR.
+-   Ao publicar em produção (ex.: EC2), exponha apenas as portas necessárias e substitua credenciais padrão.
+-   O diretório `.vscode/` traz recomendações de formatação (2 espaços, LF, remoção de espaços em branco e nova linha final), aplicadas automaticamente se o Prettier estiver instalado.
