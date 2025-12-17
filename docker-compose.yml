@@ -5,7 +5,6 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: espetinho-frontend
     ports:
       - "8080:80"
     depends_on:
@@ -16,7 +15,6 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: espetinho-api
     environment:
       PGHOST: postgres
       PGUSER: postgres
@@ -31,7 +29,6 @@ services:
 
   postgres:
     image: postgres:16
-    container_name: espetinho-db
     environment:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: espetinho
@@ -43,12 +40,15 @@ services:
     restart: always
 
   pgadmin:
-    build:
-      context: .
-      dockerfile: Dockerfile.pgadmin
-    container_name: espetinho-pgadmin
+    image: dpage/pgadmin4:8.13
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admindatony@datony.com
+      PGADMIN_DEFAULT_PASSWORD: Datony20025#!
+      PGADMIN_CONFIG_SERVER_MODE: "False"
     ports:
       - "5050:80"
+    depends_on:
+      - postgres
     restart: always
 
 volumes:
