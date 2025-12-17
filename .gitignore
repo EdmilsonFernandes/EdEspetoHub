@@ -23,7 +23,49 @@
 .env.development.local
 .env.test.local
 .env.production.local
+=======
+# ========================
+# Node / JS
+# ========================
+node_modules/
+**/node_modules/
 
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Lock files (opcional – escolha UM)
+# Se usar npm:
+# yarn.lock
+
+# Se usar yarn:
+# package-lock.json
+
+# ========================
+# Build
+# ========================
+dist/
+build/
+.out/
+.next/
+
+# ========================
+# Environment
+# ========================
+.env
+.env.*
+!.env.example
+
+# ========================
+# IDE / OS
+# ========================
+.vscode/
+*.code-workspace
+.idea/
+.DS_Store
+
+# ========================
+# Logs
+# ========================
+logs/
+*.log

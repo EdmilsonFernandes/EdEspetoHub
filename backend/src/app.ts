@@ -8,7 +8,8 @@ import { env } from './config/env';
 import { swaggerSpec } from './config/swagger';
 import { scheduleSubscriptionExpirationJob } from './jobs/subscription-expiration.job';
 
-async function bootstrap() {
+async function bootstrap()
+{
   await AppDataSource.initialize();
   const app = express();
   app.use(cors());
@@ -21,12 +22,14 @@ async function bootstrap() {
 
   scheduleSubscriptionExpirationJob();
 
-  app.listen(env.port, () => {
+  app.listen(env.port, () =>
+  {
     console.log(`API listening on port ${env.port}`);
   });
 }
 
-bootstrap().catch((error) => {
+bootstrap().catch((error) =>
+{
   console.error('Failed to start API', error);
   process.exit(1);
 });
