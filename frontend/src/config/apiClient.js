@@ -1,5 +1,7 @@
 const resolveBaseUrl = () => {
-    const base = process.env.REACT_APP_API_BASE_URL || "/api";
+    if (import.meta.env.VITE_API_BASE_URL) {
+        return import.meta.env.VITE_API_BASE_URL;
+    }
 
     if (base.endsWith("/api")) {
         return base.replace(/\/+$/, "");
