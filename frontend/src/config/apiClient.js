@@ -3,6 +3,7 @@ const resolveBaseUrl = () => {
         return import.meta.env.VITE_API_BASE_URL;
     }
 
+    const base = window.location.origin;
     if (base.endsWith("/api")) {
         return base.replace(/\/+$/, "");
     }

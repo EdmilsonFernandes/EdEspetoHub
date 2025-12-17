@@ -24,6 +24,8 @@ export function StorePage() {
   const [paymentMethod, setPaymentMethod] = useState(defaultPaymentMethod);
   const [lastOrder, setLastOrder] = useState(null);
   const [branding, setBranding] = useState(() => getPersistedBranding(storeSlug || defaultBranding.espetoId));
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
 
   const cartTotal = useMemo(() => Object.values(cart).reduce((acc, item) => acc + item.price * item.qty, 0), [cart]);
   const brandInitials = useMemo(
@@ -39,27 +41,51 @@ export function StorePage() {
       setUser(parsedSession);
     }
 
-    if (storeSlug) {
-      apiClient.setOwnerId(storeSlug);
-      storeService
-        .fetchBySlug(storeSlug)
-        .then((data) => {
-          setBranding((prev) => ({
-            ...prev,
-            espetoId: data.slug,
-            brandName: data.name || prev.brandName,
-            logoUrl: data.settings?.logo_url || prev.logoUrl,
-            primaryColor: data.settings?.primary_color || prev.primaryColor,
-            accentColor: data.settings?.secondary_color || prev.accentColor,
-            instagram: data.owner_email || prev.instagram,
-          }));
-        })
-        .catch((error) => {
-          console.error('Erro ao carregar loja', error);
-        });
+    setIsLoading(true);
+    setLoadError(null);
+
+    if (!storeSlug) {
+      console.warn('No store slug provided');
+      setIsLoading(false);
+      setLoadError('Loja não especificada');
+      return;
     }
 
-    const unsubProd = productService.subscribe(setProducts);
+    apiClient.setOwnerId(storeSlug);
+
+    // Fetch store data with fallback to defaults
+    storeService
+      .fetchBySlug(storeSlug)
+      .then((data) => {
+        if (data) {
+          setBranding((prev) => ({
+            ...prev,
+            espetoId: data.slug || prev.espetoId,
+            brandName: data.name || prev.brandName,
+            logoUrl: data.settings?.logoUrl || prev.logoUrl,
+            primaryColor: data.settings?.primaryColor || prev.primaryColor,
+            accentColor: data.settings?.secondaryColor || prev.accentColor,
+            instagram: data.owner_email || prev.instagram,
+          }));
+        }
+      })
+      .catch((error) => {
+        console.error('Erro ao carregar loja', error);
+        // Don't set error - use fallback branding instead
+        setBranding((prev) => ({
+          ...prev,
+          espetoId: storeSlug,
+          brandName: prev.brandName || 'Espetaria',
+        }));
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+
+    const unsubProd = productService.subscribe((loadedProducts) => {
+      setProducts(loadedProducts || []);
+    });
+
     return () => {
       unsubProd();
     };
@@ -175,6 +201,23 @@ export function StorePage() {
     navigate(`/${storeSlug}/orders`);
   };
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
+        <div className="text-center">
+          <div className="mb-4">
+            <div className="w-16 h-16 mx-auto rounded-full border-4 border-gray-200 dark:border-gray-700 border-t-red-500 dark:border-t-red-500 animate-spin"></div>
+          </div>
+          <p className="text-gray-600 dark:text-gray-300 font-semibold">Carregando loja...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Fallback UI if no products and no error
+  const hasContent = products.length > 0 || !loadError;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 font-sans pb-24">
       <header className="bg-white/95 backdrop-blur-sm sticky top-0 z-30 shadow-lg border-b border-gray-100">
@@ -202,7 +245,7 @@ export function StorePage() {
                 <span className="text-xs text-gray-500">{branding.espetoId || 'Churrasco premium'}</span>
               </div>
             </div>
-            
+
             <div className="hidden md:flex items-center gap-3">
               <button
                 onClick={requireAdminSession}
@@ -218,7 +261,7 @@ export function StorePage() {
                 <LayoutDashboard size={18} /> Área admin
               </button>
             </div>
-            
+
             <div className="flex md:hidden items-center gap-2">
               <button
                 onClick={() => navigate('/admin')}
@@ -226,8 +269,8 @@ export function StorePage() {
               >
                 <User size={20} />
               </button>
-              <button 
-                onClick={requireAdminSession} 
+              <button
+                onClick={requireAdminSession}
                 className="p-2 rounded-xl text-gray-600 hover:bg-gray-100 transition-colors"
               >
                 <ChefHat size={20} />
@@ -238,7 +281,33 @@ export function StorePage() {
       </header>
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {view === 'menu' && (
+        {view === 'menu' && products.length === 0 ? (
+          <div className="min-h-[60vh] flex items-center justify-center">
+            <div className="text-center">
+              <div className="mb-4">
+                <div className="text-6xl">🍖</div>
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Cardápio vazio</h2>
+              <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md">O cardápio desta loja ainda não foi configurado. Volte em breve!</p>
+              <button
+                onClick={() => navigate('/')}
+                className="px-6 py-3 rounded-lg bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold hover:from-red-600 hover:to-red-700 transition-all"
+              >
+                Voltar para início
+              </button>
+            </div>
+          </div>
+        ) : view === 'menu' && (
+          <MenuView
+            products={products}
+            cart={cart}
+            branding={branding}
+            instagramHandle={instagramHandle}
+            onUpdateCart={updateCart}
+            onProceed={() => setView('cart')}
+          />
+        )}
+        {view === 'menu' && products.length > 0 && (
           <MenuView
             products={products}
             cart={cart}
@@ -280,7 +349,7 @@ export function StorePage() {
             className="w-full bg-gradient-to-r from-gray-800 to-gray-900 text-white p-4 rounded-2xl shadow-2xl flex justify-between items-center transform hover:scale-[1.02] transition-all border border-gray-700"
           >
             <div className="flex items-center gap-3">
-              <span 
+              <span
                 className="px-3 py-1 rounded-xl text-sm font-bold text-white shadow-lg"
                 style={{ backgroundColor: branding.primaryColor }}
               >
@@ -294,8 +363,8 @@ export function StorePage() {
       )}
 
       {view === 'cart' && (
-        <div 
-          className="fixed bottom-6 right-6 text-white rounded-full p-4 shadow-2xl md:hidden cursor-pointer transform hover:scale-110 transition-all" 
+        <div
+          className="fixed bottom-6 right-6 text-white rounded-full p-4 shadow-2xl md:hidden cursor-pointer transform hover:scale-110 transition-all"
           style={{ backgroundColor: branding.primaryColor }}
           onClick={checkout}
         >
