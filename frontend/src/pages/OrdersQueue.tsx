@@ -65,7 +65,7 @@ export function OrdersQueue() {
           <GrillQueue />
         </div>
         <button
-          onClick={() => navigate(`/${storeSlug}`)}
+          onClick={() => navigate(storeSlug ? `/chamanoespeto/${storeSlug}` : '/')}
           className="flex items-center gap-2 px-4 py-3 text-white rounded-xl font-semibold hover:opacity-90 transition-all shadow-lg"
           style={{ backgroundColor: branding.primaryColor }}
         >

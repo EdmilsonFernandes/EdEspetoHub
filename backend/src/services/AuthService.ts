@@ -59,8 +59,8 @@ export class AuthService {
     const token = this.generateToken(user.id, store.id);
 
     return {
-      user,
-      store: { id: store.id, slug: store.slug },
+      user: { id: user.id },
+      store: { id: store.id, name: store.name, slug: store.slug },
       token,
       redirectUrl: `/chamanoespeto/${store.slug}`,
     };

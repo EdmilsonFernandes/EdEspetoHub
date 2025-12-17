@@ -13,8 +13,8 @@ function App() {
           <Route path="/create" element={<CreateStore />} />
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin/*" element={<Navigate to="/admin" replace />} />
-          <Route path="/:storeSlug" element={<StorePage />} />
-          <Route path="/:storeSlug/orders" element={<OrdersQueue />} />
+          <Route path="/chamanoespeto/:storeSlug" element={<StorePage />} />
+          <Route path="/chamanoespeto/:storeSlug/orders" element={<OrdersQueue />} />
         </Routes>
       </Router>
     </ThemeProvider>

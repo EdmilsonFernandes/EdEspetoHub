@@ -25,7 +25,8 @@ export function CreateStore() {
 
     try {
       const result = await storeService.create(registerForm);
-      navigate(`/${result.slug}`);
+      const destination = result.redirectUrl || (result.store?.slug ? `/chamanoespeto/${result.store.slug}` : '/');
+      navigate(destination);
     } catch (error) {
       setStoreError(error.message || 'Não foi possível criar sua loja');
     } finally {
@@ -202,14 +203,15 @@ export function CreateStore() {
                     <label className="text-sm font-semibold text-gray-700">URL da loja</label>
                     <div className="flex items-center">
                       <span className="text-sm text-gray-500 bg-gray-50 border border-r-0 border-gray-200 rounded-l-xl px-3 py-3">
-                        /
+                        /chamanoespeto/
                       </span>
                       <input
                         disabled
-                        value={(registerForm.storeName || '').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}
+                        value="gerada automaticamente"
                         className="flex-1 border border-gray-200 rounded-r-xl p-3 bg-gray-50 text-gray-500 text-sm"
                       />
                     </div>
+                    <p className="text-xs text-gray-500">A URL será criada pelo sistema após o cadastro. Use o link retornado na resposta.</p>
                   </div>
                 </div>
               </div>
