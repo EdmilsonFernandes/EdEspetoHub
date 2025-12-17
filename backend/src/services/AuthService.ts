@@ -65,7 +65,6 @@ export class AuthService
       });
       await storeRepo.save(store);
 
-      // ⛔ NÃO FAÇA MAIS NADA AQUI
       return {
         userId: user.id,
         storeId: store.id,
