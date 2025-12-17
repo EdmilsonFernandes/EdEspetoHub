@@ -198,7 +198,7 @@ export function StorePage() {
       navigate('/admin');
       return;
     }
-    navigate(`/${storeSlug}/orders`);
+    navigate(storeSlug ? `/chamanoespeto/${storeSlug}/orders` : '/admin');
   };
 
   // Loading state
