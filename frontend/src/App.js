@@ -10,8 +10,8 @@ import {
   FileText,
   LogOut,
   CreditCard,
-  Shield,
-  Building2
+  Building2,
+  AlertTriangle
 } from 'lucide-react';
 import { productService } from './services/productService';
 import { orderService } from './services/orderService';
@@ -63,7 +63,7 @@ const brandingStorageKey = (ownerId) => `brandingSettings:${ownerId || defaultBr
 const resolveStoreSlug = () => {
   if (typeof window === 'undefined') return defaultBranding.espetoId;
   const path = window.location.pathname.split('/').filter(Boolean);
-  if (path[0] === 'loja' || path[0] === 'store') return path[1];
+  if (path[ 0 ] === 'loja' || path[ 0 ] === 'store') return path[ 1 ];
 
   const query = new URLSearchParams(window.location.search);
   return query.get('store') || null;
@@ -72,39 +72,41 @@ const resolveStoreSlug = () => {
 const getPersistedBranding = (ownerId = defaultBranding.espetoId) => {
   const saved = localStorage.getItem(brandingStorageKey(ownerId));
   if (!saved) return { ...defaultBranding, espetoId: ownerId };
-  try {
+  try
+  {
     const parsed = JSON.parse(saved);
     return { ...defaultBranding, espetoId: ownerId, ...parsed };
-  } catch (error) {
+  } catch (error)
+  {
     console.error('Erro ao carregar branding salvo', error);
     return { ...defaultBranding, espetoId: ownerId };
   }
 };
 
 function App() {
-  const [user, setUser] = useState(null);
-  const [products, setProducts] = useState([]);
-  const [orders, setOrders] = useState([]);
-  const [customers, setCustomers] = useState([]);
-  const [view, setView] = useState(resolveStoreSlug() ? 'menu' : 'landing');
-  const [adminTab, setAdminTab] = useState('dashboard');
-  const [cart, setCart] = useState({});
-  const [customer, setCustomer] = useState(initialCustomer);
-  const [paymentMethod, setPaymentMethod] = useState(defaultPaymentMethod);
-  const [lastOrder, setLastOrder] = useState(null);
-  const [loginForm, setLoginForm] = useState({ username: '', password: '', espetoId: defaultBranding.espetoId });
-  const [loginError, setLoginError] = useState('');
-  const [branding, setBranding] = useState(() => getPersistedBranding(defaultBranding.espetoId));
-  const [storeSlug, setStoreSlug] = useState(resolveStoreSlug());
-  const [storeInfo, setStoreInfo] = useState(null);
-  const [storeError, setStoreError] = useState('');
-  const [subscription, setSubscription] = useState(null);
-  const [plans, setPlans] = useState([]);
-  const [platformStores, setPlatformStores] = useState([]);
-  const [subscriptionLoading, setSubscriptionLoading] = useState(false);
-  const [platformLoading, setPlatformLoading] = useState(false);
-  const [isRegistering, setIsRegistering] = useState(false);
-  const [registerForm, setRegisterForm] = useState({
+  const [ user, setUser ] = useState(null);
+  const [ products, setProducts ] = useState([]);
+  const [ orders, setOrders ] = useState([]);
+  const [ customers, setCustomers ] = useState([]);
+  const [ view, setView ] = useState(resolveStoreSlug() ? 'menu' : 'landing');
+  const [ adminTab, setAdminTab ] = useState('dashboard');
+  const [ cart, setCart ] = useState({});
+  const [ customer, setCustomer ] = useState(initialCustomer);
+  const [ paymentMethod, setPaymentMethod ] = useState(defaultPaymentMethod);
+  const [ lastOrder, setLastOrder ] = useState(null);
+  const [ loginForm, setLoginForm ] = useState({ username: '', password: '', espetoId: defaultBranding.espetoId });
+  const [ loginError, setLoginError ] = useState('');
+  const [ branding, setBranding ] = useState(() => getPersistedBranding(defaultBranding.espetoId));
+  const [ storeSlug, setStoreSlug ] = useState(resolveStoreSlug());
+  const [ storeInfo, setStoreInfo ] = useState(null);
+  const [ storeError, setStoreError ] = useState('');
+  const [ subscription, setSubscription ] = useState(null);
+  const [ plans, setPlans ] = useState([]);
+  const [ platformStores, setPlatformStores ] = useState([]);
+  const [ subscriptionLoading, setSubscriptionLoading ] = useState(false);
+  const [ platformLoading, setPlatformLoading ] = useState(false);
+  const [ isRegistering, setIsRegistering ] = useState(false);
+  const [ registerForm, setRegisterForm ] = useState({
     fullName: '',
     email: '',
     password: '',
@@ -115,7 +117,7 @@ function App() {
     primaryColor: '#b91c1c',
     secondaryColor: '#111827',
   });
-  const [reportFilter, setReportFilter] = useState({
+  const [ reportFilter, setReportFilter ] = useState({
     mode: 'all',
     month: '',
     year: new Date().getFullYear().toString(),
@@ -149,7 +151,8 @@ function App() {
     const savedSession = localStorage.getItem('adminSession');
     const initialOwnerId = storeSlug || defaultBranding.espetoId;
 
-    if (savedSession) {
+    if (savedSession)
+    {
       const parsedSession = JSON.parse(savedSession);
       setUser(parsedSession);
       setView('admin');
@@ -157,7 +160,8 @@ function App() {
       setBranding(getPersistedBranding(parsedSession.ownerId || initialOwnerId));
     }
 
-    if (initialOwnerId) {
+    if (initialOwnerId)
+    {
       apiClient.setOwnerId(initialOwnerId);
     }
 
@@ -165,10 +169,11 @@ function App() {
     return () => {
       unsubProd();
     };
-  }, [storeSlug]);
+  }, [ storeSlug ]);
 
   useEffect(() => {
-    if (!storeSlug) {
+    if (!storeSlug)
+    {
       setStoreInfo(null);
       setBranding((prev) => ({ ...defaultBranding, ...prev, espetoId: defaultBranding.espetoId }));
       return;
@@ -197,11 +202,11 @@ function App() {
         setStoreError('Não foi possível carregar esta loja.');
         setView('landing');
       });
-  }, [storeSlug]);
+  }, [ storeSlug ]);
 
   const resolvedOwnerId = useMemo(
     () => storeSlug || user?.ownerId || branding?.espetoId || defaultBranding.espetoId,
-    [storeSlug, user?.ownerId, branding?.espetoId]
+    [ storeSlug, user?.ownerId, branding?.espetoId ]
   );
 
   useEffect(() => {
@@ -211,7 +216,7 @@ function App() {
       if (prev.espetoId === resolvedOwnerId) return prev;
       return getPersistedBranding(resolvedOwnerId);
     });
-  }, [resolvedOwnerId]);
+  }, [ resolvedOwnerId ]);
 
   useEffect(() => {
     if (!storeInfo?.id) return;
@@ -221,10 +226,11 @@ function App() {
       .then(setSubscription)
       .catch(() => setSubscription(null))
       .finally(() => setSubscriptionLoading(false));
-  }, [storeInfo?.id]);
+  }, [ storeInfo?.id ]);
 
   useEffect(() => {
-    if (!user?.ownerId) {
+    if (!user?.ownerId)
+    {
       setOrders([]);
       setCustomers([]);
       return undefined;
@@ -237,7 +243,7 @@ function App() {
     return () => {
       unsubscribe();
     };
-  }, [user?.ownerId]);
+  }, [ user?.ownerId ]);
 
   useEffect(() => {
     if (adminTab !== 'platform') return;
@@ -247,21 +253,21 @@ function App() {
       .then(setPlatformStores)
       .catch((error) => console.error('Erro ao carregar lojas', error))
       .finally(() => setPlatformLoading(false));
-  }, [adminTab]);
+  }, [ adminTab ]);
 
   useEffect(() => {
     const storageKey = brandingStorageKey(branding.espetoId || resolvedOwnerId);
     localStorage.setItem(storageKey, JSON.stringify(branding));
     document.documentElement.style.setProperty('--primary-color', branding.primaryColor || defaultBranding.primaryColor);
     document.documentElement.style.setProperty('--accent-color', branding.accentColor || branding.primaryColor || defaultBranding.accentColor);
-  }, [branding, resolvedOwnerId]);
+  }, [ branding, resolvedOwnerId ]);
 
-  const cartTotal = useMemo(() => Object.values(cart).reduce((acc, item) => acc + item.price * item.qty, 0), [cart]);
+  const cartTotal = useMemo(() => Object.values(cart).reduce((acc, item) => acc + item.price * item.qty, 0), [ cart ]);
   const brandInitials = useMemo(
-    () => branding.brandName?.split(' ').map((part) => part?.[0]).join('').slice(0, 2).toUpperCase() || 'ED',
-    [branding.brandName]
+    () => branding.brandName?.split(' ').map((part) => part?.[ 0 ]).join('').slice(0, 2).toUpperCase() || 'ED',
+    [ branding.brandName ]
   );
-  const instagramHandle = useMemo(() => (branding.instagram ? `@${branding.instagram.replace('@', '')}` : ''), [branding.instagram]);
+  const instagramHandle = useMemo(() => (branding.instagram ? `@${branding.instagram.replace('@', '')}` : ''), [ branding.instagram ]);
 
   const filteredOrders = useMemo(() => {
     if (!reportFilter.mode || reportFilter.mode === 'all') return orders;
@@ -270,16 +276,19 @@ function App() {
       const date = getOrderDateValue(order);
       if (!date) return false;
 
-      if (reportFilter.mode === 'month' && reportFilter.month) {
+      if (reportFilter.mode === 'month' && reportFilter.month)
+      {
         const monthString = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
         return monthString === reportFilter.month;
       }
 
-      if (reportFilter.mode === 'year' && reportFilter.year) {
+      if (reportFilter.mode === 'year' && reportFilter.year)
+      {
         return String(date.getFullYear()) === reportFilter.year;
       }
 
-      if (reportFilter.mode === 'range' && reportFilter.start && reportFilter.end) {
+      if (reportFilter.mode === 'range' && reportFilter.start && reportFilter.end)
+      {
         const startDate = new Date(reportFilter.start);
         const endDate = new Date(reportFilter.end);
         endDate.setHours(23, 59, 59, 999);
@@ -288,23 +297,24 @@ function App() {
 
       return true;
     });
-  }, [orders, reportFilter, getOrderDateValue]);
+  }, [ orders, reportFilter, getOrderDateValue ]);
 
   const filteredTotal = useMemo(
     () => filteredOrders.reduce((acc, order) => acc + (order.total || 0), 0),
-    [filteredOrders]
+    [ filteredOrders ]
   );
 
   const updateCart = (item, qty) => {
     setCart((previous) => {
-      const currentQty = previous[item.id]?.qty || 0;
+      const currentQty = previous[ item.id ]?.qty || 0;
       const nextQty = currentQty + qty;
-      if (nextQty <= 0) {
+      if (nextQty <= 0)
+      {
         const copy = { ...previous };
-        delete copy[item.id];
+        delete copy[ item.id ];
         return copy;
       }
-      return { ...previous, [item.id]: { ...item, qty: nextQty } };
+      return { ...previous, [ item.id ]: { ...item, qty: nextQty } };
     });
   };
 
@@ -325,12 +335,14 @@ function App() {
   };
 
   const checkout = async () => {
-    if (!customer.name || !customer.phone) {
+    if (!customer.name || !customer.phone)
+    {
       alert('Preencha Nome e Telefone');
       return;
     }
 
-    if (customer.type === 'delivery' && !customer.address) {
+    if (customer.type === 'delivery' && !customer.address)
+    {
       alert('Informe o endereço completo para entrega.');
       return;
     }
@@ -352,9 +364,10 @@ function App() {
     };
 
     await orderService.save(order, storeInfo?.id || storeSlug);
-    customerService.fetchAll().then(setCustomers).catch(() => {});
+    customerService.fetchAll().then(setCustomers).catch(() => { });
 
-    if (isPickup) {
+    if (isPickup)
+    {
       const itemsList = Object.values(cart)
         .map((item) => `▪ ${item.qty}x ${item.name}`)
         .join('\n');
@@ -401,7 +414,8 @@ function App() {
     event?.preventDefault();
     setLoginError('');
 
-    try {
+    try
+    {
       const session = await authService.login(loginForm.username, loginForm.password);
       const sessionData = {
         token: session.token,
@@ -413,7 +427,8 @@ function App() {
       setUser(sessionData);
       setStoreSlug(session.store?.slug || sessionData.ownerId);
       setView('admin');
-    } catch (error) {
+    } catch (error)
+    {
       setLoginError(error.message || 'Falha ao autenticar');
     }
   };
@@ -430,7 +445,8 @@ function App() {
     setStoreError('');
     setIsRegistering(true);
 
-    try {
+    try
+    {
       const result = await storeService.create(registerForm);
       setStoreSlug(result.store?.slug || result.slug);
       setBranding((prev) => ({
@@ -444,9 +460,11 @@ function App() {
       setLoginForm((prev) => ({ ...prev, espetoId: result.store?.slug || result.slug, username: registerForm.email }));
       setRegisterForm((prev) => ({ ...prev, password: '', storeName: '', fullName: '', email: '', phone: '', address: '' }));
       setView('menu');
-    } catch (error) {
+    } catch (error)
+    {
       setStoreError(error.message || 'Não foi possível criar sua loja');
-    } finally {
+    } finally
+    {
       setIsRegistering(false);
     }
   };
@@ -467,7 +485,8 @@ function App() {
   };
 
   const requireAdminSession = (nextView) => {
-    if (!user) {
+    if (!user)
+    {
       setLoginError('Faça login para acessar esta área protegida.');
       setView('login');
       return;
@@ -502,19 +521,24 @@ function App() {
   const handleRenewSubscription = async (planId) => {
     if (!storeInfo?.id) return;
     setSubscriptionLoading(true);
-    try {
-      if (subscription?.id) {
+    try
+    {
+      if (subscription?.id)
+      {
         const renewed = await subscriptionService.renew(subscription.id, { planId });
         setSubscription(renewed);
-      } else {
+      } else
+      {
         const created = await subscriptionService.create({ storeId: storeInfo.id, planId });
         setSubscription(created);
       }
       setView('admin');
-    } catch (error) {
+    } catch (error)
+    {
       console.error('Erro ao renovar assinatura', error);
       setSubscription((prev) => ({ ...prev, status: prev?.status || 'EXPIRED' }));
-    } finally {
+    } finally
+    {
       setSubscriptionLoading(false);
     }
   };
@@ -523,7 +547,7 @@ function App() {
     setView('plans');
   };
 
-  const isSubscriptionBlocked = ['EXPIRED', 'SUSPENDED'].includes(subscription?.status);
+  const isSubscriptionBlocked = [ 'EXPIRED', 'SUSPENDED' ].includes(subscription?.status);
 
   const suspendStoreSubscription = async (subscriptionId) => {
     if (!subscriptionId) return;
@@ -543,11 +567,13 @@ function App() {
     );
   };
 
-  if (isSubscriptionBlocked && view !== 'plans') {
+  if (isSubscriptionBlocked && view !== 'plans')
+  {
     return <SubscriptionGate status={subscription?.status} onSelectPlans={openPlanSelection} />;
   }
 
-  if (view === 'plans') {
+  if (view === 'plans')
+  {
     return (
       <div className="min-h-screen bg-gray-50 p-6">
         <PlanSelection plans={plans} onSelect={handleRenewSubscription} loading={subscriptionLoading} />
@@ -555,7 +581,8 @@ function App() {
     );
   }
 
-  if (view === 'admin' && user) {
+  if (view === 'admin' && user)
+  {
     return (
       <div className="min-h-screen bg-gray-50 flex">
         <aside className="w-64 bg-gray-900 text-white hidden md:flex flex-col">
@@ -568,57 +595,50 @@ function App() {
           <nav className="flex-1 px-4 space-y-2">
             <button
               onClick={() => setAdminTab('dashboard')}
-              className={`w-full flex items-center gap-3 p-3 rounded-lg text-sm ${
-                adminTab === 'dashboard' ? 'bg-red-600 font-bold' : 'text-gray-400 hover:bg-gray-800'
-              }`}
+              className={`w-full flex items-center gap-3 p-3 rounded-lg text-sm ${adminTab === 'dashboard' ? 'bg-red-600 font-bold' : 'text-gray-400 hover:bg-gray-800'
+                }`}
             >
               <LayoutDashboard size={18} /> Dashboard
             </button>
             <button
               onClick={() => setAdminTab('products')}
-              className={`w-full flex items-center gap-3 p-3 rounded-lg text-sm ${
-                adminTab === 'products' ? 'bg-red-600 font-bold' : 'text-gray-400 hover:bg-gray-800'
-              }`}
+              className={`w-full flex items-center gap-3 p-3 rounded-lg text-sm ${adminTab === 'products' ? 'bg-red-600 font-bold' : 'text-gray-400 hover:bg-gray-800'
+                }`}
             >
               <Package size={18} /> Produtos
             </button>
             <button
               onClick={() => setAdminTab('queue')}
-              className={`w-full flex items-center gap-3 p-3 rounded-lg text-sm ${
-                adminTab === 'queue' ? 'bg-red-600 font-bold' : 'text-gray-400 hover:bg-gray-800'
-              }`}
+              className={`w-full flex items-center gap-3 p-3 rounded-lg text-sm ${adminTab === 'queue' ? 'bg-red-600 font-bold' : 'text-gray-400 hover:bg-gray-800'
+                }`}
             >
               <UtensilsCrossed size={18} /> Fila do Churrasqueiro
             </button>
             <button
               onClick={() => setAdminTab('reports')}
-              className={`w-full flex items-center gap-3 p-3 rounded-lg text-sm ${
-                adminTab === 'reports' ? 'bg-red-600 font-bold' : 'text-gray-400 hover:bg-gray-800'
-              }`}
+              className={`w-full flex items-center gap-3 p-3 rounded-lg text-sm ${adminTab === 'reports' ? 'bg-red-600 font-bold' : 'text-gray-400 hover:bg-gray-800'
+                }`}
             >
               <FileText size={18} /> Relatório Vendas
             </button>
             <button
               onClick={() => setAdminTab('subscription')}
-              className={`w-full flex items-center gap-3 p-3 rounded-lg text-sm ${
-                adminTab === 'subscription' ? 'bg-red-600 font-bold' : 'text-gray-400 hover:bg-gray-800'
-              }`}
+              className={`w-full flex items-center gap-3 p-3 rounded-lg text-sm ${adminTab === 'subscription' ? 'bg-red-600 font-bold' : 'text-gray-400 hover:bg-gray-800'
+                }`}
             >
               <CreditCard size={18} /> Assinatura
             </button>
             <button
               onClick={() => setAdminTab('platform')}
-              className={`w-full flex items-center gap-3 p-3 rounded-lg text-sm ${
-                adminTab === 'platform' ? 'bg-red-600 font-bold' : 'text-gray-400 hover:bg-gray-800'
-              }`}
+              className={`w-full flex items-center gap-3 p-3 rounded-lg text-sm ${adminTab === 'platform' ? 'bg-red-600 font-bold' : 'text-gray-400 hover:bg-gray-800'
+                }`}
             >
               <Building2 size={18} /> Plataforma
             </button>
             <button
               onClick={() => setAdminTab('branding')}
-              className={`w-full flex items-center gap-3 p-3 rounded-lg text-sm ${
-                adminTab === 'branding' ? 'bg-red-600 font-bold' : 'text-gray-400 hover:bg-gray-800'
-              }`}
+              className={`w-full flex items-center gap-3 p-3 rounded-lg text-sm ${adminTab === 'branding' ? 'bg-red-600 font-bold' : 'text-gray-400 hover:bg-gray-800'
+                }`}
             >
               <ChefHat size={18} /> Aparência da Loja
             </button>
@@ -626,7 +646,7 @@ function App() {
           <div className="p-4 border-t border-gray-800">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-sm font-bold">
-                {user.name?.[0]?.toUpperCase() || user.username?.[0]?.toUpperCase() || 'U'}
+                {user.name?.[ 0 ]?.toUpperCase() || user.username?.[ 0 ]?.toUpperCase() || 'U'}
               </div>
               <div className="overflow-hidden">
                 <p className="text-sm font-bold truncate">{user.name || 'Administrador'}</p>
@@ -771,7 +791,7 @@ function App() {
                   </thead>
                   <tbody className="divide-y">
                     {filteredOrders.map((order) => (
-                    <tr key={order.id}>
+                      <tr key={order.id}>
                         <td className="p-3 text-gray-500">{formatOrderDate(order)}</td>
                         <td className="p-3 font-medium">{order.name}</td>
 
@@ -781,9 +801,8 @@ function App() {
                         <td className="p-3 font-bold text-green-600">{formatCurrency(order.total || 0)}</td>
                         <td className="p-3">
                           <span
-                            className={`px-2 py-1 rounded text-xs font-bold ${
-                              order.status === 'pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'
-                            }`}
+                            className={`px-2 py-1 rounded text-xs font-bold ${order.status === 'pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'
+                              }`}
                           >
                             {formatOrderStatus(order.status)}
                           </span>
@@ -819,7 +838,8 @@ function App() {
     );
   }
 
-  if (view === 'landing') {
+  if (view === 'landing')
+  {
     return (
       <div className="min-h-screen bg-gray-50">
         <header className="bg-white shadow-sm">
@@ -1129,7 +1149,7 @@ function App() {
             </div>
           </form>
         )}
-          {view === 'menu' && (
+        {view === 'menu' && (
           <MenuView
             products={products}
             cart={cart}
@@ -1139,18 +1159,18 @@ function App() {
             onProceed={() => setView('cart')}
           />
         )}
-          {view === 'cart' && (
-            <CartView
-              cart={cart}
-              customer={customer}
-              customers={customers}
-              paymentMethod={paymentMethod}
-              onChangeCustomer={handleCustomerChange}
-              onChangePayment={setPaymentMethod}
-              onCheckout={checkout}
-              onBack={() => setView('menu')}
-            />
-          )}
+        {view === 'cart' && (
+          <CartView
+            cart={cart}
+            customer={customer}
+            customers={customers}
+            paymentMethod={paymentMethod}
+            onChangeCustomer={handleCustomerChange}
+            onChangePayment={setPaymentMethod}
+            onCheckout={checkout}
+            onBack={() => setView('menu')}
+          />
+        )}
         {view === 'success' && (
           <SuccessView
             orderType={lastOrder?.type}
