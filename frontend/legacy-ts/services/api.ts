@@ -1,4 +1,10 @@
-const API_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:4000/api';
+const resolveBaseUrl = () => {
+  const base = process.env.REACT_APP_API_BASE_URL || '/api';
+  if (base.endsWith('/api')) return base.replace(/\/+$/, '');
+  return `${base.replace(/\/+$/, '')}/api`;
+};
+
+const API_URL = resolveBaseUrl();
 
 async function request(path: string, options?: RequestInit) {
   const res = await fetch(`${API_URL}${path}`, {

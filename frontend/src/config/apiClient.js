@@ -1,8 +1,11 @@
 const resolveBaseUrl = () => {
-    const base = process.env.REACT_APP_API_BASE_URL
-        || (typeof window === "undefined" ? "http://localhost:4000" : window.location.origin || "http://localhost:4000");
+    const base = process.env.REACT_APP_API_BASE_URL || "/api";
 
-    return base.endsWith("/api") ? base : `${base.replace(/\/$/, "")}/api`;
+    if (base.endsWith("/api")) {
+        return base.replace(/\/+$/, "");
+    }
+
+    return `${base.replace(/\/+$/, "")}/api`;
 };
 
 const API_BASE_URL = resolveBaseUrl();
@@ -13,7 +16,10 @@ const defaultHeaders = {
 
 let currentStoreSlug = null;
 
-const buildUrl = (path) => new URL(path, API_BASE_URL).toString();
+const buildUrl = (path) => {
+    const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+    return `${API_BASE_URL}${normalizedPath}`;
+};
 
 const handleResponse = async (response) => {
     if (!response.ok) {
