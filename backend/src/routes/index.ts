@@ -25,6 +25,7 @@ routes.patch('/admin/stores/:storeId/suspend', PlatformAdminController.suspendSt
 routes.patch('/admin/stores/:storeId/reactivate', PlatformAdminController.reactivateStore);
 
 routes.get('/stores/:slug', StoreController.getBySlug);
+routes.get('/chamanoespeto/:slug', StoreController.getBySlug);
 routes.put('/stores/:id', StoreController.update);
 routes.put('/stores/:id/status', StoreController.updateStatus);
 

@@ -57,7 +57,13 @@ export class AuthService {
     }
 
     const token = this.generateToken(user.id, store.id);
-    return { user, store, token };
+
+    return {
+      user,
+      store: { id: store.id, slug: store.slug },
+      token,
+      redirectUrl: `/chamanoespeto/${store.slug}`,
+    };
   }
 
   async login(email: string, password: string) {
