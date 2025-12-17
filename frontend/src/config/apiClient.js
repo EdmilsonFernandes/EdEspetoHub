@@ -3,7 +3,11 @@ const resolveBaseUrl = () => {
         return import.meta.env.VITE_API_BASE_URL;
     }
 
-    return base.endsWith("/api") ? base : `${base.replace(/\/$/, "")}/api`;
+    if (base.endsWith("/api")) {
+        return base.replace(/\/+$/, "");
+    }
+
+    return `${base.replace(/\/+$/, "")}/api`;
 };
 
 const API_BASE_URL = resolveBaseUrl();
@@ -12,14 +16,11 @@ const defaultHeaders = {
     "Content-Type": "application/json",
 };
 
-let currentOwnerId = null;
+let currentStoreSlug = null;
 
 const buildUrl = (path) => {
-    const url = new URL(path, API_BASE_URL);
-    if (currentOwnerId) {
-        url.searchParams.set("ownerId", currentOwnerId);
-    }
-    return url.toString();
+    const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+    return `${API_BASE_URL}${normalizedPath}`;
 };
 
 const handleResponse = async (response) => {
@@ -28,19 +29,6 @@ const handleResponse = async (response) => {
         throw new Error(message || "Erro na API");
     }
     return response.json();
-};
-
-const attachOwnerToBody = (body) => {
-    if (!body || typeof body !== "string") return body;
-    try {
-        const parsed = JSON.parse(body);
-        if (currentOwnerId && !parsed.ownerId) {
-            parsed.ownerId = currentOwnerId;
-        }
-        return JSON.stringify(parsed);
-    } catch (error) {
-        return body;
-    }
 };
 
 const request = async (path, options = {}) => {
@@ -52,14 +40,6 @@ const request = async (path, options = {}) => {
             ...defaultHeaders,
             ...(options.headers || {}),
         };
-
-        if (currentOwnerId) {
-            finalOptions.headers["x-owner-id"] = currentOwnerId;
-        }
-
-        if (finalOptions.body) {
-            finalOptions.body = attachOwnerToBody(finalOptions.body);
-        }
 
         const response = await fetch(url, finalOptions);
         return await handleResponse(response);
@@ -80,25 +60,18 @@ const rawRequest = async (path, options = {}) => {
         ...(options.headers || {}),
     };
 
-    if (currentOwnerId) {
-        finalOptions.headers["x-owner-id"] = currentOwnerId;
-    }
-
     if (finalOptions.body && typeof finalOptions.body === "object") {
-        finalOptions.body = JSON.stringify({
-            ...finalOptions.body,
-            ...(currentOwnerId ? { ownerId: currentOwnerId } : {}),
-        });
+        finalOptions.body = JSON.stringify(finalOptions.body);
     }
 
     return fetch(url, finalOptions);
 };
 
 export const apiClient = {
-    setOwnerId: (ownerId) => {
-        currentOwnerId = ownerId || null;
+    setOwnerId: (storeSlug) => {
+        currentStoreSlug = storeSlug || null;
     },
-    getOwnerId: () => currentOwnerId,
+    getOwnerId: () => currentStoreSlug,
     get: async (path) => request(path),
     post: async (path, body) =>
         request(path, {

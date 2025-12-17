@@ -22,7 +22,7 @@ export class Product {
   @Column({ default: true })
   active!: boolean;
 
-  @ManyToOne(() => Store, (store) => store.products)
+  @ManyToOne(() => Store, (store) => store.products, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'store_id' })
   store!: Store;
 

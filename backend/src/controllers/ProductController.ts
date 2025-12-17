@@ -15,7 +15,16 @@ export class ProductController {
 
   static async list(req: Request, res: Response) {
     try {
-      const products = await productService.listByStore(req.params.storeId);
+      const products = await productService.listByStoreId(req.params.storeId);
+      return res.json(products);
+    } catch (error: any) {
+      return res.status(400).json({ message: error.message });
+    }
+  }
+
+  static async listBySlug(req: Request, res: Response) {
+    try {
+      const products = await productService.listByStoreSlug(req.params.slug);
       return res.json(products);
     } catch (error: any) {
       return res.status(400).json({ message: error.message });

@@ -28,11 +28,15 @@ export class Store {
   @Column({ default: true })
   open!: boolean;
 
-  @ManyToOne(() => User, (user) => user.stores, { eager: true })
+  @ManyToOne(() => User, (user) => user.stores, { eager: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'owner_id' })
   owner!: User;
 
-  @OneToOne(() => StoreSettings, (settings) => settings.store, { cascade: true, eager: true })
+  @OneToOne(() => StoreSettings, (settings) => settings.store, {
+    cascade: true,
+    eager: true,
+    onDelete: 'CASCADE',
+  })
   settings!: StoreSettings;
 
   @OneToMany(() => Product, (product) => product.store)

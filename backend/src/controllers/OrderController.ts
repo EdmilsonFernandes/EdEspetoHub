@@ -15,7 +15,25 @@ export class OrderController {
 
   static async list(req: Request, res: Response) {
     try {
-      const orders = await orderService.listByStore(req.params.storeId);
+      const orders = await orderService.listByStoreId(req.params.storeId);
+      return res.json(orders);
+    } catch (error: any) {
+      return res.status(400).json({ message: error.message });
+    }
+  }
+
+  static async createBySlug(req: Request, res: Response) {
+    try {
+      const order = await orderService.createBySlug({ ...req.body, storeSlug: req.params.slug });
+      return res.status(201).json(order);
+    } catch (error: any) {
+      return res.status(400).json({ message: error.message });
+    }
+  }
+
+  static async listBySlug(req: Request, res: Response) {
+    try {
+      const orders = await orderService.listByStoreSlug(req.params.slug);
       return res.json(orders);
     } catch (error: any) {
       return res.status(400).json({ message: error.message });

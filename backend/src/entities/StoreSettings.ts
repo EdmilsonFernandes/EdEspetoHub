@@ -15,7 +15,7 @@ export class StoreSettings {
   @Column({ name: 'secondary_color', nullable: true })
   secondaryColor?: string;
 
-  @OneToOne(() => Store, (store) => store.settings)
+  @OneToOne(() => Store, (store) => store.settings, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'store_id' })
   store!: Store;
 }
