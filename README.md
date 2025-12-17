@@ -140,6 +140,14 @@ Credenciais padrão do pgAdmin (pode sobrescrever via variáveis de ambiente ao 
       espetinho-pgadmin
     ```
 
+## BPMN do fluxo da aplicação
+
+Um diagrama BPMN resumindo o fluxo do "Chama no espeto" está disponível em `docs/bpmn/chama-no-espeto.bpmn`. O arquivo segue o padrão BPMN 2.0 (pode ser aberto no Camunda Modeler, Draw.io ou semelhantes) e destaca:
+
+- Jornada do cliente na loja pública (montagem e envio do pedido com Pix).
+- Validação e criação do pedido pela API.
+- Operação diária do painel interno (cadastro, catálogo, publicação da loja e fila do churrasqueiro).
+
 ## Notas adicionais
 
 - Ao publicar em produção (ex.: EC2), exponha apenas as portas necessárias e substitua credenciais padrão.

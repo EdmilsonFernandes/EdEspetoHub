@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_ChamaNoEspeto" targetNamespace="https://datony.com/chama-no-espeto/bpmn">
+  <bpmn:process id="ChamaNoEspeto" name="Fluxo Chama no Espeto" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_Main">
+      <bpmn:lane id="Lane_Customer" name="Cliente">
+        <bpmn:flowNodeRef>Start_CustomerJourney</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_AccessStore</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_AssembleOrder</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_SendOrder</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_ReceivePix</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_OrderDelivered</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_API" name="API / Backend">
+        <bpmn:flowNodeRef>Task_ValidateStore</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_ValidateProducts</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_OrderValid</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_CreateOrder</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_ExposeOrderQueue</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_NotifyPaymentStatus</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Admin" name="Painel interno / Operação">
+        <bpmn:flowNodeRef>Start_AdminOps</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_RegisterStore</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_LoginDashboard</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_ManageCatalog</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_UpdateStoreStatus</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_MonitorQueue</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_PrepareOrder</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_ConfirmDelivery</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+
+    <bpmn:startEvent id="Start_CustomerJourney" name="Cliente acessa loja online"/>
+    <bpmn:task id="Task_AccessStore" name="Abrir loja pelo slug (GET /stores/:slug)"/>
+    <bpmn:task id="Task_AssembleOrder" name="Montar e revisar pedido"/>
+    <bpmn:task id="Task_SendOrder" name="Enviar pedido (POST /stores/:slug/orders)">
+      <bpmn:outgoing>Flow_SendToBackend</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:task id="Task_ReceivePix" name="Receber chave Pix e resumo"/>
+    <bpmn:endEvent id="End_OrderDelivered" name="Pedido entregue / retirada"/>
+
+    <bpmn:startEvent id="Start_AdminOps" name="Operação diária"/>
+    <bpmn:task id="Task_RegisterStore" name="Registrar loja e usuário (POST /auth/register)"/>
+    <bpmn:task id="Task_LoginDashboard" name="Login no painel interno (POST /auth/login)"/>
+    <bpmn:task id="Task_ManageCatalog" name="Criar/atualizar produtos (POST/PUT /stores/:id/products)"/>
+    <bpmn:task id="Task_UpdateStoreStatus" name="Publicar/pausar loja (PUT /stores/:id/status)"/>
+    <bpmn:task id="Task_MonitorQueue" name="Monitorar fila do churrasqueiro (atualização a cada 5s)"/>
+    <bpmn:task id="Task_PrepareOrder" name="Assar espetos e atualizar status"/>
+    <bpmn:task id="Task_ConfirmDelivery" name="Finalizar pedido e registrar pagamento"/>
+
+    <bpmn:task id="Task_ValidateStore" name="Validar loja"/>
+    <bpmn:task id="Task_ValidateProducts" name="Validar itens e calcular total"/>
+    <bpmn:exclusiveGateway id="Gateway_OrderValid" name="Pedido válido?"/>
+    <bpmn:task id="Task_CreateOrder" name="Persistir pedido e itens"/>
+    <bpmn:task id="Task_ExposeOrderQueue" name="Expor pedido na fila"/>
+    <bpmn:task id="Task_NotifyPaymentStatus" name="Retornar status/pagamento ao painel"/>
+
+    <bpmn:sequenceFlow id="Flow_StartToAccess" sourceRef="Start_CustomerJourney" targetRef="Task_AccessStore"/>
+    <bpmn:sequenceFlow id="Flow_AccessToAssemble" sourceRef="Task_AccessStore" targetRef="Task_AssembleOrder"/>
+    <bpmn:sequenceFlow id="Flow_AssembleToSend" sourceRef="Task_AssembleOrder" targetRef="Task_SendOrder"/>
+    <bpmn:sequenceFlow id="Flow_SendToBackend" sourceRef="Task_SendOrder" targetRef="Task_ValidateStore"/>
+    <bpmn:sequenceFlow id="Flow_ValidateStore" sourceRef="Task_ValidateStore" targetRef="Task_ValidateProducts"/>
+    <bpmn:sequenceFlow id="Flow_ValidateProducts" sourceRef="Task_ValidateProducts" targetRef="Gateway_OrderValid"/>
+    <bpmn:sequenceFlow id="Flow_InvalidOrder" sourceRef="Gateway_OrderValid" targetRef="Task_AssembleOrder" name="Rejeitado"/>
+    <bpmn:sequenceFlow id="Flow_ValidOrder" sourceRef="Gateway_OrderValid" targetRef="Task_CreateOrder" name="Aprovado"/>
+    <bpmn:sequenceFlow id="Flow_CreateToQueue" sourceRef="Task_CreateOrder" targetRef="Task_ExposeOrderQueue"/>
+    <bpmn:sequenceFlow id="Flow_QueueToCustomer" sourceRef="Task_ExposeOrderQueue" targetRef="Task_ReceivePix"/>
+    <bpmn:sequenceFlow id="Flow_QueueToDashboard" sourceRef="Task_ExposeOrderQueue" targetRef="Task_MonitorQueue"/>
+    <bpmn:sequenceFlow id="Flow_PaymentSync" sourceRef="Task_NotifyPaymentStatus" targetRef="Task_MonitorQueue"/>
+    <bpmn:sequenceFlow id="Flow_PrepareToConfirm" sourceRef="Task_PrepareOrder" targetRef="Task_ConfirmDelivery"/>
+    <bpmn:sequenceFlow id="Flow_ConfirmToEnd" sourceRef="Task_ConfirmDelivery" targetRef="End_OrderDelivered"/>
+    <bpmn:sequenceFlow id="Flow_AdminStart" sourceRef="Start_AdminOps" targetRef="Task_RegisterStore"/>
+    <bpmn:sequenceFlow id="Flow_RegisterToLogin" sourceRef="Task_RegisterStore" targetRef="Task_LoginDashboard"/>
+    <bpmn:sequenceFlow id="Flow_LoginToCatalog" sourceRef="Task_LoginDashboard" targetRef="Task_ManageCatalog"/>
+    <bpmn:sequenceFlow id="Flow_CatalogToStatus" sourceRef="Task_ManageCatalog" targetRef="Task_UpdateStoreStatus"/>
+    <bpmn:sequenceFlow id="Flow_StatusToQueue" sourceRef="Task_UpdateStoreStatus" targetRef="Task_MonitorQueue"/>
+    <bpmn:sequenceFlow id="Flow_MonitorToPrepare" sourceRef="Task_MonitorQueue" targetRef="Task_PrepareOrder"/>
+    <bpmn:sequenceFlow id="Flow_QueueBackPayment" sourceRef="Task_ExposeOrderQueue" targetRef="Task_NotifyPaymentStatus"/>
+  </bpmn:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_ChamaNoEspeto">
+    <bpmndi:BPMNPlane id="BPMNPlane_ChamaNoEspeto" bpmnElement="ChamaNoEspeto"/>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
