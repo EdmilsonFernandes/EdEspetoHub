@@ -43,7 +43,7 @@ export function CreateStore() {
                 CS
               </div>
               <div className="hidden sm:block">
-                <p className="text-lg font-bold text-gray-900">Churras Sites</p>
+                <p className="text-lg font-bold text-gray-900">Chama no Espeto</p>
                 <p className="text-sm text-gray-500">Criar nova loja</p>
               </div>
             </button>
