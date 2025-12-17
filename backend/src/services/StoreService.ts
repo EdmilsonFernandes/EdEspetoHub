@@ -3,10 +3,12 @@ import { CreateStoreDto } from '../dto/CreateStoreDto';
 import { StoreSettings } from '../entities/StoreSettings';
 import { slugify } from '../utils/slugify';
 import { UserRepository } from '../repositories/UserRepository';
+import { SubscriptionService } from './SubscriptionService';
 
 export class StoreService {
   private storeRepository = new StoreRepository();
   private userRepository = new UserRepository();
+  private subscriptionService = new SubscriptionService();
 
   async create(input: CreateStoreDto) {
     const owner = await this.userRepository.findById(input.ownerId);
@@ -45,6 +47,12 @@ export class StoreService {
   async setStatus(storeId: string, open: boolean) {
     const store = await this.storeRepository.findById(storeId);
     if (!store) throw new Error('Loja não encontrada');
+    if (open) {
+      const isActive = await this.subscriptionService.assertStoreIsActive(store.id);
+      if (!isActive) {
+        throw new Error('Assinatura inativa. Renove para reabrir a loja.');
+      }
+    }
     store.open = open;
     return this.storeRepository.save(store);
   }

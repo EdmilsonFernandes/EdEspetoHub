@@ -8,7 +8,10 @@ import {
   LayoutDashboard,
   Package,
   FileText,
-  LogOut
+  LogOut,
+  CreditCard,
+  Shield,
+  Building2
 } from 'lucide-react';
 import { productService } from './services/productService';
 import { orderService } from './services/orderService';
@@ -23,6 +26,10 @@ import { ProductManager } from './components/Admin/ProductManager';
 import { GrillQueue } from './components/Admin/GrillQueue';
 import { BrandingSettings } from './components/Admin/BrandingSettings';
 import { apiClient } from './config/apiClient';
+import { SubscriptionStatus } from './components/Admin/SubscriptionStatus';
+import { PlanSelection } from './components/Client/PlanSelection';
+import { SubscriptionGate } from './components/Client/SubscriptionGate';
+import { PlatformStores } from './components/Admin/PlatformStores';
 import {
   formatCurrency,
   formatOrderStatus,
@@ -32,6 +39,9 @@ import {
 } from './utils/format';
 import { exportToCsv } from './utils/export';
 import './index.css';
+import { planService } from './services/planService';
+import { subscriptionService } from './services/subscriptionService';
+import { platformService } from './services/platformService';
 
 const DEFAULT_AREA_CODE = '12';
 const initialCustomer = { name: '', phone: formatPhoneInput('', DEFAULT_AREA_CODE), address: '', table: '', type: 'delivery' };
@@ -88,6 +98,11 @@ function App() {
   const [storeSlug, setStoreSlug] = useState(resolveStoreSlug());
   const [storeInfo, setStoreInfo] = useState(null);
   const [storeError, setStoreError] = useState('');
+  const [subscription, setSubscription] = useState(null);
+  const [plans, setPlans] = useState([]);
+  const [platformStores, setPlatformStores] = useState([]);
+  const [subscriptionLoading, setSubscriptionLoading] = useState(false);
+  const [platformLoading, setPlatformLoading] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
   const [registerForm, setRegisterForm] = useState({
     fullName: '',
@@ -124,6 +139,13 @@ function App() {
   }, []);
 
   useEffect(() => {
+    planService
+      .list()
+      .then(setPlans)
+      .catch((error) => console.error('Erro ao carregar planos', error));
+  }, []);
+
+  useEffect(() => {
     const savedSession = localStorage.getItem('adminSession');
     const initialOwnerId = storeSlug || defaultBranding.espetoId;
 
@@ -157,6 +179,7 @@ function App() {
       .fetchBySlug(storeSlug)
       .then((data) => {
         setStoreInfo(data);
+        setSubscription(data.subscription || null);
         setBranding((prev) => ({
           ...prev,
           espetoId: data.slug,
@@ -191,6 +214,16 @@ function App() {
   }, [resolvedOwnerId]);
 
   useEffect(() => {
+    if (!storeInfo?.id) return;
+    setSubscriptionLoading(true);
+    subscriptionService
+      .getByStore(storeInfo.id)
+      .then(setSubscription)
+      .catch(() => setSubscription(null))
+      .finally(() => setSubscriptionLoading(false));
+  }, [storeInfo?.id]);
+
+  useEffect(() => {
     if (!user?.ownerId) {
       setOrders([]);
       setCustomers([]);
@@ -205,6 +238,16 @@ function App() {
       unsubscribe();
     };
   }, [user?.ownerId]);
+
+  useEffect(() => {
+    if (adminTab !== 'platform') return;
+    setPlatformLoading(true);
+    platformService
+      .listStores()
+      .then(setPlatformStores)
+      .catch((error) => console.error('Erro ao carregar lojas', error))
+      .finally(() => setPlatformLoading(false));
+  }, [adminTab]);
 
   useEffect(() => {
     const storageKey = brandingStorageKey(branding.espetoId || resolvedOwnerId);
@@ -456,6 +499,62 @@ function App() {
     exportToCsv('relatorio-vendas', headers, rows);
   };
 
+  const handleRenewSubscription = async (planId) => {
+    if (!storeInfo?.id) return;
+    setSubscriptionLoading(true);
+    try {
+      if (subscription?.id) {
+        const renewed = await subscriptionService.renew(subscription.id, { planId });
+        setSubscription(renewed);
+      } else {
+        const created = await subscriptionService.create({ storeId: storeInfo.id, planId });
+        setSubscription(created);
+      }
+      setView('admin');
+    } catch (error) {
+      console.error('Erro ao renovar assinatura', error);
+      setSubscription((prev) => ({ ...prev, status: prev?.status || 'EXPIRED' }));
+    } finally {
+      setSubscriptionLoading(false);
+    }
+  };
+
+  const openPlanSelection = () => {
+    setView('plans');
+  };
+
+  const isSubscriptionBlocked = ['EXPIRED', 'SUSPENDED'].includes(subscription?.status);
+
+  const suspendStoreSubscription = async (subscriptionId) => {
+    if (!subscriptionId) return;
+    await platformService.suspendSubscription(subscriptionId);
+    setPlatformStores((prev) =>
+      prev.map((store) =>
+        store.subscription?.id === subscriptionId ? { ...store, subscription: { ...store.subscription, status: 'SUSPENDED' } } : store
+      )
+    );
+  };
+
+  const reactivateStoreSubscription = async (subscriptionId) => {
+    if (!subscriptionId) return;
+    const updated = await platformService.reactivateSubscription(subscriptionId);
+    setPlatformStores((prev) =>
+      prev.map((store) => (store.subscription?.id === subscriptionId ? { ...store, subscription: updated } : store))
+    );
+  };
+
+  if (isSubscriptionBlocked && view !== 'plans') {
+    return <SubscriptionGate status={subscription?.status} onSelectPlans={openPlanSelection} />;
+  }
+
+  if (view === 'plans') {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6">
+        <PlanSelection plans={plans} onSelect={handleRenewSubscription} loading={subscriptionLoading} />
+      </div>
+    );
+  }
+
   if (view === 'admin' && user) {
     return (
       <div className="min-h-screen bg-gray-50 flex">
@@ -500,6 +599,22 @@ function App() {
               <FileText size={18} /> Relatório Vendas
             </button>
             <button
+              onClick={() => setAdminTab('subscription')}
+              className={`w-full flex items-center gap-3 p-3 rounded-lg text-sm ${
+                adminTab === 'subscription' ? 'bg-red-600 font-bold' : 'text-gray-400 hover:bg-gray-800'
+              }`}
+            >
+              <CreditCard size={18} /> Assinatura
+            </button>
+            <button
+              onClick={() => setAdminTab('platform')}
+              className={`w-full flex items-center gap-3 p-3 rounded-lg text-sm ${
+                adminTab === 'platform' ? 'bg-red-600 font-bold' : 'text-gray-400 hover:bg-gray-800'
+              }`}
+            >
+              <Building2 size={18} /> Plataforma
+            </button>
+            <button
               onClick={() => setAdminTab('branding')}
               className={`w-full flex items-center gap-3 p-3 rounded-lg text-sm ${
                 adminTab === 'branding' ? 'bg-red-600 font-bold' : 'text-gray-400 hover:bg-gray-800'
@@ -539,6 +654,19 @@ function App() {
               </button>
             </div>
           </header>
+
+          {subscription?.status === 'EXPIRING' && (
+            <div className="mb-6 p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-700 flex items-center gap-3">
+              <AlertTriangle size={18} />
+              <div className="flex-1">
+                <p className="font-bold">Assinatura vencendo</p>
+                <p className="text-sm">Renove seu plano para não interromper os pedidos.</p>
+              </div>
+              <button onClick={openPlanSelection} className="px-3 py-2 bg-amber-600 text-white rounded-lg text-sm hover:bg-amber-700">
+                Renovar agora
+              </button>
+            </div>
+          )}
 
           {adminTab === 'dashboard' && <DashboardView orders={orders} customers={customers} />}
           {adminTab === 'products' && <ProductManager products={products} />}
@@ -665,6 +793,24 @@ function App() {
                   </tbody>
                 </table>
               </div>
+            </div>
+          )}
+          {adminTab === 'subscription' && (
+            <div className="space-y-4">
+              <SubscriptionStatus subscription={subscription} onRenew={handleRenewSubscription} plans={plans} />
+            </div>
+          )}
+          {adminTab === 'platform' && (
+            <div className="space-y-4">
+              {platformLoading ? (
+                <div className="text-gray-500">Carregando lojas...</div>
+              ) : (
+                <PlatformStores
+                  stores={platformStores}
+                  onSuspend={suspendStoreSubscription}
+                  onReactivate={reactivateStoreSubscription}
+                />
+              )}
             </div>
           )}
           {adminTab === 'branding' && <BrandingSettings branding={branding} onChange={updateBranding} />}

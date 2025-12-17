@@ -7,10 +7,14 @@ import { env } from '../config/env';
 import { StoreSettings } from '../entities/StoreSettings';
 import { slugify } from '../utils/slugify';
 import { AppDataSource } from '../config/database';
+import { PlanService } from './PlanService';
+import { SubscriptionService } from './SubscriptionService';
 
 export class AuthService {
   private userRepository = new UserRepository();
   private storeRepository = new StoreRepository();
+  private planService = new PlanService();
+  private subscriptionService = new SubscriptionService();
 
   async register(input: CreateUserDto) {
     const exists = await this.userRepository.findByEmail(input.email);
@@ -45,6 +49,12 @@ export class AuthService {
 
     await AppDataSource.manager.save(user);
     await this.storeRepository.save(store);
+
+    const plans = await this.planService.listEnabled();
+    const defaultPlan = plans.find((plan) => plan.name === 'monthly') || plans[0];
+    if (defaultPlan) {
+      await this.subscriptionService.create({ storeId: store.id, planId: defaultPlan.id });
+    }
 
     const token = this.generateToken(user.id, store.id);
     return { user, store, token };
