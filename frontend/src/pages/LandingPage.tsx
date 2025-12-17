@@ -13,7 +13,7 @@ export function LandingPage() {
   const [carouselIndex, setCarouselIndex] = useState(0);
 
   const goToDemoStore = () => {
-    navigate('/test-store');
+    navigate('/chamanoespeto/test-store');
   };
 
   // Pricing data

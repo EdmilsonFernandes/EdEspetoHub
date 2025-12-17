@@ -13,6 +13,7 @@ export const BrandingSettings = ({ branding, onChange }) => {
     .toUpperCase();
 
   return (
+
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
       <div className="p-4 border-b bg-gray-50 flex items-center justify-between">
         <div>

@@ -14,6 +14,7 @@ const PaymentSummary = ({ paymentMethod, pixKey, phone }) => {
       qrData
     )}`;
 
+
     return (
       <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 w-full mb-8">
         <div className="flex flex-col items-center gap-3 mb-4 text-center">
