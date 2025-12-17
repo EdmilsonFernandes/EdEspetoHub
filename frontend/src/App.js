@@ -58,28 +58,28 @@ const defaultBranding = {
   instagram: '',
 };
 
-const brandingStorageKey = (ownerId) => `brandingSettings:${ownerId || defaultBranding.espetoId}`;
+const brandingStorageKey = (storeSlug) => `brandingSettings:${storeSlug || defaultBranding.espetoId}`;
 
 const resolveStoreSlug = () => {
   if (typeof window === 'undefined') return defaultBranding.espetoId;
   const path = window.location.pathname.split('/').filter(Boolean);
-  if (path[ 0 ] === 'loja' || path[ 0 ] === 'store') return path[ 1 ];
+  if (path[ 0 ] === 'loja' || path[ 0 ] === 'store' || path[ 0 ] === 'chamanoespeto') return path[ 1 ];
 
   const query = new URLSearchParams(window.location.search);
   return query.get('store') || null;
 };
 
-const getPersistedBranding = (ownerId = defaultBranding.espetoId) => {
-  const saved = localStorage.getItem(brandingStorageKey(ownerId));
-  if (!saved) return { ...defaultBranding, espetoId: ownerId };
+const getPersistedBranding = (storeSlug = defaultBranding.espetoId) => {
+  const saved = localStorage.getItem(brandingStorageKey(storeSlug));
+  if (!saved) return { ...defaultBranding, espetoId: storeSlug };
   try
   {
     const parsed = JSON.parse(saved);
-    return { ...defaultBranding, espetoId: ownerId, ...parsed };
+    return { ...defaultBranding, espetoId: storeSlug, ...parsed };
   } catch (error)
   {
     console.error('Erro ao carregar branding salvo', error);
-    return { ...defaultBranding, espetoId: ownerId };
+    return { ...defaultBranding, espetoId: storeSlug };
   }
 };
 
@@ -149,20 +149,20 @@ function App() {
 
   useEffect(() => {
     const savedSession = localStorage.getItem('adminSession');
-    const initialOwnerId = storeSlug || defaultBranding.espetoId;
+    const initialStoreSlug = storeSlug || defaultBranding.espetoId;
 
     if (savedSession)
     {
       const parsedSession = JSON.parse(savedSession);
       setUser(parsedSession);
       setView('admin');
-      setLoginForm((prev) => ({ ...prev, espetoId: parsedSession.ownerId || prev.espetoId }));
-      setBranding(getPersistedBranding(parsedSession.ownerId || initialOwnerId));
+      setLoginForm((prev) => ({ ...prev, espetoId: parsedSession.storeSlug || prev.espetoId }));
+      setBranding(getPersistedBranding(parsedSession.storeSlug || initialStoreSlug));
     }
 
-    if (initialOwnerId)
+    if (initialStoreSlug)
     {
-      apiClient.setOwnerId(initialOwnerId);
+      apiClient.setOwnerId(initialStoreSlug);
     }
 
     const unsubProd = productService.subscribe(setProducts);
@@ -204,19 +204,19 @@ function App() {
       });
   }, [ storeSlug ]);
 
-  const resolvedOwnerId = useMemo(
-    () => storeSlug || user?.ownerId || branding?.espetoId || defaultBranding.espetoId,
-    [ storeSlug, user?.ownerId, branding?.espetoId ]
+  const resolvedStoreSlug = useMemo(
+    () => storeSlug || user?.storeSlug || branding?.espetoId || defaultBranding.espetoId,
+    [ storeSlug, user?.storeSlug, branding?.espetoId ]
   );
 
   useEffect(() => {
-    if (!resolvedOwnerId) return;
-    apiClient.setOwnerId(resolvedOwnerId);
+    if (!resolvedStoreSlug) return;
+    apiClient.setOwnerId(resolvedStoreSlug);
     setBranding((prev) => {
-      if (prev.espetoId === resolvedOwnerId) return prev;
-      return getPersistedBranding(resolvedOwnerId);
+      if (prev.espetoId === resolvedStoreSlug) return prev;
+      return getPersistedBranding(resolvedStoreSlug);
     });
-  }, [ resolvedOwnerId ]);
+  }, [ resolvedStoreSlug ]);
 
   useEffect(() => {
     if (!storeInfo?.id) return;
@@ -229,21 +229,21 @@ function App() {
   }, [ storeInfo?.id ]);
 
   useEffect(() => {
-    if (!user?.ownerId)
+    if (!user?.storeSlug)
     {
       setOrders([]);
       setCustomers([]);
       return undefined;
     }
 
-    apiClient.setOwnerId(user.ownerId);
+    apiClient.setOwnerId(user.storeSlug);
     const unsubscribe = orderService.subscribeAll(setOrders);
     customerService.fetchAll().then(setCustomers).catch(() => setCustomers([]));
 
     return () => {
       unsubscribe();
     };
-  }, [ user?.ownerId ]);
+  }, [ user?.storeSlug ]);
 
   useEffect(() => {
     if (adminTab !== 'platform') return;
@@ -255,12 +255,12 @@ function App() {
       .finally(() => setPlatformLoading(false));
   }, [ adminTab ]);
 
-  useEffect(() => {
-    const storageKey = brandingStorageKey(branding.espetoId || resolvedOwnerId);
-    localStorage.setItem(storageKey, JSON.stringify(branding));
-    document.documentElement.style.setProperty('--primary-color', branding.primaryColor || defaultBranding.primaryColor);
-    document.documentElement.style.setProperty('--accent-color', branding.accentColor || branding.primaryColor || defaultBranding.accentColor);
-  }, [ branding, resolvedOwnerId ]);
+    useEffect(() => {
+      const storageKey = brandingStorageKey(branding.espetoId || resolvedStoreSlug);
+      localStorage.setItem(storageKey, JSON.stringify(branding));
+      document.documentElement.style.setProperty('--primary-color', branding.primaryColor || defaultBranding.primaryColor);
+      document.documentElement.style.setProperty('--accent-color', branding.accentColor || branding.primaryColor || defaultBranding.accentColor);
+    }, [ branding, resolvedStoreSlug ]);
 
   const cartTotal = useMemo(() => Object.values(cart).reduce((acc, item) => acc + item.price * item.qty, 0), [ cart ]);
   const brandInitials = useMemo(
@@ -420,12 +420,12 @@ function App() {
       const sessionData = {
         token: session.token,
         username: session.user?.email || loginForm.username,
-        ownerId: session.store?.slug || session.store?.id,
+        storeSlug: session.store?.slug,
       };
       localStorage.setItem('adminSession', JSON.stringify(sessionData));
-      setBranding(getPersistedBranding(sessionData.ownerId));
+      setBranding(getPersistedBranding(sessionData.storeSlug));
       setUser(sessionData);
-      setStoreSlug(session.store?.slug || sessionData.ownerId);
+      setStoreSlug(session.store?.slug || sessionData.storeSlug);
       setView('admin');
     } catch (error)
     {
@@ -448,7 +448,7 @@ function App() {
     try
     {
       const result = await storeService.create(registerForm);
-      setStoreSlug(result.store?.slug || result.slug);
+      const redirectUrl = result.redirectUrl || `/chamanoespeto/${result.store?.slug || result.slug}`;
       setBranding((prev) => ({
         ...prev,
         espetoId: result.store?.slug || result.slug,
@@ -459,7 +459,7 @@ function App() {
       }));
       setLoginForm((prev) => ({ ...prev, espetoId: result.store?.slug || result.slug, username: registerForm.email }));
       setRegisterForm((prev) => ({ ...prev, password: '', storeName: '', fullName: '', email: '', phone: '', address: '' }));
-      setView('menu');
+      window.location.href = redirectUrl;
     } catch (error)
     {
       setStoreError(error.message || 'Não foi possível criar sua loja');
