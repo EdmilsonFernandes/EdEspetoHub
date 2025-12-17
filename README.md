@@ -1,4 +1,4 @@
-# Espetinho Datony
+# Chama no espeto
 
 Aplicação web para pedidos e gestão do restaurante de espetinhos Datony. O projeto traz duas experiências principais:
 
