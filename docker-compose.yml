@@ -3,7 +3,7 @@ version: "3.9"
 services:
   frontend:
     build:
-      context: .
+      context: ./frontend
       dockerfile: Dockerfile
     container_name: espetinho-frontend
     ports:
@@ -14,14 +14,15 @@ services:
 
   api:
     build:
-      context: .
-      dockerfile: Dockerfile.api
+      context: ./backend
+      dockerfile: Dockerfile
     container_name: espetinho-api
     environment:
       PGHOST: postgres
       PGUSER: postgres
       PGPASSWORD: postgres
       PGDATABASE: espetinho
+      PORT: 4000
     ports:
       - "4000:4000"
     depends_on:
@@ -38,7 +39,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
-      - ./server/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+      - ./backend/schema.sql:/docker-entrypoint-initdb.d/schema.sql
     restart: always
 
   pgadmin:
