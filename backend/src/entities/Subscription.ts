@@ -17,11 +17,11 @@ export class Subscription {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @ManyToOne(() => Store, (store) => store.subscriptions, { eager: true })
+  @ManyToOne(() => Store, (store) => store.subscriptions, { eager: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'store_id' })
   store!: Store;
 
-  @ManyToOne(() => Plan, { eager: true })
+  @ManyToOne(() => Plan, { eager: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'plan_id' })
   plan!: Plan;
 

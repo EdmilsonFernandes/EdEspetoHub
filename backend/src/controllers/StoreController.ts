@@ -19,7 +19,7 @@ export class StoreController {
 
   static async update(req: Request, res: Response) {
     try {
-      const store = await storeService.update(req.params.id, req.body);
+      const store = await storeService.update(req.params.storeId, req.body);
       return res.json(store);
     } catch (error: any) {
       return res.status(400).json({ message: error.message });
@@ -28,7 +28,7 @@ export class StoreController {
 
   static async updateStatus(req: Request, res: Response) {
     try {
-      const store = await storeService.setStatus(req.params.id, req.body.open);
+      const store = await storeService.setStatus(req.params.storeId, req.body.open);
       return res.json(store);
     } catch (error: any) {
       return res.status(400).json({ message: error.message });

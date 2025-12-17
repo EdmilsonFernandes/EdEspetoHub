@@ -50,6 +50,12 @@ export class SubscriptionService {
     return subscription;
   }
 
+  async getCurrentByStoreSlug(slug: string) {
+    const store = await this.storeRepository.findBySlug(slug);
+    if (!store) return null;
+    return this.getCurrentByStore(store.id);
+  }
+
   async renew(subscriptionId: string, input: RenewSubscriptionDto) {
     const subscription = await this.subscriptionRepository.findById(subscriptionId);
     if (!subscription) throw new Error('Assinatura não encontrada');

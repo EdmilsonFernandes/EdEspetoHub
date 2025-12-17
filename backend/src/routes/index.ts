@@ -24,17 +24,20 @@ routes.get('/admin/stores', PlatformAdminController.listStores);
 routes.patch('/admin/stores/:storeId/suspend', PlatformAdminController.suspendStore);
 routes.patch('/admin/stores/:storeId/reactivate', PlatformAdminController.reactivateStore);
 
-routes.get('/stores/:slug', StoreController.getBySlug);
+routes.get('/stores/slug/:slug', StoreController.getBySlug);
 routes.get('/chamanoespeto/:slug', StoreController.getBySlug);
-routes.put('/stores/:id', StoreController.update);
-routes.put('/stores/:id/status', StoreController.updateStatus);
+routes.put('/stores/:storeId', StoreController.update);
+routes.put('/stores/:storeId/status', StoreController.updateStatus);
 
 routes.post('/stores/:storeId/products', ProductController.create);
 routes.get('/stores/:storeId/products', ProductController.list);
+routes.get('/stores/slug/:slug/products', ProductController.listBySlug);
 routes.put('/stores/:storeId/products/:productId', ProductController.update);
 routes.delete('/stores/:storeId/products/:productId', ProductController.remove);
 
 routes.post('/stores/:storeId/orders', requireActiveSubscription, OrderController.create);
 routes.get('/stores/:storeId/orders', requireActiveSubscription, OrderController.list);
+routes.post('/stores/slug/:slug/orders', requireActiveSubscription, OrderController.createBySlug);
+routes.get('/stores/slug/:slug/orders', requireActiveSubscription, OrderController.listBySlug);
 
 export default routes;

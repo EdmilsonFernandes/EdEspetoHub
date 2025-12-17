@@ -14,12 +14,37 @@ export class OrderService {
     const store = await this.storeRepository.findById(input.storeId);
     if (!store) throw new Error('Loja não encontrada');
 
+    const order = await this.buildOrder(input, store);
+    return this.orderRepository.save(order);
+  }
+
+  async createBySlug(input: Omit<CreateOrderDto, 'storeId'> & { storeSlug: string }) {
+    const store = await this.storeRepository.findBySlug(input.storeSlug);
+    if (!store) throw new Error('Loja não encontrada');
+
+    const order = await this.buildOrder(input, store);
+    return this.orderRepository.save(order);
+  }
+
+  async listByStoreId(storeId: string) {
+    const store = await this.storeRepository.findById(storeId);
+    if (!store) throw new Error('Loja não encontrada');
+    return this.orderRepository.findByStore(store);
+  }
+
+  async listByStoreSlug(slug: string) {
+    const store = await this.storeRepository.findBySlug(slug);
+    if (!store) throw new Error('Loja não encontrada');
+    return this.orderRepository.findByStore(store);
+  }
+
+  private async buildOrder(input: Omit<CreateOrderDto, 'storeId'>, store: Awaited<ReturnType<StoreRepository['findById']>>) {
     const items: OrderItem[] = [];
     let total = 0;
 
     for (const item of input.items) {
       const product = await this.productRepository.findById(item.productId);
-      if (!product || product.store.id !== store.id) {
+      if (!product || product.store.id !== store!.id) {
         throw new Error('Produto inválido para esta loja');
       }
 
@@ -31,7 +56,7 @@ export class OrderService {
       total += orderItem.price;
     }
 
-    const order = this.orderRepository.create({
+    return this.orderRepository.create({
       customerName: input.customerName,
       phone: input.phone,
       address: input.address,
@@ -39,15 +64,7 @@ export class OrderService {
       paymentMethod: input.paymentMethod,
       items,
       total,
-      store,
+      store: store!,
     } as Order);
-
-    return this.orderRepository.save(order);
-  }
-
-  async listByStore(storeId: string) {
-    const store = await this.storeRepository.findById(storeId);
-    if (!store) throw new Error('Loja não encontrada');
-    return this.orderRepository.findByStore(store);
   }
 }

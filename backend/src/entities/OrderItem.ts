@@ -13,11 +13,11 @@ export class OrderItem {
   @Column('decimal', { precision: 10, scale: 2 })
   price!: number;
 
-  @ManyToOne(() => Product, (product) => product.orderItems, { eager: true })
+  @ManyToOne(() => Product, (product) => product.orderItems, { eager: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'product_id' })
   product!: Product;
 
-  @ManyToOne(() => Order, (order) => order.items)
+  @ManyToOne(() => Order, (order) => order.items, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'order_id' })
   order!: Order;
 }
