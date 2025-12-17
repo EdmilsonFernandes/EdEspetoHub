@@ -8,6 +8,7 @@ import { StoreSettings } from '../entities/StoreSettings';
 import { slugify } from '../utils/slugify';
 import { PlanService } from './PlanService';
 import { SubscriptionService } from './SubscriptionService';
+import { User } from '../entities/User';
 
 export class AuthService {
   private userRepository = new UserRepository();
@@ -42,7 +43,7 @@ export class AuthService {
     const store = this.storeRepository.create({
       name: input.storeName,
       slug,
-      owner: savedUser,
+      owner: { id: savedUser.id } as User,
       settings: storeSettings,
     });
 
