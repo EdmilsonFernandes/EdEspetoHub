@@ -16,7 +16,7 @@ export const storeService = {
 
   async fetchBySlug(slug) {
     if (!slug) return null;
-    const response = await apiClient.rawGet(`/stores/${slug}`);
+    const response = await apiClient.rawGet(`/stores/slug/${slug}`);
     if (response.status === 404) return null;
     return toJson(response);
   },

@@ -164,10 +164,27 @@ function App() {
     {
       apiClient.setOwnerId(initialStoreSlug);
     }
+  }, [ storeSlug ]);
 
-    const unsubProd = productService.subscribe(setProducts);
+  useEffect(() => {
+    let cancelled = false;
+    const activeSlug = storeSlug || defaultBranding.espetoId;
+
+    if (!activeSlug)
+    {
+      setProducts([]);
+      return undefined;
+    }
+
+    productService
+      .listBySlug(activeSlug)
+      .then((data) => {
+        if (!cancelled) setProducts(data);
+      })
+      .catch((error) => console.error('Erro ao carregar produtos', error));
+
     return () => {
-      unsubProd();
+      cancelled = true;
     };
   }, [ storeSlug ]);
 
@@ -194,7 +211,7 @@ function App() {
           accentColor: data.settings?.secondary_color || prev.accentColor,
           instagram: data.owner_email || prev.instagram,
         }));
-        apiClient.setOwnerId(data.slug);
+        apiClient.setOwnerId(data.id || data.slug);
         setView((prev) => (prev === 'landing' ? 'menu' : prev));
       })
       .catch((error) => {
@@ -211,12 +228,12 @@ function App() {
 
   useEffect(() => {
     if (!resolvedStoreSlug) return;
-    apiClient.setOwnerId(resolvedStoreSlug);
+    apiClient.setOwnerId(storeInfo?.id || resolvedStoreSlug);
     setBranding((prev) => {
       if (prev.espetoId === resolvedStoreSlug) return prev;
       return getPersistedBranding(resolvedStoreSlug);
     });
-  }, [ resolvedStoreSlug ]);
+  }, [ resolvedStoreSlug, storeInfo?.id ]);
 
   useEffect(() => {
     if (!storeInfo?.id) return;
@@ -236,14 +253,24 @@ function App() {
       return undefined;
     }
 
-    apiClient.setOwnerId(user.storeSlug);
-    const unsubscribe = orderService.subscribeAll(setOrders);
+    let cancelled = false;
+
+    apiClient.setOwnerId(storeInfo?.id || user.storeSlug);
+    orderService
+      .fetchAll(storeInfo?.id || user.storeSlug)
+      .then((data) => {
+        if (!cancelled) setOrders(data);
+      })
+      .catch(() => {
+        if (!cancelled) setOrders([]);
+      });
+
     customerService.fetchAll().then(setCustomers).catch(() => setCustomers([]));
 
     return () => {
-      unsubscribe();
+      cancelled = true;
     };
-  }, [ user?.storeSlug ]);
+  }, [ user?.storeSlug, storeInfo?.id ]);
 
   useEffect(() => {
     if (adminTab !== 'platform') return;

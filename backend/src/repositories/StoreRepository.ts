@@ -22,7 +22,7 @@ export class StoreRepository {
   }
 
   findById(identifier: string) {
-    return this.repository.findOne({ where: [{ id: identifier }, { slug: identifier }], relations: ['settings'] });
+    return this.repository.findOne({ where: { id: identifier }, relations: ['settings'] });
   }
 
   findAll() {

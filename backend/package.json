@@ -5,7 +5,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "start": "node dist/app.js",
-    "dev": "ts-node-dev --respawn --transpile-only src/app.ts"
+    "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
+    "db:reset": "ts-node src/scripts/resetDatabase.ts"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

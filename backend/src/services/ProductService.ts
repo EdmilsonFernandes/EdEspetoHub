@@ -21,8 +21,14 @@ export class ProductService {
     return this.productRepository.save(product);
   }
 
-  async listByStore(storeId: string) {
+  async listByStoreId(storeId: string) {
     const store = await this.storeRepository.findById(storeId);
+    if (!store) throw new Error('Loja não encontrada');
+    return this.productRepository.findByStore(store);
+  }
+
+  async listByStoreSlug(slug: string) {
+    const store = await this.storeRepository.findBySlug(slug);
     if (!store) throw new Error('Loja não encontrada');
     return this.productRepository.findByStore(store);
   }
