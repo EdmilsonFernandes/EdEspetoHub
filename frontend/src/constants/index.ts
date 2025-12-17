@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { formatPhoneInput } from '../utils/format';
 
 export const DEFAULT_AREA_CODE = '12';

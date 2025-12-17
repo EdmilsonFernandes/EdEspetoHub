@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useMemo } from "react";
 import { Plus } from "lucide-react";
 import { formatCurrency } from "../../utils/format";

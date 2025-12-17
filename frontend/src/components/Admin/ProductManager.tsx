@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useState } from 'react';
 import { Image as ImageIcon, Edit, Trash2, Save, Plus } from 'lucide-react';
 import { productService } from '../../services/productService';

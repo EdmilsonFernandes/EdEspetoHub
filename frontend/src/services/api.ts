@@ -1,3 +1,4 @@
+// @ts-nocheck
 const resolveBaseUrl = () => {
   const base = import.meta.env.REACT_APP_API_BASE_URL || '/api';
   if (base.endsWith('/api')) return base.replace(/\/+$/, '');

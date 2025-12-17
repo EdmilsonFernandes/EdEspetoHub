@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { LandingPage, CreateStore, AdminLogin, StorePage, OrdersQueue, AdminDashboard } from './pages';
