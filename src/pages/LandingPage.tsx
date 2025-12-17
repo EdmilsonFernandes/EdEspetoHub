@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Moon, Sun } from 'lucide-react';
 import { Hero } from '../components/Hero';
@@ -9,10 +9,28 @@ import fireAnimation from '../assets/fire.json';
 export function LandingPage() {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  const [isAnnual, setIsAnnual] = useState(false);
+  const [carouselIndex, setCarouselIndex] = useState(0);
 
   const goToDemoStore = () => {
     navigate('/test-store');
   };
+
+  // Pricing data
+  const plans = {
+    monthly: [
+      { name: '🥩 Plano Basic', price: 39.90, period: '/mês', features: ['Site ativo', 'Pedidos ilimitados', 'Suporte básico'] },
+      { name: '🔥 Plano Pro', price: 79.90, period: '/mês', features: ['Tudo do plano basic', 'Prioridade no suporte', 'Selo "Plano Pro" no admin'], popular: true },
+      { name: '⭐ Plano Premium', price: 149.90, period: '/mês', features: ['Tudo do plano pro', 'Acesso à API', 'Domínio personalizado', 'Analytics avançado', 'Suporte dedicado'] }
+    ],
+    annual: [
+      { name: '🥩 Plano Basic', price: 359.10, period: '/ano (R$ 29,93/mês)', features: ['Site ativo', 'Pedidos ilimitados', 'Suporte básico'], savings: 'Economize 25%' },
+      { name: '🔥 Plano Pro', price: 719.10, period: '/ano (R$ 59,93/mês)', features: ['Tudo do plano basic', 'Prioridade no suporte', 'Selo "Plano Pro" no admin'], popular: true, savings: 'Economize 25%' },
+      { name: '⭐ Plano Premium', price: 1349.10, period: '/ano (R$ 112,43/mês)', features: ['Tudo do plano pro', 'Acesso à API', 'Domínio personalizado', 'Analytics avançado', 'Suporte dedicado'], savings: 'Economize 25%' }
+    ]
+  };
+
+  const currentPlans = isAnnual ? plans.annual : plans.monthly;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
@@ -161,6 +179,131 @@ export function LandingPage() {
                 <span>Fila do churrasqueiro</span>
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* Pricing Section */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white mb-8">Planos Simples e Transparentes</h2>
+
+            {/* Toggle Switch */}
+            <div className="flex items-center justify-center gap-4 mb-8">
+              <span className={`text-lg font-semibold ${!isAnnual ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}`}>
+                Mensal
+              </span>
+              <button
+                onClick={() => setIsAnnual(!isAnnual)}
+                className={`relative inline-flex h-8 w-16 items-center rounded-full transition-colors ${isAnnual ? 'bg-red-500' : 'bg-gray-300 dark:bg-gray-600'
+                  }`}
+              >
+                <span
+                  className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${isAnnual ? 'translate-x-9' : 'translate-x-1'
+                    }`}
+                />
+              </button>
+              <span className={`text-lg font-semibold ${isAnnual ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}`}>
+                Anual
+              </span>
+              <span className={`ml-2 inline-block px-3 py-1 rounded-full text-sm font-semibold transition-colors ${isAnnual
+                ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                : 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500'
+                }`}>
+                Economize até 25%
+              </span>
+            </div>
+
+            <p className="text-lg text-gray-600 dark:text-gray-300">Escolha o plano ideal para seu negócio</p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 md:gap-0">
+            {/* Carousel for mobile, grid for desktop */}
+            <div className="md:contents">
+              {currentPlans.map((plan, index) => (
+                <div
+                  key={index}
+                  className={`transition-all duration-300 ${index === carouselIndex ? 'block md:block' : 'hidden md:block'
+                    }`}
+                >
+                  <div
+                    className={`relative rounded-2xl shadow-lg p-8 hover:shadow-xl transition-shadow h-full flex flex-col ${plan.popular
+                      ? 'md:scale-105 bg-white dark:bg-gray-800 border-2 border-red-500 shadow-2xl'
+                      : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
+                      }`}
+                  >
+                    {plan.popular && (
+                      <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                        <span className="bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-1 rounded-full text-xs font-bold">
+                          MAIS POPULAR
+                        </span>
+                      </div>
+                    )}
+                    {plan.savings && (
+                      <div className="absolute -top-4 right-4">
+                        <span className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-3 py-1 rounded-full text-xs font-bold">
+                          {plan.savings}
+                        </span>
+                      </div>
+                    )}
+                    <div className={`text-center mb-6 ${plan.popular ? 'mt-2' : ''}`}>
+                      <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{plan.name}</h3>
+                      <div className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-red-600 mb-2">
+                        R$ {plan.price.toFixed(2)}
+                      </div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">{plan.period}</p>
+                    </div>
+                    <ul className="space-y-3 mb-8 flex-grow">
+                      {plan.features.map((feature, featureIndex) => (
+                        <li key={featureIndex} className="flex items-center gap-3 text-gray-700 dark:text-gray-300">
+                          <span className="text-red-500 text-lg">✓</span>
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <button
+                      onClick={() => navigate('/create')}
+                      className={`w-full px-6 py-3 rounded-lg font-semibold transition-all ${plan.popular
+                        ? 'bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700 shadow-lg'
+                        : 'border-2 border-red-500 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20'
+                        }`}
+                    >
+                      Começar Agora
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Mobile Carousel Controls */}
+          <div className="flex md:hidden justify-center items-center gap-4 mt-8">
+            <button
+              onClick={() => setCarouselIndex((prev) => (prev - 1 + currentPlans.length) % currentPlans.length)}
+              className="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+              aria-label="Previous plan"
+            >
+              ←
+            </button>
+            <div className="flex gap-2">
+              {currentPlans.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCarouselIndex(index)}
+                  className={`w-3 h-3 rounded-full transition-colors ${index === carouselIndex
+                      ? 'bg-red-500'
+                      : 'bg-gray-300 dark:bg-gray-600'
+                    }`}
+                  aria-label={`Go to plan ${index + 1}`}
+                />
+              ))}
+            </div>
+            <button
+              onClick={() => setCarouselIndex((prev) => (prev + 1) % currentPlans.length)}
+              className="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+              aria-label="Next plan"
+            >
+              →
+            </button>
           </div>
         </section>
       </main>
