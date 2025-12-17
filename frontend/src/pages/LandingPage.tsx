@@ -216,21 +216,20 @@ export function LandingPage() {
             <p className="text-lg text-gray-600 dark:text-gray-300">Escolha o plano ideal para seu negócio</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 md:gap-0">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-6 md:items-center">
             {/* Carousel for mobile, grid for desktop */}
-            <div className="md:contents">
-              {currentPlans.map((plan, index) => (
+            {currentPlans.map((plan, index) => (
+              <div
+                key={index}
+                className={`transition-all duration-300 ${index === carouselIndex ? 'block md:block' : 'hidden md:block'
+                  }`}
+              >
                 <div
-                  key={index}
-                  className={`transition-all duration-300 ${index === carouselIndex ? 'block md:block' : 'hidden md:block'
+                  className={`relative rounded-2xl shadow-lg p-8 hover:shadow-xl transition-all h-full flex flex-col ${plan.popular
+                    ? 'md:scale-105 md:z-10 bg-white dark:bg-gray-800 border-2 border-red-500 shadow-2xl'
+                    : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
                     }`}
                 >
-                  <div
-                    className={`relative rounded-2xl shadow-lg p-8 hover:shadow-xl transition-shadow h-full flex flex-col ${plan.popular
-                      ? 'md:scale-105 bg-white dark:bg-gray-800 border-2 border-red-500 shadow-2xl'
-                      : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
-                      }`}
-                  >
                     {plan.popular && (
                       <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                         <span className="bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-1 rounded-full text-xs font-bold">
@@ -272,7 +271,6 @@ export function LandingPage() {
                   </div>
                 </div>
               ))}
-            </div>
           </div>
 
           {/* Mobile Carousel Controls */}
