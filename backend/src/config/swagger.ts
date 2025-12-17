@@ -139,6 +139,66 @@ export const swaggerSpec = {
           },
         },
       },
+      Plan: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', format: 'uuid' },
+          name: { type: 'string', enum: ['monthly', 'yearly'] },
+          price: { type: 'number' },
+          durationDays: { type: 'integer' },
+          enabled: { type: 'boolean' },
+          createdAt: { type: 'string', format: 'date-time' },
+        },
+      },
+      Subscription: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', format: 'uuid' },
+          store: { $ref: '#/components/schemas/Store' },
+          plan: { $ref: '#/components/schemas/Plan' },
+          startDate: { type: 'string', format: 'date-time' },
+          endDate: { type: 'string', format: 'date-time' },
+          status: { type: 'string', enum: ['ACTIVE', 'EXPIRING', 'EXPIRED', 'SUSPENDED'] },
+          autoRenew: { type: 'boolean' },
+          createdAt: { type: 'string', format: 'date-time' },
+          updatedAt: { type: 'string', format: 'date-time' },
+        },
+      },
+      CreateSubscriptionInput: {
+        type: 'object',
+        required: ['storeId', 'planId'],
+        properties: {
+          storeId: { type: 'string', format: 'uuid' },
+          planId: { type: 'string', format: 'uuid' },
+          autoRenew: { type: 'boolean' },
+        },
+      },
+      RenewSubscriptionInput: {
+        type: 'object',
+        properties: {
+          planId: { type: 'string', format: 'uuid' },
+          autoRenew: { type: 'boolean' },
+        },
+      },
+      UpdateSubscriptionStatusInput: {
+        type: 'object',
+        required: ['status'],
+        properties: {
+          status: { type: 'string', enum: ['ACTIVE', 'EXPIRING', 'EXPIRED', 'SUSPENDED'] },
+          subscriptionId: { type: 'string', format: 'uuid', description: 'Opcional para admin' },
+        },
+      },
+      AdminStore: {
+        allOf: [
+          { $ref: '#/components/schemas/Store' },
+          {
+            type: 'object',
+            properties: {
+              subscription: { $ref: '#/components/schemas/Subscription' },
+            },
+          },
+        ],
+      },
     },
   },
   paths: {
@@ -356,6 +416,145 @@ export const swaggerSpec = {
               },
             },
           },
+        },
+      },
+    },
+    '/api/plans': {
+      get: {
+        tags: ['Planos'],
+        summary: 'Lista planos disponíveis',
+        responses: {
+          200: {
+            description: 'Planos encontrados',
+            content: { 'application/json': { schema: { type: 'array', items: { $ref: '#/components/schemas/Plan' } } } },
+          },
+        },
+      },
+    },
+    '/api/subscriptions': {
+      post: {
+        tags: ['Assinaturas'],
+        summary: 'Cria uma assinatura para uma loja',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': { schema: { $ref: '#/components/schemas/CreateSubscriptionInput' } },
+          },
+        },
+        responses: {
+          201: { description: 'Assinatura criada', content: { 'application/json': { schema: { $ref: '#/components/schemas/Subscription' } } } },
+          400: { description: 'Erro de validação' },
+        },
+      },
+    },
+    '/api/stores/{storeId}/subscription': {
+      get: {
+        tags: ['Assinaturas'],
+        summary: 'Obtém a assinatura vigente de uma loja',
+        parameters: [{ name: 'storeId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        responses: {
+          200: { description: 'Assinatura encontrada', content: { 'application/json': { schema: { $ref: '#/components/schemas/Subscription' } } } },
+          404: { description: 'Assinatura não encontrada' },
+        },
+      },
+    },
+    '/api/subscriptions/{id}/renew': {
+      post: {
+        tags: ['Assinaturas'],
+        summary: 'Renova uma assinatura existente',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        requestBody: {
+          required: true,
+          content: { 'application/json': { schema: { $ref: '#/components/schemas/RenewSubscriptionInput' } } },
+        },
+        responses: {
+          200: { description: 'Assinatura renovada', content: { 'application/json': { schema: { $ref: '#/components/schemas/Subscription' } } } },
+          400: { description: 'Erro ao renovar' },
+        },
+      },
+    },
+    '/api/subscriptions/{id}/status': {
+      patch: {
+        tags: ['Assinaturas'],
+        summary: 'Ativa ou suspende uma assinatura',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        requestBody: {
+          required: true,
+          content: { 'application/json': { schema: { $ref: '#/components/schemas/UpdateSubscriptionStatusInput' } } },
+        },
+        responses: {
+          200: { description: 'Status atualizado', content: { 'application/json': { schema: { $ref: '#/components/schemas/Subscription' } } } },
+          400: { description: 'Erro ao atualizar' },
+        },
+      },
+    },
+    '/api/admin/stores': {
+      get: {
+        tags: ['Admin'],
+        summary: 'Lista lojas e assinaturas',
+        responses: {
+          200: {
+            description: 'Lojas retornadas',
+            content: { 'application/json': { schema: { type: 'array', items: { $ref: '#/components/schemas/AdminStore' } } } },
+          },
+        },
+        security: [{ bearerAuth: [] }],
+      },
+    },
+    '/api/admin/stores/{storeId}/suspend': {
+      patch: {
+        tags: ['Admin'],
+        summary: 'Suspende uma loja e assinatura',
+        parameters: [{ name: 'storeId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        requestBody: {
+          content: { 'application/json': { schema: { $ref: '#/components/schemas/UpdateSubscriptionStatusInput' } } },
+        },
+        responses: {
+          200: { description: 'Assinatura suspensa', content: { 'application/json': { schema: { $ref: '#/components/schemas/Subscription' } } } },
+          400: { description: 'Erro ao suspender' },
+        },
+        security: [{ bearerAuth: [] }],
+      },
+    },
+    '/api/admin/stores/{storeId}/reactivate': {
+      patch: {
+        tags: ['Admin'],
+        summary: 'Reativa uma loja e assinatura',
+        parameters: [{ name: 'storeId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
+        requestBody: {
+          content: { 'application/json': { schema: { $ref: '#/components/schemas/UpdateSubscriptionStatusInput' } } },
+        },
+        responses: {
+          200: { description: 'Assinatura reativada', content: { 'application/json': { schema: { $ref: '#/components/schemas/Subscription' } } } },
+          400: { description: 'Erro ao reativar' },
+        },
+        security: [{ bearerAuth: [] }],
+      },
+    },
+    '/api/stores/{storeId}/products/{productId}': {
+      put: {
+        tags: ['Produtos'],
+        summary: 'Atualiza um produto da loja',
+        parameters: [
+          { name: 'storeId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+          { name: 'productId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+        ],
+        requestBody: { required: true, content: { 'application/json': { schema: { $ref: '#/components/schemas/ProductInput' } } } },
+        responses: {
+          200: { description: 'Produto atualizado', content: { 'application/json': { schema: { $ref: '#/components/schemas/Product' } } } },
+          400: { description: 'Erro de validação' },
+        },
+      },
+      delete: {
+        tags: ['Produtos'],
+        summary: 'Remove um produto da loja',
+        parameters: [
+          { name: 'storeId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+          { name: 'productId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+        ],
+        responses: {
+          204: { description: 'Produto removido' },
+          400: { description: 'Erro ao remover' },
         },
       },
     },
