@@ -8,4 +8,11 @@ export const authService = {
         });
         return response;
     },
+    async adminLogin(slug, password) {
+        const response = await apiClient.post("/auth/admin-login", {
+            slug,
+            password,
+        });
+        return response;
+    },
 };

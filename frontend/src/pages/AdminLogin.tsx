@@ -6,7 +6,7 @@ import { getPersistedBranding, defaultBranding } from '../constants';
 
 export function AdminLogin() {
   const navigate = useNavigate();
-  const [loginForm, setLoginForm] = useState({ username: '', password: '', espetoId: defaultBranding.espetoId });
+  const [loginForm, setLoginForm] = useState({ slug: defaultBranding.espetoId, password: '' });
   const [loginError, setLoginError] = useState('');
   const [branding] = useState(getPersistedBranding());
 
@@ -15,8 +15,8 @@ export function AdminLogin() {
     setLoginError('');
 
     try {
-      const session = await authService.login(loginForm.username, loginForm.password, loginForm.espetoId);
-      const sessionData = { ...session, username: loginForm.username, espetoId: loginForm.espetoId };
+      const session = await authService.adminLogin(loginForm.slug, loginForm.password);
+      const sessionData = { ...session, slug: loginForm.slug };
       localStorage.setItem('adminSession', JSON.stringify(sessionData));
       navigate('/admin/dashboard');
     } catch (error) {
@@ -53,17 +53,6 @@ export function AdminLogin() {
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-700">Usuário</label>
-              <input
-                type="text"
-                value={loginForm.username}
-                onChange={(e) => setLoginForm((prev) => ({ ...prev, username: e.target.value }))}
-                className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
-                placeholder="admin"
-              />
-            </div>
-
-            <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700">Senha</label>
               <input
                 type="password"
@@ -75,15 +64,15 @@ export function AdminLogin() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-700">ID da loja</label>
+              <label className="text-sm font-semibold text-gray-700">Identificador da loja (slug)</label>
               <input
                 type="text"
-                value={loginForm.espetoId}
-                onChange={(e) => setLoginForm((prev) => ({ ...prev, espetoId: e.target.value }))}
+                value={loginForm.slug}
+                onChange={(e) => setLoginForm((prev) => ({ ...prev, slug: e.target.value }))}
                 className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
                 placeholder="ex.: espetinhodatony"
               />
-              <p className="text-xs text-gray-500">Identificador único da sua loja no sistema.</p>
+              <p className="text-xs text-gray-500">Use o slug fácil de memorizar da sua loja.</p>
             </div>
           </div>
 
