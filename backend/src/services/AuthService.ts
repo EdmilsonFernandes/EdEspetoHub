@@ -163,7 +163,7 @@ export class AuthService
         expiresAt: result.payment.expiresAt,
       },
       token,
-      redirectUrl: `/chamanoespeto/${result.store.slug}`,
+      redirectUrl: `/payment/${result.payment.id}`,
     };
   }
 
@@ -195,8 +195,19 @@ export class AuthService
 
   private sendPaymentEmail(email: string, payment: any)
   {
-    // Placeholder for real e-mail integration
-    console.log('📧 Enviar e-mail de pagamento para', email, payment);
+    console.log(
+      '📧 Mock payment e-mail',
+      JSON.stringify(
+        {
+          email,
+          paymentId: payment.id,
+          status: payment.status,
+          qrCodeBase64: payment.qrCodeBase64,
+        },
+        null,
+        2
+      )
+    );
   }
 
   private async generateUniqueSlug(name: string)

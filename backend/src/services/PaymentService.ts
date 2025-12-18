@@ -1,4 +1,5 @@
 import { EntityManager } from 'typeorm';
+import QRCode from 'qrcode';
 import { Payment, PaymentMethod } from '../entities/Payment';
 import { Subscription } from '../entities/Subscription';
 import { Plan } from '../entities/Plan';
@@ -19,17 +20,12 @@ export class PaymentService {
   ) {
     const paymentRepo = manager.getRepository(Payment);
     const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
-
-    const qrCodeBase64 =
-      data.method === 'PIX'
-        ? `data:image/png;base64,${Buffer.from(`PIX:${data.subscription.id}:${data.plan.id}`).toString('base64')}`
-        : null;
     const paymentLink =
       data.method === 'CREDIT_CARD'
         ? `https://pay.chamanoespeto.com/checkout/${data.subscription.id}`
         : null;
 
-    const payment = paymentRepo.create({
+    let payment = paymentRepo.create({
       user: data.user,
       store: data.store,
       subscription: data.subscription,
@@ -37,11 +33,20 @@ export class PaymentService {
       status: 'PENDING',
       amount: Number(data.plan.price),
       expiresAt,
-      qrCodeBase64,
+      qrCodeBase64: null,
       paymentLink,
     } as Payment);
 
-    await paymentRepo.save(payment);
+    payment = await paymentRepo.save(payment);
+
+    if (payment.method === 'PIX') {
+      const qrPayload = `PIX FAKE | Store: ${data.store.name} | Amount: ${Number(
+        data.plan.price
+      ).toFixed(2)} | PaymentId: ${payment.id}`;
+      payment.qrCodeBase64 = await QRCode.toDataURL(qrPayload);
+      await paymentRepo.save(payment);
+    }
+
     return payment;
   }
 
@@ -81,5 +86,10 @@ export class PaymentService {
     const result = new Date(date);
     result.setDate(result.getDate() + days);
     return result;
+  }
+
+  async findById(paymentId: string) {
+    const paymentRepo = AppDataSource.getRepository(Payment);
+    return paymentRepo.findOne({ where: { id: paymentId } });
   }
 }
