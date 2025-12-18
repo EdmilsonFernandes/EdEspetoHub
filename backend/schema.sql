@@ -96,3 +96,17 @@ CREATE TABLE IF NOT EXISTS subscriptions (
 
 CREATE INDEX IF NOT EXISTS idx_subscriptions_store ON subscriptions(store_id);
 CREATE INDEX IF NOT EXISTS idx_subscriptions_plan ON subscriptions(plan_id);
+
+CREATE TABLE IF NOT EXISTS payments (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+  subscription_id UUID NOT NULL REFERENCES subscriptions(id) ON DELETE CASCADE,
+  method TEXT NOT NULL,
+  status TEXT NOT NULL,
+  amount NUMERIC(10,2) NOT NULL,
+  qr_code_base64 TEXT,
+  payment_link TEXT,
+  expires_at TIMESTAMPTZ NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);

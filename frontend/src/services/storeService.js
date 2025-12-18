@@ -3,7 +3,7 @@ import { apiClient } from '../config/apiClient';
 const toJson = async (response) => {
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw new Error(error.error || 'Erro ao comunicar com a loja');
+    throw new Error(error.message || error.error || 'Erro ao comunicar com a loja');
   }
   return response.json();
 };

@@ -1,12 +1,17 @@
 // @ts-nocheck
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { storeService } from '../services/storeService';
+import { planService } from '../services/planService';
 
 export function CreateStore() {
   const navigate = useNavigate();
   const [storeError, setStoreError] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
+  const [plans, setPlans] = useState([]);
+  const [selectedPlanId, setSelectedPlanId] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('PIX');
+  const [paymentResult, setPaymentResult] = useState(null);
   const [registerForm, setRegisterForm] = useState({
     fullName: '',
     email: '',
@@ -19,15 +24,51 @@ export function CreateStore() {
     secondaryColor: '#111827',
   });
 
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        const response = await planService.list();
+        setPlans(response || []);
+        if (response?.[0]) setSelectedPlanId(response[0].id);
+      } catch (error) {
+        console.error('Não foi possível carregar os planos', error);
+      }
+    };
+
+    fetchPlans();
+  }, []);
+
   const handleCreateStore = async (event) => {
     event?.preventDefault();
     setStoreError('');
     setIsRegistering(true);
+    setPaymentResult(null);
 
     try {
-      const result = await storeService.create(registerForm);
-      const destination = result.redirectUrl || (result.store?.slug ? `/chamanoespeto/${result.store.slug}` : '/');
-      navigate(destination);
+      const payload = {
+        user: {
+          fullName: registerForm.fullName,
+          email: registerForm.email,
+          password: registerForm.password,
+          phone: registerForm.phone,
+          address: registerForm.address,
+        },
+        store: {
+          name: registerForm.storeName,
+          logoUrl: registerForm.logoUrl,
+          primaryColor: registerForm.primaryColor,
+          secondaryColor: registerForm.secondaryColor,
+        },
+        planId: selectedPlanId,
+        paymentMethod,
+      };
+
+      const result = await storeService.create(payload);
+      setPaymentResult(result);
+
+      if (result.payment?.method === 'CREDIT_CARD' && result.payment.paymentLink) {
+        window.location.href = result.payment.paymentLink;
+      }
     } catch (error) {
       setStoreError(error.message || 'Não foi possível criar sua loja');
     } finally {
@@ -182,9 +223,9 @@ export function CreateStore() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-700">Cor secundária</label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700">Cor secundária</label>
                     <div className="flex items-center gap-3">
                       <input
                         type="color"
@@ -212,8 +253,53 @@ export function CreateStore() {
                         className="flex-1 border border-gray-200 rounded-r-xl p-3 bg-gray-50 text-gray-500 text-sm"
                       />
                     </div>
-                    <p className="text-xs text-gray-500">A URL será criada pelo sistema após o cadastro. Use o link retornado na resposta.</p>
-                  </div>
+                  <p className="text-xs text-gray-500">A URL será criada pelo sistema após o cadastro. Use o link retornado na resposta.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+            <div className="pt-6 border-t border-gray-100">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Selecione um plano</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {plans.map((plan) => (
+                  <button
+                    type="button"
+                    key={plan.id}
+                    onClick={() => setSelectedPlanId(plan.id)}
+                    className={`border rounded-2xl p-4 text-left transition-all ${
+                      selectedPlanId === plan.id
+                        ? 'border-red-500 shadow-lg bg-red-50'
+                        : 'border-gray-200 hover:border-red-200'
+                    }`}
+                  >
+                    <p className="text-sm uppercase font-semibold text-gray-500">{plan.name}</p>
+                    <p className="text-2xl font-bold text-gray-900">R$ {Number(plan.price).toFixed(2)}</p>
+                    <p className="text-xs text-gray-500">{plan.durationDays} dias de acesso</p>
+                  </button>
+                ))}
+                {!plans.length && <p className="text-sm text-gray-500">Carregando planos disponíveis...</p>}
+              </div>
+
+              <div className="mt-6">
+                <h4 className="text-sm font-semibold text-gray-700 mb-2">Forma de pagamento</h4>
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod('PIX')}
+                    className={`px-4 py-2 rounded-xl border ${paymentMethod === 'PIX' ? 'border-red-500 bg-red-50' : 'border-gray-200'}`}
+                  >
+                    PIX
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod('CREDIT_CARD')}
+                    className={`px-4 py-2 rounded-xl border ${
+                      paymentMethod === 'CREDIT_CARD' ? 'border-red-500 bg-red-50' : 'border-gray-200'
+                    }`}
+                  >
+                    Cartão de crédito
+                  </button>
                 </div>
               </div>
             </div>
@@ -232,7 +318,26 @@ export function CreateStore() {
                 '🚀 Criar minha loja agora'
               )}
             </button>
-            
+
+            {paymentResult && (
+              <div className="mt-6 bg-green-50 border border-green-100 rounded-2xl p-4 space-y-2">
+                <p className="text-green-800 font-semibold">Pedido criado. Aguardando pagamento.</p>
+                <p className="text-sm text-green-700">Status da assinatura: {paymentResult.subscriptionStatus}</p>
+                <p className="text-sm text-green-700">Forma de pagamento: {paymentResult.payment?.method}</p>
+                {paymentResult.payment?.method === 'PIX' && paymentResult.payment?.qrCodeBase64 && (
+                  <div className="pt-2">
+                    <p className="text-sm text-gray-700 mb-2">Escaneie o QR Code para pagar:</p>
+                    <img src={paymentResult.payment.qrCodeBase64} alt="QR Code PIX" className="w-48 h-48" />
+                  </div>
+                )}
+                {paymentResult.payment?.method === 'CREDIT_CARD' && (
+                  <p className="text-sm text-gray-700">
+                    Você será redirecionado para o link de pagamento: {paymentResult.payment?.paymentLink}
+                  </p>
+                )}
+              </div>
+            )}
+
             <p className="text-xs text-gray-500 text-center">
               Ao criar sua conta, você concorda com nossos termos de uso.
             </p>

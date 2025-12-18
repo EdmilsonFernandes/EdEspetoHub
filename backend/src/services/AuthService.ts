@@ -5,115 +5,153 @@ import { StoreRepository } from '../repositories/StoreRepository';
 import { env } from '../config/env';
 import { StoreSettings } from '../entities/StoreSettings';
 import { slugify } from '../utils/slugify';
-import { PlanService } from './PlanService';
-import { SubscriptionService } from './SubscriptionService';
 import { AppDataSource } from '../config/database';
 import { Store } from '../entities/Store';
 import { User } from '../entities/User';
+import { PaymentService } from './PaymentService';
+import { PaymentMethod } from '../entities/Payment';
+import { Plan } from '../entities/Plan';
+import { Subscription } from '../entities/Subscription';
 
 export class AuthService
 {
   private userRepository = new UserRepository();
   private storeRepository = new StoreRepository();
-  private planService = new PlanService();
-  private subscriptionService = new SubscriptionService();
+  private paymentService = new PaymentService();
 
   async register(input: any)
   {
-    /** ===============================
-     * 1️⃣ TRANSACTION → USER + STORE
-     * =============================== */
+    const userPayload = input.user ?? {
+      fullName: input.fullName,
+      email: input.email,
+      password: input.password,
+      phone: input.phone,
+      address: input.address,
+    };
+
+    const storePayload = input.store ?? {
+      name: input.storeName,
+      logoUrl: input.logoUrl,
+      primaryColor: input.primaryColor,
+      secondaryColor: input.secondaryColor,
+    };
+
+    const paymentMethod = ((input.paymentMethod as PaymentMethod) || 'PIX').toUpperCase();
+    if (paymentMethod !== 'PIX' && paymentMethod !== 'CREDIT_CARD')
+    {
+      throw new Error('Método de pagamento inválido');
+    }
+
+    if (!input.planId)
+    {
+      throw new Error('Selecione um plano para continuar');
+    }
+
     const result = await AppDataSource.transaction(async (manager) =>
     {
       const userRepo = manager.getRepository(User);
       const storeRepo = manager.getRepository(Store);
+      const planRepo = manager.getRepository(Plan);
+      const subscriptionRepo = manager.getRepository(Subscription);
 
-      // 🔒 valida email
-      const exists = await userRepo.findOne({ where: { email: input.email } });
+      const exists = await userRepo.findOne({ where: { email: userPayload.email } });
       if (exists)
       {
         throw new Error('E-mail já cadastrado');
       }
 
-      // 🔐 hash
-      const hashed = await bcrypt.hash(input.password, 10);
+      const hashed = await bcrypt.hash(userPayload.password, 10);
 
-      // 👤 USER
       const user = userRepo.create({
-        fullName: input.fullName,
-        email: input.email,
+        fullName: userPayload.fullName,
+        email: userPayload.email,
         password: hashed,
-        phone: input.phone,
-        address: input.address,
+        phone: userPayload.phone,
+        address: userPayload.address,
       });
       await userRepo.save(user);
 
-      // 🏪 STORE
-      const slug = slugify(input.storeName);
+      const baseSlug = slugify(storePayload.name);
+      let slug = baseSlug;
+      let counter = 1;
+      while (await storeRepo.findOne({ where: { slug } }))
+      {
+        slug = `${baseSlug}-${counter++}`;
+      }
 
       const settings = manager.create(StoreSettings, {
-        logoUrl: input.logoUrl,
-        primaryColor: input.primaryColor,
-        secondaryColor: input.secondaryColor,
+        logoUrl: storePayload.logoUrl,
+        primaryColor: storePayload.primaryColor,
+        secondaryColor: storePayload.secondaryColor,
       });
 
       const store = storeRepo.create({
-        name: input.storeName,
+        name: storePayload.name,
         slug,
         owner: user,
         settings,
+        open: false,
       });
       await storeRepo.save(store);
 
-      return {
-        userId: user.id,
-        storeId: store.id,
-        storeSlug: store.slug,
-      };
+      const plan = await planRepo.findOne({ where: { id: input.planId } });
+      if (!plan || !plan.enabled)
+      {
+        throw new Error('Plano inválido ou indisponível');
+      }
+
+      const now = new Date();
+      const endDate = this.addDays(now, plan.durationDays);
+
+      const subscription = subscriptionRepo.create({
+        store,
+        plan,
+        startDate: now,
+        endDate,
+        status: 'PENDING',
+        autoRenew: false,
+      });
+      await subscriptionRepo.save(subscription);
+
+      const payment = await this.paymentService.createPayment(manager, {
+        user,
+        store,
+        subscription,
+        plan,
+        method: paymentMethod as PaymentMethod,
+      });
+
+      return { user, store, subscription, payment };
     });
 
-    /** ===============================
-     * 2️⃣ FORA DA TRANSACTION → SUBSCRIPTION
-     * =============================== */
-    try
-    {
-      const plans = await this.planService.listEnabled();
-      const defaultPlan =
-        plans.find((p) => p.name === 'monthly') || plans[ 0 ];
+    this.sendPaymentEmail(result.user.email, result.payment);
 
-      if (defaultPlan)
-      {
-        await this.subscriptionService.create({
-          storeId: result.storeId,
-          planId: defaultPlan.id,
-        });
-      }
-    } catch (err)
-    {
-      // ⚠️ NÃO quebra cadastro
-      console.error(
-        '⚠️ Falha ao criar subscription. Cadastro preservado.',
-        err
-      );
-    }
-
-    /** ===============================
-     * 3️⃣ TOKEN
-     * =============================== */
     const token = jwt.sign(
-      { sub: result.userId, storeId: result.storeId },
+      { sub: result.user.id, storeId: result.store.id },
       env.jwtSecret,
       { expiresIn: '12h' }
     );
 
     return {
-      user: { id: result.userId },
+      success: true,
+      user: { id: result.user.id },
       store: {
-        id: result.storeId,
-        slug: result.storeSlug,
+        id: result.store.id,
+        slug: result.store.slug,
+      },
+      storeStatus: 'PENDING_PAYMENT',
+      subscriptionStatus: result.subscription.status,
+      payment: {
+        id: result.payment.id,
+        method: result.payment.method,
+        status: result.payment.status,
+        amount: Number(result.payment.amount),
+        qrCodeBase64: result.payment.qrCodeBase64,
+        paymentLink: result.payment.paymentLink,
+        expiresAt: result.payment.expiresAt,
       },
       token,
-      redirectUrl: `/chamanoespeto/${result.storeSlug}`,
+      redirectUrl: `/chamanoespeto/${result.store.slug}`,
     };
   }
 
@@ -134,6 +172,19 @@ export class AuthService
   private generateToken(userId: string, storeId?: string)
   {
     return jwt.sign({ sub: userId, storeId }, env.jwtSecret, { expiresIn: '12h' });
+  }
+
+  private addDays(date: Date, days: number)
+  {
+    const result = new Date(date);
+    result.setDate(result.getDate() + days);
+    return result;
+  }
+
+  private sendPaymentEmail(email: string, payment: any)
+  {
+    // Placeholder for real e-mail integration
+    console.log('📧 Enviar e-mail de pagamento para', email, payment);
   }
 
   private async generateUniqueSlug(name: string)
