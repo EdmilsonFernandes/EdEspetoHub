@@ -21,6 +21,7 @@ export class AuthService
 
   async register(input: any)
   {
+    console.log('🔥 REGISTER ENTRY:', JSON.stringify(input, null, 2));
     const userPayload = input.user ?? {
       fullName: input.fullName,
       email: input.email,
@@ -28,6 +29,10 @@ export class AuthService
       phone: input.phone,
       address: input.address,
     };
+
+    const normalizedEmail = userPayload.email
+      .trim()
+      .toLowerCase();
 
     const storePayload = input.store ?? {
       name: input.storeName,
@@ -49,12 +54,19 @@ export class AuthService
 
     const result = await AppDataSource.transaction(async (manager) =>
     {
+      console.log('🔥 BEFORE TRANSACTION', {
+        planId: input.planId,
+        paymentMethod: input.paymentMethod,
+      });
+
       const userRepo = manager.getRepository(User);
       const storeRepo = manager.getRepository(Store);
       const planRepo = manager.getRepository(Plan);
       const subscriptionRepo = manager.getRepository(Subscription);
 
-      const exists = await userRepo.findOne({ where: { email: userPayload.email } });
+      console.log('🚨 REGISTER CALLED:', normalizedEmail, new Date().toISOString());
+
+      const exists = await userRepo.findOne({ where: { email: normalizedEmail } });
       if (exists)
       {
         throw new Error('E-mail já cadastrado');
@@ -64,7 +76,7 @@ export class AuthService
 
       const user = userRepo.create({
         fullName: userPayload.fullName,
-        email: userPayload.email,
+        email: normalizedEmail,
         password: hashed,
         phone: userPayload.phone,
         address: userPayload.address,
