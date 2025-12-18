@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { LandingPage, CreateStore, AdminLogin, StorePage, OrdersQueue, AdminDashboard } from './pages';
+import { LandingPage, CreateStore, AdminLogin, StorePage, OrdersQueue, AdminDashboard, PaymentPage } from './pages';
 import { ThemeProvider } from './contexts/ThemeContext';
 import './index.css';
 
@@ -17,6 +17,7 @@ function App() {
           <Route path="/admin/*" element={<Navigate to="/admin" replace />} />
           <Route path="/chamanoespeto/:storeSlug" element={<StorePage />} />
           <Route path="/chamanoespeto/:storeSlug/orders" element={<OrdersQueue />} />
+          <Route path="/payment/:paymentId" element={<PaymentPage />} />
         </Routes>
       </Router>
     </ThemeProvider>

@@ -24,4 +24,24 @@ export class PaymentController {
       return res.status(400).json({ message: error.message });
     }
   }
+
+  static async getById(req: Request, res: Response) {
+    const { paymentId } = req.params;
+
+    try {
+      const payment = await paymentService.findById(paymentId);
+      if (!payment) return res.status(404).json({ message: 'Pagamento não encontrado' });
+
+      return res.json({
+        id: payment.id,
+        status: payment.status,
+        method: payment.method,
+        amount: Number(payment.amount),
+        qrCodeBase64: payment.qrCodeBase64,
+        expiresAt: payment.expiresAt,
+      });
+    } catch (error: any) {
+      return res.status(500).json({ message: error.message });
+    }
+  }
 }

@@ -68,6 +68,11 @@ export function CreateStore() {
 
       if (result.payment?.method === 'CREDIT_CARD' && result.payment.paymentLink) {
         window.location.href = result.payment.paymentLink;
+        return;
+      }
+
+      if (result.redirectUrl) {
+        navigate(result.redirectUrl);
       }
     } catch (error) {
       setStoreError(error.message || 'Não foi possível criar sua loja');

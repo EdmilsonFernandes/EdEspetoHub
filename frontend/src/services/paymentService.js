@@ -1,0 +1,16 @@
+import { apiClient } from '../config/apiClient';
+
+const toJson = async (response) => {
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.message || error.error || 'Erro ao consultar pagamento');
+  }
+  return response.json();
+};
+
+export const paymentService = {
+  async getById(paymentId) {
+    const response = await apiClient.rawGet(`/payments/${paymentId}`);
+    return toJson(response);
+  },
+};
