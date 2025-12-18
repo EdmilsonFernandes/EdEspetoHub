@@ -7,6 +7,7 @@ import { PlanController } from '../controllers/PlanController';
 import { SubscriptionController } from '../controllers/SubscriptionController';
 import { PlatformAdminController } from '../controllers/PlatformAdminController';
 import { requireActiveSubscription } from '../middleware/subscriptionGuard';
+import { PaymentController } from '../controllers/PaymentController';
 
 const routes = Router();
 
@@ -19,6 +20,7 @@ routes.post('/subscriptions', SubscriptionController.create);
 routes.get('/stores/:storeId/subscription', SubscriptionController.getByStore);
 routes.post('/subscriptions/:id/renew', SubscriptionController.renew);
 routes.patch('/subscriptions/:id/status', SubscriptionController.updateStatus);
+routes.post('/webhooks/payment-confirmed', PaymentController.confirm);
 
 routes.get('/admin/stores', PlatformAdminController.listStores);
 routes.patch('/admin/stores/:storeId/suspend', PlatformAdminController.suspendStore);

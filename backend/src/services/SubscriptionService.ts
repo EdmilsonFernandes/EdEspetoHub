@@ -22,15 +22,15 @@ export class SubscriptionService {
       throw new Error('Plano indisponível para assinatura');
     }
 
-    const now = new Date();
-    const endDate = this.addDays(now, resolvedPlan.durationDays);
+    const now = input.startDate || new Date();
+    const endDate = input.endDate || this.addDays(now, resolvedPlan.durationDays);
 
     const subscription = this.subscriptionRepository.create({
       store,
       plan: resolvedPlan,
       startDate: now,
       endDate,
-      status: 'ACTIVE',
+      status: input.status || 'ACTIVE',
       autoRenew: input.autoRenew ?? false,
     } as Subscription);
 
@@ -132,6 +132,7 @@ export class SubscriptionService {
   }
 
   private resolveStatus(subscription: Subscription): SubscriptionStatus {
+    if (subscription.status === 'PENDING') return 'PENDING';
     if (subscription.status === 'SUSPENDED') return 'SUSPENDED';
 
     const now = new Date();
