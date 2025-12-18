@@ -1,19 +1,35 @@
 // @ts-nocheck
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 
 interface Props {
-  session: any;
+  session?: any;
 }
 
-export function AdminDashboard({ session }: Props) {
-  const [store, setStore] = useState<any>(session.store);
+export function AdminDashboard({ session: sessionProp }: Props) {
+  const navigate = useNavigate();
+  const { auth, hydrated } = useAuth();
+  const session = useMemo(() => sessionProp || auth, [sessionProp, auth]);
+  const [store, setStore] = useState<any>(session?.store);
   const [product, setProduct] = useState({ name: '', price: 0, category: '', imageUrl: '' });
   const [products, setProducts] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [error, setError] = useState('');
 
   const storeId = store?.id;
+
+  useEffect(() => {
+    setStore(session?.store);
+  }, [session?.store]);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    if (!session?.token || session?.user?.role !== 'ADMIN' || !session?.store) {
+      navigate('/admin');
+    }
+  }, [hydrated, navigate, session?.store, session?.token, session?.user?.role]);
 
   useEffect(() => {
     if (!storeId) return;
@@ -67,6 +83,18 @@ export function AdminDashboard({ session }: Props) {
       setError(e.message);
     }
   };
+
+  if (!hydrated) {
+    return <div className="container">Carregando painel...</div>;
+  }
+
+  if (!store) {
+    return (
+      <div className="container">
+        <p>Recupere a sessão do administrador para acessar o painel.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="container">
