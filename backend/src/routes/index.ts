@@ -13,6 +13,7 @@ const routes = Router();
 
 routes.post('/auth/register', AuthController.register);
 routes.post('/auth/login', AuthController.login);
+routes.post('/auth/admin-login', AuthController.adminLogin);
 
 routes.get('/plans', PlanController.list);
 

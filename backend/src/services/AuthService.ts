@@ -181,6 +181,32 @@ export class AuthService
     return { user, store: firstStore, token };
   }
 
+  async adminLogin(slug: string, password: string)
+  {
+    const store = await this.storeRepository.findBySlug(slug);
+
+    if (!store)
+    {
+      throw new Error('Loja não encontrada');
+    }
+
+    const owner = store.owner;
+    const valid = await bcrypt.compare(password, owner.password);
+
+    if (!valid)
+    {
+      throw new Error('Credenciais inválidas');
+    }
+
+    const token = jwt.sign(
+      { sub: owner.id, storeId: store.id, role: 'ADMIN' },
+      env.jwtSecret,
+      { expiresIn: '12h' }
+    );
+
+    return { user: owner, store, token };
+  }
+
   private generateToken(userId: string, storeId?: string)
   {
     return jwt.sign({ sub: userId, storeId }, env.jwtSecret, { expiresIn: '12h' });

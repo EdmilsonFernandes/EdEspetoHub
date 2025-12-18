@@ -30,4 +30,19 @@ export class AuthController
       return res.status(401).json({ message: error.message });
     }
   }
+
+  static async adminLogin(req: Request, res: Response)
+  {
+    const { slug, password } = req.body;
+
+    try
+    {
+      const result = await authService.adminLogin(slug, password);
+      return res.json(result);
+    } catch (error: any)
+    {
+      const status = error.message === 'Loja não encontrada' ? 404 : 401;
+      return res.status(status).json({ message: error.message });
+    }
+  }
 }
