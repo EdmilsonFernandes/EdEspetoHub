@@ -1,6 +1,6 @@
 import { apiClient } from '../config/apiClient';
 
-const toJson = async (response) => {
+const toJson = async (response: any) => {
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
     throw new Error(error.message || error.error || 'Erro ao comunicar com a loja');
@@ -9,24 +9,24 @@ const toJson = async (response) => {
 };
 
 export const storeService = {
-  async create(payload) {
+  async create(payload: any) {
     const response = await apiClient.rawPost('/auth/register', payload);
     return toJson(response);
   },
 
-  async fetchBySlug(slug) {
+  async fetchBySlug(slug: any) {
     if (!slug) return null;
     const response = await apiClient.rawGet(`/stores/slug/${slug}`);
     if (response.status === 404) return null;
     return toJson(response);
   },
 
-  async updateSettings(slug, payload) {
+  async updateSettings(slug: any, payload: any) {
     const response = await apiClient.rawPut(`/stores/${slug}/settings`, payload);
     return toJson(response);
   },
 
-  async setStatus(slug, isOpen) {
+  async setStatus(slug: any, isOpen: any) {
     const response = await apiClient.rawPatch(`/stores/${slug}/status`, { isOpen });
     return toJson(response);
   },

@@ -2,30 +2,30 @@ import { apiClient } from "../config/apiClient";
 
 const POLLING_INTERVAL = 4000;
 
-const isUuid = (value) => /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(value);
-const buildOrdersPath = (identifier) =>
+const isUuid = (value: string) => /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(value);
+const buildOrdersPath = (identifier: string) =>
     isUuid(identifier)
         ? `/stores/${identifier}/orders`
         : `/stores/slug/${identifier}/orders`;
 
-const normalizeOrder = (order) => ({
+const normalizeOrder = (order: any) => ({
     ...order,
     id: order.id ?? order.order_id ?? order.orderId,
 });
 
 export const orderService = {
-    async save(orderData, storeId) {
+    async save(orderData: any, storeId: any) {
         const targetStore = storeId || apiClient.getOwnerId();
         await apiClient.post(buildOrdersPath(targetStore), orderData);
     },
 
-    async fetchAll(storeId) {
+    async fetchAll(storeId: any) {
         const targetStore = storeId || apiClient.getOwnerId();
         const data = await apiClient.get(buildOrdersPath(targetStore));
         return data.map(normalizeOrder);
     },
 
-    subscribeAll(storeId, callback) {
+    subscribeAll(storeId: any, callback: any) {
         let cancelled = false;
         const targetStore = storeId || apiClient.getOwnerId();
 
@@ -49,13 +49,13 @@ export const orderService = {
         };
     },
 
-    async fetchQueue(storeId) {
+    async fetchQueue(storeId: any) {
         const targetStore = storeId || apiClient.getOwnerId();
         const data = await apiClient.get(buildOrdersPath(targetStore));
         return data.map(normalizeOrder);
     },
 
-    subscribeRecent(storeId, callback) {
+    subscribeRecent(storeId: any, callback: any) {
         let cancelled = false;
         const targetStore = storeId || apiClient.getOwnerId();
 
@@ -75,11 +75,11 @@ export const orderService = {
         };
     },
 
-    async updateStatus(id, status) {
+    async updateStatus(id: string, status: string) {
         await apiClient.patch(`/orders/${id}/status`, { status });
     },
 
-    async updateItems(id, items, total) {
+    async updateItems(id: string, items: any, total: number) {
         await apiClient.patch(`/orders/${id}`, { items, total });
     },
 };

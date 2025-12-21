@@ -1,14 +1,5 @@
 const resolveBaseUrl = () => {
-    if (import.meta.env.VITE_API_BASE_URL) {
-        return import.meta.env.VITE_API_BASE_URL;
-    }
-
-    const base = window.location.origin;
-    if (base.endsWith("/api")) {
-        return base.replace(/\/+$/, "");
-    }
-
-    return `${base.replace(/\/+$/, "")}/api`;
+  return import.meta.env.VITE_API_BASE_URL || '/api';
 };
 
 const API_BASE_URL = resolveBaseUrl();
@@ -17,14 +8,14 @@ const defaultHeaders = {
     "Content-Type": "application/json",
 };
 
-let currentStoreSlug = null;
+let currentStoreSlug: string | null = null;
 
-const buildUrl = (path) => {
+const buildUrl = (path: string) => {
     const normalizedPath = path.startsWith("/") ? path : `/${path}`;
     return `${API_BASE_URL}${normalizedPath}`;
 };
 
-const handleResponse = async (response) => {
+const handleResponse = async (response: any) => {
     if (!response.ok) {
         const message = await response.text();
         throw new Error(message || "Erro na API");
@@ -32,7 +23,7 @@ const handleResponse = async (response) => {
     return response.json();
 };
 
-const request = async (path, options = {}) => {
+const request = async (path: string, options: any = {}) => {
     try {
         const url = buildUrl(path);
         const finalOptions = { ...options };
@@ -52,7 +43,7 @@ const request = async (path, options = {}) => {
     }
 };
 
-const rawRequest = async (path, options = {}) => {
+const rawRequest = async (path: string, options: any = {}) => {
     const url = buildUrl(path);
     const finalOptions = { ...options };
 
@@ -69,32 +60,32 @@ const rawRequest = async (path, options = {}) => {
 };
 
 export const apiClient = {
-    setOwnerId: (storeSlug) => {
+    setOwnerId: (storeSlug: string) => {
         currentStoreSlug = storeSlug || null;
     },
     getOwnerId: () => currentStoreSlug,
-    get: async (path) => request(path),
-    post: async (path, body) =>
+    get: async (path: string) => request(path),
+    post: async (path: string, body: any) =>
         request(path, {
             method: "POST",
             headers: defaultHeaders,
             body: JSON.stringify(body),
         }),
-    put: async (path, body) =>
+    put: async (path: string, body: any) =>
         request(path, {
             method: "PUT",
             headers: defaultHeaders,
             body: JSON.stringify(body),
         }),
-    patch: async (path, body) =>
+    patch: async (path: string, body: any) =>
         request(path, {
             method: "PATCH",
             headers: defaultHeaders,
             body: JSON.stringify(body),
         }),
-    delete: async (path) => request(path, { method: "DELETE" }),
-    rawGet: (path) => rawRequest(path, { method: "GET" }),
-    rawPost: (path, body) => rawRequest(path, { method: "POST", body }),
-    rawPut: (path, body) => rawRequest(path, { method: "PUT", body }),
-    rawPatch: (path, body) => rawRequest(path, { method: "PATCH", body }),
+    delete: async (path: string) => request(path, { method: "DELETE" }),
+    rawGet: (path: string) => rawRequest(path, { method: "GET" }),
+    rawPost: (path: string, body: any) => rawRequest(path, { method: "POST", body }),
+    rawPut: (path: string, body: any) => rawRequest(path, { method: "PUT", body }),
+    rawPatch: (path: string, body: any) => rawRequest(path, { method: "PATCH", body }),
 };

@@ -1,8 +1,9 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
+import { productService } from '../services/productService';
+import { apiClient } from '../config/apiClient';
 
 interface Props {
   session?: any;
@@ -33,8 +34,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
   useEffect(() => {
     if (!storeId) return;
-    api.listProducts(storeId).then(setProducts).catch((e) => setError(e.message));
-    api.listOrders(storeId).then(setOrders).catch((e) => setError(e.message));
+    productService.listBySlug(storeId).then(setProducts).catch((e) => setError(e.message));
+    apiClient.get(`/stores/${storeId}/orders`).then(setOrders).catch((e) => setError(e.message));
   }, [storeId]);
 
   useEffect(() => {

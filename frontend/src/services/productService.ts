@@ -2,20 +2,20 @@ import { apiClient } from "../config/apiClient";
 
 const POLLING_INTERVAL = 4000;
 
-const isUuid = (value) => /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(value);
-const buildProductsPath = (identifier) =>
+const isUuid = (value: any) => /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(value);
+const buildProductsPath = (identifier: any) =>
     isUuid(identifier)
         ? `/stores/${identifier}/products`
         : `/stores/slug/${identifier}/products`;
 
-const normalizeProduct = (product) => ({
+const normalizeProduct = (product: any) => ({
     ...product,
     id: product.id ?? product.product_id ?? product.productId,
     imageUrl: product.image_url ?? product.imageUrl ?? "",
 });
 
 export const productService = {
-    async save(product) {
+    async save(product: any) {
         const storeId = apiClient.getOwnerId();
         const basePath = buildProductsPath(storeId);
         const path = product.id ? `${basePath}/${product.id}` : basePath;
@@ -26,17 +26,17 @@ export const productService = {
             await apiClient.post(basePath, product);
         }
     },
-    async delete(id) {
+    async delete(id: any) {
         const storeId = apiClient.getOwnerId();
         const basePath = buildProductsPath(storeId);
         await apiClient.delete(`${basePath}/${id}`);
     },
-    async listBySlug(slug) {
+    async listBySlug(slug: any) {
         const data = await apiClient.get(`/stores/slug/${slug}/products`);
         return data.map(normalizeProduct);
     },
 
-    subscribe(callback) {
+    subscribe(callback: any) {
         let cancelled = false;
         const storeId = apiClient.getOwnerId();
         const basePath = buildProductsPath(storeId);

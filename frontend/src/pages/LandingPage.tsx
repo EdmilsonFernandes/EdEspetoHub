@@ -1,11 +1,14 @@
 // @ts-nocheck
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Moon, Sun } from 'lucide-react';
 import { Hero } from '../components/Hero';
 import { useTheme } from '../contexts/ThemeContext';
 import Lottie from 'lottie-react';
 import fireAnimation from '../assets/fire.json';
+import { Palette, MonitorCog, Smartphone, Rocket, Ham} from 'lucide-react';
+import { storeService } from '../services/storeService';
+import { platformService } from '../services/platformService';
 
 export function LandingPage() {
   const navigate = useNavigate();
@@ -17,8 +20,26 @@ export function LandingPage() {
     navigate('/chamanoespeto/test-store');
   };
 
+  interface Plan {
+    name: string;
+    price: number;
+    period: string;
+    features: string[];
+    popular?: boolean;
+    savings?: string;
+  }
+
+  interface Plans {
+    monthly: Plan[];
+    annual: Plan[];
+  }
+
+  useEffect(() => {
+    platformService.listStores()
+  }, []);
+
   // Pricing data
-  const plans = {
+  const plans: Plans = {
     monthly: [
       { name: '🥩 Plano Basic', price: 39.90, period: '/mês', features: ['Site ativo', 'Pedidos ilimitados', 'Suporte básico'] },
       { name: '🔥 Plano Pro', price: 79.90, period: '/mês', features: ['Tudo do plano basic', 'Prioridade no suporte', 'Selo "Plano Pro" no admin'], popular: true },
@@ -46,13 +67,6 @@ export function LandingPage() {
 
             <div className="flex items-center gap-2 sm:gap-3">
               <button
-                onClick={toggleTheme}
-                className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                aria-label="Toggle theme"
-              >
-                {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
-              </button>
-              <button
                 onClick={goToDemoStore}
                 className="px-3 py-2 sm:px-4 text-sm rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
               >
@@ -60,18 +74,18 @@ export function LandingPage() {
                 <span className="sm:hidden">Demo</span>
               </button>
               <button
-                onClick={() => navigate('/create')}
-                className="px-3 py-2 sm:px-4 text-sm rounded-lg bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold hover:from-red-600 hover:to-red-700 transition-all shadow-lg"
-              >
-                <span className="hidden sm:inline">Criar Loja</span>
-                <span className="sm:hidden">Criar</span>
-              </button>
-              <button
                 onClick={() => navigate('/admin')}
                 className="px-3 py-2 sm:px-4 text-sm rounded-lg border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-white transition-all"
               >
                 <span className="hidden sm:inline">Admin</span>
                 <span className="sm:hidden">Admin</span>
+              </button>
+              <button
+                onClick={toggleTheme}
+                className="cursor-pointer p-2 rounded-lg dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                aria-label="Toggle theme"
+              >
+                {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
               </button>
             </div>
           </div>
@@ -83,14 +97,14 @@ export function LandingPage() {
         {/* Hero Section */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
           <div className="text-center space-y-6">
-            <span className="inline-flex items-center px-3 py-1 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs font-bold rounded-full uppercase tracking-wide border border-red-100 dark:border-red-800">
+            <span className="animate-bounce inline-flex items-center px-3 py-1 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs font-bold rounded-full uppercase tracking-wide border border-red-100 dark:border-red-800">
               🔥 Plataforma multi-loja
             </span>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black text-gray-900 dark:text-white leading-tight">
               Crie sites de pedidos de
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-red-600">
                 {' '}
-                churrasco{' '}
+                churrasco {' '}
               </span>
               personalizados
             </h1>
@@ -122,28 +136,28 @@ export function LandingPage() {
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
               <div className="p-6 bg-gray-50 dark:bg-gray-900 border border-red-100 dark:border-red-900 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
                 <div className="w-12 h-12 bg-gradient-to-br from-red-400 to-red-500 rounded-xl flex items-center justify-center mb-4">
-                  <span className="text-white text-2xl">🎨</span>
+                 <Palette className="text-white text-2xl" />
                 </div>
                 <p className="font-bold text-gray-900 dark:text-white mb-2 text-lg">Identidade visual flexível</p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Logo, cores e slug exclusivo por loja.</p>
               </div>
               <div className="p-6 bg-gray-50 dark:bg-gray-900 border border-red-100 dark:border-red-900 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
                 <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center mb-4">
-                  <span className="text-white text-2xl">⚡</span>
+                  <MonitorCog className="text-white text-2xl" />
                 </div>
                 <p className="font-bold text-gray-900 dark:text-white mb-2 text-lg">Gestão completa</p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Produtos, status e fila do churrasqueiro.</p>
               </div>
               <div className="p-6 bg-gray-50 dark:bg-gray-900 border border-red-100 dark:border-red-900 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
                 <div className="w-12 h-12 bg-gradient-to-br from-red-600 to-red-700 rounded-xl flex items-center justify-center mb-4">
-                  <span className="text-white text-2xl">📱</span>
+                  <Smartphone className="text-white text-2xl" />
                 </div>
                 <p className="font-bold text-gray-900 dark:text-white mb-2 text-lg">Mobile-first</p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Otimizado para celular e tablet.</p>
               </div>
               <div className="p-6 bg-gray-50 dark:bg-gray-900 border border-red-100 dark:border-red-900 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
                 <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl flex items-center justify-center mb-4">
-                  <span className="text-white text-2xl">🚀</span>
+                  <Rocket className="text-white text-2xl" />
                 </div>
                 <p className="font-bold text-gray-900 dark:text-white mb-2 text-lg">Setup rápido</p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Sua loja online em minutos.</p>
@@ -156,7 +170,7 @@ export function LandingPage() {
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
           <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-3xl shadow-xl p-8 sm:p-12 text-center">
             <div className="w-20 h-20 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl flex items-center justify-center mx-auto shadow-lg mb-6">
-              <span className="text-white text-4xl">🍖</span>
+              <Ham className="text-white text-9xl" />
             </div>
             <h2 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white mb-4">Tudo que você precisa</h2>
             <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
@@ -231,47 +245,47 @@ export function LandingPage() {
                     : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
                     }`}
                 >
-                    {plan.popular && (
-                      <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                        <span className="bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-1 rounded-full text-xs font-bold">
-                          MAIS POPULAR
-                        </span>
-                      </div>
-                    )}
-                    {plan.savings && (
-                      <div className="absolute -top-4 right-4">
-                        <span className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-3 py-1 rounded-full text-xs font-bold">
-                          {plan.savings}
-                        </span>
-                      </div>
-                    )}
-                    <div className={`text-center mb-6 ${plan.popular ? 'mt-2' : ''}`}>
-                      <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{plan.name}</h3>
-                      <div className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-red-600 mb-2">
-                        R$ {plan.price.toFixed(2)}
-                      </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">{plan.period}</p>
+                  {plan.popular && (
+                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                      <span className="bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-1 rounded-full text-xs font-bold">
+                        MAIS POPULAR
+                      </span>
                     </div>
-                    <ul className="space-y-3 mb-8 flex-grow">
-                      {plan.features.map((feature, featureIndex) => (
-                        <li key={featureIndex} className="flex items-center gap-3 text-gray-700 dark:text-gray-300">
-                          <span className="text-red-500 text-lg">✓</span>
-                          <span>{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    <button
-                      onClick={() => navigate('/create')}
-                      className={`w-full px-6 py-3 rounded-lg font-semibold transition-all ${plan.popular
-                        ? 'bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700 shadow-lg'
-                        : 'border-2 border-red-500 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20'
-                        }`}
-                    >
-                      Começar Agora
-                    </button>
+                  )}
+                  {plan.savings && (
+                    <div className="absolute -top-4 right-4">
+                      <span className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-3 py-1 rounded-full text-xs font-bold">
+                        {plan.savings}
+                      </span>
+                    </div>
+                  )}
+                  <div className={`text-center mb-6 ${plan.popular ? 'mt-2' : ''}`}>
+                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{plan.name}</h3>
+                    <div className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-red-600 mb-2">
+                      R$ {plan.price.toFixed(2)}
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">{plan.period}</p>
                   </div>
+                  <ul className="space-y-3 mb-8 flex-grow">
+                    {plan.features.map((feature, featureIndex) => (
+                      <li key={featureIndex} className="flex items-center gap-3 text-gray-700 dark:text-gray-300">
+                        <span className="text-red-500 text-lg">✓</span>
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <button
+                    onClick={() => navigate('/create')}
+                    className={`w-full px-6 py-3 rounded-lg font-semibold transition-all ${plan.popular
+                      ? 'bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700 shadow-lg'
+                      : 'border-2 border-red-500 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20'
+                      }`}
+                  >
+                    Começar Agora
+                  </button>
                 </div>
-              ))}
+              </div>
+            ))}
           </div>
 
           {/* Mobile Carousel Controls */}
@@ -289,8 +303,8 @@ export function LandingPage() {
                   key={index}
                   onClick={() => setCarouselIndex(index)}
                   className={`w-3 h-3 rounded-full transition-colors ${index === carouselIndex
-                      ? 'bg-red-500'
-                      : 'bg-gray-300 dark:bg-gray-600'
+                    ? 'bg-red-500'
+                    : 'bg-gray-300 dark:bg-gray-600'
                     }`}
                   aria-label={`Go to plan ${index + 1}`}
                 />
@@ -313,9 +327,6 @@ export function LandingPage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-red-600 text-white font-black flex items-center justify-center">
-                  CS
-                </div>
                 <span className="text-xl font-black text-white">Chama no Espeto</span>
               </div>
               <p className="text-sm text-gray-400">Plataforma completa para gestão de pedidos de churrasco online.</p>

@@ -33,7 +33,7 @@ export function AdminLogin() {
       <div className="max-w-md w-full">
         <form onSubmit={handleLogin} className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 sm:p-8 space-y-6">
           <div className="text-center">
-            <div 
+            <div
               className="w-16 h-16 rounded-2xl flex items-center justify-center text-white font-black text-2xl shadow-lg mx-auto mb-4"
               style={{ backgroundColor: branding.primaryColor }}
             >
@@ -54,6 +54,17 @@ export function AdminLogin() {
           )}
 
           <div className="space-y-4">
+                        <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700">Identificador da loja (slug)</label>
+              <input
+                type="text"
+                value={loginForm.slug}
+                onChange={(e) => setLoginForm((prev) => ({ ...prev, slug: e.target.value }))}
+                className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
+                placeholder="ex.: espetinhodatony"
+              />
+              <p className="text-xs text-gray-500">Use o slug fácil de memorizar da sua loja.</p>
+            </div>
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700">Senha</label>
               <input
@@ -65,17 +76,7 @@ export function AdminLogin() {
               />
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-700">Identificador da loja (slug)</label>
-              <input
-                type="text"
-                value={loginForm.slug}
-                onChange={(e) => setLoginForm((prev) => ({ ...prev, slug: e.target.value }))}
-                className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
-                placeholder="ex.: espetinhodatony"
-              />
-              <p className="text-xs text-gray-500">Use o slug fácil de memorizar da sua loja.</p>
-            </div>
+
           </div>
 
           <div className="space-y-3">

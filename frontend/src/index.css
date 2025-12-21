@@ -5,3 +5,39 @@
 @theme {
   --color-primary: #dc2626;
 }
+
+/* 🔥 FIRE ANIMATION */
+@keyframes flame {
+  0% {
+    background-position: 0% 50%;
+    filter: brightness(1);
+  }
+  50% {
+    background-position: 100% 50%;
+    filter: brightness(1.3);
+  }
+  100% {
+    background-position: 0% 50%;
+    filter: brightness(1);
+  }
+}
+
+@keyframes flicker {
+  0%, 100% { opacity: 1 }
+  40% { opacity: 0.9 }
+  60% { opacity: 1 }
+  80% { opacity: 0.95 }
+}
+
+/* Utility classes */
+.animate-flame {
+  animation: flame 3s ease-in-out infinite;
+}
+
+.animate-flicker {
+  animation: flicker 1.5s infinite;
+}
+
+.bg-fire {
+  background-size: 300% 300%;
+}

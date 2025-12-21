@@ -95,7 +95,7 @@ export function CreateStore() {
                 <p className="text-sm text-gray-500">Criar nova loja</p>
               </div>
             </button>
-            
+
             <button
               onClick={() => navigate('/')}
               className="px-3 py-2 sm:px-4 text-sm rounded-lg border-2 border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors"
