@@ -15,6 +15,9 @@ export class StoreSettings {
   @Column({ name: 'secondary_color', nullable: true })
   secondaryColor?: string;
 
+  @Column({ name: 'social_links', type: 'jsonb', nullable: true, default: () => "'[]'" })
+  socialLinks?: { type: string; value: string }[];
+
   @OneToOne(() => Store, (store) => store.settings, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'store_id' })
   store!: Store;

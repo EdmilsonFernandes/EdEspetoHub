@@ -19,10 +19,66 @@ export function CreateStore() {
     phone: '',
     address: '',
     storeName: '',
-    logoUrl: '',
+    logoFile: '',
     primaryColor: '#b91c1c',
     secondaryColor: '#111827',
+    socialLinks: [
+      {
+        type: 'instagram',
+        value: '',
+      },
+    ],
   });
+
+  const convertFileToBase64 = (file: File) =>
+    new Promise<string>((resolve, reject) =>
+    {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+  const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) =>
+  {
+    const file = event.target.files?.[ 0 ];
+    if (!file) return;
+
+    try
+    {
+      const base64 = await convertFileToBase64(file);
+      setRegisterForm((prev) => ({ ...prev, logoFile: base64 }));
+    } catch (error)
+    {
+      console.error('Falha ao processar logo', error);
+      setStoreError('Não foi possível carregar o logo enviado.');
+    }
+  };
+
+  const updateSocialLink = (index: number, key: 'type' | 'value', value: string) =>
+  {
+    setRegisterForm((prev) => {
+      const links = [ ...prev.socialLinks ];
+      links[ index ] = { ...links[ index ], [ key ]: value };
+      return { ...prev, socialLinks: links };
+    });
+  };
+
+  const addSocialLink = () =>
+  {
+    setRegisterForm((prev) => ({
+      ...prev,
+      socialLinks: [ ...prev.socialLinks, { type: 'instagram', value: '' } ],
+    }));
+  };
+
+  const removeSocialLink = (index: number) =>
+  {
+    setRegisterForm((prev) => ({
+      ...prev,
+      socialLinks: prev.socialLinks.filter((_, i) => i !== index),
+    }));
+  };
 
   useEffect(() => {
     const fetchPlans = async () => {
@@ -55,9 +111,10 @@ export function CreateStore() {
         },
         store: {
           name: registerForm.storeName,
-          logoUrl: registerForm.logoUrl,
+          logoFile: registerForm.logoFile,
           primaryColor: registerForm.primaryColor,
           secondaryColor: registerForm.secondaryColor,
+          socialLinks: registerForm.socialLinks.filter((link) => link.value),
         },
         planId: selectedPlanId,
         paymentMethod,
@@ -201,13 +258,21 @@ export function CreateStore() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-700">URL do logo (opcional)</label>
-                    <input
-                      value={registerForm.logoUrl}
-                      onChange={(e) => setRegisterForm((prev) => ({ ...prev, logoUrl: e.target.value }))}
-                      className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
-                      placeholder="https://..."
-                    />
+                    <label className="text-sm font-semibold text-gray-700">Logo da loja (upload opcional)</label>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleLogoUpload}
+                        className="flex-1 text-sm border border-gray-200 rounded-xl p-2"
+                      />
+                      {registerForm.logoFile && (
+                        <div className="w-12 h-12 rounded-xl overflow-hidden border border-gray-200">
+                          <img src={registerForm.logoFile} alt="Pré-visualização do logo" className="w-full h-full object-cover" />
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-500">Envie um arquivo de imagem. Este campo é opcional.</p>
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-gray-700">Cor principal</label>
@@ -229,8 +294,8 @@ export function CreateStore() {
                 </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">Cor secundária</label>
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700">Cor secundária</label>
                     <div className="flex items-center gap-3">
                       <input
                         type="color"
@@ -247,9 +312,50 @@ export function CreateStore() {
                     </div>
                   </div>
                   <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700">Redes sociais</label>
+                    <div className="space-y-3">
+                      {registerForm.socialLinks.map((link, index) => (
+                        <div key={index} className="flex gap-3 items-center">
+                          <select
+                            value={link.type}
+                            onChange={(e) => updateSocialLink(index, 'type', e.target.value)}
+                            className="border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                          >
+                            <option value="instagram">Instagram</option>
+                            <option value="facebook">Facebook</option>
+                            <option value="twitter">Twitter (X)</option>
+                          </select>
+                          <input
+                            value={link.value}
+                            onChange={(e) => updateSocialLink(index, 'value', e.target.value)}
+                            className="flex-1 border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
+                            placeholder="@usuario ou URL"
+                          />
+                          {registerForm.socialLinks.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => removeSocialLink(index)}
+                              className="text-sm text-red-600 hover:text-red-700"
+                            >
+                              Remover
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={addSocialLink}
+                        className="text-sm text-red-600 hover:text-red-700 font-semibold"
+                      >
+                        + Adicionar rede
+                      </button>
+                    </div>
+                    <p className="text-xs text-gray-500">Informe apenas as redes que quiser destacar.</p>
+                  </div>
+                  <div className="space-y-2">
                     <label className="text-sm font-semibold text-gray-700">URL da loja</label>
                     <div className="flex items-center">
-                      <span className="text-sm text-gray-500 bg-gray-50 border border-r-0 border-gray-200 rounded-l-xl px-3 py-3">
+                      <span className="text-sm text-gray-500 bg-gray-50 border border-r-0 border-gray-200 rounded-l-xl px-3 py-3"> 
                         /chamanoespeto/
                       </span>
                       <input

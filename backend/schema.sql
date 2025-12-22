@@ -33,7 +33,8 @@ CREATE TABLE IF NOT EXISTS store_settings (
   store_id UUID NOT NULL UNIQUE REFERENCES stores(id) ON DELETE CASCADE,
   logo_url TEXT,
   primary_color TEXT NOT NULL DEFAULT '#b91c1c',
-  secondary_color TEXT
+  secondary_color TEXT,
+  social_links JSONB DEFAULT '[]'
 );
 
 CREATE TABLE IF NOT EXISTS products (
