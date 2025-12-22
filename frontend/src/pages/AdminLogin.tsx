@@ -13,7 +13,7 @@ export function AdminLogin() {
   const [loginError, setLoginError] = useState('');
   const [branding] = useState(getPersistedBranding());
 
-  const handleLogin = async (event) => {
+  const handleLogin = async event => {
     event?.preventDefault();
     setLoginError('');
 
@@ -21,26 +21,38 @@ export function AdminLogin() {
       const session = await authService.adminLogin(loginForm.slug, loginForm.password);
       const sessionData = { token: session.token, user: session.user, store: session.store };
       setAuth(sessionData);
-      apiClient.setOwnerId(session.store.slug);
       navigate('/admin/dashboard');
     } catch (error) {
       setLoginError(error.message || 'Falha ao autenticar');
     }
   };
 
-  const brandInitials = branding.brandName?.split(' ').map((part) => part?.[0]).join('').slice(0, 2).toUpperCase() || 'ED';
+  const brandInitials =
+    branding.brandName
+      ?.split(' ')
+      .map(part => part?.[0])
+      .join('')
+      .slice(0, 2)
+      .toUpperCase() || 'ED';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
       <div className="max-w-md w-full">
-        <form onSubmit={handleLogin} className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 sm:p-8 space-y-6">
+        <form
+          onSubmit={handleLogin}
+          className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 sm:p-8 space-y-6"
+        >
           <div className="text-center">
             <div
               className="w-16 h-16 rounded-2xl flex items-center justify-center text-white font-black text-2xl shadow-lg mx-auto mb-4"
               style={{ backgroundColor: branding.primaryColor }}
             >
               {branding.logoUrl ? (
-                <img src={branding.logoUrl} alt={branding.brandName} className="w-full h-full object-cover rounded-2xl" />
+                <img
+                  src={branding.logoUrl}
+                  alt={branding.brandName}
+                  className="w-full h-full object-cover rounded-2xl"
+                />
               ) : (
                 brandInitials
               )}
@@ -50,18 +62,16 @@ export function AdminLogin() {
           </div>
 
           {loginError && (
-            <div className="text-sm text-red-700 bg-red-50 border border-red-200 p-4 rounded-xl">
-              {loginError}
-            </div>
+            <div className="text-sm text-red-700 bg-red-50 border border-red-200 p-4 rounded-xl">{loginError}</div>
           )}
 
           <div className="space-y-4">
-                        <div className="space-y-2">
+            <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700">Identificador da loja (slug)</label>
               <input
                 type="text"
                 value={loginForm.slug}
-                onChange={(e) => setLoginForm((prev) => ({ ...prev, slug: e.target.value }))}
+                onChange={e => setLoginForm(prev => ({ ...prev, slug: e.target.value }))}
                 className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
                 placeholder="ex.: espetinhodatony"
               />
@@ -72,13 +82,11 @@ export function AdminLogin() {
               <input
                 type="password"
                 value={loginForm.password}
-                onChange={(e) => setLoginForm((prev) => ({ ...prev, password: e.target.value }))}
+                onChange={e => setLoginForm(prev => ({ ...prev, password: e.target.value }))}
                 className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
                 placeholder="admin123"
               />
             </div>
-
-
           </div>
 
           <div className="space-y-3">

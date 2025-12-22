@@ -19,7 +19,7 @@ export const AppDataSource = new DataSource({
   password: env.database.password,
   database: env.database.database,
   synchronize: false,
-  logging: false,
-  entities: [User, Store, StoreSettings, Product, Order, OrderItem, Plan, Subscription, Payment],
+  entities: [ User, Store, StoreSettings, Product, Order, OrderItem, Plan, Subscription, Payment ],
   migrations: [],
+  logging: [ 'error', 'query' ]
 });

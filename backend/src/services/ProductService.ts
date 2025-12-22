@@ -2,11 +2,13 @@ import { CreateProductDto } from '../dto/CreateProductDto';
 import { ProductRepository } from '../repositories/ProductRepository';
 import { StoreRepository } from '../repositories/StoreRepository';
 
-export class ProductService {
+export class ProductService
+{
   private productRepository = new ProductRepository();
   private storeRepository = new StoreRepository();
 
-  async create(input: CreateProductDto) {
+  async create(input: CreateProductDto)
+  {
     const store = await this.storeRepository.findById(input.storeId);
     if (!store) throw new Error('Loja não encontrada');
 
@@ -21,19 +23,22 @@ export class ProductService {
     return this.productRepository.save(product);
   }
 
-  async listByStoreId(storeId: string) {
+  async listByStoreId(storeId: string)
+  {
     const store = await this.storeRepository.findById(storeId);
     if (!store) throw new Error('Loja não encontrada');
-    return this.productRepository.findByStore(store);
+    return this.productRepository.findByStoreId(store.id);
   }
 
-  async listByStoreSlug(slug: string) {
+  async listByStoreSlug(slug: string)
+  {
     const store = await this.storeRepository.findBySlug(slug);
     if (!store) throw new Error('Loja não encontrada');
-    return this.productRepository.findByStore(store);
+    return this.productRepository.findByStoreId(store.id);
   }
 
-  async update(storeId: string, productId: string, data: Partial<CreateProductDto>) {
+  async update(storeId: string, productId: string, data: Partial<CreateProductDto>)
+  {
     const store = await this.storeRepository.findById(storeId);
     const product = await this.productRepository.findById(productId);
     if (!store || !product || product.store.id !== store.id) throw new Error('Produto não encontrado');
@@ -46,7 +51,8 @@ export class ProductService {
     return this.productRepository.save(product);
   }
 
-  async remove(storeId: string, productId: string) {
+  async remove(storeId: string, productId: string)
+  {
     const store = await this.storeRepository.findById(storeId);
     const product = await this.productRepository.findById(productId);
     if (!store || !product || product.store.id !== store.id) throw new Error('Produto não encontrado');

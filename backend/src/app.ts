@@ -18,8 +18,9 @@ async function bootstrap()
   app.use('/uploads', express.static('uploads'));
 
   app.get('/', (_, res) => res.json({ status: 'ok', name: 'Churras Sites API' }));
-  app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+  app.use('/api/docs', swaggerUi.serve as any, swaggerUi.setup(swaggerSpec) as any);
   app.get('/api/docs.json', (_, res) => res.json(swaggerSpec));
+
   app.use('/api', routes);
 
   scheduleSubscriptionExpirationJob();

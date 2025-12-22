@@ -1,28 +1,39 @@
 import { Repository } from 'typeorm';
 import { AppDataSource } from '../config/database';
 import { Order } from '../entities/Order';
-import { Store } from '../entities/Store';
 
-export class OrderRepository {
+export class OrderRepository
+{
   private repository: Repository<Order>;
 
-  constructor() {
+  constructor()
+  {
     this.repository = AppDataSource.getRepository(Order);
   }
 
-  create(data: Partial<Order>) {
+  create(data: Partial<Order>)
+  {
     return this.repository.create(data);
   }
 
-  save(order: Order) {
+  save(order: Order)
+  {
     return this.repository.save(order);
   }
 
-  findByStore(store: Store) {
-    return this.repository.find({ where: { store }, order: { createdAt: 'DESC' } });
+  findByStoreId(storeId: string)
+  {
+    return this.repository.find({
+      where: { store: { id: storeId } },
+      order: { createdAt: 'DESC' },
+    });
   }
 
-  findQueueByStore(store: Store) {
-    return this.repository.find({ where: { store, status: 'pending' }, order: { createdAt: 'ASC' } });
+  findQueueByStoreId(storeId: string)
+  {
+    return this.repository.find({
+      where: { store: { id: storeId }, status: 'pending' },
+      order: { createdAt: 'ASC' },
+    });
   }
 }

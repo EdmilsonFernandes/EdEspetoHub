@@ -9,11 +9,6 @@ import { EntityManager } from 'typeorm';
 import { saveBase64Image } from '../utils/imageStorage';
 import { sanitizeSocialLinks } from '../utils/socialLinks';
 
-const sanitizeSocialLinks = (links: any) =>
-  Array.isArray(links)
-    ? links.filter((link) => link?.type && link?.value)
-    : [];
-
 export class StoreService
 {
   private subscriptionService = new SubscriptionService();

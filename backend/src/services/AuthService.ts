@@ -15,11 +15,6 @@ import { Subscription } from '../entities/Subscription';
 import { saveBase64Image } from '../utils/imageStorage';
 import { sanitizeSocialLinks } from '../utils/socialLinks';
 
-const sanitizeSocialLinks = (links: any) =>
-  Array.isArray(links)
-    ? links.filter((link: any) => link?.type && link?.value)
-    : [];
-
 export class AuthService
 {
   private userRepository = new UserRepository();
@@ -197,28 +192,32 @@ export class AuthService
   async adminLogin(slug: string, password: string)
   {
     const store = await this.storeRepository.findBySlug(slug);
-
-    if (!store)
-    {
-      throw new Error('Loja não encontrada');
-    }
+    if (!store) throw new Error('Loja não encontrada');
 
     const owner = store.owner;
     const valid = await bcrypt.compare(password, owner.password);
-
-    if (!valid)
-    {
-      throw new Error('Credenciais inválidas');
-    }
+    if (!valid) throw new Error('Credenciais inválidas');
 
     const token = jwt.sign(
       { sub: owner.id, storeId: store.id, role: 'ADMIN' },
       env.jwtSecret,
-      { expiresIn: '12h' }
+      { expiresIn: '7d' }
     );
 
-    return { user: owner, store, token };
+    return {
+      token,
+      user: {
+        id: owner.id,
+        fullName: owner.fullName,
+        email: owner.email,
+        phone: owner.phone,
+        address: owner.address,
+        role: 'ADMIN',
+      },
+      store,
+    };
   }
+
 
   private generateToken(userId: string, storeId?: string)
   {

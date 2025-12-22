@@ -2,84 +2,105 @@ import { apiClient } from "../config/apiClient";
 
 const POLLING_INTERVAL = 4000;
 
-const isUuid = (value: string) => /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(value);
+const isUuid = (value: string) =>
+  /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(value);
+
 const buildOrdersPath = (identifier: string) =>
-    isUuid(identifier)
-        ? `/stores/${identifier}/orders`
-        : `/stores/slug/${identifier}/orders`;
+  isUuid(identifier)
+    ? `/stores/${identifier}/orders`
+    : `/stores/slug/${identifier}/orders`;
 
 const normalizeOrder = (order: any) => ({
-    ...order,
-    id: order.id ?? order.order_id ?? order.orderId,
+  ...order,
+  id: order.id ?? order.order_id ?? order.orderId,
 });
 
+// 🔐 recupera store da sessão
+const getStoreIdentifierFromSession = (): string =>
+{
+  const raw = localStorage.getItem("adminSession");
+  if (!raw) throw new Error("Sessão inválida");
+
+  const parsed = JSON.parse(raw);
+  return parsed?.store?.id || parsed?.store?.slug;
+};
+
 export const orderService = {
-    async save(orderData: any, storeId: any) {
-        const targetStore = storeId || apiClient.getOwnerId();
-        await apiClient.post(buildOrdersPath(targetStore), orderData);
-    },
+  async save(orderData: any, storeId?: string)
+  {
+    const targetStore = storeId || getStoreIdentifierFromSession();
+    await apiClient.post(buildOrdersPath(targetStore), orderData);
+  },
 
-    async fetchAll(storeId: any) {
-        const targetStore = storeId || apiClient.getOwnerId();
+  async fetchAll(storeId?: string)
+  {
+    const targetStore = storeId || getStoreIdentifierFromSession();
+    const data = await apiClient.get(buildOrdersPath(targetStore));
+    return data.map(normalizeOrder);
+  },
+
+  async fetchQueue(storeId?: string)
+  {
+    const targetStore = storeId || getStoreIdentifierFromSession();
+    const data = await apiClient.get(buildOrdersPath(targetStore));
+    return data.map(normalizeOrder);
+  },
+
+  subscribeAll(storeId: string | undefined, callback: any)
+  {
+    let cancelled = false;
+    const targetStore = storeId || getStoreIdentifierFromSession();
+
+    const load = async () =>
+    {
+      try
+      {
         const data = await apiClient.get(buildOrdersPath(targetStore));
-        return data.map(normalizeOrder);
-    },
+        if (!cancelled) callback(data.map(normalizeOrder));
+      } catch (error)
+      {
+        console.error("Erro ao carregar pedidos", error);
+      }
+    };
 
-    subscribeAll(storeId: any, callback: any) {
-        let cancelled = false;
-        const targetStore = storeId || apiClient.getOwnerId();
+    load();
+    const interval = setInterval(load, POLLING_INTERVAL);
 
-        const load = async () => {
-            try {
-                const data = await apiClient.get(buildOrdersPath(targetStore));
-                if (!cancelled) {
-                    callback(data.map(normalizeOrder));
-                }
-            } catch (error) {
-                console.error("Erro ao carregar pedidos", error);
-            }
-        };
+    return () =>
+    {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  },
 
-        load();
-        const interval = setInterval(load, POLLING_INTERVAL);
+  subscribeRecent(storeId: string | undefined, callback: any)
+  {
+    let cancelled = false;
+    const targetStore = storeId || getStoreIdentifierFromSession();
 
-        return () => {
-            cancelled = true;
-            clearInterval(interval);
-        };
-    },
+    const load = async () =>
+    {
+      const data = await apiClient.get(buildOrdersPath(targetStore));
+      if (!cancelled) callback(data.map(normalizeOrder));
+    };
 
-    async fetchQueue(storeId: any) {
-        const targetStore = storeId || apiClient.getOwnerId();
-        const data = await apiClient.get(buildOrdersPath(targetStore));
-        return data.map(normalizeOrder);
-    },
+    load();
+    const interval = setInterval(load, POLLING_INTERVAL);
 
-    subscribeRecent(storeId: any, callback: any) {
-        let cancelled = false;
-        const targetStore = storeId || apiClient.getOwnerId();
+    return () =>
+    {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  },
 
-        const load = async () => {
-            const data = await this.fetchQueue(targetStore);
-            if (!cancelled) {
-                callback(data);
-            }
-        };
+  async updateStatus(id: string, status: string)
+  {
+    await apiClient.patch(`/orders/${id}/status`, { status });
+  },
 
-        load();
-        const interval = setInterval(load, POLLING_INTERVAL);
-
-        return () => {
-            cancelled = true;
-            clearInterval(interval);
-        };
-    },
-
-    async updateStatus(id: string, status: string) {
-        await apiClient.patch(`/orders/${id}/status`, { status });
-    },
-
-    async updateItems(id: string, items: any, total: number) {
-        await apiClient.patch(`/orders/${id}`, { items, total });
-    },
+  async updateItems(id: string, items: any, total: number)
+  {
+    await apiClient.patch(`/orders/${id}`, { items, total });
+  },
 };

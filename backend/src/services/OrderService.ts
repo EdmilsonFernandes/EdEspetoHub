@@ -5,12 +5,14 @@ import { OrderRepository } from '../repositories/OrderRepository';
 import { ProductRepository } from '../repositories/ProductRepository';
 import { StoreRepository } from '../repositories/StoreRepository';
 
-export class OrderService {
+export class OrderService
+{
   private orderRepository = new OrderRepository();
   private storeRepository = new StoreRepository();
   private productRepository = new ProductRepository();
 
-  async create(input: CreateOrderDto) {
+  async create(input: CreateOrderDto)
+  {
     const store = await this.storeRepository.findById(input.storeId);
     if (!store) throw new Error('Loja não encontrada');
 
@@ -18,7 +20,8 @@ export class OrderService {
     return this.orderRepository.save(order);
   }
 
-  async createBySlug(input: Omit<CreateOrderDto, 'storeId'> & { storeSlug: string }) {
+  async createBySlug(input: Omit<CreateOrderDto, 'storeId'> & { storeSlug: string })
+  {
     const store = await this.storeRepository.findBySlug(input.storeSlug);
     if (!store) throw new Error('Loja não encontrada');
 
@@ -26,25 +29,30 @@ export class OrderService {
     return this.orderRepository.save(order);
   }
 
-  async listByStoreId(storeId: string) {
+  async listByStoreId(storeId: string)
+  {
     const store = await this.storeRepository.findById(storeId);
     if (!store) throw new Error('Loja não encontrada');
-    return this.orderRepository.findByStore(store);
+    return this.orderRepository.findByStoreId(store.id);
   }
 
-  async listByStoreSlug(slug: string) {
+  async listByStoreSlug(slug: string)
+  {
     const store = await this.storeRepository.findBySlug(slug);
     if (!store) throw new Error('Loja não encontrada');
-    return this.orderRepository.findByStore(store);
+    return this.orderRepository.findByStoreId(store.id);
   }
 
-  private async buildOrder(input: Omit<CreateOrderDto, 'storeId'>, store: Awaited<ReturnType<StoreRepository['findById']>>) {
+  private async buildOrder(input: Omit<CreateOrderDto, 'storeId'>, store: Awaited<ReturnType<StoreRepository[ 'findById' ]>>)
+  {
     const items: OrderItem[] = [];
     let total = 0;
 
-    for (const item of input.items) {
+    for (const item of input.items)
+    {
       const product = await this.productRepository.findById(item.productId);
-      if (!product || product.store.id !== store!.id) {
+      if (!product || product.store.id !== store!.id)
+      {
         throw new Error('Produto inválido para esta loja');
       }
 

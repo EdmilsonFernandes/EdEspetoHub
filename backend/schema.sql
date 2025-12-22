@@ -37,6 +37,9 @@ CREATE TABLE IF NOT EXISTS store_settings (
   social_links JSONB DEFAULT '[]'
 );
 
+ALTER TABLE store_settings
+ADD COLUMN IF NOT EXISTS social_links JSONB DEFAULT '[]';
+
 CREATE TABLE IF NOT EXISTS products (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
