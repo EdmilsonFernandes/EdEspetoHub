@@ -13,6 +13,7 @@ import { PaymentMethod } from '../entities/Payment';
 import { Plan } from '../entities/Plan';
 import { Subscription } from '../entities/Subscription';
 import { saveBase64Image } from '../utils/imageStorage';
+import { sanitizeSocialLinks } from '../utils/socialLinks';
 
 export class AuthService
 {
@@ -100,9 +101,7 @@ export class AuthService
         logoUrl: logoUrl || storePayload.logoUrl,
         primaryColor: storePayload.primaryColor,
         secondaryColor: storePayload.secondaryColor,
-        socialLinks: (storePayload.socialLinks || []).filter(
-          (link: any) => link?.type && link?.value
-        ),
+        socialLinks: sanitizeSocialLinks(storePayload.socialLinks),
       });
 
       const store = storeRepo.create({
