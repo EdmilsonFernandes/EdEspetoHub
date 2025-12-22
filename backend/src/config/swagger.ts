@@ -150,6 +150,18 @@ export const swaggerSpec = {
           createdAt: { type: 'string', format: 'date-time' },
         },
       },
+      Payment: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', format: 'uuid' },
+          status: { type: 'string', description: 'Status do pagamento' },
+          method: { type: 'string', enum: ['PIX', 'CREDIT_CARD'] },
+          amount: { type: 'number' },
+          qrCodeBase64: { type: 'string', nullable: true },
+          paymentLink: { type: 'string', nullable: true },
+          expiresAt: { type: 'string', format: 'date-time', nullable: true },
+        },
+      },
       Subscription: {
         type: 'object',
         properties: {
@@ -202,7 +214,7 @@ export const swaggerSpec = {
     },
   },
   paths: {
-    '/api/auth/register': {
+    '/auth/register': {
       post: {
         tags: ['Autenticação'],
         summary: 'Cria um usuário e loja iniciais',
@@ -234,7 +246,7 @@ export const swaggerSpec = {
         },
       },
     },
-    '/api/auth/login': {
+    '/auth/login': {
       post: {
         tags: ['Autenticação'],
         summary: 'Autentica um usuário existente',
@@ -266,7 +278,47 @@ export const swaggerSpec = {
         },
       },
     },
-    '/api/stores/{slug}': {
+    '/auth/admin-login': {
+      post: {
+        tags: ['Autenticação'],
+        summary: 'Autentica o administrador da loja com o slug público',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['slug', 'password'],
+                properties: {
+                  slug: { type: 'string', description: 'Slug público da loja' },
+                  password: { type: 'string', description: 'Senha do dono da loja' },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          200: {
+            description: 'Login realizado com sucesso',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    token: { type: 'string' },
+                    user: { $ref: '#/components/schemas/User' },
+                    store: { $ref: '#/components/schemas/Store' },
+                  },
+                },
+              },
+            },
+          },
+          401: { description: 'Credenciais inválidas' },
+          404: { description: 'Loja não encontrada' },
+        },
+      },
+    },
+    '/stores/slug/{slug}': {
       get: {
         tags: ['Lojas'],
         summary: 'Busca loja pelo slug público',
@@ -281,13 +333,64 @@ export const swaggerSpec = {
         responses: {
           200: {
             description: 'Loja encontrada',
-            content: { 'application/json': { schema: { $ref: '#/components/schemas/Store' } } },
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  allOf: [
+                    { $ref: '#/components/schemas/Store' },
+                    {
+                      type: 'object',
+                      properties: {
+                        subscription: { $ref: '#/components/schemas/Subscription' },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
           },
           404: { description: 'Loja não encontrada' },
         },
       },
     },
-    '/api/stores/{id}': {
+    '/chamanoespeto/{slug}': {
+      get: {
+        tags: ['Lojas'],
+        summary: 'Alias público para buscar loja pelo slug',
+        parameters: [
+          {
+            name: 'slug',
+            in: 'path',
+            required: true,
+            schema: { type: 'string' },
+          },
+        ],
+        responses: {
+          200: {
+            description: 'Loja encontrada',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  allOf: [
+                    { $ref: '#/components/schemas/Store' },
+                    {
+                      type: 'object',
+                      properties: {
+                        subscription: { $ref: '#/components/schemas/Subscription' },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          404: { description: 'Loja não encontrada' },
+        },
+      },
+    },
+    '/stores/{storeId}': {
       put: {
         tags: ['Lojas'],
         summary: 'Atualiza informações da loja',
@@ -316,7 +419,7 @@ export const swaggerSpec = {
         security: [{ bearerAuth: [] }],
       },
     },
-    '/api/stores/{id}/status': {
+    '/stores/{storeId}/status': {
       put: {
         tags: ['Lojas'],
         summary: 'Define se a loja está aberta',
@@ -342,7 +445,7 @@ export const swaggerSpec = {
         security: [{ bearerAuth: [] }],
       },
     },
-    '/api/stores/{storeId}/products': {
+    '/stores/{storeId}/products': {
       post: {
         tags: ['Produtos'],
         summary: 'Cria um produto para a loja',
@@ -381,7 +484,27 @@ export const swaggerSpec = {
         },
       },
     },
-    '/api/stores/{storeId}/orders': {
+    '/stores/slug/{slug}/products': {
+      get: {
+        tags: ['Produtos'],
+        summary: 'Lista produtos pelo slug da loja (admin)',
+        parameters: [
+          { name: 'slug', in: 'path', required: true, schema: { type: 'string' } },
+        ],
+        responses: {
+          200: {
+            description: 'Lista de produtos',
+            content: {
+              'application/json': {
+                schema: { type: 'array', items: { $ref: '#/components/schemas/Product' } },
+              },
+            },
+          },
+        },
+        security: [{ bearerAuth: [] }],
+      },
+    },
+    '/stores/{storeId}/orders': {
       post: {
         tags: ['Pedidos'],
         summary: 'Cria um pedido',
@@ -417,9 +540,49 @@ export const swaggerSpec = {
             },
           },
         },
+        security: [{ bearerAuth: [] }],
       },
     },
-    '/api/plans': {
+    '/stores/slug/{slug}/orders': {
+      post: {
+        tags: ['Pedidos'],
+        summary: 'Cria um pedido usando o slug da loja',
+        parameters: [
+          { name: 'slug', in: 'path', required: true, schema: { type: 'string' } },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/OrderInput' },
+            },
+          },
+        },
+        responses: {
+          201: { description: 'Pedido criado', content: { 'application/json': { schema: { $ref: '#/components/schemas/Order' } } } },
+          400: { description: 'Erro de validação' },
+        },
+      },
+      get: {
+        tags: ['Pedidos'],
+        summary: 'Lista pedidos pelo slug da loja (staff)',
+        parameters: [
+          { name: 'slug', in: 'path', required: true, schema: { type: 'string' } },
+        ],
+        responses: {
+          200: {
+            description: 'Pedidos encontrados',
+            content: {
+              'application/json': {
+                schema: { type: 'array', items: { $ref: '#/components/schemas/Order' } },
+              },
+            },
+          },
+        },
+        security: [{ bearerAuth: [] }],
+      },
+    },
+    '/plans': {
       get: {
         tags: ['Planos'],
         summary: 'Lista planos disponíveis',
@@ -431,7 +594,7 @@ export const swaggerSpec = {
         },
       },
     },
-    '/api/subscriptions': {
+    '/subscriptions': {
       post: {
         tags: ['Assinaturas'],
         summary: 'Cria uma assinatura para uma loja',
@@ -447,7 +610,7 @@ export const swaggerSpec = {
         },
       },
     },
-    '/api/stores/{storeId}/subscription': {
+    '/stores/{storeId}/subscription': {
       get: {
         tags: ['Assinaturas'],
         summary: 'Obtém a assinatura vigente de uma loja',
@@ -458,7 +621,7 @@ export const swaggerSpec = {
         },
       },
     },
-    '/api/subscriptions/{id}/renew': {
+    '/subscriptions/{id}/renew': {
       post: {
         tags: ['Assinaturas'],
         summary: 'Renova uma assinatura existente',
@@ -473,7 +636,7 @@ export const swaggerSpec = {
         },
       },
     },
-    '/api/subscriptions/{id}/status': {
+    '/subscriptions/{id}/status': {
       patch: {
         tags: ['Assinaturas'],
         summary: 'Ativa ou suspende uma assinatura',
@@ -488,7 +651,56 @@ export const swaggerSpec = {
         },
       },
     },
-    '/api/admin/stores': {
+    '/webhooks/payment-confirmed': {
+      post: {
+        tags: ['Pagamentos'],
+        summary: 'Confirma pagamento de assinatura (webhook interno)',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['paymentId'],
+                properties: { paymentId: { type: 'string', format: 'uuid' } },
+              },
+            },
+          },
+        },
+        responses: {
+          200: {
+            description: 'Pagamento confirmado',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    payment: { $ref: '#/components/schemas/Payment' },
+                    subscriptionStatus: { type: 'string' },
+                    storeStatus: { type: 'string' },
+                  },
+                },
+              },
+            },
+          },
+          400: { description: 'Erro ao confirmar pagamento' },
+        },
+      },
+    },
+    '/payments/{paymentId}': {
+      get: {
+        tags: ['Pagamentos'],
+        summary: 'Busca um pagamento pelo ID',
+        parameters: [
+          { name: 'paymentId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
+        ],
+        responses: {
+          200: { description: 'Pagamento encontrado', content: { 'application/json': { schema: { $ref: '#/components/schemas/Payment' } } } },
+          404: { description: 'Pagamento não encontrado' },
+        },
+      },
+    },
+    '/admin/stores': {
       get: {
         tags: ['Admin'],
         summary: 'Lista lojas e assinaturas',
@@ -501,7 +713,7 @@ export const swaggerSpec = {
         security: [{ bearerAuth: [] }],
       },
     },
-    '/api/admin/stores/{storeId}/suspend': {
+    '/admin/stores/{storeId}/suspend': {
       patch: {
         tags: ['Admin'],
         summary: 'Suspende uma loja e assinatura',
@@ -516,7 +728,7 @@ export const swaggerSpec = {
         security: [{ bearerAuth: [] }],
       },
     },
-    '/api/admin/stores/{storeId}/reactivate': {
+    '/admin/stores/{storeId}/reactivate': {
       patch: {
         tags: ['Admin'],
         summary: 'Reativa uma loja e assinatura',
@@ -531,7 +743,7 @@ export const swaggerSpec = {
         security: [{ bearerAuth: [] }],
       },
     },
-    '/api/stores/{storeId}/products/{productId}': {
+    '/stores/{storeId}/products/{productId}': {
       put: {
         tags: ['Produtos'],
         summary: 'Atualiza um produto da loja',
@@ -544,6 +756,7 @@ export const swaggerSpec = {
           200: { description: 'Produto atualizado', content: { 'application/json': { schema: { $ref: '#/components/schemas/Product' } } } },
           400: { description: 'Erro de validação' },
         },
+        security: [{ bearerAuth: [] }],
       },
       delete: {
         tags: ['Produtos'],
@@ -556,6 +769,7 @@ export const swaggerSpec = {
           204: { description: 'Produto removido' },
           400: { description: 'Erro ao remover' },
         },
+        security: [{ bearerAuth: [] }],
       },
     },
   },
