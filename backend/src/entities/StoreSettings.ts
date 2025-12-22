@@ -22,11 +22,10 @@ export class StoreSettings {
     nullable: true,
     default: () => "'[]'::jsonb",
     transformer: {
-      to: (value?: SocialLink[] | null) => sanitizeSocialLinks(value ?? []),
-      from: (value: SocialLink[] | null) => (Array.isArray(value) ? value : []),
-    },
-  })
-  socialLinks?: SocialLink[];
+    to: (value?: SocialLink[] | null) => sanitizeSocialLinks(value ?? []),
+    from: (value: SocialLink[] | null) => (Array.isArray(value) ? value : []),
+    })
+socialLinks?: SocialLink[];
 
   @OneToOne(() => Store, (store) => store.settings, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'store_id' })

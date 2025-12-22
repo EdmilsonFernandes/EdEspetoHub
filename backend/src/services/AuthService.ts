@@ -15,6 +15,11 @@ import { Subscription } from '../entities/Subscription';
 import { saveBase64Image } from '../utils/imageStorage';
 import { sanitizeSocialLinks } from '../utils/socialLinks';
 
+const sanitizeSocialLinks = (links: any) =>
+  Array.isArray(links)
+    ? links.filter((link: any) => link?.type && link?.value)
+    : [];
+
 export class AuthService
 {
   private userRepository = new UserRepository();
