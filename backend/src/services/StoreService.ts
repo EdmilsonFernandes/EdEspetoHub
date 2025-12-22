@@ -7,6 +7,7 @@ import { Store } from '../entities/Store';
 import { User } from '../entities/User';
 import { EntityManager } from 'typeorm';
 import { saveBase64Image } from '../utils/imageStorage';
+import { sanitizeSocialLinks } from '../utils/socialLinks';
 
 const sanitizeSocialLinks = (links: any) =>
   Array.isArray(links)

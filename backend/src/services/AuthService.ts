@@ -13,6 +13,7 @@ import { PaymentMethod } from '../entities/Payment';
 import { Plan } from '../entities/Plan';
 import { Subscription } from '../entities/Subscription';
 import { saveBase64Image } from '../utils/imageStorage';
+import { sanitizeSocialLinks } from '../utils/socialLinks';
 
 const sanitizeSocialLinks = (links: any) =>
   Array.isArray(links)

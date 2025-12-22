@@ -1,5 +1,6 @@
 import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Store } from './Store';
+import { sanitizeSocialLinks, SocialLink } from '../utils/socialLinks';
 
 @Entity({ name: 'store_settings' })
 export class StoreSettings {
@@ -21,11 +22,10 @@ export class StoreSettings {
     nullable: true,
     default: () => "'[]'::jsonb",
     transformer: {
-      to: (value?: { type: string; value: string }[]) => value ?? [],
-      from: (value: { type: string; value: string }[] | null) => value ?? [],
-    },
-  })
-  socialLinks?: { type: string; value: string }[];
+    to: (value?: SocialLink[] | null) => sanitizeSocialLinks(value ?? []),
+    from: (value: SocialLink[] | null) => (Array.isArray(value) ? value : []),
+    })
+socialLinks?: SocialLink[];
 
   @OneToOne(() => Store, (store) => store.settings, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'store_id' })
