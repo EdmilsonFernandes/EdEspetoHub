@@ -14,6 +14,11 @@ import { Plan } from '../entities/Plan';
 import { Subscription } from '../entities/Subscription';
 import { saveBase64Image } from '../utils/imageStorage';
 
+const sanitizeSocialLinks = (links: any) =>
+  Array.isArray(links)
+    ? links.filter((link: any) => link?.type && link?.value)
+    : [];
+
 export class AuthService
 {
   private userRepository = new UserRepository();
@@ -100,9 +105,7 @@ export class AuthService
         logoUrl: logoUrl || storePayload.logoUrl,
         primaryColor: storePayload.primaryColor,
         secondaryColor: storePayload.secondaryColor,
-        socialLinks: (storePayload.socialLinks || []).filter(
-          (link: any) => link?.type && link?.value
-        ),
+        socialLinks: sanitizeSocialLinks(storePayload.socialLinks),
       });
 
       const store = storeRepo.create({

@@ -10,7 +10,13 @@ import {
 import { Store } from './Store';
 import { Plan } from './Plan';
 
-export type SubscriptionStatus = 'PENDING' | 'ACTIVE' | 'EXPIRING' | 'EXPIRED' | 'SUSPENDED';
+export type SubscriptionStatus =
+  | 'PENDING'
+  | 'ACTIVE'
+  | 'EXPIRING'
+  | 'EXPIRED'
+  | 'SUSPENDED'
+  | 'CANCELLED';
 
 @Entity({ name: 'subscriptions' })
 export class Subscription {
