@@ -24,7 +24,14 @@ export const requireActiveSubscription = async (req: Request, res: Response, nex
     const subscription = storeId
       ? await subscriptionService.getCurrentByStore(storeId)
       : await subscriptionService.getCurrentByStoreSlug(slug!);
-    if (!subscription || subscription.status !== 'ACTIVE') {
+    const now = new Date();
+    const isActive =
+      !!subscription &&
+      new Date(subscription.endDate).getTime() >= now.getTime() &&
+      subscription.status !== 'EXPIRED' &&
+      subscription.status !== 'CANCELLED';
+
+    if (!isActive) {
       return res.status(403).json({
         message: 'Assinatura inativa. Renove para continuar.',
         subscription,

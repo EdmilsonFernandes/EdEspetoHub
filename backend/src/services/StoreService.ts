@@ -8,6 +8,11 @@ import { User } from '../entities/User';
 import { EntityManager } from 'typeorm';
 import { saveBase64Image } from '../utils/imageStorage';
 
+const sanitizeSocialLinks = (links: any) =>
+  Array.isArray(links)
+    ? links.filter((link) => link?.type && link?.value)
+    : [];
+
 export class StoreService
 {
   private subscriptionService = new SubscriptionService();
@@ -37,9 +42,7 @@ export class StoreService
 
       const logoUrl = await saveBase64Image(input.logoFile, `store-${input.ownerId}`);
 
-      const socialLinks = (input.socialLinks || []).filter(
-        (link) => link?.type && link?.value
-      );
+      const socialLinks = sanitizeSocialLinks(input.socialLinks);
 
       // 3️⃣ Settings
       const settings = manager.create(StoreSettings, {
@@ -114,9 +117,7 @@ export class StoreService
 
       if (data.socialLinks)
       {
-        store.settings.socialLinks = data.socialLinks.filter(
-          (link) => link?.type && link?.value
-        );
+        store.settings.socialLinks = sanitizeSocialLinks(data.socialLinks);
       }
 
       return storeRepo.save(store);

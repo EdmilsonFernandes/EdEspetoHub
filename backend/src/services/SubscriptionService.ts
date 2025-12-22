@@ -47,7 +47,9 @@ export class SubscriptionService {
       await this.subscriptionRepository.save(subscription);
     }
 
-    if (status !== 'ACTIVE' && subscription.store?.open) {
+    const isActive = this.isSubscriptionActive(subscription);
+
+    if (!isActive && subscription.store?.open) {
       subscription.store.open = false;
       await this.storeRepository.save(subscription.store);
     }
@@ -92,17 +94,17 @@ export class SubscriptionService {
     const subscriptions = await this.subscriptionRepository.findAll();
     const updates: Subscription[] = [];
 
-    for (const sub of subscriptions) {
-      const status = this.resolveStatus(sub);
-      if (status !== sub.status) {
-        sub.status = status;
-        updates.push(sub);
+      for (const sub of subscriptions) {
+        const status = this.resolveStatus(sub);
+        if (status !== sub.status) {
+          sub.status = status;
+          updates.push(sub);
+        }
+        if (!this.isSubscriptionActive(sub) && sub.store?.open) {
+          sub.store.open = false;
+          await this.storeRepository.save(sub.store);
+        }
       }
-      if (status !== 'ACTIVE' && sub.store?.open) {
-        sub.store.open = false;
-        await this.storeRepository.save(sub.store);
-      }
-    }
 
     if (updates.length) {
       await Promise.all(updates.map((s) => this.subscriptionRepository.save(s)));
@@ -127,7 +129,7 @@ export class SubscriptionService {
 
   async assertStoreIsActive(storeId: string) {
     const subscription = await this.getCurrentByStore(storeId);
-    return subscription?.status === 'ACTIVE';
+    return subscription ? this.isSubscriptionActive(subscription) : false;
   }
 
   private addDays(date: Date, days: number) {
@@ -139,6 +141,7 @@ export class SubscriptionService {
   private resolveStatus(subscription: Subscription): SubscriptionStatus {
     if (subscription.status === 'PENDING') return 'PENDING';
     if (subscription.status === 'SUSPENDED') return 'SUSPENDED';
+    if (subscription.status === 'CANCELLED') return 'CANCELLED';
 
     const now = new Date();
     const endDate = new Date(subscription.endDate);
@@ -150,5 +153,14 @@ export class SubscriptionService {
     if (diffDays <= 5) return 'EXPIRING';
 
     return 'ACTIVE';
+  }
+
+  private isSubscriptionActive(subscription: Subscription) {
+    const now = new Date();
+    return (
+      new Date(subscription.endDate).getTime() >= now.getTime() &&
+      subscription.status !== 'EXPIRED' &&
+      subscription.status !== 'CANCELLED'
+    );
   }
 }

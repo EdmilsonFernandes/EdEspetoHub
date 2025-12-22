@@ -15,7 +15,16 @@ export class StoreSettings {
   @Column({ name: 'secondary_color', nullable: true })
   secondaryColor?: string;
 
-  @Column({ name: 'social_links', type: 'jsonb', nullable: true, default: () => "'[]'" })
+  @Column({
+    name: 'social_links',
+    type: 'jsonb',
+    nullable: true,
+    default: () => "'[]'::jsonb",
+    transformer: {
+      to: (value?: { type: string; value: string }[]) => value ?? [],
+      from: (value: { type: string; value: string }[] | null) => value ?? [],
+    },
+  })
   socialLinks?: { type: string; value: string }[];
 
   @OneToOne(() => Store, (store) => store.settings, { onDelete: 'CASCADE' })
