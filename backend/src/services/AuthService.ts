@@ -12,6 +12,7 @@ import { PaymentService } from './PaymentService';
 import { PaymentMethod } from '../entities/Payment';
 import { Plan } from '../entities/Plan';
 import { Subscription } from '../entities/Subscription';
+import { saveBase64Image } from '../utils/imageStorage';
 
 export class AuthService
 {
@@ -37,8 +38,10 @@ export class AuthService
     const storePayload = input.store ?? {
       name: input.storeName,
       logoUrl: input.logoUrl,
+      logoFile: input.logoFile,
       primaryColor: input.primaryColor,
       secondaryColor: input.secondaryColor,
+      socialLinks: input.socialLinks,
     };
 
     const paymentMethod = ((input.paymentMethod as PaymentMethod) || 'PIX').toUpperCase();
@@ -91,10 +94,15 @@ export class AuthService
         slug = `${baseSlug}-${counter++}`;
       }
 
+      const logoUrl = await saveBase64Image(storePayload.logoFile, `store-${user.id}`);
+
       const settings = manager.create(StoreSettings, {
-        logoUrl: storePayload.logoUrl,
+        logoUrl: logoUrl || storePayload.logoUrl,
         primaryColor: storePayload.primaryColor,
         secondaryColor: storePayload.secondaryColor,
+        socialLinks: (storePayload.socialLinks || []).filter(
+          (link: any) => link?.type && link?.value
+        ),
       });
 
       const store = storeRepo.create({
@@ -102,7 +110,7 @@ export class AuthService
         slug,
         owner: user,
         settings,
-        open: false,
+        open: true,
       });
       await storeRepo.save(store);
 
@@ -113,14 +121,14 @@ export class AuthService
       }
 
       const now = new Date();
-      const endDate = this.addDays(now, plan.durationDays);
+      const trialEnd = new Date(now.getTime() + 24 * 60 * 60 * 1000);
 
       const subscription = subscriptionRepo.create({
         store,
         plan,
         startDate: now,
-        endDate,
-        status: 'PENDING',
+        endDate: trialEnd,
+        status: 'ACTIVE',
         autoRenew: false,
       });
       await subscriptionRepo.save(subscription);
@@ -151,8 +159,9 @@ export class AuthService
         id: result.store.id,
         slug: result.store.slug,
       },
-      storeStatus: 'PENDING_PAYMENT',
+      storeStatus: 'ACTIVE',
       subscriptionStatus: result.subscription.status,
+      trialExpiresAt: result.subscription.endDate,
       payment: {
         id: result.payment.id,
         method: result.payment.method,

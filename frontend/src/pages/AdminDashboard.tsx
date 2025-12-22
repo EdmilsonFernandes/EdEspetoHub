@@ -18,11 +18,26 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   const [products, setProducts] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [error, setError] = useState('');
+  const [newLogoFile, setNewLogoFile] = useState('');
 
   const storeId = store?.id;
+  const storeSlug = store?.slug;
+
+  const convertFileToBase64 = (file: File) =>
+    new Promise<string>((resolve, reject) =>
+    {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
 
   useEffect(() => {
     setStore(session?.store);
+    if (session?.store?.slug)
+    {
+      apiClient.setOwnerId(session.store.slug);
+    }
   }, [session?.store]);
 
   useEffect(() => {
@@ -33,10 +48,13 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   }, [hydrated, navigate, session?.store, session?.token, session?.user?.role]);
 
   useEffect(() => {
-    if (!storeId) return;
-    productService.listBySlug(storeId).then(setProducts).catch((e) => setError(e.message));
-    apiClient.get(`/stores/${storeId}/orders`).then(setOrders).catch((e) => setError(e.message));
-  }, [storeId]);
+    if (!storeSlug) return;
+    productService.listBySlug(storeSlug).then(setProducts).catch((e) => setError(e.message));
+    apiClient
+      .get(`/stores/slug/${storeSlug}/orders`)
+      .then(setOrders)
+      .catch((e) => setError(e.message));
+  }, [storeSlug]);
 
   useEffect(() => {
     if (!store?.settings) return;
@@ -53,16 +71,60 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     }));
   };
 
+  const handleSocialChange = (index: number, key: 'type' | 'value', value: string) => {
+    setStore((prev: any) => {
+      const links = prev?.settings?.socialLinks ? [ ...prev.settings.socialLinks ] : [];
+      links[ index ] = { ...links[ index ], [ key ]: value };
+      return { ...prev, settings: { ...prev.settings, socialLinks: links } };
+    });
+  };
+
+  const addSocialLink = () => {
+    setStore((prev: any) => ({
+      ...prev,
+      settings: {
+        ...prev.settings,
+        socialLinks: [ ...(prev.settings?.socialLinks || []), { type: 'instagram', value: '' } ],
+      },
+    }));
+  };
+
+  const removeSocialLink = (index: number) => {
+    setStore((prev: any) => ({
+      ...prev,
+      settings: {
+        ...prev.settings,
+        socialLinks: (prev.settings?.socialLinks || []).filter((_: any, i: number) => i !== index),
+      },
+    }));
+  };
+
+  const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const base64 = await convertFileToBase64(file);
+      setNewLogoFile(base64);
+      setStore((prev: any) => ({ ...prev, settings: { ...prev.settings, logoUrl: base64 } }));
+    } catch (err) {
+      setError('Não foi possível carregar o logo enviado.');
+    }
+  };
+
   const saveStore = async () => {
     if (!storeId) return;
     try {
       const updated = await api.updateStore(storeId, {
         name: store.name,
-        logoUrl: store.settings?.logoUrl,
+        logoUrl: newLogoFile ? undefined : store.settings?.logoUrl,
+        logoFile: newLogoFile || undefined,
         primaryColor: store.settings?.primaryColor,
         secondaryColor: store.settings?.secondaryColor,
+        socialLinks: store.settings?.socialLinks || [],
       });
       setStore(updated);
+      setNewLogoFile('');
     } catch (e: any) {
       setError(e.message);
     }
@@ -103,7 +165,12 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       <div className="card" style={{ marginBottom: 16 }}>
         <h3>Identidade visual</h3>
         <input name="name" value={store?.name || ''} onChange={handleStoreChange} placeholder="Nome da loja" />
-        <input name="logoUrl" value={store?.settings?.logoUrl || ''} onChange={handleStoreChange} placeholder="Logo URL" />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <input type="file" accept="image/*" onChange={handleLogoUpload} />
+          {store?.settings?.logoUrl && (
+            <img src={store.settings.logoUrl} alt="Logo" style={{ width: 48, height: 48, borderRadius: 8, objectFit: 'cover' }} />
+          )}
+        </div>
         <label>
           Primária
           <input name="primaryColor" type="color" value={store?.settings?.primaryColor || '#b91c1c'} onChange={handleStoreChange} />
@@ -112,6 +179,34 @@ export function AdminDashboard({ session: sessionProp }: Props) {
           Secundária
           <input name="secondaryColor" type="color" value={store?.settings?.secondaryColor || '#111827'} onChange={handleStoreChange} />
         </label>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <strong>Redes sociais</strong>
+          {(store?.settings?.socialLinks || []).map((link: any, index: number) => (
+            <div key={`${link.type}-${index}`} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <select
+                value={link.type}
+                onChange={(e) => handleSocialChange(index, 'type', e.target.value)}
+              >
+                <option value="instagram">Instagram</option>
+                <option value="facebook">Facebook</option>
+                <option value="twitter">Twitter (X)</option>
+              </select>
+              <input
+                value={link.value}
+                onChange={(e) => handleSocialChange(index, 'value', e.target.value)}
+                placeholder="@usuario ou URL"
+              />
+              {(store.settings?.socialLinks || []).length > 1 && (
+                <button type="button" onClick={() => removeSocialLink(index)}>
+                  Remover
+                </button>
+              )}
+            </div>
+          ))}
+          <button type="button" onClick={addSocialLink}>
+            Adicionar rede
+          </button>
+        </div>
         <button className="button" onClick={saveStore}>
           Salvar
         </button>

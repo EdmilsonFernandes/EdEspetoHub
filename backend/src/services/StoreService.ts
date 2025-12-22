@@ -6,6 +6,7 @@ import { SubscriptionService } from './SubscriptionService';
 import { Store } from '../entities/Store';
 import { User } from '../entities/User';
 import { EntityManager } from 'typeorm';
+import { saveBase64Image } from '../utils/imageStorage';
 
 export class StoreService
 {
@@ -34,11 +35,18 @@ export class StoreService
         manager
       );
 
+      const logoUrl = await saveBase64Image(input.logoFile, `store-${input.ownerId}`);
+
+      const socialLinks = (input.socialLinks || []).filter(
+        (link) => link?.type && link?.value
+      );
+
       // 3️⃣ Settings
       const settings = manager.create(StoreSettings, {
-        logoUrl: input.logoUrl,
+        logoUrl: logoUrl || input.logoUrl,
         primaryColor: input.primaryColor,
         secondaryColor: input.secondaryColor,
+        socialLinks,
       });
 
       // 4️⃣ Store
@@ -93,14 +101,23 @@ export class StoreService
         store.settings = manager.create(StoreSettings);
       }
 
+      const uploadedLogo = await saveBase64Image(data.logoFile, `store-${store.id}`);
+
       store.settings.logoUrl =
-        data.logoUrl ?? store.settings.logoUrl;
+        uploadedLogo ?? data.logoUrl ?? store.settings.logoUrl;
 
       store.settings.primaryColor =
         data.primaryColor ?? store.settings.primaryColor;
 
       store.settings.secondaryColor =
         data.secondaryColor ?? store.settings.secondaryColor;
+
+      if (data.socialLinks)
+      {
+        store.settings.socialLinks = data.socialLinks.filter(
+          (link) => link?.type && link?.value
+        );
+      }
 
       return storeRepo.save(store);
     });

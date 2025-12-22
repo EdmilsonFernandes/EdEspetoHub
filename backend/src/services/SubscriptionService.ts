@@ -47,6 +47,11 @@ export class SubscriptionService {
       await this.subscriptionRepository.save(subscription);
     }
 
+    if (status !== 'ACTIVE' && subscription.store?.open) {
+      subscription.store.open = false;
+      await this.storeRepository.save(subscription.store);
+    }
+
     return subscription;
   }
 
