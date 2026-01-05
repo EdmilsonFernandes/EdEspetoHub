@@ -18,12 +18,21 @@ export const GrillQueue = () => {
   const [products, setProducts] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState({});
   const [currentTime, setCurrentTime] = useState(Date.now());
+  const [error, setError] = useState('');
 
   const loadQueue = async () => {
     setLoading(true);
-    const data = await orderService.fetchQueue();
-    setQueue(data);
-    setLoading(false);
+    setError('');
+
+    try {
+      const data = await orderService.fetchQueue();
+      setQueue(data);
+    } catch (err) {
+      console.error('Erro ao buscar fila', err);
+      setError('Não foi possível carregar os pedidos. Faça login novamente.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -271,12 +280,16 @@ export const GrillQueue = () => {
           </div>
         ))}
 
-        {sortedQueue.length === 0 && !loading && (
-          <div className="col-span-3 text-center text-gray-500 py-12 bg-white rounded-xl border border-dashed">
-            Nenhum pedido aguardando.
-          </div>
-        )}
+            {sortedQueue.length === 0 && !loading && (
+              <div className="col-span-3 text-center text-gray-500 py-12 bg-white rounded-xl border border-dashed">
+                Nenhum pedido aguardando.
+              </div>
+            )}
       </div>
+
+      {error && (
+        <div className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg p-3">{error}</div>
+      )}
     </div>
   );
 };

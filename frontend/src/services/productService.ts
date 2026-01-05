@@ -17,19 +17,35 @@ const normalizeProduct = (product: any) => ({
 });
 
 // 🔐 fonte única da loja (admin/churrasqueiro)
-const getStoreIdentifierFromSession = (): string =>
+const getStoreIdentifierFromSession = (): string | null =>
 {
   const raw = localStorage.getItem("adminSession");
-  if (!raw) throw new Error("Sessão inválida");
+  if (!raw) return null;
 
-  const parsed = JSON.parse(raw);
-  return parsed?.store?.id || parsed?.store?.slug;
+  try
+  {
+    const parsed = JSON.parse(raw);
+    return parsed?.store?.id || parsed?.store?.slug || null;
+  } catch (error)
+  {
+    console.error("Sessão inválida na leitura da loja", error);
+    localStorage.removeItem("adminSession");
+    return null;
+  }
 };
+
+const resolveStoreIdentifier = (storeId?: string): string | null =>
+  storeId || getStoreIdentifierFromSession();
 
 export const productService = {
   async save(product: any, storeId?: string)
   {
-    const targetStore = storeId || getStoreIdentifierFromSession();
+    const targetStore = resolveStoreIdentifier(storeId);
+    if (!targetStore)
+    {
+      return Promise.reject(new Error("Sessão inválida"));
+    }
+
     const basePath = buildProductsPath(targetStore);
     const path = product.id ? `${basePath}/${product.id}` : basePath;
 
@@ -44,14 +60,24 @@ export const productService = {
 
   async delete(id: string, storeId?: string)
   {
-    const targetStore = storeId || getStoreIdentifierFromSession();
+    const targetStore = resolveStoreIdentifier(storeId);
+    if (!targetStore)
+    {
+      return Promise.reject(new Error("Sessão inválida"));
+    }
+
     const basePath = buildProductsPath(targetStore);
     await apiClient.delete(`${basePath}/${id}`);
   },
 
   async list(storeId?: string)
   {
-    const targetStore = storeId || getStoreIdentifierFromSession();
+    const targetStore = resolveStoreIdentifier(storeId);
+    if (!targetStore)
+    {
+      return Promise.reject(new Error("Sessão inválida"));
+    }
+
     const data = await apiClient.get(buildProductsPath(targetStore));
     return data.map(normalizeProduct);
   },
@@ -65,7 +91,14 @@ export const productService = {
   subscribe(callback: any, storeId?: string)
   {
     let cancelled = false;
-    const targetStore = storeId || getStoreIdentifierFromSession();
+    const targetStore = resolveStoreIdentifier(storeId);
+
+    if (!targetStore)
+    {
+      console.error("Sessão inválida ao tentar inscrever produtos");
+      return () => {};
+    }
+
     const basePath = buildProductsPath(targetStore);
 
     const load = async () =>
