@@ -137,7 +137,7 @@ export const GrillQueue = () => {
 
   const handleAddItem = (orderId) => {
     const productId = selectedProducts[orderId];
-    const product = products.find((p) => p.id === Number(productId));
+    const product = products.find((p) => String(p.id) === String(productId));
     if (!product) return;
 
     applyItemsChange(orderId, (items) => {
@@ -264,13 +264,16 @@ export const GrillQueue = () => {
                 </p>
 
                 <h3 className="text-lg font-bold text-gray-800">
-                  {order.name || "Cliente"}
+                  Cliente: {order.customerName || order.name || "Cliente"}
                 </h3>
 
                 <p className="text-xs text-gray-500 uppercase">
                   {formatOrderType(order.type)}
                   {order.table ? ` · Mesa ${order.table}` : ''}
                 </p>
+                {order.phone && (
+                  <p className="text-xs text-gray-500">{order.phone}</p>
+                )}
 
                 <p className="text-xs text-gray-500 uppercase mt-1">
                   Pagamento: {formatPaymentMethod(order.payment)}
