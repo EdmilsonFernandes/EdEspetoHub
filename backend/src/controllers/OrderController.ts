@@ -15,10 +15,11 @@ export class OrderController {
 
   static async list(req: Request, res: Response) {
     try {
-      const orders = await orderService.listByStoreId(req.params.storeId);
+      const orders = await orderService.listByStoreId(req.params.storeId, req.auth?.storeId);
       return res.json(orders);
     } catch (error: any) {
-      return res.status(400).json({ message: error.message });
+      const status = error.message.includes('perm') ? 403 : 400;
+      return res.status(status).json({ message: error.message });
     }
   }
 
@@ -33,10 +34,11 @@ export class OrderController {
 
   static async listBySlug(req: Request, res: Response) {
     try {
-      const orders = await orderService.listByStoreSlug(req.params.slug);
+      const orders = await orderService.listByStoreSlug(req.params.slug, req.auth?.storeId);
       return res.json(orders);
     } catch (error: any) {
-      return res.status(400).json({ message: error.message });
+      const status = error.message.includes('perm') ? 403 : 400;
+      return res.status(status).json({ message: error.message });
     }
   }
 }

@@ -4,11 +4,13 @@ import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
 import { getPersistedBranding, defaultBranding } from '../constants';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { apiClient } from '../config/apiClient';
 
 export function AdminLogin() {
   const navigate = useNavigate();
   const { setAuth } = useAuth();
+  const { setBranding } = useTheme();
   const [loginForm, setLoginForm] = useState({ slug: defaultBranding.espetoId, password: '' });
   const [loginError, setLoginError] = useState('');
   const [branding] = useState(getPersistedBranding());
@@ -21,6 +23,12 @@ export function AdminLogin() {
       const session = await authService.adminLogin(loginForm.slug, loginForm.password);
       const sessionData = { token: session.token, user: session.user, store: session.store };
       setAuth(sessionData);
+      setBranding({
+        primaryColor: session.store?.settings?.primaryColor,
+        secondaryColor: session.store?.settings?.secondaryColor,
+        logoUrl: session.store?.settings?.logoUrl,
+        brandName: session.store?.name,
+      });
       navigate('/admin/dashboard');
     } catch (error) {
       setLoginError(error.message || 'Falha ao autenticar');

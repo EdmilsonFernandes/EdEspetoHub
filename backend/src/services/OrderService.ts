@@ -11,6 +11,15 @@ export class OrderService
   private storeRepository = new StoreRepository();
   private productRepository = new ProductRepository();
 
+  private ensureStoreAccess(store: Awaited<ReturnType<StoreRepository[ 'findById' ]>>, authStoreId?: string)
+  {
+    if (!store) throw new Error('Loja não encontrada');
+    if (authStoreId && store.id !== authStoreId)
+    {
+      throw new Error('Sem permissão para acessar esta loja');
+    }
+  }
+
   async create(input: CreateOrderDto)
   {
     const store = await this.storeRepository.findById(input.storeId);
@@ -29,18 +38,18 @@ export class OrderService
     return this.orderRepository.save(order);
   }
 
-  async listByStoreId(storeId: string)
+  async listByStoreId(storeId: string, authStoreId?: string)
   {
     const store = await this.storeRepository.findById(storeId);
-    if (!store) throw new Error('Loja não encontrada');
-    return this.orderRepository.findByStoreId(store.id);
+    this.ensureStoreAccess(store, authStoreId);
+    return this.orderRepository.findByStoreId(store!.id);
   }
 
-  async listByStoreSlug(slug: string)
+  async listByStoreSlug(slug: string, authStoreId?: string)
   {
     const store = await this.storeRepository.findBySlug(slug);
-    if (!store) throw new Error('Loja não encontrada');
-    return this.orderRepository.findByStoreId(store.id);
+    this.ensureStoreAccess(store, authStoreId);
+    return this.orderRepository.findByStoreId(store!.id);
   }
 
   private async buildOrder(input: Omit<CreateOrderDto, 'storeId'>, store: Awaited<ReturnType<StoreRepository[ 'findById' ]>>)
