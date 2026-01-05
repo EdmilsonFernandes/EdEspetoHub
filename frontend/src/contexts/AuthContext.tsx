@@ -20,9 +20,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const raw = localStorage.getItem('adminSession');
-    if (raw) {
-      setAuthState(JSON.parse(raw));
+
+    if (raw)
+    {
+      try
+      {
+        const parsed = JSON.parse(raw);
+
+        if (parsed?.token && parsed?.user)
+        {
+          setAuthState(parsed);
+        } else
+        {
+          localStorage.removeItem('adminSession');
+        }
+      } catch (error)
+      {
+        console.error('Falha ao restaurar sessão do admin', error);
+        localStorage.removeItem('adminSession');
+      }
     }
+
     setHydrated(true);
   }, []);
 

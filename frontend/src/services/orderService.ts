@@ -16,32 +16,58 @@ const normalizeOrder = (order: any) => ({
 });
 
 // 🔐 recupera store da sessão
-const getStoreIdentifierFromSession = (): string =>
+const getStoreIdentifierFromSession = (): string | null =>
 {
   const raw = localStorage.getItem("adminSession");
-  if (!raw) throw new Error("Sessão inválida");
+  if (!raw) return null;
 
-  const parsed = JSON.parse(raw);
-  return parsed?.store?.id || parsed?.store?.slug;
+  try
+  {
+    const parsed = JSON.parse(raw);
+    return parsed?.store?.id || parsed?.store?.slug || null;
+  } catch (error)
+  {
+    console.error("Sessão inválida na leitura da fila", error);
+    localStorage.removeItem("adminSession");
+    return null;
+  }
 };
+
+const resolveStoreIdentifier = (storeId?: string): string | null =>
+  storeId || getStoreIdentifierFromSession();
 
 export const orderService = {
   async save(orderData: any, storeId?: string)
   {
-    const targetStore = storeId || getStoreIdentifierFromSession();
+    const targetStore = resolveStoreIdentifier(storeId);
+    if (!targetStore)
+    {
+      return Promise.reject(new Error("Sessão inválida"));
+    }
+
     await apiClient.post(buildOrdersPath(targetStore), orderData);
   },
 
   async fetchAll(storeId?: string)
   {
-    const targetStore = storeId || getStoreIdentifierFromSession();
+    const targetStore = resolveStoreIdentifier(storeId);
+    if (!targetStore)
+    {
+      return Promise.reject(new Error("Sessão inválida"));
+    }
+
     const data = await apiClient.get(buildOrdersPath(targetStore));
     return data.map(normalizeOrder);
   },
 
   async fetchQueue(storeId?: string)
   {
-    const targetStore = storeId || getStoreIdentifierFromSession();
+    const targetStore = resolveStoreIdentifier(storeId);
+    if (!targetStore)
+    {
+      return Promise.reject(new Error("Sessão inválida"));
+    }
+
     const data = await apiClient.get(buildOrdersPath(targetStore));
     return data.map(normalizeOrder);
   },
@@ -49,7 +75,13 @@ export const orderService = {
   subscribeAll(storeId: string | undefined, callback: any)
   {
     let cancelled = false;
-    const targetStore = storeId || getStoreIdentifierFromSession();
+    const targetStore = resolveStoreIdentifier(storeId);
+
+    if (!targetStore)
+    {
+      console.error("Sessão inválida ao tentar inscrever pedidos");
+      return () => {};
+    }
 
     const load = async () =>
     {
@@ -76,7 +108,13 @@ export const orderService = {
   subscribeRecent(storeId: string | undefined, callback: any)
   {
     let cancelled = false;
-    const targetStore = storeId || getStoreIdentifierFromSession();
+    const targetStore = resolveStoreIdentifier(storeId);
+
+    if (!targetStore)
+    {
+      console.error("Sessão inválida ao tentar inscrever fila recente");
+      return () => {};
+    }
 
     const load = async () =>
     {
