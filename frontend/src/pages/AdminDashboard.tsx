@@ -39,14 +39,12 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       return;
     }
 
-    if (session?.store?.settings) {
-      setBranding({
-        primaryColor: session.store.settings.primaryColor,
-        secondaryColor: session.store.settings.secondaryColor,
-        logoUrl: session.store.settings.logoUrl,
-        brandName: session.store.name,
-      });
-    }
+    setBranding({
+      primaryColor: session?.store?.settings?.primaryColor,
+      secondaryColor: session?.store?.settings?.secondaryColor,
+      logoUrl: session?.store?.settings?.logoUrl,
+      brandName: session?.store?.name,
+    });
   }, [session, hydrated, navigate, setBranding]);
 
   /* =========================
