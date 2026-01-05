@@ -5,6 +5,8 @@ dotenv.config();
 export const env = {
   port: process.env.PORT ? Number(process.env.PORT) : 4000,
   jwtSecret: process.env.JWT_SECRET || 'super-secret-token',
+  superAdminEmail: process.env.SUPER_ADMIN_EMAIL || '',
+  superAdminPassword: process.env.SUPER_ADMIN_PASSWORD || '',
   database: {
     host: process.env.PGHOST || 'localhost',
     port: process.env.PGPORT ? Number(process.env.PGPORT) : 5432,

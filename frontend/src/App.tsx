@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { LandingPage, CreateStore, AdminLogin, StorePage, OrdersQueue, AdminDashboard, AdminOrders, AdminQueue, PaymentPage } from './pages';
+import { LandingPage, CreateStore, AdminLogin, StorePage, OrdersQueue, AdminDashboard, AdminOrders, AdminQueue, PaymentPage, SuperAdmin } from './pages';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AdminRoute } from './components/Admin/AdminRoute';
 import { AdminLayout } from './components/Admin/AdminLayout';
@@ -58,6 +58,7 @@ function App() {
           <Route path="/chamanoespeto/:storeSlug" element={<StorePage />} />
           <Route path="/chamanoespeto/:storeSlug/orders" element={<OrdersQueue />} />
           <Route path="/payment/:paymentId" element={<PaymentPage />} />
+          <Route path="/superadmin" element={<SuperAdmin />} />
         </Routes>
       </Router>
     </ThemeProvider>

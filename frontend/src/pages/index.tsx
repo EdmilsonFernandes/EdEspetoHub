@@ -7,3 +7,4 @@ export { AdminDashboard } from './AdminDashboard';
 export { AdminOrders } from './AdminOrders';
 export { AdminQueue } from './AdminQueue';
 export { PaymentPage } from './PaymentPage';
+export { SuperAdmin } from './SuperAdmin';

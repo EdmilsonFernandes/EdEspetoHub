@@ -1,5 +1,7 @@
 import { Request, Response } from 'express';
+import jwt from 'jsonwebtoken';
 import { AuthService } from '../services/AuthService';
+import { env } from '../config/env';
 
 const authService = new AuthService();
 
@@ -44,5 +46,27 @@ export class AuthController
       const status = error.message === 'Loja não encontrada' ? 404 : 401;
       return res.status(status).json({ message: error.message });
     }
+  }
+
+  static async superAdminLogin(req: Request, res: Response)
+  {
+    const { email, password } = req.body;
+    if (!env.superAdminEmail || !env.superAdminPassword)
+    {
+      return res.status(500).json({ message: 'SUPER_ADMIN_* não configurado' });
+    }
+
+    if (email !== env.superAdminEmail || password !== env.superAdminPassword)
+    {
+      return res.status(401).json({ message: 'Credenciais inválidas' });
+    }
+
+    const token = jwt.sign(
+      { sub: 'super-admin', role: 'SUPER_ADMIN' },
+      env.jwtSecret,
+      { expiresIn: '12h' }
+    );
+
+    return res.json({ token });
   }
 }

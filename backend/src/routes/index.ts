@@ -17,6 +17,7 @@ const routes = Router();
 routes.post('/auth/register', AuthController.register);
 routes.post('/auth/login', AuthController.login);
 routes.post('/auth/admin-login', AuthController.adminLogin);
+routes.post('/auth/super-login', AuthController.superAdminLogin);
 
 // Plans / payments
 routes.get('/plans', PlanController.list);
@@ -28,9 +29,10 @@ routes.post('/webhooks/payment-confirmed', PaymentController.confirm);
 routes.get('/payments/:paymentId', PaymentController.getById);
 
 // Platform admin (se for painel de plataforma mesmo, proteja)
-routes.get('/admin/stores', requireAuth, requireRole('ADMIN'), PlatformAdminController.listStores);
-routes.patch('/admin/stores/:storeId/suspend', requireAuth, requireRole('ADMIN'), PlatformAdminController.suspendStore);
-routes.patch('/admin/stores/:storeId/reactivate', requireAuth, requireRole('ADMIN'), PlatformAdminController.reactivateStore);
+routes.get('/admin/overview', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.overview);
+routes.get('/admin/stores', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.listStores);
+routes.patch('/admin/stores/:storeId/suspend', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.suspendStore);
+routes.patch('/admin/stores/:storeId/reactivate', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.reactivateStore);
 
 // Store public
 routes.get('/stores/slug/:slug', StoreController.getBySlug);

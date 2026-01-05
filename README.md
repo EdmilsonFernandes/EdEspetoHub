@@ -51,6 +51,7 @@ docker exec -i espetinho-db psql -U postgres -d espetinho < backend/schema.sql
 3) **Configurar variáveis de ambiente da API**
 
 As variáveis lidas são `PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD`, `PGDATABASE`, `PORT`, `JWT_SECRET`.
+Para super admin: `SUPER_ADMIN_EMAIL`, `SUPER_ADMIN_PASSWORD`.
 
 Exemplo (no terminal):
 
@@ -62,6 +63,8 @@ export PGPASSWORD=postgres
 export PGDATABASE=espetinho
 export PORT=4000
 export JWT_SECRET=super-secret-token
+export SUPER_ADMIN_EMAIL=superadmin@local.com
+export SUPER_ADMIN_PASSWORD=super123
 ```
 
 4) **Subir a API**
@@ -130,6 +133,27 @@ curl -X POST http://localhost:4000/api/auth/admin-login \
 ```
 
 Depois disso, acesse o painel em `http://localhost:3000/admin`.
+
+## Super Admin (visao da plataforma)
+
+1) **Configurar credenciais**
+
+Use as envs `SUPER_ADMIN_EMAIL` e `SUPER_ADMIN_PASSWORD` na API.
+
+2) **Login**
+
+```bash
+curl -X POST http://localhost:4000/api/auth/super-login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "superadmin@local.com",
+    "password": "super123"
+  }'
+```
+
+3) **Tela**
+
+Acesse: `http://localhost:3000/superadmin`
 
 ## Subir em EC2 (Docker Compose pré-configurado)
 

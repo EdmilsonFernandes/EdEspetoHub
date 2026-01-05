@@ -20,4 +20,27 @@ export class PaymentRepository {
   findById(id: string) {
     return this.repository.findOne({ where: { id }, relations: ['subscription', 'subscription.plan', 'store', 'user'] });
   }
+
+  findLatestByStoreId(storeId: string) {
+    return this.repository.findOne({
+      where: { store: { id: storeId } },
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async sumPaidAmounts() {
+    const result = await this.repository
+      .createQueryBuilder('payment')
+      .select('COALESCE(SUM(payment.amount), 0)', 'sum')
+      .where('payment.status = :status', { status: 'PAID' })
+      .getRawOne();
+    return Number(result?.sum || 0);
+  }
+
+  async countByStatus(status: string) {
+    return this.repository
+      .createQueryBuilder('payment')
+      .where('payment.status = :status', { status })
+      .getCount();
+  }
 }

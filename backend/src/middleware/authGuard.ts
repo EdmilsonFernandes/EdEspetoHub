@@ -16,11 +16,11 @@ import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { env } from '../config/env';
 
-export type UserRole = 'ADMIN' | 'CHURRASQUEIRO';
+export type UserRole = 'ADMIN' | 'CHURRASQUEIRO' | 'SUPER_ADMIN';
 
 type JwtPayload = {
   sub: string;        // userId
-  storeId: string;    // storeId do dono
+  storeId?: string;   // storeId do dono (opcional para super admin)
   role: UserRole;
 };
 
