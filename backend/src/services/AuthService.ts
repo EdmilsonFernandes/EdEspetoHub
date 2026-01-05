@@ -204,17 +204,28 @@ export class AuthService
       { expiresIn: '7d' }
     );
 
+    const sanitizedOwner = {
+      id: owner.id,
+      fullName: owner.fullName,
+      email: owner.email,
+      phone: owner.phone,
+      address: owner.address,
+      role: 'ADMIN',
+    };
+
+    const sanitizedStore = {
+      id: store.id,
+      name: store.name,
+      slug: store.slug,
+      open: store.open,
+      createdAt: store.createdAt,
+      settings: store.settings,
+    };
+
     return {
       token,
-      user: {
-        id: owner.id,
-        fullName: owner.fullName,
-        email: owner.email,
-        phone: owner.phone,
-        address: owner.address,
-        role: 'ADMIN',
-      },
-      store,
+      user: sanitizedOwner,
+      store: sanitizedStore,
     };
   }
 
