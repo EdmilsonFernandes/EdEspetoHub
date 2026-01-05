@@ -23,6 +23,135 @@ Requisitos mínimos para desenvolvimento local:
 - PostgreSQL 16+ (local) ou Docker
 - Docker + Docker Compose (para execução conteinerizada)
 
+## Passo a passo para um novo dev (local, sem Docker Compose)
+
+1) **Clonar e instalar dependências**
+
+```bash
+git clone <repo>
+cd EdEspetoHub
+cd backend && npm install
+cd ../frontend && npm install
+```
+
+2) **Subir o PostgreSQL local** (ou use seu próprio)
+
+```bash
+createdb espetinho
+psql -h localhost -U postgres -d espetinho -f backend/schema.sql
+```
+
+Se preferir Docker só para o banco:
+
+```bash
+docker run --name espetinho-db -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=espetinho -p 5432:5432 -d postgres:16
+docker exec -i espetinho-db psql -U postgres -d espetinho < backend/schema.sql
+```
+
+3) **Configurar variáveis de ambiente da API**
+
+As variáveis lidas são `PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD`, `PGDATABASE`, `PORT`, `JWT_SECRET`.
+
+Exemplo (no terminal):
+
+```bash
+export PGHOST=localhost
+export PGPORT=5432
+export PGUSER=postgres
+export PGPASSWORD=postgres
+export PGDATABASE=espetinho
+export PORT=4000
+export JWT_SECRET=super-secret-token
+```
+
+4) **Subir a API**
+
+```bash
+cd backend
+npm run dev
+```
+
+5) **Configurar o front**
+
+Crie `frontend/.env`:
+
+```bash
+VITE_API_BASE_URL=http://localhost:4000/api
+```
+
+6) **Subir o front**
+
+```bash
+cd frontend
+npm run dev
+```
+
+7) **Acessar**
+
+- Vitrine: `http://localhost:3000/<slug>`
+- Admin: `http://localhost:3000/admin`
+- Pedidos: `http://localhost:3000/admin/orders`
+- Fila: `http://localhost:3000/admin/queue`
+
+## Criar loja/admin e obter planId (primeiro acesso)
+
+1) **Listar planos (gera seed automaticamente)**
+
+```bash
+curl http://localhost:4000/api/plans
+```
+
+2) **Registrar loja e admin**
+
+```bash
+curl -X POST http://localhost:4000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "fullName": "Admin Local",
+    "email": "admin@local.com",
+    "password": "admin123",
+    "storeName": "Espetinho do Teste",
+    "primaryColor": "#b91c1c",
+    "secondaryColor": "#111827",
+    "paymentMethod": "PIX",
+    "planId": "<PLAN_ID>"
+  }'
+```
+
+3) **Login admin (slug + senha)**
+
+```bash
+curl -X POST http://localhost:4000/api/auth/admin-login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "slug": "espetinho-do-teste",
+    "password": "admin123"
+  }'
+```
+
+Depois disso, acesse o painel em `http://localhost:3000/admin`.
+
+## Subir em EC2 (Docker Compose pré-configurado)
+
+No servidor EC2, use o `docker-compose.yml` já existente no repositório:
+
+```bash
+docker compose up --build -d
+```
+
+Serviços esperados:
+- Front-end: `http://<EC2-IP>:8080`
+- API: `http://<EC2-IP>:4000` (Swagger em `/api/docs`)
+- pgAdmin (opcional): `http://<EC2-IP>:5050`
+
+Em produção, ajuste senhas/segredos e restrinja portas no Security Group.
+Checklist de portas no Security Group:
+- 22 (SSH)
+- 8080 (front)
+- 4000 (API)
+- 5050 (pgAdmin, opcional)
+- 5432 (Postgres) **não** expor publicamente
+
 ## Execução local (sem Docker)
 
 ### 1. Banco de dados
@@ -57,7 +186,8 @@ A API sobe em `http://localhost:4000` e expõe a documentação Swagger em `http
 Endpoints principais:
 
 - `POST /api/auth/register` — cria usuário, loja e retorna token JWT.
-- `POST /api/auth/login` — autenticação de administradores.
+- `POST /api/auth/admin-login` — autenticação via slug + senha.
+- `POST /api/auth/login` — autenticação via e-mail + senha.
 - `GET /api/stores/:slug`, `PUT /api/stores/:id`, `PUT /api/stores/:id/status` — gerenciamento de loja.
 - `GET /api/stores/:storeId/products`, `POST /api/stores/:storeId/products` — catálogo (admin).
 - `GET /api/stores/slug/:slug/products` — catálogo público por loja (vitrine).
