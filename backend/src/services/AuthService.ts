@@ -186,7 +186,26 @@ export class AuthService
     const firstStore = user.stores?.[ 0 ];
     const token = this.generateToken(user.id, firstStore?.id);
 
-    return { user, store: firstStore, token };
+    const sanitizedUser = {
+      id: user.id,
+      fullName: user.fullName,
+      email: user.email,
+      phone: user.phone,
+      address: user.address,
+    };
+
+    const sanitizedStore = firstStore
+      ? {
+        id: firstStore.id,
+        name: firstStore.name,
+        slug: firstStore.slug,
+        open: firstStore.open,
+        createdAt: firstStore.createdAt,
+        settings: firstStore.settings,
+      }
+      : undefined;
+
+    return { user: sanitizedUser, store: sanitizedStore, token };
   }
 
   async adminLogin(slug: string, password: string)

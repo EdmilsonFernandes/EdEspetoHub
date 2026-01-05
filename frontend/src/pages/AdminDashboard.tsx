@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -22,6 +22,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   const [products, setProducts] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [error, setError] = useState('');
+  const brandingKeyRef = useRef('');
 
   const storeId = session?.store?.id;
   const storeSlug = session?.store?.slug;
@@ -32,6 +33,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
    * PROTEÇÃO DE ROTA (ADMIN)
    * ========================= */
   useEffect(() => {
+    console.count('AdminDashboard guard effect');
     if (!hydrated) return;
 
     if (!session?.token || session?.user?.role !== 'ADMIN' || !session?.store) {
@@ -39,13 +41,34 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       return;
     }
 
+    const primaryColor = session?.store?.settings?.primaryColor;
+    const secondaryColor = session?.store?.settings?.secondaryColor;
+    const logoUrl = session?.store?.settings?.logoUrl;
+    const name = session?.store?.name;
+
+    const key = `${session?.store?.id ?? ''}|${primaryColor ?? ''}|${secondaryColor ?? ''}|${logoUrl ?? ''}|${name ?? ''}`;
+    if (!session?.store?.id) return;
+    if (brandingKeyRef.current === key) return;
+    brandingKeyRef.current = key;
+
     setBranding({
-      primaryColor: session?.store?.settings?.primaryColor,
-      secondaryColor: session?.store?.settings?.secondaryColor,
-      logoUrl: session?.store?.settings?.logoUrl,
-      brandName: session?.store?.name,
+      primaryColor,
+      secondaryColor,
+      logoUrl,
+      brandName: name,
     });
-  }, [session, hydrated, navigate, setBranding]);
+  }, [
+    hydrated,
+    navigate,
+    session?.store?.id,
+    session?.store?.name,
+    session?.store?.settings?.logoUrl,
+    session?.store?.settings?.primaryColor,
+    session?.store?.settings?.secondaryColor,
+    session?.token,
+    session?.user?.role,
+    setBranding,
+  ]);
 
   /* =========================
    * CARREGA PRODUTOS + PEDIDOS

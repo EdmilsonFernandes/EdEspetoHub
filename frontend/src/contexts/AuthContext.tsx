@@ -19,6 +19,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
+    console.count('Auth hydrate effect');
     const raw = localStorage.getItem('adminSession');
 
     if (raw)

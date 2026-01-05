@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 
 type Theme = 'light' | 'dark';
 
@@ -61,18 +61,40 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     return (saved as Theme) || 'light';
   });
   const [branding, setBrandingState] = useState<Branding>(resolveStoredBranding);
+  const lastAppliedBrandingKey = useRef('');
 
   useEffect(() => {
+    console.count('Theme toggle effect');
     localStorage.setItem('theme', theme);
     document.documentElement.classList.toggle('dark', theme === 'dark');
   }, [theme]);
 
   useEffect(() => {
+    console.count('Theme apply effect');
+
+    const key = `${branding?.primaryColor ?? ''}|${branding?.secondaryColor ?? ''}|${branding?.logoUrl ?? ''}|${branding?.brandName ?? ''}`;
+    if (!key.trim()) return;
+    if (lastAppliedBrandingKey.current === key) return;
+    lastAppliedBrandingKey.current = key;
+
     applyBrandingToCssVars(branding);
-  }, [branding]);
+  }, [branding?.primaryColor, branding?.secondaryColor, branding?.logoUrl, branding?.brandName]);
 
   const toggleTheme = () => setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
-  const setBranding = (nextBranding: Branding) => setBrandingState({ ...defaultBranding, ...nextBranding });
+  const setBranding = useCallback((nextBranding: Branding) => {
+    setBrandingState((prev) => {
+      const merged = { ...defaultBranding, ...nextBranding };
+      const prevKey = `${prev?.primaryColor ?? ''}|${prev?.secondaryColor ?? ''}|${prev?.logoUrl ?? ''}|${prev?.brandName ?? ''}`;
+      const nextKey = `${merged?.primaryColor ?? ''}|${merged?.secondaryColor ?? ''}|${merged?.logoUrl ?? ''}|${merged?.brandName ?? ''}`;
+
+      if (prevKey === nextKey)
+      {
+        return prev;
+      }
+
+      return merged;
+    });
+  }, []);
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme, branding, setBranding }}>
