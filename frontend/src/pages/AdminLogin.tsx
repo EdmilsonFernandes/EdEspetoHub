@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
 import { getPersistedBranding, defaultBranding } from '../constants';
@@ -9,7 +9,7 @@ import { apiClient } from '../config/apiClient';
 
 export function AdminLogin() {
   const navigate = useNavigate();
-  const { setAuth } = useAuth();
+  const { setAuth, auth, hydrated } = useAuth();
   const { setBranding } = useTheme();
   const [loginForm, setLoginForm] = useState({ slug: defaultBranding.espetoId, password: '' });
   const [loginError, setLoginError] = useState('');
@@ -35,37 +35,35 @@ export function AdminLogin() {
     }
   };
 
-  const brandInitials =
-    branding.brandName
-      ?.split(' ')
-      .map(part => part?.[0])
-      .join('')
-      .slice(0, 2)
-      .toUpperCase() || 'ED';
+  const platformLogo = '/chama-no-espeto.jpeg';
+
+  useEffect(() => {
+    if (!hydrated) return;
+    if (auth?.token && auth?.user?.role === 'ADMIN') {
+      navigate('/admin/dashboard');
+    }
+  }, [auth?.token, auth?.user?.role, hydrated, navigate]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
-      <div className="max-w-md w-full">
+    <div className="min-h-screen bg-brand-secondary-soft flex items-center justify-center p-4">
+      <div className="max-w-md w-full relative">
+        <div className="absolute -top-24 -right-20 w-56 h-56 bg-brand-primary-soft rounded-full blur-3xl" />
+        <div className="absolute -bottom-24 -left-16 w-56 h-56 bg-brand-secondary-soft rounded-full blur-3xl" />
         <form
           onSubmit={handleLogin}
-          className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 sm:p-8 space-y-6"
+          className="bg-white/95 backdrop-blur rounded-3xl shadow-2xl border border-white/70 p-6 sm:p-8 space-y-6 relative overflow-hidden"
         >
+          <div
+            className="absolute inset-0 opacity-10 pointer-events-none"
+            style={{
+              backgroundImage: `url(${platformLogo})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }}
+          />
           <div className="text-center">
-            <div
-              className="w-16 h-16 rounded-2xl flex items-center justify-center text-white font-black text-2xl shadow-lg mx-auto mb-4"
-              style={{ backgroundColor: branding.primaryColor }}
-            >
-              {branding.logoUrl ? (
-                <img
-                  src={branding.logoUrl}
-                  alt={branding.brandName}
-                  className="w-full h-full object-cover rounded-2xl"
-                />
-              ) : (
-                brandInitials
-              )}
-            </div>
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-2">Acesso do administrador</h2>
+            <h2 className="text-2xl sm:text-3xl font-black text-gray-800 mb-1">Chama no Espeto</h2>
+            <p className="text-sm text-gray-500">Acesso do administrador</p>
             <p className="text-sm text-gray-500">Entre com suas credenciais para acessar o painel.</p>
           </div>
 
@@ -73,14 +71,14 @@ export function AdminLogin() {
             <div className="text-sm text-red-700 bg-red-50 border border-red-200 p-4 rounded-xl">{loginError}</div>
           )}
 
-          <div className="space-y-4">
+          <div className="space-y-4 relative z-10">
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700">Identificador da loja (slug)</label>
               <input
                 type="text"
                 value={loginForm.slug}
                 onChange={e => setLoginForm(prev => ({ ...prev, slug: e.target.value }))}
-                className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
+                className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
                 placeholder="ex.: espetinhodatony"
               />
               <p className="text-xs text-gray-500">Use o slug fácil de memorizar da sua loja.</p>
@@ -91,7 +89,7 @@ export function AdminLogin() {
                 type="password"
                 value={loginForm.password}
                 onChange={e => setLoginForm(prev => ({ ...prev, password: e.target.value }))}
-                className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
+                className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
                 placeholder="admin123"
               />
             </div>
@@ -100,8 +98,7 @@ export function AdminLogin() {
           <div className="space-y-3">
             <button
               type="submit"
-              className="w-full text-white py-3 rounded-xl font-semibold hover:opacity-90 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-              style={{ backgroundColor: branding.primaryColor }}
+              className="w-full text-white py-3 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 bg-brand-gradient hover:opacity-90"
             >
               🔑 Entrar no painel
             </button>

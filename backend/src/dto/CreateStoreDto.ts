@@ -7,4 +7,5 @@ export interface CreateStoreDto {
   primaryColor: string;
   secondaryColor?: string;
   socialLinks?: { type: string; value: string }[];
+  openingHours?: any[];
 }

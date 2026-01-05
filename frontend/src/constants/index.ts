@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { formatPhoneInput } from '../utils/format';
+import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 
 export const DEFAULT_AREA_CODE = '12';
 export const initialCustomer = { name: '', phone: formatPhoneInput('', DEFAULT_AREA_CODE), address: '', table: '', type: 'delivery' };
@@ -24,7 +25,12 @@ export const getPersistedBranding = (ownerId: string = defaultBranding.espetoId)
   if (!saved) return { ...defaultBranding, espetoId: ownerId };
   try {
     const parsed = JSON.parse(saved);
-    return { ...defaultBranding, espetoId: ownerId, ...parsed };
+  return {
+    ...defaultBranding,
+    espetoId: ownerId,
+    ...parsed,
+    logoUrl: resolveAssetUrl(parsed.logoUrl || defaultBranding.logoUrl),
+  };
   } catch (error) {
     console.error('Erro ao carregar branding salvo', error);
     return { ...defaultBranding, espetoId: ownerId };

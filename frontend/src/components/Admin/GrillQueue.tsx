@@ -1,6 +1,6 @@
 // @ts-nocheck
-import React, { useEffect, useMemo, useState } from "react";
-import { CheckSquare, Clock, ChefHat, RefreshCcw, Plus, Minus, Hash } from "lucide-react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { CheckSquare, Clock, ChefHat, RefreshCcw, Plus, Minus, Hash, Volume2, VolumeX } from "lucide-react";
 import { orderService } from "../../services/orderService";
 import { productService } from "../../services/productService";
 import {
@@ -19,6 +19,32 @@ export const GrillQueue = () => {
   const [selectedProducts, setSelectedProducts] = useState({});
   const [currentTime, setCurrentTime] = useState(Date.now());
   const [error, setError] = useState('');
+  const [updating, setUpdating] = useState<string | null>(null);
+  const [soundEnabled, setSoundEnabled] = useState(false);
+  const previousIdsRef = useRef<string[]>([]);
+  const audioContextRef = useRef<AudioContext | null>(null);
+
+  const playNewOrderSound = () => {
+    if (!soundEnabled) return;
+    try {
+      const context = audioContextRef.current || new AudioContext();
+      audioContextRef.current = context;
+
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      oscillator.type = "sine";
+      oscillator.frequency.value = 880;
+      gain.gain.value = 0.07;
+
+      oscillator.connect(gain);
+      gain.connect(context.destination);
+
+      oscillator.start();
+      oscillator.stop(context.currentTime + 0.2);
+    } catch (err) {
+      console.error("Nao foi possivel tocar o som", err);
+    }
+  };
 
   const loadQueue = async () => {
     setLoading(true);
@@ -26,6 +52,13 @@ export const GrillQueue = () => {
 
     try {
       const data = await orderService.fetchQueue();
+      const nextIds = (data || []).map((order) => order.id);
+      const previousIds = previousIdsRef.current;
+      const hasNew = nextIds.some((id) => !previousIds.includes(id));
+      if (hasNew) {
+        playNewOrderSound();
+      }
+      previousIdsRef.current = nextIds;
       setQueue(data);
     } catch (err) {
       console.error('Erro ao buscar fila', err);
@@ -53,7 +86,20 @@ export const GrillQueue = () => {
   }, []);
 
   const handleAdvance = async (orderId, status) => {
-    await orderService.updateStatus(orderId, status);
+    try {
+      setUpdating(orderId);
+      await orderService.updateStatus(orderId, status);
+      setQueue((prev) =>
+        prev.map((order) =>
+          order.id === orderId ? { ...order, status } : order
+        )
+      );
+    } catch (err) {
+      console.error('Erro ao atualizar status', err);
+      setError('Nao foi possivel atualizar o status. Tente novamente.');
+    } finally {
+      setUpdating(null);
+    }
   };
 
   const applyItemsChange = async (orderId, updater) => {
@@ -63,7 +109,7 @@ export const GrillQueue = () => {
     const sanitizedItems = updatedItems.filter((item) => item.qty > 0);
 
     const nextTotal = sanitizedItems.reduce(
-      (sum, item) => sum + (item.price || 0) * item.qty,
+      (sum, item) => sum + (item.unitPrice ?? item.price ?? 0) * item.qty,
       0
     );
 
@@ -73,7 +119,12 @@ export const GrillQueue = () => {
       )
     );
 
-    await orderService.updateItems(orderId, sanitizedItems, nextTotal);
+    try {
+      await orderService.updateItems(orderId, sanitizedItems, nextTotal);
+    } catch (err) {
+      console.error('Erro ao atualizar itens', err);
+      setError('Nao foi possivel atualizar os itens. Atualize a fila.');
+    }
   };
 
   const handleQuantityChange = (orderId, itemId, delta) => {
@@ -99,7 +150,10 @@ export const GrillQueue = () => {
         );
       }
 
-      return [...items, { id: product.id, name: product.name, price: product.price, qty: 1 }];
+      return [
+        ...items,
+        { id: product.id, name: product.name, price: product.price, unitPrice: product.price, qty: 1 },
+      ];
     });
   };
 
@@ -116,24 +170,78 @@ export const GrillQueue = () => {
   );
 
   const sortedQueue = useMemo(
-    () => [...queue].sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0)),
+    () =>
+      [...queue]
+        .filter((order) => ['pending', 'preparing'].includes(order.status))
+        .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0)),
     [queue]
   );
+
+  const getStatusStyles = (status) => {
+    if (status === "preparing") {
+      return { label: "Em preparo", className: "bg-amber-100 text-amber-700" };
+    }
+    return { label: "Aguardando", className: "bg-red-100 text-red-700" };
+  };
+
+  const renderTimeline = (status) => {
+    const steps = [
+      { key: "pending", label: "Recebido" },
+      { key: "preparing", label: "Em preparo" },
+      { key: "done", label: "Pronto" },
+    ];
+
+    const isActive = (key) => {
+      if (status === "pending") return key === "pending";
+      if (status === "preparing") return key !== "done";
+      return true;
+    };
+
+    return (
+      <div className="mt-4 flex items-center gap-2 text-xs text-gray-500">
+        {steps.map((step, index) => (
+          <div key={step.key} className="flex items-center gap-2">
+            <div
+              className={`w-2.5 h-2.5 rounded-full ${
+                isActive(step.key) ? "bg-brand-primary" : "bg-gray-300"
+              }`}
+            />
+            <span className={isActive(step.key) ? "text-gray-700 font-semibold" : ""}>
+              {step.label}
+            </span>
+            {index < steps.length - 1 && <span className="text-gray-300">•</span>}
+          </div>
+        ))}
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-gray-700 font-semibold">
-          <ChefHat className="text-red-500" />
+          <ChefHat className="text-brand-primary" />
           Fila do Churrasqueiro
+          <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-bold bg-brand-primary text-white">
+            {sortedQueue.length}
+          </span>
         </div>
-        <button
-          onClick={loadQueue}
-          className="flex items-center gap-2 text-sm px-3 py-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200"
-        >
-          <RefreshCcw size={16} /> Atualizar
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setSoundEnabled((prev) => !prev)}
+            className="flex items-center gap-2 text-sm px-3 py-2 rounded-lg bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
+          >
+            {soundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
+            {soundEnabled ? "Som ligado" : "Som desligado"}
+          </button>
+          <button
+            onClick={loadQueue}
+            className="flex items-center gap-2 text-sm px-3 py-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200"
+          >
+            <RefreshCcw size={16} /> Atualizar
+          </button>
+        </div>
       </div>
 
       {/* LISTA */}
@@ -147,7 +255,7 @@ export const GrillQueue = () => {
             <div className="flex justify-between items-start">
               <div>
                 <div className="flex items-center gap-2 mb-1 text-xs text-gray-500 uppercase font-bold">
-                  <Hash size={12} className="text-red-500" /> Fila{" "}
+                  <Hash size={12} className="text-brand-primary" /> Fila{" "}
                   {String(index + 1).padStart(2, "0")}
                 </div>
 
@@ -161,6 +269,7 @@ export const GrillQueue = () => {
 
                 <p className="text-xs text-gray-500 uppercase">
                   {formatOrderType(order.type)}
+                  {order.table ? ` · Mesa ${order.table}` : ''}
                 </p>
 
                 <p className="text-xs text-gray-500 uppercase mt-1">
@@ -169,20 +278,16 @@ export const GrillQueue = () => {
               </div>
 
               <span
-                className={`px-2 py-1 text-xs font-bold rounded ${
-                  order.status === "preparing"
-                    ? "bg-yellow-100 text-yellow-700"
-                    : "bg-red-100 text-red-700"
-                }`}
+                className={`px-2 py-1 text-xs font-bold rounded ${getStatusStyles(order.status).className}`}
               >
-                {formatOrderStatus(order.status)}
+                {getStatusStyles(order.status).label}
               </span>
             </div>
 
             {/* TEMPO */}
             <div className="mt-3 text-sm font-semibold text-gray-700 flex items-center gap-2">
-              <div className="px-3 py-1 rounded-full bg-red-50 text-red-700 font-black flex items-center gap-2 shadow-sm">
-                <Clock size={14} className="text-red-500" />
+              <div className="px-3 py-1 rounded-full bg-brand-primary text-white font-black flex items-center gap-2 shadow-sm">
+                <Clock size={14} className="text-white" />
                 <span className="tabular-nums text-base">
                   {elapsedTime[order.id] || "0s"}
                 </span>
@@ -219,7 +324,7 @@ export const GrillQueue = () => {
                   </div>
 
                   <span className="font-semibold">
-                    {formatCurrency(item.price * item.qty)}
+                    {formatCurrency((item.unitPrice ?? (item.price && item.qty ? item.price / item.qty : item.price) ?? 0) * item.qty)}
                   </span>
                 </div>
               ))}
@@ -247,11 +352,13 @@ export const GrillQueue = () => {
 
               <button
                 onClick={() => handleAddItem(order.id)}
-                className="px-3 py-2 rounded-lg bg-red-50 text-red-600 text-xs font-bold flex items-center gap-1"
+                className="px-3 py-2 rounded-lg bg-brand-primary text-white text-xs font-bold flex items-center gap-1 hover:opacity-90"
               >
                 <Plus size={14} /> Incluir
               </button>
             </div>
+
+            {renderTimeline(order.status)}
 
             {/* TOTAL + BOTÕES */}
             <div className="flex justify-between items-center mt-4">
@@ -263,17 +370,19 @@ export const GrillQueue = () => {
                 {order.status === "pending" && (
                   <button
                     onClick={() => handleAdvance(order.id, "preparing")}
-                    className="px-3 py-2 rounded-lg bg-yellow-100 text-yellow-700 text-xs font-bold flex items-center gap-1"
+                    disabled={updating === order.id}
+                    className="px-3 py-2 rounded-lg bg-amber-100 text-amber-800 text-xs font-bold flex items-center gap-1 disabled:opacity-60"
                   >
-                    <Clock size={16} /> Preparar
+                    <Clock size={16} /> Iniciar preparo
                   </button>
                 )}
 
                 <button
                   onClick={() => handleAdvance(order.id, "done")}
-                  className="px-3 py-2 rounded-lg bg-green-100 text-green-700 text-xs font-bold flex items-center gap-1"
+                  disabled={updating === order.id}
+                  className="px-3 py-2 rounded-lg bg-green-100 text-green-800 text-xs font-bold flex items-center gap-1 disabled:opacity-60"
                 >
-                  <CheckSquare size={16} /> Finalizar
+                  <CheckSquare size={16} /> Marcar pronto
                 </button>
               </div>
             </div>

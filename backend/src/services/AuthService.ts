@@ -102,6 +102,7 @@ export class AuthService
         primaryColor: storePayload.primaryColor,
         secondaryColor: storePayload.secondaryColor,
         socialLinks: sanitizeSocialLinks(storePayload.socialLinks),
+        openingHours: storePayload.openingHours ?? [],
       });
 
       const store = storeRepo.create({
@@ -239,6 +240,11 @@ export class AuthService
       open: store.open,
       createdAt: store.createdAt,
       settings: store.settings,
+      owner: {
+        id: owner.id,
+        fullName: owner.fullName,
+        phone: owner.phone,
+      },
     };
 
     return {

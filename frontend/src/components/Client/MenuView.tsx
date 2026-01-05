@@ -1,12 +1,23 @@
 // @ts-nocheck
 import React, { useMemo } from "react";
-import { Plus } from "lucide-react";
+import { Plus, ChefHat, LayoutDashboard } from "lucide-react";
 import { formatCurrency } from "../../utils/format";
 
 // =======================================
 // HEADER PREMIUM COM LOGO OFICIAL
 // =======================================
-const Header = ({ branding, instagramHandle }) => {
+const normalizeWhatsApp = (value) => {
+  if (!value) return "";
+  const digits = value.toString().replace(/\D/g, "");
+  if (!digits) return "";
+  return digits.startsWith("55") ? digits : `55${digits}`;
+};
+
+const Header = ({ branding, instagramHandle, whatsappNumber, isOpenNow, todayHoursLabel, onOpenQueue, onOpenAdmin }) => {
+  const openStatus = isOpenNow !== false;
+  const statusStyle = openStatus
+    ? "bg-brand-primary-soft text-brand-primary border-brand-primary"
+    : "bg-brand-secondary-soft text-brand-secondary border-brand-secondary";
   const previewInitials = branding?.brandName
     ?.split(" ")
     .map((part) => part[0])
@@ -42,16 +53,60 @@ const Header = ({ branding, instagramHandle }) => {
             href={`https://instagram.com/${instagramHandle.replace("@", "")}`}
             target="_blank"
             rel="noreferrer"
-            className="text-primary text-sm font-semibold hover:underline"
+            className="text-brand-primary text-sm font-semibold hover:underline"
           >
             {instagramHandle}
           </a>
         )}
       </div>
 
-      {/* STATUS */}
-      <div className="px-3 py-1 rounded-full accent-pill text-sm font-bold shadow-sm">
-        Aberto
+      <div className="flex flex-col items-end gap-2">
+        <div className="flex items-center gap-2">
+          <div
+            className={`px-3 py-1.5 rounded-full text-[11px] font-semibold uppercase tracking-wide flex items-center gap-2 border ${statusStyle}`}
+          >
+            <span
+              className={`w-2 h-2 rounded-full shadow-sm ${
+                openStatus ? "bg-brand-primary status-blink" : "bg-brand-secondary"
+              }`}
+            />
+            {openStatus ? "Aberto" : "Fechado"}
+          </div>
+          {todayHoursLabel && (
+            <div className="px-3 py-1.5 rounded-full text-[11px] font-semibold uppercase tracking-wide border border-brand-secondary text-brand-secondary bg-white">
+              {todayHoursLabel}
+            </div>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2">
+          {normalizeWhatsApp(whatsappNumber) && (
+            <a
+              href={`https://wa.me/${normalizeWhatsApp(whatsappNumber)}`}
+              target="_blank"
+              rel="noreferrer"
+              className="px-3 py-2 rounded-full text-xs font-semibold bg-green-600 text-white shadow-sm hover:shadow-md transition"
+            >
+              WhatsApp
+            </a>
+          )}
+          {onOpenQueue && (
+            <button
+              onClick={onOpenQueue}
+              className="px-3 py-2 rounded-full text-xs font-semibold bg-brand-secondary text-white shadow-sm hover:shadow-md transition flex items-center gap-1"
+            >
+              <ChefHat size={14} /> Visao do churrasqueiro
+            </button>
+          )}
+          {onOpenAdmin && (
+            <button
+              onClick={onOpenAdmin}
+              className="px-3 py-2 rounded-full text-xs font-semibold border border-brand-secondary text-brand-secondary hover:bg-brand-secondary-soft transition flex items-center gap-1"
+            >
+              <LayoutDashboard size={14} /> Area admin
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -60,36 +115,67 @@ const Header = ({ branding, instagramHandle }) => {
 // =======================================
 // MENU ORGANIZADO POR CATEGORIA (COM FOTOS)
 // =======================================
-export const MenuView = ({ products, cart, onUpdateCart, branding, instagramHandle }) => {
+export const MenuView = ({
+  products,
+  cart,
+  onUpdateCart,
+  branding,
+  instagramHandle,
+  whatsappNumber,
+  isOpenNow,
+  todayHoursLabel,
+  showHeader = true,
+  onOpenQueue,
+  onOpenAdmin
+}) => {
 
   const grouped = useMemo(() => {
-    const map = {};
+    const categories = [
+      { key: "espetos", label: "Espetos" },
+      { key: "bebidas", label: "Bebidas" },
+      { key: "porcoes", label: "Porções" },
+      { key: "outros", label: "Outros" },
+    ];
+
+    const map = categories.reduce((acc, category) => {
+      acc[category.key] = { label: category.label, items: [] };
+      return acc;
+    }, {});
+
     products.forEach((item) => {
-      const cat = item.category || "Outros";
-      if (!map[cat]) map[cat] = [];
-      map[cat].push(item);
+      const raw = (item.category || "outros").toString().toLowerCase();
+      const normalized = map[raw] ? raw : "outros";
+      map[normalized].items.push(item);
     });
 
-    // Ordenação Z -> A
-    const sortedMap = {};
-    Object.keys(map)
-      .sort((a, b) => b.localeCompare(a)) // O segredo está aqui: b comparado com a
-      .forEach((key) => {
-        sortedMap[key] = map[key];
-      });
-
-    return sortedMap;
+    return categories
+      .map((category) => ({
+      key: category.key,
+      label: category.label,
+      items: map[category.key].items,
+    }))
+      .filter((category) => category.items.length > 0);
   }, [products]);
 
   return (
     <div className="bg-gray-50 min-h-screen">
 
-      <Header branding={branding} instagramHandle={instagramHandle} />
+      {showHeader && (
+        <Header
+          branding={branding}
+          instagramHandle={instagramHandle}
+          whatsappNumber={whatsappNumber}
+          isOpenNow={isOpenNow}
+          todayHoursLabel={todayHoursLabel}
+          onOpenQueue={onOpenQueue}
+          onOpenAdmin={onOpenAdmin}
+        />
+      )}
 
       <div className="space-y-10 p-4">
 
-        {Object.keys(grouped).map((category) => (
-          <div key={category} className="space-y-3">
+        {grouped.map((category) => (
+          <div key={category.key} className="space-y-3">
 
             {/* Título da categoria */}
             <div
@@ -97,13 +183,13 @@ export const MenuView = ({ products, cart, onUpdateCart, branding, instagramHand
               style={{ borderColor: branding?.primaryColor, background: 'rgba(0,0,0,0.02)' }}
             >
               <h2 className="font-bold text-lg capitalize tracking-wide" style={{ color: branding?.primaryColor }}>
-                {category}
+                {category.label}
               </h2>
             </div>
 
             {/* Lista de itens */}
             <div className="space-y-4">
-              {grouped[category].map((item) => (
+              {category.items.map((item) => (
                 <div
                   key={item.id}
                   className="bg-white rounded-xl shadow-sm border border-gray-100 p-3 flex gap-4 items-center hover:shadow-md active:scale-[0.99] transition cursor-pointer"
@@ -129,7 +215,7 @@ export const MenuView = ({ products, cart, onUpdateCart, branding, instagramHand
                     <p className="font-semibold text-gray-900 text-[15px]">
                       {item.name}
                     </p>
-                    <p className="text-primary font-bold text-lg mt-[-1px]">
+                    <p className="text-brand-primary font-bold text-lg mt-[-1px]">
                       {formatCurrency(item.price)}
                     </p>
                   </div>
@@ -137,12 +223,15 @@ export const MenuView = ({ products, cart, onUpdateCart, branding, instagramHand
                   {/* Botão de adicionar */}
                   <button
                     onClick={() => onUpdateCart(item, 1)}
-                    className="w-11 h-11 rounded-full bg-primary text-white flex items-center justify-center hover:opacity-90 shadow-md active:scale-95 transition"
+                    className="w-11 h-11 rounded-full bg-brand-primary text-white flex items-center justify-center hover:opacity-90 shadow-md active:scale-95 transition"
                   >
                     <Plus size={20} />
                   </button>
                 </div>
               ))}
+              {category.items.length === 0 && (
+                <div className="text-sm text-gray-500 px-2">Sem produtos nessa categoria.</div>
+              )}
             </div>
 
           </div>

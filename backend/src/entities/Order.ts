@@ -24,6 +24,9 @@ export class Order {
   @Column({ nullable: true })
   address?: string;
 
+  @Column({ name: 'table_number', nullable: true })
+  table?: string;
+
   @Column({ default: 'delivery' })
   type!: string;
 

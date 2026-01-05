@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ShoppingCart, ChefHat } from 'lucide-react';
 import { GrillQueue } from '../components/Admin/GrillQueue';
-import { apiClient } from '../config/apiClient';
 import { getPersistedBranding, defaultBranding } from '../constants';
 
 export function OrdersQueue() {
@@ -19,9 +18,6 @@ export function OrdersQueue() {
       setUser(parsedSession);
     }
 
-    if (storeSlug) {
-      apiClient.setOwnerId(storeSlug);
-    }
   }, [storeSlug]);
 
   if (!user) {

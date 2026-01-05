@@ -1,9 +1,10 @@
-import { CreateOrderDto } from '../dto/CreateOrderDto';
+import { CreateOrderDto, CreateOrderItemInput } from '../dto/CreateOrderDto';
 import { Order } from '../entities/Order';
 import { OrderItem } from '../entities/OrderItem';
 import { OrderRepository } from '../repositories/OrderRepository';
 import { ProductRepository } from '../repositories/ProductRepository';
 import { StoreRepository } from '../repositories/StoreRepository';
+import { AppDataSource } from '../config/database';
 
 export class OrderService
 {
@@ -52,6 +53,57 @@ export class OrderService
     return this.orderRepository.findByStoreId(store!.id);
   }
 
+  async updateStatus(orderId: string, status: string, authStoreId?: string)
+  {
+    const order = await this.orderRepository.findById(orderId);
+    if (!order) throw new Error('Pedido não encontrado');
+    this.ensureStoreAccess(order.store, authStoreId);
+
+    order.status = status;
+    return this.orderRepository.save(order);
+  }
+
+  async updateItems(orderId: string, items: CreateOrderItemInput[], authStoreId?: string)
+  {
+    const order = await this.orderRepository.findById(orderId);
+    if (!order) throw new Error('Pedido não encontrado');
+    this.ensureStoreAccess(order.store, authStoreId);
+
+    await AppDataSource.createQueryBuilder()
+      .delete()
+      .from(OrderItem)
+      .where('order_id = :id', { id: order.id })
+      .execute();
+
+    const nextItems: OrderItem[] = [];
+    let total = 0;
+
+    for (const item of items)
+    {
+      const productId = item.productId || (item as any).id;
+      if (!productId) continue;
+
+      const product = await this.productRepository.findById(productId);
+      if (!product || product.store.id !== order.store.id)
+      {
+        throw new Error('Produto inválido para esta loja');
+      }
+
+      const orderItem = new OrderItem();
+      orderItem.product = product;
+      orderItem.order = order;
+      orderItem.quantity = item.quantity;
+      orderItem.price = Number(product.price) * item.quantity;
+      nextItems.push(orderItem);
+      total += orderItem.price;
+    }
+
+    order.items = nextItems;
+    order.total = total;
+
+    return this.orderRepository.save(order);
+  }
+
   private async buildOrder(input: Omit<CreateOrderDto, 'storeId'>, store: Awaited<ReturnType<StoreRepository[ 'findById' ]>>)
   {
     const items: OrderItem[] = [];
@@ -77,6 +129,7 @@ export class OrderService
       customerName: input.customerName,
       phone: input.phone,
       address: input.address,
+      table: input.table,
       type: input.type,
       paymentMethod: input.paymentMethod,
       items,

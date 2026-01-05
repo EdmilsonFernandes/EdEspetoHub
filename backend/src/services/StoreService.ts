@@ -46,6 +46,7 @@ export class StoreService
         primaryColor: input.primaryColor,
         secondaryColor: input.secondaryColor,
         socialLinks,
+        openingHours: input.openingHours ?? [],
       });
 
       // 4️⃣ Store
@@ -114,6 +115,11 @@ export class StoreService
       if (data.socialLinks)
       {
         store.settings.socialLinks = sanitizeSocialLinks(data.socialLinks);
+      }
+
+      if (data.openingHours)
+      {
+        store.settings.openingHours = data.openingHours;
       }
 
       return storeRepo.save(store);

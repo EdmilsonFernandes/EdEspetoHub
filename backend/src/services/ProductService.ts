@@ -1,6 +1,7 @@
 import { CreateProductDto } from '../dto/CreateProductDto';
 import { ProductRepository } from '../repositories/ProductRepository';
 import { StoreRepository } from '../repositories/StoreRepository';
+import { saveBase64Image } from '../utils/imageStorage';
 
 export class ProductService
 {
@@ -22,12 +23,13 @@ export class ProductService
     this.ensureStoreAccess(store, authStoreId);
 
     const safeStore = store!;
+    const uploadedImage = await saveBase64Image(input.imageFile, `product-${safeStore.id}`, 'products');
 
     const product = this.productRepository.create({
       name: input.name,
       price: input.price,
       category: input.category,
-      imageUrl: input.imageUrl,
+      imageUrl: uploadedImage || input.imageUrl,
       store: safeStore,
     });
 
@@ -55,10 +57,12 @@ export class ProductService
     this.ensureStoreAccess(store, authStoreId);
     if (!store || !product || product.store.id !== store.id) throw new Error('Produto não encontrado');
 
+    const uploadedImage = await saveBase64Image(data.imageFile, `product-${store.id}`, 'products');
+
     product.name = data.name ?? product.name;
     product.price = data.price ?? product.price;
     product.category = data.category ?? product.category;
-    product.imageUrl = data.imageUrl ?? product.imageUrl;
+    product.imageUrl = uploadedImage ?? data.imageUrl ?? product.imageUrl;
 
     return this.productRepository.save(product);
   }

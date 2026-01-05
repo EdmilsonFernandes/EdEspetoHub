@@ -26,8 +26,13 @@ export const storeService = {
     return toJson(response);
   },
 
-  async setStatus(slug: any, isOpen: any) {
-    const response = await apiClient.rawPatch(`/stores/${slug}/status`, { isOpen });
+  async update(storeId: string, payload: any) {
+    const response = await apiClient.rawPut(`/stores/${storeId}`, payload);
+    return toJson(response);
+  },
+
+  async setStatus(storeId: any, isOpen: any) {
+    const response = await apiClient.rawPut(`/stores/${storeId}/status`, { open: isOpen });
     return toJson(response);
   },
 };

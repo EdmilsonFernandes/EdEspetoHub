@@ -45,7 +45,7 @@ export const CartView = ({
       {/* voltar */}
       <button
         onClick={onBack}
-        className="mb-6 flex items-center text-red-700 font-semibold hover:text-red-800"
+        className="mb-6 flex items-center text-brand-primary font-semibold hover:opacity-80"
       >
         <ChevronLeft size={20} /> Continuar comprando
       </button>
@@ -67,7 +67,7 @@ export const CartView = ({
               }
               placeholder="Ex: João Silva"
               list="customer-suggestions"
-              className="w-full border-b-2 border-gray-100 py-3 text-lg outline-none focus:border-red-500 placeholder:text-gray-300"
+              className="w-full border-b-2 border-gray-100 py-3 text-lg outline-none focus:border-brand-primary placeholder:text-gray-300"
             />
             <datalist id="customer-suggestions">
               {customers.map((entry) => (
@@ -88,7 +88,7 @@ export const CartView = ({
               value={customer.phone}
               onChange={(e) => handlePhoneChange(e.target.value)}
               placeholder="(12) 90000-0000"
-              className="w-full border-b-2 border-gray-100 py-3 text-lg outline-none focus:border-red-500 placeholder:text-gray-300"
+              className="w-full border-b-2 border-gray-100 py-3 text-lg outline-none focus:border-brand-primary placeholder:text-gray-300"
             />
           </div>
 
@@ -100,7 +100,7 @@ export const CartView = ({
                 onClick={() => onChangeCustomer({ ...customer, type })}
                 className={`flex-1 py-3 rounded-xl border-2 flex flex-col items-center justify-center gap-1 transition-all ${
                   customer.type === type
-                    ? "border-red-600 bg-red-50 text-red-700 font-bold"
+                    ? "border-brand-primary bg-brand-primary-soft text-brand-primary font-bold"
                     : "border-gray-100 text-gray-400 grayscale"
                 }`}
               >
@@ -126,7 +126,18 @@ export const CartView = ({
                 onChangeCustomer({ ...customer, address: e.target.value })
               }
               placeholder="Endereço completo"
-              className="w-full p-4 rounded-xl bg-gray-50 border border-gray-100 text-gray-700 outline-none focus:ring-2 focus:ring-red-200"
+              className="w-full p-4 rounded-xl bg-gray-50 border border-gray-100 text-gray-700 outline-none focus:ring-2 focus:ring-brand-primary"
+            />
+          )}
+
+          {customer.type === "table" && (
+            <input
+              value={customer.table}
+              onChange={(e) =>
+                onChangeCustomer({ ...customer, table: e.target.value })
+              }
+              placeholder="Número da mesa"
+              className="w-full p-4 rounded-xl bg-gray-50 border border-gray-100 text-gray-700 outline-none focus:ring-2 focus:ring-brand-primary"
             />
           )}
         </div>
@@ -142,7 +153,7 @@ export const CartView = ({
             className="flex justify-between items-center py-3 border-b border-gray-50 last:border-0"
           >
             <div className="flex items-center gap-3">
-              <span className="bg-red-100 text-red-700 font-bold w-6 h-6 rounded flex items-center justify-center text-xs">
+              <span className="bg-brand-primary-soft text-brand-primary font-bold w-6 h-6 rounded flex items-center justify-center text-xs">
                 {item.qty}
               </span>
               <span className="text-gray-700 font-medium">{item.name}</span>
@@ -159,6 +170,11 @@ export const CartView = ({
             {formatCurrency(total)}
           </span>
         </div>
+        {customer.type === "table" && customer.table && (
+          <div className="mt-3 text-xs text-gray-600 bg-gray-50 border border-gray-100 rounded-lg p-3">
+            Mesa {customer.table}
+          </div>
+        )}
 
         <div className="mt-3 text-xs text-gray-500 bg-gray-50 border border-gray-100 rounded-lg p-3 leading-relaxed">
           {isPickup &&
@@ -175,7 +191,7 @@ export const CartView = ({
       {/* Forma de Pagamento */}
       <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
         <h2 className="font-bold text-gray-800 mb-4 text-lg flex items-center gap-2">
-          <CreditCard size={18} className="text-red-500" /> Forma de Pagamento
+          <CreditCard size={18} className="text-brand-primary" /> Forma de Pagamento
         </h2>
 
         <div className="grid grid-cols-2 gap-3">
@@ -189,8 +205,8 @@ export const CartView = ({
               onClick={() => onChangePayment(method.id)}
               className={`border-2 rounded-xl p-3 text-left transition-all ${
                 paymentMethod === method.id
-                  ? "border-red-500 bg-red-50 text-red-700"
-                  : "border-gray-100 text-gray-500 hover:border-red-200"
+                  ? "border-brand-primary bg-brand-primary-soft text-brand-primary"
+                  : "border-gray-100 text-gray-500 hover:border-brand-primary"
               }`}
             >
               <div className="font-bold">{method.label}</div>
@@ -204,7 +220,7 @@ export const CartView = ({
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-100 max-w-lg mx-auto z-40">
         <button
           onClick={onCheckout}
-          className="w-full bg-green-600 text-white font-bold py-4 rounded-xl shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2"
+          className="w-full bg-brand-primary text-white font-bold py-4 rounded-xl shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2"
         >
           {isPickup ? <WalletCards size={20} /> : <Send size={20} />}
           {actionLabel}

@@ -42,7 +42,7 @@ const PaymentSummary = ({ paymentMethod, pixKey, phone }) => {
 
         <button
           onClick={() => navigator.clipboard.writeText(qrData)}
-          className="w-full mt-4 py-3 bg-gray-800 text-white rounded-xl font-bold text-sm hover:bg-gray-900 transition-colors"
+          className="w-full mt-4 py-3 bg-brand-primary text-white rounded-xl font-bold text-sm hover:opacity-90 transition-colors"
         >
           Copiar chave Pix
         </button>
@@ -71,10 +71,11 @@ export const SuccessView = ({
   onNewOrder,
   pixKey,
   phone,
+  table,
 }) => {
   return (
     <div className="flex flex-col items-center justify-center min-h-[80vh] text-center px-6 animate-in zoom-in">
-      <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-6 text-green-600 shadow-sm">
+      <div className="w-24 h-24 bg-brand-primary-soft rounded-full flex items-center justify-center mb-6 text-brand-primary shadow-sm">
         <CheckCircle size={48} />
       </div>
 
@@ -85,6 +86,8 @@ export const SuccessView = ({
       <p className="text-gray-500 mb-8 max-w-xs mx-auto leading-relaxed">
         {orderType === "delivery"
           ? "Recebemos seu pedido de entrega. Avisaremos quando sair para entrega."
+          : orderType === "table"
+          ? `Seu pedido foi recebido e seguirá para a produção. Mesa ${table || "-"}.`
           : "Seu pedido foi recebido e seguirá para a produção."}
       </p>
 
@@ -96,7 +99,7 @@ export const SuccessView = ({
 
       <button
         onClick={onNewOrder}
-        className="flex items-center gap-2 text-white bg-red-600 font-bold px-6 py-3 rounded-xl transition-colors hover:bg-red-700"
+        className="flex items-center gap-2 text-white bg-brand-primary font-bold px-6 py-3 rounded-xl transition-colors hover:opacity-90"
       >
         <ArrowLeft size={18} /> Voltar para os pedidos
       </button>

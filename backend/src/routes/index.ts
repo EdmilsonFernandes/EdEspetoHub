@@ -35,6 +35,8 @@ routes.patch('/admin/stores/:storeId/reactivate', requireAuth, requireRole('ADMI
 // Store public
 routes.get('/stores/slug/:slug', StoreController.getBySlug);
 routes.get('/chamanoespeto/:slug', StoreController.getBySlug);
+routes.get('/stores/slug/:slug/products', ProductController.listPublicBySlug);
+routes.get('/public/stores/slug/:slug/products', ProductController.listPublicBySlug);
 
 // Store admin
 routes.put('/stores/:storeId', requireAuth, requireRole('ADMIN'), StoreController.update);
@@ -43,7 +45,6 @@ routes.put('/stores/:storeId/status', requireAuth, requireRole('ADMIN'), StoreCo
 // Products admin (cadastro não depende de assinatura)
 routes.post('/stores/:storeId/products', requireAuth, requireRole('ADMIN'), ProductController.create);
 routes.get('/stores/:storeId/products', requireAuth, requireRole('ADMIN'), ProductController.list);
-routes.get('/stores/slug/:slug/products', requireAuth, requireRole('ADMIN'), ProductController.listBySlug);
 routes.put('/stores/:storeId/products/:productId', requireAuth, requireRole('ADMIN'), ProductController.update);
 routes.delete('/stores/:storeId/products/:productId', requireAuth, requireRole('ADMIN'), ProductController.remove);
 
@@ -54,5 +55,7 @@ routes.post('/stores/slug/:slug/orders', requireActiveSubscription, OrderControl
 // Orders - staff vê fila/histórico (churrasqueiro + admin)
 routes.get('/stores/:storeId/orders', requireAuth, requireRole('ADMIN', 'CHURRASQUEIRO'), OrderController.list);
 routes.get('/stores/slug/:slug/orders', requireAuth, requireRole('ADMIN', 'CHURRASQUEIRO'), OrderController.listBySlug);
+routes.patch('/orders/:orderId/status', requireAuth, requireRole('ADMIN', 'CHURRASQUEIRO'), OrderController.updateStatus);
+routes.patch('/orders/:orderId', requireAuth, requireRole('ADMIN', 'CHURRASQUEIRO'), OrderController.updateItems);
 
 export default routes;

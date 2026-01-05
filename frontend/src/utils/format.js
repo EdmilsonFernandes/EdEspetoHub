@@ -1,5 +1,8 @@
-export const formatCurrency = (value) =>
-  value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+export const formatCurrency = (value) => {
+  const numeric = Number(value);
+  const safeValue = Number.isFinite(numeric) ? numeric : 0;
+  return safeValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+};
 
 export const formatDateTime = (timestamp) => {
   if (!timestamp) return '';
@@ -71,4 +74,3 @@ export const formatPhoneInput = (value = '', defaultAreaCode = '12') => {
 
   return `(${ddd}) `;
 };
-

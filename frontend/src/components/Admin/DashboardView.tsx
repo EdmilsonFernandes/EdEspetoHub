@@ -17,9 +17,18 @@ import {
 import { formatCurrency } from "../../utils/format";
 import { exportToCsv } from "../../utils/export";
 
-const COLORS = ["#ef4444", "#f59e0b", "#10b981", "#3b82f6"];
+const COLORS = ["var(--color-primary)", "var(--color-secondary)", "#10b981", "#3b82f6"];
 
 export const DashboardView = ({ orders = [], customers = [] }) => {
+  const resolveDateKey = (order) => {
+    if (order.dateString) return order.dateString;
+    const raw = order.createdAt || order.created_at;
+    if (!raw) return null;
+    const date = raw instanceof Date ? raw : new Date(raw);
+    if (Number.isNaN(date.getTime())) return null;
+    return date.toLocaleDateString("pt-BR");
+  };
+
   const stats = useMemo(() => {
     const totalSales = orders.reduce((acc, curr) => acc + (curr.total || 0), 0);
     const totalOrders = orders.length;
@@ -38,10 +47,9 @@ export const DashboardView = ({ orders = [], customers = [] }) => {
 
     const salesByDay = {};
     orders.forEach((order) => {
-      if (order.dateString) {
-        salesByDay[order.dateString] =
-          (salesByDay[order.dateString] || 0) + (order.total || 0);
-      }
+      const key = resolveDateKey(order);
+      if (!key) return;
+      salesByDay[key] = (salesByDay[key] || 0) + (order.total || 0);
     });
 
     const chartData = Object.entries(salesByDay).map(([date, total]) => ({
@@ -77,11 +85,11 @@ export const DashboardView = ({ orders = [], customers = [] }) => {
               <p className="text-gray-500 text-sm font-bold uppercase">
                 Faturamento Total
               </p>
-              <h3 className="text-3xl font-black text-green-600">
+              <h3 className="text-3xl font-black text-brand-primary">
                 {formatCurrency(stats.totalSales)}
               </h3>
             </div>
-            <div className="p-3 bg-green-50 rounded-lg text-green-600">
+            <div className="p-3 bg-brand-primary-soft rounded-lg text-brand-primary">
               <DollarSign />
             </div>
           </div>
@@ -94,11 +102,11 @@ export const DashboardView = ({ orders = [], customers = [] }) => {
               <p className="text-gray-500 text-sm font-bold uppercase">
                 Total Pedidos
               </p>
-              <h3 className="text-3xl font-black text-blue-600">
+              <h3 className="text-3xl font-black text-brand-secondary">
                 {stats.totalOrders}
               </h3>
             </div>
-            <div className="p-3 bg-blue-50 rounded-lg text-blue-600">
+            <div className="p-3 bg-brand-secondary-soft rounded-lg text-brand-secondary">
               <Package />
             </div>
           </div>
@@ -108,46 +116,64 @@ export const DashboardView = ({ orders = [], customers = [] }) => {
       {/* ---------- GRÁFICOS ---------- */}
       <div className="grid md:grid-cols-2 gap-6">
         {/* Faturamento por dia */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 h-80">
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 h-80 overflow-hidden">
           <h4 className="font-bold text-gray-700 mb-4">Vendas por Dia</h4>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={stats.chartData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" fontSize={12} />
-              <YAxis fontSize={12} />
-              <RechartsTooltip formatter={(v) => formatCurrency(v)} />
-              <Bar dataKey="total" fill="#ef4444" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+          {stats.chartData.length === 0 ? (
+            <div className="h-full flex items-center justify-center text-sm text-gray-400">
+              Sem vendas registradas ainda.
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={stats.chartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="date" fontSize={12} />
+                <YAxis fontSize={12} />
+                <RechartsTooltip formatter={(v) => formatCurrency(v)} />
+                <Bar dataKey="total" fill="var(--color-primary)" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
         </div>
 
         {/* Top produtos */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 h-80">
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 h-80 overflow-hidden">
           <h4 className="font-bold text-gray-700 mb-4">
             Top 5 Produtos Mais Vendidos
           </h4>
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={stats.topProducts}
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={80}
-                paddingAngle={5}
-                dataKey="qty"
-              >
-                {stats.topProducts.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={COLORS[index % COLORS.length]}
-                  />
-                ))}
-              </Pie>
-              <RechartsTooltip />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
+          {stats.topProducts.length === 0 ? (
+            <div className="h-full flex items-center justify-center text-sm text-gray-400">
+              Sem produtos vendidos ainda.
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={stats.topProducts}
+                  cx="50%"
+                  cy="45%"
+                  innerRadius={55}
+                  outerRadius={75}
+                  paddingAngle={5}
+                  dataKey="qty"
+                >
+                  {stats.topProducts.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS[index % COLORS.length]}
+                    />
+                  ))}
+                </Pie>
+                <RechartsTooltip />
+                <Legend
+                  verticalAlign="bottom"
+                  height={36}
+                  formatter={(value) =>
+                    value.length > 16 ? `${value.slice(0, 16)}...` : value
+                  }
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          )}
         </div>
       </div>
 
@@ -163,7 +189,7 @@ export const DashboardView = ({ orders = [], customers = [] }) => {
 
           <button
             onClick={exportCustomers}
-            className="px-3 py-2 rounded-lg bg-green-600 text-white text-xs font-semibold hover:bg-green-700"
+            className="px-3 py-2 rounded-lg bg-brand-primary text-white text-xs font-semibold hover:opacity-90"
           >
             Exportar Excel (.csv)
           </button>

@@ -29,6 +29,18 @@ export class StoreSettings
   })
   socialLinks?: SocialLink[];
 
+  @Column({
+    name: 'opening_hours',
+    type: 'jsonb',
+    nullable: true,
+    default: () => "'[]'::jsonb",
+    transformer: {
+      to: (value?: unknown[] | null) => (Array.isArray(value) ? value : []),
+      from: (value: unknown[] | null) => (Array.isArray(value) ? value : []),
+    },
+  })
+  openingHours?: any[];
+
   @OneToOne(() => Store, (store) => store.settings, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'store_id' })
   store!: Store;

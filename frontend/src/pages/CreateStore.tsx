@@ -12,6 +12,7 @@ export function CreateStore() {
   const [selectedPlanId, setSelectedPlanId] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('PIX');
   const [paymentResult, setPaymentResult] = useState(null);
+  const platformLogo = '/chama-no-espeto.jpeg';
   const [registerForm, setRegisterForm] = useState({
     fullName: '',
     email: '',
@@ -138,14 +139,25 @@ export function CreateStore() {
     }
   };
 
+  const slugify = (value = '') =>
+    value
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[^a-z0-9\s-]/g, '')
+      .trim()
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-');
+
+  const storeSlugPreview = slugify(registerForm.storeName || '');
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <header className="bg-white/95 backdrop-blur-sm shadow-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-20">
             <button onClick={() => navigate('/')} className="flex items-center gap-3">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-red-500 to-red-600 text-white font-black flex items-center justify-center shadow-lg">
-                CS
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl overflow-hidden shadow-lg border border-white bg-white">
+                <img src={platformLogo} alt="Chama no Espeto" className="w-full h-full object-cover" />
               </div>
               <div className="hidden sm:block">
                 <p className="text-lg font-bold text-gray-900">Chama no Espeto</p>
@@ -166,8 +178,8 @@ export function CreateStore() {
       <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         <div className="bg-white border border-gray-100 rounded-3xl shadow-xl p-6 sm:p-8">
           <div className="mb-8 text-center">
-            <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-              <span className="text-white text-3xl">🍖</span>
+            <div className="w-20 h-20 rounded-2xl overflow-hidden shadow-lg mx-auto mb-4 border border-white bg-white">
+              <img src={platformLogo} alt="Chama no Espeto" className="w-full h-full object-cover" />
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Criar minha loja</h1>
             <p className="text-gray-500">Preencha os dados para gerar seu site automaticamente.</p>
@@ -245,16 +257,19 @@ export function CreateStore() {
             <div className="pt-6 border-t border-gray-100">
               <h3 className="text-lg font-semibold text-gray-800 mb-4">Configurações da loja</h3>
               <div className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-gray-700">Nome da loja</label>
-                  <input
-                    required
-                    value={registerForm.storeName}
-                    onChange={(e) => setRegisterForm((prev) => ({ ...prev, storeName: e.target.value }))}
-                    className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
-                    placeholder="Ex.: Espetinho do João"
-                  />
-                </div>
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700">Nome da loja</label>
+              <input
+                required
+                value={registerForm.storeName}
+                onChange={(e) => setRegisterForm((prev) => ({ ...prev, storeName: e.target.value }))}
+                className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
+                placeholder="Ex.: Espetinho do João"
+              />
+              <div className="text-xs text-gray-500">
+                URL da loja: <span className="font-semibold text-gray-700">/chamanoespeto/{storeSlugPreview || 'sua-loja'}</span>
+              </div>
+            </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">

@@ -37,6 +37,15 @@ export class ProductController {
     }
   }
 
+  static async listPublicBySlug(req: Request, res: Response) {
+    try {
+      const products = await productService.listByStoreSlug(req.params.slug);
+      return res.json(products);
+    } catch (error: any) {
+      return res.status(400).json({ message: error.message });
+    }
+  }
+
   static async update(req: Request, res: Response) {
     try {
       const product = await productService.update(

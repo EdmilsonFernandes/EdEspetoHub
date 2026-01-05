@@ -41,4 +41,25 @@ export class OrderController {
       return res.status(status).json({ message: error.message });
     }
   }
+
+  static async updateStatus(req: Request, res: Response) {
+    const { status } = req.body;
+    try {
+      const order = await orderService.updateStatus(req.params.orderId, status, req.auth?.storeId);
+      return res.json(order);
+    } catch (error: any) {
+      const statusCode = error.message.includes('perm') ? 403 : 400;
+      return res.status(statusCode).json({ message: error.message });
+    }
+  }
+
+  static async updateItems(req: Request, res: Response) {
+    try {
+      const order = await orderService.updateItems(req.params.orderId, req.body.items || [], req.auth?.storeId);
+      return res.json({ id: order.id, total: order.total });
+    } catch (error: any) {
+      const statusCode = error.message.includes('perm') ? 403 : 400;
+      return res.status(statusCode).json({ message: error.message });
+    }
+  }
 }

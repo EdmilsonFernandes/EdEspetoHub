@@ -13,6 +13,26 @@ const buildOrdersPath = (identifier: string) =>
 const normalizeOrder = (order: any) => ({
   ...order,
   id: order.id ?? order.order_id ?? order.orderId,
+  createdAt: order.createdAt
+    ? new Date(order.createdAt).getTime()
+    : order.created_at
+    ? new Date(order.created_at).getTime()
+    : order.createdAt,
+  payment: order.payment ?? order.paymentMethod ?? order.payment_method,
+  type: order.type ?? order.order_type,
+  items: (order.items || []).map((item: any) => ({
+    ...item,
+    id: item.id ?? item.item_id ?? item.orderItemId,
+    qty: item.qty ?? item.quantity ?? 0,
+    name: item.name ?? item.product?.name,
+    unitPrice:
+      item.unitPrice ??
+      item.product?.price ??
+      (item.price && item.quantity ? Number(item.price) / Number(item.quantity) : item.price) ??
+      0,
+    price: item.price ?? item.product?.price ?? 0,
+    productId: item.productId ?? item.product?.id,
+  })),
 });
 
 // 🔐 recupera store da sessão
@@ -37,6 +57,15 @@ const resolveStoreIdentifier = (storeId?: string): string | null =>
   storeId || getStoreIdentifierFromSession();
 
 export const orderService = {
+  async createBySlug(orderData: any, storeSlug: string)
+  {
+    if (!storeSlug)
+    {
+      return Promise.reject(new Error("Loja inválida"));
+    }
+
+    await apiClient.post(`/stores/slug/${storeSlug}/orders`, orderData);
+  },
   async save(orderData: any, storeId?: string)
   {
     const targetStore = resolveStoreIdentifier(storeId);
@@ -139,6 +168,10 @@ export const orderService = {
 
   async updateItems(id: string, items: any, total: number)
   {
-    await apiClient.patch(`/orders/${id}`, { items, total });
+    const normalizedItems = (items || []).map((item: any) => ({
+      productId: item.productId ?? item.product?.id ?? item.id,
+      quantity: Number(item.qty ?? item.quantity ?? 0),
+    }));
+    await apiClient.patch(`/orders/${id}`, { items: normalizedItems, total });
   },
 };

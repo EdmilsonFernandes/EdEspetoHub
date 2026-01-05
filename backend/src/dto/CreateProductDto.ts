@@ -3,5 +3,6 @@ export interface CreateProductDto {
   price: number;
   category?: string;
   imageUrl?: string;
+  imageFile?: string | null;
   storeId: string;
 }

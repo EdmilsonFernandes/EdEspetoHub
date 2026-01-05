@@ -34,11 +34,14 @@ CREATE TABLE IF NOT EXISTS store_settings (
   logo_url TEXT,
   primary_color TEXT NOT NULL DEFAULT '#b91c1c',
   secondary_color TEXT,
-  social_links JSONB DEFAULT '[]'
+  social_links JSONB DEFAULT '[]',
+  opening_hours JSONB DEFAULT '[]'
 );
 
 ALTER TABLE store_settings
 ADD COLUMN IF NOT EXISTS social_links JSONB DEFAULT '[]';
+ALTER TABLE store_settings
+ADD COLUMN IF NOT EXISTS opening_hours JSONB DEFAULT '[]';
 
 CREATE TABLE IF NOT EXISTS products (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -57,12 +60,16 @@ CREATE TABLE IF NOT EXISTS orders (
   customer_name TEXT NOT NULL,
   phone TEXT,
   address TEXT,
+  table_number TEXT,
   type TEXT NOT NULL DEFAULT 'delivery',
   status TEXT NOT NULL DEFAULT 'pending',
   payment_method TEXT,
   total NUMERIC(10,2) NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+ALTER TABLE orders
+ADD COLUMN IF NOT EXISTS table_number TEXT;
 
 CREATE TABLE IF NOT EXISTS order_items (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ShoppingCart, Send, User, ChefHat, LayoutDashboard } from 'lucide-react';
+import { ShoppingCart, Send } from 'lucide-react';
 import { productService } from '../services/productService';
 import { orderService } from '../services/orderService';
 import { customerService } from '../services/customerService';
@@ -9,9 +9,10 @@ import { storeService } from '../services/storeService';
 import { MenuView } from '../components/Client/MenuView';
 import { CartView } from '../components/Client/CartView';
 import { SuccessView } from '../components/Client/SuccessView';
-import { apiClient } from '../config/apiClient';
 import { formatCurrency, formatPaymentMethod, formatPhoneInput } from '../utils/format';
+import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getPersistedBranding, brandingStorageKey, defaultBranding, initialCustomer, defaultPaymentMethod, DEFAULT_AREA_CODE, WHATSAPP_NUMBER, PIX_KEY } from '../constants';
+import { isStoreOpenNow, normalizeOpeningHours } from '../utils/storeHours';
 
 export function StorePage() {
   const { storeSlug } = useParams();
@@ -25,14 +26,32 @@ export function StorePage() {
   const [paymentMethod, setPaymentMethod] = useState(defaultPaymentMethod);
   const [lastOrder, setLastOrder] = useState(null);
   const [branding, setBranding] = useState(() => getPersistedBranding(storeSlug || defaultBranding.espetoId));
+  const [storeOpenNow, setStoreOpenNow] = useState(true);
+  const [storePhone, setStorePhone] = useState('');
+  const [openingHours, setOpeningHours] = useState([]);
+  const customersStorageKey = useMemo(
+    () => `customers:${storeSlug || defaultBranding.espetoId}`,
+    [storeSlug]
+  );
+  const resolvedWhatsApp = useMemo(() => {
+    const raw = storePhone || WHATSAPP_NUMBER;
+    const digits = (raw || '').toString().replace(/\D/g, '');
+    if (!digits) return '';
+    return digits.startsWith('55') ? digits : `55${digits}`;
+  }, [storePhone]);
+
+  const todayHoursLabel = useMemo(() => {
+    if (!openingHours?.length) return '';
+    const today = openingHours.find((entry) => entry.day === new Date().getDay());
+    if (!today || today.enabled === false) return 'Fechado hoje';
+    const intervals = Array.isArray(today.intervals) ? today.intervals : [];
+    if (!intervals.length) return '';
+    return intervals.map((interval) => `${interval.start}–${interval.end}`).join(' • ');
+  }, [openingHours]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
 
   const cartTotal = useMemo(() => Object.values(cart).reduce((acc, item) => acc + item.price * item.qty, 0), [cart]);
-  const brandInitials = useMemo(
-    () => branding.brandName?.split(' ').map((part) => part?.[0]).join('').slice(0, 2).toUpperCase() || 'ED',
-    [branding.brandName]
-  );
   const instagramHandle = useMemo(() => (branding.instagram ? `@${branding.instagram.replace('@', '')}` : ''), [branding.instagram]);
 
   useEffect(() => {
@@ -42,8 +61,14 @@ export function StorePage() {
       setUser(parsedSession);
     }
 
-    setIsLoading(true);
-    setLoadError(null);
+    const savedCustomers = localStorage.getItem(customersStorageKey);
+    if (savedCustomers) {
+      try {
+        setCustomers(JSON.parse(savedCustomers) || []);
+      } catch (error) {
+        console.error('Falha ao carregar clientes salvos', error);
+      }
+    }
 
     if (!storeSlug) {
       console.warn('No store slug provided');
@@ -52,43 +77,74 @@ export function StorePage() {
       return;
     }
 
-    apiClient.setOwnerId(storeSlug);
+    const loadStore = async (silent = false) => {
+      if (!silent) {
+        setIsLoading(true);
+        setLoadError(null);
+      }
 
-    // Fetch store data with fallback to defaults
-    storeService
-      .fetchBySlug(storeSlug)
-      .then((data) => {
+      try {
+        const data = await storeService.fetchBySlug(storeSlug);
         if (data) {
+          const socialLinks = data.settings?.socialLinks || [];
+          const instagramLink = socialLinks.find((link) => link?.type === 'instagram')?.value;
+
           setBranding((prev) => ({
             ...prev,
             espetoId: data.slug || prev.espetoId,
             brandName: data.name || prev.brandName,
-            logoUrl: data.settings?.logoUrl || prev.logoUrl,
+            logoUrl: resolveAssetUrl(data.settings?.logoUrl) || prev.logoUrl,
             primaryColor: data.settings?.primaryColor || prev.primaryColor,
             accentColor: data.settings?.secondaryColor || prev.accentColor,
-            instagram: data.owner_email || prev.instagram,
+            instagram: instagramLink || prev.instagram,
+          }));
+          const normalizedHours = normalizeOpeningHours(data.settings?.openingHours || []);
+          setOpeningHours(normalizedHours);
+          setStorePhone(data.owner?.phone || '');
+          const openNow =
+            typeof data.openNow === 'boolean'
+              ? data.openNow
+              : isStoreOpenNow(normalizedHours, data.open);
+          setStoreOpenNow(openNow);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar loja', error);
+        if (!silent) {
+          setBranding((prev) => ({
+            ...prev,
+            espetoId: storeSlug,
+            brandName: prev.brandName || 'Espetaria',
           }));
         }
-      })
-      .catch((error) => {
-        console.error('Erro ao carregar loja', error);
-        // Don't set error - use fallback branding instead
-        setBranding((prev) => ({
-          ...prev,
-          espetoId: storeSlug,
-          brandName: prev.brandName || 'Espetaria',
-        }));
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
+      } finally {
+        if (!silent) {
+          setIsLoading(false);
+        }
+      }
+    };
 
-    const unsubProd = productService.subscribe((loadedProducts) => {
-      setProducts(loadedProducts || []);
-    });
+    const loadProducts = async () => {
+      try {
+        const loadedProducts = await productService.listPublicBySlug(storeSlug);
+        setProducts(loadedProducts || []);
+      } catch (error) {
+        console.error('Erro ao carregar produtos', error);
+      }
+    };
+
+    loadStore(false);
+    loadProducts();
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        loadStore(true);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibility);
 
     return () => {
-      unsubProd();
+      document.removeEventListener('visibilitychange', handleVisibility);
     };
   }, [storeSlug]);
 
@@ -97,6 +153,8 @@ export function StorePage() {
     localStorage.setItem(storageKey, JSON.stringify(branding));
     document.documentElement.style.setProperty('--primary-color', branding.primaryColor || defaultBranding.primaryColor);
     document.documentElement.style.setProperty('--accent-color', branding.accentColor || branding.primaryColor || defaultBranding.accentColor);
+    document.documentElement.style.setProperty('--color-primary', branding.primaryColor || defaultBranding.primaryColor);
+    document.documentElement.style.setProperty('--color-secondary', branding.accentColor || branding.primaryColor || defaultBranding.accentColor);
   }, [branding]);
 
   const updateCart = (item, qty) => {
@@ -135,6 +193,11 @@ export function StorePage() {
       return;
     }
 
+    if (customer.type === 'table' && !customer.table) {
+      alert('Informe o número da mesa.');
+      return;
+    }
+
     const isPickup = customer.type === 'pickup';
     const payment = paymentMethod;
 
@@ -143,14 +206,30 @@ export function StorePage() {
     const pixKey = PIX_KEY || sanitizedPhoneKey;
 
     const order = {
-      ...customer,
-      items: Object.values(cart),
-      total: cartTotal,
-      status: 'pending',
-      payment
+      customerName: customer.name,
+      phone: customer.phone,
+      address: customer.address,
+      table: customer.table,
+      type: customer.type,
+      paymentMethod: payment,
+      items: Object.values(cart).map((item) => ({
+        productId: item.id,
+        quantity: item.qty,
+      })),
     };
 
-    await orderService.save(order);
+    if (!storeSlug) {
+      alert('Loja não especificada.');
+      return;
+    }
+
+    await orderService.createBySlug(order, storeSlug);
+    const nextCustomers = [
+      { name: customer.name, phone: customer.phone, table: customer.table },
+      ...customers.filter((entry) => entry.name !== customer.name),
+    ].slice(0, 50);
+    setCustomers(nextCustomers);
+    localStorage.setItem(customersStorageKey, JSON.stringify(nextCustomers));
     customerService.fetchAll().then(setCustomers).catch(() => {});
 
     if (isPickup) {
@@ -158,11 +237,12 @@ export function StorePage() {
         .map((item) => `▪ ${item.qty}x ${item.name}`)
         .join('\n');
 
-      const messageLines = [
+    const messageLines = [
         '*NOVO PEDIDO - DATONY*',
         '------------------',
         `👤 *${customer.name}* (${customer.phone})`,
         `🛒 *Tipo:* ${customer.type}`,
+        customer.table ? `🪑 *Mesa:* ${customer.table}` : '',
         payment ? `💳 Pagamento: ${formatPaymentMethod(payment)}` : '',
         customer.address ? `📍 End: ${customer.address}` : '',
         '------------------',
@@ -178,7 +258,8 @@ export function StorePage() {
       ].filter(Boolean);
 
       const encodedMessage = encodeURIComponent(messageLines.join('\n'));
-      window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`, '_blank');
+      const targetNumber = resolvedWhatsApp || WHATSAPP_NUMBER;
+      window.open(`https://wa.me/${targetNumber}?text=${encodedMessage}`, '_blank');
     }
 
     setCart({});
@@ -190,6 +271,7 @@ export function StorePage() {
       payment,
       phone: sanitizedPhoneKey || customer.phone,
       pixKey,
+      table: customer.table,
     });
     setView('success');
   };
@@ -221,65 +303,30 @@ export function StorePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 font-sans pb-24">
-      <header className="bg-white/95 backdrop-blur-sm sticky top-0 z-30 shadow-lg border-b border-gray-100">
-        <div
-          className="text-white p-2 text-center text-xs font-medium uppercase tracking-wider"
-          style={{ backgroundColor: branding.primaryColor }}
-        >
-          {branding.tagline}
-        </div>
-        <div className="px-4 py-3 sm:py-4">
-          <div className="max-w-6xl mx-auto flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div
-                className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-white font-black text-lg sm:text-xl shadow-lg overflow-hidden"
-                style={{ backgroundColor: branding.primaryColor }}
-              >
-                {branding.logoUrl ? (
-                  <img src={branding.logoUrl} alt={branding.brandName} className="w-full h-full object-cover" />
-                ) : (
-                  brandInitials
-                )}
-              </div>
-              <div>
-                <h1 className="font-bold text-gray-800 leading-none text-lg sm:text-xl">{branding.brandName}</h1>
-                <span className="text-xs text-gray-500">{branding.espetoId || 'Churrasco premium'}</span>
-              </div>
-            </div>
-
-            <div className="hidden md:flex items-center gap-3">
-              <button
-                onClick={requireAdminSession}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl font-semibold border-2 border-gray-200 text-gray-700 bg-white hover:bg-gray-50 transition-all"
-              >
-                <ChefHat size={18} /> Fila do churrasqueiro
-              </button>
-              <button
-                onClick={() => navigate('/admin')}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-white shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5"
-                style={{ backgroundColor: branding.primaryColor }}
-              >
-                <LayoutDashboard size={18} /> Área admin
-              </button>
-            </div>
-
-            <div className="flex md:hidden items-center gap-2">
-              <button
-                onClick={() => navigate('/admin')}
-                className="p-2 rounded-xl text-gray-600 hover:bg-gray-100 transition-colors"
-              >
-                <User size={20} />
-              </button>
-              <button
-                onClick={requireAdminSession}
-                className="p-2 rounded-xl text-gray-600 hover:bg-gray-100 transition-colors"
-              >
-                <ChefHat size={20} />
-              </button>
-            </div>
+      {view !== 'menu' && (
+        <div className="bg-white shadow-md px-4 py-4 flex items-center gap-4 sticky top-0 z-40 border-b border-gray-100">
+          <div
+            className="w-12 h-12 rounded-full overflow-hidden border shadow-sm bg-white flex items-center justify-center"
+            style={{ borderColor: branding?.primaryColor, color: branding?.primaryColor }}
+          >
+            {branding?.logoUrl ? (
+              <img src={branding.logoUrl} alt={branding.brandName} className="w-full h-full object-cover" />
+            ) : (
+              <span className="font-bold text-lg">{branding?.brandName?.slice(0, 2)?.toUpperCase() || 'ES'}</span>
+            )}
           </div>
+          <div className="flex-1 leading-tight">
+            <h1 className="text-lg font-bold text-gray-900">{branding?.brandName || 'Seu Espeto'}</h1>
+            <p className="text-xs text-gray-500">{branding?.tagline}</p>
+          </div>
+          <button
+            onClick={() => setView('menu')}
+            className="px-3 py-2 rounded-lg text-sm font-semibold border border-gray-200 text-gray-700 hover:bg-gray-50"
+          >
+            Voltar ao cardápio
+          </button>
         </div>
-      </header>
+      )}
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {view === 'menu' && products.length === 0 ? (
@@ -292,13 +339,13 @@ export function StorePage() {
               <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md">O cardápio desta loja ainda não foi configurado. Volte em breve!</p>
               <button
                 onClick={() => navigate('/')}
-                className="px-6 py-3 rounded-lg bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold hover:from-red-600 hover:to-red-700 transition-all"
+                className="px-6 py-3 rounded-lg bg-brand-gradient text-white font-semibold hover:opacity-90 transition-all"
               >
                 Voltar para início
               </button>
             </div>
           </div>
-        ) : view === 'menu' && (
+        ) : view === 'menu' && products.length > 0 && (
           <MenuView
             products={products}
             cart={cart}
@@ -306,16 +353,11 @@ export function StorePage() {
             instagramHandle={instagramHandle}
             onUpdateCart={updateCart}
             onProceed={() => setView('cart')}
-          />
-        )}
-        {view === 'menu' && products.length > 0 && (
-          <MenuView
-            products={products}
-            cart={cart}
-            branding={branding}
-            instagramHandle={instagramHandle}
-            onUpdateCart={updateCart}
-            onProceed={() => setView('cart')}
+            onOpenQueue={user?.token ? requireAdminSession : undefined}
+            onOpenAdmin={user?.token ? () => navigate('/admin/dashboard') : undefined}
+            isOpenNow={storeOpenNow}
+            whatsappNumber={storePhone}
+            todayHoursLabel={todayHoursLabel}
           />
         )}
         {view === 'cart' && (
@@ -337,6 +379,7 @@ export function StorePage() {
               paymentMethod={lastOrder?.payment}
               pixKey={lastOrder?.pixKey}
               phone={lastOrder?.phone}
+              table={lastOrder?.table}
               onNewOrder={() => setView('menu')}
             />
           </div>
@@ -347,7 +390,7 @@ export function StorePage() {
         <div className="fixed bottom-4 left-4 right-4 z-40 max-w-md mx-auto">
           <button
             onClick={() => setView('cart')}
-            className="w-full bg-gradient-to-r from-gray-800 to-gray-900 text-white p-4 rounded-2xl shadow-2xl flex justify-between items-center transform hover:scale-[1.02] transition-all border border-gray-700"
+            className="w-full bg-brand-gradient text-white p-4 rounded-2xl shadow-2xl flex justify-between items-center transform hover:scale-[1.02] transition-all"
           >
             <div className="flex items-center gap-3">
               <span

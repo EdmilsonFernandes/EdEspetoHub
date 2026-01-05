@@ -4,24 +4,61 @@ import { Image as ImageIcon, Edit, Trash2, Save, Plus } from 'lucide-react';
 import { productService } from '../../services/productService';
 import { formatCurrency } from '../../utils/format';
 
-const initialForm = { name: '', price: '', category: 'espetos', imageUrl: '', desc: '' };
+const initialForm = { name: '', price: '', category: 'espetos', imageUrl: '', imageFile: '', desc: '' };
 
 export const ProductManager = ({ products }) => {
   const [editing, setEditing] = useState(null);
   const [formData, setFormData] = useState(initialForm);
+  const [imageMode, setImageMode] = useState('url');
+  const [imagePreview, setImagePreview] = useState('');
+
+  const resetForm = () => {
+    setEditing(null);
+    setFormData(initialForm);
+    setImageMode('url');
+    setImagePreview('');
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (!formData.name || !formData.price) return;
 
-    await productService.save({ ...formData, id: editing?.id, price: parseFloat(formData.price) });
-    setEditing(null);
-    setFormData(initialForm);
+    const payload = {
+      ...formData,
+      id: editing?.id,
+      price: parseFloat(formData.price),
+      imageFile: imageMode === 'upload' ? formData.imageFile : undefined,
+      imageUrl: imageMode === 'url' ? formData.imageUrl : undefined,
+    };
+
+    await productService.save(payload);
+    resetForm();
   };
 
   const handleEdit = (product) => {
     setEditing(product);
-    setFormData(product);
+    setFormData({
+      ...product,
+      imageFile: '',
+    });
+    setImageMode('url');
+    setImagePreview(product?.imageUrl || '');
+  };
+
+  const handleUpload = (file) => {
+    if (!file) {
+      setFormData((prev) => ({ ...prev, imageFile: '' }));
+      setImagePreview('');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result?.toString() || '';
+      setFormData((prev) => ({ ...prev, imageFile: result }));
+      setImagePreview(result);
+    };
+    reader.readAsDataURL(file);
   };
 
   return (
@@ -51,12 +88,50 @@ export const ProductManager = ({ products }) => {
             <option value="bebidas">Bebidas</option>
             <option value="porcoes">Porções</option>
           </select>
-          <input
-            className="p-3 border rounded-lg"
-            placeholder="URL da Foto (https://...)"
-            value={formData.imageUrl}
-            onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-          />
+          <div className="md:col-span-2 space-y-2">
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setImageMode('url')}
+                className={`px-3 py-2 rounded-lg text-sm font-semibold border ${imageMode === 'url' ? 'bg-brand-secondary text-white border-brand-secondary' : 'bg-white text-gray-600 border-gray-200'}`}
+              >
+                Imagem por URL
+              </button>
+              <button
+                type="button"
+                onClick={() => setImageMode('upload')}
+                className={`px-3 py-2 rounded-lg text-sm font-semibold border ${imageMode === 'upload' ? 'bg-brand-secondary text-white border-brand-secondary' : 'bg-white text-gray-600 border-gray-200'}`}
+              >
+                Upload de imagem
+              </button>
+            </div>
+
+            {imageMode === 'url' ? (
+              <input
+                className="p-3 border rounded-lg w-full"
+                placeholder="URL da Foto (https://...)"
+                value={formData.imageUrl}
+                onChange={(e) => {
+                  setFormData({ ...formData, imageUrl: e.target.value });
+                  setImagePreview(e.target.value);
+                }}
+              />
+            ) : (
+              <input
+                className="p-3 border rounded-lg w-full"
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleUpload(e.target.files?.[0])}
+              />
+            )}
+
+            {imagePreview && (
+              <div className="flex items-center gap-3 text-sm text-gray-600">
+                <img src={imagePreview} alt="Preview" className="w-12 h-12 rounded object-cover border" />
+                <span>Pré-visualização da imagem</span>
+              </div>
+            )}
+          </div>
           <textarea
             className="p-3 border rounded-lg md:col-span-2"
             placeholder="Descrição do item..."
@@ -65,17 +140,16 @@ export const ProductManager = ({ products }) => {
           />
 
           <div className="md:col-span-2 flex gap-2">
-            <button type="submit" className="bg-green-600 text-white px-6 py-3 rounded-lg font-bold flex-1 flex justify-center items-center gap-2">
+            <button type="submit" className="bg-brand-primary text-white px-6 py-3 rounded-lg font-bold flex-1 flex justify-center items-center gap-2 hover:opacity-90">
               <Save size={18} /> Salvar
             </button>
             {editing && (
               <button
                 type="button"
                 onClick={() => {
-                  setEditing(null);
-                  setFormData(initialForm);
+                  resetForm();
                 }}
-                className="bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-bold"
+                className="bg-brand-secondary-soft text-brand-secondary px-6 py-3 rounded-lg font-bold hover:opacity-90"
               >
                 Cancelar
               </button>
@@ -109,9 +183,9 @@ export const ProductManager = ({ products }) => {
                 </td>
                 <td className="p-4 font-medium">{product.name}</td>
                 <td className="p-4 capitalize text-sm text-gray-500">{product.category}</td>
-                <td className="p-4 text-green-600 font-bold">{formatCurrency(product.price)}</td>
+                <td className="p-4 text-brand-primary font-bold">{formatCurrency(product.price)}</td>
                 <td className="p-4 text-right space-x-2">
-                  <button onClick={() => handleEdit(product)} className="text-blue-600 hover:bg-blue-50 p-2 rounded">
+                  <button onClick={() => handleEdit(product)} className="text-brand-primary hover:bg-brand-primary-soft p-2 rounded">
                     <Edit size={18} />
                   </button>
                   <button

@@ -1,4 +1,5 @@
 import { apiClient } from "../config/apiClient";
+import { resolveAssetUrl } from "../utils/resolveAssetUrl";
 
 const POLLING_INTERVAL = 4000;
 
@@ -13,7 +14,7 @@ const buildProductsPath = (identifier: string) =>
 const normalizeProduct = (product: any) => ({
   ...product,
   id: product.id ?? product.product_id ?? product.productId,
-  imageUrl: product.image_url ?? product.imageUrl ?? "",
+  imageUrl: resolveAssetUrl(product.image_url ?? product.imageUrl ?? ""),
 });
 
 // 🔐 fonte única da loja (admin/churrasqueiro)
@@ -83,6 +84,12 @@ export const productService = {
   },
 
   async listBySlug(slug: string)
+  {
+    const data = await apiClient.get(`/stores/slug/${slug}/products`);
+    return data.map(normalizeProduct);
+  },
+
+  async listPublicBySlug(slug: string)
   {
     const data = await apiClient.get(`/stores/slug/${slug}/products`);
     return data.map(normalizeProduct);

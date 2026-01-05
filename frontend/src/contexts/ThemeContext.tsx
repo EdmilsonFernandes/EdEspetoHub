@@ -1,5 +1,6 @@
 // @ts-nocheck
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 
 type Theme = 'light' | 'dark';
 
@@ -36,7 +37,7 @@ const resolveStoredBranding = (): Branding =>
       return {
         primaryColor: settings.primaryColor || defaultBranding.primaryColor,
         secondaryColor: settings.secondaryColor || defaultBranding.secondaryColor,
-        logoUrl: settings.logoUrl,
+        logoUrl: resolveAssetUrl(settings.logoUrl),
         brandName: session?.store?.name,
       };
     } catch (error)
@@ -53,6 +54,8 @@ const applyBrandingToCssVars = (branding: Branding) =>
   const { primaryColor, secondaryColor } = { ...defaultBranding, ...branding };
   document.documentElement.style.setProperty('--primary-color', primaryColor || defaultBranding.primaryColor!);
   document.documentElement.style.setProperty('--secondary-color', secondaryColor || defaultBranding.secondaryColor!);
+  document.documentElement.style.setProperty('--color-primary', primaryColor || defaultBranding.primaryColor!);
+  document.documentElement.style.setProperty('--color-secondary', secondaryColor || defaultBranding.secondaryColor!);
 };
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
@@ -83,7 +86,16 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const toggleTheme = () => setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
   const setBranding = useCallback((nextBranding: Branding) => {
     setBrandingState((prev) => {
-      const merged = { ...defaultBranding, ...nextBranding };
+      const resolvedLogo =
+        nextBranding?.logoUrl === undefined
+          ? prev?.logoUrl
+          : resolveAssetUrl(nextBranding?.logoUrl);
+      const merged = {
+        ...defaultBranding,
+        ...prev,
+        ...nextBranding,
+        logoUrl: resolvedLogo,
+      };
       const prevKey = `${prev?.primaryColor ?? ''}|${prev?.secondaryColor ?? ''}|${prev?.logoUrl ?? ''}|${prev?.brandName ?? ''}`;
       const nextKey = `${merged?.primaryColor ?? ''}|${merged?.secondaryColor ?? ''}|${merged?.logoUrl ?? ''}|${merged?.brandName ?? ''}`;
 

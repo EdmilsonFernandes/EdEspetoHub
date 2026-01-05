@@ -29,6 +29,14 @@ export class OrderRepository
     });
   }
 
+  findById(orderId: string)
+  {
+    return this.repository.findOne({
+      where: { id: orderId },
+      relations: [ 'store', 'items', 'items.product' ],
+    });
+  }
+
   findQueueByStoreId(storeId: string)
   {
     return this.repository.find({

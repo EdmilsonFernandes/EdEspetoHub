@@ -59,7 +59,8 @@ Endpoints principais:
 - `POST /api/auth/register` — cria usuário, loja e retorna token JWT.
 - `POST /api/auth/login` — autenticação de administradores.
 - `GET /api/stores/:slug`, `PUT /api/stores/:id`, `PUT /api/stores/:id/status` — gerenciamento de loja.
-- `GET /api/stores/:storeId/products`, `POST /api/stores/:storeId/products` — catálogo.
+- `GET /api/stores/:storeId/products`, `POST /api/stores/:storeId/products` — catálogo (admin).
+- `GET /api/stores/slug/:slug/products` — catálogo público por loja (vitrine).
 - `GET /api/stores/:storeId/orders`, `POST /api/stores/:storeId/orders` — pedidos e fila.
 
 ### 3. Front-end React (pasta `frontend/`)
@@ -67,16 +68,20 @@ Endpoints principais:
 ```bash
 cd frontend
 npm install
-npm start
+npm run dev
 ```
 
 Crie um arquivo `.env` (ou use `.env.production`) na pasta `frontend/` com o endpoint da API:
 
 ```bash
-REACT_APP_API_BASE_URL=http://localhost:4000
+VITE_API_BASE_URL=http://localhost:4000/api
 ```
 
-Com a API em execução, a loja fica acessível em `http://localhost:3000`.
+Com a API em execução, a loja fica acessível em:
+
+- Vitrine (cliente): `http://localhost:3000/<slug>` (ex: `http://localhost:3000/lojadoedmilson`)
+- Admin pedidos: `http://localhost:3000/admin/orders`
+- Fila do churrasqueiro: `http://localhost:3000/admin/queue`
 
 ### 4. pgAdmin (opcional, local)
 
@@ -101,6 +106,29 @@ Serviços expostos:
 - pgAdmin: http://localhost:5050
 
 Credenciais padrão do pgAdmin (pode sobrescrever via variáveis de ambiente ao subir): `admindatony@datony.com` / `Datony20025#!`.
+
+### Atualizar schema (horário de funcionamento)
+
+Para bancos existentes, a API aplica a migração automaticamente ao iniciar
+(`opening_hours` e `social_links` em `store_settings`). Basta reiniciar a API.
+
+Se quiser aplicar manualmente, use:
+
+```sql
+ALTER TABLE store_settings
+ADD COLUMN IF NOT EXISTS opening_hours JSONB DEFAULT '[]';
+```
+
+Com Docker:
+
+```bash
+docker exec -i chamanoespeto-postgres psql -U postgres -d espetinho <<'SQL'
+ALTER TABLE store_settings
+ADD COLUMN IF NOT EXISTS opening_hours JSONB DEFAULT '[]';
+SQL
+```
+
+Para um banco vazio, continue usando o `backend/schema.sql` (já contém a coluna nova).
 
 ### Imagens individuais
 
@@ -152,3 +180,8 @@ Um diagrama BPMN resumindo o fluxo do "Chama no espeto" está disponível em `do
 
 - Ao publicar em produção (ex.: EC2), exponha apenas as portas necessárias e substitua credenciais padrão.
 - O diretório `.vscode/` traz recomendações de formatação (2 espaços, LF, remoção de espaços em branco e nova linha final), aplicadas automaticamente se o Prettier estiver instalado.
+Vitrine e painel com Docker:
+
+- Vitrine (cliente): `http://localhost:8080/<slug>` (ex: `http://localhost:8080/lojadoedmilson`)
+- Admin pedidos: `http://localhost:8080/admin/orders`
+- Fila do churrasqueiro: `http://localhost:8080/admin/queue`

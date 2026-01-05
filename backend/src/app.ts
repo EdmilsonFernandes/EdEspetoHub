@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 import express from 'express';
+import path from 'path';
 import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
 import { AppDataSource } from './config/database';
@@ -7,15 +8,18 @@ import routes from './routes';
 import { env } from './config/env';
 import { swaggerSpec } from './config/swagger';
 import { scheduleSubscriptionExpirationJob } from './jobs/subscription-expiration.job';
+import { runMigrations } from './utils/runMigrations';
 
 async function bootstrap()
 {
   await AppDataSource.initialize();
+  await runMigrations();
   const app = express();
   app.use(cors());
   app.use(express.json({ limit: '10mb' }));
 
-  app.use('/uploads', express.static('uploads'));
+  const uploadsDir = path.join(process.cwd(), 'uploads');
+  app.use('/uploads', express.static(uploadsDir));
 
   app.get('/', (_, res) => res.json({ status: 'ok', name: 'Churras Sites API' }));
   app.use('/api/docs', swaggerUi.serve as any, swaggerUi.setup(swaggerSpec) as any);
