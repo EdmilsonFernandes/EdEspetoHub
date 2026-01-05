@@ -1,10 +1,14 @@
 // @ts-nocheck
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
 export function AdminRoute({ children }: { children: React.ReactNode }) {
   const { auth, hydrated } = useAuth();
+
+  useEffect(() => {
+    console.count('AdminRoute render effect');
+  }, [hydrated, auth]);
 
   if (!hydrated) {
     return (
