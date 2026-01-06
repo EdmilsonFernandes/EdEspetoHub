@@ -12,6 +12,14 @@ export const formatDateTime = (timestamp) => {
   return new Date(timestamp).toLocaleString('pt-BR');
 };
 
+export const formatDate = (timestamp) => {
+  if (!timestamp) return '';
+  if (timestamp.seconds) {
+    return new Date(timestamp.seconds * 1000).toLocaleDateString('pt-BR');
+  }
+  return new Date(timestamp).toLocaleDateString('pt-BR');
+};
+
 export const formatDuration = (milliseconds) => {
   if (!milliseconds || Number.isNaN(milliseconds)) return '0s';
   const totalSeconds = Math.max(0, Math.floor(milliseconds / 1000));

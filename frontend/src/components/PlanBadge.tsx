@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React from 'react';
 import { BILLING_OPTIONS, PLAN_TIERS } from '../constants/planCatalog';
-import { formatCurrency, formatDateTime } from '../utils/format';
+import { formatCurrency, formatDate } from '../utils/format';
 
 const PLAN_STYLES = {
   basic: {
@@ -93,14 +93,14 @@ export const PlanBadge = ({ planName, variant = 'light', details }) => {
             {details?.startDate && (
               <div className="flex items-center justify-between">
                 <span>Iniciado</span>
-                <span className="font-semibold text-gray-700">{formatDateTime(details.startDate)}</span>
+                <span className="font-semibold text-gray-700">{formatDate(details.startDate)}</span>
               </div>
             )}
             {details?.latestPaymentAt && (
               <div className="flex items-center justify-between">
                 <span>Ultimo pagamento</span>
                 <span className="font-semibold text-gray-700">
-                  {formatDateTime(details.latestPaymentAt)}
+                  {formatDate(details.latestPaymentAt)}
                 </span>
               </div>
             )}
@@ -115,7 +115,7 @@ export const PlanBadge = ({ planName, variant = 'light', details }) => {
             {details?.endDate && (
               <div className="flex items-center justify-between">
                 <span>Expira em</span>
-                <span className="font-semibold text-gray-700">{formatDateTime(details.endDate)}</span>
+                <span className="font-semibold text-gray-700">{formatDate(details.endDate)}</span>
               </div>
             )}
           </div>
