@@ -9,11 +9,11 @@ export const env = {
   superAdminEmail: process.env.SUPER_ADMIN_EMAIL || '',
   superAdminPassword: process.env.SUPER_ADMIN_PASSWORD || '',
   mercadoPago: {
-    accessToken: process.env.MP_ACCESS_TOKEN || 'TEST-6483127096011967-010608-b32b7cd5ddd0b80f3e81696ef5e2823f-198026375',
-    publicKey: process.env.MP_PUBLIC_KEY || 'TEST-bcf19d97-748a-4f07-96bf-7e905be5a4cb',
-    webhookSecret: process.env.MP_WEBHOOK_SECRET || '1d39b0d27c80f07a39631e9830d79caa3081b1d281099603cded3f4e1a2b0609',
+    accessToken: process.env.MP_ACCESS_TOKEN || '',
+    publicKey: process.env.MP_PUBLIC_KEY || '',
+    webhookSecret: process.env.MP_WEBHOOK_SECRET || '',
     apiBaseUrl: process.env.MP_API_BASE_URL || 'https://api.mercadopago.com',
-    webhookUrl: process.env.MP_WEBHOOK_URL || 'https://elian-unrazored-nilda.ngrok-free.dev/api/webhooks/mercadopago',
+    webhookUrl: process.env.MP_WEBHOOK_URL || '',
     debug: process.env.MP_DEBUG === 'true',
   },
   email: {
