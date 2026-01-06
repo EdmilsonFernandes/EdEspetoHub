@@ -57,6 +57,7 @@ build/
 !.env.example
 !.env.prod.example
 !backend/.env.example
+!backend/.env.docker.example
 
 # ========================
 # IDE / OS

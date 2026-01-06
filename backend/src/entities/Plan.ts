@@ -1,6 +1,15 @@
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-export type PlanName = 'monthly' | 'yearly' | 'premium' | string;
+export type PlanName =
+  | 'basic_monthly'
+  | 'pro_monthly'
+  | 'premium_monthly'
+  | 'basic_yearly'
+  | 'pro_yearly'
+  | 'premium_yearly'
+  | 'monthly'
+  | 'yearly'
+  | string;
 
 @Entity({ name: 'plans' })
 export class Plan {

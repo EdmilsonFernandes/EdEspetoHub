@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { storeService } from '../services/storeService';
 import { planService } from '../services/planService';
+import { BILLING_OPTIONS, PLAN_TIERS, getPlanName } from '../constants/planCatalog';
 
 export function CreateStore() {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ export function CreateStore() {
   const [selectedPlanId, setSelectedPlanId] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('PIX');
   const [paymentResult, setPaymentResult] = useState(null);
+  const [isAnnual, setIsAnnual] = useState(false);
   const openedPaymentLinkRef = useRef('');
   const platformLogo = '/chama-no-espeto.jpeg';
   const [registerForm, setRegisterForm] = useState({
@@ -87,7 +89,12 @@ export function CreateStore() {
       try {
         const response = await planService.list();
         setPlans(response || []);
-        if (response?.[0]) setSelectedPlanId(response[0].id);
+        const defaultPlan = response?.find((plan) => plan.name === getPlanName('basic', 'monthly'));
+        if (defaultPlan) {
+          setSelectedPlanId(defaultPlan.id);
+        } else if (response?.[0]) {
+          setSelectedPlanId(response[0].id);
+        }
       } catch (error) {
         console.error('Não foi possível carregar os planos', error);
       }
@@ -95,6 +102,24 @@ export function CreateStore() {
 
     fetchPlans();
   }, []);
+
+  const billingKey = isAnnual ? 'yearly' : 'monthly';
+  const billing = BILLING_OPTIONS[billingKey];
+  const plansByName = plans.reduce((acc, plan) => {
+    acc[plan.name] = plan;
+    return acc;
+  }, {});
+
+  useEffect(() => {
+    if (!plans.length) return;
+    const currentPlan = plans.find((plan) => plan.id === selectedPlanId);
+    const isCurrentCycle = currentPlan?.name?.endsWith(`_${billingKey}`);
+    if (isCurrentCycle) return;
+    const fallback = PLAN_TIERS
+      .map((tier) => plansByName[getPlanName(tier.key, billingKey)]?.id)
+      .find(Boolean);
+    if (fallback) setSelectedPlanId(fallback);
+  }, [billingKey, plans, plansByName, selectedPlanId]);
 
   useEffect(() => {
     const method = paymentResult?.payment?.method;
@@ -398,23 +423,70 @@ export function CreateStore() {
 
             <div className="pt-6 border-t border-gray-100">
               <h3 className="text-lg font-semibold text-gray-800 mb-4">Selecione um plano</h3>
+              <div className="flex items-center justify-center gap-4 mb-6">
+                <span className={`text-sm font-semibold ${!isAnnual ? 'text-gray-900' : 'text-gray-500'}`}>
+                  Mensal
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setIsAnnual(!isAnnual)}
+                  className={`relative inline-flex h-8 w-16 items-center rounded-full transition-colors ${isAnnual ? 'bg-red-500' : 'bg-gray-300'
+                    }`}
+                >
+                  <span
+                    className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${isAnnual ? 'translate-x-9' : 'translate-x-1'
+                      }`}
+                  />
+                </button>
+                <span className={`text-sm font-semibold ${isAnnual ? 'text-gray-900' : 'text-gray-500'}`}>
+                  Anual
+                </span>
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {plans.map((plan) => (
+                {PLAN_TIERS.map((tier) => {
+                  const planKey = getPlanName(tier.key, billingKey);
+                  const plan = plansByName[planKey];
+                  const price = plan ? Number(plan.price) : billing.priceByTier[tier.key];
+                  const durationLabel = plan
+                    ? `${plan.durationDays} dias de acesso`
+                    : billingKey === 'yearly'
+                      ? '365 dias de acesso'
+                      : '30 dias de acesso';
+                  const isSelected = plan?.id && selectedPlanId === plan.id;
+                  const isDisabled = !plan?.id;
+                  return (
                   <button
                     type="button"
-                    key={plan.id}
-                    onClick={() => setSelectedPlanId(plan.id)}
-                    className={`border rounded-2xl p-4 text-left transition-all ${
-                      selectedPlanId === plan.id
-                        ? 'border-red-500 shadow-lg bg-red-50'
-                        : 'border-gray-200 hover:border-red-200'
-                    }`}
+                    key={planKey}
+                    onClick={() => plan?.id && setSelectedPlanId(plan.id)}
+                    disabled={isDisabled}
+                    className={`border rounded-2xl p-4 text-left transition-all relative ${isSelected
+                      ? 'border-red-500 shadow-lg bg-red-50'
+                      : 'border-gray-200 hover:border-red-200'
+                      } ${isDisabled ? 'opacity-60 cursor-not-allowed' : ''}`}
                   >
-                    <p className="text-sm uppercase font-semibold text-gray-500">{plan.name}</p>
-                    <p className="text-2xl font-bold text-gray-900">R$ {Number(plan.price).toFixed(2)}</p>
-                    <p className="text-xs text-gray-500">{plan.durationDays} dias de acesso</p>
+                    {tier.popular && (
+                      <span className="absolute -top-3 right-4 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                        MAIS POPULAR
+                      </span>
+                    )}
+                    {billing.savings && (
+                      <span className="absolute -top-3 left-4 bg-amber-100 text-amber-700 text-xs font-bold px-2 py-1 rounded-full">
+                        {billing.savings}
+                      </span>
+                    )}
+                    <p className="text-sm uppercase font-semibold text-gray-500">{tier.label}</p>
+                    <p className="text-2xl font-bold text-gray-900">R$ {Number(price).toFixed(2)}</p>
+                    <p className="text-xs text-gray-500">{billing.period}</p>
+                    <p className="text-xs text-gray-500 mt-1">{durationLabel}</p>
+                    <ul className="mt-3 text-xs text-gray-600 space-y-1">
+                      {tier.features.map((feature) => (
+                        <li key={feature}>✓ {feature}</li>
+                      ))}
+                    </ul>
                   </button>
-                ))}
+                );
+                })}
                 {!plans.length && <p className="text-sm text-gray-500">Carregando planos disponíveis...</p>}
               </div>
 

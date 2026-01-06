@@ -3,9 +3,14 @@ set -e
 
 ROOT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
 ENV_FILE="$ROOT_DIR/.env.prod"
+API_ENV_FILE="$ROOT_DIR/backend/.env.docker"
 
 if [ ! -f "$ENV_FILE" ]; then
   echo "Missing $ENV_FILE. Create it from .env.prod.example." >&2
+  exit 1
+fi
+if [ ! -f "$API_ENV_FILE" ]; then
+  echo "Missing $API_ENV_FILE. Create it from backend/.env.docker.example." >&2
   exit 1
 fi
 

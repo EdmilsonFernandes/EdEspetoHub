@@ -51,15 +51,15 @@ export class PlatformAdminController {
           if (subscription?.status === 'ACTIVE') acc.activeSubscriptions += 1;
           if (subscription?.status === 'EXPIRING') acc.expiringSubscriptions += 1;
           if (subscription?.status === 'EXPIRED') acc.expiredSubscriptions += 1;
-          if (subscription?.plan?.name === 'monthly') acc.monthlyPlans += 1;
-          if (subscription?.plan?.name === 'yearly') acc.yearlyPlans += 1;
+          const planName = subscription?.plan?.name || '';
+          const durationDays = subscription?.plan?.durationDays || 0;
+          const isYearly = planName.includes('yearly') || durationDays >= 360;
+          const isMonthly = planName.includes('monthly') || (durationDays > 0 && durationDays <= 31);
+          if (isMonthly) acc.monthlyPlans += 1;
+          if (isYearly) acc.yearlyPlans += 1;
           if (subscription?.plan?.price) {
             const price = Number(subscription.plan.price);
-            if (subscription.plan.name === 'yearly') {
-              acc.mrrProjected += price / 12;
-            } else {
-              acc.mrrProjected += price;
-            }
+            acc.mrrProjected += isYearly ? price / 12 : price;
           }
           return acc;
         },

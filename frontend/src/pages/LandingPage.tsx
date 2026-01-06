@@ -9,6 +9,7 @@ import fireAnimation from '../assets/fire.json';
 import { Palette, MonitorCog, Smartphone, Rocket, Ham} from 'lucide-react';
 import { storeService } from '../services/storeService';
 import { platformService } from '../services/platformService';
+import { BILLING_OPTIONS, PLAN_TIERS } from '../constants/planCatalog';
 
 export function LandingPage() {
   const navigate = useNavigate();
@@ -20,39 +21,20 @@ export function LandingPage() {
     navigate('/chamanoespeto/test-store');
   };
 
-  interface Plan {
-    name: string;
-    price: number;
-    period: string;
-    features: string[];
-    popular?: boolean;
-    savings?: string;
-  }
-
-  interface Plans {
-    monthly: Plan[];
-    annual: Plan[];
-  }
-
   useEffect(() => {
     platformService.listStores()
   }, []);
 
-  // Pricing data
-  const plans: Plans = {
-    monthly: [
-      { name: '🥩 Plano Basic', price: 39.90, period: '/mês', features: ['Site ativo', 'Pedidos ilimitados', 'Suporte básico'] },
-      { name: '🔥 Plano Pro', price: 79.90, period: '/mês', features: ['Tudo do plano basic', 'Prioridade no suporte', 'Selo "Plano Pro" no admin'], popular: true },
-      { name: '⭐ Plano Premium', price: 149.90, period: '/mês', features: ['Tudo do plano pro', 'Acesso à API', 'Domínio personalizado', 'Analytics avançado', 'Suporte dedicado'] }
-    ],
-    annual: [
-      { name: '🥩 Plano Basic', price: 359.10, period: '/ano (R$ 29,93/mês)', features: ['Site ativo', 'Pedidos ilimitados', 'Suporte básico'], savings: 'Economize 25%' },
-      { name: '🔥 Plano Pro', price: 719.10, period: '/ano (R$ 59,93/mês)', features: ['Tudo do plano basic', 'Prioridade no suporte', 'Selo "Plano Pro" no admin'], popular: true, savings: 'Economize 25%' },
-      { name: '⭐ Plano Premium', price: 1349.10, period: '/ano (R$ 112,43/mês)', features: ['Tudo do plano pro', 'Acesso à API', 'Domínio personalizado', 'Analytics avançado', 'Suporte dedicado'], savings: 'Economize 25%' }
-    ]
-  };
-
-  const currentPlans = isAnnual ? plans.annual : plans.monthly;
+  const billingKey = isAnnual ? 'yearly' : 'monthly';
+  const billing = BILLING_OPTIONS[billingKey];
+  const currentPlans = PLAN_TIERS.map((tier) => ({
+    name: tier.label,
+    price: billing.priceByTier[tier.key],
+    period: billing.period,
+    features: tier.features,
+    popular: tier.popular,
+    savings: billing.savings,
+  }));
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">

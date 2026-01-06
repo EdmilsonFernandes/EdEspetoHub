@@ -1,15 +1,16 @@
 import { PlanRepository } from '../repositories/PlanRepository';
 import { Plan, PlanName } from '../entities/Plan';
 
-const DEFAULT_PRICES: Record<PlanName, number> = {
-  monthly: 49.9,
-  yearly: 499,
-};
+const DEFAULT_PLANS: Array<Pick<Plan, 'name' | 'price' | 'durationDays' | 'enabled'>> = [
+  { name: 'basic_monthly', price: 39.9, durationDays: 30, enabled: true },
+  { name: 'pro_monthly', price: 79.9, durationDays: 30, enabled: true },
+  { name: 'premium_monthly', price: 149.9, durationDays: 30, enabled: true },
+  { name: 'basic_yearly', price: 359.1, durationDays: 365, enabled: true },
+  { name: 'pro_yearly', price: 719.1, durationDays: 365, enabled: true },
+  { name: 'premium_yearly', price: 1349.1, durationDays: 365, enabled: true },
+];
 
-const DEFAULT_DURATIONS: Record<PlanName, number> = {
-  monthly: 30,
-  yearly: 365,
-};
+const LEGACY_PLANS: PlanName[] = ['monthly', 'yearly'];
 
 export class PlanService {
   private planRepository = new PlanRepository();
@@ -21,19 +22,28 @@ export class PlanService {
 
   async ensureSeededPlans() {
     const existing = await this.planRepository.findAll();
-    if (existing.length >= 2) return existing;
+    const byName = new Map(existing.map((plan) => [plan.name, plan]));
 
-    const plansToEnsure: PlanName[] = ['monthly', 'yearly'];
-    for (const name of plansToEnsure) {
-      const planExists = await this.planRepository.findByName(name);
+    for (const seed of DEFAULT_PLANS) {
+      const planExists = byName.get(seed.name);
       if (!planExists) {
-        const plan = this.planRepository.create({
-          name,
-          price: DEFAULT_PRICES[name],
-          durationDays: DEFAULT_DURATIONS[name],
-          enabled: true,
-        } as Plan);
+        const plan = this.planRepository.create(seed as Plan);
         await this.planRepository.save(plan);
+      } else {
+        const shouldUpdate =
+          Number(planExists.price) !== seed.price ||
+          planExists.durationDays !== seed.durationDays ||
+          planExists.enabled !== seed.enabled;
+        if (shouldUpdate) {
+          await this.planRepository.save({ ...planExists, ...seed });
+        }
+      }
+    }
+
+    for (const legacy of LEGACY_PLANS) {
+      const legacyPlan = byName.get(legacy);
+      if (legacyPlan && legacyPlan.enabled) {
+        await this.planRepository.save({ ...legacyPlan, enabled: false });
       }
     }
 

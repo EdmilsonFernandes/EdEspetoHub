@@ -57,6 +57,11 @@ Webhook seguro (opcional): `MP_WEBHOOK_SECRET`.
 Debug MP: `MP_DEBUG=true` para logs das chamadas.
 Para e-mails: `APP_BASE_URL`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_SECURE`, `EMAIL_FROM`.
 
+Crie `backend/.env` para uso local (host `localhost`):
+
+```bash
+cp backend/.env.example backend/.env
+```
 Exemplo (no terminal):
 
 ```bash
@@ -182,7 +187,7 @@ No servidor EC2, crie/ajuste um arquivo `.env.prod` com a porta 80
 FRONTEND_PORT=80
 ```
 
-Tambem e necessario criar o arquivo `backend/.env` (use `backend/.env.example`
+Tambem e necessario criar o arquivo `backend/.env.docker` (use `backend/.env.docker.example`
 como base) com as credenciais e segredos da API.
 
 Suba usando o arquivo de ambiente de produção:
@@ -302,6 +307,12 @@ Com a API em execução, a loja fica acessível em:
 ## Execução com Docker
 
 ### Subir tudo com Docker Compose
+
+Antes de subir, copie o arquivo de ambiente do Docker:
+
+```bash
+cp backend/.env.docker.example backend/.env.docker
+```
 
 ```bash
 docker compose up --build
