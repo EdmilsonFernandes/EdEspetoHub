@@ -180,11 +180,12 @@ Acesse: `http://localhost:3000/superadmin`
 O `docker-compose.yml` usa `FRONTEND_PORT` para decidir a porta pública do front.
 O valor padrão é `8080` via `.env` no repositório, mantendo o uso local.
 
-No servidor EC2, crie/ajuste um arquivo `.env.prod` com a porta 80
-(use `.env.prod.example` como base):
+No servidor EC2, crie/ajuste um arquivo `.env.prod` com a porta 8080
+(use `.env.prod.example` como base). Essa porta e usada pelo container do front;
+o acesso publico deve ficar no Nginx (80/443):
 
 ```bash
-FRONTEND_PORT=80
+FRONTEND_PORT=8080
 ```
 
 Tambem e necessario criar o arquivo `backend/.env.docker` (use `backend/.env.docker.example`
@@ -196,19 +197,19 @@ Suba usando o arquivo de ambiente de produção:
 docker compose --env-file .env.prod up --build -d
 ```
 
-Serviços esperados:
+Serviços esperados (via Nginx):
 - Front-end: `http://<EC2-IP>` (porta 80)
-- API: `http://<EC2-IP>:4000` (Swagger em `/api/docs`)
+- API: `http://<EC2-IP>/api` (Swagger em `/api/docs`)
 - pgAdmin (opcional): `http://<EC2-IP>:5050`
 
 Em produção, ajuste senhas/segredos e restrinja portas no Security Group.
 Checklist de portas no Security Group:
 - 22 (SSH)
-- 80 (front)
-- 443 (HTTPS, se usar)
-- 4000 (API)
+- 80 (HTTP via Nginx)
+- 443 (HTTPS via Nginx)
 - 5050 (pgAdmin, opcional)
 - 5432 (Postgres) **não** expor publicamente
+- 4000 (API) manter fechado se estiver atrás do Nginx
 
 ## Webhook Mercado Pago com ngrok (teste local)
 
