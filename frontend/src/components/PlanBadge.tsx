@@ -1,0 +1,94 @@
+// @ts-nocheck
+import React from 'react';
+import { BILLING_OPTIONS, PLAN_TIERS } from '../constants/planCatalog';
+
+const PLAN_STYLES = {
+  basic: {
+    label: 'Basic',
+    badge:
+      'from-emerald-400/90 to-teal-500/90 text-emerald-50 ring-emerald-200/40 shadow-emerald-500/30',
+  },
+  pro: {
+    label: 'Pro',
+    badge: 'from-amber-400/95 to-orange-500/95 text-amber-50 ring-amber-200/50 shadow-orange-500/30',
+  },
+  premium: {
+    label: 'Premium',
+    badge:
+      'from-violet-500/95 to-fuchsia-500/95 text-fuchsia-50 ring-fuchsia-200/50 shadow-fuchsia-500/30',
+  },
+};
+
+const resolvePlanDetails = (planName = '') => {
+  const normalized = String(planName || '').toLowerCase();
+  if (normalized === 'monthly') {
+    return { tierKey: 'basic', tier: PLAN_TIERS[0], billingKey: 'monthly' };
+  }
+  if (normalized === 'yearly') {
+    return { tierKey: 'basic', tier: PLAN_TIERS[0], billingKey: 'yearly' };
+  }
+  const tierKey = PLAN_TIERS.find((tier) => normalized.includes(tier.key))?.key;
+  if (!tierKey) return null;
+  const billingKey = normalized.includes('yearly')
+    ? 'yearly'
+    : normalized.includes('monthly')
+      ? 'monthly'
+      : null;
+  const tier = PLAN_TIERS.find((entry) => entry.key === tierKey);
+  return {
+    tierKey,
+    tier,
+    billingKey,
+  };
+};
+
+export const PlanBadge = ({ planName, variant = 'light' }) => {
+  const details = resolvePlanDetails(planName);
+  const styleKey = details?.tierKey || 'basic';
+  const style = PLAN_STYLES[styleKey];
+  const billing = details?.billingKey ? BILLING_OPTIONS[details.billingKey] : null;
+  const badgeTone =
+    variant === 'dark'
+      ? 'bg-white/15 text-white ring-white/25 shadow-black/20'
+      : `bg-gradient-to-r ${style.badge}`;
+
+  return (
+    <details className="relative group">
+      <summary
+        className={`list-none cursor-pointer select-none rounded-full px-3 py-1.5 text-xs font-semibold ring-1 shadow-md flex items-center gap-2 ${badgeTone}`}
+        style={{ listStyle: 'none' }}
+      >
+        <span className="uppercase tracking-wide">
+          {details?.tier?.label || 'Plano não definido'}
+        </span>
+        {billing && <span className="text-[10px] font-bold opacity-80">{billing.label}</span>}
+        <span className="text-[10px] opacity-70">▼</span>
+      </summary>
+
+      <div
+        className={`absolute right-0 mt-3 w-64 rounded-2xl border border-white/20 bg-white p-4 text-gray-700 shadow-xl backdrop-blur-lg ${
+          variant === 'dark' ? 'bg-white/95' : ''
+        }`}
+      >
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-bold uppercase tracking-widest text-gray-400">Plano</span>
+          {billing?.savings && (
+            <span className="text-[10px] font-semibold text-amber-600">{billing.savings}</span>
+          )}
+        </div>
+        <h4 className="mt-1 text-base font-bold text-gray-900">
+          {details?.tier?.label || 'Sem plano'} {billing ? `(${billing.label})` : ''}
+        </h4>
+        <ul className="mt-3 space-y-2 text-xs text-gray-600">
+          {(details?.tier?.features || ['Plano indefinido.']).map((feature) => (
+            <li key={feature} className="flex items-start gap-2">
+              <span className="mt-0.5 h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              <span>{feature}</span>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-3 text-[10px] text-gray-400">Toque para fechar.</p>
+      </div>
+    </details>
+  );
+};

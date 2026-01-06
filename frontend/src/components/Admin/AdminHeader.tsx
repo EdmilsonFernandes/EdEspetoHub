@@ -1,9 +1,11 @@
 // @ts-nocheck
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ChefHat, LayoutDashboard, LogOut, ShoppingCart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import { subscriptionService } from '../../services/subscriptionService';
+import { PlanBadge } from '../PlanBadge';
 
 type Props = {
   contextLabel?: string;
@@ -13,12 +15,27 @@ export function AdminHeader({ contextLabel = 'Painel da Loja' }: Props) {
   const navigate = useNavigate();
   const { auth, logout } = useAuth();
   const { branding } = useTheme();
+  const [planName, setPlanName] = useState('');
 
   const storeName = branding?.brandName || auth?.store?.name;
   const storeSlug = auth?.store?.slug;
   const socialLinks = auth?.store?.settings?.socialLinks || [];
   const instagramLink = socialLinks.find((link) => link?.type === 'instagram')?.value;
   const instagramHandle = instagramLink ? `@${instagramLink.replace('@', '')}` : '';
+
+  useEffect(() => {
+    const storeId = auth?.store?.id;
+    if (!storeId) return;
+    const loadPlan = async () => {
+      try {
+        const subscription = await subscriptionService.getByStore(storeId);
+        setPlanName(subscription?.plan?.name || '');
+      } catch (error) {
+        console.error('Falha ao carregar plano da loja', error);
+      }
+    };
+    loadPlan();
+  }, [auth?.store?.id]);
 
   return (
     <header
@@ -55,6 +72,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja' }: Props) {
         </div>
       </div>
       <div className="flex flex-wrap items-center gap-2">
+        <PlanBadge planName={planName} variant="dark" />
         <button
           onClick={() => navigate('/admin/dashboard')}
           className="px-3 py-2 rounded-lg text-xs font-semibold bg-white/20 hover:bg-white/30 transition flex items-center gap-1"

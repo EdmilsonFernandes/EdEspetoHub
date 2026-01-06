@@ -2,6 +2,7 @@
 import React, { useMemo } from "react";
 import { ChefHat, Instagram, LayoutDashboard, Link, Plus } from "lucide-react";
 import { formatCurrency } from "../../utils/format";
+import { PlanBadge } from "../PlanBadge";
 
 // =======================================
 // HEADER PREMIUM COM LOGO OFICIAL
@@ -13,7 +14,7 @@ const normalizeWhatsApp = (value) => {
   return digits.startsWith("55") ? digits : `55${digits}`;
 };
 
-const Header = ({ branding, instagramHandle, whatsappNumber, isOpenNow, todayHoursLabel, onOpenQueue, onOpenAdmin }) => {
+const Header = ({ branding, instagramHandle, whatsappNumber, isOpenNow, todayHoursLabel, onOpenQueue, onOpenAdmin, planName }) => {
   const storeSlug = branding?.espetoId || "";
   const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
   const storeUrl = storeSlug ? `${baseUrl}/chamanoespeto/${storeSlug}` : "";
@@ -73,6 +74,7 @@ const Header = ({ branding, instagramHandle, whatsappNumber, isOpenNow, todayHou
 
       <div className="flex flex-col items-end gap-2">
         <div className="flex items-center gap-2">
+          <PlanBadge planName={planName} />
           {onOpenQueue && (
             <button
               onClick={onOpenQueue}
@@ -109,7 +111,8 @@ export const MenuView = ({
   todayHoursLabel,
   showHeader = true,
   onOpenQueue,
-  onOpenAdmin
+  onOpenAdmin,
+  planName
 }) => {
 
   const grouped = useMemo(() => {
@@ -172,6 +175,7 @@ export const MenuView = ({
           todayHoursLabel={todayHoursLabel}
           onOpenQueue={onOpenQueue}
           onOpenAdmin={onOpenAdmin}
+          planName={planName}
         />
       )}
 
