@@ -191,6 +191,26 @@ FRONTEND_PORT=8080
 Tambem e necessario criar o arquivo `backend/.env.docker` (use `backend/.env.docker.example`
 como base) com as credenciais e segredos da API.
 
+### Nginx (reverse proxy)
+
+Use o template em `docs/nginx/chamanoespeto.conf` e ajuste o `server_name` se necessario.
+O proxy deve encaminhar:
+- `/` -> `http://127.0.0.1:8080`
+- `/api/` -> `http://127.0.0.1:4000/api/`
+
+Depois de copiar o arquivo para `/etc/nginx/conf.d/`, valide e reinicie:
+
+```bash
+sudo nginx -t
+sudo systemctl restart nginx
+```
+
+Para HTTPS, execute o certbot:
+
+```bash
+sudo certbot --nginx -d chamanoespeto.com.br -d www.chamanoespeto.com.br
+```
+
 Suba usando o arquivo de ambiente de produção:
 
 ```bash
