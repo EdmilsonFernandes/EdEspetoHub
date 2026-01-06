@@ -19,6 +19,8 @@ services:
       dockerfile: Dockerfile
     env_file:
       - ./backend/.env
+    volumes:
+      - ./backend/uploads:/app/uploads
     ports:
       - "4000:4000"
     depends_on:
