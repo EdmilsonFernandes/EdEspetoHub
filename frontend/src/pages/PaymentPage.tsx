@@ -15,6 +15,7 @@ export function PaymentPage() {
   const [eventsPage, setEventsPage] = useState(0);
   const [eventsHasMore, setEventsHasMore] = useState(true);
   const EVENTS_PAGE_SIZE = 25;
+  const platformLogo = '/chama-no-espeto.jpeg';
 
   useEffect(() => {
     let interval: number | undefined;
@@ -49,14 +50,25 @@ export function PaymentPage() {
     };
   }, [paymentId]);
 
+  const isPaid = payment?.status === 'PAID';
+  const isFailed = payment?.status === 'FAILED';
+  const statusLabel = isPaid ? 'Pagamento aprovado' : isFailed ? 'Pagamento falhou' : 'Aguardando pagamento';
+  const statusTone = isPaid ? 'text-emerald-600' : isFailed ? 'text-red-600' : 'text-yellow-600';
+  const statusBg = isPaid ? 'bg-emerald-50 text-emerald-600' : isFailed ? 'bg-red-50 text-red-600' : 'bg-yellow-50 text-yellow-600';
+  const isMock = payment?.provider === 'MOCK';
+  const storeSlug = payment?.storeSlug;
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+  const storeUrl = storeSlug ? `${baseUrl}/chamanoespeto/${storeSlug}` : '';
+  const adminUrl = `${baseUrl}/admin`;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <header className="bg-white/95 backdrop-blur-sm shadow-sm sticky top-0 z-50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-20">
             <button onClick={() => navigate('/')} className="flex items-center gap-3">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-red-500 to-red-600 text-white font-black flex items-center justify-center shadow-lg">
-                CS
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl overflow-hidden shadow-lg border border-white bg-white">
+                <img src={platformLogo} alt="Chama no Espeto" className="w-full h-full object-cover" />
               </div>
               <div className="hidden sm:block text-left">
                 <p className="text-lg font-bold text-gray-900">Chama no Espeto</p>
@@ -91,22 +103,69 @@ export function PaymentPage() {
           {!isLoading && !error && payment && (
             <div className="space-y-6">
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-green-50 text-green-600 flex items-center justify-center text-2xl">
+                <div className={`w-12 h-12 rounded-2xl ${statusBg} flex items-center justify-center text-2xl`}>
                   💳
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Pagamento #{payment.id}</p>
-                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                    Aguardando pagamento para liberar sua loja
-                  </h1>
-                  <p className="text-gray-600 mt-2">Use o QR Code abaixo para completar o pagamento.</p>
+                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{statusLabel}</h1>
+                  {isPaid ? (
+                    <p className="text-gray-600 mt-2">
+                      Sua loja foi liberada. Use o e-mail e senha cadastrados para acessar o painel.
+                    </p>
+                  ) : isFailed ? (
+                    <p className="text-gray-600 mt-2">
+                      O pagamento não foi aprovado. Você pode tentar novamente ou escolher outra forma.
+                    </p>
+                  ) : (
+                    <p className="text-gray-600 mt-2">
+                      {payment.method === 'BOLETO'
+                        ? 'Boleto pode levar até 3 dias úteis para compensar. Sua loja será liberada automaticamente.'
+                        : 'Use o QR Code abaixo para completar o pagamento.'}
+                    </p>
+                  )}
                 </div>
               </div>
+
+              {isPaid && (
+                <div className="p-5 border border-emerald-100 rounded-2xl bg-emerald-50 flex flex-col gap-3">
+                  <p className="text-sm font-semibold text-emerald-800">Loja ativa</p>
+                  {payment.storeName && (
+                    <p className="text-sm text-emerald-800">
+                      <span className="font-semibold">Loja:</span> {payment.storeName}
+                    </p>
+                  )}
+                  {storeSlug && (
+                    <p className="text-sm text-emerald-800">
+                      <span className="font-semibold">Slug da loja:</span> {storeSlug}
+                    </p>
+                  )}
+                  <div className="flex flex-wrap gap-3">
+                    <a
+                      href={adminUrl}
+                      className="px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:opacity-90"
+                    >
+                      Acessar painel
+                    </a>
+                    {storeUrl && (
+                      <a
+                        href={storeUrl}
+                        className="px-4 py-2 rounded-lg border border-emerald-200 text-emerald-700 text-sm font-semibold hover:bg-emerald-100"
+                      >
+                        Ver vitrine
+                      </a>
+                    )}
+                  </div>
+                  <p className="text-xs text-emerald-800">
+                    Use o login e senha cadastrados para entrar no painel.
+                  </p>
+                </div>
+              )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="p-5 border border-gray-100 rounded-2xl bg-gray-50">
                   <p className="text-sm font-semibold text-gray-700 mb-2">Status</p>
-                  <p className="text-lg font-bold text-yellow-600">
+                  <p className={`text-lg font-bold ${statusTone}`}>
                     {payment.status}
                     {polling && <span className="ml-2 text-xs text-gray-500">(atualizando)</span>}
                   </p>
@@ -124,11 +183,17 @@ export function PaymentPage() {
                 </div>
 
                 <div className="p-5 border border-gray-100 rounded-2xl bg-gray-50 flex flex-col items-center justify-center gap-3">
-                  {payment.method === 'PIX' && payment.qrCodeBase64 ? (
+                  {isPaid ? (
+                    <p className="text-sm text-emerald-700 font-semibold text-center">
+                      Pagamento confirmado. Sua loja já está liberada.
+                    </p>
+                  ) : payment.method === 'PIX' && payment.qrCodeBase64 ? (
                     <>
                       <p className="text-sm font-semibold text-gray-700">Escaneie o QR Code PIX</p>
                       <img src={payment.qrCodeBase64} alt="QR Code PIX" className="w-64 h-64 object-contain" />
-                      <p className="text-xs text-gray-500 text-center">Pagamento mock para testes - nenhum valor será cobrado.</p>
+                      {isMock && (
+                        <p className="text-xs text-gray-500 text-center">Pagamento mock para testes - nenhum valor será cobrado.</p>
+                      )}
                     </>
                   ) : payment.paymentLink ? (
                     <>

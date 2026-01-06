@@ -94,6 +94,8 @@ export class PaymentController {
         provider: payment.provider,
         providerId: payment.providerId,
         expiresAt: payment.expiresAt,
+        storeSlug: payment.store?.slug || null,
+        storeName: payment.store?.name || null,
       });
     } catch (error: any) {
       return res.status(500).json({ message: error.message });
