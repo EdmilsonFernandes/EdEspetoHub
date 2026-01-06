@@ -182,6 +182,9 @@ No servidor EC2, crie/ajuste um arquivo `.env.prod` com a porta 80
 FRONTEND_PORT=80
 ```
 
+Tambem e necessario criar o arquivo `backend/.env` (use `backend/.env.example`
+como base) com as credenciais e segredos da API.
+
 Suba usando o arquivo de ambiente de produção:
 
 ```bash
