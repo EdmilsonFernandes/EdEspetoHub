@@ -60,7 +60,7 @@ export function LandingPage() {
               </button>
               <button
                 onClick={goToDemoStore}
-                className="px-3 py-2 sm:px-4 text-sm rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                className="px-3 py-2 sm:px-4 text-sm rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors"
               >
                 <span className="hidden sm:inline">Ver loja demo</span>
                 <span className="sm:hidden">Demo</span>
