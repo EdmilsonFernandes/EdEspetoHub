@@ -1,7 +1,9 @@
 // @ts-nocheck
-import React from "react";
+import React, { useRef } from "react";
+import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
 
-export const BrandingSettings = ({ branding, onChange }) => {
+export const BrandingSettings = ({ branding, onChange, storeSlug }) => {
+  const fileInputRef = useRef(null);
   const handleChange = (field, value) => {
     onChange((prev) => ({ ...prev, [field]: value }));
   };
@@ -13,6 +15,8 @@ export const BrandingSettings = ({ branding, onChange }) => {
     .slice(0, 2)
     .toUpperCase();
 
+  const logoPreview = resolveAssetUrl(branding.logoUrl) || branding.logoFile || "";
+
   return (
 
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
@@ -22,8 +26,8 @@ export const BrandingSettings = ({ branding, onChange }) => {
           <p className="text-sm text-gray-500">Deixe a loja com a cara do seu churrasco.</p>
         </div>
         <div className="text-xs text-gray-500 text-right">
-          ID do espeto
-          <div className="font-bold text-gray-800">{branding.espetoId || "não informado"}</div>
+          Slug da loja
+          <div className="font-bold text-gray-800">{storeSlug || "não informado"}</div>
         </div>
       </div>
 
@@ -40,26 +44,57 @@ export const BrandingSettings = ({ branding, onChange }) => {
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-gray-700">ID do espeto (único para você)</label>
+          <label className="text-sm font-semibold text-gray-700">Slug da loja (fixo)</label>
           <input
             type="text"
-            value={branding.espetoId}
-            onChange={(e) => handleChange("espetoId", e.target.value.replace(/\s+/g, "").toLowerCase())}
-            className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-primary focus:outline-none"
-            placeholder="meu-espeto"
+            value={storeSlug || ""}
+            readOnly
+            className="w-full border rounded-lg p-3 bg-gray-50 text-gray-500 cursor-not-allowed"
           />
-          <p className="text-xs text-gray-500">Use letras, números e traços. Ajuda a identificar sua conta em marketplaces.</p>
+          <p className="text-xs text-gray-500">Use esse slug para acessar o painel e a vitrine.</p>
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-gray-700">Logo (URL)</label>
-          <input
-            type="url"
-            value={branding.logoUrl}
-            onChange={(e) => handleChange("logoUrl", e.target.value)}
-            className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-primary focus:outline-none"
-            placeholder="https://.../meu-logo.png"
-          />
+          <label className="text-sm font-semibold text-gray-700">Logo da loja</label>
+          <div className="flex items-center gap-3">
+            <div className="w-14 h-14 rounded-xl border border-gray-200 bg-white overflow-hidden flex items-center justify-center">
+              {logoPreview ? (
+                <img src={logoPreview} alt="Logo atual" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-sm font-bold text-gray-400">{previewInitials || "ES"}</span>
+              )}
+            </div>
+            <div className="flex flex-col gap-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  const reader = new FileReader();
+                  reader.onload = () => {
+                    handleChange("logoFile", reader.result);
+                    handleChange("logoUrl", reader.result);
+                  };
+                  reader.readAsDataURL(file);
+                }}
+                className="text-xs text-gray-600"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  handleChange("logoFile", "");
+                  handleChange("logoUrl", "");
+                  if (fileInputRef.current) fileInputRef.current.value = "";
+                }}
+                className="text-xs text-gray-500 underline"
+              >
+                Remover logo
+              </button>
+            </div>
+          </div>
+          <p className="text-xs text-gray-500">PNG, JPG ou SVG. Recomendado 400x400.</p>
         </div>
 
         <div className="space-y-2">
@@ -84,25 +119,16 @@ export const BrandingSettings = ({ branding, onChange }) => {
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-gray-700">Cor de apoio</label>
+          <label className="text-sm font-semibold text-gray-700">Cor secundária</label>
           <input
             type="color"
-            value={branding.accentColor}
-            onChange={(e) => handleChange("accentColor", e.target.value)}
+            value={branding.secondaryColor}
+            onChange={(e) => handleChange("secondaryColor", e.target.value)}
             className="w-full border rounded-lg h-12 cursor-pointer"
           />
         </div>
 
-        <div className="md:col-span-2 space-y-2">
-          <label className="text-sm font-semibold text-gray-700">Mensagem do topo</label>
-          <input
-            type="text"
-            value={branding.tagline}
-            onChange={(e) => handleChange("tagline", e.target.value)}
-            className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-primary focus:outline-none"
-            placeholder="O melhor churrasco da região"
-          />
-        </div>
+        <div className="md:col-span-2 space-y-2" />
       </div>
 
       <div className="p-4 bg-gray-50 border-t">
@@ -112,8 +138,8 @@ export const BrandingSettings = ({ branding, onChange }) => {
             className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold shadow-sm"
             style={{ backgroundColor: branding.primaryColor }}
           >
-            {branding.logoUrl ? (
-              <img src={branding.logoUrl} alt={branding.brandName} className="w-full h-full object-cover rounded-xl" />
+            {logoPreview ? (
+              <img src={logoPreview} alt={branding.brandName} className="w-full h-full object-cover rounded-xl" />
             ) : (
               previewInitials || "ES"
             )}

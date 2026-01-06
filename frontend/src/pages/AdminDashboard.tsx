@@ -12,6 +12,8 @@ import { StoreIdentityCard } from '../components/Admin/StoreIdentityCard';
 import { OpeningHoursCard } from '../components/Admin/OpeningHoursCard';
 import { storeService } from '../services/storeService';
 import { AdminHeader } from '../components/Admin/AdminHeader';
+import { BrandingSettings } from '../components/Admin/BrandingSettings';
+import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 
 interface Props {
   session?: any;
@@ -20,7 +22,7 @@ interface Props {
 export function AdminDashboard({ session: sessionProp }: Props) {
   const navigate = useNavigate();
   const { auth, hydrated, setAuth } = useAuth();
-  const { branding } = useTheme();
+  const { branding, setBranding } = useTheme();
 
   const session = useMemo(() => sessionProp || auth, [sessionProp, auth]);
   const [products, setProducts] = useState<any[]>([]);
@@ -36,6 +38,15 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   const instagramHandle = instagramLink ? `@${instagramLink.replace('@', '')}` : '';
   const manualOpen = session?.store?.open ?? true;
   const [savingStatus, setSavingStatus] = useState(false);
+  const [brandingDraft, setBrandingDraft] = useState(() => ({
+    brandName: session?.store?.name || '',
+    logoUrl: resolveAssetUrl(session?.store?.settings?.logoUrl) || '',
+    logoFile: '',
+    primaryColor: session?.store?.settings?.primaryColor || '#b91c1c',
+    secondaryColor: session?.store?.settings?.secondaryColor || '#111827',
+    instagram: instagramHandle?.replace('@', '') || '',
+  }));
+  const [savingBranding, setSavingBranding] = useState(false);
 
   const updateAuthStore = (updates) => {
     if (!auth?.store) return;
@@ -66,6 +77,23 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     }
 
   }, [hydrated, navigate, session?.store, session?.token, session?.user?.role]);
+
+  useEffect(() => {
+    setBrandingDraft({
+      brandName: session?.store?.name || '',
+      logoUrl: resolveAssetUrl(session?.store?.settings?.logoUrl) || '',
+      logoFile: '',
+      primaryColor: session?.store?.settings?.primaryColor || '#b91c1c',
+      secondaryColor: session?.store?.settings?.secondaryColor || '#111827',
+      instagram: instagramHandle?.replace('@', '') || '',
+    });
+  }, [
+    session?.store?.name,
+    session?.store?.settings?.logoUrl,
+    session?.store?.settings?.primaryColor,
+    session?.store?.settings?.secondaryColor,
+    instagramHandle,
+  ]);
 
   /* =========================
    * CARREGA PRODUTOS + PEDIDOS
@@ -123,6 +151,35 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     }
   };
 
+  const handleSaveBranding = async () => {
+    if (!storeId) return;
+    setSavingBranding(true);
+    setError('');
+    try {
+      const payload = {
+        name: brandingDraft.brandName,
+        logoFile: brandingDraft.logoFile || undefined,
+        logoUrl: brandingDraft.logoFile ? undefined : brandingDraft.logoUrl || undefined,
+        primaryColor: brandingDraft.primaryColor,
+        secondaryColor: brandingDraft.secondaryColor,
+        socialLinks: brandingDraft.instagram ? [{ type: 'instagram', value: brandingDraft.instagram }] : [],
+      };
+      const updated = await storeService.update(storeId, payload);
+      updateAuthStore(updated);
+      setBranding({
+        primaryColor: updated?.settings?.primaryColor,
+        secondaryColor: updated?.settings?.secondaryColor,
+        logoUrl: updated?.settings?.logoUrl,
+        brandName: updated?.name,
+      });
+    } catch (err) {
+      console.error('Erro ao salvar identidade', err);
+      setError('Nao foi possivel salvar a identidade da loja.');
+    } finally {
+      setSavingBranding(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50" style={{ background: 'linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%)' }}>
       <div className="max-w-6xl mx-auto py-8 px-4 space-y-6">
@@ -155,6 +212,16 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
         {activeTab === 'config' && (
           <div className="space-y-4">
+            <BrandingSettings branding={brandingDraft} onChange={setBrandingDraft} storeSlug={storeSlug} />
+            <div className="flex justify-end">
+              <button
+                onClick={handleSaveBranding}
+                disabled={savingBranding}
+                className="px-4 py-2 rounded-lg bg-brand-primary text-white text-sm font-semibold hover:opacity-90 disabled:opacity-60"
+              >
+                {savingBranding ? 'Salvando...' : 'Salvar identidade'}
+              </button>
+            </div>
             <StoreIdentityCard
               branding={branding}
               socialLinks={socialLinks}

@@ -43,7 +43,14 @@ export function StoreIdentityCard({ branding, socialLinks = [], manualOpen, onTo
             <Image size={14} className="text-slate-400" />
             Logo
           </span>
-          <span className="font-semibold">{storeLogo ? 'Personalizado' : 'Padrão'}</span>
+          {storeLogo ? (
+            <span className="flex items-center gap-2 text-xs text-slate-600">
+              <img src={storeLogo} alt="Logo da loja" className="w-6 h-6 rounded-md object-cover border border-white/70 shadow" />
+              Logo atual
+            </span>
+          ) : (
+            <span className="font-semibold text-slate-500">Sem logo</span>
+          )}
         </div>
         <div className="flex items-center justify-between">
           <span className="flex items-center gap-2">
