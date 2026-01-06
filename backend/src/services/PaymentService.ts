@@ -107,15 +107,22 @@ export class PaymentService {
 
   async confirmPayment(paymentId: string) {
     return AppDataSource.transaction(async (manager) => {
-      const payment = await manager.getRepository(Payment).findOne({
+      const paymentRepo = manager.getRepository(Payment);
+      const lockedPayment = await paymentRepo
+        .createQueryBuilder('payment')
+        .setLock('pessimistic_write')
+        .where('payment.id = :id', { id: paymentId })
+        .getOne();
+
+      if (!lockedPayment) throw new Error('Pagamento não encontrado');
+      if (lockedPayment.status === 'PAID') return lockedPayment;
+      if (lockedPayment.status === 'FAILED') throw new Error('Pagamento falhou');
+
+      const payment = await paymentRepo.findOne({
         where: { id: paymentId },
         relations: ['subscription', 'subscription.plan', 'store', 'user'],
-        lock: { mode: 'pessimistic_write' },
       });
-
       if (!payment) throw new Error('Pagamento não encontrado');
-      if (payment.status === 'PAID') return payment;
-      if (payment.status === 'FAILED') throw new Error('Pagamento falhou');
 
       const subscription = payment.subscription;
       const store = payment.store;
