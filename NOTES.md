@@ -55,3 +55,10 @@
 - Admin login bloqueado se pagamento pendente.
 - Email real depende de SMTP valido (Gmail com senha de app).
 
+## DNS / Dominio (Registro.br)
+- Ativar modo avancado em "Configurar enderecamento" -> "Modo avancado".
+- Se a tabela mostrar "Dominio em transicao", aguardar alguns minutos e recarregar.
+- Quando liberar, criar registros:
+  - A @ -> Elastic IP
+  - A www -> Elastic IP (ou CNAME www -> @)
+- Propagacao pode levar minutos ate horas.

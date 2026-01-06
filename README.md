@@ -172,21 +172,31 @@ Acesse: `http://localhost:3000/superadmin`
 
 ## Subir em EC2 (Docker Compose pré-configurado)
 
-No servidor EC2, use o `docker-compose.yml` já existente no repositório:
+O `docker-compose.yml` usa `FRONTEND_PORT` para decidir a porta pública do front.
+O valor padrão é `8080` via `.env` no repositório, mantendo o uso local.
+
+No servidor EC2, crie/ajuste um arquivo `.env.prod` com a porta 80:
 
 ```bash
-docker compose up --build -d
+FRONTEND_PORT=80
+```
+
+Suba usando o arquivo de ambiente de produção:
+
+```bash
+docker compose --env-file .env.prod up --build -d
 ```
 
 Serviços esperados:
-- Front-end: `http://<EC2-IP>:8080`
+- Front-end: `http://<EC2-IP>` (porta 80)
 - API: `http://<EC2-IP>:4000` (Swagger em `/api/docs`)
 - pgAdmin (opcional): `http://<EC2-IP>:5050`
 
 Em produção, ajuste senhas/segredos e restrinja portas no Security Group.
 Checklist de portas no Security Group:
 - 22 (SSH)
-- 8080 (front)
+- 80 (front)
+- 443 (HTTPS, se usar)
 - 4000 (API)
 - 5050 (pgAdmin, opcional)
 - 5432 (Postgres) **não** expor publicamente
@@ -299,6 +309,28 @@ Serviços expostos:
 - API: http://localhost:4000 (Swagger em `/api/docs`)
 - PostgreSQL: porta 5432 (volume `postgres-data`)
 - pgAdmin: http://localhost:5050
+
+### Rodar com portas de produção (porta 80)
+
+Crie um arquivo `.env.prod` com `FRONTEND_PORT=80` e suba assim:
+
+```bash
+docker compose --env-file .env.prod up --build -d
+```
+
+### Atalhos (scripts)
+
+Execução local (porta 8080):
+
+```bash
+sh scripts/compose-dev.sh
+```
+
+Execução produção (porta 80):
+
+```bash
+sh scripts/compose-prod.sh
+```
 
 Credenciais padrão do pgAdmin (pode sobrescrever via variáveis de ambiente ao subir): `admindatony@datony.com` / `Datony20025#!`.
 
