@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { paymentService } from '../services/paymentService';
 
@@ -16,6 +16,7 @@ export function PaymentPage() {
   const [eventsHasMore, setEventsHasMore] = useState(true);
   const EVENTS_PAGE_SIZE = 25;
   const platformLogo = '/chama-no-espeto.jpeg';
+  const redirectRef = useRef(false);
 
   useEffect(() => {
     let interval: number | undefined;
@@ -60,6 +61,15 @@ export function PaymentPage() {
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
   const storeUrl = storeSlug ? `${baseUrl}/chamanoespeto/${storeSlug}` : '';
   const adminUrl = `${baseUrl}/admin`;
+
+  useEffect(() => {
+    if (!isPaid || redirectRef.current) return;
+    redirectRef.current = true;
+    const timeout = window.setTimeout(() => {
+      navigate('/admin');
+    }, 2500);
+    return () => window.clearTimeout(timeout);
+  }, [isPaid, navigate]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -157,7 +167,7 @@ export function PaymentPage() {
                     )}
                   </div>
                   <p className="text-xs text-emerald-800">
-                    Use o login e senha cadastrados para entrar no painel.
+                    Use o login e senha cadastrados para entrar no painel. Redirecionando...
                   </p>
                 </div>
               )}
