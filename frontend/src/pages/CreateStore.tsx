@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { storeService } from '../services/storeService';
 import { planService } from '../services/planService';
@@ -12,6 +12,7 @@ export function CreateStore() {
   const [selectedPlanId, setSelectedPlanId] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('PIX');
   const [paymentResult, setPaymentResult] = useState(null);
+  const openedPaymentLinkRef = useRef('');
   const platformLogo = '/chama-no-espeto.jpeg';
   const [registerForm, setRegisterForm] = useState({
     fullName: '',
@@ -94,6 +95,16 @@ export function CreateStore() {
 
     fetchPlans();
   }, []);
+
+  useEffect(() => {
+    const method = paymentResult?.payment?.method;
+    const link = paymentResult?.payment?.paymentLink;
+    if (!method || !link) return;
+    if (method !== 'CREDIT_CARD' && method !== 'BOLETO') return;
+    if (openedPaymentLinkRef.current === link) return;
+    openedPaymentLinkRef.current = link;
+    window.open(link, '_blank', 'noopener,noreferrer');
+  }, [paymentResult]);
 
   const handleCreateStore = async (event) => {
     event?.preventDefault();
@@ -426,6 +437,15 @@ export function CreateStore() {
                   >
                     Cartão de crédito
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod('BOLETO')}
+                    className={`px-4 py-2 rounded-xl border ${
+                      paymentMethod === 'BOLETO' ? 'border-red-500 bg-red-50' : 'border-gray-200'
+                    }`}
+                  >
+                    Boleto
+                  </button>
                 </div>
               </div>
             </div>
@@ -456,10 +476,24 @@ export function CreateStore() {
                     <img src={paymentResult.payment.qrCodeBase64} alt="QR Code PIX" className="w-48 h-48" />
                   </div>
                 )}
-                {paymentResult.payment?.method === 'CREDIT_CARD' && (
-                  <p className="text-sm text-gray-700">
-                    Você será redirecionado para o link de pagamento: {paymentResult.payment?.paymentLink}
-                  </p>
+                {(paymentResult.payment?.method === 'CREDIT_CARD' || paymentResult.payment?.method === 'BOLETO') && (
+                  <div className="space-y-2">
+                    <p className="text-sm text-gray-700">
+                      {paymentResult.payment?.method === 'BOLETO'
+                        ? 'Boleto gerado. Abra o link para pagar.'
+                        : 'Pagamento por cartão disponível no link abaixo.'}
+                    </p>
+                    {paymentResult.payment?.paymentLink && (
+                      <a
+                        href={paymentResult.payment.paymentLink}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-brand-primary text-white text-sm font-semibold hover:opacity-90"
+                      >
+                        Abrir pagamento
+                      </a>
+                    )}
+                  </div>
                 )}
               </div>
             )}

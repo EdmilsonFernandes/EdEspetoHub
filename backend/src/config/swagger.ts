@@ -86,7 +86,7 @@ export const swaggerSpec = {
       },
       RegisterRequest: {
         type: 'object',
-        required: ['fullName', 'email', 'password', 'storeName', 'primaryColor'],
+        required: ['fullName', 'email', 'password', 'storeName', 'primaryColor', 'planId'],
         properties: {
           fullName: { type: 'string' },
           email: { type: 'string' },
@@ -95,8 +95,12 @@ export const swaggerSpec = {
           address: { type: 'string' },
           storeName: { type: 'string' },
           logoUrl: { type: 'string' },
+          logoFile: { type: 'string' },
           primaryColor: { type: 'string' },
           secondaryColor: { type: 'string' },
+          planId: { type: 'string', format: 'uuid' },
+          paymentMethod: { type: 'string', enum: ['PIX', 'CREDIT_CARD', 'BOLETO'] },
+          socialLinks: { type: 'array', items: { type: 'object' } },
         },
       },
       LoginRequest: {
@@ -155,10 +159,12 @@ export const swaggerSpec = {
         properties: {
           id: { type: 'string', format: 'uuid' },
           status: { type: 'string', description: 'Status do pagamento' },
-          method: { type: 'string', enum: ['PIX', 'CREDIT_CARD'] },
+          method: { type: 'string', enum: ['PIX', 'CREDIT_CARD', 'BOLETO'] },
           amount: { type: 'number' },
           qrCodeBase64: { type: 'string', nullable: true },
           paymentLink: { type: 'string', nullable: true },
+          provider: { type: 'string', enum: ['MERCADO_PAGO', 'MOCK'] },
+          providerId: { type: 'string', nullable: true },
           expiresAt: { type: 'string', format: 'date-time', nullable: true },
         },
       },

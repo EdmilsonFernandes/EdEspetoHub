@@ -1,27 +1,66 @@
 // @ts-nocheck
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Image as ImageIcon, Edit, Trash2, Save, Plus } from 'lucide-react';
 import { productService } from '../../services/productService';
 import { formatCurrency } from '../../utils/format';
 
 const initialForm = { name: '', price: '', category: 'espetos', imageUrl: '', imageFile: '', desc: '' };
+const defaultCategories = [
+  { id: 'espetos', label: 'Espetos' },
+  { id: 'bebidas', label: 'Bebidas' },
+  { id: 'porcoes', label: 'Porções' },
+  { id: 'outros', label: 'Outros' },
+];
+
+const normalizeCategory = (value = '') => value.toString().trim().toLowerCase();
+const formatCategoryLabel = (value = '') => {
+  const normalized = normalizeCategory(value);
+  const known = defaultCategories.find((entry) => entry.id === normalized);
+  if (known) return known.label;
+  return normalized
+    .split(' ')
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+};
 
 export const ProductManager = ({ products }) => {
   const [editing, setEditing] = useState(null);
   const [formData, setFormData] = useState(initialForm);
   const [imageMode, setImageMode] = useState('url');
   const [imagePreview, setImagePreview] = useState('');
+  const [categorySelect, setCategorySelect] = useState(initialForm.category);
+  const [customCategory, setCustomCategory] = useState('');
+
+  const categoryOptions = useMemo(() => {
+    const unique = new Set(defaultCategories.map((entry) => entry.id));
+    (products || []).forEach((product) => {
+      const key = normalizeCategory(product.category);
+      if (key) unique.add(key);
+    });
+    const known = defaultCategories.map((entry) => ({
+      id: entry.id,
+      label: entry.label,
+    }));
+    const extras = Array.from(unique)
+      .filter((entry) => !defaultCategories.find((item) => item.id === entry))
+      .sort()
+      .map((entry) => ({ id: entry, label: formatCategoryLabel(entry) }));
+    return [ ...known, ...extras ];
+  }, [products]);
 
   const resetForm = () => {
     setEditing(null);
     setFormData(initialForm);
     setImageMode('url');
     setImagePreview('');
+    setCategorySelect(initialForm.category);
+    setCustomCategory('');
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (!formData.name || !formData.price) return;
+    if (categorySelect === '__custom__' && !formData.category) return;
 
     const payload = {
       ...formData,
@@ -36,9 +75,14 @@ export const ProductManager = ({ products }) => {
   };
 
   const handleEdit = (product) => {
+    const categoryKey = normalizeCategory(product.category || initialForm.category);
+    const isKnown = categoryOptions.some((entry) => entry.id === categoryKey);
+    setCategorySelect(isKnown ? categoryKey : '__custom__');
+    setCustomCategory(isKnown ? '' : categoryKey);
     setEditing(product);
     setFormData({
       ...product,
+      category: categoryKey,
       imageFile: '',
     });
     setImageMode('url');
@@ -83,11 +127,41 @@ export const ProductManager = ({ products }) => {
             value={formData.price}
             onChange={(e) => setFormData({ ...formData, price: e.target.value })}
           />
-          <select className="p-3 border rounded-lg" value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })}>
-            <option value="espetos">Espetos</option>
-            <option value="bebidas">Bebidas</option>
-            <option value="porcoes">Porções</option>
-          </select>
+          <div className="space-y-2">
+            <select
+              className="p-3 border rounded-lg w-full"
+              value={categorySelect}
+              onChange={(e) => {
+                const value = e.target.value;
+                setCategorySelect(value);
+                if (value === '__custom__') {
+                  setFormData({ ...formData, category: normalizeCategory(customCategory) });
+                } else {
+                  setCustomCategory('');
+                  setFormData({ ...formData, category: value });
+                }
+              }}
+            >
+              {categoryOptions.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.label}
+                </option>
+              ))}
+              <option value="__custom__">+ Nova categoria</option>
+            </select>
+            {categorySelect === '__custom__' && (
+              <input
+                className="p-3 border rounded-lg w-full"
+                placeholder="Digite a nova categoria"
+                value={customCategory}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setCustomCategory(value);
+                  setFormData({ ...formData, category: normalizeCategory(value) });
+                }}
+              />
+            )}
+          </div>
           <div className="md:col-span-2 space-y-2">
             <div className="flex items-center gap-2">
               <button
@@ -182,7 +256,7 @@ export const ProductManager = ({ products }) => {
                   )}
                 </td>
                 <td className="p-4 font-medium">{product.name}</td>
-                <td className="p-4 capitalize text-sm text-gray-500">{product.category}</td>
+                <td className="p-4 capitalize text-sm text-gray-500">{formatCategoryLabel(product.category)}</td>
                 <td className="p-4 text-brand-primary font-bold">{formatCurrency(product.price)}</td>
                 <td className="p-4 text-right space-x-2">
                   <button onClick={() => handleEdit(product)} className="text-brand-primary hover:bg-brand-primary-soft p-2 rounded">

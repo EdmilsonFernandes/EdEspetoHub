@@ -20,15 +20,31 @@ export const GrillQueue = () => {
   const [currentTime, setCurrentTime] = useState(Date.now());
   const [error, setError] = useState('');
   const [updating, setUpdating] = useState<string | null>(null);
-  const [soundEnabled, setSoundEnabled] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(() => {
+    if (typeof window === "undefined") return true;
+    const saved = localStorage.getItem("queueSoundEnabled");
+    return saved ? saved === "true" : true;
+  });
   const previousIdsRef = useRef<string[]>([]);
   const audioContextRef = useRef<AudioContext | null>(null);
+
+  const ensureAudioContext = async () => {
+    const context = audioContextRef.current || new AudioContext();
+    audioContextRef.current = context;
+    if (context.state === "suspended") {
+      await context.resume();
+    }
+    return context;
+  };
 
   const playNewOrderSound = () => {
     if (!soundEnabled) return;
     try {
       const context = audioContextRef.current || new AudioContext();
       audioContextRef.current = context;
+      if (context.state === "suspended") {
+        return;
+      }
 
       const oscillator = context.createOscillator();
       const gain = context.createGain();
@@ -43,6 +59,14 @@ export const GrillQueue = () => {
       oscillator.stop(context.currentTime + 0.2);
     } catch (err) {
       console.error("Nao foi possivel tocar o som", err);
+    }
+  };
+
+  const handleToggleSound = async () => {
+    const next = !soundEnabled;
+    setSoundEnabled(next);
+    if (next) {
+      await ensureAudioContext().catch(() => {});
     }
   };
 
@@ -79,6 +103,25 @@ export const GrillQueue = () => {
       unsubProducts();
     };
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem("queueSoundEnabled", String(soundEnabled));
+    if (!soundEnabled) return;
+
+    const unlock = () => {
+      ensureAudioContext().catch(() => {});
+      window.removeEventListener("click", unlock);
+      window.removeEventListener("keydown", unlock);
+    };
+
+    window.addEventListener("click", unlock, { once: true });
+    window.addEventListener("keydown", unlock, { once: true });
+
+    return () => {
+      window.removeEventListener("click", unlock);
+      window.removeEventListener("keydown", unlock);
+    };
+  }, [soundEnabled]);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(Date.now()), 1000);
@@ -229,11 +272,22 @@ export const GrillQueue = () => {
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={() => setSoundEnabled((prev) => !prev)}
+            onClick={handleToggleSound}
             className="flex items-center gap-2 text-sm px-3 py-2 rounded-lg bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
           >
             {soundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
             {soundEnabled ? "Som ligado" : "Som desligado"}
+          </button>
+          <button
+            onClick={() => {
+              if (!soundEnabled) {
+                setSoundEnabled(true);
+              }
+              ensureAudioContext().then(() => playNewOrderSound()).catch(() => {});
+            }}
+            className="flex items-center gap-2 text-sm px-3 py-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200"
+          >
+            Testar som
           </button>
           <button
             onClick={loadQueue}

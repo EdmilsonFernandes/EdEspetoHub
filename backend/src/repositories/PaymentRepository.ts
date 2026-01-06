@@ -43,4 +43,12 @@ export class PaymentRepository {
       .where('payment.status = :status', { status })
       .getCount();
   }
+
+  findRecent(limit = 50) {
+    return this.repository.find({
+      order: { createdAt: 'DESC' },
+      take: limit,
+      relations: ['store', 'subscription', 'subscription.plan', 'user'],
+    });
+  }
 }

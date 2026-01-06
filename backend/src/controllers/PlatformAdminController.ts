@@ -2,10 +2,12 @@ import { Request, Response } from 'express';
 import { StoreRepository } from '../repositories/StoreRepository';
 import { SubscriptionService } from '../services/SubscriptionService';
 import { PaymentRepository } from '../repositories/PaymentRepository';
+import { PaymentEventRepository } from '../repositories/PaymentEventRepository';
 
 const storeRepository = new StoreRepository();
 const subscriptionService = new SubscriptionService();
 const paymentRepository = new PaymentRepository();
+const paymentEventRepository = new PaymentEventRepository();
 
 export class PlatformAdminController {
   static async listStores(_req: Request, res: Response) {
@@ -72,6 +74,9 @@ export class PlatformAdminController {
         }
       );
 
+      const recentPayments = await paymentRepository.findRecent(50);
+      const paymentEvents = await paymentEventRepository.findRecent(50);
+
       return res.json({
         summary: {
           ...summary,
@@ -80,6 +85,8 @@ export class PlatformAdminController {
           paidRevenue,
         },
         stores: enriched,
+        payments: recentPayments,
+        paymentEvents,
       });
     } catch (error: any) {
       return res.status(400).json({ message: error.message });
@@ -101,6 +108,24 @@ export class PlatformAdminController {
     try {
       const subscription = await subscriptionService.activate(subscriptionId);
       return res.json(subscription);
+    } catch (error: any) {
+      return res.status(400).json({ message: error.message });
+    }
+  }
+
+  static async listPaymentEvents(req: Request, res: Response) {
+    const paymentId = req.query.paymentId as string | undefined;
+    const storeId = req.query.storeId as string | undefined;
+    const limit = req.query.limit ? Number(req.query.limit) : 50;
+    const offset = req.query.offset ? Number(req.query.offset) : 0;
+
+    try {
+      const events = paymentId
+        ? await paymentEventRepository.findByPaymentId(paymentId, limit, offset)
+        : storeId
+          ? await paymentEventRepository.findByStoreId(storeId, limit, offset)
+          : await paymentEventRepository.findRecent(limit, offset);
+      return res.json(events);
     } catch (error: any) {
       return res.status(400).json({ message: error.message });
     }

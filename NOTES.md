@@ -1,45 +1,57 @@
-# Conversa e ajustes - EdEspetoHub
+# Projeto Chama no Espeto - Contexto Atual
 
-## Ajustes feitos
-- Corrigido erro de tela branca no `StorePage` (referencia a `storeSlug` fora de escopo).
-- Admin > Fila do churrasqueiro:
-  - Header com logo/identidade mantido e responsivo.
-  - Botões "Voltar" (para vitrine) e "Sair" no header.
-  - Corrigido "Adicionar item" na fila: comparação de `id` como string.
-  - Nome do cliente exibido como "Cliente: ..."; telefone aparece apenas se existir.
-  - Estados da fila voltaram para amarelo/verde padrão.
-- Admin > Tema:
-  - Criadas classes utilitárias de tema em `src/index.css` (brand primary/secondary).
-  - Aplicadas cores da loja em telas admin (principais ações e destaques).
-  - Ações destrutivas/erros mantidas em vermelho padrão.
-- Admin > Dashboard:
-  - Dashboard reorganizado em abas: Resumo, Produtos, Configurações, Fila.
-- Admin > Pedidos:
-  - Lista real de pedidos com detalhes (status, total, itens).
-  - Filtros: status + data, busca, limpar filtros.
-  - Modo Cards/Tabela com persistência no localStorage.
-  - Tabela compacta no mobile (esconde colunas).
-- Vitrine (loja):
-  - Aplicadas cores de marca no Menu, Carrinho e Sucesso.
-  - Status Aberto/Fechado com cores da loja.
+## Estado atual (resumo rapido)
+- Vitrine premium com hero novo, cards e categorias refinadas.
+  - Header simplificado: identidade + acoes.
+  - Hero concentra status/horario/WhatsApp.
+  - "Id da loja" usa slug.
+  - Cores primaria/secundaria aplicadas corretamente.
+- Fila do churrasqueiro usa o mesmo header do admin e mantem tema/cores.
+- Admin:
+  - Header unico para todas as telas (Dashboard, Pedidos, Fila).
+  - Tela de pedidos limpa (so lista).
+  - Dashboard com receita total/mes/periodo, ticket medio, grafico melhorado e filtro 30/60/90/tudo.
+- Checkout:
+  - Autocomplete de cliente (3+ letras) com preenchimento automatico do telefone.
+  - Clientes recentes antes de digitar.
+  - Mesa com selecao rapida (1-12) + campo "outra mesa".
+  - Visual "iFood-like" no bloco de dados do pedido.
+- Som na fila:
+  - Ligado por padrao, salva preferencia.
+  - Botao "Testar som".
+- Mercado Pago:
+  - Integracao com webhook, QR normalizado.
+  - Idempotency key adicionada.
+  - Cai em mock apenas se MP falhar.
+- Email:
+  - SMTP (Gmail com senha de app).
+  - Reset de senha + paginas `ForgotPassword` e `ResetPassword`.
+  - Email de ativacao com logo e links.
 
-## Arquivos principais alterados
-- frontend/src/pages/StorePage.tsx
+## Arquivos principais mexidos
+- frontend/src/components/Client/MenuView.tsx
+- frontend/src/components/Client/CartView.tsx
+- frontend/src/pages/OrdersQueue.tsx
+- frontend/src/components/Admin/AdminHeader.tsx
 - frontend/src/pages/AdminDashboard.tsx
 - frontend/src/pages/AdminOrders.tsx
 - frontend/src/pages/AdminQueue.tsx
-- frontend/src/components/Admin/GrillQueue.tsx
 - frontend/src/components/Admin/DashboardView.tsx
+- frontend/src/components/Admin/GrillQueue.tsx
 - frontend/src/components/Admin/ProductManager.tsx
-- frontend/src/components/Admin/StoreIdentityCard.tsx
-- frontend/src/components/Admin/OpeningHoursCard.tsx
-- frontend/src/pages/AdminLogin.tsx
-- frontend/src/components/Client/MenuView.tsx
-- frontend/src/components/Client/CartView.tsx
-- frontend/src/components/Client/SuccessView.tsx
-- frontend/src/index.css
+- backend/src/services/PaymentService.ts
+- backend/src/services/MercadoPagoService.ts
+- backend/src/services/EmailService.ts
+- backend/src/services/AuthService.ts
+- backend/schema.sql
+- backend/src/entities/PasswordReset.ts
+- frontend/src/pages/ForgotPassword.tsx
+- frontend/src/pages/ResetPassword.tsx
+- frontend/src/services/authService.ts
 
-## Pendências / próximos ajustes possíveis
-- Validar se precisa limpar o select "Adicionar item" após incluir.
-- Opcional: mostrar telefone/mesa também no Admin > Pedidos (cards/tabela).
-- Testar fluxo completo no navegador (dev server).
+## Observacoes importantes
+- Som so toca apos interacao do usuario (limitacao do navegador).
+- Mercado Pago exige chave PIX cadastrada (em teste pode bloquear).
+- Admin login bloqueado se pagamento pendente.
+- Email real depende de SMTP valido (Gmail com senha de app).
+

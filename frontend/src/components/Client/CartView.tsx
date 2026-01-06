@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import {
   ChevronLeft,
   Bike,
@@ -7,7 +7,9 @@ import {
   UtensilsCrossed,
   Send,
   WalletCards,
-  CreditCard
+  CreditCard,
+  Search,
+  User
 } from "lucide-react";
 import { formatCurrency, formatPhoneInput } from "../../utils/format";
 
@@ -23,6 +25,7 @@ export const CartView = ({
 }) => {
   const cartItems = Object.values(cart);
   const total = cartItems.reduce((acc, item) => acc + item.price * item.qty, 0);
+  const [suggestionsOpen, setSuggestionsOpen] = useState(false);
 
   const isPickup = customer.type === "pickup";
   const isDelivery = customer.type === "delivery";
@@ -40,6 +43,41 @@ export const CartView = ({
     onChangeCustomer({ ...customer, phone: formatted });
   };
 
+  const normalizedQuery = customer.name?.trim().toLowerCase() || "";
+  const filteredCustomers =
+    normalizedQuery.length >= 3
+      ? customers.filter((entry) =>
+          entry.name?.toLowerCase().includes(normalizedQuery)
+        )
+      : [];
+  const recentCustomers = customers.slice(0, 6);
+
+  const handleNameChange = (value) => {
+    const next = { ...customer, name: value };
+    const normalized = value.trim().toLowerCase();
+    if (normalized.length >= 3) {
+      const match = customers.find(
+        (entry) => entry.name?.trim().toLowerCase() === normalized
+      );
+      if (match?.phone) {
+        next.phone = formatPhoneInput(match.phone);
+      }
+    }
+    onChangeCustomer(next);
+    setSuggestionsOpen(true);
+  };
+
+  const handleSelectCustomer = (entry) => {
+    onChangeCustomer({
+      ...customer,
+      name: entry.name,
+      phone: formatPhoneInput(entry.phone || ""),
+    });
+    setSuggestionsOpen(false);
+  };
+
+  const tableOptions = Array.from({ length: 12 }, (_, index) => `${index + 1}`);
+
   return (
     <div className="animate-in slide-in-from-right">
       {/* voltar */}
@@ -51,35 +89,76 @@ export const CartView = ({
       </button>
 
       {/* Dados do cliente */}
-      <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
-        <h2 className="font-bold text-gray-800 mb-6 text-lg">Detalhes do Pedido</h2>
-
-        <div className="space-y-4">
-          {/* Nome */}
+      <div className="bg-white rounded-3xl shadow-sm p-6 mb-6 border border-gray-100">
+        <div className="flex items-center justify-between mb-6">
           <div>
+            <h2 className="font-bold text-gray-800 text-lg">Detalhes do Pedido</h2>
+            <p className="text-sm text-gray-500">Complete as infos para enviarmos seu pedido.</p>
+          </div>
+          <span className="text-xs font-semibold text-brand-primary bg-brand-primary-soft px-3 py-1 rounded-full">
+            Etapa 1/2
+          </span>
+        </div>
+
+        <div className="space-y-5">
+          {/* Nome */}
+          <div className="rounded-2xl border border-gray-100 p-4">
             <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">
               Seu Nome
             </label>
-            <input
-              value={customer.name}
-              onChange={(e) =>
-                onChangeCustomer({ ...customer, name: e.target.value })
-              }
-              placeholder="Ex: João Silva"
-              list="customer-suggestions"
-              className="w-full border-b-2 border-gray-100 py-3 text-lg outline-none focus:border-brand-primary placeholder:text-gray-300"
-            />
-            <datalist id="customer-suggestions">
-              {customers.map((entry) => (
-                <option key={entry.id || entry.name} value={entry.name}>
-                  {entry.phone}
-                </option>
-              ))}
-            </datalist>
+            <div className="relative mt-2">
+              <input
+                value={customer.name}
+                onChange={(e) => handleNameChange(e.target.value)}
+                onFocus={() => filteredCustomers.length && setSuggestionsOpen(true)}
+                onBlur={() => setTimeout(() => setSuggestionsOpen(false), 150)}
+                placeholder="Ex: João Silva"
+                className="w-full border-b-2 border-gray-100 py-3 pl-9 text-lg outline-none focus:border-brand-primary placeholder:text-gray-300 bg-transparent"
+              />
+              <Search size={18} className="absolute left-0 top-1/2 -translate-y-1/2 text-gray-300" />
+              {suggestionsOpen && filteredCustomers.length > 0 && (
+                <div className="absolute z-10 mt-2 w-full bg-white border border-gray-100 rounded-xl shadow-lg overflow-hidden">
+                  {filteredCustomers.slice(0, 6).map((entry) => (
+                    <button
+                      key={entry.id || entry.name}
+                      type="button"
+                      onMouseDown={(event) => event.preventDefault()}
+                      onClick={() => handleSelectCustomer(entry)}
+                      className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center justify-between"
+                    >
+                      <span className="font-semibold text-gray-800 flex items-center gap-2">
+                        <User size={14} className="text-gray-400" />
+                        {entry.name}
+                      </span>
+                      <span className="text-xs text-gray-500">{entry.phone || "Sem telefone"}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            {normalizedQuery.length < 3 && recentCustomers.length > 0 && (
+              <div className="mt-3">
+                <p className="text-[11px] text-gray-400 uppercase tracking-wider font-semibold mb-2">
+                  Clientes recentes
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {recentCustomers.map((entry) => (
+                    <button
+                      key={entry.id || entry.name}
+                      type="button"
+                      onClick={() => handleSelectCustomer(entry)}
+                      className="px-3 py-1.5 rounded-full text-xs font-semibold border border-gray-200 text-gray-600 hover:bg-gray-50"
+                    >
+                      {entry.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* WhatsApp */}
-          <div>
+          <div className="rounded-2xl border border-gray-100 p-4">
             <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">
               WhatsApp
             </label>
@@ -88,57 +167,89 @@ export const CartView = ({
               value={customer.phone}
               onChange={(e) => handlePhoneChange(e.target.value)}
               placeholder="(12) 90000-0000"
-              className="w-full border-b-2 border-gray-100 py-3 text-lg outline-none focus:border-brand-primary placeholder:text-gray-300"
+              className="w-full border-b-2 border-gray-100 py-3 text-lg outline-none focus:border-brand-primary placeholder:text-gray-300 bg-transparent"
             />
           </div>
 
           {/* Tipo de pedido */}
-          <div className="flex gap-3 pt-2">
-            {["delivery", "pickup", "table"].map((type) => (
-              <button
-                key={type}
-                onClick={() => onChangeCustomer({ ...customer, type })}
-                className={`flex-1 py-3 rounded-xl border-2 flex flex-col items-center justify-center gap-1 transition-all ${
-                  customer.type === type
-                    ? "border-brand-primary bg-brand-primary-soft text-brand-primary font-bold"
-                    : "border-gray-100 text-gray-400 grayscale"
-                }`}
-              >
-                {type === "delivery" && <Bike size={20} />}
-                {type === "pickup" && <Home size={20} />}
-                {type === "table" && <UtensilsCrossed size={20} />}
-                <span className="text-[10px] uppercase font-bold tracking-wide">
-                  {type === "table"
-                    ? "Mesa"
-                    : type === "pickup"
-                    ? "Retira"
-                    : "Entrega"}
-                </span>
-              </button>
-            ))}
+          <div className="rounded-2xl border border-gray-100 p-4">
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
+              Tipo de pedido
+            </p>
+            <div className="flex gap-3">
+              {["delivery", "pickup", "table"].map((type) => (
+                <button
+                  key={type}
+                  onClick={() => onChangeCustomer({ ...customer, type })}
+                  className={`flex-1 py-3 rounded-xl border-2 flex flex-col items-center justify-center gap-1 transition-all ${
+                    customer.type === type
+                      ? "border-brand-primary bg-brand-primary-soft text-brand-primary font-bold"
+                      : "border-gray-100 text-gray-400 grayscale"
+                  }`}
+                >
+                  {type === "delivery" && <Bike size={20} />}
+                  {type === "pickup" && <Home size={20} />}
+                  {type === "table" && <UtensilsCrossed size={20} />}
+                  <span className="text-[10px] uppercase font-bold tracking-wide">
+                    {type === "table"
+                      ? "Mesa"
+                      : type === "pickup"
+                      ? "Retira"
+                      : "Entrega"}
+                  </span>
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Endereço */}
           {customer.type === "delivery" && (
-            <textarea
-              value={customer.address}
-              onChange={(e) =>
-                onChangeCustomer({ ...customer, address: e.target.value })
-              }
-              placeholder="Endereço completo"
-              className="w-full p-4 rounded-xl bg-gray-50 border border-gray-100 text-gray-700 outline-none focus:ring-2 focus:ring-brand-primary"
-            />
+            <div className="rounded-2xl border border-gray-100 p-4">
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                Endereço de entrega
+              </p>
+              <textarea
+                value={customer.address}
+                onChange={(e) =>
+                  onChangeCustomer({ ...customer, address: e.target.value })
+                }
+                placeholder="Rua, número, bairro e referência"
+                className="w-full p-4 rounded-xl bg-gray-50 border border-gray-100 text-gray-700 outline-none focus:ring-2 focus:ring-brand-primary"
+              />
+            </div>
           )}
 
           {customer.type === "table" && (
-            <input
-              value={customer.table}
-              onChange={(e) =>
-                onChangeCustomer({ ...customer, table: e.target.value })
-              }
-              placeholder="Número da mesa"
-              className="w-full p-4 rounded-xl bg-gray-50 border border-gray-100 text-gray-700 outline-none focus:ring-2 focus:ring-brand-primary"
-            />
+            <div className="rounded-2xl border border-gray-100 p-4 space-y-3">
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                Escolha a mesa
+              </p>
+              <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+                {tableOptions.map((table) => (
+                  <button
+                    key={table}
+                    type="button"
+                    onClick={() => onChangeCustomer({ ...customer, table })}
+                    className={`py-2 rounded-lg text-sm font-semibold border transition ${
+                      customer.table === table
+                        ? "bg-brand-primary text-white border-brand-primary"
+                        : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
+                    }`}
+                  >
+                    {table}
+                  </button>
+                ))}
+              </div>
+              <input
+                value={customer.table}
+                onChange={(e) =>
+                  onChangeCustomer({ ...customer, table: e.target.value })
+                }
+                inputMode="numeric"
+                placeholder="Outra mesa (ex: 18)"
+                className="w-full p-4 rounded-xl bg-gray-50 border border-gray-100 text-gray-700 outline-none focus:ring-2 focus:ring-brand-primary"
+              />
+            </div>
           )}
         </div>
       </div>

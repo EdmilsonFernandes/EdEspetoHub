@@ -7,24 +7,46 @@ export function PaymentPage() {
   const { paymentId } = useParams();
   const navigate = useNavigate();
   const [payment, setPayment] = useState(null);
+  const [events, setEvents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [polling, setPolling] = useState(false);
+  const [expandedEvents, setExpandedEvents] = useState<Record<string, boolean>>({});
+  const [eventsPage, setEventsPage] = useState(0);
+  const [eventsHasMore, setEventsHasMore] = useState(true);
+  const EVENTS_PAGE_SIZE = 25;
 
   useEffect(() => {
-    const loadPayment = async () => {
+    let interval: number | undefined;
+
+    const loadPayment = async (silent = false) => {
+      if (!silent) setIsLoading(true);
       try {
         const data = await paymentService.getById(paymentId);
         setPayment(data);
-      } catch (err) {
+        const eventData = await paymentService.getEvents(paymentId, EVENTS_PAGE_SIZE, 0);
+        setEvents(eventData || []);
+        setEventsPage(0);
+        setEventsHasMore((eventData || []).length === EVENTS_PAGE_SIZE);
+        if (data?.status === 'PAID' || data?.status === 'FAILED') {
+          setPolling(false);
+        }
+      } catch (err: any) {
         setError(err.message || 'Não foi possível carregar o pagamento');
       } finally {
-        setIsLoading(false);
+        if (!silent) setIsLoading(false);
       }
     };
 
     if (paymentId) {
       loadPayment();
+      setPolling(true);
+      interval = window.setInterval(() => loadPayment(true), 8000);
     }
+
+    return () => {
+      if (interval) window.clearInterval(interval);
+    };
   }, [paymentId]);
 
   return (
@@ -84,7 +106,10 @@ export function PaymentPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="p-5 border border-gray-100 rounded-2xl bg-gray-50">
                   <p className="text-sm font-semibold text-gray-700 mb-2">Status</p>
-                  <p className="text-lg font-bold text-yellow-600">{payment.status}</p>
+                  <p className="text-lg font-bold text-yellow-600">
+                    {payment.status}
+                    {polling && <span className="ml-2 text-xs text-gray-500">(atualizando)</span>}
+                  </p>
 
                   <div className="mt-4 space-y-2 text-sm text-gray-700">
                     <p><span className="font-semibold">Forma de pagamento:</span> {payment.method}</p>
@@ -105,11 +130,93 @@ export function PaymentPage() {
                       <img src={payment.qrCodeBase64} alt="QR Code PIX" className="w-64 h-64 object-contain" />
                       <p className="text-xs text-gray-500 text-center">Pagamento mock para testes - nenhum valor será cobrado.</p>
                     </>
+                  ) : payment.paymentLink ? (
+                    <>
+                      <p className="text-sm font-semibold text-gray-700">
+                        {payment.method === 'BOLETO' ? 'Acesse o boleto' : 'Acesse o link de pagamento'}
+                      </p>
+                      <a
+                        href={payment.paymentLink}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="px-4 py-2 rounded-lg bg-brand-primary text-white text-sm font-semibold hover:opacity-90"
+                      >
+                        Abrir pagamento
+                      </a>
+                      <p className="text-xs text-gray-500 text-center">Você será direcionado para o provedor de pagamento.</p>
+                    </>
                   ) : (
-                    <p className="text-gray-600 text-center">Forma de pagamento não suporta QR Code.</p>
+                    <p className="text-gray-600 text-center">Forma de pagamento não disponível no momento.</p>
                   )}
                 </div>
               </div>
+              {payment.provider && (
+                <div className="border border-gray-100 rounded-2xl p-5 bg-white">
+                  <p className="text-sm font-semibold text-gray-700 mb-2">Linha do tempo</p>
+                  <p className="text-sm text-gray-600">
+                    Provedor: <span className="font-semibold">{payment.provider}</span>
+                  </p>
+                  {payment.providerId && (
+                    <p className="text-sm text-gray-600">
+                      ID do provedor: <span className="font-semibold">{payment.providerId}</span>
+                    </p>
+                  )}
+                  <div className="mt-3 space-y-2">
+                    {(events || []).length === 0 ? (
+                      <p className="text-sm text-gray-500">Nenhum evento recebido ainda.</p>
+                    ) : (
+                      events.map((event) => {
+                        const isExpanded = Boolean(expandedEvents[event.id]);
+                        return (
+                          <div key={event.id} className="text-sm text-gray-600 border border-gray-100 rounded-xl p-3 bg-gray-50">
+                            <div className="flex items-center justify-between">
+                              <span className="font-semibold">{event.status}</span>
+                              <div className="flex items-center gap-3">
+                                <span className="text-xs text-gray-400">
+                                  {new Date(event.createdAt).toLocaleString('pt-BR')}
+                                </span>
+                                {event.payload && (
+                                  <button
+                                    onClick={() =>
+                                      setExpandedEvents((prev) => ({
+                                        ...prev,
+                                        [event.id]: !prev[event.id],
+                                      }))
+                                    }
+                                    className="text-xs font-semibold text-brand-primary hover:underline"
+                                  >
+                                    {isExpanded ? 'Ocultar' : 'Ver payload'}
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                            {isExpanded && event.payload && (
+                              <pre className="mt-2 bg-slate-900 text-slate-100 text-xs p-3 rounded-lg overflow-auto max-h-48">
+                                {JSON.stringify(event.payload, null, 2)}
+                              </pre>
+                            )}
+                          </div>
+                        );
+                      })
+                    )}
+                    {eventsHasMore && (
+                      <button
+                        onClick={async () => {
+                          const nextPage = eventsPage + 1;
+                          const next = await paymentService.getEvents(paymentId, EVENTS_PAGE_SIZE, nextPage * EVENTS_PAGE_SIZE);
+                          const nextEvents = [ ...events, ...(next || []) ];
+                          setEvents(nextEvents);
+                          setEventsPage(nextPage);
+                          setEventsHasMore((next || []).length === EVENTS_PAGE_SIZE);
+                        }}
+                        className="w-full mt-2 px-3 py-2 rounded-lg text-sm font-semibold border border-gray-200 text-gray-600 hover:bg-gray-50"
+                      >
+                        Carregar mais eventos
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

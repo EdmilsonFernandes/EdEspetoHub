@@ -10,8 +10,9 @@ import { User } from './User';
 import { Store } from './Store';
 import { Subscription } from './Subscription';
 
-export type PaymentMethod = 'PIX' | 'CREDIT_CARD';
+export type PaymentMethod = 'PIX' | 'CREDIT_CARD' | 'BOLETO';
 export type PaymentStatus = 'PENDING' | 'PAID' | 'FAILED';
+export type PaymentProvider = 'MERCADO_PAGO' | 'MOCK';
 
 @Entity({ name: 'payments' })
 export class Payment {
@@ -44,6 +45,12 @@ export class Payment {
 
   @Column({ name: 'payment_link', type: 'text', nullable: true })
   paymentLink?: string | null;
+
+  @Column({ name: 'provider', type: 'varchar', default: 'MOCK' })
+  provider!: PaymentProvider;
+
+  @Column({ name: 'provider_id', type: 'varchar', nullable: true })
+  providerId?: string | null;
 
   @Column({ name: 'expires_at', type: 'timestamptz' })
   expiresAt!: Date;

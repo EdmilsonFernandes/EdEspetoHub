@@ -52,6 +52,10 @@ docker exec -i espetinho-db psql -U postgres -d espetinho < backend/schema.sql
 
 As variáveis lidas são `PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD`, `PGDATABASE`, `PORT`, `JWT_SECRET`.
 Para super admin: `SUPER_ADMIN_EMAIL`, `SUPER_ADMIN_PASSWORD`.
+Para Mercado Pago: `MP_ACCESS_TOKEN`, `MP_PUBLIC_KEY`, `MP_WEBHOOK_URL` (opcional `MP_API_BASE_URL`).
+Webhook seguro (opcional): `MP_WEBHOOK_SECRET`.
+Debug MP: `MP_DEBUG=true` para logs das chamadas.
+Para e-mails: `APP_BASE_URL`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_SECURE`, `EMAIL_FROM`.
 
 Exemplo (no terminal):
 
@@ -65,6 +69,17 @@ export PORT=4000
 export JWT_SECRET=super-secret-token
 export SUPER_ADMIN_EMAIL=superadmin@local.com
 export SUPER_ADMIN_PASSWORD=super123
+export MP_ACCESS_TOKEN=...
+export MP_PUBLIC_KEY=...
+export MP_WEBHOOK_URL=http://localhost:4000/api/webhooks/mercadopago
+export MP_WEBHOOK_SECRET=...
+export APP_BASE_URL=http://localhost:3000
+export SMTP_HOST=smtp.seu-provedor.com
+export SMTP_PORT=587
+export SMTP_USER=usuario
+export SMTP_PASS=senha
+export SMTP_SECURE=false
+export EMAIL_FROM="Chama no Espeto <no-reply@chamanoespeto.com>"
 ```
 
 4) **Subir a API**
@@ -175,6 +190,32 @@ Checklist de portas no Security Group:
 - 4000 (API)
 - 5050 (pgAdmin, opcional)
 - 5432 (Postgres) **não** expor publicamente
+
+## Webhook Mercado Pago com ngrok (teste local)
+
+1) Suba a API localmente na porta 4000.
+2) Em outro terminal:
+
+```bash
+ngrok http 4000
+```
+
+3) Copie a URL pública gerada (ex.: `https://abcd1234.ngrok-free.app`).
+4) Configure no painel do Mercado Pago:
+   - URL de webhook: `https://abcd1234.ngrok-free.app/api/webhooks/mercadopago`
+   - Eventos: **Pagamentos**
+   - Se habilitar "Assinatura secreta", copie para `MP_WEBHOOK_SECRET`
+5) Exporte a env local:
+
+```bash
+export MP_WEBHOOK_URL=https://abcd1234.ngrok-free.app/api/webhooks/mercadopago
+export MP_WEBHOOK_SECRET=...
+```
+
+Se configurar assinatura secreta no painel, defina `MP_WEBHOOK_SECRET` na API.
+
+### O que é ngrok (explicação rápida)
+ngrok cria um túnel público temporário para seu servidor local. Isso permite que o Mercado Pago envie o webhook para sua máquina local durante testes. Sempre que você reiniciar o ngrok, a URL pública muda (a menos que use um plano pago com URL fixa).
 
 ## Execução local (sem Docker)
 

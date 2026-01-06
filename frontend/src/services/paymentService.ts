@@ -13,4 +13,8 @@ export const paymentService = {
     const response = await apiClient.rawGet(`/payments/${paymentId}`);
     return toJson(response);
   },
+  async getEvents(paymentId: any, limit = 25, offset = 0) {
+    const response = await apiClient.rawGet(`/payments/${paymentId}/events?limit=${limit}&offset=${offset}`);
+    return toJson(response);
+  },
 };

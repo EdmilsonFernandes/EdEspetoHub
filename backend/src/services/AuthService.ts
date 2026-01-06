@@ -1,4 +1,5 @@
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import { UserRepository } from '../repositories/UserRepository';
 import { StoreRepository } from '../repositories/StoreRepository';
@@ -9,17 +10,20 @@ import { AppDataSource } from '../config/database';
 import { Store } from '../entities/Store';
 import { User } from '../entities/User';
 import { PaymentService } from './PaymentService';
+import { EmailService } from './EmailService';
 import { PaymentMethod } from '../entities/Payment';
 import { Plan } from '../entities/Plan';
 import { Subscription } from '../entities/Subscription';
 import { saveBase64Image } from '../utils/imageStorage';
 import { sanitizeSocialLinks } from '../utils/socialLinks';
+import { PasswordReset } from '../entities/PasswordReset';
 
 export class AuthService
 {
   private userRepository = new UserRepository();
   private storeRepository = new StoreRepository();
   private paymentService = new PaymentService();
+  private emailService = new EmailService();
 
   async register(input: any)
   {
@@ -46,7 +50,7 @@ export class AuthService
     };
 
     const paymentMethod = ((input.paymentMethod as PaymentMethod) || 'PIX').toUpperCase();
-    if (paymentMethod !== 'PIX' && paymentMethod !== 'CREDIT_CARD')
+    if (paymentMethod !== 'PIX' && paymentMethod !== 'CREDIT_CARD' && paymentMethod !== 'BOLETO')
     {
       throw new Error('Método de pagamento inválido');
     }
@@ -206,6 +210,10 @@ export class AuthService
       }
       : undefined;
 
+    if (sanitizedStore && !sanitizedStore.open) {
+      throw new Error('Pagamento pendente. Sua loja ainda não está ativa.');
+    }
+
     return { user: sanitizedUser, store: sanitizedStore, token };
   }
 
@@ -217,6 +225,7 @@ export class AuthService
     const owner = store.owner;
     const valid = await bcrypt.compare(password, owner.password);
     if (!valid) throw new Error('Credenciais inválidas');
+    if (!store.open) throw new Error('Pagamento pendente. Sua loja ainda não está ativa.');
 
     const token = jwt.sign(
       { sub: owner.id, storeId: store.id, role: 'ADMIN' },
@@ -252,6 +261,67 @@ export class AuthService
       user: sanitizedOwner,
       store: sanitizedStore,
     };
+  }
+
+  async requestPasswordReset(email: string)
+  {
+    const normalizedEmail = email?.trim().toLowerCase();
+    if (!normalizedEmail) throw new Error('E-mail obrigatório');
+
+    const user = await this.userRepository.findByEmail(normalizedEmail);
+    if (!user) {
+      return { message: 'Se o e-mail existir, enviaremos instruções.' };
+    }
+
+    const resetRepo = AppDataSource.getRepository(PasswordReset);
+    await resetRepo
+      .createQueryBuilder()
+      .update()
+      .set({ usedAt: new Date() })
+      .where('user_id = :userId AND used_at IS NULL', { userId: user.id })
+      .execute();
+
+    const token = crypto.randomBytes(32).toString('hex');
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
+
+    await resetRepo.save(
+      resetRepo.create({
+        user,
+        tokenHash,
+        expiresAt,
+      })
+    );
+
+    const link = `${env.appUrl}/reset-password?token=${encodeURIComponent(token)}`;
+    await this.emailService.sendPasswordReset(user.email, link);
+    return { message: 'Se o e-mail existir, enviaremos instruções.' };
+  }
+
+  async resetPassword(token: string, newPassword: string)
+  {
+    if (!token) throw new Error('Token inválido');
+    if (!newPassword || newPassword.length < 6) throw new Error('Senha muito curta');
+
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    const resetRepo = AppDataSource.getRepository(PasswordReset);
+    const reset = await resetRepo.findOne({
+      where: { tokenHash },
+      relations: ['user'],
+    });
+
+    if (!reset || reset.usedAt) throw new Error('Token inválido ou expirado');
+    if (reset.expiresAt.getTime() < Date.now()) throw new Error('Token expirado');
+
+    reset.user.password = await bcrypt.hash(newPassword, 10);
+    reset.usedAt = new Date();
+
+    await AppDataSource.transaction(async (manager) => {
+      await manager.save(reset.user);
+      await manager.save(reset);
+    });
+
+    return { message: 'Senha atualizada com sucesso' };
   }
 
 

@@ -92,6 +92,13 @@ export function AdminLogin() {
                 className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
                 placeholder="admin123"
               />
+              <button
+                type="button"
+                onClick={() => navigate('/forgot-password')}
+                className="text-xs font-semibold text-brand-primary hover:underline"
+              >
+                Esqueci minha senha
+              </button>
             </div>
           </div>
 

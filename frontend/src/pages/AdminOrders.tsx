@@ -1,17 +1,12 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { useTheme } from '../contexts/ThemeContext';
 import { orderService } from '../services/orderService';
-import { useNavigate } from 'react-router-dom';
-import { ChefHat, LayoutDashboard, ShoppingCart, LogOut } from 'lucide-react';
-import { StoreIdentityCard } from '../components/Admin/StoreIdentityCard';
-import { OpeningHoursCard } from '../components/Admin/OpeningHoursCard';
 import { formatCurrency, formatDateTime, formatOrderStatus, formatOrderType, formatPaymentMethod } from '../utils/format';
+import { AdminHeader } from '../components/Admin/AdminHeader';
 
 export function AdminOrders() {
-  const { auth, logout } = useAuth();
-  const { branding } = useTheme();
+  const { auth } = useAuth();
   const [orders, setOrders] = useState<any[]>([]);
   const [statusFilter, setStatusFilter] = useState('all');
   const [query, setQuery] = useState('');
@@ -20,15 +15,9 @@ export function AdminOrders() {
     if (typeof window === 'undefined') return 'cards';
     return localStorage.getItem('adminOrdersView') === 'table' ? 'table' : 'cards';
   });
-  const navigate = useNavigate();
 
   const storeId = auth?.store?.id;
   const storeSlug = auth?.store?.slug;
-  const socialLinks = auth?.store?.settings?.socialLinks || [];
-  const manualOpen = auth?.store?.open ?? true;
-  const whatsappNumber = auth?.store?.owner?.phone || '';
-  const instagramLink = socialLinks.find((link) => link?.type === 'instagram')?.value;
-  const instagramHandle = instagramLink ? `@${instagramLink.replace('@', '')}` : '';
 
   useEffect(() => {
     if (!storeId && !storeSlug) return;
@@ -115,77 +104,7 @@ export function AdminOrders() {
   return (
     <div className="min-h-screen bg-slate-50" style={{ background: 'linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%)' }}>
       <div className="max-w-6xl mx-auto py-8 px-4 space-y-6">
-        <header
-          className="p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between gap-4"
-          style={{
-            background: `linear-gradient(120deg, ${branding?.primaryColor || '#b91c1c'} 0%, ${branding?.secondaryColor || '#111827'} 100%)`,
-            color: '#fff',
-          }}
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center overflow-hidden">
-              {branding?.logoUrl ? (
-                <img src={branding.logoUrl} alt={branding?.brandName} className="w-full h-full object-cover" />
-              ) : (
-                <span className="text-xl font-black">{branding?.brandName?.slice(0, 2)?.toUpperCase() || 'ED'}</span>
-              )}
-            </div>
-            <div>
-              <p className="text-sm uppercase tracking-wide font-semibold opacity-90">Pedidos</p>
-              <h1 className="text-xl font-black leading-tight">{branding?.brandName || auth?.store?.name}</h1>
-              {instagramHandle && (
-                <a
-                  href={`https://instagram.com/${instagramHandle.replace('@', '')}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-xs opacity-80 hover:opacity-100"
-                >
-                  {instagramHandle}
-                </a>
-              )}
-            </div>
-          </div>
-          <div className="flex flex-col items-end gap-2">
-            <p className="text-sm font-semibold">Atalhos</p>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => navigate('/admin/dashboard')}
-                className="px-3 py-2 rounded-lg text-xs font-semibold bg-white/20 hover:bg-white/30 transition flex items-center gap-1"
-              >
-                <LayoutDashboard size={14} /> Dashboard
-              </button>
-              <button
-                onClick={() => navigate('/admin/queue')}
-                className="px-3 py-2 rounded-lg text-xs font-semibold bg-white/20 hover:bg-white/30 transition flex items-center gap-1"
-              >
-                <ChefHat size={14} /> Fila
-              </button>
-              <button
-                onClick={() => navigate(auth?.store?.slug ? `/${auth.store.slug}` : '/')}
-                className="px-3 py-2 rounded-lg text-xs font-semibold bg-white/20 hover:bg-white/30 transition flex items-center gap-1"
-              >
-                <ShoppingCart size={14} /> Vitrine
-              </button>
-              <button
-                onClick={() => {
-                  logout();
-                  navigate('/admin');
-                }}
-                className="px-3 py-2 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 transition flex items-center gap-1"
-              >
-                <LogOut size={14} /> Sair
-              </button>
-            </div>
-          </div>
-        </header>
-
-        <StoreIdentityCard
-          branding={branding}
-          socialLinks={socialLinks}
-          manualOpen={manualOpen}
-          whatsappNumber={whatsappNumber}
-        />
-        <OpeningHoursCard />
+        <AdminHeader contextLabel="Pedidos" />
 
         <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
           <div className="flex items-center justify-between gap-3 mb-4">

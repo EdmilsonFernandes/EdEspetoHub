@@ -23,6 +23,10 @@ services:
       PGPASSWORD: postgres
       PGDATABASE: espetinho
       PORT: 4000
+      MP_ACCESS_TOKEN: ${MP_ACCESS_TOKEN}
+      MP_PUBLIC_KEY: ${MP_PUBLIC_KEY}
+      MP_WEBHOOK_URL: ${MP_WEBHOOK_URL}
+      MP_API_BASE_URL: ${MP_API_BASE_URL}
     ports:
       - "4000:4000"
     depends_on:

@@ -34,4 +34,39 @@ export const superAdminService = {
     });
     return handleResponse(response);
   },
+  async fetchPaymentEvents(token: string, paymentId?: string, limit = 50, offset = 0, storeId?: string) {
+    const params = new URLSearchParams();
+    if (paymentId) params.set('paymentId', paymentId);
+    if (storeId) params.set('storeId', storeId);
+    if (limit) params.set('limit', String(limit));
+    if (offset) params.set('offset', String(offset));
+    const response = await fetch(buildUrl(`/admin/payment-events?${params.toString()}`), {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return handleResponse(response);
+  },
+  async fetchPaymentEventsByStore(token: string, storeId: string, limit = 50) {
+    const params = new URLSearchParams();
+    params.set('storeId', storeId);
+    if (limit) params.set('limit', String(limit));
+    const response = await fetch(buildUrl(`/admin/payment-events?${params.toString()}`), {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return handleResponse(response);
+  },
+  async reprocessPayment(token: string, paymentId: string, providerId?: string) {
+    const response = await fetch(buildUrl(`/admin/payments/${paymentId}/reprocess`), {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(providerId ? { providerId } : {}),
+    });
+    return handleResponse(response);
+  },
 };

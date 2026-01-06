@@ -49,6 +49,7 @@ export const formatPaymentMethod = (payment) => {
     pix: 'Pix',
     debito: 'Débito',
     credito: 'Crédito',
+    boleto: 'Boleto',
   };
 
   return map[payment] || 'Não informado';

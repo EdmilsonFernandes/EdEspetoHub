@@ -8,3 +8,5 @@ export { AdminOrders } from './AdminOrders';
 export { AdminQueue } from './AdminQueue';
 export { PaymentPage } from './PaymentPage';
 export { SuperAdmin } from './SuperAdmin';
+export { ForgotPassword } from './ForgotPassword';
+export { ResetPassword } from './ResetPassword';
