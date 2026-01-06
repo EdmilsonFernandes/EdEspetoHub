@@ -197,6 +197,7 @@ Use o template em `docs/nginx/chamanoespeto.conf` e ajuste o `server_name` se ne
 O proxy deve encaminhar:
 - `/` -> `http://127.0.0.1:8080`
 - `/api/` -> `http://127.0.0.1:4000/api/`
+- `/uploads/` -> `http://127.0.0.1:4000/uploads/`
 
 Depois de copiar o arquivo para `/etc/nginx/conf.d/`, valide e reinicie:
 
