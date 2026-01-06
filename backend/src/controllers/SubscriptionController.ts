@@ -1,7 +1,9 @@
 import { Request, Response } from 'express';
 import { SubscriptionService } from '../services/SubscriptionService';
+import { PaymentRepository } from '../repositories/PaymentRepository';
 
 const subscriptionService = new SubscriptionService();
+const paymentRepository = new PaymentRepository();
 
 export class SubscriptionController {
   static async create(req: Request, res: Response) {
@@ -17,7 +19,13 @@ export class SubscriptionController {
     try {
       const subscription = await subscriptionService.getCurrentByStore(req.params.storeId);
       if (!subscription) return res.status(404).json({ message: 'Assinatura não encontrada' });
-      return res.json(subscription);
+      const latestPayment = await paymentRepository.findLatestByStoreId(req.params.storeId);
+      return res.json({
+        ...subscription,
+        latestPaymentAt: latestPayment?.createdAt ?? null,
+        latestPaymentStatus: latestPayment?.status ?? null,
+        latestPaymentAmount: latestPayment?.amount ?? null,
+      });
     } catch (error: any) {
       return res.status(400).json({ message: error.message });
     }

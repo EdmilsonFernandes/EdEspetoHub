@@ -29,7 +29,6 @@ export function StorePage() {
   const [storeOpenNow, setStoreOpenNow] = useState(true);
   const [storePhone, setStorePhone] = useState('');
   const [openingHours, setOpeningHours] = useState([]);
-  const [planName, setPlanName] = useState('');
   const customersStorageKey = useMemo(
     () => `customers:${storeSlug || defaultBranding.espetoId}`,
     [storeSlug]
@@ -102,7 +101,6 @@ export function StorePage() {
           const normalizedHours = normalizeOpeningHours(data.settings?.openingHours || []);
           setOpeningHours(normalizedHours);
           setStorePhone(data.owner?.phone || '');
-          setPlanName(data.subscription?.plan?.name || '');
           const openNow =
             typeof data.openNow === 'boolean'
               ? data.openNow
@@ -360,7 +358,6 @@ export function StorePage() {
             isOpenNow={storeOpenNow}
             whatsappNumber={storePhone}
             todayHoursLabel={todayHoursLabel}
-            planName={planName}
           />
         )}
         {view === 'cart' && (

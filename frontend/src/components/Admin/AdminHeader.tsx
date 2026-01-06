@@ -15,7 +15,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja' }: Props) {
   const navigate = useNavigate();
   const { auth, logout } = useAuth();
   const { branding } = useTheme();
-  const [planName, setPlanName] = useState('');
+  const [planDetails, setPlanDetails] = useState(null);
 
   const storeName = branding?.brandName || auth?.store?.name;
   const storeSlug = auth?.store?.slug;
@@ -29,7 +29,14 @@ export function AdminHeader({ contextLabel = 'Painel da Loja' }: Props) {
     const loadPlan = async () => {
       try {
         const subscription = await subscriptionService.getByStore(storeId);
-        setPlanName(subscription?.plan?.name || '');
+        setPlanDetails({
+          planName: subscription?.plan?.name || '',
+          startDate: subscription?.startDate || null,
+          endDate: subscription?.endDate || null,
+          latestPaymentAt: subscription?.latestPaymentAt || null,
+          latestPaymentStatus: subscription?.latestPaymentStatus || null,
+          latestPaymentAmount: subscription?.latestPaymentAmount || null,
+        });
       } catch (error) {
         console.error('Falha ao carregar plano da loja', error);
       }
@@ -72,7 +79,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja' }: Props) {
         </div>
       </div>
       <div className="flex flex-wrap items-center gap-2">
-        <PlanBadge planName={planName} variant="dark" />
+        <PlanBadge planName={planDetails?.planName} variant="dark" details={planDetails} />
         <button
           onClick={() => navigate('/admin/dashboard')}
           className="px-3 py-2 rounded-lg text-xs font-semibold bg-white/20 hover:bg-white/30 transition flex items-center gap-1"

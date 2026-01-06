@@ -1,6 +1,7 @@
 // @ts-nocheck
 import React from 'react';
 import { BILLING_OPTIONS, PLAN_TIERS } from '../constants/planCatalog';
+import { formatCurrency, formatDateTime } from '../utils/format';
 
 const PLAN_STYLES = {
   basic: {
@@ -42,11 +43,11 @@ const resolvePlanDetails = (planName = '') => {
   };
 };
 
-export const PlanBadge = ({ planName, variant = 'light' }) => {
-  const details = resolvePlanDetails(planName);
-  const styleKey = details?.tierKey || 'basic';
+export const PlanBadge = ({ planName, variant = 'light', details }) => {
+  const planDetails = resolvePlanDetails(planName);
+  const styleKey = planDetails?.tierKey || 'basic';
   const style = PLAN_STYLES[styleKey];
-  const billing = details?.billingKey ? BILLING_OPTIONS[details.billingKey] : null;
+  const billing = planDetails?.billingKey ? BILLING_OPTIONS[planDetails.billingKey] : null;
   const badgeTone =
     variant === 'dark'
       ? 'bg-white/15 text-white ring-white/25 shadow-black/20'
@@ -59,7 +60,7 @@ export const PlanBadge = ({ planName, variant = 'light' }) => {
         style={{ listStyle: 'none' }}
       >
         <span className="uppercase tracking-wide">
-          {details?.tier?.label || 'Plano não definido'}
+          {planDetails?.tier?.label || 'Plano não definido'}
         </span>
         {billing && <span className="text-[10px] font-bold opacity-80">{billing.label}</span>}
         <span className="text-[10px] opacity-70">▼</span>
@@ -77,16 +78,48 @@ export const PlanBadge = ({ planName, variant = 'light' }) => {
           )}
         </div>
         <h4 className="mt-1 text-base font-bold text-gray-900">
-          {details?.tier?.label || 'Sem plano'} {billing ? `(${billing.label})` : ''}
+          {planDetails?.tier?.label || 'Sem plano'} {billing ? `(${billing.label})` : ''}
         </h4>
         <ul className="mt-3 space-y-2 text-xs text-gray-600">
-          {(details?.tier?.features || ['Plano indefinido.']).map((feature) => (
+          {(planDetails?.tier?.features || ['Plano indefinido.']).map((feature) => (
             <li key={feature} className="flex items-start gap-2">
               <span className="mt-0.5 h-1.5 w-1.5 rounded-full bg-emerald-500" />
               <span>{feature}</span>
             </li>
           ))}
         </ul>
+        {details?.startDate || details?.endDate || details?.latestPaymentAt ? (
+          <div className="mt-3 border-t border-gray-100 pt-3 text-[11px] text-gray-500 space-y-1">
+            {details?.startDate && (
+              <div className="flex items-center justify-between">
+                <span>Iniciado</span>
+                <span className="font-semibold text-gray-700">{formatDateTime(details.startDate)}</span>
+              </div>
+            )}
+            {details?.latestPaymentAt && (
+              <div className="flex items-center justify-between">
+                <span>Ultimo pagamento</span>
+                <span className="font-semibold text-gray-700">
+                  {formatDateTime(details.latestPaymentAt)}
+                </span>
+              </div>
+            )}
+            {details?.latestPaymentAmount && (
+              <div className="flex items-center justify-between">
+                <span>Valor pago</span>
+                <span className="font-semibold text-gray-700">
+                  {formatCurrency(details.latestPaymentAmount)}
+                </span>
+              </div>
+            )}
+            {details?.endDate && (
+              <div className="flex items-center justify-between">
+                <span>Expira em</span>
+                <span className="font-semibold text-gray-700">{formatDateTime(details.endDate)}</span>
+              </div>
+            )}
+          </div>
+        ) : null}
         <p className="mt-3 text-[10px] text-gray-400">Toque para fechar.</p>
       </div>
     </details>
