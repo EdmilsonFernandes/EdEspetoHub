@@ -92,7 +92,7 @@ export function LandingPage() {
             <span className="animate-bounce inline-flex items-center px-3 py-1 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs font-bold rounded-full uppercase tracking-wide border border-red-100 dark:border-red-800">
               🔥 Plataforma multi-loja
             </span>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black text-gray-900 dark:text-white leading-tight">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-[56px] font-semibold text-gray-900 dark:text-white leading-tight tracking-tight">
               Crie sites de pedidos de
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-red-600">
                 {' '}
@@ -100,7 +100,7 @@ export function LandingPage() {
               </span>
               personalizados
             </h1>
-            <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 leading-relaxed max-w-3xl mx-auto">
+            <p className="text-base sm:text-lg text-gray-600 dark:text-gray-300 leading-relaxed max-w-3xl mx-auto">
               Configure a identidade visual do seu espeto e publique um link exclusivo para seus clientes fazerem
               pedidos online.
             </p>
