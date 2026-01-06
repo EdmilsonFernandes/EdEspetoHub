@@ -238,6 +238,20 @@ ngrok cria um túnel público temporário para seu servidor local. Isso permite 
 
 ## Execução local (sem Docker)
 
+### Fluxo rápido (local)
+
+```bash
+cp backend/.env.example backend/.env
+docker start chamanoespeto-postgres
+cd backend && npm run dev
+```
+
+Para o front:
+
+```bash
+cd frontend && npm run dev
+```
+
 ### 1. Banco de dados
 
 1. Crie um banco chamado `espetinho` e aplique o schema inicial (opcional, a API também cria tabelas on-demand):
