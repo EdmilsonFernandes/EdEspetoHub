@@ -262,15 +262,15 @@ export const GrillQueue = () => {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-gray-700 font-semibold">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap items-center gap-2 text-gray-700 font-semibold">
           <ChefHat className="text-brand-primary" />
           Fila do Churrasqueiro
           <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-bold bg-brand-primary text-white">
             {sortedQueue.length}
           </span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={handleToggleSound}
             className="flex items-center gap-2 text-sm px-3 py-2 rounded-lg bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
@@ -358,7 +358,7 @@ export const GrillQueue = () => {
                   key={item.id}
                   className="flex justify-between text-sm text-gray-700 items-center gap-3"
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <button
                       onClick={() => handleQuantityChange(order.id, item.id, -1)}
                       className="p-1 rounded-full bg-gray-100 hover:bg-gray-200"
@@ -377,7 +377,7 @@ export const GrillQueue = () => {
                       <Plus size={14} />
                     </button>
 
-                    <span>{item.name}</span>
+                    <span className="break-words">{item.name}</span>
                   </div>
 
                   <span className="font-semibold">
@@ -418,12 +418,12 @@ export const GrillQueue = () => {
             {renderTimeline(order.status)}
 
             {/* TOTAL + BOTÕES */}
-            <div className="flex justify-between items-center mt-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mt-4">
               <div className="text-gray-800 font-black">
                 {formatCurrency(order.total || 0)}
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {order.status === "pending" && (
                   <button
                     onClick={() => handleAdvance(order.id, "preparing")}
@@ -446,11 +446,11 @@ export const GrillQueue = () => {
           </div>
         ))}
 
-            {sortedQueue.length === 0 && !loading && (
-              <div className="col-span-3 text-center text-gray-500 py-12 bg-white rounded-xl border border-dashed">
-                Nenhum pedido aguardando.
-              </div>
-            )}
+        {sortedQueue.length === 0 && !loading && (
+          <div className="col-span-full text-center text-gray-500 py-12 bg-white rounded-xl border border-dashed">
+            Nenhum pedido aguardando.
+          </div>
+        )}
       </div>
 
       {error && (
