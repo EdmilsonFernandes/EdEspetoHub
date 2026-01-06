@@ -198,6 +198,7 @@ O proxy deve encaminhar:
 - `/` -> `http://127.0.0.1:8080`
 - `/api/` -> `http://127.0.0.1:4000/api/`
 - `/uploads/` -> `http://127.0.0.1:4000/uploads/`
+Inclua `client_max_body_size 20m` para permitir upload de logo.
 
 Depois de copiar o arquivo para `/etc/nginx/conf.d/`, valide e reinicie:
 
@@ -211,6 +212,12 @@ Para HTTPS, execute o certbot:
 ```bash
 sudo certbot --nginx -d chamanoespeto.com.br -d www.chamanoespeto.com.br
 ```
+
+### Mercado Pago (producao)
+
+- `MP_ACCESS_TOKEN`, `MP_PUBLIC_KEY`, `MP_WEBHOOK_SECRET` e `MP_WEBHOOK_URL` devem estar em `backend/.env.docker`.
+- Webhook exige HTTPS valido e rota `https://www.chamanoespeto.com.br/api/webhooks/mercadopago`.
+- Se pagamentos ficarem pendentes, verifique logs da API e o webhook no painel do MP.
 
 Suba usando o arquivo de ambiente de produção:
 

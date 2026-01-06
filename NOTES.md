@@ -54,6 +54,7 @@
 - Mercado Pago exige chave PIX cadastrada (em teste pode bloquear).
 - Admin login bloqueado se pagamento pendente.
 - Email real depende de SMTP valido (Gmail com senha de app).
+- Pagamento aprovado atualiza status via webhook Mercado Pago; sem HTTPS nao chega.
 
 ## DNS / Dominio (Registro.br)
 - Ativar modo avancado em "Configurar enderecamento" -> "Modo avancado".
@@ -62,3 +63,22 @@
   - A @ -> Elastic IP
   - A www -> Elastic IP (ou CNAME www -> @)
 - Propagacao pode levar minutos ate horas.
+
+## Deploy EC2 (resumo tecnico)
+- Nginx como reverse proxy para HTTPS.
+  - `/` -> `http://127.0.0.1:8080`
+  - `/api/` -> `http://127.0.0.1:4000/api/`
+  - `/uploads/` -> `http://127.0.0.1:4000/uploads/`
+- Nginx precisa de `client_max_body_size 20m` para upload de logo.
+- Certbot configurado para `chamanoespeto.com.br` e `www.chamanoespeto.com.br`.
+- Docker Compose usa `.env.prod` com `FRONTEND_PORT=8080` (front fica atras do Nginx).
+- Arquivo de exemplo do Nginx: `docs/nginx/chamanoespeto.conf`.
+
+## Mercado Pago (producao)
+- Variaveis obrigatorias no `backend/.env.docker`:
+  - `MP_ACCESS_TOKEN`
+  - `MP_PUBLIC_KEY`
+  - `MP_WEBHOOK_SECRET`
+  - `MP_WEBHOOK_URL=https://www.chamanoespeto.com.br/api/webhooks/mercadopago`
+- Webhook exige HTTPS valido.
+- Painel MP: eventos de Pagamentos ativados.
