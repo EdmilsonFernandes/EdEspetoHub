@@ -21,80 +21,42 @@ Requisitos mínimos para desenvolvimento local:
 
 - Node.js 18+ e npm/yarn
 - PostgreSQL 16+ (local) ou Docker
-- Docker + Docker Compose (para execução conteinerizada)
+- Docker + Docker Compose (opcional, recomendado)
 
-## Passo a passo para um novo dev (local, sem Docker Compose)
-
-1) **Clonar e instalar dependências**
+## Rodar local com Docker Compose (recomendado)
 
 ```bash
-git clone <repo>
-cd EdEspetoHub
+cp backend/.env.docker.example backend/.env.docker
+docker compose up --build
+```
+
+Serviços locais:
+- Front-end: `http://localhost:8080`
+- API: `http://localhost:4000` (Swagger em `/api/docs`)
+
+## Rodar local sem Docker
+
+1) **Instalar dependências**
+
+```bash
 cd backend && npm install
 cd ../frontend && npm install
 ```
 
-2) **Subir o PostgreSQL local** (ou use seu próprio)
+2) **Banco local**
 
 ```bash
 createdb espetinho
 psql -h localhost -U postgres -d espetinho -f backend/schema.sql
 ```
 
-Se preferir Docker só para o banco:
-
-```bash
-docker run --name espetinho-db -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=espetinho -p 5432:5432 -d postgres:16
-docker exec -i espetinho-db psql -U postgres -d espetinho < backend/schema.sql
-```
-
-3) **Configurar variáveis de ambiente da API**
-
-As variáveis lidas são `PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD`, `PGDATABASE`, `PORT`, `JWT_SECRET`.
-Para super admin: `SUPER_ADMIN_EMAIL`, `SUPER_ADMIN_PASSWORD`.
-Para Mercado Pago: `MP_ACCESS_TOKEN`, `MP_PUBLIC_KEY`, `MP_WEBHOOK_URL` (opcional `MP_API_BASE_URL`).
-Webhook seguro (opcional): `MP_WEBHOOK_SECRET`.
-Debug MP: `MP_DEBUG=true` para logs das chamadas.
-Para e-mails: `APP_BASE_URL`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_SECURE`, `EMAIL_FROM`.
-
-Crie `backend/.env` para uso local (host `localhost`):
+3) **Configurar envs**
 
 ```bash
 cp backend/.env.example backend/.env
 ```
-Exemplo (no terminal):
 
-```bash
-export PGHOST=localhost
-export PGPORT=5432
-export PGUSER=postgres
-export PGPASSWORD=postgres
-export PGDATABASE=espetinho
-export PORT=4000
-export JWT_SECRET=super-secret-token
-export SUPER_ADMIN_EMAIL=superadmin@local.com
-export SUPER_ADMIN_PASSWORD=super123
-export MP_ACCESS_TOKEN=...
-export MP_PUBLIC_KEY=...
-export MP_WEBHOOK_URL=http://localhost:4000/api/webhooks/mercadopago
-export MP_WEBHOOK_SECRET=...
-export APP_BASE_URL=http://localhost:3000
-export SMTP_HOST=smtp.seu-provedor.com
-export SMTP_PORT=587
-export SMTP_USER=usuario
-export SMTP_PASS=senha
-export SMTP_SECURE=false
-export EMAIL_FROM="Chama no Espeto <no-reply@chamanoespeto.com>"
-```
-
-4) **Subir a API**
-
-```bash
-cd backend
-npm run dev
-```
-
-5) **Configurar o front**
+Edite `backend/.env` e ajuste `PG*`, `PORT` e `JWT_SECRET`.
 
 Crie `frontend/.env`:
 
@@ -102,162 +64,21 @@ Crie `frontend/.env`:
 VITE_API_BASE_URL=http://localhost:4000/api
 ```
 
-6) **Subir o front**
+4) **Subir**
 
 ```bash
-cd frontend
-npm run dev
+cd backend && npm run dev
+cd ../frontend && npm run dev
 ```
 
-7) **Acessar**
+Serviços locais:
+- Front-end: `http://localhost:3000`
+- API: `http://localhost:4000`
 
-- Vitrine: `http://localhost:3000/<slug>`
-- Admin: `http://localhost:3000/admin`
-- Pedidos: `http://localhost:3000/admin/orders`
-- Fila: `http://localhost:3000/admin/queue`
-
-## Criar loja/admin e obter planId (primeiro acesso)
-
-1) **Listar planos (gera seed automaticamente)**
+## Criar primeira loja (seed de planos)
 
 ```bash
 curl http://localhost:4000/api/plans
-```
-
-2) **Registrar loja e admin**
-
-```bash
-curl -X POST http://localhost:4000/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "fullName": "Admin Local",
-    "email": "admin@local.com",
-    "password": "admin123",
-    "storeName": "Espetinho do Teste",
-    "primaryColor": "#b91c1c",
-    "secondaryColor": "#111827",
-    "paymentMethod": "PIX",
-    "planId": "<PLAN_ID>"
-  }'
-```
-
-3) **Login admin (slug + senha)**
-
-```bash
-curl -X POST http://localhost:4000/api/auth/admin-login \
-  -H "Content-Type: application/json" \
-  -d '{
-    "slug": "espetinho-do-teste",
-    "password": "admin123"
-  }'
-```
-
-Depois disso, acesse o painel em `http://localhost:3000/admin`.
-
-## Super Admin (visao da plataforma)
-
-1) **Configurar credenciais**
-
-Use as envs `SUPER_ADMIN_EMAIL` e `SUPER_ADMIN_PASSWORD` na API.
-
-2) **Login**
-
-```bash
-curl -X POST http://localhost:4000/api/auth/super-login \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "superadmin@local.com",
-    "password": "super123"
-  }'
-```
-
-3) **Tela**
-
-Acesse: `http://localhost:3000/superadmin`
-
-## Subir em EC2 (Docker Compose pré-configurado)
-
-O `docker-compose.yml` usa `FRONTEND_PORT` para decidir a porta pública do front.
-O valor padrão é `8080` via `.env` no repositório, mantendo o uso local.
-
-No servidor EC2, crie/ajuste um arquivo `.env.prod` com a porta 8080
-(use `.env.prod.example` como base). Essa porta e usada pelo container do front;
-o acesso publico deve ficar no Nginx (80/443):
-
-```bash
-FRONTEND_PORT=8080
-```
-
-Tambem e necessario criar o arquivo `backend/.env.docker` (use `backend/.env.docker.example`
-como base) com as credenciais e segredos da API.
-
-### Nginx (reverse proxy)
-
-Use o template em `docs/nginx/chamanoespeto.conf` e ajuste o `server_name` se necessario.
-O proxy deve encaminhar:
-- `/` -> `http://127.0.0.1:8080`
-- `/api/` -> `http://127.0.0.1:4000/api/`
-- `/uploads/` -> `http://127.0.0.1:4000/uploads/`
-Inclua `client_max_body_size 20m` para permitir upload de logo.
-
-Depois de copiar o arquivo para `/etc/nginx/conf.d/`, valide e reinicie:
-
-```bash
-sudo nginx -t
-sudo systemctl restart nginx
-```
-
-Para HTTPS, execute o certbot:
-
-```bash
-sudo certbot --nginx -d chamanoespeto.com.br -d www.chamanoespeto.com.br
-```
-
-### Mercado Pago (producao)
-
-- `MP_ACCESS_TOKEN`, `MP_PUBLIC_KEY`, `MP_WEBHOOK_SECRET` e `MP_WEBHOOK_URL` devem estar em `backend/.env.docker`.
-- Webhook exige HTTPS valido e rota `https://www.chamanoespeto.com.br/api/webhooks/mercadopago`.
-- Se pagamentos ficarem pendentes, verifique logs da API e o webhook no painel do MP.
-
-Suba usando o arquivo de ambiente de produção:
-
-```bash
-docker compose --env-file .env.prod up --build -d
-```
-
-Serviços esperados (via Nginx):
-- Front-end: `http://<EC2-IP>` (porta 80)
-- API: `http://<EC2-IP>/api` (Swagger em `/api/docs`)
-- pgAdmin (opcional): `http://<EC2-IP>:5050`
-
-Em produção, ajuste senhas/segredos e restrinja portas no Security Group.
-Checklist de portas no Security Group:
-- 22 (SSH)
-- 80 (HTTP via Nginx)
-- 443 (HTTPS via Nginx)
-- 5050 (pgAdmin, opcional)
-- 5432 (Postgres) **não** expor publicamente
-- 4000 (API) manter fechado se estiver atrás do Nginx
-
-## Webhook Mercado Pago com ngrok (teste local)
-
-1) Suba a API localmente na porta 4000.
-2) Em outro terminal:
-
-```bash
-ngrok http 4000
-```
-
-3) Copie a URL pública gerada (ex.: `https://abcd1234.ngrok-free.app`).
-4) Configure no painel do Mercado Pago:
-   - URL de webhook: `https://abcd1234.ngrok-free.app/api/webhooks/mercadopago`
-   - Eventos: **Pagamentos**
-   - Se habilitar "Assinatura secreta", copie para `MP_WEBHOOK_SECRET`
-5) Exporte a env local:
-
-```bash
-export MP_WEBHOOK_URL=https://abcd1234.ngrok-free.app/api/webhooks/mercadopago
-export MP_WEBHOOK_SECRET=...
 ```
 
 Se configurar assinatura secreta no painel, defina `MP_WEBHOOK_SECRET` na API.
