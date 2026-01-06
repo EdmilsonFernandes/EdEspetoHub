@@ -42,6 +42,10 @@ export function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-20">
             <div className="flex items-center gap-3">
+              <div className="relative h-16 w-16 overflow-hidden rounded-2xl border border-white/80 bg-white shadow-lg ring-2 ring-red-200/60">
+                <img src="/chama-no-espeto.jpeg" alt="Chama no Espeto" className="h-full w-full object-cover" />
+                <div className="absolute inset-0 ring-1 ring-white/70 rounded-2xl" />
+              </div>
               <div className="hidden sm:block">
                 <p className="text-2xl font-black text-gray-900 dark:text-white">Chama no Espeto</p>
               </div>
