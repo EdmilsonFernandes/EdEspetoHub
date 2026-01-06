@@ -175,7 +175,8 @@ Acesse: `http://localhost:3000/superadmin`
 O `docker-compose.yml` usa `FRONTEND_PORT` para decidir a porta pública do front.
 O valor padrão é `8080` via `.env` no repositório, mantendo o uso local.
 
-No servidor EC2, crie/ajuste um arquivo `.env.prod` com a porta 80:
+No servidor EC2, crie/ajuste um arquivo `.env.prod` com a porta 80
+(use `.env.prod.example` como base):
 
 ```bash
 FRONTEND_PORT=80

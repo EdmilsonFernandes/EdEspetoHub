@@ -55,6 +55,7 @@ build/
 .env
 .env.*
 !.env.example
+!.env.prod.example
 
 # ========================
 # IDE / OS
