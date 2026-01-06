@@ -54,7 +54,7 @@ export function LandingPage() {
             <div className="flex items-center gap-2 sm:gap-3">
               <button
                 onClick={() => navigate('/create')}
-                className="px-4 py-2 text-sm rounded-lg bg-red-600 text-white font-semibold shadow-sm hover:bg-red-700 transition-colors"
+                className="px-4 py-2 text-sm rounded-lg bg-red-600 text-white font-semibold shadow-[0_10px_30px_-20px_rgba(220,38,38,0.8)] hover:bg-red-700 transition-colors"
               >
                 Criar loja
               </button>
@@ -67,7 +67,7 @@ export function LandingPage() {
               </button>
               <button
                 onClick={() => navigate('/admin')}
-                className="px-3 py-2 sm:px-4 text-sm rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition-all"
+                className="px-3 py-2 sm:px-4 text-sm rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all"
               >
                 <span className="hidden sm:inline">Admin</span>
                 <span className="sm:hidden">Admin</span>
