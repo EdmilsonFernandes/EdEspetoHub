@@ -35,6 +35,22 @@ const normalizeOrder = (order: any) => ({
   })),
 });
 
+const handleSessionError = (error: any) => {
+  const message = (error?.message || '').toString();
+  if (!message) return;
+  if (
+    message.includes('Token') ||
+    message.includes('Sessão') ||
+    message.includes('Loja não encontrada') ||
+    message.includes('Sem permissão')
+  ) {
+    localStorage.removeItem('adminSession');
+    if (typeof window !== 'undefined') {
+      window.location.href = '/admin';
+    }
+  }
+};
+
 // 🔐 recupera store da sessão
 const getStoreIdentifierFromSession = (): string | null =>
 {
@@ -85,8 +101,13 @@ export const orderService = {
       return Promise.reject(new Error("Sessão inválida"));
     }
 
-    const data = await apiClient.get(buildOrdersPath(targetStore));
-    return data.map(normalizeOrder);
+    try {
+      const data = await apiClient.get(buildOrdersPath(targetStore));
+      return data.map(normalizeOrder);
+    } catch (error) {
+      handleSessionError(error);
+      throw error;
+    }
   },
 
   async fetchQueue(storeId?: string)
@@ -97,8 +118,13 @@ export const orderService = {
       return Promise.reject(new Error("Sessão inválida"));
     }
 
-    const data = await apiClient.get(buildOrdersPath(targetStore));
-    return data.map(normalizeOrder);
+    try {
+      const data = await apiClient.get(buildOrdersPath(targetStore));
+      return data.map(normalizeOrder);
+    } catch (error) {
+      handleSessionError(error);
+      throw error;
+    }
   },
 
   subscribeAll(storeId: string | undefined, callback: any)
@@ -120,6 +146,7 @@ export const orderService = {
         if (!cancelled) callback(data.map(normalizeOrder));
       } catch (error)
       {
+        handleSessionError(error);
         console.error("Erro ao carregar pedidos", error);
       }
     };
@@ -147,8 +174,13 @@ export const orderService = {
 
     const load = async () =>
     {
-      const data = await apiClient.get(buildOrdersPath(targetStore));
-      if (!cancelled) callback(data.map(normalizeOrder));
+      try {
+        const data = await apiClient.get(buildOrdersPath(targetStore));
+        if (!cancelled) callback(data.map(normalizeOrder));
+      } catch (error) {
+        handleSessionError(error);
+        console.error("Erro ao carregar pedidos", error);
+      }
     };
 
     load();

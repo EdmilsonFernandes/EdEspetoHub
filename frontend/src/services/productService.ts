@@ -17,6 +17,22 @@ const normalizeProduct = (product: any) => ({
   imageUrl: resolveAssetUrl(product.image_url ?? product.imageUrl ?? ""),
 });
 
+const handleSessionError = (error: any) => {
+  const message = (error?.message || '').toString();
+  if (!message) return;
+  if (
+    message.includes('Token') ||
+    message.includes('Sessão') ||
+    message.includes('Loja não encontrada') ||
+    message.includes('Sem permissão')
+  ) {
+    localStorage.removeItem('adminSession');
+    if (typeof window !== 'undefined') {
+      window.location.href = '/admin';
+    }
+  }
+};
+
 // 🔐 fonte única da loja (admin/churrasqueiro)
 const getStoreIdentifierFromSession = (): string | null =>
 {
@@ -79,8 +95,13 @@ export const productService = {
       return Promise.reject(new Error("Sessão inválida"));
     }
 
-    const data = await apiClient.get(buildProductsPath(targetStore));
-    return data.map(normalizeProduct);
+    try {
+      const data = await apiClient.get(buildProductsPath(targetStore));
+      return data.map(normalizeProduct);
+    } catch (error) {
+      handleSessionError(error);
+      throw error;
+    }
   },
 
   async listBySlug(slug: string)
@@ -119,6 +140,7 @@ export const productService = {
         }
       } catch (error)
       {
+        handleSessionError(error);
         console.error("Erro ao carregar produtos", error);
       }
     };
