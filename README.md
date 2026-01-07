@@ -118,6 +118,17 @@ sudo certbot --nginx -d chamanoespeto.com.br -d www.chamanoespeto.com.br
   - `MP_WEBHOOK_URL=https://www.chamanoespeto.com.br/api/webhooks/mercadopago`
 - O webhook exige HTTPS valido.
 
+6) SMTP (exemplo Zoho):
+
+```
+SMTP_HOST=smtp.zoho.com
+SMTP_PORT=587
+SMTP_USER=contato@chamanoespeto.com.br
+SMTP_PASS=<senha-ou-app-password>
+SMTP_SECURE=false
+EMAIL_FROM=Chama no Espeto <contato@chamanoespeto.com.br>
+```
+
 Se configurar assinatura secreta no painel, defina `MP_WEBHOOK_SECRET` na API.
 
 ### O que é ngrok (explicação rápida)
