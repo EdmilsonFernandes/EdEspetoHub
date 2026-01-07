@@ -95,6 +95,13 @@ FRONTEND_PORT=8080
 docker compose --env-file .env.prod up --build -d
 ```
 
+Opcional: use `.env.prod.secrets` para manter MP/SMTP fora do git. O script `scripts/compose-prod.sh`
+carrega esse arquivo e aplica no `backend/.env.docker` antes de subir:
+
+```bash
+cp .env.prod.secrets.example .env.prod.secrets
+```
+
 3) Nginx como reverse proxy:
 
 - Use `docs/nginx/chamanoespeto.conf`
