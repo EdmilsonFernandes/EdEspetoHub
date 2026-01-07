@@ -37,4 +37,8 @@ export async function runMigrations() {
   await AppDataSource.query(`
     CREATE INDEX IF NOT EXISTS idx_email_verifications_token ON email_verifications(token_hash);
   `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS subscriptions
+    ADD COLUMN IF NOT EXISTS payment_method TEXT DEFAULT 'PIX';
+  `);
 }

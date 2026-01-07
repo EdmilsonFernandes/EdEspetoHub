@@ -135,18 +135,11 @@ export class AuthService
         endDate: now,
         status: 'PENDING',
         autoRenew: false,
+        paymentMethod,
       });
       await subscriptionRepo.save(subscription);
 
-      const payment = await this.paymentService.createPayment(manager, {
-        user,
-        store,
-        subscription,
-        plan,
-        method: paymentMethod as PaymentMethod,
-      });
-
-      return { user, store, subscription, payment };
+      return { user, store, subscription };
     });
 
     await this.sendVerificationEmail(result.user);
@@ -167,15 +160,7 @@ export class AuthService
       storeStatus: result.store.open ? 'ACTIVE' : 'PENDING_PAYMENT',
       subscriptionStatus: result.subscription.status,
       trialExpiresAt: result.subscription.endDate,
-      payment: {
-        id: result.payment.id,
-        method: result.payment.method,
-        status: result.payment.status,
-        amount: Number(result.payment.amount),
-        qrCodeBase64: result.payment.qrCodeBase64,
-        paymentLink: result.payment.paymentLink,
-        expiresAt: result.payment.expiresAt,
-      },
+      payment: null,
       token,
       redirectUrl: `/verify-email`,
     };
@@ -364,7 +349,33 @@ export class AuthService
     });
 
     const store = await this.storeRepository.findByOwnerId(verification.user.id);
-    const latestPayment = store ? await this.paymentRepository.findLatestByStoreId(store.id) : null;
+    if (!store) {
+      return { message: 'E-mail verificado', redirectUrl: '/' };
+    }
+
+    const subscription = await AppDataSource.getRepository(Subscription).findOne({
+      where: { store: { id: store.id } },
+      relations: ['plan', 'store', 'user'],
+      order: { createdAt: 'DESC' } as any,
+    });
+
+    if (!subscription) {
+      return { message: 'E-mail verificado', redirectUrl: '/' };
+    }
+
+    let latestPayment = await this.paymentRepository.findLatestByStoreId(store.id);
+
+    if (!latestPayment) {
+      latestPayment = await AppDataSource.transaction(async (manager) => {
+        return this.paymentService.createPayment(manager, {
+          user: verification.user,
+          store,
+          subscription,
+          plan: subscription.plan,
+          method: (subscription.paymentMethod || 'PIX') as PaymentMethod,
+        });
+      });
+    }
 
     if (latestPayment?.id && latestPayment.status === 'PAID') {
       await this.paymentService.confirmPayment(latestPayment.id);

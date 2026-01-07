@@ -43,6 +43,9 @@ export class Subscription {
   @Column({ name: 'auto_renew', default: false })
   autoRenew!: boolean;
 
+  @Column({ name: 'payment_method', default: 'PIX' })
+  paymentMethod!: string;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 

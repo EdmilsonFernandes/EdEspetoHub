@@ -30,10 +30,9 @@ EOF
 )"
 
 REGISTER_RESPONSE="$(curl -s -X POST "$API_BASE/auth/register" -H "Content-Type: application/json" -d "$REGISTER_PAYLOAD")"
-PAYMENT_ID="$(printf '%s' "$REGISTER_RESPONSE" | jq -r '.payment.id')"
 STORE_SLUG="$(printf '%s' "$REGISTER_RESPONSE" | jq -r '.store.slug')"
 
-if [ -z "$PAYMENT_ID" ] || [ "$PAYMENT_ID" = "null" ]; then
+if [ -z "$STORE_SLUG" ] || [ "$STORE_SLUG" = "null" ]; then
   echo "Falha ao registrar usuario. Resposta: $REGISTER_RESPONSE" >&2
   exit 1
 fi
@@ -46,10 +45,14 @@ VERIFY_PAYLOAD="$(cat <<EOF
 { "token": "$VERIFY_TOKEN" }
 EOF
 )"
-curl -s -X POST "$API_BASE/auth/verify-email" -H "Content-Type: application/json" -d "$VERIFY_PAYLOAD" >/dev/null
+VERIFY_RESPONSE="$(curl -s -X POST "$API_BASE/auth/verify-email" -H "Content-Type: application/json" -d "$VERIFY_PAYLOAD")"
+REDIRECT_URL="$(printf '%s' "$VERIFY_RESPONSE" | jq -r '.redirectUrl')"
+PAYMENT_ID="$(printf '%s' "$REDIRECT_URL" | sed -n 's#.*/payment/##p')"
 
-echo "==> Pagamento criado: $PAYMENT_ID"
-echo "Acesse: $API_BASE/../payment/$PAYMENT_ID"
+if [ -n "$PAYMENT_ID" ]; then
+  echo "==> Pagamento criado: $PAYMENT_ID"
+  echo "Acesse: $API_BASE/../payment/$PAYMENT_ID"
+fi
 
 echo "==> Login admin"
 LOGIN_PAYLOAD="$(cat <<EOF

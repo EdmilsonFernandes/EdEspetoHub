@@ -86,7 +86,8 @@ curl http://localhost:4000/api/plans
 1) Front envia `POST /api/auth/register` com dados do usuario, loja, plano e metodo.
 2) API cria usuario (email nao verificado), gera slug unico, cria loja `open=false`.
 3) Envia e-mail de confirmacao e redireciona para `/verify-email`.
-4) Ao confirmar, o pagamento fica disponivel em `/payment/:id` e o e-mail de pagamento pendente e enviado.
+4) Ao confirmar, o pagamento e criado e fica disponivel em `/payment/:id`.
+5) E-mail de pagamento pendente e enviado com o link/QR.
 5) Quando o MP aprova, o webhook confirma o pagamento, ativa a assinatura e abre a loja.
 6) E-mail de ativacao e enviado com links do admin e da vitrine.
 
@@ -99,12 +100,13 @@ flowchart TD
   E --> F[Gerar pagamento MP]
   F --> G[Enviar email confirmacao]
   G --> H[Confirmar e-mail /verify-email]
-  H --> I[Enviar email pagamento pendente]
-  H --> J[Redirect /payment/:id]
-  K[Webhook MP aprovado] --> L[Confirmar pagamento]
-  L --> M[Assinatura ACTIVE + datas]
-  L --> N[Loja open=true]
-  L --> O[Enviar email de ativacao]
+  H --> I[Criar pagamento]
+  I --> J[Enviar email pagamento pendente]
+  I --> K[Redirect /payment/:id]
+  L[Webhook MP aprovado] --> M[Confirmar pagamento]
+  M --> N[Assinatura ACTIVE + datas]
+  M --> O[Loja open=true]
+  M --> P[Enviar email de ativacao]
 ```
 
 ## Deploy no EC2 (resumo rapido)
