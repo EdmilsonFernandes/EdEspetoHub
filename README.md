@@ -81,6 +81,15 @@ Serviços locais:
 curl http://localhost:4000/api/plans
 ```
 
+## Fluxo de criacao de conta (resumo)
+
+1) Front envia `POST /api/auth/register` com dados do usuario, loja, plano e metodo.
+2) API cria usuario, gera slug unico, cria loja `open=false`.
+3) Cria assinatura `PENDING` e gera pagamento no Mercado Pago.
+4) Responde com `redirectUrl` para `/payment/:id` e envia e-mail de pagamento pendente.
+5) Quando o MP aprova, o webhook confirma o pagamento, ativa a assinatura e abre a loja.
+6) E-mail de ativacao e enviado com links do admin e da vitrine.
+
 ## Deploy no EC2 (resumo rapido)
 
 1) Configurar `.env.prod` com a porta do front:
