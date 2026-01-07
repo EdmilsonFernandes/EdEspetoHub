@@ -29,22 +29,6 @@ export class PlanService {
       if (!planExists) {
         const plan = this.planRepository.create(seed as Plan);
         await this.planRepository.save(plan);
-      } else {
-        const shouldUpdate =
-          Number(planExists.price) !== seed.price ||
-          planExists.durationDays !== seed.durationDays ||
-          planExists.enabled !== seed.enabled ||
-          planExists.displayName !== seed.displayName;
-        if (shouldUpdate) {
-          await this.planRepository.save({ ...planExists, ...seed });
-        }
-      }
-    }
-
-    for (const legacy of LEGACY_PLANS) {
-      const legacyPlan = byName.get(legacy);
-      if (legacyPlan && legacyPlan.enabled) {
-        await this.planRepository.save({ ...legacyPlan, enabled: false });
       }
     }
 
