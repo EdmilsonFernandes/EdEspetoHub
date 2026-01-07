@@ -34,4 +34,10 @@ export const authService = {
         });
         return response;
     },
+    async resendVerification(email: string) {
+        const response = await apiClient.post("/auth/resend-verification", {
+            email,
+        });
+        return response;
+    },
 };

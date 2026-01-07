@@ -21,6 +21,7 @@ routes.post('/auth/super-login', AuthController.superAdminLogin);
 routes.post('/auth/forgot-password', AuthController.forgotPassword);
 routes.post('/auth/reset-password', AuthController.resetPassword);
 routes.post('/auth/verify-email', AuthController.verifyEmail);
+routes.post('/auth/resend-verification', AuthController.resendVerification);
 
 // Plans / payments
 routes.get('/plans', PlanController.list);

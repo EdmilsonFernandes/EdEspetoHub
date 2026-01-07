@@ -301,6 +301,22 @@ export class AuthService
     return { message: 'Se o e-mail existir, enviaremos instruções.' };
   }
 
+  async resendVerificationEmail(email: string) {
+    const normalizedEmail = email?.trim().toLowerCase();
+    if (!normalizedEmail) throw new Error('E-mail obrigatório');
+
+    const user = await this.userRepository.findByEmail(normalizedEmail);
+    if (!user) {
+      return { message: 'Se o e-mail existir, enviaremos instruções.' };
+    }
+    if (user.emailVerified) {
+      return { message: 'E-mail já verificado.' };
+    }
+
+    await this.sendVerificationEmail(user);
+    return { message: 'Se o e-mail existir, enviaremos instruções.' };
+  }
+
   async resetPassword(token: string, newPassword: string)
   {
     if (!token) throw new Error('Token inválido');
@@ -381,6 +397,13 @@ export class AuthService
     const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
     const verificationRepo = AppDataSource.getRepository(EmailVerification);
+
+    await verificationRepo
+      .createQueryBuilder()
+      .update()
+      .set({ usedAt: new Date() })
+      .where('user_id = :userId AND used_at IS NULL', { userId: user.id })
+      .execute();
 
     await verificationRepo.save(
       verificationRepo.create({

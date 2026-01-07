@@ -108,4 +108,17 @@ export class AuthController
       return res.status(400).json({ message: error.message });
     }
   }
+
+  static async resendVerification(req: Request, res: Response)
+  {
+    const { email } = req.body || {};
+    try
+    {
+      const result = await authService.resendVerificationEmail(email);
+      return res.json(result);
+    } catch (error: any)
+    {
+      return res.status(400).json({ message: error.message });
+    }
+  }
 }
