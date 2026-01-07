@@ -1,14 +1,14 @@
 // @ts-nocheck
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { authService } from '../services/authService';
 import { getPersistedBranding, defaultBranding } from '../constants';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { apiClient } from '../config/apiClient';
 
 export function AdminLogin() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { setAuth, auth, hydrated } = useAuth();
   const { setBranding } = useTheme();
   const [loginForm, setLoginForm] = useState({ slug: defaultBranding.espetoId, password: '' });
@@ -43,6 +43,13 @@ export function AdminLogin() {
       navigate('/admin/dashboard');
     }
   }, [auth?.token, auth?.user?.role, hydrated, navigate]);
+
+  useEffect(() => {
+    const slug = searchParams.get('slug');
+    if (slug) {
+      setLoginForm(prev => ({ ...prev, slug }));
+    }
+  }, [searchParams]);
 
   return (
     <div className="min-h-screen bg-brand-secondary-soft flex items-center justify-center p-4">

@@ -61,16 +61,16 @@ export function PaymentPage() {
   const storeSlug = payment?.storeSlug;
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
   const storeUrl = storeSlug ? `${baseUrl}/chamanoespeto/${storeSlug}` : '';
-  const adminUrl = `${baseUrl}/admin`;
+  const adminUrl = storeSlug ? `${baseUrl}/admin?slug=${encodeURIComponent(storeSlug)}` : `${baseUrl}/admin`;
 
   useEffect(() => {
     if (!isPaid || !isVerified || redirectRef.current) return;
     redirectRef.current = true;
     const timeout = window.setTimeout(() => {
-      navigate('/admin');
-    }, 2500);
+      navigate(storeSlug ? `/admin?slug=${encodeURIComponent(storeSlug)}` : '/admin');
+    }, 7000);
     return () => window.clearTimeout(timeout);
-  }, [isPaid, navigate]);
+  }, [isPaid, isVerified, navigate, storeSlug]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -170,8 +170,9 @@ export function PaymentPage() {
                     )}
                   </div>
                   <p className="text-xs text-emerald-800">
-                    Use o login e senha cadastrados para entrar no painel. Redirecionando...
+                    Use o login e senha cadastrados para entrar no painel. Seu slug ja vai preenchido no login.
                   </p>
+                  <p className="text-xs text-emerald-700">Redirecionando em alguns segundos...</p>
                 </div>
               )}
 

@@ -458,6 +458,7 @@ export class AuthService
   {
     const baseUrl = env.appUrl?.replace(/\/$/, '') || 'http://localhost:3000';
     const paymentUrl = `${baseUrl}/payment/${payment.id}`;
+    const logoUrl = `${baseUrl}/chama-no-espeto.jpeg`;
     const methodLabel =
       payment.method === 'PIX'
         ? 'PIX'
@@ -483,17 +484,24 @@ export class AuthService
           </div>`
         : '';
     const html = `
-      <div style="font-family: Arial, sans-serif; background: #f8fafc; padding: 24px;">
-        <div style="max-width: 520px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px;">
-          <h2 style="margin: 0 0 8px; color: #0f172a;">Pagamento pendente</h2>
-          <p style="margin: 0 0 12px; color: #475569;">Recebemos seu cadastro. Assim que o pagamento for confirmado, sua loja sera liberada.</p>
-          <p style="margin: 0 0 8px; color: #0f172a;"><strong>Forma:</strong> ${methodLabel}</p>
-          <p style="margin: 0 0 16px; color: #0f172a;">
-            <a href="${paymentUrl}" style="color: #dc2626; font-weight: 600; text-decoration: none;">Abrir pagina de pagamento</a>
-          </p>
-          ${payment.paymentLink ? `<p style="margin: 0 0 16px; color: #0f172a;"><a href="${payment.paymentLink}" style="color: #dc2626; font-weight: 600; text-decoration: none;">Abrir link do provedor</a></p>` : ''}
-          ${payment.method === 'BOLETO' ? '<p style="margin: 0; color: #64748b; font-size: 12px;">Boletos podem levar ate 3 dias uteis para compensar.</p>' : ''}
-          ${qrBlock}
+      <div style="font-family: Arial, sans-serif; background: #f1f5f9; padding: 32px;">
+        <div style="max-width: 540px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 18px; overflow: hidden;">
+          <div style="padding: 24px; background: linear-gradient(135deg, #dc2626 0%, #f97316 100%);">
+            <img src="${logoUrl}" alt="Chama no Espeto" style="width: 96px; height: 96px; border-radius: 16px; border: 2px solid rgba(255,255,255,0.5);" />
+            <p style="margin: 12px 0 0; color: #ffffff; font-size: 18px; font-weight: 700;">Pagamento pendente</p>
+            <p style="margin: 4px 0 0; color: rgba(255,255,255,0.9); font-size: 13px;">Finalize para liberar sua loja</p>
+          </div>
+          <div style="padding: 24px;">
+            <p style="margin: 0 0 16px; color: #475569;">Recebemos seu cadastro. Assim que o pagamento for confirmado, sua loja sera liberada automaticamente.</p>
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px; margin-bottom: 16px;">
+              <p style="margin: 0 0 6px; color: #0f172a; font-size: 14px;"><strong>Forma:</strong> ${methodLabel}</p>
+              <p style="margin: 0; color: #0f172a; font-size: 14px;"><strong>Valor:</strong> R$ ${Number(payment.amount || 0).toFixed(2)}</p>
+            </div>
+            <a href="${paymentUrl}" style="display: inline-block; padding: 12px 18px; background: #dc2626; color: #ffffff; text-decoration: none; border-radius: 10px; font-weight: 700;">Acessar pagina de pagamento</a>
+            ${payment.paymentLink ? `<p style="margin: 14px 0 0; color: #0f172a;"><a href="${payment.paymentLink}" style="color: #dc2626; font-weight: 600; text-decoration: none;">Abrir link do provedor</a></p>` : ''}
+            ${payment.method === 'BOLETO' ? '<p style="margin: 16px 0 0; color: #64748b; font-size: 12px;">Boletos podem levar ate 3 dias uteis para compensar.</p>' : ''}
+            ${qrBlock}
+          </div>
         </div>
       </div>
     `;
