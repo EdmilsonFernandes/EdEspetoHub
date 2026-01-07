@@ -38,6 +38,9 @@
   - `reminder_stage` evita envio duplicado.
   - Renovacao no admin com escolha de plano e pagamento.
   - Admin expirada cai em `/admin/renewal`.
+- SEO:
+  - Meta tags dinamicas por loja (OG/Twitter + favicon do cliente).
+  - `sitemap.xml` e `robots.txt` com sitemap.
 - Pagamento:
   - Linha do tempo do usuario mostra apenas status + data.
   - Admin login sem valores predefinidos.

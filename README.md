@@ -99,6 +99,10 @@ Assinaturas:
 - Job diario marca expiracao e envia avisos em D-3, D-1 e D-0.
 - Renovacao ocorre pelo painel `/admin/renewal` com escolha de plano.
 
+SEO basico:
+- `robots.txt` aponta para o sitemap.
+- `sitemap.xml` com rotas publicas basicas (home, create, terms).
+
 ```mermaid
 flowchart TD
   A[Cadastro /api/auth/register] --> B[Criar usuario]
