@@ -159,6 +159,7 @@ export class SubscriptionService {
     const now = new Date();
     return (
       new Date(subscription.endDate).getTime() >= now.getTime() &&
+      subscription.status !== 'PENDING' &&
       subscription.status !== 'EXPIRED' &&
       subscription.status !== 'CANCELLED'
     );

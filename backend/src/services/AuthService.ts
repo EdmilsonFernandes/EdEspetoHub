@@ -114,7 +114,7 @@ export class AuthService
         slug,
         owner: user,
         settings,
-        open: true,
+        open: false,
       });
       await storeRepo.save(store);
 
@@ -125,14 +125,12 @@ export class AuthService
       }
 
       const now = new Date();
-      const trialEnd = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-
       const subscription = subscriptionRepo.create({
         store,
         plan,
         startDate: now,
-        endDate: trialEnd,
-        status: 'ACTIVE',
+        endDate: now,
+        status: 'PENDING',
         autoRenew: false,
       });
       await subscriptionRepo.save(subscription);
@@ -163,7 +161,7 @@ export class AuthService
         id: result.store.id,
         slug: result.store.slug,
       },
-      storeStatus: 'ACTIVE',
+      storeStatus: result.store.open ? 'ACTIVE' : 'PENDING_PAYMENT',
       subscriptionStatus: result.subscription.status,
       trialExpiresAt: result.subscription.endDate,
       payment: {
@@ -339,19 +337,48 @@ export class AuthService
 
   private sendPaymentEmail(email: string, payment: any)
   {
-    console.log(
-      '📧 Mock payment e-mail',
-      JSON.stringify(
-        {
-          email,
-          paymentId: payment.id,
-          status: payment.status,
-          qrCodeBase64: payment.qrCodeBase64,
-        },
-        null,
-        2
-      )
-    );
+    const baseUrl = env.appUrl?.replace(/\/$/, '') || 'http://localhost:3000';
+    const paymentUrl = `${baseUrl}/payment/${payment.id}`;
+    const methodLabel =
+      payment.method === 'PIX'
+        ? 'PIX'
+        : payment.method === 'BOLETO'
+        ? 'Boleto'
+        : 'Cartao de credito';
+    const subject = 'Pagamento pendente - Chama no Espeto';
+    const text = [
+      'Recebemos seu cadastro e o pagamento esta pendente.',
+      `Forma: ${methodLabel}`,
+      `Acesse o pagamento: ${paymentUrl}`,
+      payment.paymentLink ? `Link do provedor: ${payment.paymentLink}` : '',
+      payment.method === 'BOLETO'
+        ? 'Boletos podem levar ate 3 dias uteis para compensar.'
+        : 'A aprovacao costuma ser imediata.',
+    ]
+      .filter(Boolean)
+      .join('\n');
+    const qrBlock =
+      payment.method === 'PIX' && payment.qrCodeBase64
+        ? `<div style="margin-top: 16px; text-align: center;">
+            <img src="${payment.qrCodeBase64}" alt="QR Code PIX" style="width: 220px; height: 220px;" />
+          </div>`
+        : '';
+    const html = `
+      <div style="font-family: Arial, sans-serif; background: #f8fafc; padding: 24px;">
+        <div style="max-width: 520px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px;">
+          <h2 style="margin: 0 0 8px; color: #0f172a;">Pagamento pendente</h2>
+          <p style="margin: 0 0 12px; color: #475569;">Recebemos seu cadastro. Assim que o pagamento for confirmado, sua loja sera liberada.</p>
+          <p style="margin: 0 0 8px; color: #0f172a;"><strong>Forma:</strong> ${methodLabel}</p>
+          <p style="margin: 0 0 16px; color: #0f172a;">
+            <a href="${paymentUrl}" style="color: #dc2626; font-weight: 600; text-decoration: none;">Abrir pagina de pagamento</a>
+          </p>
+          ${payment.paymentLink ? `<p style="margin: 0 0 16px; color: #0f172a;"><a href="${payment.paymentLink}" style="color: #dc2626; font-weight: 600; text-decoration: none;">Abrir link do provedor</a></p>` : ''}
+          ${payment.method === 'BOLETO' ? '<p style="margin: 0; color: #64748b; font-size: 12px;">Boletos podem levar ate 3 dias uteis para compensar.</p>' : ''}
+          ${qrBlock}
+        </div>
+      </div>
+    `;
+    this.emailService.send({ to: email, subject, text, html });
   }
 
   private async generateUniqueSlug(name: string)
