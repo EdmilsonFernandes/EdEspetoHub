@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Package, DollarSign } from "lucide-react";
 import {
   BarChart,
@@ -21,8 +21,17 @@ const COLORS = ["var(--color-primary)", "var(--color-secondary)", "#10b981", "#3
 
 export const DashboardView = ({ orders = [], customers = [] }) => {
   const [periodDays, setPeriodDays] = useState("30");
+  const nowDate = new Date();
+  const currentMonthKey = `${nowDate.getFullYear()}-${String(nowDate.getMonth() + 1).padStart(2, "0")}`;
+  const [selectedMonth, setSelectedMonth] = useState(currentMonthKey);
   const periodLabel = periodDays === "all" ? "Todo período" : `${periodDays} dias`;
-  const monthLabel = new Date().toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
+
+  const formatMonthLabel = (key) => {
+    if (!key) return "";
+    const date = new Date(`${key}-01T00:00:00`);
+    if (Number.isNaN(date.getTime())) return key;
+    return date.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
+  };
 
   const resolveDateKey = (order) => {
     const raw = order.createdAt || order.created_at;
@@ -53,6 +62,28 @@ export const DashboardView = ({ orders = [], customers = [] }) => {
     return Number.isFinite(time) ? time : null;
   };
 
+  const availableMonths = useMemo(() => {
+    const set = new Set();
+    orders.forEach((order) => {
+      const ts = resolveTimestamp(order);
+      if (!ts) return;
+      const key = new Date(ts).toISOString().slice(0, 7);
+      set.add(key);
+    });
+    const sorted = Array.from(set).sort((a, b) => (a > b ? -1 : 1));
+    if (!sorted.includes(currentMonthKey)) {
+      sorted.unshift(currentMonthKey);
+    }
+    return sorted;
+  }, [orders, currentMonthKey]);
+
+  useEffect(() => {
+    if (availableMonths.length === 0) return;
+    if (!availableMonths.includes(selectedMonth)) {
+      setSelectedMonth(availableMonths[0]);
+    }
+  }, [availableMonths, selectedMonth]);
+
   const resolveOrderTotal = (order) => {
     if (typeof order.total === "number") return order.total;
     if (order.total && !Number.isNaN(Number(order.total))) return Number(order.total);
@@ -67,8 +98,7 @@ export const DashboardView = ({ orders = [], customers = [] }) => {
     const now = Date.now();
     const rangeDays = periodDays === "all" ? null : Number(periodDays);
     const startPeriod = rangeDays ? now - rangeDays * 24 * 60 * 60 * 1000 : null;
-    const nowDate = new Date();
-    const monthKey = `${nowDate.getFullYear()}-${String(nowDate.getMonth() + 1).padStart(2, "0")}`;
+    const monthKey = selectedMonth || currentMonthKey;
 
     const ordersWithDate = orders
       .map((order) => ({ order, ts: resolveTimestamp(order) }))
@@ -115,7 +145,7 @@ export const DashboardView = ({ orders = [], customers = [] }) => {
 
     const avgTicket = totalOrders > 0 ? totalSales / totalOrders : 0;
     return { totalSales, totalOrders, topProducts, chartData, periodRevenue, monthRevenue, avgTicket };
-  }, [orders, periodDays]);
+  }, [orders, periodDays, selectedMonth, currentMonthKey]);
 
   const exportCustomers = () => {
     const headers = [
@@ -163,7 +193,20 @@ export const DashboardView = ({ orders = [], customers = [] }) => {
               <h3 className="text-3xl font-black text-brand-primary">
                 {formatCurrency(stats.monthRevenue)}
               </h3>
-              <p className="text-xs text-gray-500 mt-1">Mês: {monthLabel}</p>
+              <div className="mt-2">
+                <label className="text-[10px] uppercase tracking-wide text-gray-400">Mês selecionado</label>
+                <select
+                  value={selectedMonth}
+                  onChange={(e) => setSelectedMonth(e.target.value)}
+                  className="mt-1 w-full text-xs border border-gray-200 rounded-md px-2 py-1 text-gray-600 bg-white"
+                >
+                  {availableMonths.map((monthKey) => (
+                    <option key={monthKey} value={monthKey}>
+                      {formatMonthLabel(monthKey)}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
             <div className="p-3 bg-brand-primary-soft rounded-lg text-brand-primary">
               <DollarSign />
