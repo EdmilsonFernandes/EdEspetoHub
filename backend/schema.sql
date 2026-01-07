@@ -87,6 +87,7 @@ CREATE INDEX IF NOT EXISTS idx_order_items_order ON order_items(order_id);
 CREATE TABLE IF NOT EXISTS plans (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL UNIQUE,
+  display_name TEXT,
   price NUMERIC(10,2) NOT NULL,
   duration_days INTEGER NOT NULL,
   enabled BOOLEAN NOT NULL DEFAULT TRUE,

@@ -31,6 +31,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja' }: Props) {
         const subscription = await subscriptionService.getByStore(storeId);
         setPlanDetails({
           planName: subscription?.plan?.name || '',
+          displayName: subscription?.plan?.displayName || '',
           startDate: subscription?.startDate || null,
           endDate: subscription?.endDate || null,
           latestPaymentAt: subscription?.latestPaymentAt || null,
@@ -79,7 +80,12 @@ export function AdminHeader({ contextLabel = 'Painel da Loja' }: Props) {
         </div>
       </div>
       <div className="flex flex-wrap items-center gap-2">
-        <PlanBadge planName={planDetails?.planName} variant="dark" details={planDetails} />
+        <PlanBadge
+          planName={planDetails?.planName}
+          displayName={planDetails?.displayName}
+          variant="dark"
+          details={planDetails}
+        />
         <button
           onClick={() => navigate('/admin/dashboard')}
           className="px-3 py-2 rounded-lg text-xs font-semibold bg-white/20 hover:bg-white/30 transition flex items-center gap-1"

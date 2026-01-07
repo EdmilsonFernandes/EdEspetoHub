@@ -539,7 +539,9 @@ export function SuperAdmin() {
             </thead>
             <tbody className="divide-y">
               {stores.map((store: any) => {
-                const planName = formatPlanName(store.subscription?.plan?.name || '-');
+                const planName =
+                  store.subscription?.plan?.displayName ||
+                  formatPlanName(store.subscription?.plan?.name || '-');
                 const planPrice = store.subscription?.plan?.price || 0;
                 const status = store.subscription?.status || 'PENDING';
                 const endDate = store.subscription?.endDate;

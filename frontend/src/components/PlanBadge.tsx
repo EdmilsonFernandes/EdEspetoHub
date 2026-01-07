@@ -43,7 +43,7 @@ const resolvePlanDetails = (planName = '') => {
   };
 };
 
-export const PlanBadge = ({ planName, variant = 'light', details }) => {
+export const PlanBadge = ({ planName, displayName, variant = 'light', details }) => {
   const planDetails = resolvePlanDetails(planName);
   const styleKey = planDetails?.tierKey || 'basic';
   const style = PLAN_STYLES[styleKey];
@@ -52,6 +52,7 @@ export const PlanBadge = ({ planName, variant = 'light', details }) => {
     variant === 'dark'
       ? 'bg-white/15 text-white ring-white/25 shadow-black/20'
       : `bg-gradient-to-r ${style.badge}`;
+  const titleLabel = displayName || planDetails?.tier?.label || 'Plano não definido';
 
   return (
     <details className="relative group">
@@ -59,9 +60,7 @@ export const PlanBadge = ({ planName, variant = 'light', details }) => {
         className={`list-none cursor-pointer select-none rounded-full px-3 py-1.5 text-xs font-semibold ring-1 shadow-md flex items-center gap-2 ${badgeTone}`}
         style={{ listStyle: 'none' }}
       >
-        <span className="uppercase tracking-wide">
-          {planDetails?.tier?.label || 'Plano não definido'}
-        </span>
+        <span className="uppercase tracking-wide">{titleLabel}</span>
         {billing && <span className="text-[10px] font-bold opacity-80">{billing.label}</span>}
         <span className="text-[10px] opacity-70">▼</span>
       </summary>
@@ -78,7 +77,7 @@ export const PlanBadge = ({ planName, variant = 'light', details }) => {
           )}
         </div>
         <h4 className="mt-1 text-base font-bold text-gray-900">
-          {planDetails?.tier?.label || 'Sem plano'} {billing ? `(${billing.label})` : ''}
+          {titleLabel} {billing ? `(${billing.label})` : ''}
         </h4>
         <ul className="mt-3 space-y-2 text-xs text-gray-600">
           {(planDetails?.tier?.features || ['Plano indefinido.']).map((feature) => (

@@ -60,7 +60,8 @@ export class PaymentService {
 
     payment = await paymentRepo.save(payment);
 
-    const description = `Assinatura ${data.plan.name} - ${data.store.name}`;
+    const planLabel = data.plan.displayName || data.plan.name;
+    const description = `Assinatura ${planLabel} - ${data.store.name}`;
     const mercadoPagoEnabled = Boolean(env.mercadoPago.accessToken);
 
     if (mercadoPagoEnabled) {

@@ -13,4 +13,8 @@ export async function runMigrations() {
     ALTER TABLE IF EXISTS orders
     ADD COLUMN IF NOT EXISTS table_number TEXT;
   `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS plans
+    ADD COLUMN IF NOT EXISTS display_name TEXT;
+  `);
 }

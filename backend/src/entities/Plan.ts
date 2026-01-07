@@ -19,6 +19,9 @@ export class Plan {
   @Column({ unique: true })
   name!: PlanName;
 
+  @Column({ name: 'display_name', nullable: true })
+  displayName?: string;
+
   @Column('numeric', { precision: 10, scale: 2 })
   price!: number;
 
