@@ -20,9 +20,13 @@ export function CreateStore() {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [lgpdAccepted, setLgpdAccepted] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
+  const [showValidationModal, setShowValidationModal] = useState(false);
+  const [validationMessage, setValidationMessage] = useState('');
   const platformLogo = '/chama-no-espeto.jpeg';
   const primaryPalette = [ '#dc2626', '#ea580c', '#f59e0b', '#16a34a', '#0ea5e9', '#2563eb', '#7c3aed' ];
   const secondaryPalette = [ '#111827', '#1f2937', '#334155', '#0f172a', '#0f766e', '#065f46', '#4b5563' ];
+  const termsRef = useRef<HTMLDivElement | null>(null);
+  const termsCheckboxRef = useRef<HTMLInputElement | null>(null);
   const [registerForm, setRegisterForm] = useState({
     fullName: '',
     email: '',
@@ -191,7 +195,15 @@ export function CreateStore() {
 
     try {
       if (!termsAccepted || !lgpdAccepted) {
-        setStoreError('Aceite os termos de uso e a politica de privacidade para continuar.');
+        setStoreError('');
+        setValidationMessage('Para continuar, aceite os termos de uso e a politica de privacidade.');
+        setShowValidationModal(true);
+        if (termsRef.current) {
+          termsRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        if (termsCheckboxRef.current) {
+          termsCheckboxRef.current.focus();
+        }
         return;
       }
       setIsRegistering(true);
@@ -696,12 +708,13 @@ export function CreateStore() {
               </div>
             </div>
 
-            <div className="pt-6 border-t border-gray-100 space-y-3">
+            <div ref={termsRef} className="pt-6 border-t border-gray-100 space-y-3">
               <label className="flex items-start gap-3 text-sm text-gray-600">
                 <input
                   type="checkbox"
                   checked={termsAccepted}
                   onChange={(e) => setTermsAccepted(e.target.checked)}
+                  ref={termsCheckboxRef}
                   className="mt-1"
                 />
                 <span>
@@ -856,6 +869,33 @@ export function CreateStore() {
                 className="px-4 py-2 rounded-lg bg-brand-primary text-white text-sm font-semibold hover:opacity-90"
               >
                 Entendi
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showValidationModal && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+            <div className="px-5 py-4 border-b border-slate-200 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold">
+                !
+              </div>
+              <div>
+                <p className="text-base font-semibold text-slate-900">Falta uma confirmacao</p>
+                <p className="text-xs text-slate-500">Verifique os dados abaixo.</p>
+              </div>
+            </div>
+            <div className="px-5 py-4 text-sm text-slate-600">
+              {validationMessage || 'Confira os campos obrigatorios antes de continuar.'}
+            </div>
+            <div className="px-5 py-4 border-t border-slate-200 bg-slate-50 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setShowValidationModal(false)}
+                className="px-4 py-2 rounded-lg bg-brand-primary text-white text-sm font-semibold hover:opacity-90"
+              >
+                Voltar ao cadastro
               </button>
             </div>
           </div>
