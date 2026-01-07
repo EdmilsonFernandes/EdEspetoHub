@@ -81,6 +81,34 @@ Serviços locais:
 curl http://localhost:4000/api/plans
 ```
 
+## Deploy no EC2 (resumo rapido)
+
+1) Configurar `.env.prod` com a porta do front:
+
+```bash
+FRONTEND_PORT=8080
+```
+
+2) Subir os containers:
+
+```bash
+docker compose --env-file .env.prod up --build -d
+```
+
+3) Nginx como reverse proxy:
+
+- Use `docs/nginx/chamanoespeto.conf`
+- `/` -> `http://127.0.0.1:8080`
+- `/api/` -> `http://127.0.0.1:4000/api/`
+- `/uploads/` -> `http://127.0.0.1:4000/uploads/`
+- `client_max_body_size 20m`
+
+4) HTTPS:
+
+```bash
+sudo certbot --nginx -d chamanoespeto.com.br -d www.chamanoespeto.com.br
+```
+
 Se configurar assinatura secreta no painel, defina `MP_WEBHOOK_SECRET` na API.
 
 ### O que é ngrok (explicação rápida)
