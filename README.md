@@ -102,6 +102,14 @@ cp .env.prod.secrets.example .env.prod.secrets
 sh scripts/compose-prod.sh
 ```
 
+4) Verificacao rapida:
+
+```bash
+docker ps
+docker exec -it chamanoespeto-api env | grep -E '^(MP_|SMTP_|EMAIL_FROM|APP_BASE_URL)'
+curl -s https://www.chamanoespeto.com.br/api/docs.json | head -n 1
+```
+
 3) Nginx como reverse proxy:
 
 - Use `docs/nginx/chamanoespeto.conf`
