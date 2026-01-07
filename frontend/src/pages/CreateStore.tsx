@@ -22,11 +22,13 @@ export function CreateStore() {
   const [showTerms, setShowTerms] = useState(false);
   const [showValidationModal, setShowValidationModal] = useState(false);
   const [validationMessage, setValidationMessage] = useState('');
+  const [logoPreviewUrl, setLogoPreviewUrl] = useState('');
   const platformLogo = '/chama-no-espeto.jpeg';
   const primaryPalette = [ '#dc2626', '#ea580c', '#f59e0b', '#16a34a', '#0ea5e9', '#2563eb', '#7c3aed' ];
   const secondaryPalette = [ '#111827', '#1f2937', '#334155', '#0f172a', '#0f766e', '#065f46', '#4b5563' ];
   const termsRef = useRef<HTMLDivElement | null>(null);
   const termsCheckboxRef = useRef<HTMLInputElement | null>(null);
+  const logoObjectUrlRef = useRef('');
   const [registerForm, setRegisterForm] = useState({
     fullName: '',
     email: '',
@@ -69,14 +71,29 @@ export function CreateStore() {
 
     try
     {
+      if (logoObjectUrlRef.current) {
+        URL.revokeObjectURL(logoObjectUrlRef.current);
+      }
+      const nextPreview = URL.createObjectURL(file);
+      logoObjectUrlRef.current = nextPreview;
+      setLogoPreviewUrl(nextPreview);
       const base64 = await convertFileToBase64(file);
       setRegisterForm((prev) => ({ ...prev, logoFile: base64 }));
     } catch (error)
     {
       console.error('Falha ao processar logo', error);
+      setLogoPreviewUrl('');
       setStoreError('Não foi possível carregar o logo enviado.');
     }
   };
+
+  useEffect(() => {
+    return () => {
+      if (logoObjectUrlRef.current) {
+        URL.revokeObjectURL(logoObjectUrlRef.current);
+      }
+    };
+  }, []);
 
   const updateSocialLink = (index: number, key: 'type' | 'value', value: string) =>
   {
@@ -503,9 +520,13 @@ export function CreateStore() {
                         onChange={handleLogoUpload}
                         className="flex-1 text-sm border border-gray-200 rounded-xl p-2"
                       />
-                      {registerForm.logoFile && (
+                      {(logoPreviewUrl || registerForm.logoFile) && (
                         <div className="w-12 h-12 rounded-xl overflow-hidden border border-gray-200">
-                          <img src={registerForm.logoFile} alt="Pré-visualização do logo" className="w-full h-full object-cover" />
+                          <img
+                            src={logoPreviewUrl || registerForm.logoFile}
+                            alt="Pré-visualização do logo"
+                            className="w-full h-full object-cover"
+                          />
                         </div>
                       )}
                     </div>
