@@ -33,6 +33,11 @@
   - Reset de senha + paginas `ForgotPassword` e `ResetPassword`.
   - Email de confirmacao mais premium (header com gradiente).
   - Email de ativacao com logo e links.
+- Assinaturas:
+  - Avisos por e-mail em D-3, D-1 e D-0.
+  - `reminder_stage` evita envio duplicado.
+  - Renovacao no admin com escolha de plano e pagamento.
+  - Admin expirada cai em `/admin/renewal`.
 - Pagamento:
   - Linha do tempo do usuario mostra apenas status + data.
   - Admin login sem valores predefinidos.

@@ -95,6 +95,10 @@ Cadastro (UX):
 - Termos/LGPD aparecem em modal no `/create` e bloqueiam o envio se nao forem aceitos.
 - CEP consulta ViaCEP para preencher endereco.
 
+Assinaturas:
+- Job diario marca expiracao e envia avisos em D-3, D-1 e D-0.
+- Renovacao ocorre pelo painel `/admin/renewal` com escolha de plano.
+
 ```mermaid
 flowchart TD
   A[Cadastro /api/auth/register] --> B[Criar usuario]
