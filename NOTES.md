@@ -11,6 +11,11 @@
   - Header unico para todas as telas (Dashboard, Pedidos, Fila).
   - Tela de pedidos limpa (so lista).
   - Dashboard com receita total/mes/periodo, ticket medio, grafico melhorado e filtro 30/60/90/tudo.
+- Cadastro:
+  - Agora pede CPF/CNPJ, aceita termos/LGPD e endereco separado com CEP (via ViaCEP).
+  - Termos de uso em modal premium (nao perde dados ao abrir).
+  - Paleta de cores por escolha visual (sem expor codigo hex).
+  - Preview do logo corrigido com upload.
 - Checkout:
   - Autocomplete de cliente (3+ letras) com preenchimento automatico do telefone.
   - Clientes recentes antes de digitar.
@@ -26,7 +31,12 @@
 - Email:
   - SMTP (Gmail com senha de app).
   - Reset de senha + paginas `ForgotPassword` e `ResetPassword`.
+  - Email de confirmacao mais premium (header com gradiente).
   - Email de ativacao com logo e links.
+- Pagamento:
+  - Linha do tempo do usuario mostra apenas status + data.
+  - Admin login sem valores predefinidos.
+  - Sessao expirada limpa `adminSession` e redireciona pro login.
 
 ## Arquivos principais mexidos
 - frontend/src/components/Client/MenuView.tsx

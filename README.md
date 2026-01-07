@@ -83,13 +83,17 @@ curl http://localhost:4000/api/plans
 
 ## Fluxo de criacao de conta (resumo)
 
-1) Front envia `POST /api/auth/register` com dados do usuario, loja, plano e metodo.
+1) Front envia `POST /api/auth/register` com dados do usuario (CPF/CNPJ), endereco com CEP e aceite de termos/LGPD.
 2) API cria usuario (email nao verificado), gera slug unico, cria loja `open=false`.
 3) Envia e-mail de confirmacao e redireciona para `/verify-email`.
 4) Ao confirmar, o pagamento e criado e fica disponivel em `/payment/:id`.
 5) E-mail de pagamento pendente e enviado com o link/QR.
 5) Quando o MP aprova, o webhook confirma o pagamento, ativa a assinatura e abre a loja.
 6) E-mail de ativacao e enviado com links do admin e da vitrine.
+
+Cadastro (UX):
+- Termos/LGPD aparecem em modal no `/create` e bloqueiam o envio se nao forem aceitos.
+- CEP consulta ViaCEP para preencher endereco.
 
 ```mermaid
 flowchart TD
