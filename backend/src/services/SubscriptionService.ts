@@ -4,6 +4,7 @@ import { Subscription, SubscriptionStatus } from '../entities/Subscription';
 import { PlanRepository } from '../repositories/PlanRepository';
 import { StoreRepository } from '../repositories/StoreRepository';
 import { SubscriptionRepository } from '../repositories/SubscriptionRepository';
+import { env } from '../config/env';
 
 export class SubscriptionService {
   private planRepository = new PlanRepository();
@@ -93,18 +94,29 @@ export class SubscriptionService {
   async updateStatusesForAll() {
     const subscriptions = await this.subscriptionRepository.findAll();
     const updates: Subscription[] = [];
+    const pendingCutoff = new Date(Date.now() - env.pendingSignupTtlDays * 24 * 60 * 60 * 1000);
 
-      for (const sub of subscriptions) {
-        const status = this.resolveStatus(sub);
-        if (status !== sub.status) {
-          sub.status = status;
-          updates.push(sub);
-        }
-        if (!this.isSubscriptionActive(sub) && sub.store?.open) {
+    for (const sub of subscriptions) {
+      if (sub.status === 'PENDING' && sub.createdAt < pendingCutoff) {
+        sub.status = 'CANCELLED';
+        updates.push(sub);
+        if (sub.store?.open) {
           sub.store.open = false;
           await this.storeRepository.save(sub.store);
         }
+        continue;
       }
+
+      const status = this.resolveStatus(sub);
+      if (status !== sub.status) {
+        sub.status = status;
+        updates.push(sub);
+      }
+      if (!this.isSubscriptionActive(sub) && sub.store?.open) {
+        sub.store.open = false;
+        await this.storeRepository.save(sub.store);
+      }
+    }
 
     if (updates.length) {
       await Promise.all(updates.map((s) => this.subscriptionRepository.save(s)));

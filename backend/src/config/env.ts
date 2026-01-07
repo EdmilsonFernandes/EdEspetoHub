@@ -8,6 +8,12 @@ export const env = {
   appUrl: process.env.APP_BASE_URL || 'http://localhost:3000',
   superAdminEmail: process.env.SUPER_ADMIN_EMAIL || '',
   superAdminPassword: process.env.SUPER_ADMIN_PASSWORD || '',
+  pendingSignupTtlDays: (() => {
+    const raw = process.env.PENDING_SIGNUP_TTL_DAYS;
+    if (!raw) return 7;
+    const value = Number(raw);
+    return Number.isFinite(value) && value > 0 ? value : 7;
+  })(),
   mercadoPago: {
     accessToken: process.env.MP_ACCESS_TOKEN || '',
     publicKey: process.env.MP_PUBLIC_KEY || '',
