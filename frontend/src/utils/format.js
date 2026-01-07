@@ -63,6 +63,28 @@ export const formatPaymentMethod = (payment) => {
   return map[payment] || 'Não informado';
 };
 
+export const formatPlanName = (name = '') => {
+  const normalized = String(name).toLowerCase();
+  const tier =
+    normalized.includes('premium')
+      ? 'Premium'
+      : normalized.includes('pro')
+        ? 'Pro'
+        : normalized.includes('basic') || normalized === 'monthly' || normalized === 'yearly'
+          ? 'Basico'
+          : '';
+  const billing = normalized.includes('yearly')
+    ? 'Anual'
+    : normalized.includes('monthly') || normalized === 'monthly'
+      ? 'Mensal'
+      : '';
+
+  if (!tier && !billing) return name || '-';
+  if (!billing) return tier;
+  if (!tier) return billing;
+  return `${tier} ${billing}`;
+};
+
 export const formatPhoneInput = (value = '', defaultAreaCode = '12') => {
   const digits = (value || '').replace(/\D/g, '');
   const base = digits || defaultAreaCode;
