@@ -22,7 +22,19 @@ export class User {
   phone?: string;
 
   @Column({ nullable: true })
+  document?: string;
+
+  @Column({ name: 'document_type', nullable: true })
+  documentType?: string;
+
+  @Column({ nullable: true })
   address?: string;
+
+  @Column({ name: 'terms_accepted_at', type: 'timestamptz', nullable: true })
+  termsAcceptedAt?: Date;
+
+  @Column({ name: 'lgpd_accepted_at', type: 'timestamptz', nullable: true })
+  lgpdAcceptedAt?: Date;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;

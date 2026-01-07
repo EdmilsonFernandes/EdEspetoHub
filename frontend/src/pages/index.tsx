@@ -1,5 +1,6 @@
 export { LandingPage } from './LandingPage';
 export { CreateStore } from './CreateStore';
+export { TermsOfUse } from './TermsOfUse';
 export { AdminLogin } from './AdminLogin';
 export { StorePage } from './StorePage';
 export { OrdersQueue } from './OrdersQueue';

@@ -16,7 +16,11 @@ CREATE TABLE IF NOT EXISTS users (
   password TEXT NOT NULL,
   email_verified BOOLEAN NOT NULL DEFAULT FALSE,
   phone TEXT,
+  document TEXT,
+  document_type TEXT,
   address TEXT,
+  terms_accepted_at TIMESTAMPTZ,
+  lgpd_accepted_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 

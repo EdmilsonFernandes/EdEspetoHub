@@ -15,13 +15,27 @@ export function CreateStore() {
   const [paymentResult, setPaymentResult] = useState(null);
   const [isAnnual, setIsAnnual] = useState(false);
   const openedPaymentLinkRef = useRef('');
+  const [isCepLoading, setIsCepLoading] = useState(false);
+  const [cepError, setCepError] = useState('');
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [lgpdAccepted, setLgpdAccepted] = useState(false);
   const platformLogo = '/chama-no-espeto.jpeg';
+  const primaryPalette = [ '#dc2626', '#ea580c', '#f59e0b', '#16a34a', '#0ea5e9', '#2563eb', '#7c3aed' ];
+  const secondaryPalette = [ '#111827', '#1f2937', '#334155', '#0f172a', '#0f766e', '#065f46', '#4b5563' ];
   const [registerForm, setRegisterForm] = useState({
     fullName: '',
     email: '',
     password: '',
     phone: '',
-    address: '',
+    document: '',
+    documentType: 'CPF',
+    cep: '',
+    street: '',
+    number: '',
+    complement: '',
+    neighborhood: '',
+    city: '',
+    state: '',
     storeName: '',
     logoFile: '',
     primaryColor: '#b91c1c',
@@ -84,6 +98,44 @@ export function CreateStore() {
     }));
   };
 
+  const formatAddress = () => {
+    const parts = [
+      registerForm.street && `${registerForm.street}, ${registerForm.number || 's/n'}`,
+      registerForm.complement,
+      registerForm.neighborhood,
+      registerForm.city && registerForm.state ? `${registerForm.city} - ${registerForm.state}` : registerForm.city,
+      registerForm.cep && `CEP ${registerForm.cep}`,
+    ].filter(Boolean);
+    return parts.join(' | ');
+  };
+
+  const handleCepLookup = async () => {
+    const rawCep = registerForm.cep.replace(/\D/g, '');
+    if (rawCep.length !== 8) return;
+    setIsCepLoading(true);
+    setCepError('');
+    try {
+      const response = await fetch(`https://viacep.com.br/ws/${rawCep}/json/`);
+      const data = await response.json();
+      if (data?.erro) {
+        setCepError('CEP nao encontrado.');
+        return;
+      }
+      setRegisterForm((prev) => ({
+        ...prev,
+        street: prev.street || data.logradouro || '',
+        neighborhood: prev.neighborhood || data.bairro || '',
+        city: prev.city || data.localidade || '',
+        state: prev.state || data.uf || '',
+        complement: prev.complement || data.complemento || '',
+      }));
+    } catch (error) {
+      setCepError('Nao foi possivel consultar o CEP.');
+    } finally {
+      setIsCepLoading(false);
+    }
+  };
+
   useEffect(() => {
     const fetchPlans = async () => {
       try {
@@ -134,17 +186,23 @@ export function CreateStore() {
   const handleCreateStore = async (event) => {
     event?.preventDefault();
     setStoreError('');
-    setIsRegistering(true);
     setPaymentResult(null);
 
     try {
+      if (!termsAccepted || !lgpdAccepted) {
+        setStoreError('Aceite os termos de uso e a politica de privacidade para continuar.');
+        return;
+      }
+      setIsRegistering(true);
       const payload = {
         user: {
           fullName: registerForm.fullName,
           email: registerForm.email,
           password: registerForm.password,
           phone: registerForm.phone,
-          address: registerForm.address,
+          document: registerForm.document,
+          documentType: registerForm.documentType,
+          address: formatAddress(),
         },
         store: {
           name: registerForm.storeName,
@@ -155,6 +213,8 @@ export function CreateStore() {
         },
         planId: selectedPlanId,
         paymentMethod,
+        termsAccepted,
+        lgpdAccepted,
       };
 
       const result = await storeService.create(payload);
@@ -252,10 +312,31 @@ export function CreateStore() {
                       className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
                       placeholder="seu@email.com"
                     />
+                    <p className="text-xs text-gray-500">Cada e-mail pode ter apenas uma conta.</p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700">Documento</label>
+                    <div className="flex gap-2">
+                      <select
+                        value={registerForm.documentType}
+                        onChange={(e) => setRegisterForm((prev) => ({ ...prev, documentType: e.target.value }))}
+                        className="border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                      >
+                        <option value="CPF">CPF</option>
+                        <option value="CNPJ">CNPJ</option>
+                      </select>
+                      <input
+                        required
+                        value={registerForm.document}
+                        onChange={(e) => setRegisterForm((prev) => ({ ...prev, document: e.target.value }))}
+                        className="flex-1 border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
+                        placeholder={registerForm.documentType === 'CNPJ' ? '00.000.000/0000-00' : '000.000.000-00'}
+                      />
+                    </div>
+                  </div>
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-gray-700">Senha</label>
                     <input
@@ -278,14 +359,95 @@ export function CreateStore() {
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-gray-700">Endereço completo</label>
-                  <input
-                    value={registerForm.address}
-                    onChange={(e) => setRegisterForm((prev) => ({ ...prev, address: e.target.value }))}
-                    className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
-                    placeholder="Rua, número, bairro, cidade"
-                  />
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-gray-700">CEP</label>
+                      <div className="flex gap-2">
+                      <input
+                        required
+                        value={registerForm.cep}
+                          onChange={(e) => setRegisterForm((prev) => ({ ...prev, cep: e.target.value }))}
+                          onBlur={handleCepLookup}
+                          className="flex-1 border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
+                          placeholder="00000-000"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleCepLookup}
+                          className="px-3 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50"
+                        >
+                          {isCepLoading ? 'Buscando...' : 'Buscar'}
+                        </button>
+                      </div>
+                      {cepError && <p className="text-xs text-red-600">{cepError}</p>}
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-gray-700">Cidade</label>
+                      <input
+                        required
+                        value={registerForm.city}
+                        onChange={(e) => setRegisterForm((prev) => ({ ...prev, city: e.target.value }))}
+                        className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
+                        placeholder="Sua cidade"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-gray-700">Estado</label>
+                      <input
+                        required
+                        value={registerForm.state}
+                        onChange={(e) => setRegisterForm((prev) => ({ ...prev, state: e.target.value }))}
+                        className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
+                        placeholder="UF"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-gray-700">Rua / Avenida</label>
+                      <input
+                        required
+                        value={registerForm.street}
+                        onChange={(e) => setRegisterForm((prev) => ({ ...prev, street: e.target.value }))}
+                        className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
+                        placeholder="Nome da rua"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-gray-700">Bairro</label>
+                      <input
+                        required
+                        value={registerForm.neighborhood}
+                        onChange={(e) => setRegisterForm((prev) => ({ ...prev, neighborhood: e.target.value }))}
+                        className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
+                        placeholder="Bairro"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-gray-700">Numero</label>
+                      <input
+                        required
+                        value={registerForm.number}
+                        onChange={(e) => setRegisterForm((prev) => ({ ...prev, number: e.target.value }))}
+                        className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
+                        placeholder="123"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-gray-700">Complemento</label>
+                      <input
+                        value={registerForm.complement}
+                        onChange={(e) => setRegisterForm((prev) => ({ ...prev, complement: e.target.value }))}
+                        className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
+                        placeholder="Apto, sala, bloco"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -305,6 +467,9 @@ export function CreateStore() {
               <div className="text-xs text-gray-500">
                 URL da loja: <span className="font-semibold text-gray-700">/chamanoespeto/{storeSlugPreview || 'sua-loja'}</span>
               </div>
+              <p className="text-xs text-gray-500">
+                Se ja existir uma loja com esse nome, o sistema adiciona um sufixo (ex.: {storeSlugPreview || 'sua-loja'}-2).
+              </p>
             </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -334,13 +499,20 @@ export function CreateStore() {
                         onChange={(e) => setRegisterForm((prev) => ({ ...prev, primaryColor: e.target.value }))}
                         className="w-12 h-12 border border-gray-200 rounded-xl cursor-pointer"
                       />
-                      <input
-                        type="text"
-                        value={registerForm.primaryColor}
-                        onChange={(e) => setRegisterForm((prev) => ({ ...prev, primaryColor: e.target.value }))}
-                        className="flex-1 border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors text-sm font-mono"
-                      />
+                      <div className="flex flex-wrap gap-2">
+                        {primaryPalette.map((color) => (
+                          <button
+                            key={color}
+                            type="button"
+                            onClick={() => setRegisterForm((prev) => ({ ...prev, primaryColor: color }))}
+                            className={`w-8 h-8 rounded-full border ${registerForm.primaryColor === color ? 'border-gray-900' : 'border-gray-200'}`}
+                            style={{ backgroundColor: color }}
+                            aria-label={`Selecionar cor ${color}`}
+                          />
+                        ))}
+                      </div>
                     </div>
+                    <p className="text-xs text-gray-500">Escolha a cor principal da sua marca.</p>
                   </div>
                 </div>
 
@@ -354,13 +526,20 @@ export function CreateStore() {
                         onChange={(e) => setRegisterForm((prev) => ({ ...prev, secondaryColor: e.target.value }))}
                         className="w-12 h-12 border border-gray-200 rounded-xl cursor-pointer"
                       />
-                      <input
-                        type="text"
-                        value={registerForm.secondaryColor}
-                        onChange={(e) => setRegisterForm((prev) => ({ ...prev, secondaryColor: e.target.value }))}
-                        className="flex-1 border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors text-sm font-mono"
-                      />
+                      <div className="flex flex-wrap gap-2">
+                        {secondaryPalette.map((color) => (
+                          <button
+                            key={color}
+                            type="button"
+                            onClick={() => setRegisterForm((prev) => ({ ...prev, secondaryColor: color }))}
+                            className={`w-8 h-8 rounded-full border ${registerForm.secondaryColor === color ? 'border-gray-900' : 'border-gray-200'}`}
+                            style={{ backgroundColor: color }}
+                            aria-label={`Selecionar cor ${color}`}
+                          />
+                        ))}
+                      </div>
                     </div>
+                    <p className="text-xs text-gray-500">Use um tom de apoio para fundos e detalhes.</p>
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-gray-700">Redes sociais</label>
@@ -522,6 +701,47 @@ export function CreateStore() {
               </div>
             </div>
 
+            <div className="pt-6 border-t border-gray-100 space-y-3">
+              <label className="flex items-start gap-3 text-sm text-gray-600">
+                <input
+                  type="checkbox"
+                  checked={termsAccepted}
+                  onChange={(e) => setTermsAccepted(e.target.checked)}
+                  className="mt-1"
+                />
+                <span>
+                  Li e aceito os{' '}
+                  <button
+                    type="button"
+                    onClick={() => navigate('/terms')}
+                    className="text-brand-primary font-semibold hover:underline"
+                  >
+                    termos de uso
+                  </button>{' '}
+                  da plataforma.
+                </span>
+              </label>
+              <label className="flex items-start gap-3 text-sm text-gray-600">
+                <input
+                  type="checkbox"
+                  checked={lgpdAccepted}
+                  onChange={(e) => setLgpdAccepted(e.target.checked)}
+                  className="mt-1"
+                />
+                <span>
+                  Concordo com o tratamento de dados pessoais conforme a LGPD e a{' '}
+                  <button
+                    type="button"
+                    onClick={() => navigate('/terms')}
+                    className="text-brand-primary font-semibold hover:underline"
+                  >
+                    politica de privacidade
+                  </button>
+                  .
+                </span>
+              </label>
+            </div>
+
             <button
               type="submit"
               disabled={isRegistering}
@@ -571,7 +791,7 @@ export function CreateStore() {
             )}
 
             <p className="text-xs text-gray-500 text-center">
-              Ao criar sua conta, você concorda com nossos termos de uso.
+              Ao criar sua conta, voce confirma a veracidade dos dados fornecidos.
             </p>
           </form>
         </div>

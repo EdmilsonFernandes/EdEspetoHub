@@ -37,6 +37,8 @@ export class AuthService
       password: input.password,
       phone: input.phone,
       address: input.address,
+      document: input.document,
+      documentType: input.documentType,
     };
 
     const normalizedEmail = userPayload.email
@@ -61,6 +63,16 @@ export class AuthService
     if (!input.planId)
     {
       throw new Error('Selecione um plano para continuar');
+    }
+
+    if (!input.termsAccepted || !input.lgpdAccepted)
+    {
+      throw new Error('Aceite os termos de uso e a politica de privacidade para continuar');
+    }
+
+    if (!userPayload.document || !userPayload.documentType)
+    {
+      throw new Error('Informe CPF ou CNPJ para continuar');
     }
 
     const result = await AppDataSource.transaction(async (manager) =>
@@ -91,6 +103,10 @@ export class AuthService
         password: hashed,
         phone: userPayload.phone,
         address: userPayload.address,
+        document: userPayload.document,
+        documentType: userPayload.documentType,
+        termsAcceptedAt: new Date(),
+        lgpdAcceptedAt: new Date(),
       });
       await userRepo.save(user);
 

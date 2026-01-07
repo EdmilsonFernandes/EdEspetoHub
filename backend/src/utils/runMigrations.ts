@@ -22,6 +22,22 @@ export async function runMigrations() {
     ADD COLUMN IF NOT EXISTS email_verified BOOLEAN DEFAULT FALSE;
   `);
   await AppDataSource.query(`
+    ALTER TABLE IF EXISTS users
+    ADD COLUMN IF NOT EXISTS document TEXT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS users
+    ADD COLUMN IF NOT EXISTS document_type TEXT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS users
+    ADD COLUMN IF NOT EXISTS terms_accepted_at TIMESTAMPTZ;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS users
+    ADD COLUMN IF NOT EXISTS lgpd_accepted_at TIMESTAMPTZ;
+  `);
+  await AppDataSource.query(`
     CREATE TABLE IF NOT EXISTS email_verifications (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
       user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
