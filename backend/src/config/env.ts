@@ -14,6 +14,12 @@ export const env = {
     const value = Number(raw);
     return Number.isFinite(value) && value > 0 ? value : 7;
   })(),
+  firstMonthPromoPrice: (() => {
+    const raw = process.env.FIRST_MONTH_PROMO_PRICE;
+    if (!raw) return 14.9;
+    const value = Number(raw);
+    return Number.isFinite(value) && value > 0 ? value : 14.9;
+  })(),
   mercadoPago: {
     accessToken: process.env.MP_ACCESS_TOKEN || '',
     publicKey: process.env.MP_PUBLIC_KEY || '',

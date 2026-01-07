@@ -54,6 +54,41 @@ export function StorePage() {
   const cartTotal = useMemo(() => Object.values(cart).reduce((acc, item) => acc + item.price * item.qty, 0), [cart]);
   const instagramHandle = useMemo(() => (branding.instagram ? `@${branding.instagram.replace('@', '')}` : ''), [branding.instagram]);
 
+  const applyStoreMeta = (store: any) => {
+    if (!store) return;
+    const name = store.name || store.slug || 'Chama no Espeto';
+    const description = `Cardapio online e pedidos da loja ${name}.`;
+    const logo = resolveAssetUrl(store.settings?.logoUrl) || '/chama-no-espeto.jpeg';
+    const url = typeof window !== 'undefined' ? window.location.href : '';
+
+    const upsertMeta = (key: string, value: string, attr: 'name' | 'property' = 'name') => {
+      if (!value) return;
+      let tag = document.querySelector(`meta[${attr}="${key}"]`);
+      if (!tag) {
+        tag = document.createElement('meta');
+        tag.setAttribute(attr, key);
+        document.head.appendChild(tag);
+      }
+      tag.setAttribute('content', value);
+    };
+
+    document.title = `${name} | Chama no Espeto`;
+    upsertMeta('description', description, 'name');
+    upsertMeta('og:title', name, 'property');
+    upsertMeta('og:description', description, 'property');
+    upsertMeta('og:image', logo, 'property');
+    upsertMeta('og:url', url, 'property');
+    upsertMeta('twitter:card', 'summary_large_image', 'name');
+    upsertMeta('twitter:title', name, 'name');
+    upsertMeta('twitter:description', description, 'name');
+    upsertMeta('twitter:image', logo, 'name');
+
+    const favicon = document.querySelector('link[rel="icon"]') || document.createElement('link');
+    favicon.setAttribute('rel', 'icon');
+    favicon.setAttribute('href', logo);
+    document.head.appendChild(favicon);
+  };
+
   useEffect(() => {
     const savedSession = localStorage.getItem('adminSession');
     if (savedSession) {
@@ -106,6 +141,7 @@ export function StorePage() {
               ? data.openNow
               : isStoreOpenNow(normalizedHours, data.open);
           setStoreOpenNow(openNow);
+          applyStoreMeta(data);
         }
       } catch (error) {
         console.error('Erro ao carregar loja', error);

@@ -58,6 +58,19 @@ export class PaymentService {
       provider: 'MOCK',
     } as Payment);
 
+    const previousPaidCount = await paymentRepo.count({
+      where: {
+        store: { id: data.store.id },
+        status: 'PAID',
+      } as any,
+    });
+
+    const isMonthlyPlan =
+      (data.plan.name || '').endsWith('_monthly') || data.plan.durationDays === 30;
+    const shouldApplyPromo = isMonthlyPlan && previousPaidCount === 0;
+    const chargeAmount = shouldApplyPromo ? env.firstMonthPromoPrice : Number(data.plan.price);
+    payment.amount = chargeAmount;
+
     payment = await paymentRepo.save(payment);
 
     const planLabel = data.plan.displayName || data.plan.name;
@@ -67,7 +80,7 @@ export class PaymentService {
     if (mercadoPagoEnabled) {
       try {
         const mpPayment = await this.mercadoPago.createPayment({
-          amount: Number(data.plan.price),
+          amount: chargeAmount,
           method: data.method,
           description,
           externalReference: payment.id,
@@ -97,7 +110,7 @@ export class PaymentService {
 
     if (payment.method === 'PIX') {
       const qrPayload = `PIX FAKE | Store: ${data.store.name} | Amount: ${Number(
-        data.plan.price
+        chargeAmount
       ).toFixed(2)} | PaymentId: ${payment.id}`;
       payment.qrCodeBase64 = await QRCode.toDataURL(qrPayload);
       await paymentRepo.save(payment);
