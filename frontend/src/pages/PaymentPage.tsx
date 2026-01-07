@@ -11,7 +11,6 @@ export function PaymentPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [polling, setPolling] = useState(false);
-  const [expandedEvents, setExpandedEvents] = useState<Record<string, boolean>>({});
   const [eventsPage, setEventsPage] = useState(0);
   const [eventsHasMore, setEventsHasMore] = useState(true);
   const EVENTS_PAGE_SIZE = 25;
@@ -244,39 +243,16 @@ export function PaymentPage() {
                     {(events || []).length === 0 ? (
                       <p className="text-sm text-gray-500">Nenhum evento recebido ainda.</p>
                     ) : (
-                      events.map((event) => {
-                        const isExpanded = Boolean(expandedEvents[event.id]);
-                        return (
-                          <div key={event.id} className="text-sm text-gray-600 border border-gray-100 rounded-xl p-3 bg-gray-50">
-                            <div className="flex items-center justify-between">
-                              <span className="font-semibold">{event.status}</span>
-                              <div className="flex items-center gap-3">
-                                <span className="text-xs text-gray-400">
-                                  {new Date(event.createdAt).toLocaleString('pt-BR')}
-                                </span>
-                                {event.payload && (
-                                  <button
-                                    onClick={() =>
-                                      setExpandedEvents((prev) => ({
-                                        ...prev,
-                                        [event.id]: !prev[event.id],
-                                      }))
-                                    }
-                                    className="text-xs font-semibold text-brand-primary hover:underline"
-                                  >
-                                    {isExpanded ? 'Ocultar' : 'Ver payload'}
-                                  </button>
-                                )}
-                              </div>
-                            </div>
-                            {isExpanded && event.payload && (
-                              <pre className="mt-2 bg-slate-900 text-slate-100 text-xs p-3 rounded-lg overflow-auto max-h-48">
-                                {JSON.stringify(event.payload, null, 2)}
-                              </pre>
-                            )}
+                      events.map((event) => (
+                        <div key={event.id} className="text-sm text-gray-600 border border-gray-100 rounded-xl p-3 bg-gray-50">
+                          <div className="flex items-center justify-between">
+                            <span className="font-semibold">{event.status}</span>
+                            <span className="text-xs text-gray-400">
+                              {new Date(event.createdAt).toLocaleString('pt-BR')}
+                            </span>
                           </div>
-                        );
-                      })
+                        </div>
+                      ))
                     )}
                     {eventsHasMore && (
                       <button

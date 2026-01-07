@@ -69,13 +69,18 @@ export class EmailService {
     const text = `Para ativar sua conta, confirme seu e-mail neste link: ${link}\n\nSe nao foi voce, ignore este e-mail.`;
     const logoUrl = this.getLogoUrl();
     const html = `
-      <div style="font-family: Arial, sans-serif; background: #f8fafc; padding: 24px;">
-        <div style="max-width: 520px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px;">
-          <img src="${logoUrl}" alt="Chama no Espeto" style="width: 120px; height: auto; margin-bottom: 16px;" />
-          <h2 style="margin: 0 0 8px; color: #0f172a;">Confirme seu e-mail</h2>
-          <p style="margin: 0 0 16px; color: #475569;">Clique no botao abaixo para ativar sua conta.</p>
-          <a href="${link}" style="display: inline-block; padding: 10px 16px; background: #dc2626; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600;">Confirmar e-mail</a>
-          <p style="margin: 16px 0 0; color: #64748b; font-size: 12px;">Se nao foi voce, ignore este e-mail.</p>
+      <div style="font-family: Arial, sans-serif; background: #f1f5f9; padding: 32px;">
+        <div style="max-width: 560px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 18px; overflow: hidden;">
+          <div style="padding: 24px; background: linear-gradient(135deg, #dc2626 0%, #f97316 100%);">
+            <img src="${logoUrl}" alt="Chama no Espeto" style="width: 96px; height: 96px; border-radius: 16px; border: 2px solid rgba(255,255,255,0.5);" />
+            <p style="margin: 12px 0 0; color: #ffffff; font-size: 18px; font-weight: 700;">Confirme seu e-mail</p>
+            <p style="margin: 4px 0 0; color: rgba(255,255,255,0.9); font-size: 13px;">Ative sua conta para liberar sua loja</p>
+          </div>
+          <div style="padding: 24px;">
+            <p style="margin: 0 0 16px; color: #475569;">Clique no botao abaixo para ativar sua conta e continuar o pagamento.</p>
+            <a href="${link}" style="display: inline-block; padding: 12px 18px; background: #dc2626; color: #ffffff; text-decoration: none; border-radius: 10px; font-weight: 700;">Confirmar e-mail</a>
+            <p style="margin: 16px 0 0; color: #64748b; font-size: 12px;">Se nao foi voce, ignore este e-mail.</p>
+          </div>
         </div>
       </div>
     `;
