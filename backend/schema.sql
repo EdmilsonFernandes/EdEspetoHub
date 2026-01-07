@@ -94,6 +94,7 @@ CREATE TABLE IF NOT EXISTS plans (
   name TEXT NOT NULL UNIQUE,
   display_name TEXT,
   price NUMERIC(10,2) NOT NULL,
+  promo_price NUMERIC(10,2),
   duration_days INTEGER NOT NULL,
   enabled BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()

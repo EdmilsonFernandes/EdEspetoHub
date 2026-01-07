@@ -18,6 +18,10 @@ export async function runMigrations() {
     ADD COLUMN IF NOT EXISTS display_name TEXT;
   `);
   await AppDataSource.query(`
+    ALTER TABLE IF EXISTS plans
+    ADD COLUMN IF NOT EXISTS promo_price NUMERIC(10,2);
+  `);
+  await AppDataSource.query(`
     ALTER TABLE IF EXISTS users
     ADD COLUMN IF NOT EXISTS email_verified BOOLEAN DEFAULT FALSE;
   `);

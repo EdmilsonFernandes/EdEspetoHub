@@ -68,7 +68,8 @@ export class PaymentService {
     const isMonthlyPlan =
       (data.plan.name || '').endsWith('_monthly') || data.plan.durationDays === 30;
     const shouldApplyPromo = isMonthlyPlan && previousPaidCount === 0;
-    const chargeAmount = shouldApplyPromo ? env.firstMonthPromoPrice : Number(data.plan.price);
+    const promoPrice = data.plan.promoPrice ?? env.firstMonthPromoPrice;
+    const chargeAmount = shouldApplyPromo ? Number(promoPrice) : Number(data.plan.price);
     payment.amount = chargeAmount;
 
     payment = await paymentRepo.save(payment);

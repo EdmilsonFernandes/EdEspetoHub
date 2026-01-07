@@ -25,6 +25,9 @@ export class Plan {
   @Column('numeric', { precision: 10, scale: 2 })
   price!: number;
 
+  @Column({ name: 'promo_price', type: 'numeric', precision: 10, scale: 2, nullable: true })
+  promoPrice?: number | null;
+
   @Column({ name: 'duration_days', type: 'int' })
   durationDays!: number;
 
