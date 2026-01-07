@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Moon, Sun } from 'lucide-react';
 import { Hero } from '../components/Hero';
@@ -7,15 +7,16 @@ import { useTheme } from '../contexts/ThemeContext';
 import Lottie from 'lottie-react';
 import fireAnimation from '../assets/fire.json';
 import { Palette, MonitorCog, Smartphone, Rocket, Ham} from 'lucide-react';
-import { storeService } from '../services/storeService';
 import { platformService } from '../services/platformService';
-import { BILLING_OPTIONS, PLAN_TIERS } from '../constants/planCatalog';
+import { planService } from '../services/planService';
+import { BILLING_OPTIONS, PLAN_TIERS, getPlanName } from '../constants/planCatalog';
 
 export function LandingPage() {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
   const [isAnnual, setIsAnnual] = useState(false);
   const [carouselIndex, setCarouselIndex] = useState(0);
+  const [plans, setPlans] = useState([]);
 
   const goToDemoStore = () => {
     navigate('/chamanoespeto/test-store');
@@ -25,16 +26,40 @@ export function LandingPage() {
     platformService.listStores()
   }, []);
 
+  useEffect(() => {
+    const loadPlans = async () => {
+      try {
+        const data = await planService.list();
+        setPlans(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error('Falha ao carregar planos', error);
+      }
+    };
+    loadPlans();
+  }, []);
+
   const billingKey = isAnnual ? 'yearly' : 'monthly';
   const billing = BILLING_OPTIONS[billingKey];
-  const currentPlans = PLAN_TIERS.map((tier) => ({
-    name: tier.label,
-    price: billing.priceByTier[tier.key],
-    period: billing.period,
-    features: tier.features,
-    popular: tier.popular,
-    savings: billing.savings,
-  }));
+  const plansByName = useMemo(() => {
+    const map = {};
+    plans.forEach((plan) => {
+      map[plan.name] = plan;
+    });
+    return map;
+  }, [plans]);
+  const currentPlans = PLAN_TIERS.map((tier) => {
+    const planKey = getPlanName(tier.key, billingKey);
+    const plan = plansByName[planKey];
+    const price = plan?.price ?? billing.priceByTier[tier.key];
+    return {
+      name: plan?.displayName || tier.label,
+      price: Number(price),
+      period: billing.period,
+      features: tier.features,
+      popular: tier.popular,
+      savings: billing.savings,
+    };
+  });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
