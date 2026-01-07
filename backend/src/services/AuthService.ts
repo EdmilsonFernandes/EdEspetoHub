@@ -373,7 +373,7 @@ export class AuthService
 
     const subscription = await AppDataSource.getRepository(Subscription).findOne({
       where: { store: { id: store.id } },
-      relations: ['plan', 'store', 'user'],
+      relations: ['plan', 'store'],
       order: { createdAt: 'DESC' } as any,
     });
 
