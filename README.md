@@ -84,9 +84,9 @@ curl http://localhost:4000/api/plans
 ## Fluxo de criacao de conta (resumo)
 
 1) Front envia `POST /api/auth/register` com dados do usuario, loja, plano e metodo.
-2) API cria usuario, gera slug unico, cria loja `open=false`.
-3) Cria assinatura `PENDING` e gera pagamento no Mercado Pago.
-4) Responde com `redirectUrl` para `/payment/:id` e envia e-mail de pagamento pendente.
+2) API cria usuario (email nao verificado), gera slug unico, cria loja `open=false`.
+3) Envia e-mail de confirmacao e redireciona para `/verify-email`.
+4) Ao confirmar, o pagamento fica disponivel em `/payment/:id` e o e-mail de pagamento pendente e enviado.
 5) Quando o MP aprova, o webhook confirma o pagamento, ativa a assinatura e abre a loja.
 6) E-mail de ativacao e enviado com links do admin e da vitrine.
 
@@ -97,12 +97,14 @@ flowchart TD
   C --> D[Criar loja open=false]
   D --> E[Assinatura PENDING]
   E --> F[Gerar pagamento MP]
-  F --> G[Enviar email pagamento pendente]
-  F --> H[Redirect /payment/:id]
-  I[Webhook MP aprovado] --> J[Confirmar pagamento]
-  J --> K[Assinatura ACTIVE + datas]
-  J --> L[Loja open=true]
-  J --> M[Enviar email de ativacao]
+  F --> G[Enviar email confirmacao]
+  G --> H[Confirmar e-mail /verify-email]
+  H --> I[Enviar email pagamento pendente]
+  H --> J[Redirect /payment/:id]
+  K[Webhook MP aprovado] --> L[Confirmar pagamento]
+  L --> M[Assinatura ACTIVE + datas]
+  L --> N[Loja open=true]
+  L --> O[Enviar email de ativacao]
 ```
 
 ## Deploy no EC2 (resumo rapido)

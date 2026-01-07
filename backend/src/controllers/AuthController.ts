@@ -95,4 +95,17 @@ export class AuthController
       return res.status(400).json({ message: error.message });
     }
   }
+
+  static async verifyEmail(req: Request, res: Response)
+  {
+    const { token } = req.body || {};
+    try
+    {
+      const result = await authService.verifyEmail(token);
+      return res.json(result);
+    } catch (error: any)
+    {
+      return res.status(400).json({ message: error.message });
+    }
+  }
 }

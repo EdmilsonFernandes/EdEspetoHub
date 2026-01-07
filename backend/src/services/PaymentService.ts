@@ -116,7 +116,6 @@ export class PaymentService {
         .getOne();
 
       if (!lockedPayment) throw new Error('Pagamento não encontrado');
-      if (lockedPayment.status === 'PAID') return lockedPayment;
       if (lockedPayment.status === 'FAILED') throw new Error('Pagamento falhou');
 
       const payment = await paymentRepo.findOne({
@@ -124,6 +123,13 @@ export class PaymentService {
         relations: ['subscription', 'subscription.plan', 'store', 'user'],
       });
       if (!payment) throw new Error('Pagamento não encontrado');
+      const alreadyPaid = payment.status === 'PAID';
+      if (alreadyPaid && payment.user?.emailVerified !== true) {
+        return payment;
+      }
+      if (alreadyPaid && payment.subscription.status === 'ACTIVE' && payment.store.open) {
+        return payment;
+      }
 
       const subscription = payment.subscription;
       const store = payment.store;
@@ -131,7 +137,9 @@ export class PaymentService {
       const now = new Date();
       const endDate = this.addDays(now, plan.durationDays);
 
-      payment.status = 'PAID';
+      if (!alreadyPaid) {
+        payment.status = 'PAID';
+      }
       subscription.status = 'ACTIVE';
       subscription.startDate = now;
       subscription.endDate = endDate;
@@ -260,6 +268,6 @@ export class PaymentService {
 
   async findById(paymentId: string) {
     const paymentRepo = AppDataSource.getRepository(Payment);
-    return paymentRepo.findOne({ where: { id: paymentId }, relations: ['store'] });
+    return paymentRepo.findOne({ where: { id: paymentId }, relations: ['store', 'user'] });
   }
 }

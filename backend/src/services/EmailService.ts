@@ -64,6 +64,24 @@ export class EmailService {
     await this.send({ to: email, subject, text, html });
   }
 
+  async sendEmailVerification(email: string, link: string) {
+    const subject = 'Verifique seu e-mail - Chama no Espeto';
+    const text = `Para ativar sua conta, confirme seu e-mail neste link: ${link}\n\nSe nao foi voce, ignore este e-mail.`;
+    const logoUrl = this.getLogoUrl();
+    const html = `
+      <div style="font-family: Arial, sans-serif; background: #f8fafc; padding: 24px;">
+        <div style="max-width: 520px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px;">
+          <img src="${logoUrl}" alt="Chama no Espeto" style="width: 120px; height: auto; margin-bottom: 16px;" />
+          <h2 style="margin: 0 0 8px; color: #0f172a;">Confirme seu e-mail</h2>
+          <p style="margin: 0 0 16px; color: #475569;">Clique no botao abaixo para ativar sua conta.</p>
+          <a href="${link}" style="display: inline-block; padding: 10px 16px; background: #dc2626; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600;">Confirmar e-mail</a>
+          <p style="margin: 16px 0 0; color: #64748b; font-size: 12px;">Se nao foi voce, ignore este e-mail.</p>
+        </div>
+      </div>
+    `;
+    await this.send({ to: email, subject, text, html });
+  }
+
   async sendActivationEmail(email: string, slug: string) {
     const adminUrl = `${env.appUrl}/admin`;
     const storeUrl = `${env.appUrl}/chamanoespeto/${slug}`;

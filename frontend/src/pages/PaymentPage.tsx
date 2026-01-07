@@ -53,6 +53,7 @@ export function PaymentPage() {
 
   const isPaid = payment?.status === 'PAID';
   const isFailed = payment?.status === 'FAILED';
+  const isVerified = payment?.emailVerified;
   const statusLabel = isPaid ? 'Pagamento aprovado' : isFailed ? 'Pagamento falhou' : 'Aguardando pagamento';
   const statusTone = isPaid ? 'text-emerald-600' : isFailed ? 'text-red-600' : 'text-yellow-600';
   const statusBg = isPaid ? 'bg-emerald-50 text-emerald-600' : isFailed ? 'bg-red-50 text-red-600' : 'bg-yellow-50 text-yellow-600';
@@ -63,7 +64,7 @@ export function PaymentPage() {
   const adminUrl = `${baseUrl}/admin`;
 
   useEffect(() => {
-    if (!isPaid || redirectRef.current) return;
+    if (!isPaid || !isVerified || redirectRef.current) return;
     redirectRef.current = true;
     const timeout = window.setTimeout(() => {
       navigate('/admin');
@@ -121,7 +122,9 @@ export function PaymentPage() {
                   <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{statusLabel}</h1>
                   {isPaid ? (
                     <p className="text-gray-600 mt-2">
-                      Sua loja foi liberada. Use o e-mail e senha cadastrados para acessar o painel.
+                      {isVerified
+                        ? 'Sua loja foi liberada. Use o e-mail e senha cadastrados para acessar o painel.'
+                        : 'Pagamento aprovado. Confirme seu e-mail para liberar a loja.'}
                     </p>
                   ) : isFailed ? (
                     <p className="text-gray-600 mt-2">
@@ -137,7 +140,7 @@ export function PaymentPage() {
                 </div>
               </div>
 
-              {isPaid && (
+              {isPaid && isVerified && (
                 <div className="p-5 border border-emerald-100 rounded-2xl bg-emerald-50 flex flex-col gap-3">
                   <p className="text-sm font-semibold text-emerald-800">Loja ativa</p>
                   {payment.storeName && (

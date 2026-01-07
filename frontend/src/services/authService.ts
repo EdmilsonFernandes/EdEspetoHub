@@ -28,4 +28,10 @@ export const authService = {
         });
         return response;
     },
+    async verifyEmail(token: string) {
+        const response = await apiClient.post("/auth/verify-email", {
+            token,
+        });
+        return response;
+    },
 };

@@ -96,6 +96,7 @@ export class PaymentController {
         expiresAt: payment.expiresAt,
         storeSlug: payment.store?.slug || null,
         storeName: payment.store?.name || null,
+        emailVerified: payment.user?.emailVerified ?? false,
       });
     } catch (error: any) {
       return res.status(500).json({ message: error.message });

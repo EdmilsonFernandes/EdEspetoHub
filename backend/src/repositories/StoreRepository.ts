@@ -25,6 +25,10 @@ export class StoreRepository {
     return this.repository.findOne({ where: { id: identifier }, relations: ['settings'] });
   }
 
+  findByOwnerId(ownerId: string) {
+    return this.repository.findOne({ where: { owner: { id: ownerId } }, relations: ['settings', 'owner'] });
+  }
+
   findAll() {
     return this.repository.find({ relations: ['settings', 'owner'] });
   }

@@ -17,6 +17,8 @@ import { Subscription } from '../entities/Subscription';
 import { saveBase64Image } from '../utils/imageStorage';
 import { sanitizeSocialLinks } from '../utils/socialLinks';
 import { PasswordReset } from '../entities/PasswordReset';
+import { EmailVerification } from '../entities/EmailVerification';
+import { PaymentRepository } from '../repositories/PaymentRepository';
 
 export class AuthService
 {
@@ -24,6 +26,7 @@ export class AuthService
   private storeRepository = new StoreRepository();
   private paymentService = new PaymentService();
   private emailService = new EmailService();
+  private paymentRepository = new PaymentRepository();
 
   async register(input: any)
   {
@@ -146,7 +149,7 @@ export class AuthService
       return { user, store, subscription, payment };
     });
 
-    this.sendPaymentEmail(result.user.email, result.payment);
+    await this.sendVerificationEmail(result.user);
 
     const token = jwt.sign(
       { sub: result.user.id, storeId: result.store.id },
@@ -174,7 +177,7 @@ export class AuthService
         expiresAt: result.payment.expiresAt,
       },
       token,
-      redirectUrl: `/payment/${result.payment.id}`,
+      redirectUrl: `/verify-email`,
     };
   }
 
@@ -185,6 +188,7 @@ export class AuthService
 
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) throw new Error('Credenciais inválidas');
+    if (!user.emailVerified) throw new Error('E-mail não verificado');
 
     const firstStore = user.stores?.[ 0 ];
     const token = this.generateToken(user.id, firstStore?.id);
@@ -223,6 +227,7 @@ export class AuthService
     const owner = store.owner;
     const valid = await bcrypt.compare(password, owner.password);
     if (!valid) throw new Error('Credenciais inválidas');
+    if (!owner.emailVerified) throw new Error('E-mail não verificado');
     if (!store.open) throw new Error('Pagamento pendente. Sua loja ainda não está ativa.');
 
     const token = jwt.sign(
@@ -322,6 +327,42 @@ export class AuthService
     return { message: 'Senha atualizada com sucesso' };
   }
 
+  async verifyEmail(token: string) {
+    if (!token) throw new Error('Token inválido');
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    const verificationRepo = AppDataSource.getRepository(EmailVerification);
+    const verification = await verificationRepo.findOne({
+      where: { tokenHash },
+      relations: ['user'],
+    });
+
+    if (!verification || verification.usedAt) throw new Error('Token inválido ou expirado');
+    if (verification.expiresAt.getTime() < Date.now()) throw new Error('Token expirado');
+
+    verification.user.emailVerified = true;
+    verification.usedAt = new Date();
+
+    await AppDataSource.transaction(async (manager) => {
+      await manager.save(verification.user);
+      await manager.save(verification);
+    });
+
+    const store = await this.storeRepository.findByOwnerId(verification.user.id);
+    const latestPayment = store ? await this.paymentRepository.findLatestByStoreId(store.id) : null;
+
+    if (latestPayment?.id && latestPayment.status === 'PAID') {
+      await this.paymentService.confirmPayment(latestPayment.id);
+      return { message: 'E-mail verificado', redirectUrl: '/admin' };
+    }
+
+    if (latestPayment?.id) {
+      this.sendPaymentEmail(verification.user.email, latestPayment);
+      return { message: 'E-mail verificado', redirectUrl: `/payment/${latestPayment.id}` };
+    }
+
+    return { message: 'E-mail verificado', redirectUrl: '/' };
+  }
+
 
   private generateToken(userId: string, storeId?: string)
   {
@@ -333,6 +374,24 @@ export class AuthService
     const result = new Date(date);
     result.setDate(result.getDate() + days);
     return result;
+  }
+
+  private async sendVerificationEmail(user: User) {
+    const token = crypto.randomBytes(32).toString('hex');
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const verificationRepo = AppDataSource.getRepository(EmailVerification);
+
+    await verificationRepo.save(
+      verificationRepo.create({
+        user,
+        tokenHash,
+        expiresAt,
+      })
+    );
+
+    const link = `${env.appUrl}/verify-email?token=${encodeURIComponent(token)}`;
+    await this.emailService.sendEmailVerification(user.email, link);
   }
 
   private sendPaymentEmail(email: string, payment: any)

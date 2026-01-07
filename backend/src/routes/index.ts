@@ -20,6 +20,7 @@ routes.post('/auth/admin-login', AuthController.adminLogin);
 routes.post('/auth/super-login', AuthController.superAdminLogin);
 routes.post('/auth/forgot-password', AuthController.forgotPassword);
 routes.post('/auth/reset-password', AuthController.resetPassword);
+routes.post('/auth/verify-email', AuthController.verifyEmail);
 
 // Plans / payments
 routes.get('/plans', PlanController.list);
