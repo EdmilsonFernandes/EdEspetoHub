@@ -109,6 +109,15 @@ docker compose --env-file .env.prod up --build -d
 sudo certbot --nginx -d chamanoespeto.com.br -d www.chamanoespeto.com.br
 ```
 
+5) Mercado Pago (producao):
+
+- Configure em `backend/.env.docker`:
+  - `MP_ACCESS_TOKEN`
+  - `MP_PUBLIC_KEY`
+  - `MP_WEBHOOK_SECRET`
+  - `MP_WEBHOOK_URL=https://www.chamanoespeto.com.br/api/webhooks/mercadopago`
+- O webhook exige HTTPS valido.
+
 Se configurar assinatura secreta no painel, defina `MP_WEBHOOK_SECRET` na API.
 
 ### O que é ngrok (explicação rápida)
