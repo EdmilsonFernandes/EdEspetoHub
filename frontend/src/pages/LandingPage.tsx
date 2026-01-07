@@ -50,10 +50,11 @@ export function LandingPage() {
   const currentPlans = PLAN_TIERS.map((tier) => {
     const planKey = getPlanName(tier.key, billingKey);
     const plan = plansByName[planKey];
-    const price = plan?.price ?? billing.priceByTier[tier.key];
+    const price = plan?.price ?? null;
     return {
       name: plan?.displayName || tier.label,
       price: Number(price),
+      hasPrice: price !== null && price !== undefined,
       period: billing.period,
       features: tier.features,
       popular: tier.popular,
@@ -278,10 +279,16 @@ export function LandingPage() {
                   )}
                   <div className={`text-center mb-6 ${plan.popular ? 'mt-2' : ''}`}>
                     <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{plan.name}</h3>
-                    <div className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-red-600 mb-2">
-                      R$ {plan.price.toFixed(2)}
-                    </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">{plan.period}</p>
+                    {plan.hasPrice ? (
+                      <>
+                        <div className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-red-600 mb-2">
+                          R$ {plan.price.toFixed(2)}
+                        </div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{plan.period}</p>
+                      </>
+                    ) : (
+                      <div className="text-lg font-semibold text-gray-500 mb-2">Indisponível</div>
+                    )}
                   </div>
                   <ul className="space-y-3 mb-8 flex-grow">
                     {plan.features.map((feature, featureIndex) => (
