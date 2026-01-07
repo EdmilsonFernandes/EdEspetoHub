@@ -19,6 +19,7 @@ import { sanitizeSocialLinks } from '../utils/socialLinks';
 import { PasswordReset } from '../entities/PasswordReset';
 import { EmailVerification } from '../entities/EmailVerification';
 import { PaymentRepository } from '../repositories/PaymentRepository';
+import { SubscriptionService } from './SubscriptionService';
 
 export class AuthService
 {
@@ -27,6 +28,7 @@ export class AuthService
   private paymentService = new PaymentService();
   private emailService = new EmailService();
   private paymentRepository = new PaymentRepository();
+  private subscriptionService = new SubscriptionService();
 
   async register(input: any)
   {
@@ -229,7 +231,10 @@ export class AuthService
     const valid = await bcrypt.compare(password, owner.password);
     if (!valid) throw new Error('Credenciais inválidas');
     if (!owner.emailVerified) throw new Error('E-mail não verificado');
-    if (!store.open) throw new Error('Pagamento pendente. Sua loja ainda não está ativa.');
+    const currentSubscription = await this.subscriptionService.getCurrentByStore(store.id);
+    if (!store.open && currentSubscription?.status !== 'EXPIRED') {
+      throw new Error('Pagamento pendente. Sua loja ainda não está ativa.');
+    }
 
     const token = jwt.sign(
       { sub: owner.id, storeId: store.id, role: 'ADMIN' },
@@ -264,6 +269,14 @@ export class AuthService
       token,
       user: sanitizedOwner,
       store: sanitizedStore,
+      subscription: currentSubscription
+        ? {
+            id: currentSubscription.id,
+            status: currentSubscription.status,
+            plan: currentSubscription.plan,
+            endDate: currentSubscription.endDate,
+          }
+        : null,
     };
   }
 

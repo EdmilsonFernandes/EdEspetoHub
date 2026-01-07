@@ -61,4 +61,8 @@ export async function runMigrations() {
     ALTER TABLE IF EXISTS subscriptions
     ADD COLUMN IF NOT EXISTS payment_method TEXT DEFAULT 'PIX';
   `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS subscriptions
+    ADD COLUMN IF NOT EXISTS reminder_stage INT DEFAULT 0;
+  `);
 }

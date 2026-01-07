@@ -157,6 +157,7 @@ export class PaymentService {
       subscription.status = 'ACTIVE';
       subscription.startDate = now;
       subscription.endDate = endDate;
+      subscription.reminderStage = 0;
       store.open = true;
 
       await manager.save(subscription);

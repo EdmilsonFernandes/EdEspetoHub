@@ -114,4 +114,39 @@ export class EmailService {
     `;
     await this.send({ to: email, subject, text, html });
   }
+
+  async sendSubscriptionReminder(email: string, storeName: string, slug: string, daysLeft: number) {
+    const adminUrl = `${env.appUrl}/admin`;
+    const storeUrl = `${env.appUrl}/chamanoespeto/${slug}`;
+    const subject =
+      daysLeft <= 0
+        ? 'Sua assinatura expira hoje - Chama no Espeto'
+        : `Sua assinatura expira em ${daysLeft} dia${daysLeft === 1 ? '' : 's'} - Chama no Espeto`;
+    const text = [
+      `Olá! A assinatura da loja ${storeName} expira em ${daysLeft <= 0 ? 'hoje' : `${daysLeft} dia(s)`}.`,
+      'Acesse o painel para renovar e evitar interrupção no atendimento.',
+      adminUrl,
+    ].join('\n');
+    const logoUrl = this.getLogoUrl();
+    const html = `
+      <div style="font-family: Arial, sans-serif; background: #f1f5f9; padding: 32px;">
+        <div style="max-width: 560px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 18px; overflow: hidden;">
+          <div style="padding: 24px; background: linear-gradient(135deg, #dc2626 0%, #f97316 100%);">
+            <img src="${logoUrl}" alt="Chama no Espeto" style="width: 96px; height: 96px; border-radius: 16px; border: 2px solid rgba(255,255,255,0.5);" />
+            <p style="margin: 12px 0 0; color: #ffffff; font-size: 18px; font-weight: 700;">Assinatura prestes a expirar</p>
+            <p style="margin: 4px 0 0; color: rgba(255,255,255,0.9); font-size: 13px;">Evite interrupções no atendimento</p>
+          </div>
+          <div style="padding: 24px;">
+            <p style="margin: 0 0 8px; color: #475569;">Loja: <strong>${storeName}</strong></p>
+            <p style="margin: 0 0 16px; color: #475569;">
+              ${daysLeft <= 0 ? 'Sua assinatura expira hoje. Renove agora para manter a loja ativa.' : `Faltam ${daysLeft} dia${daysLeft === 1 ? '' : 's'} para sua assinatura expirar.`}
+            </p>
+            <a href="${adminUrl}" style="display: inline-block; padding: 12px 18px; background: #dc2626; color: #ffffff; text-decoration: none; border-radius: 10px; font-weight: 700;">Renovar assinatura</a>
+            <p style="margin: 16px 0 0; color: #64748b; font-size: 12px;">Vitrine: ${storeUrl}</p>
+          </div>
+        </div>
+      </div>
+    `;
+    await this.send({ to: email, subject, text, html });
+  }
 }

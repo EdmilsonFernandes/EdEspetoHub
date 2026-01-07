@@ -5,11 +5,17 @@ import { PlanRepository } from '../repositories/PlanRepository';
 import { StoreRepository } from '../repositories/StoreRepository';
 import { SubscriptionRepository } from '../repositories/SubscriptionRepository';
 import { env } from '../config/env';
+import { EmailService } from './EmailService';
+import { AppDataSource } from '../config/database';
+import { PaymentService } from './PaymentService';
+import { PaymentMethod } from '../entities/Payment';
 
 export class SubscriptionService {
   private planRepository = new PlanRepository();
   private storeRepository = new StoreRepository();
   private subscriptionRepository = new SubscriptionRepository();
+  private emailService = new EmailService();
+  private paymentService = new PaymentService();
 
   async create(input: CreateSubscriptionDto) {
     const store = await this.storeRepository.findById(input.storeId);
@@ -87,8 +93,47 @@ export class SubscriptionService {
     subscription.status = 'ACTIVE';
     subscription.autoRenew = input.autoRenew ?? subscription.autoRenew;
     subscription.plan = plan;
+    subscription.reminderStage = 0;
 
     return this.subscriptionRepository.save(subscription);
+  }
+
+  async createRenewalPayment(storeId: string, input: RenewSubscriptionDto, authStoreId?: string) {
+    const store = await this.storeRepository.findById(storeId);
+    if (!store) throw new Error('Loja não encontrada');
+    if (authStoreId && store.id !== authStoreId) throw new Error('Sem permissão para acessar esta loja');
+
+    const plan = input.planId
+      ? await this.planRepository.findById(input.planId)
+      : null;
+    const resolvedPlan =
+      plan || (await this.planRepository.findAll()).find((p) => p.id === input.planId);
+    if (!resolvedPlan || !resolvedPlan.enabled) throw new Error('Plano inválido para renovação');
+
+    const paymentMethod = (input.paymentMethod || 'PIX') as PaymentMethod;
+    const now = new Date();
+
+    return AppDataSource.transaction(async (manager) => {
+      const subscriptionRepo = manager.getRepository(Subscription);
+      const subscription = subscriptionRepo.create({
+        store,
+        plan: resolvedPlan,
+        startDate: now,
+        endDate: now,
+        status: 'PENDING',
+        autoRenew: false,
+        paymentMethod,
+      } as Subscription);
+      await subscriptionRepo.save(subscription);
+
+      return this.paymentService.createPayment(manager, {
+        user: store.owner,
+        store,
+        subscription,
+        plan: resolvedPlan,
+        method: paymentMethod,
+      });
+    });
   }
 
   async updateStatusesForAll() {
@@ -97,6 +142,11 @@ export class SubscriptionService {
     const pendingCutoff = new Date(Date.now() - env.pendingSignupTtlDays * 24 * 60 * 60 * 1000);
 
     for (const sub of subscriptions) {
+      const endDate = new Date(sub.endDate);
+      const now = new Date();
+      const diffMs = endDate.getTime() - now.getTime();
+      const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
       if (sub.status === 'PENDING' && sub.createdAt < pendingCutoff) {
         sub.status = 'CANCELLED';
         updates.push(sub);
@@ -115,6 +165,21 @@ export class SubscriptionService {
       if (!this.isSubscriptionActive(sub) && sub.store?.open) {
         sub.store.open = false;
         await this.storeRepository.save(sub.store);
+      }
+
+      if (sub.store?.owner?.email && sub.status !== 'PENDING' && sub.status !== 'CANCELLED' && sub.status !== 'SUSPENDED') {
+        const nextStage =
+          diffDays <= 0 ? 3 : diffDays <= 1 ? 2 : diffDays <= 3 ? 1 : 0;
+        if (nextStage > 0 && sub.reminderStage < nextStage) {
+          await this.emailService.sendSubscriptionReminder(
+            sub.store.owner.email,
+            sub.store.name,
+            sub.store.slug,
+            diffDays <= 0 ? 0 : diffDays
+          );
+          sub.reminderStage = nextStage;
+          updates.push(sub);
+        }
       }
     }
 

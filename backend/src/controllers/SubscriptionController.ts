@@ -53,4 +53,18 @@ export class SubscriptionController {
       return res.status(400).json({ message: error.message });
     }
   }
+
+  static async createRenewalPayment(req: Request, res: Response) {
+    try {
+      const payment = await subscriptionService.createRenewalPayment(
+        req.params.storeId,
+        req.body,
+        req.auth?.storeId
+      );
+      return res.status(201).json(payment);
+    } catch (error: any) {
+      const status = error.message.includes('perm') ? 403 : 400;
+      return res.status(status).json({ message: error.message });
+    }
+  }
 }

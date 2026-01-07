@@ -10,6 +10,9 @@ export const subscriptionService = {
   async renew(id: any, payload: any) {
     return apiClient.post(`/subscriptions/${id}/renew`, payload);
   },
+  async createRenewal(storeId: any, payload: any) {
+    return apiClient.post(`/stores/${storeId}/subscription/renew`, payload);
+  },
   async suspend(id: any) {
     return apiClient.patch(`/subscriptions/${id}/status`, { status: 'SUSPENDED' });
   },

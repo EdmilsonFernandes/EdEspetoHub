@@ -27,6 +27,7 @@ routes.post('/auth/resend-verification', AuthController.resendVerification);
 routes.get('/plans', PlanController.list);
 routes.post('/subscriptions', SubscriptionController.create);
 routes.get('/stores/:storeId/subscription', SubscriptionController.getByStore);
+routes.post('/stores/:storeId/subscription/renew', requireAuth, requireRole('ADMIN'), SubscriptionController.createRenewalPayment);
 routes.post('/subscriptions/:id/renew', SubscriptionController.renew);
 routes.patch('/subscriptions/:id/status', SubscriptionController.updateStatus);
 routes.post('/webhooks/payment-confirmed', PaymentController.confirm);

@@ -46,6 +46,9 @@ export class Subscription {
   @Column({ name: 'payment_method', default: 'PIX' })
   paymentMethod!: string;
 
+  @Column({ name: 'reminder_stage', type: 'int', default: 0 })
+  reminderStage!: number;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 

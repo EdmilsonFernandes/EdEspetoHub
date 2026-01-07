@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { LandingPage, CreateStore, AdminLogin, StorePage, OrdersQueue, AdminDashboard, AdminOrders, AdminQueue, PaymentPage, SuperAdmin, ForgotPassword, ResetPassword, VerifyEmail, TermsOfUse } from './pages';
+import { LandingPage, CreateStore, AdminLogin, StorePage, OrdersQueue, AdminDashboard, AdminOrders, AdminQueue, AdminRenewal, PaymentPage, SuperAdmin, ForgotPassword, ResetPassword, VerifyEmail, TermsOfUse } from './pages';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AdminRoute } from './components/Admin/AdminRoute';
 import { AdminLayout } from './components/Admin/AdminLayout';
@@ -52,6 +52,16 @@ function App() {
                   <AdminLayout>
                     <AdminQueue />
                   </AdminLayout>
+                </AdminRoute>
+              </AppErrorBoundary>
+            }
+          />
+          <Route
+            path="/admin/renewal"
+            element={
+              <AppErrorBoundary>
+                <AdminRoute>
+                  <AdminRenewal />
                 </AdminRoute>
               </AppErrorBoundary>
             }

@@ -1,10 +1,11 @@
 // @ts-nocheck
 import React, { useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
 export function AdminRoute({ children }: { children: React.ReactNode }) {
   const { auth, hydrated } = useAuth();
+  const location = useLocation();
 
   useEffect(() => {
     console.count('AdminRoute render effect');
@@ -20,6 +21,11 @@ export function AdminRoute({ children }: { children: React.ReactNode }) {
 
   if (!auth?.token || auth?.user?.role !== 'ADMIN' || !auth?.store) {
     return <Navigate to="/admin" replace />;
+  }
+
+  const subscriptionStatus = auth?.subscription?.status;
+  if (subscriptionStatus === 'EXPIRED' && location.pathname !== '/admin/renewal') {
+    return <Navigate to="/admin/renewal" replace />;
   }
 
   return <>{children}</>;
