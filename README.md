@@ -89,17 +89,17 @@ curl http://localhost:4000/api/plans
 FRONTEND_PORT=8080
 ```
 
-2) Subir os containers:
-
-```bash
-docker compose --env-file .env.prod up --build -d
-```
-
-Opcional: use `.env.prod.secrets` para manter MP/SMTP fora do git. O script `scripts/compose-prod.sh`
-carrega esse arquivo e aplica no `backend/.env.docker` antes de subir:
+2) Preparar segredos (recomendado):
 
 ```bash
 cp .env.prod.secrets.example .env.prod.secrets
+# edite os valores reais
+```
+
+3) Subir usando o script (preserva envs):
+
+```bash
+sh scripts/compose-prod.sh
 ```
 
 3) Nginx como reverse proxy:
