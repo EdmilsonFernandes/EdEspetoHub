@@ -332,23 +332,41 @@ export class AuthService
     if (!token) throw new Error('Token inválido');
     const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
     const verificationRepo = AppDataSource.getRepository(EmailVerification);
-    const verification = await verificationRepo.findOne({
+    let verification = await verificationRepo.findOne({
       where: { tokenHash },
       relations: ['user'],
     });
 
-    if (!verification || verification.usedAt) throw new Error('Token inválido ou expirado');
-    if (verification.expiresAt.getTime() < Date.now()) throw new Error('Token expirado');
+    let verifiedUser = verification?.user;
 
-    verification.user.emailVerified = true;
-    verification.usedAt = new Date();
+    if (!verification) {
+      try {
+        const decoded: any = jwt.verify(token, env.jwtSecret);
+        if (!decoded?.sub) throw new Error('Token inválido');
+        const userRepo = AppDataSource.getRepository(User);
+        const user = await userRepo.findOne({ where: { id: decoded.sub } });
+        if (!user) throw new Error('Token inválido ou expirado');
+        verifiedUser = user;
+      } catch {
+        throw new Error('Token inválido ou expirado');
+      }
+    }
+
+    if (verification?.usedAt) throw new Error('Token inválido ou expirado');
+    if (verification?.expiresAt && verification.expiresAt.getTime() < Date.now()) throw new Error('Token expirado');
+
+    if (!verifiedUser) throw new Error('Token inválido ou expirado');
+    verifiedUser.emailVerified = true;
+    if (verification) verification.usedAt = new Date();
 
     await AppDataSource.transaction(async (manager) => {
-      await manager.save(verification.user);
-      await manager.save(verification);
+      await manager.save(verifiedUser);
+      if (verification) {
+        await manager.save(verification);
+      }
     });
 
-    const store = await this.storeRepository.findByOwnerId(verification.user.id);
+    const store = await this.storeRepository.findByOwnerId(verifiedUser.id);
     if (!store) {
       return { message: 'E-mail verificado', redirectUrl: '/' };
     }
@@ -368,7 +386,7 @@ export class AuthService
     if (!latestPayment) {
       latestPayment = await AppDataSource.transaction(async (manager) => {
         return this.paymentService.createPayment(manager, {
-          user: verification.user,
+          user: verifiedUser,
           store,
           subscription,
           plan: subscription.plan,
@@ -383,7 +401,7 @@ export class AuthService
     }
 
     if (latestPayment?.id) {
-      this.sendPaymentEmail(verification.user.email, latestPayment);
+      this.sendPaymentEmail(verifiedUser.email, latestPayment);
       return { message: 'E-mail verificado', redirectUrl: `/payment/${latestPayment.id}` };
     }
 
@@ -404,7 +422,15 @@ export class AuthService
   }
 
   private async sendVerificationEmail(user: User) {
-    const token = crypto.randomBytes(32).toString('hex');
+    const token = jwt.sign(
+      {
+        sub: user.id,
+        type: 'email-verify',
+        jti: crypto.randomBytes(16).toString('hex'),
+      },
+      env.jwtSecret,
+      { expiresIn: '24h' }
+    );
     const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
     const verificationRepo = AppDataSource.getRepository(EmailVerification);

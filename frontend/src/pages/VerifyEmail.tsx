@@ -1,15 +1,17 @@
 // @ts-nocheck
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { authService } from '../services/authService';
 
 export function VerifyEmail() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const platformLogo = '/chama-no-espeto.jpeg';
   const [status, setStatus] = useState('Verificando seu e-mail...');
   const [error, setError] = useState('');
   const [email, setEmail] = useState('');
   const [sending, setSending] = useState(false);
+  const verifyingRef = useRef(false);
 
   useEffect(() => {
     const token = searchParams.get('token');
@@ -19,6 +21,8 @@ export function VerifyEmail() {
     }
 
     const run = async () => {
+      if (verifyingRef.current) return;
+      verifyingRef.current = true;
       try {
         const result = await authService.verifyEmail(token);
         setStatus('E-mail confirmado com sucesso.');
@@ -27,6 +31,8 @@ export function VerifyEmail() {
         }
       } catch (err) {
         setError(err.message || 'Nao foi possivel confirmar seu e-mail.');
+      } finally {
+        verifyingRef.current = false;
       }
     };
 
@@ -49,6 +55,9 @@ export function VerifyEmail() {
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-white border border-slate-200 rounded-2xl shadow-sm p-6 text-center">
+        <div className="mx-auto mb-4 h-16 w-16 overflow-hidden rounded-2xl border border-slate-200 shadow-sm">
+          <img src={platformLogo} alt="Chama no Espeto" className="h-full w-full object-cover" />
+        </div>
         <h1 className="text-xl font-bold text-slate-900 mb-2">Confirmacao de e-mail</h1>
         {error ? (
           <p className="text-sm text-red-600">{error}</p>
