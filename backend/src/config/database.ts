@@ -12,6 +12,7 @@ import { Subscription } from '../entities/Subscription';
 import { Payment } from '../entities/Payment';
 import { PaymentEvent } from '../entities/PaymentEvent';
 import { PasswordReset } from '../entities/PasswordReset';
+import { EmailVerification } from '../entities/EmailVerification';
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -21,7 +22,7 @@ export const AppDataSource = new DataSource({
   password: env.database.password,
   database: env.database.database,
   synchronize: false,
-  entities: [ User, Store, StoreSettings, Product, Order, OrderItem, Plan, Subscription, Payment, PaymentEvent, PasswordReset ],
+  entities: [ User, Store, StoreSettings, Product, Order, OrderItem, Plan, Subscription, Payment, PaymentEvent, PasswordReset, EmailVerification ],
   migrations: [],
   logging: [ 'error', 'query' ]
 });
