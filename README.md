@@ -90,6 +90,21 @@ curl http://localhost:4000/api/plans
 5) Quando o MP aprova, o webhook confirma o pagamento, ativa a assinatura e abre a loja.
 6) E-mail de ativacao e enviado com links do admin e da vitrine.
 
+```mermaid
+flowchart TD
+  A[Cadastro /api/auth/register] --> B[Criar usuario]
+  B --> C[Gerar slug unico]
+  C --> D[Criar loja open=false]
+  D --> E[Assinatura PENDING]
+  E --> F[Gerar pagamento MP]
+  F --> G[Enviar email pagamento pendente]
+  F --> H[Redirect /payment/:id]
+  I[Webhook MP aprovado] --> J[Confirmar pagamento]
+  J --> K[Assinatura ACTIVE + datas]
+  J --> L[Loja open=true]
+  J --> M[Enviar email de ativacao]
+```
+
 ## Deploy no EC2 (resumo rapido)
 
 1) Configurar `.env.prod` com a porta do front:
