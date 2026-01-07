@@ -150,6 +150,15 @@ curl -X POST https://www.chamanoespeto.com.br/api/auth/forgot-password \
 docker logs chamanoespeto-api --tail 200 | grep -i "mercadopago\\|webhook"
 ```
 
+## Teste de fluxo (manual assistido)
+
+O script `scripts/test-flow.sh` cria usuario, confirma e-mail e valida login admin.
+Requer `jq` instalado e o token de confirmacao copiado do e-mail.
+
+```bash
+sh scripts/test-flow.sh
+```
+
 3) Nginx como reverse proxy:
 
 - Use `docs/nginx/chamanoespeto.conf`
