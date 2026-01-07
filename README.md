@@ -110,6 +110,20 @@ docker exec -it chamanoespeto-api env | grep -E '^(MP_|SMTP_|EMAIL_FROM|APP_BASE
 curl -s https://www.chamanoespeto.com.br/api/docs.json | head -n 1
 ```
 
+5) Teste de e-mail (reset de senha):
+
+```bash
+curl -X POST https://www.chamanoespeto.com.br/api/auth/forgot-password \
+  -H "Content-Type: application/json" \
+  -d '{"email":"seu-email@gmail.com"}'
+```
+
+6) Webhook MP (checagem rapida):
+
+```bash
+docker logs chamanoespeto-api --tail 200 | grep -i "mercadopago\\|webhook"
+```
+
 3) Nginx como reverse proxy:
 
 - Use `docs/nginx/chamanoespeto.conf`
