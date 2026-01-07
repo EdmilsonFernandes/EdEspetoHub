@@ -11,7 +11,7 @@ export function AdminLogin() {
   const [searchParams] = useSearchParams();
   const { setAuth, auth, hydrated } = useAuth();
   const { setBranding } = useTheme();
-  const [loginForm, setLoginForm] = useState({ slug: defaultBranding.espetoId, password: '' });
+  const [loginForm, setLoginForm] = useState({ slug: '', password: '' });
   const [loginError, setLoginError] = useState('');
   const [branding] = useState(getPersistedBranding());
 
@@ -86,7 +86,7 @@ export function AdminLogin() {
                 value={loginForm.slug}
                 onChange={e => setLoginForm(prev => ({ ...prev, slug: e.target.value }))}
                 className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
-                placeholder="ex.: espetinhodatony"
+                placeholder="Digite o slug da sua loja"
               />
               <p className="text-xs text-gray-500">Use o slug fácil de memorizar da sua loja.</p>
             </div>
@@ -97,7 +97,7 @@ export function AdminLogin() {
                 value={loginForm.password}
                 onChange={e => setLoginForm(prev => ({ ...prev, password: e.target.value }))}
                 className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
-                placeholder="admin123"
+                placeholder="Sua senha de acesso"
               />
               <button
                 type="button"
