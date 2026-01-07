@@ -19,6 +19,7 @@ export function CreateStore() {
   const [cepError, setCepError] = useState('');
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [lgpdAccepted, setLgpdAccepted] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
   const platformLogo = '/chama-no-espeto.jpeg';
   const primaryPalette = [ '#dc2626', '#ea580c', '#f59e0b', '#16a34a', '#0ea5e9', '#2563eb', '#7c3aed' ];
   const secondaryPalette = [ '#111827', '#1f2937', '#334155', '#0f172a', '#0f766e', '#065f46', '#4b5563' ];
@@ -288,9 +289,9 @@ export function CreateStore() {
           )}
 
           <form className="space-y-6" onSubmit={handleCreateStore}>
-            <div>
+            <div className="space-y-4">
               <h3 className="text-lg font-semibold text-gray-800 mb-4">Informações pessoais</h3>
-              <div className="space-y-4">
+              <div className="space-y-4 rounded-2xl border border-gray-100 bg-gray-50/70 p-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-gray-700">Nome completo</label>
@@ -348,15 +349,6 @@ export function CreateStore() {
                       placeholder="Mínimo 6 caracteres"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-700">Telefone</label>
-                    <input
-                      value={registerForm.phone}
-                      onChange={(e) => setRegisterForm((prev) => ({ ...prev, phone: e.target.value }))}
-                      className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
-                      placeholder="(12) 99999-9999"
-                    />
-                  </div>
                 </div>
 
                 <div className="space-y-4">
@@ -364,7 +356,7 @@ export function CreateStore() {
                     <div className="space-y-2">
                       <label className="text-sm font-semibold text-gray-700">CEP</label>
                       <div className="flex gap-2">
-                      <input
+                        <input
                         required
                         value={registerForm.cep}
                           onChange={(e) => setRegisterForm((prev) => ({ ...prev, cep: e.target.value }))}
@@ -449,12 +441,29 @@ export function CreateStore() {
                     </div>
                   </div>
                 </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700">Telefone</label>
+                    <input
+                      value={registerForm.phone}
+                      onChange={(e) => setRegisterForm((prev) => ({ ...prev, phone: e.target.value }))}
+                      className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
+                      placeholder="(12) 99999-9999"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700">Resumo do endereço</label>
+                    <div className="w-full border border-gray-200 rounded-xl p-3 bg-white text-sm text-gray-500">
+                      {formatAddress() || 'Preencha o endereco para visualizar o resumo.'}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
             <div className="pt-6 border-t border-gray-100">
               <h3 className="text-lg font-semibold text-gray-800 mb-4">Configurações da loja</h3>
-              <div className="space-y-4">
+              <div className="space-y-4 rounded-2xl border border-gray-100 bg-gray-50/70 p-4">
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700">Nome da loja</label>
               <input
@@ -582,20 +591,6 @@ export function CreateStore() {
                     </div>
                     <p className="text-xs text-gray-500">Informe apenas as redes que quiser destacar.</p>
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-700">URL da loja</label>
-                    <div className="flex items-center">
-                      <span className="text-sm text-gray-500 bg-gray-50 border border-r-0 border-gray-200 rounded-l-xl px-3 py-3"> 
-                        /chamanoespeto/
-                      </span>
-                      <input
-                        disabled
-                        value="gerada automaticamente"
-                        className="flex-1 border border-gray-200 rounded-r-xl p-3 bg-gray-50 text-gray-500 text-sm"
-                      />
-                    </div>
-                  <p className="text-xs text-gray-500">A URL será criada pelo sistema após o cadastro. Use o link retornado na resposta.</p>
-                </div>
               </div>
             </div>
           </div>
@@ -713,7 +708,7 @@ export function CreateStore() {
                   Li e aceito os{' '}
                   <button
                     type="button"
-                    onClick={() => navigate('/terms')}
+                    onClick={() => setShowTerms(true)}
                     className="text-brand-primary font-semibold hover:underline"
                   >
                     termos de uso
@@ -732,7 +727,7 @@ export function CreateStore() {
                   Concordo com o tratamento de dados pessoais conforme a LGPD e a{' '}
                   <button
                     type="button"
-                    onClick={() => navigate('/terms')}
+                    onClick={() => setShowTerms(true)}
                     className="text-brand-primary font-semibold hover:underline"
                   >
                     politica de privacidade
@@ -796,6 +791,76 @@ export function CreateStore() {
           </form>
         </div>
       </main>
+      {showTerms && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="w-full max-w-3xl bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden">
+            <div className="px-6 py-5 border-b border-slate-200 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
+                  <img src={platformLogo} alt="Chama no Espeto" className="w-full h-full object-cover" />
+                </div>
+                <div>
+                  <p className="text-lg font-bold text-slate-900">Termos de uso</p>
+                  <p className="text-xs text-slate-500">LGPD e politica de privacidade</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowTerms(false)}
+                className="text-sm text-slate-500 hover:text-slate-700"
+              >
+                Fechar
+              </button>
+            </div>
+            <div className="p-6 space-y-5 max-h-[70vh] overflow-y-auto text-sm text-slate-600">
+              <section className="space-y-2">
+                <h3 className="text-base font-semibold text-slate-900">1. Plataforma e finalidade</h3>
+                <p>
+                  A plataforma Chama no Espeto fornece ferramentas para criar, publicar e gerir lojas digitais.
+                  O usuario e responsavel pelo conteudo, precos, ofertas e atendimento.
+                </p>
+              </section>
+              <section className="space-y-2">
+                <h3 className="text-base font-semibold text-slate-900">2. Cadastro e veracidade</h3>
+                <p>
+                  Informacoes fornecidas devem ser verdadeiras e atualizadas. Dados incorretos podem impedir
+                  a ativacao da loja e o recebimento de pagamentos.
+                </p>
+              </section>
+              <section className="space-y-2">
+                <h3 className="text-base font-semibold text-slate-900">3. Pagamentos e acesso</h3>
+                <p>
+                  A ativacao completa depende da confirmacao do pagamento do plano escolhido. Boletos podem
+                  levar ate 3 dias uteis para compensar.
+                </p>
+              </section>
+              <section className="space-y-2">
+                <h3 className="text-base font-semibold text-slate-900">4. LGPD e privacidade</h3>
+                <p>
+                  Os dados pessoais sao tratados para cadastro, autenticacao, cobranca e suporte, conforme a
+                  LGPD. O usuario pode solicitar atualizacao ou exclusao quando aplicavel.
+                </p>
+              </section>
+              <section className="space-y-2">
+                <h3 className="text-base font-semibold text-slate-900">5. Uso adequado</h3>
+                <p>
+                  E proibido utilizar a plataforma para fins ilegais ou fraudulentos. Contas em desacordo
+                  podem ser suspensas.
+                </p>
+              </section>
+            </div>
+            <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setShowTerms(false)}
+                className="px-4 py-2 rounded-lg bg-brand-primary text-white text-sm font-semibold hover:opacity-90"
+              >
+                Entendi
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
