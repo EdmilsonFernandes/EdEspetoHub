@@ -276,6 +276,22 @@ export function LandingPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-6 md:items-center">
+            <div className="md:col-span-3">
+              <div className="bg-gradient-to-r from-amber-50 via-white to-red-50 border border-amber-200 rounded-2xl p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shadow-sm">
+                <div>
+                  <p className="text-sm font-semibold text-amber-700">7 dias gratis para experimentar</p>
+                  <p className="text-xs text-amber-700/80">
+                    Use tudo agora e, ao final do periodo gratuito, escolha o plano ideal para continuar.
+                  </p>
+                </div>
+                <button
+                  onClick={() => navigate('/create')}
+                  className="px-4 py-2 rounded-lg bg-amber-500 text-white text-sm font-semibold hover:opacity-90"
+                >
+                  Comecar gratis
+                </button>
+              </div>
+            </div>
             {/* Carousel for mobile, grid for desktop */}
             {currentPlans.map((plan, index) => (
               <div
