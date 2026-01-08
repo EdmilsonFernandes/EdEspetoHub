@@ -275,8 +275,8 @@ export function LandingPage() {
             <p className="text-lg text-gray-600 dark:text-gray-300">Escolha o plano ideal para seu negócio</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-6 md:items-center">
-            <div className="transition-all duration-300">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-6 items-stretch">
+            <div className="transition-all duration-300 h-full">
               <div className="relative rounded-2xl shadow-lg p-8 h-full flex flex-col bg-gradient-to-br from-amber-50 via-white to-red-50 border border-amber-200">
                 <span className="absolute -top-4 left-6 bg-amber-500 text-white px-3 py-1 rounded-full text-xs font-bold">
                   7 DIAS GRATIS
