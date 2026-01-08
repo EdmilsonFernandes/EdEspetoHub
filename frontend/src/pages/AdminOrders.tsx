@@ -1,9 +1,9 @@
 // @ts-nocheck
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { AdminHeader } from '../components/Admin/AdminHeader';
 import { useAuth } from '../contexts/AuthContext';
 import { orderService } from '../services/orderService';
 import { formatCurrency, formatDateTime, formatOrderStatus, formatOrderType, formatPaymentMethod } from '../utils/format';
-import { AdminHeader } from '../components/Admin/AdminHeader';
 
 export function AdminOrders() {
   const { auth } = useAuth();
@@ -103,7 +103,7 @@ export function AdminOrders() {
 
   return (
     <div className="min-h-screen bg-slate-50" style={{ background: 'linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%)' }}>
-      <div className="max-w-6xl mx-auto py-8 px-4 space-y-6">
+      <div className="mx-auto py-8 px-4 space-y-6">
         <AdminHeader contextLabel="Pedidos" />
 
         <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">

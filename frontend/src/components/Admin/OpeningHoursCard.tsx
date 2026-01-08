@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { storeService } from '../../services/storeService';
 import { normalizeOpeningHours } from '../../utils/storeHours';
@@ -92,7 +92,7 @@ export function OpeningHoursCard() {
   return (
     <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
       <h3 className="text-lg font-bold text-slate-800 mb-3">Horario de funcionamento</h3>
-      <div className="space-y-3">
+      <div className="space-y-3 grid grid-cols-2 gap-8">
         {openingHours.map((entry) => (
           <div key={entry.day} className="space-y-2">
             <div className="flex items-center gap-3">
@@ -144,14 +144,14 @@ export function OpeningHoursCard() {
             ))}
           </div>
         ))}
+      </div>
         <button
           onClick={saveOpeningHours}
-          className="w-full text-white py-2 rounded-lg text-sm font-semibold bg-brand-gradient hover:opacity-90 transition"
+          className="mt-4 w-full text-white py-2 rounded-lg text-sm font-semibold bg-brand-gradient hover:opacity-90 transition"
           disabled={saving}
         >
           {saving ? 'Salvando...' : 'Salvar horario'}
         </button>
-      </div>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 // @ts-nocheck
-import React, { useEffect, useState } from 'react';
-import { ChefHat, LayoutDashboard, LogOut, ShoppingCart } from 'lucide-react';
+import { LayoutDashboard, LogOut, Package } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -22,6 +22,15 @@ export function AdminHeader({ contextLabel = 'Painel da Loja' }: Props) {
   const socialLinks = auth?.store?.settings?.socialLinks || [];
   const instagramLink = socialLinks.find((link) => link?.type === 'instagram')?.value;
   const instagramHandle = instagramLink ? `@${instagramLink.replace('@', '')}` : '';
+
+  const navigationGroups = {
+    main: [
+      { label: 'Dashboard', icon: LayoutDashboard, path: '/admin/dashboard' },
+    ],
+    store: [
+      { label: 'Vitrine', icon: Package, path: storeSlug ? `/${storeSlug}` : '/' },
+    ],
+  };
 
   useEffect(() => {
     const storeId = auth?.store?.id;
@@ -79,45 +88,61 @@ export function AdminHeader({ contextLabel = 'Painel da Loja' }: Props) {
           )}
         </div>
       </div>
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-3">
         <PlanBadge
           planName={planDetails?.planName}
           displayName={planDetails?.displayName}
           variant="dark"
           details={planDetails}
         />
-        <button
-          onClick={() => navigate('/admin/dashboard')}
-          className="px-3 py-2 rounded-lg text-xs font-semibold bg-white/20 hover:bg-white/30 transition flex items-center gap-1"
-        >
-          <LayoutDashboard size={14} /> Dashboard
-        </button>
-        <button
-          onClick={() => navigate('/admin/orders')}
-          className="px-3 py-2 rounded-lg text-xs font-semibold bg-white/20 hover:bg-white/30 transition flex items-center gap-1"
-        >
-          <LayoutDashboard size={14} /> Pedidos
-        </button>
-        <button
-          onClick={() => navigate('/admin/queue')}
-          className="px-3 py-2 rounded-lg text-xs font-semibold bg-white/20 hover:bg-white/30 transition flex items-center gap-1"
-        >
-          <ChefHat size={14} /> Fila
-        </button>
-        <button
-          onClick={() => navigate(storeSlug ? `/${storeSlug}` : '/')}
-          className="px-3 py-2 rounded-lg text-xs font-semibold bg-white/20 hover:bg-white/30 transition flex items-center gap-1"
-        >
-          <ShoppingCart size={14} /> Vitrine
-        </button>
+
+        {/* Main Actions */}
+        <div className="flex items-center gap-1 bg-white/10 rounded-lg p-1">
+          {navigationGroups.main.map((item) => {
+            const Icon = item.icon;
+            return (
+              <button
+                key={item.path}
+                onClick={() => navigate(item.path)}
+                className="px-3 py-2 rounded-md text-xs font-semibold hover:bg-white/20 transition flex items-center gap-1.5"
+                title={item.label}
+              >
+                <Icon size={14} />
+                <span className="hidden sm:inline">{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Store Actions */}
+        <div className="flex items-center gap-1">
+          {navigationGroups.store.map((item) => {
+            const Icon = item.icon;
+            return (
+              <button
+                key={item.path}
+                onClick={() => navigate(item.path)}
+                className="px-3 py-2 rounded-lg text-xs font-semibold bg-white/15 hover:bg-white/25 transition flex items-center gap-1.5"
+                title={item.label}
+              >
+                <Icon size={14} />
+                <span className="hidden sm:inline">{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Logout */}
         <button
           onClick={() => {
             logout();
             navigate('/admin');
           }}
-          className="px-3 py-2 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 transition flex items-center gap-1"
+          className="px-3 py-2 rounded-lg text-xs font-semibold bg-red-500/20 hover:bg-red-500/30 transition flex items-center gap-1.5 border border-red-300/20"
+          title="Sair do sistema"
         >
-          <LogOut size={14} /> Sair
+          <LogOut size={14} />
+          <span className="hidden sm:inline">Sair</span>
         </button>
       </div>
     </header>

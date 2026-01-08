@@ -112,24 +112,36 @@ export const ProductManager = ({ products }) => {
           {editing ? <Edit size={20} /> : <Plus size={20} />}
           {editing ? 'Editar Produto' : 'Novo Produto'}
         </h3>
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <input
-            className="p-3 border rounded-lg"
-            placeholder="Nome do Produto"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          />
-          <input
-            className="p-3 border rounded-lg"
-            placeholder="Preço (Ex: 10.50)"
-            type="number"
-            step="0.01"
-            value={formData.price}
-            onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-          />
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">Nome do Produto</label>
+              <input
+                className="p-3 border border-gray-200 rounded-lg w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+                placeholder="Ex: Espeto de Carne"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">Preço</label>
+              <input
+                className="p-3 border border-gray-200 rounded-lg w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+                placeholder="Ex: 10.50"
+                type="number"
+                step="0.01"
+                value={formData.price}
+                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                required
+              />
+            </div>
+          </div>
+          
           <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">Categoria</label>
             <select
-              className="p-3 border rounded-lg w-full"
+              className="p-3 border border-gray-200 rounded-lg w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent"
               value={categorySelect}
               onChange={(e) => {
                 const value = e.target.value;
@@ -151,7 +163,7 @@ export const ProductManager = ({ products }) => {
             </select>
             {categorySelect === '__custom__' && (
               <input
-                className="p-3 border rounded-lg w-full"
+                className="p-3 border border-gray-200 rounded-lg w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent"
                 placeholder="Digite a nova categoria"
                 value={customCategory}
                 onChange={(e) => {
@@ -162,28 +174,34 @@ export const ProductManager = ({ products }) => {
               />
             )}
           </div>
-          <div className="md:col-span-2 space-y-2">
-            <div className="flex items-center gap-2">
+
+          <div className="space-y-3">
+            <label className="text-sm font-medium text-gray-700">Imagem do Produto</label>
+            <div className="bg-gray-50 rounded-lg p-1 inline-flex">
               <button
                 type="button"
                 onClick={() => setImageMode('url')}
-                className={`px-3 py-2 rounded-lg text-sm font-semibold border ${imageMode === 'url' ? 'bg-brand-secondary text-white border-brand-secondary' : 'bg-white text-gray-600 border-gray-200'}`}
+                className={`px-3 py-2 rounded-md text-sm font-medium transition ${
+                  imageMode === 'url' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                }`}
               >
-                Imagem por URL
+                URL da Imagem
               </button>
               <button
                 type="button"
                 onClick={() => setImageMode('upload')}
-                className={`px-3 py-2 rounded-lg text-sm font-semibold border ${imageMode === 'upload' ? 'bg-brand-secondary text-white border-brand-secondary' : 'bg-white text-gray-600 border-gray-200'}`}
+                className={`px-3 py-2 rounded-md text-sm font-medium transition ${
+                  imageMode === 'upload' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                }`}
               >
-                Upload de imagem
+                Upload
               </button>
             </div>
 
             {imageMode === 'url' ? (
               <input
-                className="p-3 border rounded-lg w-full"
-                placeholder="URL da Foto (https://...)"
+                className="p-3 border border-gray-200 rounded-lg w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+                placeholder="https://exemplo.com/imagem.jpg"
                 value={formData.imageUrl}
                 onChange={(e) => {
                   setFormData({ ...formData, imageUrl: e.target.value });
@@ -192,7 +210,7 @@ export const ProductManager = ({ products }) => {
               />
             ) : (
               <input
-                className="p-3 border rounded-lg w-full"
+                className="p-3 border border-gray-200 rounded-lg w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-brand-primary file:text-white hover:file:bg-brand-primary/90"
                 type="file"
                 accept="image/*"
                 onChange={(e) => handleUpload(e.target.files?.[0])}
@@ -200,30 +218,40 @@ export const ProductManager = ({ products }) => {
             )}
 
             {imagePreview && (
-              <div className="flex items-center gap-3 text-sm text-gray-600">
-                <img src={imagePreview} alt="Preview" className="w-12 h-12 rounded object-cover border" />
-                <span>Pré-visualização da imagem</span>
+              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                <img src={imagePreview} alt="Preview" className="w-16 h-16 rounded-lg object-cover border" />
+                <div>
+                  <p className="text-sm font-medium text-gray-900">Pré-visualização</p>
+                  <p className="text-xs text-gray-500">Imagem carregada com sucesso</p>
+                </div>
               </div>
             )}
           </div>
-          <textarea
-            className="p-3 border rounded-lg md:col-span-2"
-            placeholder="Descrição do item..."
-            value={formData.desc}
-            onChange={(e) => setFormData({ ...formData, desc: e.target.value })}
-          />
 
-          <div className="md:col-span-2 flex gap-2">
-            <button type="submit" className="bg-brand-primary text-white px-6 py-3 rounded-lg font-bold flex-1 flex justify-center items-center gap-2 hover:opacity-90">
-              <Save size={18} /> Salvar
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">Descrição (opcional)</label>
+            <textarea
+              className="p-3 border border-gray-200 rounded-lg w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+              placeholder="Descreva o produto..."
+              rows={3}
+              value={formData.desc}
+              onChange={(e) => setFormData({ ...formData, desc: e.target.value })}
+            />
+          </div>
+
+          <div className="flex gap-3 pt-2">
+            <button 
+              type="submit" 
+              className="bg-brand-primary text-white px-6 py-3 rounded-lg font-semibold flex-1 flex justify-center items-center gap-2 hover:bg-brand-primary/90 transition"
+            >
+              <Save size={18} /> 
+              {editing ? 'Atualizar Produto' : 'Adicionar Produto'}
             </button>
             {editing && (
               <button
                 type="button"
-                onClick={() => {
-                  resetForm();
-                }}
-                className="bg-brand-secondary-soft text-brand-secondary px-6 py-3 rounded-lg font-bold hover:opacity-90"
+                onClick={resetForm}
+                className="bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-200 transition"
               >
                 Cancelar
               </button>

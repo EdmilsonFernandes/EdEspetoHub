@@ -2,6 +2,9 @@
 import React, { useRef } from "react";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
 
+const primaryPalette = [ '#dc2626', '#ea580c', '#f59e0b', '#16a34a', '#0ea5e9', '#2563eb', '#7c3aed' ];
+const secondaryPalette = [ '#111827', '#1f2937', '#334155', '#0f172a', '#0f766e', '#065f46', '#4b5563' ];
+
 export const BrandingSettings = ({ branding, onChange, storeSlug }) => {
   const fileInputRef = useRef(null);
   const handleChange = (field, value) => {
@@ -19,52 +22,51 @@ export const BrandingSettings = ({ branding, onChange, storeSlug }) => {
 
   return (
 
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-      <div className="p-4 border-b bg-gray-50 flex items-center justify-between">
-        <div>
-          <h3 className="font-bold text-gray-800">Identidade visual</h3>
-          <p className="text-sm text-gray-500">Deixe a loja com a cara do seu churrasco.</p>
-        </div>
-        <div className="text-xs text-gray-500 text-right">
-          Slug da loja
-          <div className="font-bold text-gray-800">{storeSlug || "não informado"}</div>
-        </div>
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="p-6 border-b bg-gray-50/70">
+        <h3 className="text-lg font-bold text-gray-800 mb-1">Identidade visual</h3>
+        <p className="text-sm text-gray-500">Deixe a loja com a cara do seu churrasco.</p>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-4 p-4">
-        <div className="space-y-2">
-          <label className="text-sm font-semibold text-gray-700">Nome da marca</label>
-          <input
-            type="text"
-            value={branding.brandName}
-            onChange={(e) => handleChange("brandName", e.target.value)}
-            className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-primary focus:outline-none"
-            placeholder="Ex: Churras do Lucas"
-          />
-        </div>
+      <div className="p-6 space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-gray-700">Nome da marca</label>
+            <input
+              type="text"
+              value={branding.brandName}
+              onChange={(e) => handleChange("brandName", e.target.value)}
+              className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
+              placeholder="Ex: Churras do Lucas"
+            />
+          </div>
 
-        <div className="space-y-2">
-          <label className="text-sm font-semibold text-gray-700">Slug da loja (fixo)</label>
-          <input
-            type="text"
-            value={storeSlug || ""}
-            readOnly
-            className="w-full border rounded-lg p-3 bg-gray-50 text-gray-500 cursor-not-allowed"
-          />
-          <p className="text-xs text-gray-500">Use esse slug para acessar o painel e a vitrine.</p>
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-sm font-semibold text-gray-700">Logo da loja</label>
-          <div className="flex items-center gap-3">
-            <div className="w-14 h-14 rounded-xl border border-gray-200 bg-white overflow-hidden flex items-center justify-center">
-              {logoPreview ? (
-                <img src={logoPreview} alt="Logo atual" className="w-full h-full object-cover" />
-              ) : (
-                <span className="text-sm font-bold text-gray-400">{previewInitials || "ES"}</span>
-              )}
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-gray-700">Instagram</label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">@</span>
+              <input
+                type="text"
+                value={branding.instagram}
+                onChange={(e) => handleChange("instagram", e.target.value.replace("@", ""))}
+                className="w-full border border-gray-200 rounded-xl p-3 pl-8 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
+                placeholder="meuchurras"
+              />
             </div>
-            <div className="flex flex-col gap-2">
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <label className="text-sm font-semibold text-gray-700">Logo da loja</label>
+          <div className="flex items-start gap-4">
+            <label className="flex-1 cursor-pointer">
+              <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 hover:border-red-400 transition-colors text-center">
+                <svg className="w-8 h-8 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+                <p className="text-sm text-gray-600 mb-1">Clique para enviar</p>
+                <p className="text-xs text-gray-500">PNG, JPG até 5MB</p>
+              </div>
               <input
                 ref={fileInputRef}
                 type="file"
@@ -79,60 +81,96 @@ export const BrandingSettings = ({ branding, onChange, storeSlug }) => {
                   };
                   reader.readAsDataURL(file);
                 }}
-                className="text-xs text-gray-600"
+                className="hidden"
               />
-              <button
-                type="button"
-                onClick={() => {
-                  handleChange("logoFile", "");
-                  handleChange("logoUrl", "");
-                  if (fileInputRef.current) fileInputRef.current.value = "";
-                }}
-                className="text-xs text-gray-500 underline"
-              >
-                Remover logo
-              </button>
-            </div>
+            </label>
+            {logoPreview && (
+              <div className="w-24 h-24 rounded-xl overflow-hidden border-2 border-gray-200 flex-shrink-0 relative group">
+                <img
+                  src={logoPreview}
+                  alt="Logo atual"
+                  className="w-full h-full object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleChange("logoFile", "");
+                    handleChange("logoUrl", "");
+                    if (fileInputRef.current) fileInputRef.current.value = "";
+                  }}
+                  className="absolute inset-0 bg-black/50 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                >
+                  Remover
+                </button>
+              </div>
+            )}
           </div>
-          <p className="text-xs text-gray-500">PNG, JPG ou SVG. Recomendado 400x400.</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-3">
+            <label className="text-sm font-semibold text-gray-700">Cor principal</label>
+            <input
+              type="color"
+              value={branding.primaryColor}
+              onChange={(e) => handleChange("primaryColor", e.target.value)}
+              className="w-16 h-16 cursor-pointer block"
+            />
+            <div className="flex flex-wrap gap-2">
+              {primaryPalette.map((color) => (
+                <button
+                  key={color}
+                  type="button"
+                  onClick={() => handleChange("primaryColor", color)}
+                  className={`w-8 h-8 rounded-full border-2 transition-all ${
+                    branding.primaryColor === color ? 'border-gray-900 scale-110' : 'border-gray-200 hover:scale-105'
+                  }`}
+                  style={{ backgroundColor: color }}
+                />
+              ))}
+            </div>
+            <p className="text-xs text-gray-500">Escolha a cor principal da sua marca.</p>
+          </div>
+
+          <div className="space-y-3">
+            <label className="text-sm font-semibold text-gray-700">Cor secundária</label>
+            <input
+              type="color"
+              value={branding.secondaryColor}
+              onChange={(e) => handleChange("secondaryColor", e.target.value)}
+              className="w-16 h-16 cursor-pointer block"
+            />
+            <div className="flex flex-wrap gap-2">
+              {secondaryPalette.map((color) => (
+                <button
+                  key={color}
+                  type="button"
+                  onClick={() => handleChange("secondaryColor", color)}
+                  className={`w-8 h-8 rounded-full border-2 transition-all ${
+                    branding.secondaryColor === color ? 'border-gray-900 scale-110' : 'border-gray-200 hover:scale-105'
+                  }`}
+                  style={{ backgroundColor: color }}
+                />
+              ))}
+            </div>
+            <p className="text-xs text-gray-500">Use um tom de apoio para fundos e detalhes.</p>
+          </div>
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-gray-700">Instagram</label>
+          <label className="text-sm font-semibold text-gray-700">Slug da loja (fixo)</label>
           <input
             type="text"
-            value={branding.instagram}
-            onChange={(e) => handleChange("instagram", e.target.value.replace("@", ""))}
-            className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-primary focus:outline-none"
-            placeholder="@meuchurras"
+            value={storeSlug || ""}
+            readOnly
+            className="w-full border border-gray-200 rounded-xl p-3 bg-gray-50 text-gray-500 cursor-not-allowed"
           />
+          <p className="text-xs text-gray-500">Use esse slug para acessar o painel e a vitrine.</p>
         </div>
-
-        <div className="space-y-2">
-          <label className="text-sm font-semibold text-gray-700">Cor primária</label>
-          <input
-            type="color"
-            value={branding.primaryColor}
-            onChange={(e) => handleChange("primaryColor", e.target.value)}
-            className="w-full border rounded-lg h-12 cursor-pointer"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-sm font-semibold text-gray-700">Cor secundária</label>
-          <input
-            type="color"
-            value={branding.secondaryColor}
-            onChange={(e) => handleChange("secondaryColor", e.target.value)}
-            className="w-full border rounded-lg h-12 cursor-pointer"
-          />
-        </div>
-
-        <div className="md:col-span-2 space-y-2" />
       </div>
 
-      <div className="p-4 bg-gray-50 border-t">
-        <h4 className="font-semibold text-gray-700 mb-3">Pré-visualização rápida</h4>
+      <div className="p-6 bg-gray-50/70 border-t">
+        <h4 className="font-semibold text-gray-700 mb-3">Pré-visualização</h4>
         <div className="flex items-center gap-3">
           <div
             className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold shadow-sm"
@@ -145,7 +183,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug }) => {
             )}
           </div>
           <div>
-            <div className="font-bold text-gray-900">{branding.brandName}</div>
+            <div className="font-bold text-gray-900">{branding.brandName || "Sua Loja"}</div>
             <div className="text-xs text-gray-500">@{branding.instagram || "seuinsta"}</div>
           </div>
         </div>

@@ -1,6 +1,6 @@
 // @ts-nocheck
-import React, { useMemo } from "react";
-import { ChefHat, Instagram, LayoutDashboard, Link, Plus } from "lucide-react";
+import React, { useMemo, useState } from "react";
+import { ChefHat, Instagram, LayoutDashboard, Link, Plus, X } from "lucide-react";
 import { formatCurrency } from "../../utils/format";
 
 // =======================================
@@ -11,6 +11,65 @@ const normalizeWhatsApp = (value) => {
   const digits = value.toString().replace(/\D/g, "");
   if (!digits) return "";
   return digits.startsWith("55") ? digits : `55${digits}`;
+};
+
+const ProductModal = ({ product, isOpen, onClose, onAddToCart }) => {
+  if (!isOpen || !product) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" onClick={onClose}>
+      <div 
+        className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto" 
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="relative">
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center shadow-lg z-10"
+          >
+            <X size={16} />
+          </button>
+          
+          {product.imageUrl ? (
+            <img
+              src={product.imageUrl}
+              alt={product.name}
+              className="w-full h-64 object-cover rounded-t-2xl"
+            />
+          ) : (
+            <div className="w-full h-64 bg-gray-100 rounded-t-2xl flex items-center justify-center text-gray-400">
+              Sem imagem
+            </div>
+          )}
+        </div>
+        
+        <div className="p-6 space-y-4">
+          <div>
+            <h3 className="text-xl font-bold text-gray-900">{product.name}</h3>
+            <p className="text-2xl font-bold text-brand-primary mt-1">{formatCurrency(product.price)}</p>
+          </div>
+          
+          {product.desc && (
+            <div>
+              <h4 className="font-semibold text-gray-700 mb-2">Descrição</h4>
+              <p className="text-gray-600 text-sm leading-relaxed">{product.desc}</p>
+            </div>
+          )}
+          
+          <button
+            onClick={() => {
+              onAddToCart(product, 1);
+              onClose();
+            }}
+            className="w-full bg-brand-primary text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-brand-primary/90 transition"
+          >
+            <Plus size={18} />
+            Adicionar ao pedido
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 const Header = ({ branding, instagramHandle, whatsappNumber, isOpenNow, todayHoursLabel, onOpenQueue, onOpenAdmin }) => {
@@ -111,6 +170,18 @@ export const MenuView = ({
   onOpenQueue,
   onOpenAdmin
 }) => {
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openProductModal = (product) => {
+    setSelectedProduct(product);
+    setIsModalOpen(true);
+  };
+
+  const closeProductModal = () => {
+    setIsModalOpen(false);
+    setSelectedProduct(null);
+  };
 
   const grouped = useMemo(() => {
     const defaults = [
@@ -264,6 +335,7 @@ export const MenuView = ({
                 <div
                   key={item.id}
                   className="bg-white/95 rounded-2xl shadow-sm border border-slate-100 p-3 flex gap-4 items-center hover:shadow-lg hover:-translate-y-0.5 active:scale-[0.99] transition cursor-pointer"
+                  onClick={() => openProductModal(item)}
                 >
 
                   {/* Foto do prato */}
@@ -293,7 +365,10 @@ export const MenuView = ({
 
                   {/* Botão de adicionar */}
                   <button
-                    onClick={() => onUpdateCart(item, 1)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onUpdateCart(item, 1);
+                    }}
                     title="Adicionar"
                     className="w-11 h-11 rounded-2xl bg-brand-primary text-white flex items-center justify-center hover:opacity-90 shadow-md active:scale-95 transition"
                   >
@@ -310,6 +385,13 @@ export const MenuView = ({
         ))}
         </div>
       </div>
+      
+      <ProductModal
+        product={selectedProduct}
+        isOpen={isModalOpen}
+        onClose={closeProductModal}
+        onAddToCart={onUpdateCart}
+      />
     </div>
   );
 };
