@@ -281,6 +281,9 @@ export function LandingPage() {
                 <span className="absolute -top-4 left-6 bg-amber-500 text-white px-3 py-1 rounded-full text-xs font-bold">
                   7 DIAS GRATIS
                 </span>
+                <div className="w-14 h-14 rounded-2xl overflow-hidden border border-amber-200 bg-white shadow-sm mb-4">
+                  <img src="/chama-no-espeto.jpeg" alt="Chama no Espeto" className="w-full h-full object-cover" />
+                </div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">Teste completo</h3>
                 <p className="text-sm text-gray-600 mb-6">
                   Use a plataforma por 7 dias sem cartao. Depois, escolha o plano ideal para continuar.
