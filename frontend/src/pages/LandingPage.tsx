@@ -124,8 +124,8 @@ export function LandingPage() {
         {/* Hero Section */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
           <div className="text-center space-y-6">
-            <span className="animate-bounce inline-flex items-center px-3 py-1 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs font-bold rounded-full uppercase tracking-wide border border-red-100 dark:border-red-800">
-              ⭐ 7 dias gratis para testar
+            <span className="animate-bounce inline-flex items-center px-4 py-1.5 bg-gradient-to-r from-amber-400 via-orange-400 to-red-500 text-white text-xs font-bold rounded-full uppercase tracking-[0.2em] shadow-lg">
+              7 dias gratis + sem cartao
             </span>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-[56px] font-semibold text-gray-900 dark:text-white leading-tight tracking-tight">
               Crie sites de pedidos de

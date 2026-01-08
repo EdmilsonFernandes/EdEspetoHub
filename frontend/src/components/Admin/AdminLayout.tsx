@@ -71,6 +71,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     return Math.ceil((end - now) / (1000 * 60 * 60 * 24));
   }, [subscription?.endDate]);
 
+  const isTrial = subscription?.status === 'TRIAL';
   const showRenewBanner =
     subscription?.status === 'EXPIRING' ||
     (typeof daysLeft === 'number' && daysLeft <= 3 && daysLeft >= 0);
@@ -84,6 +85,26 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <>
+      {isTrial && (
+        <div className="bg-blue-50 border-b border-blue-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold text-blue-900">Periodo gratis ativo</p>
+              <p className="text-xs text-blue-800">
+                {typeof daysLeft === 'number' && daysLeft >= 0
+                  ? `Seu trial termina em ${daysLeft} dia${daysLeft === 1 ? '' : 's'}.`
+                  : 'Seu trial esta ativo. Aproveite para configurar sua loja.'}
+              </p>
+            </div>
+            <button
+              onClick={() => navigate('/admin/renewal')}
+              className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:opacity-90"
+            >
+              Garantir minha vaga
+            </button>
+          </div>
+        </div>
+      )}
       {showRenewBanner && (
         <div className="bg-amber-50 border-b border-amber-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
