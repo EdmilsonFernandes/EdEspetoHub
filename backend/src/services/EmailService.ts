@@ -149,4 +149,40 @@ export class EmailService {
     `;
     await this.send({ to: email, subject, text, html });
   }
+
+  async sendSignupNotification(payload: {
+    emails: string[];
+    storeName: string;
+    ownerName: string;
+    ownerEmail: string;
+    slug: string;
+    createdAt: Date;
+  }) {
+    if (!payload.emails.length) return;
+    const subject = 'Novo cadastro - Chama no Espeto';
+    const text = [
+      'Novo cadastro recebido.',
+      `Loja: ${payload.storeName}`,
+      `Slug: ${payload.slug}`,
+      `Cliente: ${payload.ownerName} (${payload.ownerEmail})`,
+      `Criado em: ${payload.createdAt.toISOString()}`,
+    ].join('\n');
+    const html = `
+      <div style="font-family: Arial, sans-serif; background: #f8fafc; padding: 24px;">
+        <div style="max-width: 520px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px;">
+          <h2 style="margin: 0 0 8px; color: #0f172a;">Novo cadastro</h2>
+          <p style="margin: 0 0 12px; color: #475569;">Um novo cliente criou loja na plataforma.</p>
+          <ul style="padding-left: 18px; margin: 0; color: #0f172a;">
+            <li><strong>Loja:</strong> ${payload.storeName}</li>
+            <li><strong>Slug:</strong> ${payload.slug}</li>
+            <li><strong>Cliente:</strong> ${payload.ownerName} (${payload.ownerEmail})</li>
+            <li><strong>Criado em:</strong> ${payload.createdAt.toISOString()}</li>
+          </ul>
+        </div>
+      </div>
+    `;
+    await Promise.all(
+      payload.emails.map((email) => this.send({ to: email, subject, text, html }))
+    );
+  }
 }

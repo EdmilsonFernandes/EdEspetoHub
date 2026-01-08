@@ -41,6 +41,7 @@ export const env = {
     smtpUser: process.env.SMTP_USER || '',
     smtpPass: process.env.SMTP_PASS || '',
     smtpSecure: process.env.SMTP_SECURE === 'true',
+    notifyOnSignup: process.env.NOTIFY_ON_SIGNUP_EMAILS || '',
   },
   database: {
     host: process.env.PGHOST || 'localhost',

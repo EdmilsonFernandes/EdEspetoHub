@@ -165,6 +165,7 @@ export class AuthService
     });
 
     await this.sendVerificationEmail(result.user);
+    await this.notifySignup(result.user, result.store);
 
     const token = jwt.sign(
       { sub: result.user.id, storeId: result.store.id },
@@ -493,6 +494,23 @@ export class AuthService
 
     const link = `${env.appUrl}/verify-email?token=${encodeURIComponent(token)}`;
     await this.emailService.sendEmailVerification(user.email, link);
+  }
+
+  private async notifySignup(user: User, store: Store) {
+    const raw = env.email.notifyOnSignup || '';
+    const emails = raw
+      .split(',')
+      .map((entry) => entry.trim())
+      .filter(Boolean);
+    if (!emails.length) return;
+    await this.emailService.sendSignupNotification({
+      emails,
+      storeName: store.name,
+      ownerName: user.fullName,
+      ownerEmail: user.email,
+      slug: store.slug,
+      createdAt: new Date(),
+    });
   }
 
   private sendPaymentEmail(email: string, payment: any)
