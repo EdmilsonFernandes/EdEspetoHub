@@ -14,6 +14,12 @@ export const env = {
     const value = Number(raw);
     return Number.isFinite(value) && value > 0 ? value : 7;
   })(),
+  trialDays: (() => {
+    const raw = process.env.TRIAL_DAYS;
+    if (!raw) return 7;
+    const value = Number(raw);
+    return Number.isFinite(value) && value > 0 ? value : 7;
+  })(),
   firstMonthPromoPrice: (() => {
     const raw = process.env.FIRST_MONTH_PROMO_PRICE;
     if (!raw) return 14.9;

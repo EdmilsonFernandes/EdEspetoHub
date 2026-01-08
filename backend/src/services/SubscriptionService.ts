@@ -224,6 +224,8 @@ export class SubscriptionService {
     const endDate = new Date(subscription.endDate);
     if (now > endDate) return 'EXPIRED';
 
+    if (subscription.status === 'TRIAL') return 'TRIAL';
+
     const diffMs = endDate.getTime() - now.getTime();
     const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 

@@ -11,6 +11,7 @@ import { Store } from './Store';
 import { Plan } from './Plan';
 
 export type SubscriptionStatus =
+  | 'TRIAL'
   | 'PENDING'
   | 'ACTIVE'
   | 'EXPIRING'

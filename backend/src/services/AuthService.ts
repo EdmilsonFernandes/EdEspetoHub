@@ -146,12 +146,13 @@ export class AuthService
       }
 
       const now = new Date();
+      const trialEnd = this.addDays(now, env.trialDays);
       const subscription = subscriptionRepo.create({
         store,
         plan,
         startDate: now,
-        endDate: now,
-        status: 'PENDING',
+        endDate: trialEnd,
+        status: 'TRIAL',
         autoRenew: false,
         paymentMethod,
       });
@@ -408,6 +409,14 @@ export class AuthService
 
     if (!subscription) {
       return { message: 'E-mail verificado', redirectUrl: '/' };
+    }
+
+    if (subscription.status === 'TRIAL') {
+      if (!store.open) {
+        store.open = true;
+        await AppDataSource.getRepository(Store).save(store);
+      }
+      return { message: 'E-mail verificado', redirectUrl: '/admin' };
     }
 
     let latestPayment = await this.paymentRepository.findLatestByStoreId(store.id);
