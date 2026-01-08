@@ -333,13 +333,13 @@ export function StorePage() {
       navigate('/admin');
       return;
     }
-    navigate(storeSlug ? `/chamanoespeto/${storeSlug}/orders` : '/admin');
+    navigate(storeSlug ? `/admin/dashboard` : '/admin', { state: { activeTab: 'fila' } });
   };
 
   // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
         <div className="text-center">
           <div className="mb-4">
             <div className="w-16 h-16 mx-auto rounded-full border-4 border-gray-200 dark:border-gray-700 border-t-red-500 dark:border-t-red-500 animate-spin"></div>
@@ -354,36 +354,36 @@ export function StorePage() {
   const hasContent = products.length > 0 || !loadError;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 font-sans pb-24">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 font-sans pb-28 sm:pb-24">
       {view !== 'menu' && (
-        <div className="bg-white shadow-md px-4 py-4 flex items-center gap-4 sticky top-0 z-40 border-b border-gray-100">
+        <div className="bg-white shadow-md px-3 sm:px-4 py-3 sm:py-4 flex items-center gap-3 sticky top-0 z-40 border-b border-gray-100">
           <div
-            className="w-12 h-12 rounded-full overflow-hidden border shadow-sm bg-white flex items-center justify-center"
+            className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden border shadow-sm bg-white flex-shrink-0 flex items-center justify-center"
             style={{ borderColor: branding?.primaryColor, color: branding?.primaryColor }}
           >
             {branding?.logoUrl ? (
               <img src={branding.logoUrl} alt={branding.brandName} className="w-full h-full object-cover" />
             ) : (
-              <span className="font-bold text-lg">{branding?.brandName?.slice(0, 2)?.toUpperCase() || 'ES'}</span>
+              <span className="font-bold text-sm sm:text-lg">{branding?.brandName?.slice(0, 2)?.toUpperCase() || 'ES'}</span>
             )}
           </div>
-          <div className="flex-1 leading-tight">
-            <h1 className="text-lg font-bold text-gray-900">{branding?.brandName || 'Seu Espeto'}</h1>
-            <p className="text-xs text-gray-500">{branding?.tagline}</p>
+          <div className="flex-1 leading-tight min-w-0">
+            <h1 className="text-base sm:text-lg font-bold text-gray-900 truncate">{branding?.brandName || 'Seu Espeto'}</h1>
+            <p className="text-xs text-gray-500 truncate">{branding?.tagline}</p>
           </div>
           <button
             onClick={() => setView('menu')}
-            className="px-3 py-2 rounded-lg text-sm font-semibold border border-gray-200 text-gray-700 hover:bg-gray-50"
+            className="px-2 sm:px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold border border-gray-200 text-gray-700 hover:bg-gray-50 whitespace-nowrap flex-shrink-0"
           >
-            Voltar ao cardápio
+            Voltar
           </button>
         </div>
       )}
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <main className="mx-auto px-0 sm:px-4 md:px-6 lg:px-8 py-0 sm:py-6">
         {view === 'menu' && products.length === 0 ? (
           <div className="min-h-[80vh] flex items-center justify-center">
-            <div className="text-center">
+            <div className="text-center px-4">
               <div className="mb-4">
                 <div className="text-6xl">🍖</div>
               </div>
@@ -425,7 +425,7 @@ export function StorePage() {
           />
         )}
         {view === 'success' && (
-          <div className="max-w-md mx-auto">
+          <div className="max-w-md mx-auto px-2">
             <SuccessView
               orderType={lastOrder?.type}
               paymentMethod={lastOrder?.payment}
@@ -439,28 +439,28 @@ export function StorePage() {
       </main>
 
       {view === 'menu' && Object.keys(cart).length > 0 && (
-        <div className="fixed bottom-4 left-4 right-4 z-40 max-w-md mx-auto">
+        <div className="fixed bottom-4 left-4 right-4 z-40 sm:max-w-md sm:left-auto sm:right-6">
           <button
             onClick={() => setView('cart')}
-            className="w-full bg-brand-gradient text-white p-4 rounded-2xl shadow-2xl flex justify-between items-center transform hover:scale-[1.02] transition-all"
+            className="w-full bg-brand-gradient text-white p-3 sm:p-4 rounded-xl sm:rounded-2xl shadow-2xl flex justify-between items-center transform hover:scale-[1.02] transition-all text-sm sm:text-base"
           >
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <span
-                className="px-3 py-1 rounded-xl text-sm font-bold text-white shadow-lg"
+                className="px-2.5 sm:px-3 py-1 rounded-lg sm:rounded-xl text-xs sm:text-sm font-bold text-white shadow-lg"
                 style={{ backgroundColor: branding.primaryColor }}
               >
                 {Object.values(cart).reduce((acc, item) => acc + item.qty, 0)}
               </span>
-              <span className="font-bold">Ver sacola</span>
+              <span className="font-bold truncate">Ver sacola</span>
             </div>
-            <span className="font-bold text-lg">{formatCurrency(cartTotal)}</span>
+            <span className="font-bold text-base sm:text-lg ml-2 flex-shrink-0">{formatCurrency(cartTotal)}</span>
           </button>
         </div>
       )}
 
       {view === 'cart' && (
         <div
-          className="fixed bottom-6 right-6 text-white rounded-full p-4 shadow-2xl md:hidden cursor-pointer transform hover:scale-110 transition-all"
+          className="fixed bottom-6 right-6 text-white rounded-full p-3 sm:p-4 shadow-2xl sm:hidden cursor-pointer transform hover:scale-110 transition-all"
           style={{ backgroundColor: branding.primaryColor }}
           onClick={checkout}
         >

@@ -18,8 +18,8 @@ const ProductModal = ({ product, isOpen, onClose, onAddToCart }) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" onClick={onClose}>
-      <div 
-        className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto" 
+      <div
+        className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="relative">
@@ -29,7 +29,7 @@ const ProductModal = ({ product, isOpen, onClose, onAddToCart }) => {
           >
             <X size={16} />
           </button>
-          
+
           {product.imageUrl ? (
             <img
               src={product.imageUrl}
@@ -42,20 +42,20 @@ const ProductModal = ({ product, isOpen, onClose, onAddToCart }) => {
             </div>
           )}
         </div>
-        
+
         <div className="p-6 space-y-4">
           <div>
             <h3 className="text-xl font-bold text-gray-900">{product.name}</h3>
             <p className="text-2xl font-bold text-brand-primary mt-1">{formatCurrency(product.price)}</p>
           </div>
-          
+
           {product.desc && (
             <div>
               <h4 className="font-semibold text-gray-700 mb-2">Descrição</h4>
               <p className="text-gray-600 text-sm leading-relaxed">{product.desc}</p>
             </div>
           )}
-          
+
           <button
             onClick={() => {
               onAddToCart(product, 1);
@@ -84,7 +84,7 @@ const Header = ({ branding, instagramHandle, whatsappNumber, isOpenNow, todayHou
     .toUpperCase();
 
   return (
-    <div className="w-full relative bg-white/95 backdrop-blur shadow-md px-4 py-4 flex items-center gap-4 sticky top-0 z-50 border-b border-gray-100">
+    <div className="w-full bg-white/95 backdrop-blur shadow-md px-3 sm:px-4 py-3 sm:py-4 flex items-center gap-2 sm:gap-4 sticky top-0 z-50 border-b border-gray-100 flex-wrap sm:flex-nowrap">
       <div
         className="absolute top-0 left-0 right-0 h-1"
         style={{ backgroundImage: "linear-gradient(120deg, var(--color-primary), var(--color-secondary))" }}
@@ -92,7 +92,7 @@ const Header = ({ branding, instagramHandle, whatsappNumber, isOpenNow, todayHou
 
       {/* LOGO OFICIAL */}
       <div
-        className="w-14 h-14 rounded-full overflow-hidden border shadow-sm bg-white flex items-center justify-center"
+        className="w-10 h-10 sm:w-14 sm:h-14 rounded-full overflow-hidden border shadow-sm bg-white flex-shrink-0 flex items-center justify-center"
         style={{ borderColor: branding?.primaryColor, color: branding?.primaryColor, backgroundColor: '#fff' }}
       >
         {branding?.logoUrl ? (
@@ -102,18 +102,18 @@ const Header = ({ branding, instagramHandle, whatsappNumber, isOpenNow, todayHou
             className="w-full h-full object-cover"
           />
         ) : (
-          <span className="font-bold text-lg">{previewInitials || "ES"}</span>
+          <span className="font-bold text-sm sm:text-lg">{previewInitials || "ES"}</span>
         )}
       </div>
 
       {/* Nome + infos */}
-      <div className="flex-1 leading-tight">
-        <h1 className="text-xl font-bold text-gray-900">{branding?.brandName || "Seu Espeto"}</h1>
-        <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+      <div className="flex-1 leading-tight min-w-0">
+        <h1 className="text-base sm:text-xl font-bold text-gray-900 truncate">{branding?.brandName || "Seu Espeto"}</h1>
+        <div className="mt-0.5 sm:mt-1 flex flex-wrap items-center gap-1 sm:gap-2 text-xs text-slate-500">
           {storeSlug && (
-            <span className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full border border-slate-200 bg-white text-slate-600 text-[11px] uppercase tracking-wide">
+            <span className="hidden sm:inline-flex items-center gap-2 px-2.5 py-1 rounded-full border border-slate-200 bg-white text-slate-600 text-[11px] uppercase tracking-wide">
               <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-              Id da loja: <span className="font-semibold normal-case">{storeSlug}</span>
+              Id: <span className="font-semibold normal-case">{storeSlug}</span>
             </span>
           )}
           {instagramHandle && (
@@ -121,34 +121,40 @@ const Header = ({ branding, instagramHandle, whatsappNumber, isOpenNow, todayHou
               href={`https://instagram.com/${instagramHandle.replace("@", "")}`}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1 px-2 py-1 rounded-full border border-brand-primary text-brand-primary bg-brand-primary-soft font-semibold hover:underline"
+              className="inline-flex items-center gap-1 px-2 py-1 rounded-full border border-brand-primary text-brand-primary bg-brand-primary-soft font-semibold hover:underline text-[10px] sm:text-xs"
             >
-              <Instagram size={12} />
-              Instagram {instagramHandle}
+              <Instagram size={10} className="hidden sm:block" />
+              <Instagram size={9} className="sm:hidden" />
+              <span className="hidden sm:inline">Instagram {instagramHandle}</span>
+              <span className="sm:hidden">{instagramHandle}</span>
             </a>
           )}
         </div>
       </div>
 
-      <div className="flex flex-col items-end gap-2">
-        <div className="flex items-center gap-2">
-          {onOpenQueue && (
-            <button
-              onClick={onOpenQueue}
-              className="px-3 py-2 rounded-full text-xs font-semibold bg-brand-secondary text-white shadow-sm hover:shadow-md transition flex items-center gap-1"
-            >
-              <ChefHat size={14} /> Visao do churrasqueiro
-            </button>
-          )}
-          {onOpenAdmin && (
-            <button
-              onClick={onOpenAdmin}
-              className="px-3 py-2 rounded-full text-xs font-semibold border border-brand-secondary text-brand-secondary hover:bg-brand-secondary-soft transition flex items-center gap-1"
-            >
-              <LayoutDashboard size={14} /> Area admin
-            </button>
-          )}
-        </div>
+      {/* Buttons - Responsive */}
+      <div className="w-full sm:w-auto flex flex-col sm:flex-row items-end sm:items-center gap-1.5 sm:gap-2 order-last sm:order-none sm:flex-shrink-0">
+        {onOpenQueue && (
+          <button
+            onClick={onOpenQueue}
+            className="hidden md:flex flex-1 md:flex-none px-2 sm:px-3 py-1.5 sm:py-2 rounded-full text-xs font-semibold bg-brand-secondary text-white shadow-sm hover:shadow-md transition items-center gap-1 whitespace-nowrap"
+          >
+            <ChefHat size={12} className="hidden lg:block" />
+            <ChefHat size={11} className="lg:hidden" />
+            <span className="hidden lg:inline">Visao do churrasqueiro</span>
+            <span className="hidden md:inline lg:hidden text-[10px]">Churrasqueiro</span>
+          </button>
+        )}
+        {onOpenAdmin && (
+          <button
+            onClick={onOpenAdmin}
+            className="px-2 sm:px-3 py-1.5 sm:py-2 rounded-full text-xs font-semibold border border-brand-secondary text-brand-secondary hover:bg-brand-secondary-soft transition flex items-center gap-1 whitespace-nowrap"
+          >
+            <LayoutDashboard size={12} className="hidden sm:block" />
+            <LayoutDashboard size={10} className="sm:hidden" />
+            <span className="hidden sm:inline">Admin</span>
+          </button>
+        )}
       </div>
     </div>
   );
@@ -300,15 +306,28 @@ export const MenuView = ({
                   Falar no WhatsApp
                 </a>
               )}
-              <button
-                onClick={() =>
-                  document.getElementById("menu-list")?.scrollIntoView({ behavior: "smooth", block: "start" })
-                }
-                className="px-4 py-2 rounded-full text-sm font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50"
-                type="button"
-              >
-                Ver destaques
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={() =>
+                    document.getElementById("menu-list")?.scrollIntoView({ behavior: "smooth", block: "start" })
+                  }
+                  className="flex-1 px-4 py-2 rounded-full text-sm font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50"
+                  type="button"
+                >
+                  Ver destaques
+                </button>
+                {instagramHandle && (
+                  <a
+                    href={`https://instagram.com/${instagramHandle.replace("@", "")}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-4 py-2 rounded-full text-sm font-semibold border border-brand-primary text-white bg-brand-primary hover:opacity-90 shadow-sm flex items-center gap-2"
+                  >
+                    <Instagram size={16} />
+                    <span className="hidden sm:inline">Instagram</span>
+                  </a>
+                )}
+              </div>
             </div>
           </div>
         </section>
@@ -325,7 +344,7 @@ export const MenuView = ({
                 {category.label}
               </h2>
               <span className="text-xs font-semibold text-slate-500 bg-slate-50 border border-slate-200 px-2 py-1 rounded-full">
-                {category.items.length} itens
+                {category.items.length === 1 ? '1 item' : `${category.items.length} itens`}
               </span>
             </div>
 
@@ -385,7 +404,7 @@ export const MenuView = ({
         ))}
         </div>
       </div>
-      
+
       <ProductModal
         product={selectedProduct}
         isOpen={isModalOpen}

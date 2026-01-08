@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { BarChart3, ChefHat, Package, Settings, ShoppingCart } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { AdminHeader } from '../components/Admin/AdminHeader';
 import { BrandingSettings } from '../components/Admin/BrandingSettings';
 import DashboardView from '../components/Admin/DashboardView';
@@ -160,6 +160,7 @@ interface Props {
 
 export function AdminDashboard({ session: sessionProp }: Props) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { auth, hydrated, setAuth } = useAuth();
   const { branding, setBranding } = useTheme();
 
@@ -167,7 +168,9 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   const [products, setProducts] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState<'resumo' | 'pedidos' | 'produtos' | 'config' | 'fila'>('resumo');
+  const [activeTab, setActiveTab] = useState<'resumo' | 'pedidos' | 'produtos' | 'config' | 'fila'>(() => {
+    return (location.state as any)?.activeTab || 'resumo';
+  });
 
   const storeId = session?.store?.id;
   const storeSlug = session?.store?.slug;

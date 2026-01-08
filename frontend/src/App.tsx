@@ -8,6 +8,7 @@ import { AdminRoute } from './components/Admin/AdminRoute';
 import { AdminLayout } from './components/Admin/AdminLayout';
 import { AppErrorBoundary } from './components/common/AppErrorBoundary';
 import './index.css';
+import { PortfolioPage } from './pages/PortfolioPage';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Router>
           <Routes>
             <Route path="/" element={<LandingPage />} />
+            <Route path="/portfolio" element={<PortfolioPage />} />
             <Route path="/create" element={<CreateStore />} />
             <Route path="/admin" element={<AdminLogin />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />

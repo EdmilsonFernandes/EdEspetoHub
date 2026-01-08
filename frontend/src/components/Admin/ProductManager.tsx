@@ -1,15 +1,15 @@
 // @ts-nocheck
 import React, { useMemo, useState } from 'react';
-import { Image as ImageIcon, Edit, Trash2, Save, Plus } from 'lucide-react';
+import { Image as ImageIcon, Edit, Trash2, Save, Plus, Flame, Wine, Package, MoreHorizontal } from 'lucide-react';
 import { productService } from '../../services/productService';
 import { formatCurrency } from '../../utils/format';
 
 const initialForm = { name: '', price: '', category: 'espetos', imageUrl: '', imageFile: '', desc: '' };
 const defaultCategories = [
-  { id: 'espetos', label: 'Espetos' },
-  { id: 'bebidas', label: 'Bebidas' },
-  { id: 'porcoes', label: 'Porções' },
-  { id: 'outros', label: 'Outros' },
+  { id: 'espetos', label: 'Espetos', icon: Flame },
+  { id: 'bebidas', label: 'Bebidas', icon: Wine },
+  { id: 'porcoes', label: 'Porções', icon: Package },
+  { id: 'outros', label: 'Outros', icon: MoreHorizontal },
 ];
 
 const normalizeCategory = (value = '') => value.toString().trim().toLowerCase();
@@ -23,6 +23,12 @@ const formatCategoryLabel = (value = '') => {
     .join(' ');
 };
 
+const getCategoryIcon = (categoryId = '') => {
+  const normalized = normalizeCategory(categoryId);
+  const known = defaultCategories.find((entry) => entry.id === normalized);
+  return known?.icon || MoreHorizontal;
+};
+
 export const ProductManager = ({ products }) => {
   const [editing, setEditing] = useState(null);
   const [formData, setFormData] = useState(initialForm);
@@ -30,6 +36,7 @@ export const ProductManager = ({ products }) => {
   const [imagePreview, setImagePreview] = useState('');
   const [categorySelect, setCategorySelect] = useState(initialForm.category);
   const [customCategory, setCustomCategory] = useState('');
+  const [showCustomInput, setShowCustomInput] = useState(false);
 
   const categoryOptions = useMemo(() => {
     const unique = new Set(defaultCategories.map((entry) => entry.id));
@@ -40,11 +47,12 @@ export const ProductManager = ({ products }) => {
     const known = defaultCategories.map((entry) => ({
       id: entry.id,
       label: entry.label,
+      icon: entry.icon,
     }));
     const extras = Array.from(unique)
       .filter((entry) => !defaultCategories.find((item) => item.id === entry))
       .sort()
-      .map((entry) => ({ id: entry, label: formatCategoryLabel(entry) }));
+      .map((entry) => ({ id: entry, label: formatCategoryLabel(entry), icon: MoreHorizontal }));
     return [ ...known, ...extras ];
   }, [products]);
 
@@ -55,6 +63,7 @@ export const ProductManager = ({ products }) => {
     setImagePreview('');
     setCategorySelect(initialForm.category);
     setCustomCategory('');
+    setShowCustomInput(false);
   };
 
   const handleSubmit = async (event) => {
@@ -79,6 +88,7 @@ export const ProductManager = ({ products }) => {
     const isKnown = categoryOptions.some((entry) => entry.id === categoryKey);
     setCategorySelect(isKnown ? categoryKey : '__custom__');
     setCustomCategory(isKnown ? '' : categoryKey);
+    setShowCustomInput(!isKnown);
     setEditing(product);
     setFormData({
       ...product,
@@ -137,52 +147,81 @@ export const ProductManager = ({ products }) => {
               />
             </div>
           </div>
-          
+
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-700">Categoria</label>
-            <select
-              className="p-3 border border-gray-200 rounded-lg w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent"
-              value={categorySelect}
-              onChange={(e) => {
-                const value = e.target.value;
-                setCategorySelect(value);
-                if (value === '__custom__') {
-                  setFormData({ ...formData, category: normalizeCategory(customCategory) });
-                } else {
-                  setCustomCategory('');
-                  setFormData({ ...formData, category: value });
-                }
-              }}
-            >
-              {categoryOptions.map((option) => (
-                <option key={option.id} value={option.id}>
-                  {option.label}
-                </option>
-              ))}
-              <option value="__custom__">+ Nova categoria</option>
-            </select>
-            {categorySelect === '__custom__' && (
+            <div className="flex flex-wrap gap-2">
+              {categoryOptions.map((option) => {
+                const Icon = option.icon;
+                const isSelected = categorySelect === option.id;
+                return (
+                  <button
+                    key={option.id}
+                    type="button"
+                    onClick={() => {
+                      setCategorySelect(option.id);
+                      setCustomCategory('');
+                      setShowCustomInput(false);
+                      setFormData({ ...formData, category: option.id });
+                    }}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg font-medium text-sm transition ${
+                      isSelected
+                        ? 'bg-brand-primary text-white shadow-md'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    <Icon size={16} />
+                    {option.label}
+                  </button>
+                );
+              })}
+              <button
+                type="button"
+                onClick={() => {
+                  setShowCustomInput(!showCustomInput);
+                  if (showCustomInput) {
+                    setCustomCategory('');
+                    setCategorySelect(initialForm.category);
+                    setFormData({ ...formData, category: initialForm.category });
+                  }
+                }}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg font-medium text-sm transition border-2 ${
+                  showCustomInput
+                    ? 'border-brand-primary bg-brand-primary-soft text-brand-primary'
+                    : 'border-gray-300 border-dashed text-gray-600 hover:border-brand-primary hover:text-brand-primary'
+                }`}
+              >
+                <Plus size={16} />
+                Nova
+              </button>
+            </div>
+            {showCustomInput && (
               <input
-                className="p-3 border border-gray-200 rounded-lg w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent"
-                placeholder="Digite a nova categoria"
+                className="p-3 border border-gray-200 rounded-lg w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent mt-3"
+                placeholder="Digite o nome da nova categoria"
                 value={customCategory}
                 onChange={(e) => {
                   const value = e.target.value;
                   setCustomCategory(value);
                   setFormData({ ...formData, category: normalizeCategory(value) });
                 }}
+                autoFocus
               />
             )}
           </div>
 
           <div className="space-y-3">
             <label className="text-sm font-medium text-gray-700">Imagem do Produto</label>
-            <div className="bg-gray-50 rounded-lg p-1 inline-flex">
+
+            {/* Toggle buttons */}
+            <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => setImageMode('url')}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition ${
-                  imageMode === 'url' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                className={`px-4 py-2.5 rounded-lg text-sm font-semibold transition ${
+                  imageMode === 'url'
+                    ? 'bg-brand-primary text-white shadow-md'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
                 URL da Imagem
@@ -190,40 +229,87 @@ export const ProductManager = ({ products }) => {
               <button
                 type="button"
                 onClick={() => setImageMode('upload')}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition ${
-                  imageMode === 'upload' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                className={`px-4 py-2.5 rounded-lg text-sm font-semibold transition ${
+                  imageMode === 'upload'
+                    ? 'bg-brand-primary text-white shadow-md'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                Upload
+                Fazer Upload
               </button>
             </div>
 
-            {imageMode === 'url' ? (
-              <input
-                className="p-3 border border-gray-200 rounded-lg w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent"
-                placeholder="https://exemplo.com/imagem.jpg"
-                value={formData.imageUrl}
-                onChange={(e) => {
-                  setFormData({ ...formData, imageUrl: e.target.value });
-                  setImagePreview(e.target.value);
-                }}
-              />
-            ) : (
-              <input
-                className="p-3 border border-gray-200 rounded-lg w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-brand-primary file:text-white hover:file:bg-brand-primary/90"
-                type="file"
-                accept="image/*"
-                onChange={(e) => handleUpload(e.target.files?.[0])}
-              />
+            {/* URL input */}
+            {imageMode === 'url' && (
+              <div className="space-y-2">
+                <input
+                  className="p-3 border border-gray-200 rounded-lg w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+                  placeholder="https://exemplo.com/imagem.jpg"
+                  value={formData.imageUrl}
+                  onChange={(e) => {
+                    setFormData({ ...formData, imageUrl: e.target.value });
+                    setImagePreview(e.target.value);
+                  }}
+                />
+                {imagePreview && (
+                  <div className="relative rounded-lg overflow-hidden border border-gray-200 bg-gray-50 max-w-48">
+                    <img
+                      src={imagePreview}
+                      alt="Preview"
+                      className="w-full h-48 object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setImagePreview('');
+                        setFormData({ ...formData, imageUrl: '', imageFile: '' });
+                      }}
+                      className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg transition shadow-lg"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
 
-            {imagePreview && (
-              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                <img src={imagePreview} alt="Preview" className="w-16 h-16 rounded-lg object-cover border" />
-                <div>
-                  <p className="text-sm font-medium text-gray-900">Pré-visualização</p>
-                  <p className="text-xs text-gray-500">Imagem carregada com sucesso</p>
-                </div>
+            {/* Upload area */}
+            {imageMode === 'upload' && (
+              <div className="space-y-2">
+                {!imagePreview && (
+                  <label className="relative flex flex-col items-center justify-center w-full p-6 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-brand-primary hover:bg-brand-primary/5 transition">
+                    <div className="flex flex-col items-center justify-center">
+                      <ImageIcon size={24} className="text-gray-400 mb-2" />
+                      <p className="text-sm font-semibold text-gray-700">Arraste uma imagem aqui</p>
+                      <p className="text-xs text-gray-500">ou clique para selecionar</p>
+                    </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleUpload(e.target.files?.[0])}
+                      className="hidden"
+                    />
+                  </label>
+                )}
+                {imagePreview && (
+                  <div className="relative rounded-lg overflow-hidden border border-gray-200 bg-gray-50 max-w-48">
+                    <img
+                      src={imagePreview}
+                      alt="Preview"
+                      className="w-48 h-48 object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setImagePreview('');
+                        setFormData({ ...formData, imageUrl: '', imageFile: '' });
+                      }}
+                      className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg transition shadow-lg"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -240,11 +326,11 @@ export const ProductManager = ({ products }) => {
           </div>
 
           <div className="flex gap-3 pt-2">
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="bg-brand-primary text-white px-6 py-3 rounded-lg font-semibold flex-1 flex justify-center items-center gap-2 hover:bg-brand-primary/90 transition"
             >
-              <Save size={18} /> 
+              <Save size={18} />
               {editing ? 'Atualizar Produto' : 'Adicionar Produto'}
             </button>
             {editing && (
@@ -284,7 +370,15 @@ export const ProductManager = ({ products }) => {
                   )}
                 </td>
                 <td className="p-4 font-medium">{product.name}</td>
-                <td className="p-4 capitalize text-sm text-gray-500">{formatCategoryLabel(product.category)}</td>
+                <td className="p-4">
+                  <div className="flex items-center gap-2">
+                    {(() => {
+                      const Icon = getCategoryIcon(product.category);
+                      return <Icon size={16} className="text-brand-primary" />;
+                    })()}
+                    <span className="text-sm text-gray-600">{formatCategoryLabel(product.category)}</span>
+                  </div>
+                </td>
                 <td className="p-4 text-brand-primary font-bold">{formatCurrency(product.price)}</td>
                 <td className="p-4 text-right space-x-2">
                   <button onClick={() => handleEdit(product)} className="text-brand-primary hover:bg-brand-primary-soft p-2 rounded">
