@@ -52,6 +52,14 @@ export async function runMigrations() {
     );
   `);
   await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS site_settings (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+  await AppDataSource.query(`
     CREATE INDEX IF NOT EXISTS idx_email_verifications_user ON email_verifications(user_id);
   `);
   await AppDataSource.query(`

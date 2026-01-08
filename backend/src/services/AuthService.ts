@@ -20,6 +20,7 @@ import { PasswordReset } from '../entities/PasswordReset';
 import { EmailVerification } from '../entities/EmailVerification';
 import { PaymentRepository } from '../repositories/PaymentRepository';
 import { SubscriptionService } from './SubscriptionService';
+import { SettingsService } from './SettingsService';
 
 export class AuthService
 {
@@ -29,6 +30,7 @@ export class AuthService
   private emailService = new EmailService();
   private paymentRepository = new PaymentRepository();
   private subscriptionService = new SubscriptionService();
+  private settingsService = new SettingsService();
 
   async register(input: any)
   {
@@ -146,7 +148,8 @@ export class AuthService
       }
 
       const now = new Date();
-      const trialEnd = this.addDays(now, env.trialDays);
+      const trialDays = await this.settingsService.getNumber('trial_days', env.trialDays);
+      const trialEnd = this.addDays(now, trialDays);
       const subscription = subscriptionRepo.create({
         store,
         plan,
