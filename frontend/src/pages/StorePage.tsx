@@ -50,6 +50,7 @@ export function StorePage() {
   }, [openingHours]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
+  const isDemo = storeSlug === 'demo' || storeSlug === 'test-store';
 
   const cartTotal = useMemo(() => Object.values(cart).reduce((acc, item) => acc + item.price * item.qty, 0), [cart]);
   const instagramHandle = useMemo(() => (branding.instagram ? `@${branding.instagram.replace('@', '')}` : ''), [branding.instagram]);
@@ -256,6 +257,21 @@ export function StorePage() {
 
     if (!storeSlug) {
       alert('Loja não especificada.');
+      return;
+    }
+
+    if (isDemo) {
+      setCart({});
+      setCustomer(initialCustomer);
+      setPaymentMethod(defaultPaymentMethod);
+      setLastOrder({
+        type: customer.type,
+        payment,
+        phone: sanitizedPhoneKey || customer.phone,
+        pixKey,
+        table: customer.table,
+      });
+      setView('success');
       return;
     }
 

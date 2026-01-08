@@ -17,7 +17,7 @@ export function LandingPage() {
   const [plans, setPlans] = useState([]);
 
   const goToDemoStore = () => {
-    navigate('/chamanoespeto/test-store');
+    navigate('/chamanoespeto/demo');
   };
 
   useEffect(() => {
