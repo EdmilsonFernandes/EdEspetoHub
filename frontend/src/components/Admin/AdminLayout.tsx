@@ -86,19 +86,24 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
       {isTrial && (
-        <div className="bg-blue-50 border-b border-blue-200">
+        <div className="bg-gradient-to-r from-blue-50 via-white to-indigo-50 border-b border-blue-100">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div>
-              <p className="text-sm font-semibold text-blue-900">Periodo gratis ativo</p>
-              <p className="text-xs text-blue-800">
-                {typeof daysLeft === 'number' && daysLeft >= 0
-                  ? `Seu trial termina em ${daysLeft} dia${daysLeft === 1 ? '' : 's'}.`
-                  : 'Seu trial esta ativo. Aproveite para configurar sua loja.'}
-              </p>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold">
+                ★
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-slate-900">Trial premium ativo</p>
+                <p className="text-xs text-slate-600">
+                  {typeof daysLeft === 'number' && daysLeft >= 0
+                    ? `Seu trial termina em ${daysLeft} dia${daysLeft === 1 ? '' : 's'}.`
+                    : 'Seu trial esta ativo. Aproveite para configurar sua loja.'}
+                </p>
+              </div>
             </div>
             <button
               onClick={() => navigate('/admin/renewal')}
-              className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:opacity-90"
+              className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:opacity-90 shadow-sm"
             >
               Garantir minha vaga
             </button>
