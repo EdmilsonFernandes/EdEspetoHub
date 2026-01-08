@@ -38,6 +38,10 @@
   - `reminder_stage` evita envio duplicado.
   - Renovacao no admin com escolha de plano e pagamento.
   - Admin expirada cai em `/admin/renewal`.
+- Trial:
+  - Periodo gratis configuravel via `site_settings` (`trial_days`).
+  - Confirmou e-mail, loja ativa e envia e-mail de ativacao.
+  - Banner premium no admin mostra dias restantes e CTA de renovacao.
 - SEO:
   - Meta tags dinamicas por loja (OG/Twitter + favicon do cliente).
   - `sitemap.xml` e `robots.txt` com sitemap.
@@ -45,6 +49,9 @@
   - Linha do tempo do usuario mostra apenas status + data.
   - Admin login sem valores predefinidos.
   - Sessao expirada limpa `adminSession` e redireciona pro login.
+- Demo:
+  - Vitrine demo em `/chamanoespeto/demo`.
+  - Admin demo em `/admin/demo` com dados locais (localStorage).
 
 ## Arquivos principais mexidos
 - frontend/src/components/Client/MenuView.tsx

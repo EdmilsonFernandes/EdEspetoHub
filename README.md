@@ -103,6 +103,14 @@ SEO basico:
 - `robots.txt` aponta para o sitemap.
 - `sitemap.xml` com rotas publicas basicas (home, create, terms).
 
+Trial:
+- Periodo gratis configuravel via `site_settings` (`trial_days`).
+- Loja ativa apos confirmacao de e-mail, sem cobrar durante o trial.
+
+Demo:
+- Vitrine demo em `/chamanoespeto/demo`.
+- Admin demo em `/admin/demo` com dados locais.
+
 ```mermaid
 flowchart TD
   A[Cadastro /api/auth/register] --> B[Criar usuario]
