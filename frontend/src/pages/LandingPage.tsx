@@ -20,6 +20,10 @@ export function LandingPage() {
     navigate('/chamanoespeto/demo');
   };
 
+  const goToAdminDemo = () => {
+    navigate('/admin/demo');
+  };
+
   useEffect(() => {
     platformService.listStores()
   }, []);
@@ -89,6 +93,13 @@ export function LandingPage() {
                 <span className="sm:hidden">Demo</span>
               </button>
               <button
+                onClick={goToAdminDemo}
+                className="px-3 py-2 sm:px-4 text-sm rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors"
+              >
+                <span className="hidden sm:inline">Admin demo</span>
+                <span className="sm:hidden">Admin</span>
+              </button>
+              <button
                 onClick={() => navigate('/admin')}
                 className="px-3 py-2 sm:px-4 text-sm rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all"
               >
@@ -138,6 +149,12 @@ export function LandingPage() {
                 className="cursor-pointer px-8 py-4 text-lg rounded-xl border-2 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
               >
                 👀 Ver loja demo
+              </button>
+              <button
+                onClick={goToAdminDemo}
+                className="cursor-pointer px-8 py-4 text-lg rounded-xl border-2 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              >
+                🧾 Ver admin demo
               </button>
             </div>
           </div>

@@ -8,6 +8,7 @@ export { AdminDashboard } from './AdminDashboard';
 export { AdminOrders } from './AdminOrders';
 export { AdminQueue } from './AdminQueue';
 export { AdminRenewal } from './AdminRenewal';
+export { AdminDemo } from './AdminDemo';
 export { PaymentPage } from './PaymentPage';
 export { SuperAdmin } from './SuperAdmin';
 export { ForgotPassword } from './ForgotPassword';
