@@ -61,7 +61,7 @@ export function PortfolioPage() {
         <div className="max-w-6xl mx-auto px-4">
           {/* Header */}
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">
               Nosso Time
             </h2>
             <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
@@ -87,10 +87,10 @@ export function PortfolioPage() {
                     {member.name}
                   </h3>
                   <div className="flex items-center justify-center gap-2 mb-2">
-                    <p className="text-blue-600 dark:text-blue-400 font-semibold">
+                    <p className="text-red-600 dark:text-red-400 font-semibold">
                       {member.role}
                     </p>
-                    <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 px-2 py-1 rounded-full font-semibold">
+                    <span className="text-xs bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-300 px-2 py-1 rounded-full font-semibold">
                       {member.years}y
                     </span>
                   </div>
@@ -112,7 +112,7 @@ export function PortfolioPage() {
                     {member.experience.map((exp, expIndex) => (
                       <span
                         key={expIndex}
-                        className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 text-xs font-semibold rounded-full"
+                        className="px-3 py-1 bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-300 text-xs font-semibold rounded-full"
                       >
                         {exp}
                       </span>
@@ -143,9 +143,9 @@ export function PortfolioPage() {
 
             {/* Info Cards */}
             <div className="space-y-4">
-              <div className="bg-slate-50 dark:bg-slate-900 rounded-lg p-6 border-l-4 border-blue-600">
+              <div className="bg-slate-50 dark:bg-slate-900 rounded-lg p-6 border-l-4 border-red-600">
                 <div className="flex items-center gap-3 mb-2">
-                  <Code2 className="w-6 h-6 text-blue-600" />
+                  <Code2 className="w-6 h-6 text-red-600" />
                   <h3 className="font-bold text-slate-900 dark:text-white">
                     Stack Tecnológico
                   </h3>
@@ -155,9 +155,9 @@ export function PortfolioPage() {
                 </p>
               </div>
 
-              <div className="bg-slate-50 dark:bg-slate-900 rounded-lg p-6 border-l-4 border-purple-600">
+              <div className="bg-slate-50 dark:bg-slate-900 rounded-lg p-6 border-l-4 border-orange-600">
                 <div className="flex items-center gap-3 mb-2">
-                  <Zap className="w-6 h-6 text-purple-600" />
+                  <Zap className="w-6 h-6 text-orange-600" />
                   <h3 className="font-bold text-slate-900 dark:text-white">
                     Expertise
                   </h3>
@@ -167,9 +167,9 @@ export function PortfolioPage() {
                 </p>
               </div>
 
-              <div className="bg-slate-50 dark:bg-slate-900 rounded-lg p-6 border-l-4 border-pink-600">
+              <div className="bg-slate-50 dark:bg-slate-900 rounded-lg p-6 border-l-4 border-red-500">
                 <div className="flex items-center gap-3 mb-2">
-                  <Palette className="w-6 h-6 text-pink-600" />
+                  <Palette className="w-6 h-6 text-red-500" />
                   <h3 className="font-bold text-slate-900 dark:text-white">
                     Nossa Missão
                   </h3>
@@ -188,7 +188,7 @@ export function PortfolioPage() {
         <div className="max-w-6xl mx-auto px-4">
           {/* Header */}
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">
               Nossos Clientes
             </h2>
             <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
@@ -219,23 +219,23 @@ export function PortfolioPage() {
 
             <div className="carousel-scroll flex gap-8 w-max">
               {[
-                "TechVision",
-                "CloudSync",
-                "DataFlow",
-                "NexusHub",
-                "InnovateLabs",
-                "TechVision",
-                "CloudSync",
-                "DataFlow",
-                "NexusHub",
-                "InnovateLabs"
+                "Wibx",
+                "Ericsson",
+                "Fitec",
+                "NtConsult",
+                "BirdiRx",
+                "Cartola Express",
+                "Wibx",
+                "Ericsson",
+                "Fitec",
+                "NtConsult"
               ].map((brand, index) => (
                 <div
                   key={index}
                   className="flex-shrink-0 w-64 h-32 bg-white dark:bg-slate-800 rounded-lg shadow-md flex items-center justify-center border border-gray-200 dark:border-slate-700 hover:shadow-lg transition-shadow duration-300"
                 >
                   <div className="text-center">
-                    <div className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    <div className="text-2xl font-bold bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">
                       {brand}
                     </div>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
