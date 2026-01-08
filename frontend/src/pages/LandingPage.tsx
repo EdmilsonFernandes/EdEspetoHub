@@ -1,15 +1,15 @@
 // @ts-nocheck
-import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
 import { Hero } from '../components/Hero';
-import { useTheme } from '../contexts/ThemeContext';
 import { Palette, MonitorCog, Smartphone, Rocket, Ham } from 'lucide-react';
 import { platformService } from '../services/platformService';
 import { planService } from '../services/planService';
 import { BILLING_OPTIONS, PLAN_TIERS, getPlanName } from '../constants/planCatalog';
 import { LandingPageLayout } from '../layouts/LandingPageLayout';
+import { useNavigate } from 'react-router-dom';
 
 export function LandingPage() {
+  const navigate = useNavigate();
   const [isAnnual, setIsAnnual] = useState(false);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [plans, setPlans] = useState([]);

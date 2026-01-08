@@ -2,7 +2,7 @@
 import { BarChart3, ChefHat, Package, Settings, ShoppingCart } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { AdminHeader } from '../components/Admin/AdminHeader';
+import { AdminLayout } from '../layouts/AdminLayout';
 import { BrandingSettings } from '../components/Admin/BrandingSettings';
 import DashboardView from '../components/Admin/DashboardView';
 import { GrillQueue } from '../components/Admin/GrillQueue';
@@ -323,79 +323,75 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50" style={{ background: 'linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%)' }}>
-      <div className="mx-auto p-4 space-y-6">
-        <AdminHeader contextLabel="Painel da Loja" />
-
-        <div className="flex justify-center">
-          <div className="bg-white rounded-xl border border-slate-200 p-1 shadow-sm inline-flex gap-2">
-          {[
-            { id: 'resumo', label: 'Resumo', icon: BarChart3 },
-            { id: 'pedidos', label: 'Pedidos', icon: ShoppingCart },
-            { id: 'produtos', label: 'Produtos', icon: Package },
-            { id: 'config', label: 'Configurações', icon: Settings },
-            { id: 'fila', label: 'Fila do churrasqueiro', icon: ChefHat },
-          ].map((tab) => {
-            const Icon = tab.icon;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as typeof activeTab)}
-                className={`cursor-pointer px-4 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2 ${
-                  activeTab === tab.id
-                    ? 'bg-brand-primary text-white shadow-sm'
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                }`}
-              >
-                <Icon size={16} />
-                <span className="hidden sm:inline">{tab.label}</span>
-              </button>
-            );
-          })}
-          </div>
+    <AdminLayout contextLabel="Painel da Loja">
+      <div className="flex justify-center">
+        <div className="bg-white rounded-xl border border-slate-200 p-1 shadow-sm inline-flex gap-2">
+        {[
+          { id: 'resumo', label: 'Resumo', icon: BarChart3 },
+          { id: 'pedidos', label: 'Pedidos', icon: ShoppingCart },
+          { id: 'produtos', label: 'Produtos', icon: Package },
+          { id: 'config', label: 'Configurações', icon: Settings },
+          { id: 'fila', label: 'Fila do churrasqueiro', icon: ChefHat },
+        ].map((tab) => {
+          const Icon = tab.icon;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as typeof activeTab)}
+              className={`cursor-pointer px-4 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2 ${
+                activeTab === tab.id
+                  ? 'bg-brand-primary text-white shadow-sm'
+                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+              }`}
+            >
+              <Icon size={16} />
+              <span className="hidden sm:inline">{tab.label}</span>
+            </button>
+          );
+        })}
         </div>
-
-        {activeTab === 'resumo' && <DashboardView orders={orders} customers={customers} />}
-
-        {activeTab === 'pedidos' && (
-          <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-            <OrdersView orders={orders} />
-          </div>
-        )}
-
-        {activeTab === 'produtos' && <ProductManager products={products} />}
-
-        {activeTab === 'config' && (
-          <div className="space-y-4">
-              <StoreIdentityCard
-                branding={branding}
-                socialLinks={socialLinks}
-                manualOpen={manualOpen}
-                onToggleOpen={savingStatus ? undefined : toggleManualOpen}
-                whatsappNumber={whatsappNumber}
-              />
-            <BrandingSettings branding={brandingDraft} onChange={setBrandingDraft} storeSlug={storeSlug} />
-            <div className="flex justify-end">
-              <button
-                onClick={handleSaveBranding}
-                disabled={savingBranding}
-                className="px-4 py-2 rounded-lg bg-brand-primary text-white text-sm font-semibold hover:opacity-90 disabled:opacity-60"
-              >
-                {savingBranding ? 'Salvando...' : 'Salvar identidade'}
-              </button>
-            </div>
-            <OpeningHoursCard />
-          </div>
-        )}
-
-        {activeTab === 'fila' && (
-          <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-            <GrillQueue />
-          </div>
-        )}
-
-        {error && <p className="text-red-600 text-sm">{error}</p>}
       </div>
-    </div>
+
+      {activeTab === 'resumo' && <DashboardView orders={orders} customers={customers} />}
+
+      {activeTab === 'pedidos' && (
+        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <OrdersView orders={orders} />
+        </div>
+      )}
+
+      {activeTab === 'produtos' && <ProductManager products={products} />}
+
+      {activeTab === 'config' && (
+        <div className="space-y-4">
+            <StoreIdentityCard
+              branding={branding}
+              socialLinks={socialLinks}
+              manualOpen={manualOpen}
+              onToggleOpen={savingStatus ? undefined : toggleManualOpen}
+              whatsappNumber={whatsappNumber}
+            />
+          <BrandingSettings branding={brandingDraft} onChange={setBrandingDraft} storeSlug={storeSlug} />
+          <div className="flex justify-end">
+            <button
+              onClick={handleSaveBranding}
+              disabled={savingBranding}
+              className="px-4 py-2 rounded-lg bg-brand-primary text-white text-sm font-semibold hover:opacity-90 disabled:opacity-60"
+            >
+              {savingBranding ? 'Salvando...' : 'Salvar identidade'}
+            </button>
+          </div>
+          <OpeningHoursCard />
+        </div>
+      )}
+
+      {activeTab === 'fila' && (
+        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <GrillQueue />
+        </div>
+      )}
+
+      {error && <p className="text-red-600 text-sm">{error}</p>}
+    </AdminLayout>
   );
 }

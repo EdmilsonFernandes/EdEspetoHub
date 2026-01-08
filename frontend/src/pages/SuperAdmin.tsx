@@ -1,5 +1,23 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
+import {
+  RefreshCw,
+  TrendingUp,
+  Store,
+  CheckCircle,
+  AlertCircle,
+  DollarSign,
+  CreditCard,
+  Clock,
+  BarChart3,
+  Filter,
+  Download,
+  Trash2,
+  Eye,
+  ChevronLeft,
+  ChevronRight,
+  Search,
+} from 'lucide-react';
 import { superAdminService } from '../services/superAdminService';
 import { formatCurrency, formatPlanName } from '../utils/format';
 import { exportToCsv } from '../utils/export';
@@ -8,6 +26,7 @@ import Lottie from 'lottie-react';
 import fireAnimation from '../assets/fire.json';
 import { useToast } from '../contexts/ToastContext';
 import { AuthLayout } from '../layouts/AuthLayout';
+import { AdminLayout } from '../layouts/AdminLayout';
 
 const STORAGE_KEY = 'superAdminToken';
 const FILTERS_KEY = 'superAdminPaymentFilters';
@@ -466,25 +485,36 @@ export function SuperAdmin() {
   }
 
   return (
-    <>
-      <div className="min-h-screen bg-slate-50">
-        <div className="max-w-6xl mx-auto py-8 px-4 space-y-6">
-        <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-black text-slate-800">Super Admin</h1>
-            <p className="text-sm text-slate-500">Visao geral da plataforma</p>
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setAutoRefresh((prev) => !prev)}
-              className={`px-4 py-2 rounded-lg border ${autoRefresh ? 'border-brand-primary text-brand-primary' : 'border-slate-200 text-slate-600'} hover:bg-slate-50`}
+    <AdminLayout contextLabel="Plataforma" showHeader={false}>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-black text-slate-800">Super Admin</h1>
+          <p className="text-sm text-slate-500">Visão geral da plataforma</p>
+        </div>
+        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          <span className="text-sm font-semibold text-slate-600">Auto-refresh</span>
+          <button
+            onClick={() => setAutoRefresh((prev) => !prev)}
+            className={`relative inline-flex h-6 w-12 items-center rounded-full transition-colors ${
+              autoRefresh ? 'bg-brand-primary' : 'bg-slate-300'
+            }`}
+            title={autoRefresh ? 'Auto-refresh ON' : 'Auto-refresh OFF'}
+          >
+            <span
+              className={`h-4 w-4 transform rounded-full bg-white transition-transform flex items-center justify-center ${
+                autoRefresh ? 'translate-x-7' : 'translate-x-1'
+              }`}
             >
-              {autoRefresh ? 'Auto-refresh ON' : 'Auto-refresh OFF'}
-            </button>
+
+            </span>
+          </button>
+        </div>
             <button
               onClick={() => loadOverview(token)}
-              className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50"
+              className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 flex items-center gap-2"
             >
+              <RefreshCw size={16} />
               Atualizar
             </button>
             <button
@@ -494,44 +524,68 @@ export function SuperAdmin() {
               Sair
             </button>
           </div>
-        </header>
+        </div>
 
         {loading && <div className="text-sm text-slate-500">Carregando...</div>}
 
         {summary && (
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
-              <p className="text-xs uppercase text-slate-400 font-semibold">Lojas</p>
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs uppercase text-slate-400 font-semibold">Lojas</p>
+                <Store size={20} className="text-blue-500" />
+              </div>
               <p className="text-2xl font-black text-slate-800">{summary.totalStores}</p>
             </div>
-            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
-              <p className="text-xs uppercase text-slate-400 font-semibold">Assinaturas ativas</p>
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs uppercase text-slate-400 font-semibold">Assinaturas ativas</p>
+                <CheckCircle size={20} className="text-emerald-600" />
+              </div>
               <p className="text-2xl font-black text-emerald-600">{summary.activeSubscriptions}</p>
             </div>
-            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
-              <p className="text-xs uppercase text-slate-400 font-semibold">Expirando</p>
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs uppercase text-slate-400 font-semibold">Expirando</p>
+                <AlertCircle size={20} className="text-amber-600" />
+              </div>
               <p className="text-2xl font-black text-amber-600">{summary.expiringSubscriptions}</p>
             </div>
-            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
-              <p className="text-xs uppercase text-slate-400 font-semibold">Receita confirmada</p>
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs uppercase text-slate-400 font-semibold">Receita confirmada</p>
+                <DollarSign size={20} className="text-brand-primary" />
+              </div>
               <p className="text-2xl font-black text-brand-primary">{paidRevenue}</p>
             </div>
-            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
-              <p className="text-xs uppercase text-slate-400 font-semibold">Pagamentos pagos</p>
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs uppercase text-slate-400 font-semibold">Pagamentos pagos</p>
+                <CheckCircle size={20} className="text-emerald-500" />
+              </div>
               <p className="text-2xl font-black text-slate-800">{summary.paidPayments}</p>
             </div>
-            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
-              <p className="text-xs uppercase text-slate-400 font-semibold">Pagamentos pendentes</p>
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs uppercase text-slate-400 font-semibold">Pagamentos pendentes</p>
+                <Clock size={20} className="text-amber-500" />
+              </div>
               <p className="text-2xl font-black text-slate-800">{summary.pendingPayments}</p>
             </div>
-            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
-              <p className="text-xs uppercase text-slate-400 font-semibold">Mensal vs Anual</p>
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs uppercase text-slate-400 font-semibold">Mensal vs Anual</p>
+                <TrendingUp size={20} className="text-slate-500" />
+              </div>
               <p className="text-lg font-semibold text-slate-700">
                 {summary.monthlyPlans} mensal · {summary.yearlyPlans} anual
               </p>
             </div>
-            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
-              <p className="text-xs uppercase text-slate-400 font-semibold">MRR projetado</p>
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs uppercase text-slate-400 font-semibold">MRR projetado</p>
+                <TrendingUp size={20} className="text-slate-500" />
+              </div>
               <p className="text-2xl font-black text-slate-800">{formatCurrency(summary.mrrProjected || 0)}</p>
             </div>
           </div>
@@ -539,7 +593,10 @@ export function SuperAdmin() {
 
         <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-bold text-slate-800">Receita por mes</h2>
+            <div className="flex items-center gap-2">
+              <BarChart3 size={20} className="text-slate-700" />
+              <h2 className="text-lg font-bold text-slate-800">Receita por mês</h2>
+            </div>
           </div>
           {revenueByMonth.length === 0 ? (
             <div className="text-sm text-slate-500">Nenhuma receita paga registrada.</div>
@@ -618,39 +675,47 @@ export function SuperAdmin() {
 
         <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm overflow-x-auto">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-bold text-slate-800">Pagamentos recentes</h2>
+            <div className="flex items-center gap-2">
+              <CreditCard size={20} className="text-slate-700" />
+              <h2 className="text-lg font-bold text-slate-800">Pagamentos recentes</h2>
+            </div>
             <div className="flex gap-2">
               <button
                 onClick={resetFilters}
-                className="px-3 py-2 rounded-lg text-sm font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50"
+                className="px-3 py-2 rounded-lg text-sm font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50 flex items-center gap-1"
               >
+                <Trash2 size={14} />
                 Limpar filtros
               </button>
               <button
                 onClick={exportPaymentsCsv}
-                className="px-3 py-2 rounded-lg text-sm font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50"
+                className="px-3 py-2 rounded-lg text-sm font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50 flex items-center gap-1"
               >
+                <Download size={14} />
                 Exportar CSV
               </button>
             </div>
           </div>
           <div className="flex flex-wrap gap-2 mb-3">
-            <input
-              type="text"
-              value={paymentQuery}
-              onChange={(event) => setPaymentQuery(event.target.value)}
-              placeholder="Buscar por loja, email, providerId..."
-              className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none focus:ring-2 focus:ring-brand-primary"
-            />
+            <div className="flex items-center px-3 py-2 rounded-lg border border-slate-200 bg-white">
+              <Search size={16} className="text-slate-400" />
+              <input
+                type="text"
+                value={paymentQuery}
+                onChange={(event) => setPaymentQuery(event.target.value)}
+                placeholder="Buscar por loja, email, providerId..."
+                className="ml-2 bg-transparent outline-none text-sm w-48"
+              />
+            </div>
             <select
               value={dateRange}
               onChange={(event) => setDateRange(event.target.value)}
-              className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none"
+              className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none flex items-center gap-2"
             >
-              <option value="7">Ultimos 7 dias</option>
-              <option value="30">Ultimos 30 dias</option>
-              <option value="90">Ultimos 90 dias</option>
-              <option value="all">Todo periodo</option>
+              <option value="7">Últimos 7 dias</option>
+              <option value="30">Últimos 30 dias</option>
+              <option value="90">Últimos 90 dias</option>
+              <option value="all">Todo período</option>
             </select>
             <input
               type="number"
@@ -774,17 +839,17 @@ export function SuperAdmin() {
               <div className="flex gap-2">
                 <button
                   onClick={() => setPaymentsPage((prev) => Math.max(1, prev - 1))}
-                  className="px-3 py-1 rounded-lg border border-slate-200 hover:bg-slate-50"
+                  className="px-3 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 flex items-center gap-1"
                   disabled={paymentsPage === 1}
                 >
-                  Anterior
+                  <ChevronLeft size={16} />
                 </button>
                 <button
                   onClick={() => setPaymentsPage((prev) => Math.min(totalPages, prev + 1))}
-                  className="px-3 py-1 rounded-lg border border-slate-200 hover:bg-slate-50"
+                  className="px-3 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 flex items-center gap-1"
                   disabled={paymentsPage === totalPages}
                 >
-                  Proxima
+                  <ChevronRight size={16} />
                 </button>
               </div>
             </div>
@@ -796,11 +861,15 @@ export function SuperAdmin() {
 
         <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm overflow-x-auto">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-bold text-slate-800">Eventos de pagamento</h2>
+            <div className="flex items-center gap-2">
+              <RefreshCw size={20} className="text-slate-700" />
+              <h2 className="text-lg font-bold text-slate-800">Eventos de pagamento</h2>
+            </div>
             <button
               onClick={exportEventsCsv}
-              className="px-3 py-2 rounded-lg text-sm font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50"
+              className="px-3 py-2 rounded-lg text-sm font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50 flex items-center gap-1"
             >
+              <Download size={14} />
               Exportar CSV
             </button>
           </div>
@@ -856,8 +925,9 @@ export function SuperAdmin() {
                   <td className="py-3 pr-4">
                     <button
                       onClick={() => setSelectedEventPayload(event.payload || {})}
-                      className="text-xs font-semibold text-brand-primary hover:underline"
+                      className="text-xs font-semibold text-brand-primary hover:underline flex items-center gap-1"
                     >
+                      <Eye size={14} />
                       Ver payload
                     </button>
                   </td>
@@ -874,23 +944,22 @@ export function SuperAdmin() {
             <div className="flex gap-2">
               <button
                 onClick={() => setEventsPage((prev) => Math.max(1, prev - 1))}
-                className="px-3 py-1 rounded-lg border border-slate-200 hover:bg-slate-50"
+                className="px-3 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 flex items-center gap-1"
                 disabled={eventsPage === 1}
               >
-                Anterior
+                <ChevronLeft size={16} />
               </button>
               <button
                 onClick={() => setEventsPage((prev) => prev + 1)}
-                className="px-3 py-1 rounded-lg border border-slate-200 hover:bg-slate-50"
+                className="px-3 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 flex items-center gap-1"
                 disabled={filteredEvents.length < EVENTS_PAGE_SIZE}
               >
-                Proxima
+                <ChevronRight size={16} />
               </button>
             </div>
           </div>
         </div>
-      </div>
-      </div>
+
       {selectedEventPayload && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-3xl p-6 space-y-4">
@@ -909,6 +978,7 @@ export function SuperAdmin() {
           </div>
         </div>
       )}
-    </>
+    </AdminLayout>
   );
 }
+

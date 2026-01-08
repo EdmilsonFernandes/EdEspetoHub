@@ -305,7 +305,7 @@ export const CartView = ({
           <CreditCard size={18} className="text-brand-primary" /> Forma de Pagamento
         </h2>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-3 gap-3">
           {[
             { id: "pix", label: "Pix", description: "Registro rápido" },
             { id: "debito", label: "Débito", description: "Pagamento no local" },
@@ -328,7 +328,7 @@ export const CartView = ({
       </div>
 
       {/* Botão Finalizar */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-100 max-w-lg mx-auto z-40">
+      <div className="fixed bottom-0 left-0 right-0 p-4 border-t border-gray-100 max-w-lg mx-auto z-40">
         <button
           onClick={onCheckout}
           className="w-full bg-brand-primary text-white font-bold py-4 rounded-xl shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2"

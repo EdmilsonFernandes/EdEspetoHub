@@ -45,22 +45,15 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                     Criar loja
                   </button>
                   <button
-                    onClick={() => navigate('/portfolio')}
-                    className="px-3 py-2 sm:px-4 text-sm rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors"
-                  >
-                    <span className="hidden sm:inline">Portfólio</span>
-                    <span className="sm:hidden">Portfólio</span>
-                  </button>
-                  <button
                     onClick={goToDemoStore}
-                    className="px-3 py-2 sm:px-4 text-sm rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors"
+                    className="hidden md:inline-block px-3 py-2 sm:px-4 text-sm rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors"
                   >
                     <span className="hidden sm:inline">Ver loja demo</span>
                     <span className="sm:hidden">Demo</span>
                   </button>
                   <button
                     onClick={goToAdminDemo}
-                    className="px-3 py-2 sm:px-4 text-sm rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors"
+                    className="hidden lg:inline-block px-3 py-2 sm:px-4 text-sm rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors"
                   >
                     <span className="hidden sm:inline">Admin demo</span>
                     <span className="sm:hidden">Admin</span>
@@ -80,8 +73,15 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                 </button>
               )}
               <button
+                onClick={() => navigate('/portfolio')}
+                className="hidden md:inline-block px-3 py-2 sm:px-4 text-sm rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors"
+              >
+                <span className="hidden sm:inline">Portfólio</span>
+                <span className="sm:hidden">Portfólio</span>
+              </button>
+              <button
                 onClick={() => navigate('/admin')}
-                className="px-3 py-2 sm:px-4 text-sm rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all"
+                className="hidden md:inline-block px-3 py-2 sm:px-4 text-sm rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all"
               >
                 <span className="hidden sm:inline">Admin</span>
                 <span className="sm:hidden">Admin</span>
