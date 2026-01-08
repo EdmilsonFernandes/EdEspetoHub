@@ -123,7 +123,7 @@ export function LandingPage() {
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
           <div className="text-center space-y-6">
             <span className="animate-bounce inline-flex items-center px-3 py-1 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs font-bold rounded-full uppercase tracking-wide border border-red-100 dark:border-red-800">
-              🔥 Plataforma multi-loja
+              ⭐ 7 dias gratis para testar
             </span>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-[56px] font-semibold text-gray-900 dark:text-white leading-tight tracking-tight">
               Crie sites de pedidos de
@@ -134,8 +134,8 @@ export function LandingPage() {
               personalizados
             </h1>
             <p className="text-base sm:text-lg text-gray-600 dark:text-gray-300 leading-relaxed max-w-3xl mx-auto">
-              Configure a identidade visual do seu espeto e publique um link exclusivo para seus clientes fazerem
-              pedidos online.
+              Configure a identidade visual do seu espeto, publique um link exclusivo e teste tudo gratis por 7 dias.
+              Ao finalizar o periodo, voce escolhe o plano para continuar.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
               <button
@@ -167,6 +167,11 @@ export function LandingPage() {
         <section className="bg-white dark:bg-gray-800 border-y border-gray-200 dark:border-gray-700 py-16 sm:py-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white text-center mb-12">Recursos da Plataforma</h2>
+            <div className="max-w-2xl mx-auto mb-10 text-center">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                7 dias gratis para experimentar. Depois, escolha o plano ideal para sua loja.
+              </p>
+            </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
               <div className="p-6 bg-gray-50 dark:bg-gray-900 border border-red-100 dark:border-red-900 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
                 <div className="w-12 h-12 bg-gradient-to-br from-red-400 to-red-500 rounded-xl flex items-center justify-center mb-4">
@@ -210,6 +215,9 @@ export function LandingPage() {
             <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
               Recursos completos para gerenciar seu negócio de espetinhos online.
             </p>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold bg-red-50 text-red-600 border border-red-100 mb-6">
+              7 dias gratis para testar • Sem compromisso
+            </div>
             <div className="grid sm:grid-cols-2 gap-4 max-w-2xl mx-auto text-left">
               <div className="flex items-center gap-3 text-gray-700 dark:text-gray-300">
                 <span className="text-red-500 text-xl">✓</span>
