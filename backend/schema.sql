@@ -37,8 +37,6 @@ CREATE TABLE IF NOT EXISTS stores (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_stores_name_unique
-  ON stores (name);
 
 CREATE TABLE IF NOT EXISTS store_settings (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

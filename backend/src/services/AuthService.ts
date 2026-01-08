@@ -127,12 +127,6 @@ export class AuthService
       });
       await userRepo.save(user);
 
-      const existingStoreName = await storeRepo.findOne({ where: { name: storePayload.name } });
-      if (existingStoreName)
-      {
-        throw new Error('Nome de loja já cadastrado');
-      }
-
       const baseSlug = slugify(storePayload.name);
       let slug = baseSlug;
       let counter = 1;

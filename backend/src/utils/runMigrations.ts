@@ -66,7 +66,7 @@ export async function runMigrations() {
     CREATE UNIQUE INDEX IF NOT EXISTS idx_users_document_unique ON users (document) WHERE document IS NOT NULL;
   `);
   await AppDataSource.query(`
-    CREATE UNIQUE INDEX IF NOT EXISTS idx_stores_name_unique ON stores (name);
+    DROP INDEX IF EXISTS idx_stores_name_unique;
   `);
   await AppDataSource.query(`
     CREATE INDEX IF NOT EXISTS idx_email_verifications_token ON email_verifications(token_hash);
