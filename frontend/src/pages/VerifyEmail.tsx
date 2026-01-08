@@ -14,6 +14,13 @@ export function VerifyEmail() {
   const verifyingRef = useRef(false);
 
   useEffect(() => {
+    const savedEmail = localStorage.getItem('signupEmail');
+    if (savedEmail) {
+      setEmail(savedEmail);
+    }
+  }, []);
+
+  useEffect(() => {
     const token = searchParams.get('token');
     if (!token) {
       setStatus('Confira seu e-mail e clique no link de confirmacao.');
@@ -43,7 +50,11 @@ export function VerifyEmail() {
     setSending(true);
     setError('');
     try {
-      await authService.resendVerification(email);
+      const targetEmail = email.trim();
+      await authService.resendVerification(targetEmail);
+      if (targetEmail) {
+        localStorage.setItem('signupEmail', targetEmail);
+      }
       setStatus('Se o e-mail existir, enviaremos instrucoes.');
     } catch (err) {
       setError(err.message || 'Nao foi possivel reenviar o e-mail.');

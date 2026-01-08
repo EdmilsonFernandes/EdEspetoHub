@@ -250,6 +250,9 @@ export function CreateStore() {
 
       const result = await storeService.create(payload);
       setPaymentResult(result);
+      if (registerForm.email) {
+        localStorage.setItem('signupEmail', registerForm.email.trim());
+      }
 
       if (result.payment?.method === 'CREDIT_CARD' && result.payment.paymentLink) {
         window.location.href = result.payment.paymentLink;
