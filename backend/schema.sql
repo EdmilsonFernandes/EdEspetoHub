@@ -24,6 +24,10 @@ CREATE TABLE IF NOT EXISTS users (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE UNIQUE INDEX IF NOT EXISTS idx_users_document_unique
+  ON users (document)
+  WHERE document IS NOT NULL;
+
 CREATE TABLE IF NOT EXISTS stores (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
@@ -32,6 +36,9 @@ CREATE TABLE IF NOT EXISTS stores (
   open BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_stores_name_unique
+  ON stores (name);
 
 CREATE TABLE IF NOT EXISTS store_settings (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

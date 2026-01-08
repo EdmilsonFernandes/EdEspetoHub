@@ -21,6 +21,7 @@ import { EmailVerification } from '../entities/EmailVerification';
 import { PaymentRepository } from '../repositories/PaymentRepository';
 import { SubscriptionService } from './SubscriptionService';
 import { SettingsService } from './SettingsService';
+import { normalizeDocument, validateDocument } from '../utils/documents';
 
 export class AuthService
 {
@@ -79,6 +80,12 @@ export class AuthService
       throw new Error('Informe CPF ou CNPJ para continuar');
     }
 
+    const normalizedDocument = normalizeDocument(userPayload.document);
+    if (!validateDocument(normalizedDocument, userPayload.documentType))
+    {
+      throw new Error('CPF ou CNPJ inválido');
+    }
+
     const result = await AppDataSource.transaction(async (manager) =>
     {
       console.log('🔥 BEFORE TRANSACTION', {
@@ -99,6 +106,12 @@ export class AuthService
         throw new Error('E-mail já cadastrado');
       }
 
+      const existingDocument = await userRepo.findOne({ where: { document: normalizedDocument } });
+      if (existingDocument)
+      {
+        throw new Error('CPF/CNPJ já cadastrado');
+      }
+
       const hashed = await bcrypt.hash(userPayload.password, 10);
 
       const user = userRepo.create({
@@ -107,12 +120,18 @@ export class AuthService
         password: hashed,
         phone: userPayload.phone,
         address: userPayload.address,
-        document: userPayload.document,
+        document: normalizedDocument,
         documentType: userPayload.documentType,
         termsAcceptedAt: new Date(),
         lgpdAcceptedAt: new Date(),
       });
       await userRepo.save(user);
+
+      const existingStoreName = await storeRepo.findOne({ where: { name: storePayload.name } });
+      if (existingStoreName)
+      {
+        throw new Error('Nome de loja já cadastrado');
+      }
 
       const baseSlug = slugify(storePayload.name);
       let slug = baseSlug;
