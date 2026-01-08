@@ -67,14 +67,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const lastAppliedBrandingKey = useRef('');
 
   useEffect(() => {
-    console.count('Theme toggle effect');
     localStorage.setItem('theme', theme);
     document.documentElement.classList.toggle('dark', theme === 'dark');
   }, [theme]);
 
   useEffect(() => {
-    console.count('Theme apply effect');
-
     const key = `${branding?.primaryColor ?? ''}|${branding?.secondaryColor ?? ''}|${branding?.logoUrl ?? ''}|${branding?.brandName ?? ''}`;
     if (!key.trim()) return;
     if (lastAppliedBrandingKey.current === key) return;

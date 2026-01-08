@@ -5,30 +5,31 @@ export function Hero() {
   return (
     <div className="w-full relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="relative overflow-hidden rounded-[32px] border border-slate-200/70 bg-white shadow-[0_28px_70px_-48px_rgba(15,23,42,0.7)]">
-          <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-red-200/40 blur-3xl" />
-          <div className="absolute -bottom-32 -left-16 h-72 w-72 rounded-full bg-orange-200/40 blur-3xl" />
+        <div className="relative overflow-hidden rounded-[32px] border border-slate-200/70 dark:border-slate-700/70 bg-white dark:bg-gray-800 shadow-[0_28px_70px_-48px_rgba(15,23,42,0.7)] dark:shadow-[0_28px_70px_-48px_rgba(0,0,0,0.9)]">
+          <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-red-200/40 dark:bg-red-900/30 blur-3xl" />
+          <div className="absolute -bottom-32 -left-16 h-72 w-72 rounded-full bg-orange-200/40 dark:bg-orange-900/30 blur-3xl" />
 
           <div className="relative p-4 sm:p-6 lg:p-8">
-            <div className="overflow-hidden rounded-[24px] border border-slate-100 bg-slate-50/70">
+            <div className="overflow-hidden rounded-[24px]">
               <img
                 src="/chama-no-espeto.jpeg"
                 alt="Chama no Espeto"
-                className="w-full h-[280px] sm:h-[420px] lg:h-[500px] object-contain"
+                className="w-full h-[280px] sm:h-[420px] lg:h-[500px] object-cover object-top opacity-95"
+                style={{ maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%)', WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%)' }}
               />
             </div>
             <div className="mt-5 grid gap-3 md:grid-cols-3">
-              <div className="rounded-2xl border border-slate-200/70 bg-white p-4 shadow-[0_14px_32px_-24px_rgba(15,23,42,0.6)]">
-                <p className="text-xs font-semibold text-slate-500">Site pronto em minutos</p>
-                <p className="mt-1 text-sm font-semibold text-slate-900">Sua vitrine publicada e organizada</p>
+              <div className="rounded-2xl border border-slate-200/70 dark:border-slate-700/70 bg-white dark:bg-gray-800 p-4 shadow-[0_14px_32px_-24px_rgba(15,23,42,0.6)] dark:shadow-[0_14px_32px_-24px_rgba(0,0,0,0.8)]">
+                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Site pronto em minutos</p>
+                <p className="mt-1 text-sm font-semibold text-slate-900 dark:text-white">Sua vitrine publicada e organizada</p>
               </div>
-              <div className="rounded-2xl border border-slate-200/70 bg-white p-4 shadow-[0_14px_32px_-24px_rgba(15,23,42,0.6)]">
-                <p className="text-xs font-semibold text-slate-500">Fila do churrasqueiro</p>
-                <p className="mt-1 text-sm font-semibold text-slate-900">Controle total do preparo</p>
+              <div className="rounded-2xl border border-slate-200/70 dark:border-slate-700/70 bg-white dark:bg-gray-800 p-4 shadow-[0_14px_32px_-24px_rgba(15,23,42,0.6)] dark:shadow-[0_14px_32px_-24px_rgba(0,0,0,0.8)]">
+                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Fila do churrasqueiro</p>
+                <p className="mt-1 text-sm font-semibold text-slate-900 dark:text-white">Controle total do preparo</p>
               </div>
-              <div className="rounded-2xl border border-slate-200/70 bg-white p-4 shadow-[0_14px_32px_-24px_rgba(15,23,42,0.6)]">
-                <p className="text-xs font-semibold text-slate-500">Pagamentos organizados</p>
-                <p className="mt-1 text-sm font-semibold text-slate-900">Pix e checkout prontos</p>
+              <div className="rounded-2xl border border-slate-200/70 dark:border-slate-700/70 bg-white dark:bg-gray-800 p-4 shadow-[0_14px_32px_-24px_rgba(15,23,42,0.6)] dark:shadow-[0_14px_32px_-24px_rgba(0,0,0,0.8)]">
+                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Pagamentos organizados</p>
+                <p className="mt-1 text-sm font-semibold text-slate-900 dark:text-white">Pix e checkout prontos</p>
               </div>
             </div>
           </div>

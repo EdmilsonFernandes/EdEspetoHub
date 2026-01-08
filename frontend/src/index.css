@@ -29,6 +29,17 @@
   80% { opacity: 0.95 }
 }
 
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
 /* Utility classes */
 .animate-flame {
   animation: flame 3s ease-in-out infinite;
@@ -36,6 +47,10 @@
 
 .animate-flicker {
   animation: flicker 1.5s infinite;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.3s ease-out;
 }
 
 .bg-fire {

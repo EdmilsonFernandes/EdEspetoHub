@@ -366,7 +366,7 @@ export function StorePage() {
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {view === 'menu' && products.length === 0 ? (
-          <div className="min-h-[60vh] flex items-center justify-center">
+          <div className="min-h-[80vh] flex items-center justify-center">
             <div className="text-center">
               <div className="mb-4">
                 <div className="text-6xl">🍖</div>

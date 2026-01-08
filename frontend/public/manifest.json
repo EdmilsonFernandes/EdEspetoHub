@@ -1,15 +1,26 @@
 {
   "short_name": "Chama no Espeto",
-  "name": "Chama no Espeto - Plataforma de Pedidos",
+  "name": "Chama no Espeto - Sistema de Gestão para Espetinhos",
+  "description": "Plataforma completa para gestão de restaurantes de espetinhos com pedidos online e pagamento via Pix",
   "icons": [
     {
       "src": "favicon.svg",
       "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.svg",
+      "sizes": "512x512",
       "type": "image/svg+xml"
     }
   ],
-  "start_url": ".",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "orientation": "portrait",
+  "theme_color": "#FF6B35",
+  "background_color": "#ffffff",
+  "categories": ["food", "business", "productivity"],
+  "lang": "pt-BR"
 }

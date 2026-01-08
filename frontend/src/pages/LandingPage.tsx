@@ -4,8 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { Moon, Sun } from 'lucide-react';
 import { Hero } from '../components/Hero';
 import { useTheme } from '../contexts/ThemeContext';
-import Lottie from 'lottie-react';
-import fireAnimation from '../assets/fire.json';
 import { Palette, MonitorCog, Smartphone, Rocket, Ham} from 'lucide-react';
 import { platformService } from '../services/platformService';
 import { planService } from '../services/planService';
@@ -68,9 +66,8 @@ export function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-20">
             <div className="flex items-center gap-3">
-              <div className="relative h-16 w-16 overflow-hidden rounded-2xl border border-white/80 bg-white shadow-lg ring-2 ring-red-200/60">
-                <img src="/chama-no-espeto.jpeg" alt="Chama no Espeto" className="h-full w-full object-cover" />
-                <div className="absolute inset-0 ring-1 ring-white/70 rounded-2xl" />
+              <div className="h-10 w-10">
+                <img src="/logo.svg" alt="Chama no Espeto" className="h-full w-full object-cover" draggable={false} />
               </div>
               <div className="hidden sm:block">
                 <p className="text-2xl font-black text-gray-900 dark:text-white">Chama no Espeto</p>
@@ -110,7 +107,6 @@ export function LandingPage() {
         </div>
       </header>
 
-      <Hero />
       <main>
         {/* Hero Section */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
@@ -120,7 +116,7 @@ export function LandingPage() {
             </span>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-[56px] font-semibold text-gray-900 dark:text-white leading-tight tracking-tight">
               Crie sites de pedidos de
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-red-600">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500">
                 {' '}
                 churrasco {' '}
               </span>
@@ -133,19 +129,22 @@ export function LandingPage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
               <button
                 onClick={() => navigate('/create')}
-                className="px-8 py-4 text-lg rounded-xl bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold hover:from-red-600 hover:to-red-700 transition-all shadow-lg"
+                className="cursor-pointer px-8 py-4 text-lg rounded-xl bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold hover:from-red-600 hover:to-red-700 transition-all shadow-lg"
               >
                 🚀 Criar minha loja agora
               </button>
               <button
                 onClick={goToDemoStore}
-                className="px-8 py-4 text-lg rounded-xl border-2 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                className="cursor-pointer px-8 py-4 text-lg rounded-xl border-2 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
               >
                 👀 Ver loja demo
               </button>
             </div>
           </div>
         </section>
+
+      <Hero />
+
 
         {/* Features Section */}
         <section className="bg-white dark:bg-gray-800 border-y border-gray-200 dark:border-gray-700 py-16 sm:py-20">
@@ -238,7 +237,7 @@ export function LandingPage() {
               <span className={`text-lg font-semibold ${isAnnual ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}`}>
                 Anual
               </span>
-              <span className={`ml-2 inline-block px-3 py-1 rounded-full text-sm font-semibold transition-colors ${isAnnual
+                <span className={`ml-2 inline-block px-3 py-1 rounded-full text-sm font-semibold transition-colors ${isAnnual
                 ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
                 : 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500'
                 }`}>
@@ -267,13 +266,6 @@ export function LandingPage() {
                     <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                       <span className="bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-1 rounded-full text-xs font-bold">
                         MAIS POPULAR
-                      </span>
-                    </div>
-                  )}
-                  {plan.savings && (
-                    <div className="absolute -top-4 right-4">
-                      <span className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-3 py-1 rounded-full text-xs font-bold">
-                        {plan.savings}
                       </span>
                     </div>
                   )}

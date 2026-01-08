@@ -23,7 +23,8 @@ export function CreateStore() {
   const [showValidationModal, setShowValidationModal] = useState(false);
   const [validationMessage, setValidationMessage] = useState('');
   const [logoPreviewUrl, setLogoPreviewUrl] = useState('');
-  const platformLogo = '/chama-no-espeto.jpeg';
+  const [showPassword, setShowPassword] = useState(false);
+  const platformLogo = '/logo.svg';
   const primaryPalette = [ '#dc2626', '#ea580c', '#f59e0b', '#16a34a', '#0ea5e9', '#2563eb', '#7c3aed' ];
   const secondaryPalette = [ '#111827', '#1f2937', '#334155', '#0f172a', '#0f766e', '#065f46', '#4b5563' ];
   const termsRef = useRef<HTMLDivElement | null>(null);
@@ -282,12 +283,12 @@ export function CreateStore() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-20">
             <button onClick={() => navigate('/')} className="flex items-center gap-3">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl overflow-hidden shadow-lg border border-white bg-white">
-                <img src={platformLogo} alt="Chama no Espeto" className="w-full h-full object-cover" />
+                <div className="h-10 w-10">
+                <img src="/logo.svg" alt="Chama no Espeto" className="h-full w-full object-cover" draggable={false} />
               </div>
               <div className="hidden sm:block">
                 <p className="text-lg font-bold text-gray-900">Chama no Espeto</p>
-                <p className="text-sm text-gray-500">Criar nova loja</p>
+                <p className="text-sm text-gray-500 text-left">Criar nova loja</p>
               </div>
             </button>
 
@@ -321,17 +322,18 @@ export function CreateStore() {
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-gray-800 mb-4">Informações pessoais</h3>
               <div className="space-y-4 rounded-2xl border border-gray-100 bg-gray-50/70 p-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-700">Nome completo</label>
+                  <input
+                    required
+                    value={registerForm.fullName}
+                    onChange={(e) => setRegisterForm((prev) => ({ ...prev, fullName: e.target.value }))}
+                    className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
+                    placeholder="Seu nome completo"
+                  />
+                </div>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-700">Nome completo</label>
-                    <input
-                      required
-                      value={registerForm.fullName}
-                      onChange={(e) => setRegisterForm((prev) => ({ ...prev, fullName: e.target.value }))}
-                      className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
-                      placeholder="Seu nome completo"
-                    />
-                  </div>
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-gray-700">Email</label>
                     <input
@@ -343,6 +345,15 @@ export function CreateStore() {
                       placeholder="seu@email.com"
                     />
                     <p className="text-xs text-gray-500">Cada e-mail pode ter apenas uma conta.</p>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700">Telefone</label>
+                    <input
+                      value={registerForm.phone}
+                      onChange={(e) => setRegisterForm((prev) => ({ ...prev, phone: e.target.value }))}
+                      className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
+                      placeholder="(12) 99999-9999"
+                    />
                   </div>
                 </div>
 
@@ -369,121 +380,131 @@ export function CreateStore() {
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-gray-700">Senha</label>
-                    <input
-                      required
-                      type="password"
-                      value={registerForm.password}
-                      onChange={(e) => setRegisterForm((prev) => ({ ...prev, password: e.target.value }))}
-                      className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
-                      placeholder="Mínimo 6 caracteres"
-                    />
+                    <div className="relative">
+                      <input
+                        required
+                        type={showPassword ? 'text' : 'password'}
+                        value={registerForm.password}
+                        onChange={(e) => setRegisterForm((prev) => ({ ...prev, password: e.target.value }))}
+                        className="w-full border border-gray-200 rounded-xl p-3 pr-10 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
+                        placeholder="Mínimo 6 caracteres"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                      >
+                        {showPassword ? (
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                          </svg>
+                        ) : (
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
 
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-semibold text-gray-700">CEP</label>
-                      <div className="flex gap-2">
+                <div className="pt-4 border-t border-gray-200">
+                  <h4 className="text-sm font-semibold text-gray-700 mb-3">Endereço</h4>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                      <div className="sm:col-span-2 space-y-2">
+                        <label className="text-sm font-semibold text-gray-700">CEP</label>
                         <input
-                        required
-                        value={registerForm.cep}
+                          required
+                          value={registerForm.cep}
                           onChange={(e) => setRegisterForm((prev) => ({ ...prev, cep: e.target.value }))}
                           onBlur={handleCepLookup}
-                          className="flex-1 border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
+                          disabled={isCepLoading}
+                          className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
                           placeholder="00000-000"
                         />
                         <button
                           type="button"
                           onClick={handleCepLookup}
-                          className="px-3 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50"
+                          disabled={isCepLoading}
+                          className="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         >
-                          {isCepLoading ? 'Buscando...' : 'Buscar'}
+                          {isCepLoading ? 'Buscando...' : 'Buscar CEP'}
                         </button>
+                        {cepError && <p className="text-xs text-red-600">{cepError}</p>}
                       </div>
-                      {cepError && <p className="text-xs text-red-600">{cepError}</p>}
+                      <div className="space-y-2">
+                        <label className="text-sm font-semibold text-gray-700">Cidade</label>
+                        <input
+                          required
+                          value={registerForm.city}
+                          onChange={(e) => setRegisterForm((prev) => ({ ...prev, city: e.target.value }))}
+                          disabled={isCepLoading}
+                          className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          placeholder="Sua cidade"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-semibold text-gray-700">Estado</label>
+                        <input
+                          required
+                          value={registerForm.state}
+                          onChange={(e) => setRegisterForm((prev) => ({ ...prev, state: e.target.value }))}
+                          disabled={isCepLoading}
+                          className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          placeholder="UF"
+                        />
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-semibold text-gray-700">Cidade</label>
-                      <input
-                        required
-                        value={registerForm.city}
-                        onChange={(e) => setRegisterForm((prev) => ({ ...prev, city: e.target.value }))}
-                        className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
-                        placeholder="Sua cidade"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-semibold text-gray-700">Estado</label>
-                      <input
-                        required
-                        value={registerForm.state}
-                        onChange={(e) => setRegisterForm((prev) => ({ ...prev, state: e.target.value }))}
-                        className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
-                        placeholder="UF"
-                      />
-                    </div>
-                  </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-semibold text-gray-700">Rua / Avenida</label>
-                      <input
-                        required
-                        value={registerForm.street}
-                        onChange={(e) => setRegisterForm((prev) => ({ ...prev, street: e.target.value }))}
-                        className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
-                        placeholder="Nome da rua"
-                      />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-sm font-semibold text-gray-700">Rua / Avenida</label>
+                        <input
+                          required
+                          value={registerForm.street}
+                          onChange={(e) => setRegisterForm((prev) => ({ ...prev, street: e.target.value }))}
+                          disabled={isCepLoading}
+                          className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          placeholder="Nome da rua"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-semibold text-gray-700">Bairro</label>
+                        <input
+                          required
+                          value={registerForm.neighborhood}
+                          onChange={(e) => setRegisterForm((prev) => ({ ...prev, neighborhood: e.target.value }))}
+                          disabled={isCepLoading}
+                          className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          placeholder="Bairro"
+                        />
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-semibold text-gray-700">Bairro</label>
-                      <input
-                        required
-                        value={registerForm.neighborhood}
-                        onChange={(e) => setRegisterForm((prev) => ({ ...prev, neighborhood: e.target.value }))}
-                        className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
-                        placeholder="Bairro"
-                      />
-                    </div>
-                  </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-semibold text-gray-700">Numero</label>
-                      <input
-                        required
-                        value={registerForm.number}
-                        onChange={(e) => setRegisterForm((prev) => ({ ...prev, number: e.target.value }))}
-                        className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
-                        placeholder="123"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-semibold text-gray-700">Complemento</label>
-                      <input
-                        value={registerForm.complement}
-                        onChange={(e) => setRegisterForm((prev) => ({ ...prev, complement: e.target.value }))}
-                        className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
-                        placeholder="Apto, sala, bloco"
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-700">Telefone</label>
-                    <input
-                      value={registerForm.phone}
-                      onChange={(e) => setRegisterForm((prev) => ({ ...prev, phone: e.target.value }))}
-                      className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
-                      placeholder="(12) 99999-9999"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-700">Resumo do endereço</label>
-                    <div className="w-full border border-gray-200 rounded-xl p-3 bg-white text-sm text-gray-500">
-                      {formatAddress() || 'Preencha o endereco para visualizar o resumo.'}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-sm font-semibold text-gray-700">Número</label>
+                        <input
+                          required
+                          value={registerForm.number}
+                          onChange={(e) => setRegisterForm((prev) => ({ ...prev, number: e.target.value }))}
+                          disabled={isCepLoading}
+                          className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          placeholder="123"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-semibold text-gray-700">Complemento</label>
+                        <input
+                          value={registerForm.complement}
+                          onChange={(e) => setRegisterForm((prev) => ({ ...prev, complement: e.target.value }))}
+                          disabled={isCepLoading}
+                          className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          placeholder="Apto, sala, bloco (opcional)"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -510,80 +531,85 @@ export function CreateStore() {
               </p>
             </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-700">Logo da loja (upload opcional)</label>
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleLogoUpload}
-                        className="flex-1 text-sm border border-gray-200 rounded-xl p-2"
-                      />
-                      {(logoPreviewUrl || registerForm.logoFile) && (
-                        <div className="w-12 h-12 rounded-xl overflow-hidden border border-gray-200">
-                          <img
-                            src={logoPreviewUrl || registerForm.logoFile}
-                            alt="Pré-visualização do logo"
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      )}
-                    </div>
-                    <p className="text-xs text-gray-500">Envie um arquivo de imagem. Este campo é opcional.</p>
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700 block">Logo da loja (opcional)</label>
+              <div className="flex items-start gap-4">
+                <label className="flex-1 cursor-pointer">
+                  <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 hover:border-red-400 transition-colors text-center">
+                    <svg className="w-8 h-8 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                    <p className="text-sm text-gray-600 mb-1">Clique para enviar</p>
+                    <p className="text-xs text-gray-500">PNG, JPG até 5MB</p>
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-700">Cor principal</label>
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="color"
-                        value={registerForm.primaryColor}
-                        onChange={(e) => setRegisterForm((prev) => ({ ...prev, primaryColor: e.target.value }))}
-                        className="w-12 h-12 border border-gray-200 rounded-xl cursor-pointer"
-                      />
-                      <div className="flex flex-wrap gap-2">
-                        {primaryPalette.map((color) => (
-                          <button
-                            key={color}
-                            type="button"
-                            onClick={() => setRegisterForm((prev) => ({ ...prev, primaryColor: color }))}
-                            className={`w-8 h-8 rounded-full border ${registerForm.primaryColor === color ? 'border-gray-900' : 'border-gray-200'}`}
-                            style={{ backgroundColor: color }}
-                            aria-label={`Selecionar cor ${color}`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                    <p className="text-xs text-gray-500">Escolha a cor principal da sua marca.</p>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleLogoUpload}
+                    className="hidden"
+                  />
+                </label>
+                {(logoPreviewUrl || registerForm.logoFile) && (
+                  <div className="w-24 h-24 rounded-xl overflow-hidden border-2 border-gray-200 flex-shrink-0">
+                    <img
+                      src={logoPreviewUrl || registerForm.logoFile}
+                      alt="Pré-visualização do logo"
+                      className="w-full h-full object-cover"
+                    />
                   </div>
-                </div>
+                )}
+              </div>
+            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-700">Cor secundária</label>
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="color"
-                        value={registerForm.secondaryColor}
-                        onChange={(e) => setRegisterForm((prev) => ({ ...prev, secondaryColor: e.target.value }))}
-                        className="w-12 h-12 border border-gray-200 rounded-xl cursor-pointer"
-                      />
-                      <div className="flex flex-wrap gap-2">
-                        {secondaryPalette.map((color) => (
-                          <button
-                            key={color}
-                            type="button"
-                            onClick={() => setRegisterForm((prev) => ({ ...prev, secondaryColor: color }))}
-                            className={`w-8 h-8 rounded-full border ${registerForm.secondaryColor === color ? 'border-gray-900' : 'border-gray-200'}`}
-                            style={{ backgroundColor: color }}
-                            aria-label={`Selecionar cor ${color}`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                    <p className="text-xs text-gray-500">Use um tom de apoio para fundos e detalhes.</p>
-                  </div>
-                  <div className="space-y-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700 block">Cor principal</label>
+                <input
+                  type="color"
+                  value={registerForm.primaryColor}
+                  onChange={(e) => setRegisterForm((prev) => ({ ...prev, primaryColor: e.target.value }))}
+                  className="w-16 h-16  cursor-pointer block"
+                />
+                <div className="flex flex-wrap gap-2 pt-2">
+                  {primaryPalette.map((color) => (
+                    <button
+                      key={color}
+                      type="button"
+                      onClick={() => setRegisterForm((prev) => ({ ...prev, primaryColor: color }))}
+                      className={`w-8 h-8 rounded-full border-2 transition-all ${registerForm.primaryColor === color ? 'border-gray-900 scale-110' : 'border-gray-200 hover:scale-105'}`}
+                      style={{ backgroundColor: color }}
+                      aria-label={`Selecionar cor ${color}`}
+                    />
+                  ))}
+                </div>
+                <p className="text-xs text-gray-500">Escolha a cor principal da sua marca.</p>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700 block">Cor secundária</label>
+                <input
+                  type="color"
+                  value={registerForm.secondaryColor}
+                  onChange={(e) => setRegisterForm((prev) => ({ ...prev, secondaryColor: e.target.value }))}
+                  className="w-16 h-16  cursor-pointer block"
+                />
+                <div className="flex flex-wrap gap-2 pt-2">
+                  {secondaryPalette.map((color) => (
+                    <button
+                      key={color}
+                      type="button"
+                      onClick={() => setRegisterForm((prev) => ({ ...prev, secondaryColor: color }))}
+                      className={`w-8 h-8 rounded-full border-2 transition-all ${registerForm.secondaryColor === color ? 'border-gray-900 scale-110' : 'border-gray-200 hover:scale-105'}`}
+                      style={{ backgroundColor: color }}
+                      aria-label={`Selecionar cor ${color}`}
+                    />
+                  ))}
+                </div>
+                <p className="text-xs text-gray-500">Use um tom de apoio para fundos e detalhes.</p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
                     <label className="text-sm font-semibold text-gray-700">Redes sociais</label>
                     <div className="space-y-3">
                       {registerForm.socialLinks.map((link, index) => (
@@ -626,7 +652,6 @@ export function CreateStore() {
                   </div>
               </div>
             </div>
-          </div>
 
             <div className="pt-6 border-t border-gray-100">
               <h3 className="text-lg font-semibold text-gray-800 mb-4">Selecione um plano</h3>
@@ -648,6 +673,12 @@ export function CreateStore() {
                 <span className={`text-sm font-semibold ${isAnnual ? 'text-gray-900' : 'text-gray-500'}`}>
                   Anual
                 </span>
+             <span className={`ml-2 inline-block px-3 py-1 rounded-full text-sm font-semibold transition-colors ${isAnnual
+                ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                : 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500'
+                }`}>
+                Economize até 25%
+              </span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {PLAN_TIERS.map((tier) => {
@@ -672,16 +703,6 @@ export function CreateStore() {
                       : 'border-gray-200 hover:border-red-200'
                       } ${isDisabled ? 'opacity-60 cursor-not-allowed' : ''}`}
                   >
-                    {tier.popular && (
-                      <span className="absolute -top-3 right-4 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                        MAIS POPULAR
-                      </span>
-                    )}
-                    {billing.savings && (
-                      <span className="absolute -top-3 left-4 bg-amber-100 text-amber-700 text-xs font-bold px-2 py-1 rounded-full">
-                        {billing.savings}
-                      </span>
-                    )}
                     <p className="text-sm uppercase font-semibold text-gray-500">{tier.label}</p>
                     <p className="text-2xl font-bold text-gray-900">R$ {Number(price).toFixed(2)}</p>
                     <p className="text-xs text-gray-500">{billing.period}</p>
@@ -691,6 +712,11 @@ export function CreateStore() {
                         <li key={feature}>✓ {feature}</li>
                       ))}
                     </ul>
+                    {tier.popular && (
+                      <span className="absolute -top-3 left-13 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                        MAIS POPULAR
+                      </span>
+                    )}
                   </button>
                 );
                 })}
