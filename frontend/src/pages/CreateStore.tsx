@@ -681,9 +681,12 @@ export function CreateStore() {
               </span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="relative border border-amber-200 rounded-2xl p-4 text-left bg-gradient-to-br from-amber-50 via-white to-red-50 shadow-sm">
+                <div className="relative border-2 border-amber-400 rounded-2xl p-4 text-left bg-gradient-to-br from-amber-50 via-white to-red-50 shadow-sm ring-2 ring-amber-200/60">
                   <span className="absolute -top-3 left-4 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-full">
                     7 DIAS GRATIS
+                  </span>
+                  <span className="absolute -top-3 right-4 bg-emerald-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                    SELECIONADO
                   </span>
                   <p className="text-sm uppercase font-semibold text-amber-700">Teste completo</p>
                   <p className="text-2xl font-bold text-gray-900">Sem cartao</p>
