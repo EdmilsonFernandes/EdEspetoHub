@@ -10,11 +10,6 @@ export const PLAN_TIERS = [
     features: ['Tudo do plano basic', 'Prioridade no suporte', 'Selo "Plano Pro" no admin'],
     popular: true,
   },
-  {
-    key: 'premium',
-    label: '⭐ Plano Premium',
-    features: ['Tudo do plano pro', 'Acesso à API', 'Domínio personalizado', 'Analytics avançado', 'Suporte dedicado'],
-  },
 ];
 
 export const BILLING_OPTIONS = {
@@ -24,7 +19,6 @@ export const BILLING_OPTIONS = {
     priceByTier: {
       basic: 39.9,
       pro: 79.9,
-      premium: 149.9,
     },
   },
   yearly: {
@@ -34,7 +28,6 @@ export const BILLING_OPTIONS = {
     priceByTier: {
       basic: 359.1,
       pro: 719.1,
-      premium: 1349.1,
     },
   },
 };

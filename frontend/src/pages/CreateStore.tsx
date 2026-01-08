@@ -654,18 +654,18 @@ export function CreateStore() {
             </div>
 
             <div className="pt-6 border-t border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Selecione um plano</h3>
               <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-red-50 border border-red-100 rounded-2xl px-4 py-3">
                 <div>
                   <p className="text-sm font-semibold text-red-700">7 dias gratis para testar</p>
                   <p className="text-xs text-red-600">
-                    Voce pode usar a plataforma agora e escolher o plano para continuar apos o periodo gratuito.
+                    Use tudo agora e escolha o plano ideal para continuar apos o periodo gratuito.
                   </p>
                 </div>
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-white text-red-600 border border-red-200">
                   Sem cartao nos 7 dias
                 </span>
               </div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Selecione um plano</h3>
               <div className="flex items-center justify-center gap-4 mb-6">
                 <span className={`text-sm font-semibold ${!isAnnual ? 'text-gray-900' : 'text-gray-500'}`}>
                   Mensal
