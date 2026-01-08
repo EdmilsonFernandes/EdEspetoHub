@@ -654,17 +654,6 @@ export function CreateStore() {
             </div>
 
             <div className="pt-6 border-t border-gray-100">
-              <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-red-50 border border-red-100 rounded-2xl px-4 py-3">
-                <div>
-                  <p className="text-sm font-semibold text-red-700">7 dias gratis para testar</p>
-                  <p className="text-xs text-red-600">
-                    Use tudo agora e escolha o plano ideal para continuar apos o periodo gratuito.
-                  </p>
-                </div>
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-white text-red-600 border border-red-200">
-                  Sem cartao nos 7 dias
-                </span>
-              </div>
               <h3 className="text-lg font-semibold text-gray-800 mb-4">Selecione um plano</h3>
               <div className="flex items-center justify-center gap-4 mb-6">
                 <span className={`text-sm font-semibold ${!isAnnual ? 'text-gray-900' : 'text-gray-500'}`}>
@@ -692,6 +681,19 @@ export function CreateStore() {
               </span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="relative border border-amber-200 rounded-2xl p-4 text-left bg-gradient-to-br from-amber-50 via-white to-red-50 shadow-sm">
+                  <span className="absolute -top-3 left-4 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                    7 DIAS GRATIS
+                  </span>
+                  <p className="text-sm uppercase font-semibold text-amber-700">Teste completo</p>
+                  <p className="text-2xl font-bold text-gray-900">Sem cartao</p>
+                  <p className="text-xs text-gray-500">Escolha o plano ao final do periodo gratuito.</p>
+                  <ul className="mt-3 text-xs text-gray-600 space-y-1">
+                    <li>✓ Loja ativa por 7 dias</li>
+                    <li>✓ Acesso ao painel completo</li>
+                    <li>✓ Pode renovar quando quiser</li>
+                  </ul>
+                </div>
                 {PLAN_TIERS.map((tier) => {
                   const planKey = getPlanName(tier.key, billingKey);
                   const plan = plansByName[planKey];

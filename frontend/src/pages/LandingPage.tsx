@@ -276,20 +276,23 @@ export function LandingPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-6 md:items-center">
-            <div className="md:col-span-3">
-              <div className="bg-gradient-to-r from-amber-50 via-white to-red-50 border border-amber-200 rounded-2xl p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shadow-sm">
-                <div>
-                  <p className="text-sm font-semibold text-amber-700">7 dias gratis para experimentar</p>
-                  <p className="text-xs text-amber-700/80">
-                    Use tudo agora e, ao final do periodo gratuito, escolha o plano ideal para continuar.
-                  </p>
+            <div className="transition-all duration-300">
+              <div className="relative rounded-2xl shadow-lg p-8 h-full flex flex-col bg-gradient-to-br from-amber-50 via-white to-red-50 border border-amber-200">
+                <span className="absolute -top-4 left-6 bg-amber-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                  7 DIAS GRATIS
+                </span>
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">Teste completo</h3>
+                <p className="text-sm text-gray-600 mb-6">
+                  Use a plataforma por 7 dias sem cartao. Depois, escolha o plano ideal para continuar.
+                </p>
+                <div className="mt-auto">
+                  <button
+                    onClick={() => navigate('/create')}
+                    className="w-full px-6 py-3 rounded-lg font-semibold bg-amber-500 text-white hover:opacity-90 shadow"
+                  >
+                    Comecar gratis
+                  </button>
                 </div>
-                <button
-                  onClick={() => navigate('/create')}
-                  className="px-4 py-2 rounded-lg bg-amber-500 text-white text-sm font-semibold hover:opacity-90"
-                >
-                  Comecar gratis
-                </button>
               </div>
             </div>
             {/* Carousel for mobile, grid for desktop */}
