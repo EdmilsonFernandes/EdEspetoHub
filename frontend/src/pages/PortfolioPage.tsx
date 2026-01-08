@@ -187,14 +187,14 @@ export function PortfolioPage() {
       <section className="py-16 bg-slate-50 dark:bg-slate-900">
         <div className="max-w-6xl mx-auto px-4">
           {/* Header */}
-          <div className="text-center mb-12">
+          {/* <div className="text-center mb-12">
             <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">
               Nossos Clientes
             </h2>
             <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
               Trabalhamos com empresas inovadoras de diversos setores
             </p>
-          </div>
+          </div> */}
 
           {/* Carousel */}
           <div className="relative overflow-hidden">
@@ -217,7 +217,7 @@ export function PortfolioPage() {
               }
             `}</style>
 
-            <div className="carousel-scroll flex gap-8 w-max">
+            {/* <div className="carousel-scroll flex gap-8 w-max">
               {[
                 "Wibx",
                 "Ericsson",
@@ -244,7 +244,7 @@ export function PortfolioPage() {
                   </div>
                 </div>
               ))}
-            </div>
+            </div> */}
           </div>
         </div>
       </section>
