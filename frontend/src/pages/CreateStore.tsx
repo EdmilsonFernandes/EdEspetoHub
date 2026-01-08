@@ -685,9 +685,6 @@ export function CreateStore() {
                   <span className="absolute -top-3 left-4 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-full">
                     7 DIAS GRATIS
                   </span>
-                  <span className="absolute -top-3 right-4 bg-emerald-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                    SELECIONADO
-                  </span>
                   <p className="text-sm uppercase font-semibold text-amber-700">Teste completo</p>
                   <p className="text-2xl font-bold text-gray-900">Sem cartao</p>
                   <p className="text-xs text-gray-500">Escolha o plano ao final do periodo gratuito.</p>

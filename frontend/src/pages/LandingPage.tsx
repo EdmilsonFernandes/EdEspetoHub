@@ -277,9 +277,12 @@ export function LandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-6 items-stretch">
             <div className="transition-all duration-300 h-full">
-              <div className="relative rounded-2xl shadow-lg p-8 h-full flex flex-col bg-gradient-to-br from-amber-50 via-white to-red-50 border border-amber-200">
+              <div className="relative rounded-2xl shadow-lg p-8 h-full flex flex-col bg-gradient-to-br from-amber-50 via-white to-red-50 border-2 border-amber-400 ring-2 ring-amber-200/60">
                 <span className="absolute -top-4 left-6 bg-amber-500 text-white px-3 py-1 rounded-full text-xs font-bold">
                   7 DIAS GRATIS
+                </span>
+                <span className="absolute -top-4 right-6 bg-emerald-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                  SELECIONADO
                 </span>
                 <div className="w-14 h-14 rounded-2xl overflow-hidden border border-amber-200 bg-white shadow-sm mb-4">
                   <img src="/chama-no-espeto.jpeg" alt="Chama no Espeto" className="w-full h-full object-cover" />
