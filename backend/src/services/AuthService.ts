@@ -433,6 +433,7 @@ export class AuthService
         store.open = true;
         await AppDataSource.getRepository(Store).save(store);
       }
+      await this.emailService.sendActivationEmail(verifiedUser.email, store.slug);
       return { message: 'E-mail verificado', redirectUrl: '/admin' };
     }
 
