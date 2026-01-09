@@ -73,12 +73,10 @@ export function LandingPage() {
     const planKey = getPlanName(tier.key, billingKey);
     const plan = plansByName[planKey];
     const price = plan?.price ?? null;
-    const promo = plan?.promoPrice ?? null;
     return {
       name: plan?.displayName || tier.label,
       price: Number(price),
       hasPrice: price !== null && price !== undefined,
-      promo: promo ? Number(promo) : null,
       period: billing.period,
       features: tier.features,
       popular: tier.popular,
@@ -394,11 +392,9 @@ export function LandingPage() {
                       <div className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-red-600 mb-2">
                         R$ {plan.price.toFixed(2)}
                       </div>
-                      {plan.promo && (
-                        <p className="text-xs font-semibold text-red-600 mb-2">
-                          7 dias gratis + 1º mes por R$ {plan.promo.toFixed(2)}
-                        </p>
-                      )}
+                      <p className="text-xs font-semibold text-slate-600 mb-2">
+                        7 dias gratis. Renovacao pelo valor do plano.
+                      </p>
                       <p className="text-sm text-gray-600 dark:text-gray-400">{plan.period}</p>
                     </>
                   ) : (
