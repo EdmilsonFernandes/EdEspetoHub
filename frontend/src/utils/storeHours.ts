@@ -49,3 +49,20 @@ export const isStoreOpenNow = (openingHours?: OpeningDay[], manualOpen?: boolean
     return minutes >= start && minutes < end;
   });
 };
+
+export const formatOpeningHoursSummary = (openingHours?: OpeningDay[]) => {
+  if (!Array.isArray(openingHours) || openingHours.length === 0) return [];
+  const labels = [ 'Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab' ];
+  return openingHours.map((entry) => {
+    const dayLabel = labels[ entry.day ] || 'Dia';
+    if (entry.enabled === false) {
+      return `${dayLabel}: fechado`;
+    }
+    const intervals = Array.isArray(entry.intervals) ? entry.intervals : [];
+    if (!intervals.length) {
+      return `${dayLabel}: horario livre`;
+    }
+    const ranges = intervals.map((interval) => `${interval.start}–${interval.end}`).join(' • ');
+    return `${dayLabel}: ${ranges}`;
+  });
+};

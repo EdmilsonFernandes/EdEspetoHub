@@ -228,10 +228,20 @@ export function OrderTracking() {
                         <span>{order.address}</span>
                       </p>
                     )}
-                    {storePhone && (
-                      <p>
-                        <span className="font-semibold">Contato da loja:</span> {storePhone}
-                      </p>
+                  {storePhone && (
+                      <div className="flex flex-col gap-2">
+                        <p>
+                          <span className="font-semibold">Contato da loja:</span> {storePhone}
+                        </p>
+                        <a
+                          href={`https://wa.me/${storePhone.replace(/\D/g, '')}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center justify-center px-3 py-2 rounded-lg bg-green-600 text-white text-xs font-semibold hover:opacity-90"
+                        >
+                          Falar no WhatsApp
+                        </a>
+                      </div>
                     )}
                     <p>
                       <span className="font-semibold">Status:</span> {statusLabel}

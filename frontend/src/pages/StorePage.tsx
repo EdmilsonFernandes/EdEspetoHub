@@ -12,7 +12,7 @@ import { SuccessView } from '../components/Client/SuccessView';
 import { formatCurrency, formatPaymentMethod, formatPhoneInput } from '../utils/format';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getPersistedBranding, brandingStorageKey, defaultBranding, initialCustomer, defaultPaymentMethod, DEFAULT_AREA_CODE, WHATSAPP_NUMBER, PIX_KEY } from '../constants';
-import { isStoreOpenNow, normalizeOpeningHours } from '../utils/storeHours';
+import { formatOpeningHoursSummary, isStoreOpenNow, normalizeOpeningHours } from '../utils/storeHours';
 
 export function StorePage() {
   const { storeSlug } = useParams();
@@ -50,6 +50,7 @@ export function StorePage() {
     if (!intervals.length) return '';
     return intervals.map((interval) => `${interval.start}–${interval.end}`).join(' • ');
   }, [openingHours]);
+  const weeklyHours = useMemo(() => formatOpeningHoursSummary(openingHours), [openingHours]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
   const isDemo = storeSlug === 'demo' || storeSlug === 'test-store';
@@ -515,6 +516,16 @@ export function StorePage() {
                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
                   Horario de hoje: {todayHoursLabel}
                 </p>
+              )}
+              {weeklyHours.length > 0 && (
+                <div className="mt-4 text-left bg-white/70 border border-gray-100 rounded-2xl p-4 text-xs text-gray-600">
+                  <p className="text-xs font-semibold text-gray-700 mb-2">Horarios da semana</p>
+                  <div className="space-y-1">
+                    {weeklyHours.map((line) => (
+                      <p key={line}>{line}</p>
+                    ))}
+                  </div>
+                </div>
               )}
               <button
                 onClick={() => navigate('/')}
