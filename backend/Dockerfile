@@ -1,8 +1,9 @@
+# syntax=docker/dockerfile:1.4
 FROM node:20-alpine AS build
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm ci
+RUN --mount=type=cache,target=/root/.npm npm ci
 
 COPY tsconfig.json ./
 COPY src ./src
@@ -15,7 +16,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 COPY package*.json ./
-RUN npm ci --omit=dev
+RUN --mount=type=cache,target=/root/.npm npm ci --omit=dev
 
 COPY --from=build /app/dist ./dist
 COPY schema.sql ./schema.sql

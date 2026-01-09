@@ -1,11 +1,12 @@
+# syntax=docker/dockerfile:1.4
 # Build do React (Vite)
 FROM node:18-alpine AS build
 
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
+RUN --mount=type=cache,target=/root/.npm npm ci
 COPY . .
-RUN npm run build
+RUN --mount=type=cache,target=/app/node_modules/.vite npm run build
 
 # Servir no Nginx com proxy configurado
 FROM nginx:1.27-alpine
