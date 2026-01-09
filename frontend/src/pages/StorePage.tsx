@@ -516,35 +516,60 @@ export function StorePage() {
         )}
         {showClosedState && (
           <div className="min-h-[70vh] flex items-center justify-center">
-            <div className="text-center px-4 max-w-md">
-              <div className="mb-4">
-                <div className="text-6xl">🕒</div>
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Loja fechada agora</h2>
-              <p className="text-gray-600 dark:text-gray-400 mb-2">
-                O atendimento esta fechado no momento.
-              </p>
-              {todayHoursLabel && (
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-                  Horario de hoje: {todayHoursLabel}
-                </p>
-              )}
-              {weeklyHours.length > 0 && (
-                <div className="mt-4 text-left bg-white/70 border border-gray-100 rounded-2xl p-4 text-xs text-gray-600">
-                  <p className="text-xs font-semibold text-gray-700 mb-2">Horarios da semana</p>
-                  <div className="space-y-1">
-                    {weeklyHours.map((line) => (
-                      <p key={line}>{line}</p>
-                    ))}
+            <div className="w-full max-w-3xl px-4">
+              <div className="bg-white border border-gray-100 rounded-3xl shadow-xl p-6 sm:p-8 text-center">
+                <div className="flex flex-col items-center gap-3 mb-5">
+                  <div className="w-16 h-16 rounded-2xl overflow-hidden border border-gray-200 shadow-sm bg-white">
+                    <img
+                      src={branding?.logoUrl || '/chama-no-espeto.jpeg'}
+                      alt={branding?.brandName || 'Chama no Espeto'}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div>
+                    <p className="text-sm uppercase tracking-[0.3em] text-gray-400">Atendimento</p>
+                    <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                      {branding?.brandName || 'Loja fechada agora'}
+                    </h2>
                   </div>
                 </div>
-              )}
-              <button
-                onClick={() => navigate('/')}
-                className="px-6 py-3 rounded-lg border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-all"
-              >
-                Voltar ao inicio
-              </button>
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold mb-4">
+                  🕒 Loja fechada no momento
+                </div>
+                <p className="text-gray-600 mb-3">
+                  O atendimento esta fechado. Volte no proximo horario de funcionamento.
+                </p>
+                {todayHoursLabel && (
+                  <p className="text-sm text-gray-500 mb-6">Horario de hoje: {todayHoursLabel}</p>
+                )}
+                {weeklyHours.length > 0 && (
+                  <div className="mt-4 text-left bg-gray-50 border border-gray-100 rounded-2xl p-4 text-xs text-gray-600">
+                    <p className="text-xs font-semibold text-gray-700 mb-2">Horarios da semana</p>
+                    <div className="grid sm:grid-cols-2 gap-2">
+                      {weeklyHours.map((line) => (
+                        <p key={line}>{line}</p>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+                  <button
+                    onClick={() => navigate('/')}
+                    className="px-6 py-3 rounded-lg border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-all"
+                  >
+                    Voltar ao inicio
+                  </button>
+                  <button
+                    onClick={() => navigate('/create')}
+                    className="px-6 py-3 rounded-lg bg-brand-gradient text-white font-semibold hover:opacity-90 transition-all"
+                  >
+                    Criar loja no Chama
+                  </button>
+                </div>
+                <div className="mt-6 text-xs text-gray-400">
+                  <span className="font-semibold text-gray-500">Chama no Espeto</span> • plataforma de pedidos online
+                </div>
+              </div>
             </div>
           </div>
         )}
