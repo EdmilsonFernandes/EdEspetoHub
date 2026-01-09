@@ -33,7 +33,7 @@ export class OrderRepository
   {
     return this.repository.findOne({
       where: { id: orderId },
-      relations: [ 'store', 'items', 'items.product' ],
+      relations: [ 'store', 'store.owner', 'items', 'items.product' ],
     });
   }
 

@@ -113,6 +113,7 @@ export class OrderController {
               id: order.store.id,
               name: order.store.name,
               slug: order.store.slug,
+              phone: order.store.owner?.phone || null,
             }
           : null,
       });

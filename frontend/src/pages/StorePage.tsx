@@ -56,6 +56,12 @@ export function StorePage() {
 
   const cartTotal = useMemo(() => Object.values(cart).reduce((acc, item) => acc + item.price * item.qty, 0), [cart]);
   const instagramHandle = useMemo(() => (branding.instagram ? `@${branding.instagram.replace('@', '')}` : ''), [branding.instagram]);
+  const subscriptionStatus = storeSubscription?.status;
+  const isSubscriptionActive =
+    subscriptionStatus &&
+    ![ 'PENDING', 'CANCELLED', 'SUSPENDED', 'EXPIRED' ].includes(subscriptionStatus);
+  const showInactiveState = view === 'menu' && !isSubscriptionActive;
+  const showClosedState = view === 'menu' && isSubscriptionActive && !storeOpenNow;
 
   const applyStoreMeta = (store: any) => {
     if (!store) return;
@@ -236,10 +242,9 @@ export function StorePage() {
   };
 
   const checkout = async () => {
-    const subscriptionStatus = storeSubscription?.status;
     const isSubscriptionActive =
-      !subscriptionStatus ||
-      !['CANCELLED', 'SUSPENDED', 'EXPIRED'].includes(subscriptionStatus);
+      subscriptionStatus &&
+      ![ 'PENDING', 'CANCELLED', 'SUSPENDED', 'EXPIRED' ].includes(subscriptionStatus);
     if (!isSubscriptionActive) {
       alert('Loja com assinatura inativa. Tente novamente mais tarde.');
       return;
@@ -477,7 +482,50 @@ export function StorePage() {
       )}
 
       <main className="mx-auto px-0 sm:px-4 md:px-6 lg:px-8 py-0 sm:py-6">
-        {view === 'menu' && products.length === 0 ? (
+        {showInactiveState && (
+          <div className="min-h-[70vh] flex items-center justify-center">
+            <div className="text-center px-4 max-w-md">
+              <div className="mb-4">
+                <div className="text-6xl">🔒</div>
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Loja inativa no momento</h2>
+              <p className="text-gray-600 dark:text-gray-400 mb-6">
+                Esta loja esta com a assinatura inativa. Entre em contato ou tente novamente mais tarde.
+              </p>
+              <button
+                onClick={() => navigate(storeSlug ? `/admin?slug=${encodeURIComponent(storeSlug)}` : '/admin')}
+                className="px-6 py-3 rounded-lg border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-all"
+              >
+                Sou o administrador
+              </button>
+            </div>
+          </div>
+        )}
+        {showClosedState && (
+          <div className="min-h-[70vh] flex items-center justify-center">
+            <div className="text-center px-4 max-w-md">
+              <div className="mb-4">
+                <div className="text-6xl">🕒</div>
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Loja fechada agora</h2>
+              <p className="text-gray-600 dark:text-gray-400 mb-2">
+                O atendimento esta fechado no momento.
+              </p>
+              {todayHoursLabel && (
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                  Horario de hoje: {todayHoursLabel}
+                </p>
+              )}
+              <button
+                onClick={() => navigate('/')}
+                className="px-6 py-3 rounded-lg border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-all"
+              >
+                Voltar ao inicio
+              </button>
+            </div>
+          </div>
+        )}
+        {!showInactiveState && !showClosedState && view === 'menu' && products.length === 0 ? (
           <div className="min-h-[80vh] flex items-center justify-center">
             <div className="text-center px-4">
               <div className="mb-4">
@@ -503,7 +551,7 @@ export function StorePage() {
               </div>
             </div>
           </div>
-        ) : view === 'menu' && products.length > 0 && (
+        ) : !showInactiveState && !showClosedState && view === 'menu' && products.length > 0 && (
           <MenuView
             products={products}
             cart={cart}

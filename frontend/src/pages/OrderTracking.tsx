@@ -91,6 +91,7 @@ export function OrderTracking() {
   const isReady = status === 'done' || status === 'delivered';
   const queuePosition = order?.queuePosition;
   const queueSize = order?.queueSize;
+  const storePhone = order?.store?.phone;
   const estimateMinutes =
     typeof queuePosition === 'number' && queuePosition > 0 ? Math.max(5, queuePosition * 6) : null;
 
@@ -102,6 +103,7 @@ export function OrderTracking() {
     ],
     []
   );
+  const currentStep = status === 'delivered' ? 'done' : status;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -170,7 +172,9 @@ export function OrderTracking() {
                 </div>
                 <div className="grid sm:grid-cols-3 gap-3">
                   {steps.map((step) => {
-                    const isDone = steps.findIndex((item) => item.id === step.id) <= steps.findIndex((item) => item.id === status);
+                    const isDone =
+                      steps.findIndex((item) => item.id === step.id) <=
+                      steps.findIndex((item) => item.id === currentStep);
                     return (
                       <div
                         key={step.id}
@@ -222,6 +226,11 @@ export function OrderTracking() {
                       <p className="flex items-start gap-2">
                         <MapPin size={16} className="text-gray-400 mt-0.5" />
                         <span>{order.address}</span>
+                      </p>
+                    )}
+                    {storePhone && (
+                      <p>
+                        <span className="font-semibold">Contato da loja:</span> {storePhone}
                       </p>
                     )}
                     <p>
