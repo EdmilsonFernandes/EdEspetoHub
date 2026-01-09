@@ -260,7 +260,14 @@ export function StorePage() {
     const phoneFromMatch = !nextCustomer.phone && matchedCustomer?.phone ? matchedCustomer.phone : nextCustomer.phone;
     const formattedPhone = formatPhoneInput(phoneFromMatch, DEFAULT_AREA_CODE);
 
-    setCustomer({ ...nextCustomer, phone: formattedPhone });
+    const updatedCustomer = { ...nextCustomer, phone: formattedPhone };
+    if (!user?.token && nextCustomer.type === 'table') {
+      setLastPublicOrderId('');
+      if (storeSlug) {
+        localStorage.removeItem(`lastOrder:${storeSlug}`);
+      }
+    }
+    setCustomer(updatedCustomer);
   };
 
   const checkout = async () => {
