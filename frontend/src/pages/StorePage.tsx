@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ShoppingCart, Send } from 'lucide-react';
 import { productService } from '../services/productService';
@@ -29,6 +29,8 @@ export function StorePage() {
   const [storeOpenNow, setStoreOpenNow] = useState(true);
   const [storePhone, setStorePhone] = useState('');
   const [openingHours, setOpeningHours] = useState([]);
+  const [storeSubscription, setStoreSubscription] = useState(null);
+  const autoTrackRef = useRef(false);
   const customersStorageKey = useMemo(
     () => `customers:${storeSlug || defaultBranding.espetoId}`,
     [storeSlug]
@@ -142,6 +144,7 @@ export function StorePage() {
               ? data.openNow
               : isStoreOpenNow(normalizedHours, data.open);
           setStoreOpenNow(openNow);
+          setStoreSubscription(data.subscription || null);
           applyStoreMeta(data);
         }
       } catch (error) {
@@ -194,6 +197,19 @@ export function StorePage() {
     document.documentElement.style.setProperty('--color-secondary', branding.accentColor || branding.primaryColor || defaultBranding.accentColor);
   }, [branding]);
 
+  useEffect(() => {
+    if (view !== 'success' || !lastOrder?.id) {
+      autoTrackRef.current = false;
+      return;
+    }
+    if (autoTrackRef.current) return;
+    autoTrackRef.current = true;
+    const timeout = window.setTimeout(() => {
+      navigate(`/pedido/${lastOrder.id}`);
+    }, 1500);
+    return () => window.clearTimeout(timeout);
+  }, [view, lastOrder?.id, navigate]);
+
   const updateCart = (item, qty) => {
     setCart((previous) => {
       const currentQty = previous[item.id]?.qty || 0;
@@ -220,6 +236,18 @@ export function StorePage() {
   };
 
   const checkout = async () => {
+    const subscriptionStatus = storeSubscription?.status;
+    const isSubscriptionActive =
+      !subscriptionStatus ||
+      !['CANCELLED', 'SUSPENDED', 'EXPIRED'].includes(subscriptionStatus);
+    if (!isSubscriptionActive) {
+      alert('Loja com assinatura inativa. Tente novamente mais tarde.');
+      return;
+    }
+    if (!storeOpenNow) {
+      alert('Loja fechada no momento. Tente novamente durante o horario de atendimento.');
+      return;
+    }
     if (!customer.name || !customer.phone) {
       alert('Preencha Nome e Telefone');
       return;
@@ -261,21 +289,43 @@ export function StorePage() {
     }
 
     if (isDemo) {
+      const demoId = `demo-${Date.now()}`;
       setCart({});
       setCustomer(initialCustomer);
       setPaymentMethod(defaultPaymentMethod);
       setLastOrder({
+        id: demoId,
         type: customer.type,
         payment,
         phone: sanitizedPhoneKey || customer.phone,
         pixKey,
         table: customer.table,
       });
+      sessionStorage.setItem(
+        `demo:order:${demoId}`,
+        JSON.stringify({
+          id: demoId,
+          status: 'pending',
+          type: customer.type,
+          table: customer.table,
+          customerName: customer.name,
+          items: Object.values(cart).map((item) => ({
+            id: item.id,
+            name: item.name,
+            quantity: item.qty,
+            price: item.price * item.qty,
+          })),
+          phone: customer.phone,
+          total: cartTotal,
+          store: { name: 'Chama no Espeto Demo', slug: storeSlug },
+          createdAt: Date.now(),
+        })
+      );
       setView('success');
       return;
     }
 
-    await orderService.createBySlug(order, storeSlug);
+    const createdOrder = await orderService.createBySlug(order, storeSlug);
     const nextCustomers = [
       { name: customer.name, phone: customer.phone, table: customer.table },
       ...customers.filter((entry) => entry.name !== customer.name),
@@ -284,7 +334,8 @@ export function StorePage() {
     localStorage.setItem(customersStorageKey, JSON.stringify(nextCustomers));
     customerService.fetchAll().then(setCustomers).catch(() => {});
 
-    if (isPickup) {
+    const shouldNotifyOwner = customer.type === 'pickup' || customer.type === 'table';
+    if (shouldNotifyOwner) {
       const itemsList = Object.values(cart)
         .map((item) => `▪ ${item.qty}x ${item.name}`)
         .join('\n');
@@ -319,6 +370,7 @@ export function StorePage() {
     setPaymentMethod(defaultPaymentMethod);
 
     setLastOrder({
+      id: createdOrder?.id,
       type: customer.type,
       payment,
       phone: sanitizedPhoneKey || customer.phone,
@@ -486,6 +538,12 @@ export function StorePage() {
               pixKey={lastOrder?.pixKey}
               phone={lastOrder?.phone}
               table={lastOrder?.table}
+              orderId={lastOrder?.id}
+              onTrackOrder={() => {
+                if (lastOrder?.id) {
+                  navigate(`/pedido/${lastOrder.id}`);
+                }
+              }}
               onNewOrder={() => setView('menu')}
             />
           </div>

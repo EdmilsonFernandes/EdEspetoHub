@@ -68,5 +68,6 @@ routes.get('/stores/:storeId/orders', requireAuth, requireRole('ADMIN', 'CHURRAS
 routes.get('/stores/slug/:slug/orders', requireAuth, requireRole('ADMIN', 'CHURRASQUEIRO'), OrderController.listBySlug);
 routes.patch('/orders/:orderId/status', requireAuth, requireRole('ADMIN', 'CHURRASQUEIRO'), OrderController.updateStatus);
 routes.patch('/orders/:orderId', requireAuth, requireRole('ADMIN', 'CHURRASQUEIRO'), OrderController.updateItems);
+routes.get('/orders/:orderId/public', OrderController.getPublic);
 
 export default routes;

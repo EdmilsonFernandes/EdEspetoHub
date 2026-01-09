@@ -80,7 +80,7 @@ export const orderService = {
       return Promise.reject(new Error("Loja inválida"));
     }
 
-    await apiClient.post(`/stores/slug/${storeSlug}/orders`, orderData);
+    return apiClient.post(`/stores/slug/${storeSlug}/orders`, orderData);
   },
   async save(orderData: any, storeId?: string)
   {
@@ -259,5 +259,10 @@ export const orderService = {
       quantity: Number(item.qty ?? item.quantity ?? 0),
     }));
     await apiClient.patch(`/orders/${id}`, { items: normalizedItems, total });
+  },
+
+  async getPublicById(orderId: string)
+  {
+    return apiClient.get(`/orders/${orderId}/public`);
   },
 };

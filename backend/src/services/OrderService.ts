@@ -104,6 +104,24 @@ export class OrderService
     return this.orderRepository.save(order);
   }
 
+  async getPublicById(orderId: string)
+  {
+    const order = await this.orderRepository.findById(orderId);
+    if (!order) return null;
+    const queueStatuses = [ 'pending', 'preparing' ];
+    let queuePosition: number | null = null;
+    let queueSize: number | null = null;
+
+    if (order.store?.id) {
+      queueSize = await this.orderRepository.countByStoreAndStatuses(order.store.id, queueStatuses);
+      if (queueStatuses.includes(order.status)) {
+        queuePosition = await this.orderRepository.countQueueAhead(order.store.id, queueStatuses, order.createdAt);
+      }
+    }
+
+    return { order, queuePosition, queueSize };
+  }
+
   private async buildOrder(input: Omit<CreateOrderDto, 'storeId'>, store: Awaited<ReturnType<StoreRepository[ 'findById' ]>>)
   {
     const items: OrderItem[] = [];

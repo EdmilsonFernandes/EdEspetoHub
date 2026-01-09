@@ -37,6 +37,25 @@ export class OrderRepository
     });
   }
 
+  countByStoreAndStatuses(storeId: string, statuses: string[])
+  {
+    return this.repository
+      .createQueryBuilder('o')
+      .where('o.store_id = :storeId', { storeId })
+      .andWhere('o.status IN (:...statuses)', { statuses })
+      .getCount();
+  }
+
+  countQueueAhead(storeId: string, statuses: string[], createdAt: Date)
+  {
+    return this.repository
+      .createQueryBuilder('o')
+      .where('o.store_id = :storeId', { storeId })
+      .andWhere('o.status IN (:...statuses)', { statuses })
+      .andWhere('o.created_at <= :createdAt', { createdAt })
+      .getCount();
+  }
+
   findQueueByStoreId(storeId: string)
   {
     return this.repository.find({

@@ -80,4 +80,45 @@ export class OrderController {
       return res.status(statusCode).json({ message: error.message });
     }
   }
+
+  static async getPublic(req: Request, res: Response) {
+    const { orderId } = req.params;
+    try {
+      log.debug('Order public get request', { orderId });
+      const result = await orderService.getPublicById(orderId);
+      if (!result) return res.status(404).json({ message: 'Pedido não encontrado' });
+      const { order, queuePosition, queueSize } = result;
+
+      return res.json({
+        id: order.id,
+        status: order.status,
+        type: order.type,
+        table: order.table,
+        customerName: order.customerName,
+        phone: order.phone,
+        address: order.address,
+        total: order.total,
+        createdAt: order.createdAt,
+        queuePosition,
+        queueSize,
+        items: (order.items || []).map((item) => ({
+          id: item.id,
+          name: item.product?.name || item.name,
+          quantity: item.quantity,
+          price: item.price,
+          productId: item.product?.id,
+        })),
+        store: order.store
+          ? {
+              id: order.store.id,
+              name: order.store.name,
+              slug: order.store.slug,
+            }
+          : null,
+      });
+    } catch (error: any) {
+      log.warn('Order public get failed', { orderId, error });
+      return res.status(400).json({ message: error.message });
+    }
+  }
 }

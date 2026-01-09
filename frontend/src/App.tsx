@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { LandingPage, CreateStore, AdminLogin, StorePage, OrdersQueue, AdminDashboard, AdminOrders, AdminQueue, AdminRenewal, AdminDemo, PaymentPage, SuperAdmin, ForgotPassword, ResetPassword, VerifyEmail, TermsOfUse } from './pages';
+import { LandingPage, CreateStore, AdminLogin, StorePage, OrdersQueue, AdminDashboard, AdminOrders, AdminQueue, AdminRenewal, AdminDemo, PaymentPage, SuperAdmin, ForgotPassword, ResetPassword, VerifyEmail, TermsOfUse, OrderTracking } from './pages';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { ToastProvider } from './contexts/ToastContext';
 import { AdminRoute } from './components/Admin/AdminRoute';
@@ -83,6 +83,7 @@ function App() {
             <Route path="/:storeSlug" element={<StorePage />} />
             <Route path="/chamanoespeto/:storeSlug" element={<StorePage />} />
             <Route path="/chamanoespeto/:storeSlug/orders" element={<OrdersQueue />} />
+            <Route path="/pedido/:orderId" element={<OrderTracking />} />
             <Route path="/payment/:paymentId" element={<PaymentPage />} />
             <Route path="/superadmin" element={<SuperAdmin />} />
           </Routes>

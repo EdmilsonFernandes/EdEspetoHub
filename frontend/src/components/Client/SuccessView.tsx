@@ -72,6 +72,8 @@ export const SuccessView = ({
   pixKey,
   phone,
   table,
+  orderId,
+  onTrackOrder,
 }) => {
   return (
     <div className="flex flex-col items-center justify-center min-h-[80vh] text-center px-6 animate-in zoom-in">
@@ -97,12 +99,22 @@ export const SuccessView = ({
         phone={phone}
       />
 
-      <button
-        onClick={onNewOrder}
-        className="flex items-center gap-2 text-white bg-brand-primary font-bold px-6 py-3 rounded-xl transition-colors hover:opacity-90"
-      >
-        <ArrowLeft size={18} /> Voltar para os pedidos
-      </button>
+      <div className="flex flex-col sm:flex-row gap-3">
+        {orderId && (
+          <button
+            onClick={onTrackOrder}
+            className="flex items-center justify-center gap-2 text-white bg-emerald-600 font-bold px-6 py-3 rounded-xl transition-colors hover:opacity-90"
+          >
+            <CheckCircle size={18} /> Acompanhar pedido
+          </button>
+        )}
+        <button
+          onClick={onNewOrder}
+          className="flex items-center justify-center gap-2 text-white bg-brand-primary font-bold px-6 py-3 rounded-xl transition-colors hover:opacity-90"
+        >
+          <ArrowLeft size={18} /> Voltar para os pedidos
+        </button>
+      </div>
     </div>
   );
 };
