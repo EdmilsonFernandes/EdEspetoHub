@@ -14,12 +14,14 @@ export function AdminLogin() {
   const { setBranding } = useTheme();
   const [loginForm, setLoginForm] = useState({ slug: '', password: '' });
   const [loginError, setLoginError] = useState('');
+  const [pendingPayment, setPendingPayment] = useState(null);
   const [branding] = useState(getPersistedBranding());
   const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async event => {
     event?.preventDefault();
     setLoginError('');
+    setPendingPayment(null);
 
     try {
       const session = await authService.adminLogin(loginForm.slug, loginForm.password);
@@ -43,7 +45,18 @@ export function AdminLogin() {
       sessionStorage.removeItem('admin:redirectSlug');
       navigate('/admin/dashboard');
     } catch (error) {
-      setLoginError(error.message || 'Falha ao autenticar');
+      let message = error.message || 'Falha ao autenticar';
+      try {
+        const payload = JSON.parse(message);
+        message = payload.message || message;
+        if (payload?.code === 'PAYMENT_PENDING') {
+          setPendingPayment({
+            paymentUrl: payload.paymentUrl,
+            paymentLink: payload.paymentLink,
+          });
+        }
+      } catch {}
+      setLoginError(message);
     }
   };
 
@@ -87,7 +100,27 @@ export function AdminLogin() {
         </div>
 
         {loginError && (
-          <div className="text-sm text-red-700 bg-red-50 border border-red-200 p-4 rounded-xl">{loginError}</div>
+          <div className="text-sm text-red-700 bg-red-50 border border-red-200 p-4 rounded-xl space-y-3">
+            <p>{loginError}</p>
+            {pendingPayment?.paymentUrl && (
+              <a
+                href={pendingPayment.paymentUrl}
+                className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-brand-primary text-white text-xs font-semibold hover:opacity-90"
+              >
+                Acessar pagamento
+              </a>
+            )}
+            {!pendingPayment?.paymentUrl && pendingPayment?.paymentLink && (
+              <a
+                href={pendingPayment.paymentLink}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-brand-primary text-white text-xs font-semibold hover:opacity-90"
+              >
+                Acessar pagamento
+              </a>
+            )}
+          </div>
         )}
 
         <div className="space-y-4">

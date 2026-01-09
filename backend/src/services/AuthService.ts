@@ -239,7 +239,7 @@ export class AuthService
       const currentSubscription = await this.subscriptionService.getCurrentByStore(firstStore.id);
       const isActive = this.subscriptionService.isActiveSubscription(currentSubscription);
       if (!isActive) {
-        throw new Error('Pagamento pendente. Sua loja ainda não está ativa.');
+        await this.throwPendingPayment(firstStore.id);
       }
       if (currentSubscription && !firstStore.open) {
         firstStore.open = true;
@@ -262,7 +262,7 @@ export class AuthService
     const currentSubscription = await this.subscriptionService.getCurrentByStore(store.id);
     const isActive = this.subscriptionService.isActiveSubscription(currentSubscription);
     if (!isActive) {
-      throw new Error('Pagamento pendente. Sua loja ainda não está ativa.');
+      await this.throwPendingPayment(store.id);
     }
     if (currentSubscription && !store.open) {
       store.open = true;
@@ -490,6 +490,16 @@ export class AuthService
     const result = new Date(date);
     result.setDate(result.getDate() + days);
     return result;
+  }
+
+  private async throwPendingPayment(storeId: string)
+  {
+    const payment = await this.paymentRepository.findLatestByStoreId(storeId);
+    const error: any = new Error('Pagamento pendente. Sua loja ainda não está ativa.');
+    error.code = 'PAYMENT_PENDING';
+    error.paymentUrl = payment?.id ? `${env.appUrl}/payment/${payment.id}` : null;
+    error.paymentLink = payment?.paymentLink || null;
+    throw error;
   }
 
   private async sendVerificationEmail(user: User) {

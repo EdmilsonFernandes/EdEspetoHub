@@ -5,8 +5,9 @@ export const normalizeOpeningHours = (openingHours?: OpeningDay[]) => {
   const base = Array.isArray(openingHours) ? openingHours : [];
   const byDay = new Map<number, OpeningDay>();
   base.forEach((entry) => {
-    if (typeof entry?.day === 'number') {
-      byDay.set(entry.day, entry);
+    const dayValue = typeof entry?.day === 'number' ? entry.day : Number(entry?.day);
+    if (Number.isFinite(dayValue)) {
+      byDay.set(dayValue, { ...entry, day: dayValue });
     }
   });
 

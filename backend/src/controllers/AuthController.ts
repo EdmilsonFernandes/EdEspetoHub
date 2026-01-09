@@ -40,6 +40,14 @@ export class AuthController
     } catch (error: any)
     {
       log.warn('Login failed', { email, error });
+      if (error?.code === 'PAYMENT_PENDING') {
+        return res.status(402).json({
+          message: error.message,
+          code: error.code,
+          paymentUrl: error.paymentUrl,
+          paymentLink: error.paymentLink,
+        });
+      }
       return res.status(401).json({ message: error.message });
     }
   }
@@ -57,6 +65,14 @@ export class AuthController
     } catch (error: any)
     {
       log.warn('Admin login failed', { slug, error });
+      if (error?.code === 'PAYMENT_PENDING') {
+        return res.status(402).json({
+          message: error.message,
+          code: error.code,
+          paymentUrl: error.paymentUrl,
+          paymentLink: error.paymentLink,
+        });
+      }
       const status = error.message === 'Loja não encontrada' ? 404 : 401;
       return res.status(status).json({ message: error.message });
     }
