@@ -493,12 +493,24 @@ export function StorePage() {
               <p className="text-gray-600 dark:text-gray-400 mb-6">
                 Esta loja esta com a assinatura inativa. Entre em contato ou tente novamente mais tarde.
               </p>
-              <button
-                onClick={() => navigate(storeSlug ? `/admin?slug=${encodeURIComponent(storeSlug)}` : '/admin')}
-                className="px-6 py-3 rounded-lg border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-all"
-              >
-                Sou o administrador
-              </button>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                {storePhone && (
+                  <a
+                    href={`https://wa.me/${storePhone.replace(/\D/g, '')}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-6 py-3 rounded-lg bg-green-600 text-white font-semibold hover:opacity-90 transition-all"
+                  >
+                    Falar no WhatsApp
+                  </a>
+                )}
+                <button
+                  onClick={() => navigate(storeSlug ? `/admin?slug=${encodeURIComponent(storeSlug)}` : '/admin')}
+                  className="px-6 py-3 rounded-lg border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-all"
+                >
+                  Sou o administrador
+                </button>
+              </div>
             </div>
           </div>
         )}

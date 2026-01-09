@@ -153,6 +153,11 @@ export function OrderTracking() {
                   <p className="text-sm text-gray-500 mt-2">
                     {order.store?.name || 'Chama no Espeto'} • {typeLabel}
                   </p>
+                  {estimateMinutes && !isReady && (
+                    <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold">
+                      Estimativa: ~{estimateMinutes} min
+                    </div>
+                  )}
                 </div>
                 <div className="flex items-center gap-2 text-sm text-gray-600">
                   <Clock size={16} />
