@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ChefHat, CircleCheck, Clock, Loader2, MapPin } from 'lucide-react';
+import { Bike, ChefHat, CircleCheck, Clock, Loader2, MapPin } from 'lucide-react';
 import { orderService } from '../services/orderService';
 import { formatCurrency, formatDateTime, formatDuration } from '../utils/format';
 
@@ -176,6 +176,11 @@ export function OrderTracking() {
                     <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Pedido #{order.id}</p>
                     <div className="mt-2 flex items-center gap-3 flex-wrap">
                       <h1 className="text-2xl sm:text-3xl font-black text-gray-900">{statusLabel}</h1>
+                      {isDelivery && (status === 'done' || status === 'delivered') && (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold px-3 py-1">
+                          <Bike size={14} /> Saiu para entrega
+                        </span>
+                      )}
                       <span
                         className={`px-3 py-1 rounded-full text-xs font-semibold ${
                           isReady
@@ -231,6 +236,7 @@ export function OrderTracking() {
                     const isDone =
                       steps.findIndex((item) => item.id === step.id) <=
                       steps.findIndex((item) => item.id === currentStep);
+                    const showBike = isDelivery && step.id === 'done';
                     return (
                       <div
                         key={step.id}
@@ -240,7 +246,13 @@ export function OrderTracking() {
                             : 'border-gray-200 text-gray-500'
                         } ${step.id === currentStep && !isReady ? 'ring-2 ring-amber-300 animate-pulse' : ''}`}
                       >
-                        {isDone ? <CircleCheck size={18} /> : <Clock size={18} />}
+                        {showBike ? (
+                          <Bike size={18} />
+                        ) : isDone ? (
+                          <CircleCheck size={18} />
+                        ) : (
+                          <Clock size={18} />
+                        )}
                         <span className="text-sm font-semibold">{step.label}</span>
                       </div>
                     );
