@@ -99,14 +99,12 @@ export function OrderTracking() {
   const status = order?.status || 'pending';
   const typeLabel = typeLabels[order?.type] || 'Pedido';
   const isDelivery = order?.type === 'delivery';
-  const isDelivered = status === 'delivered';
   const statusLabel = useMemo(() => {
-    if (isDelivery && status === 'done') return 'Saiu para entrega';
-    if (isDelivery && status === 'delivered') return 'Entregue';
+    if (isDelivery && (status === 'done' || status === 'delivered')) return 'Saiu para entrega';
     if (order?.type === 'table' && status === 'done') return 'Pronto para servir';
     return statusLabels[status] || status;
   }, [isDelivery, order?.type, status]);
-  const isReady = isDelivery ? isDelivered : status === 'done' || status === 'delivered';
+  const isReady = status === 'done' || status === 'delivered';
   const queuePosition = order?.queuePosition;
   const queueSize = order?.queueSize;
   const storePhone = order?.store?.phone;
@@ -119,7 +117,6 @@ export function OrderTracking() {
         { id: 'pending', label: 'Recebido' },
         { id: 'preparing', label: 'Em preparo' },
         { id: 'done', label: 'Saiu para entrega' },
-        { id: 'delivered', label: 'Entregue' },
       ];
     }
     return [
@@ -128,7 +125,7 @@ export function OrderTracking() {
       { id: 'done', label: order?.type === 'table' ? 'Pronto para servir' : 'Pronto' },
     ];
   }, [isDelivery, order?.type]);
-  const currentStep = status === 'delivered' ? 'delivered' : status;
+  const currentStep = isDelivery && status === 'delivered' ? 'done' : status;
   const currentIndex = Math.max(0, steps.findIndex((item) => item.id === currentStep));
   const progress = steps.length > 1 ? Math.round((currentIndex / (steps.length - 1)) * 100) : 0;
 
@@ -229,7 +226,7 @@ export function OrderTracking() {
                   </div>
                   <div className="mt-2 text-xs text-gray-500">{progress}% completo</div>
                 </div>
-                <div className={`grid gap-3 ${isDelivery ? 'sm:grid-cols-4' : 'sm:grid-cols-3'}`}>
+                <div className="grid gap-3 sm:grid-cols-3">
                   {steps.map((step) => {
                     const isDone =
                       steps.findIndex((item) => item.id === step.id) <=
@@ -338,11 +335,6 @@ export function OrderTracking() {
                         : order?.type === 'table'
                         ? 'Seu pedido esta pronto. Aguarde o atendimento na sua mesa.'
                         : 'Seu pedido esta pronto! Pode ir retirar. Bom apetite!'}
-                    </div>
-                  )}
-                  {isDelivery && status === 'done' && (
-                    <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
-                      Motoboy a caminho. Seu pedido esta saindo para entrega.
                     </div>
                   )}
                 </div>
