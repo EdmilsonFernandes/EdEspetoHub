@@ -1,10 +1,12 @@
 import { Request, Response } from 'express';
 import { StoreService } from '../services/StoreService';
 import { SubscriptionService } from '../services/SubscriptionService';
+import { logger } from '../utils/logger';
 
 const storeService = new StoreService();
 const subscriptionService = new SubscriptionService();
 const DEMO_SLUGS = new Set([ 'demo', 'test-store' ]);
+const log = logger.child({ scope: 'StoreController' });
 
 const buildDemoStore = (slug: string) => {
   const now = new Date();
@@ -79,6 +81,7 @@ export class StoreController {
       if (DEMO_SLUGS.has(req.params.slug)) {
         return res.json(buildDemoStore(req.params.slug));
       }
+      log.debug('Store get by slug request', { slug: req.params.slug });
       const store = await storeService.getBySlug(req.params.slug);
       if (!store) return res.status(404).json({ message: 'Loja não encontrada' });
       const subscription = await subscriptionService.getCurrentByStore(store.id);
@@ -101,24 +104,31 @@ export class StoreController {
       };
       return res.json({ ...sanitizedStore, subscription });
     } catch (error: any) {
+      log.warn('Store get by slug failed', { slug: req.params.slug, error });
       return res.status(400).json({ message: error.message });
     }
   }
 
   static async update(req: Request, res: Response) {
     try {
+      log.info('Store update request', { storeId: req.params.storeId });
       const store = await storeService.update(req.params.storeId, req.body);
+      log.info('Store updated', { storeId: req.params.storeId });
       return res.json(store);
     } catch (error: any) {
+      log.warn('Store update failed', { storeId: req.params.storeId, error });
       return res.status(400).json({ message: error.message });
     }
   }
 
   static async updateStatus(req: Request, res: Response) {
     try {
+      log.info('Store status update request', { storeId: req.params.storeId, open: req.body?.open });
       const store = await storeService.setStatus(req.params.storeId, req.body.open);
+      log.info('Store status updated', { storeId: req.params.storeId, open: store?.open });
       return res.json(store);
     } catch (error: any) {
+      log.warn('Store status update failed', { storeId: req.params.storeId, error });
       return res.status(400).json({ message: error.message });
     }
   }

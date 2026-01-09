@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
 import { env } from '../config/env';
+import { logger } from '../utils/logger';
 
 type EmailPayload = {
   to: string;
@@ -10,6 +11,7 @@ type EmailPayload = {
 
 export class EmailService {
   private transporter?: nodemailer.Transporter;
+  private log = logger.child({ scope: 'EmailService' });
   private getLogoUrl() {
     const base = env.appUrl?.replace(/\/$/, '') || 'http://localhost:3000';
     return `${base}/chama-no-espeto.jpeg`;
@@ -34,7 +36,7 @@ export class EmailService {
   async send(payload: EmailPayload) {
     const transporter = this.getTransporter();
     if (!transporter) {
-      console.log('📧 Email mock', JSON.stringify(payload, null, 2));
+      this.log.info('Email mock', { to: payload.to, subject: payload.subject });
       return;
     }
     await transporter.sendMail({

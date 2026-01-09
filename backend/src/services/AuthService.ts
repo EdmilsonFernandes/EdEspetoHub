@@ -22,9 +22,11 @@ import { PaymentRepository } from '../repositories/PaymentRepository';
 import { SubscriptionService } from './SubscriptionService';
 import { SettingsService } from './SettingsService';
 import { normalizeDocument, validateDocument } from '../utils/documents';
+import { logger } from '../utils/logger';
 
 export class AuthService
 {
+  private log = logger.child({ scope: 'AuthService' });
   private userRepository = new UserRepository();
   private storeRepository = new StoreRepository();
   private paymentService = new PaymentService();
@@ -35,7 +37,12 @@ export class AuthService
 
   async register(input: any)
   {
-    console.log('🔥 REGISTER ENTRY:', JSON.stringify(input, null, 2));
+    this.log.info('Register start', {
+      email: input?.email || input?.user?.email,
+      storeName: input?.storeName || input?.store?.name,
+      planId: input?.planId,
+      paymentMethod: input?.paymentMethod,
+    });
     const userPayload = input.user ?? {
       fullName: input.fullName,
       email: input.email,
@@ -88,17 +95,10 @@ export class AuthService
 
     const result = await AppDataSource.transaction(async (manager) =>
     {
-      console.log('🔥 BEFORE TRANSACTION', {
-        planId: input.planId,
-        paymentMethod: input.paymentMethod,
-      });
-
       const userRepo = manager.getRepository(User);
       const storeRepo = manager.getRepository(Store);
       const planRepo = manager.getRepository(Plan);
       const subscriptionRepo = manager.getRepository(Subscription);
-
-      console.log('🚨 REGISTER CALLED:', normalizedEmail, new Date().toISOString());
 
       const exists = await userRepo.findOne({ where: { email: normalizedEmail } });
       if (exists)
@@ -179,6 +179,7 @@ export class AuthService
 
     await this.sendVerificationEmail(result.user);
     await this.notifySignup(result.user, result.store);
+    this.log.info('Register success', { userId: result.user.id, storeId: result.store.id });
 
     const token = jwt.sign(
       { sub: result.user.id, storeId: result.store.id },

@@ -10,11 +10,13 @@ import { MercadoPagoService } from './MercadoPagoService';
 import { env } from '../config/env';
 import { PaymentEventRepository } from '../repositories/PaymentEventRepository';
 import { EmailService } from './EmailService';
+import { logger } from '../utils/logger';
 
 export class PaymentService {
   private mercadoPago = new MercadoPagoService();
   private paymentEventRepository = new PaymentEventRepository();
   private emailService = new EmailService();
+  private log = logger.child({ scope: 'PaymentService' });
   private normalizeQrCode(qrCode?: string | null) {
     if (!qrCode) return null;
     if (qrCode.startsWith('data:image')) return qrCode;
@@ -105,7 +107,7 @@ export class PaymentService {
         await paymentRepo.save(payment);
         return payment;
       } catch (error) {
-        console.error('Mercado Pago erro, usando fallback mock', error);
+        this.log.warn('Mercado Pago failed, using fallback', { error });
       }
     }
 
@@ -121,6 +123,7 @@ export class PaymentService {
   }
 
   async confirmPayment(paymentId: string) {
+    this.log.info('Confirm payment start', { paymentId });
     return AppDataSource.transaction(async (manager) => {
       const paymentRepo = manager.getRepository(Payment);
       const lockedPayment = await paymentRepo
@@ -164,12 +167,19 @@ export class PaymentService {
       await manager.save(store);
       await manager.save(payment);
       await this.sendActivationEmail(payment.user.email, store.slug);
+      this.log.info('Payment confirmed', {
+        paymentId,
+        storeId: store.id,
+        subscriptionId: subscription.id,
+        status: payment.status,
+      });
 
       return payment;
     });
   }
 
   async confirmMercadoPagoPayment(mercadoPagoPaymentId: string) {
+    this.log.info('Confirm Mercado Pago payment', { mercadoPagoPaymentId });
     if (!env.mercadoPago.accessToken) {
       throw new Error('Mercado Pago nao configurado');
     }
@@ -183,6 +193,7 @@ export class PaymentService {
   }
 
   async reprocessByPaymentId(paymentId: string, providerId?: string) {
+    this.log.info('Reprocess payment', { paymentId, providerId });
     if (!env.mercadoPago.accessToken) {
       throw new Error('Mercado Pago nao configurado');
     }
@@ -215,6 +226,7 @@ export class PaymentService {
     if (providerStatus && failedStatuses.includes(providerStatus)) {
       payment.status = 'FAILED';
       await paymentRepo.save(payment);
+      this.log.warn('Payment marked as failed', { paymentId, providerStatus });
     }
   }
 

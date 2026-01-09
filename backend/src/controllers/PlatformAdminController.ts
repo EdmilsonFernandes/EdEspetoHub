@@ -3,15 +3,18 @@ import { StoreRepository } from '../repositories/StoreRepository';
 import { SubscriptionService } from '../services/SubscriptionService';
 import { PaymentRepository } from '../repositories/PaymentRepository';
 import { PaymentEventRepository } from '../repositories/PaymentEventRepository';
+import { logger } from '../utils/logger';
 
 const storeRepository = new StoreRepository();
 const subscriptionService = new SubscriptionService();
 const paymentRepository = new PaymentRepository();
 const paymentEventRepository = new PaymentEventRepository();
+const log = logger.child({ scope: 'PlatformAdminController' });
 
 export class PlatformAdminController {
   static async listStores(_req: Request, res: Response) {
     try {
+      log.debug('Admin list stores request');
       const stores = await storeRepository.findAll();
       const enriched = await Promise.all(
         stores.map(async (store) => {
@@ -26,12 +29,14 @@ export class PlatformAdminController {
       );
       return res.json(enriched);
     } catch (error: any) {
+      log.warn('Admin list stores failed', { error });
       return res.status(400).json({ message: error.message });
     }
   }
 
   static async overview(_req: Request, res: Response) {
     try {
+      log.debug('Admin overview request');
       const stores = await storeRepository.findAll();
       const enriched = await Promise.all(
         stores.map(async (store) => {
@@ -89,6 +94,7 @@ export class PlatformAdminController {
         paymentEvents,
       });
     } catch (error: any) {
+      log.warn('Admin overview failed', { error });
       return res.status(400).json({ message: error.message });
     }
   }
@@ -96,9 +102,11 @@ export class PlatformAdminController {
   static async suspendStore(req: Request, res: Response) {
     const subscriptionId = (req.body?.subscriptionId as string) || req.params.storeId;
     try {
+      log.info('Admin suspend store request', { subscriptionId });
       const subscription = await subscriptionService.suspend(subscriptionId);
       return res.json(subscription);
     } catch (error: any) {
+      log.warn('Admin suspend store failed', { subscriptionId, error });
       return res.status(400).json({ message: error.message });
     }
   }
@@ -106,9 +114,11 @@ export class PlatformAdminController {
   static async reactivateStore(req: Request, res: Response) {
     const subscriptionId = (req.body?.subscriptionId as string) || req.params.storeId;
     try {
+      log.info('Admin reactivate store request', { subscriptionId });
       const subscription = await subscriptionService.activate(subscriptionId);
       return res.json(subscription);
     } catch (error: any) {
+      log.warn('Admin reactivate store failed', { subscriptionId, error });
       return res.status(400).json({ message: error.message });
     }
   }
@@ -120,6 +130,7 @@ export class PlatformAdminController {
     const offset = req.query.offset ? Number(req.query.offset) : 0;
 
     try {
+      log.debug('Admin payment events request', { paymentId, storeId, limit, offset });
       const events = paymentId
         ? await paymentEventRepository.findByPaymentId(paymentId, limit, offset)
         : storeId
@@ -127,6 +138,7 @@ export class PlatformAdminController {
           : await paymentEventRepository.findRecent(limit, offset);
       return res.json(events);
     } catch (error: any) {
+      log.warn('Admin payment events failed', { paymentId, storeId, error });
       return res.status(400).json({ message: error.message });
     }
   }

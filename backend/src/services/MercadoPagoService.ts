@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import { env } from '../config/env';
+import { logger } from '../utils/logger';
 
 type MercadoPagoPreferenceResponse = {
   id: string;
@@ -42,9 +43,10 @@ const buildHeaders = () => ({
 });
 
 export class MercadoPagoService {
-  private log(message: string, data?: Record<string, any>) {
+  private log = logger.child({ scope: 'MercadoPagoService' });
+  private debugLog(message: string, data?: Record<string, any>) {
     if (!env.mercadoPago.debug) return;
-    console.log(`[MercadoPago] ${message}`, data || '');
+    this.log.info(message, data || {});
   }
 
   async createPayment(input: CreatePaymentInput) {
@@ -64,14 +66,14 @@ export class MercadoPagoService {
   async getPayment(paymentId: string) {
     if (!hasCredentials()) return null;
     const url = `${env.mercadoPago.apiBaseUrl}/v1/payments/${paymentId}`;
-    this.log('GET payment', { url, paymentId });
+    this.debugLog('GET payment', { url, paymentId });
     const response = await fetch(url, { headers: buildHeaders() });
     if (!response.ok) {
       const body = await response.text().catch(() => '');
-      console.error('[MercadoPago] GET payment failed', { status: response.status, body });
+      this.log.error('GET payment failed', { status: response.status, body });
       throw new Error('Falha ao consultar pagamento no Mercado Pago');
     }
-    this.log('GET payment ok', { status: response.status });
+    this.debugLog('GET payment ok', { status: response.status });
     return (await response.json()) as MercadoPagoPaymentResponse;
   }
 
@@ -102,12 +104,12 @@ export class MercadoPagoService {
 
     if (!response.ok) {
       const bodyText = await response.text().catch(() => '');
-      console.error('[MercadoPago] POST preference failed', { status: response.status, body: bodyText });
+      this.log.error('POST preference failed', { status: response.status, body: bodyText });
       throw new Error('Falha ao criar preferencia no Mercado Pago');
     }
 
     const data = (await response.json()) as MercadoPagoPreferenceResponse;
-    this.log('POST preference ok', { id: data.id });
+    this.debugLog('POST preference ok', { id: data.id });
     return {
       paymentLink: data.init_point || data.sandbox_init_point || null,
       qrCodeBase64: null,
@@ -149,12 +151,12 @@ export class MercadoPagoService {
 
     if (!response.ok) {
       const bodyText = await response.text().catch(() => '');
-      console.error('[MercadoPago] POST boleto preference failed', { status: response.status, body: bodyText });
+      this.log.error('POST boleto preference failed', { status: response.status, body: bodyText });
       throw new Error('Falha ao criar boleto no Mercado Pago');
     }
 
     const data = (await response.json()) as MercadoPagoPreferenceResponse;
-    this.log('POST boleto preference ok', { id: data.id });
+    this.debugLog('POST boleto preference ok', { id: data.id });
     return {
       paymentLink: data.init_point || data.sandbox_init_point || null,
       qrCodeBase64: null,
@@ -185,12 +187,12 @@ export class MercadoPagoService {
 
     if (!response.ok) {
       const bodyText = await response.text().catch(() => '');
-      console.error('[MercadoPago] POST pix failed', { status: response.status, body: bodyText });
+      this.log.error('POST pix failed', { status: response.status, body: bodyText });
       throw new Error('Falha ao criar PIX no Mercado Pago');
     }
 
     const data = (await response.json()) as MercadoPagoPaymentResponse;
-    this.log('POST pix ok', { id: data.id });
+    this.debugLog('POST pix ok', { id: data.id });
     return {
       paymentLink: data.transaction_details?.external_resource_url || null,
       qrCodeBase64: data.point_of_interaction?.transaction_data?.qr_code_base64 || null,

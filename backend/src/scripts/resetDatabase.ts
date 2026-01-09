@@ -1,21 +1,22 @@
 import 'reflect-metadata';
 import { AppDataSource } from '../config/database';
+import { logger } from '../utils/logger';
 
 const reset = async () => {
   try {
-    console.log('Initializing data source...');
+    logger.info('Initializing data source');
     const dataSource = await AppDataSource.initialize();
 
-    console.log('Dropping existing schema...');
+    logger.info('Dropping existing schema');
     await dataSource.dropDatabase();
 
-    console.log('Synchronizing entities...');
+    logger.info('Synchronizing entities');
     await dataSource.synchronize();
 
-    console.log('Database reset completed.');
+    logger.info('Database reset completed');
     await dataSource.destroy();
   } catch (error) {
-    console.error('Failed to reset database schema:', error);
+    logger.error('Failed to reset database schema', { error });
     process.exit(1);
   }
 };

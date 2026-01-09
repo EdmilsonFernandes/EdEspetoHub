@@ -3,9 +3,11 @@ import crypto from 'crypto';
 import { PaymentService } from '../services/PaymentService';
 import { env } from '../config/env';
 import { PaymentEventRepository } from '../repositories/PaymentEventRepository';
+import { logger } from '../utils/logger';
 
 const paymentService = new PaymentService();
 const paymentEventRepository = new PaymentEventRepository();
+const log = logger.child({ scope: 'PaymentController' });
 
 export class PaymentController {
   static async confirm(req: Request, res: Response) {
@@ -13,7 +15,9 @@ export class PaymentController {
     if (!paymentId) return res.status(400).json({ message: 'paymentId é obrigatório' });
 
     try {
+      log.info('Payment confirm request', { paymentId });
       const payment = await paymentService.confirmPayment(paymentId);
+      log.info('Payment confirmed', { paymentId, status: payment.status });
       return res.json({
         payment: {
           id: payment.id,
@@ -25,6 +29,7 @@ export class PaymentController {
         storeStatus: payment.store.open ? 'ACTIVE' : 'PENDING_PAYMENT',
       });
     } catch (error: any) {
+      log.warn('Payment confirm failed', { paymentId, error });
       return res.status(400).json({ message: error.message });
     }
   }
@@ -70,9 +75,12 @@ export class PaymentController {
     }
 
     try {
+      log.info('Mercado Pago webhook received', { paymentId });
       const result = await paymentService.confirmMercadoPagoPayment(String(paymentId));
+      log.info('Mercado Pago webhook processed', { paymentId });
       return res.json({ status: 'ok', result });
     } catch (error: any) {
+      log.warn('Mercado Pago webhook failed', { paymentId, error });
       return res.status(400).json({ message: error.message });
     }
   }
@@ -81,6 +89,7 @@ export class PaymentController {
     const { paymentId } = req.params;
 
     try {
+      log.debug('Payment get request', { paymentId });
       const payment = await paymentService.findById(paymentId);
       if (!payment) return res.status(404).json({ message: 'Pagamento não encontrado' });
 
@@ -99,6 +108,7 @@ export class PaymentController {
         emailVerified: payment.user?.emailVerified ?? false,
       });
     } catch (error: any) {
+      log.warn('Payment get failed', { paymentId, error });
       return res.status(500).json({ message: error.message });
     }
   }
@@ -109,6 +119,7 @@ export class PaymentController {
     const offset = req.query.offset ? Number(req.query.offset) : 0;
 
     try {
+      log.debug('Payment events request', { paymentId, limit, offset });
       const events = await paymentEventRepository.findByPaymentId(paymentId, limit, offset);
       const payload = events.map((event) => ({
         id: event.id,
@@ -119,6 +130,7 @@ export class PaymentController {
       }));
       return res.json(payload);
     } catch (error: any) {
+      log.warn('Payment events failed', { paymentId, error });
       return res.status(500).json({ message: error.message });
     }
   }
@@ -128,9 +140,12 @@ export class PaymentController {
     const { providerId } = req.body || {};
 
     try {
+      log.info('Payment reprocess request', { paymentId, providerId });
       const result = await paymentService.reprocessByPaymentId(paymentId, providerId);
+      log.info('Payment reprocess success', { paymentId });
       return res.json({ status: 'ok', result });
     } catch (error: any) {
+      log.warn('Payment reprocess failed', { paymentId, error });
       return res.status(400).json({ message: error.message });
     }
   }

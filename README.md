@@ -57,6 +57,7 @@ cp backend/.env.example backend/.env
 ```
 
 Edite `backend/.env` e ajuste `PG*`, `PORT` e `JWT_SECRET`.
+Opcional: `LOG_LEVEL=debug|info|warn|error` para controlar os logs da API.
 
 Crie `frontend/.env`:
 

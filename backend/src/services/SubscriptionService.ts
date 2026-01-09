@@ -9,6 +9,7 @@ import { EmailService } from './EmailService';
 import { AppDataSource } from '../config/database';
 import { PaymentService } from './PaymentService';
 import { PaymentMethod } from '../entities/Payment';
+import { logger } from '../utils/logger';
 
 export class SubscriptionService {
   private planRepository = new PlanRepository();
@@ -16,8 +17,10 @@ export class SubscriptionService {
   private subscriptionRepository = new SubscriptionRepository();
   private emailService = new EmailService();
   private paymentService = new PaymentService();
+  private log = logger.child({ scope: 'SubscriptionService' });
 
   async create(input: CreateSubscriptionDto) {
+    this.log.info('Create subscription', { storeId: input.storeId, planId: input.planId });
     const store = await this.storeRepository.findById(input.storeId);
     if (!store) throw new Error('Loja não encontrada');
 
@@ -71,6 +74,7 @@ export class SubscriptionService {
   }
 
   async renew(subscriptionId: string, input: RenewSubscriptionDto) {
+    this.log.info('Renew subscription', { subscriptionId, planId: input.planId });
     const subscription = await this.subscriptionRepository.findById(subscriptionId);
     if (!subscription) throw new Error('Assinatura não encontrada');
 
@@ -99,6 +103,7 @@ export class SubscriptionService {
   }
 
   async createRenewalPayment(storeId: string, input: RenewSubscriptionDto, authStoreId?: string) {
+    this.log.info('Create renewal payment', { storeId, planId: input.planId, paymentMethod: input.paymentMethod });
     const store = await this.storeRepository.findById(storeId);
     if (!store) throw new Error('Loja não encontrada');
     if (authStoreId && store.id !== authStoreId) throw new Error('Sem permissão para acessar esta loja');
@@ -185,6 +190,7 @@ export class SubscriptionService {
 
     if (updates.length) {
       await Promise.all(updates.map((s) => this.subscriptionRepository.save(s)));
+      this.log.info('Subscription statuses updated', { total: updates.length });
     }
 
     return updates;

@@ -9,12 +9,15 @@ import { env } from './config/env';
 import { swaggerSpec } from './config/swagger';
 import { scheduleSubscriptionExpirationJob } from './jobs/subscription-expiration.job';
 import { runMigrations } from './utils/runMigrations';
+import { requestLogger } from './middleware/requestLogger';
+import { logger } from './utils/logger';
 
 async function bootstrap()
 {
   await AppDataSource.initialize();
   await runMigrations();
   const app = express();
+  app.use(requestLogger);
   app.use(cors());
   app.use(express.json({ limit: '10mb' }));
 
@@ -31,12 +34,12 @@ async function bootstrap()
 
   app.listen(env.port, () =>
   {
-    console.log(`API listening on port ${env.port}`);
+    logger.info('API listening', { port: env.port });
   });
 }
 
 bootstrap().catch((error) =>
 {
-  console.error('Failed to start API', error);
+  logger.error('Failed to start API', { error });
   process.exit(1);
 });
