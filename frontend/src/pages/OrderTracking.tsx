@@ -177,8 +177,12 @@ export function OrderTracking() {
                     <div className="mt-2 flex items-center gap-3 flex-wrap">
                       <h1 className="text-2xl sm:text-3xl font-black text-gray-900">{statusLabel}</h1>
                       {isDelivery && (status === 'done' || status === 'delivered') && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold px-3 py-1">
-                          <Bike size={14} /> Saiu para entrega
+                        <span
+                          className="inline-flex items-center rounded-full bg-amber-100 text-amber-800 text-xs font-semibold px-3 py-1"
+                          title="Saiu para entrega"
+                          aria-label="Saiu para entrega"
+                        >
+                          <Bike size={14} />
                         </span>
                       )}
                       <span
