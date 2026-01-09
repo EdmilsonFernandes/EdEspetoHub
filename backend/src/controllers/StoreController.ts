@@ -56,10 +56,11 @@ export class StoreController {
     const day = now.getDay();
     const minutes = now.getHours() * 60 + now.getMinutes();
 
-    const dayEntry = openingHours.find((entry: any) => entry?.day === day);
+    const dayEntry = openingHours.find((entry: any) => Number(entry?.day) === day);
     if (!dayEntry || dayEntry?.enabled === false) return false;
 
     const intervals = Array.isArray(dayEntry.intervals) ? dayEntry.intervals : [];
+    if (!intervals.length) return true;
     return intervals.some((interval: any) => {
       if (!interval?.start || !interval?.end) return false;
       const [startH, startM] = interval.start.split(':').map(Number);

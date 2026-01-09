@@ -59,6 +59,11 @@ export class SubscriptionService {
 
     const isActive = this.isSubscriptionActive(subscription);
 
+    if (isActive && subscription.store && !subscription.store.open) {
+      subscription.store.open = true;
+      await this.storeRepository.save(subscription.store);
+    }
+
     if (!isActive && subscription.store?.open) {
       subscription.store.open = false;
       await this.storeRepository.save(subscription.store);
@@ -212,6 +217,10 @@ export class SubscriptionService {
 
   async assertStoreIsActive(storeId: string) {
     const subscription = await this.getCurrentByStore(storeId);
+    return subscription ? this.isSubscriptionActive(subscription) : false;
+  }
+
+  isActiveSubscription(subscription?: Subscription | null) {
     return subscription ? this.isSubscriptionActive(subscription) : false;
   }
 

@@ -235,8 +235,16 @@ export class AuthService
       }
       : undefined;
 
-    if (sanitizedStore && !sanitizedStore.open) {
-      throw new Error('Pagamento pendente. Sua loja ainda não está ativa.');
+    if (sanitizedStore) {
+      const currentSubscription = await this.subscriptionService.getCurrentByStore(firstStore.id);
+      const isActive = this.subscriptionService.isActiveSubscription(currentSubscription);
+      if (!isActive) {
+        throw new Error('Pagamento pendente. Sua loja ainda não está ativa.');
+      }
+      if (currentSubscription && !firstStore.open) {
+        firstStore.open = true;
+        await this.storeRepository.save(firstStore);
+      }
     }
 
     return { user: sanitizedUser, store: sanitizedStore, token };
@@ -252,8 +260,13 @@ export class AuthService
     if (!valid) throw new Error('Credenciais inválidas');
     if (!owner.emailVerified) throw new Error('E-mail não verificado');
     const currentSubscription = await this.subscriptionService.getCurrentByStore(store.id);
-    if (!store.open && currentSubscription?.status !== 'EXPIRED') {
+    const isActive = this.subscriptionService.isActiveSubscription(currentSubscription);
+    if (!isActive) {
       throw new Error('Pagamento pendente. Sua loja ainda não está ativa.');
+    }
+    if (currentSubscription && !store.open) {
+      store.open = true;
+      await this.storeRepository.save(store);
     }
 
     const token = jwt.sign(

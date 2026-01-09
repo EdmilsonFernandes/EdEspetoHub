@@ -152,11 +152,7 @@ export function StorePage() {
             : [ 'delivery', 'pickup', 'table' ];
           setOrderTypes(allowedTypes);
           setStorePhone(data.owner?.phone || '');
-          const openNow =
-            typeof data.openNow === 'boolean'
-              ? data.openNow
-              : isStoreOpenNow(normalizedHours);
-          setStoreOpenNow(openNow);
+          setStoreOpenNow(isStoreOpenNow(normalizedHours));
           setStoreSubscription(data.subscription || null);
           applyStoreMeta(data);
         }
