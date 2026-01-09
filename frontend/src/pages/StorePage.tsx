@@ -150,7 +150,7 @@ export function StorePage() {
           const openNow =
             typeof data.openNow === 'boolean'
               ? data.openNow
-              : isStoreOpenNow(normalizedHours, data.open);
+              : isStoreOpenNow(normalizedHours);
           setStoreOpenNow(openNow);
           setStoreSubscription(data.subscription || null);
           applyStoreMeta(data);

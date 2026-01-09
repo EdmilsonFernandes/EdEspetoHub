@@ -2,7 +2,7 @@
 import React from 'react';
 import { Image, Instagram, Palette } from 'lucide-react';
 
-export function StoreIdentityCard({ branding, socialLinks = [], manualOpen, onToggleOpen, whatsappNumber }) {
+export function StoreIdentityCard({ branding, socialLinks = [], whatsappNumber }) {
   const storeLogo = branding?.logoUrl;
   const instagramLink = socialLinks.find((link) => link?.type === 'instagram')?.value;
   const instagramHandle = instagramLink ? `@${instagramLink.replace('@', '')}` : '';
@@ -70,28 +70,6 @@ export function StoreIdentityCard({ branding, socialLinks = [], manualOpen, onTo
             <span className="font-semibold text-slate-500">Não informado</span>
           )}
         </div>
-        {typeof manualOpen === 'boolean' && (
-          <div className="flex items-center justify-between">
-            <span className="flex items-center gap-2">
-              <span className={`w-2.5 h-2.5 rounded-full ${manualOpen ? 'bg-green-500' : 'bg-red-500'}`} />
-              Status manual
-            </span>
-            {onToggleOpen ? (
-              <button
-                onClick={onToggleOpen}
-                className={`px-3 py-1 rounded-full text-xs font-semibold border transition ${
-                  manualOpen
-                    ? 'border-red-200 text-red-600 hover:bg-red-50'
-                    : 'border-green-200 text-green-700 hover:bg-green-50'
-                }`}
-              >
-                {manualOpen ? 'Fechar agora' : 'Abrir agora'}
-              </button>
-            ) : (
-              <span className="font-semibold text-slate-700">{manualOpen ? 'Aberta' : 'Fechada'}</span>
-            )}
-          </div>
-        )}
         {normalizedWhatsapp && (
           <div className="flex items-center justify-between">
             <span className="flex items-center gap-2">

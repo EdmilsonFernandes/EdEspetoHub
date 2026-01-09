@@ -180,8 +180,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   const whatsappNumber = session?.store?.owner?.phone || '';
   const instagramLink = socialLinks.find((link) => link?.type === 'instagram')?.value;
   const instagramHandle = instagramLink ? `@${instagramLink.replace('@', '')}` : '';
-  const manualOpen = session?.store?.open ?? true;
-  const [savingStatus, setSavingStatus] = useState(false);
   const [brandingDraft, setBrandingDraft] = useState(() => ({
     brandName: session?.store?.name || '',
     logoUrl: resolveAssetUrl(session?.store?.settings?.logoUrl) || '',
@@ -280,22 +278,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   }
 
 
-  const toggleManualOpen = async () => {
-    if (!storeId) return;
-    setSavingStatus(true);
-    try {
-      const nextOpen = !manualOpen;
-      const updated = await storeService.setStatus(storeId, nextOpen);
-      updateAuthStore({ open: updated?.open ?? nextOpen });
-      showToast(nextOpen ? 'Loja aberta manualmente' : 'Loja fechada manualmente', 'success');
-    } catch (err) {
-      console.error('Erro ao atualizar status manual', err);
-      setError('Nao foi possivel atualizar o status da loja.');
-      showToast('Nao foi possivel atualizar o status da loja', 'error');
-    } finally {
-      setSavingStatus(false);
-    }
-  };
 
   const handleSaveBranding = async () => {
     if (!storeId) return;
@@ -373,8 +355,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             <StoreIdentityCard
               branding={branding}
               socialLinks={socialLinks}
-              manualOpen={manualOpen}
-              onToggleOpen={savingStatus ? undefined : toggleManualOpen}
               whatsappNumber={whatsappNumber}
             />
           <BrandingSettings branding={brandingDraft} onChange={setBrandingDraft} storeSlug={storeSlug} />

@@ -48,7 +48,6 @@ const buildDemoStore = (slug: string) => {
 
 export class StoreController {
   private static isStoreOpenNow(store: any) {
-    if (!store?.open) return false;
     const openingHours = store?.settings?.openingHours;
     if (!Array.isArray(openingHours) || openingHours.length === 0) return true;
 
