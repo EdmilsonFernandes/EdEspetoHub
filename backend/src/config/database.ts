@@ -25,5 +25,6 @@ export const AppDataSource = new DataSource({
   synchronize: false,
   entities: [ User, Store, StoreSettings, Product, Order, OrderItem, Plan, Subscription, Payment, PaymentEvent, PasswordReset, EmailVerification, SiteSetting ],
   migrations: [],
-  logging: [ 'error', 'query' ]
+  logging: [ 'error' ]
+  //logging: [ 'error', 'query' ]
 });

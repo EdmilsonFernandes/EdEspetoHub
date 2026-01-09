@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { useEffect, useMemo, useState } from 'react';
 import { Hero } from '../components/Hero';
-import { Palette, MonitorCog, Smartphone, Rocket, Ham } from 'lucide-react';
+import { Palette, MonitorCog, Smartphone, Rocket, Ham, ShoppingCart, ChefHat, BarChart3 } from 'lucide-react';
 import { platformService } from '../services/platformService';
 import { planService } from '../services/planService';
 import { BILLING_OPTIONS, PLAN_TIERS, getPlanName } from '../constants/planCatalog';
@@ -20,6 +20,11 @@ export function LandingPage() {
 
   const goToAdminDemo = () => {
     navigate('/admin/demo');
+  };
+  const scrollToFlow = () => {
+    if (typeof document === 'undefined') return;
+    const section = document.getElementById('demo-flow');
+    section?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   useEffect(() => {
@@ -95,19 +100,99 @@ export function LandingPage() {
               onClick={goToDemoStore}
               className="cursor-pointer px-8 py-4 text-lg rounded-xl border-2 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
             >
-              👀 Ver loja demo
+              👀 Ver cardapio demo
             </button>
             <button
               onClick={goToAdminDemo}
               className="cursor-pointer px-8 py-4 text-lg rounded-xl border-2 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
             >
-              🧾 Ver admin demo
+              🧾 Ver painel demo
+            </button>
+            <button
+              onClick={scrollToFlow}
+              className="cursor-pointer px-8 py-4 text-lg rounded-xl border-2 border-transparent text-gray-700 dark:text-gray-300 font-semibold hover:text-red-600 transition-colors"
+            >
+              ✨ Como funciona
             </button>
           </div>
         </div>
       </section>
 
       <Hero />
+
+      {/* Demo Flow Section */}
+      <section id="demo-flow" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+        <div className="text-center mb-12">
+          <p className="text-xs uppercase tracking-[0.3em] text-red-500 font-bold">Demo guiada</p>
+          <h2 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white mt-3">
+            Veja o fluxo completo em 3 passos
+          </h2>
+          <p className="text-base sm:text-lg text-gray-600 dark:text-gray-300 mt-4 max-w-3xl mx-auto">
+            Primeiro você cadastra os produtos, depois faz o pedido no cardápio e, por fim, acompanha a fila do
+            churrasqueiro e as métricas no painel.
+          </p>
+        </div>
+        <div className="grid md:grid-cols-3 gap-6">
+          <div className="bg-white dark:bg-gray-900 border border-red-100 dark:border-red-900 rounded-3xl p-6 shadow-lg">
+            <div className="w-12 h-12 rounded-2xl bg-red-500 text-white flex items-center justify-center mb-4">
+              <MonitorCog />
+            </div>
+            <p className="text-sm font-semibold text-red-500">Passo 1</p>
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mt-2">Cadastre produtos</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-3">
+              Monte categorias, precos e imagens para o cardapio ficar pronto em minutos.
+            </p>
+            <button
+              onClick={goToAdminDemo}
+              className="mt-5 w-full px-4 py-3 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-700"
+            >
+              Abrir painel demo
+            </button>
+          </div>
+          <div className="bg-white dark:bg-gray-900 border border-orange-100 dark:border-orange-900 rounded-3xl p-6 shadow-lg">
+            <div className="w-12 h-12 rounded-2xl bg-orange-500 text-white flex items-center justify-center mb-4">
+              <ShoppingCart />
+            </div>
+            <p className="text-sm font-semibold text-orange-500">Passo 2</p>
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mt-2">Receba pedidos</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-3">
+              O cliente escolhe, envia o pedido e voce recebe tudo organizado no painel.
+            </p>
+            <button
+              onClick={goToDemoStore}
+              className="mt-5 w-full px-4 py-3 rounded-xl border border-orange-200 text-orange-600 font-semibold hover:bg-orange-50"
+            >
+              Abrir cardapio demo
+            </button>
+          </div>
+          <div className="bg-white dark:bg-gray-900 border border-amber-100 dark:border-amber-900 rounded-3xl p-6 shadow-lg">
+            <div className="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center mb-4">
+              <ChefHat />
+            </div>
+            <p className="text-sm font-semibold text-amber-500">Passo 3</p>
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mt-2">Fila + dashboard</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-3">
+              A fila do churrasqueiro atualiza quase em tempo real e o dashboard mostra resultados do dia.
+            </p>
+            <button
+              onClick={() => navigate('/create')}
+              className="mt-5 w-full px-4 py-3 rounded-xl bg-gray-900 text-white font-semibold hover:bg-black"
+            >
+              Quero minha loja
+            </button>
+          </div>
+        </div>
+        <div className="mt-10 flex items-center justify-center gap-6 text-sm text-gray-500 dark:text-gray-400">
+          <div className="flex items-center gap-2">
+            <ChefHat size={16} />
+            Fila atualiza a cada 5s
+          </div>
+          <div className="flex items-center gap-2">
+            <BarChart3 size={16} />
+            Dashboard com metricas
+          </div>
+        </div>
+      </section>
 
       {/* Features Section */}
       <section className="bg-white dark:bg-gray-800 border-y border-gray-200 dark:border-gray-700 py-16 sm:py-20">
