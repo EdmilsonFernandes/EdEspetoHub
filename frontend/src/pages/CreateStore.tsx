@@ -24,6 +24,11 @@ export function CreateStore() {
   const [validationMessage, setValidationMessage] = useState('');
   const [logoPreviewUrl, setLogoPreviewUrl] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({
+    email: '',
+    document: '',
+    storeName: '',
+  });
   const platformLogo = '/logo.svg';
   const primaryPalette = [ '#dc2626', '#ea580c', '#f59e0b', '#16a34a', '#0ea5e9', '#2563eb', '#7c3aed' ];
   const secondaryPalette = [ '#111827', '#1f2937', '#334155', '#0f172a', '#0f766e', '#065f46', '#4b5563' ];
@@ -278,6 +283,66 @@ export function CreateStore() {
       .replace(/\s+/g, '-')
       .replace(/-+/g, '-');
 
+  const validateEmail = (value = '') => {
+    const normalized = value.trim().toLowerCase();
+    if (!normalized) return 'Informe um e-mail valido.';
+    const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized);
+    return isValid ? '' : 'Informe um e-mail valido.';
+  };
+
+  const normalizeDigits = (value = '') => value.replace(/\D/g, '');
+
+  const isValidCPF = (value = '') => {
+    const digits = normalizeDigits(value);
+    if (digits.length !== 11) return false;
+    if (/^(\d)\1+$/.test(digits)) return false;
+    let sum = 0;
+    for (let i = 0; i < 9; i += 1) sum += Number(digits[i]) * (10 - i);
+    let first = (sum * 10) % 11;
+    if (first === 10) first = 0;
+    if (first !== Number(digits[9])) return false;
+    sum = 0;
+    for (let i = 0; i < 10; i += 1) sum += Number(digits[i]) * (11 - i);
+    let second = (sum * 10) % 11;
+    if (second === 10) second = 0;
+    return second === Number(digits[10]);
+  };
+
+  const isValidCNPJ = (value = '') => {
+    const digits = normalizeDigits(value);
+    if (digits.length !== 14) return false;
+    if (/^(\d)\1+$/.test(digits)) return false;
+    const weights1 = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+    const weights2 = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+    let sum = 0;
+    for (let i = 0; i < weights1.length; i += 1) sum += Number(digits[i]) * weights1[i];
+    let mod = sum % 11;
+    const first = mod < 2 ? 0 : 11 - mod;
+    if (first !== Number(digits[12])) return false;
+    sum = 0;
+    for (let i = 0; i < weights2.length; i += 1) sum += Number(digits[i]) * weights2[i];
+    mod = sum % 11;
+    const second = mod < 2 ? 0 : 11 - mod;
+    return second === Number(digits[13]);
+  };
+
+  const validateDocument = (value = '', type = 'CPF') => {
+    if (!value.trim()) return 'Informe CPF ou CNPJ.';
+    const isValid = type === 'CNPJ' ? isValidCNPJ(value) : isValidCPF(value);
+    return isValid ? '' : 'Documento invalido.';
+  };
+
+  const validateStoreName = (value = '') => {
+    const slug = slugify(value);
+    if (!value.trim()) return 'Informe o nome da loja.';
+    if (slug.length < 3) return 'Nome muito curto.';
+    return '';
+  };
+
+  const updateFieldError = (key: string, message: string) => {
+    setFieldErrors((prev) => ({ ...prev, [key]: message }));
+  };
+
   const storeSlugPreview = slugify(registerForm.storeName || '');
 
   return (
@@ -343,11 +408,24 @@ export function CreateStore() {
                       required
                       type="email"
                       value={registerForm.email}
-                      onChange={(e) => setRegisterForm((prev) => ({ ...prev, email: e.target.value }))}
-                      className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
+                      onChange={(e) => {
+                        const next = e.target.value;
+                        setRegisterForm((prev) => ({ ...prev, email: next }));
+                        if (fieldErrors.email) {
+                          updateFieldError('email', '');
+                        }
+                      }}
+                      onBlur={() => updateFieldError('email', validateEmail(registerForm.email))}
+                      className={`w-full border rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors ${
+                        fieldErrors.email ? 'border-red-400' : 'border-gray-200'
+                      }`}
                       placeholder="seu@email.com"
                     />
+                    {fieldErrors.email ? (
+                      <p className="text-xs text-red-600">{fieldErrors.email}</p>
+                    ) : (
                     <p className="text-xs text-gray-500">Cada e-mail pode ter apenas uma conta.</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-gray-700">Telefone</label>
@@ -366,7 +444,13 @@ export function CreateStore() {
                     <div className="flex gap-2">
                       <select
                         value={registerForm.documentType}
-                        onChange={(e) => setRegisterForm((prev) => ({ ...prev, documentType: e.target.value }))}
+                        onChange={(e) => {
+                          const nextType = e.target.value;
+                          setRegisterForm((prev) => ({ ...prev, documentType: nextType }));
+                          if (registerForm.document) {
+                            updateFieldError('document', validateDocument(registerForm.document, nextType));
+                          }
+                        }}
                         className="border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500"
                       >
                         <option value="CPF">CPF</option>
@@ -375,11 +459,23 @@ export function CreateStore() {
                       <input
                         required
                         value={registerForm.document}
-                        onChange={(e) => setRegisterForm((prev) => ({ ...prev, document: e.target.value }))}
-                        className="flex-1 border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
+                        onChange={(e) => {
+                          const next = e.target.value;
+                          setRegisterForm((prev) => ({ ...prev, document: next }));
+                          if (fieldErrors.document) {
+                            updateFieldError('document', '');
+                          }
+                        }}
+                        onBlur={() => updateFieldError('document', validateDocument(registerForm.document, registerForm.documentType))}
+                        className={`flex-1 border rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors ${
+                          fieldErrors.document ? 'border-red-400' : 'border-gray-200'
+                        }`}
                         placeholder={registerForm.documentType === 'CNPJ' ? '00.000.000/0000-00' : '000.000.000-00'}
                       />
                     </div>
+                    {fieldErrors.document && (
+                      <p className="text-xs text-red-600">{fieldErrors.document}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-gray-700">Senha</label>
@@ -522,10 +618,22 @@ export function CreateStore() {
               <input
                 required
                 value={registerForm.storeName}
-                onChange={(e) => setRegisterForm((prev) => ({ ...prev, storeName: e.target.value }))}
-                className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
+                onChange={(e) => {
+                  const next = e.target.value;
+                  setRegisterForm((prev) => ({ ...prev, storeName: next }));
+                  if (fieldErrors.storeName) {
+                    updateFieldError('storeName', '');
+                  }
+                }}
+                onBlur={() => updateFieldError('storeName', validateStoreName(registerForm.storeName))}
+                className={`w-full border rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors ${
+                  fieldErrors.storeName ? 'border-red-400' : 'border-gray-200'
+                }`}
                 placeholder="Ex.: Espetinho do João"
               />
+              {fieldErrors.storeName && (
+                <p className="text-xs text-red-600">{fieldErrors.storeName}</p>
+              )}
               <div className="text-xs text-gray-500">
                 URL da loja: <span className="font-semibold text-gray-700">/chamanoespeto/{storeSlugPreview || 'sua-loja'}</span>
               </div>
