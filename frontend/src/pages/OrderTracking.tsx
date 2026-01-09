@@ -221,8 +221,13 @@ export function OrderTracking() {
                       </span>
                     </div>
                     <p className="text-sm text-gray-500 mt-2">
-                      {order.store?.name || 'Chama no Espeto'} • {typeLabel}
+                      {storeName} • {typeLabel}
                     </p>
+                    {isReady && elapsedMs > 0 && (
+                      <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-brand-primary text-white text-xs font-semibold px-4 py-2 shadow-sm">
+                        Tempo total: {formatDuration(elapsedMs)}
+                      </div>
+                    )}
                     {estimateMinutes && !isReady && (
                       <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold animate-pulse">
                         Estimativa: ~{estimateMinutes} min
@@ -362,6 +367,11 @@ export function OrderTracking() {
                     <p>
                       <span className="font-semibold">Status:</span> {statusLabel}
                     </p>
+                    {isReady && elapsedMs > 0 && (
+                      <p>
+                        <span className="font-semibold">Tempo total:</span> {formatDuration(elapsedMs)}
+                      </p>
+                    )}
                     {typeof queuePosition === 'number' && typeof queueSize === 'number' && (
                       <p>
                         <span className="font-semibold">Posicao na fila:</span> {queuePosition} de {queueSize}
