@@ -115,6 +115,13 @@ export class OrderController {
               name: order.store.name,
               slug: order.store.slug,
               phone: order.store.owner?.phone || null,
+              settings: order.store.settings
+                ? {
+                    logoUrl: order.store.settings.logoUrl || null,
+                    primaryColor: order.store.settings.primaryColor || null,
+                    secondaryColor: order.store.settings.secondaryColor || null,
+                  }
+                : null,
             }
           : null,
       });

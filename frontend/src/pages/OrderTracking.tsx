@@ -4,6 +4,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Bike, ChefHat, CircleCheck, Clock, Loader2, MapPin } from 'lucide-react';
 import { orderService } from '../services/orderService';
 import { formatCurrency, formatDateTime, formatDuration } from '../utils/format';
+import { resolveAssetUrl } from '../utils/resolveAssetUrl';
+import { applyBrandTheme } from '../utils/brandTheme';
 
 const statusLabels: Record<string, string> = {
   pending: 'Recebido',
@@ -99,6 +101,9 @@ export function OrderTracking() {
   const status = order?.status || 'pending';
   const typeLabel = typeLabels[order?.type] || 'Pedido';
   const isDelivery = order?.type === 'delivery';
+  const storeName = order?.store?.name || 'Chama no Espeto';
+  const storeLogo =
+    resolveAssetUrl(order?.store?.settings?.logoUrl) || '/chama-no-espeto.jpeg';
   const statusLabel = useMemo(() => {
     if (isDelivery && (status === 'done' || status === 'delivered')) return 'Saiu para entrega';
     if (order?.type === 'table' && status === 'done') return 'Pronto para servir';
@@ -110,6 +115,25 @@ export function OrderTracking() {
   const storePhone = order?.store?.phone;
   const estimateMinutes =
     typeof queuePosition === 'number' && queuePosition > 0 ? Math.max(5, queuePosition * 6) : null;
+
+  useEffect(() => {
+    const settings = order?.store?.settings;
+    applyBrandTheme(
+      settings
+        ? {
+            primaryColor: settings.primaryColor,
+            accentColor: settings.secondaryColor,
+          }
+        : {}
+    );
+    const title = storeName ? `Pedido | ${storeName}` : 'Acompanhar pedido';
+    document.title = title;
+    const favicon =
+      document.querySelector('link[rel="icon"]') || document.createElement('link');
+    favicon.setAttribute('rel', 'icon');
+    favicon.setAttribute('href', storeLogo);
+    document.head.appendChild(favicon);
+  }, [order?.store?.settings, storeLogo, storeName]);
 
   const steps = useMemo(() => {
     if (isDelivery) {
@@ -136,11 +160,11 @@ export function OrderTracking() {
           <div className="flex items-center justify-between h-16 sm:h-20">
             <button onClick={() => navigate('/')} className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl overflow-hidden shadow border border-white bg-white">
-                <img src="/chama-no-espeto.jpeg" alt="Chama no Espeto" className="w-full h-full object-cover" />
+                <img src={storeLogo} alt={storeName} className="w-full h-full object-cover" />
               </div>
               <div className="hidden sm:block text-left">
-                <p className="text-lg font-bold text-gray-900">Acompanhar pedido</p>
-                <p className="text-sm text-gray-500">Status em tempo real</p>
+                <p className="text-lg font-bold text-gray-900">{storeName}</p>
+                <p className="text-sm text-gray-500">Acompanhar pedido</p>
               </div>
             </button>
             <button
