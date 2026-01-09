@@ -13,6 +13,7 @@ export function OpeningHoursCard() {
     normalizeOpeningHours(auth?.store?.settings?.openingHours || [])
   );
   const [saving, setSaving] = useState(false);
+  const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
 
   useEffect(() => {
     setOpeningHours(normalizeOpeningHours(auth?.store?.settings?.openingHours || []));
@@ -85,6 +86,7 @@ export function OpeningHoursCard() {
         });
       }
       showToast('Horario salvo com sucesso', 'success');
+      setLastSavedAt(Date.now());
     } catch (err) {
       console.error('Erro ao salvar horario', err);
       showToast('Nao foi possivel salvar o horario', 'error');
@@ -95,7 +97,17 @@ export function OpeningHoursCard() {
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-      <h3 className="text-lg font-bold text-slate-800 mb-3">Horario de funcionamento</h3>
+      <div className="flex items-center justify-between mb-3">
+        <div>
+          <h3 className="text-lg font-bold text-slate-800">Horario de funcionamento</h3>
+          <p className="text-xs text-slate-500">Atualize os horarios visiveis na vitrine.</p>
+        </div>
+        {lastSavedAt && (
+          <span className="text-xs text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-1 rounded-full">
+            Salvo agora
+          </span>
+        )}
+      </div>
       <div className="space-y-3 grid grid-cols-2 gap-8">
         {openingHours.map((entry) => (
           <div key={entry.day} className="space-y-2">

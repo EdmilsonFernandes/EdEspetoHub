@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   ChevronLeft,
   Bike,
@@ -26,6 +26,9 @@ export const CartView = ({
   const cartItems = Object.values(cart);
   const total = cartItems.reduce((acc, item) => acc + item.price * item.qty, 0);
   const [suggestionsOpen, setSuggestionsOpen] = useState(false);
+  const [mapUrl, setMapUrl] = useState("");
+  const [mapLink, setMapLink] = useState("");
+  const [mapLoading, setMapLoading] = useState(false);
 
   const isPickup = customer.type === "pickup";
   const isDelivery = customer.type === "delivery";
@@ -77,6 +80,48 @@ export const CartView = ({
   };
 
   const tableOptions = Array.from({ length: 12 }, (_, index) => `${index + 1}`);
+
+  useEffect(() => {
+    if (!isDelivery) {
+      setMapUrl("");
+      setMapLink("");
+      return;
+    }
+    const address = (customer.address || "").trim();
+    if (address.length < 8) {
+      setMapUrl("");
+      setMapLink("");
+      return;
+    }
+    let cancelled = false;
+    const loadMap = async () => {
+      setMapLoading(true);
+      try {
+        const query = encodeURIComponent(address);
+        setMapLink(`https://www.openstreetmap.org/search?query=${query}`);
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${query}`
+        );
+        const data = await response.json();
+        if (!Array.isArray(data) || !data[0]) return;
+        const lat = Number(data[0].lat);
+        const lon = Number(data[0].lon);
+        if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+        const delta = 0.005;
+        const bbox = [ lon - delta, lat - delta, lon + delta, lat + delta ].join(",");
+        const url = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat}%2C${lon}`;
+        if (!cancelled) setMapUrl(url);
+      } catch {
+        // ignore map errors
+      } finally {
+        if (!cancelled) setMapLoading(false);
+      }
+    };
+    loadMap();
+    return () => {
+      cancelled = true;
+    };
+  }, [customer.address, isDelivery]);
 
   return (
     <div className="animate-in slide-in-from-right">
@@ -208,14 +253,43 @@ export const CartView = ({
               <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
                 Endereço de entrega
               </p>
-              <textarea
-                value={customer.address}
-                onChange={(e) =>
-                  onChangeCustomer({ ...customer, address: e.target.value })
-                }
-                placeholder="Rua, número, bairro e referência"
-                className="w-full p-4 rounded-xl bg-gray-50 border border-gray-100 text-gray-700 outline-none focus:ring-2 focus:ring-brand-primary"
-              />
+              <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-4">
+                <textarea
+                  value={customer.address}
+                  onChange={(e) =>
+                    onChangeCustomer({ ...customer, address: e.target.value })
+                  }
+                  placeholder="Rua, número, bairro e referência"
+                  className="w-full min-h-[120px] p-4 rounded-xl bg-gray-50 border border-gray-100 text-gray-700 outline-none focus:ring-2 focus:ring-brand-primary"
+                />
+                <div className="rounded-xl border border-gray-100 bg-white overflow-hidden flex flex-col">
+                  <div className="px-3 py-2 text-xs text-gray-500 border-b bg-gray-50 flex items-center justify-between">
+                    <span>Visualizar no mapa</span>
+                    {mapLink && (
+                      <a
+                        href={mapLink}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-brand-primary font-semibold"
+                      >
+                        Abrir
+                      </a>
+                    )}
+                  </div>
+                  <div className="flex-1 min-h-[140px] bg-gray-100 flex items-center justify-center text-xs text-gray-500">
+                    {mapLoading && "Carregando mapa..."}
+                    {!mapLoading && mapUrl && (
+                      <iframe
+                        title="Mapa"
+                        src={mapUrl}
+                        className="w-full h-full border-0"
+                        loading="lazy"
+                      />
+                    )}
+                    {!mapLoading && !mapUrl && "Digite o endereço para ver o mapa"}
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
