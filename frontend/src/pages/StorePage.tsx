@@ -335,6 +335,12 @@ export function StorePage() {
     }
     navigate(storeSlug ? `/admin/dashboard` : '/admin', { state: { activeTab: 'fila' } });
   };
+  const goToDemoGuide = () => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('scrollToDemoFlow', 'true');
+    }
+    navigate('/');
+  };
   const openProductsSetup = () => {
     if (storeSlug) {
       sessionStorage.setItem('admin:redirectTab', 'produtos');
@@ -370,6 +376,29 @@ export function StorePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 font-sans pb-28 sm:pb-24">
+      {isDemo && view === 'menu' && (
+        <div className="bg-amber-50 border-b border-amber-200">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm text-amber-900">
+            <span>
+              Demo do cardápio ativa. Veja o fluxo completo para entender como funciona.
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={goToDemoGuide}
+                className="px-3 py-1.5 rounded-lg border border-amber-300 text-amber-800 hover:bg-amber-100"
+              >
+                Voltar ao guia
+              </button>
+              <button
+                onClick={() => navigate('/admin/demo')}
+                className="px-3 py-1.5 rounded-lg bg-amber-600 text-white hover:bg-amber-700"
+              >
+                Ver painel demo
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {view !== 'menu' && (
         <div className="bg-white shadow-md px-3 sm:px-4 py-3 sm:py-4 flex items-center gap-3 sticky top-0 z-40 border-b border-gray-100">
           <div

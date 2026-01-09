@@ -1,7 +1,8 @@
 // @ts-nocheck
 import { useEffect, useMemo, useState } from 'react';
 import { Hero } from '../components/Hero';
-import { Palette, MonitorCog, Smartphone, Rocket, Ham, ShoppingCart, ChefHat, BarChart3 } from 'lucide-react';
+import { Palette, MonitorCog, Smartphone, Rocket, Ham, ShoppingCart, ChefHat, BarChart3, Sparkles } from 'lucide-react';
+import { DemoTour } from '../components/Landing/DemoTour';
 import { platformService } from '../services/platformService';
 import { planService } from '../services/planService';
 import { BILLING_OPTIONS, PLAN_TIERS, getPlanName } from '../constants/planCatalog';
@@ -13,6 +14,7 @@ export function LandingPage() {
   const [isAnnual, setIsAnnual] = useState(false);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [plans, setPlans] = useState([]);
+  const [tourOpen, setTourOpen] = useState(false);
 
   const goToDemoStore = () => {
     navigate('/chamanoespeto/demo');
@@ -118,6 +120,12 @@ export function LandingPage() {
               👀 Ver demo guiada
             </button>
             <button
+              onClick={() => setTourOpen(true)}
+              className="cursor-pointer px-8 py-4 text-lg rounded-xl border-2 border-transparent text-gray-700 dark:text-gray-300 font-semibold hover:text-red-600 transition-colors"
+            >
+              ✨ Tour interativo
+            </button>
+            <button
               onClick={scrollToFlow}
               className="cursor-pointer px-8 py-4 text-lg rounded-xl border-2 border-transparent text-gray-700 dark:text-gray-300 font-semibold hover:text-red-600 transition-colors"
             >
@@ -200,6 +208,13 @@ export function LandingPage() {
             <BarChart3 size={16} />
             Dashboard com metricas
           </div>
+          <button
+            onClick={() => setTourOpen(true)}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-red-200 text-red-600 hover:bg-red-50"
+          >
+            <Sparkles size={14} />
+            Tour interativo
+          </button>
         </div>
       </section>
 
@@ -443,6 +458,8 @@ export function LandingPage() {
           </button>
         </div>
       </section>
+
+      <DemoTour open={tourOpen} onClose={() => setTourOpen(false)} />
     </LandingPageLayout>
   );
 }

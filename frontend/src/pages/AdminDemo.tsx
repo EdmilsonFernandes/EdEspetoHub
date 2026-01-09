@@ -150,6 +150,15 @@ export function AdminDemo() {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => {
+                  sessionStorage.setItem('scrollToDemoFlow', 'true');
+                  navigate('/');
+                }}
+                className="px-3 py-2 text-sm rounded-lg border border-amber-200 text-amber-700 hover:bg-amber-50 flex items-center gap-2"
+              >
+                Voltar ao guia
+              </button>
+              <button
+                onClick={() => {
                   localStorage.removeItem(demoStorageKey);
                   persist(seedProducts);
                 }}
