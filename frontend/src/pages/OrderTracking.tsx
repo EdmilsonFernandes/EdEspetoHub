@@ -86,24 +86,40 @@ export function OrderTracking() {
   }, [orderId, polling]);
 
   const status = order?.status || 'pending';
-  const statusLabel = statusLabels[status] || status;
   const typeLabel = typeLabels[order?.type] || 'Pedido';
-  const isReady = status === 'done' || status === 'delivered';
+  const isDelivery = order?.type === 'delivery';
+  const isDelivered = status === 'delivered';
+  const statusLabel = useMemo(() => {
+    if (isDelivery && status === 'done') return 'Saiu para entrega';
+    if (isDelivery && status === 'delivered') return 'Entregue';
+    if (order?.type === 'table' && status === 'done') return 'Pronto para servir';
+    return statusLabels[status] || status;
+  }, [isDelivery, order?.type, status]);
+  const isReady = isDelivery ? isDelivered : status === 'done' || status === 'delivered';
   const queuePosition = order?.queuePosition;
   const queueSize = order?.queueSize;
   const storePhone = order?.store?.phone;
   const estimateMinutes =
     typeof queuePosition === 'number' && queuePosition > 0 ? Math.max(5, queuePosition * 6) : null;
 
-  const steps = useMemo(
-    () => [
+  const steps = useMemo(() => {
+    if (isDelivery) {
+      return [
+        { id: 'pending', label: 'Recebido' },
+        { id: 'preparing', label: 'Em preparo' },
+        { id: 'done', label: 'Saiu para entrega' },
+        { id: 'delivered', label: 'Entregue' },
+      ];
+    }
+    return [
       { id: 'pending', label: 'Recebido' },
       { id: 'preparing', label: 'Em preparo' },
-      { id: 'done', label: 'Pronto' },
-    ],
-    []
-  );
-  const currentStep = status === 'delivered' ? 'done' : status;
+      { id: 'done', label: order?.type === 'table' ? 'Pronto para servir' : 'Pronto' },
+    ];
+  }, [isDelivery, order?.type]);
+  const currentStep = status === 'delivered' ? 'delivered' : status;
+  const currentIndex = Math.max(0, steps.findIndex((item) => item.id === currentStep));
+  const progress = steps.length > 1 ? Math.round((currentIndex / (steps.length - 1)) * 100) : 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -188,7 +204,16 @@ export function OrderTracking() {
                     </p>
                   </div>
                 </div>
-                <div className="grid sm:grid-cols-3 gap-3">
+                <div className="mb-4">
+                  <div className="h-2 w-full rounded-full bg-gray-200 overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 transition-all"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                  <div className="mt-2 text-xs text-gray-500">{progress}% completo</div>
+                </div>
+                <div className={`grid gap-3 ${isDelivery ? 'sm:grid-cols-4' : 'sm:grid-cols-3'}`}>
                   {steps.map((step) => {
                     const isDone =
                       steps.findIndex((item) => item.id === step.id) <=
@@ -226,7 +251,7 @@ export function OrderTracking() {
                     <span>{formatCurrency(order.total || 0)}</span>
                   </div>
                 </div>
-              <div className="rounded-2xl border border-gray-100 p-4 space-y-3">
+                <div className="rounded-2xl border border-gray-100 p-4 space-y-3">
                   <p className="text-sm font-semibold text-gray-800">Informacoes</p>
                   <div className="text-sm text-gray-600 space-y-2">
                     <p>
@@ -279,7 +304,11 @@ export function OrderTracking() {
                   </div>
                   {isReady && (
                     <div className="rounded-xl border border-green-200 bg-green-50 p-3 text-sm text-green-700">
-                      Seu pedido esta pronto! Pode ir retirar ou aguarde o atendimento.
+                      {isDelivery
+                        ? 'Seu pedido saiu para entrega. Em breve chegara ate voce.'
+                        : order?.type === 'table'
+                        ? 'Seu pedido esta pronto. Aguarde o atendimento na sua mesa.'
+                        : 'Seu pedido esta pronto! Pode ir retirar.'}
                     </div>
                   )}
                 </div>
