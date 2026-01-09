@@ -107,6 +107,7 @@ export class OrderController {
           quantity: item.quantity,
           price: item.price,
           productId: item.product?.id,
+          imageUrl: item.product?.imageUrl || null,
         })),
         store: order.store
           ? {

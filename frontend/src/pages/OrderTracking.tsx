@@ -256,8 +256,21 @@ export function OrderTracking() {
                   <p className="text-sm font-semibold text-gray-800 mb-3">Resumo do pedido</p>
                   <div className="space-y-2 text-sm text-gray-600">
                     {(order.items || []).map((item) => (
-                      <div key={item.id || item.productId} className="flex items-center justify-between">
-                        <span>{item.quantity}x {item.name}</span>
+                      <div key={item.id || item.productId} className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          {item.imageUrl ? (
+                            <img
+                              src={item.imageUrl}
+                              alt={item.name}
+                              className="w-10 h-10 rounded-lg object-cover border border-gray-200"
+                            />
+                          ) : (
+                            <div className="w-10 h-10 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center text-xs text-gray-400">
+                              🍖
+                            </div>
+                          )}
+                          <span>{item.quantity}x {item.name}</span>
+                        </div>
                         <span>R$ {Number(item.price).toFixed(2)}</span>
                       </div>
                     ))}
@@ -321,10 +334,15 @@ export function OrderTracking() {
                   {isReady && (
                     <div className="rounded-xl border border-green-200 bg-green-50 p-3 text-sm text-green-700">
                       {isDelivery
-                        ? 'Seu pedido saiu para entrega. Em breve chegara ate voce.'
+                        ? 'Seu pedido saiu para entrega. Logo chega ao seu destino. Bom apetite!'
                         : order?.type === 'table'
                         ? 'Seu pedido esta pronto. Aguarde o atendimento na sua mesa.'
-                        : 'Seu pedido esta pronto! Pode ir retirar.'}
+                        : 'Seu pedido esta pronto! Pode ir retirar. Bom apetite!'}
+                    </div>
+                  )}
+                  {isDelivery && status === 'done' && (
+                    <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+                      Motoboy a caminho. Seu pedido esta saindo para entrega.
                     </div>
                   )}
                 </div>
