@@ -47,6 +47,7 @@ export class StoreService
         secondaryColor: input.secondaryColor,
         socialLinks,
         openingHours: input.openingHours ?? [],
+        orderTypes: input.orderTypes ?? [ 'delivery', 'pickup', 'table' ],
       });
 
       // 4️⃣ Store
@@ -120,6 +121,11 @@ export class StoreService
       if (data.openingHours)
       {
         store.settings.openingHours = data.openingHours;
+      }
+
+      if (data.orderTypes)
+      {
+        store.settings.orderTypes = data.orderTypes;
       }
 
       return storeRepo.save(store);

@@ -1,6 +1,8 @@
 export interface CreateOrderItemInput {
   productId: string;
   quantity: number;
+  cookingPoint?: string;
+  passSkewer?: boolean;
 }
 
 export interface CreateOrderDto {

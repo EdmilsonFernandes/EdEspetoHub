@@ -143,6 +143,7 @@ export class AuthService
         secondaryColor: storePayload.secondaryColor,
         socialLinks: sanitizeSocialLinks(storePayload.socialLinks),
         openingHours: storePayload.openingHours ?? [],
+        orderTypes: storePayload.orderTypes ?? [ 'delivery', 'pickup', 'table' ],
       });
 
       const store = storeRepo.create({

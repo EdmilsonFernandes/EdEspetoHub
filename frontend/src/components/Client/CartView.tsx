@@ -19,6 +19,7 @@ export const CartView = ({
   customers = [],
   paymentMethod,
   allowCustomerAutocomplete = false,
+  allowedOrderTypes = [ "delivery", "pickup", "table" ],
   onChangeCustomer,
   onChangePayment,
   onCheckout,
@@ -30,6 +31,9 @@ export const CartView = ({
   const [cepLoading, setCepLoading] = useState(false);
   const [cepError, setCepError] = useState("");
 
+  const visibleOrderTypes = Array.isArray(allowedOrderTypes) && allowedOrderTypes.length
+    ? allowedOrderTypes
+    : [ "delivery", "pickup", "table" ];
   const isPickup = customer.type === "pickup";
   const isDelivery = customer.type === "delivery";
   const isPix = paymentMethod === "pix";
@@ -84,6 +88,12 @@ export const CartView = ({
   };
 
   const tableOptions = Array.from({ length: 12 }, (_, index) => `${index + 1}`);
+  const formatItemOptions = (item) => {
+    const labels = [];
+    if (item?.cookingPoint) labels.push(item.cookingPoint);
+    if (item?.passSkewer) labels.push('passar varinha');
+    return labels.length ? labels.join(' • ') : '';
+  };
 
   const buildDeliveryAddress = (data) => {
     const parts = [
@@ -245,7 +255,7 @@ export const CartView = ({
               Tipo de pedido
             </p>
             <div className="flex gap-3">
-              {["delivery", "pickup", "table"].map((type) => (
+              {visibleOrderTypes.map((type) => (
                 <button
                   key={type}
                   onClick={() => onChangeCustomer({ ...customer, type })}
@@ -425,14 +435,19 @@ export const CartView = ({
 
         {cartItems.map((item) => (
           <div
-            key={item.id}
+            key={item.key || item.id}
             className="flex justify-between items-center py-3 border-b border-gray-50 last:border-0"
           >
             <div className="flex items-center gap-3">
               <span className="bg-brand-primary-soft text-brand-primary font-bold w-6 h-6 rounded flex items-center justify-center text-xs">
                 {item.qty}
               </span>
-              <span className="text-gray-700 font-medium">{item.name}</span>
+              <div className="flex flex-col">
+                <span className="text-gray-700 font-medium">{item.name}</span>
+                {formatItemOptions(item) && (
+                  <span className="text-[11px] text-gray-500">{formatItemOptions(item)}</span>
+                )}
+              </div>
             </div>
             <span className="font-bold text-gray-900">
               {formatCurrency(item.price * item.qty)}

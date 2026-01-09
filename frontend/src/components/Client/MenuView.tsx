@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { ChefHat, Instagram, LayoutDashboard, Link, Plus, X } from "lucide-react";
 import { formatCurrency } from "../../utils/format";
 
@@ -13,7 +13,21 @@ const normalizeWhatsApp = (value) => {
   return digits.startsWith("55") ? digits : `55${digits}`;
 };
 
+const isEspetoCategory = (category) => {
+  const normalized = (category || "").toString().trim().toLowerCase();
+  return normalized.includes("espeto");
+};
+
 const ProductModal = ({ product, isOpen, onClose, onAddToCart }) => {
+  const [cookingPoint, setCookingPoint] = useState("ao ponto");
+  const [passSkewer, setPassSkewer] = useState(false);
+  const showEspetoOptions = product ? isEspetoCategory(product.category) : false;
+
+  useEffect(() => {
+    setCookingPoint("ao ponto");
+    setPassSkewer(false);
+  }, [product?.id]);
+
   if (!isOpen || !product) return null;
 
   return (
@@ -49,16 +63,41 @@ const ProductModal = ({ product, isOpen, onClose, onAddToCart }) => {
             <p className="text-2xl font-bold text-brand-primary mt-1">{formatCurrency(product.price)}</p>
           </div>
 
-          {product.desc && (
+          {product.description && (
             <div>
               <h4 className="font-semibold text-gray-700 mb-2">Descrição</h4>
-              <p className="text-gray-600 text-sm leading-relaxed">{product.desc}</p>
+              <p className="text-gray-600 text-sm leading-relaxed">{product.description}</p>
+            </div>
+          )}
+
+          {showEspetoOptions && (
+            <div className="space-y-3">
+              <div>
+                <label className="text-sm font-semibold text-gray-700">Ponto da carne</label>
+                <select
+                  value={cookingPoint}
+                  onChange={(event) => setCookingPoint(event.target.value)}
+                  className="mt-2 w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-brand-primary focus:border-brand-primary"
+                >
+                  <option value="bem passada">Bem passada</option>
+                  <option value="ao ponto">Ao ponto</option>
+                  <option value="mal passada">Mal passada</option>
+                </select>
+              </div>
+              <label className="flex items-center gap-2 text-sm text-gray-600">
+                <input
+                  type="checkbox"
+                  checked={passSkewer}
+                  onChange={(event) => setPassSkewer(event.target.checked)}
+                />
+                Passar varinha
+              </label>
             </div>
           )}
 
           <button
             onClick={() => {
-              onAddToCart(product, 1);
+              onAddToCart(product, 1, showEspetoOptions ? { cookingPoint, passSkewer } : undefined);
               onClose();
             }}
             className="w-full bg-brand-primary text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-brand-primary/90 transition"
@@ -387,6 +426,9 @@ export const MenuView = ({
                     <p className="font-semibold text-gray-900 text-[15px]">
                       {item.name}
                     </p>
+                    {item.description && (
+                      <p className="text-xs text-gray-500 line-clamp-2">{item.description}</p>
+                    )}
                     <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-brand-primary-soft text-brand-primary">
                       {formatCurrency(item.price)}
                     </span>
@@ -396,6 +438,10 @@ export const MenuView = ({
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
+                      if (isEspetoCategory(item.category)) {
+                        openProductModal(item);
+                        return;
+                      }
                       onUpdateCart(item, 1);
                     }}
                     title="Adicionar"

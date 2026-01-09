@@ -16,6 +16,9 @@ export class Product {
   @Column({ nullable: true })
   category?: string;
 
+  @Column({ type: 'text', nullable: true })
+  description?: string;
+
   @Column({ name: 'image_url', nullable: true })
   imageUrl?: string;
 

@@ -41,6 +41,18 @@ export class StoreSettings
   })
   openingHours?: any[];
 
+  @Column({
+    name: 'order_types',
+    type: 'jsonb',
+    nullable: true,
+    default: () => "'[\"delivery\",\"pickup\",\"table\"]'::jsonb",
+    transformer: {
+      to: (value?: string[] | null) => (Array.isArray(value) ? value : [ 'delivery', 'pickup', 'table' ]),
+      from: (value: string[] | null) => (Array.isArray(value) ? value : [ 'delivery', 'pickup', 'table' ]),
+    },
+  })
+  orderTypes?: string[];
+
   @OneToOne(() => Store, (store) => store.settings, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'store_id' })
   store!: Store;

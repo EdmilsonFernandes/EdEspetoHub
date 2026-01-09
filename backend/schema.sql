@@ -52,6 +52,8 @@ ALTER TABLE store_settings
 ADD COLUMN IF NOT EXISTS social_links JSONB DEFAULT '[]';
 ALTER TABLE store_settings
 ADD COLUMN IF NOT EXISTS opening_hours JSONB DEFAULT '[]';
+ALTER TABLE store_settings
+ADD COLUMN IF NOT EXISTS order_types JSONB DEFAULT '["delivery","pickup","table"]';
 
 CREATE TABLE IF NOT EXISTS products (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -59,6 +61,7 @@ CREATE TABLE IF NOT EXISTS products (
   name TEXT NOT NULL,
   price NUMERIC(10,2) NOT NULL,
   category TEXT,
+  description TEXT,
   image_url TEXT,
   active BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -86,8 +89,18 @@ CREATE TABLE IF NOT EXISTS order_items (
   order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
   product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
   quantity INTEGER NOT NULL,
-  price NUMERIC(10,2) NOT NULL
+  price NUMERIC(10,2) NOT NULL,
+  cooking_point TEXT,
+  pass_skewer BOOLEAN NOT NULL DEFAULT FALSE
 );
+
+ALTER TABLE products
+ADD COLUMN IF NOT EXISTS description TEXT;
+
+ALTER TABLE order_items
+ADD COLUMN IF NOT EXISTS cooking_point TEXT;
+ALTER TABLE order_items
+ADD COLUMN IF NOT EXISTS pass_skewer BOOLEAN NOT NULL DEFAULT FALSE;
 
 -- Índices multi-loja
 CREATE INDEX IF NOT EXISTS idx_products_store ON products(store_id);

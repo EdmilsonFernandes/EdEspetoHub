@@ -25,6 +25,8 @@ const normalizeOrder = (order: any) => ({
     id: item.id ?? item.item_id ?? item.orderItemId,
     qty: item.qty ?? item.quantity ?? 0,
     name: item.name ?? item.product?.name,
+    cookingPoint: item.cookingPoint ?? item.cooking_point,
+    passSkewer: item.passSkewer ?? item.pass_skewer ?? false,
     unitPrice:
       item.unitPrice ??
       item.product?.price ??
@@ -257,6 +259,8 @@ export const orderService = {
     const normalizedItems = (items || []).map((item: any) => ({
       productId: item.productId ?? item.product?.id ?? item.id,
       quantity: Number(item.qty ?? item.quantity ?? 0),
+      cookingPoint: item.cookingPoint,
+      passSkewer: item.passSkewer,
     }));
     await apiClient.patch(`/orders/${id}`, { items: normalizedItems, total });
   },

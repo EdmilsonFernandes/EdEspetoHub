@@ -5,7 +5,7 @@ import { productService } from '../../services/productService';
 import { formatCurrency } from '../../utils/format';
 import { useToast } from '../../contexts/ToastContext';
 
-const initialForm = { name: '', price: '', category: 'espetos', imageUrl: '', imageFile: '', desc: '' };
+const initialForm = { name: '', price: '', category: 'espetos', imageUrl: '', imageFile: '', description: '' };
 const defaultCategories = [
   { id: 'espetos', label: 'Espetos', icon: Flame },
   { id: 'bebidas', label: 'Bebidas', icon: Wine },
@@ -81,6 +81,7 @@ export const ProductManager = ({ products }) => {
       price: parseFloat(formData.price),
       imageFile: imageMode === 'upload' ? formData.imageFile : undefined,
       imageUrl: imageMode === 'url' ? formData.imageUrl : undefined,
+      description: formData.description || undefined,
     };
 
     try {
@@ -105,6 +106,7 @@ export const ProductManager = ({ products }) => {
       ...product,
       category: categoryKey,
       imageFile: '',
+      description: product.description ?? product.desc ?? '',
     });
     setImageMode('url');
     setImagePreview(product?.imageUrl || '');
@@ -331,8 +333,8 @@ export const ProductManager = ({ products }) => {
               className="p-3 border border-gray-200 rounded-lg w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent"
               placeholder="Descreva o produto..."
               rows={3}
-              value={formData.desc}
-              onChange={(e) => setFormData({ ...formData, desc: e.target.value })}
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             />
           </div>
 

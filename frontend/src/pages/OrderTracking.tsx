@@ -153,6 +153,12 @@ export function OrderTracking() {
   const currentStep = isDelivery && status === 'delivered' ? 'done' : status;
   const currentIndex = Math.max(0, steps.findIndex((item) => item.id === currentStep));
   const progress = steps.length > 1 ? Math.round((currentIndex / (steps.length - 1)) * 100) : 0;
+  const formatItemOptions = (item: any) => {
+    const labels = [];
+    if (item?.cookingPoint) labels.push(item.cookingPoint);
+    if (item?.passSkewer) labels.push('passar varinha');
+    return labels.length ? labels.join(' • ') : '';
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -316,7 +322,12 @@ export function OrderTracking() {
                               🍖
                             </div>
                           )}
-                          <span>{item.quantity}x {item.name}</span>
+                          <div className="flex flex-col">
+                            <span>{item.quantity}x {item.name}</span>
+                            {formatItemOptions(item) && (
+                              <span className="text-[11px] text-gray-500">{formatItemOptions(item)}</span>
+                            )}
+                          </div>
                         </div>
                         <span>R$ {Number(item.price).toFixed(2)}</span>
                       </div>

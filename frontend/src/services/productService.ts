@@ -11,11 +11,16 @@ const buildProductsPath = (identifier: string) =>
     ? `/stores/${identifier}/products`
     : `/stores/slug/${identifier}/products`;
 
-const normalizeProduct = (product: any) => ({
-  ...product,
-  id: product.id ?? product.product_id ?? product.productId,
-  imageUrl: resolveAssetUrl(product.image_url ?? product.imageUrl ?? ""),
-});
+const normalizeProduct = (product: any) => {
+  const description = product.description ?? product.desc ?? "";
+  return {
+    ...product,
+    id: product.id ?? product.product_id ?? product.productId,
+    imageUrl: resolveAssetUrl(product.image_url ?? product.imageUrl ?? ""),
+    description,
+    desc: description,
+  };
+};
 
 const handleSessionError = (error: any) => {
   const message = (error?.message || '').toString();

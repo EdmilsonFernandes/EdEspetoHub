@@ -29,6 +29,7 @@ export function StorePage() {
   const [storeOpenNow, setStoreOpenNow] = useState(true);
   const [storePhone, setStorePhone] = useState('');
   const [openingHours, setOpeningHours] = useState([]);
+  const [orderTypes, setOrderTypes] = useState([ 'delivery', 'pickup', 'table' ]);
   const [storeSubscription, setStoreSubscription] = useState(null);
   const autoTrackRef = useRef(false);
   const [lastPublicOrderId, setLastPublicOrderId] = useState('');
@@ -146,6 +147,10 @@ export function StorePage() {
           }));
           const normalizedHours = normalizeOpeningHours(data.settings?.openingHours || []);
           setOpeningHours(normalizedHours);
+          const allowedTypes = Array.isArray(data.settings?.orderTypes) && data.settings.orderTypes.length > 0
+            ? data.settings.orderTypes
+            : [ 'delivery', 'pickup', 'table' ];
+          setOrderTypes(allowedTypes);
           setStorePhone(data.owner?.phone || '');
           const openNow =
             typeof data.openNow === 'boolean'
@@ -211,6 +216,13 @@ export function StorePage() {
   }, [storeSlug]);
 
   useEffect(() => {
+    if (!orderTypes.length) return;
+    if (!orderTypes.includes(customer.type)) {
+      setCustomer((prev) => ({ ...prev, type: orderTypes[0] }));
+    }
+  }, [orderTypes, customer.type]);
+
+  useEffect(() => {
     const storageKey = brandingStorageKey(branding.espetoId);
     localStorage.setItem(storageKey, JSON.stringify(branding));
     document.documentElement.style.setProperty('--primary-color', branding.primaryColor || defaultBranding.primaryColor);
@@ -238,17 +250,36 @@ export function StorePage() {
     }
   }, [user?.token]);
 
-  const updateCart = (item, qty) => {
+  const updateCart = (item, qty, options) => {
+    const cookingPoint = options?.cookingPoint ?? item?.cookingPoint;
+    const passSkewer = Boolean(options?.passSkewer ?? item?.passSkewer);
+    const cartKey = `${item.id}:${cookingPoint || ''}:${passSkewer ? '1' : '0'}`;
     setCart((previous) => {
-      const currentQty = previous[item.id]?.qty || 0;
+      const currentQty = previous[cartKey]?.qty || 0;
       const nextQty = currentQty + qty;
       if (nextQty <= 0) {
         const copy = { ...previous };
-        delete copy[item.id];
+        delete copy[cartKey];
         return copy;
       }
-      return { ...previous, [item.id]: { ...item, qty: nextQty } };
+      return {
+        ...previous,
+        [cartKey]: {
+          ...item,
+          key: cartKey,
+          qty: nextQty,
+          cookingPoint,
+          passSkewer,
+        },
+      };
     });
+  };
+
+  const formatItemOptions = (item) => {
+    const labels = [];
+    if (item?.cookingPoint) labels.push(item.cookingPoint);
+    if (item?.passSkewer) labels.push('passar varinha');
+    return labels.length ? `(${labels.join(' • ')})` : '';
   };
 
   const handleCustomerChange = (nextCustomer) => {
@@ -314,6 +345,8 @@ export function StorePage() {
       items: Object.values(cart).map((item) => ({
         productId: item.id,
         quantity: item.qty,
+        cookingPoint: item.cookingPoint,
+        passSkewer: item.passSkewer,
       })),
     };
 
@@ -354,6 +387,8 @@ export function StorePage() {
             name: item.name,
             quantity: item.qty,
             price: item.price * item.qty,
+            cookingPoint: item.cookingPoint,
+            passSkewer: item.passSkewer,
           })),
           phone: customer.phone,
           total: cartTotal,
@@ -377,7 +412,7 @@ export function StorePage() {
     const shouldNotifyOwner = customer.type === 'pickup' || customer.type === 'table';
     if (shouldNotifyOwner) {
       const itemsList = Object.values(cart)
-        .map((item) => `▪ ${item.qty}x ${item.name}`)
+        .map((item) => `▪ ${item.qty}x ${item.name} ${formatItemOptions(item)}`.trim())
         .join('\n');
 
     const messageLines = [
@@ -674,6 +709,7 @@ export function StorePage() {
             customer={customer}
             customers={customers}
             paymentMethod={paymentMethod}
+            allowedOrderTypes={orderTypes}
             allowCustomerAutocomplete={Boolean(user?.token)}
             onChangeCustomer={handleCustomerChange}
             onChangePayment={setPaymentMethod}

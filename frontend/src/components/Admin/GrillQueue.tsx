@@ -27,6 +27,12 @@ export const GrillQueue = () => {
   });
   const previousIdsRef = useRef<string[]>([]);
   const audioContextRef = useRef<AudioContext | null>(null);
+  const formatItemOptions = (item) => {
+    const labels = [];
+    if (item?.cookingPoint) labels.push(item.cookingPoint);
+    if (item?.passSkewer) labels.push('passar varinha');
+    return labels.length ? labels.join(' • ') : '';
+  };
 
   const ensureAudioContext = async () => {
     const context = audioContextRef.current || new AudioContext();
@@ -401,7 +407,12 @@ export const GrillQueue = () => {
                       <Plus size={14} />
                     </button>
 
-                    <span className="break-words">{item.name}</span>
+                    <div className="flex flex-col">
+                      <span className="break-words">{item.name}</span>
+                      {formatItemOptions(item) && (
+                        <span className="text-[11px] text-gray-500">{formatItemOptions(item)}</span>
+                      )}
+                    </div>
                   </div>
 
                   <span className="font-semibold">

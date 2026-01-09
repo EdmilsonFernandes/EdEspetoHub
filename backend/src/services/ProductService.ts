@@ -29,6 +29,7 @@ export class ProductService
       name: input.name,
       price: input.price,
       category: input.category,
+      description: (input as any).description ?? (input as any).desc,
       imageUrl: uploadedImage || input.imageUrl,
       store: safeStore,
     });
@@ -62,6 +63,7 @@ export class ProductService
     product.name = data.name ?? product.name;
     product.price = data.price ?? product.price;
     product.category = data.category ?? product.category;
+    product.description = (data as any).description ?? (data as any).desc ?? product.description;
     product.imageUrl = uploadedImage ?? data.imageUrl ?? product.imageUrl;
 
     return this.productRepository.save(product);

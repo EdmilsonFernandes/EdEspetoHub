@@ -13,6 +13,12 @@ export class OrderItem {
   @Column('decimal', { precision: 10, scale: 2 })
   price!: number;
 
+  @Column({ name: 'cooking_point', type: 'varchar', nullable: true })
+  cookingPoint?: string;
+
+  @Column({ name: 'pass_skewer', type: 'boolean', default: false })
+  passSkewer?: boolean;
+
   @ManyToOne(() => Product, (product) => product.orderItems, { eager: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'product_id' })
   product!: Product;

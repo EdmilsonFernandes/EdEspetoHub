@@ -94,6 +94,8 @@ export class OrderService
       orderItem.order = order;
       orderItem.quantity = item.quantity;
       orderItem.price = Number(product.price) * item.quantity;
+      orderItem.cookingPoint = item.cookingPoint;
+      orderItem.passSkewer = Boolean(item.passSkewer);
       nextItems.push(orderItem);
       total += orderItem.price;
     }
@@ -124,6 +126,12 @@ export class OrderService
 
   private async buildOrder(input: Omit<CreateOrderDto, 'storeId'>, store: Awaited<ReturnType<StoreRepository[ 'findById' ]>>)
   {
+    const allowedTypes = Array.isArray(store?.settings?.orderTypes) && store.settings.orderTypes.length > 0
+      ? store.settings.orderTypes
+      : [ 'delivery', 'pickup', 'table' ];
+    if (!allowedTypes.includes(input.type)) {
+      throw new Error('Tipo de pedido não permitido para esta loja');
+    }
     const items: OrderItem[] = [];
     let total = 0;
 
@@ -139,6 +147,8 @@ export class OrderService
       orderItem.product = product;
       orderItem.quantity = item.quantity;
       orderItem.price = Number(product.price) * item.quantity;
+      orderItem.cookingPoint = item.cookingPoint;
+      orderItem.passSkewer = Boolean(item.passSkewer);
       items.push(orderItem);
       total += orderItem.price;
     }

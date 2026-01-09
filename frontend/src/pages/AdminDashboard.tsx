@@ -9,6 +9,7 @@ import { GrillQueue } from '../components/Admin/GrillQueue';
 import { OpeningHoursCard } from '../components/Admin/OpeningHoursCard';
 import { ProductManager } from '../components/Admin/ProductManager';
 import { StoreIdentityCard } from '../components/Admin/StoreIdentityCard';
+import { OrderTypeSettingsCard } from '../components/Admin/OrderTypeSettingsCard';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useToast } from '../contexts/ToastContext';
@@ -367,6 +368,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
               {savingBranding ? 'Salvando...' : 'Salvar identidade'}
             </button>
           </div>
+          <OrderTypeSettingsCard />
           <OpeningHoursCard />
         </div>
       )}

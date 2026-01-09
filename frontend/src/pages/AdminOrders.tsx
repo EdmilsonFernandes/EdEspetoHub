@@ -84,6 +84,12 @@ export function AdminOrders() {
     if (status === 'done') return 'bg-green-100 text-green-800';
     return 'bg-red-100 text-red-700';
   };
+  const formatItemOptions = (item) => {
+    const labels = [];
+    if (item?.cookingPoint) labels.push(item.cookingPoint);
+    if (item?.passSkewer) labels.push('passar varinha');
+    return labels.length ? `(${labels.join(' • ')})` : '';
+  };
 
   const clearFilters = () => {
     setStatusFilter('all');
@@ -234,7 +240,7 @@ export function AdminOrders() {
                         {order.items.map((item) => (
                           <div key={item.id || item.name} className="flex items-center justify-between">
                             <span>
-                              {item.qty}x {item.name}
+                              {item.qty}x {item.name} {formatItemOptions(item)}
                             </span>
                             <span className="font-semibold">{formatCurrency((item.unitPrice ?? item.price ?? 0) * item.qty)}</span>
                           </div>
@@ -276,7 +282,7 @@ export function AdminOrders() {
                         {(order.items || []).length === 0
                           ? '-'
                           : order.items
-                              .map((item) => `${item.qty}x ${item.name}`)
+                              .map((item) => `${item.qty}x ${item.name} ${formatItemOptions(item)}`.trim())
                               .join(', ')}
                       </td>
                       <td className="py-3 pr-4">

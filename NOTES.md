@@ -61,6 +61,13 @@
   - Endereco separado com CEP + ViaCEP.
   - Link de mapa (OpenStreetMap) em vez de iframe.
   - Autocomplete de cliente apenas para admin.
+- Produtos:
+  - Campo de descricao persistido e exibido na vitrine.
+- Espetos:
+  - Seleciona ponto da carne e "passar varinha" por item na vitrine.
+  - Opcoes aparecem no pedido (fila/admin/WhatsApp/tracking).
+- Loja:
+  - Tipos de pedido configuraveis (entrega, retirada, mesa).
 - Vitrine:
   - Banner "Acompanhar pedido" apenas para publico e nao aparece em pedidos de mesa.
 

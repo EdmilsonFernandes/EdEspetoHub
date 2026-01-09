@@ -108,6 +108,8 @@ export class OrderController {
           price: item.price,
           productId: item.product?.id,
           imageUrl: item.product?.imageUrl || null,
+          cookingPoint: item.cookingPoint || null,
+          passSkewer: item.passSkewer || false,
         })),
         store: order.store
           ? {
