@@ -22,8 +22,7 @@ export const normalizeOpeningHours = (openingHours?: OpeningDay[]) => {
   });
 };
 
-export const isStoreOpenNow = (openingHours?: OpeningDay[], manualOpen?: boolean) => {
-  if (manualOpen === false) return false;
+export const isStoreOpenNow = (openingHours?: OpeningDay[]) => {
   if (!Array.isArray(openingHours) || openingHours.length === 0) return true;
 
   const now = new Date();
