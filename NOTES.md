@@ -52,11 +52,23 @@
 - Demo:
   - Vitrine demo em `/chamanoespeto/demo`.
   - Admin demo em `/admin/demo` com dados locais (localStorage).
+- Acompanhamento publico:
+  - Pagina `/pedido/:orderId` com timeline, status e fila.
+  - Branding da loja aplicado (logo, cores, titulo, favicon).
+  - Entrega finaliza em "Saiu para entrega" (sem status de motoboy).
+  - Tempo total destacado ao finalizar.
+- Checkout (entrega):
+  - Endereco separado com CEP + ViaCEP.
+  - Link de mapa (OpenStreetMap) em vez de iframe.
+  - Autocomplete de cliente apenas para admin.
+- Vitrine:
+  - Banner "Acompanhar pedido" apenas para publico e nao aparece em pedidos de mesa.
 
 ## Arquivos principais mexidos
 - frontend/src/components/Client/MenuView.tsx
 - frontend/src/components/Client/CartView.tsx
 - frontend/src/pages/OrdersQueue.tsx
+- frontend/src/pages/OrderTracking.tsx
 - frontend/src/components/Admin/AdminHeader.tsx
 - frontend/src/pages/AdminDashboard.tsx
 - frontend/src/pages/AdminOrders.tsx
@@ -68,6 +80,7 @@
 - backend/src/services/MercadoPagoService.ts
 - backend/src/services/EmailService.ts
 - backend/src/services/AuthService.ts
+- backend/src/controllers/OrderController.ts
 - backend/schema.sql
 - backend/src/entities/PasswordReset.ts
 - frontend/src/pages/ForgotPassword.tsx

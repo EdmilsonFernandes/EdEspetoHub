@@ -4,6 +4,7 @@ Aplicação web para pedidos e gestão do restaurante de espetinhos Datony. O pr
 
 - **Loja do cliente**: montagem e edição do pedido, envio para WhatsApp e pagamento via chave Pix.
 - **Painel interno**: dashboard com métricas, CRUD de produtos, fila do churrasqueiro (atualização a cada 5s) e histórico de pedidos.
+- **Acompanhar pedido**: pagina publica em `/pedido/:orderId` com status, fila e branding da loja.
 
 ## Estrutura de pastas
 
@@ -275,6 +276,7 @@ Endpoints principais:
 - `GET /api/stores/:storeId/products`, `POST /api/stores/:storeId/products` — catálogo (admin).
 - `GET /api/stores/slug/:slug/products` — catálogo público por loja (vitrine).
 - `GET /api/stores/:storeId/orders`, `POST /api/stores/:storeId/orders` — pedidos e fila.
+- `GET /api/orders/:orderId/public` — acompanhamento publico do pedido (status + dados da loja).
 
 ### 3. Front-end React (pasta `frontend/`)
 
