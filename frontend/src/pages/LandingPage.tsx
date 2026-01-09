@@ -21,6 +21,12 @@ export function LandingPage() {
   const goToAdminDemo = () => {
     navigate('/admin/demo');
   };
+  const goToDemoGuide = () => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('scrollToDemoFlow', 'true');
+    }
+    navigate('/');
+  };
   const scrollToFlow = () => {
     if (typeof document === 'undefined') return;
     const section = document.getElementById('demo-flow');
@@ -29,6 +35,15 @@ export function LandingPage() {
 
   useEffect(() => {
     platformService.listStores();
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const shouldScroll = sessionStorage.getItem('scrollToDemoFlow') === 'true';
+    if (shouldScroll) {
+      sessionStorage.removeItem('scrollToDemoFlow');
+      setTimeout(scrollToFlow, 50);
+    }
   }, []);
 
   useEffect(() => {
@@ -97,16 +112,10 @@ export function LandingPage() {
               🚀 Criar minha loja agora
             </button>
             <button
-              onClick={goToDemoStore}
+              onClick={goToDemoGuide}
               className="cursor-pointer px-8 py-4 text-lg rounded-xl border-2 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
             >
-              👀 Ver cardapio demo
-            </button>
-            <button
-              onClick={goToAdminDemo}
-              className="cursor-pointer px-8 py-4 text-lg rounded-xl border-2 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-            >
-              🧾 Ver painel demo
+              👀 Ver demo guiada
             </button>
             <button
               onClick={scrollToFlow}

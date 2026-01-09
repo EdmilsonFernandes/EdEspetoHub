@@ -14,12 +14,11 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
 
-  const goToDemoStore = () => {
-    navigate('/chamanoespeto/demo');
-  };
-
-  const goToAdminDemo = () => {
-    navigate('/admin/demo');
+  const goToDemoGuide = () => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('scrollToDemoFlow', 'true');
+    }
+    navigate('/');
   };
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
@@ -45,18 +44,10 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                     Criar loja
                   </button>
                   <button
-                    onClick={goToDemoStore}
+                    onClick={goToDemoGuide}
                     className="hidden md:inline-block px-3 py-2 sm:px-4 text-sm rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors"
                   >
-                    <span className="hidden sm:inline">Ver loja demo</span>
-                    <span className="sm:hidden">Demo</span>
-                  </button>
-                  <button
-                    onClick={goToAdminDemo}
-                    className="hidden lg:inline-block px-3 py-2 sm:px-4 text-sm rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors"
-                  >
-                    <span className="hidden sm:inline">Admin demo</span>
-                    <span className="sm:hidden">Admin</span>
+                    Ver demo guiada
                   </button>
                 </>
               )}
@@ -115,7 +106,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                 <button onClick={() => navigate('/create')} className="block hover:text-red-400 transition-colors">
                   Criar Loja
                 </button>
-                <button onClick={goToDemoStore} className="block hover:text-red-400 transition-colors">
+                <button onClick={goToDemoGuide} className="block hover:text-red-400 transition-colors">
                   Ver Demo
                 </button>
                 <button onClick={() => navigate('/admin')} className="block hover:text-red-400 transition-colors">
