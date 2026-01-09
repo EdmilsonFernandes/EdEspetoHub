@@ -281,14 +281,24 @@ export const MenuView = ({
                 Cardápio atualizado e atendimento rápido.
               </p>
               <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
-                <span
-                  className={`px-3 py-1 rounded-full ${
-                    isOpenNow ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"
-                  }`}
-                >
-                  {isOpenNow ? "Aberto agora" : "Fechado no momento"}
-                </span>
-                {todayHoursLabel && (
+                {(() => {
+                  const closedToday = todayHoursLabel === "Fechado hoje";
+                  const statusText = isOpenNow
+                    ? "Aberto agora"
+                    : closedToday
+                    ? "Fechado hoje"
+                    : "Fechado no momento";
+                  return (
+                    <span
+                      className={`px-3 py-1 rounded-full ${
+                        isOpenNow ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"
+                      }`}
+                    >
+                      {statusText}
+                    </span>
+                  );
+                })()}
+                {todayHoursLabel && todayHoursLabel !== "Fechado hoje" && (
                   <span className="px-3 py-1 rounded-full border border-slate-200 text-slate-600 bg-white">
                     Hoje: {todayHoursLabel}
                   </span>
