@@ -16,6 +16,40 @@ const resolveLevel = (): LogLevel => {
 };
 
 const activeLevel = resolveLevel();
+const fileLoggingEnabled = (process.env.LOG_TO_FILE || '').toLowerCase() === 'true';
+const logDir = process.env.LOG_DIR || 'logs';
+
+let currentDate = new Date().toISOString().slice(0, 10);
+let appStream: import('fs').WriteStream | null = null;
+let errorStream: import('fs').WriteStream | null = null;
+
+const ensureStreams = async () => {
+  if (!fileLoggingEnabled) return;
+  const fs = await import('fs');
+  const path = await import('path');
+  const today = new Date().toISOString().slice(0, 10);
+  if (today !== currentDate || !appStream || !errorStream) {
+    currentDate = today;
+    if (appStream) appStream.end();
+    if (errorStream) errorStream.end();
+    fs.mkdirSync(logDir, { recursive: true });
+    appStream = fs.createWriteStream(path.join(logDir, `app-${currentDate}.log`), { flags: 'a' });
+    errorStream = fs.createWriteStream(path.join(logDir, `error-${currentDate}.log`), { flags: 'a' });
+  }
+};
+
+const writeToFile = async (level: LogLevel, payload: string) => {
+  if (!fileLoggingEnabled) return;
+  try {
+    await ensureStreams();
+    appStream?.write(`${payload}\n`);
+    if (levelRank[level] >= levelRank.warn) {
+      errorStream?.write(`${payload}\n`);
+    }
+  } catch {
+    // Ignore file logging errors to avoid breaking runtime flow.
+  }
+};
 
 const redactKeys = new Set([
   'password',
@@ -84,13 +118,16 @@ export class Logger {
     const payload = JSON.stringify(entry);
     if (level === 'error') {
       console.error(payload);
+      void writeToFile(level, payload);
       return;
     }
     if (level === 'warn') {
       console.warn(payload);
+      void writeToFile(level, payload);
       return;
     }
     console.log(payload);
+    void writeToFile(level, payload);
   }
 
   debug(message: string, meta?: Record<string, any>) {
