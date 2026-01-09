@@ -3,6 +3,7 @@ import React, { useMemo, useState } from 'react';
 import { Image as ImageIcon, Edit, Trash2, Save, Plus, Flame, Wine, Package, MoreHorizontal } from 'lucide-react';
 import { productService } from '../../services/productService';
 import { formatCurrency } from '../../utils/format';
+import { useToast } from '../../contexts/ToastContext';
 
 const initialForm = { name: '', price: '', category: 'espetos', imageUrl: '', imageFile: '', desc: '' };
 const defaultCategories = [
@@ -30,6 +31,7 @@ const getCategoryIcon = (categoryId = '') => {
 };
 
 export const ProductManager = ({ products }) => {
+  const { showToast } = useToast();
   const [editing, setEditing] = useState(null);
   const [formData, setFormData] = useState(initialForm);
   const [imageMode, setImageMode] = useState('url');
@@ -37,6 +39,7 @@ export const ProductManager = ({ products }) => {
   const [categorySelect, setCategorySelect] = useState(initialForm.category);
   const [customCategory, setCustomCategory] = useState('');
   const [showCustomInput, setShowCustomInput] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const categoryOptions = useMemo(() => {
     const unique = new Set(defaultCategories.map((entry) => entry.id));
@@ -71,6 +74,7 @@ export const ProductManager = ({ products }) => {
     if (!formData.name || !formData.price) return;
     if (categorySelect === '__custom__' && !formData.category) return;
 
+    setSaving(true);
     const payload = {
       ...formData,
       id: editing?.id,
@@ -79,8 +83,15 @@ export const ProductManager = ({ products }) => {
       imageUrl: imageMode === 'url' ? formData.imageUrl : undefined,
     };
 
-    await productService.save(payload);
-    resetForm();
+    try {
+      await productService.save(payload);
+      showToast(editing ? 'Produto atualizado com sucesso' : 'Produto adicionado com sucesso', 'success');
+      resetForm();
+    } catch (err) {
+      showToast('Nao foi possivel salvar o produto', 'error');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleEdit = (product) => {
@@ -328,10 +339,11 @@ export const ProductManager = ({ products }) => {
           <div className="flex gap-3 pt-2">
             <button
               type="submit"
-              className="bg-brand-primary text-white px-6 py-3 rounded-lg font-semibold flex-1 flex justify-center items-center gap-2 hover:bg-brand-primary/90 transition"
+              className="bg-brand-primary text-white px-6 py-3 rounded-lg font-semibold flex-1 flex justify-center items-center gap-2 hover:bg-brand-primary/90 transition disabled:opacity-60"
+              disabled={saving}
             >
               <Save size={18} />
-              {editing ? 'Atualizar Produto' : 'Adicionar Produto'}
+              {saving ? 'Salvando...' : editing ? 'Atualizar Produto' : 'Adicionar Produto'}
             </button>
             {editing && (
               <button
@@ -386,7 +398,13 @@ export const ProductManager = ({ products }) => {
                   </button>
                   <button
                     onClick={() => {
-                      if (window.confirm('Excluir produto?')) productService.delete(product.id);
+                      if (!window.confirm('Excluir produto?')) return;
+                      setSaving(true);
+                      productService
+                        .delete(product.id)
+                        .then(() => showToast('Produto removido', 'success'))
+                        .catch(() => showToast('Nao foi possivel remover o produto', 'error'))
+                        .finally(() => setSaving(false));
                     }}
                     className="text-red-600 hover:bg-red-50 p-2 rounded"
                   >

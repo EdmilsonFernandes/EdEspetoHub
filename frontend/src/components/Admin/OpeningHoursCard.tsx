@@ -1,11 +1,13 @@
 // @ts-nocheck
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext';
 import { storeService } from '../../services/storeService';
 import { normalizeOpeningHours } from '../../utils/storeHours';
 
 export function OpeningHoursCard() {
   const { auth, setAuth } = useAuth();
+  const { showToast } = useToast();
   const storeId = auth?.store?.id;
   const [openingHours, setOpeningHours] = useState(() =>
     normalizeOpeningHours(auth?.store?.settings?.openingHours || [])
@@ -82,8 +84,10 @@ export function OpeningHoursCard() {
           },
         });
       }
+      showToast('Horario salvo com sucesso', 'success');
     } catch (err) {
       console.error('Erro ao salvar horario', err);
+      showToast('Nao foi possivel salvar o horario', 'error');
     } finally {
       setSaving(false);
     }

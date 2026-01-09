@@ -11,6 +11,7 @@ import { ProductManager } from '../components/Admin/ProductManager';
 import { StoreIdentityCard } from '../components/Admin/StoreIdentityCard';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { useToast } from '../contexts/ToastContext';
 import { orderService } from '../services/orderService';
 import { productService } from '../services/productService';
 import { storeService } from '../services/storeService';
@@ -163,6 +164,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   const location = useLocation();
   const { auth, hydrated, setAuth } = useAuth();
   const { branding, setBranding } = useTheme();
+  const { showToast } = useToast();
 
   const session = useMemo(() => sessionProp || auth, [sessionProp, auth]);
   const [products, setProducts] = useState<any[]>([]);
@@ -285,9 +287,11 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       const nextOpen = !manualOpen;
       const updated = await storeService.setStatus(storeId, nextOpen);
       updateAuthStore({ open: updated?.open ?? nextOpen });
+      showToast(nextOpen ? 'Loja aberta manualmente' : 'Loja fechada manualmente', 'success');
     } catch (err) {
       console.error('Erro ao atualizar status manual', err);
       setError('Nao foi possivel atualizar o status da loja.');
+      showToast('Nao foi possivel atualizar o status da loja', 'error');
     } finally {
       setSavingStatus(false);
     }
@@ -314,9 +318,11 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         logoUrl: updated?.settings?.logoUrl,
         brandName: updated?.name,
       });
+      showToast('Identidade salva com sucesso', 'success');
     } catch (err) {
       console.error('Erro ao salvar identidade', err);
       setError('Nao foi possivel salvar a identidade da loja.');
+      showToast('Nao foi possivel salvar a identidade da loja', 'error');
     } finally {
       setSavingBranding(false);
     }
