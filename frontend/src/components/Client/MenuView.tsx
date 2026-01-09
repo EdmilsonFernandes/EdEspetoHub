@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from "react";
-import { ChefHat, Instagram, LayoutDashboard, Link, Plus, X } from "lucide-react";
+import { ChefHat, Instagram, LayoutDashboard, Link, Plus, X, Clock, MapPin, CreditCard, DollarSign, Zap } from "lucide-react";
 import { formatCurrency } from "../../utils/format";
 
 // =======================================
@@ -28,24 +28,47 @@ const ProductModal = ({ product, isOpen, onClose, onAddToCart }) => {
     setPassSkewer(false);
   }, [product?.id]);
 
-  if (!isOpen || !product) return null;
+  const [isAnimating, setIsAnimating] = React.useState(false);
+
+  React.useEffect(() => {
+    if (isOpen) {
+      setIsAnimating(true);
+    }
+  }, [isOpen]);
+
+  const handleClose = () => {
+    setIsAnimating(false);
+    setTimeout(() => {
+      onClose();
+    }, 200);
+  };
+
+  if (!isOpen && !isAnimating) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" onClick={onClose}>
+    <div
+      className={`fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 transition-opacity duration-200 ${
+        isAnimating ? "opacity-100" : "opacity-0"
+      }`}
+      onClick={handleClose}
+    >
       <div
-        className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto"
+        className={`bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto transition-all duration-200 transform ${
+          isAnimating ? "scale-100 opacity-100" : "scale-95 opacity-0"
+        }`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="relative">
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="absolute top-4 right-4 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center shadow-lg z-10"
           >
             <X size={16} />
           </button>
 
-          {product.imageUrl ? (
+          {product?.imageUrl ? (
             <img
+              draggable={false}
               src={product.imageUrl}
               alt={product.name}
               className="w-full h-64 object-cover rounded-t-2xl"
@@ -59,14 +82,14 @@ const ProductModal = ({ product, isOpen, onClose, onAddToCart }) => {
 
         <div className="p-6 space-y-4">
           <div>
-            <h3 className="text-xl font-bold text-gray-900">{product.name}</h3>
-            <p className="text-2xl font-bold text-brand-primary mt-1">{formatCurrency(product.price)}</p>
+            <h3 className="text-xl font-bold text-gray-900">{product?.name}</h3>
+            <p className="text-2xl font-bold text-brand-primary mt-1">{formatCurrency(product?.price)}</p>
           </div>
 
-          {product.description && (
+          {product?.desc && (
             <div>
               <h4 className="font-semibold text-gray-700 mb-2">Descrição</h4>
-              <p className="text-gray-600 text-sm leading-relaxed">{product.description}</p>
+              <p className="text-gray-600 text-sm leading-relaxed">{product?.desc}</p>
             </div>
           )}
 
@@ -98,7 +121,7 @@ const ProductModal = ({ product, isOpen, onClose, onAddToCart }) => {
           <button
             onClick={() => {
               onAddToCart(product, 1, showEspetoOptions ? { cookingPoint, passSkewer } : undefined);
-              onClose();
+              handleClose();
             }}
             className="w-full bg-brand-primary text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-brand-primary/90 transition"
           >
@@ -305,78 +328,72 @@ export const MenuView = ({
               background: "radial-gradient(circle, var(--color-secondary) 0%, transparent 70%)",
             }}
           />
-          <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div className="space-y-2">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-                Vitrine premium
-              </p>
-              <h2 className="text-xl sm:text-3xl font-black text-slate-900">
-                {branding?.brandName || "Seu Espeto"} em poucos cliques
-              </h2>
-              <p className="text-sm text-slate-600 max-w-xl hidden sm:block">
-                Peça seus espetos favoritos com rapidez. Cardápio sempre atualizado e atendimento direto no balcão.
-              </p>
-              <p className="text-xs text-slate-600 sm:hidden">
-                Cardápio atualizado e atendimento rápido.
-              </p>
-              <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
-                {(() => {
-                  const closedToday = todayHoursLabel === "Fechado hoje";
-                  const statusText = isOpenNow
-                    ? "Aberto agora"
-                    : closedToday
-                    ? "Fechado hoje"
-                    : "Fechado no momento";
-                  return (
-                    <span
-                      className={`px-3 py-1 rounded-full ${
-                        isOpenNow ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"
-                      }`}
-                    >
-                      {statusText}
-                    </span>
-                  );
-                })()}
+          <div className="relative space-y-5">
+            {/* Main Header Section */}
+            <div className="space-y-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
+                  Bem-vindo ao nosso cardápio
+                </p>
+                <h2 className="text-2xl sm:text-4xl font-black text-slate-900 mt-1">
+                  {branding?.brandName || "Seu Espeto"}
+                </h2>
+              </div>
+
+              {/* Status & Hours */}
+              <div className="flex flex-wrap items-center gap-2">
+                <span
+                  className={`px-3.5 py-2 rounded-full font-semibold text-sm flex items-center gap-2 ${
+                    isOpenNow
+                      ? "bg-emerald-100 text-emerald-700"
+                      : "bg-red-100 text-red-700"
+                  }`}
+                >
+                  <span className={`w-2 h-2 rounded-full ${isOpenNow ? "bg-emerald-600" : "bg-red-600"}`} />
+                  {isOpenNow ? "Aberto agora" : "Fechado no momento"}
+                </span>
                 {todayHoursLabel && todayHoursLabel !== "Fechado hoje" && (
-                  <span className="px-3 py-1 rounded-full border border-slate-200 text-slate-600 bg-white">
-                    Hoje: {todayHoursLabel}
+                  <span className="px-3.5 py-2 rounded-full border border-slate-200 text-slate-600 bg-white font-semibold text-sm flex items-center gap-2">
+                    <Clock size={14} />
+                    {todayHoursLabel}
                   </span>
                 )}
               </div>
             </div>
-            <div className="flex flex-col gap-2 w-full sm:w-auto">
+
+
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-2.5 w-full pt-2">
               {normalizeWhatsApp(whatsappNumber) && (
                 <a
                   href={`https://wa.me/${normalizeWhatsApp(whatsappNumber)}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="px-4 py-2 rounded-full text-sm font-semibold text-white bg-emerald-600 hover:opacity-90 shadow-sm text-center"
+                  className="flex-1 px-4 py-3 rounded-full text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-lg text-center transition"
                 >
-                  Falar no WhatsApp
+                  💬 Falar no WhatsApp
                 </a>
               )}
-              <div className="flex gap-2">
-                <button
-                  onClick={() =>
-                    document.getElementById("menu-list")?.scrollIntoView({ behavior: "smooth", block: "start" })
-                  }
-                  className="flex-1 px-4 py-2 rounded-full text-sm font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50"
-                  type="button"
+              <button
+                onClick={() =>
+                  document.getElementById("menu-list")?.scrollIntoView({ behavior: "smooth", block: "start" })
+                }
+                className="flex-1 px-4 py-3 rounded-full text-sm font-bold border-2 border-slate-300 text-slate-700 hover:bg-slate-50 transition"
+                type="button"
+              >
+                📋 Ver cardápio completo
+              </button>
+              {instagramHandle && (
+                <a
+                  href={`https://instagram.com/${instagramHandle.replace("@", "")}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-4 py-3 rounded-full text-sm font-bold border border-brand-primary text-white bg-brand-primary hover:opacity-90 shadow-lg items-center justify-center gap-2 transition hidden sm:flex"
                 >
-                  Ver destaques
-                </button>
-                {instagramHandle && (
-                  <a
-                    href={`https://instagram.com/${instagramHandle.replace("@", "")}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="px-4 py-2 rounded-full text-sm font-semibold border border-brand-primary text-white bg-brand-primary hover:opacity-90 shadow-sm flex items-center gap-2"
-                  >
-                    <Instagram size={16} />
-                    <span className="hidden sm:inline">Instagram</span>
-                  </a>
-                )}
-              </div>
+                  <Instagram size={16} />
+                  <span>Instagram</span>
+                </a>
+              )}
             </div>
           </div>
         </section>
