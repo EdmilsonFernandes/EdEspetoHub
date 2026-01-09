@@ -103,7 +103,7 @@ export class OrderController {
         queueSize,
         items: (order.items || []).map((item) => ({
           id: item.id,
-          name: item.product?.name || item.name,
+          name: item.product?.name || 'Produto',
           quantity: item.quantity,
           price: item.price,
           productId: item.product?.id,
