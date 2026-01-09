@@ -94,12 +94,36 @@ export const GrillQueue = () => {
 
   useEffect(() => {
     loadQueue();
-    const interval = setInterval(loadQueue, 5000);
+    let interval: number | undefined;
+    const startPolling = () => {
+      if (interval) return;
+      interval = window.setInterval(loadQueue, 5000);
+    };
+    const stopPolling = () => {
+      if (!interval) return;
+      clearInterval(interval);
+      interval = undefined;
+    };
+    const handleVisibility = () => {
+      if (typeof document === 'undefined') return;
+      if (document.visibilityState === 'visible') {
+        startPolling();
+      } else {
+        stopPolling();
+      }
+    };
+    startPolling();
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', handleVisibility);
+    }
 
     const unsubProducts = productService.subscribe(setProducts);
 
     return () => {
-      clearInterval(interval);
+      stopPolling();
+      if (typeof document !== 'undefined') {
+        document.removeEventListener('visibilitychange', handleVisibility);
+      }
       unsubProducts();
     };
   }, []);

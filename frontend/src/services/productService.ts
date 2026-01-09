@@ -119,6 +119,7 @@ export const productService = {
   subscribe(callback: any, storeId?: string)
   {
     let cancelled = false;
+    let interval: number | undefined;
     const targetStore = resolveStoreIdentifier(storeId);
 
     if (!targetStore)
@@ -145,13 +146,39 @@ export const productService = {
       }
     };
 
-    load();
-    const interval = setInterval(load, POLLING_INTERVAL);
+    const startPolling = () => {
+      if (interval) return;
+      load();
+      interval = window.setInterval(load, POLLING_INTERVAL);
+    };
+
+    const stopPolling = () => {
+      if (!interval) return;
+      clearInterval(interval);
+      interval = undefined;
+    };
+
+    const handleVisibility = () => {
+      if (typeof document === 'undefined') return;
+      if (document.visibilityState === 'visible') {
+        startPolling();
+      } else {
+        stopPolling();
+      }
+    };
+
+    startPolling();
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', handleVisibility);
+    }
 
     return () =>
     {
       cancelled = true;
-      clearInterval(interval);
+      stopPolling();
+      if (typeof document !== 'undefined') {
+        document.removeEventListener('visibilitychange', handleVisibility);
+      }
     };
   },
 };
