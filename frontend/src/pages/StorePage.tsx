@@ -187,7 +187,8 @@ export function StorePage() {
         const raw = localStorage.getItem(`lastOrder:${storeSlug}`);
         if (raw) {
           const parsed = JSON.parse(raw);
-          setLastPublicOrderId(parsed?.id || '');
+          const shouldShow = parsed?.id && parsed?.type !== 'table';
+          setLastPublicOrderId(shouldShow ? parsed.id : '');
         } else {
           setLastPublicOrderId('');
         }
@@ -230,6 +231,12 @@ export function StorePage() {
     }, 1500);
     return () => window.clearTimeout(timeout);
   }, [view, lastOrder?.id, navigate]);
+
+  useEffect(() => {
+    if (user?.token) {
+      setLastPublicOrderId('');
+    }
+  }, [user?.token]);
 
   const updateCart = (item, qty) => {
     setCart((previous) => {
@@ -321,10 +328,12 @@ export function StorePage() {
         pixKey,
         table: customer.table,
       });
-      localStorage.setItem(
-        `lastOrder:${storeSlug}`,
-        JSON.stringify({ id: demoId, createdAt: Date.now() })
-      );
+      if (customer.type !== 'table') {
+        localStorage.setItem(
+          `lastOrder:${storeSlug}`,
+          JSON.stringify({ id: demoId, createdAt: Date.now(), type: customer.type })
+        );
+      }
       sessionStorage.setItem(
         `demo:order:${demoId}`,
         JSON.stringify({
@@ -401,10 +410,10 @@ export function StorePage() {
       pixKey,
       table: customer.table,
     });
-    if (createdOrder?.id) {
+    if (createdOrder?.id && !user?.token && customer.type !== 'table') {
       localStorage.setItem(
         `lastOrder:${storeSlug}`,
-        JSON.stringify({ id: createdOrder.id, createdAt: Date.now() })
+        JSON.stringify({ id: createdOrder.id, createdAt: Date.now(), type: customer.type })
       );
       setLastPublicOrderId(createdOrder.id);
     }
@@ -626,7 +635,7 @@ export function StorePage() {
           </div>
         ) : !showInactiveState && !showClosedState && view === 'menu' && products.length > 0 && (
           <div className="space-y-4">
-            {lastPublicOrderId && (
+            {!user?.token && lastPublicOrderId && (
               <div className="mx-3 sm:mx-6 rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                 <span>Deseja continuar acompanhando seu ultimo pedido?</span>
                 <button
