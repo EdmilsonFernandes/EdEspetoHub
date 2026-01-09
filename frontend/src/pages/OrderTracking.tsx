@@ -88,16 +88,6 @@ export function OrderTracking() {
     };
   }, [orderId, polling]);
 
-  useEffect(() => {
-    if (!order?.createdAt) return;
-    const start = new Date(order.createdAt).getTime();
-    if (!Number.isFinite(start)) return;
-    const update = () => setElapsedMs(Date.now() - start);
-    update();
-    const timer = window.setInterval(update, 1000);
-    return () => window.clearInterval(timer);
-  }, [order?.createdAt]);
-
   const status = order?.status || 'pending';
   const typeLabel = typeLabels[order?.type] || 'Pedido';
   const isDelivery = order?.type === 'delivery';
@@ -134,6 +124,17 @@ export function OrderTracking() {
     favicon.setAttribute('href', storeLogo);
     document.head.appendChild(favicon);
   }, [order?.store?.settings, storeLogo, storeName]);
+
+  useEffect(() => {
+    if (!order?.createdAt) return;
+    const start = new Date(order.createdAt).getTime();
+    if (!Number.isFinite(start)) return;
+    const update = () => setElapsedMs(Date.now() - start);
+    update();
+    if (isReady) return;
+    const timer = window.setInterval(update, 1000);
+    return () => window.clearInterval(timer);
+  }, [order?.createdAt, isReady]);
 
   const steps = useMemo(() => {
     if (isDelivery) {
@@ -212,8 +213,8 @@ export function OrderTracking() {
                       <span
                         className={`px-3 py-1 rounded-full text-xs font-semibold ${
                           isReady
-                            ? 'bg-emerald-100 text-emerald-800'
-                            : 'bg-amber-100 text-amber-800 animate-pulse'
+                            ? 'bg-brand-primary text-white'
+                            : 'bg-brand-primary-soft text-brand-primary animate-pulse'
                         }`}
                       >
                         {isReady ? 'Finalizado' : 'Em andamento'}
@@ -253,8 +254,12 @@ export function OrderTracking() {
                 <div className="mb-4">
                   <div className="h-2 w-full rounded-full bg-gray-200 overflow-hidden">
                     <div
-                      className="h-full bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 transition-all"
-                      style={{ width: `${progress}%` }}
+                      className="h-full transition-all"
+                      style={{
+                        width: `${progress}%`,
+                        backgroundImage:
+                          'linear-gradient(90deg, var(--color-primary), var(--color-secondary))',
+                      }}
                     />
                   </div>
                   <div className="mt-2 text-xs text-gray-500">{progress}% completo</div>
@@ -270,9 +275,9 @@ export function OrderTracking() {
                         key={step.id}
                         className={`rounded-xl border px-4 py-3 flex items-center gap-2 ${
                           isDone
-                            ? 'border-green-200 bg-green-50 text-green-700'
+                            ? 'border-brand-primary bg-brand-primary-soft text-brand-primary'
                             : 'border-gray-200 text-gray-500'
-                        } ${step.id === currentStep && !isReady ? 'ring-2 ring-amber-300 animate-pulse' : ''}`}
+                        } ${step.id === currentStep && !isReady ? 'ring-2 ring-brand-primary animate-pulse' : ''}`}
                       >
                         {showBike ? (
                           <Bike size={18} />
