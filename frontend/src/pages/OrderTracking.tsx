@@ -386,7 +386,7 @@ export function OrderTracking() {
                   {isReady && (
                     <div className="rounded-xl border border-green-200 bg-green-50 p-3 text-sm text-green-700">
                       {isDelivery
-                        ? 'Seu pedido saiu para entrega. Logo chega ao seu destino. Bom apetite!'
+                        ? 'Seu pedido saiu para entrega. Se precisar, mande uma referencia do endereco. Bom apetite!'
                         : order?.type === 'table'
                         ? 'Seu pedido esta pronto. Aguarde o atendimento na sua mesa.'
                         : 'Seu pedido esta pronto! Pode ir retirar. Bom apetite!'}
