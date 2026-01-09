@@ -65,11 +65,13 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      <div className="fixed top-4 right-4 z-50 space-y-2 pointer-events-none">
+      <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 space-y-2">
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className={`pointer-events-auto border rounded-xl px-4 py-3 shadow-lg animate-slide-in-right flex items-center gap-3 min-w-[300px] ${getToastStyles(toast.type)}`}
+            onClick={() => removeToast(toast.id)}
+            role="button"
+            className={`border rounded-xl px-4 py-3 shadow-lg animate-slide-in-right flex items-center gap-3 min-w-[320px] cursor-pointer ${getToastStyles(toast.type)}`}
           >
             <span className="text-lg font-bold">{getIcon(toast.type)}</span>
             <span className="text-sm font-medium flex-1">{toast.message}</span>
