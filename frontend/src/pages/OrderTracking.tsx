@@ -146,22 +146,35 @@ export function OrderTracking() {
 
           {!loading && !error && order && (
             <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                <div>
-                  <p className="text-sm text-gray-500">Pedido #{order.id}</p>
-                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{statusLabel}</h1>
-                  <p className="text-sm text-gray-500 mt-2">
-                    {order.store?.name || 'Chama no Espeto'} • {typeLabel}
-                  </p>
-                  {estimateMinutes && !isReady && (
-                    <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold">
-                      Estimativa: ~{estimateMinutes} min
+              <div className="rounded-3xl border border-gray-100 bg-gradient-to-br from-white via-gray-50 to-white p-5 sm:p-6 shadow-lg">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Pedido #{order.id}</p>
+                    <div className="mt-2 flex items-center gap-3 flex-wrap">
+                      <h1 className="text-2xl sm:text-3xl font-black text-gray-900">{statusLabel}</h1>
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                          isReady
+                            ? 'bg-emerald-100 text-emerald-800'
+                            : 'bg-amber-100 text-amber-800 animate-pulse'
+                        }`}
+                      >
+                        {isReady ? 'Finalizado' : 'Em andamento'}
+                      </span>
                     </div>
-                  )}
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Clock size={16} />
-                  {order.createdAt ? formatDateTime(order.createdAt) : 'Agora'}
+                    <p className="text-sm text-gray-500 mt-2">
+                      {order.store?.name || 'Chama no Espeto'} • {typeLabel}
+                    </p>
+                    {estimateMinutes && !isReady && (
+                      <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold animate-pulse">
+                        Estimativa: ~{estimateMinutes} min
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Clock size={16} />
+                    {order.createdAt ? formatDateTime(order.createdAt) : 'Agora'}
+                  </div>
                 </div>
               </div>
 
@@ -184,8 +197,10 @@ export function OrderTracking() {
                       <div
                         key={step.id}
                         className={`rounded-xl border px-4 py-3 flex items-center gap-2 ${
-                          isDone ? 'border-green-200 bg-green-50 text-green-700' : 'border-gray-200 text-gray-500'
-                        }`}
+                          isDone
+                            ? 'border-green-200 bg-green-50 text-green-700'
+                            : 'border-gray-200 text-gray-500'
+                        } ${step.id === currentStep && !isReady ? 'ring-2 ring-amber-300 animate-pulse' : ''}`}
                       >
                         {isDone ? <CircleCheck size={18} /> : <Clock size={18} />}
                         <span className="text-sm font-semibold">{step.label}</span>
