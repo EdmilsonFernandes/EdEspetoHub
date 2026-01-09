@@ -8,7 +8,7 @@ import { BILLING_OPTIONS, PLAN_TIERS, getPlanName } from '../constants/planCatal
 
 export function AdminRenewal() {
   const navigate = useNavigate();
-  const { auth } = useAuth();
+  const { auth, logout } = useAuth();
   const [plans, setPlans] = useState([]);
   const [selectedPlanId, setSelectedPlanId] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('PIX');
@@ -87,6 +87,10 @@ export function AdminRenewal() {
 
   const expiresLabel = currentEndDate ? new Date(currentEndDate).toLocaleDateString('pt-BR') : '—';
   const platformLogo = '/chama-no-espeto.jpeg';
+  const handleGoToLogin = () => {
+    logout();
+    navigate('/admin');
+  };
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -103,7 +107,7 @@ export function AdminRenewal() {
               </div>
             </button>
             <button
-              onClick={() => navigate('/admin')}
+              onClick={handleGoToLogin}
               className="px-3 py-2 sm:px-4 text-sm rounded-lg border-2 border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors"
             >
               Ir para login

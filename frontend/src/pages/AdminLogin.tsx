@@ -31,6 +31,16 @@ export function AdminLogin() {
         logoUrl: session.store?.settings?.logoUrl,
         brandName: session.store?.name,
       });
+      const redirectTab = sessionStorage.getItem('admin:redirectTab');
+      const redirectSlug = sessionStorage.getItem('admin:redirectSlug');
+      if (redirectTab && (!redirectSlug || redirectSlug === session.store?.slug)) {
+        sessionStorage.removeItem('admin:redirectTab');
+        sessionStorage.removeItem('admin:redirectSlug');
+        navigate('/admin/dashboard', { state: { activeTab: redirectTab } });
+        return;
+      }
+      sessionStorage.removeItem('admin:redirectTab');
+      sessionStorage.removeItem('admin:redirectSlug');
       navigate('/admin/dashboard');
     } catch (error) {
       setLoginError(error.message || 'Falha ao autenticar');
@@ -42,14 +52,28 @@ export function AdminLogin() {
   useEffect(() => {
     if (!hydrated) return;
     if (auth?.token && auth?.user?.role === 'ADMIN') {
+      const redirectTab = sessionStorage.getItem('admin:redirectTab');
+      const redirectSlug = sessionStorage.getItem('admin:redirectSlug');
+      if (redirectTab && (!redirectSlug || redirectSlug === auth.store?.slug)) {
+        sessionStorage.removeItem('admin:redirectTab');
+        sessionStorage.removeItem('admin:redirectSlug');
+        navigate('/admin/dashboard', { state: { activeTab: redirectTab } });
+        return;
+      }
+      sessionStorage.removeItem('admin:redirectTab');
+      sessionStorage.removeItem('admin:redirectSlug');
       navigate('/admin/dashboard');
     }
   }, [auth?.token, auth?.user?.role, hydrated, navigate]);
 
   useEffect(() => {
     const slug = searchParams.get('slug');
+    const tab = searchParams.get('tab');
     if (slug) {
       setLoginForm(prev => ({ ...prev, slug }));
+    }
+    if (tab) {
+      sessionStorage.setItem('admin:redirectTab', tab);
     }
   }, [searchParams]);
 

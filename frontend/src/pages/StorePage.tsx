@@ -335,6 +335,21 @@ export function StorePage() {
     }
     navigate(storeSlug ? `/admin/dashboard` : '/admin', { state: { activeTab: 'fila' } });
   };
+  const openProductsSetup = () => {
+    if (storeSlug) {
+      sessionStorage.setItem('admin:redirectTab', 'produtos');
+      sessionStorage.setItem('admin:redirectSlug', storeSlug);
+    }
+    if (user?.store?.slug && storeSlug && user.store.slug === storeSlug) {
+      navigate('/admin/dashboard', { state: { activeTab: 'produtos' } });
+      return;
+    }
+    if (storeSlug) {
+      navigate(`/admin?slug=${encodeURIComponent(storeSlug)}&tab=produtos`);
+      return;
+    }
+    navigate('/admin');
+  };
 
   // Loading state
   if (isLoading) {
@@ -387,14 +402,24 @@ export function StorePage() {
               <div className="mb-4">
                 <div className="text-6xl">🍖</div>
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Cardápio vazio</h2>
-              <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md">O cardápio desta loja ainda não foi configurado. Volte em breve!</p>
-              <button
-                onClick={() => navigate('/')}
-                className="px-6 py-3 rounded-lg bg-brand-gradient text-white font-semibold hover:opacity-90 transition-all"
-              >
-                Voltar para início
-              </button>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Loja ainda não configurada</h2>
+              <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md">
+                Falta cadastrar os produtos para o cardápio aparecer. Se você é o responsável pela loja, clique abaixo para configurar.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <button
+                  onClick={openProductsSetup}
+                  className="px-6 py-3 rounded-lg bg-brand-gradient text-white font-semibold hover:opacity-90 transition-all"
+                >
+                  Cadastrar produtos
+                </button>
+                <button
+                  onClick={() => navigate('/')}
+                  className="px-6 py-3 rounded-lg border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-all"
+                >
+                  Voltar para início
+                </button>
+              </div>
             </div>
           </div>
         ) : view === 'menu' && products.length > 0 && (
