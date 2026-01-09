@@ -31,6 +31,7 @@ export function StorePage() {
   const [openingHours, setOpeningHours] = useState([]);
   const [storeSubscription, setStoreSubscription] = useState(null);
   const autoTrackRef = useRef(false);
+  const [lastPublicOrderId, setLastPublicOrderId] = useState('');
   const customersStorageKey = useMemo(
     () => `customers:${storeSlug || defaultBranding.espetoId}`,
     [storeSlug]
@@ -181,6 +182,19 @@ export function StorePage() {
 
     loadStore(false);
     loadProducts();
+    if (storeSlug) {
+      try {
+        const raw = localStorage.getItem(`lastOrder:${storeSlug}`);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          setLastPublicOrderId(parsed?.id || '');
+        } else {
+          setLastPublicOrderId('');
+        }
+      } catch {
+        setLastPublicOrderId('');
+      }
+    }
 
     const handleVisibility = () => {
       if (document.visibilityState === 'visible') {
@@ -307,6 +321,10 @@ export function StorePage() {
         pixKey,
         table: customer.table,
       });
+      localStorage.setItem(
+        `lastOrder:${storeSlug}`,
+        JSON.stringify({ id: demoId, createdAt: Date.now() })
+      );
       sessionStorage.setItem(
         `demo:order:${demoId}`,
         JSON.stringify({
@@ -383,6 +401,13 @@ export function StorePage() {
       pixKey,
       table: customer.table,
     });
+    if (createdOrder?.id) {
+      localStorage.setItem(
+        `lastOrder:${storeSlug}`,
+        JSON.stringify({ id: createdOrder.id, createdAt: Date.now() })
+      );
+      setLastPublicOrderId(createdOrder.id);
+    }
     setView('success');
   };
 
@@ -600,19 +625,32 @@ export function StorePage() {
             </div>
           </div>
         ) : !showInactiveState && !showClosedState && view === 'menu' && products.length > 0 && (
-          <MenuView
-            products={products}
-            cart={cart}
-            branding={branding}
-            instagramHandle={instagramHandle}
-            onUpdateCart={updateCart}
-            onProceed={() => setView('cart')}
-            onOpenQueue={user?.token ? requireAdminSession : undefined}
-            onOpenAdmin={user?.token ? () => navigate('/admin/dashboard') : undefined}
-            isOpenNow={storeOpenNow}
-            whatsappNumber={storePhone}
-            todayHoursLabel={todayHoursLabel}
-          />
+          <div className="space-y-4">
+            {lastPublicOrderId && (
+              <div className="mx-3 sm:mx-6 rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <span>Deseja continuar acompanhando seu ultimo pedido?</span>
+                <button
+                  onClick={() => navigate(`/pedido/${lastPublicOrderId}`)}
+                  className="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:opacity-90"
+                >
+                  Acompanhar agora
+                </button>
+              </div>
+            )}
+            <MenuView
+              products={products}
+              cart={cart}
+              branding={branding}
+              instagramHandle={instagramHandle}
+              onUpdateCart={updateCart}
+              onProceed={() => setView('cart')}
+              onOpenQueue={user?.token ? requireAdminSession : undefined}
+              onOpenAdmin={user?.token ? () => navigate('/admin/dashboard') : undefined}
+              isOpenNow={storeOpenNow}
+              whatsappNumber={storePhone}
+              todayHoursLabel={todayHoursLabel}
+            />
+          </div>
         )}
         {view === 'cart' && (
           <CartView

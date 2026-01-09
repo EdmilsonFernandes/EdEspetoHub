@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ChefHat, CircleCheck, Clock, Loader2, MapPin } from 'lucide-react';
 import { orderService } from '../services/orderService';
-import { formatCurrency, formatDateTime } from '../utils/format';
+import { formatCurrency, formatDateTime, formatDuration } from '../utils/format';
 
 const statusLabels: Record<string, string> = {
   pending: 'Recebido',
@@ -32,6 +32,7 @@ export function OrderTracking() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [polling, setPolling] = useState(true);
+  const [elapsedMs, setElapsedMs] = useState(0);
 
   useEffect(() => {
     if (!orderId) return;
@@ -84,6 +85,16 @@ export function OrderTracking() {
       if (interval) window.clearInterval(interval);
     };
   }, [orderId, polling]);
+
+  useEffect(() => {
+    if (!order?.createdAt) return;
+    const start = new Date(order.createdAt).getTime();
+    if (!Number.isFinite(start)) return;
+    const update = () => setElapsedMs(Date.now() - start);
+    update();
+    const timer = window.setInterval(update, 1000);
+    return () => window.clearInterval(timer);
+  }, [order?.createdAt]);
 
   const status = order?.status || 'pending';
   const typeLabel = typeLabels[order?.type] || 'Pedido';
@@ -190,6 +201,11 @@ export function OrderTracking() {
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <Clock size={16} />
                     {order.createdAt ? formatDateTime(order.createdAt) : 'Agora'}
+                    {elapsedMs > 0 && (
+                      <span className="ml-2 inline-flex items-center gap-1 text-xs text-gray-500">
+                        • {formatDuration(elapsedMs)}
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
