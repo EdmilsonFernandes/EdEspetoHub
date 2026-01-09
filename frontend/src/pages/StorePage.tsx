@@ -658,6 +658,7 @@ export function StorePage() {
             customer={customer}
             customers={customers}
             paymentMethod={paymentMethod}
+            allowCustomerAutocomplete={Boolean(user?.token)}
             onChangeCustomer={handleCustomerChange}
             onChangePayment={setPaymentMethod}
             onCheckout={checkout}

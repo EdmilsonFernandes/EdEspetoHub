@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   ChevronLeft,
   Bike,
@@ -18,6 +18,7 @@ export const CartView = ({
   customer,
   customers = [],
   paymentMethod,
+  allowCustomerAutocomplete = false,
   onChangeCustomer,
   onChangePayment,
   onCheckout,
@@ -26,9 +27,8 @@ export const CartView = ({
   const cartItems = Object.values(cart);
   const total = cartItems.reduce((acc, item) => acc + item.price * item.qty, 0);
   const [suggestionsOpen, setSuggestionsOpen] = useState(false);
-  const [mapUrl, setMapUrl] = useState("");
-  const [mapLink, setMapLink] = useState("");
-  const [mapLoading, setMapLoading] = useState(false);
+  const [cepLoading, setCepLoading] = useState(false);
+  const [cepError, setCepError] = useState("");
 
   const isPickup = customer.type === "pickup";
   const isDelivery = customer.type === "delivery";
@@ -48,26 +48,30 @@ export const CartView = ({
 
   const normalizedQuery = customer.name?.trim().toLowerCase() || "";
   const filteredCustomers =
-    normalizedQuery.length >= 3
+    allowCustomerAutocomplete && normalizedQuery.length >= 3
       ? customers.filter((entry) =>
           entry.name?.toLowerCase().includes(normalizedQuery)
         )
       : [];
-  const recentCustomers = customers.slice(0, 6);
+  const recentCustomers = allowCustomerAutocomplete ? customers.slice(0, 6) : [];
 
   const handleNameChange = (value) => {
     const next = { ...customer, name: value };
-    const normalized = value.trim().toLowerCase();
-    if (normalized.length >= 3) {
-      const match = customers.find(
-        (entry) => entry.name?.trim().toLowerCase() === normalized
-      );
-      if (match?.phone) {
-        next.phone = formatPhoneInput(match.phone);
+    if (allowCustomerAutocomplete) {
+      const normalized = value.trim().toLowerCase();
+      if (normalized.length >= 3) {
+        const match = customers.find(
+          (entry) => entry.name?.trim().toLowerCase() === normalized
+        );
+        if (match?.phone) {
+          next.phone = formatPhoneInput(match.phone);
+        }
       }
     }
     onChangeCustomer(next);
-    setSuggestionsOpen(true);
+    if (allowCustomerAutocomplete) {
+      setSuggestionsOpen(true);
+    }
   };
 
   const handleSelectCustomer = (entry) => {
@@ -81,47 +85,58 @@ export const CartView = ({
 
   const tableOptions = Array.from({ length: 12 }, (_, index) => `${index + 1}`);
 
-  useEffect(() => {
-    if (!isDelivery) {
-      setMapUrl("");
-      setMapLink("");
-      return;
-    }
-    const address = (customer.address || "").trim();
-    if (address.length < 8) {
-      setMapUrl("");
-      setMapLink("");
-      return;
-    }
-    let cancelled = false;
-    const loadMap = async () => {
-      setMapLoading(true);
-      try {
-        const query = encodeURIComponent(address);
-        setMapLink(`https://www.openstreetmap.org/search?query=${query}`);
-        const response = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${query}`
-        );
-        const data = await response.json();
-        if (!Array.isArray(data) || !data[0]) return;
-        const lat = Number(data[0].lat);
-        const lon = Number(data[0].lon);
-        if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
-        const delta = 0.005;
-        const bbox = [ lon - delta, lat - delta, lon + delta, lat + delta ].join(",");
-        const url = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat}%2C${lon}`;
-        if (!cancelled) setMapUrl(url);
-      } catch {
-        // ignore map errors
-      } finally {
-        if (!cancelled) setMapLoading(false);
+  const buildDeliveryAddress = (data) => {
+    const parts = [
+      data.street && `${data.street}, ${data.number || "s/n"}`,
+      data.complement,
+      data.neighborhood,
+      data.city && data.state ? `${data.city} - ${data.state}` : data.city,
+      data.cep && `CEP ${data.cep}`,
+    ].filter(Boolean);
+    return parts.join(" | ");
+  };
+
+  const updateDeliveryField = (field, value) => {
+    const next = { ...customer, [field]: value };
+    next.address = buildDeliveryAddress(next);
+    onChangeCustomer(next);
+  };
+
+  const handleCepLookup = async () => {
+    const rawCep = (customer.cep || "").replace(/\D/g, "");
+    if (rawCep.length !== 8) return;
+    setCepLoading(true);
+    setCepError("");
+    try {
+      const response = await fetch(`https://viacep.com.br/ws/${rawCep}/json/`);
+      const data = await response.json();
+      if (data?.erro) {
+        setCepError("CEP nao encontrado.");
+        return;
       }
-    };
-    loadMap();
-    return () => {
-      cancelled = true;
-    };
-  }, [customer.address, isDelivery]);
+      const next = {
+        ...customer,
+        street: customer.street || data.logradouro || "",
+        neighborhood: customer.neighborhood || data.bairro || "",
+        city: customer.city || data.localidade || "",
+        state: customer.state || data.uf || "",
+        complement: customer.complement || data.complemento || "",
+      };
+      next.address = buildDeliveryAddress(next);
+      onChangeCustomer(next);
+    } catch (error) {
+      setCepError("Nao foi possivel consultar o CEP.");
+    } finally {
+      setCepLoading(false);
+    }
+  };
+
+  const mapLink = useMemo(() => {
+    if (!isDelivery) return "";
+    const address = buildDeliveryAddress(customer).trim();
+    if (address.length < 8) return "";
+    return `https://www.openstreetmap.org/search?query=${encodeURIComponent(address)}`;
+  }, [customer, isDelivery]);
 
   return (
     <div className="animate-in slide-in-from-right">
@@ -155,13 +170,19 @@ export const CartView = ({
               <input
                 value={customer.name}
                 onChange={(e) => handleNameChange(e.target.value)}
-                onFocus={() => filteredCustomers.length && setSuggestionsOpen(true)}
-                onBlur={() => setTimeout(() => setSuggestionsOpen(false), 150)}
+                onFocus={() =>
+                  allowCustomerAutocomplete &&
+                  filteredCustomers.length &&
+                  setSuggestionsOpen(true)
+                }
+                onBlur={() =>
+                  allowCustomerAutocomplete && setTimeout(() => setSuggestionsOpen(false), 150)
+                }
                 placeholder="Ex: João Silva"
                 className="w-full border-b-2 border-gray-100 py-3 pl-9 text-lg outline-none focus:border-brand-primary placeholder:text-gray-300 bg-transparent"
               />
               <Search size={18} className="absolute left-0 top-1/2 -translate-y-1/2 text-gray-300" />
-              {suggestionsOpen && filteredCustomers.length > 0 && (
+              {allowCustomerAutocomplete && suggestionsOpen && filteredCustomers.length > 0 && (
                 <div className="absolute z-10 mt-2 w-full bg-white border border-gray-100 rounded-xl shadow-lg overflow-hidden">
                   {filteredCustomers.slice(0, 6).map((entry) => (
                     <button
@@ -181,7 +202,9 @@ export const CartView = ({
                 </div>
               )}
             </div>
-            {normalizedQuery.length < 3 && recentCustomers.length > 0 && (
+            {allowCustomerAutocomplete &&
+              normalizedQuery.length < 3 &&
+              recentCustomers.length > 0 && (
               <div className="mt-3">
                 <p className="text-[11px] text-gray-400 uppercase tracking-wider font-semibold mb-2">
                   Clientes recentes
@@ -254,18 +277,96 @@ export const CartView = ({
                 Endereço de entrega
               </p>
               <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-4">
-                <textarea
-                  value={customer.address}
-                  onChange={(e) =>
-                    onChangeCustomer({ ...customer, address: e.target.value })
-                  }
-                  placeholder="Rua, número, bairro e referência"
-                  className="w-full min-h-[120px] p-4 rounded-xl bg-gray-50 border border-gray-100 text-gray-700 outline-none focus:ring-2 focus:ring-brand-primary"
-                />
-                <div className="rounded-xl border border-gray-100 bg-white overflow-hidden flex flex-col">
-                  <div className="px-3 py-2 text-xs text-gray-500 border-b bg-gray-50 flex items-center justify-between">
+                <div className="space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="sm:col-span-2">
+                      <label className="text-xs font-semibold text-gray-500">CEP</label>
+                      <input
+                        value={customer.cep || ""}
+                        onChange={(e) => updateDeliveryField("cep", e.target.value)}
+                        onBlur={handleCepLookup}
+                        disabled={cepLoading}
+                        placeholder="00000-000"
+                        className="w-full p-3 rounded-xl bg-gray-50 border border-gray-100 text-gray-700 outline-none focus:ring-2 focus:ring-brand-primary disabled:opacity-60"
+                      />
+                    </div>
+                    <div className="flex items-end">
+                      <button
+                        type="button"
+                        onClick={handleCepLookup}
+                        disabled={cepLoading}
+                        className="w-full px-3 py-3 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-60"
+                      >
+                        {cepLoading ? "Buscando..." : "Buscar CEP"}
+                      </button>
+                    </div>
+                  </div>
+                  {cepError && <p className="text-xs text-red-600">{cepError}</p>}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs font-semibold text-gray-500">Rua / Avenida</label>
+                      <input
+                        value={customer.street || ""}
+                        onChange={(e) => updateDeliveryField("street", e.target.value)}
+                        placeholder="Rua, avenida"
+                        className="w-full p-3 rounded-xl bg-gray-50 border border-gray-100 text-gray-700 outline-none focus:ring-2 focus:ring-brand-primary"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold text-gray-500">Numero</label>
+                      <input
+                        value={customer.number || ""}
+                        onChange={(e) => updateDeliveryField("number", e.target.value)}
+                        placeholder="Numero"
+                        className="w-full p-3 rounded-xl bg-gray-50 border border-gray-100 text-gray-700 outline-none focus:ring-2 focus:ring-brand-primary"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs font-semibold text-gray-500">Bairro</label>
+                      <input
+                        value={customer.neighborhood || ""}
+                        onChange={(e) => updateDeliveryField("neighborhood", e.target.value)}
+                        placeholder="Bairro"
+                        className="w-full p-3 rounded-xl bg-gray-50 border border-gray-100 text-gray-700 outline-none focus:ring-2 focus:ring-brand-primary"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold text-gray-500">Complemento</label>
+                      <input
+                        value={customer.complement || ""}
+                        onChange={(e) => updateDeliveryField("complement", e.target.value)}
+                        placeholder="Apto, bloco, referencia"
+                        className="w-full p-3 rounded-xl bg-gray-50 border border-gray-100 text-gray-700 outline-none focus:ring-2 focus:ring-brand-primary"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="sm:col-span-2">
+                      <label className="text-xs font-semibold text-gray-500">Cidade</label>
+                      <input
+                        value={customer.city || ""}
+                        onChange={(e) => updateDeliveryField("city", e.target.value)}
+                        placeholder="Cidade"
+                        className="w-full p-3 rounded-xl bg-gray-50 border border-gray-100 text-gray-700 outline-none focus:ring-2 focus:ring-brand-primary"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold text-gray-500">UF</label>
+                      <input
+                        value={customer.state || ""}
+                        onChange={(e) => updateDeliveryField("state", e.target.value)}
+                        placeholder="UF"
+                        className="w-full p-3 rounded-xl bg-gray-50 border border-gray-100 text-gray-700 outline-none focus:ring-2 focus:ring-brand-primary"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="rounded-xl border border-gray-100 bg-white overflow-hidden">
+                  <div className="px-3 py-3 text-xs text-gray-500 bg-gray-50 flex items-center justify-between">
                     <span>Visualizar no mapa</span>
-                    {mapLink && (
+                    {mapLink ? (
                       <a
                         href={mapLink}
                         target="_blank"
@@ -274,19 +375,9 @@ export const CartView = ({
                       >
                         Abrir
                       </a>
+                    ) : (
+                      <span className="text-gray-400">Digite o endereco</span>
                     )}
-                  </div>
-                  <div className="flex-1 min-h-[140px] bg-gray-100 flex items-center justify-center text-xs text-gray-500">
-                    {mapLoading && "Carregando mapa..."}
-                    {!mapLoading && mapUrl && (
-                      <iframe
-                        title="Mapa"
-                        src={mapUrl}
-                        className="w-full h-full border-0"
-                        loading="lazy"
-                      />
-                    )}
-                    {!mapLoading && !mapUrl && "Digite o endereço para ver o mapa"}
                   </div>
                 </div>
               </div>
