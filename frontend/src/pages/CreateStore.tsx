@@ -1,16 +1,18 @@
 // @ts-nocheck
 import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { storeService } from '../services/storeService';
 import { planService } from '../services/planService';
 import { BILLING_OPTIONS, PLAN_TIERS, getPlanName } from '../constants/planCatalog';
 
 export function CreateStore() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const planIdFromUrl = searchParams.get('planId');
   const [storeError, setStoreError] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
   const [plans, setPlans] = useState([]);
-  const [selectedPlanId, setSelectedPlanId] = useState('');
+  const [selectedPlanId, setSelectedPlanId] = useState('test-plan-7days');
   const [paymentMethod, setPaymentMethod] = useState('PIX');
   const [paymentResult, setPaymentResult] = useState(null);
   const [isAnnual, setIsAnnual] = useState(false);
@@ -169,19 +171,34 @@ export function CreateStore() {
       try {
         const response = await planService.list();
         setPlans(response || []);
-        const defaultPlan = response?.find((plan) => plan.name === getPlanName('basic', 'monthly'));
-        if (defaultPlan) {
-          setSelectedPlanId(defaultPlan.id);
-        } else if (response?.[0]) {
-          setSelectedPlanId(response[0].id);
+
+        // If planId is provided via URL, use it
+        if (planIdFromUrl) {
+          setSelectedPlanId(planIdFromUrl);
+          return;
         }
+
+        // If the test plan is already selected (default), keep it
+        // Otherwise set a default paid plan
+        setSelectedPlanId((current) => {
+          if (current === 'test-plan-7days') {
+            return current; // Keep test plan selected
+          }
+          const defaultPlan = response?.find((plan) => plan.name === getPlanName('basic', 'monthly'));
+          if (defaultPlan) {
+            return defaultPlan.id;
+          } else if (response?.[0]) {
+            return response[0].id;
+          }
+          return current;
+        });
       } catch (error) {
         console.error('Não foi possível carregar os planos', error);
       }
     };
 
     fetchPlans();
-  }, []);
+  }, [planIdFromUrl]);
 
   const billingKey = isAnnual ? 'yearly' : 'monthly';
   const billing = BILLING_OPTIONS[billingKey];
@@ -191,6 +208,9 @@ export function CreateStore() {
   }, {});
 
   useEffect(() => {
+    // Don't modify test plan selection
+    if (selectedPlanId === 'test-plan-7days') return;
+
     if (!plans.length) return;
     const currentPlan = plans.find((plan) => plan.id === selectedPlanId);
     const isCurrentCycle = currentPlan?.name?.endsWith(`_${billingKey}`);
@@ -792,7 +812,14 @@ export function CreateStore() {
               </span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="relative border-2 border-amber-400 rounded-2xl p-4 text-left bg-gradient-to-br from-amber-50 via-white to-red-50 shadow-sm ring-2 ring-amber-200/60">
+                <button
+                  type="button"
+                  onClick={() => setSelectedPlanId('test-plan-7days')}
+                  className={`border-2 rounded-2xl p-4 text-left transition-all relative cursor-pointer ${selectedPlanId === 'test-plan-7days'
+                    ? 'border-amber-500 shadow-lg bg-amber-50'
+                    : 'border-amber-300 hover:border-amber-400'
+                  }`}
+                >
                   <span className="absolute -top-3 left-4 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-full">
                     7 DIAS GRATIS
                   </span>
@@ -804,7 +831,7 @@ export function CreateStore() {
                     <li>✓ Acesso ao painel completo</li>
                     <li>✓ Pode renovar quando quiser</li>
                   </ul>
-                </div>
+                </button>
                 {PLAN_TIERS.map((tier) => {
                   const planKey = getPlanName(tier.key, billingKey);
                   const plan = plansByName[planKey];
@@ -822,7 +849,7 @@ export function CreateStore() {
                     key={planKey}
                     onClick={() => plan?.id && setSelectedPlanId(plan.id)}
                     disabled={isDisabled}
-                    className={`border rounded-2xl p-4 text-left transition-all relative ${isSelected
+                    className={`cursor-pointer border rounded-2xl p-4 text-left transition-all relative ${isSelected
                       ? 'border-red-500 shadow-lg bg-red-50'
                       : 'border-gray-200 hover:border-red-200'
                       } ${isDisabled ? 'opacity-60 cursor-not-allowed' : ''}`}
@@ -847,36 +874,38 @@ export function CreateStore() {
                 {!plans.length && <p className="text-sm text-gray-500">Carregando planos disponíveis...</p>}
               </div>
 
-              <div className="mt-6">
-                <h4 className="text-sm font-semibold text-gray-700 mb-2">Forma de pagamento</h4>
-                <div className="flex gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod('PIX')}
-                    className={`px-4 py-2 rounded-xl border ${paymentMethod === 'PIX' ? 'border-red-500 bg-red-50' : 'border-gray-200'}`}
-                  >
-                    PIX
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod('CREDIT_CARD')}
-                    className={`px-4 py-2 rounded-xl border ${
-                      paymentMethod === 'CREDIT_CARD' ? 'border-red-500 bg-red-50' : 'border-gray-200'
-                    }`}
-                  >
-                    Cartão de crédito
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod('BOLETO')}
-                    className={`px-4 py-2 rounded-xl border ${
-                      paymentMethod === 'BOLETO' ? 'border-red-500 bg-red-50' : 'border-gray-200'
-                    }`}
-                  >
-                    Boleto
-                  </button>
+              {selectedPlanId !== 'test-plan-7days' && (
+                <div className="mt-6">
+                  <h4 className="text-sm font-semibold text-gray-700 mb-2">Forma de pagamento</h4>
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod('PIX')}
+                      className={`px-4 py-2 rounded-xl border ${paymentMethod === 'PIX' ? 'border-red-500 bg-red-50' : 'border-gray-200'}`}
+                    >
+                      PIX
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod('CREDIT_CARD')}
+                      className={`px-4 py-2 rounded-xl border ${
+                        paymentMethod === 'CREDIT_CARD' ? 'border-red-500 bg-red-50' : 'border-gray-200'
+                      }`}
+                    >
+                      Cartão de crédito
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod('BOLETO')}
+                      className={`px-4 py-2 rounded-xl border ${
+                        paymentMethod === 'BOLETO' ? 'border-red-500 bg-red-50' : 'border-gray-200'
+                      }`}
+                    >
+                      Boleto
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
             <div ref={termsRef} className="pt-6 border-t border-gray-100 space-y-3">
@@ -886,14 +915,14 @@ export function CreateStore() {
                   checked={termsAccepted}
                   onChange={(e) => setTermsAccepted(e.target.checked)}
                   ref={termsCheckboxRef}
-                  className="mt-1"
+                  className="mt-1 accent-red-500"
                 />
                 <span>
                   Li e aceito os{' '}
                   <button
                     type="button"
                     onClick={() => setShowTerms(true)}
-                    className="text-brand-primary font-semibold hover:underline"
+                    className="text-red-500 font-semibold hover:underline"
                   >
                     termos de uso
                   </button>{' '}
@@ -905,14 +934,14 @@ export function CreateStore() {
                   type="checkbox"
                   checked={lgpdAccepted}
                   onChange={(e) => setLgpdAccepted(e.target.checked)}
-                  className="mt-1"
+                  className="mt-1 accent-red-500"
                 />
                 <span>
                   Concordo com o tratamento de dados pessoais conforme a LGPD e a{' '}
                   <button
                     type="button"
                     onClick={() => setShowTerms(true)}
-                    className="text-brand-primary font-semibold hover:underline"
+                    className="text-red-500 font-semibold hover:underline"
                   >
                     politica de privacidade
                   </button>
