@@ -5,6 +5,7 @@ import { OrderRepository } from '../repositories/OrderRepository';
 import { ProductRepository } from '../repositories/ProductRepository';
 import { StoreRepository } from '../repositories/StoreRepository';
 import { AppDataSource } from '../config/database';
+import { AppError } from '../errors/AppError';
 
 export class OrderService
 {
@@ -14,17 +15,17 @@ export class OrderService
 
   private ensureStoreAccess(store: Awaited<ReturnType<StoreRepository[ 'findById' ]>>, authStoreId?: string)
   {
-    if (!store) throw new Error('Loja não encontrada');
+    if (!store) throw new AppError('STORE-001', 404);
     if (authStoreId && store.id !== authStoreId)
     {
-      throw new Error('Sem permissão para acessar esta loja');
+      throw new AppError('AUTH-003', 403);
     }
   }
 
   async create(input: CreateOrderDto)
   {
     const store = await this.storeRepository.findById(input.storeId);
-    if (!store) throw new Error('Loja não encontrada');
+    if (!store) throw new AppError('STORE-001', 404);
 
     const order = await this.buildOrder(input, store);
     return this.orderRepository.save(order);
@@ -33,7 +34,7 @@ export class OrderService
   async createBySlug(input: Omit<CreateOrderDto, 'storeId'> & { storeSlug: string })
   {
     const store = await this.storeRepository.findBySlug(input.storeSlug);
-    if (!store) throw new Error('Loja não encontrada');
+    if (!store) throw new AppError('STORE-001', 404);
 
     const order = await this.buildOrder(input, store);
     return this.orderRepository.save(order);
@@ -56,7 +57,7 @@ export class OrderService
   async updateStatus(orderId: string, status: string, authStoreId?: string)
   {
     const order = await this.orderRepository.findById(orderId);
-    if (!order) throw new Error('Pedido não encontrado');
+    if (!order) throw new AppError('ORDER-001', 404);
     this.ensureStoreAccess(order.store, authStoreId);
 
     order.status = status;
@@ -66,7 +67,7 @@ export class OrderService
   async updateItems(orderId: string, items: CreateOrderItemInput[], authStoreId?: string)
   {
     const order = await this.orderRepository.findById(orderId);
-    if (!order) throw new Error('Pedido não encontrado');
+    if (!order) throw new AppError('ORDER-001', 404);
     this.ensureStoreAccess(order.store, authStoreId);
 
     await AppDataSource.createQueryBuilder()
@@ -86,7 +87,7 @@ export class OrderService
       const product = await this.productRepository.findById(productId);
       if (!product || product.store.id !== order.store.id)
       {
-        throw new Error('Produto inválido para esta loja');
+        throw new AppError('PROD-002', 400);
       }
 
       const orderItem = new OrderItem();
@@ -130,7 +131,7 @@ export class OrderService
       ? store.settings.orderTypes
       : [ 'delivery', 'pickup', 'table' ];
     if (!allowedTypes.includes(input.type)) {
-      throw new Error('Tipo de pedido não permitido para esta loja');
+      throw new AppError('ORDER-002', 400);
     }
     const items: OrderItem[] = [];
     let total = 0;
@@ -140,7 +141,7 @@ export class OrderService
       const product = await this.productRepository.findById(item.productId);
       if (!product || product.store.id !== store!.id)
       {
-        throw new Error('Produto inválido para esta loja');
+        throw new AppError('PROD-002', 400);
       }
 
       const orderItem = new OrderItem();

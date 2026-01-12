@@ -9,6 +9,12 @@ const defaultHeaders: Record<string, string> = {
   'Content-Type': 'application/json',
 };
 
+const getLang = (): string => {
+  const stored = localStorage.getItem('lang');
+  if (stored) return stored;
+  return navigator.language?.toLowerCase() || 'pt';
+};
+
 // 🔐 recupera token do adminSession
 const getToken = (): string | null =>
 {
@@ -34,8 +40,19 @@ const handleResponse = async (response: Response) =>
 {
   if (!response.ok)
   {
-    const text = await response.text();
-    throw new Error(text || response.statusText);
+    const contentType = response.headers.get('content-type') || '';
+    let payload: any = null;
+    if (contentType.includes('application/json')) {
+      payload = await response.json().catch(() => null);
+    } else {
+      const text = await response.text().catch(() => '');
+      payload = text ? { message: text } : null;
+    }
+    const message = payload?.message || response.statusText;
+    const error: any = new Error(message);
+    if (payload?.code) error.code = payload.code;
+    if (payload?.details) error.details = payload.details;
+    throw error;
   }
   return response.json();
 };
@@ -51,6 +68,7 @@ const request = async (path: string, options: any = {}) =>
       ...defaultHeaders,
       ...(options.headers || {}),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      'X-Lang': getLang(),
     },
   };
 
@@ -75,6 +93,7 @@ const rawRequest = async (path: string, options: any = {}) =>
       ...defaultHeaders,
       ...(options.headers || {}),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      'X-Lang': getLang(),
     },
   };
 

@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { ProductService } from '../services/ProductService';
 import { logger } from '../utils/logger';
+import { respondWithError } from '../errors/respondWithError';
 
 const productService = new ProductService();
 const log = logger.child({ scope: 'ProductController' });
@@ -55,8 +56,7 @@ export class ProductController {
       return res.status(201).json(product);
     } catch (error: any) {
       log.warn('Product create failed', { storeId: req.params.storeId, error });
-      const status = error.message.includes('perm') ? 403 : 400;
-      return res.status(status).json({ message: error.message });
+      return respondWithError(req, res, error, 400);
     }
   }
 
@@ -67,8 +67,7 @@ export class ProductController {
       return res.json(products);
     } catch (error: any) {
       log.warn('Product list failed', { storeId: req.params.storeId, error });
-      const status = error.message.includes('perm') ? 403 : 400;
-      return res.status(status).json({ message: error.message });
+      return respondWithError(req, res, error, 400);
     }
   }
 
@@ -82,8 +81,7 @@ export class ProductController {
       return res.json(products);
     } catch (error: any) {
       log.warn('Product list by slug failed', { slug: req.params.slug, error });
-      const status = error.message.includes('perm') ? 403 : 400;
-      return res.status(status).json({ message: error.message });
+      return respondWithError(req, res, error, 400);
     }
   }
 
@@ -97,7 +95,7 @@ export class ProductController {
       return res.json(products);
     } catch (error: any) {
       log.warn('Product public list failed', { slug: req.params.slug, error });
-      return res.status(400).json({ message: error.message });
+      return respondWithError(req, res, error, 400);
     }
   }
 
@@ -114,8 +112,7 @@ export class ProductController {
       return res.json(product);
     } catch (error: any) {
       log.warn('Product update failed', { storeId: req.params.storeId, productId: req.params.productId, error });
-      const status = error.message.includes('perm') ? 403 : 400;
-      return res.status(status).json({ message: error.message });
+      return respondWithError(req, res, error, 400);
     }
   }
 
@@ -127,8 +124,7 @@ export class ProductController {
       return res.status(204).send();
     } catch (error: any) {
       log.warn('Product remove failed', { storeId: req.params.storeId, productId: req.params.productId, error });
-      const status = error.message.includes('perm') ? 403 : 400;
-      return res.status(status).json({ message: error.message });
+      return respondWithError(req, res, error, 400);
     }
   }
 }

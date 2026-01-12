@@ -4,6 +4,8 @@ import { PaymentService } from '../services/PaymentService';
 import { env } from '../config/env';
 import { PaymentEventRepository } from '../repositories/PaymentEventRepository';
 import { logger } from '../utils/logger';
+import { AppError } from '../errors/AppError';
+import { respondWithError } from '../errors/respondWithError';
 
 const paymentService = new PaymentService();
 const paymentEventRepository = new PaymentEventRepository();
@@ -12,7 +14,7 @@ const log = logger.child({ scope: 'PaymentController' });
 export class PaymentController {
   static async confirm(req: Request, res: Response) {
     const { paymentId } = req.body;
-    if (!paymentId) return res.status(400).json({ message: 'paymentId é obrigatório' });
+    if (!paymentId) return respondWithError(req, res, new AppError('PAY-006', 400), 400);
 
     try {
       log.info('Payment confirm request', { paymentId });
@@ -30,7 +32,7 @@ export class PaymentController {
       });
     } catch (error: any) {
       log.warn('Payment confirm failed', { paymentId, error });
-      return res.status(400).json({ message: error.message });
+      return respondWithError(req, res, error, 400);
     }
   }
 
@@ -41,7 +43,7 @@ export class PaymentController {
       const dataId = req.body?.data?.id;
 
       if (!signature || !requestId || !dataId) {
-        return res.status(401).json({ message: 'Assinatura ausente' });
+        return respondWithError(req, res, new AppError('PAY-007', 401), 401);
       }
 
       const parts = signature.split(',').reduce((acc, chunk) => {
@@ -54,7 +56,7 @@ export class PaymentController {
       const hash = parts.v1;
 
       if (!ts || !hash) {
-        return res.status(401).json({ message: 'Assinatura invalida' });
+        return respondWithError(req, res, new AppError('PAY-008', 401), 401);
       }
 
       const manifest = `id:${dataId};request-id:${requestId};ts:${ts};`;
@@ -64,14 +66,14 @@ export class PaymentController {
         .digest('hex');
 
       if (expected !== hash) {
-        return res.status(401).json({ message: 'Assinatura invalida' });
+        return respondWithError(req, res, new AppError('PAY-008', 401), 401);
       }
     }
 
     const payload = req.body || {};
     const paymentId = payload?.data?.id;
     if (!paymentId) {
-      return res.status(200).json({ message: 'Evento ignorado' });
+      return respondWithError(req, res, new AppError('PAY-009', 200), 200);
     }
 
     try {
@@ -81,7 +83,7 @@ export class PaymentController {
       return res.json({ status: 'ok', result });
     } catch (error: any) {
       log.warn('Mercado Pago webhook failed', { paymentId, error });
-      return res.status(400).json({ message: error.message });
+      return respondWithError(req, res, error, 400);
     }
   }
 
@@ -91,7 +93,7 @@ export class PaymentController {
     try {
       log.debug('Payment get request', { paymentId });
       const payment = await paymentService.findById(paymentId);
-      if (!payment) return res.status(404).json({ message: 'Pagamento não encontrado' });
+      if (!payment) return respondWithError(req, res, new AppError('PAY-001', 404), 404);
 
       return res.json({
         id: payment.id,
@@ -110,7 +112,7 @@ export class PaymentController {
       });
     } catch (error: any) {
       log.warn('Payment get failed', { paymentId, error });
-      return res.status(500).json({ message: error.message });
+      return respondWithError(req, res, error, 500);
     }
   }
 
@@ -132,7 +134,7 @@ export class PaymentController {
       return res.json(payload);
     } catch (error: any) {
       log.warn('Payment events failed', { paymentId, error });
-      return res.status(500).json({ message: error.message });
+      return respondWithError(req, res, error, 500);
     }
   }
 
@@ -147,7 +149,7 @@ export class PaymentController {
       return res.json({ status: 'ok', result });
     } catch (error: any) {
       log.warn('Payment reprocess failed', { paymentId, error });
-      return res.status(400).json({ message: error.message });
+      return respondWithError(req, res, error, 400);
     }
   }
 }

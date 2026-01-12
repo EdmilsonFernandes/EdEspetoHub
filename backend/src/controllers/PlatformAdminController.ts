@@ -4,6 +4,7 @@ import { SubscriptionService } from '../services/SubscriptionService';
 import { PaymentRepository } from '../repositories/PaymentRepository';
 import { PaymentEventRepository } from '../repositories/PaymentEventRepository';
 import { logger } from '../utils/logger';
+import { respondWithError } from '../errors/respondWithError';
 
 const storeRepository = new StoreRepository();
 const subscriptionService = new SubscriptionService();
@@ -30,7 +31,7 @@ export class PlatformAdminController {
       return res.json(enriched);
     } catch (error: any) {
       log.warn('Admin list stores failed', { error });
-      return res.status(400).json({ message: error.message });
+      return respondWithError(_req, res, error, 400);
     }
   }
 
@@ -95,7 +96,7 @@ export class PlatformAdminController {
       });
     } catch (error: any) {
       log.warn('Admin overview failed', { error });
-      return res.status(400).json({ message: error.message });
+      return respondWithError(_req, res, error, 400);
     }
   }
 
@@ -107,7 +108,7 @@ export class PlatformAdminController {
       return res.json(subscription);
     } catch (error: any) {
       log.warn('Admin suspend store failed', { subscriptionId, error });
-      return res.status(400).json({ message: error.message });
+      return respondWithError(req, res, error, 400);
     }
   }
 
@@ -119,7 +120,7 @@ export class PlatformAdminController {
       return res.json(subscription);
     } catch (error: any) {
       log.warn('Admin reactivate store failed', { subscriptionId, error });
-      return res.status(400).json({ message: error.message });
+      return respondWithError(req, res, error, 400);
     }
   }
 
@@ -139,7 +140,7 @@ export class PlatformAdminController {
       return res.json(events);
     } catch (error: any) {
       log.warn('Admin payment events failed', { paymentId, storeId, error });
-      return res.status(400).json({ message: error.message });
+      return respondWithError(req, res, error, 400);
     }
   }
 }

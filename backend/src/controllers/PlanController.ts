@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { PlanService } from '../services/PlanService';
 import { logger } from '../utils/logger';
+import { respondWithError } from '../errors/respondWithError';
 
 const planService = new PlanService();
 const log = logger.child({ scope: 'PlanController' });
@@ -13,7 +14,7 @@ export class PlanController {
       return res.json(plans);
     } catch (error: any) {
       log.warn('Plan list failed', { error });
-      return res.status(400).json({ message: error.message });
+      return respondWithError(req, res, error, 400);
     }
   }
 }

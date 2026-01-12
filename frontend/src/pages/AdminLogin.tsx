@@ -44,18 +44,14 @@ export function AdminLogin() {
       sessionStorage.removeItem('admin:redirectTab');
       sessionStorage.removeItem('admin:redirectSlug');
       navigate('/admin/dashboard');
-    } catch (error) {
-      let message = error.message || 'Falha ao autenticar';
-      try {
-        const payload = JSON.parse(message);
-        message = payload.message || message;
-        if (payload?.code === 'PAYMENT_PENDING') {
-          setPendingPayment({
-            paymentUrl: payload.paymentUrl,
-            paymentLink: payload.paymentLink,
-          });
-        }
-      } catch {}
+    } catch (error: any) {
+      const message = error.message || 'Falha ao autenticar';
+      if (error?.code === 'PAY-010') {
+        setPendingPayment({
+          paymentUrl: error?.details?.paymentUrl,
+          paymentLink: error?.details?.paymentLink,
+        });
+      }
       setLoginError(message);
     }
   };

@@ -11,6 +11,7 @@ import { PaymentService } from './PaymentService';
 import { PaymentMethod } from '../entities/Payment';
 import { PaymentRepository } from '../repositories/PaymentRepository';
 import { logger } from '../utils/logger';
+import { AppError } from '../errors/AppError';
 
 export class SubscriptionService {
   private planRepository = new PlanRepository();
@@ -24,14 +25,14 @@ export class SubscriptionService {
   async create(input: CreateSubscriptionDto) {
     this.log.info('Create subscription', { storeId: input.storeId, planId: input.planId });
     const store = await this.storeRepository.findById(input.storeId);
-    if (!store) throw new Error('Loja não encontrada');
+    if (!store) throw new AppError('STORE-001', 404);
 
     const plan = await this.planRepository.findById(input.planId);
     const resolvedPlan = plan || (await this.planRepository.findAll()).find((p) => p.id === input.planId);
-    if (!resolvedPlan) throw new Error('Plano inválido');
+    if (!resolvedPlan) throw new AppError('SUB-003', 400);
 
     if (!resolvedPlan.enabled) {
-      throw new Error('Plano indisponível para assinatura');
+      throw new AppError('SUB-004', 400);
     }
 
     const now = input.startDate || new Date();
@@ -83,17 +84,17 @@ export class SubscriptionService {
   async renew(subscriptionId: string, input: RenewSubscriptionDto) {
     this.log.info('Renew subscription', { subscriptionId, planId: input.planId });
     const subscription = await this.subscriptionRepository.findById(subscriptionId);
-    if (!subscription) throw new Error('Assinatura não encontrada');
+    if (!subscription) throw new AppError('SUB-001', 404);
 
     if (subscription.status === 'SUSPENDED') {
-      throw new Error('Assinatura suspensa. Entre em contato com o suporte.');
+      throw new AppError('SUB-005', 400);
     }
 
     let plan = subscription.plan;
     if (input.planId && input.planId !== subscription.plan.id) {
       const otherPlan = await this.planRepository.findById(input.planId);
       const resolved = otherPlan || (await this.planRepository.findAll()).find((p) => p.id === input.planId);
-      if (!resolved || !resolved.enabled) throw new Error('Plano inválido para renovação');
+      if (!resolved || !resolved.enabled) throw new AppError('SUB-003', 400);
       plan = resolved;
     }
 
@@ -112,8 +113,8 @@ export class SubscriptionService {
   async createRenewalPayment(storeId: string, input: RenewSubscriptionDto, authStoreId?: string) {
     this.log.info('Create renewal payment', { storeId, planId: input.planId, paymentMethod: input.paymentMethod });
     const store = await this.storeRepository.findById(storeId);
-    if (!store) throw new Error('Loja não encontrada');
-    if (authStoreId && store.id !== authStoreId) throw new Error('Sem permissão para acessar esta loja');
+    if (!store) throw new AppError('STORE-001', 404);
+    if (authStoreId && store.id !== authStoreId) throw new AppError('AUTH-003', 403);
 
     const now = new Date();
     const existingPending = await this.paymentRepository.findLatestPendingByStoreId(storeId);
@@ -128,7 +129,7 @@ export class SubscriptionService {
     const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
     const recentCount = await this.paymentRepository.countRecentByStoreId(storeId, since);
     if (recentCount >= 3) {
-      throw new Error('Limite de tentativas de pagamento atingido. Tente novamente mais tarde.');
+      throw new AppError('SUB-006', 429);
     }
 
     const plan = input.planId
@@ -136,7 +137,7 @@ export class SubscriptionService {
       : null;
     const resolvedPlan =
       plan || (await this.planRepository.findAll()).find((p) => p.id === input.planId);
-    if (!resolvedPlan || !resolvedPlan.enabled) throw new Error('Plano inválido para renovação');
+    if (!resolvedPlan || !resolvedPlan.enabled) throw new AppError('SUB-003', 400);
 
     const paymentMethod = (input.paymentMethod || 'PIX') as PaymentMethod;
 
@@ -220,14 +221,14 @@ export class SubscriptionService {
 
   async suspend(subscriptionId: string) {
     const subscription = await this.subscriptionRepository.findById(subscriptionId);
-    if (!subscription) throw new Error('Assinatura não encontrada');
+    if (!subscription) throw new AppError('SUB-001', 404);
     subscription.status = 'SUSPENDED';
     return this.subscriptionRepository.save(subscription);
   }
 
   async activate(subscriptionId: string) {
     const subscription = await this.subscriptionRepository.findById(subscriptionId);
-    if (!subscription) throw new Error('Assinatura não encontrada');
+    if (!subscription) throw new AppError('SUB-001', 404);
     subscription.status = this.resolveStatus(subscription);
     return this.subscriptionRepository.save(subscription);
   }

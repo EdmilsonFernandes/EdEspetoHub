@@ -8,6 +8,7 @@ import { User } from '../entities/User';
 import { EntityManager } from 'typeorm';
 import { saveBase64Image } from '../utils/imageStorage';
 import { sanitizeSocialLinks } from '../utils/socialLinks';
+import { AppError } from '../errors/AppError';
 
 export class StoreService
 {
@@ -28,7 +29,7 @@ export class StoreService
       const owner = await userRepo.findOne({ where: { id: input.ownerId } });
       if (!owner)
       {
-        throw new Error('Proprietário não encontrado');
+        throw new AppError('STORE-002', 404);
       }
 
       // 2️⃣ Slug único
@@ -84,7 +85,7 @@ export class StoreService
 
       if (!store)
       {
-        throw new Error('Loja não encontrada');
+        throw new AppError('STORE-001', 404);
       }
 
       // 🧠 REGRA DE NOME / SLUG
@@ -153,7 +154,7 @@ export class StoreService
       const store = await storeRepo.findOne({ where: { id: storeId } });
       if (!store)
       {
-        throw new Error('Loja não encontrada');
+        throw new AppError('STORE-001', 404);
       }
 
       if (open)

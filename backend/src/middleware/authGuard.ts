@@ -15,6 +15,8 @@
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { env } from '../config/env';
+import { AppError } from '../errors/AppError';
+import { respondWithError } from '../errors/respondWithError';
 
 export type UserRole = 'ADMIN' | 'CHURRASQUEIRO' | 'SUPER_ADMIN';
 
@@ -40,7 +42,7 @@ export const requireAuth = (req: Request, res: Response, next: NextFunction) =>
   const header = req.headers.authorization;
   if (!header?.startsWith('Bearer '))
   {
-    return res.status(401).json({ message: 'Token ausente' });
+    return respondWithError(req, res, new AppError('AUTH-001', 401), 401);
   }
 
   try
@@ -51,7 +53,7 @@ export const requireAuth = (req: Request, res: Response, next: NextFunction) =>
     return next();
   } catch
   {
-    return res.status(401).json({ message: 'Token inválido' });
+    return respondWithError(req, res, new AppError('AUTH-002', 401), 401);
   }
 };
 
@@ -62,7 +64,7 @@ export const requireRole = (...roles: UserRole[]) =>
     const role = req.auth?.role;
     if (!role || !roles.includes(role))
     {
-      return res.status(403).json({ message: 'Sem permissão' });
+      return respondWithError(req, res, new AppError('AUTH-003', 403), 403);
     }
     return next();
   };

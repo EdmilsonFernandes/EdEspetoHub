@@ -2,6 +2,8 @@ import { Request, Response } from 'express';
 import { SubscriptionService } from '../services/SubscriptionService';
 import { PaymentRepository } from '../repositories/PaymentRepository';
 import { logger } from '../utils/logger';
+import { AppError } from '../errors/AppError';
+import { respondWithError } from '../errors/respondWithError';
 
 const subscriptionService = new SubscriptionService();
 const paymentRepository = new PaymentRepository();
@@ -16,7 +18,7 @@ export class SubscriptionController {
       return res.status(201).json(subscription);
     } catch (error: any) {
       log.warn('Subscription create failed', { storeId: req.body?.storeId, error });
-      return res.status(400).json({ message: error.message });
+      return respondWithError(req, res, error, 400);
     }
   }
 
@@ -24,7 +26,7 @@ export class SubscriptionController {
     try {
       log.debug('Subscription get request', { storeId: req.params.storeId });
       const subscription = await subscriptionService.getCurrentByStore(req.params.storeId);
-      if (!subscription) return res.status(404).json({ message: 'Assinatura não encontrada' });
+      if (!subscription) return respondWithError(req, res, new AppError('SUB-001', 404), 404);
       const latestPayment = await paymentRepository.findLatestByStoreId(req.params.storeId);
       return res.json({
         ...subscription,
@@ -34,7 +36,7 @@ export class SubscriptionController {
       });
     } catch (error: any) {
       log.warn('Subscription get failed', { storeId: req.params.storeId, error });
-      return res.status(400).json({ message: error.message });
+      return respondWithError(req, res, error, 400);
     }
   }
 
@@ -46,7 +48,7 @@ export class SubscriptionController {
       return res.json(subscription);
     } catch (error: any) {
       log.warn('Subscription renew failed', { subscriptionId: req.params.id, error });
-      return res.status(400).json({ message: error.message });
+      return respondWithError(req, res, error, 400);
     }
   }
 
@@ -62,7 +64,7 @@ export class SubscriptionController {
       return res.json(subscription);
     } catch (error: any) {
       log.warn('Subscription status update failed', { subscriptionId: req.params.id, error });
-      return res.status(400).json({ message: error.message });
+      return respondWithError(req, res, error, 400);
     }
   }
 
@@ -78,8 +80,7 @@ export class SubscriptionController {
       return res.status(201).json(payment);
     } catch (error: any) {
       log.warn('Renewal payment failed', { storeId: req.params.storeId, error });
-      const status = error.message.includes('perm') ? 403 : 400;
-      return res.status(status).json({ message: error.message });
+      return respondWithError(req, res, error, 400);
     }
   }
 }

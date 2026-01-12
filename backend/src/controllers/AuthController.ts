@@ -3,6 +3,8 @@ import jwt from 'jsonwebtoken';
 import { AuthService } from '../services/AuthService';
 import { env } from '../config/env';
 import { logger } from '../utils/logger';
+import { AppError } from '../errors/AppError';
+import { respondWithError } from '../errors/respondWithError';
 
 const authService = new AuthService();
 const log = logger.child({ scope: 'AuthController' });
@@ -24,7 +26,7 @@ export class AuthController
     } catch (error: any)
     {
       log.warn('Register failed', { error, email: req.body?.email || req.body?.user?.email });
-      return res.status(400).json({ message: error.message });
+      return respondWithError(req, res, error, 400);
     }
   }
 
@@ -40,15 +42,7 @@ export class AuthController
     } catch (error: any)
     {
       log.warn('Login failed', { email, error });
-      if (error?.code === 'PAYMENT_PENDING') {
-        return res.status(402).json({
-          message: error.message,
-          code: error.code,
-          paymentUrl: error.paymentUrl,
-          paymentLink: error.paymentLink,
-        });
-      }
-      return res.status(401).json({ message: error.message });
+      return respondWithError(req, res, error, 401);
     }
   }
 
@@ -65,16 +59,7 @@ export class AuthController
     } catch (error: any)
     {
       log.warn('Admin login failed', { slug, error });
-      if (error?.code === 'PAYMENT_PENDING') {
-        return res.status(402).json({
-          message: error.message,
-          code: error.code,
-          paymentUrl: error.paymentUrl,
-          paymentLink: error.paymentLink,
-        });
-      }
-      const status = error.message === 'Loja não encontrada' ? 404 : 401;
-      return res.status(status).json({ message: error.message });
+      return respondWithError(req, res, error, 401);
     }
   }
 
@@ -83,13 +68,13 @@ export class AuthController
     const { email, password } = req.body;
     if (!env.superAdminEmail || !env.superAdminPassword)
     {
-      return res.status(500).json({ message: 'SUPER_ADMIN_* não configurado' });
+      return respondWithError(req, res, new AppError('AUTH-020', 500), 500);
     }
 
     if (email !== env.superAdminEmail || password !== env.superAdminPassword)
     {
       log.warn('Super admin login failed', { email });
-      return res.status(401).json({ message: 'Credenciais inválidas' });
+      return respondWithError(req, res, new AppError('AUTH-021', 401), 401);
     }
 
     const token = jwt.sign(
@@ -114,7 +99,7 @@ export class AuthController
     } catch (error: any)
     {
       log.warn('Forgot password failed', { email, error });
-      return res.status(400).json({ message: error.message });
+      return respondWithError(req, res, error, 400);
     }
   }
 
@@ -130,7 +115,7 @@ export class AuthController
     } catch (error: any)
     {
       log.warn('Reset password failed', { error });
-      return res.status(400).json({ message: error.message });
+      return respondWithError(req, res, error, 400);
     }
   }
 
@@ -146,7 +131,7 @@ export class AuthController
     } catch (error: any)
     {
       log.warn('Verify email failed', { error });
-      return res.status(400).json({ message: error.message });
+      return respondWithError(req, res, error, 400);
     }
   }
 
@@ -162,7 +147,7 @@ export class AuthController
     } catch (error: any)
     {
       log.warn('Resend verification failed', { email, error });
-      return res.status(400).json({ message: error.message });
+      return respondWithError(req, res, error, 400);
     }
   }
 }

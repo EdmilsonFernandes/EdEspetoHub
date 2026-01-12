@@ -11,6 +11,7 @@ import { env } from '../config/env';
 import { PaymentEventRepository } from '../repositories/PaymentEventRepository';
 import { EmailService } from './EmailService';
 import { logger } from '../utils/logger';
+import { AppError } from '../errors/AppError';
 
 export class PaymentService {
   private mercadoPago = new MercadoPagoService();
@@ -126,14 +127,14 @@ export class PaymentService {
         .where('payment.id = :id', { id: paymentId })
         .getOne();
 
-      if (!lockedPayment) throw new Error('Pagamento não encontrado');
-      if (lockedPayment.status === 'FAILED') throw new Error('Pagamento falhou');
+      if (!lockedPayment) throw new AppError('PAY-001', 404);
+      if (lockedPayment.status === 'FAILED') throw new AppError('PAY-002', 400);
 
       const payment = await paymentRepo.findOne({
         where: { id: paymentId },
         relations: ['subscription', 'subscription.plan', 'store', 'user'],
       });
-      if (!payment) throw new Error('Pagamento não encontrado');
+      if (!payment) throw new AppError('PAY-001', 404);
       const alreadyPaid = payment.status === 'PAID';
       if (alreadyPaid && payment.user?.emailVerified !== true) {
         return payment;
@@ -175,12 +176,12 @@ export class PaymentService {
   async confirmMercadoPagoPayment(mercadoPagoPaymentId: string) {
     this.log.info('Confirm Mercado Pago payment', { mercadoPagoPaymentId });
     if (!env.mercadoPago.accessToken) {
-      throw new Error('Mercado Pago nao configurado');
+      throw new AppError('PAY-003', 400);
     }
 
     const mpPayment = await this.mercadoPago.getPayment(mercadoPagoPaymentId);
     if (!mpPayment) {
-      throw new Error('Pagamento nao encontrado no Mercado Pago');
+      throw new AppError('PAY-004', 404);
     }
 
     return this.applyMercadoPagoStatus(mpPayment);
@@ -189,23 +190,23 @@ export class PaymentService {
   async reprocessByPaymentId(paymentId: string, providerId?: string) {
     this.log.info('Reprocess payment', { paymentId, providerId });
     if (!env.mercadoPago.accessToken) {
-      throw new Error('Mercado Pago nao configurado');
+      throw new AppError('PAY-003', 400);
     }
 
     const paymentRepo = AppDataSource.getRepository(Payment);
     const payment = await paymentRepo.findOne({ where: { id: paymentId } });
     if (!payment) {
-      throw new Error('Pagamento nao encontrado');
+      throw new AppError('PAY-001', 404);
     }
 
     const mpId = providerId || payment.providerId;
     if (!mpId) {
-      throw new Error('providerId ausente');
+      throw new AppError('PAY-005', 400);
     }
 
     const mpPayment = await this.mercadoPago.getPayment(mpId);
     if (!mpPayment) {
-      throw new Error('Pagamento nao encontrado no Mercado Pago');
+      throw new AppError('PAY-004', 404);
     }
 
     return this.applyMercadoPagoStatus(mpPayment);
@@ -275,7 +276,7 @@ export class PaymentService {
 
     const internalId = mpPayment.external_reference;
     if (!internalId) {
-      throw new Error('Referencia externa ausente');
+      throw new AppError('GEN-002', 400);
     }
 
     return this.confirmPayment(String(internalId));

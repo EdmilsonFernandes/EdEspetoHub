@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import { env } from '../config/env';
 import { logger } from '../utils/logger';
+import { AppError } from '../errors/AppError';
 
 type MercadoPagoPreferenceResponse = {
   id: string;
@@ -72,7 +73,7 @@ export class MercadoPagoService {
     if (!response.ok) {
       const body = await response.text().catch(() => '');
       this.log.error('GET payment failed', { status: response.status, body });
-      throw new Error('Falha ao consultar pagamento no Mercado Pago');
+      throw new AppError('PAY-004', 400);
     }
     this.debugLog('GET payment ok', { status: response.status });
     return (await response.json()) as MercadoPagoPaymentResponse;
@@ -106,7 +107,7 @@ export class MercadoPagoService {
     if (!response.ok) {
       const bodyText = await response.text().catch(() => '');
       this.log.error('POST preference failed', { status: response.status, body: bodyText });
-      throw new Error('Falha ao criar preferencia no Mercado Pago');
+      throw new AppError('PAY-004', 400);
     }
 
     const data = (await response.json()) as MercadoPagoPreferenceResponse;
@@ -154,7 +155,7 @@ export class MercadoPagoService {
     if (!response.ok) {
       const bodyText = await response.text().catch(() => '');
       this.log.error('POST boleto preference failed', { status: response.status, body: bodyText });
-      throw new Error('Falha ao criar boleto no Mercado Pago');
+      throw new AppError('PAY-004', 400);
     }
 
     const data = (await response.json()) as MercadoPagoPreferenceResponse;
@@ -191,7 +192,7 @@ export class MercadoPagoService {
     if (!response.ok) {
       const bodyText = await response.text().catch(() => '');
       this.log.error('POST pix failed', { status: response.status, body: bodyText });
-      throw new Error('Falha ao criar PIX no Mercado Pago');
+      throw new AppError('PAY-004', 400);
     }
 
     const data = (await response.json()) as MercadoPagoPaymentResponse;

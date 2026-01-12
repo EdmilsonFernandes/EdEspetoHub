@@ -23,6 +23,7 @@ import { SubscriptionService } from './SubscriptionService';
 import { SettingsService } from './SettingsService';
 import { normalizeDocument, validateDocument } from '../utils/documents';
 import { logger } from '../utils/logger';
+import { AppError } from '../errors/AppError';
 
 export class AuthService
 {
@@ -69,28 +70,28 @@ export class AuthService
     const paymentMethod = ((input.paymentMethod as PaymentMethod) || 'PIX').toUpperCase();
     if (paymentMethod !== 'PIX' && paymentMethod !== 'CREDIT_CARD' && paymentMethod !== 'BOLETO')
     {
-      throw new Error('Método de pagamento inválido');
+      throw new AppError('AUTH-014', 400);
     }
 
     if (!input.planId)
     {
-      throw new Error('Selecione um plano para continuar');
+      throw new AppError('AUTH-013', 400);
     }
 
     if (!input.termsAccepted || !input.lgpdAccepted)
     {
-      throw new Error('Aceite os termos de uso e a politica de privacidade para continuar');
+      throw new AppError('AUTH-012', 400);
     }
 
     if (!userPayload.document || !userPayload.documentType)
     {
-      throw new Error('Informe CPF ou CNPJ para continuar');
+      throw new AppError('AUTH-009', 400);
     }
 
     const normalizedDocument = normalizeDocument(userPayload.document);
     if (!validateDocument(normalizedDocument, userPayload.documentType))
     {
-      throw new Error('CPF ou CNPJ inválido');
+      throw new AppError('AUTH-009', 400);
     }
 
     const result = await AppDataSource.transaction(async (manager) =>
@@ -103,13 +104,13 @@ export class AuthService
       const exists = await userRepo.findOne({ where: { email: normalizedEmail } });
       if (exists)
       {
-        throw new Error('E-mail já cadastrado');
+        throw new AppError('AUTH-011', 409);
       }
 
       const existingDocument = await userRepo.findOne({ where: { document: normalizedDocument } });
       if (existingDocument)
       {
-        throw new Error('CPF/CNPJ já cadastrado');
+        throw new AppError('AUTH-010', 409);
       }
 
       const hashed = await bcrypt.hash(userPayload.password, 10);
@@ -159,7 +160,7 @@ export class AuthService
       const plan = await planRepo.findOne({ where: { id: input.planId } });
       if (!plan || !plan.enabled)
       {
-        throw new Error('Plano inválido ou indisponível');
+        throw new AppError('SUB-003', 400);
       }
 
       const now = new Date();
@@ -208,11 +209,11 @@ export class AuthService
   async login(email: string, password: string)
   {
     const user = await this.userRepository.findByEmail(email);
-    if (!user) throw new Error('Credenciais inválidas');
+    if (!user) throw new AppError('AUTH-004', 401);
 
     const valid = await bcrypt.compare(password, user.password);
-    if (!valid) throw new Error('Credenciais inválidas');
-    if (!user.emailVerified) throw new Error('E-mail não verificado');
+    if (!valid) throw new AppError('AUTH-004', 401);
+    if (!user.emailVerified) throw new AppError('AUTH-005', 401);
 
     const firstStore = user.stores?.[ 0 ];
     const token = this.generateToken(user.id, firstStore?.id);
@@ -254,12 +255,12 @@ export class AuthService
   async adminLogin(slug: string, password: string)
   {
     const store = await this.storeRepository.findBySlug(slug);
-    if (!store) throw new Error('Loja não encontrada');
+    if (!store) throw new AppError('STORE-001', 404);
 
     const owner = store.owner;
     const valid = await bcrypt.compare(password, owner.password);
-    if (!valid) throw new Error('Credenciais inválidas');
-    if (!owner.emailVerified) throw new Error('E-mail não verificado');
+    if (!valid) throw new AppError('AUTH-004', 401);
+    if (!owner.emailVerified) throw new AppError('AUTH-005', 401);
     const currentSubscription = await this.subscriptionService.getCurrentByStore(store.id);
     const isActive = this.subscriptionService.isActiveSubscription(currentSubscription);
     if (!isActive) {
@@ -317,7 +318,7 @@ export class AuthService
   async requestPasswordReset(email: string)
   {
     const normalizedEmail = email?.trim().toLowerCase();
-    if (!normalizedEmail) throw new Error('E-mail obrigatório');
+    if (!normalizedEmail) throw new AppError('AUTH-006', 400);
 
     const user = await this.userRepository.findByEmail(normalizedEmail);
     if (!user) {
@@ -351,7 +352,7 @@ export class AuthService
 
   async resendVerificationEmail(email: string) {
     const normalizedEmail = email?.trim().toLowerCase();
-    if (!normalizedEmail) throw new Error('E-mail obrigatório');
+    if (!normalizedEmail) throw new AppError('AUTH-006', 400);
 
     const user = await this.userRepository.findByEmail(normalizedEmail);
     if (!user) {
@@ -367,8 +368,8 @@ export class AuthService
 
   async resetPassword(token: string, newPassword: string)
   {
-    if (!token) throw new Error('Token inválido');
-    if (!newPassword || newPassword.length < 6) throw new Error('Senha muito curta');
+    if (!token) throw new AppError('AUTH-007', 400);
+    if (!newPassword || newPassword.length < 6) throw new AppError('AUTH-008', 400);
 
     const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
     const resetRepo = AppDataSource.getRepository(PasswordReset);
@@ -377,8 +378,8 @@ export class AuthService
       relations: ['user'],
     });
 
-    if (!reset || reset.usedAt) throw new Error('Token inválido ou expirado');
-    if (reset.expiresAt.getTime() < Date.now()) throw new Error('Token expirado');
+    if (!reset || reset.usedAt) throw new AppError('AUTH-007', 400);
+    if (reset.expiresAt.getTime() < Date.now()) throw new AppError('AUTH-007', 400);
 
     reset.user.password = await bcrypt.hash(newPassword, 10);
     reset.usedAt = new Date();
@@ -392,7 +393,7 @@ export class AuthService
   }
 
   async verifyEmail(token: string) {
-    if (!token) throw new Error('Token inválido');
+    if (!token) throw new AppError('AUTH-007', 400);
     const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
     const verificationRepo = AppDataSource.getRepository(EmailVerification);
     let verification = await verificationRepo.findOne({
@@ -405,20 +406,20 @@ export class AuthService
     if (!verification) {
       try {
         const decoded: any = jwt.verify(token, env.jwtSecret);
-        if (!decoded?.sub) throw new Error('Token inválido');
+        if (!decoded?.sub) throw new AppError('AUTH-007', 400);
         const userRepo = AppDataSource.getRepository(User);
         const user = await userRepo.findOne({ where: { id: decoded.sub } });
-        if (!user) throw new Error('Token inválido ou expirado');
+        if (!user) throw new AppError('AUTH-007', 400);
         verifiedUser = user;
       } catch {
-        throw new Error('Token inválido ou expirado');
+        throw new AppError('AUTH-007', 400);
       }
     }
 
-    if (verification?.usedAt) throw new Error('Token inválido ou expirado');
-    if (verification?.expiresAt && verification.expiresAt.getTime() < Date.now()) throw new Error('Token expirado');
+    if (verification?.usedAt) throw new AppError('AUTH-007', 400);
+    if (verification?.expiresAt && verification.expiresAt.getTime() < Date.now()) throw new AppError('AUTH-007', 400);
 
-    if (!verifiedUser) throw new Error('Token inválido ou expirado');
+    if (!verifiedUser) throw new AppError('AUTH-007', 400);
     verifiedUser.emailVerified = true;
     if (verification) verification.usedAt = new Date();
 
@@ -505,11 +506,10 @@ export class AuthService
   private async throwPendingPayment(storeId: string)
   {
     const payment = await this.paymentRepository.findLatestByStoreId(storeId);
-    const error: any = new Error('Pagamento pendente. Sua loja ainda não está ativa.');
-    error.code = 'PAYMENT_PENDING';
-    error.paymentUrl = payment?.id ? `${env.appUrl}/payment/${payment.id}` : null;
-    error.paymentLink = payment?.paymentLink || null;
-    throw error;
+    throw new AppError('PAY-010', 402, {
+      paymentUrl: payment?.id ? `${env.appUrl}/payment/${payment.id}` : null,
+      paymentLink: payment?.paymentLink || null,
+    });
   }
 
   private async sendVerificationEmail(user: User) {

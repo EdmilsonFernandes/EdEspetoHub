@@ -2,6 +2,8 @@ import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { env } from '../config/env';
 import { SubscriptionService } from '../services/SubscriptionService';
+import { AppError } from '../errors/AppError';
+import { respondWithError } from '../errors/respondWithError';
 
 const subscriptionService = new SubscriptionService();
 
@@ -57,7 +59,7 @@ export const requireActiveSubscription = async (
   const { storeId, slug } = resolveStoreParams(req);
   if (!storeId && !slug)
   {
-    return res.status(400).json({ message: 'Loja não informada' });
+    return respondWithError(req, res, new AppError('GEN-002', 400), 400);
   }
 
   try
@@ -68,10 +70,12 @@ export const requireActiveSubscription = async (
 
     if (!subscription)
     {
-      return res.status(403).json({
-        message: 'Assinatura inativa. Renove para continuar.',
-        subscription: null,
-      });
+      return respondWithError(
+        req,
+        res,
+        new AppError('SUB-002', 403, { subscription: null }),
+        403
+      );
     }
 
     const now = Date.now();
@@ -87,15 +91,17 @@ export const requireActiveSubscription = async (
 
     if (blocked)
     {
-      return res.status(403).json({
-        message: 'Assinatura inativa. Renove para continuar.',
-        subscription,
-      });
+      return respondWithError(
+        req,
+        res,
+        new AppError('SUB-002', 403, { subscription }),
+        403
+      );
     }
 
     return next();
   } catch (error: any)
   {
-    return res.status(500).json({ message: error.message });
+    return respondWithError(req, res, error, 500);
   }
 };

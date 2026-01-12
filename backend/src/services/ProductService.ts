@@ -2,6 +2,7 @@ import { CreateProductDto } from '../dto/CreateProductDto';
 import { ProductRepository } from '../repositories/ProductRepository';
 import { StoreRepository } from '../repositories/StoreRepository';
 import { saveBase64Image } from '../utils/imageStorage';
+import { AppError } from '../errors/AppError';
 
 export class ProductService
 {
@@ -10,10 +11,10 @@ export class ProductService
 
   private ensureStoreAccess(store: Awaited<ReturnType<StoreRepository[ 'findById' ]>>, authStoreId?: string)
   {
-    if (!store) throw new Error('Loja não encontrada');
+    if (!store) throw new AppError('STORE-001', 404);
     if (authStoreId && store.id !== authStoreId)
     {
-      throw new Error('Sem permissão para acessar esta loja');
+      throw new AppError('AUTH-003', 403);
     }
   }
 
@@ -56,7 +57,7 @@ export class ProductService
     const store = await this.storeRepository.findById(storeId);
     const product = await this.productRepository.findById(productId);
     this.ensureStoreAccess(store, authStoreId);
-    if (!store || !product || product.store.id !== store.id) throw new Error('Produto não encontrado');
+    if (!store || !product || product.store.id !== store.id) throw new AppError('PROD-001', 404);
 
     const uploadedImage = await saveBase64Image(data.imageFile, `product-${store.id}`, 'products');
 
@@ -74,7 +75,7 @@ export class ProductService
     const store = await this.storeRepository.findById(storeId);
     const product = await this.productRepository.findById(productId);
     this.ensureStoreAccess(store, authStoreId);
-    if (!store || !product || product.store.id !== store.id) throw new Error('Produto não encontrado');
+    if (!store || !product || product.store.id !== store.id) throw new AppError('PROD-001', 404);
 
     return this.productRepository.delete(product.id);
   }

@@ -2,6 +2,8 @@ import { Request, Response } from 'express';
 import { StoreService } from '../services/StoreService';
 import { SubscriptionService } from '../services/SubscriptionService';
 import { logger } from '../utils/logger';
+import { AppError } from '../errors/AppError';
+import { respondWithError } from '../errors/respondWithError';
 
 const storeService = new StoreService();
 const subscriptionService = new SubscriptionService();
@@ -107,7 +109,7 @@ export class StoreController {
       return res.json(entries.filter(Boolean));
     } catch (error: any) {
       log.warn('Store portfolio list failed', { error });
-      return res.status(400).json({ message: error.message });
+      return respondWithError(_req, res, error, 400);
     }
   }
   static async getBySlug(req: Request, res: Response) {
@@ -117,7 +119,7 @@ export class StoreController {
       }
       log.debug('Store get by slug request', { slug: req.params.slug });
       const store = await storeService.getBySlug(req.params.slug);
-      if (!store) return res.status(404).json({ message: 'Loja não encontrada' });
+      if (!store) return respondWithError(req, res, new AppError('STORE-001', 404), 404);
       const subscription = await subscriptionService.getCurrentByStore(store.id);
       const sanitizedStore = {
         id: store.id,
@@ -140,7 +142,7 @@ export class StoreController {
       return res.json({ ...sanitizedStore, subscription });
     } catch (error: any) {
       log.warn('Store get by slug failed', { slug: req.params.slug, error });
-      return res.status(400).json({ message: error.message });
+      return respondWithError(req, res, error, 400);
     }
   }
 
@@ -152,7 +154,7 @@ export class StoreController {
       return res.json(store);
     } catch (error: any) {
       log.warn('Store update failed', { storeId: req.params.storeId, error });
-      return res.status(400).json({ message: error.message });
+      return respondWithError(req, res, error, 400);
     }
   }
 
@@ -164,7 +166,7 @@ export class StoreController {
       return res.json(store);
     } catch (error: any) {
       log.warn('Store status update failed', { storeId: req.params.storeId, error });
-      return res.status(400).json({ message: error.message });
+      return respondWithError(req, res, error, 400);
     }
   }
 }

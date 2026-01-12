@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import { OrderService } from '../services/OrderService';
 import { logger } from '../utils/logger';
+import { AppError } from '../errors/AppError';
+import { respondWithError } from '../errors/respondWithError';
 
 const orderService = new OrderService();
 const log = logger.child({ scope: 'OrderController' });
@@ -14,7 +16,7 @@ export class OrderController {
       return res.status(201).json(order);
     } catch (error: any) {
       log.warn('Order create failed', { storeId: req.params.storeId, error });
-      return res.status(400).json({ message: error.message });
+      return respondWithError(req, res, error, 400);
     }
   }
 
@@ -25,8 +27,7 @@ export class OrderController {
       return res.json(orders);
     } catch (error: any) {
       log.warn('Order list failed', { storeId: req.params.storeId, error });
-      const status = error.message.includes('perm') ? 403 : 400;
-      return res.status(status).json({ message: error.message });
+      return respondWithError(req, res, error, 400);
     }
   }
 
@@ -38,7 +39,7 @@ export class OrderController {
       return res.status(201).json(order);
     } catch (error: any) {
       log.warn('Order create by slug failed', { slug: req.params.slug, error });
-      return res.status(400).json({ message: error.message });
+      return respondWithError(req, res, error, 400);
     }
   }
 
@@ -49,8 +50,7 @@ export class OrderController {
       return res.json(orders);
     } catch (error: any) {
       log.warn('Order list by slug failed', { slug: req.params.slug, error });
-      const status = error.message.includes('perm') ? 403 : 400;
-      return res.status(status).json({ message: error.message });
+      return respondWithError(req, res, error, 400);
     }
   }
 
@@ -63,8 +63,7 @@ export class OrderController {
       return res.json(order);
     } catch (error: any) {
       log.warn('Order status update failed', { orderId: req.params.orderId, error });
-      const statusCode = error.message.includes('perm') ? 403 : 400;
-      return res.status(statusCode).json({ message: error.message });
+      return respondWithError(req, res, error, 400);
     }
   }
 
@@ -76,8 +75,7 @@ export class OrderController {
       return res.json({ id: order.id, total: order.total });
     } catch (error: any) {
       log.warn('Order items update failed', { orderId: req.params.orderId, error });
-      const statusCode = error.message.includes('perm') ? 403 : 400;
-      return res.status(statusCode).json({ message: error.message });
+      return respondWithError(req, res, error, 400);
     }
   }
 
@@ -86,7 +84,7 @@ export class OrderController {
     try {
       log.debug('Order public get request', { orderId });
       const result = await orderService.getPublicById(orderId);
-      if (!result) return res.status(404).json({ message: 'Pedido não encontrado' });
+      if (!result) return respondWithError(req, res, new AppError('ORDER-001', 404), 404);
       const { order, queuePosition, queueSize } = result;
 
       return res.json({
@@ -129,7 +127,7 @@ export class OrderController {
       });
     } catch (error: any) {
       log.warn('Order public get failed', { orderId, error });
-      return res.status(400).json({ message: error.message });
+      return respondWithError(req, res, error, 400);
     }
   }
 }
