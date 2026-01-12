@@ -5,8 +5,20 @@ import { LandingPageLayout } from "../layouts/LandingPageLayout";
 import { storeService } from "../services/storeService";
 import { resolveAssetUrl } from "../utils/resolveAssetUrl";
 
+type PortfolioStore = {
+  id?: string;
+  name?: string;
+  slug?: string;
+  settings?: {
+    logoUrl?: string | null;
+    description?: string | null;
+    primaryColor?: string | null;
+    secondaryColor?: string | null;
+  } | null;
+};
+
 export function PortfolioPage() {
-  const [stores, setStores] = useState([]);
+  const [stores, setStores] = useState<PortfolioStore[]>([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -18,8 +30,8 @@ export function PortfolioPage() {
         setLoading(true);
         const data = await storeService.listPortfolio();
         if (active) setStores(Array.isArray(data) ? data : []);
-      } catch (err) {
-        if (active) setError(err.message || "Nao foi possivel carregar as lojas.");
+      } catch (err: any) {
+        if (active) setError(err?.message || "Nao foi possivel carregar as lojas.");
       } finally {
         if (active) setLoading(false);
       }
