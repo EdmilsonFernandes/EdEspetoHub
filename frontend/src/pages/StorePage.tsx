@@ -57,6 +57,11 @@ export function StorePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
   const isDemo = storeSlug === 'demo' || storeSlug === 'test-store';
+  const isStoreAdmin =
+    Boolean(user?.token) &&
+    Boolean(user?.store?.slug) &&
+    Boolean(storeSlug) &&
+    user.store.slug === storeSlug;
 
   const cartTotal = useMemo(() => Object.values(cart).reduce((acc, item) => acc + item.price * item.qty, 0), [cart]);
   const instagramHandle = useMemo(() => (branding.instagram ? `@${branding.instagram.replace('@', '')}` : ''), [branding.instagram]);
@@ -463,8 +468,8 @@ export function StorePage() {
   };
 
   const requireAdminSession = () => {
-    if (!user) {
-      navigate('/admin');
+    if (!isStoreAdmin) {
+      navigate(storeSlug ? `/admin?slug=${encodeURIComponent(storeSlug)}` : '/admin');
       return;
     }
     navigate(storeSlug ? `/admin/dashboard` : '/admin', { state: { activeTab: 'fila' } });
@@ -480,7 +485,7 @@ export function StorePage() {
       sessionStorage.setItem('admin:redirectTab', 'produtos');
       sessionStorage.setItem('admin:redirectSlug', storeSlug);
     }
-    if (user?.store?.slug && storeSlug && user.store.slug === storeSlug) {
+    if (isStoreAdmin) {
       navigate('/admin/dashboard', { state: { activeTab: 'produtos' } });
       return;
     }
@@ -695,8 +700,8 @@ export function StorePage() {
               instagramHandle={instagramHandle}
               onUpdateCart={updateCart}
               onProceed={() => setView('cart')}
-              onOpenQueue={user?.token ? requireAdminSession : undefined}
-              onOpenAdmin={user?.token ? () => navigate('/admin/dashboard') : undefined}
+              onOpenQueue={isStoreAdmin ? requireAdminSession : undefined}
+              onOpenAdmin={isStoreAdmin ? () => navigate('/admin/dashboard') : undefined}
               isOpenNow={storeOpenNow}
               whatsappNumber={storePhone}
               todayHoursLabel={todayHoursLabel}

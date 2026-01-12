@@ -184,30 +184,34 @@ export function PortfolioPage() {
                     className="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm hover:shadow-2xl transition-all"
                   >
                     <div
-                      className="h-24"
+                      className="relative p-6 pb-8"
                       style={{
                         backgroundImage: `linear-gradient(120deg, ${primary}, ${secondary})`,
                       }}
-                    />
-                    <div className="absolute inset-x-0 top-0 h-24 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.35),_transparent_60%)]" />
-                    <div className="absolute right-4 top-4 rounded-full bg-white/80 px-3 py-1 text-[11px] font-semibold text-emerald-700 shadow-sm">
-                      Loja ativa
-                    </div>
-                    <div className="relative -mt-8 p-6 space-y-4">
-                      <div className="flex items-start gap-4">
-                        <div className="w-16 h-16 rounded-2xl overflow-hidden border border-white shadow-lg bg-white flex items-center justify-center text-lg font-bold text-slate-700">
+                    >
+                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.35),_transparent_60%)]" />
+                      <div className="relative flex items-center justify-between">
+                        <span className="rounded-full bg-white/85 px-3 py-1 text-[11px] font-semibold text-emerald-700 shadow-sm">
+                          Loja ativa
+                        </span>
+                        <ArrowUpRight className="w-5 h-5 text-white/80 transition-transform group-hover:translate-x-1" />
+                      </div>
+                      <div className="relative mt-6 flex items-center gap-4">
+                        <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-white shadow-lg bg-white flex items-center justify-center text-lg font-bold text-slate-700">
                           {logo ? (
                             <img src={logo} alt={store.name} className="w-full h-full object-cover" />
                           ) : (
                             getInitials(store?.name)
                           )}
                         </div>
-                        <div className="flex-1">
-                          <p className="text-[11px] uppercase tracking-[0.35em] text-slate-400">Loja</p>
-                          <h3 className="text-lg font-bold text-slate-900">{store.name}</h3>
-                          <p className="text-xs text-slate-500">/{store.slug}</p>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[11px] uppercase tracking-[0.35em] text-white/70">Loja</p>
+                          <h3 className="text-lg font-bold text-white truncate">{store.name}</h3>
+                          <p className="text-xs text-white/80 truncate">/{store.slug}</p>
                         </div>
                       </div>
+                    </div>
+                    <div className="p-6 space-y-4">
                       <p className="text-sm text-slate-600 line-clamp-3">{description}</p>
                       <div className="inline-flex items-center gap-2 text-sm font-semibold text-red-600">
                         Visitar loja
