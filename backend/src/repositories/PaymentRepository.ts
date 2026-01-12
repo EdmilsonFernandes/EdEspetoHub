@@ -28,6 +28,14 @@ export class PaymentRepository {
     });
   }
 
+  findLatestPendingByStoreId(storeId: string) {
+    return this.repository.findOne({
+      where: { store: { id: storeId }, status: 'PENDING' },
+      order: { createdAt: 'DESC' },
+      relations: ['subscription', 'subscription.plan', 'store', 'user'],
+    });
+  }
+
   async sumPaidAmounts() {
     const result = await this.repository
       .createQueryBuilder('payment')

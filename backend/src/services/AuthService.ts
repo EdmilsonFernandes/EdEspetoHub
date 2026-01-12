@@ -454,8 +454,17 @@ export class AuthService
     }
 
     let latestPayment = await this.paymentRepository.findLatestByStoreId(store.id);
+    if (latestPayment?.status === 'PENDING') {
+      const now = new Date();
+      if (!latestPayment.expiresAt || latestPayment.expiresAt > now) {
+        this.sendPaymentEmail(verifiedUser.email, latestPayment);
+        return { message: 'E-mail verificado', redirectUrl: `/payment/${latestPayment.id}` };
+      }
+      latestPayment.status = 'FAILED';
+      await this.paymentRepository.save(latestPayment);
+    }
 
-    if (!latestPayment) {
+    if (!latestPayment || latestPayment.status === 'FAILED') {
       latestPayment = await AppDataSource.transaction(async (manager) => {
         return this.paymentService.createPayment(manager, {
           user: verifiedUser,

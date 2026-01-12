@@ -413,8 +413,10 @@ export function StorePage() {
         .map((item) => `▪ ${item.qty}x ${item.name} ${formatItemOptions(item)}`.trim())
         .join('\n');
 
-    const messageLines = [
-        '*NOVO PEDIDO - DATONY*',
+      const messageLines = [
+        `*NOVO PEDIDO - ${branding?.brandName || 'Chama no Espeto'}*`,
+        storeSlug ? `🏷️ *Loja:* ${storeSlug}` : '',
+        storeAddress ? `📍 *Endereco da loja:* ${storeAddress}` : '',
         '------------------',
         `👤 *${customer.name}* (${customer.phone})`,
         `🛒 *Tipo:* ${customer.type}`,

@@ -9,6 +9,7 @@ import { EmailService } from './EmailService';
 import { AppDataSource } from '../config/database';
 import { PaymentService } from './PaymentService';
 import { PaymentMethod } from '../entities/Payment';
+import { PaymentRepository } from '../repositories/PaymentRepository';
 import { logger } from '../utils/logger';
 
 export class SubscriptionService {
@@ -17,6 +18,7 @@ export class SubscriptionService {
   private subscriptionRepository = new SubscriptionRepository();
   private emailService = new EmailService();
   private paymentService = new PaymentService();
+  private paymentRepository = new PaymentRepository();
   private log = logger.child({ scope: 'SubscriptionService' });
 
   async create(input: CreateSubscriptionDto) {
@@ -113,6 +115,16 @@ export class SubscriptionService {
     if (!store) throw new Error('Loja não encontrada');
     if (authStoreId && store.id !== authStoreId) throw new Error('Sem permissão para acessar esta loja');
 
+    const now = new Date();
+    const existingPending = await this.paymentRepository.findLatestPendingByStoreId(storeId);
+    if (existingPending) {
+      if (!existingPending.expiresAt || existingPending.expiresAt > now) {
+        return existingPending;
+      }
+      existingPending.status = 'FAILED';
+      await this.paymentRepository.save(existingPending);
+    }
+
     const plan = input.planId
       ? await this.planRepository.findById(input.planId)
       : null;
@@ -121,7 +133,6 @@ export class SubscriptionService {
     if (!resolvedPlan || !resolvedPlan.enabled) throw new Error('Plano inválido para renovação');
 
     const paymentMethod = (input.paymentMethod || 'PIX') as PaymentMethod;
-    const now = new Date();
 
     return AppDataSource.transaction(async (manager) => {
       const subscriptionRepo = manager.getRepository(Subscription);

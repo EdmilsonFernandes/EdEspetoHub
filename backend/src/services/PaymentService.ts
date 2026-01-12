@@ -61,18 +61,7 @@ export class PaymentService {
       provider: 'MOCK',
     } as Payment);
 
-    const previousPaidCount = await paymentRepo.count({
-      where: {
-        store: { id: data.store.id },
-        status: 'PAID',
-      } as any,
-    });
-
-    const isMonthlyPlan =
-      (data.plan.name || '').endsWith('_monthly') || data.plan.durationDays === 30;
-    const shouldApplyPromo = isMonthlyPlan && previousPaidCount === 0;
-    const promoPrice = data.plan.promoPrice ?? env.firstMonthPromoPrice;
-    const chargeAmount = shouldApplyPromo ? Number(promoPrice) : Number(data.plan.price);
+    const chargeAmount = Number(data.plan.price);
     payment.amount = chargeAmount;
 
     payment = await paymentRepo.save(payment);
