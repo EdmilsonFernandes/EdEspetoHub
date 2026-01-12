@@ -29,6 +29,7 @@ export function StorePage() {
   const [storeOpenNow, setStoreOpenNow] = useState(true);
   const [storePhone, setStorePhone] = useState('');
   const [storeAddress, setStoreAddress] = useState('');
+  const [storeDescription, setStoreDescription] = useState('');
   const [openingHours, setOpeningHours] = useState([]);
   const [orderTypes, setOrderTypes] = useState([ 'delivery', 'pickup', 'table' ]);
   const [storeSubscription, setStoreSubscription] = useState(null);
@@ -159,6 +160,7 @@ export function StorePage() {
           setOrderTypes(allowedTypes);
           setStorePhone(data.owner?.phone || '');
           setStoreAddress(data.owner?.address || '');
+          setStoreDescription(data.settings?.description || '');
           setStoreOpenNow(isStoreOpenNow(normalizedHours));
           setStoreSubscription(data.subscription || null);
           applyStoreMeta(data);
@@ -598,8 +600,8 @@ export function StorePage() {
         {showClosedState && (
           <div className="min-h-[70vh] flex items-center justify-center">
             <div className="w-full max-w-3xl px-4">
-              <div className="bg-white border border-gray-100 rounded-3xl shadow-xl p-6 sm:p-8 text-center">
-                <div className="flex flex-col items-center gap-3 mb-5">
+              <div className="bg-white border border-gray-100 rounded-3xl shadow-xl p-6 sm:p-8">
+                <div className="flex flex-col items-center gap-3 mb-5 text-center">
                   <div className="w-16 h-16 rounded-2xl overflow-hidden border border-gray-200 shadow-sm bg-white">
                     <img
                       src={branding?.logoUrl || '/chama-no-espeto.jpeg'}
@@ -614,15 +616,54 @@ export function StorePage() {
                     </h2>
                   </div>
                 </div>
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold mb-4">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold mb-4 mx-auto">
                   🕒 Loja fechada no momento
                 </div>
-                <p className="text-gray-600 mb-3">
+                <p className="text-gray-600 mb-3 text-center">
                   O atendimento esta fechado. Volte no proximo horario de funcionamento.
                 </p>
                 {todayHoursLabel && (
-                  <p className="text-sm text-gray-500 mb-6">Horario de hoje: {todayHoursLabel}</p>
+                  <p className="text-sm text-gray-500 mb-6 text-center">Horario de hoje: {todayHoursLabel}</p>
                 )}
+                <div className="grid gap-4 sm:grid-cols-2 mb-6">
+                  {storeDescription && (
+                    <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4 text-sm text-gray-600">
+                      <p className="text-xs uppercase tracking-[0.25em] text-gray-400 mb-2">Sobre a loja</p>
+                      <p>{storeDescription}</p>
+                    </div>
+                  )}
+                  <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4 text-sm text-gray-600 space-y-2">
+                    <p className="text-xs uppercase tracking-[0.25em] text-gray-400">Contato</p>
+                    {instagramHandle && (
+                      <a
+                        href={`https://instagram.com/${instagramHandle.replace('@', '')}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex items-center justify-between gap-2 text-sm font-semibold text-[#0a66c2]"
+                      >
+                        <span>Instagram</span>
+                        <span>{instagramHandle}</span>
+                      </a>
+                    )}
+                    {storePhone && (
+                      <a
+                        href={`https://wa.me/${storePhone.replace(/\D/g, '')}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex items-center justify-between gap-2 text-sm font-semibold text-green-600"
+                      >
+                        <span>WhatsApp</span>
+                        <span>{formatPhoneInput(storePhone)}</span>
+                      </a>
+                    )}
+                    {storeAddress && (
+                      <div className="text-sm text-gray-500">
+                        <p className="font-semibold text-gray-700">Endereco</p>
+                        <p>{storeAddress}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
                 {weeklyHours.length > 0 && (
                   <div className="mt-4 text-left bg-gray-50 border border-gray-100 rounded-2xl p-4 text-xs text-gray-600">
                     <p className="text-xs font-semibold text-gray-700 mb-2">Horarios da semana</p>
@@ -647,7 +688,7 @@ export function StorePage() {
                     Criar loja no Chama
                   </button>
                 </div>
-                <div className="mt-6 text-xs text-gray-400">
+                <div className="mt-6 text-xs text-gray-400 text-center">
                   <span className="font-semibold text-gray-500">Chama no Espeto</span> • plataforma de pedidos online
                 </div>
               </div>
