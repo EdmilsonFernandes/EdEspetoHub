@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowUpRight, Search } from "lucide-react";
+import { ArrowUpRight, Search, X } from "lucide-react";
 import { LandingPageLayout } from "../layouts/LandingPageLayout";
 import { storeService } from "../services/storeService";
 import { resolveAssetUrl } from "../utils/resolveAssetUrl";
@@ -79,6 +79,7 @@ export function PortfolioPage() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [profilePreview, setProfilePreview] = useState<{ name: string; image: string } | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -118,6 +119,17 @@ export function PortfolioPage() {
       .join("")
       .slice(0, 2)
       .toUpperCase();
+
+  useEffect(() => {
+    if (!profilePreview) return;
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setProfilePreview(null);
+      }
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [profilePreview]);
 
   return (
     <LandingPageLayout>
@@ -258,7 +270,19 @@ export function PortfolioPage() {
                 <div className={`h-16 bg-gradient-to-r ${member.color}`} />
                 <div className="px-6 pb-6 -mt-8">
                   <div className="flex items-start justify-between">
-                    <div className="relative h-20 w-20 rounded-[22px] bg-white border-2 border-white shadow-xl flex items-center justify-center text-lg font-bold text-slate-700 overflow-hidden">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (member.profileImage) {
+                          setProfilePreview({
+                            name: member.name,
+                            image: resolveAssetUrl(member.profileImage),
+                          });
+                        }
+                      }}
+                      className="relative h-20 w-20 rounded-[22px] bg-white border-2 border-white shadow-xl flex items-center justify-center text-lg font-bold text-slate-700 overflow-hidden transition hover:scale-[1.02]"
+                      aria-label={`Ver foto de ${member.name}`}
+                    >
                       {member.profileImage ? (
                         <img
                           src={resolveAssetUrl(member.profileImage)}
@@ -268,7 +292,7 @@ export function PortfolioPage() {
                       ) : (
                         member.avatar
                       )}
-                    </div>
+                    </button>
                     <span className="text-xs font-semibold text-slate-500 bg-white border border-slate-200 px-3 py-1 rounded-full">
                       {member.years} anos
                     </span>
@@ -309,6 +333,41 @@ export function PortfolioPage() {
           </div>
         </div>
       </section>
+      {profilePreview && (
+        <div
+          className="fixed inset-0 z-[70] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setProfilePreview(null)}
+        >
+          <div
+            className="w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Perfil</p>
+                <p className="text-base font-semibold text-slate-900">{profilePreview.name}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setProfilePreview(null)}
+                className="h-9 w-9 rounded-full border border-slate-200 text-slate-500 hover:text-slate-700 hover:bg-slate-50 flex items-center justify-center"
+                aria-label="Fechar"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="p-5">
+              <div className="rounded-2xl overflow-hidden bg-slate-100">
+                <img
+                  src={profilePreview.image}
+                  alt={profilePreview.name}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </LandingPageLayout>
   );
 }
