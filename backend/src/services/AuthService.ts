@@ -322,7 +322,7 @@ export class AuthService
 
     const user = await this.userRepository.findByEmail(normalizedEmail);
     if (!user) {
-      return { message: 'Se o e-mail existir, enviaremos instruções.' };
+      return { code: 'AUTH-S001' };
     }
 
     const resetRepo = AppDataSource.getRepository(PasswordReset);
@@ -347,7 +347,7 @@ export class AuthService
 
     const link = `${env.appUrl}/reset-password?token=${encodeURIComponent(token)}`;
     await this.emailService.sendPasswordReset(user.email, link);
-    return { message: 'Se o e-mail existir, enviaremos instruções.' };
+    return { code: 'AUTH-S001' };
   }
 
   async resendVerificationEmail(email: string) {
@@ -356,14 +356,14 @@ export class AuthService
 
     const user = await this.userRepository.findByEmail(normalizedEmail);
     if (!user) {
-      return { message: 'Se o e-mail existir, enviaremos instruções.' };
+      return { code: 'AUTH-S002' };
     }
     if (user.emailVerified) {
-      return { message: 'E-mail já verificado.' };
+      return { code: 'AUTH-S005' };
     }
 
     await this.sendVerificationEmail(user);
-    return { message: 'Se o e-mail existir, enviaremos instruções.' };
+    return { code: 'AUTH-S002' };
   }
 
   async resetPassword(token: string, newPassword: string)
@@ -389,7 +389,7 @@ export class AuthService
       await manager.save(reset);
     });
 
-    return { message: 'Senha atualizada com sucesso' };
+    return { code: 'AUTH-S003' };
   }
 
   async verifyEmail(token: string) {
@@ -432,7 +432,7 @@ export class AuthService
 
     const store = await this.storeRepository.findByOwnerId(verifiedUser.id);
     if (!store) {
-      return { message: 'E-mail verificado', redirectUrl: '/' };
+      return { code: 'AUTH-S004', redirectUrl: '/' };
     }
 
     const subscription = await AppDataSource.getRepository(Subscription).findOne({
@@ -442,7 +442,7 @@ export class AuthService
     });
 
     if (!subscription) {
-      return { message: 'E-mail verificado', redirectUrl: '/' };
+      return { code: 'AUTH-S004', redirectUrl: '/' };
     }
 
     if (subscription.status === 'TRIAL') {
@@ -451,7 +451,7 @@ export class AuthService
         await AppDataSource.getRepository(Store).save(store);
       }
       await this.emailService.sendActivationEmail(verifiedUser.email, store.slug);
-      return { message: 'E-mail verificado', redirectUrl: '/admin' };
+      return { code: 'AUTH-S004', redirectUrl: '/admin' };
     }
 
     let latestPayment = await this.paymentRepository.findLatestByStoreId(store.id);
@@ -459,7 +459,7 @@ export class AuthService
       const now = new Date();
       if (!latestPayment.expiresAt || latestPayment.expiresAt > now) {
         this.sendPaymentEmail(verifiedUser.email, latestPayment);
-        return { message: 'E-mail verificado', redirectUrl: `/payment/${latestPayment.id}` };
+        return { code: 'AUTH-S004', redirectUrl: `/payment/${latestPayment.id}` };
       }
       latestPayment.status = 'FAILED';
       await this.paymentRepository.save(latestPayment);
@@ -479,15 +479,15 @@ export class AuthService
 
     if (latestPayment?.id && latestPayment.status === 'PAID') {
       await this.paymentService.confirmPayment(latestPayment.id);
-      return { message: 'E-mail verificado', redirectUrl: '/admin' };
+      return { code: 'AUTH-S004', redirectUrl: '/admin' };
     }
 
     if (latestPayment?.id) {
       this.sendPaymentEmail(verifiedUser.email, latestPayment);
-      return { message: 'E-mail verificado', redirectUrl: `/payment/${latestPayment.id}` };
+      return { code: 'AUTH-S004', redirectUrl: `/payment/${latestPayment.id}` };
     }
 
-    return { message: 'E-mail verificado', redirectUrl: '/' };
+    return { code: 'AUTH-S004', redirectUrl: '/' };
   }
 
 

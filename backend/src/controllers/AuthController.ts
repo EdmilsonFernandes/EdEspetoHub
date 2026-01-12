@@ -5,6 +5,7 @@ import { env } from '../config/env';
 import { logger } from '../utils/logger';
 import { AppError } from '../errors/AppError';
 import { respondWithError } from '../errors/respondWithError';
+import { respondWithSuccess } from '../errors/respondWithSuccess';
 
 const authService = new AuthService();
 const log = logger.child({ scope: 'AuthController' });
@@ -95,7 +96,8 @@ export class AuthController
       log.info('Forgot password request', { email });
       const result = await authService.requestPasswordReset(email);
       log.info('Forgot password dispatched', { email });
-      return res.json(result);
+      const { code, ...data } = result;
+      return respondWithSuccess(req, res, code, data);
     } catch (error: any)
     {
       log.warn('Forgot password failed', { email, error });
@@ -111,7 +113,8 @@ export class AuthController
       log.info('Reset password request');
       const result = await authService.resetPassword(token, newPassword);
       log.info('Reset password success');
-      return res.json(result);
+      const { code, ...data } = result;
+      return respondWithSuccess(req, res, code, data);
     } catch (error: any)
     {
       log.warn('Reset password failed', { error });
@@ -127,7 +130,8 @@ export class AuthController
       log.info('Verify email request');
       const result = await authService.verifyEmail(token);
       log.info('Verify email success', { redirectUrl: result.redirectUrl });
-      return res.json(result);
+      const { code, ...data } = result;
+      return respondWithSuccess(req, res, code, data);
     } catch (error: any)
     {
       log.warn('Verify email failed', { error });
@@ -143,7 +147,8 @@ export class AuthController
       log.info('Resend verification request', { email });
       const result = await authService.resendVerificationEmail(email);
       log.info('Resend verification dispatched', { email });
-      return res.json(result);
+      const { code, ...data } = result;
+      return respondWithSuccess(req, res, code, data);
     } catch (error: any)
     {
       log.warn('Resend verification failed', { email, error });

@@ -1,8 +1,10 @@
 import { Request } from 'express';
 import pt from './pt.json';
+import en from './en.json';
 
 const messages = {
   pt,
+  en,
 };
 
 type Lang = keyof typeof messages;
@@ -13,6 +15,7 @@ const normalizeLang = (value?: string | string[]) => {
   const normalized = raw.split(',')[0]?.trim().toLowerCase();
   if (!normalized) return 'pt';
   if (normalized.startsWith('pt')) return 'pt';
+  if (normalized.startsWith('en')) return 'en';
   return 'pt';
 };
 
