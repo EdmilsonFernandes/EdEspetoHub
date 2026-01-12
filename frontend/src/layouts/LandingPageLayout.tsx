@@ -25,14 +25,17 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
       <header className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm shadow-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-20">
-            <div className="flex items-center gap-3">
+            <a
+              href="https://www.chamanoespeto.com.br"
+              className="flex items-center gap-3"
+            >
               <div className="h-10 w-10">
                 <img src="/logo.svg" alt="Chama no Espeto" className="h-full w-full object-cover" draggable={false} />
               </div>
               <div className="hidden sm:block">
                 <p className="text-2xl font-black text-gray-900 dark:text-white">Chama no Espeto</p>
               </div>
-            </div>
+            </a>
 
             <div className="flex items-center gap-2 sm:gap-3">
               {!auth && (
@@ -65,7 +68,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
               )}
               <button
                 onClick={() => navigate('/portfolio')}
-                className="hidden md:inline-block px-3 py-2 sm:px-4 text-sm rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors"
+                className="px-3 py-2 sm:px-4 text-sm rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors"
               >
                 <span className="hidden sm:inline">Portfólio</span>
                 <span className="sm:hidden">Portfólio</span>
