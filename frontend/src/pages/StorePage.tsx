@@ -599,97 +599,91 @@ export function StorePage() {
         )}
         {showClosedState && (
           <div className="min-h-[70vh] flex items-center justify-center">
-            <div className="w-full max-w-3xl px-4">
-              <div className="bg-white border border-gray-100 rounded-3xl shadow-xl p-6 sm:p-8">
-                <div className="flex flex-col items-center gap-3 mb-5 text-center">
-                  <div className="w-16 h-16 rounded-2xl overflow-hidden border border-gray-200 shadow-sm bg-white">
-                    <img
-                      src={branding?.logoUrl || '/chama-no-espeto.jpeg'}
-                      alt={branding?.brandName || 'Chama no Espeto'}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div>
-                    <p className="text-sm uppercase tracking-[0.3em] text-gray-400">Atendimento</p>
-                    <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                      {branding?.brandName || 'Loja fechada agora'}
-                    </h2>
-                  </div>
-                </div>
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold mb-4 mx-auto">
-                  🕒 Loja fechada no momento
-                </div>
-                <p className="text-gray-600 mb-3 text-center">
-                  O atendimento esta fechado. Volte no proximo horario de funcionamento.
-                </p>
-                {todayHoursLabel && (
-                  <p className="text-sm text-gray-500 mb-6 text-center">Horario de hoje: {todayHoursLabel}</p>
-                )}
-                <div className="grid gap-4 sm:grid-cols-2 mb-6">
-                  {storeDescription && (
-                    <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4 text-sm text-gray-600">
-                      <p className="text-xs uppercase tracking-[0.25em] text-gray-400 mb-2">Sobre a loja</p>
-                      <p>{storeDescription}</p>
+            <div className="w-full max-w-4xl px-4">
+              <div className="relative overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-[0_30px_80px_-50px_rgba(15,23,42,0.65)]">
+                <div className="absolute inset-x-0 top-0 h-2 bg-gradient-to-r from-amber-400 via-orange-500 to-red-500" />
+                <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] p-6 sm:p-8">
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-4">
+                      <div className="w-16 h-16 rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-white">
+                        <img
+                          src={branding?.logoUrl || '/chama-no-espeto.jpeg'}
+                          alt={branding?.brandName || 'Chama no Espeto'}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div>
+                        <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Atendimento</p>
+                        <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">
+                          {branding?.brandName || 'Loja fechada agora'}
+                        </h2>
+                      </div>
                     </div>
-                  )}
-                  <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4 text-sm text-gray-600 space-y-2">
-                    <p className="text-xs uppercase tracking-[0.25em] text-gray-400">Contato</p>
-                    {instagramHandle && (
-                      <a
-                        href={`https://instagram.com/${instagramHandle.replace('@', '')}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="flex items-center justify-between gap-2 text-sm font-semibold text-[#0a66c2]"
-                      >
-                        <span>Instagram</span>
-                        <span>{instagramHandle}</span>
-                      </a>
+                    <div className="inline-flex items-center gap-2 rounded-full bg-amber-100 px-4 py-2 text-xs font-semibold text-amber-800">
+                      🕒 Loja fechada no momento
+                    </div>
+                    <p className="text-slate-600">
+                      O atendimento esta fechado. Volte no proximo horario de funcionamento.
+                    </p>
+                    {todayHoursLabel && (
+                      <p className="text-sm text-slate-500">Horario de hoje: {todayHoursLabel}</p>
                     )}
-                    {storePhone && (
-                      <a
-                        href={`https://wa.me/${storePhone.replace(/\D/g, '')}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="flex items-center justify-between gap-2 text-sm font-semibold text-green-600"
-                      >
-                        <span>WhatsApp</span>
-                        <span>{formatPhoneInput(storePhone)}</span>
-                      </a>
-                    )}
-                    {storeAddress && (
-                      <div className="text-sm text-gray-500">
-                        <p className="font-semibold text-gray-700">Endereco</p>
-                        <p>{storeAddress}</p>
+                    {storeDescription && (
+                      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                        <p className="text-xs uppercase tracking-[0.25em] text-slate-400 mb-2">Sobre a loja</p>
+                        <p>{storeDescription}</p>
                       </div>
                     )}
-                  </div>
-                </div>
-                {weeklyHours.length > 0 && (
-                  <div className="mt-4 text-left bg-gray-50 border border-gray-100 rounded-2xl p-4 text-xs text-gray-600">
-                    <p className="text-xs font-semibold text-gray-700 mb-2">Horarios da semana</p>
-                    <div className="grid sm:grid-cols-2 gap-2">
-                      {weeklyHours.map((line) => (
-                        <p key={line}>{line}</p>
-                      ))}
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <button
+                        onClick={() => navigate('/')}
+                        className="px-6 py-3 rounded-xl border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50 transition-all"
+                      >
+                        Voltar ao inicio
+                      </button>
+                      <button
+                        onClick={() => navigate('/create')}
+                        className="px-6 py-3 rounded-xl bg-brand-gradient text-white font-semibold hover:opacity-90 transition-all"
+                      >
+                        Criar loja no Chama
+                      </button>
                     </div>
                   </div>
-                )}
-                <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
-                  <button
-                    onClick={() => navigate('/')}
-                    className="px-6 py-3 rounded-lg border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-all"
-                  >
-                    Voltar ao inicio
-                  </button>
-                  <button
-                    onClick={() => navigate('/create')}
-                    className="px-6 py-3 rounded-lg bg-brand-gradient text-white font-semibold hover:opacity-90 transition-all"
-                  >
-                    Criar loja no Chama
-                  </button>
-                </div>
-                <div className="mt-6 text-xs text-gray-400 text-center">
-                  <span className="font-semibold text-gray-500">Chama no Espeto</span> • plataforma de pedidos online
+                  <div className="rounded-3xl border border-slate-200 bg-white/80 p-5 space-y-4">
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600 space-y-2">
+                      <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Contato</p>
+                      {instagramHandle && (
+                        <a
+                          href={`https://instagram.com/${instagramHandle.replace('@', '')}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="flex items-center justify-between gap-2 text-sm font-semibold text-[#0a66c2]"
+                        >
+                          <span>Instagram</span>
+                          <span>{instagramHandle}</span>
+                        </a>
+                      )}
+                      {storeAddress && (
+                        <div className="text-sm text-slate-500">
+                          <p className="font-semibold text-slate-700">Endereco</p>
+                          <p>{storeAddress}</p>
+                        </div>
+                      )}
+                    </div>
+                    {weeklyHours.length > 0 && (
+                      <div className="rounded-2xl border border-slate-200 bg-white p-4 text-xs text-slate-600">
+                        <p className="text-xs font-semibold text-slate-700 mb-2">Horarios da semana</p>
+                        <div className="grid sm:grid-cols-2 gap-2">
+                          {weeklyHours.map((line) => (
+                            <p key={line}>{line}</p>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    <div className="text-xs text-slate-400 text-center">
+                      <span className="font-semibold text-slate-500">Chama no Espeto</span> • plataforma de pedidos online
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
