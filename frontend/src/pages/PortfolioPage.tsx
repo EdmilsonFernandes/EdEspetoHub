@@ -222,51 +222,65 @@ export function PortfolioPage() {
         </div>
       </section>
 
-      <section className="bg-white py-14">
+      <section className="bg-[#f3f6f8] py-16">
         <div className="max-w-6xl mx-auto px-4">
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-10">
             <div className="space-y-3 max-w-2xl">
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Nosso time</p>
-              <h2 className="text-2xl sm:text-4xl font-black text-slate-900">Quem constroi o Chama no Espeto</h2>
+              <p className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.35em] text-[#0a66c2]">
+                Nosso time
+              </p>
+              <h2 className="text-2xl sm:text-4xl font-black text-slate-900">
+                Perfis de alto nivel por tras do Chama no Espeto
+              </h2>
               <p className="text-sm text-slate-600">
-                Um time enxuto e experiente, com foco em performance, escalabilidade e experiencia do usuario.
+                Estrutura enxuta, stack moderna e foco em entrega rapida com qualidade de produto.
               </p>
             </div>
-            <div className="text-sm text-slate-500">Equipe tecnica premium</div>
+            <div className="text-sm text-slate-500 bg-white border border-slate-200 px-4 py-2 rounded-full">
+              Equipe tecnica premium
+            </div>
           </div>
 
           <div className="grid gap-6 md:grid-cols-3">
             {teamMembers.map((member) => (
               <div
                 key={member.name}
-                className="group rounded-3xl border border-slate-200 bg-gradient-to-br from-white to-slate-50 p-6 shadow-sm hover:shadow-xl transition-all"
+                className="group rounded-3xl border border-slate-200 bg-white shadow-sm hover:shadow-xl transition-all overflow-hidden"
               >
-                <div className="flex items-start justify-between">
-                  <div className={`h-12 w-12 rounded-2xl bg-gradient-to-br ${member.color} text-white flex items-center justify-center text-lg font-bold`}>
-                    {member.avatar}
+                <div className={`h-16 bg-gradient-to-r ${member.color}`} />
+                <div className="px-6 pb-6 -mt-8">
+                  <div className="flex items-start justify-between">
+                    <div className="h-16 w-16 rounded-2xl bg-white border-2 border-white shadow flex items-center justify-center text-lg font-bold text-slate-700">
+                      {member.avatar}
+                    </div>
+                    <span className="text-xs font-semibold text-slate-500 bg-white border border-slate-200 px-3 py-1 rounded-full">
+                      {member.years} anos
+                    </span>
                   </div>
-                  <span className="text-xs font-semibold text-slate-500 bg-white border border-slate-200 px-3 py-1 rounded-full">
-                    {member.years} anos
-                  </span>
-                </div>
-                <div className="mt-4 space-y-3">
-                  <div>
-                    <h3 className="text-lg font-bold text-slate-900">{member.name}</h3>
-                    <p className="text-sm text-red-600 font-semibold">{member.role}</p>
-                  </div>
-                  <p className="text-sm text-slate-600">{member.description}</p>
-                  <div className="rounded-2xl border border-slate-200 bg-white p-3 text-xs text-slate-600">
-                    {member.previousWork}
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {member.experience.map((exp) => (
-                      <span
-                        key={exp}
-                        className="text-[11px] font-semibold text-slate-600 bg-slate-100 border border-slate-200 px-3 py-1 rounded-full"
-                      >
-                        {exp}
-                      </span>
-                    ))}
+                  <div className="mt-4 space-y-3">
+                    <div>
+                      <h3 className="text-lg font-bold text-slate-900">{member.name}</h3>
+                      <p className="text-sm text-[#0a66c2] font-semibold">{member.role}</p>
+                    </div>
+                    <p className="text-sm text-slate-600">{member.description}</p>
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
+                      {member.previousWork}
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {member.experience.map((exp) => (
+                        <span
+                          key={exp}
+                          className="text-[11px] font-semibold text-slate-600 bg-slate-100 border border-slate-200 px-3 py-1 rounded-full"
+                        >
+                          {exp}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="pt-3 border-t border-slate-100">
+                      <button className="w-full text-xs font-semibold text-[#0a66c2] border border-[#0a66c2] rounded-full py-2 hover:bg-[#0a66c2] hover:text-white transition">
+                        Ver perfil
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
