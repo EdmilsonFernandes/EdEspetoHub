@@ -186,15 +186,15 @@ export function LandingPage() {
               <ChefHat />
             </div>
             <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">Passo 3</p>
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white mt-2">Fila + dashboard</h3>
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mt-2">Visão do churrasqueiro + dashboard</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-3">
-              A fila do churrasqueiro atualiza quase em tempo real e o dashboard mostra resultados do dia.
+              A visão do churrasqueiro mostra pedidos chegando em tempo real e o dashboard entrega o resultado do dia.
             </p>
             <button
-              onClick={() => navigate('/create')}
-              className="mt-5 w-full px-4 py-3 rounded-xl bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold hover:from-red-600 hover:to-red-700 transition-all"
+              onClick={goToAdminDemo}
+              className="mt-5 w-full px-4 py-3 rounded-xl border-2 border-gray-900 text-gray-900 font-semibold hover:bg-gray-900 hover:text-white transition-colors"
             >
-              Quero minha loja
+              Abrir painel demo
             </button>
           </div>
         </div>

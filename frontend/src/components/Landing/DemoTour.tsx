@@ -34,13 +34,13 @@ export function DemoTour({ open, onClose }: Props) {
       },
       {
         id: 'queue',
-        title: 'Fila e dashboard',
+        title: 'Visao do churrasqueiro + dashboard',
         description:
-          'A fila do churrasqueiro atualiza quase em tempo real. O painel mostra pedidos e resultado do dia.',
+          'A visao do churrasqueiro mostra pedidos chegando em tempo real. O dashboard mostra o resultado do dia.',
         ctaLabel: 'Abrir painel demo',
         action: () => navigate('/admin/demo'),
         icon: ChefHat,
-        highlight: 'Operacao ao vivo',
+        highlight: 'Pedidos ao vivo + resultado',
       },
     ],
     [navigate]
