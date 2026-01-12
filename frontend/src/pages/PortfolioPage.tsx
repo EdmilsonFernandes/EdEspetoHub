@@ -258,12 +258,12 @@ export function PortfolioPage() {
                 <div className={`h-16 bg-gradient-to-r ${member.color}`} />
                 <div className="px-6 pb-6 -mt-8">
                   <div className="flex items-start justify-between">
-                    <div className="relative h-16 w-16 rounded-2xl bg-white border-2 border-white shadow flex items-center justify-center text-lg font-bold text-slate-700 overflow-hidden">
+                    <div className="relative h-20 w-20 rounded-[22px] bg-white border-2 border-white shadow-xl flex items-center justify-center text-lg font-bold text-slate-700 overflow-hidden">
                       {member.profileImage ? (
                         <img
                           src={resolveAssetUrl(member.profileImage)}
                           alt={member.name}
-                          className="h-full w-full object-cover rounded-[18px] ring-2 ring-white"
+                          className="h-full w-full object-cover rounded-[20px] ring-2 ring-white brightness-105 contrast-110"
                         />
                       ) : (
                         member.avatar
