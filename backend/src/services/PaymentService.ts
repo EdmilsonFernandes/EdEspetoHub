@@ -56,6 +56,7 @@ export class PaymentService {
       amount: Number(data.plan.price),
       expiresAt,
       qrCodeBase64: null,
+      qrCodeText: null,
       paymentLink,
       provider: 'MOCK',
     } as Payment);
@@ -103,6 +104,9 @@ export class PaymentService {
         if (mpPayment?.qrCodeBase64 && payment.method === 'PIX') {
           payment.qrCodeBase64 = this.normalizeQrCode(mpPayment.qrCodeBase64);
         }
+        if (mpPayment?.qrCodeText && payment.method === 'PIX') {
+          payment.qrCodeText = mpPayment.qrCodeText;
+        }
 
         await paymentRepo.save(payment);
         return payment;
@@ -116,6 +120,7 @@ export class PaymentService {
         chargeAmount
       ).toFixed(2)} | PaymentId: ${payment.id}`;
       payment.qrCodeBase64 = await QRCode.toDataURL(qrPayload);
+      payment.qrCodeText = qrPayload;
       await paymentRepo.save(payment);
     }
 

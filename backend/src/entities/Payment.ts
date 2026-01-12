@@ -43,6 +43,9 @@ export class Payment {
   @Column({ name: 'qr_code_base64', type: 'text', nullable: true })
   qrCodeBase64?: string | null;
 
+  @Column({ name: 'qr_code_text', type: 'text', nullable: true })
+  qrCodeText?: string | null;
+
   @Column({ name: 'payment_link', type: 'text', nullable: true })
   paymentLink?: string | null;
 

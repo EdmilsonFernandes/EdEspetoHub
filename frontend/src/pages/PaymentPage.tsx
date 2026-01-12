@@ -13,9 +13,34 @@ export function PaymentPage() {
   const [polling, setPolling] = useState(false);
   const [eventsPage, setEventsPage] = useState(0);
   const [eventsHasMore, setEventsHasMore] = useState(true);
+  const [pixCopied, setPixCopied] = useState(false);
   const EVENTS_PAGE_SIZE = 25;
   const platformLogo = '/chama-no-espeto.jpeg';
+  const mpLogo = '/mercado-pago.svg';
   const redirectRef = useRef(false);
+
+  const handleCopyPix = async (value: string) => {
+    if (!value) return;
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(value);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = value;
+        textarea.setAttribute('readonly', '');
+        textarea.style.position = 'absolute';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
+      setPixCopied(true);
+      window.setTimeout(() => setPixCopied(false), 2000);
+    } catch (error) {
+      console.error('Falha ao copiar PIX', error);
+    }
+  };
 
   useEffect(() => {
     let interval: number | undefined;
@@ -202,8 +227,23 @@ export function PaymentPage() {
                     </p>
                   ) : payment.method === 'PIX' && payment.qrCodeBase64 ? (
                     <>
-                      <p className="text-sm font-semibold text-gray-700">Escaneie o QR Code PIX</p>
+                      <div className="flex items-center gap-2 text-sm text-gray-700">
+                        <img src={mpLogo} alt="Mercado Pago" className="h-5" />
+                        <span>Escaneie o QR Code PIX</span>
+                      </div>
                       <img src={payment.qrCodeBase64} alt="QR Code PIX" className="w-64 h-64 object-contain" />
+                      {payment.qrCodeText && (
+                        <div className="w-full rounded-xl border border-slate-200 bg-white p-3 text-left space-y-2">
+                          <p className="text-xs text-gray-500">Codigo copia e cola</p>
+                          <p className="text-xs text-gray-700 break-all">{payment.qrCodeText}</p>
+                          <button
+                            onClick={() => handleCopyPix(payment.qrCodeText)}
+                            className="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:opacity-90"
+                          >
+                            {pixCopied ? 'Copiado!' : 'Copiar codigo'}
+                          </button>
+                        </div>
+                      )}
                       {isMock && (
                         <p className="text-xs text-gray-500 text-center">Pagamento mock para testes - nenhum valor será cobrado.</p>
                       )}

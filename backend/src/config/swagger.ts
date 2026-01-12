@@ -163,6 +163,7 @@ export const swaggerSpec = {
           method: { type: 'string', enum: ['PIX', 'CREDIT_CARD', 'BOLETO'] },
           amount: { type: 'number' },
           qrCodeBase64: { type: 'string', nullable: true },
+          qrCodeText: { type: 'string', nullable: true },
           paymentLink: { type: 'string', nullable: true },
           provider: { type: 'string', enum: ['MERCADO_PAGO', 'MOCK'] },
           providerId: { type: 'string', nullable: true },

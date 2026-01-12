@@ -42,6 +42,10 @@ export async function runMigrations() {
     ADD COLUMN IF NOT EXISTS promo_price NUMERIC(10,2);
   `);
   await AppDataSource.query(`
+    ALTER TABLE IF EXISTS payments
+    ADD COLUMN IF NOT EXISTS qr_code_text TEXT;
+  `);
+  await AppDataSource.query(`
     ALTER TABLE IF EXISTS users
     ADD COLUMN IF NOT EXISTS email_verified BOOLEAN DEFAULT FALSE;
   `);

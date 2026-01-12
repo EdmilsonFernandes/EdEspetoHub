@@ -99,6 +99,7 @@ export class PaymentController {
         method: payment.method,
         amount: Number(payment.amount),
         qrCodeBase64: payment.qrCodeBase64,
+        qrCodeText: payment.qrCodeText,
         paymentLink: payment.paymentLink,
         provider: payment.provider,
         providerId: payment.providerId,

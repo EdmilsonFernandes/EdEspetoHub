@@ -17,6 +17,7 @@ type MercadoPagoPaymentResponse = {
   point_of_interaction?: {
     transaction_data?: {
       qr_code_base64?: string;
+      qr_code?: string;
     };
   };
   external_reference?: string;
@@ -196,6 +197,7 @@ export class MercadoPagoService {
     return {
       paymentLink: data.transaction_details?.external_resource_url || null,
       qrCodeBase64: data.point_of_interaction?.transaction_data?.qr_code_base64 || null,
+      qrCodeText: data.point_of_interaction?.transaction_data?.qr_code || null,
       providerId: data.id?.toString() || null,
     };
   }

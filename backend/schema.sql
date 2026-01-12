@@ -154,6 +154,7 @@ CREATE TABLE IF NOT EXISTS payments (
   status TEXT NOT NULL,
   amount NUMERIC(10,2) NOT NULL,
   qr_code_base64 TEXT,
+  qr_code_text TEXT,
   payment_link TEXT,
   provider TEXT NOT NULL DEFAULT 'MOCK',
   provider_id TEXT,
@@ -165,6 +166,8 @@ ALTER TABLE payments
 ADD COLUMN IF NOT EXISTS provider TEXT DEFAULT 'MOCK';
 ALTER TABLE payments
 ADD COLUMN IF NOT EXISTS provider_id TEXT;
+ALTER TABLE payments
+ADD COLUMN IF NOT EXISTS qr_code_text TEXT;
 
 CREATE TABLE IF NOT EXISTS payment_events (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

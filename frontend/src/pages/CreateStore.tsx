@@ -21,6 +21,7 @@ export function CreateStore() {
   const [cepError, setCepError] = useState('');
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [lgpdAccepted, setLgpdAccepted] = useState(false);
+  const [pixCopied, setPixCopied] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
   const [showValidationModal, setShowValidationModal] = useState(false);
   const [validationMessage, setValidationMessage] = useState('');
@@ -32,6 +33,7 @@ export function CreateStore() {
     storeName: '',
   });
   const platformLogo = '/logo.svg';
+  const mpLogo = '/mercado-pago.svg';
   const primaryPalette = [ '#dc2626', '#ea580c', '#f59e0b', '#16a34a', '#0ea5e9', '#2563eb', '#7c3aed' ];
   const secondaryPalette = [ '#111827', '#1f2937', '#334155', '#0f172a', '#0f766e', '#065f46', '#4b5563' ];
   const termsRef = useRef<HTMLDivElement | null>(null);
@@ -93,6 +95,29 @@ export function CreateStore() {
       console.error('Falha ao processar logo', error);
       setLogoPreviewUrl('');
       setStoreError('Não foi possível carregar o logo enviado.');
+    }
+  };
+
+  const handleCopyPix = async (value: string) => {
+    if (!value) return;
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(value);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = value;
+        textarea.setAttribute('readonly', '');
+        textarea.style.position = 'absolute';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
+      setPixCopied(true);
+      window.setTimeout(() => setPixCopied(false), 2000);
+    } catch (error) {
+      console.error('Falha ao copiar PIX', error);
     }
   };
 
@@ -988,9 +1013,27 @@ export function CreateStore() {
                 <p className="text-sm text-green-700">Status da assinatura: {paymentResult.subscriptionStatus}</p>
                 <p className="text-sm text-green-700">Forma de pagamento: {paymentResult.payment?.method}</p>
                 {paymentResult.payment?.method === 'PIX' && paymentResult.payment?.qrCodeBase64 && (
-                  <div className="pt-2">
-                    <p className="text-sm text-gray-700 mb-2">Escaneie o QR Code para pagar:</p>
+                  <div className="pt-2 space-y-3">
+                    <div className="flex items-center gap-2 text-sm text-gray-700">
+                      <img src={mpLogo} alt="Mercado Pago" className="h-5" />
+                      <span>Escaneie o QR Code PIX para pagar</span>
+                    </div>
                     <img src={paymentResult.payment.qrCodeBase64} alt="QR Code PIX" className="w-48 h-48" />
+                    {paymentResult.payment?.qrCodeText && (
+                      <div className="rounded-xl border border-emerald-200 bg-white p-3 space-y-2">
+                        <p className="text-xs text-gray-500">Codigo copia e cola</p>
+                        <p className="text-xs text-gray-700 break-all">
+                          {paymentResult.payment.qrCodeText}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => handleCopyPix(paymentResult.payment.qrCodeText)}
+                          className="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:opacity-90"
+                        >
+                          {pixCopied ? 'Copiado!' : 'Copiar codigo'}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
                 {(paymentResult.payment?.method === 'CREDIT_CARD' || paymentResult.payment?.method === 'BOLETO') && (
