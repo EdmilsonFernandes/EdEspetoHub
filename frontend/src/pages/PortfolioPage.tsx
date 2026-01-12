@@ -20,7 +20,7 @@ type PortfolioStore = {
 export function PortfolioPage() {
   const teamMembers = [
     {
-      name: "Edmilson Lopes",
+      name: "Edmilson Lopes Fernandes",
       role: "Arquiteto de Software & Desenvolvedor Full Stack Senior",
       years: 15,
       description:
@@ -35,6 +35,7 @@ export function PortfolioPage() {
       previousWork: "Liderou desenvolvimento backend para multiplas plataformas SaaS e e-commerce",
       avatar: "E",
       color: "from-red-500 to-amber-500",
+      profileUrl: "https://www.linkedin.com/in/edmilson-santos-6805a515/",
     },
     {
       name: "Gabriel Botega",
@@ -52,6 +53,7 @@ export function PortfolioPage() {
       previousWork: "Desenvolveu infraestrutura backend para plataformas fintech e baseadas em assinatura",
       avatar: "G",
       color: "from-sky-500 to-indigo-500",
+      profileUrl: "https://www.linkedin.com/in/gabrielbotega/",
     },
     {
       name: "Juan Felipe Rada",
@@ -69,6 +71,7 @@ export function PortfolioPage() {
       previousWork: "Construiu aplicacoes frontend para plataformas de e-commerce e gerenciamento",
       avatar: "J",
       color: "from-emerald-500 to-teal-500",
+      profileUrl: "https://www.linkedin.com/in/radapls/",
     },
   ];
   const [stores, setStores] = useState<PortfolioStore[]>([]);
@@ -281,9 +284,14 @@ export function PortfolioPage() {
                       ))}
                     </div>
                     <div className="pt-3 border-t border-slate-100">
-                      <button className="w-full text-xs font-semibold text-[#0a66c2] border border-[#0a66c2] rounded-full py-2 hover:bg-[#0a66c2] hover:text-white transition">
+                      <a
+                        href={member.profileUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="w-full text-center text-xs font-semibold text-[#0a66c2] border border-[#0a66c2] rounded-full py-2 hover:bg-[#0a66c2] hover:text-white transition"
+                      >
                         Ver perfil
-                      </button>
+                      </a>
                     </div>
                   </div>
                 </div>
