@@ -36,6 +36,7 @@ export function PortfolioPage() {
       avatar: "E",
       color: "from-red-500 to-amber-500",
       profileUrl: "https://www.linkedin.com/in/edmilson-santos-6805a515/",
+      profileImage: "/uploads/perfil/edmilson.jpeg",
     },
     {
       name: "Gabriel Botega",
@@ -257,8 +258,16 @@ export function PortfolioPage() {
                 <div className={`h-16 bg-gradient-to-r ${member.color}`} />
                 <div className="px-6 pb-6 -mt-8">
                   <div className="flex items-start justify-between">
-                    <div className="h-16 w-16 rounded-2xl bg-white border-2 border-white shadow flex items-center justify-center text-lg font-bold text-slate-700">
-                      {member.avatar}
+                    <div className="relative h-16 w-16 rounded-2xl bg-white border-2 border-white shadow flex items-center justify-center text-lg font-bold text-slate-700 overflow-hidden">
+                      {member.profileImage ? (
+                        <img
+                          src={resolveAssetUrl(member.profileImage)}
+                          alt={member.name}
+                          className="h-full w-full object-cover rounded-[18px] ring-2 ring-white"
+                        />
+                      ) : (
+                        member.avatar
+                      )}
                     </div>
                     <span className="text-xs font-semibold text-slate-500 bg-white border border-slate-200 px-3 py-1 rounded-full">
                       {member.years} anos
@@ -288,9 +297,9 @@ export function PortfolioPage() {
                         href={member.profileUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="w-full text-center text-xs font-semibold text-[#0a66c2] border border-[#0a66c2] rounded-full py-2 hover:bg-[#0a66c2] hover:text-white transition"
+                        className="w-full text-center text-sm font-semibold text-white bg-[#0a66c2] rounded-full py-2.5 shadow-sm hover:bg-[#0a66c2]/90 transition"
                       >
-                        Ver perfil
+                        Ver perfil no LinkedIn
                       </a>
                     </div>
                   </div>
