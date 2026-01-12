@@ -274,9 +274,10 @@ export function PortfolioPage() {
                       type="button"
                       onClick={() => {
                         if (member.profileImage) {
+                          const resolved = resolveAssetUrl(member.profileImage) || member.profileImage;
                           setProfilePreview({
                             name: member.name,
-                            image: resolveAssetUrl(member.profileImage),
+                            image: resolved,
                           });
                         }
                       }}
@@ -285,7 +286,7 @@ export function PortfolioPage() {
                     >
                       {member.profileImage ? (
                         <img
-                          src={resolveAssetUrl(member.profileImage)}
+                          src={resolveAssetUrl(member.profileImage) || member.profileImage}
                           alt={member.name}
                           className="h-full w-full object-cover rounded-[20px] ring-2 ring-white brightness-105 contrast-110"
                         />
