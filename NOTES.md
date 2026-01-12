@@ -100,6 +100,7 @@
 - Admin login bloqueado se pagamento pendente.
 - Email real depende de SMTP valido (Gmail com senha de app).
 - Pagamento aprovado atualiza status via webhook Mercado Pago; sem HTTPS nao chega.
+- Postgres pode entrar em loop se o `pg_hba.conf` for corrompido (ex.: linha `EOF` invalida). Workaround: reescrever o arquivo no volume e resetar a senha sem apagar dados.
 
 ## DNS / Dominio (Registro.br)
 - Ativar modo avancado em "Configurar enderecamento" -> "Modo avancado".
@@ -118,6 +119,31 @@
 - Certbot configurado para `chamanoespeto.com.br` e `www.chamanoespeto.com.br`.
 - Docker Compose usa `.env.prod` com `FRONTEND_PORT=8080` (front fica atras do Nginx).
 - Arquivo de exemplo do Nginx: `docs/nginx/chamanoespeto.conf`.
+
+## Workaround Postgres (pg_hba.conf corrompido)
+Sintoma: container `chamanoespeto-postgres` reiniciando com "invalid connection type \"EOF\"".
+
+1) Descobrir o volume:
+```bash
+docker volume ls | grep postgres
+```
+
+2) Reescrever `pg_hba.conf` em modo trust:
+```bash
+docker stop chamanoespeto-postgres
+docker run --rm -v edespetohub_postgres-data:/var/lib/postgresql/data alpine \
+  sh -c "printf 'local all all trust\nhost all all all trust\n' > /var/lib/postgresql/data/pg_hba.conf"
+docker start chamanoespeto-postgres
+```
+
+3) Resetar senha e voltar para scram:
+```bash
+docker exec -it chamanoespeto-postgres psql -U postgres -d postgres -c "ALTER USER postgres WITH PASSWORD 'postgres';"
+docker run --rm -v edespetohub_postgres-data:/var/lib/postgresql/data alpine \
+  sh -c "printf 'local all all scram-sha-256\nhost all all all scram-sha-256\n' > /var/lib/postgresql/data/pg_hba.conf"
+docker restart chamanoespeto-postgres
+docker restart chamanoespeto-api
+```
 
 ## Mercado Pago (producao)
 - Variaveis obrigatorias no `backend/.env.docker`:
