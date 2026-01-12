@@ -120,7 +120,7 @@ export function PortfolioPage() {
           {!loading && !error && filteredStores.length > 0 && (
             <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
               {filteredStores.map((store) => {
-                const logo = resolveAssetUrl(store?.settings?.logoUrl);
+                const logo = resolveAssetUrl(store?.settings?.logoUrl || undefined);
                 const description = store?.settings?.description || "Loja ativa no Chama no Espeto.";
                 const primary = store?.settings?.primaryColor || "#dc2626";
                 const secondary = store?.settings?.secondaryColor || "#111827";
