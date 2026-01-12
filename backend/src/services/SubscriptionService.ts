@@ -125,6 +125,12 @@ export class SubscriptionService {
       await this.paymentRepository.save(existingPending);
     }
 
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const recentCount = await this.paymentRepository.countRecentByStoreId(storeId, since);
+    if (recentCount >= 3) {
+      throw new Error('Limite de tentativas de pagamento atingido. Tente novamente mais tarde.');
+    }
+
     const plan = input.planId
       ? await this.planRepository.findById(input.planId)
       : null;

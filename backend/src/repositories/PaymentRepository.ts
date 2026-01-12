@@ -59,4 +59,12 @@ export class PaymentRepository {
       relations: ['store', 'subscription', 'subscription.plan', 'user'],
     });
   }
+
+  async countRecentByStoreId(storeId: string, since: Date) {
+    return this.repository
+      .createQueryBuilder('payment')
+      .where('payment.store_id = :storeId', { storeId })
+      .andWhere('payment.created_at >= :since', { since })
+      .getCount();
+  }
 }
