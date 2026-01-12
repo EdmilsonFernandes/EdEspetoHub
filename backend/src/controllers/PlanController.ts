@@ -7,7 +7,7 @@ const planService = new PlanService();
 const log = logger.child({ scope: 'PlanController' });
 
 export class PlanController {
-  static async list(_req: Request, res: Response) {
+  static async list(req: Request, res: Response) {
     try {
       log.debug('Plan list request');
       const plans = await planService.listEnabled();
