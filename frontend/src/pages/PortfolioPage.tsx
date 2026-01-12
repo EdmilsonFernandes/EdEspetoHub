@@ -18,6 +18,59 @@ type PortfolioStore = {
 };
 
 export function PortfolioPage() {
+  const teamMembers = [
+    {
+      name: "Edmilson Lopes",
+      role: "Arquiteto de Software & Desenvolvedor Full Stack Senior",
+      years: 15,
+      description:
+        "Atuo ha mais de 15 anos no desenvolvimento e arquitetura de sistemas, liderando solucoes digitais escalaveis e orientadas a negocio.",
+      experience: [
+        "Node.js & Express",
+        "PostgreSQL",
+        "Arquitetura de Sistemas",
+        "Design de Banco de Dados",
+        "Desenvolvimento de APIs",
+      ],
+      previousWork: "Liderou desenvolvimento backend para multiplas plataformas SaaS e e-commerce",
+      avatar: "E",
+      color: "from-red-500 to-amber-500",
+    },
+    {
+      name: "Gabriel Botega",
+      role: "Desenvolvedor Backend",
+      years: 4,
+      description:
+        "Especialista em construir sistemas backend confiaveis e otimizar performance com foco em eficiencia e escalabilidade.",
+      experience: [
+        "Node.js & Express",
+        "Design de Sistemas",
+        "Otimizacao de Banco de Dados",
+        "Arquitetura de APIs",
+        "Ajuste de Performance",
+      ],
+      previousWork: "Desenvolveu infraestrutura backend para plataformas fintech e baseadas em assinatura",
+      avatar: "G",
+      color: "from-sky-500 to-indigo-500",
+    },
+    {
+      name: "Juan Felipe Rada",
+      role: "Desenvolvedor Frontend",
+      years: 4,
+      description:
+        "Focado em criar interfaces bonitas e eficientes com experiencia em frameworks modernos e design responsivo.",
+      experience: [
+        "React & TypeScript",
+        "Design Responsivo",
+        "Arquitetura de Componentes",
+        "Implementacao de UI",
+        "Otimizacao de Performance",
+      ],
+      previousWork: "Construiu aplicacoes frontend para plataformas de e-commerce e gerenciamento",
+      avatar: "J",
+      color: "from-emerald-500 to-teal-500",
+    },
+  ];
   const [stores, setStores] = useState<PortfolioStore[]>([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
@@ -166,6 +219,59 @@ export function PortfolioPage() {
               })}
             </div>
           )}
+        </div>
+      </section>
+
+      <section className="bg-white py-14">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-10">
+            <div className="space-y-3 max-w-2xl">
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Nosso time</p>
+              <h2 className="text-2xl sm:text-4xl font-black text-slate-900">Quem constroi o Chama no Espeto</h2>
+              <p className="text-sm text-slate-600">
+                Um time enxuto e experiente, com foco em performance, escalabilidade e experiencia do usuario.
+              </p>
+            </div>
+            <div className="text-sm text-slate-500">Equipe tecnica premium</div>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-3">
+            {teamMembers.map((member) => (
+              <div
+                key={member.name}
+                className="group rounded-3xl border border-slate-200 bg-gradient-to-br from-white to-slate-50 p-6 shadow-sm hover:shadow-xl transition-all"
+              >
+                <div className="flex items-start justify-between">
+                  <div className={`h-12 w-12 rounded-2xl bg-gradient-to-br ${member.color} text-white flex items-center justify-center text-lg font-bold`}>
+                    {member.avatar}
+                  </div>
+                  <span className="text-xs font-semibold text-slate-500 bg-white border border-slate-200 px-3 py-1 rounded-full">
+                    {member.years} anos
+                  </span>
+                </div>
+                <div className="mt-4 space-y-3">
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-900">{member.name}</h3>
+                    <p className="text-sm text-red-600 font-semibold">{member.role}</p>
+                  </div>
+                  <p className="text-sm text-slate-600">{member.description}</p>
+                  <div className="rounded-2xl border border-slate-200 bg-white p-3 text-xs text-slate-600">
+                    {member.previousWork}
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {member.experience.map((exp) => (
+                      <span
+                        key={exp}
+                        className="text-[11px] font-semibold text-slate-600 bg-slate-100 border border-slate-200 px-3 py-1 rounded-full"
+                      >
+                        {exp}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     </LandingPageLayout>
