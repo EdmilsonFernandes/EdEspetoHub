@@ -114,6 +114,7 @@ export class MercadoPagoService {
     return {
       paymentLink: data.init_point || data.sandbox_init_point || null,
       qrCodeBase64: null,
+      qrCodeText: null,
       providerId: data.id,
     };
   }
@@ -161,6 +162,7 @@ export class MercadoPagoService {
     return {
       paymentLink: data.init_point || data.sandbox_init_point || null,
       qrCodeBase64: null,
+      qrCodeText: null,
       providerId: data.id,
     };
   }
