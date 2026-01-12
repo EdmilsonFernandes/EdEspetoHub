@@ -14,6 +14,10 @@ export async function runMigrations() {
     ADD COLUMN IF NOT EXISTS order_types JSONB DEFAULT '["delivery","pickup","table"]';
   `);
   await AppDataSource.query(`
+    ALTER TABLE IF EXISTS store_settings
+    ADD COLUMN IF NOT EXISTS description TEXT;
+  `);
+  await AppDataSource.query(`
     ALTER TABLE IF EXISTS orders
     ADD COLUMN IF NOT EXISTS table_number TEXT;
   `);

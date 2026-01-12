@@ -47,6 +47,7 @@ export const swaggerSpec = {
         type: 'object',
         properties: {
           logoUrl: { type: 'string', nullable: true },
+          description: { type: 'string', nullable: true },
           primaryColor: { type: 'string' },
           secondaryColor: { type: 'string', nullable: true },
         },

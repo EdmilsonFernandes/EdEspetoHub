@@ -21,6 +21,11 @@ export const storeService = {
     return toJson(response);
   },
 
+  async listPortfolio() {
+    const response = await apiClient.rawGet('/public/stores');
+    return toJson(response);
+  },
+
   async updateSettings(slug: any, payload: any) {
     const response = await apiClient.rawPut(`/stores/${slug}/settings`, payload);
     return toJson(response);

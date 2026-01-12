@@ -11,6 +11,9 @@ export class StoreSettings
   @Column({ name: 'logo_url', nullable: true })
   logoUrl?: string;
 
+  @Column({ name: 'description', type: 'text', nullable: true })
+  description?: string;
+
   @Column({ name: 'primary_color', default: '#b91c1c' })
   primaryColor!: string;
 

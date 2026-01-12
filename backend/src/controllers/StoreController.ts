@@ -19,6 +19,7 @@ const buildDemoStore = (slug: string) => {
     createdAt: now,
     settings: {
       logoUrl: '/chama-no-espeto.jpeg',
+      description: 'Loja demo de espetos com combos especiais e atendimento rapido.',
       primaryColor: '#dc2626',
       secondaryColor: '#111827',
       socialLinks: [ { type: 'instagram', value: 'chamanoespeto' } ],
@@ -38,6 +39,7 @@ const buildDemoStore = (slug: string) => {
       fullName: 'Loja Demo',
       email: 'demo@chamanoespeto.com.br',
       phone: '(11) 99999-0000',
+      address: 'Rua Demo 123, Centro - Sao Paulo/SP',
     },
     subscription: {
       status: 'ACTIVE',
@@ -77,6 +79,37 @@ export class StoreController {
       return minutes >= start && minutes < end;
     });
   }
+
+  static async listPortfolio(_req: Request, res: Response) {
+    try {
+      log.debug('Store portfolio list request');
+      const stores = await storeService.listAll();
+      const entries = await Promise.all(
+        stores.map(async (store) => {
+          const subscription = await subscriptionService.getCurrentByStore(store.id);
+          const isActive = subscriptionService.isActiveSubscription(subscription);
+          if (!isActive) return null;
+          return {
+            id: store.id,
+            name: store.name,
+            slug: store.slug,
+            settings: store.settings
+              ? {
+                  logoUrl: store.settings.logoUrl || null,
+                  description: store.settings.description || null,
+                  primaryColor: store.settings.primaryColor || null,
+                  secondaryColor: store.settings.secondaryColor || null,
+                }
+              : null,
+          };
+        })
+      );
+      return res.json(entries.filter(Boolean));
+    } catch (error: any) {
+      log.warn('Store portfolio list failed', { error });
+      return res.status(400).json({ message: error.message });
+    }
+  }
   static async getBySlug(req: Request, res: Response) {
     try {
       if (DEMO_SLUGS.has(req.params.slug)) {
@@ -99,6 +132,7 @@ export class StoreController {
             fullName: store.owner.fullName,
             email: store.owner.email,
             phone: store.owner.phone,
+            address: store.owner.address,
           }
           : null,
         openNow: StoreController.isStoreOpenNow(store),

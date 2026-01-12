@@ -12,6 +12,7 @@ import { sanitizeSocialLinks } from '../utils/socialLinks';
 export class StoreService
 {
   private subscriptionService = new SubscriptionService();
+  private storeRepository = AppDataSource.getRepository(Store);
 
   /* =========================
    * CREATE STORE
@@ -43,6 +44,7 @@ export class StoreService
       // 3️⃣ Settings
       const settings = manager.create(StoreSettings, {
         logoUrl: logoUrl || input.logoUrl,
+        description: input.description,
         primaryColor: input.primaryColor,
         secondaryColor: input.secondaryColor,
         socialLinks,
@@ -60,6 +62,10 @@ export class StoreService
 
       return storeRepo.save(store);
     });
+  }
+
+  async listAll() {
+    return this.storeRepository.find({ relations: [ 'settings', 'owner' ] });
   }
 
   /* =========================
@@ -106,6 +112,9 @@ export class StoreService
 
       store.settings.logoUrl =
         uploadedLogo ?? data.logoUrl ?? store.settings.logoUrl;
+
+      store.settings.description =
+        data.description ?? store.settings.description;
 
       store.settings.primaryColor =
         data.primaryColor ?? store.settings.primaryColor;

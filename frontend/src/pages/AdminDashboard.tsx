@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { BarChart3, ChefHat, Package, Settings, ShoppingCart } from 'lucide-react';
+import { BarChart3, ChefHat, CreditCard, Package, Settings, ShoppingCart } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AdminLayout } from '../layouts/AdminLayout';
@@ -16,6 +16,7 @@ import { useToast } from '../contexts/ToastContext';
 import { orderService } from '../services/orderService';
 import { productService } from '../services/productService';
 import { storeService } from '../services/storeService';
+import { subscriptionService } from '../services/subscriptionService';
 import { formatCurrency, formatDateTime, formatOrderStatus, formatOrderType } from '../utils/format';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 
@@ -156,6 +157,79 @@ const OrdersView = ({ orders }) => {
   );
 };
 
+const PaymentsView = ({ subscription, loading, error }) => {
+  const plan = subscription?.plan;
+  const planLabel = plan?.displayName || plan?.name || 'Plano nao identificado';
+  const priceValue = subscription?.latestPaymentAmount ?? plan?.price ?? 0;
+  const method = (subscription?.paymentMethod || '').toUpperCase();
+  const methodLabel =
+    method === 'CREDIT_CARD'
+      ? 'Cartao de credito'
+      : method === 'BOLETO'
+      ? 'Boleto'
+      : method === 'PIX'
+      ? 'Pix'
+      : method || 'Nao informado';
+  const expiresLabel = subscription?.endDate ? formatDateTime(subscription.endDate) : '—';
+  const statusLabel = subscription?.status || '—';
+  const paidAtLabel = subscription?.latestPaymentAt ? formatDateTime(subscription.latestPaymentAt) : '—';
+  const paymentStatus = subscription?.latestPaymentStatus || '—';
+
+  if (loading) {
+    return <div className="py-8 text-sm text-slate-500">Carregando dados de pagamento...</div>;
+  }
+
+  if (error) {
+    return <div className="py-4 text-sm text-red-600">{error}</div>;
+  }
+
+  if (!subscription) {
+    return <div className="py-8 text-sm text-slate-500">Nenhuma assinatura encontrada.</div>;
+  }
+
+  return (
+    <div className="grid gap-4 lg:grid-cols-2">
+      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm space-y-3">
+        <div>
+          <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Plano atual</p>
+          <h3 className="text-lg font-bold text-slate-800">{planLabel}</h3>
+        </div>
+        <div className="flex items-center justify-between text-sm text-slate-600">
+          <span>Valor pago</span>
+          <span className="font-semibold text-slate-800">{formatCurrency(priceValue)}</span>
+        </div>
+        <div className="flex items-center justify-between text-sm text-slate-600">
+          <span>Forma</span>
+          <span className="font-semibold text-slate-800">{methodLabel}</span>
+        </div>
+        <div className="flex items-center justify-between text-sm text-slate-600">
+          <span>Status</span>
+          <span className="font-semibold text-slate-800">{statusLabel}</span>
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm space-y-3">
+        <div>
+          <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Ciclo</p>
+          <h3 className="text-lg font-bold text-slate-800">Vencimento da assinatura</h3>
+        </div>
+        <div className="flex items-center justify-between text-sm text-slate-600">
+          <span>Expira em</span>
+          <span className="font-semibold text-slate-800">{expiresLabel}</span>
+        </div>
+        <div className="flex items-center justify-between text-sm text-slate-600">
+          <span>Ultimo pagamento</span>
+          <span className="font-semibold text-slate-800">{paidAtLabel}</span>
+        </div>
+        <div className="flex items-center justify-between text-sm text-slate-600">
+          <span>Status do pagamento</span>
+          <span className="font-semibold text-slate-800">{paymentStatus}</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 interface Props {
   session?: any;
 }
@@ -171,7 +245,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   const [products, setProducts] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState<'resumo' | 'pedidos' | 'produtos' | 'config' | 'fila'>(() => {
+  const [subscriptionDetails, setSubscriptionDetails] = useState<any>(null);
+  const [subscriptionError, setSubscriptionError] = useState('');
+  const [subscriptionLoading, setSubscriptionLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<'resumo' | 'pedidos' | 'produtos' | 'config' | 'fila' | 'pagamentos'>(() => {
     return (location.state as any)?.activeTab || 'resumo';
   });
 
@@ -185,6 +262,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     brandName: session?.store?.name || '',
     logoUrl: resolveAssetUrl(session?.store?.settings?.logoUrl) || '',
     logoFile: '',
+    description: session?.store?.settings?.description || '',
     primaryColor: session?.store?.settings?.primaryColor || '#b91c1c',
     secondaryColor: session?.store?.settings?.secondaryColor || '#111827',
     instagram: instagramHandle?.replace('@', '') || '',
@@ -226,6 +304,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       brandName: session?.store?.name || '',
       logoUrl: resolveAssetUrl(session?.store?.settings?.logoUrl) || '',
       logoFile: '',
+      description: session?.store?.settings?.description || '',
       primaryColor: session?.store?.settings?.primaryColor || '#b91c1c',
       secondaryColor: session?.store?.settings?.secondaryColor || '#111827',
       instagram: instagramHandle?.replace('@', '') || '',
@@ -233,6 +312,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   }, [
     session?.store?.name,
     session?.store?.settings?.logoUrl,
+    session?.store?.settings?.description,
     session?.store?.settings?.primaryColor,
     session?.store?.settings?.secondaryColor,
     instagramHandle,
@@ -254,6 +334,32 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       unsubscribeOrders?.();
     };
   }, [storeId, storeSlug]);
+
+  useEffect(() => {
+    if (!storeId) return;
+    let active = true;
+
+    const loadSubscription = async () => {
+      setSubscriptionLoading(true);
+      setSubscriptionError('');
+      try {
+        const data = await subscriptionService.getByStore(storeId);
+        if (active) setSubscriptionDetails(data);
+      } catch (err) {
+        if (active) {
+          setSubscriptionError(err.message || 'Nao foi possivel carregar a assinatura.');
+        }
+      } finally {
+        if (active) setSubscriptionLoading(false);
+      }
+    };
+
+    loadSubscription();
+
+    return () => {
+      active = false;
+    };
+  }, [storeId]);
 
   /* =========================
    * CLIENTES PARA RELATÓRIO
@@ -289,6 +395,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         name: brandingDraft.brandName,
         logoFile: brandingDraft.logoFile || undefined,
         logoUrl: brandingDraft.logoFile ? undefined : brandingDraft.logoUrl || undefined,
+        description: brandingDraft.description || undefined,
         primaryColor: brandingDraft.primaryColor,
         secondaryColor: brandingDraft.secondaryColor,
         socialLinks: brandingDraft.instagram ? [{ type: 'instagram', value: brandingDraft.instagram }] : [],
@@ -319,6 +426,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
           { id: 'resumo', label: 'Resumo', icon: BarChart3 },
           { id: 'pedidos', label: 'Pedidos', icon: ShoppingCart },
           { id: 'produtos', label: 'Produtos', icon: Package },
+          { id: 'pagamentos', label: 'Pagamentos', icon: CreditCard },
           { id: 'config', label: 'Configurações', icon: Settings },
           { id: 'fila', label: 'Fila do churrasqueiro', icon: ChefHat },
         ].map((tab) => {
@@ -350,6 +458,16 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       )}
 
       {activeTab === 'produtos' && <ProductManager products={products} />}
+
+      {activeTab === 'pagamentos' && (
+        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <PaymentsView
+            subscription={subscriptionDetails}
+            loading={subscriptionLoading}
+            error={subscriptionError}
+          />
+        </div>
+      )}
 
       {activeTab === 'config' && (
         <div className="space-y-4">

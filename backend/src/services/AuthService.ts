@@ -139,6 +139,7 @@ export class AuthService
 
       const settings = manager.create(StoreSettings, {
         logoUrl: logoUrl || storePayload.logoUrl,
+        description: storePayload.description,
         primaryColor: storePayload.primaryColor,
         secondaryColor: storePayload.secondaryColor,
         socialLinks: sanitizeSocialLinks(storePayload.socialLinks),

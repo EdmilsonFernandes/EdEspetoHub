@@ -44,6 +44,7 @@ routes.patch('/admin/stores/:storeId/suspend', requireAuth, requireRole('SUPER_A
 routes.patch('/admin/stores/:storeId/reactivate', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.reactivateStore);
 
 // Store public
+routes.get('/public/stores', StoreController.listPortfolio);
 routes.get('/stores/slug/:slug', StoreController.getBySlug);
 routes.get('/chamanoespeto/:slug', StoreController.getBySlug);
 routes.get('/stores/slug/:slug/products', ProductController.listPublicBySlug);

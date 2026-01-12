@@ -56,6 +56,21 @@ export const BrandingSettings = ({ branding, onChange, storeSlug }) => {
           </div>
         </div>
 
+        <div className="space-y-2">
+          <label className="text-sm font-semibold text-gray-700">Descricao da loja</label>
+          <textarea
+            value={branding.description || ""}
+            onChange={(e) => handleChange("description", e.target.value)}
+            className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors min-h-[110px]"
+            placeholder="Uma frase curta para o portfolio."
+            maxLength={220}
+          />
+          <div className="flex items-center justify-between text-xs text-gray-500">
+            <span>Mostra no portfolio da plataforma.</span>
+            <span>{(branding.description || "").length}/220</span>
+          </div>
+        </div>
+
         <div className="space-y-3">
           <label className="text-sm font-semibold text-gray-700">Logo da loja</label>
           <div className="flex items-start gap-4">

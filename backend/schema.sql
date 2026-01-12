@@ -42,6 +42,7 @@ CREATE TABLE IF NOT EXISTS store_settings (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   store_id UUID NOT NULL UNIQUE REFERENCES stores(id) ON DELETE CASCADE,
   logo_url TEXT,
+  description TEXT,
   primary_color TEXT NOT NULL DEFAULT '#b91c1c',
   secondary_color TEXT,
   social_links JSONB DEFAULT '[]',
@@ -54,6 +55,8 @@ ALTER TABLE store_settings
 ADD COLUMN IF NOT EXISTS opening_hours JSONB DEFAULT '[]';
 ALTER TABLE store_settings
 ADD COLUMN IF NOT EXISTS order_types JSONB DEFAULT '["delivery","pickup","table"]';
+ALTER TABLE store_settings
+ADD COLUMN IF NOT EXISTS description TEXT;
 
 CREATE TABLE IF NOT EXISTS products (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

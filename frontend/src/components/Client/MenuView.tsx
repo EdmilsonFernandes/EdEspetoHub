@@ -119,12 +119,18 @@ export const MenuView = ({
   whatsappNumber,
   isOpenNow,
   todayHoursLabel,
+  storeAddress,
   showHeader = true,
   onOpenQueue,
   onOpenAdmin
 }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const mapQuery = storeAddress ? encodeURIComponent(storeAddress) : "";
+  const googleMapsUrl = mapQuery
+    ? `https://www.google.com/maps/search/?api=1&query=${mapQuery}`
+    : "";
+  const wazeUrl = mapQuery ? `https://waze.com/ul?q=${mapQuery}&navigate=yes` : "";
 
   const openProductModal = (product) => {
     setSelectedProduct(product);
@@ -246,6 +252,45 @@ export const MenuView = ({
               </div>
             </div>
 
+            {storeAddress && (
+              <div className="rounded-2xl border border-slate-200 bg-white/90 p-4">
+                <a
+                  href={googleMapsUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-start gap-3 hover:opacity-90 transition"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center flex-shrink-0">
+                    <MapPin size={18} />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                      Endereco da loja
+                    </p>
+                    <p className="text-sm font-semibold text-slate-900">{storeAddress}</p>
+                    <p className="text-xs text-slate-500">Toque para abrir no mapa</p>
+                  </div>
+                </a>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <a
+                    href={googleMapsUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-3 py-2 rounded-full text-xs font-semibold border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 transition"
+                  >
+                    Abrir no Google Maps
+                  </a>
+                  <a
+                    href={wazeUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-3 py-2 rounded-full text-xs font-semibold border border-brand-primary text-brand-primary bg-brand-primary-soft hover:opacity-90 transition"
+                  >
+                    Abrir no Waze
+                  </a>
+                </div>
+              </div>
+            )}
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-2.5 w-full pt-2">

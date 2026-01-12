@@ -20,6 +20,13 @@ const typeLabels: Record<string, string> = {
   table: 'Comer no local',
 };
 
+const normalizeWhatsApp = (value?: string) => {
+  if (!value) return '';
+  const digits = value.toString().replace(/\D/g, '');
+  if (!digits) return '';
+  return digits.startsWith('55') ? digits : `55${digits}`;
+};
+
 const buildDemoStatus = (createdAt: number) => {
   const diff = Date.now() - createdAt;
   if (diff > 8 * 60 * 1000) return 'done';
@@ -105,6 +112,32 @@ export function OrderTracking() {
   const storePhone = order?.store?.phone;
   const estimateMinutes =
     typeof queuePosition === 'number' && queuePosition > 0 ? Math.max(5, queuePosition * 6) : null;
+  const formatItemOptions = (item: any) => {
+    const labels = [];
+    if (item?.cookingPoint) labels.push(item.cookingPoint);
+    if (item?.passSkewer) labels.push('passar varinha');
+    return labels.length ? labels.join(' • ') : '';
+  };
+  const trackingLink = typeof window !== 'undefined' && order?.id
+    ? `${window.location.origin}/pedido/${order.id}`
+    : '';
+  const orderItemsText = (order?.items || [])
+    .map((item: any) => {
+      const options = formatItemOptions(item);
+      return `- ${item.quantity}x ${item.name}${options ? ` (${options})` : ''}`;
+    })
+    .join('\n');
+  const whatsappMessage = [
+    `Pedido #${order?.id || ''} - ${storeName}`,
+    orderItemsText ? `Itens:\n${orderItemsText}` : '',
+    `Total: ${formatCurrency(order?.total || 0)}`,
+    trackingLink ? `Acompanhar: ${trackingLink}` : '',
+  ]
+    .filter(Boolean)
+    .join('\n');
+  const whatsappLink = storePhone
+    ? `https://wa.me/${normalizeWhatsApp(storePhone)}?text=${encodeURIComponent(whatsappMessage)}`
+    : '';
 
   useEffect(() => {
     const settings = order?.store?.settings;
@@ -153,12 +186,6 @@ export function OrderTracking() {
   const currentStep = isDelivery && status === 'delivered' ? 'done' : status;
   const currentIndex = Math.max(0, steps.findIndex((item) => item.id === currentStep));
   const progress = steps.length > 1 ? Math.round((currentIndex / (steps.length - 1)) * 100) : 0;
-  const formatItemOptions = (item: any) => {
-    const labels = [];
-    if (item?.cookingPoint) labels.push(item.cookingPoint);
-    if (item?.passSkewer) labels.push('passar varinha');
-    return labels.length ? labels.join(' • ') : '';
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -361,20 +388,20 @@ export function OrderTracking() {
                       </p>
                     )}
                   {storePhone && (
-                      <div className="flex flex-col gap-2">
-                        <p>
-                          <span className="font-semibold">Contato da loja:</span> {storePhone}
-                        </p>
-                        <a
-                          href={`https://wa.me/${storePhone.replace(/\D/g, '')}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex items-center justify-center px-3 py-2 rounded-lg bg-green-600 text-white text-xs font-semibold hover:opacity-90"
-                        >
-                          Falar no WhatsApp
-                        </a>
-                      </div>
-                    )}
+                    <div className="flex flex-col gap-2">
+                      <p>
+                        <span className="font-semibold">Contato da loja:</span> {storePhone}
+                      </p>
+                      <a
+                        href={whatsappLink}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center justify-center px-3 py-2 rounded-lg bg-green-600 text-white text-xs font-semibold hover:opacity-90"
+                      >
+                        Enviar detalhes no WhatsApp
+                      </a>
+                    </div>
+                  )}
                     <p>
                       <span className="font-semibold">Status:</span> {statusLabel}
                     </p>

@@ -4,6 +4,7 @@ export interface CreateStoreDto {
   slug?: string;
   logoUrl?: string;
   logoFile?: string | null;
+  description?: string;
   primaryColor: string;
   secondaryColor?: string;
   socialLinks?: { type: string; value: string }[];

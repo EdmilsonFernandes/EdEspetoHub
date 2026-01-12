@@ -28,6 +28,7 @@ export function StorePage() {
   const [branding, setBranding] = useState(() => getPersistedBranding(storeSlug || defaultBranding.espetoId));
   const [storeOpenNow, setStoreOpenNow] = useState(true);
   const [storePhone, setStorePhone] = useState('');
+  const [storeAddress, setStoreAddress] = useState('');
   const [openingHours, setOpeningHours] = useState([]);
   const [orderTypes, setOrderTypes] = useState([ 'delivery', 'pickup', 'table' ]);
   const [storeSubscription, setStoreSubscription] = useState(null);
@@ -152,6 +153,7 @@ export function StorePage() {
             : [ 'delivery', 'pickup', 'table' ];
           setOrderTypes(allowedTypes);
           setStorePhone(data.owner?.phone || '');
+          setStoreAddress(data.owner?.address || '');
           setStoreOpenNow(isStoreOpenNow(normalizedHours));
           setStoreSubscription(data.subscription || null);
           applyStoreMeta(data);
@@ -696,6 +698,7 @@ export function StorePage() {
               isOpenNow={storeOpenNow}
               whatsappNumber={storePhone}
               todayHoursLabel={todayHoursLabel}
+              storeAddress={storeAddress}
             />
           </div>
         )}
