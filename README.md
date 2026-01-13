@@ -326,6 +326,9 @@ Crie um arquivo `.env` (ou use `.env.production`) na pasta `frontend/` com o end
 VITE_API_BASE_URL=http://localhost:4000/api
 ```
 
+SSM local (setup rapido):
+- Veja `docs/ssm-local.md`
+
 Com a API em execução, a loja fica acessível em:
 
 - Vitrine (cliente): `http://localhost:3000/<slug>` (ex: `http://localhost:3000/lojadoedmilson`)
