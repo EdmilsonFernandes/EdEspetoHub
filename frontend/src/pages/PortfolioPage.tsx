@@ -5,6 +5,25 @@ import { LandingPageLayout } from "../layouts/LandingPageLayout";
 import { storeService } from "../services/storeService";
 import { resolveAssetUrl } from "../utils/resolveAssetUrl";
 
+/**
+ * Type definition for a team member. Adding this type allows TypeScript to
+ * enforce that all required properties are present and helps catch missing
+ * fields during development.
+ */
+type TeamMember = {
+  name: string;
+  role: string;
+  years: number;
+  description: string;
+  experience: string[];
+  previousWork: string;
+  avatar: string;
+  color: string;
+  profileUrl: string;
+  profileImage?: string;
+  link?: string;
+};
+
 type PortfolioStore = {
   id?: string;
   name?: string;
@@ -18,7 +37,7 @@ type PortfolioStore = {
 };
 
 export function PortfolioPage() {
-  const teamMembers = [
+  const teamMembers: TeamMember[] = [
     {
       name: "Edmilson Lopes Fernandes",
       role: "Arquiteto de Software & Desenvolvedor Full Stack Senior",
@@ -53,27 +72,31 @@ export function PortfolioPage() {
       ],
       previousWork: "Desenvolveu infraestrutura backend para plataformas fintech e baseadas em assinatura",
       avatar: "G",
+      profileImage: "https://media.licdn.com/dms/image/v2/D4D03AQE-iBAfFfRPmQ/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1713894904137?e=1769644800&v=beta&t=dRjzWCu87_bo1eoa6jOW7rC5pfyCLVuNNbl2loNogY0",
       color: "from-sky-500 to-indigo-500",
       profileUrl: "https://www.linkedin.com/in/gabrielbotega/",
     },
     {
       name: "Juan Felipe Rada",
-      role: "Desenvolvedor Frontend",
+      role: "Desenvolvedor UX/UI",
       years: 4,
       description:
-        "Focado em criar interfaces bonitas e eficientes com experiencia em frameworks modernos e design responsivo.",
+        "Especialista em criar interfaces modernas, eficientes e intuitivas, unindo estética, usabilidade e consistência visual.",
       experience: [
         "React & TypeScript",
-        "Design Responsivo",
+        "Design Systems",
+        "Atomic Design",
         "Arquitetura de Componentes",
-        "Implementacao de UI",
-        "Otimizacao de Performance",
+        "Implementação e Evolução de Interfaces"
       ],
-      previousWork: "Construiu aplicacoes frontend para plataformas de e-commerce e gerenciamento",
+      previousWork:
+        "Construção, padronização e manutenção de design systems, com foco em reutilização, performance e experiência do usuário.",
       avatar: "J",
-      color: "from-emerald-500 to-teal-500",
+      profileImage: "https://media.licdn.com/dms/image/v2/D5603AQHig2NXQu3iIw/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1730128271936?e=1769644800&v=beta&t=9VbtD4hKaF_XYVTqCNEehLbsBWOI7Jc76g3TsUZqZ2A",
+      color: "from-purple-500 to-indigo-500",
       profileUrl: "https://www.linkedin.com/in/radapls/",
-    },
+      link: "https://radapls.github.io",
+    }
   ];
   const [stores, setStores] = useState<PortfolioStore[]>([]);
   const [query, setQuery] = useState("");
@@ -327,6 +350,18 @@ export function PortfolioPage() {
                         Ver perfil no LinkedIn
                       </a>
                     </div>
+                    {member.link && (
+                      <a
+                        href={member.link}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="block w-full text-center text-sm font-semibold text-white bg-indigo-600 rounded-full py-2.5 shadow-sm hover:bg-indigo-600/90 transition"
+                      >
+                        Visitar web personal
+                      </a>
+
+                    )}
+
                   </div>
                 </div>
               </div>
