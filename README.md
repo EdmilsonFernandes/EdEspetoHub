@@ -67,6 +67,10 @@ Opcional (producao): usar AWS SSM Parameter Store (SecureString) com um JSON uni
 
 Exemplo de JSON no SSM:
 ```
+
+Verificacao rapida:
+- `aws ssm get-parameter --name /chamanoespeto/prod --with-decryption --region us-east-2`
+- Ao subir a API, procure o log `SSM env loaded` (mostra o nome do parametro e a quantidade de chaves).
 {
   "JWT_SECRET": "secret",
   "APP_BASE_URL": "https://chamanoespeto.com.br",

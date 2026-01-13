@@ -41,4 +41,9 @@ export const loadSsmEnv = async () => {
     if (!shouldOverride && process.env[key]) return;
     process.env[key] = String(value);
   });
+
+  console.info('SSM env loaded', {
+    parameter: parameterName,
+    keys: Object.keys(parsed).length,
+  });
 };
