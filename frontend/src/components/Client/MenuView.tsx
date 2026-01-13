@@ -345,64 +345,62 @@ export const MenuView = ({
             </div>
 
             {/* Lista de itens */}
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="space-y-3">
               {category.items.map((item) => (
                 <div
                   key={item.id}
-                  className="group bg-white/95 rounded-3xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-xl hover:-translate-y-0.5 active:scale-[0.99] transition cursor-pointer flex flex-col"
+                  className="group bg-white/95 rounded-2xl shadow-sm border border-slate-100 p-3 flex gap-3 items-center hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99] transition cursor-pointer"
                   onClick={() => openProductModal(item)}
                 >
-                  <div className="relative">
-                    <div className="aspect-[4/3] w-full overflow-hidden bg-gray-100">
-                      {item.imageUrl ? (
-                        <img
-                          src={item.imageUrl}
-                          alt={item.name}
-                          className="w-full h-full object-cover transition duration-300 group-hover:scale-[1.03]"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
-                          sem foto
-                        </div>
-                      )}
-                    </div>
-                    <div className="absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-black/55 to-transparent" />
-                    <div className="absolute bottom-3 left-3 inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-white/90 text-slate-900 shadow-sm">
-                      {formatCurrency(item.price)}
-                    </div>
+                  <div className="w-16 h-16 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-200">
+                    {item.imageUrl ? (
+                      <img
+                        src={item.imageUrl}
+                        alt={item.name}
+                        className="w-full h-full object-cover transition duration-300 group-hover:scale-[1.03]"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-400 text-[10px]">
+                        sem foto
+                      </div>
+                    )}
                   </div>
 
-                  <div className="flex-1 p-4 space-y-2">
+                  <div className="flex-1 min-w-0 space-y-1">
                     <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="font-semibold text-slate-900 text-[15px] leading-tight">
+                      <div className="min-w-0">
+                        <p className="font-semibold text-slate-900 text-[15px] leading-tight truncate">
                           {item.name}
                         </p>
                         {item.description && (
                           <p className="text-xs text-slate-500 line-clamp-1">{item.description}</p>
                         )}
                       </div>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (isEspetoCategory(item.category)) {
-                            openProductModal(item);
-                            return;
-                          }
-                          onUpdateCart(item, 1);
-                        }}
-                        title="Adicionar"
-                        className="w-10 h-10 rounded-2xl bg-brand-primary text-white flex items-center justify-center hover:opacity-90 shadow-md active:scale-95 transition"
-                      >
-                        <Plus size={18} />
-                      </button>
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold bg-brand-primary-soft text-brand-primary">
+                        {formatCurrency(item.price)}
+                      </span>
                     </div>
                     {isEspetoCategory(item.category) && (
                       <div className="inline-flex items-center gap-2 text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full">
-                        Ponto da carne e varinha ao tocar
+                        Clique para escolher o ponto da carne
                       </div>
                     )}
                   </div>
+
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (isEspetoCategory(item.category)) {
+                        openProductModal(item);
+                        return;
+                      }
+                      onUpdateCart(item, 1);
+                    }}
+                    title="Adicionar"
+                    className="w-10 h-10 rounded-2xl bg-brand-primary text-white flex items-center justify-center hover:opacity-90 shadow-md active:scale-95 transition"
+                  >
+                    <Plus size={18} />
+                  </button>
                 </div>
               ))}
               {category.items.length === 0 && (
