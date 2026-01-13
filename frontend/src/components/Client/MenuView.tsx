@@ -328,17 +328,33 @@ export const MenuView = ({
           </div>
         </section>
         <div id="menu-list" className="space-y-10">
-        {grouped.map((category) => (
+        {grouped.map((category, index) => {
+          const accentColors = [
+            "#ef4444",
+            "#f59e0b",
+            "#10b981",
+            "#3b82f6",
+            "#8b5cf6",
+            "#ec4899",
+          ];
+          const accent = accentColors[index % accentColors.length];
+          return (
           <div key={category.key} className="space-y-3">
 
             {/* Título da categoria */}
             <div
-              className="px-4 py-2 rounded-2xl border border-slate-100 bg-white/80 shadow-sm flex items-center justify-between"
+              className="px-4 py-2 rounded-2xl border border-slate-100 bg-white/90 shadow-sm flex items-center justify-between"
               style={{ borderColor: "color-mix(in srgb, var(--color-primary) 20%, #e2e8f0)" }}
             >
-              <h2 className="font-bold text-lg capitalize tracking-wide text-slate-800">
-                {category.label}
-              </h2>
+              <div className="flex items-center gap-3">
+                <span
+                  className="h-9 w-1.5 rounded-full"
+                  style={{ backgroundColor: accent }}
+                />
+                <h2 className="font-bold text-lg capitalize tracking-wide text-slate-800">
+                  {category.label}
+                </h2>
+              </div>
               <span className="text-xs font-semibold text-slate-500 bg-slate-50 border border-slate-200 px-2 py-1 rounded-full">
                 {category.items.length === 1 ? '1 item' : `${category.items.length} itens`}
               </span>
@@ -409,7 +425,8 @@ export const MenuView = ({
             </div>
 
           </div>
-        ))}
+        );
+        })}
         </div>
       </div>
 
