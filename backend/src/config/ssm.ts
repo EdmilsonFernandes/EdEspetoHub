@@ -37,10 +37,12 @@ export const loadSsmEnv = async () => {
   }
 
   const shouldOverride = process.env.SSM_OVERRIDE !== 'false';
+  const appliedKeys: string[] = [];
   Object.entries(parsed).forEach(([key, value]) => {
     if (value === undefined || value === null) return;
     if (!shouldOverride && process.env[key]) return;
     process.env[key] = String(value);
+    appliedKeys.push(key);
   });
 
   const runningInDocker = fs.existsSync('/.dockerenv') || process.env.DOCKER === 'true';
@@ -48,11 +50,17 @@ export const loadSsmEnv = async () => {
     const localDbHost = process.env.SSM_LOCAL_DB_HOST;
     if (localDbHost && process.env.PGHOST === 'postgres') {
       process.env.PGHOST = localDbHost;
+      appliedKeys.push('PGHOST');
     }
   }
 
+  const logKeys = process.env.SSM_LOG_KEYS === 'true';
   console.info('SSM env loaded', {
     parameter: parameterName,
     keys: Object.keys(parsed).length,
+    applied: appliedKeys.length,
+    override: shouldOverride,
+    docker: runningInDocker,
+    ...(logKeys ? { appliedKeys } : {}),
   });
 };
