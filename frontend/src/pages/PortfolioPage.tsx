@@ -322,7 +322,7 @@ export function PortfolioPage() {
                         href={member.profileUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="w-full text-center text-sm font-semibold text-white bg-[#0a66c2] rounded-full py-2.5 shadow-sm hover:bg-[#0a66c2]/90 transition"
+                        className="block w-full text-center text-sm font-semibold text-white bg-[#0a66c2] rounded-full py-2.5 shadow-sm hover:bg-[#0a66c2]/90 transition"
                       >
                         Ver perfil no LinkedIn
                       </a>

@@ -171,9 +171,30 @@ const PaymentsView = ({ subscription, loading, error }) => {
       ? 'Pix'
       : method || 'Nao informado';
   const expiresLabel = subscription?.endDate ? formatDateTime(subscription.endDate) : '—';
-  const statusLabel = subscription?.status || '—';
+  const rawStatus = (subscription?.status || '').toUpperCase();
+  const statusMap: Record<string, { label: string; tone: string }> = {
+    TRIAL: { label: 'Trial ativo (7 dias)', tone: 'bg-emerald-100 text-emerald-700' },
+    ACTIVE: { label: 'Assinatura ativa', tone: 'bg-emerald-100 text-emerald-700' },
+    PENDING: { label: 'Aguardando pagamento', tone: 'bg-amber-100 text-amber-700' },
+    EXPIRED: { label: 'Assinatura expirada', tone: 'bg-rose-100 text-rose-700' },
+    SUSPENDED: { label: 'Assinatura suspensa', tone: 'bg-rose-100 text-rose-700' },
+    CANCELLED: { label: 'Assinatura cancelada', tone: 'bg-slate-100 text-slate-600' },
+  };
+  const statusLabel = statusMap[rawStatus]?.label || subscription?.status || '—';
+  const statusTone = statusMap[rawStatus]?.tone || 'bg-slate-100 text-slate-600';
   const paidAtLabel = subscription?.latestPaymentAt ? formatDateTime(subscription.latestPaymentAt) : '—';
-  const paymentStatus = subscription?.latestPaymentStatus || '—';
+  const rawPaymentStatus = (subscription?.latestPaymentStatus || '').toUpperCase();
+  const paymentStatusMap: Record<string, string> = {
+    PAID: 'Pagamento aprovado',
+    PENDING: 'Pagamento pendente',
+    FAILED: 'Pagamento falhou',
+    CANCELLED: 'Pagamento cancelado',
+    EXPIRED: 'Pagamento expirado',
+  };
+  const paymentStatus =
+    rawStatus === 'TRIAL'
+      ? 'Sem cobranca durante o trial'
+      : paymentStatusMap[rawPaymentStatus] || subscription?.latestPaymentStatus || '—';
 
   if (loading) {
     return <div className="py-8 text-sm text-slate-500">Carregando dados de pagamento...</div>;
@@ -188,42 +209,40 @@ const PaymentsView = ({ subscription, loading, error }) => {
   }
 
   return (
-    <div className="grid gap-4 lg:grid-cols-2">
-      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm space-y-3">
-        <div>
-          <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Plano atual</p>
-          <h3 className="text-lg font-bold text-slate-800">{planLabel}</h3>
+    <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
+      <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_20px_60px_-50px_rgba(15,23,42,0.45)] space-y-6">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Plano atual</p>
+            <h3 className="text-2xl font-bold text-slate-900 mt-2">{planLabel}</h3>
+          </div>
+          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusTone}`}>
+            {statusLabel}
+          </span>
         </div>
-        <div className="flex items-center justify-between text-sm text-slate-600">
-          <span>Valor pago</span>
-          <span className="font-semibold text-slate-800">{formatCurrency(priceValue)}</span>
-        </div>
-        <div className="flex items-center justify-between text-sm text-slate-600">
-          <span>Forma</span>
-          <span className="font-semibold text-slate-800">{methodLabel}</span>
-        </div>
-        <div className="flex items-center justify-between text-sm text-slate-600">
-          <span>Status</span>
-          <span className="font-semibold text-slate-800">{statusLabel}</span>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Valor</p>
+            <p className="text-lg font-semibold text-slate-900 mt-2">{formatCurrency(priceValue)}</p>
+            <p className="text-xs text-slate-500 mt-1">Plano {plan?.billingCycle || 'mensal'}</p>
+          </div>
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Forma de pagamento</p>
+            <p className="text-lg font-semibold text-slate-900 mt-2">{methodLabel}</p>
+            <p className="text-xs text-slate-500 mt-1">{paymentStatus}</p>
+          </div>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm space-y-3">
+      <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_20px_60px_-50px_rgba(15,23,42,0.35)] space-y-4">
         <div>
-          <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Ciclo</p>
-          <h3 className="text-lg font-bold text-slate-800">Vencimento da assinatura</h3>
+          <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Ciclo</p>
+          <h3 className="text-lg font-bold text-slate-900 mt-2">Proximo vencimento</h3>
         </div>
-        <div className="flex items-center justify-between text-sm text-slate-600">
-          <span>Expira em</span>
-          <span className="font-semibold text-slate-800">{expiresLabel}</span>
-        </div>
-        <div className="flex items-center justify-between text-sm text-slate-600">
-          <span>Ultimo pagamento</span>
-          <span className="font-semibold text-slate-800">{paidAtLabel}</span>
-        </div>
-        <div className="flex items-center justify-between text-sm text-slate-600">
-          <span>Status do pagamento</span>
-          <span className="font-semibold text-slate-800">{paymentStatus}</span>
+        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+          <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Expira em</p>
+          <p className="text-lg font-semibold text-slate-900 mt-2">{expiresLabel}</p>
+          <p className="text-xs text-slate-500 mt-1">Ultimo pagamento: {paidAtLabel}</p>
         </div>
       </div>
     </div>

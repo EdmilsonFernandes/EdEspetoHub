@@ -641,12 +641,6 @@ export function StorePage() {
                       >
                         Voltar ao inicio
                       </button>
-                      <button
-                        onClick={() => navigate('/create')}
-                        className="px-6 py-3 rounded-xl bg-brand-gradient text-white font-semibold hover:opacity-90 transition-all"
-                      >
-                        Criar loja no Chama
-                      </button>
                     </div>
                   </div>
                   <div className="rounded-3xl border border-slate-200 bg-white/80 p-5 space-y-4">
