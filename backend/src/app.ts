@@ -43,6 +43,6 @@ async function bootstrap()
 
 bootstrap().catch((error) =>
 {
-  logger.error('Failed to start API', { error });
+  console.error('Failed to start API', error);
   process.exit(1);
 });
