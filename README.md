@@ -66,6 +66,7 @@ Opcional (producao): usar AWS SSM Parameter Store (SecureString) com um JSON uni
 - `SSM_OVERRIDE=true` para sobrescrever variaveis locais
 Opcional (dev local): se o SSM vier com `PGHOST=postgres`, defina `SSM_LOCAL_DB_HOST=localhost` para sobrescrever apenas no host (fora do Docker).
 Opcional (debug): `SSM_LOG_KEYS=true` para logar quais chaves foram aplicadas (somente nomes).
+Opcional (debug): `SSM_LOG_OVERRIDES=false` para ocultar overrides locais (padrao loga).
 
 Exemplo de JSON no SSM:
 ```
