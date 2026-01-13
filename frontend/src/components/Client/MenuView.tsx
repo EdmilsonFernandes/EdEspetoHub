@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from "react";
-import { ChefHat, Instagram, LayoutDashboard, Link, Plus, X, Clock, MapPin, CreditCard, DollarSign, Zap } from "lucide-react";
+import { ChefHat, Instagram, LayoutDashboard, Link, Plus, X, Clock, MapPin, CreditCard, DollarSign, Zap, Search } from "lucide-react";
 import { formatCurrency } from "../../utils/format";
 import { ProductModal } from "../Cart/ProductModal";
 
@@ -126,6 +126,7 @@ export const MenuView = ({
 }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [query, setQuery] = useState("");
   const mapQuery = storeAddress ? encodeURIComponent(storeAddress) : "";
   const googleMapsUrl = mapQuery
     ? `https://www.google.com/maps/search/?api=1&query=${mapQuery}`
@@ -183,6 +184,27 @@ export const MenuView = ({
 
     return ordered.filter((category) => category.items.length > 0);
   }, [products]);
+
+  const filteredGrouped = useMemo(() => {
+    const normalized = query.trim().toLowerCase();
+    if (!normalized) return grouped;
+    return grouped
+      .map((category) => {
+        const items = category.items.filter((item) => {
+          const haystack = [
+            item?.name,
+            item?.description,
+            item?.category,
+          ]
+            .filter(Boolean)
+            .join(" ")
+            .toLowerCase();
+          return haystack.includes(normalized);
+        });
+        return { ...category, items };
+      })
+      .filter((category) => category.items.length > 0);
+  }, [grouped, query]);
 
   return (
     <div
@@ -325,10 +347,19 @@ export const MenuView = ({
                 </a>
               )}
             </div>
+            <div className="relative">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                className="w-full rounded-full border border-slate-200 bg-white py-2 pl-9 pr-4 text-sm focus:ring-2 focus:ring-brand-primary focus:border-brand-primary"
+                placeholder="Buscar no cardapio (ex: costela)"
+              />
+            </div>
           </div>
         </section>
         <div id="menu-list" className="space-y-10">
-        {grouped.map((category, index) => {
+        {filteredGrouped.map((category, index) => {
           const accentColors = [
             "#ef4444",
             "#f59e0b",
@@ -427,6 +458,11 @@ export const MenuView = ({
           </div>
         );
         })}
+        {filteredGrouped.length === 0 && (
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-500">
+            Nenhum item encontrado.
+          </div>
+        )}
         </div>
       </div>
 
