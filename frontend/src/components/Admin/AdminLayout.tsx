@@ -73,8 +73,9 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
 
   const isTrial = subscription?.status === 'TRIAL';
   const showRenewBanner =
-    subscription?.status === 'EXPIRING' ||
-    (typeof daysLeft === 'number' && daysLeft <= 3 && daysLeft >= 0);
+    !isTrial &&
+    (subscription?.status === 'EXPIRING' ||
+      (typeof daysLeft === 'number' && daysLeft <= 3 && daysLeft >= 0));
 
   const bannerText =
     typeof daysLeft === 'number' && daysLeft <= 0
