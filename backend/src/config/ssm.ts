@@ -1,4 +1,5 @@
 import { SSMClient, GetParameterCommand } from '@aws-sdk/client-ssm';
+import fs from 'fs';
 
 const parseJson = (raw: string) => {
   try {
@@ -41,6 +42,14 @@ export const loadSsmEnv = async () => {
     if (!shouldOverride && process.env[key]) return;
     process.env[key] = String(value);
   });
+
+  const runningInDocker = fs.existsSync('/.dockerenv') || process.env.DOCKER === 'true';
+  if (!runningInDocker) {
+    const localDbHost = process.env.SSM_LOCAL_DB_HOST;
+    if (localDbHost && process.env.PGHOST === 'postgres') {
+      process.env.PGHOST = localDbHost;
+    }
+  }
 
   console.info('SSM env loaded', {
     parameter: parameterName,

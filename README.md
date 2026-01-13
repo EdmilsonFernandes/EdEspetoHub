@@ -64,6 +64,7 @@ Opcional (producao): usar AWS SSM Parameter Store (SecureString) com um JSON uni
 - `SSM_PARAMETER_NAME` (ex: `/chamanoespeto/prod`)
 - `AWS_REGION` (ex: `us-east-1`)
 - `SSM_OVERRIDE=true` para sobrescrever variaveis locais
+Opcional (dev local): se o SSM vier com `PGHOST=postgres`, defina `SSM_LOCAL_DB_HOST=localhost` para sobrescrever apenas no host (fora do Docker).
 
 Exemplo de JSON no SSM:
 ```
