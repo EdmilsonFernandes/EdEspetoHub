@@ -60,6 +60,33 @@ cp backend/.env.example backend/.env
 Edite `backend/.env` e ajuste `PG*`, `PORT` e `JWT_SECRET`.
 Opcional: `LOG_LEVEL=debug|info|warn|error`, `LOG_TO_FILE=true` e `LOG_DIR=logs` para controlar logs e salvar em arquivo.
 
+Opcional (producao): usar AWS SSM Parameter Store (SecureString) com um JSON unico. Configure:
+- `SSM_PARAMETER_NAME` (ex: `/chamanoespeto/prod`)
+- `AWS_REGION` (ex: `us-east-1`)
+- `SSM_OVERRIDE=true` para sobrescrever variaveis locais
+
+Exemplo de JSON no SSM:
+```
+{
+  "JWT_SECRET": "secret",
+  "APP_BASE_URL": "https://chamanoespeto.com.br",
+  "PGHOST": "db.prod",
+  "PGPORT": "5432",
+  "PGUSER": "postgres",
+  "PGPASSWORD": "senha",
+  "PGDATABASE": "espetinho",
+  "MP_ACCESS_TOKEN": "xxx",
+  "MP_PUBLIC_KEY": "xxx",
+  "MP_WEBHOOK_SECRET": "xxx",
+  "SMTP_HOST": "smtp.seu-dominio.com",
+  "SMTP_PORT": "587",
+  "SMTP_USER": "usuario",
+  "SMTP_PASS": "senha",
+  "SMTP_SECURE": "false",
+  "EMAIL_FROM": "Chama no Espeto <contato@chamanoespeto.com.br>"
+}
+```
+
 Crie `frontend/.env`:
 
 ```bash

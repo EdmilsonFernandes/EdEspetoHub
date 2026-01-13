@@ -3,17 +3,20 @@ import express from 'express';
 import path from 'path';
 import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
-import { AppDataSource } from './config/database';
-import routes from './routes';
-import { env } from './config/env';
-import { swaggerSpec } from './config/swagger';
-import { scheduleSubscriptionExpirationJob } from './jobs/subscription-expiration.job';
-import { runMigrations } from './utils/runMigrations';
-import { requestLogger } from './middleware/requestLogger';
-import { logger } from './utils/logger';
+import { loadSsmEnv } from './config/ssm';
 
 async function bootstrap()
 {
+  await loadSsmEnv();
+  const { AppDataSource } = await import('./config/database');
+  const routes = (await import('./routes')).default;
+  const { env } = await import('./config/env');
+  const { swaggerSpec } = await import('./config/swagger');
+  const { scheduleSubscriptionExpirationJob } = await import('./jobs/subscription-expiration.job');
+  const { runMigrations } = await import('./utils/runMigrations');
+  const { requestLogger } = await import('./middleware/requestLogger');
+  const { logger } = await import('./utils/logger');
+
   await AppDataSource.initialize();
   await runMigrations();
   const app = express();
