@@ -114,6 +114,7 @@ export function SuperAdmin() {
     logs: false,
     events: false,
   });
+  const [activeSection, setActiveSection] = useState('executive');
 
   const loadOverview = async (authToken: string) => {
     setLoading(true);
@@ -138,6 +139,29 @@ export function SuperAdmin() {
   const toggleSection = (key: keyof typeof sectionsOpen) => {
     setSectionsOpen((prev) => ({ ...prev, [key]: !prev[key] }));
   };
+
+  useEffect(() => {
+    const sectionIds = [ 'executive', 'rankings', 'stores', 'payments', 'logs', 'events' ];
+    const elements = sectionIds
+      .map((id) => document.getElementById(id))
+      .filter(Boolean) as HTMLElement[];
+    if (!elements.length) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+        if (visible[0]?.target?.id) {
+          setActiveSection(visible[0].target.id);
+        }
+      },
+      { rootMargin: '-30% 0px -60% 0px', threshold: [ 0.1, 0.4, 0.7 ] }
+    );
+
+    elements.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     if (token) {
@@ -697,37 +721,61 @@ export function SuperAdmin() {
         <div className="flex flex-wrap gap-2 text-xs font-semibold text-slate-700">
           <a
             href="#executive"
-            className="px-3 py-1.5 rounded-full border border-slate-200 bg-gradient-to-r from-slate-900 to-slate-700 text-white shadow-sm hover:opacity-90"
+            className={`px-3 py-1.5 rounded-full border border-slate-200 shadow-sm transition ${
+              activeSection === 'executive'
+                ? 'bg-gradient-to-r from-slate-900 to-slate-700 text-white'
+                : 'bg-white text-slate-700 hover:-translate-y-0.5 hover:shadow-md'
+            }`}
           >
             Resumo
           </a>
           <a
             href="#rankings"
-            className="px-3 py-1.5 rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition"
+            className={`px-3 py-1.5 rounded-full border border-slate-200 shadow-sm transition ${
+              activeSection === 'rankings'
+                ? 'bg-slate-900 text-white'
+                : 'bg-white text-slate-700 hover:-translate-y-0.5 hover:shadow-md'
+            }`}
           >
             Rankings
           </a>
           <a
             href="#stores"
-            className="px-3 py-1.5 rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition"
+            className={`px-3 py-1.5 rounded-full border border-slate-200 shadow-sm transition ${
+              activeSection === 'stores'
+                ? 'bg-slate-900 text-white'
+                : 'bg-white text-slate-700 hover:-translate-y-0.5 hover:shadow-md'
+            }`}
           >
             Lojas
           </a>
           <a
             href="#payments"
-            className="px-3 py-1.5 rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition"
+            className={`px-3 py-1.5 rounded-full border border-slate-200 shadow-sm transition ${
+              activeSection === 'payments'
+                ? 'bg-slate-900 text-white'
+                : 'bg-white text-slate-700 hover:-translate-y-0.5 hover:shadow-md'
+            }`}
           >
             Pagamentos
           </a>
           <a
             href="#logs"
-            className="px-3 py-1.5 rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition"
+            className={`px-3 py-1.5 rounded-full border border-slate-200 shadow-sm transition ${
+              activeSection === 'logs'
+                ? 'bg-slate-900 text-white'
+                : 'bg-white text-slate-700 hover:-translate-y-0.5 hover:shadow-md'
+            }`}
           >
             Logs
           </a>
           <a
             href="#events"
-            className="px-3 py-1.5 rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition"
+            className={`px-3 py-1.5 rounded-full border border-slate-200 shadow-sm transition ${
+              activeSection === 'events'
+                ? 'bg-slate-900 text-white'
+                : 'bg-white text-slate-700 hover:-translate-y-0.5 hover:shadow-md'
+            }`}
           >
             Eventos
           </a>
