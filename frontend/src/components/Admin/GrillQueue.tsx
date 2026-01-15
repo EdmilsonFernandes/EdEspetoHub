@@ -28,6 +28,7 @@ export const GrillQueue = () => {
   });
   const previousIdsRef = useRef<string[]>([]);
   const audioContextRef = useRef<AudioContext | null>(null);
+  const itemOrderRef = useRef<Map<string, Map<string, number>>>(new Map());
   const formatItemOptions = (item) => {
     const labels = [];
     if (item?.cookingPoint) labels.push(item.cookingPoint);
@@ -40,18 +41,29 @@ export const GrillQueue = () => {
     if (position === 3) return "bg-yellow-400 text-slate-900";
     return "bg-slate-100 text-slate-700";
   };
-  const sortItems = (items = []) =>
-    [...items].sort((a, b) => {
-      const nameA = (a?.name || "").toString().toLowerCase();
-      const nameB = (b?.name || "").toString().toLowerCase();
-      if (nameA !== nameB) return nameA.localeCompare(nameB);
-      const optionsA = `${a?.cookingPoint || ""}-${a?.passSkewer ? "1" : "0"}`;
-      const optionsB = `${b?.cookingPoint || ""}-${b?.passSkewer ? "1" : "0"}`;
-      if (optionsA !== optionsB) return optionsA.localeCompare(optionsB);
-      const idA = (a?.productId || a?.id || "").toString();
-      const idB = (b?.productId || b?.id || "").toString();
-      return idA.localeCompare(idB);
+  const getItemKey = (item) =>
+    `${item?.productId || item?.id || ''}-${item?.cookingPoint || ''}-${item?.passSkewer ? '1' : '0'}`;
+  const ensureOrderIndex = (orderId, items = []) => {
+    if (!orderId) return;
+    const map = itemOrderRef.current.get(orderId) || new Map<string, number>();
+    let nextIndex = map.size;
+    items.forEach((item) => {
+      const key = getItemKey(item);
+      if (!map.has(key)) {
+        map.set(key, nextIndex++);
+      }
     });
+    itemOrderRef.current.set(orderId, map);
+  };
+  const getOrderedItems = (orderId, items = []) => {
+    ensureOrderIndex(orderId, items);
+    const map = itemOrderRef.current.get(orderId) || new Map<string, number>();
+    return [...items].sort((a, b) => {
+      const indexA = map.get(getItemKey(a)) ?? 0;
+      const indexB = map.get(getItemKey(b)) ?? 0;
+      return indexA - indexB;
+    });
+  };
 
   const productsById = useMemo(() => {
     const map = new Map();
@@ -205,6 +217,7 @@ export const GrillQueue = () => {
     const updatedItems = updater(targetOrder?.items || []);
 
     const sanitizedItems = updatedItems.filter((item) => item.qty > 0);
+    ensureOrderIndex(orderId, sanitizedItems);
 
     const nextTotal = sanitizedItems.reduce(
       (sum, item) => sum + (item.unitPrice ?? item.price ?? 0) * item.qty,
@@ -408,7 +421,7 @@ export const GrillQueue = () => {
 
             {/* LISTA DE ITENS */}
             <div className="mt-4 space-y-2">
-              {sortItems(order.items || []).map((item) => (
+              {getOrderedItems(order.id, order.items || []).map((item) => (
                 <div
                   key={item.id}
                   className="flex justify-between text-sm text-gray-700 items-center gap-3"
