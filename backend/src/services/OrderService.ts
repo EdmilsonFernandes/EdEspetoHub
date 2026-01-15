@@ -119,6 +119,9 @@ export class OrderService
       queueSize = await this.orderRepository.countByStoreAndStatuses(order.store.id, queueStatuses);
       if (queueStatuses.includes(order.status)) {
         queuePosition = await this.orderRepository.countQueueAhead(order.store.id, queueStatuses, order.createdAt);
+        if (typeof queuePosition === 'number') {
+          queuePosition += 1;
+        }
       }
     }
 

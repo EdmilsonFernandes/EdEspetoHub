@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Bike, ChefHat, CircleCheck, Clock, Loader2, MapPin } from 'lucide-react';
 import { orderService } from '../services/orderService';
-import { formatCurrency, formatDateTime, formatDuration } from '../utils/format';
+import { formatCurrency, formatDateTime, formatDuration, formatPaymentMethod } from '../utils/format';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { applyBrandTheme } from '../utils/brandTheme';
 
@@ -111,6 +111,7 @@ export function OrderTracking() {
   const queueSize = order?.queueSize;
   const storePhone = order?.store?.phone;
   const customerPhone = order?.phone;
+  const paymentLabel = formatPaymentMethod(order?.paymentMethod || order?.payment);
   const estimateMinutes =
     typeof queuePosition === 'number' && queuePosition > 0 ? Math.max(5, queuePosition * 6) : null;
   const formatItemOptions = (item: any) => {
@@ -275,8 +276,8 @@ export function OrderTracking() {
                     <Clock size={16} />
                     {order.createdAt ? formatDateTime(order.createdAt) : 'Agora'}
                     {elapsedMs > 0 && (
-                      <span className="ml-2 inline-flex items-center gap-1 text-xs text-gray-500">
-                        • {formatDuration(elapsedMs)}
+                      <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-600">
+                        Tempo corrido: {formatDuration(elapsedMs)}
                       </span>
                     )}
                   </div>
@@ -337,7 +338,14 @@ export function OrderTracking() {
 
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="rounded-2xl border border-gray-100 p-4">
-                  <p className="text-sm font-semibold text-gray-800 mb-3">Resumo do pedido</p>
+                  <div className="flex items-center justify-between gap-3 mb-3">
+                    <p className="text-sm font-semibold text-gray-800">Resumo do pedido</p>
+                    {paymentLabel && (
+                      <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                        {paymentLabel}
+                      </span>
+                    )}
+                  </div>
                   <div className="space-y-2 text-sm text-gray-600">
                     {(order.items || []).map((item) => (
                       <div key={item.id || item.productId} className="flex items-center justify-between gap-3">
@@ -384,6 +392,11 @@ export function OrderTracking() {
                     <p>
                       <span className="font-semibold">Cliente:</span> {order.customerName || 'Cliente'}
                     </p>
+                    {paymentLabel && (
+                      <p>
+                        <span className="font-semibold">Pagamento:</span> {paymentLabel}
+                      </p>
+                    )}
                     {order.phone && (
                       <p>
                         <span className="font-semibold">Telefone:</span> {order.phone}
