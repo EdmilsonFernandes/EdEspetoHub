@@ -695,12 +695,42 @@ export function SuperAdmin() {
 
       <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3 bg-white/90 backdrop-blur border-b border-slate-200">
         <div className="flex flex-wrap gap-2 text-xs font-semibold text-slate-700">
-          <a href="#executive" className="px-3 py-1 rounded-full border border-slate-200 hover:bg-slate-50">Resumo</a>
-          <a href="#rankings" className="px-3 py-1 rounded-full border border-slate-200 hover:bg-slate-50">Rankings</a>
-          <a href="#stores" className="px-3 py-1 rounded-full border border-slate-200 hover:bg-slate-50">Lojas</a>
-          <a href="#payments" className="px-3 py-1 rounded-full border border-slate-200 hover:bg-slate-50">Pagamentos</a>
-          <a href="#logs" className="px-3 py-1 rounded-full border border-slate-200 hover:bg-slate-50">Logs</a>
-          <a href="#events" className="px-3 py-1 rounded-full border border-slate-200 hover:bg-slate-50">Eventos</a>
+          <a
+            href="#executive"
+            className="px-3 py-1.5 rounded-full border border-slate-200 bg-gradient-to-r from-slate-900 to-slate-700 text-white shadow-sm hover:opacity-90"
+          >
+            Resumo
+          </a>
+          <a
+            href="#rankings"
+            className="px-3 py-1.5 rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition"
+          >
+            Rankings
+          </a>
+          <a
+            href="#stores"
+            className="px-3 py-1.5 rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition"
+          >
+            Lojas
+          </a>
+          <a
+            href="#payments"
+            className="px-3 py-1.5 rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition"
+          >
+            Pagamentos
+          </a>
+          <a
+            href="#logs"
+            className="px-3 py-1.5 rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition"
+          >
+            Logs
+          </a>
+          <a
+            href="#events"
+            className="px-3 py-1.5 rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition"
+          >
+            Eventos
+          </a>
         </div>
       </div>
 
