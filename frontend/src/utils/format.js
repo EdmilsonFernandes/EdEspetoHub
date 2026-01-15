@@ -53,14 +53,18 @@ export const formatOrderStatus = (status) => {
 };
 
 export const formatPaymentMethod = (payment) => {
+  const normalized = (payment || '').toString().toLowerCase();
   const map = {
     pix: 'Pix',
     debito: 'Débito',
+    debit: 'Débito',
     credito: 'Crédito',
+    credit: 'Crédito',
+    credit_card: 'Crédito',
     boleto: 'Boleto',
   };
 
-  return map[payment] || 'Não informado';
+  return map[normalized] || 'Não informado';
 };
 
 export const formatPlanName = (name = '') => {
