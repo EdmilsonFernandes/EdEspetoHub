@@ -27,13 +27,13 @@ const METHOD_LABELS: Record<string, string> = {
 };
 
 const METHOD_ICONS: Record<string, string> = {
-  pix: '/uploads/payment/pix.jpeg',
-  debito: '/uploads/payment/cartao_credit_debit.webp',
-  debit: '/uploads/payment/cartao_credit_debit.webp',
-  credito: '/uploads/payment/cartao_credit_debit.webp',
-  credit: '/uploads/payment/cartao_credit_debit.webp',
-  credit_card: '/uploads/payment/cartao_credit_debit.webp',
-  'credit-card': '/uploads/payment/cartao_credit_debit.webp',
+  pix: '/uploads/payment/pix.webp',
+  debito: '/uploads/payment/credit-card.webp',
+  debit: '/uploads/payment/credit-card.webp',
+  credito: '/uploads/payment/credit-card.webp',
+  credit: '/uploads/payment/credit-card.webp',
+  credit_card: '/uploads/payment/credit-card.webp',
+  'credit-card': '/uploads/payment/credit-card.webp',
 };
 
 const PROVIDER_LABELS: Record<string, string> = {
@@ -42,8 +42,8 @@ const PROVIDER_LABELS: Record<string, string> = {
 };
 
 const PROVIDER_ICONS: Record<string, string> = {
-  mercado_pago: '/uploads/payment/mercado_pago.png',
-  mercadopago: '/uploads/payment/mercado_pago.png',
+  mercado_pago: '/uploads/payment/mercado-pago.webp',
+  mercadopago: '/uploads/payment/mercado-pago.webp',
 };
 
 export const getPaymentMethodMeta = (method?: string) => {
