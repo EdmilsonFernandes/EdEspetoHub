@@ -447,6 +447,34 @@ export function StorePage() {
       window.open(`https://wa.me/${targetNumber}?text=${encodedMessage}`, '_blank');
     }
 
+    const trackingLink =
+      typeof window !== 'undefined' && createdOrder?.id
+        ? `${window.location.origin}/pedido/${createdOrder.id}`
+        : '';
+    const customerItemsList = Object.values(cart)
+      .map((item) => `- ${item.qty}x ${item.name} ${formatItemOptions(item)}`.trim())
+      .join('\n');
+    const customerMessageLines = [
+      `Pedido #${createdOrder?.id || ''} - ${branding?.brandName || 'Chama no Espeto'}`,
+      customerItemsList ? `Itens:\n${customerItemsList}` : '',
+      `Total: ${formatCurrency(cartTotal)}`,
+      trackingLink ? `Acompanhar: ${trackingLink}` : '',
+    ]
+      .filter(Boolean)
+      .join('\n');
+    const customerNumber =
+      sanitizedPhone.length >= 10
+        ? sanitizedPhone.startsWith('55')
+          ? sanitizedPhone
+          : `55${sanitizedPhone}`
+        : '';
+    if (customerNumber) {
+      window.open(
+        `https://wa.me/${customerNumber}?text=${encodeURIComponent(customerMessageLines)}`,
+        '_blank'
+      );
+    }
+
     setCart({});
     setCustomer(initialCustomer);
     setPaymentMethod(defaultPaymentMethod);
