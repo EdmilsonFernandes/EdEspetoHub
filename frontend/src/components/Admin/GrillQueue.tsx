@@ -346,16 +346,16 @@ export const GrillQueue = () => {
         {sortedQueue.map((order, index) => (
           <div
             key={order.id}
-            className="relative bg-white p-4 pt-6 rounded-xl shadow-sm border border-gray-100"
+            className="relative bg-white p-4 rounded-xl shadow-sm border border-gray-100"
           >
-            <div className={`absolute right-4 top-4 w-12 h-12 rounded-2xl flex items-center justify-center text-lg font-black shadow-sm ${getPriorityTone(index + 1)}`}>
-              {String(index + 1).padStart(2, "0")}
-            </div>
             {/* HEADER DO CARD */}
             <div className="flex justify-between items-start">
               <div className="relative flex-1">
                 <div className="flex items-center gap-2 mb-1 text-xs text-gray-500 uppercase font-bold">
                   <Hash size={12} className="text-brand-primary" /> Fila
+                  <span className={`ml-1 px-2 py-0.5 rounded-full text-[11px] font-black shadow-sm ${getPriorityTone(index + 1)}`}>
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
                 </div>
 
                 <p className="text-sm text-gray-500">
