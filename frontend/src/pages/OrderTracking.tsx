@@ -344,7 +344,7 @@ export function OrderTracking() {
                         <div className="flex items-center gap-3">
                           {item.imageUrl ? (
                             <img
-                              src={item.imageUrl}
+                              src={resolveAssetUrl(item.imageUrl)}
                               alt={item.name}
                               className="w-10 h-10 rounded-lg object-cover border border-gray-200"
                             />
