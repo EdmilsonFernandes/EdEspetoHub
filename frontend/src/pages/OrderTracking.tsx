@@ -355,9 +355,18 @@ export function OrderTracking() {
                           )}
                           <div className="flex flex-col">
                             <span>{item.quantity}x {item.name}</span>
-                            {formatItemOptions(item) && (
-                              <span className="text-[11px] text-gray-500">{formatItemOptions(item)}</span>
-                            )}
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {item?.cookingPoint && (
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800 border border-amber-200">
+                                  {item.cookingPoint}
+                                </span>
+                              )}
+                              {item?.passSkewer && (
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-fuchsia-100 text-fuchsia-700 border border-fuchsia-200">
+                                  passar varinha
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
                         <span>R$ {Number(item.price).toFixed(2)}</span>

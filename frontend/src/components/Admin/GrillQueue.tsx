@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { CheckSquare, Clock, ChefHat, RefreshCcw, Plus, Minus, Hash, Volume2, VolumeX } from "lucide-react";
 import { orderService } from "../../services/orderService";
 import { productService } from "../../services/productService";
+import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
 import {
   formatCurrency,
   formatDateTime,
@@ -33,6 +34,12 @@ export const GrillQueue = () => {
     if (item?.passSkewer) labels.push('passar varinha');
     return labels.length ? labels.join(' • ') : '';
   };
+
+  const productsById = useMemo(() => {
+    const map = new Map();
+    (products || []).forEach((product) => map.set(product.id, product));
+    return map;
+  }, [products]);
 
   const ensureAudioContext = async () => {
     const context = audioContextRef.current || new AudioContext();
@@ -408,10 +415,36 @@ export const GrillQueue = () => {
                     </button>
 
                     <div className="flex flex-col">
-                      <span className="break-words">{item.name}</span>
-                      {formatItemOptions(item) && (
-                        <span className="text-[11px] text-gray-500">{formatItemOptions(item)}</span>
-                      )}
+                      <div className="flex items-center gap-2">
+                        <div className="w-10 h-10 rounded-lg overflow-hidden border border-gray-200 bg-gray-100 flex-shrink-0">
+                          {item.imageUrl || productsById.get(item.productId || item.id)?.imageUrl ? (
+                            <img
+                              src={resolveAssetUrl(item.imageUrl || productsById.get(item.productId || item.id)?.imageUrl)}
+                              alt={item.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-[10px] text-gray-400">
+                              🍖
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="break-words">{item.name}</span>
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {item?.cookingPoint && (
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800 border border-amber-200">
+                                {item.cookingPoint}
+                              </span>
+                            )}
+                            {item?.passSkewer && (
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-fuchsia-100 text-fuchsia-700 border border-fuchsia-200">
+                                passar varinha
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
