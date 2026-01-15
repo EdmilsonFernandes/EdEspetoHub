@@ -214,7 +214,8 @@ export const GrillQueue = () => {
 
   const applyItemsChange = async (orderId, updater) => {
     const targetOrder = queue.find((entry) => entry.id === orderId);
-    const updatedItems = updater(targetOrder?.items || []);
+    const baseItems = getOrderedItems(orderId, targetOrder?.items || []);
+    const updatedItems = updater(baseItems);
 
     const sanitizedItems = updatedItems.filter((item) => item.qty > 0);
     ensureOrderIndex(orderId, sanitizedItems, true);
@@ -263,7 +264,7 @@ export const GrillQueue = () => {
 
       return [
         ...items,
-        { id: product.id, name: product.name, price: product.price, unitPrice: product.price, qty: 1 },
+        { id: product.id, productId: product.id, name: product.name, price: product.price, unitPrice: product.price, qty: 1 },
       ];
     });
   };
