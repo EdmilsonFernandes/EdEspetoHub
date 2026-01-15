@@ -16,6 +16,7 @@ import { StoreRepository } from '../repositories/StoreRepository';
 import { SubscriptionService } from '../services/SubscriptionService';
 import { PaymentRepository } from '../repositories/PaymentRepository';
 import { PaymentEventRepository } from '../repositories/PaymentEventRepository';
+import { OrderRepository } from '../repositories/OrderRepository';
 import { logger } from '../utils/logger';
 import { respondWithError } from '../errors/respondWithError';
 
@@ -23,6 +24,7 @@ const storeRepository = new StoreRepository();
 const subscriptionService = new SubscriptionService();
 const paymentRepository = new PaymentRepository();
 const paymentEventRepository = new PaymentEventRepository();
+const orderRepository = new OrderRepository();
 const log = logger.child({ scope: 'PlatformAdminController' });
 
 /**
@@ -81,6 +83,12 @@ export class PlatformAdminController {
       const paidPayments = await paymentRepository.countByStatus('PAID');
       const pendingPayments = await paymentRepository.countByStatus('PENDING');
       const paidRevenue = await paymentRepository.sumPaidAmounts();
+      const now = new Date();
+      const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      const totalOrders = await orderRepository.countAll();
+      const ordersLast7Days = await orderRepository.countSince(sevenDaysAgo);
+      const ordersLast30Days = await orderRepository.countSince(thirtyDaysAgo);
 
       const summary = enriched.reduce(
         (acc, store) => {
@@ -108,6 +116,9 @@ export class PlatformAdminController {
           monthlyPlans: 0,
           yearlyPlans: 0,
           mrrProjected: 0,
+          totalOrders,
+          ordersLast7Days,
+          ordersLast30Days,
         }
       );
 

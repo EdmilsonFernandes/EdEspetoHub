@@ -148,4 +148,29 @@ export class OrderRepository
       order: { createdAt: 'ASC' },
     });
   }
+
+  /**
+   * Counts all orders.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
+  countAll()
+  {
+    return this.repository.count();
+  }
+
+  /**
+   * Counts orders since a date.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
+  countSince(since: Date)
+  {
+    return this.repository
+      .createQueryBuilder('o')
+      .where('o.created_at >= :since', { since })
+      .getCount();
+  }
 }

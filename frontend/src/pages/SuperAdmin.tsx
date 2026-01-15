@@ -175,6 +175,10 @@ export function SuperAdmin() {
   const stores = overview?.stores || [];
   const payments = overview?.payments || [];
   const paymentEvents = overview?.paymentEvents || [];
+  const paidRevenueValue = summary?.paidRevenue ? Number(summary.paidRevenue) : 0;
+  const totalOrders = summary?.totalOrders || 0;
+  const ordersLast7Days = summary?.ordersLast7Days || 0;
+  const ordersLast30Days = summary?.ordersLast30Days || 0;
   const paymentEventByPayment = useMemo(() => {
     const map = new Map();
     paymentEvents.forEach((event: any) => {
@@ -298,6 +302,69 @@ export function SuperAdmin() {
       return acc + Number(payment.amount || 0);
     }, 0);
   }, [payments, dateRange]);
+
+  const storeHealth = useMemo(() => {
+    const counts = {
+      active: 0,
+      trial: 0,
+      expiring: 0,
+      expired: 0,
+      suspended: 0,
+      pending: 0,
+      open: 0,
+      closed: 0,
+    };
+
+    stores.forEach((store: any) => {
+      if (store.open) counts.open += 1;
+      else counts.closed += 1;
+      const status = store.subscription?.status || 'PENDING';
+      if (status === 'ACTIVE') counts.active += 1;
+      else if (status === 'TRIAL') counts.trial += 1;
+      else if (status === 'EXPIRING') counts.expiring += 1;
+      else if (status === 'EXPIRED') counts.expired += 1;
+      else if (status === 'SUSPENDED') counts.suspended += 1;
+      else counts.pending += 1;
+    });
+
+    return counts;
+  }, [stores]);
+
+  const expiringSoon = useMemo(() => {
+    return stores
+      .map((store: any) => {
+        const endDate = store.subscription?.endDate;
+        if (!endDate) return null;
+        const daysLeft = daysUntil(endDate);
+        if (typeof daysLeft !== 'number' || daysLeft < 0 || daysLeft > 7) return null;
+        return {
+          id: store.id,
+          name: store.name,
+          slug: store.slug,
+          daysLeft,
+          endDate,
+          status: store.subscription?.status || 'PENDING',
+        };
+      })
+      .filter(Boolean)
+      .sort((a: any, b: any) => a.daysLeft - b.daysLeft)
+      .slice(0, 6);
+  }, [stores]);
+
+  const recentStores = useMemo(() => {
+    const now = Date.now();
+    return stores.filter((store: any) => {
+      const createdAt = store.createdAt ? new Date(store.createdAt).getTime() : 0;
+      if (!Number.isFinite(createdAt)) return false;
+      const diffDays = (now - createdAt) / (1000 * 60 * 60 * 24);
+      return diffDays <= 7;
+    }).length;
+  }, [stores]);
+
+  const revenuePerActive = useMemo(() => {
+    if (!storeHealth.active) return 0;
+    return paidRevenueValue / storeHealth.active;
+  }, [paidRevenueValue, storeHealth.active]);
 
   const handleReprocess = async (paymentId: string, providerId?: string) => {
     if (!token) return;
@@ -529,64 +596,149 @@ export function SuperAdmin() {
         {loading && <div className="text-sm text-slate-500">Carregando...</div>}
 
         {summary && (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-xs uppercase text-slate-400 font-semibold">Lojas</p>
-                <Store size={20} className="text-blue-500" />
+          <div className="grid lg:grid-cols-[2.1fr,1fr] gap-4">
+            <div className="relative overflow-hidden rounded-3xl bg-slate-900 text-white p-6 shadow-lg">
+              <div className="absolute -right-20 -top-20 w-64 h-64 rounded-full bg-brand-primary/20 blur-3xl" />
+              <div className="absolute right-16 bottom-0 w-40 h-40 rounded-full bg-emerald-400/20 blur-2xl" />
+              <div className="relative space-y-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.2em] text-slate-300">Panorama da plataforma</p>
+                    <h2 className="text-2xl font-black">Resumo executivo</h2>
+                  </div>
+                  <span className="px-3 py-1 rounded-full text-xs font-semibold bg-white/10 text-white">
+                    Atualizado agora
+                  </span>
+                </div>
+                <div className="grid sm:grid-cols-3 gap-4">
+                  <div className="rounded-2xl bg-white/10 p-4 border border-white/10">
+                    <p className="text-xs text-slate-300 uppercase">Receita confirmada</p>
+                    <p className="text-2xl font-black mt-1">{paidRevenue}</p>
+                    <p className="text-xs text-slate-300 mt-2">Periodo: {formatCurrency(periodTotal)}</p>
+                  </div>
+                  <div className="rounded-2xl bg-white/10 p-4 border border-white/10">
+                    <p className="text-xs text-slate-300 uppercase">MRR projetado</p>
+                    <p className="text-2xl font-black mt-1">{formatCurrency(summary.mrrProjected || 0)}</p>
+                    <p className="text-xs text-slate-300 mt-2">
+                      {summary.monthlyPlans} mensal · {summary.yearlyPlans} anual
+                    </p>
+                  </div>
+                  <div className="rounded-2xl bg-white/10 p-4 border border-white/10">
+                    <p className="text-xs text-slate-300 uppercase">Pedidos totais</p>
+                    <p className="text-2xl font-black mt-1">{totalOrders}</p>
+                    <p className="text-xs text-slate-300 mt-2">
+                      +{ordersLast7Days} nos ultimos 7 dias
+                    </p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-3 text-xs text-slate-200">
+                  <span className="px-3 py-1 rounded-full bg-white/10 border border-white/10">
+                    {summary.totalStores} lojas criadas
+                  </span>
+                  <span className="px-3 py-1 rounded-full bg-white/10 border border-white/10">
+                    {storeHealth.open} abertas · {storeHealth.closed} fechadas
+                  </span>
+                  <span className="px-3 py-1 rounded-full bg-white/10 border border-white/10">
+                    {formatCurrency(revenuePerActive)} por loja ativa
+                  </span>
+                  <span className="px-3 py-1 rounded-full bg-white/10 border border-white/10">
+                    {recentStores} novas lojas na semana
+                  </span>
+                </div>
               </div>
-              <p className="text-2xl font-black text-slate-800">{summary.totalStores}</p>
             </div>
-            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition">
+
+            <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm space-y-4">
+              <div>
+                <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Saude da base</p>
+                <h3 className="text-lg font-bold text-slate-800">Lojas em operacao</h3>
+              </div>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-3">
+                  <p className="text-xs text-emerald-700 uppercase">Ativas</p>
+                  <p className="text-xl font-black text-emerald-700">{storeHealth.active}</p>
+                </div>
+                <div className="rounded-2xl border border-blue-100 bg-blue-50 p-3">
+                  <p className="text-xs text-blue-700 uppercase">Trial</p>
+                  <p className="text-xl font-black text-blue-700">{storeHealth.trial}</p>
+                </div>
+                <div className="rounded-2xl border border-amber-100 bg-amber-50 p-3">
+                  <p className="text-xs text-amber-700 uppercase">Expirando</p>
+                  <p className="text-xl font-black text-amber-700">{storeHealth.expiring}</p>
+                </div>
+                <div className="rounded-2xl border border-red-100 bg-red-50 p-3">
+                  <p className="text-xs text-red-700 uppercase">Expiradas</p>
+                  <p className="text-xl font-black text-red-700">{storeHealth.expired}</p>
+                </div>
+              </div>
+              <div className="rounded-2xl border border-slate-200 p-3">
+                <p className="text-xs uppercase text-slate-400">Pagamentos</p>
+                <div className="flex items-center justify-between mt-2">
+                  <span className="text-sm text-slate-600">Pagos</span>
+                  <span className="font-bold text-emerald-600">{summary.paidPayments}</span>
+                </div>
+                <div className="flex items-center justify-between mt-1">
+                  <span className="text-sm text-slate-600">Pendentes</span>
+                  <span className="font-bold text-amber-600">{summary.pendingPayments}</span>
+                </div>
+              </div>
+              <div>
+                <p className="text-xs uppercase text-slate-400">Expirando em ate 7 dias</p>
+                {expiringSoon.length === 0 ? (
+                  <p className="text-sm text-slate-500 mt-2">Nenhuma loja em risco imediato.</p>
+                ) : (
+                  <div className="mt-2 space-y-2">
+                    {expiringSoon.map((store: any) => (
+                      <div key={store.id} className="flex items-center justify-between text-sm">
+                        <div>
+                          <p className="font-semibold text-slate-700">{store.name}</p>
+                          <p className="text-xs text-slate-400">{store.slug}</p>
+                        </div>
+                        <span className="px-2 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">
+                          {store.daysLeft}d
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {summary && (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
               <div className="flex items-center justify-between mb-2">
-                <p className="text-xs uppercase text-slate-400 font-semibold">Assinaturas ativas</p>
-                <CheckCircle size={20} className="text-emerald-600" />
+                <p className="text-xs uppercase text-slate-400 font-semibold">Pedidos 7 dias</p>
+                <BarChart3 size={18} className="text-brand-primary" />
+              </div>
+              <p className="text-2xl font-black text-slate-800">{ordersLast7Days}</p>
+              <p className="text-xs text-slate-400 mt-1">Ultimos 30 dias: {ordersLast30Days}</p>
+            </div>
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs uppercase text-slate-400 font-semibold">Lojas ativas</p>
+                <CheckCircle size={18} className="text-emerald-600" />
               </div>
               <p className="text-2xl font-black text-emerald-600">{summary.activeSubscriptions}</p>
+              <p className="text-xs text-slate-400 mt-1">Total lojas: {summary.totalStores}</p>
             </div>
-            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition">
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
               <div className="flex items-center justify-between mb-2">
-                <p className="text-xs uppercase text-slate-400 font-semibold">Expirando</p>
-                <AlertCircle size={20} className="text-amber-600" />
+                <p className="text-xs uppercase text-slate-400 font-semibold">Lojas expirando</p>
+                <AlertCircle size={18} className="text-amber-600" />
               </div>
               <p className="text-2xl font-black text-amber-600">{summary.expiringSubscriptions}</p>
+              <p className="text-xs text-slate-400 mt-1">Em risco: {expiringSoon.length}</p>
             </div>
-            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition">
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
               <div className="flex items-center justify-between mb-2">
-                <p className="text-xs uppercase text-slate-400 font-semibold">Receita confirmada</p>
-                <DollarSign size={20} className="text-brand-primary" />
+                <p className="text-xs uppercase text-slate-400 font-semibold">Receita por ativa</p>
+                <DollarSign size={18} className="text-brand-primary" />
               </div>
-              <p className="text-2xl font-black text-brand-primary">{paidRevenue}</p>
-            </div>
-            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-xs uppercase text-slate-400 font-semibold">Pagamentos pagos</p>
-                <CheckCircle size={20} className="text-emerald-500" />
-              </div>
-              <p className="text-2xl font-black text-slate-800">{summary.paidPayments}</p>
-            </div>
-            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-xs uppercase text-slate-400 font-semibold">Pagamentos pendentes</p>
-                <Clock size={20} className="text-amber-500" />
-              </div>
-              <p className="text-2xl font-black text-slate-800">{summary.pendingPayments}</p>
-            </div>
-            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-xs uppercase text-slate-400 font-semibold">Mensal vs Anual</p>
-                <TrendingUp size={20} className="text-slate-500" />
-              </div>
-              <p className="text-lg font-semibold text-slate-700">
-                {summary.monthlyPlans} mensal · {summary.yearlyPlans} anual
-              </p>
-            </div>
-            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md transition">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-xs uppercase text-slate-400 font-semibold">MRR projetado</p>
-                <TrendingUp size={20} className="text-slate-500" />
-              </div>
-              <p className="text-2xl font-black text-slate-800">{formatCurrency(summary.mrrProjected || 0)}</p>
+              <p className="text-2xl font-black text-slate-800">{formatCurrency(revenuePerActive)}</p>
+              <p className="text-xs text-slate-400 mt-1">Media por loja ativa</p>
             </div>
           </div>
         )}
