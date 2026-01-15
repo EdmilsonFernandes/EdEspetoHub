@@ -110,6 +110,7 @@ export function OrderTracking() {
   const queuePosition = order?.queuePosition;
   const queueSize = order?.queueSize;
   const storePhone = order?.store?.phone;
+  const customerPhone = order?.phone;
   const estimateMinutes =
     typeof queuePosition === 'number' && queuePosition > 0 ? Math.max(5, queuePosition * 6) : null;
   const formatItemOptions = (item: any) => {
@@ -135,8 +136,11 @@ export function OrderTracking() {
   ]
     .filter(Boolean)
     .join('\n');
-  const whatsappLink = storePhone
-    ? `https://wa.me/${normalizeWhatsApp(storePhone)}?text=${encodeURIComponent(whatsappMessage)}`
+  const customerWhatsappLink = customerPhone
+    ? `https://wa.me/${normalizeWhatsApp(customerPhone)}?text=${encodeURIComponent(whatsappMessage)}`
+    : '';
+  const storeWhatsappLink = storePhone
+    ? `https://wa.me/${normalizeWhatsApp(storePhone)}`
     : '';
 
   useEffect(() => {
@@ -387,19 +391,28 @@ export function OrderTracking() {
                         <span>{order.address}</span>
                       </p>
                     )}
-                  {storePhone && (
+                  {(customerWhatsappLink || storeWhatsappLink) && (
                     <div className="flex flex-col gap-2">
-                      <p>
-                        <span className="font-semibold">Contato da loja:</span> {storePhone}
-                      </p>
-                      <a
-                        href={whatsappLink}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center justify-center px-3 py-2 rounded-lg bg-green-600 text-white text-xs font-semibold hover:opacity-90"
-                      >
-                        Enviar detalhes no WhatsApp
-                      </a>
+                      {customerWhatsappLink && (
+                        <a
+                          href={customerWhatsappLink}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center justify-center px-3 py-2 rounded-lg bg-green-600 text-white text-xs font-semibold hover:opacity-90"
+                        >
+                          Enviar detalhes para meu WhatsApp
+                        </a>
+                      )}
+                      {storeWhatsappLink && (
+                        <a
+                          href={storeWhatsappLink}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center justify-center px-3 py-2 rounded-lg border border-green-600 text-green-700 text-xs font-semibold hover:bg-green-50"
+                        >
+                          Falar com a loja no WhatsApp
+                        </a>
+                      )}
                     </div>
                   )}
                     <p>
