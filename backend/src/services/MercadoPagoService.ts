@@ -25,6 +25,8 @@ type MercadoPagoPreferenceResponse = {
 type MercadoPagoPaymentResponse = {
   id: number | string;
   status?: string;
+  status_detail?: string;
+  date_of_expiration?: string;
   transaction_details?: {
     external_resource_url?: string;
   };
@@ -275,6 +277,7 @@ export class MercadoPagoService {
       qrCodeBase64: data.point_of_interaction?.transaction_data?.qr_code_base64 || null,
       qrCodeText: data.point_of_interaction?.transaction_data?.qr_code || null,
       providerId: data.id?.toString() || null,
+      expiresAt: data.date_of_expiration || null,
     };
   }
 }

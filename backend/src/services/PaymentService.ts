@@ -127,6 +127,12 @@ export class PaymentService {
 
         payment.provider = 'MERCADO_PAGO';
         payment.providerId = mpPayment?.providerId || payment.providerId;
+        if (mpPayment?.expiresAt) {
+          const parsed = new Date(mpPayment.expiresAt);
+          if (!Number.isNaN(parsed.getTime())) {
+            payment.expiresAt = parsed;
+          }
+        }
 
         if (mpPayment?.qrCodeBase64 && payment.method === 'PIX') {
           payment.qrCodeBase64 = this.normalizeQrCode(mpPayment.qrCodeBase64);

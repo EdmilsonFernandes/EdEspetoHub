@@ -25,6 +25,7 @@ import { PaymentMethod } from '../entities/Payment';
 import { PaymentRepository } from '../repositories/PaymentRepository';
 import { logger } from '../utils/logger';
 import { AppError } from '../errors/AppError';
+import { MercadoPagoService } from './MercadoPagoService';
 
 /**
  * Represents SubscriptionService.
@@ -39,6 +40,7 @@ export class SubscriptionService {
   private emailService = new EmailService();
   private paymentService = new PaymentService();
   private paymentRepository = new PaymentRepository();
+  private mercadoPago = new MercadoPagoService();
   private log = logger.child({ scope: 'SubscriptionService' });
 
   /**
@@ -166,9 +168,12 @@ export class SubscriptionService {
     if (authStoreId && store.id !== authStoreId) throw new AppError('AUTH-003', 403);
 
     const now = new Date();
+    const paymentMethod = (input.paymentMethod || 'PIX') as PaymentMethod;
     const existingPending = await this.paymentRepository.findLatestPendingByStoreId(storeId);
     if (existingPending) {
-      if (!existingPending.expiresAt || existingPending.expiresAt > now) {
+      const sameMethod = existingPending.method === paymentMethod;
+      const stillValid = await this.isPaymentStillValid(existingPending);
+      if (sameMethod && stillValid) {
         return existingPending;
       }
       existingPending.status = 'FAILED';
@@ -187,8 +192,6 @@ export class SubscriptionService {
     const resolvedPlan =
       plan || (await this.planRepository.findAll()).find((p) => p.id === input.planId);
     if (!resolvedPlan || !resolvedPlan.enabled) throw new AppError('SUB-003', 400);
-
-    const paymentMethod = (input.paymentMethod || 'PIX') as PaymentMethod;
 
     return AppDataSource.transaction(async (manager) => {
       const subscriptionRepo = manager.getRepository(Subscription);
@@ -211,6 +214,38 @@ export class SubscriptionService {
         method: paymentMethod,
       });
     });
+  }
+
+  /**
+   * Checks if a pending payment is still valid.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
+  private async isPaymentStillValid(payment: any) {
+    const now = new Date();
+    if (payment.status !== 'PENDING') return false;
+    if (!payment.expiresAt || payment.expiresAt <= now) return false;
+    if (
+      payment.provider === 'MERCADO_PAGO' &&
+      payment.method === 'PIX' &&
+      payment.providerId &&
+      env.mercadoPago.accessToken
+    ) {
+      try {
+        const mpPayment = await this.mercadoPago.getPayment(payment.providerId);
+        const status = mpPayment?.status || '';
+        const terminalStatuses = [ 'cancelled', 'rejected', 'refunded', 'charged_back', 'failed', 'expired' ];
+        if (terminalStatuses.includes(status)) return false;
+        const expiration = mpPayment?.date_of_expiration ? new Date(mpPayment.date_of_expiration) : null;
+        if (expiration && !Number.isNaN(expiration.getTime()) && expiration <= now) {
+          return false;
+        }
+      } catch (error) {
+        this.log.warn('Failed to validate Mercado Pago payment', { error, paymentId: payment.id });
+      }
+    }
+    return true;
   }
 
   /**
