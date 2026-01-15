@@ -40,6 +40,18 @@ export const GrillQueue = () => {
     if (position === 3) return "bg-yellow-400 text-slate-900";
     return "bg-slate-100 text-slate-700";
   };
+  const sortItems = (items = []) =>
+    [...items].sort((a, b) => {
+      const nameA = (a?.name || "").toString().toLowerCase();
+      const nameB = (b?.name || "").toString().toLowerCase();
+      if (nameA !== nameB) return nameA.localeCompare(nameB);
+      const optionsA = `${a?.cookingPoint || ""}-${a?.passSkewer ? "1" : "0"}`;
+      const optionsB = `${b?.cookingPoint || ""}-${b?.passSkewer ? "1" : "0"}`;
+      if (optionsA !== optionsB) return optionsA.localeCompare(optionsB);
+      const idA = (a?.productId || a?.id || "").toString();
+      const idB = (b?.productId || b?.id || "").toString();
+      return idA.localeCompare(idB);
+    });
 
   const productsById = useMemo(() => {
     const map = new Map();
@@ -396,7 +408,7 @@ export const GrillQueue = () => {
 
             {/* LISTA DE ITENS */}
             <div className="mt-4 space-y-2">
-              {(order.items || []).map((item) => (
+              {sortItems(order.items || []).map((item) => (
                 <div
                   key={item.id}
                   className="flex justify-between text-sm text-gray-700 items-center gap-3"
