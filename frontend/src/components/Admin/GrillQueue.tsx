@@ -43,9 +43,9 @@ export const GrillQueue = () => {
   };
   const getItemKey = (item) =>
     `${item?.productId || item?.id || ''}-${item?.cookingPoint || ''}-${item?.passSkewer ? '1' : '0'}`;
-  const ensureOrderIndex = (orderId, items = []) => {
+  const ensureOrderIndex = (orderId, items = [], reset = false) => {
     if (!orderId) return;
-    const map = itemOrderRef.current.get(orderId) || new Map<string, number>();
+    const map = reset ? new Map<string, number>() : (itemOrderRef.current.get(orderId) || new Map<string, number>());
     let nextIndex = map.size;
     items.forEach((item) => {
       const key = getItemKey(item);
@@ -217,7 +217,7 @@ export const GrillQueue = () => {
     const updatedItems = updater(targetOrder?.items || []);
 
     const sanitizedItems = updatedItems.filter((item) => item.qty > 0);
-    ensureOrderIndex(orderId, sanitizedItems);
+    ensureOrderIndex(orderId, sanitizedItems, true);
 
     const nextTotal = sanitizedItems.reduce(
       (sum, item) => sum + (item.unitPrice ?? item.price ?? 0) * item.qty,
