@@ -29,6 +29,7 @@ import { AuthLayout } from '../layouts/AuthLayout';
 import { AdminLayout } from '../layouts/AdminLayout';
 
 const STORAGE_KEY = 'superAdminToken';
+const STORAGE_USER_KEY = 'superAdminUser';
 const FILTERS_KEY = 'superAdminPaymentFilters';
 const EVENTS_FILTERS_KEY = 'superAdminEventFilters';
 const EVENTS_PAGE_SIZE = 25;
@@ -68,6 +69,7 @@ const statusStyle = (status?: string) => {
 export function SuperAdmin() {
   const { showToast } = useToast();
   const [token, setToken] = useState(() => localStorage.getItem(STORAGE_KEY) || '');
+  const [superAdminUser, setSuperAdminUser] = useState(() => localStorage.getItem(STORAGE_USER_KEY) || '');
   const [overview, setOverview] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loginForm, setLoginForm] = useState({ email: '', password: '' });
@@ -199,7 +201,9 @@ export function SuperAdmin() {
       const data = await superAdminService.login(loginForm.email, loginForm.password);
       const nextToken = data.token;
       localStorage.setItem(STORAGE_KEY, nextToken);
+      localStorage.setItem(STORAGE_USER_KEY, loginForm.email);
       setToken(nextToken);
+      setSuperAdminUser(loginForm.email);
       showToast('Login realizado com sucesso', 'success');
     } catch (err: any) {
       const message = err.message || 'Falha ao autenticar';
@@ -212,8 +216,10 @@ export function SuperAdmin() {
 
   const handleLogout = () => {
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(STORAGE_USER_KEY);
     setToken('');
     setOverview(null);
+    setSuperAdminUser('');
   };
 
   const summary = overview?.summary;
@@ -685,6 +691,15 @@ export function SuperAdmin() {
           </div>
         </div>
         <div className="relative flex gap-2">
+          <div className="flex items-center gap-2 px-3 py-2 rounded-full border border-slate-200 bg-white/80 shadow-sm">
+            <div className="w-7 h-7 rounded-full bg-slate-900 text-white text-xs font-bold flex items-center justify-center">
+              {superAdminUser ? superAdminUser.slice(0, 2).toUpperCase() : 'SA'}
+            </div>
+            <div className="text-xs leading-tight">
+              <div className="font-semibold text-slate-800">{superAdminUser || 'Super Admin'}</div>
+              <div className="text-slate-500">SUPER_ADMIN</div>
+            </div>
+          </div>
           <div className="flex gap-2 items-center">
             <span className="text-sm font-semibold text-slate-600">Auto-refresh</span>
             <button

@@ -22,6 +22,14 @@ export function AdminHeader({ contextLabel = 'Painel da Loja' }: Props) {
   const socialLinks = auth?.store?.settings?.socialLinks || [];
   const instagramLink = socialLinks.find((link) => link?.type === 'instagram')?.value;
   const instagramHandle = instagramLink ? `@${instagramLink.replace('@', '')}` : '';
+  const userName = auth?.user?.fullName || auth?.user?.name || auth?.user?.email || 'Admin';
+  const userRole = auth?.user?.role || 'ADMIN';
+  const userInitials = userName
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join('');
 
   const navigationGroups = {
     main: [
@@ -89,6 +97,15 @@ export function AdminHeader({ contextLabel = 'Painel da Loja' }: Props) {
         </div>
       </div>
       <div className="flex flex-wrap items-center gap-3">
+        <div className="flex items-center gap-2 bg-white/10 rounded-full px-3 py-1.5 border border-white/15">
+          <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center text-xs font-bold">
+            {userInitials || 'AD'}
+          </div>
+          <div className="flex flex-col leading-tight">
+            <span className="text-xs font-semibold">{userName}</span>
+            <span className="text-[10px] opacity-80">{userRole}</span>
+          </div>
+        </div>
         <PlanBadge
           planName={planDetails?.planName}
           displayName={planDetails?.displayName}
