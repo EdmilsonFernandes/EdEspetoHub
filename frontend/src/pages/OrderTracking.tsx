@@ -42,6 +42,7 @@ export function OrderTracking() {
   const [loading, setLoading] = useState(true);
   const [polling, setPolling] = useState(true);
   const [elapsedMs, setElapsedMs] = useState(0);
+  const [prepStart, setPrepStart] = useState<number | null>(null);
 
   useEffect(() => {
     if (!orderId) return;
@@ -114,6 +115,10 @@ export function OrderTracking() {
   const paymentLabel = formatPaymentMethod(order?.paymentMethod || order?.payment);
   const estimateMinutes =
     typeof queuePosition === 'number' && queuePosition > 0 ? Math.max(10, queuePosition * 10) : null;
+  const estimatedReadyAt = useMemo(() => {
+    if (status !== 'preparing' || !estimateMinutes || !prepStart) return null;
+    return new Date(prepStart + estimateMinutes * 60 * 1000);
+  }, [estimateMinutes, prepStart, status]);
   const formatItemOptions = (item: any) => {
     const labels = [];
     if (item?.cookingPoint) labels.push(item.cookingPoint);
@@ -173,6 +178,23 @@ export function OrderTracking() {
     const timer = window.setInterval(update, 1000);
     return () => window.clearInterval(timer);
   }, [order?.createdAt, isReady]);
+
+  useEffect(() => {
+    if (!order?.id) return;
+    if (status !== 'preparing') return;
+    const storageKey = `prepStart:${order.id}`;
+    const existing = sessionStorage.getItem(storageKey);
+    if (existing) {
+      const parsed = Number(existing);
+      if (Number.isFinite(parsed)) {
+        setPrepStart(parsed);
+        return;
+      }
+    }
+    const now = Date.now();
+    sessionStorage.setItem(storageKey, String(now));
+    setPrepStart(now);
+  }, [order?.id, status]);
 
   const steps = useMemo(() => {
     if (isDelivery) {
@@ -269,6 +291,11 @@ export function OrderTracking() {
                     {estimateMinutes && !isReady && (
                       <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold animate-pulse">
                         Estimativa: ~{estimateMinutes} min
+                      </div>
+                    )}
+                    {estimatedReadyAt && (
+                      <div className="mt-2 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold">
+                        Previsao de entrega: {estimatedReadyAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                       </div>
                     )}
                   </div>
