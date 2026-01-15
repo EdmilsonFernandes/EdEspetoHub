@@ -387,6 +387,7 @@ export function StorePage() {
           type: customer.type,
           table: customer.table,
           customerName: customer.name,
+          paymentMethod: payment,
           items: Object.values(cart).map((item) => ({
             id: item.id,
             name: item.name,

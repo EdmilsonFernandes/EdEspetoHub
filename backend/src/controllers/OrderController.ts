@@ -95,6 +95,7 @@ export class OrderController {
         customerName: order.customerName,
         phone: order.phone,
         address: order.address,
+        paymentMethod: order.paymentMethod,
         total: order.total,
         createdAt: order.createdAt,
         queuePosition,
