@@ -155,7 +155,7 @@ export function AdminOrders() {
                 type="text"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Buscar por cliente, telefone ou pedido #"
+                placeholder="Buscar por cliente, telefone ou pedido"
                 className="w-full sm:w-64 rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-brand-primary"
               />
               <div className="flex gap-2">
