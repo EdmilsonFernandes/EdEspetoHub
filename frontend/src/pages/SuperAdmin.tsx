@@ -432,13 +432,13 @@ export function SuperAdmin() {
 
             <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">Email</label>
+                <label className="text-sm font-semibold text-gray-700">Usuario</label>
                 <input
-                  type="email"
+                  type="text"
                   value={loginForm.email}
                   onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
                   className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
-                  placeholder="Digite seu email"
+                  placeholder="Digite seu usuario"
                 />
               </div>
               <div className="space-y-2">
@@ -981,4 +981,3 @@ export function SuperAdmin() {
     </AdminLayout>
   );
 }
-

@@ -153,6 +153,15 @@ Demo:
 - Vitrine demo em `/chamanoespeto/demo`.
 - Admin demo em `/admin/demo` com dados locais.
 
+## Super admin
+
+- Tela: `http://localhost:3000/superadmin`
+- Autenticacao usa a tabela `platform_admins` (nao usa mais variavel de ambiente).
+- Usuario seed (criado em `schema.sql` e `runMigrations`):
+  - usuario: `chamanoespetoadmin`
+  - senha: `chamanoespeto2026#!`
+- Troque a senha direto no banco se precisar.
+
 ```mermaid
 flowchart TD
   A[Cadastro /api/auth/register] --> B[Criar usuario]
