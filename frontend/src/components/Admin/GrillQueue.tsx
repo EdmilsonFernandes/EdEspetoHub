@@ -41,14 +41,38 @@ export const GrillQueue = () => {
     if (position === 3) return "bg-yellow-400 text-slate-900";
     return "bg-slate-100 text-slate-700";
   };
-  const getItemKey = (item) =>
+  const getItemBaseKey = (item) =>
     `${item?.productId || item?.name || ''}-${item?.cookingPoint || ''}-${item?.passSkewer ? '1' : '0'}`;
+  const assignItemKeys = (orderId, items = []) => {
+    if (!orderId) return items.map((item) => ({ item, key: getItemBaseKey(item) }));
+    const map = itemOrderRef.current.get(orderId) || new Map<string, number>();
+    const existingByBase = new Map<string, string[]>();
+    for (const key of map.keys()) {
+      const base = key.split('::')[0];
+      const list = existingByBase.get(base) || [];
+      list.push(key);
+      existingByBase.set(base, list);
+    }
+    const usedCount = new Map<string, number>();
+    return items.map((item) => {
+      const base = getItemBaseKey(item);
+      const existingList = existingByBase.get(base) || [];
+      const used = usedCount.get(base) || 0;
+      let key = existingList[used];
+      if (!key) {
+        const occurrence = existingList.length + used + 1;
+        key = `${base}::${occurrence}`;
+      }
+      usedCount.set(base, used + 1);
+      return { item, key };
+    });
+  };
   const ensureOrderIndex = (orderId, items = []) => {
     if (!orderId) return;
     const map = itemOrderRef.current.get(orderId) || new Map<string, number>();
     let nextIndex = map.size;
-    items.forEach((item) => {
-      const key = getItemKey(item);
+    const assignedItems = assignItemKeys(orderId, items);
+    assignedItems.forEach(({ key }) => {
       if (!map.has(key)) {
         map.set(key, nextIndex++);
       }
@@ -56,13 +80,14 @@ export const GrillQueue = () => {
     itemOrderRef.current.set(orderId, map);
   };
   const getOrderedItems = (orderId, items = []) => {
+    const assignedItems = assignItemKeys(orderId, items);
     ensureOrderIndex(orderId, items);
     const map = itemOrderRef.current.get(orderId) || new Map<string, number>();
-    return [...items].sort((a, b) => {
-      const indexA = map.get(getItemKey(a)) ?? 0;
-      const indexB = map.get(getItemKey(b)) ?? 0;
+    return [...assignedItems].sort((a, b) => {
+      const indexA = map.get(a.key) ?? 0;
+      const indexB = map.get(b.key) ?? 0;
       return indexA - indexB;
-    });
+    }).map(({ item }) => item);
   };
 
   const productsById = useMemo(() => {
