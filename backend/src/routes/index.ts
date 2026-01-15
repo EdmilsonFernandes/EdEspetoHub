@@ -47,6 +47,7 @@ routes.post('/webhooks/payment-confirmed', PaymentController.confirm);
 routes.post('/webhooks/mercadopago', PaymentController.mercadoPagoWebhook);
 routes.get('/payments/:paymentId', PaymentController.getById);
 routes.get('/payments/:paymentId/events', PaymentController.getEvents);
+routes.post('/payments/:paymentId/renew', PaymentController.renewFromPayment);
 
 // Platform admin (se for painel de plataforma mesmo, proteja)
 routes.get('/admin/overview', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.overview);

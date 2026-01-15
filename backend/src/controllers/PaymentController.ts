@@ -14,6 +14,8 @@
 import { Request, Response } from 'express';
 import crypto from 'crypto';
 import { PaymentService } from '../services/PaymentService';
+import { SubscriptionService } from '../services/SubscriptionService';
+import { PaymentMethod } from '../entities/Payment';
 import { env } from '../config/env';
 import { PaymentEventRepository } from '../repositories/PaymentEventRepository';
 import { logger } from '../utils/logger';
@@ -21,6 +23,7 @@ import { AppError } from '../errors/AppError';
 import { respondWithError } from '../errors/respondWithError';
 
 const paymentService = new PaymentService();
+const subscriptionService = new SubscriptionService();
 const paymentEventRepository = new PaymentEventRepository();
 const log = logger.child({ scope: 'PaymentController' });
 
@@ -143,8 +146,11 @@ export class PaymentController {
         provider: payment.provider,
         providerId: payment.providerId,
         expiresAt: payment.expiresAt,
+        storeId: payment.store?.id || null,
         storeSlug: payment.store?.slug || null,
         storeName: payment.store?.name || null,
+        subscriptionId: payment.subscription?.id || null,
+        planId: payment.subscription?.plan?.id || null,
         emailVerified: payment.user?.emailVerified ?? false,
       });
     } catch (error: any) {
@@ -198,6 +204,47 @@ export class PaymentController {
       return res.json({ status: 'ok', result });
     } catch (error: any) {
       log.warn('Payment reprocess failed', { paymentId, error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  /**
+   * Creates a new renewal payment from a failed/expired payment.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
+  static async renewFromPayment(req: Request, res: Response) {
+    const { paymentId } = req.params;
+    const { paymentMethod } = req.body || {};
+
+    try {
+      const payment = await paymentService.findById(paymentId);
+      if (!payment) {
+        return respondWithError(req, res, new AppError('PAY-001', 404), 404);
+      }
+
+      const now = new Date();
+      const isExpired = payment.expiresAt ? payment.expiresAt <= now : false;
+      if (!isExpired && payment.status !== 'FAILED') {
+        return res.json(payment);
+      }
+
+      const method = (paymentMethod || payment.method || 'PIX') as PaymentMethod;
+      const planId = payment.subscription?.plan?.id;
+      const storeId = payment.store?.id;
+      if (!planId || !storeId) {
+        return respondWithError(req, res, new AppError('PAY-008', 400), 400);
+      }
+
+      const newPayment = await subscriptionService.createRenewalPayment(storeId, {
+        planId,
+        paymentMethod: method,
+      });
+
+      return res.json(newPayment);
+    } catch (error: any) {
+      log.warn('Payment renew failed', { paymentId, error });
       return respondWithError(req, res, error, 400);
     }
   }

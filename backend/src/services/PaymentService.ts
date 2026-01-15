@@ -382,6 +382,9 @@ export class PaymentService {
    */
   async findById(paymentId: string) {
     const paymentRepo = AppDataSource.getRepository(Payment);
-    return paymentRepo.findOne({ where: { id: paymentId }, relations: ['store', 'user'] });
+    return paymentRepo.findOne({
+      where: { id: paymentId },
+      relations: ['store', 'user', 'subscription', 'subscription.plan'],
+    });
   }
 }

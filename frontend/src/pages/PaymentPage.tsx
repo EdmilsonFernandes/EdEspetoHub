@@ -14,6 +14,8 @@ export function PaymentPage() {
   const [eventsPage, setEventsPage] = useState(0);
   const [eventsHasMore, setEventsHasMore] = useState(true);
   const [pixCopied, setPixCopied] = useState(false);
+  const [renewMethod, setRenewMethod] = useState('PIX');
+  const [renewing, setRenewing] = useState(false);
   const EVENTS_PAGE_SIZE = 25;
   const platformLogo = '/chama-no-espeto.jpeg';
   const mpLogo = '/mercado-pago.svg';
@@ -77,10 +79,12 @@ export function PaymentPage() {
 
   const isPaid = payment?.status === 'PAID';
   const isFailed = payment?.status === 'FAILED';
+  const isExpired = payment?.expiresAt ? new Date(payment.expiresAt) <= new Date() : false;
+  const needsRenew = isFailed || isExpired;
   const isVerified = payment?.emailVerified;
-  const statusLabel = isPaid ? 'Pagamento aprovado' : isFailed ? 'Pagamento falhou' : 'Aguardando pagamento';
-  const statusTone = isPaid ? 'text-emerald-600' : isFailed ? 'text-red-600' : 'text-yellow-600';
-  const statusBg = isPaid ? 'bg-emerald-50 text-emerald-600' : isFailed ? 'bg-red-50 text-red-600' : 'bg-yellow-50 text-yellow-600';
+  const statusLabel = isPaid ? 'Pagamento aprovado' : needsRenew ? 'Pagamento expirou' : 'Aguardando pagamento';
+  const statusTone = isPaid ? 'text-emerald-600' : needsRenew ? 'text-red-600' : 'text-yellow-600';
+  const statusBg = isPaid ? 'bg-emerald-50 text-emerald-600' : needsRenew ? 'bg-red-50 text-red-600' : 'bg-yellow-50 text-yellow-600';
   const isMock = payment?.provider === 'MOCK';
   const storeSlug = payment?.storeSlug;
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
@@ -137,28 +141,28 @@ export function PaymentPage() {
 
           {!isLoading && !error && payment && (
             <div className="space-y-6">
-              <div className="flex items-start gap-4">
-                <div className={`w-12 h-12 rounded-2xl ${statusBg} flex items-center justify-center text-2xl`}>
-                  💳
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Pagamento #{payment.id}</p>
-                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{statusLabel}</h1>
-                  {isPaid ? (
+                <div className="flex items-start gap-4">
+                  <div className={`w-12 h-12 rounded-2xl ${statusBg} flex items-center justify-center text-2xl`}>
+                    💳
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Pagamento #{payment.id}</p>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{statusLabel}</h1>
+                    {isPaid ? (
                     <p className="text-gray-600 mt-2">
                       {isVerified
                         ? 'Sua loja foi liberada. Use o e-mail e senha cadastrados para acessar o painel.'
                         : 'Pagamento aprovado. Confirme seu e-mail para liberar a loja.'}
                     </p>
-                  ) : isFailed ? (
-                    <p className="text-gray-600 mt-2">
-                      O pagamento não foi aprovado. Você pode tentar novamente ou escolher outra forma.
-                    </p>
-                  ) : (
-                    <p className="text-gray-600 mt-2">
-                      {payment.method === 'BOLETO'
-                        ? 'Boleto pode levar até 3 dias úteis para compensar. Sua loja será liberada automaticamente.'
-                        : 'Use o QR Code abaixo para completar o pagamento.'}
+                    ) : needsRenew ? (
+                      <p className="text-gray-600 mt-2">
+                        O pagamento expirou ou falhou. Gere um novo pagamento para continuar.
+                      </p>
+                    ) : (
+                      <p className="text-gray-600 mt-2">
+                        {payment.method === 'BOLETO'
+                          ? 'Boleto pode levar até 3 dias úteis para compensar. Sua loja será liberada automaticamente.'
+                          : 'Use o QR Code abaixo para completar o pagamento.'}
                     </p>
                   )}
                 </div>
@@ -225,6 +229,63 @@ export function PaymentPage() {
                     <p className="text-sm text-emerald-700 font-semibold text-center">
                       Pagamento confirmado. Sua loja já está liberada.
                     </p>
+                  ) : needsRenew ? (
+                    <>
+                      <p className="text-sm font-semibold text-gray-700 text-center">
+                        Escolha uma forma para gerar um novo pagamento
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setRenewMethod('PIX')}
+                          className={`px-3 py-2 rounded-lg border text-sm font-semibold ${
+                            renewMethod === 'PIX' ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-gray-200'
+                          }`}
+                        >
+                          PIX
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setRenewMethod('CREDIT_CARD')}
+                          className={`px-3 py-2 rounded-lg border text-sm font-semibold ${
+                            renewMethod === 'CREDIT_CARD' ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-gray-200'
+                          }`}
+                        >
+                          Cartao
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setRenewMethod('BOLETO')}
+                          className={`px-3 py-2 rounded-lg border text-sm font-semibold ${
+                            renewMethod === 'BOLETO' ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-gray-200'
+                          }`}
+                        >
+                          Boleto
+                        </button>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          if (!paymentId) return;
+                          setRenewing(true);
+                          setError('');
+                          try {
+                            const nextPayment = await paymentService.renew(paymentId, { paymentMethod: renewMethod });
+                            if (nextPayment?.id) {
+                              navigate(`/payment/${nextPayment.id}`);
+                            }
+                          } catch (err: any) {
+                            setError(err.message || 'Nao foi possivel gerar um novo pagamento.');
+                          } finally {
+                            setRenewing(false);
+                          }
+                        }}
+                        className="px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:opacity-90"
+                        disabled={renewing}
+                      >
+                        {renewing ? 'Gerando...' : 'Gerar novo pagamento'}
+                      </button>
+                    </>
                   ) : payment.method === 'PIX' && payment.qrCodeBase64 ? (
                     <>
                       <div className="flex items-center gap-2 text-sm text-gray-700">

@@ -17,4 +17,8 @@ export const paymentService = {
     const response = await apiClient.rawGet(`/payments/${paymentId}/events?limit=${limit}&offset=${offset}`);
     return toJson(response);
   },
+  async renew(paymentId: any, payload: { paymentMethod?: string }) {
+    const response = await apiClient.rawPost(`/payments/${paymentId}/renew`, payload);
+    return toJson(response);
+  },
 };
