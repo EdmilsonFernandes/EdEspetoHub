@@ -106,6 +106,14 @@ export function SuperAdmin() {
   const [accessLogMethod, setAccessLogMethod] = useState('all');
   const [accessLogStatus, setAccessLogStatus] = useState('all');
   const [accessLogStore, setAccessLogStore] = useState('all');
+  const [sectionsOpen, setSectionsOpen] = useState({
+    charts: true,
+    rankings: true,
+    stores: true,
+    payments: true,
+    logs: false,
+    events: false,
+  });
 
   const loadOverview = async (authToken: string) => {
     setLoading(true);
@@ -125,6 +133,10 @@ export function SuperAdmin() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const toggleSection = (key: keyof typeof sectionsOpen) => {
+    setSectionsOpen((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
   useEffect(() => {
@@ -844,63 +856,85 @@ export function SuperAdmin() {
         )}
 
         {summary && (
-          <div className="grid lg:grid-cols-2 gap-4">
-            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <TrendingUp size={18} className="text-emerald-600" />
-                  <h3 className="text-lg font-bold text-slate-800">Top lojas por receita</h3>
+          <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <TrendingUp size={18} className="text-emerald-600" />
+                <h3 className="text-lg font-bold text-slate-800">Rankings da plataforma</h3>
+              </div>
+              <button
+                onClick={() => toggleSection('rankings')}
+                className="px-3 py-1 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 flex items-center gap-1"
+              >
+                <ChevronRight
+                  size={14}
+                  className={`transition-transform ${sectionsOpen.rankings ? 'rotate-90' : ''}`}
+                />
+                {sectionsOpen.rankings ? 'Ocultar' : 'Mostrar'}
+              </button>
+            </div>
+            {sectionsOpen.rankings ? (
+              <div className="grid lg:grid-cols-2 gap-4 mt-4">
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <TrendingUp size={18} className="text-emerald-600" />
+                      <h3 className="text-lg font-bold text-slate-800">Top lojas por receita</h3>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    {rankings.byRevenue?.length ? (
+                      rankings.byRevenue.map((store: any, index: number) => (
+                        <div key={store.id} className="flex items-center justify-between text-sm">
+                          <div>
+                            <p className="font-semibold text-slate-700">
+                              {index + 1}. {store.name}
+                            </p>
+                            <p className="text-xs text-slate-400">{store.slug}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-bold text-emerald-600">{formatCurrency(store.totalRevenue || 0)}</p>
+                            <p className="text-xs text-slate-400">{store.totalOrders || 0} pedidos</p>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-slate-500">Sem dados suficientes.</p>
+                    )}
+                  </div>
+                </div>
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <BarChart3 size={18} className="text-slate-600" />
+                      <h3 className="text-lg font-bold text-slate-800">Top lojas por pedidos</h3>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    {rankings.byOrders?.length ? (
+                      rankings.byOrders.map((store: any, index: number) => (
+                        <div key={store.id} className="flex items-center justify-between text-sm">
+                          <div>
+                            <p className="font-semibold text-slate-700">
+                              {index + 1}. {store.name}
+                            </p>
+                            <p className="text-xs text-slate-400">{store.slug}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-bold text-slate-700">{store.totalOrders || 0} pedidos</p>
+                            <p className="text-xs text-slate-400">{formatCurrency(store.totalRevenue || 0)}</p>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-slate-500">Sem dados suficientes.</p>
+                    )}
+                  </div>
                 </div>
               </div>
-              <div className="space-y-3">
-                {rankings.byRevenue?.length ? (
-                  rankings.byRevenue.map((store: any, index: number) => (
-                    <div key={store.id} className="flex items-center justify-between text-sm">
-                      <div>
-                        <p className="font-semibold text-slate-700">
-                          {index + 1}. {store.name}
-                        </p>
-                        <p className="text-xs text-slate-400">{store.slug}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-bold text-emerald-600">{formatCurrency(store.totalRevenue || 0)}</p>
-                        <p className="text-xs text-slate-400">{store.totalOrders || 0} pedidos</p>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-sm text-slate-500">Sem dados suficientes.</p>
-                )}
-              </div>
-            </div>
-            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <BarChart3 size={18} className="text-slate-600" />
-                  <h3 className="text-lg font-bold text-slate-800">Top lojas por pedidos</h3>
-                </div>
-              </div>
-              <div className="space-y-3">
-                {rankings.byOrders?.length ? (
-                  rankings.byOrders.map((store: any, index: number) => (
-                    <div key={store.id} className="flex items-center justify-between text-sm">
-                      <div>
-                        <p className="font-semibold text-slate-700">
-                          {index + 1}. {store.name}
-                        </p>
-                        <p className="text-xs text-slate-400">{store.slug}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-bold text-slate-700">{store.totalOrders || 0} pedidos</p>
-                        <p className="text-xs text-slate-400">{formatCurrency(store.totalRevenue || 0)}</p>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-sm text-slate-500">Sem dados suficientes.</p>
-                )}
-              </div>
-            </div>
+            ) : (
+              <div className="text-sm text-slate-500 mt-3">Rankings ocultos.</div>
+            )}
           </div>
         )}
 
@@ -910,20 +944,34 @@ export function SuperAdmin() {
               <BarChart3 size={20} className="text-slate-700" />
               <h2 className="text-lg font-bold text-slate-800">Receita por mês</h2>
             </div>
+            <button
+              onClick={() => toggleSection('charts')}
+              className="px-3 py-1 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 flex items-center gap-1"
+            >
+              <ChevronRight
+                size={14}
+                className={`transition-transform ${sectionsOpen.charts ? 'rotate-90' : ''}`}
+              />
+              {sectionsOpen.charts ? 'Ocultar' : 'Mostrar'}
+            </button>
           </div>
-          {revenueByMonth.length === 0 ? (
-            <div className="text-sm text-slate-500">Nenhuma receita paga registrada.</div>
+          {sectionsOpen.charts ? (
+            revenueByMonth.length === 0 ? (
+              <div className="text-sm text-slate-500">Nenhuma receita paga registrada.</div>
+            ) : (
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={revenueByMonth}>
+                    <XAxis dataKey="month" fontSize={12} />
+                    <YAxis fontSize={12} />
+                    <Tooltip formatter={(value) => formatCurrency(value)} />
+                    <Bar dataKey="total" fill="var(--color-primary)" radius={[6, 6, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            )
           ) : (
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={revenueByMonth}>
-                  <XAxis dataKey="month" fontSize={12} />
-                  <YAxis fontSize={12} />
-                  <Tooltip formatter={(value) => formatCurrency(value)} />
-                  <Bar dataKey="total" fill="var(--color-primary)" radius={[6, 6, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            <div className="text-sm text-slate-500">Grafico oculto.</div>
           )}
         </div>
 
@@ -934,70 +982,92 @@ export function SuperAdmin() {
         </div>
 
         <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm overflow-x-auto">
-          <table className="min-w-full text-sm">
-            <thead className="text-xs uppercase text-slate-400 border-b">
-              <tr>
-                <th className="py-2 pr-4 text-left">Loja</th>
-                <th className="py-2 pr-4 text-left">Plano</th>
-                <th className="py-2 pr-4 text-left">Status</th>
-                <th className="py-2 pr-4 text-left">Criada</th>
-                <th className="py-2 pr-4 text-left">Expira</th>
-                <th className="py-2 pr-4 text-left">Dias</th>
-                <th className="py-2 pr-4 text-left">Pedidos</th>
-                <th className="py-2 pr-4 text-left">Receita pedidos</th>
-                <th className="py-2 pr-4 text-left">Mais vendido</th>
-                <th className="py-2 pr-4 text-left">Pagamento</th>
-                <th className="py-2 text-right">Valor</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {stores.map((store: any) => {
-                const planName =
-                  store.subscription?.plan?.displayName ||
-                  formatPlanName(store.subscription?.plan?.name || '-');
-                const planPrice = store.subscription?.plan?.price || 0;
-                const status = store.subscription?.status || 'PENDING';
-                const endDate = store.subscription?.endDate;
-                const remaining = daysUntil(endDate);
-                const paymentStatus = store.latestPayment?.status || '-';
-                const ordersCount = store.orderMetrics?.totalOrders || 0;
-                const ordersRevenue = store.orderMetrics?.totalRevenue || 0;
-                const topProduct = store.topProduct?.name || '-';
-                const topProductQty = store.topProduct?.quantity || 0;
-                return (
-                  <tr key={store.id}>
-                    <td className="py-3 pr-4">
-                      <div className="font-semibold text-slate-700">{store.name}</div>
-                      <div className="text-xs text-slate-400">{store.slug}</div>
-                    </td>
-                    <td className="py-3 pr-4 capitalize">{planName}</td>
-                    <td className="py-3 pr-4">
-                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${statusStyle(status)}`}>
-                        {status}
-                      </span>
-                    </td>
-                    <td className="py-3 pr-4">{formatDate(store.createdAt)}</td>
-                    <td className="py-3 pr-4">{formatDate(endDate)}</td>
-                    <td className="py-3 pr-4">{remaining}</td>
-                    <td className="py-3 pr-4 font-semibold text-slate-700">{ordersCount}</td>
-                    <td className="py-3 pr-4 text-slate-700">{formatCurrency(ordersRevenue)}</td>
-                    <td className="py-3 pr-4">
-                      <div className="text-slate-700">{topProduct}</div>
-                      {topProductQty ? (
-                        <div className="text-xs text-slate-400">{topProductQty} vendas</div>
-                      ) : null}
-                    </td>
-                    <td className="py-3 pr-4">{paymentStatus}</td>
-                    <td className="py-3 text-right font-semibold text-brand-primary">
-                      {formatCurrency(planPrice)}
-                    </td>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Store size={18} className="text-slate-700" />
+              <h2 className="text-lg font-bold text-slate-800">Lojas e performance</h2>
+            </div>
+            <button
+              onClick={() => toggleSection('stores')}
+              className="px-3 py-1 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 flex items-center gap-1"
+            >
+              <ChevronRight
+                size={14}
+                className={`transition-transform ${sectionsOpen.stores ? 'rotate-90' : ''}`}
+              />
+              {sectionsOpen.stores ? 'Ocultar' : 'Mostrar'}
+            </button>
+          </div>
+          {sectionsOpen.stores ? (
+            <>
+              <table className="min-w-full text-sm">
+                <thead className="text-xs uppercase text-slate-400 border-b">
+                  <tr>
+                    <th className="py-2 pr-4 text-left">Loja</th>
+                    <th className="py-2 pr-4 text-left">Plano</th>
+                    <th className="py-2 pr-4 text-left">Status</th>
+                    <th className="py-2 pr-4 text-left">Criada</th>
+                    <th className="py-2 pr-4 text-left">Expira</th>
+                    <th className="py-2 pr-4 text-left">Dias</th>
+                    <th className="py-2 pr-4 text-left">Pedidos</th>
+                    <th className="py-2 pr-4 text-left">Receita pedidos</th>
+                    <th className="py-2 pr-4 text-left">Mais vendido</th>
+                    <th className="py-2 pr-4 text-left">Pagamento</th>
+                    <th className="py-2 text-right">Valor</th>
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
-          {stores.length === 0 && (
-            <div className="text-center text-slate-500 py-8">Nenhuma loja encontrada.</div>
+                </thead>
+                <tbody className="divide-y">
+                  {stores.map((store: any) => {
+                    const planName =
+                      store.subscription?.plan?.displayName ||
+                      formatPlanName(store.subscription?.plan?.name || '-');
+                    const planPrice = store.subscription?.plan?.price || 0;
+                    const status = store.subscription?.status || 'PENDING';
+                    const endDate = store.subscription?.endDate;
+                    const remaining = daysUntil(endDate);
+                    const paymentStatus = store.latestPayment?.status || '-';
+                    const ordersCount = store.orderMetrics?.totalOrders || 0;
+                    const ordersRevenue = store.orderMetrics?.totalRevenue || 0;
+                    const topProduct = store.topProduct?.name || '-';
+                    const topProductQty = store.topProduct?.quantity || 0;
+                    return (
+                      <tr key={store.id}>
+                        <td className="py-3 pr-4">
+                          <div className="font-semibold text-slate-700">{store.name}</div>
+                          <div className="text-xs text-slate-400">{store.slug}</div>
+                        </td>
+                        <td className="py-3 pr-4 capitalize">{planName}</td>
+                        <td className="py-3 pr-4">
+                          <span className={`px-2 py-1 rounded-full text-xs font-semibold ${statusStyle(status)}`}>
+                            {status}
+                          </span>
+                        </td>
+                        <td className="py-3 pr-4">{formatDate(store.createdAt)}</td>
+                        <td className="py-3 pr-4">{formatDate(endDate)}</td>
+                        <td className="py-3 pr-4">{remaining}</td>
+                        <td className="py-3 pr-4 font-semibold text-slate-700">{ordersCount}</td>
+                        <td className="py-3 pr-4 text-slate-700">{formatCurrency(ordersRevenue)}</td>
+                        <td className="py-3 pr-4">
+                          <div className="text-slate-700">{topProduct}</div>
+                          {topProductQty ? (
+                            <div className="text-xs text-slate-400">{topProductQty} vendas</div>
+                          ) : null}
+                        </td>
+                        <td className="py-3 pr-4">{paymentStatus}</td>
+                        <td className="py-3 text-right font-semibold text-brand-primary">
+                          {formatCurrency(planPrice)}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+              {stores.length === 0 && (
+                <div className="text-center text-slate-500 py-8">Nenhuma loja encontrada.</div>
+              )}
+            </>
+          ) : (
+            <div className="text-sm text-slate-500">Tabela ocultada.</div>
           )}
         </div>
 
@@ -1007,7 +1077,17 @@ export function SuperAdmin() {
               <CreditCard size={20} className="text-slate-700" />
               <h2 className="text-lg font-bold text-slate-800">Pagamentos recentes</h2>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 items-center">
+              <button
+                onClick={() => toggleSection('payments')}
+                className="px-3 py-2 rounded-lg text-xs font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50 flex items-center gap-1"
+              >
+                <ChevronRight
+                  size={14}
+                  className={`transition-transform ${sectionsOpen.payments ? 'rotate-90' : ''}`}
+                />
+                {sectionsOpen.payments ? 'Ocultar' : 'Mostrar'}
+              </button>
               <button
                 onClick={resetFilters}
                 className="px-3 py-2 rounded-lg text-sm font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50 flex items-center gap-1"
@@ -1024,6 +1104,8 @@ export function SuperAdmin() {
               </button>
             </div>
           </div>
+          {sectionsOpen.payments ? (
+            <>
           <div className="flex flex-wrap gap-2 mb-3">
             <div className="flex items-center px-3 py-2 rounded-lg border border-slate-200 bg-white">
               <Search size={16} className="text-slate-400" />
@@ -1185,6 +1267,10 @@ export function SuperAdmin() {
           <div className="mt-3 text-sm text-slate-600">
             Total filtrado: <span className="font-semibold">{formatCurrency(filteredTotal)}</span>
           </div>
+          </>
+          ) : (
+            <div className="text-sm text-slate-500">Tabela de pagamentos oculta.</div>
+          )}
         </div>
 
         <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm overflow-x-auto">
@@ -1193,14 +1279,28 @@ export function SuperAdmin() {
               <Filter size={18} className="text-slate-700" />
               <h2 className="text-lg font-bold text-slate-800">Logs de acesso</h2>
             </div>
-            <button
-              onClick={() => loadAccessLogs(accessLogsPage)}
-              className="px-3 py-2 rounded-lg text-sm font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50 flex items-center gap-1"
-            >
-              <RefreshCw size={14} />
-              Atualizar
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => toggleSection('logs')}
+                className="px-3 py-2 rounded-lg text-xs font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50 flex items-center gap-1"
+              >
+                <ChevronRight
+                  size={14}
+                  className={`transition-transform ${sectionsOpen.logs ? 'rotate-90' : ''}`}
+                />
+                {sectionsOpen.logs ? 'Ocultar' : 'Mostrar'}
+              </button>
+              <button
+                onClick={() => loadAccessLogs(accessLogsPage)}
+                className="px-3 py-2 rounded-lg text-sm font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50 flex items-center gap-1"
+              >
+                <RefreshCw size={14} />
+                Atualizar
+              </button>
+            </div>
           </div>
+          {sectionsOpen.logs ? (
+            <>
           <div className="flex flex-wrap gap-2 mb-3">
             <div className="flex items-center px-3 py-2 rounded-lg border border-slate-200 bg-white">
               <Search size={16} className="text-slate-400" />
@@ -1320,6 +1420,10 @@ export function SuperAdmin() {
           <div className="mt-3 text-sm text-slate-600">
             Total de logs: <span className="font-semibold">{accessLogsTotal}</span>
           </div>
+          </>
+          ) : (
+            <div className="text-sm text-slate-500">Logs ocultos.</div>
+          )}
         </div>
 
         <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm overflow-x-auto">
@@ -1328,14 +1432,28 @@ export function SuperAdmin() {
               <RefreshCw size={20} className="text-slate-700" />
               <h2 className="text-lg font-bold text-slate-800">Eventos de pagamento</h2>
             </div>
-            <button
-              onClick={exportEventsCsv}
-              className="px-3 py-2 rounded-lg text-sm font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50 flex items-center gap-1"
-            >
-              <Download size={14} />
-              Exportar CSV
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => toggleSection('events')}
+                className="px-3 py-2 rounded-lg text-xs font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50 flex items-center gap-1"
+              >
+                <ChevronRight
+                  size={14}
+                  className={`transition-transform ${sectionsOpen.events ? 'rotate-90' : ''}`}
+                />
+                {sectionsOpen.events ? 'Ocultar' : 'Mostrar'}
+              </button>
+              <button
+                onClick={exportEventsCsv}
+                className="px-3 py-2 rounded-lg text-sm font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50 flex items-center gap-1"
+              >
+                <Download size={14} />
+                Exportar CSV
+              </button>
+            </div>
           </div>
+          {sectionsOpen.events ? (
+            <>
           <div className="flex flex-wrap gap-2 mb-3">
             <select
               value={eventStoreFilter}
@@ -1421,6 +1539,10 @@ export function SuperAdmin() {
               </button>
             </div>
           </div>
+          </>
+          ) : (
+            <div className="text-sm text-slate-500">Eventos ocultos.</div>
+          )}
         </div>
 
       {selectedEventPayload && (
