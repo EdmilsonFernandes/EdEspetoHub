@@ -4,6 +4,7 @@ import { AdminHeader } from '../components/Admin/AdminHeader';
 import { useAuth } from '../contexts/AuthContext';
 import { orderService } from '../services/orderService';
 import { formatCurrency, formatDateTime, formatOrderStatus, formatOrderType, formatPaymentMethod } from '../utils/format';
+import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 
 export function AdminOrders() {
   const { auth } = useAuth();
@@ -90,6 +91,7 @@ export function AdminOrders() {
     if (item?.passSkewer) labels.push('passar varinha');
     return labels.length ? `(${labels.join(' • ')})` : '';
   };
+  const shortId = (value) => (value ? String(value).slice(0, 8) : '');
 
   const clearFilters = () => {
     setStatusFilter('all');
@@ -193,20 +195,25 @@ export function AdminOrders() {
               {filteredOrders.map((order, index) => (
                 <div
                   key={order.id || `${order.customerName}-${index}`}
-                  className="border border-slate-200 rounded-2xl p-4 flex flex-col gap-4"
+                  className="border border-slate-200 rounded-3xl bg-white p-5 shadow-sm flex flex-col gap-4"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div>
                       <p className="text-xs uppercase tracking-wide text-slate-500 font-semibold">
                         {formatDateTime(order.createdAt)}
                       </p>
-                      <h3 className="text-base font-bold text-slate-800">
+                      <h3 className="text-base font-bold text-slate-900">
                         {order.customerName || order.name || 'Cliente'}
                       </h3>
-                      <p className="text-sm text-slate-600">
-                        {formatOrderType(order.type)}
-                        {order.table ? ` · Mesa ${order.table}` : ''}
-                      </p>
+                      <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                        <span className="px-2 py-1 rounded-full border border-slate-200 bg-slate-50 font-semibold">
+                          Pedido #{shortId(order.id)}
+                        </span>
+                        <span>
+                          {formatOrderType(order.type)}
+                          {order.table ? ` · Mesa ${order.table}` : ''}
+                        </span>
+                      </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusStyles(order.status)}`}>
@@ -220,8 +227,9 @@ export function AdminOrders() {
 
                   <div className="grid sm:grid-cols-3 gap-3 text-sm text-slate-600">
                     <div>
-                      <p className="text-xs uppercase text-slate-400">Telefone</p>
-                      <p className="font-semibold text-slate-700">{order.phone || '-'}</p>
+                      <p className="text-xs uppercase text-slate-400">Cliente</p>
+                      <p className="font-semibold text-slate-700">{order.customerName || order.name || 'Cliente'}</p>
+                      <p className="text-xs text-slate-500">{order.phone || '-'}</p>
                     </div>
                     <div>
                       <p className="text-xs uppercase text-slate-400">Pagamento</p>
@@ -238,11 +246,42 @@ export function AdminOrders() {
                       <p className="text-xs uppercase text-slate-400 mb-2">Itens</p>
                       <div className="grid sm:grid-cols-2 gap-2 text-sm text-slate-700">
                         {order.items.map((item) => (
-                          <div key={item.id || item.name} className="flex items-center justify-between">
-                            <span>
-                              {item.qty}x {item.name} {formatItemOptions(item)}
+                          <div key={item.id || item.name} className="flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-lg overflow-hidden border border-slate-200 bg-slate-100 flex-shrink-0">
+                                {item.imageUrl ? (
+                                  <img
+                                    src={resolveAssetUrl(item.imageUrl)}
+                                    alt={item.name}
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center text-[10px] text-slate-400">
+                                    🍖
+                                  </div>
+                                )}
+                              </div>
+                              <div className="flex flex-col">
+                                <span className="font-semibold">
+                                  {item.qty}x {item.name}
+                                </span>
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                  {item?.cookingPoint && (
+                                    <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800 border border-amber-200">
+                                      {item.cookingPoint}
+                                    </span>
+                                  )}
+                                  {item?.passSkewer && (
+                                    <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-fuchsia-100 text-fuchsia-700 border border-fuchsia-200">
+                                      passar varinha
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            <span className="font-semibold">
+                              {formatCurrency((item.unitPrice ?? item.price ?? 0) * item.qty)}
                             </span>
-                            <span className="font-semibold">{formatCurrency((item.unitPrice ?? item.price ?? 0) * item.qty)}</span>
                           </div>
                         ))}
                       </div>
