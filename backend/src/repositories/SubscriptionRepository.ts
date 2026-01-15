@@ -105,4 +105,47 @@ export class SubscriptionRepository {
   findAll() {
     return this.repository.find({ relations: ['store', 'plan'] });
   }
+
+  /**
+   * Counts subscriptions by status list.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
+  countByStatuses(statuses: string[])
+  {
+    return this.repository
+      .createQueryBuilder('s')
+      .where('s.status IN (:...statuses)', { statuses })
+      .getCount();
+  }
+
+  /**
+   * Counts active subscriptions updated since a date.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
+  countActiveUpdatedSince(since: Date)
+  {
+    return this.repository
+      .createQueryBuilder('s')
+      .where('s.status = :status', { status: 'ACTIVE' })
+      .andWhere('s.updated_at >= :since', { since })
+      .getCount();
+  }
+
+  /**
+   * Counts subscriptions started since a date.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
+  countStartedSince(since: Date)
+  {
+    return this.repository
+      .createQueryBuilder('s')
+      .where('s.start_date >= :since', { since })
+      .getCount();
+  }
 }

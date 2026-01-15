@@ -175,10 +175,13 @@ export function SuperAdmin() {
   const stores = overview?.stores || [];
   const payments = overview?.payments || [];
   const paymentEvents = overview?.paymentEvents || [];
+  const rankings = overview?.rankings || { byRevenue: [], byOrders: [] };
   const paidRevenueValue = summary?.paidRevenue ? Number(summary.paidRevenue) : 0;
   const ordersRevenueTotal = summary?.ordersRevenueTotal ? Number(summary.ordersRevenueTotal) : 0;
   const ordersRevenueLast7Days = summary?.ordersRevenueLast7Days ? Number(summary.ordersRevenueLast7Days) : 0;
   const ordersRevenueLast30Days = summary?.ordersRevenueLast30Days ? Number(summary.ordersRevenueLast30Days) : 0;
+  const churnedStores = summary?.churnedStores || 0;
+  const reactivatedStores = summary?.reactivatedStores || 0;
   const totalOrders = summary?.totalOrders || 0;
   const ordersLast7Days = summary?.ordersLast7Days || 0;
   const ordersLast30Days = summary?.ordersLast30Days || 0;
@@ -693,6 +696,17 @@ export function SuperAdmin() {
                   <span className="font-bold text-amber-600">{summary.pendingPayments}</span>
                 </div>
               </div>
+              <div className="rounded-2xl border border-slate-200 p-3">
+                <p className="text-xs uppercase text-slate-400">Churn & retomadas</p>
+                <div className="flex items-center justify-between mt-2">
+                  <span className="text-sm text-slate-600">Churn (exp/susp)</span>
+                  <span className="font-bold text-red-600">{churnedStores}</span>
+                </div>
+                <div className="flex items-center justify-between mt-1">
+                  <span className="text-sm text-slate-600">Reativadas (30d)</span>
+                  <span className="font-bold text-emerald-600">{reactivatedStores}</span>
+                </div>
+              </div>
               <div>
                 <p className="text-xs uppercase text-slate-400">Expirando em ate 7 dias</p>
                 {expiringSoon.length === 0 ? (
@@ -768,6 +782,67 @@ export function SuperAdmin() {
               </div>
               <p className="text-2xl font-black text-slate-800">{ordersPerStore.toFixed(1)}</p>
               <p className="text-xs text-slate-400 mt-1">Media global por loja</p>
+            </div>
+          </div>
+        )}
+
+        {summary && (
+          <div className="grid lg:grid-cols-2 gap-4">
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <TrendingUp size={18} className="text-emerald-600" />
+                  <h3 className="text-lg font-bold text-slate-800">Top lojas por receita</h3>
+                </div>
+              </div>
+              <div className="space-y-3">
+                {rankings.byRevenue?.length ? (
+                  rankings.byRevenue.map((store: any, index: number) => (
+                    <div key={store.id} className="flex items-center justify-between text-sm">
+                      <div>
+                        <p className="font-semibold text-slate-700">
+                          {index + 1}. {store.name}
+                        </p>
+                        <p className="text-xs text-slate-400">{store.slug}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold text-emerald-600">{formatCurrency(store.totalRevenue || 0)}</p>
+                        <p className="text-xs text-slate-400">{store.totalOrders || 0} pedidos</p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-slate-500">Sem dados suficientes.</p>
+                )}
+              </div>
+            </div>
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <BarChart3 size={18} className="text-slate-600" />
+                  <h3 className="text-lg font-bold text-slate-800">Top lojas por pedidos</h3>
+                </div>
+              </div>
+              <div className="space-y-3">
+                {rankings.byOrders?.length ? (
+                  rankings.byOrders.map((store: any, index: number) => (
+                    <div key={store.id} className="flex items-center justify-between text-sm">
+                      <div>
+                        <p className="font-semibold text-slate-700">
+                          {index + 1}. {store.name}
+                        </p>
+                        <p className="text-xs text-slate-400">{store.slug}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold text-slate-700">{store.totalOrders || 0} pedidos</p>
+                        <p className="text-xs text-slate-400">{formatCurrency(store.totalRevenue || 0)}</p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-slate-500">Sem dados suficientes.</p>
+                )}
+              </div>
             </div>
           </div>
         )}

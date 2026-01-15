@@ -18,6 +18,7 @@ import { PaymentRepository } from '../repositories/PaymentRepository';
 import { PaymentEventRepository } from '../repositories/PaymentEventRepository';
 import { OrderRepository } from '../repositories/OrderRepository';
 import { AppDataSource } from '../config/database';
+import { SubscriptionRepository } from '../repositories/SubscriptionRepository';
 import { logger } from '../utils/logger';
 import { respondWithError } from '../errors/respondWithError';
 
@@ -26,6 +27,7 @@ const subscriptionService = new SubscriptionService();
 const paymentRepository = new PaymentRepository();
 const paymentEventRepository = new PaymentEventRepository();
 const orderRepository = new OrderRepository();
+const subscriptionRepository = new SubscriptionRepository();
 const log = logger.child({ scope: 'PlatformAdminController' });
 
 /**
@@ -95,6 +97,10 @@ export class PlatformAdminController {
       const ordersRevenueLast30Days = await orderRepository.sumRevenueSince(thirtyDaysAgo);
       const orderAggregates = await orderRepository.aggregateByStore();
       const orderAggregateMap = new Map(orderAggregates.map((row) => [ row.storeId, row ]));
+      const churnedStores = await subscriptionRepository.countByStatuses([ 'EXPIRED', 'SUSPENDED' ]);
+      const activeUpdated = await subscriptionRepository.countActiveUpdatedSince(thirtyDaysAgo);
+      const startedLast30Days = await subscriptionRepository.countStartedSince(thirtyDaysAgo);
+      const reactivatedStores = Math.max(activeUpdated - startedLast30Days, 0);
 
       const topProductsByStore = await AppDataSource.query(`
         SELECT DISTINCT ON (o.store_id)
@@ -113,6 +119,29 @@ export class PlatformAdminController {
           { name: row.productName, quantity: Number(row.quantity || 0) },
         ])
       );
+
+      const storeMetrics = enriched.map((store) => {
+        const aggregate = orderAggregateMap.get(store.id);
+        const totalOrders = aggregate?.ordersCount || 0;
+        const totalRevenue = aggregate?.ordersRevenue || 0;
+        const avgTicket = totalOrders ? totalRevenue / totalOrders : 0;
+        return {
+          id: store.id,
+          name: store.name,
+          slug: store.slug,
+          totalOrders,
+          totalRevenue,
+          avgTicket,
+          status: store.subscription?.status || 'PENDING',
+          endDate: store.subscription?.endDate || null,
+        };
+      });
+      const topStoresByRevenue = [ ...storeMetrics ]
+        .sort((a, b) => b.totalRevenue - a.totalRevenue)
+        .slice(0, 10);
+      const topStoresByOrders = [ ...storeMetrics ]
+        .sort((a, b) => b.totalOrders - a.totalOrders)
+        .slice(0, 10);
 
       const summary = enriched.reduce(
         (acc, store) => {
@@ -146,6 +175,8 @@ export class PlatformAdminController {
           ordersRevenueTotal,
           ordersRevenueLast7Days,
           ordersRevenueLast30Days,
+          churnedStores,
+          reactivatedStores,
         }
       );
 
@@ -174,6 +205,10 @@ export class PlatformAdminController {
             topProduct,
           };
         }),
+        rankings: {
+          byRevenue: topStoresByRevenue,
+          byOrders: topStoresByOrders,
+        },
         payments: recentPayments,
         paymentEvents,
       });
