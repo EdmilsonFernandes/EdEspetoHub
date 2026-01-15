@@ -18,7 +18,8 @@ import { productService } from '../services/productService';
 import { storeService } from '../services/storeService';
 import { subscriptionService } from '../services/subscriptionService';
 import { paymentService } from '../services/paymentService';
-import { formatCurrency, formatDateTime, formatOrderStatus, formatOrderType, formatPaymentMethod } from '../utils/format';
+import { formatCurrency, formatDateTime, formatOrderStatus, formatOrderType } from '../utils/format';
+import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 
 const OrdersView = ({ orders, products }) => {
@@ -168,7 +169,21 @@ const OrdersView = ({ orders, products }) => {
                   </div>
                 <div>
                   <p className="text-xs uppercase text-slate-400">Pagamento</p>
-                  <p className="font-semibold text-slate-700">{formatPaymentMethod(order.payment)}</p>
+                  {(() => {
+                    const paymentMeta = getPaymentMethodMeta(order.payment);
+                    return (
+                      <p className="font-semibold text-slate-700 inline-flex items-center gap-2">
+                        {paymentMeta.icon && (
+                          <img
+                            src={paymentMeta.icon}
+                            alt={paymentMeta.label}
+                            className="h-4 w-4 object-contain"
+                          />
+                        )}
+                        {paymentMeta.label}
+                      </p>
+                    );
+                  })()}
                 </div>
                 <div>
                   <p className="text-xs uppercase text-slate-400">Endereco</p>
@@ -239,15 +254,7 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
   const plan = subscription?.plan;
   const planLabel = plan?.displayName || plan?.name || 'Plano nao identificado';
   const priceValue = subscription?.latestPaymentAmount ?? plan?.price ?? 0;
-  const method = (subscription?.paymentMethod || '').toUpperCase();
-  const methodLabel =
-    method === 'CREDIT_CARD'
-      ? 'Cartao de credito'
-      : method === 'BOLETO'
-      ? 'Boleto'
-      : method === 'PIX'
-      ? 'Pix'
-      : method || 'Nao informado';
+  const methodMeta = getPaymentMethodMeta(subscription?.paymentMethod);
   const expiresLabel = subscription?.endDate ? formatDateTime(subscription.endDate) : '—';
   const rawStatus = (subscription?.status || '').toUpperCase();
   const statusMap: Record<string, { label: string; tone: string }> = {
@@ -306,7 +313,12 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
           </div>
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
             <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Forma de pagamento</p>
-            <p className="text-lg font-semibold text-slate-900 mt-2">{methodLabel}</p>
+            <p className="text-lg font-semibold text-slate-900 mt-2 inline-flex items-center gap-2">
+              {methodMeta.icon && (
+                <img src={methodMeta.icon} alt={methodMeta.label} className="h-4 w-4 object-contain" />
+              )}
+              {methodMeta.label}
+            </p>
             <p className="text-xs text-slate-500 mt-1">{paymentStatus}</p>
           </div>
         </div>
@@ -329,16 +341,40 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
               {payments.slice(0, 6).map((payment) => (
                 <div key={payment.id} className="flex items-center justify-between text-sm">
                   <div>
-                    <p className="font-semibold text-slate-700">
-                      {payment.method} · {payment.status}
-                    </p>
+                    {(() => {
+                      const paymentMeta = getPaymentMethodMeta(payment.method);
+                      const providerMeta = getPaymentProviderMeta(payment.provider);
+                      return (
+                        <p className="font-semibold text-slate-700 flex flex-wrap items-center gap-2">
+                          {paymentMeta.icon && (
+                            <img src={paymentMeta.icon} alt={paymentMeta.label} className="h-4 w-4 object-contain" />
+                          )}
+                          <span>{paymentMeta.label}</span>
+                          <span className="text-slate-300">·</span>
+                          <span>{payment.status}</span>
+                          {providerMeta.icon && (
+                            <>
+                              <span className="text-slate-300">·</span>
+                              <img
+                                src={providerMeta.icon}
+                                alt={providerMeta.label}
+                                className="h-4 w-4 object-contain"
+                              />
+                              <span className="text-xs text-slate-500">{providerMeta.label}</span>
+                            </>
+                          )}
+                        </p>
+                      );
+                    })()}
                     <p className="text-xs text-slate-400">
                       {payment.createdAt ? formatDateTime(payment.createdAt) : '—'}
                     </p>
                   </div>
                   <div className="text-right">
                     <p className="font-semibold text-slate-900">{formatCurrency(payment.amount || 0)}</p>
-                    <p className="text-xs text-slate-400">{payment.provider || '-'}</p>
+                    <p className="text-xs text-slate-400">
+                      {getPaymentProviderMeta(payment.provider).label}
+                    </p>
                   </div>
                 </div>
               ))}

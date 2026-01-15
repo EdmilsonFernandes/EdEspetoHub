@@ -18,6 +18,7 @@ import {
   ChevronRight,
   Search,
 } from 'lucide-react';
+import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
 import { superAdminService } from '../services/superAdminService';
 import { formatCurrency, formatPlanName } from '../utils/format';
 import { exportToCsv } from '../utils/export';
@@ -1367,13 +1368,45 @@ export function SuperAdmin() {
                         <div className="font-semibold text-slate-700">{payment.store?.name || '-'}</div>
                         <div className="text-xs text-slate-400">{payment.store?.slug || '-'}</div>
                       </td>
-                      <td className="py-3 pr-4">{payment.method}</td>
+                      <td className="py-3 pr-4">
+                        {(() => {
+                          const paymentMeta = getPaymentMethodMeta(payment.method);
+                          return (
+                            <span className="inline-flex items-center gap-2 text-slate-700">
+                              {paymentMeta.icon && (
+                                <img
+                                  src={paymentMeta.icon}
+                                  alt={paymentMeta.label}
+                                  className="h-4 w-4 object-contain"
+                                />
+                              )}
+                              {paymentMeta.label}
+                            </span>
+                          );
+                        })()}
+                      </td>
                       <td className="py-3 pr-4">
                         <span className={`px-2 py-1 rounded-full text-xs font-semibold ${statusBadge(payment.status)}`}>
                           {payment.status}
                         </span>
                       </td>
-                      <td className="py-3 pr-4">{payment.provider || '-'}</td>
+                      <td className="py-3 pr-4">
+                        {(() => {
+                          const providerMeta = getPaymentProviderMeta(payment.provider);
+                          return (
+                            <span className="inline-flex items-center gap-2 text-slate-700">
+                              {providerMeta.icon && (
+                                <img
+                                  src={providerMeta.icon}
+                                  alt={providerMeta.label}
+                                  className="h-4 w-4 object-contain"
+                                />
+                              )}
+                              {providerMeta.label}
+                            </span>
+                          );
+                        })()}
+                      </td>
                       <td className="py-3 text-right font-semibold text-brand-primary">
                         {formatCurrency(payment.amount || 0)}
                       </td>
@@ -1674,7 +1707,23 @@ export function SuperAdmin() {
                       {event.status}
                     </span>
                   </td>
-                  <td className="py-3 pr-4">{event.provider}</td>
+                  <td className="py-3 pr-4">
+                    {(() => {
+                      const providerMeta = getPaymentProviderMeta(event.provider);
+                      return (
+                        <span className="inline-flex items-center gap-2 text-slate-700">
+                          {providerMeta.icon && (
+                            <img
+                              src={providerMeta.icon}
+                              alt={providerMeta.label}
+                              className="h-4 w-4 object-contain"
+                            />
+                          )}
+                          {providerMeta.label}
+                        </span>
+                      );
+                    })()}
+                  </td>
                   <td className="py-3 pr-4">
                     <button
                       onClick={() => setSelectedEventPayload(event.payload || {})}

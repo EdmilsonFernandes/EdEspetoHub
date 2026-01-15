@@ -10,8 +10,8 @@ import {
   formatDuration,
   formatOrderStatus,
   formatOrderType,
-  formatPaymentMethod,
 } from "../../utils/format";
+import { getPaymentMethodMeta } from "../../utils/paymentAssets";
 
 export const GrillQueue = () => {
   const [queue, setQueue] = useState([]);
@@ -425,8 +425,23 @@ export const GrillQueue = () => {
                   <p className="text-xs text-gray-500">{order.phone}</p>
                 )}
 
-                <p className="text-xs text-gray-500 uppercase mt-1">
-                  Pagamento: {formatPaymentMethod(order.payment)}
+                <p className="text-xs text-gray-500 uppercase mt-1 inline-flex items-center gap-2">
+                  Pagamento:
+                  {(() => {
+                    const paymentMeta = getPaymentMethodMeta(order.payment);
+                    return (
+                      <>
+                        {paymentMeta.icon && (
+                          <img
+                            src={paymentMeta.icon}
+                            alt={paymentMeta.label}
+                            className="h-4 w-4 object-contain"
+                          />
+                        )}
+                        <span>{paymentMeta.label}</span>
+                      </>
+                    );
+                  })()}
                 </p>
               </div>
 

@@ -3,7 +3,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { AdminHeader } from '../components/Admin/AdminHeader';
 import { useAuth } from '../contexts/AuthContext';
 import { orderService } from '../services/orderService';
-import { formatCurrency, formatDateTime, formatOrderStatus, formatOrderType, formatPaymentMethod } from '../utils/format';
+import { formatCurrency, formatDateTime, formatOrderStatus, formatOrderType } from '../utils/format';
+import { getPaymentMethodMeta } from '../utils/paymentAssets';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 
 export function AdminOrders() {
@@ -231,7 +232,21 @@ export function AdminOrders() {
                     </div>
                     <div>
                       <p className="text-xs uppercase text-slate-400">Pagamento</p>
-                      <p className="font-semibold text-slate-700">{formatPaymentMethod(order.payment)}</p>
+                      {(() => {
+                        const paymentMeta = getPaymentMethodMeta(order.payment);
+                        return (
+                          <p className="font-semibold text-slate-700 inline-flex items-center gap-2">
+                            {paymentMeta.icon && (
+                              <img
+                                src={paymentMeta.icon}
+                                alt={paymentMeta.label}
+                                className="h-4 w-4 object-contain"
+                              />
+                            )}
+                            {paymentMeta.label}
+                          </p>
+                        );
+                      })()}
                     </div>
                     <div>
                       <p className="text-xs uppercase text-slate-400">Endereço</p>
@@ -317,7 +332,23 @@ export function AdminOrders() {
                         {formatOrderType(order.type)}
                         {order.table ? ` · Mesa ${order.table}` : ''}
                       </td>
-                      <td className="py-3 pr-4 whitespace-nowrap hidden lg:table-cell">{formatPaymentMethod(order.payment)}</td>
+                      <td className="py-3 pr-4 whitespace-nowrap hidden lg:table-cell">
+                        {(() => {
+                          const paymentMeta = getPaymentMethodMeta(order.payment);
+                          return (
+                            <span className="inline-flex items-center gap-2">
+                              {paymentMeta.icon && (
+                                <img
+                                  src={paymentMeta.icon}
+                                  alt={paymentMeta.label}
+                                  className="h-4 w-4 object-contain"
+                                />
+                              )}
+                              {paymentMeta.label}
+                            </span>
+                          );
+                        })()}
+                      </td>
                       <td className="py-3 pr-4 text-xs text-slate-600 min-w-[180px] hidden lg:table-cell">
                         {(order.items || []).length === 0
                           ? '-'

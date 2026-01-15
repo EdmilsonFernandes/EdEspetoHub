@@ -12,6 +12,7 @@ import {
   User
 } from "lucide-react";
 import { formatCurrency, formatPhoneInput } from "../../utils/format";
+import { getPaymentMethodMeta } from "../../utils/paymentAssets";
 
 export const CartView = ({
   cart,
@@ -506,7 +507,21 @@ export const CartView = ({
                   : "border-gray-100 text-gray-500 hover:border-brand-primary"
               }`}
             >
-              <div className="font-bold">{method.label}</div>
+              {(() => {
+                const methodMeta = getPaymentMethodMeta(method.id);
+                return (
+                  <div className="flex items-center gap-2 font-bold">
+                    {methodMeta.icon && (
+                      <img
+                        src={methodMeta.icon}
+                        alt={methodMeta.label}
+                        className="h-5 w-5 object-contain"
+                      />
+                    )}
+                    <span>{method.label}</span>
+                  </div>
+                );
+              })()}
               <div className="text-xs text-gray-500">{method.description}</div>
             </button>
           ))}

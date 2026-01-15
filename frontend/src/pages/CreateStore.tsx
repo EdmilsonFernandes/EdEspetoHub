@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { storeService } from '../services/storeService';
 import { planService } from '../services/planService';
 import { BILLING_OPTIONS, PLAN_TIERS, getPlanName } from '../constants/planCatalog';
+import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
 
 export function CreateStore() {
   const navigate = useNavigate();
@@ -33,7 +34,6 @@ export function CreateStore() {
     storeName: '',
   });
   const platformLogo = '/logo.svg';
-  const mpLogo = '/mercado-pago.svg';
   const primaryPalette = [ '#dc2626', '#ea580c', '#f59e0b', '#16a34a', '#0ea5e9', '#2563eb', '#7c3aed' ];
   const secondaryPalette = [ '#111827', '#1f2937', '#334155', '#0f172a', '#0f766e', '#065f46', '#4b5563' ];
   const termsRef = useRef<HTMLDivElement | null>(null);
@@ -925,7 +925,14 @@ export function CreateStore() {
                       onClick={() => setPaymentMethod('PIX')}
                       className={`px-4 py-2 rounded-xl border ${paymentMethod === 'PIX' ? 'border-red-500 bg-red-50' : 'border-gray-200'}`}
                     >
-                      PIX
+                      <span className="flex items-center gap-2">
+                        <img
+                          src={getPaymentMethodMeta('PIX').icon}
+                          alt="Pix"
+                          className="h-4 w-4 object-contain"
+                        />
+                        PIX
+                      </span>
                     </button>
                     <button
                       type="button"
@@ -934,7 +941,14 @@ export function CreateStore() {
                         paymentMethod === 'CREDIT_CARD' ? 'border-red-500 bg-red-50' : 'border-gray-200'
                       }`}
                     >
-                      Cartão de crédito
+                      <span className="flex items-center gap-2">
+                        <img
+                          src={getPaymentMethodMeta('CREDIT_CARD').icon}
+                          alt="Cartao"
+                          className="h-4 w-4 object-contain"
+                        />
+                        Cartão de crédito
+                      </span>
                     </button>
                     <button
                       type="button"
@@ -1011,11 +1025,32 @@ export function CreateStore() {
               <div className="mt-6 bg-green-50 border border-green-100 rounded-2xl p-4 space-y-2">
                 <p className="text-green-800 font-semibold">Pedido criado. Aguardando pagamento.</p>
                 <p className="text-sm text-green-700">Status da assinatura: {paymentResult.subscriptionStatus}</p>
-                <p className="text-sm text-green-700">Forma de pagamento: {paymentResult.payment?.method}</p>
+                {(() => {
+                  const methodMeta = getPaymentMethodMeta(paymentResult.payment?.method);
+                  return (
+                    <p className="text-sm text-green-700 flex items-center gap-2">
+                      Forma de pagamento:
+                      {methodMeta.icon && (
+                        <img
+                          src={methodMeta.icon}
+                          alt={methodMeta.label}
+                          className="h-4 w-4 object-contain"
+                        />
+                      )}
+                      <span>{methodMeta.label}</span>
+                    </p>
+                  );
+                })()}
                 {paymentResult.payment?.method === 'PIX' && paymentResult.payment?.qrCodeBase64 && (
                   <div className="pt-2 space-y-3">
                     <div className="flex items-center gap-2 text-sm text-gray-700">
-                      <img src={mpLogo} alt="Mercado Pago" className="h-5" />
+                      {getPaymentProviderMeta(paymentResult.payment?.provider || 'MERCADO_PAGO').icon && (
+                        <img
+                          src={getPaymentProviderMeta(paymentResult.payment?.provider || 'MERCADO_PAGO').icon}
+                          alt={getPaymentProviderMeta(paymentResult.payment?.provider || 'MERCADO_PAGO').label}
+                          className="h-5"
+                        />
+                      )}
                       <span>Escaneie o QR Code PIX para pagar</span>
                     </div>
                     <img src={paymentResult.payment.qrCodeBase64} alt="QR Code PIX" className="w-48 h-48" />

@@ -1,7 +1,8 @@
 // @ts-nocheck
 import React from "react";
-import { CheckCircle, QrCode, ArrowLeft, CreditCard, WalletCards } from "lucide-react";
+import { CheckCircle, QrCode, ArrowLeft, CreditCard } from "lucide-react";
 import { formatPaymentMethod } from "../../utils/format";
+import { getPaymentMethodMeta } from "../../utils/paymentAssets";
 
 // Chave Pix fixa (mock)
 const PIX_KEY_MOCK =
@@ -53,11 +54,23 @@ const PaymentSummary = ({ paymentMethod, pixKey, phone }) => {
   return (
     <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 w-full mb-8 text-left">
       <h3 className="font-bold text-gray-800 mb-2">Pagamento na entrega/retirada</h3>
-      <p className="text-sm text-gray-600">
-        Forma registrada:{" "}
-        <span className="font-bold uppercase">
-          {formatPaymentMethod(paymentMethod)}
-        </span>
+      <p className="text-sm text-gray-600 flex flex-wrap items-center gap-2">
+        Forma registrada:
+        {(() => {
+          const methodMeta = getPaymentMethodMeta(paymentMethod);
+          return (
+            <span className="font-bold uppercase inline-flex items-center gap-2">
+              {methodMeta.icon && (
+                <img
+                  src={methodMeta.icon}
+                  alt={methodMeta.label}
+                  className="h-4 w-4 object-contain"
+                />
+              )}
+              {formatPaymentMethod(paymentMethod)}
+            </span>
+          );
+        })()}
         . Quando seu pedido estiver pronto, finalize o pagamento no local.
       </p>
     </div>
@@ -69,7 +82,7 @@ const PaymentBadge = ({ paymentMethod }) => {
   const isPix = method === "pix";
   const isDebit = method === "debito";
   const label = formatPaymentMethod(paymentMethod);
-  const Icon = isPix ? QrCode : isDebit ? WalletCards : CreditCard;
+  const methodMeta = getPaymentMethodMeta(paymentMethod);
   const tone = isPix
     ? "bg-emerald-50 text-emerald-700 border-emerald-200"
     : isDebit
@@ -78,7 +91,11 @@ const PaymentBadge = ({ paymentMethod }) => {
 
   return (
     <div className={`inline-flex items-center gap-2 px-3 py-2 rounded-full border text-xs font-semibold ${tone}`}>
-      <Icon size={14} />
+      {methodMeta.icon ? (
+        <img src={methodMeta.icon} alt={label} className="h-4 w-4 object-contain" />
+      ) : (
+        <CreditCard size={14} />
+      )}
       <span>Pagamento: {label}</span>
     </div>
   );

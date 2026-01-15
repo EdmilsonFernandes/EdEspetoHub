@@ -3,7 +3,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Bike, ChefHat, CircleCheck, Clock, Loader2, MapPin } from 'lucide-react';
 import { orderService } from '../services/orderService';
-import { formatCurrency, formatDateTime, formatDuration, formatPaymentMethod } from '../utils/format';
+import { formatCurrency, formatDateTime, formatDuration } from '../utils/format';
+import { getPaymentMethodMeta } from '../utils/paymentAssets';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { applyBrandTheme } from '../utils/brandTheme';
 
@@ -112,7 +113,8 @@ export function OrderTracking() {
   const queueSize = order?.queueSize;
   const storePhone = order?.store?.phone;
   const customerPhone = order?.phone;
-  const paymentLabel = formatPaymentMethod(order?.paymentMethod || order?.payment);
+  const paymentValue = order?.paymentMethod || order?.payment;
+  const paymentMeta = paymentValue ? getPaymentMethodMeta(paymentValue) : null;
   const estimateMinutes =
     typeof queuePosition === 'number' && queuePosition > 0 ? Math.max(15, queuePosition * 15) : null;
   const estimatedReadyAt = useMemo(() => {
@@ -367,9 +369,12 @@ export function OrderTracking() {
                 <div className="rounded-3xl border border-gray-100 p-5 bg-white shadow-sm">
                   <div className="flex items-center justify-between gap-3 mb-4">
                     <p className="text-sm font-semibold text-gray-900">Resumo do pedido</p>
-                    {paymentLabel && (
-                      <span className="px-3 py-1 rounded-full text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
-                        {paymentLabel}
+                    {paymentMeta?.label && (
+                      <span className="px-3 py-1 rounded-full text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 inline-flex items-center gap-2">
+                        {paymentMeta.icon && (
+                          <img src={paymentMeta.icon} alt={paymentMeta.label} className="h-4 w-4 object-contain" />
+                        )}
+                        {paymentMeta.label}
                       </span>
                     )}
                   </div>
@@ -419,9 +424,13 @@ export function OrderTracking() {
                     <p>
                       <span className="font-semibold">Cliente:</span> {order.customerName || 'Cliente'}
                     </p>
-                    {paymentLabel && (
-                      <p>
-                        <span className="font-semibold">Pagamento:</span> {paymentLabel}
+                    {paymentMeta?.label && (
+                      <p className="flex items-center gap-2">
+                        <span className="font-semibold">Pagamento:</span>
+                        {paymentMeta.icon && (
+                          <img src={paymentMeta.icon} alt={paymentMeta.label} className="h-4 w-4 object-contain" />
+                        )}
+                        <span>{paymentMeta.label}</span>
                       </p>
                     )}
                     {order.phone && (

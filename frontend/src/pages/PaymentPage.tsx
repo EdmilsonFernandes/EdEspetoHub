@@ -2,6 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { paymentService } from '../services/paymentService';
+import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
 
 export function PaymentPage() {
   const { paymentId } = useParams();
@@ -18,7 +19,6 @@ export function PaymentPage() {
   const [renewing, setRenewing] = useState(false);
   const EVENTS_PAGE_SIZE = 25;
   const platformLogo = '/chama-no-espeto.jpeg';
-  const mpLogo = '/mercado-pago.svg';
   const redirectRef = useRef(false);
 
   const handleCopyPix = async (value: string) => {
@@ -101,6 +101,8 @@ export function PaymentPage() {
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
   const storeUrl = storeSlug ? `${baseUrl}/chamanoespeto/${storeSlug}` : '';
   const adminUrl = storeSlug ? `${baseUrl}/admin?slug=${encodeURIComponent(storeSlug)}` : `${baseUrl}/admin`;
+  const methodMeta = getPaymentMethodMeta(payment?.method);
+  const providerMeta = getPaymentProviderMeta(payment?.provider);
 
   useEffect(() => {
     if (!isPaid || !isVerified || redirectRef.current) return;
@@ -224,7 +226,13 @@ export function PaymentPage() {
                   </p>
 
                   <div className="mt-4 space-y-2 text-sm text-gray-700">
-                    <p><span className="font-semibold">Forma de pagamento:</span> {payment.method}</p>
+                    <p className="flex items-center gap-2">
+                      <span className="font-semibold">Forma de pagamento:</span>
+                      {methodMeta.icon && (
+                        <img src={methodMeta.icon} alt={methodMeta.label} className="h-5 w-5 object-contain" />
+                      )}
+                      <span>{methodMeta.label}</span>
+                    </p>
                     <p><span className="font-semibold">Valor:</span> R$ {Number(payment.amount).toFixed(2)}</p>
                     {payment.expiresAt && (
                       <p>
@@ -253,7 +261,14 @@ export function PaymentPage() {
                             renewMethod === 'PIX' ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-gray-200'
                           }`}
                         >
-                          PIX
+                          <span className="flex items-center gap-2">
+                            <img
+                              src={getPaymentMethodMeta('PIX').icon}
+                              alt="Pix"
+                              className="h-4 w-4 object-contain"
+                            />
+                            PIX
+                          </span>
                         </button>
                         <button
                           type="button"
@@ -262,7 +277,14 @@ export function PaymentPage() {
                             renewMethod === 'CREDIT_CARD' ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-gray-200'
                           }`}
                         >
-                          Cartao
+                          <span className="flex items-center gap-2">
+                            <img
+                              src={getPaymentMethodMeta('CREDIT_CARD').icon}
+                              alt="Cartao"
+                              className="h-4 w-4 object-contain"
+                            />
+                            Cartao
+                          </span>
                         </button>
                         <button
                           type="button"
@@ -300,7 +322,9 @@ export function PaymentPage() {
                   ) : payment.method === 'PIX' && payment.qrCodeBase64 ? (
                     <>
                       <div className="flex items-center gap-2 text-sm text-gray-700">
-                        <img src={mpLogo} alt="Mercado Pago" className="h-5" />
+                        {providerMeta.icon && (
+                          <img src={providerMeta.icon} alt={providerMeta.label} className="h-5" />
+                        )}
                         <span>Escaneie o QR Code PIX</span>
                       </div>
                       <img src={payment.qrCodeBase64} alt="QR Code PIX" className="w-64 h-64 object-contain" />
@@ -346,7 +370,13 @@ export function PaymentPage() {
                 <div className="border border-gray-100 rounded-2xl p-5 bg-white">
                   <p className="text-sm font-semibold text-gray-700 mb-2">Linha do tempo</p>
                   <p className="text-sm text-gray-600">
-                    Provedor: <span className="font-semibold">{payment.provider}</span>
+                    Provedor:{' '}
+                    <span className="font-semibold inline-flex items-center gap-2">
+                      {providerMeta.icon && (
+                        <img src={providerMeta.icon} alt={providerMeta.label} className="h-4 w-4 object-contain" />
+                      )}
+                      {providerMeta.label}
+                    </span>
                   </p>
                   {payment.providerId && (
                     <p className="text-sm text-gray-600">

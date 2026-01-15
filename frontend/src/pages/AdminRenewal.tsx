@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { planService } from '../services/planService';
 import { subscriptionService } from '../services/subscriptionService';
 import { BILLING_OPTIONS, PLAN_TIERS, getPlanName } from '../constants/planCatalog';
+import { getPaymentMethodMeta } from '../utils/paymentAssets';
 
 export function AdminRenewal() {
   const navigate = useNavigate();
@@ -198,14 +199,24 @@ export function AdminRenewal() {
                 onClick={() => setPaymentMethod('PIX')}
                 className={`px-4 py-2 rounded-xl border ${paymentMethod === 'PIX' ? 'border-red-500 bg-red-50' : 'border-gray-200'}`}
               >
-                PIX
+                <span className="flex items-center gap-2">
+                  <img src={getPaymentMethodMeta('PIX').icon} alt="Pix" className="h-4 w-4 object-contain" />
+                  PIX
+                </span>
               </button>
               <button
                 type="button"
                 onClick={() => setPaymentMethod('CREDIT_CARD')}
                 className={`px-4 py-2 rounded-xl border ${paymentMethod === 'CREDIT_CARD' ? 'border-red-500 bg-red-50' : 'border-gray-200'}`}
               >
-                Cartão de crédito
+                <span className="flex items-center gap-2">
+                  <img
+                    src={getPaymentMethodMeta('CREDIT_CARD').icon}
+                    alt="Cartao"
+                    className="h-4 w-4 object-contain"
+                  />
+                  Cartão de crédito
+                </span>
               </button>
               <button
                 type="button"
