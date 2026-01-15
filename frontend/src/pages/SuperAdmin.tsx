@@ -176,6 +176,9 @@ export function SuperAdmin() {
   const payments = overview?.payments || [];
   const paymentEvents = overview?.paymentEvents || [];
   const paidRevenueValue = summary?.paidRevenue ? Number(summary.paidRevenue) : 0;
+  const ordersRevenueTotal = summary?.ordersRevenueTotal ? Number(summary.ordersRevenueTotal) : 0;
+  const ordersRevenueLast7Days = summary?.ordersRevenueLast7Days ? Number(summary.ordersRevenueLast7Days) : 0;
+  const ordersRevenueLast30Days = summary?.ordersRevenueLast30Days ? Number(summary.ordersRevenueLast30Days) : 0;
   const totalOrders = summary?.totalOrders || 0;
   const ordersLast7Days = summary?.ordersLast7Days || 0;
   const ordersLast30Days = summary?.ordersLast30Days || 0;
@@ -365,6 +368,11 @@ export function SuperAdmin() {
     if (!storeHealth.active) return 0;
     return paidRevenueValue / storeHealth.active;
   }, [paidRevenueValue, storeHealth.active]);
+
+  const ordersPerStore = useMemo(() => {
+    if (!summary?.totalStores) return 0;
+    return totalOrders / summary.totalStores;
+  }, [summary?.totalStores, totalOrders]);
 
   const handleReprocess = async (paymentId: string, providerId?: string) => {
     if (!token) return;
@@ -642,6 +650,9 @@ export function SuperAdmin() {
                     {formatCurrency(revenuePerActive)} por loja ativa
                   </span>
                   <span className="px-3 py-1 rounded-full bg-white/10 border border-white/10">
+                    {formatCurrency(ordersRevenueLast30Days)} receita pedidos (30d)
+                  </span>
+                  <span className="px-3 py-1 rounded-full bg-white/10 border border-white/10">
                     {recentStores} novas lojas na semana
                   </span>
                 </div>
@@ -740,6 +751,24 @@ export function SuperAdmin() {
               <p className="text-2xl font-black text-slate-800">{formatCurrency(revenuePerActive)}</p>
               <p className="text-xs text-slate-400 mt-1">Media por loja ativa</p>
             </div>
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs uppercase text-slate-400 font-semibold">Receita pedidos</p>
+                <DollarSign size={18} className="text-emerald-600" />
+              </div>
+              <p className="text-2xl font-black text-slate-800">{formatCurrency(ordersRevenueTotal)}</p>
+              <p className="text-xs text-slate-400 mt-1">
+                {formatCurrency(ordersRevenueLast7Days)} (7d) · {formatCurrency(ordersRevenueLast30Days)} (30d)
+              </p>
+            </div>
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs uppercase text-slate-400 font-semibold">Pedidos por loja</p>
+                <BarChart3 size={18} className="text-slate-500" />
+              </div>
+              <p className="text-2xl font-black text-slate-800">{ordersPerStore.toFixed(1)}</p>
+              <p className="text-xs text-slate-400 mt-1">Media global por loja</p>
+            </div>
           </div>
         )}
 
@@ -782,6 +811,9 @@ export function SuperAdmin() {
                 <th className="py-2 pr-4 text-left">Criada</th>
                 <th className="py-2 pr-4 text-left">Expira</th>
                 <th className="py-2 pr-4 text-left">Dias</th>
+                <th className="py-2 pr-4 text-left">Pedidos</th>
+                <th className="py-2 pr-4 text-left">Receita pedidos</th>
+                <th className="py-2 pr-4 text-left">Mais vendido</th>
                 <th className="py-2 pr-4 text-left">Pagamento</th>
                 <th className="py-2 text-right">Valor</th>
               </tr>
@@ -796,6 +828,10 @@ export function SuperAdmin() {
                 const endDate = store.subscription?.endDate;
                 const remaining = daysUntil(endDate);
                 const paymentStatus = store.latestPayment?.status || '-';
+                const ordersCount = store.orderMetrics?.totalOrders || 0;
+                const ordersRevenue = store.orderMetrics?.totalRevenue || 0;
+                const topProduct = store.topProduct?.name || '-';
+                const topProductQty = store.topProduct?.quantity || 0;
                 return (
                   <tr key={store.id}>
                     <td className="py-3 pr-4">
@@ -811,6 +847,14 @@ export function SuperAdmin() {
                     <td className="py-3 pr-4">{formatDate(store.createdAt)}</td>
                     <td className="py-3 pr-4">{formatDate(endDate)}</td>
                     <td className="py-3 pr-4">{remaining}</td>
+                    <td className="py-3 pr-4 font-semibold text-slate-700">{ordersCount}</td>
+                    <td className="py-3 pr-4 text-slate-700">{formatCurrency(ordersRevenue)}</td>
+                    <td className="py-3 pr-4">
+                      <div className="text-slate-700">{topProduct}</div>
+                      {topProductQty ? (
+                        <div className="text-xs text-slate-400">{topProductQty} vendas</div>
+                      ) : null}
+                    </td>
                     <td className="py-3 pr-4">{paymentStatus}</td>
                     <td className="py-3 text-right font-semibold text-brand-primary">
                       {formatCurrency(planPrice)}

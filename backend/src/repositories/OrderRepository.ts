@@ -173,4 +173,60 @@ export class OrderRepository
       .where('o.created_at >= :since', { since })
       .getCount();
   }
+
+  /**
+   * Aggregates orders by store.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
+  async aggregateByStore()
+  {
+    const rows = await this.repository
+      .createQueryBuilder('o')
+      .select('o.store_id', 'storeId')
+      .addSelect('COUNT(*)', 'ordersCount')
+      .addSelect('COALESCE(SUM(o.total), 0)', 'ordersRevenue')
+      .addSelect('MAX(o.created_at)', 'lastOrderAt')
+      .groupBy('o.store_id')
+      .getRawMany();
+
+    return rows.map((row) => ({
+      storeId: row.storeId,
+      ordersCount: Number(row.ordersCount || 0),
+      ordersRevenue: Number(row.ordersRevenue || 0),
+      lastOrderAt: row.lastOrderAt,
+    }));
+  }
+
+  /**
+   * Sums total revenue from orders.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
+  async sumAllRevenue()
+  {
+    const row = await this.repository
+      .createQueryBuilder('o')
+      .select('COALESCE(SUM(o.total), 0)', 'sum')
+      .getRawOne();
+    return Number(row?.sum || 0);
+  }
+
+  /**
+   * Sums revenue from orders since a date.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
+  async sumRevenueSince(since: Date)
+  {
+    const row = await this.repository
+      .createQueryBuilder('o')
+      .select('COALESCE(SUM(o.total), 0)', 'sum')
+      .where('o.created_at >= :since', { since })
+      .getRawOne();
+    return Number(row?.sum || 0);
+  }
 }

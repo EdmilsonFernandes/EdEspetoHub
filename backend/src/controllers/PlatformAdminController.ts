@@ -17,6 +17,7 @@ import { SubscriptionService } from '../services/SubscriptionService';
 import { PaymentRepository } from '../repositories/PaymentRepository';
 import { PaymentEventRepository } from '../repositories/PaymentEventRepository';
 import { OrderRepository } from '../repositories/OrderRepository';
+import { AppDataSource } from '../config/database';
 import { logger } from '../utils/logger';
 import { respondWithError } from '../errors/respondWithError';
 
@@ -89,6 +90,29 @@ export class PlatformAdminController {
       const totalOrders = await orderRepository.countAll();
       const ordersLast7Days = await orderRepository.countSince(sevenDaysAgo);
       const ordersLast30Days = await orderRepository.countSince(thirtyDaysAgo);
+      const ordersRevenueTotal = await orderRepository.sumAllRevenue();
+      const ordersRevenueLast7Days = await orderRepository.sumRevenueSince(sevenDaysAgo);
+      const ordersRevenueLast30Days = await orderRepository.sumRevenueSince(thirtyDaysAgo);
+      const orderAggregates = await orderRepository.aggregateByStore();
+      const orderAggregateMap = new Map(orderAggregates.map((row) => [ row.storeId, row ]));
+
+      const topProductsByStore = await AppDataSource.query(`
+        SELECT DISTINCT ON (o.store_id)
+          o.store_id AS "storeId",
+          p.name AS "productName",
+          SUM(oi.quantity) AS "quantity"
+        FROM order_items oi
+        INNER JOIN orders o ON o.id = oi.order_id
+        INNER JOIN products p ON p.id = oi.product_id
+        GROUP BY o.store_id, p.name
+        ORDER BY o.store_id, SUM(oi.quantity) DESC;
+      `);
+      const topProductMap = new Map(
+        (topProductsByStore || []).map((row: any) => [
+          row.storeId,
+          { name: row.productName, quantity: Number(row.quantity || 0) },
+        ])
+      );
 
       const summary = enriched.reduce(
         (acc, store) => {
@@ -119,6 +143,9 @@ export class PlatformAdminController {
           totalOrders,
           ordersLast7Days,
           ordersLast30Days,
+          ordersRevenueTotal,
+          ordersRevenueLast7Days,
+          ordersRevenueLast30Days,
         }
       );
 
@@ -132,7 +159,21 @@ export class PlatformAdminController {
           pendingPayments,
           paidRevenue,
         },
-        stores: enriched,
+        stores: enriched.map((store) => {
+          const aggregate = orderAggregateMap.get(store.id);
+          const topProduct = topProductMap.get(store.id) || null;
+          return {
+            ...store,
+            orderMetrics: aggregate
+              ? {
+                  totalOrders: aggregate.ordersCount,
+                  totalRevenue: aggregate.ordersRevenue,
+                  lastOrderAt: aggregate.lastOrderAt,
+                }
+              : { totalOrders: 0, totalRevenue: 0, lastOrderAt: null },
+            topProduct,
+          };
+        }),
         payments: recentPayments,
         paymentEvents,
       });
