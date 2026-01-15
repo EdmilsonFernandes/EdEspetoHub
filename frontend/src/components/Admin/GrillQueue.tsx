@@ -34,6 +34,12 @@ export const GrillQueue = () => {
     if (item?.passSkewer) labels.push('passar varinha');
     return labels.length ? labels.join(' • ') : '';
   };
+  const getPriorityTone = (position) => {
+    if (position === 1) return "bg-red-600 text-white";
+    if (position === 2) return "bg-amber-500 text-white";
+    if (position === 3) return "bg-yellow-400 text-slate-900";
+    return "bg-slate-100 text-slate-700";
+  };
 
   const productsById = useMemo(() => {
     const map = new Map();
@@ -344,31 +350,35 @@ export const GrillQueue = () => {
           >
             {/* HEADER DO CARD */}
             <div className="flex justify-between items-start">
-              <div>
-                <div className="flex items-center gap-2 mb-1 text-xs text-gray-500 uppercase font-bold">
-                  <Hash size={12} className="text-brand-primary" /> Fila{" "}
+              <div className="flex items-start gap-3">
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-lg font-black shadow-sm ${getPriorityTone(index + 1)}`}>
                   {String(index + 1).padStart(2, "0")}
                 </div>
+                <div>
+                  <div className="flex items-center gap-2 mb-1 text-xs text-gray-500 uppercase font-bold">
+                    <Hash size={12} className="text-brand-primary" /> Fila
+                  </div>
 
-                <p className="text-sm text-gray-500">
-                  {formatDateTime(order.createdAt)}
-                </p>
+                  <p className="text-sm text-gray-500">
+                    {formatDateTime(order.createdAt)}
+                  </p>
 
-                <h3 className="text-lg font-bold text-gray-800">
-                  Cliente: {order.customerName || order.name || "Cliente"}
-                </h3>
+                  <h3 className="text-lg font-bold text-gray-800">
+                    Cliente: {order.customerName || order.name || "Cliente"}
+                  </h3>
 
-                <p className="text-xs text-gray-500 uppercase">
-                  {formatOrderType(order.type)}
-                  {order.table ? ` · Mesa ${order.table}` : ''}
-                </p>
-                {order.phone && (
-                  <p className="text-xs text-gray-500">{order.phone}</p>
-                )}
+                  <p className="text-xs text-gray-500 uppercase">
+                    {formatOrderType(order.type)}
+                    {order.table ? ` · Mesa ${order.table}` : ''}
+                  </p>
+                  {order.phone && (
+                    <p className="text-xs text-gray-500">{order.phone}</p>
+                  )}
 
-                <p className="text-xs text-gray-500 uppercase mt-1">
-                  Pagamento: {formatPaymentMethod(order.payment)}
-                </p>
+                  <p className="text-xs text-gray-500 uppercase mt-1">
+                    Pagamento: {formatPaymentMethod(order.payment)}
+                  </p>
+                </div>
               </div>
 
               <span
