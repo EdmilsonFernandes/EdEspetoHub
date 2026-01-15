@@ -407,6 +407,16 @@ export function SuperAdmin() {
     return totalOrders / summary.totalStores;
   }, [summary?.totalStores, totalOrders]);
 
+  const avgTicketGlobal = useMemo(() => {
+    if (!totalOrders) return 0;
+    return ordersRevenueTotal / totalOrders;
+  }, [ordersRevenueTotal, totalOrders]);
+
+  const activeRate = useMemo(() => {
+    if (!summary?.totalStores) return 0;
+    return (summary.activeSubscriptions / summary.totalStores) * 100;
+  }, [summary?.totalStores, summary?.activeSubscriptions]);
+
   const handleReprocess = async (paymentId: string, providerId?: string) => {
     if (!token) return;
     setReprocessingId(paymentId);
@@ -639,44 +649,53 @@ export function SuperAdmin() {
           <p className="text-sm text-slate-500">Visão geral da plataforma</p>
         </div>
         <div className="flex gap-2">
-        <div className="flex gap-2 items-center">
-          <span className="text-sm font-semibold text-slate-600">Auto-refresh</span>
-          <button
-            onClick={() => setAutoRefresh((prev) => !prev)}
-            className={`relative inline-flex h-6 w-12 items-center rounded-full transition-colors ${
-              autoRefresh ? 'bg-brand-primary' : 'bg-slate-300'
-            }`}
-            title={autoRefresh ? 'Auto-refresh ON' : 'Auto-refresh OFF'}
-          >
-            <span
-              className={`h-4 w-4 transform rounded-full bg-white transition-transform flex items-center justify-center ${
-                autoRefresh ? 'translate-x-7' : 'translate-x-1'
+          <div className="flex gap-2 items-center">
+            <span className="text-sm font-semibold text-slate-600">Auto-refresh</span>
+            <button
+              onClick={() => setAutoRefresh((prev) => !prev)}
+              className={`relative inline-flex h-6 w-12 items-center rounded-full transition-colors ${
+                autoRefresh ? 'bg-brand-primary' : 'bg-slate-300'
               }`}
+              title={autoRefresh ? 'Auto-refresh ON' : 'Auto-refresh OFF'}
             >
-
-            </span>
-          </button>
-        </div>
-            <button
-              onClick={() => loadOverview(token)}
-              className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 flex items-center gap-2"
-            >
-              <RefreshCw size={16} />
-              Atualizar
-            </button>
-            <button
-              onClick={handleLogout}
-              className="px-4 py-2 rounded-lg bg-slate-900 text-white hover:bg-slate-800"
-            >
-              Sair
+              <span
+                className={`h-4 w-4 transform rounded-full bg-white transition-transform flex items-center justify-center ${
+                  autoRefresh ? 'translate-x-7' : 'translate-x-1'
+                }`}
+              />
             </button>
           </div>
+          <button
+            onClick={() => loadOverview(token)}
+            className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 flex items-center gap-2"
+          >
+            <RefreshCw size={16} />
+            Atualizar
+          </button>
+          <button
+            onClick={handleLogout}
+            className="px-4 py-2 rounded-lg bg-slate-900 text-white hover:bg-slate-800"
+          >
+            Sair
+          </button>
         </div>
+      </div>
+
+      <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3 bg-white/90 backdrop-blur border-b border-slate-200">
+        <div className="flex flex-wrap gap-2 text-xs font-semibold text-slate-600">
+          <a href="#executive" className="px-3 py-1 rounded-full border border-slate-200 hover:bg-slate-50">Resumo</a>
+          <a href="#rankings" className="px-3 py-1 rounded-full border border-slate-200 hover:bg-slate-50">Rankings</a>
+          <a href="#stores" className="px-3 py-1 rounded-full border border-slate-200 hover:bg-slate-50">Lojas</a>
+          <a href="#payments" className="px-3 py-1 rounded-full border border-slate-200 hover:bg-slate-50">Pagamentos</a>
+          <a href="#logs" className="px-3 py-1 rounded-full border border-slate-200 hover:bg-slate-50">Logs</a>
+          <a href="#events" className="px-3 py-1 rounded-full border border-slate-200 hover:bg-slate-50">Eventos</a>
+        </div>
+      </div>
 
         {loading && <div className="text-sm text-slate-500">Carregando...</div>}
 
         {summary && (
-          <div className="grid lg:grid-cols-[2.1fr,1fr] gap-4">
+          <div id="executive" className="grid lg:grid-cols-[2.1fr,1fr] gap-4">
             <div className="relative overflow-hidden rounded-3xl bg-slate-900 text-white p-6 shadow-lg">
               <div className="absolute -right-20 -top-20 w-64 h-64 rounded-full bg-brand-primary/20 blur-3xl" />
               <div className="absolute right-16 bottom-0 w-40 h-40 rounded-full bg-emerald-400/20 blur-2xl" />
@@ -816,7 +835,7 @@ export function SuperAdmin() {
                 <CheckCircle size={18} className="text-emerald-600" />
               </div>
               <p className="text-2xl font-black text-emerald-600">{summary.activeSubscriptions}</p>
-              <p className="text-xs text-slate-400 mt-1">Total lojas: {summary.totalStores}</p>
+              <p className="text-xs text-slate-400 mt-1">Ativacao: {activeRate.toFixed(1)}%</p>
             </div>
             <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
               <div className="flex items-center justify-between mb-2">
@@ -852,11 +871,27 @@ export function SuperAdmin() {
               <p className="text-2xl font-black text-slate-800">{ordersPerStore.toFixed(1)}</p>
               <p className="text-xs text-slate-400 mt-1">Media global por loja</p>
             </div>
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs uppercase text-slate-400 font-semibold">Ticket medio global</p>
+                <DollarSign size={18} className="text-slate-600" />
+              </div>
+              <p className="text-2xl font-black text-slate-800">{formatCurrency(avgTicketGlobal)}</p>
+              <p className="text-xs text-slate-400 mt-1">Receita / pedidos</p>
+            </div>
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs uppercase text-slate-400 font-semibold">Saude da base</p>
+                <CheckCircle size={18} className="text-emerald-600" />
+              </div>
+              <p className="text-2xl font-black text-slate-800">{activeRate.toFixed(1)}%</p>
+              <p className="text-xs text-slate-400 mt-1">Lojas ativas vs total</p>
+            </div>
           </div>
         )}
 
         {summary && (
-          <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+          <div id="rankings" className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <TrendingUp size={18} className="text-emerald-600" />
@@ -981,7 +1016,7 @@ export function SuperAdmin() {
           </p>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm overflow-x-auto">
+        <div id="stores" className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm overflow-x-auto">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Store size={18} className="text-slate-700" />
@@ -1071,7 +1106,7 @@ export function SuperAdmin() {
           )}
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm overflow-x-auto">
+        <div id="payments" className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm overflow-x-auto">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <CreditCard size={20} className="text-slate-700" />
@@ -1273,7 +1308,7 @@ export function SuperAdmin() {
           )}
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm overflow-x-auto">
+        <div id="logs" className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm overflow-x-auto">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Filter size={18} className="text-slate-700" />
@@ -1426,7 +1461,7 @@ export function SuperAdmin() {
           )}
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm overflow-x-auto">
+        <div id="events" className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm overflow-x-auto">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <RefreshCw size={20} className="text-slate-700" />
