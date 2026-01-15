@@ -155,7 +155,7 @@ export function AdminOrders() {
                 type="text"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Buscar por cliente, telefone..."
+                placeholder="Buscar por cliente, telefone ou pedido #"
                 className="w-full sm:w-64 rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-brand-primary"
               />
               <div className="flex gap-2">
@@ -200,13 +200,13 @@ export function AdminOrders() {
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div>
-                      <p className="text-xs uppercase tracking-wide text-slate-500 font-semibold">
-                        {formatDateTime(order.createdAt)}
-                      </p>
                       <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                        <span className="px-2 py-1 rounded-full border border-slate-200 bg-slate-50 font-semibold">
+                        <span className="px-2.5 py-1 rounded-full border border-slate-200 bg-slate-50 font-semibold">
                           Pedido #{shortId(order.id)}
                         </span>
+                        <span>{formatDateTime(order.createdAt)}</span>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
                         <span>
                           {formatOrderType(order.type)}
                           {order.table ? ` · Mesa ${order.table}` : ''}
@@ -223,10 +223,10 @@ export function AdminOrders() {
                     </div>
                   </div>
 
-                <div className="grid sm:grid-cols-3 gap-3 text-sm text-slate-600">
-                  <div>
-                    <p className="text-xs uppercase text-slate-400">Cliente</p>
-                    <p className="font-semibold text-slate-700">{order.customerName || order.name || 'Cliente'}</p>
+                  <div className="grid sm:grid-cols-3 gap-3 text-sm text-slate-600">
+                    <div>
+                      <p className="text-xs uppercase text-slate-400">Cliente</p>
+                      <p className="font-semibold text-slate-700">{order.customerName || order.name || 'Cliente'}</p>
                       <p className="text-xs text-slate-500">{order.phone || '-'}</p>
                     </div>
                     <div>

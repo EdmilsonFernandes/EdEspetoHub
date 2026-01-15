@@ -119,7 +119,7 @@ const OrdersView = ({ orders, products }) => {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Buscar por cliente, telefone..."
+            placeholder="Buscar por cliente, telefone ou pedido #"
             className="w-full sm:w-64 rounded-lg border border-slate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-brand-primary"
           />
         </div>
@@ -136,13 +136,13 @@ const OrdersView = ({ orders, products }) => {
             >
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
-                  <p className="text-xs uppercase tracking-wide text-slate-500 font-semibold">
-                    {formatDateTime(order.createdAt)}
-                  </p>
                   <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                    <span className="px-2 py-1 rounded-full border border-slate-200 bg-slate-50 font-semibold">
+                    <span className="px-2.5 py-1 rounded-full border border-slate-200 bg-slate-50 font-semibold">
                       Pedido #{shortId(order.id)}
                     </span>
+                    <span>{formatDateTime(order.createdAt)}</span>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
                     <span>
                       {formatOrderType(order.type)}
                       {order.table ? ` · Mesa ${order.table}` : ''}
