@@ -51,7 +51,10 @@ const OrdersView = ({ orders, products }) => {
         if (localDate !== dateFilter) return false;
       }
       if (!normalized) return true;
-      const haystack = [order.customerName, order.name, order.phone, order.id].filter(Boolean).join(' ').toLowerCase();
+      const haystack = [order.customerName, order.name, order.phone, order.id, order.id?.slice(0, 8)]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
       return haystack.includes(normalized);
     });
   }, [sortedOrders, statusFilter, query, dateFilter]);
@@ -136,9 +139,6 @@ const OrdersView = ({ orders, products }) => {
                   <p className="text-xs uppercase tracking-wide text-slate-500 font-semibold">
                     {formatDateTime(order.createdAt)}
                   </p>
-                  <h3 className="text-base font-bold text-slate-900">
-                    {order.customerName || order.name || 'Cliente'}
-                  </h3>
                   <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
                     <span className="px-2 py-1 rounded-full border border-slate-200 bg-slate-50 font-semibold">
                       Pedido #{shortId(order.id)}
@@ -159,12 +159,12 @@ const OrdersView = ({ orders, products }) => {
                 </div>
               </div>
 
-              <div className="grid sm:grid-cols-3 gap-3 text-sm text-slate-600">
-                <div>
-                  <p className="text-xs uppercase text-slate-400">Cliente</p>
-                  <p className="font-semibold text-slate-700">{order.customerName || order.name || 'Cliente'}</p>
-                  <p className="text-xs text-slate-500">{order.phone || '-'}</p>
-                </div>
+                <div className="grid sm:grid-cols-3 gap-3 text-sm text-slate-600">
+                  <div>
+                    <p className="text-xs uppercase text-slate-400">Cliente</p>
+                    <p className="font-semibold text-slate-700">{order.customerName || order.name || 'Cliente'}</p>
+                    <p className="text-xs text-slate-500">{order.phone || '-'}</p>
+                  </div>
                 <div>
                   <p className="text-xs uppercase text-slate-400">Pagamento</p>
                   <p className="font-semibold text-slate-700">{formatPaymentMethod(order.payment)}</p>

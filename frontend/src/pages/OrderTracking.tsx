@@ -114,7 +114,7 @@ export function OrderTracking() {
   const customerPhone = order?.phone;
   const paymentLabel = formatPaymentMethod(order?.paymentMethod || order?.payment);
   const estimateMinutes =
-    typeof queuePosition === 'number' && queuePosition > 0 ? Math.max(10, queuePosition * 10) : null;
+    typeof queuePosition === 'number' && queuePosition > 0 ? Math.max(15, queuePosition * 15) : null;
   const estimatedReadyAt = useMemo(() => {
     if (status !== 'preparing' || !estimateMinutes || !prepStart) return null;
     return new Date(prepStart + estimateMinutes * 60 * 1000);

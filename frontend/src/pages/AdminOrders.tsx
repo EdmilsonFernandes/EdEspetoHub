@@ -60,6 +60,7 @@ export function AdminOrders() {
         order.name,
         order.phone,
         order.id,
+        order.id?.slice(0, 8),
       ]
         .filter(Boolean)
         .join(' ')
@@ -202,9 +203,6 @@ export function AdminOrders() {
                       <p className="text-xs uppercase tracking-wide text-slate-500 font-semibold">
                         {formatDateTime(order.createdAt)}
                       </p>
-                      <h3 className="text-base font-bold text-slate-900">
-                        {order.customerName || order.name || 'Cliente'}
-                      </h3>
                       <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
                         <span className="px-2 py-1 rounded-full border border-slate-200 bg-slate-50 font-semibold">
                           Pedido #{shortId(order.id)}
@@ -225,10 +223,10 @@ export function AdminOrders() {
                     </div>
                   </div>
 
-                  <div className="grid sm:grid-cols-3 gap-3 text-sm text-slate-600">
-                    <div>
-                      <p className="text-xs uppercase text-slate-400">Cliente</p>
-                      <p className="font-semibold text-slate-700">{order.customerName || order.name || 'Cliente'}</p>
+                <div className="grid sm:grid-cols-3 gap-3 text-sm text-slate-600">
+                  <div>
+                    <p className="text-xs uppercase text-slate-400">Cliente</p>
+                    <p className="font-semibold text-slate-700">{order.customerName || order.name || 'Cliente'}</p>
                       <p className="text-xs text-slate-500">{order.phone || '-'}</p>
                     </div>
                     <div>
