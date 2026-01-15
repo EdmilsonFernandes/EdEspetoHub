@@ -17,13 +17,18 @@ import { orderService } from '../services/orderService';
 import { productService } from '../services/productService';
 import { storeService } from '../services/storeService';
 import { subscriptionService } from '../services/subscriptionService';
-import { formatCurrency, formatDateTime, formatOrderStatus, formatOrderType } from '../utils/format';
+import { formatCurrency, formatDateTime, formatOrderStatus, formatOrderType, formatPaymentMethod } from '../utils/format';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 
-const OrdersView = ({ orders }) => {
+const OrdersView = ({ orders, products }) => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [query, setQuery] = useState('');
   const [dateFilter, setDateFilter] = useState('');
+  const productsById = useMemo(() => {
+    const map = new Map();
+    (products || []).forEach((product) => map.set(product.id, product));
+    return map;
+  }, [products]);
 
   const sortedOrders = useMemo(() => {
     const resolveTime = (value) => {
@@ -68,6 +73,7 @@ const OrdersView = ({ orders }) => {
     if (status === 'done') return 'bg-green-100 text-green-800';
     return 'bg-red-100 text-red-700';
   };
+  const shortId = (value) => (value ? String(value).slice(0, 8) : '');
 
   return (
     <div className="space-y-4">
@@ -121,19 +127,27 @@ const OrdersView = ({ orders }) => {
       ) : (
         <div className="space-y-4">
           {filteredOrders.map((order, index) => (
-            <div key={order.id || `${order.customerName}-${index}`} className="border border-slate-200 rounded-2xl p-4">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
+            <div
+              key={order.id || `${order.customerName}-${index}`}
+              className="border border-slate-200 rounded-3xl bg-white p-5 shadow-sm space-y-4"
+            >
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
                   <p className="text-xs uppercase tracking-wide text-slate-500 font-semibold">
                     {formatDateTime(order.createdAt)}
                   </p>
-                  <h3 className="text-base font-bold text-slate-800">
+                  <h3 className="text-base font-bold text-slate-900">
                     {order.customerName || order.name || 'Cliente'}
                   </h3>
-                  <p className="text-sm text-slate-600">
-                    {formatOrderType(order.type)}
-                    {order.table ? ` · Mesa ${order.table}` : ''}
-                  </p>
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                    <span className="px-2 py-1 rounded-full border border-slate-200 bg-slate-50 font-semibold">
+                      Pedido #{shortId(order.id)}
+                    </span>
+                    <span>
+                      {formatOrderType(order.type)}
+                      {order.table ? ` · Mesa ${order.table}` : ''}
+                    </span>
+                  </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusStyles(order.status)}`}>
@@ -144,9 +158,72 @@ const OrdersView = ({ orders }) => {
                   </span>
                 </div>
               </div>
-              {order.items && order.items.length > 0 && (
-                <div className="text-sm text-slate-600">
-                  <strong>Itens:</strong> {order.items.map(item => `${item.quantity}x ${item.name}`).join(', ')}
+
+              <div className="grid sm:grid-cols-3 gap-3 text-sm text-slate-600">
+                <div>
+                  <p className="text-xs uppercase text-slate-400">Cliente</p>
+                  <p className="font-semibold text-slate-700">{order.customerName || order.name || 'Cliente'}</p>
+                  <p className="text-xs text-slate-500">{order.phone || '-'}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase text-slate-400">Pagamento</p>
+                  <p className="font-semibold text-slate-700">{formatPaymentMethod(order.payment)}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase text-slate-400">Endereco</p>
+                  <p className="font-semibold text-slate-700">{order.address || '-'}</p>
+                </div>
+              </div>
+
+              {(order.items || []).length > 0 && (
+                <div className="border-t border-slate-100 pt-3">
+                  <p className="text-xs uppercase text-slate-400 mb-2">Itens</p>
+                  <div className="grid sm:grid-cols-2 gap-2 text-sm text-slate-700">
+                    {order.items.map((item) => {
+                      const quantity = item.qty ?? item.quantity ?? 1;
+                      const image =
+                        item.imageUrl || productsById.get(item.productId || item.id)?.imageUrl || '';
+                      return (
+                        <div key={item.id || item.name} className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg overflow-hidden border border-slate-200 bg-slate-100 flex-shrink-0">
+                              {image ? (
+                                <img
+                                  src={resolveAssetUrl(image)}
+                                  alt={item.name}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-[10px] text-slate-400">
+                                  🍖
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="font-semibold">
+                                {quantity}x {item.name}
+                              </span>
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {item?.cookingPoint && (
+                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800 border border-amber-200">
+                                    {item.cookingPoint}
+                                  </span>
+                                )}
+                                {item?.passSkewer && (
+                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-fuchsia-100 text-fuchsia-700 border border-fuchsia-200">
+                                    passar varinha
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          <span className="font-semibold">
+                            {formatCurrency((item.unitPrice ?? item.price ?? 0) * quantity)}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </div>
@@ -472,7 +549,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
       {activeTab === 'pedidos' && (
         <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-          <OrdersView orders={orders} />
+          <OrdersView orders={orders} products={products} />
         </div>
       )}
 
