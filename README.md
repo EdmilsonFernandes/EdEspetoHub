@@ -12,6 +12,12 @@ Aplicação web para pedidos e gestão do restaurante de espetinhos Datony. O pr
 - `backend/`: API Node.js/Express + TypeORM em TypeScript, com documentação Swagger em `/api/docs`.
 - `docker-compose.yml`: sobe frontend, API, PostgreSQL e pgAdmin já apontando para as pastas certas.
 
+## Padrao de documentacao (backend)
+
+- Todo arquivo `backend/src/**/*.ts` deve conter o cabecalho CONFIDENTIAL com `@file`, `@Date` e `@author`.
+- Classes e metodos no backend devem ter TSDoc em ingles com nome e data.
+- A data deve refletir a criacao do arquivo (git diff-filter=A).
+
 ## Visão geral do stack
 
 - **Front-end**: React (Create React App) servido por nginx (`frontend/Dockerfile`).
