@@ -643,17 +643,24 @@ export function SuperAdmin() {
 
   return (
     <AdminLayout contextLabel="Plataforma" showHeader={false}>
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl border border-slate-200 bg-white shadow-sm flex items-center justify-center">
-            <img src={platformLogo} alt="Chama no Espeto" className="w-6 h-6 object-contain" />
+      <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white/80 backdrop-blur px-4 py-4 sm:px-6 sm:py-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="absolute -right-20 -top-16 w-64 h-64 rounded-full bg-brand-primary/10 blur-3xl" />
+        <div className="absolute right-24 -bottom-20 w-56 h-56 rounded-full bg-emerald-400/10 blur-3xl" />
+        <div className="relative flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl border border-slate-200 bg-white shadow-sm flex items-center justify-center">
+            <img src={platformLogo} alt="Chama no Espeto" className="w-7 h-7 object-contain" />
           </div>
           <div>
-            <h1 className="text-2xl font-black text-slate-800">Super Admin</h1>
-            <p className="text-sm text-slate-500">Visão geral da plataforma</p>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl sm:text-3xl font-black text-slate-800">Super Admin</h1>
+              <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-900 text-white">
+                Master Console
+              </span>
+            </div>
+            <p className="text-sm text-slate-500">Visão executiva da plataforma</p>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="relative flex gap-2">
           <div className="flex gap-2 items-center">
             <span className="text-sm font-semibold text-slate-600">Auto-refresh</span>
             <button
