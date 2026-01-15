@@ -1,3 +1,16 @@
+/*
+ * Chama no espeto CONFIDENTIAL
+ * ------------------
+ * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ *
+ * This file, project or its parts can not be copied and/or distributed without
+ * the express permission of Chama no espeto.
+ *
+ * @file: EmailService.ts
+ * @Date: 2026-01-06
+ * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ */
+
 import nodemailer from 'nodemailer';
 import { env } from '../config/env';
 import { logger } from '../utils/logger';
@@ -9,14 +22,32 @@ type EmailPayload = {
   html?: string;
 };
 
+/**
+ * Represents EmailService.
+ *
+ * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @date 2026-01-06
+ */
 export class EmailService {
   private transporter?: nodemailer.Transporter;
   private log = logger.child({ scope: 'EmailService' });
+  /**
+   * Gets logo url.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-06
+   */
   private getLogoUrl() {
     const base = env.appUrl?.replace(/\/$/, '') || 'http://localhost:3000';
     return `${base}/chama-no-espeto.jpeg`;
   }
 
+  /**
+   * Gets transporter.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-06
+   */
   private getTransporter() {
     if (!env.email.smtpHost || !env.email.smtpUser || !env.email.smtpPass) return null;
     if (!this.transporter) {
@@ -33,6 +64,12 @@ export class EmailService {
     return this.transporter;
   }
 
+  /**
+   * Executes send logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-06
+   */
   async send(payload: EmailPayload) {
     const transporter = this.getTransporter();
     if (!transporter) {
@@ -48,6 +85,12 @@ export class EmailService {
     });
   }
 
+  /**
+   * Sends password reset.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-06
+   */
   async sendPasswordReset(email: string, link: string) {
     const subject = 'Redefinir senha - Chama no Espeto';
     const text = `Recebemos seu pedido para redefinir a senha.\n\nAbra este link para continuar: ${link}\n\nSe não foi você, ignore este e-mail.`;
@@ -66,6 +109,12 @@ export class EmailService {
     await this.send({ to: email, subject, text, html });
   }
 
+  /**
+   * Sends email verification.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-06
+   */
   async sendEmailVerification(email: string, link: string) {
     const subject = 'Verifique seu e-mail - Chama no Espeto';
     const text = `Para ativar sua conta, confirme seu e-mail neste link: ${link}\n\nSe nao foi voce, ignore este e-mail.`;
@@ -89,6 +138,12 @@ export class EmailService {
     await this.send({ to: email, subject, text, html });
   }
 
+  /**
+   * Sends activation email.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-06
+   */
   async sendActivationEmail(email: string, slug: string) {
     const adminUrl = `${env.appUrl}/admin`;
     const storeUrl = `${env.appUrl}/chamanoespeto/${slug}`;
@@ -117,6 +172,12 @@ export class EmailService {
     await this.send({ to: email, subject, text, html });
   }
 
+  /**
+   * Sends subscription reminder.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-06
+   */
   async sendSubscriptionReminder(email: string, storeName: string, slug: string, daysLeft: number) {
     const adminUrl = `${env.appUrl}/admin`;
     const storeUrl = `${env.appUrl}/chamanoespeto/${slug}`;
@@ -152,6 +213,12 @@ export class EmailService {
     await this.send({ to: email, subject, text, html });
   }
 
+  /**
+   * Sends signup notification.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-06
+   */
   async sendSignupNotification(payload: {
     emails: string[];
     storeName: string;

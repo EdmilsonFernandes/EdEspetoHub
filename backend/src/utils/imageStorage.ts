@@ -1,10 +1,35 @@
+/*
+ * Chama no espeto CONFIDENTIAL
+ * ------------------
+ * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ *
+ * This file, project or its parts can not be copied and/or distributed without
+ * the express permission of Chama no espeto.
+ *
+ * @file: imageStorage.ts
+ * @Date: 2025-12-22
+ * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ */
+
 import fs from 'fs/promises';
 import path from 'path';
 
 const UPLOADS_DIR = path.join(process.cwd(), 'uploads');
 
+/**
+ * Resolves target dir.
+ *
+ * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @date 2025-12-22
+ */
 const resolveTargetDir = (folder: string) => path.join(UPLOADS_DIR, folder);
 
+/**
+ * Ensures dir.
+ *
+ * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @date 2025-12-22
+ */
 const ensureDir = async (dir: string) => {
   await fs.mkdir(dir, { recursive: true });
 };

@@ -1,3 +1,16 @@
+/*
+ * Chama no espeto CONFIDENTIAL
+ * ------------------
+ * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ *
+ * This file, project or its parts can not be copied and/or distributed without
+ * the express permission of Chama no espeto.
+ *
+ * @file: logger.ts
+ * @Date: 2026-01-09
+ * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ */
+
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
 const levelRank: Record<LogLevel, number> = {
@@ -23,6 +36,12 @@ let currentDate = new Date().toISOString().slice(0, 10);
 let appStream: import('fs').WriteStream | null = null;
 let errorStream: import('fs').WriteStream | null = null;
 
+/**
+ * Ensures streams.
+ *
+ * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @date 2026-01-09
+ */
 const ensureStreams = async () => {
   if (!fileLoggingEnabled) return;
   const fs = await import('fs');
@@ -38,6 +57,12 @@ const ensureStreams = async () => {
   }
 };
 
+/**
+ * Executes write to file logic.
+ *
+ * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @date 2026-01-09
+ */
 const writeToFile = async (level: LogLevel, payload: string) => {
   if (!fileLoggingEnabled) return;
   try {
@@ -63,6 +88,12 @@ const redactKeys = new Set([
   'mp_access_token',
 ]);
 
+/**
+ * Normalizes error.
+ *
+ * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @date 2026-01-09
+ */
 const normalizeError = (value: unknown) => {
   if (!value || !(value instanceof Error)) return value;
   return {
@@ -72,6 +103,12 @@ const normalizeError = (value: unknown) => {
   };
 };
 
+/**
+ * Executes sanitize meta logic.
+ *
+ * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @date 2026-01-09
+ */
 const sanitizeMeta = (meta?: Record<string, any>) => {
   if (!meta) return undefined;
   const cleaned: Record<string, any> = {};
@@ -89,20 +126,44 @@ const sanitizeMeta = (meta?: Record<string, any>) => {
   return cleaned;
 };
 
+/**
+ * Represents Logger.
+ *
+ * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @date 2026-01-09
+ */
 export class Logger {
   private context?: string;
   private baseMeta: Record<string, any>;
 
+  /**
+   * Creates a new Logger.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-09
+   */
   constructor(context?: string, baseMeta: Record<string, any> = {}) {
     this.context = context;
     this.baseMeta = baseMeta;
   }
 
+  /**
+   * Executes child logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-09
+   */
   child(meta: Record<string, any> = {}, context?: string) {
     const merged = { ...this.baseMeta, ...meta };
     return new Logger(context || this.context, merged);
   }
 
+  /**
+   * Executes log logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-09
+   */
   log(level: LogLevel, message: string, meta?: Record<string, any>) {
     if (levelRank[level] < levelRank[activeLevel]) return;
 
@@ -130,18 +191,42 @@ export class Logger {
     void writeToFile(level, payload);
   }
 
+  /**
+   * Executes debug logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-09
+   */
   debug(message: string, meta?: Record<string, any>) {
     this.log('debug', message, meta);
   }
 
+  /**
+   * Executes info logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-09
+   */
   info(message: string, meta?: Record<string, any>) {
     this.log('info', message, meta);
   }
 
+  /**
+   * Executes warn logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-09
+   */
   warn(message: string, meta?: Record<string, any>) {
     this.log('warn', message, meta);
   }
 
+  /**
+   * Executes error logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-09
+   */
   error(message: string, meta?: Record<string, any>) {
     this.log('error', message, meta);
   }

@@ -1,8 +1,27 @@
+/*
+ * Chama no espeto CONFIDENTIAL
+ * ------------------
+ * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ *
+ * This file, project or its parts can not be copied and/or distributed without
+ * the express permission of Chama no espeto.
+ *
+ * @file: StoreSettings.ts
+ * @Date: 2025-12-17
+ * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ */
+
 import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Store } from './Store';
 import { sanitizeSocialLinks, SocialLink } from '../utils/socialLinks';
 
 @Entity({ name: 'store_settings' })
+/**
+ * Represents StoreSettings.
+ *
+ * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @date 2025-12-17
+ */
 export class StoreSettings
 {
   @PrimaryGeneratedColumn('uuid')

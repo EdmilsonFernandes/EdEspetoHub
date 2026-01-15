@@ -1,3 +1,16 @@
+/*
+ * Chama no espeto CONFIDENTIAL
+ * ------------------
+ * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ *
+ * This file, project or its parts can not be copied and/or distributed without
+ * the express permission of Chama no espeto.
+ *
+ * @file: SubscriptionController.ts
+ * @Date: 2025-12-17
+ * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ */
+
 import { Request, Response } from 'express';
 import { SubscriptionService } from '../services/SubscriptionService';
 import { PaymentRepository } from '../repositories/PaymentRepository';
@@ -9,7 +22,19 @@ const subscriptionService = new SubscriptionService();
 const paymentRepository = new PaymentRepository();
 const log = logger.child({ scope: 'SubscriptionController' });
 
+/**
+ * Represents SubscriptionController.
+ *
+ * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @date 2025-12-17
+ */
 export class SubscriptionController {
+  /**
+   * Executes create logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   static async create(req: Request, res: Response) {
     try {
       log.info('Subscription create request', { storeId: req.body?.storeId, planId: req.body?.planId });
@@ -22,6 +47,12 @@ export class SubscriptionController {
     }
   }
 
+  /**
+   * Gets by store.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   static async getByStore(req: Request, res: Response) {
     try {
       log.debug('Subscription get request', { storeId: req.params.storeId });
@@ -40,6 +71,12 @@ export class SubscriptionController {
     }
   }
 
+  /**
+   * Executes renew logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   static async renew(req: Request, res: Response) {
     try {
       log.info('Subscription renew request', { subscriptionId: req.params.id, planId: req.body?.planId });
@@ -52,6 +89,12 @@ export class SubscriptionController {
     }
   }
 
+  /**
+   * Updates status.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   static async updateStatus(req: Request, res: Response) {
     const { status } = req.body;
     try {
@@ -68,6 +111,12 @@ export class SubscriptionController {
     }
   }
 
+  /**
+   * Creates renewal payment.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   static async createRenewalPayment(req: Request, res: Response) {
     try {
       log.info('Renewal payment request', { storeId: req.params.storeId, planId: req.body?.planId });

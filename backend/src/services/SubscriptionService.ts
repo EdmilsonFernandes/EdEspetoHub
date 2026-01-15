@@ -1,3 +1,16 @@
+/*
+ * Chama no espeto CONFIDENTIAL
+ * ------------------
+ * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ *
+ * This file, project or its parts can not be copied and/or distributed without
+ * the express permission of Chama no espeto.
+ *
+ * @file: SubscriptionService.ts
+ * @Date: 2025-12-17
+ * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ */
+
 import { CreateSubscriptionDto } from '../dto/CreateSubscriptionDto';
 import { RenewSubscriptionDto } from '../dto/RenewSubscriptionDto';
 import { Subscription, SubscriptionStatus } from '../entities/Subscription';
@@ -13,6 +26,12 @@ import { PaymentRepository } from '../repositories/PaymentRepository';
 import { logger } from '../utils/logger';
 import { AppError } from '../errors/AppError';
 
+/**
+ * Represents SubscriptionService.
+ *
+ * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @date 2025-12-17
+ */
 export class SubscriptionService {
   private planRepository = new PlanRepository();
   private storeRepository = new StoreRepository();
@@ -22,6 +41,12 @@ export class SubscriptionService {
   private paymentRepository = new PaymentRepository();
   private log = logger.child({ scope: 'SubscriptionService' });
 
+  /**
+   * Executes create logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   async create(input: CreateSubscriptionDto) {
     this.log.info('Create subscription', { storeId: input.storeId, planId: input.planId });
     const store = await this.storeRepository.findById(input.storeId);
@@ -50,6 +75,12 @@ export class SubscriptionService {
     return this.subscriptionRepository.save(subscription);
   }
 
+  /**
+   * Gets current by store.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   async getCurrentByStore(storeId: string) {
     const subscription = await this.subscriptionRepository.findLatestByStoreId(storeId);
     if (!subscription) return null;
@@ -75,12 +106,24 @@ export class SubscriptionService {
     return subscription;
   }
 
+  /**
+   * Gets current by store slug.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   async getCurrentByStoreSlug(slug: string) {
     const store = await this.storeRepository.findBySlug(slug);
     if (!store) return null;
     return this.getCurrentByStore(store.id);
   }
 
+  /**
+   * Executes renew logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   async renew(subscriptionId: string, input: RenewSubscriptionDto) {
     this.log.info('Renew subscription', { subscriptionId, planId: input.planId });
     const subscription = await this.subscriptionRepository.findById(subscriptionId);
@@ -110,6 +153,12 @@ export class SubscriptionService {
     return this.subscriptionRepository.save(subscription);
   }
 
+  /**
+   * Creates renewal payment.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   async createRenewalPayment(storeId: string, input: RenewSubscriptionDto, authStoreId?: string) {
     this.log.info('Create renewal payment', { storeId, planId: input.planId, paymentMethod: input.paymentMethod });
     const store = await this.storeRepository.findById(storeId);
@@ -164,6 +213,12 @@ export class SubscriptionService {
     });
   }
 
+  /**
+   * Updates statuses for all.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   async updateStatusesForAll() {
     const subscriptions = await this.subscriptionRepository.findAll();
     const updates: Subscription[] = [];
@@ -219,6 +274,12 @@ export class SubscriptionService {
     return updates;
   }
 
+  /**
+   * Executes suspend logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   async suspend(subscriptionId: string) {
     const subscription = await this.subscriptionRepository.findById(subscriptionId);
     if (!subscription) throw new AppError('SUB-001', 404);
@@ -226,6 +287,12 @@ export class SubscriptionService {
     return this.subscriptionRepository.save(subscription);
   }
 
+  /**
+   * Executes activate logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   async activate(subscriptionId: string) {
     const subscription = await this.subscriptionRepository.findById(subscriptionId);
     if (!subscription) throw new AppError('SUB-001', 404);
@@ -233,21 +300,51 @@ export class SubscriptionService {
     return this.subscriptionRepository.save(subscription);
   }
 
+  /**
+   * Executes assert store is active logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   async assertStoreIsActive(storeId: string) {
     const subscription = await this.getCurrentByStore(storeId);
     return subscription ? this.isSubscriptionActive(subscription) : false;
   }
 
+  /**
+   * Executes is active subscription logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
+  /**
+   * Checks active subscription.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   isActiveSubscription(subscription?: Subscription | null) {
     return subscription ? this.isSubscriptionActive(subscription) : false;
   }
 
+  /**
+   * Executes add days logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   private addDays(date: Date, days: number) {
     const result = new Date(date);
     result.setDate(result.getDate() + days);
     return result;
   }
 
+  /**
+   * Resolves status.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   private resolveStatus(subscription: Subscription): SubscriptionStatus {
     if (subscription.status === 'PENDING') return 'PENDING';
     if (subscription.status === 'SUSPENDED') return 'SUSPENDED';
@@ -267,8 +364,26 @@ export class SubscriptionService {
     return 'ACTIVE';
   }
 
+  /**
+   * Executes is subscription active logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
+  /**
+   * Checks subscription active.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   private isSubscriptionActive(subscription: Subscription) {
     const now = new Date();
+    /**
+     * Executes return logic.
+     *
+     * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+     * @date 2025-12-17
+     */
     return (
       new Date(subscription.endDate).getTime() >= now.getTime() &&
       subscription.status !== 'PENDING' &&

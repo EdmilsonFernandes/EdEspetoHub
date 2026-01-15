@@ -1,3 +1,16 @@
+/*
+ * Chama no espeto CONFIDENTIAL
+ * ------------------
+ * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ *
+ * This file, project or its parts can not be copied and/or distributed without
+ * the express permission of Chama no espeto.
+ *
+ * @file: PlanService.ts
+ * @Date: 2025-12-17
+ * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ */
+
 import { PlanRepository } from '../repositories/PlanRepository';
 import { Plan, PlanName } from '../entities/Plan';
 
@@ -12,14 +25,32 @@ const DEFAULT_PLANS: Array<Pick<Plan, 'name' | 'displayName' | 'price' | 'durati
 
 const LEGACY_PLANS: PlanName[] = ['monthly', 'yearly'];
 
+/**
+ * Represents PlanService.
+ *
+ * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @date 2025-12-17
+ */
 export class PlanService {
   private planRepository = new PlanRepository();
 
+  /**
+   * Lists enabled.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   async listEnabled() {
     await this.ensureSeededPlans();
     return this.planRepository.findEnabled();
   }
 
+  /**
+   * Ensures seeded plans.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   async ensureSeededPlans() {
     const existing = await this.planRepository.findAll();
     const byName = new Map(existing.map((plan) => [plan.name, plan]));

@@ -1,3 +1,16 @@
+/*
+ * Chama no espeto CONFIDENTIAL
+ * ------------------
+ * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ *
+ * This file, project or its parts can not be copied and/or distributed without
+ * the express permission of Chama no espeto.
+ *
+ * @file: Subscription.ts
+ * @Date: 2025-12-17
+ * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ */
+
 import {
   Column,
   CreateDateColumn,
@@ -20,6 +33,12 @@ export type SubscriptionStatus =
   | 'CANCELLED';
 
 @Entity({ name: 'subscriptions' })
+/**
+ * Represents Subscription.
+ *
+ * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @date 2025-12-17
+ */
 export class Subscription {
   @PrimaryGeneratedColumn('uuid')
   id!: string;

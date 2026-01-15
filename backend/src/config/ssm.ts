@@ -1,6 +1,25 @@
+/*
+ * Chama no espeto CONFIDENTIAL
+ * ------------------
+ * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ *
+ * This file, project or its parts can not be copied and/or distributed without
+ * the express permission of Chama no espeto.
+ *
+ * @file: ssm.ts
+ * @Date: 2026-01-13
+ * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ */
+
 import { SSMClient, GetParameterCommand } from '@aws-sdk/client-ssm';
 import fs from 'fs';
 
+/**
+ * Parses json.
+ *
+ * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @date 2026-01-13
+ */
 const parseJson = (raw: string) => {
   try {
     return JSON.parse(raw) as Record<string, any>;
@@ -9,6 +28,12 @@ const parseJson = (raw: string) => {
   }
 };
 
+/**
+ * Loads ssm env.
+ *
+ * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @date 2026-01-13
+ */
 export const loadSsmEnv = async () => {
   const parameterName = process.env.SSM_PARAMETER_NAME;
   if (!parameterName) return;

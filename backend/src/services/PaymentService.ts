@@ -1,3 +1,16 @@
+/*
+ * Chama no espeto CONFIDENTIAL
+ * ------------------
+ * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ *
+ * This file, project or its parts can not be copied and/or distributed without
+ * the express permission of Chama no espeto.
+ *
+ * @file: PaymentService.ts
+ * @Date: 2025-12-17
+ * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ */
+
 import { EntityManager } from 'typeorm';
 import QRCode from 'qrcode';
 import { Payment, PaymentMethod } from '../entities/Payment';
@@ -13,20 +26,44 @@ import { EmailService } from './EmailService';
 import { logger } from '../utils/logger';
 import { AppError } from '../errors/AppError';
 
+/**
+ * Represents PaymentService.
+ *
+ * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @date 2025-12-17
+ */
 export class PaymentService {
   private mercadoPago = new MercadoPagoService();
   private paymentEventRepository = new PaymentEventRepository();
   private emailService = new EmailService();
   private log = logger.child({ scope: 'PaymentService' });
+  /**
+   * Normalizes qr code.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   private normalizeQrCode(qrCode?: string | null) {
     if (!qrCode) return null;
     if (qrCode.startsWith('data:image')) return qrCode;
     return `data:image/png;base64,${qrCode}`;
   }
+  /**
+   * Sends activation email.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   private async sendActivationEmail(email: string, slug: string) {
     await this.emailService.sendActivationEmail(email, slug);
   }
 
+  /**
+   * Creates payment.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   async createPayment(
     manager: EntityManager,
     data: {
@@ -117,6 +154,12 @@ export class PaymentService {
     return payment;
   }
 
+  /**
+   * Executes confirm payment logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   async confirmPayment(paymentId: string) {
     this.log.info('Confirm payment start', { paymentId });
     return AppDataSource.transaction(async (manager) => {
@@ -173,6 +216,12 @@ export class PaymentService {
     });
   }
 
+  /**
+   * Executes confirm mercado pago payment logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   async confirmMercadoPagoPayment(mercadoPagoPaymentId: string) {
     this.log.info('Confirm Mercado Pago payment', { mercadoPagoPaymentId });
     if (!env.mercadoPago.accessToken) {
@@ -187,6 +236,12 @@ export class PaymentService {
     return this.applyMercadoPagoStatus(mpPayment);
   }
 
+  /**
+   * Executes reprocess by payment id logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   async reprocessByPaymentId(paymentId: string, providerId?: string) {
     this.log.info('Reprocess payment', { paymentId, providerId });
     if (!env.mercadoPago.accessToken) {
@@ -212,6 +267,12 @@ export class PaymentService {
     return this.applyMercadoPagoStatus(mpPayment);
   }
 
+  /**
+   * Updates payment status.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   private async updatePaymentStatus(paymentId: string, providerStatus?: string) {
     const paymentRepo = AppDataSource.getRepository(Payment);
     const payment = await paymentRepo.findOne({ where: { id: paymentId } });
@@ -225,6 +286,12 @@ export class PaymentService {
     }
   }
 
+  /**
+   * Executes apply mercado pago status logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   private async applyMercadoPagoStatus(mpPayment: any) {
     if (mpPayment.external_reference) {
       const paymentId = String(mpPayment.external_reference);
@@ -282,12 +349,30 @@ export class PaymentService {
     return this.confirmPayment(String(internalId));
   }
 
+  /**
+   * Executes add days logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   private addDays(date: Date, days: number) {
     const result = new Date(date);
     result.setDate(result.getDate() + days);
     return result;
   }
 
+  /**
+   * Executes find by id logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
+  /**
+   * Finds by id.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   async findById(paymentId: string) {
     const paymentRepo = AppDataSource.getRepository(Payment);
     return paymentRepo.findOne({ where: { id: paymentId }, relations: ['store', 'user'] });

@@ -1,3 +1,16 @@
+/*
+ * Chama no espeto CONFIDENTIAL
+ * ------------------
+ * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ *
+ * This file, project or its parts can not be copied and/or distributed without
+ * the express permission of Chama no espeto.
+ *
+ * @file: MercadoPagoService.ts
+ * @Date: 2026-01-06
+ * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ */
+
 import crypto from 'crypto';
 import { env } from '../config/env';
 import { logger } from '../utils/logger';
@@ -35,22 +48,52 @@ type CreatePaymentInput = {
   };
 };
 
+/**
+ * Executes has credentials logic.
+ *
+ * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @date 2026-01-06
+ */
 const hasCredentials = () =>
   Boolean(env.mercadoPago.accessToken && env.mercadoPago.publicKey);
 
+/**
+ * Builds headers.
+ *
+ * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @date 2026-01-06
+ */
 const buildHeaders = () => ({
   Authorization: `Bearer ${env.mercadoPago.accessToken}`,
   'Content-Type': 'application/json',
   'X-Idempotency-Key': crypto.randomUUID(),
 });
 
+/**
+ * Represents MercadoPagoService.
+ *
+ * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @date 2026-01-06
+ */
 export class MercadoPagoService {
   private log = logger.child({ scope: 'MercadoPagoService' });
+  /**
+   * Executes debug log logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-06
+   */
   private debugLog(message: string, data?: Record<string, any>) {
     if (!env.mercadoPago.debug) return;
     this.log.info(message, data || {});
   }
 
+  /**
+   * Creates payment.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-06
+   */
   async createPayment(input: CreatePaymentInput) {
     if (!hasCredentials()) return null;
 
@@ -65,6 +108,12 @@ export class MercadoPagoService {
     return this.createCardPreference(input);
   }
 
+  /**
+   * Gets payment.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-06
+   */
   async getPayment(paymentId: string) {
     if (!hasCredentials()) return null;
     const url = `${env.mercadoPago.apiBaseUrl}/v1/payments/${paymentId}`;
@@ -76,9 +125,21 @@ export class MercadoPagoService {
       throw new AppError('PAY-004', 400);
     }
     this.debugLog('GET payment ok', { status: response.status });
+    /**
+     * Executes return logic.
+     *
+     * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+     * @date 2026-01-06
+     */
     return (await response.json()) as MercadoPagoPaymentResponse;
   }
 
+  /**
+   * Creates card preference.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-06
+   */
   private async createCardPreference(input: CreatePaymentInput) {
     const url = `${env.mercadoPago.apiBaseUrl}/checkout/preferences`;
     const body = {
@@ -120,6 +181,12 @@ export class MercadoPagoService {
     };
   }
 
+  /**
+   * Creates boleto preference.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-06
+   */
   private async createBoletoPreference(input: CreatePaymentInput) {
     const url = `${env.mercadoPago.apiBaseUrl}/checkout/preferences`;
     const body = {
@@ -168,6 +235,12 @@ export class MercadoPagoService {
     };
   }
 
+  /**
+   * Creates pix payment.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-06
+   */
   private async createPixPayment(input: CreatePaymentInput) {
     const url = `${env.mercadoPago.apiBaseUrl}/v1/payments`;
     const body = {

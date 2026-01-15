@@ -1,3 +1,16 @@
+/*
+ * Chama no espeto CONFIDENTIAL
+ * ------------------
+ * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ *
+ * This file, project or its parts can not be copied and/or distributed without
+ * the express permission of Chama no espeto.
+ *
+ * @file: ProductController.ts
+ * @Date: 2025-12-17
+ * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ */
+
 import { Request, Response } from 'express';
 import { ProductService } from '../services/ProductService';
 import { logger } from '../utils/logger';
@@ -44,7 +57,19 @@ const demoProducts = [
   },
 ];
 
+/**
+ * Represents ProductController.
+ *
+ * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @date 2025-12-17
+ */
 export class ProductController {
+  /**
+   * Executes create logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   static async create(req: Request, res: Response) {
     try {
       log.info('Product create request', { storeId: req.params.storeId });
@@ -60,6 +85,12 @@ export class ProductController {
     }
   }
 
+  /**
+   * Executes list logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   static async list(req: Request, res: Response) {
     try {
       log.debug('Product list request', { storeId: req.params.storeId });
@@ -71,6 +102,12 @@ export class ProductController {
     }
   }
 
+  /**
+   * Lists by slug.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   static async listBySlug(req: Request, res: Response) {
     try {
       if (DEMO_SLUGS.has(req.params.slug)) {
@@ -85,6 +122,12 @@ export class ProductController {
     }
   }
 
+  /**
+   * Lists public by slug.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   static async listPublicBySlug(req: Request, res: Response) {
     try {
       if (DEMO_SLUGS.has(req.params.slug)) {
@@ -99,6 +142,12 @@ export class ProductController {
     }
   }
 
+  /**
+   * Executes update logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   static async update(req: Request, res: Response) {
     try {
       log.info('Product update request', { storeId: req.params.storeId, productId: req.params.productId });
@@ -116,6 +165,12 @@ export class ProductController {
     }
   }
 
+  /**
+   * Executes remove logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   static async remove(req: Request, res: Response) {
     try {
       log.info('Product remove request', { storeId: req.params.storeId, productId: req.params.productId });

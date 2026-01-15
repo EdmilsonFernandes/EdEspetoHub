@@ -1,3 +1,16 @@
+/*
+ * Chama no espeto CONFIDENTIAL
+ * ------------------
+ * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ *
+ * This file, project or its parts can not be copied and/or distributed without
+ * the express permission of Chama no espeto.
+ *
+ * @file: PlatformAdminController.ts
+ * @Date: 2025-12-17
+ * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ */
+
 import { Request, Response } from 'express';
 import { StoreRepository } from '../repositories/StoreRepository';
 import { SubscriptionService } from '../services/SubscriptionService';
@@ -12,7 +25,19 @@ const paymentRepository = new PaymentRepository();
 const paymentEventRepository = new PaymentEventRepository();
 const log = logger.child({ scope: 'PlatformAdminController' });
 
+/**
+ * Represents PlatformAdminController.
+ *
+ * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @date 2025-12-17
+ */
 export class PlatformAdminController {
+  /**
+   * Lists stores.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   static async listStores(_req: Request, res: Response) {
     try {
       log.debug('Admin list stores request');
@@ -35,6 +60,12 @@ export class PlatformAdminController {
     }
   }
 
+  /**
+   * Executes overview logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   static async overview(_req: Request, res: Response) {
     try {
       log.debug('Admin overview request');
@@ -100,6 +131,12 @@ export class PlatformAdminController {
     }
   }
 
+  /**
+   * Executes suspend store logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   static async suspendStore(req: Request, res: Response) {
     const subscriptionId = (req.body?.subscriptionId as string) || req.params.storeId;
     try {
@@ -112,6 +149,12 @@ export class PlatformAdminController {
     }
   }
 
+  /**
+   * Executes reactivate store logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   static async reactivateStore(req: Request, res: Response) {
     const subscriptionId = (req.body?.subscriptionId as string) || req.params.storeId;
     try {
@@ -124,6 +167,12 @@ export class PlatformAdminController {
     }
   }
 
+  /**
+   * Lists payment events.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   static async listPaymentEvents(req: Request, res: Response) {
     const paymentId = req.query.paymentId as string | undefined;
     const storeId = req.query.storeId as string | undefined;

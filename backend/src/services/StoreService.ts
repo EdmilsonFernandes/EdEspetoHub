@@ -1,3 +1,16 @@
+/*
+ * Chama no espeto CONFIDENTIAL
+ * ------------------
+ * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ *
+ * This file, project or its parts can not be copied and/or distributed without
+ * the express permission of Chama no espeto.
+ *
+ * @file: StoreService.ts
+ * @Date: 2025-12-17
+ * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ */
+
 import { AppDataSource } from '../config/database';
 import { CreateStoreDto } from '../dto/CreateStoreDto';
 import { StoreSettings } from '../entities/StoreSettings';
@@ -10,6 +23,12 @@ import { saveBase64Image } from '../utils/imageStorage';
 import { sanitizeSocialLinks } from '../utils/socialLinks';
 import { AppError } from '../errors/AppError';
 
+/**
+ * Represents StoreService.
+ *
+ * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @date 2025-12-17
+ */
 export class StoreService
 {
   private subscriptionService = new SubscriptionService();
@@ -18,6 +37,12 @@ export class StoreService
   /* =========================
    * CREATE STORE
    * ========================= */
+  /**
+   * Executes create logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   async create(input: CreateStoreDto)
   {
     return AppDataSource.transaction(async (manager) =>
@@ -65,6 +90,12 @@ export class StoreService
     });
   }
 
+  /**
+   * Lists all.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   async listAll() {
     return this.storeRepository.find({ relations: [ 'settings', 'owner' ] });
   }
@@ -72,6 +103,12 @@ export class StoreService
   /* =========================
    * UPDATE STORE
    * ========================= */
+  /**
+   * Executes update logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   async update(storeId: string, data: Partial<CreateStoreDto>)
   {
     return AppDataSource.transaction(async (manager) =>
@@ -145,6 +182,12 @@ export class StoreService
   /* =========================
    * OPEN / CLOSE STORE
    * ========================= */
+  /**
+   * Executes set status logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   async setStatus(storeId: string, open: boolean)
   {
     return AppDataSource.transaction(async (manager) =>
@@ -170,6 +213,12 @@ export class StoreService
   /* =========================
    * GET BY SLUG
    * ========================= */
+  /**
+   * Gets by slug.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   async getBySlug(slug: string)
   {
     const repo = AppDataSource.getRepository(Store);
@@ -183,6 +232,12 @@ export class StoreService
   /* =========================
    * SLUG UNIQUE (PRIVATE)
    * ========================= */
+  /**
+   * Generates unique slug.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   private async generateUniqueSlug(
     value: string,
     manager: EntityManager

@@ -1,3 +1,16 @@
+/*
+ * Chama no espeto CONFIDENTIAL
+ * ------------------
+ * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ *
+ * This file, project or its parts can not be copied and/or distributed without
+ * the express permission of Chama no espeto.
+ *
+ * @file: OrderService.ts
+ * @Date: 2025-12-17
+ * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ */
+
 import { CreateOrderDto, CreateOrderItemInput } from '../dto/CreateOrderDto';
 import { Order } from '../entities/Order';
 import { OrderItem } from '../entities/OrderItem';
@@ -7,12 +20,24 @@ import { StoreRepository } from '../repositories/StoreRepository';
 import { AppDataSource } from '../config/database';
 import { AppError } from '../errors/AppError';
 
+/**
+ * Represents OrderService.
+ *
+ * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @date 2025-12-17
+ */
 export class OrderService
 {
   private orderRepository = new OrderRepository();
   private storeRepository = new StoreRepository();
   private productRepository = new ProductRepository();
 
+  /**
+   * Ensures store access.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   private ensureStoreAccess(store: Awaited<ReturnType<StoreRepository[ 'findById' ]>>, authStoreId?: string)
   {
     if (!store) throw new AppError('STORE-001', 404);
@@ -22,6 +47,12 @@ export class OrderService
     }
   }
 
+  /**
+   * Executes create logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   async create(input: CreateOrderDto)
   {
     const store = await this.storeRepository.findById(input.storeId);
@@ -31,6 +62,12 @@ export class OrderService
     return this.orderRepository.save(order);
   }
 
+  /**
+   * Creates by slug.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   async createBySlug(input: Omit<CreateOrderDto, 'storeId'> & { storeSlug: string })
   {
     const store = await this.storeRepository.findBySlug(input.storeSlug);
@@ -40,6 +77,12 @@ export class OrderService
     return this.orderRepository.save(order);
   }
 
+  /**
+   * Lists by store id.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   async listByStoreId(storeId: string, authStoreId?: string)
   {
     const store = await this.storeRepository.findById(storeId);
@@ -47,6 +90,12 @@ export class OrderService
     return this.orderRepository.findByStoreId(store!.id);
   }
 
+  /**
+   * Lists by store slug.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   async listByStoreSlug(slug: string, authStoreId?: string)
   {
     const store = await this.storeRepository.findBySlug(slug);
@@ -54,6 +103,12 @@ export class OrderService
     return this.orderRepository.findByStoreId(store!.id);
   }
 
+  /**
+   * Updates status.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   async updateStatus(orderId: string, status: string, authStoreId?: string)
   {
     const order = await this.orderRepository.findById(orderId);
@@ -64,6 +119,12 @@ export class OrderService
     return this.orderRepository.save(order);
   }
 
+  /**
+   * Updates items.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   async updateItems(orderId: string, items: CreateOrderItemInput[], authStoreId?: string)
   {
     const order = await this.orderRepository.findById(orderId);
@@ -107,6 +168,12 @@ export class OrderService
     return this.orderRepository.save(order);
   }
 
+  /**
+   * Gets public by id.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   async getPublicById(orderId: string)
   {
     const order = await this.orderRepository.findById(orderId);
@@ -128,6 +195,12 @@ export class OrderService
     return { order, queuePosition, queueSize };
   }
 
+  /**
+   * Builds order.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   private async buildOrder(input: Omit<CreateOrderDto, 'storeId'>, store: Awaited<ReturnType<StoreRepository[ 'findById' ]>>)
   {
     const allowedTypes = Array.isArray(store?.settings?.orderTypes) && store.settings.orderTypes.length > 0

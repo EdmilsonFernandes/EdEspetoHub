@@ -1,3 +1,16 @@
+/*
+ * Chama no espeto CONFIDENTIAL
+ * ------------------
+ * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ *
+ * This file, project or its parts can not be copied and/or distributed without
+ * the express permission of Chama no espeto.
+ *
+ * @file: OrderController.ts
+ * @Date: 2025-12-17
+ * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ */
+
 import { Request, Response } from 'express';
 import { OrderService } from '../services/OrderService';
 import { logger } from '../utils/logger';
@@ -7,7 +20,19 @@ import { respondWithError } from '../errors/respondWithError';
 const orderService = new OrderService();
 const log = logger.child({ scope: 'OrderController' });
 
+/**
+ * Represents OrderController.
+ *
+ * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @date 2025-12-17
+ */
 export class OrderController {
+  /**
+   * Executes create logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   static async create(req: Request, res: Response) {
     try {
       log.info('Order create request', { storeId: req.params.storeId });
@@ -20,6 +45,12 @@ export class OrderController {
     }
   }
 
+  /**
+   * Executes list logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   static async list(req: Request, res: Response) {
     try {
       log.debug('Order list request', { storeId: req.params.storeId });
@@ -31,6 +62,12 @@ export class OrderController {
     }
   }
 
+  /**
+   * Creates by slug.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   static async createBySlug(req: Request, res: Response) {
     try {
       log.info('Order create by slug request', { slug: req.params.slug });
@@ -43,6 +80,12 @@ export class OrderController {
     }
   }
 
+  /**
+   * Lists by slug.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   static async listBySlug(req: Request, res: Response) {
     try {
       log.debug('Order list by slug request', { slug: req.params.slug });
@@ -54,6 +97,12 @@ export class OrderController {
     }
   }
 
+  /**
+   * Updates status.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   static async updateStatus(req: Request, res: Response) {
     const { status } = req.body;
     try {
@@ -67,6 +116,12 @@ export class OrderController {
     }
   }
 
+  /**
+   * Updates items.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   static async updateItems(req: Request, res: Response) {
     try {
       log.info('Order items update request', { orderId: req.params.orderId });
@@ -79,6 +134,12 @@ export class OrderController {
     }
   }
 
+  /**
+   * Gets public.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   static async getPublic(req: Request, res: Response) {
     const { orderId } = req.params;
     try {

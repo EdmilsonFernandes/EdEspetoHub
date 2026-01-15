@@ -1,7 +1,38 @@
+/*
+ * Chama no espeto CONFIDENTIAL
+ * ------------------
+ * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ *
+ * This file, project or its parts can not be copied and/or distributed without
+ * the express permission of Chama no espeto.
+ *
+ * @file: documents.ts
+ * @Date: 2026-01-08
+ * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ */
+
+/**
+ * Executes only digits logic.
+ *
+ * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @date 2026-01-08
+ */
 const onlyDigits = (value: string) => value.replace(/\D/g, '');
 
+/**
+ * Checks repeated.
+ *
+ * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @date 2026-01-08
+ */
 const isRepeated = (value: string) => /^(\d)\1+$/.test(value);
 
+/**
+ * Executes validate cpf logic.
+ *
+ * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @date 2026-01-08
+ */
 const validateCpf = (cpf: string) => {
   const digits = onlyDigits(cpf);
   if (digits.length !== 11 || isRepeated(digits)) return false;
@@ -18,10 +49,22 @@ const validateCpf = (cpf: string) => {
   return mod === numbers[10];
 };
 
+/**
+ * Executes validate cnpj logic.
+ *
+ * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @date 2026-01-08
+ */
 const validateCnpj = (cnpj: string) => {
   const digits = onlyDigits(cnpj);
   if (digits.length !== 14 || isRepeated(digits)) return false;
   const numbers = digits.split('').map(Number);
+  /**
+   * Executes calc logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-08
+   */
   const calc = (base: number[]) => {
     let sum = 0;
     let factor = 2;
@@ -38,8 +81,20 @@ const validateCnpj = (cnpj: string) => {
   return digit2 === numbers[13];
 };
 
+/**
+ * Normalizes document.
+ *
+ * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @date 2026-01-08
+ */
 export const normalizeDocument = (value?: string) => (value ? onlyDigits(value) : '');
 
+/**
+ * Executes validate document logic.
+ *
+ * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @date 2026-01-08
+ */
 export const validateDocument = (value: string, type: string) => {
   const normalizedType = (type || '').toUpperCase();
   if (normalizedType === 'CPF') return validateCpf(value);

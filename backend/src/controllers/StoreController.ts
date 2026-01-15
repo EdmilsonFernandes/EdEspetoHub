@@ -1,3 +1,16 @@
+/*
+ * Chama no espeto CONFIDENTIAL
+ * ------------------
+ * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ *
+ * This file, project or its parts can not be copied and/or distributed without
+ * the express permission of Chama no espeto.
+ *
+ * @file: StoreController.ts
+ * @Date: 2025-12-17
+ * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ */
+
 import { Request, Response } from 'express';
 import { StoreService } from '../services/StoreService';
 import { SubscriptionService } from '../services/SubscriptionService';
@@ -10,6 +23,12 @@ const subscriptionService = new SubscriptionService();
 const DEMO_SLUGS = new Set([ 'demo', 'test-store' ]);
 const log = logger.child({ scope: 'StoreController' });
 
+/**
+ * Builds demo store.
+ *
+ * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @date 2025-12-17
+ */
 const buildDemoStore = (slug: string) => {
   const now = new Date();
   const endDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
@@ -51,7 +70,25 @@ const buildDemoStore = (slug: string) => {
   };
 };
 
+/**
+ * Represents StoreController.
+ *
+ * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @date 2025-12-17
+ */
 export class StoreController {
+  /**
+   * Executes is store open now logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
+  /**
+   * Checks store open now.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   private static isStoreOpenNow(store: any) {
     const openingHours = store?.settings?.openingHours;
     if (!Array.isArray(openingHours) || openingHours.length === 0) return true;
@@ -82,6 +119,12 @@ export class StoreController {
     });
   }
 
+  /**
+   * Lists portfolio.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   static async listPortfolio(_req: Request, res: Response) {
     try {
       log.debug('Store portfolio list request');
@@ -112,6 +155,12 @@ export class StoreController {
       return respondWithError(_req, res, error, 400);
     }
   }
+  /**
+   * Gets by slug.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   static async getBySlug(req: Request, res: Response) {
     try {
       if (DEMO_SLUGS.has(req.params.slug)) {
@@ -146,6 +195,12 @@ export class StoreController {
     }
   }
 
+  /**
+   * Executes update logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   static async update(req: Request, res: Response) {
     try {
       log.info('Store update request', { storeId: req.params.storeId });
@@ -158,6 +213,12 @@ export class StoreController {
     }
   }
 
+  /**
+   * Updates status.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   static async updateStatus(req: Request, res: Response) {
     try {
       log.info('Store status update request', { storeId: req.params.storeId, open: req.body?.open });

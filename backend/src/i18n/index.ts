@@ -1,3 +1,16 @@
+/*
+ * Chama no espeto CONFIDENTIAL
+ * ------------------
+ * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ *
+ * This file, project or its parts can not be copied and/or distributed without
+ * the express permission of Chama no espeto.
+ *
+ * @file: index.ts
+ * @Date: 2026-01-12
+ * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ */
+
 import { Request } from 'express';
 import pt from './pt.json';
 import en from './en.json';
@@ -9,6 +22,12 @@ const messages = {
 
 type Lang = keyof typeof messages;
 
+/**
+ * Normalizes lang.
+ *
+ * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @date 2026-01-12
+ */
 const normalizeLang = (value?: string | string[]) => {
   if (!value) return 'pt';
   const raw = Array.isArray(value) ? value[0] : value;
@@ -24,6 +43,12 @@ export const resolveLang = (req: Request): Lang => {
   return normalizeLang(header) as Lang;
 };
 
+/**
+ * Gets message.
+ *
+ * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @date 2026-01-12
+ */
 export const getMessage = (code: string, lang: Lang = 'pt') => {
   const bundle = messages[lang] || messages.pt;
   return bundle[code as keyof typeof pt] || bundle['GEN-001'];

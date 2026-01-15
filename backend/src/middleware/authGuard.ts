@@ -1,4 +1,17 @@
 /*
+ * Chama no espeto CONFIDENTIAL
+ * ------------------
+ * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ *
+ * This file, project or its parts can not be copied and/or distributed without
+ * the express permission of Chama no espeto.
+ *
+ * @file: authGuard.ts
+ * @Date: 2025-12-22
+ * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ */
+
+/*
  * EDCORE CONFIDENTIAL
  * -------------------
  * Copyright (C) 2025 EDCORE Tecnologia
@@ -9,7 +22,7 @@
  *
  * @file authGuard.ts
  * @author Author Name
- * @date 2025-12-22 17:10:41
+ * @date 2025-12-22
  */
 
 import { NextFunction, Request, Response } from 'express';
@@ -37,6 +50,12 @@ declare global
   }
 }
 
+/**
+ * Executes require auth logic.
+ *
+ * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @date 2025-12-22
+ */
 export const requireAuth = (req: Request, res: Response, next: NextFunction) =>
 {
   const header = req.headers.authorization;
@@ -57,6 +76,12 @@ export const requireAuth = (req: Request, res: Response, next: NextFunction) =>
   }
 };
 
+/**
+ * Executes require role logic.
+ *
+ * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @date 2025-12-22
+ */
 export const requireRole = (...roles: UserRole[]) =>
 {
   return (req: Request, res: Response, next: NextFunction) =>

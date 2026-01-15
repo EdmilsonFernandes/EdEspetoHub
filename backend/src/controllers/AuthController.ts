@@ -1,3 +1,16 @@
+/*
+ * Chama no espeto CONFIDENTIAL
+ * ------------------
+ * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ *
+ * This file, project or its parts can not be copied and/or distributed without
+ * the express permission of Chama no espeto.
+ *
+ * @file: AuthController.ts
+ * @Date: 2025-12-17
+ * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ */
+
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { AuthService } from '../services/AuthService';
@@ -10,8 +23,20 @@ import { respondWithSuccess } from '../errors/respondWithSuccess';
 const authService = new AuthService();
 const log = logger.child({ scope: 'AuthController' });
 
+/**
+ * Represents AuthController.
+ *
+ * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @date 2025-12-17
+ */
 export class AuthController
 {
+  /**
+   * Executes register logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   static async register(req: Request, res: Response)
   {
     try
@@ -31,6 +56,12 @@ export class AuthController
     }
   }
 
+  /**
+   * Executes login logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   static async login(req: Request, res: Response)
   {
     const { email, password } = req.body;
@@ -47,6 +78,12 @@ export class AuthController
     }
   }
 
+  /**
+   * Executes admin login logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   static async adminLogin(req: Request, res: Response)
   {
     const { slug, password } = req.body;
@@ -64,6 +101,12 @@ export class AuthController
     }
   }
 
+  /**
+   * Executes super admin login logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   static async superAdminLogin(req: Request, res: Response)
   {
     const { email, password } = req.body;
@@ -88,6 +131,12 @@ export class AuthController
     return res.json({ token });
   }
 
+  /**
+   * Executes forgot password logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   static async forgotPassword(req: Request, res: Response)
   {
     const { email } = req.body || {};
@@ -105,6 +154,12 @@ export class AuthController
     }
   }
 
+  /**
+   * Executes reset password logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   static async resetPassword(req: Request, res: Response)
   {
     const { token, newPassword } = req.body || {};
@@ -122,6 +177,12 @@ export class AuthController
     }
   }
 
+  /**
+   * Verifies email.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   static async verifyEmail(req: Request, res: Response)
   {
     const { token } = req.body || {};
@@ -139,6 +200,12 @@ export class AuthController
     }
   }
 
+  /**
+   * Executes resend verification logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   static async resendVerification(req: Request, res: Response)
   {
     const { email } = req.body || {};

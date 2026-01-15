@@ -1,3 +1,16 @@
+/*
+ * Chama no espeto CONFIDENTIAL
+ * ------------------
+ * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ *
+ * This file, project or its parts can not be copied and/or distributed without
+ * the express permission of Chama no espeto.
+ *
+ * @file: PaymentController.ts
+ * @Date: 2025-12-17
+ * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ */
+
 import { Request, Response } from 'express';
 import crypto from 'crypto';
 import { PaymentService } from '../services/PaymentService';
@@ -11,7 +24,19 @@ const paymentService = new PaymentService();
 const paymentEventRepository = new PaymentEventRepository();
 const log = logger.child({ scope: 'PaymentController' });
 
+/**
+ * Represents PaymentController.
+ *
+ * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @date 2025-12-17
+ */
 export class PaymentController {
+  /**
+   * Executes confirm logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   static async confirm(req: Request, res: Response) {
     const { paymentId } = req.body;
     if (!paymentId) return respondWithError(req, res, new AppError('PAY-006', 400), 400);
@@ -36,6 +61,12 @@ export class PaymentController {
     }
   }
 
+  /**
+   * Executes mercado pago webhook logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   static async mercadoPagoWebhook(req: Request, res: Response) {
     if (env.mercadoPago.webhookSecret) {
       const signature = req.headers['x-signature'] as string | undefined;
@@ -87,6 +118,12 @@ export class PaymentController {
     }
   }
 
+  /**
+   * Gets by id.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   static async getById(req: Request, res: Response) {
     const { paymentId } = req.params;
 
@@ -116,6 +153,12 @@ export class PaymentController {
     }
   }
 
+  /**
+   * Gets events.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   static async getEvents(req: Request, res: Response) {
     const { paymentId } = req.params;
     const limit = req.query.limit ? Number(req.query.limit) : 25;
@@ -138,6 +181,12 @@ export class PaymentController {
     }
   }
 
+  /**
+   * Executes reprocess logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   static async reprocess(req: Request, res: Response) {
     const { paymentId } = req.params;
     const { providerId } = req.body || {};

@@ -1,5 +1,24 @@
+/*
+ * Chama no espeto CONFIDENTIAL
+ * ------------------
+ * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ *
+ * This file, project or its parts can not be copied and/or distributed without
+ * the express permission of Chama no espeto.
+ *
+ * @file: runMigrations.ts
+ * @Date: 2026-01-05
+ * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ */
+
 import { AppDataSource } from '../config/database';
 
+/**
+ * Executes run migrations logic.
+ *
+ * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @date 2026-01-05
+ */
 export async function runMigrations() {
   await AppDataSource.query(`
     ALTER TABLE IF EXISTS store_settings

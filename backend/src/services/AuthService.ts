@@ -1,3 +1,16 @@
+/*
+ * Chama no espeto CONFIDENTIAL
+ * ------------------
+ * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ *
+ * This file, project or its parts can not be copied and/or distributed without
+ * the express permission of Chama no espeto.
+ *
+ * @file: AuthService.ts
+ * @Date: 2025-12-17
+ * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ */
+
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
@@ -25,6 +38,12 @@ import { normalizeDocument, validateDocument } from '../utils/documents';
 import { logger } from '../utils/logger';
 import { AppError } from '../errors/AppError';
 
+/**
+ * Represents AuthService.
+ *
+ * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @date 2025-12-17
+ */
 export class AuthService
 {
   private log = logger.child({ scope: 'AuthService' });
@@ -36,6 +55,12 @@ export class AuthService
   private subscriptionService = new SubscriptionService();
   private settingsService = new SettingsService();
 
+  /**
+   * Executes register logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   async register(input: any)
   {
     this.log.info('Register start', {
@@ -206,6 +231,12 @@ export class AuthService
     };
   }
 
+  /**
+   * Executes login logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   async login(email: string, password: string)
   {
     const user = await this.userRepository.findByEmail(email);
@@ -252,6 +283,12 @@ export class AuthService
     return { user: sanitizedUser, store: sanitizedStore, token };
   }
 
+  /**
+   * Executes admin login logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   async adminLogin(slug: string, password: string)
   {
     const store = await this.storeRepository.findBySlug(slug);
@@ -315,6 +352,12 @@ export class AuthService
     };
   }
 
+  /**
+   * Executes request password reset logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   async requestPasswordReset(email: string)
   {
     const normalizedEmail = email?.trim().toLowerCase();
@@ -350,6 +393,12 @@ export class AuthService
     return { code: 'AUTH-S001' };
   }
 
+  /**
+   * Executes resend verification email logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   async resendVerificationEmail(email: string) {
     const normalizedEmail = email?.trim().toLowerCase();
     if (!normalizedEmail) throw new AppError('AUTH-006', 400);
@@ -366,6 +415,12 @@ export class AuthService
     return { code: 'AUTH-S002' };
   }
 
+  /**
+   * Executes reset password logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   async resetPassword(token: string, newPassword: string)
   {
     if (!token) throw new AppError('AUTH-007', 400);
@@ -392,6 +447,12 @@ export class AuthService
     return { code: 'AUTH-S003' };
   }
 
+  /**
+   * Verifies email.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   async verifyEmail(token: string) {
     if (!token) throw new AppError('AUTH-007', 400);
     const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
@@ -491,11 +552,23 @@ export class AuthService
   }
 
 
+  /**
+   * Generates token.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   private generateToken(userId: string, storeId?: string)
   {
     return jwt.sign({ sub: userId, storeId }, env.jwtSecret, { expiresIn: '12h' });
   }
 
+  /**
+   * Executes add days logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   private addDays(date: Date, days: number)
   {
     const result = new Date(date);
@@ -503,6 +576,12 @@ export class AuthService
     return result;
   }
 
+  /**
+   * Executes throw pending payment logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   private async throwPendingPayment(storeId: string)
   {
     const payment = await this.paymentRepository.findLatestByStoreId(storeId);
@@ -512,6 +591,12 @@ export class AuthService
     });
   }
 
+  /**
+   * Sends verification email.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   private async sendVerificationEmail(user: User) {
     const token = jwt.sign(
       {
@@ -545,6 +630,12 @@ export class AuthService
     await this.emailService.sendEmailVerification(user.email, link);
   }
 
+  /**
+   * Executes notify signup logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   private async notifySignup(user: User, store: Store) {
     const raw = env.email.notifyOnSignup || '';
     const emails = raw
@@ -562,6 +653,12 @@ export class AuthService
     });
   }
 
+  /**
+   * Sends payment email.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   private sendPaymentEmail(email: string, payment: any)
   {
     const baseUrl = env.appUrl?.replace(/\/$/, '') || 'http://localhost:3000';
@@ -616,6 +713,12 @@ export class AuthService
     this.emailService.send({ to: email, subject, text, html });
   }
 
+  /**
+   * Generates unique slug.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   private async generateUniqueSlug(name: string)
   {
     const base = slugify(name);
