@@ -697,7 +697,7 @@ export function SuperAdmin() {
                     <p className="text-xs text-slate-300 mt-2">Periodo: {formatCurrency(periodTotal)}</p>
                   </div>
                   <div className="rounded-2xl bg-white/10 p-4 border border-white/10">
-                    <p className="text-xs text-slate-300 uppercase">MRR projetado</p>
+                    <p className="text-xs text-slate-300 uppercase">Receita recorrente estimada (mês)</p>
                     <p className="text-2xl font-black mt-1">{formatCurrency(summary.mrrProjected || 0)}</p>
                     <p className="text-xs text-slate-300 mt-2">
                       {summary.monthlyPlans} mensal · {summary.yearlyPlans} anual
