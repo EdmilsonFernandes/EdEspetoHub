@@ -30,7 +30,7 @@ const getCategoryIcon = (categoryId = '') => {
   return known?.icon || MoreHorizontal;
 };
 
-export const ProductManager = ({ products }) => {
+export const ProductManager = ({ products, onProductsChange }) => {
   const { showToast } = useToast();
   const [editing, setEditing] = useState(null);
   const [formData, setFormData] = useState(initialForm);
@@ -69,6 +69,16 @@ export const ProductManager = ({ products }) => {
     setShowCustomInput(false);
   };
 
+  const refreshProducts = async () => {
+    if (!onProductsChange) return;
+    try {
+      const updated = await productService.list();
+      onProductsChange(updated);
+    } catch (error) {
+      console.error('Nao foi possivel atualizar produtos', error);
+    }
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (!formData.name || !formData.price) return;
@@ -88,6 +98,7 @@ export const ProductManager = ({ products }) => {
       await productService.save(payload);
       showToast(editing ? 'Produto atualizado com sucesso' : 'Produto adicionado com sucesso', 'success');
       resetForm();
+      await refreshProducts();
     } catch (err) {
       showToast('Nao foi possivel salvar o produto', 'error');
     } finally {
@@ -404,7 +415,10 @@ export const ProductManager = ({ products }) => {
                       setSaving(true);
                       productService
                         .delete(product.id)
-                        .then(() => showToast('Produto removido', 'success'))
+                        .then(async () => {
+                          showToast('Produto removido', 'success');
+                          await refreshProducts();
+                        })
                         .catch(() => showToast('Nao foi possivel remover o produto', 'error'))
                         .finally(() => setSaving(false));
                     }}

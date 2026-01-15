@@ -553,7 +553,9 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         </div>
       )}
 
-      {activeTab === 'produtos' && <ProductManager products={products} />}
+      {activeTab === 'produtos' && (
+        <ProductManager products={products} onProductsChange={setProducts} />
+      )}
 
       {activeTab === 'pagamentos' && (
         <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">

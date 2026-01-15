@@ -1,7 +1,5 @@
 import { apiClient } from "../config/apiClient";
 
-const POLLING_INTERVAL = 4000;
-
 const isUuid = (value: string) =>
   /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(value);
 
@@ -132,7 +130,6 @@ export const orderService = {
   subscribeAll(storeId: string | undefined, callback: any)
   {
     let cancelled = false;
-    let interval: number | undefined;
     const targetStore = resolveStoreIdentifier(storeId);
 
     if (!targetStore)
@@ -154,46 +151,17 @@ export const orderService = {
       }
     };
 
-    const startPolling = () => {
-      if (interval) return;
-      load();
-      interval = window.setInterval(load, POLLING_INTERVAL);
-    };
-
-    const stopPolling = () => {
-      if (!interval) return;
-      clearInterval(interval);
-      interval = undefined;
-    };
-
-    const handleVisibility = () => {
-      if (typeof document === 'undefined') return;
-      if (document.visibilityState === 'visible') {
-        startPolling();
-      } else {
-        stopPolling();
-      }
-    };
-
-    startPolling();
-    if (typeof document !== 'undefined') {
-      document.addEventListener('visibilitychange', handleVisibility);
-    }
+    load();
 
     return () =>
     {
       cancelled = true;
-      stopPolling();
-      if (typeof document !== 'undefined') {
-        document.removeEventListener('visibilitychange', handleVisibility);
-      }
     };
   },
 
   subscribeRecent(storeId: string | undefined, callback: any)
   {
     let cancelled = false;
-    let interval: number | undefined;
     const targetStore = resolveStoreIdentifier(storeId);
 
     if (!targetStore)
@@ -213,39 +181,11 @@ export const orderService = {
       }
     };
 
-    const startPolling = () => {
-      if (interval) return;
-      load();
-      interval = window.setInterval(load, POLLING_INTERVAL);
-    };
-
-    const stopPolling = () => {
-      if (!interval) return;
-      clearInterval(interval);
-      interval = undefined;
-    };
-
-    const handleVisibility = () => {
-      if (typeof document === 'undefined') return;
-      if (document.visibilityState === 'visible') {
-        startPolling();
-      } else {
-        stopPolling();
-      }
-    };
-
-    startPolling();
-    if (typeof document !== 'undefined') {
-      document.addEventListener('visibilitychange', handleVisibility);
-    }
+    load();
 
     return () =>
     {
       cancelled = true;
-      stopPolling();
-      if (typeof document !== 'undefined') {
-        document.removeEventListener('visibilitychange', handleVisibility);
-      }
     };
   },
 
