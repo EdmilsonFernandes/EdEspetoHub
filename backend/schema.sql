@@ -201,3 +201,16 @@ CREATE TABLE IF NOT EXISTS email_verifications (
 
 CREATE INDEX IF NOT EXISTS idx_email_verifications_user ON email_verifications(user_id);
 CREATE INDEX IF NOT EXISTS idx_email_verifications_token ON email_verifications(token_hash);
+
+CREATE TABLE IF NOT EXISTS platform_admins (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  username TEXT NOT NULL UNIQUE,
+  password_hash TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+INSERT INTO platform_admins (username, password_hash)
+SELECT 'chamanoespetoadmin', crypt('chamanoespeto2026#!', gen_salt('bf'))
+WHERE NOT EXISTS (
+  SELECT 1 FROM platform_admins WHERE username = 'chamanoespetoadmin'
+);

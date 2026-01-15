@@ -122,4 +122,19 @@ export async function runMigrations() {
     ALTER TABLE IF EXISTS subscriptions
     ADD COLUMN IF NOT EXISTS reminder_stage INT DEFAULT 0;
   `);
+  await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS platform_admins (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      username TEXT NOT NULL UNIQUE,
+      password_hash TEXT NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+  await AppDataSource.query(`
+    INSERT INTO platform_admins (username, password_hash)
+    SELECT 'chamanoespetoadmin', crypt('chamanoespeto2026#!', gen_salt('bf'))
+    WHERE NOT EXISTS (
+      SELECT 1 FROM platform_admins WHERE username = 'chamanoespetoadmin'
+    );
+  `);
 }

@@ -37,6 +37,7 @@ import { SettingsService } from './SettingsService';
 import { normalizeDocument, validateDocument } from '../utils/documents';
 import { logger } from '../utils/logger';
 import { AppError } from '../errors/AppError';
+import { PlatformAdmin } from '../entities/PlatformAdmin';
 
 /**
  * Represents AuthService.
@@ -54,6 +55,43 @@ export class AuthService
   private paymentRepository = new PaymentRepository();
   private subscriptionService = new SubscriptionService();
   private settingsService = new SettingsService();
+
+  /**
+   * Executes super admin login logic.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
+  async superAdminLogin(username: string, password: string)
+  {
+    const normalized = (username || '').trim().toLowerCase();
+    if (!normalized || !password)
+    {
+      throw new AppError('AUTH-004', 401);
+    }
+
+    const repo = AppDataSource.getRepository(PlatformAdmin);
+    const admin = await repo.findOne({ where: { username: normalized } });
+
+    if (!admin)
+    {
+      throw new AppError('AUTH-020', 500);
+    }
+
+    const matches = await bcrypt.compare(password, admin.passwordHash);
+    if (!matches)
+    {
+      throw new AppError('AUTH-021', 401);
+    }
+
+    const token = jwt.sign(
+      { sub: admin.id, role: 'SUPER_ADMIN' },
+      env.jwtSecret,
+      { expiresIn: '12h' }
+    );
+
+    return { token };
+  }
 
   /**
    * Executes register logic.

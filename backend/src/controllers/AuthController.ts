@@ -12,9 +12,7 @@
  */
 
 import { Request, Response } from 'express';
-import jwt from 'jsonwebtoken';
 import { AuthService } from '../services/AuthService';
-import { env } from '../config/env';
 import { logger } from '../utils/logger';
 import { AppError } from '../errors/AppError';
 import { respondWithError } from '../errors/respondWithError';
@@ -110,25 +108,17 @@ export class AuthController
   static async superAdminLogin(req: Request, res: Response)
   {
     const { email, password } = req.body;
-    if (!env.superAdminEmail || !env.superAdminPassword)
+    try
     {
-      return respondWithError(req, res, new AppError('AUTH-020', 500), 500);
-    }
-
-    if (email !== env.superAdminEmail || password !== env.superAdminPassword)
+      log.info('Super admin login request', { email });
+      const result = await authService.superAdminLogin(email, password);
+      log.info('Super admin login success', { email });
+      return res.json(result);
+    } catch (error: any)
     {
-      log.warn('Super admin login failed', { email });
-      return respondWithError(req, res, new AppError('AUTH-021', 401), 401);
+      log.warn('Super admin login failed', { email, error });
+      return respondWithError(req, res, error, 401);
     }
-
-    const token = jwt.sign(
-      { sub: 'super-admin', role: 'SUPER_ADMIN' },
-      env.jwtSecret,
-      { expiresIn: '12h' }
-    );
-
-    log.info('Super admin login success', { email });
-    return res.json({ token });
   }
 
   /**

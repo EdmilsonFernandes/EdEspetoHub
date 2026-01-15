@@ -15,7 +15,7 @@
   "AUTH-012": "Aceite os termos de uso e politica de privacidade.",
   "AUTH-013": "Selecione um plano para continuar.",
   "AUTH-014": "Metodo de pagamento invalido.",
-  "AUTH-020": "SUPER_ADMIN nao configurado.",
+  "AUTH-020": "SUPER_ADMIN nao configurado no banco.",
   "AUTH-021": "Credenciais invalidas.",
   "AUTH-S001": "Se o e-mail existir, enviaremos instrucoes.",
   "AUTH-S002": "Se o e-mail existir, enviaremos instrucoes.",

@@ -15,7 +15,7 @@
   "AUTH-012": "Accept the terms and privacy policy.",
   "AUTH-013": "Select a plan to continue.",
   "AUTH-014": "Invalid payment method.",
-  "AUTH-020": "SUPER_ADMIN not configured.",
+  "AUTH-020": "SUPER_ADMIN not found in database.",
   "AUTH-021": "Invalid credentials.",
   "AUTH-S001": "If the email exists, we will send instructions.",
   "AUTH-S002": "If the email exists, we will send instructions.",

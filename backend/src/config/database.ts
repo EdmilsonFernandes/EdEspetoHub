@@ -27,6 +27,7 @@ import { PaymentEvent } from '../entities/PaymentEvent';
 import { PasswordReset } from '../entities/PasswordReset';
 import { EmailVerification } from '../entities/EmailVerification';
 import { SiteSetting } from '../entities/SiteSetting';
+import { PlatformAdmin } from '../entities/PlatformAdmin';
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -36,7 +37,7 @@ export const AppDataSource = new DataSource({
   password: env.database.password,
   database: env.database.database,
   synchronize: false,
-  entities: [ User, Store, StoreSettings, Product, Order, OrderItem, Plan, Subscription, Payment, PaymentEvent, PasswordReset, EmailVerification, SiteSetting ],
+  entities: [ User, Store, StoreSettings, Product, Order, OrderItem, Plan, Subscription, Payment, PaymentEvent, PasswordReset, EmailVerification, SiteSetting, PlatformAdmin ],
   migrations: [],
   logging: [ 'error' ]
   //logging: [ 'error', 'query' ]
