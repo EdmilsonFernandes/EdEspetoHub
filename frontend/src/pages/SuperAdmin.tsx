@@ -694,7 +694,7 @@ export function SuperAdmin() {
       </div>
 
       <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3 bg-white/90 backdrop-blur border-b border-slate-200">
-        <div className="flex flex-wrap gap-2 text-xs font-semibold text-slate-600">
+        <div className="flex flex-wrap gap-2 text-xs font-semibold text-slate-700">
           <a href="#executive" className="px-3 py-1 rounded-full border border-slate-200 hover:bg-slate-50">Resumo</a>
           <a href="#rankings" className="px-3 py-1 rounded-full border border-slate-200 hover:bg-slate-50">Rankings</a>
           <a href="#stores" className="px-3 py-1 rounded-full border border-slate-200 hover:bg-slate-50">Lojas</a>
@@ -703,6 +703,26 @@ export function SuperAdmin() {
           <a href="#events" className="px-3 py-1 rounded-full border border-slate-200 hover:bg-slate-50">Eventos</a>
         </div>
       </div>
+
+      {summary && (
+        <div className="grid md:grid-cols-3 gap-3">
+          <div className="rounded-2xl p-4 border border-emerald-100 bg-gradient-to-br from-emerald-50 via-white to-white">
+            <p className="text-xs uppercase text-emerald-600 font-semibold">Ativacao da base</p>
+            <p className="text-2xl font-black text-emerald-700 mt-1">{activeRate.toFixed(1)}%</p>
+            <p className="text-xs text-emerald-700/70 mt-1">Lojas ativas vs total</p>
+          </div>
+          <div className="rounded-2xl p-4 border border-slate-200 bg-gradient-to-br from-slate-50 via-white to-white">
+            <p className="text-xs uppercase text-slate-500 font-semibold">Ticket medio global</p>
+            <p className="text-2xl font-black text-slate-800 mt-1">{formatCurrency(avgTicketGlobal)}</p>
+            <p className="text-xs text-slate-500 mt-1">Receita por pedido</p>
+          </div>
+          <div className="rounded-2xl p-4 border border-blue-100 bg-gradient-to-br from-blue-50 via-white to-white">
+            <p className="text-xs uppercase text-blue-600 font-semibold">Receita por loja ativa</p>
+            <p className="text-2xl font-black text-blue-700 mt-1">{formatCurrency(revenuePerActive)}</p>
+            <p className="text-xs text-blue-700/70 mt-1">Eficiência da base ativa</p>
+          </div>
+        </div>
+      )}
 
         {loading && <div className="text-sm text-slate-500">Carregando...</div>}
 
