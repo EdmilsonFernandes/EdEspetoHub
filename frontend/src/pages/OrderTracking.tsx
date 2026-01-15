@@ -113,7 +113,7 @@ export function OrderTracking() {
   const customerPhone = order?.phone;
   const paymentLabel = formatPaymentMethod(order?.paymentMethod || order?.payment);
   const estimateMinutes =
-    typeof queuePosition === 'number' && queuePosition > 0 ? Math.max(5, queuePosition * 6) : null;
+    typeof queuePosition === 'number' && queuePosition > 0 ? Math.max(10, queuePosition * 10) : null;
   const formatItemOptions = (item: any) => {
     const labels = [];
     if (item?.cookingPoint) labels.push(item.cookingPoint);
