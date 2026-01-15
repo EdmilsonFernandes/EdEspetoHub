@@ -58,6 +58,19 @@ export const superAdminService = {
     });
     return handleResponse(response);
   },
+  async fetchAccessLogs(token: string, filters: Record<string, string> = {}) {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (!value) return;
+      params.set(key, value);
+    });
+    const response = await fetch(buildUrl(`/admin/access-logs?${params.toString()}`), {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return handleResponse(response);
+  },
   async reprocessPayment(token: string, paymentId: string, providerId?: string) {
     const response = await fetch(buildUrl(`/admin/payments/${paymentId}/reprocess`), {
       method: 'POST',

@@ -137,4 +137,27 @@ export async function runMigrations() {
       SELECT 1 FROM platform_admins WHERE username = 'chamanoespetoadmin'
     );
   `);
+  await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS access_logs (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      user_id TEXT NOT NULL,
+      store_id UUID,
+      role TEXT NOT NULL,
+      method TEXT NOT NULL,
+      path TEXT NOT NULL,
+      status INT NOT NULL,
+      ip_address TEXT,
+      user_agent TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_access_logs_created_at ON access_logs(created_at DESC);
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_access_logs_role ON access_logs(role);
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_access_logs_store_id ON access_logs(store_id);
+  `);
 }

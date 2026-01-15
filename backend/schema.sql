@@ -214,3 +214,20 @@ SELECT 'chamanoespetoadmin', crypt('chamanoespeto2026#!', gen_salt('bf'))
 WHERE NOT EXISTS (
   SELECT 1 FROM platform_admins WHERE username = 'chamanoespetoadmin'
 );
+
+CREATE TABLE IF NOT EXISTS access_logs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id TEXT NOT NULL,
+  store_id UUID,
+  role TEXT NOT NULL,
+  method TEXT NOT NULL,
+  path TEXT NOT NULL,
+  status INT NOT NULL,
+  ip_address TEXT,
+  user_agent TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_access_logs_created_at ON access_logs(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_access_logs_role ON access_logs(role);
+CREATE INDEX IF NOT EXISTS idx_access_logs_store_id ON access_logs(store_id);

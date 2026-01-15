@@ -35,6 +35,7 @@ async function bootstrap()
   const { scheduleSubscriptionExpirationJob } = await import('./jobs/subscription-expiration.job');
   const { runMigrations } = await import('./utils/runMigrations');
   const { requestLogger } = await import('./middleware/requestLogger');
+  const { accessLogger } = await import('./middleware/accessLogger');
   const { logger } = await import('./utils/logger');
 
   await AppDataSource.initialize();
@@ -43,6 +44,7 @@ async function bootstrap()
   app.use(requestLogger);
   app.use(cors());
   app.use(express.json({ limit: '10mb' }));
+  app.use(accessLogger);
 
   const uploadsDir = path.join(process.cwd(), 'uploads');
   app.use('/uploads', express.static(uploadsDir));

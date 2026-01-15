@@ -19,6 +19,7 @@ import { PaymentEventRepository } from '../repositories/PaymentEventRepository';
 import { OrderRepository } from '../repositories/OrderRepository';
 import { AppDataSource } from '../config/database';
 import { SubscriptionRepository } from '../repositories/SubscriptionRepository';
+import { AccessLogRepository } from '../repositories/AccessLogRepository';
 import { logger } from '../utils/logger';
 import { respondWithError } from '../errors/respondWithError';
 
@@ -28,6 +29,7 @@ const paymentRepository = new PaymentRepository();
 const paymentEventRepository = new PaymentEventRepository();
 const orderRepository = new OrderRepository();
 const subscriptionRepository = new SubscriptionRepository();
+const accessLogRepository = new AccessLogRepository();
 const log = logger.child({ scope: 'PlatformAdminController' });
 
 /**
@@ -276,6 +278,45 @@ export class PlatformAdminController {
       return res.json(events);
     } catch (error: any) {
       log.warn('Admin payment events failed', { paymentId, storeId, error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  /**
+   * Lists access logs.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
+  static async listAccessLogs(req: Request, res: Response) {
+    try {
+      const role = (req.query.role as string | undefined) || undefined;
+      const storeId = (req.query.storeId as string | undefined) || undefined;
+      const userId = (req.query.userId as string | undefined) || undefined;
+      const method = (req.query.method as string | undefined) || undefined;
+      const status = req.query.status ? Number(req.query.status) : undefined;
+      const search = (req.query.search as string | undefined) || undefined;
+      const from = req.query.from ? new Date(String(req.query.from)) : undefined;
+      const to = req.query.to ? new Date(String(req.query.to)) : undefined;
+      const limit = req.query.limit ? Number(req.query.limit) : 50;
+      const offset = req.query.offset ? Number(req.query.offset) : 0;
+
+      const logs = await accessLogRepository.list({
+        role,
+        storeId,
+        userId,
+        method,
+        status,
+        search,
+        from: from && !Number.isNaN(from.getTime()) ? from : undefined,
+        to: to && !Number.isNaN(to.getTime()) ? to : undefined,
+        limit,
+        offset,
+      });
+
+      return res.json(logs);
+    } catch (error: any) {
+      log.warn('Admin access logs failed', { error });
       return respondWithError(req, res, error, 400);
     }
   }

@@ -97,6 +97,15 @@ export function SuperAdmin() {
   const [eventsPage, setEventsPage] = useState(1);
   const [eventsLoading, setEventsLoading] = useState(false);
   const [eventResults, setEventResults] = useState([]);
+  const [accessLogs, setAccessLogs] = useState([]);
+  const [accessLogsTotal, setAccessLogsTotal] = useState(0);
+  const [accessLogsPage, setAccessLogsPage] = useState(1);
+  const [accessLogsLoading, setAccessLogsLoading] = useState(false);
+  const [accessLogQuery, setAccessLogQuery] = useState('');
+  const [accessLogRole, setAccessLogRole] = useState('all');
+  const [accessLogMethod, setAccessLogMethod] = useState('all');
+  const [accessLogStatus, setAccessLogStatus] = useState('all');
+  const [accessLogStore, setAccessLogStore] = useState('all');
 
   const loadOverview = async (authToken: string) => {
     setLoading(true);
@@ -197,6 +206,14 @@ export function SuperAdmin() {
     return map;
   }, [paymentEvents]);
 
+  const storeNameById = useMemo(() => {
+    const map = new Map();
+    stores.forEach((store: any) => {
+      map.set(store.id, store.name);
+    });
+    return map;
+  }, [stores]);
+
   const revenueByMonth = useMemo(() => {
     const map = new Map<string, number>();
     payments.forEach((payment: any) => {
@@ -286,6 +303,7 @@ export function SuperAdmin() {
   }, [filteredPayments, paymentsPage]);
 
   const totalPages = Math.max(1, Math.ceil(filteredPayments.length / PAYMENTS_PER_PAGE));
+  const accessLogsTotalPages = Math.max(1, Math.ceil(accessLogsTotal / 25));
 
   const filteredEvents = useMemo(() => {
     return eventResults;
@@ -427,6 +445,45 @@ export function SuperAdmin() {
     const interval = window.setInterval(() => loadEvents(eventsPage, eventStoreFilter), 15000);
     return () => window.clearInterval(interval);
   }, [token, autoRefresh, eventsPage, eventStoreFilter]);
+
+  const loadAccessLogs = async (page = accessLogsPage) => {
+    if (!token) return;
+    setAccessLogsLoading(true);
+    try {
+      const offset = (page - 1) * 25;
+      const filters: Record<string, string> = {
+        limit: '25',
+        offset: String(offset),
+      };
+      if (accessLogQuery) filters.search = accessLogQuery;
+      if (accessLogRole !== 'all') filters.role = accessLogRole;
+      if (accessLogMethod !== 'all') filters.method = accessLogMethod;
+      if (accessLogStatus !== 'all') filters.status = accessLogStatus;
+      if (accessLogStore !== 'all') filters.storeId = accessLogStore;
+      const data = await superAdminService.fetchAccessLogs(token, filters);
+      setAccessLogs(data?.data || []);
+      setAccessLogsTotal(data?.total || 0);
+    } catch (err: any) {
+      showToast(err.message || 'Falha ao carregar logs', 'error');
+    } finally {
+      setAccessLogsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!token) return;
+    loadAccessLogs(accessLogsPage);
+  }, [token, accessLogsPage, accessLogQuery, accessLogRole, accessLogMethod, accessLogStatus, accessLogStore]);
+
+  useEffect(() => {
+    if (!token || !autoRefresh) return;
+    const interval = window.setInterval(() => loadAccessLogs(accessLogsPage), 20000);
+    return () => window.clearInterval(interval);
+  }, [token, autoRefresh, accessLogsPage, accessLogQuery, accessLogRole, accessLogMethod, accessLogStatus, accessLogStore]);
+
+  useEffect(() => {
+    setAccessLogsPage(1);
+  }, [accessLogQuery, accessLogRole, accessLogMethod, accessLogStatus, accessLogStore]);
 
   const exportPaymentsCsv = () => {
     const headers = [
@@ -1127,6 +1184,141 @@ export function SuperAdmin() {
           )}
           <div className="mt-3 text-sm text-slate-600">
             Total filtrado: <span className="font-semibold">{formatCurrency(filteredTotal)}</span>
+          </div>
+        </div>
+
+        <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm overflow-x-auto">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Filter size={18} className="text-slate-700" />
+              <h2 className="text-lg font-bold text-slate-800">Logs de acesso</h2>
+            </div>
+            <button
+              onClick={() => loadAccessLogs(accessLogsPage)}
+              className="px-3 py-2 rounded-lg text-sm font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50 flex items-center gap-1"
+            >
+              <RefreshCw size={14} />
+              Atualizar
+            </button>
+          </div>
+          <div className="flex flex-wrap gap-2 mb-3">
+            <div className="flex items-center px-3 py-2 rounded-lg border border-slate-200 bg-white">
+              <Search size={16} className="text-slate-400" />
+              <input
+                type="text"
+                value={accessLogQuery}
+                onChange={(event) => setAccessLogQuery(event.target.value)}
+                placeholder="Buscar rota ou user-agent..."
+                className="ml-2 bg-transparent outline-none text-sm w-48"
+              />
+            </div>
+            <select
+              value={accessLogRole}
+              onChange={(event) => setAccessLogRole(event.target.value)}
+              className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none"
+            >
+              <option value="all">Role: Todas</option>
+              <option value="SUPER_ADMIN">Super admin</option>
+              <option value="ADMIN">Admin</option>
+              <option value="CHURRASQUEIRO">Churrasqueiro</option>
+            </select>
+            <select
+              value={accessLogMethod}
+              onChange={(event) => setAccessLogMethod(event.target.value)}
+              className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none"
+            >
+              <option value="all">Metodo: Todos</option>
+              <option value="GET">GET</option>
+              <option value="POST">POST</option>
+              <option value="PATCH">PATCH</option>
+              <option value="PUT">PUT</option>
+              <option value="DELETE">DELETE</option>
+            </select>
+            <select
+              value={accessLogStatus}
+              onChange={(event) => setAccessLogStatus(event.target.value)}
+              className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none"
+            >
+              <option value="all">Status: Todos</option>
+              <option value="200">200</option>
+              <option value="201">201</option>
+              <option value="204">204</option>
+              <option value="400">400</option>
+              <option value="401">401</option>
+              <option value="403">403</option>
+              <option value="404">404</option>
+              <option value="500">500</option>
+            </select>
+            <select
+              value={accessLogStore}
+              onChange={(event) => setAccessLogStore(event.target.value)}
+              className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none"
+            >
+              <option value="all">Loja: Todas</option>
+              {stores.map((store: any) => (
+                <option key={store.id} value={store.id}>
+                  {store.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <table className="min-w-full text-sm">
+            <thead className="text-xs uppercase text-slate-400 border-b">
+              <tr>
+                <th className="py-2 pr-4 text-left">Data</th>
+                <th className="py-2 pr-4 text-left">Role</th>
+                <th className="py-2 pr-4 text-left">Usuario</th>
+                <th className="py-2 pr-4 text-left">Loja</th>
+                <th className="py-2 pr-4 text-left">Metodo</th>
+                <th className="py-2 pr-4 text-left">Rota</th>
+                <th className="py-2 pr-4 text-left">Status</th>
+                <th className="py-2 pr-4 text-left">IP</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {accessLogs.map((entry: any) => (
+                <tr key={entry.id}>
+                  <td className="py-3 pr-4">{formatDate(entry.createdAt)}</td>
+                  <td className="py-3 pr-4">{entry.role}</td>
+                  <td className="py-3 pr-4 text-xs text-slate-500">{entry.userId}</td>
+                  <td className="py-3 pr-4">{entry.storeId ? storeNameById.get(entry.storeId) || '-' : '-'}</td>
+                  <td className="py-3 pr-4">{entry.method}</td>
+                  <td className="py-3 pr-4 text-xs text-slate-500">{entry.path}</td>
+                  <td className="py-3 pr-4">{entry.status}</td>
+                  <td className="py-3 pr-4 text-xs text-slate-500">{entry.ipAddress || '-'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {accessLogsLoading && <div className="text-center text-slate-500 py-6">Carregando...</div>}
+          {!accessLogsLoading && accessLogs.length === 0 && (
+            <div className="text-center text-slate-500 py-8">Nenhum log encontrado.</div>
+          )}
+          {accessLogsTotal > 25 && (
+            <div className="flex items-center justify-between mt-4 text-sm text-slate-600">
+              <span>
+                Pagina {accessLogsPage} de {accessLogsTotalPages}
+              </span>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setAccessLogsPage((prev) => Math.max(1, prev - 1))}
+                  className="px-3 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 flex items-center gap-1"
+                  disabled={accessLogsPage === 1}
+                >
+                  <ChevronLeft size={16} />
+                </button>
+                <button
+                  onClick={() => setAccessLogsPage((prev) => Math.min(accessLogsTotalPages, prev + 1))}
+                  className="px-3 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 flex items-center gap-1"
+                  disabled={accessLogsPage === accessLogsTotalPages}
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            </div>
+          )}
+          <div className="mt-3 text-sm text-slate-600">
+            Total de logs: <span className="font-semibold">{accessLogsTotal}</span>
           </div>
         </div>
 
