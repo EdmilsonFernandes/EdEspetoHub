@@ -155,7 +155,7 @@ export function AdminOrders() {
                 type="text"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Buscar por cliente, telefone ou pedido"
+                placeholder="Buscar cliente, telefone ou pedido (ex: 89035f7b)"
                 className="w-full sm:w-64 rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-brand-primary"
               />
               <div className="flex gap-2">
@@ -291,20 +291,23 @@ export function AdminOrders() {
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full text-sm">
-                <thead className="text-left text-xs uppercase text-slate-500 border-b">
-                  <tr>
-                    <th className="py-2 pr-4">Data</th>
-                    <th className="py-2 pr-4">Cliente</th>
-                    <th className="py-2 pr-4 hidden md:table-cell">Tipo</th>
-                    <th className="py-2 pr-4 hidden lg:table-cell">Pagamento</th>
-                    <th className="py-2 pr-4 hidden lg:table-cell">Itens</th>
-                    <th className="py-2 pr-4">Status</th>
-                    <th className="py-2 text-right">Total</th>
+                <thead className="text-left text-xs uppercase text-slate-500">
+                  <tr className="bg-slate-100/80">
+                    <th className="py-3 pr-4 pl-3 rounded-l-xl">Data</th>
+                    <th className="py-3 pr-4">Cliente</th>
+                    <th className="py-3 pr-4 hidden md:table-cell">Tipo</th>
+                    <th className="py-3 pr-4 hidden lg:table-cell">Pagamento</th>
+                    <th className="py-3 pr-4 hidden lg:table-cell">Itens</th>
+                    <th className="py-3 pr-4">Status</th>
+                    <th className="py-3 pr-3 text-right rounded-r-xl">Total</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y">
+                <tbody className="divide-y divide-slate-100">
                   {filteredOrders.map((order, index) => (
-                    <tr key={order.id || `${order.customerName}-${index}`} className="text-slate-700">
+                    <tr
+                      key={order.id || `${order.customerName}-${index}`}
+                      className="text-slate-700 hover:bg-slate-50/80 transition"
+                    >
                       <td className="py-3 pr-4 whitespace-nowrap">{formatDateTime(order.createdAt)}</td>
                       <td className="py-3 pr-4">
                         <div className="font-semibold">{order.customerName || order.name || 'Cliente'}</div>

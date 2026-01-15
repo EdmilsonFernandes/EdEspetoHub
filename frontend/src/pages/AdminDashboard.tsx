@@ -119,7 +119,7 @@ const OrdersView = ({ orders, products }) => {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Buscar por cliente, telefone ou pedido"
+            placeholder="Buscar cliente, telefone ou pedido (ex: 89035f7b)"
             className="w-full sm:w-64 rounded-lg border border-slate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-brand-primary"
           />
         </div>
