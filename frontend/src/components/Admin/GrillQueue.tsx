@@ -351,9 +351,9 @@ export const GrillQueue = () => {
             {/* HEADER DO CARD */}
             <div className="flex justify-between items-start">
               <div className="relative flex-1">
-                <div className="flex items-center gap-2 mb-1 text-xs text-gray-500 uppercase font-bold">
-                  <Hash size={12} className="text-brand-primary" /> Fila
-                  <span className={`ml-1 px-2 py-0.5 rounded-full text-[11px] font-black shadow-sm ${getPriorityTone(index + 1)}`}>
+                <div className="flex items-center gap-2 mb-1 text-[11px] text-gray-600 uppercase font-bold">
+                  <Hash size={14} className="text-brand-primary" /> Fila
+                  <span className={`ml-1 px-2.5 py-1 rounded-full text-xs font-black shadow-sm ${getPriorityTone(index + 1)}`}>
                     {String(index + 1).padStart(2, "0")}
                   </span>
                 </div>
