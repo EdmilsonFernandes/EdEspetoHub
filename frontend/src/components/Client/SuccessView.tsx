@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React from "react";
-import { CheckCircle, QrCode, ArrowLeft } from "lucide-react";
+import { CheckCircle, QrCode, ArrowLeft, CreditCard, WalletCards } from "lucide-react";
 import { formatPaymentMethod } from "../../utils/format";
 
 // Chave Pix fixa (mock)
@@ -64,6 +64,26 @@ const PaymentSummary = ({ paymentMethod, pixKey, phone }) => {
   );
 };
 
+const PaymentBadge = ({ paymentMethod }) => {
+  const method = (paymentMethod || "").toLowerCase();
+  const isPix = method === "pix";
+  const isDebit = method === "debito";
+  const label = formatPaymentMethod(paymentMethod);
+  const Icon = isPix ? QrCode : isDebit ? WalletCards : CreditCard;
+  const tone = isPix
+    ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+    : isDebit
+    ? "bg-sky-50 text-sky-700 border-sky-200"
+    : "bg-indigo-50 text-indigo-700 border-indigo-200";
+
+  return (
+    <div className={`inline-flex items-center gap-2 px-3 py-2 rounded-full border text-xs font-semibold ${tone}`}>
+      <Icon size={14} />
+      <span>Pagamento: {label}</span>
+    </div>
+  );
+};
+
 // Tela final de sucesso do pedido
 export const SuccessView = ({
   orderType,
@@ -92,6 +112,8 @@ export const SuccessView = ({
           ? `Seu pedido foi recebido e seguirá para a produção. Mesa ${table || "-"}.`
           : "Seu pedido foi recebido e seguirá para a produção."}
       </p>
+
+      <PaymentBadge paymentMethod={paymentMethod} />
 
       <PaymentSummary
         paymentMethod={paymentMethod}

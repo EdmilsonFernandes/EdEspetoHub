@@ -37,13 +37,19 @@ export const CartView = ({
   const isPickup = customer.type === "pickup";
   const isDelivery = customer.type === "delivery";
   const isPix = paymentMethod === "pix";
+  const isCredit = paymentMethod === "credito";
+  const isDebit = paymentMethod === "debito";
 
   const actionLabel = useMemo(() => {
-    if (isPickup) return "Gerar Pix e enviar pedido";
+    if (isPickup && isPix) return "Gerar Pix e enviar pedido";
+    if (isPickup) return "Enviar pedido para retirada";
+    if (isDelivery && isPix) return "Finalizar pedido (Pix)";
     if (isDelivery) return "Finalizar pedido para entrega";
+    if (isCredit) return "Finalizar pedido (Credito)";
+    if (isDebit) return "Finalizar pedido (Debito)";
     if (isPix) return "Finalizar pedido (Pix)";
     return "Finalizar pedido na mesa";
-  }, [isDelivery, isPickup, isPix]);
+  }, [isDelivery, isPickup, isPix, isCredit, isDebit]);
 
   const handlePhoneChange = (nextValue) => {
     const formatted = formatPhoneInput(nextValue);
