@@ -346,14 +346,14 @@ export const GrillQueue = () => {
         {sortedQueue.map((order, index) => (
           <div
             key={order.id}
-            className="bg-white p-4 rounded-xl shadow-sm border border-gray-100"
+            className="relative bg-white p-4 pt-6 rounded-xl shadow-sm border border-gray-100"
           >
+            <div className={`absolute right-4 top-4 w-12 h-12 rounded-2xl flex items-center justify-center text-lg font-black shadow-sm ${getPriorityTone(index + 1)}`}>
+              {String(index + 1).padStart(2, "0")}
+            </div>
             {/* HEADER DO CARD */}
             <div className="flex justify-between items-start">
-              <div className="relative flex-1 pr-16">
-                <div className={`absolute right-0 top-0 w-12 h-12 rounded-2xl flex items-center justify-center text-lg font-black shadow-sm ${getPriorityTone(index + 1)}`}>
-                  {String(index + 1).padStart(2, "0")}
-                </div>
+              <div className="relative flex-1">
                 <div className="flex items-center gap-2 mb-1 text-xs text-gray-500 uppercase font-bold">
                   <Hash size={12} className="text-brand-primary" /> Fila
                 </div>
@@ -379,20 +379,18 @@ export const GrillQueue = () => {
                 </p>
               </div>
 
-              <span
-                className={`px-2 py-1 text-xs font-bold rounded ${getStatusStyles(order.status).className}`}
-              >
-                {getStatusStyles(order.status).label}
-              </span>
-            </div>
-
-            {/* TEMPO */}
-            <div className="mt-3 text-sm font-semibold text-gray-700 flex items-center gap-2">
-              <div className="px-3 py-1 rounded-full bg-brand-primary text-white font-black flex items-center gap-2 shadow-sm">
-                <Clock size={14} className="text-white" />
-                <span className="tabular-nums text-base">
-                  {elapsedTime[order.id] || "0s"}
+              <div className="flex flex-col items-end gap-2">
+                <span
+                  className={`px-2 py-1 text-xs font-bold rounded ${getStatusStyles(order.status).className}`}
+                >
+                  {getStatusStyles(order.status).label}
                 </span>
+                <div className="px-3 py-1 rounded-full bg-brand-primary text-white font-black flex items-center gap-2 shadow-sm text-xs">
+                  <Clock size={12} className="text-white" />
+                  <span className="tabular-nums">
+                    {elapsedTime[order.id] || "0s"}
+                  </span>
+                </div>
               </div>
             </div>
 
