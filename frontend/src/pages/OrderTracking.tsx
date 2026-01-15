@@ -337,16 +337,16 @@ export function OrderTracking() {
               </div>
 
               <div className="grid sm:grid-cols-2 gap-4">
-                <div className="rounded-2xl border border-gray-100 p-4">
-                  <div className="flex items-center justify-between gap-3 mb-3">
-                    <p className="text-sm font-semibold text-gray-800">Resumo do pedido</p>
+                <div className="rounded-3xl border border-gray-100 p-5 bg-white shadow-sm">
+                  <div className="flex items-center justify-between gap-3 mb-4">
+                    <p className="text-sm font-semibold text-gray-900">Resumo do pedido</p>
                     {paymentLabel && (
-                      <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                      <span className="px-3 py-1 rounded-full text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
                         {paymentLabel}
                       </span>
                     )}
                   </div>
-                  <div className="space-y-2 text-sm text-gray-600">
+                  <div className="space-y-3 text-sm text-gray-600">
                     {(order.items || []).map((item) => (
                       <div key={item.id || item.productId} className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-3">
@@ -354,15 +354,15 @@ export function OrderTracking() {
                             <img
                               src={resolveAssetUrl(item.imageUrl)}
                               alt={item.name}
-                              className="w-10 h-10 rounded-lg object-cover border border-gray-200"
+                              className="w-11 h-11 rounded-xl object-cover border border-gray-200"
                             />
                           ) : (
-                            <div className="w-10 h-10 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center text-xs text-gray-400">
+                            <div className="w-11 h-11 rounded-xl bg-gray-100 border border-gray-200 flex items-center justify-center text-xs text-gray-400">
                               🍖
                             </div>
                           )}
                           <div className="flex flex-col">
-                            <span>{item.quantity}x {item.name}</span>
+                            <span className="font-semibold text-gray-800">{item.quantity}x {item.name}</span>
                             <div className="flex flex-wrap gap-1 mt-1">
                               {item?.cookingPoint && (
                                 <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800 border border-amber-200">
@@ -377,17 +377,17 @@ export function OrderTracking() {
                             </div>
                           </div>
                         </div>
-                        <span>R$ {Number(item.price).toFixed(2)}</span>
+                        <span className="font-semibold text-gray-800">R$ {Number(item.price).toFixed(2)}</span>
                       </div>
                     ))}
                   </div>
-                  <div className="mt-4 flex items-center justify-between text-sm font-semibold text-gray-800">
+                  <div className="mt-5 flex items-center justify-between text-sm font-semibold text-gray-800 border-t border-gray-100 pt-4">
                     <span>Total</span>
-                    <span>{formatCurrency(order.total || 0)}</span>
+                    <span className="text-base">{formatCurrency(order.total || 0)}</span>
                   </div>
                 </div>
-                <div className="rounded-2xl border border-gray-100 p-4 space-y-3">
-                  <p className="text-sm font-semibold text-gray-800">Informacoes</p>
+                <div className="rounded-3xl border border-gray-100 p-5 space-y-3 bg-white shadow-sm">
+                  <p className="text-sm font-semibold text-gray-900">Informações</p>
                   <div className="text-sm text-gray-600 space-y-2">
                     <p>
                       <span className="font-semibold">Cliente:</span> {order.customerName || 'Cliente'}
