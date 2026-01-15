@@ -644,9 +644,14 @@ export function SuperAdmin() {
   return (
     <AdminLayout contextLabel="Plataforma" showHeader={false}>
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-black text-slate-800">Super Admin</h1>
-          <p className="text-sm text-slate-500">Visão geral da plataforma</p>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl border border-slate-200 bg-white shadow-sm flex items-center justify-center">
+            <img src={platformLogo} alt="Chama no Espeto" className="w-6 h-6 object-contain" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-black text-slate-800">Super Admin</h1>
+            <p className="text-sm text-slate-500">Visão geral da plataforma</p>
+          </div>
         </div>
         <div className="flex gap-2">
           <div className="flex gap-2 items-center">
