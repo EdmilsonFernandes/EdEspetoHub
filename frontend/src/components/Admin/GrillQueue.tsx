@@ -350,37 +350,33 @@ export const GrillQueue = () => {
           >
             {/* HEADER DO CARD */}
             <div className="flex justify-between items-start">
-              <div className="flex items-start gap-3 relative z-10">
-                <div className="pt-1">
-                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-lg font-black shadow-sm ${getPriorityTone(index + 1)}`}>
-                    {String(index + 1).padStart(2, "0")}
-                  </div>
+              <div className="relative flex-1 pr-16">
+                <div className={`absolute right-0 top-0 w-12 h-12 rounded-2xl flex items-center justify-center text-lg font-black shadow-sm ${getPriorityTone(index + 1)}`}>
+                  {String(index + 1).padStart(2, "0")}
                 </div>
-                <div>
-                  <div className="flex items-center gap-2 mb-1 text-xs text-gray-500 uppercase font-bold">
-                    <Hash size={12} className="text-brand-primary" /> Fila
-                  </div>
-
-                  <p className="text-sm text-gray-500">
-                    {formatDateTime(order.createdAt)}
-                  </p>
-
-                  <h3 className="text-lg font-bold text-gray-800">
-                    Cliente: {order.customerName || order.name || "Cliente"}
-                  </h3>
-
-                  <p className="text-xs text-gray-500 uppercase">
-                    {formatOrderType(order.type)}
-                    {order.table ? ` · Mesa ${order.table}` : ''}
-                  </p>
-                  {order.phone && (
-                    <p className="text-xs text-gray-500">{order.phone}</p>
-                  )}
-
-                  <p className="text-xs text-gray-500 uppercase mt-1">
-                    Pagamento: {formatPaymentMethod(order.payment)}
-                  </p>
+                <div className="flex items-center gap-2 mb-1 text-xs text-gray-500 uppercase font-bold">
+                  <Hash size={12} className="text-brand-primary" /> Fila
                 </div>
+
+                <p className="text-sm text-gray-500">
+                  {formatDateTime(order.createdAt)}
+                </p>
+
+                <h3 className="text-lg font-bold text-gray-800">
+                  Cliente: {order.customerName || order.name || "Cliente"}
+                </h3>
+
+                <p className="text-xs text-gray-500 uppercase">
+                  {formatOrderType(order.type)}
+                  {order.table ? ` · Mesa ${order.table}` : ''}
+                </p>
+                {order.phone && (
+                  <p className="text-xs text-gray-500">{order.phone}</p>
+                )}
+
+                <p className="text-xs text-gray-500 uppercase mt-1">
+                  Pagamento: {formatPaymentMethod(order.payment)}
+                </p>
               </div>
 
               <span
