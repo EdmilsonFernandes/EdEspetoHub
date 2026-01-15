@@ -170,4 +170,19 @@ export class PaymentRepository {
       .andWhere('payment.created_at >= :since', { since })
       .getCount();
   }
+
+  /**
+   * Lists payments by store id.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
+  findByStoreId(storeId: string, limit = 20) {
+    return this.repository.find({
+      where: { store: { id: storeId } },
+      order: { createdAt: 'DESC' },
+      take: limit,
+      relations: ['subscription', 'subscription.plan', 'store', 'user'],
+    });
+  }
 }

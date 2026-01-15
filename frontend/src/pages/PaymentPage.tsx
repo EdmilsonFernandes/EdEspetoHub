@@ -80,9 +80,20 @@ export function PaymentPage() {
   const isPaid = payment?.status === 'PAID';
   const isFailed = payment?.status === 'FAILED';
   const isExpired = payment?.expiresAt ? new Date(payment.expiresAt) <= new Date() : false;
+  const createdAt = payment?.createdAt ? new Date(payment.createdAt) : null;
+  const isRecentPayment =
+    createdAt && Number.isFinite(createdAt.getTime())
+      ? Date.now() - createdAt.getTime() <= 24 * 60 * 60 * 1000
+      : false;
   const needsRenew = isFailed || isExpired;
   const isVerified = payment?.emailVerified;
-  const statusLabel = isPaid ? 'Pagamento aprovado' : needsRenew ? 'Pagamento expirou' : 'Aguardando pagamento';
+  const statusLabel = isPaid
+    ? 'Pagamento aprovado'
+    : isFailed
+    ? 'Pagamento falhou'
+    : isExpired
+    ? 'Pagamento expirou'
+    : 'Aguardando pagamento';
   const statusTone = isPaid ? 'text-emerald-600' : needsRenew ? 'text-red-600' : 'text-yellow-600';
   const statusBg = isPaid ? 'bg-emerald-50 text-emerald-600' : needsRenew ? 'bg-red-50 text-red-600' : 'bg-yellow-50 text-yellow-600';
   const isMock = payment?.provider === 'MOCK';
@@ -309,7 +320,7 @@ export function PaymentPage() {
                         <p className="text-xs text-gray-500 text-center">Pagamento mock para testes - nenhum valor será cobrado.</p>
                       )}
                     </>
-                  ) : payment.paymentLink ? (
+                  ) : payment.paymentLink && isRecentPayment ? (
                     <>
                       <p className="text-sm font-semibold text-gray-700">
                         {payment.method === 'BOLETO' ? 'Acesse o boleto' : 'Acesse o link de pagamento'}
@@ -325,7 +336,9 @@ export function PaymentPage() {
                       <p className="text-xs text-gray-500 text-center">Você será direcionado para o provedor de pagamento.</p>
                     </>
                   ) : (
-                    <p className="text-gray-600 text-center">Forma de pagamento não disponível no momento.</p>
+                    <p className="text-gray-600 text-center">
+                      Este link expirou. Gere um novo pagamento para continuar.
+                    </p>
                   )}
                 </div>
               </div>

@@ -21,6 +21,8 @@ import { PaymentEventRepository } from '../repositories/PaymentEventRepository';
 import { logger } from '../utils/logger';
 import { AppError } from '../errors/AppError';
 import { respondWithError } from '../errors/respondWithError';
+import { AppDataSource } from '../config/database';
+import { Payment } from '../entities/Payment';
 
 const paymentService = new PaymentService();
 const subscriptionService = new SubscriptionService();
@@ -145,6 +147,7 @@ export class PaymentController {
         paymentLink: payment.paymentLink,
         provider: payment.provider,
         providerId: payment.providerId,
+        createdAt: payment.createdAt,
         expiresAt: payment.expiresAt,
         storeId: payment.store?.id || null,
         storeSlug: payment.store?.slug || null,
@@ -183,6 +186,45 @@ export class PaymentController {
       return res.json(payload);
     } catch (error: any) {
       log.warn('Payment events failed', { paymentId, error });
+      return respondWithError(req, res, error, 500);
+    }
+  }
+
+  /**
+   * Lists payments by store.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
+  static async listByStore(req: Request, res: Response) {
+    const { storeId } = req.params;
+    const limit = req.query.limit ? Number(req.query.limit) : 20;
+
+    try {
+      if (req.auth?.storeId && req.auth.storeId !== storeId) {
+        return respondWithError(req, res, new AppError('AUTH-003', 403), 403);
+      }
+      log.debug('Payment list by store request', { storeId, limit });
+      const paymentRepo = AppDataSource.getRepository(Payment);
+      const payments = await paymentRepo.find({
+        where: { store: { id: storeId } },
+        order: { createdAt: 'DESC' },
+        take: limit,
+        relations: ['subscription', 'subscription.plan', 'store', 'user'],
+      });
+      const payload = payments.map((payment) => ({
+        id: payment.id,
+        status: payment.status,
+        method: payment.method,
+        amount: Number(payment.amount),
+        provider: payment.provider,
+        providerId: payment.providerId,
+        createdAt: payment.createdAt,
+        expiresAt: payment.expiresAt,
+      }));
+      return res.json(payload);
+    } catch (error: any) {
+      log.warn('Payment list by store failed', { storeId, error });
       return respondWithError(req, res, error, 500);
     }
   }

@@ -17,6 +17,7 @@ import { orderService } from '../services/orderService';
 import { productService } from '../services/productService';
 import { storeService } from '../services/storeService';
 import { subscriptionService } from '../services/subscriptionService';
+import { paymentService } from '../services/paymentService';
 import { formatCurrency, formatDateTime, formatOrderStatus, formatOrderType, formatPaymentMethod } from '../utils/format';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 
@@ -234,7 +235,7 @@ const OrdersView = ({ orders, products }) => {
   );
 };
 
-const PaymentsView = ({ subscription, loading, error }) => {
+const PaymentsView = ({ subscription, loading, error, payments }) => {
   const plan = subscription?.plan;
   const planLabel = plan?.displayName || plan?.name || 'Plano nao identificado';
   const priceValue = subscription?.latestPaymentAmount ?? plan?.price ?? 0;
@@ -321,6 +322,29 @@ const PaymentsView = ({ subscription, loading, error }) => {
           <p className="text-lg font-semibold text-slate-900 mt-2">{expiresLabel}</p>
           <p className="text-xs text-slate-500 mt-1">Ultimo pagamento: {paidAtLabel}</p>
         </div>
+        {Array.isArray(payments) && payments.length > 0 && (
+          <div className="pt-2 border-t border-slate-200">
+            <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Historico de pagamentos</p>
+            <div className="mt-3 space-y-2">
+              {payments.slice(0, 6).map((payment) => (
+                <div key={payment.id} className="flex items-center justify-between text-sm">
+                  <div>
+                    <p className="font-semibold text-slate-700">
+                      {payment.method} · {payment.status}
+                    </p>
+                    <p className="text-xs text-slate-400">
+                      {payment.createdAt ? formatDateTime(payment.createdAt) : '—'}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-semibold text-slate-900">{formatCurrency(payment.amount || 0)}</p>
+                    <p className="text-xs text-slate-400">{payment.provider || '-'}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -342,6 +366,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   const [orders, setOrders] = useState<any[]>([]);
   const [error, setError] = useState('');
   const [subscriptionDetails, setSubscriptionDetails] = useState<any>(null);
+  const [paymentsHistory, setPaymentsHistory] = useState<any[]>([]);
   const [subscriptionError, setSubscriptionError] = useState('');
   const [subscriptionLoading, setSubscriptionLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'resumo' | 'pedidos' | 'produtos' | 'config' | 'fila' | 'pagamentos'>(() => {
@@ -457,6 +482,23 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     };
   }, [storeId]);
 
+  useEffect(() => {
+    if (!storeId) return;
+    let active = true;
+    const loadPayments = async () => {
+      try {
+        const data = await paymentService.listByStore(storeId, 20);
+        if (active) setPaymentsHistory(data || []);
+      } catch (error) {
+        console.error('Nao foi possivel carregar historico de pagamentos', error);
+      }
+    };
+    loadPayments();
+    return () => {
+      active = false;
+    };
+  }, [storeId]);
+
   /* =========================
    * CLIENTES PARA RELATÓRIO
    * ========================= */
@@ -563,6 +605,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             subscription={subscriptionDetails}
             loading={subscriptionLoading}
             error={subscriptionError}
+            payments={paymentsHistory}
           />
         </div>
       )}

@@ -21,4 +21,8 @@ export const paymentService = {
     const response = await apiClient.rawPost(`/payments/${paymentId}/renew`, payload);
     return toJson(response);
   },
+  async listByStore(storeId: string, limit = 20) {
+    const response = await apiClient.rawGet(`/stores/${storeId}/payments?limit=${limit}`);
+    return toJson(response);
+  },
 };

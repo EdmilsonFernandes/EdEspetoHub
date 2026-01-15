@@ -45,6 +45,7 @@ routes.post('/subscriptions/:id/renew', SubscriptionController.renew);
 routes.patch('/subscriptions/:id/status', SubscriptionController.updateStatus);
 routes.post('/webhooks/payment-confirmed', PaymentController.confirm);
 routes.post('/webhooks/mercadopago', PaymentController.mercadoPagoWebhook);
+routes.get('/stores/:storeId/payments', requireAuth, requireRole('ADMIN'), PaymentController.listByStore);
 routes.get('/payments/:paymentId', PaymentController.getById);
 routes.get('/payments/:paymentId/events', PaymentController.getEvents);
 routes.post('/payments/:paymentId/renew', PaymentController.renewFromPayment);
