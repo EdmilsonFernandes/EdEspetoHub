@@ -721,61 +721,73 @@ export function SuperAdmin() {
         <div className="flex flex-wrap gap-2 text-xs font-semibold text-slate-700">
           <a
             href="#executive"
+            onClick={() => setActiveSection('executive')}
             className={`px-3 py-1.5 rounded-full border border-slate-200 shadow-sm transition ${
               activeSection === 'executive'
                 ? 'bg-gradient-to-r from-slate-900 to-slate-700 text-white'
                 : 'bg-white text-slate-700 hover:-translate-y-0.5 hover:shadow-md'
             }`}
+            aria-current={activeSection === 'executive' ? 'true' : 'false'}
           >
             Resumo
           </a>
           <a
             href="#rankings"
+            onClick={() => setActiveSection('rankings')}
             className={`px-3 py-1.5 rounded-full border border-slate-200 shadow-sm transition ${
               activeSection === 'rankings'
                 ? 'bg-slate-900 text-white'
                 : 'bg-white text-slate-700 hover:-translate-y-0.5 hover:shadow-md'
             }`}
+            aria-current={activeSection === 'rankings' ? 'true' : 'false'}
           >
             Rankings
           </a>
           <a
             href="#stores"
+            onClick={() => setActiveSection('stores')}
             className={`px-3 py-1.5 rounded-full border border-slate-200 shadow-sm transition ${
               activeSection === 'stores'
                 ? 'bg-slate-900 text-white'
                 : 'bg-white text-slate-700 hover:-translate-y-0.5 hover:shadow-md'
             }`}
+            aria-current={activeSection === 'stores' ? 'true' : 'false'}
           >
             Lojas
           </a>
           <a
             href="#payments"
+            onClick={() => setActiveSection('payments')}
             className={`px-3 py-1.5 rounded-full border border-slate-200 shadow-sm transition ${
               activeSection === 'payments'
                 ? 'bg-slate-900 text-white'
                 : 'bg-white text-slate-700 hover:-translate-y-0.5 hover:shadow-md'
             }`}
+            aria-current={activeSection === 'payments' ? 'true' : 'false'}
           >
             Pagamentos
           </a>
           <a
             href="#logs"
+            onClick={() => setActiveSection('logs')}
             className={`px-3 py-1.5 rounded-full border border-slate-200 shadow-sm transition ${
               activeSection === 'logs'
                 ? 'bg-slate-900 text-white'
                 : 'bg-white text-slate-700 hover:-translate-y-0.5 hover:shadow-md'
             }`}
+            aria-current={activeSection === 'logs' ? 'true' : 'false'}
           >
             Logs
           </a>
           <a
             href="#events"
+            onClick={() => setActiveSection('events')}
             className={`px-3 py-1.5 rounded-full border border-slate-200 shadow-sm transition ${
               activeSection === 'events'
                 ? 'bg-slate-900 text-white'
                 : 'bg-white text-slate-700 hover:-translate-y-0.5 hover:shadow-md'
             }`}
+            aria-current={activeSection === 'events' ? 'true' : 'false'}
           >
             Eventos
           </a>
