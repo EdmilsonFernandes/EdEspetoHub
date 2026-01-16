@@ -426,7 +426,9 @@ export const GrillQueue = () => {
 
                 <p className="text-xs text-gray-500 uppercase">
                   {formatOrderType(order.type)}
-                  {order.table ? ` · Mesa ${order.table}` : ''}
+                  {order.table && (
+                    <span className="font-semibold text-gray-800"> · Mesa {order.table}</span>
+                  )}
                 </p>
                 {order.phone && (
                   <p className="text-xs text-gray-500">{order.phone}</p>
@@ -509,7 +511,9 @@ export const GrillQueue = () => {
                           )}
                         </div>
                         <div className="flex flex-col">
-                          <span className="break-words">{item.name}</span>
+                          <span className="max-w-[160px] sm:max-w-[220px] truncate" title={item.name}>
+                            {item.name}
+                          </span>
                           <div className="flex flex-wrap gap-1 mt-1">
                             {item?.cookingPoint && (
                               <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800 border border-amber-200">
