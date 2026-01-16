@@ -415,7 +415,9 @@ export function OrderTracking() {
                   </div>
                   <div className="mt-5 flex items-center justify-between text-sm font-semibold text-gray-800 border-t border-gray-100 pt-4">
                     <span>Total</span>
-                    <span className="text-base">{formatCurrency(order.total || 0)}</span>
+                    <span className="text-base px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      {formatCurrency(order.total || 0)}
+                    </span>
                   </div>
                 </div>
                 <div className="rounded-3xl border border-gray-100 p-5 space-y-3 bg-white shadow-sm">

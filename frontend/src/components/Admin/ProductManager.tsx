@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { Image as ImageIcon, Edit, Trash2, Save, Plus, Flame, Wine, Package, MoreHorizontal } from 'lucide-react';
 import { productService } from '../../services/productService';
 import { formatCurrency } from '../../utils/format';
@@ -32,6 +32,7 @@ const getCategoryIcon = (categoryId = '') => {
 
 export const ProductManager = ({ products, onProductsChange }) => {
   const { showToast } = useToast();
+  const formRef = useRef<HTMLDivElement | null>(null);
   const [editing, setEditing] = useState(null);
   const [formData, setFormData] = useState(initialForm);
   const [imageMode, setImageMode] = useState('url');
@@ -121,6 +122,9 @@ export const ProductManager = ({ products, onProductsChange }) => {
     });
     setImageMode('url');
     setImagePreview(product?.imageUrl || '');
+    if (formRef.current) {
+      formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   };
 
   const handleUpload = (file) => {
@@ -141,7 +145,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+      <div ref={formRef} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
         <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
           {editing ? <Edit size={20} /> : <Plus size={20} />}
           {editing ? 'Editar Produto' : 'Novo Produto'}
