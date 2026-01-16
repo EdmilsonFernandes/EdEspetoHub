@@ -37,6 +37,8 @@ export function StorePage() {
   const [lastPublicOrderId, setLastPublicOrderId] = useState('');
   const [isMobile, setIsMobile] = useState(false);
   const [showInfoSheet, setShowInfoSheet] = useState(false);
+  const [copiedAddress, setCopiedAddress] = useState(false);
+  const [copiedPhone, setCopiedPhone] = useState(false);
   const customersStorageKey = useMemo(
     () => `customers:${storeSlug || defaultBranding.espetoId}`,
     [storeSlug]
@@ -894,24 +896,66 @@ export function StorePage() {
                     >
                       Abrir no Waze
                     </a>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        if (!storeAddress) return;
+                        try {
+                          await navigator.clipboard.writeText(storeAddress);
+                          setCopiedAddress(true);
+                          window.setTimeout(() => setCopiedAddress(false), 2000);
+                        } catch (error) {
+                          console.error('Falha ao copiar endereco', error);
+                        }
+                      }}
+                      className="px-3 py-2 rounded-full text-xs font-semibold border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 transition"
+                    >
+                      {copiedAddress ? 'Endereco copiado' : 'Copiar endereco'}
+                    </button>
+                  </div>
+                  <div className="rounded-xl overflow-hidden border border-slate-200 bg-white">
+                    <iframe
+                      title="Mapa da loja"
+                      src={`https://maps.google.com/maps?q=${encodeURIComponent(storeAddress)}&z=16&output=embed`}
+                      className="w-full h-40"
+                      loading="lazy"
+                    />
                   </div>
                 </div>
               )}
 
               {resolvedWhatsApp && (
-                <div className="rounded-2xl border border-slate-200 bg-white p-4 flex items-center justify-between">
+                <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-3">
                   <div>
                     <p className="text-xs uppercase tracking-[0.25em] text-slate-400">WhatsApp</p>
                     <p className="text-sm font-semibold text-slate-800">{formatPhoneInput(storePhone)}</p>
                   </div>
-                  <a
-                    href={`https://wa.me/${resolvedWhatsApp}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="px-3 py-2 rounded-full text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 transition"
-                  >
-                    Conversar
-                  </a>
+                  <div className="flex flex-wrap gap-2">
+                    <a
+                      href={`https://wa.me/${resolvedWhatsApp}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="px-3 py-2 rounded-full text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 transition"
+                    >
+                      Conversar
+                    </a>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        if (!storePhone) return;
+                        try {
+                          await navigator.clipboard.writeText(storePhone);
+                          setCopiedPhone(true);
+                          window.setTimeout(() => setCopiedPhone(false), 2000);
+                        } catch (error) {
+                          console.error('Falha ao copiar telefone', error);
+                        }
+                      }}
+                      className="px-3 py-2 rounded-full text-xs font-semibold border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 transition"
+                    >
+                      {copiedPhone ? 'Telefone copiado' : 'Copiar telefone'}
+                    </button>
+                  </div>
                 </div>
               )}
 
