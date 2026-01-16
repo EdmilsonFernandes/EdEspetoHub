@@ -101,6 +101,8 @@ export function OrderTracking() {
   const typeLabel = typeLabels[order?.type] || 'Pedido';
   const isDelivery = order?.type === 'delivery';
   const storeName = order?.store?.name || 'Chama no Espeto';
+  const storeSlug = order?.store?.slug;
+  const storeHomePath = storeSlug ? `/${storeSlug}` : '/';
   const storeLogo =
     resolveAssetUrl(order?.store?.settings?.logoUrl) || '/chama-no-espeto.jpeg';
   const statusLabel = useMemo(() => {
@@ -221,7 +223,7 @@ export function OrderTracking() {
       <header className="bg-white/95 backdrop-blur-sm shadow-sm sticky top-0 z-50">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-20">
-            <button onClick={() => navigate('/')} className="flex items-center gap-3">
+            <button onClick={() => navigate(storeHomePath)} className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl overflow-hidden shadow border border-white bg-white">
                 <img src={storeLogo} alt={storeName} className="w-full h-full object-cover" />
               </div>
@@ -231,7 +233,7 @@ export function OrderTracking() {
               </div>
             </button>
             <button
-              onClick={() => navigate('/')}
+              onClick={() => navigate(storeHomePath)}
               className="px-3 py-2 sm:px-4 text-sm rounded-lg border-2 border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors"
             >
               Voltar
