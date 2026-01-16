@@ -537,6 +537,11 @@ export const GrillQueue = () => {
                 </div>
 
                 <div className="flex flex-row sm:flex-col items-center sm:items-end gap-2">
+                  {order.type === "table" && order.table && (
+                    <div className="px-3 py-1.5 rounded-full bg-slate-900 text-white text-xs font-black tracking-wide shadow-sm">
+                      Mesa {order.table}
+                    </div>
+                  )}
                   <span
                     className={`px-2 py-1 text-xs font-bold rounded ${getStatusStyles(order.status).className}`}
                   >
