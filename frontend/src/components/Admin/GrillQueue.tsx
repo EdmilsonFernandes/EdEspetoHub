@@ -670,36 +670,46 @@ export const GrillQueue = () => {
               {renderTimeline(order.status)}
 
               {/* TOTAL + BOTÕES */}
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mt-4">
-                <div className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600">
-                  Total
-                  <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-sm font-bold">
-                    {formatCurrency(order.total || 0)}
-                  </span>
-                </div>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mt-4">
+              <div className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600">
+                Total
+                <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-sm font-bold">
+                  {formatCurrency(order.total || 0)}
+                </span>
+              </div>
 
-                <div className="flex flex-wrap gap-2">
-                  {order.status === "pending" && (
+              <div className="flex flex-wrap gap-2">
+                {order.status === "pending" && (
+                  <div className="w-full sm:w-auto">
+                    <div className="mb-2 text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-2.5 py-1">
+                      Clique em iniciar preparo para começar.
+                    </div>
                     <button
                       onClick={() => handleAdvance(order.id, "preparing")}
                       disabled={updating === order.id}
-                      className="px-3 py-2 rounded-lg bg-amber-100 text-amber-800 text-xs font-bold flex items-center gap-1 disabled:opacity-60"
+                      className="w-full sm:w-auto px-3 py-2 rounded-lg bg-amber-500 text-white text-xs font-bold flex items-center justify-center gap-1 disabled:opacity-60 shadow-sm"
                     >
                       <Clock size={16} /> Iniciar preparo
                     </button>
-                  )}
+                  </div>
+                )}
 
-                  {order.status === "preparing" && (
+                {order.status === "preparing" && (
+                  <div className="w-full sm:w-auto">
+                    <div className="mb-2 text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-lg px-2.5 py-1">
+                      Pedido pronto? Clique para finalizar.
+                    </div>
                     <button
                       onClick={() => handleAdvance(order.id, "done")}
                       disabled={updating === order.id}
-                      className="px-3 py-2 rounded-lg bg-green-100 text-green-800 text-xs font-bold flex items-center gap-1 disabled:opacity-60"
+                      className="w-full sm:w-auto px-3 py-2 rounded-lg bg-emerald-600 text-white text-xs font-bold flex items-center justify-center gap-1 disabled:opacity-60 shadow-sm"
                     >
                       <CheckSquare size={16} /> Marcar pronto
                     </button>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
+            </div>
             </div>
           ))}
 
