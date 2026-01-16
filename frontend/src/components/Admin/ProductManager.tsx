@@ -419,7 +419,14 @@ export const ProductManager = ({ products, onProductsChange }) => {
                           showToast('Produto removido', 'success');
                           await refreshProducts();
                         })
-                        .catch(() => showToast('Nao foi possivel remover o produto', 'error'))
+                        .catch(async (error) => {
+                          if (error?.code === 'PROD-001') {
+                            showToast('Produto removido', 'success');
+                            await refreshProducts();
+                            return;
+                          }
+                          showToast('Nao foi possivel remover o produto', 'error');
+                        })
                         .finally(() => setSaving(false));
                     }}
                     className="text-red-600 hover:bg-red-50 p-2 rounded"
