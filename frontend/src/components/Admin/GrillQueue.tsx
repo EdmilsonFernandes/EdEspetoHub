@@ -454,15 +454,15 @@ export const GrillQueue = () => {
       </div>
 
       {/* LISTA */}
-      <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
         {sortedQueue.map((order, index) => (
           <div
             key={order.id}
-            className="relative bg-gradient-to-br from-white via-white to-slate-50 p-4 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md transition"
+            className="relative w-full max-w-full bg-gradient-to-br from-white via-white to-slate-50 p-4 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md transition"
           >
             {/* HEADER DO CARD */}
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
-              <div className="relative flex-1">
+              <div className="relative flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1 text-[11px] text-gray-600 uppercase font-bold">
                   <Hash size={14} className="text-brand-primary" /> Fila
                   <span className={`ml-1 px-2.5 py-1 rounded-full text-xs font-black shadow-sm ${getPriorityTone(index + 1)}`}>
@@ -474,21 +474,27 @@ export const GrillQueue = () => {
                   {formatDateTime(order.createdAt)}
                 </p>
 
-                <h3 className="text-lg font-bold text-gray-800">
+                <h3 className="text-lg font-bold text-gray-800 truncate">
                   Cliente: {order.customerName || order.name || "Cliente"}
                 </h3>
 
-                <p className="text-xs text-gray-500 uppercase">
-                  {formatOrderType(order.type)}
-                  {order.table && (
-                    <span className="font-semibold text-gray-800"> · Mesa {order.table}</span>
+                <p className="text-xs text-gray-500 uppercase break-words">
+                  {order.type === "table" && order.table ? (
+                    <span className="font-semibold text-gray-800">Mesa {order.table}</span>
+                  ) : (
+                    <>
+                      {formatOrderType(order.type)}
+                      {order.table && (
+                        <span className="font-semibold text-gray-800"> · Mesa {order.table}</span>
+                      )}
+                    </>
                   )}
                 </p>
                 {order.phone && (
-                  <p className="text-xs text-gray-500">{order.phone}</p>
+                  <p className="text-xs text-gray-500 break-words">{order.phone}</p>
                 )}
 
-                <p className="text-xs text-gray-500 uppercase mt-1 inline-flex items-center gap-2">
+                <p className="text-xs text-gray-500 uppercase mt-1 inline-flex flex-wrap items-center gap-2">
                   Pagamento:
                   {(() => {
                     const paymentMeta = getPaymentMethodMeta(order.payment);
@@ -672,9 +678,9 @@ export const GrillQueue = () => {
           </span>
         </div>
 
-        <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
           {completedToday.map((order) => (
-            <div key={order.id} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <div key={order.id} className="w-full max-w-full rounded-xl border border-slate-200 bg-slate-50 p-4">
               <div className="flex items-start justify-between gap-2 mb-3">
                 <div>
                   <p className="text-sm font-semibold text-slate-700">Pedido #{String(order.id).slice(0, 8)}</p>
@@ -690,8 +696,14 @@ export const GrillQueue = () => {
                   {order.customerName || order.name || 'Cliente'}
                 </p>
                 <p className="uppercase">
-                  {formatOrderType(order.type)}
-                  {order.table && <span className="font-semibold text-slate-800"> · Mesa {order.table}</span>}
+                  {order.type === "table" && order.table ? (
+                    <span className="font-semibold text-slate-800">Mesa {order.table}</span>
+                  ) : (
+                    <>
+                      {formatOrderType(order.type)}
+                      {order.table && <span className="font-semibold text-slate-800"> · Mesa {order.table}</span>}
+                    </>
+                  )}
                 </p>
                 {order.phone && <p>{order.phone}</p>}
                 <div className="flex items-center gap-2">
