@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { LayoutDashboard, LogOut, Package } from 'lucide-react';
+import { LayoutDashboard, LogOut, Package, Globe, Instagram } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -115,15 +115,16 @@ export function AdminHeader({ contextLabel = 'Painel da Loja' }: Props) {
         <div>
           <p className="text-sm uppercase tracking-wide font-semibold opacity-90">{contextLabel}</p>
           <h1 className="text-xl font-black leading-tight">{storeName}</h1>
-          <div className={`${showMobileDetails ? 'block' : 'hidden'} md:block mt-1 flex flex-col gap-1 text-xs`}>
+          <div className={`${showMobileDetails ? 'block' : 'hidden'} md:block mt-2 flex flex-wrap items-center gap-2 text-xs`}>
             {storeSlug && (
               <a
                 href={storeUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="opacity-90 hover:opacity-100 underline-offset-2 hover:underline"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 border border-white/20 opacity-95 hover:opacity-100 hover:bg-white/20 transition"
               >
-                Site: {storeUrl.replace('https://', '')}
+                <Globe size={12} />
+                {storeUrl.replace('https://', '')}
               </a>
             )}
             {instagramHandle && (
@@ -131,9 +132,10 @@ export function AdminHeader({ contextLabel = 'Painel da Loja' }: Props) {
                 href={`https://instagram.com/${instagramHandle.replace('@', '')}`}
                 target="_blank"
                 rel="noreferrer"
-                className="opacity-90 hover:opacity-100"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 border border-white/20 opacity-95 hover:opacity-100 hover:bg-white/20 transition"
               >
-                Instagram {instagramHandle}
+                <Instagram size={12} />
+                {instagramHandle}
               </a>
             )}
           </div>
