@@ -212,7 +212,7 @@ export function AdminRenewal() {
                 <span className="flex items-center gap-2">
                   <img
                     src={getPaymentMethodMeta('CREDIT_CARD').icon}
-                    alt="Cartao"
+                    alt="Cartão"
                     className="h-4 w-4 object-contain"
                   />
                   Cartão de crédito

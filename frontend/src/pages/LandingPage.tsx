@@ -91,7 +91,7 @@ export function LandingPage() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
         <div className="text-center space-y-6">
           <span className="animate-bounce inline-flex items-center px-4 py-1.5 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-bold rounded-full uppercase tracking-[0.2em] shadow-lg">
-            7 dias gratis + sem cartao
+            7 dias grátis + sem cartão
           </span>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-[56px] font-semibold text-gray-900 dark:text-white leading-tight tracking-tight">
             Crie sites de pedidos de
@@ -102,8 +102,8 @@ export function LandingPage() {
             personalizados
           </h1>
           <p className="text-base sm:text-lg text-gray-600 dark:text-gray-300 leading-relaxed max-w-3xl mx-auto">
-            Configure a identidade visual do seu espeto, publique um link exclusivo e teste tudo gratis por 7 dias. Ao
-            finalizar o periodo, voce escolhe o plano para continuar.
+            Configure a identidade visual do seu espeto, publique um link exclusivo e teste tudo grátis por 7 dias. Ao
+            finalizar o periodo, você escolhe o plano para continuar.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
             <button
@@ -172,7 +172,7 @@ export function LandingPage() {
             <p className="text-sm font-semibold text-red-500">Passo 2</p>
             <h3 className="text-xl font-bold text-gray-900 dark:text-white mt-2">Receba pedidos</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-3">
-              O cliente escolhe, envia o pedido e voce recebe tudo organizado no painel.
+              O cliente escolhe, envia o pedido e você recebe tudo organizado no painel.
             </p>
             <button
               onClick={goToDemoStore}
@@ -225,7 +225,7 @@ export function LandingPage() {
           </h2>
           <div className="max-w-2xl mx-auto mb-10 text-center">
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              7 dias gratis para experimentar. Depois, escolha o plano ideal para sua loja.
+              7 dias grátis para experimentar. Depois, escolha o plano ideal para sua loja.
             </p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -272,7 +272,7 @@ export function LandingPage() {
             Recursos completos para gerenciar seu negócio de espetinhos online.
           </p>
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 mb-6">
-            7 dias gratis para testar • Sem compromisso
+            7 dias grátis para testar • Sem compromisso
           </div>
           <div className="grid sm:grid-cols-2 gap-4 max-w-2xl mx-auto text-left">
             <div className="flex items-center gap-3 text-gray-700 dark:text-gray-300">
@@ -347,7 +347,7 @@ export function LandingPage() {
               name: 'Teste completo',
               price: 0,
               hasPrice: true,
-              period: '7 dias gratis',
+              period: '7 dias grátis',
               features: [
                 'Cardápio personalizado',
                 'Integração com WhatsApp',
@@ -392,10 +392,10 @@ export function LandingPage() {
                     {plan.isTest ? (
                       <>
                         <div className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-600 mb-2">
-                          Gratis
+                          Grátis
                         </div>
                         <p className="text-xs font-semibold text-slate-600 mb-2">
-                          Use a plataforma por 7 dias sem cartao.
+                          Use a plataforma por 7 dias sem cartão.
                         </p>
                         <p className="text-sm text-gray-600 dark:text-gray-400">{plan.period}</p>
                       </>
@@ -405,7 +405,7 @@ export function LandingPage() {
                           R$ {plan.price.toFixed(2)}
                         </div>
                         <p className="text-xs font-semibold text-slate-600 mb-2">
-                          7 dias gratis. Renovacao pelo valor do plano.
+                          7 dias grátis. Renovação pelo valor do plano.
                         </p>
                         <p className="text-sm text-gray-600 dark:text-gray-400">{plan.period}</p>
                       </>
@@ -433,7 +433,7 @@ export function LandingPage() {
                         : 'border-2 border-red-500 text-red-600 dark:text-red-500 hover:bg-red-50 dark:hover:bg-red-950'
                     }`}
                   >
-                    {plan.isTest ? 'Começar gratis' : 'Começar Agora'}
+                    {plan.isTest ? 'Começar grátis' : 'Começar Agora'}
                   </button>
                 </div>
               </div>

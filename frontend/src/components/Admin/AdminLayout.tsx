@@ -54,7 +54,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           setAuth({ ...auth, subscription: fresh });
         }
       } catch (error) {
-        console.error('Nao foi possivel carregar assinatura', error);
+        console.error('Não foi possível carregar assinatura', error);
       }
     };
 

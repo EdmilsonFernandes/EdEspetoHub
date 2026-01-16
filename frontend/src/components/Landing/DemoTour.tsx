@@ -26,7 +26,7 @@ export function DemoTour({ open, onClose }: Props) {
         id: 'orders',
         title: 'Pedido no cardapio',
         description:
-          'O cliente escolhe, finaliza o pedido e envia para voce. Tudo organizado e pronto para produzir.',
+          'O cliente escolhe, finaliza o pedido e envia para você. Tudo organizado e pronto para produzir.',
         ctaLabel: 'Abrir cardapio demo',
         action: () => navigate('/chamanoespeto/demo'),
         icon: ShoppingCart,
@@ -117,17 +117,17 @@ export function DemoTour({ open, onClose }: Props) {
               </div>
               <div className="mt-6 grid sm:grid-cols-2 gap-4">
                 <div className="rounded-2xl border border-gray-200 dark:border-gray-800 p-4 bg-white/80 dark:bg-gray-900/60">
-                  <p className="text-xs text-gray-500">Resumo rapido</p>
+                  <p className="text-xs text-gray-500">Resumo rápido</p>
                   <p className="text-lg font-semibold text-gray-900 dark:text-white mt-2">{active.title}</p>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">{active.description}</p>
                 </div>
                 <div className="rounded-2xl border border-dashed border-red-200 dark:border-red-900 p-4">
-                  <p className="text-xs text-gray-500">Proximo ganho</p>
+                  <p className="text-xs text-gray-500">Próximo ganho</p>
                   <p className="text-base font-semibold text-gray-900 dark:text-white mt-2">
                     Menos erros, fila organizada e mais pedidos
                   </p>
                   <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                    Em poucos cliques voce mostra ao cliente como tudo funciona.
+                    Em poucos cliques você mostra ao cliente como tudo funciona.
                   </p>
                 </div>
               </div>
@@ -166,7 +166,7 @@ export function DemoTour({ open, onClose }: Props) {
                   disabled={activeIndex === steps.length - 1}
                   className="px-4 py-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-50"
                 >
-                  Proximo
+                  Próximo
                 </button>
               </div>
             </div>

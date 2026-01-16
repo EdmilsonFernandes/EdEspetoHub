@@ -187,7 +187,7 @@ const OrdersView = ({ orders, products }) => {
                   })()}
                 </div>
                 <div>
-                  <p className="text-xs uppercase text-slate-400">Endereco</p>
+                  <p className="text-xs uppercase text-slate-400">Endereço</p>
                   <p className="font-semibold text-slate-700">{order.address || '-'}</p>
                 </div>
               </div>
@@ -253,7 +253,7 @@ const OrdersView = ({ orders, products }) => {
 
 const PaymentsView = ({ subscription, loading, error, payments }) => {
   const plan = subscription?.plan;
-  const planLabel = plan?.displayName || plan?.name || 'Plano nao identificado';
+  const planLabel = plan?.displayName || plan?.name || 'Plano não identificado';
   const priceValue = subscription?.latestPaymentAmount ?? plan?.price ?? 0;
   const methodMeta = getPaymentMethodMeta(subscription?.paymentMethod);
   const expiresLabel = subscription?.endDate ? formatDateTime(subscription.endDate) : '—';
@@ -328,7 +328,7 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
       <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_20px_60px_-50px_rgba(15,23,42,0.35)] space-y-4">
         <div>
           <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Ciclo</p>
-          <h3 className="text-lg font-bold text-slate-900 mt-2">Proximo vencimento</h3>
+          <h3 className="text-lg font-bold text-slate-900 mt-2">Próximo vencimento</h3>
         </div>
         <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
           <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Expira em</p>
@@ -505,7 +505,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         if (active) setSubscriptionDetails(data);
       } catch (err) {
         if (active) {
-          setSubscriptionError(err.message || 'Nao foi possivel carregar a assinatura.');
+          setSubscriptionError(err.message || 'Não foi possível carregar a assinatura.');
         }
       } finally {
         if (active) setSubscriptionLoading(false);
@@ -527,7 +527,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         const data = await paymentService.listByStore(storeId, 20);
         if (active) setPaymentsHistory(data || []);
       } catch (error) {
-        console.error('Nao foi possivel carregar historico de pagamentos', error);
+        console.error('Não foi possível carregar histórico de pagamentos', error);
       }
     };
     loadPayments();
@@ -586,8 +586,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       showToast('Identidade salva com sucesso', 'success');
     } catch (err) {
       console.error('Erro ao salvar identidade', err);
-      setError('Nao foi possivel salvar a identidade da loja.');
-      showToast('Nao foi possivel salvar a identidade da loja', 'error');
+      setError('Não foi possível salvar a identidade da loja.');
+      showToast('Não foi possível salvar a identidade da loja', 'error');
     } finally {
       setSavingBranding(false);
     }

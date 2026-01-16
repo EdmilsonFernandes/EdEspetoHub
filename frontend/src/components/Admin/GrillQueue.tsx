@@ -127,7 +127,7 @@ export const GrillQueue = () => {
       oscillator.start();
       oscillator.stop(context.currentTime + 0.2);
     } catch (err) {
-      console.error("Nao foi possivel tocar o som", err);
+      console.error("Não foi possível tocar o som", err);
     }
   };
 
@@ -243,7 +243,7 @@ export const GrillQueue = () => {
       );
     } catch (err) {
       console.error('Erro ao atualizar status', err);
-      setError('Nao foi possivel atualizar o status. Tente novamente.');
+      setError('Não foi possível atualizar o status. Tente novamente.');
     } finally {
       setUpdating(null);
     }
@@ -279,7 +279,7 @@ export const GrillQueue = () => {
       }
     } catch (err) {
       console.error('Erro ao atualizar itens', err);
-      setError('Nao foi possivel atualizar os itens. Atualize a fila.');
+      setError('Não foi possível atualizar os itens. Atualize a fila.');
     }
   };
 

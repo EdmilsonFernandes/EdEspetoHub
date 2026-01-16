@@ -500,7 +500,7 @@ export function StorePage() {
       const messageLines = [
         `*NOVO PEDIDO - ${branding?.brandName || 'Chama no Espeto'}*`,
         storeSlug ? `🏷️ *Loja:* ${storeSlug}` : '',
-        storeAddress ? `📍 *Endereco da loja:* ${storeAddress}` : '',
+        storeAddress ? `📍 *Endereço da loja:* ${storeAddress}` : '',
         '------------------',
         `👤 *${customer.name}* (${customer.phone})`,
         `🛒 *Tipo:* ${customer.type}`,
@@ -764,7 +764,7 @@ export function StorePage() {
                       )}
                       {storeAddress && (
                         <div className="text-sm text-slate-500">
-                          <p className="font-semibold text-slate-700">Endereco</p>
+                          <p className="font-semibold text-slate-700">Endereço</p>
                           <p>{storeAddress}</p>
                         </div>
                       )}
@@ -928,7 +928,7 @@ export function StorePage() {
             <div className="p-5 space-y-4">
               {storeAddress && (
                 <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 space-y-3">
-                  <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Endereco</p>
+                  <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Endereço</p>
                   <p className="text-sm font-semibold text-slate-800">{storeAddress}</p>
                   <div className="flex flex-wrap gap-2">
                     <a
@@ -961,7 +961,7 @@ export function StorePage() {
                       }}
                       className="px-3 py-2 rounded-full text-xs font-semibold border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 transition"
                     >
-                      {copiedAddress ? 'Endereco copiado' : 'Copiar endereco'}
+                      {copiedAddress ? 'Endereço copiado' : 'Copiar endereco'}
                     </button>
                   </div>
                   <div className="rounded-xl overflow-hidden border border-slate-200 bg-white sm:hidden">

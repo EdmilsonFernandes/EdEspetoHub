@@ -40,7 +40,7 @@ const buildDemoStore = (slug: string) => {
     createdAt: now,
     settings: {
       logoUrl: '/chama-no-espeto.jpeg',
-      description: 'Loja demo de espetos com combos especiais e atendimento rapido.',
+      description: 'Loja demo de espetos com combos especiais e atendimento rápido.',
       primaryColor: '#dc2626',
       secondaryColor: '#111827',
       socialLinks: [ { type: 'instagram', value: 'chamanoespeto' } ],

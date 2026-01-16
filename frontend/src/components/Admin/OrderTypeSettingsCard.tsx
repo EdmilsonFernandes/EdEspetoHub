@@ -62,7 +62,7 @@ export function OrderTypeSettingsCard() {
       showToast('Tipos de pedido salvos', 'success');
     } catch (err) {
       console.error('Erro ao salvar tipos de pedido', err);
-      showToast('Nao foi possivel salvar os tipos de pedido', 'error');
+      showToast('Não foi possível salvar os tipos de pedido', 'error');
     } finally {
       setSaving(false);
     }

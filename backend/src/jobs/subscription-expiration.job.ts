@@ -36,9 +36,9 @@ export const scheduleSubscriptionExpirationJob = () => {
     await service.updateStatusesForAll();
   };
 
-  run().catch((error) => log.error('Erro ao executar verificacao de assinatura', { error }));
+  run().catch((error) => log.error('Erro ao executar verificação de assinatura', { error }));
 
   setInterval(() => {
-    run().catch((error) => log.error('Erro ao executar verificacao de assinatura', { error }));
+    run().catch((error) => log.error('Erro ao executar verificação de assinatura', { error }));
   }, DAY_IN_MS);
 };

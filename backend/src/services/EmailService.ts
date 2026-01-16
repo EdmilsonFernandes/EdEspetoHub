@@ -117,7 +117,7 @@ export class EmailService {
    */
   async sendEmailVerification(email: string, link: string) {
     const subject = 'Verifique seu e-mail - Chama no Espeto';
-    const text = `Para ativar sua conta, confirme seu e-mail neste link: ${link}\n\nSe nao foi voce, ignore este e-mail.`;
+    const text = `Para ativar sua conta, confirme seu e-mail neste link: ${link}\n\nSe não foi você, ignore este e-mail.`;
     const logoUrl = this.getLogoUrl();
     const html = `
       <div style="font-family: Arial, sans-serif; background: #f1f5f9; padding: 32px;">
@@ -130,7 +130,7 @@ export class EmailService {
           <div style="padding: 24px;">
             <p style="margin: 0 0 16px; color: #475569;">Clique no botao abaixo para ativar sua conta e continuar o pagamento.</p>
             <a href="${link}" style="display: inline-block; padding: 12px 18px; background: #dc2626; color: #ffffff; text-decoration: none; border-radius: 10px; font-weight: 700;">Confirmar e-mail</a>
-            <p style="margin: 16px 0 0; color: #64748b; font-size: 12px;">Se nao foi voce, ignore este e-mail.</p>
+            <p style="margin: 16px 0 0; color: #64748b; font-size: 12px;">Se não foi você, ignore este e-mail.</p>
           </div>
         </div>
       </div>

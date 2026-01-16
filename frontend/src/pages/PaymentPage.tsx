@@ -280,10 +280,10 @@ export function PaymentPage() {
                           <span className="flex items-center gap-2">
                             <img
                               src={getPaymentMethodMeta('CREDIT_CARD').icon}
-                              alt="Cartao"
+                              alt="Cartão"
                               className="h-4 w-4 object-contain"
                             />
-                            Cartao
+                            Cartão
                           </span>
                         </button>
                         <button
@@ -308,7 +308,7 @@ export function PaymentPage() {
                               navigate(`/payment/${nextPayment.id}`);
                             }
                           } catch (err: any) {
-                            setError(err.message || 'Nao foi possivel gerar um novo pagamento.');
+                            setError(err.message || 'Não foi possível gerar um novo pagamento.');
                           } finally {
                             setRenewing(false);
                           }
@@ -330,7 +330,7 @@ export function PaymentPage() {
                       <img src={payment.qrCodeBase64} alt="QR Code PIX" className="w-64 h-64 object-contain" />
                       {payment.qrCodeText && (
                         <div className="w-full rounded-xl border border-slate-200 bg-white p-3 text-left space-y-2">
-                          <p className="text-xs text-gray-500">Codigo copia e cola</p>
+                          <p className="text-xs text-gray-500">Código copia e cola</p>
                           <p className="text-xs text-gray-700 break-all">{payment.qrCodeText}</p>
                           <button
                             onClick={() => handleCopyPix(payment.qrCodeText)}

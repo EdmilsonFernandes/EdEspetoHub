@@ -33,7 +33,7 @@ export function TermsOfUse() {
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">Termos de uso</h1>
             <p className="text-sm text-slate-500 mt-2">
-              Ao criar uma conta, voce declara que leu e concorda com os termos abaixo.
+              Ao criar uma conta, você declara que leu e concorda com os termos abaixo.
             </p>
           </div>
 
@@ -41,7 +41,7 @@ export function TermsOfUse() {
             <h2 className="text-base font-semibold text-slate-900">1. Plataforma e finalidade</h2>
             <p>
               A plataforma Chama no Espeto oferece ferramentas para criacao e gestao de lojas digitais de
-              espetos e similares. O usuario e responsavel pelo conteudo publicado, precos, ofertas e
+              espetos e similares. O usuário e responsável pelo conteudo publicado, precos, ofertas e
               atendimento aos seus clientes.
             </p>
           </section>
@@ -49,7 +49,7 @@ export function TermsOfUse() {
           <section className="space-y-3 text-sm text-slate-600">
             <h2 className="text-base font-semibold text-slate-900">2. Cadastro e veracidade</h2>
             <p>
-              O usuario deve fornecer informacoes verdadeiras e atualizadas. Dados incorretos podem impedir
+              O usuário deve fornecer informações verdadeiras e atualizadas. Dados incorretos podem impedir
               o uso da plataforma e o recebimento de pagamentos.
             </p>
           </section>
@@ -65,7 +65,7 @@ export function TermsOfUse() {
           <section className="space-y-3 text-sm text-slate-600">
             <h2 className="text-base font-semibold text-slate-900">4. Propriedade e conteudo</h2>
             <p>
-              Todo material enviado pelo usuario (logos, textos, imagens) permanece sob sua
+              Todo material enviado pelo usuário (logos, textos, imagens) permanece sob sua
               responsabilidade. A plataforma pode exibir esse conteudo para operacao do servico.
             </p>
           </section>
@@ -74,8 +74,8 @@ export function TermsOfUse() {
             <h2 className="text-base font-semibold text-slate-900">5. LGPD e privacidade</h2>
             <p>
               Os dados pessoais sao tratados para fins de cadastro, autenticacao, cobranca e suporte,
-              conforme a Lei Geral de Protecao de Dados (LGPD). O usuario pode solicitar atualizacao ou
-              exclusao de dados quando aplicavel.
+              conforme a Lei Geral de Proteção de Dados (LGPD). O usuário pode solicitar atualização ou
+              exclusão de dados quando aplicavel.
             </p>
           </section>
 

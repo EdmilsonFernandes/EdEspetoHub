@@ -75,7 +75,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
       const updated = await productService.list();
       onProductsChange(updated);
     } catch (error) {
-      console.error('Nao foi possivel atualizar produtos', error);
+      console.error('Não foi possível atualizar produtos', error);
     }
   };
 
@@ -100,7 +100,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
       resetForm();
       await refreshProducts();
     } catch (err) {
-      showToast('Nao foi possivel salvar o produto', 'error');
+      showToast('Não foi possível salvar o produto', 'error');
     } finally {
       setSaving(false);
     }
@@ -426,7 +426,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
                             await refreshProducts();
                             return;
                           }
-                          showToast('Nao foi possivel remover o produto', 'error');
+                          showToast('Não foi possível remover o produto', 'error');
                         })
                         .finally(() => setSaving(false));
                     }}

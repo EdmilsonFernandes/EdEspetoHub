@@ -620,13 +620,13 @@ export function SuperAdmin() {
 
             <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">Usuario</label>
+                <label className="text-sm font-semibold text-gray-700">Usuário</label>
                 <input
                   type="text"
                   value={loginForm.email}
                   onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
                   className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
-                  placeholder="Digite seu usuario"
+                  placeholder="Digite seu usuário"
                 />
               </div>
               <div className="space-y-2">
@@ -1331,7 +1331,7 @@ export function SuperAdmin() {
             >
               <option value="all">Metodo: Todos</option>
               <option value="PIX">Pix</option>
-              <option value="CREDIT_CARD">Cartao</option>
+              <option value="CREDIT_CARD">Cartão</option>
               <option value="BOLETO">Boleto</option>
             </select>
             <select
@@ -1572,7 +1572,7 @@ export function SuperAdmin() {
               <tr>
                 <th className="py-2 pr-4 text-left">Data</th>
                 <th className="py-2 pr-4 text-left">Role</th>
-                <th className="py-2 pr-4 text-left">Usuario</th>
+                <th className="py-2 pr-4 text-left">Usuário</th>
                 <th className="py-2 pr-4 text-left">Loja</th>
                 <th className="py-2 pr-4 text-left">Metodo</th>
                 <th className="py-2 pr-4 text-left">Rota</th>

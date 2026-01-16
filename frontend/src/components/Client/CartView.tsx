@@ -49,8 +49,8 @@ export const CartView = ({
     if (isPickup) return "Enviar pedido para retirada";
     if (isDelivery && isPix) return "Finalizar pedido (Pix)";
     if (isDelivery) return "Finalizar pedido para entrega";
-    if (isCredit) return "Finalizar pedido (Credito)";
-    if (isDebit) return "Finalizar pedido (Debito)";
+    if (isCredit) return "Finalizar pedido (Crédito)";
+    if (isDebit) return "Finalizar pedido (Débito)";
     if (isPix) return "Finalizar pedido (Pix)";
     return "Finalizar pedido na mesa";
   }, [isDelivery, isPickup, isPix, isCredit, isDebit]);
@@ -131,7 +131,7 @@ export const CartView = ({
       const response = await fetch(`https://viacep.com.br/ws/${rawCep}/json/`);
       const data = await response.json();
       if (data?.erro) {
-        setCepError("CEP nao encontrado.");
+        setCepError("CEP não encontrado.");
         return;
       }
       const next = {
@@ -145,7 +145,7 @@ export const CartView = ({
       next.address = buildDeliveryAddress(next);
       onChangeCustomer(next);
     } catch (error) {
-      setCepError("Nao foi possivel consultar o CEP.");
+      setCepError("Não foi possível consultar o CEP.");
     } finally {
       setCepLoading(false);
     }
@@ -180,7 +180,7 @@ export const CartView = ({
       {/* Resumo compacto (mobile) */}
       <div className={`sm:hidden mb-4 rounded-2xl border border-slate-200 bg-white/90 shadow-sm px-4 ${summaryCompact ? 'py-2' : 'py-2.5'} flex items-center justify-between sticky top-2 z-40 backdrop-blur-sm transition-all`}>
         <div>
-          <p className="text-[11px] uppercase tracking-[0.3em] text-slate-400">Resumo rapido</p>
+          <p className="text-[11px] uppercase tracking-[0.3em] text-slate-400">Resumo rápido</p>
           <p className="text-sm font-semibold text-slate-800">
             {cartItems.reduce((acc, item) => acc + item.qty, 0)} itens
           </p>
@@ -511,13 +511,13 @@ export const CartView = ({
             <CreditCard size={18} className="text-brand-primary" /> Forma de Pagamento
           </h2>
           <span className="text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-full">
-            Seguro e rapido
+            Seguro e rápido
           </span>
         </div>
 
         <div className="grid grid-cols-3 gap-3">
           {[
-            { id: "pix", label: "Pix", description: "Registro rapido" },
+            { id: "pix", label: "Pix", description: "Registro rápido" },
             { id: "debito", label: "Débito", description: "Pague no local" },
             { id: "credito", label: "Crédito", description: "Pague no local" }
           ].map((method) => (

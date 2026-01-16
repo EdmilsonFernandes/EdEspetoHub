@@ -102,7 +102,7 @@ const Header = ({
             type="button"
             onClick={onOpenInfo}
             className="px-2.5 py-1.5 rounded-full text-xs font-semibold border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition"
-            aria-label="Informacoes da loja"
+            aria-label="Informações da loja"
           >
             <span className="flex items-center gap-1">
               <Info size={12} />
@@ -366,7 +366,7 @@ export const MenuView = ({
                   </div>
                   <div className="space-y-1">
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                      Endereco da loja
+                      Endereço da loja
                     </p>
                     <p className="text-sm font-semibold text-slate-900">{storeAddress}</p>
                     <p className="text-xs text-slate-500">Toque para abrir no mapa</p>

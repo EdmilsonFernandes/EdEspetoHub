@@ -174,7 +174,7 @@ export function CreateStore() {
       const response = await fetch(`https://viacep.com.br/ws/${rawCep}/json/`);
       const data = await response.json();
       if (data?.erro) {
-        setCepError('CEP nao encontrado.');
+        setCepError('CEP não encontrado.');
         return;
       }
       setRegisterForm((prev) => ({
@@ -186,7 +186,7 @@ export function CreateStore() {
         complement: prev.complement || data.complemento || '',
       }));
     } catch (error) {
-      setCepError('Nao foi possivel consultar o CEP.');
+      setCepError('Não foi possível consultar o CEP.');
     } finally {
       setIsCepLoading(false);
     }
@@ -376,7 +376,7 @@ export function CreateStore() {
   const validateDocument = (value = '', type = 'CPF') => {
     if (!value.trim()) return 'Informe CPF ou CNPJ.';
     const isValid = type === 'CNPJ' ? isValidCNPJ(value) : isValidCPF(value);
-    return isValid ? '' : 'Documento invalido.';
+    return isValid ? '' : 'Documento inválido.';
   };
 
   const validateStoreName = (value = '') => {
@@ -690,7 +690,7 @@ export function CreateStore() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-700">Descricao curta da loja</label>
+              <label className="text-sm font-semibold text-gray-700">Descrição curta da loja</label>
               <textarea
                 value={registerForm.storeDescription}
                 onChange={(e) => setRegisterForm((prev) => ({ ...prev, storeDescription: e.target.value }))}
@@ -800,7 +800,7 @@ export function CreateStore() {
                             value={link.value}
                             onChange={(e) => updateSocialLink(index, 'value', e.target.value)}
                             className="flex-1 border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
-                            placeholder="@usuario ou URL"
+                            placeholder="@usuário ou URL"
                           />
                           {registerForm.socialLinks.length > 1 && (
                             <button
@@ -866,7 +866,7 @@ export function CreateStore() {
                     7 DIAS GRATIS
                   </span>
                   <p className="text-sm uppercase font-semibold text-amber-700">Teste completo</p>
-                  <p className="text-2xl font-bold text-gray-900">Sem cartao</p>
+                  <p className="text-2xl font-bold text-gray-900">Sem cartão</p>
                   <p className="text-xs text-gray-500">Escolha o plano ao final do periodo gratuito.</p>
                   <ul className="mt-3 text-xs text-gray-600 space-y-1">
                     <li>✓ Loja ativa por 7 dias</li>
@@ -944,7 +944,7 @@ export function CreateStore() {
                       <span className="flex items-center gap-2">
                         <img
                           src={getPaymentMethodMeta('CREDIT_CARD').icon}
-                          alt="Cartao"
+                          alt="Cartão"
                           className="h-4 w-4 object-contain"
                         />
                         Cartão de crédito
@@ -1056,7 +1056,7 @@ export function CreateStore() {
                     <img src={paymentResult.payment.qrCodeBase64} alt="QR Code PIX" className="w-48 h-48" />
                     {paymentResult.payment?.qrCodeText && (
                       <div className="rounded-xl border border-emerald-200 bg-white p-3 space-y-2">
-                        <p className="text-xs text-gray-500">Codigo copia e cola</p>
+                        <p className="text-xs text-gray-500">Código copia e cola</p>
                         <p className="text-xs text-gray-700 break-all">
                           {paymentResult.payment.qrCodeText}
                         </p>
@@ -1094,7 +1094,7 @@ export function CreateStore() {
             )}
 
             <p className="text-xs text-gray-500 text-center">
-              Ao criar sua conta, voce confirma a veracidade dos dados fornecidos.
+              Ao criar sua conta, você confirma a veracidade dos dados fornecidos.
             </p>
           </form>
         </div>
@@ -1125,13 +1125,13 @@ export function CreateStore() {
                 <h3 className="text-base font-semibold text-slate-900">1. Plataforma e finalidade</h3>
                 <p>
                   A plataforma Chama no Espeto fornece ferramentas para criar, publicar e gerir lojas digitais.
-                  O usuario e responsavel pelo conteudo, precos, ofertas e atendimento.
+                  O usuário e responsável pelo conteudo, precos, ofertas e atendimento.
                 </p>
               </section>
               <section className="space-y-2">
                 <h3 className="text-base font-semibold text-slate-900">2. Cadastro e veracidade</h3>
                 <p>
-                  Informacoes fornecidas devem ser verdadeiras e atualizadas. Dados incorretos podem impedir
+                  Informações fornecidas devem ser verdadeiras e atualizadas. Dados incorretos podem impedir
                   a ativacao da loja e o recebimento de pagamentos.
                 </p>
               </section>
@@ -1146,7 +1146,7 @@ export function CreateStore() {
                 <h3 className="text-base font-semibold text-slate-900">4. LGPD e privacidade</h3>
                 <p>
                   Os dados pessoais sao tratados para cadastro, autenticacao, cobranca e suporte, conforme a
-                  LGPD. O usuario pode solicitar atualizacao ou exclusao quando aplicavel.
+                  LGPD. O usuário pode solicitar atualização ou exclusão quando aplicavel.
                 </p>
               </section>
               <section className="space-y-2">

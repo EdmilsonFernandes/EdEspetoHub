@@ -89,7 +89,7 @@ export function OpeningHoursCard() {
       setLastSavedAt(Date.now());
     } catch (err) {
       console.error('Erro ao salvar horario', err);
-      showToast('Nao foi possivel salvar o horario', 'error');
+      showToast('Não foi possível salvar o horario', 'error');
     } finally {
       setSaving(false);
     }

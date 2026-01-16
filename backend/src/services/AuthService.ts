@@ -707,7 +707,7 @@ export class AuthService
         ? 'PIX'
         : payment.method === 'BOLETO'
         ? 'Boleto'
-        : 'Cartao de credito';
+        : 'Cartão de crédito';
     const subject = 'Pagamento pendente - Chama no Espeto';
     const text = [
       'Recebemos seu cadastro e o pagamento esta pendente.',

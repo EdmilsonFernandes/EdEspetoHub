@@ -37,7 +37,7 @@ export function VerifyEmail() {
           setTimeout(() => navigate(result.redirectUrl), 2000);
         }
       } catch (err) {
-        setError(err.message || 'Nao foi possivel confirmar seu e-mail.');
+        setError(err.message || 'Não foi possível confirmar seu e-mail.');
       } finally {
         verifyingRef.current = false;
       }
@@ -55,9 +55,9 @@ export function VerifyEmail() {
       if (targetEmail) {
         localStorage.setItem('signupEmail', targetEmail);
       }
-      setStatus('Se o e-mail existir, enviaremos instrucoes.');
+      setStatus('Se o e-mail existir, enviaremos instruções.');
     } catch (err) {
-      setError(err.message || 'Nao foi possivel reenviar o e-mail.');
+      setError(err.message || 'Não foi possível reenviar o e-mail.');
     } finally {
       setSending(false);
     }
