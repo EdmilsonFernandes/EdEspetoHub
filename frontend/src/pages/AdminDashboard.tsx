@@ -18,11 +18,11 @@ import { productService } from '../services/productService';
 import { storeService } from '../services/storeService';
 import { subscriptionService } from '../services/subscriptionService';
 import { paymentService } from '../services/paymentService';
-import { formatCurrency, formatDateTime, formatOrderStatus, formatOrderType } from '../utils/format';
+import { formatCurrency, formatDateTime, formatOrderDisplayId, formatOrderStatus, formatOrderType } from '../utils/format';
 import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 
-const OrdersView = ({ orders, products }) => {
+const OrdersView = ({ orders, products, storeSlug }) => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [query, setQuery] = useState('');
   const [dateFilter, setDateFilter] = useState('');
@@ -53,7 +53,7 @@ const OrdersView = ({ orders, products }) => {
         if (localDate !== dateFilter) return false;
       }
       if (!normalized) return true;
-      const haystack = [order.customerName, order.name, order.phone, order.id, order.id?.slice(0, 8)]
+      const haystack = [order.customerName, order.name, order.phone, order.id, formatOrderDisplayId(order.id, storeSlug)]
         .filter(Boolean)
         .join(' ')
         .toLowerCase();
@@ -79,7 +79,7 @@ const OrdersView = ({ orders, products }) => {
     if (status === 'cancelled') return 'bg-slate-100 text-slate-600';
     return 'bg-red-100 text-red-700';
   };
-  const shortId = (value) => (value ? String(value).slice(0, 8) : '');
+  const shortId = (value) => formatOrderDisplayId(value, storeSlug);
 
   return (
     <div className="space-y-4">
@@ -628,7 +628,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
       {activeTab === 'pedidos' && (
         <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-          <OrdersView orders={orders} products={products} />
+          <OrdersView orders={orders} products={products} storeSlug={storeSlug} />
         </div>
       )}
 

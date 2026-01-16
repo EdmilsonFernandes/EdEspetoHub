@@ -9,7 +9,7 @@ import { storeService } from '../services/storeService';
 import { MenuView } from '../components/Client/MenuView';
 import { CartView } from '../components/Client/CartView';
 import { SuccessView } from '../components/Client/SuccessView';
-import { formatCurrency, formatPaymentMethod, formatPhoneInput } from '../utils/format';
+import { formatCurrency, formatOrderDisplayId, formatPaymentMethod, formatPhoneInput } from '../utils/format';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getPersistedBranding, brandingStorageKey, defaultBranding, initialCustomer, defaultPaymentMethod, DEFAULT_AREA_CODE, WHATSAPP_NUMBER, PIX_KEY } from '../constants';
 import { formatOpeningHoursSummary, isStoreOpenNow, normalizeOpeningHours } from '../utils/storeHours';
@@ -534,7 +534,7 @@ export function StorePage() {
       .map((item) => `- ${item.qty}x ${item.name} ${formatItemOptions(item)}`.trim())
       .join('\n');
     const customerMessageLines = [
-      `Pedido #${createdOrder?.id || ''} - ${branding?.brandName || 'Chama no Espeto'}`,
+      `Pedido #${formatOrderDisplayId(createdOrder?.id, storeSlug)} - ${branding?.brandName || 'Chama no Espeto'}`,
       customerItemsList ? `Itens:\n${customerItemsList}` : '',
       `Total: ${formatCurrency(cartTotal)}`,
       trackingLink ? `Acompanhar: ${trackingLink}` : '',

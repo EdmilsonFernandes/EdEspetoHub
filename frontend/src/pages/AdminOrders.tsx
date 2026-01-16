@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { AdminHeader } from '../components/Admin/AdminHeader';
 import { useAuth } from '../contexts/AuthContext';
 import { orderService } from '../services/orderService';
-import { formatCurrency, formatDateTime, formatOrderStatus, formatOrderType } from '../utils/format';
+import { formatCurrency, formatDateTime, formatOrderDisplayId, formatOrderStatus, formatOrderType } from '../utils/format';
 import { getPaymentMethodMeta } from '../utils/paymentAssets';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 
@@ -61,7 +61,7 @@ export function AdminOrders() {
         order.name,
         order.phone,
         order.id,
-        order.id?.slice(0, 8),
+        formatOrderDisplayId(order.id, storeSlug),
       ]
         .filter(Boolean)
         .join(' ')
@@ -94,7 +94,7 @@ export function AdminOrders() {
     if (item?.passSkewer) labels.push('passar varinha');
     return labels.length ? `(${labels.join(' • ')})` : '';
   };
-  const shortId = (value) => (value ? String(value).slice(0, 8) : '');
+  const shortId = (value) => formatOrderDisplayId(value, storeSlug);
 
   const clearFilters = () => {
     setStatusFilter('all');

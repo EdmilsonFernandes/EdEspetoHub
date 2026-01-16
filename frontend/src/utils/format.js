@@ -110,3 +110,10 @@ export const formatPhoneInput = (value = '', defaultAreaCode = '12') => {
 
   return `(${ddd}) `;
 };
+
+export const formatOrderDisplayId = (orderId, storeSlug = '') => {
+  if (!orderId) return '';
+  const shortId = String(orderId).slice(0, 8);
+  const prefix = storeSlug ? String(storeSlug).replace(/[^a-zA-Z0-9]/g, '').slice(0, 3).toUpperCase() : '';
+  return `${prefix}${shortId}`;
+};

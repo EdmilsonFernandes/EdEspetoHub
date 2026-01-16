@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Bike, ChefHat, CircleCheck, Clock, Loader2, MapPin } from 'lucide-react';
 import { orderService } from '../services/orderService';
-import { formatCurrency, formatDateTime, formatDuration } from '../utils/format';
+import { formatCurrency, formatDateTime, formatDuration, formatOrderDisplayId } from '../utils/format';
 import { getPaymentMethodMeta } from '../utils/paymentAssets';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { applyBrandTheme } from '../utils/brandTheme';
@@ -158,7 +158,7 @@ export function OrderTracking() {
     })
     .join('\n');
   const whatsappMessage = [
-    `Pedido #${order?.id || ''} - ${storeName}`,
+    `Pedido #${formatOrderDisplayId(order?.id, storeSlug)} - ${storeName}`,
     orderItemsText ? `Itens:\n${orderItemsText}` : '',
     `Total: ${formatCurrency(order?.total || 0)}`,
     trackingLink ? `Acompanhar: ${trackingLink}` : '',
@@ -281,7 +281,9 @@ export function OrderTracking() {
               <div className="rounded-3xl border border-gray-100 bg-gradient-to-br from-white via-gray-50 to-white p-5 sm:p-6 shadow-lg">
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                   <div>
-                    <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Pedido #{order.id}</p>
+                    <p className="text-xs uppercase tracking-[0.3em] text-gray-400">
+                      Pedido #{formatOrderDisplayId(order.id, storeSlug)}
+                    </p>
                     <div className="mt-2 flex items-center gap-3 flex-wrap">
                       <h1 className="text-2xl sm:text-3xl font-black text-gray-900">{statusLabel}</h1>
                       {isDelivery && (status === 'done' || status === 'delivered') && (
