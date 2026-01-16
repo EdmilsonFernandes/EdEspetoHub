@@ -919,45 +919,53 @@ export function CreateStore() {
               {selectedPlanId !== 'test-plan-7days' && (
                 <div className="mt-6">
                   <h4 className="text-sm font-semibold text-gray-700 mb-2">Forma de pagamento</h4>
-                  <div className="flex gap-3">
+                  <div className="flex flex-wrap gap-3">
                     <button
                       type="button"
                       onClick={() => setPaymentMethod('PIX')}
-                      className={`px-4 py-2 rounded-xl border ${paymentMethod === 'PIX' ? 'border-red-500 bg-red-50' : 'border-gray-200'}`}
+                      className={`rounded-2xl px-4 py-3 text-left transition-all border active:scale-[0.98] ${
+                        paymentMethod === 'PIX'
+                          ? 'border-brand-primary bg-gradient-to-br from-brand-primary/15 via-white to-white text-brand-primary shadow-lg ring-2 ring-brand-primary/30'
+                          : 'border-gray-200 text-gray-600 bg-white/80 hover:border-brand-primary/40 hover:shadow-sm'
+                      }`}
                     >
-                      <span className="flex items-center gap-2">
+                      <span className="flex items-center gap-3">
                         <img
                           src={getPaymentMethodMeta('PIX').icon}
                           alt="Pix"
-                          className="h-4 w-4 object-contain"
+                          className="h-6 w-6 object-contain"
                         />
-                        PIX
+                        <span className="text-sm font-semibold tracking-tight">Pix</span>
                       </span>
                     </button>
                     <button
                       type="button"
                       onClick={() => setPaymentMethod('CREDIT_CARD')}
-                      className={`px-4 py-2 rounded-xl border ${
-                        paymentMethod === 'CREDIT_CARD' ? 'border-red-500 bg-red-50' : 'border-gray-200'
+                      className={`rounded-2xl px-4 py-3 text-left transition-all border active:scale-[0.98] ${
+                        paymentMethod === 'CREDIT_CARD'
+                          ? 'border-brand-primary bg-gradient-to-br from-brand-primary/15 via-white to-white text-brand-primary shadow-lg ring-2 ring-brand-primary/30'
+                          : 'border-gray-200 text-gray-600 bg-white/80 hover:border-brand-primary/40 hover:shadow-sm'
                       }`}
                     >
-                      <span className="flex items-center gap-2">
+                      <span className="flex items-center gap-3">
                         <img
                           src={getPaymentMethodMeta('CREDIT_CARD').icon}
                           alt="Cartão"
-                          className="h-4 w-4 object-contain"
+                          className="h-6 w-6 object-contain"
                         />
-                        Cartão de crédito
+                        <span className="text-sm font-semibold tracking-tight">Cartão de crédito</span>
                       </span>
                     </button>
                     <button
                       type="button"
                       onClick={() => setPaymentMethod('BOLETO')}
-                      className={`px-4 py-2 rounded-xl border ${
-                        paymentMethod === 'BOLETO' ? 'border-red-500 bg-red-50' : 'border-gray-200'
+                      className={`rounded-2xl px-4 py-3 text-left transition-all border active:scale-[0.98] ${
+                        paymentMethod === 'BOLETO'
+                          ? 'border-brand-primary bg-gradient-to-br from-brand-primary/15 via-white to-white text-brand-primary shadow-lg ring-2 ring-brand-primary/30'
+                          : 'border-gray-200 text-gray-600 bg-white/80 hover:border-brand-primary/40 hover:shadow-sm'
                       }`}
                     >
-                      Boleto
+                      <span className="text-sm font-semibold tracking-tight">Boleto</span>
                     </button>
                   </div>
                 </div>

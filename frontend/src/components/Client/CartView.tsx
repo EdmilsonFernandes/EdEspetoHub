@@ -440,10 +440,10 @@ export const CartView = ({
                     key={table}
                     type="button"
                     onClick={() => onChangeCustomer({ ...customer, table })}
-                    className={`py-2 rounded-lg text-sm font-semibold border transition ${
+                    className={`py-2.5 rounded-xl text-sm font-semibold border transition shadow-sm ${
                       customer.table === table
-                        ? "bg-brand-primary text-white border-brand-primary"
-                        : "bg-white border-gray-200 text-gray-600 hover:bg-gray-50"
+                        ? "bg-gradient-to-br from-brand-primary to-brand-primary/80 text-white border-brand-primary ring-2 ring-brand-primary/30"
+                        : "bg-white/80 border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-brand-primary/40"
                     }`}
                   >
                     {table}
@@ -524,17 +524,17 @@ export const CartView = ({
             <button
               key={method.id}
               onClick={() => onChangePayment(method.id)}
-              className={`rounded-2xl p-3 text-left transition-all border active:scale-[0.98] ${
+              className={`rounded-2xl p-3 sm:p-4 text-left transition-all border active:scale-[0.98] ${
                 paymentMethod === method.id
-                  ? "border-brand-primary bg-gradient-to-br from-brand-primary-soft/70 to-white text-brand-primary shadow-md"
-                  : "border-gray-100 text-gray-500 hover:border-brand-primary hover:shadow-sm hover:-translate-y-0.5"
+                  ? "border-brand-primary bg-gradient-to-br from-brand-primary/15 via-white to-white text-brand-primary shadow-lg ring-2 ring-brand-primary/30"
+                  : "border-gray-100 text-gray-500 bg-white/70 hover:border-brand-primary/40 hover:shadow-sm hover:-translate-y-0.5"
               }`}
             >
               {(() => {
                 const methodMeta = getPaymentMethodMeta(method.id);
                 return (
-                  <div className="flex items-center gap-2 font-bold">
-                    <span className={`h-9 w-9 rounded-xl flex items-center justify-center ${paymentMethod === method.id ? 'bg-brand-primary text-white' : 'bg-slate-100 text-slate-600'}`}>
+                  <div className="flex items-center gap-3">
+                    <span className={`h-10 w-10 rounded-xl flex items-center justify-center shadow-md ${paymentMethod === method.id ? 'bg-brand-primary text-white' : 'bg-slate-100 text-slate-600'}`}>
                       {methodMeta.icon ? (
                         <img
                           src={methodMeta.icon}
@@ -545,9 +545,11 @@ export const CartView = ({
                         <CreditCard size={16} />
                       )}
                     </span>
-                    <div className="space-y-0.5">
-                      <div className="text-sm font-semibold">{method.label}</div>
-                      <div className="text-[11px] text-gray-500">{method.description}</div>
+                    <div className="space-y-1">
+                      <div className="text-sm sm:text-base font-semibold tracking-tight">{method.label}</div>
+                      <div className={`text-[11px] sm:text-xs ${paymentMethod === method.id ? 'text-brand-primary/70' : 'text-gray-500'}`}>
+                        {method.description}
+                      </div>
                     </div>
                   </div>
                 );

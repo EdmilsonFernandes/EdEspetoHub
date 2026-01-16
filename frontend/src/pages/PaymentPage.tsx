@@ -253,47 +253,53 @@ export function PaymentPage() {
                       <p className="text-sm font-semibold text-gray-700 text-center">
                         Escolha uma forma para gerar um novo pagamento
                       </p>
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap gap-3">
                         <button
                           type="button"
                           onClick={() => setRenewMethod('PIX')}
-                          className={`px-3 py-2 rounded-lg border text-sm font-semibold ${
-                            renewMethod === 'PIX' ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-gray-200'
+                          className={`rounded-2xl px-4 py-3 text-left transition-all border text-sm font-semibold active:scale-[0.98] ${
+                            renewMethod === 'PIX'
+                              ? 'border-emerald-500 bg-gradient-to-br from-emerald-100 via-white to-white text-emerald-700 shadow-lg ring-2 ring-emerald-200'
+                              : 'border-gray-200 text-gray-600 bg-white/80 hover:border-emerald-300 hover:shadow-sm'
                           }`}
                         >
-                          <span className="flex items-center gap-2">
+                          <span className="flex items-center gap-3">
                             <img
                               src={getPaymentMethodMeta('PIX').icon}
                               alt="Pix"
-                              className="h-4 w-4 object-contain"
+                              className="h-6 w-6 object-contain"
                             />
-                            PIX
+                            <span className="text-sm font-semibold tracking-tight">Pix</span>
                           </span>
                         </button>
                         <button
                           type="button"
                           onClick={() => setRenewMethod('CREDIT_CARD')}
-                          className={`px-3 py-2 rounded-lg border text-sm font-semibold ${
-                            renewMethod === 'CREDIT_CARD' ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-gray-200'
+                          className={`rounded-2xl px-4 py-3 text-left transition-all border text-sm font-semibold active:scale-[0.98] ${
+                            renewMethod === 'CREDIT_CARD'
+                              ? 'border-emerald-500 bg-gradient-to-br from-emerald-100 via-white to-white text-emerald-700 shadow-lg ring-2 ring-emerald-200'
+                              : 'border-gray-200 text-gray-600 bg-white/80 hover:border-emerald-300 hover:shadow-sm'
                           }`}
                         >
-                          <span className="flex items-center gap-2">
+                          <span className="flex items-center gap-3">
                             <img
                               src={getPaymentMethodMeta('CREDIT_CARD').icon}
                               alt="Cartão"
-                              className="h-4 w-4 object-contain"
+                              className="h-6 w-6 object-contain"
                             />
-                            Cartão
+                            <span className="text-sm font-semibold tracking-tight">Cartão</span>
                           </span>
                         </button>
                         <button
                           type="button"
                           onClick={() => setRenewMethod('BOLETO')}
-                          className={`px-3 py-2 rounded-lg border text-sm font-semibold ${
-                            renewMethod === 'BOLETO' ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-gray-200'
+                          className={`rounded-2xl px-4 py-3 text-left transition-all border text-sm font-semibold active:scale-[0.98] ${
+                            renewMethod === 'BOLETO'
+                              ? 'border-emerald-500 bg-gradient-to-br from-emerald-100 via-white to-white text-emerald-700 shadow-lg ring-2 ring-emerald-200'
+                              : 'border-gray-200 text-gray-600 bg-white/80 hover:border-emerald-300 hover:shadow-sm'
                           }`}
                         >
-                          Boleto
+                          <span className="text-sm font-semibold tracking-tight">Boleto</span>
                         </button>
                       </div>
                       <button

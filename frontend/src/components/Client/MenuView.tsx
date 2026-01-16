@@ -505,7 +505,7 @@ export const MenuView = ({
                         )}
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold bg-brand-primary-soft text-brand-primary">
+                        <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs sm:text-sm font-extrabold bg-brand-primary/10 text-brand-primary border border-brand-primary/20 shadow-sm">
                           {formatCurrency(item.price)}
                         </span>
                         {itemQtyMap.get(String(item.id)) > 0 && (
@@ -535,7 +535,7 @@ export const MenuView = ({
                     className="relative w-10 h-10 rounded-2xl bg-brand-primary text-white flex items-center justify-center hover:opacity-90 shadow-md active:scale-95 transition"
                   >
                     {itemQtyMap.get(String(item.id)) > 0 && (
-                      <span className="absolute -top-1 -right-1 min-w-[18px] h-5 px-1 rounded-full bg-white text-brand-primary text-[10px] font-bold border border-brand-primary flex items-center justify-center shadow-sm">
+                      <span className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1 rounded-full bg-amber-400 text-slate-900 text-[10px] font-extrabold border border-amber-300 flex items-center justify-center shadow-md">
                         {itemQtyMap.get(String(item.id))}
                       </span>
                     )}
