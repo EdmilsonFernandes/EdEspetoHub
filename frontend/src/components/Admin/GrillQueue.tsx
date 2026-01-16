@@ -502,7 +502,7 @@ export const GrillQueue = () => {
 
                   <p className="text-xs text-gray-500 uppercase break-words">
                     {order.type === "table" && order.table ? (
-                      <span className="font-semibold text-gray-800">Mesa {order.table}</span>
+                      <span className="font-semibold text-gray-800">Mesa</span>
                     ) : (
                       <>
                         {formatOrderType(order.type)}
