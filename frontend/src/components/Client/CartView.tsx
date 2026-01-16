@@ -168,7 +168,7 @@ export const CartView = ({
       </button>
 
       {/* Resumo compacto (mobile) */}
-      <div className="sm:hidden mb-4 rounded-2xl border border-slate-200 bg-white shadow-sm px-4 py-3 flex items-center justify-between">
+      <div className="sm:hidden mb-4 rounded-2xl border border-slate-200 bg-white shadow-sm px-4 py-3 flex items-center justify-between sticky top-2 z-40 backdrop-blur">
         <div>
           <p className="text-[11px] uppercase tracking-[0.3em] text-slate-400">Resumo rapido</p>
           <p className="text-sm font-semibold text-slate-800">
