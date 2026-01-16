@@ -509,7 +509,7 @@ export const MenuView = ({
                           {formatCurrency(item.price)}
                         </span>
                         {itemQtyMap.get(String(item.id)) > 0 && (
-                          <span className="inline-flex items-center px-2 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          <span className="inline-flex sm:hidden items-center px-2 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                             {itemQtyMap.get(String(item.id))}x
                           </span>
                         )}
