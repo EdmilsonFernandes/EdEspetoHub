@@ -268,15 +268,17 @@ export const CartView = ({
                 <button
                   key={type}
                   onClick={() => onChangeCustomer({ ...customer, type })}
-                  className={`flex-1 py-2.5 sm:py-3 rounded-xl border-2 flex flex-col items-center justify-center gap-1 transition-all ${
+                  className={`flex-1 py-2.5 sm:py-3 rounded-2xl border flex flex-col items-center justify-center gap-1 transition-all ${
                     customer.type === type
-                      ? "border-brand-primary bg-brand-primary-soft text-brand-primary font-bold"
-                      : "border-gray-100 text-gray-400 grayscale"
+                      ? "border-brand-primary bg-gradient-to-br from-brand-primary-soft/70 to-white text-brand-primary shadow-md"
+                      : "border-gray-100 text-gray-500 hover:border-brand-primary hover:shadow-sm"
                   }`}
                 >
-                  {type === "delivery" && <Bike size={18} />}
-                  {type === "pickup" && <Home size={18} />}
-                  {type === "table" && <UtensilsCrossed size={18} />}
+                  <span className={`h-9 w-9 rounded-xl flex items-center justify-center ${customer.type === type ? 'bg-brand-primary text-white' : 'bg-slate-100 text-slate-600'}`}>
+                    {type === "delivery" && <Bike size={16} />}
+                    {type === "pickup" && <Home size={16} />}
+                    {type === "table" && <UtensilsCrossed size={16} />}
+                  </span>
                   <span className="text-[10px] uppercase font-bold tracking-wide">
                     {type === "table"
                       ? "Mesa"
