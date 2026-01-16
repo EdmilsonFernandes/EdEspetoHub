@@ -130,7 +130,8 @@ export class ProductService
     const store = await this.storeRepository.findById(storeId);
     const product = await this.productRepository.findById(productId);
     this.ensureStoreAccess(store, authStoreId);
-    if (!store || !product || product.store.id !== store.id) throw new AppError('PROD-001', 404);
+    if (!product) return;
+    if (!store || product.store.id !== store.id) throw new AppError('PROD-001', 404);
 
     return this.productRepository.delete(product.id);
   }
