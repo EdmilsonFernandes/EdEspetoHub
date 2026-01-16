@@ -913,7 +913,7 @@ export function StorePage() {
                       {copiedAddress ? 'Endereco copiado' : 'Copiar endereco'}
                     </button>
                   </div>
-                  <div className="rounded-xl overflow-hidden border border-slate-200 bg-white">
+                  <div className="rounded-xl overflow-hidden border border-slate-200 bg-white sm:hidden">
                     <iframe
                       title="Mapa da loja"
                       src={`https://maps.google.com/maps?q=${encodeURIComponent(storeAddress)}&z=16&output=embed`}
