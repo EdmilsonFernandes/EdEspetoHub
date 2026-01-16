@@ -60,6 +60,7 @@
 - Acompanhamento publico:
   - Pagina `/pedido/:orderId` com timeline, status e fila.
   - Branding da loja aplicado (logo, cores, titulo, favicon).
+  - Ultimo pedido do usuario publico fica salvo em `localStorage` (inclusive mesa) e habilita CTA "Acompanhar agora" na vitrine.
   - Entrega finaliza em "Saiu para entrega" (sem status de motoboy).
   - Tempo total destacado ao finalizar.
 - Checkout (entrega):
@@ -74,7 +75,7 @@
 - Loja:
   - Tipos de pedido configuraveis (entrega, retirada, mesa).
 - Vitrine:
-  - Banner "Acompanhar pedido" apenas para publico e nao aparece em pedidos de mesa.
+  - Banner "Acompanhar pedido" para publico usando `localStorage` (inclui pedidos de mesa).
   - Botao "Info" abre sheet com endereco, contatos e horarios.
 
 ## Arquivos principais mexidos

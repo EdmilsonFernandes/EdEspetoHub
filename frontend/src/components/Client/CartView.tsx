@@ -447,7 +447,7 @@ export const CartView = ({
                     onClick={() => onChangeCustomer({ ...customer, table })}
                     className={`py-2.5 rounded-xl text-sm font-semibold border transition shadow-sm ${
                       customer.table === table
-                        ? "bg-gradient-to-br from-brand-primary to-brand-primary/80 text-white border-brand-primary ring-2 ring-brand-primary/30"
+                        ? "bg-white text-slate-900 border-brand-primary ring-2 ring-brand-primary/30 shadow-[inset_0_0_0_1px_rgba(15,23,42,0.2)]"
                         : "bg-white/80 border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-brand-primary/40"
                     }`}
                   >
