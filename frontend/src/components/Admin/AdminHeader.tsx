@@ -16,7 +16,10 @@ export function AdminHeader({ contextLabel = 'Painel da Loja' }: Props) {
   const { auth, logout } = useAuth();
   const { branding } = useTheme();
   const [planDetails, setPlanDetails] = useState(null);
-  const [showMobileDetails, setShowMobileDetails] = useState(false);
+  const [showMobileDetails, setShowMobileDetails] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return localStorage.getItem('adminHeader:details') === 'true';
+  });
 
   const storeName = branding?.brandName || auth?.store?.name;
   const storeSlug = auth?.store?.slug;
@@ -102,7 +105,15 @@ export function AdminHeader({ contextLabel = 'Painel da Loja' }: Props) {
         </div>
         <button
           type="button"
-          onClick={() => setShowMobileDetails((prev) => !prev)}
+          onClick={() =>
+            setShowMobileDetails((prev) => {
+              const next = !prev;
+              if (typeof window !== 'undefined') {
+                localStorage.setItem('adminHeader:details', String(next));
+              }
+              return next;
+            })
+          }
           className="md:hidden px-3 py-2 rounded-full text-xs font-semibold bg-white/15 hover:bg-white/25 transition border border-white/20"
         >
           {showMobileDetails ? 'Ocultar' : 'Detalhes'}
