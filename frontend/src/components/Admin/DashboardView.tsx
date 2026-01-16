@@ -119,7 +119,10 @@ export const DashboardView = ({ orders = [], customers = [] }) => {
     const productCount = {};
     orders.forEach((order) => {
       (order.items || []).forEach((item) => {
-        productCount[item.name] = (productCount[item.name] || 0) + item.qty;
+        const productName = item.name || item.productName || item.product?.name || item.title;
+        const qty = Number(item.qty ?? item.quantity ?? 0);
+        if (!productName || qty <= 0) return;
+        productCount[productName] = (productCount[productName] || 0) + qty;
       });
     });
 
