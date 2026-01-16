@@ -167,6 +167,20 @@ export const CartView = ({
         <ChevronLeft size={20} /> Continuar comprando
       </button>
 
+      {/* Resumo compacto (mobile) */}
+      <div className="sm:hidden mb-4 rounded-2xl border border-slate-200 bg-white shadow-sm px-4 py-3 flex items-center justify-between">
+        <div>
+          <p className="text-[11px] uppercase tracking-[0.3em] text-slate-400">Resumo rapido</p>
+          <p className="text-sm font-semibold text-slate-800">
+            {cartItems.reduce((acc, item) => acc + item.qty, 0)} itens
+          </p>
+        </div>
+        <div className="text-right">
+          <p className="text-[11px] text-slate-400">Total</p>
+          <p className="text-base font-bold text-slate-900">{formatCurrency(total)}</p>
+        </div>
+      </div>
+
       {/* Dados do cliente */}
       <div className="bg-white rounded-3xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-6 border border-gray-100">
         <div className="flex items-center justify-between mb-4 sm:mb-6">
