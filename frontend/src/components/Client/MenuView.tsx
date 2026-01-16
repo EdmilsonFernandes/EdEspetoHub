@@ -47,9 +47,9 @@ const Header = ({
       />
 
       {/* LOGO OFICIAL */}
-      {!compact && (
+      {( !compact || (compact && branding?.logoUrl) ) && (
         <div
-          className="w-10 h-10 sm:w-14 sm:h-14 rounded-full overflow-hidden border shadow-sm bg-white flex-shrink-0 flex items-center justify-center"
+          className={`${compact ? 'w-8 h-8' : 'w-10 h-10 sm:w-14 sm:h-14'} rounded-full overflow-hidden border shadow-sm bg-white flex-shrink-0 flex items-center justify-center`}
           style={{ borderColor: branding?.primaryColor, color: branding?.primaryColor, backgroundColor: '#fff' }}
         >
           {branding?.logoUrl ? (
