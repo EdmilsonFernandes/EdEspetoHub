@@ -563,6 +563,11 @@ export const ProductManager = ({ products, onProductsChange }) => {
                             onChange={(e) => {
                               const file = e.target.files?.[0];
                               if (!file) return;
+                              if (file.size > 3 * 1024 * 1024) {
+                                showToast('Imagem acima de 3MB. Reduza e tente novamente.', 'error');
+                                e.target.value = '';
+                                return;
+                              }
                               const reader = new FileReader();
                               reader.onload = () => {
                                 const result = reader.result?.toString() || '';
