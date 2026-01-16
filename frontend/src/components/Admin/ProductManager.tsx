@@ -118,6 +118,8 @@ export const ProductManager = ({ products, onProductsChange }) => {
 
   const handleEdit = (product) => {
     setInlineEditId(product.id);
+    setInlineDetailsId(product.id);
+    setInlineImageFile('');
     setInlineForm({
       name: product.name || '',
       price: product.price != null ? String(product.price) : '',
@@ -405,8 +407,8 @@ export const ProductManager = ({ products, onProductsChange }) => {
         </form>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <table className="w-full text-left">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-x-auto">
+        <table className="w-full text-left min-w-[680px]">
           <thead className="bg-gray-50 border-b">
             <tr>
               <th className="p-4 font-bold text-gray-600">Foto</th>
@@ -419,11 +421,11 @@ export const ProductManager = ({ products, onProductsChange }) => {
           <tbody className="divide-y">
             {products.map((product) => (
               <React.Fragment key={product.id}>
-                <tr className="hover:bg-gray-50">
-                  <td className="p-4">
-                    {product.imageUrl ? (
-                      <img src={product.imageUrl} className="w-10 h-10 rounded object-cover" alt="" />
-                    ) : (
+              <tr className={`hover:bg-gray-50 ${inlineEditId === product.id ? 'bg-amber-50/60' : ''}`}>
+                <td className="p-4">
+                  {product.imageUrl ? (
+                    <img src={product.imageUrl} className="w-10 h-10 rounded object-cover" alt="" />
+                  ) : (
                       <div className="w-10 h-10 bg-gray-200 rounded flex items-center justify-center">
                         <ImageIcon size={16} className="text-gray-400" />
                       </div>
@@ -454,11 +456,14 @@ export const ProductManager = ({ products, onProductsChange }) => {
                           onChange={(e) => setInlineForm((prev) => ({ ...prev, price: e.target.value }))}
                         />
                       </td>
-                      <td className="p-4 text-right space-x-2">
-                        <button
-                          onClick={handleInlineSave}
-                          className="text-emerald-600 hover:bg-emerald-50 p-2 rounded"
-                          disabled={saving}
+                    <td className="p-4 text-right space-x-2">
+                      <span className="mr-2 inline-flex items-center px-2 py-1 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700 border border-amber-200">
+                        Editando
+                      </span>
+                      <button
+                        onClick={handleInlineSave}
+                        className="text-emerald-600 hover:bg-emerald-50 p-2 rounded"
+                        disabled={saving}
                         >
                           <Save size={18} />
                         </button>
