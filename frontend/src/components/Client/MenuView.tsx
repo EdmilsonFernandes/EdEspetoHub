@@ -102,7 +102,7 @@ const Header = ({
               type="button"
               className="px-3 py-1.5 rounded-full text-xs font-semibold bg-brand-primary text-white"
             >
-              Vitrine
+              Cardapio
             </button>
             <button
               type="button"
