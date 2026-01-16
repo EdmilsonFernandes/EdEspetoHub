@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { CheckSquare, Clock, ChefHat, RefreshCcw, Plus, Minus, Hash, Volume2, VolumeX } from "lucide-react";
+import { CheckSquare, Clock, ChefHat, RefreshCcw, Plus, Minus, Hash, Volume2, VolumeX, MoreVertical } from "lucide-react";
 import { orderService } from "../../services/orderService";
 import { productService } from "../../services/productService";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
@@ -26,6 +26,7 @@ export const GrillQueue = () => {
     const saved = localStorage.getItem("queueSoundEnabled");
     return saved ? saved === "true" : true;
   });
+  const [actionsOpen, setActionsOpen] = useState(false);
   const previousIdsRef = useRef<string[]>([]);
   const audioContextRef = useRef<AudioContext | null>(null);
   const itemOrderRef = useRef<Map<string, Map<string, number>>>(new Map());
@@ -220,6 +221,17 @@ export const GrillQueue = () => {
     return () => clearInterval(timer);
   }, []);
 
+  useEffect(() => {
+    const handleClick = (event) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest("[data-queue-actions]")) {
+        setActionsOpen(false);
+      }
+    };
+    document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
+  }, []);
+
   const handleAdvance = async (orderId, status) => {
     try {
       setUpdating(orderId);
@@ -372,30 +384,56 @@ export const GrillQueue = () => {
           </span>
         </div>
         <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2">
-          <button
-            onClick={handleToggleSound}
-            className="flex items-center gap-2 text-sm px-3 py-2 rounded-lg bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 w-full sm:w-auto"
-          >
-            {soundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
-            {soundEnabled ? "Som ligado" : "Som desligado"}
-          </button>
-          <button
-            onClick={() => {
-              if (!soundEnabled) {
-                setSoundEnabled(true);
-              }
-              ensureAudioContext().then(() => playNewOrderSound()).catch(() => {});
-            }}
-            className="flex items-center gap-2 text-sm px-3 py-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 w-full sm:w-auto"
-          >
-            Testar som
-          </button>
-          <button
-            onClick={loadQueue}
-            className="flex items-center gap-2 text-sm px-3 py-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 w-full sm:w-auto"
-          >
-            <RefreshCcw size={16} /> Atualizar
-          </button>
+          <div className="relative w-full sm:w-auto" data-queue-actions>
+            <button
+              type="button"
+              onClick={() => setActionsOpen((prev) => !prev)}
+              className="flex items-center justify-between gap-2 text-sm px-3 py-2 rounded-lg bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 w-full sm:w-auto"
+            >
+              <span className="flex items-center gap-2">
+                <MoreVertical size={16} />
+                Acoes rapidas
+              </span>
+              <span className="text-xs text-gray-400">{soundEnabled ? "Som on" : "Som off"}</span>
+            </button>
+            {actionsOpen && (
+              <div className="absolute right-0 mt-2 w-full sm:w-52 rounded-xl border border-gray-200 bg-white shadow-lg overflow-hidden z-20">
+                <button
+                  onClick={() => {
+                    handleToggleSound();
+                    setActionsOpen(false);
+                  }}
+                  className="w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                >
+                  {soundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
+                  {soundEnabled ? "Som ligado" : "Som desligado"}
+                </button>
+                <button
+                  onClick={() => {
+                    if (!soundEnabled) {
+                      setSoundEnabled(true);
+                    }
+                    ensureAudioContext().then(() => playNewOrderSound()).catch(() => {});
+                    setActionsOpen(false);
+                  }}
+                  className="w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                >
+                  <Volume2 size={16} />
+                  Testar som
+                </button>
+                <button
+                  onClick={() => {
+                    loadQueue();
+                    setActionsOpen(false);
+                  }}
+                  className="w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                >
+                  <RefreshCcw size={16} />
+                  Atualizar fila
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
