@@ -1,8 +1,12 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_ChamaNoEspeto" targetNamespace="https://datony.com/chama-no-espeto/bpmn">
+<?xml version='1.0' encoding='utf-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_ChamaNoEspeto" targetNamespace="https://datony.com/chama-no-espeto/bpmn">
   <bpmn:process id="ChamaNoEspeto" name="Fluxo Chama no Espeto" isExecutable="false">
     <bpmn:laneSet id="LaneSet_Main">
       <bpmn:lane id="Lane_Customer" name="Cliente">
+        <bpmn:flowNodeRef>Start_Registration</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_SubmitRegistration</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_ConfirmEmail</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_RedirectPayment</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Start_CustomerJourney</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Task_AccessStore</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Task_AssembleOrder</bpmn:flowNodeRef>
@@ -13,6 +17,18 @@
         <bpmn:flowNodeRef>End_OrderDelivered</bpmn:flowNodeRef>
       </bpmn:lane>
       <bpmn:lane id="Lane_API" name="API / Backend">
+        <bpmn:flowNodeRef>Task_CreateUser</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_GenerateSlug</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_CreateStoreClosed</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_CreateSubscriptionPending</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_CreatePayment</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_SendEmailConfirmation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_SendPendingPaymentEmail</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_WebhookApproved</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_ConfirmPayment</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_ActivateSubscription</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_OpenStore</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_SendActivationEmail</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Task_ValidateStore</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Task_ValidateProducts</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gateway_OrderValid</bpmn:flowNodeRef>
@@ -32,60 +48,93 @@
       </bpmn:lane>
     </bpmn:laneSet>
 
-    <bpmn:startEvent id="Start_CustomerJourney" name="Cliente acessa loja online"/>
-    <bpmn:task id="Task_AccessStore" name="Abrir loja pelo slug (GET /stores/:slug)"/>
-    <bpmn:task id="Task_AssembleOrder" name="Montar e revisar pedido"/>
+    <bpmn:startEvent id="Start_Registration" name="Cadastro /api/auth/register" />
+    <bpmn:task id="Task_SubmitRegistration" name="Enviar cadastro" />
+    <bpmn:task id="Task_ConfirmEmail" name="Confirmar e-mail /verify-email" />
+    <bpmn:task id="Task_RedirectPayment" name="Redirect /payment/:id" />
+    <bpmn:startEvent id="Start_CustomerJourney" name="Cliente acessa loja online" />
+    <bpmn:task id="Task_AccessStore" name="Abrir loja pelo slug (GET /stores/:slug)" />
+    <bpmn:task id="Task_AssembleOrder" name="Montar e revisar pedido" />
     <bpmn:task id="Task_SendOrder" name="Enviar pedido (POST /stores/:slug/orders)">
       <bpmn:outgoing>Flow_SendToBackend</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:exclusiveGateway id="Gateway_AdminOrder" name="Pedido criado por admin?"/>
-    <bpmn:task id="Task_ReceivePix" name="Receber resumo + link (salvar ultimos 3 pedidos)"/>
-    <bpmn:task id="Task_ReturnMenu" name="Voltar para o cardapio"/>
-    <bpmn:endEvent id="End_OrderDelivered" name="Pedido entregue / retirada"/>
+    <bpmn:exclusiveGateway id="Gateway_AdminOrder" name="Pedido criado por admin?" />
+    <bpmn:task id="Task_ReceivePix" name="Receber resumo + link (salvar ultimos 3 pedidos)" />
+    <bpmn:task id="Task_ReturnMenu" name="Voltar para o cardapio" />
+    <bpmn:endEvent id="End_OrderDelivered" name="Pedido entregue / retirada" />
 
-    <bpmn:startEvent id="Start_AdminOps" name="Operação diária"/>
-    <bpmn:task id="Task_RegisterStore" name="Registrar loja e usuário (POST /auth/register)"/>
-    <bpmn:task id="Task_LoginDashboard" name="Login no painel interno (POST /auth/login)"/>
-    <bpmn:task id="Task_ManageCatalog" name="Criar/atualizar produtos (POST/PUT /stores/:id/products)"/>
-    <bpmn:task id="Task_UpdateStoreStatus" name="Publicar/pausar loja (PUT /stores/:id/status)"/>
-    <bpmn:task id="Task_MonitorQueue" name="Monitorar fila do churrasqueiro (atualização a cada 5s)"/>
-    <bpmn:task id="Task_PrepareOrder" name="Assar espetos e atualizar status"/>
-    <bpmn:task id="Task_ConfirmDelivery" name="Finalizar pedido e registrar pagamento"/>
+    <bpmn:startEvent id="Start_AdminOps" name="Operação diária" />
+    <bpmn:task id="Task_RegisterStore" name="Registrar loja e usuário (POST /auth/register)" />
+    <bpmn:task id="Task_LoginDashboard" name="Login no painel interno (POST /auth/login)" />
+    <bpmn:task id="Task_ManageCatalog" name="Criar/atualizar produtos (POST/PUT /stores/:id/products)" />
+    <bpmn:task id="Task_UpdateStoreStatus" name="Publicar/pausar loja (PUT /stores/:id/status)" />
+    <bpmn:task id="Task_MonitorQueue" name="Monitorar fila do churrasqueiro (atualização a cada 5s)" />
+    <bpmn:task id="Task_PrepareOrder" name="Assar espetos e atualizar status" />
+    <bpmn:task id="Task_ConfirmDelivery" name="Finalizar pedido e registrar pagamento" />
 
-    <bpmn:task id="Task_ValidateStore" name="Validar loja"/>
-    <bpmn:task id="Task_ValidateProducts" name="Validar itens e calcular total"/>
-    <bpmn:exclusiveGateway id="Gateway_OrderValid" name="Pedido válido?"/>
-    <bpmn:task id="Task_CreateOrder" name="Persistir pedido e itens"/>
-    <bpmn:task id="Task_ExposeOrderQueue" name="Expor pedido na fila"/>
-    <bpmn:task id="Task_NotifyPaymentStatus" name="Gerar notificacoes (WhatsApp/links)"/>
+    <bpmn:task id="Task_CreateUser" name="Criar usuario" />
+    <bpmn:task id="Task_GenerateSlug" name="Gerar slug unico" />
+    <bpmn:task id="Task_CreateStoreClosed" name="Criar loja open=false" />
+    <bpmn:task id="Task_CreateSubscriptionPending" name="Assinatura PENDING" />
+    <bpmn:task id="Task_CreatePayment" name="Gerar pagamento MP" />
+    <bpmn:task id="Task_SendEmailConfirmation" name="Enviar email confirmacao" />
+    <bpmn:task id="Task_SendPendingPaymentEmail" name="Enviar email pagamento pendente" />
+    <bpmn:task id="Task_WebhookApproved" name="Webhook MP aprovado" />
+    <bpmn:task id="Task_ConfirmPayment" name="Confirmar pagamento" />
+    <bpmn:task id="Task_ActivateSubscription" name="Assinatura ACTIVE + datas" />
+    <bpmn:task id="Task_OpenStore" name="Loja open=true" />
+    <bpmn:task id="Task_SendActivationEmail" name="Enviar email de ativacao" />
 
-    <bpmn:sequenceFlow id="Flow_StartToAccess" sourceRef="Start_CustomerJourney" targetRef="Task_AccessStore"/>
-    <bpmn:sequenceFlow id="Flow_AccessToAssemble" sourceRef="Task_AccessStore" targetRef="Task_AssembleOrder"/>
-    <bpmn:sequenceFlow id="Flow_AssembleToSend" sourceRef="Task_AssembleOrder" targetRef="Task_SendOrder"/>
-    <bpmn:sequenceFlow id="Flow_SendToBackend" sourceRef="Task_SendOrder" targetRef="Task_ValidateStore"/>
-    <bpmn:sequenceFlow id="Flow_ValidateStore" sourceRef="Task_ValidateStore" targetRef="Task_ValidateProducts"/>
-    <bpmn:sequenceFlow id="Flow_ValidateProducts" sourceRef="Task_ValidateProducts" targetRef="Gateway_OrderValid"/>
-    <bpmn:sequenceFlow id="Flow_InvalidOrder" sourceRef="Gateway_OrderValid" targetRef="Task_AssembleOrder" name="Rejeitado"/>
-    <bpmn:sequenceFlow id="Flow_ValidOrder" sourceRef="Gateway_OrderValid" targetRef="Task_CreateOrder" name="Aprovado"/>
-    <bpmn:sequenceFlow id="Flow_CreateToQueue" sourceRef="Task_CreateOrder" targetRef="Task_ExposeOrderQueue"/>
-    <bpmn:sequenceFlow id="Flow_QueueToCustomer" sourceRef="Task_ExposeOrderQueue" targetRef="Gateway_AdminOrder"/>
-    <bpmn:sequenceFlow id="Flow_AdminOrderYes" sourceRef="Gateway_AdminOrder" targetRef="Task_ReturnMenu" name="Sim"/>
-    <bpmn:sequenceFlow id="Flow_AdminOrderNo" sourceRef="Gateway_AdminOrder" targetRef="Task_ReceivePix" name="Nao"/>
-    <bpmn:sequenceFlow id="Flow_ReturnToAssemble" sourceRef="Task_ReturnMenu" targetRef="Task_AssembleOrder" name="Novo pedido"/>
-    <bpmn:sequenceFlow id="Flow_QueueToDashboard" sourceRef="Task_ExposeOrderQueue" targetRef="Task_MonitorQueue"/>
-    <bpmn:sequenceFlow id="Flow_PaymentSync" sourceRef="Task_NotifyPaymentStatus" targetRef="Task_MonitorQueue"/>
-    <bpmn:sequenceFlow id="Flow_PrepareToConfirm" sourceRef="Task_PrepareOrder" targetRef="Task_ConfirmDelivery"/>
-    <bpmn:sequenceFlow id="Flow_ConfirmToEnd" sourceRef="Task_ConfirmDelivery" targetRef="End_OrderDelivered"/>
-    <bpmn:sequenceFlow id="Flow_AdminStart" sourceRef="Start_AdminOps" targetRef="Task_RegisterStore"/>
-    <bpmn:sequenceFlow id="Flow_RegisterToLogin" sourceRef="Task_RegisterStore" targetRef="Task_LoginDashboard"/>
-    <bpmn:sequenceFlow id="Flow_LoginToCatalog" sourceRef="Task_LoginDashboard" targetRef="Task_ManageCatalog"/>
-    <bpmn:sequenceFlow id="Flow_CatalogToStatus" sourceRef="Task_ManageCatalog" targetRef="Task_UpdateStoreStatus"/>
-    <bpmn:sequenceFlow id="Flow_StatusToQueue" sourceRef="Task_UpdateStoreStatus" targetRef="Task_MonitorQueue"/>
-    <bpmn:sequenceFlow id="Flow_MonitorToPrepare" sourceRef="Task_MonitorQueue" targetRef="Task_PrepareOrder"/>
-    <bpmn:sequenceFlow id="Flow_QueueBackPayment" sourceRef="Task_ExposeOrderQueue" targetRef="Task_NotifyPaymentStatus"/>
+    <bpmn:task id="Task_ValidateStore" name="Validar loja" />
+    <bpmn:task id="Task_ValidateProducts" name="Validar itens e calcular total" />
+    <bpmn:exclusiveGateway id="Gateway_OrderValid" name="Pedido válido?" />
+    <bpmn:task id="Task_CreateOrder" name="Persistir pedido e itens" />
+    <bpmn:task id="Task_ExposeOrderQueue" name="Expor pedido na fila" />
+    <bpmn:task id="Task_NotifyPaymentStatus" name="Gerar notificacoes (WhatsApp/links)" />
+
+    <bpmn:sequenceFlow id="Flow_RegisterStart" sourceRef="Start_Registration" targetRef="Task_SubmitRegistration" />
+    <bpmn:sequenceFlow id="Flow_SubmitToCreateUser" sourceRef="Task_SubmitRegistration" targetRef="Task_CreateUser" />
+    <bpmn:sequenceFlow id="Flow_CreateUserToSlug" sourceRef="Task_CreateUser" targetRef="Task_GenerateSlug" />
+    <bpmn:sequenceFlow id="Flow_SlugToStore" sourceRef="Task_GenerateSlug" targetRef="Task_CreateStoreClosed" />
+    <bpmn:sequenceFlow id="Flow_StoreToSubscription" sourceRef="Task_CreateStoreClosed" targetRef="Task_CreateSubscriptionPending" />
+    <bpmn:sequenceFlow id="Flow_SubscriptionToPayment" sourceRef="Task_CreateSubscriptionPending" targetRef="Task_CreatePayment" />
+    <bpmn:sequenceFlow id="Flow_PaymentToEmailConfirm" sourceRef="Task_CreatePayment" targetRef="Task_SendEmailConfirmation" />
+    <bpmn:sequenceFlow id="Flow_EmailConfirmToUser" sourceRef="Task_SendEmailConfirmation" targetRef="Task_ConfirmEmail" />
+    <bpmn:sequenceFlow id="Flow_ConfirmToPendingEmail" sourceRef="Task_ConfirmEmail" targetRef="Task_SendPendingPaymentEmail" />
+    <bpmn:sequenceFlow id="Flow_PendingToRedirect" sourceRef="Task_SendPendingPaymentEmail" targetRef="Task_RedirectPayment" />
+    <bpmn:sequenceFlow id="Flow_WebhookApproved" sourceRef="Task_RedirectPayment" targetRef="Task_WebhookApproved" />
+    <bpmn:sequenceFlow id="Flow_WebhookToConfirm" sourceRef="Task_WebhookApproved" targetRef="Task_ConfirmPayment" />
+    <bpmn:sequenceFlow id="Flow_ConfirmToActivate" sourceRef="Task_ConfirmPayment" targetRef="Task_ActivateSubscription" />
+    <bpmn:sequenceFlow id="Flow_ActivateToOpenStore" sourceRef="Task_ActivateSubscription" targetRef="Task_OpenStore" />
+    <bpmn:sequenceFlow id="Flow_OpenToActivationEmail" sourceRef="Task_OpenStore" targetRef="Task_SendActivationEmail" />
+
+    <bpmn:sequenceFlow id="Flow_StartToAccess" sourceRef="Start_CustomerJourney" targetRef="Task_AccessStore" />
+    <bpmn:sequenceFlow id="Flow_AccessToAssemble" sourceRef="Task_AccessStore" targetRef="Task_AssembleOrder" />
+    <bpmn:sequenceFlow id="Flow_AssembleToSend" sourceRef="Task_AssembleOrder" targetRef="Task_SendOrder" />
+    <bpmn:sequenceFlow id="Flow_SendToBackend" sourceRef="Task_SendOrder" targetRef="Task_ValidateStore" />
+    <bpmn:sequenceFlow id="Flow_ValidateStore" sourceRef="Task_ValidateStore" targetRef="Task_ValidateProducts" />
+    <bpmn:sequenceFlow id="Flow_ValidateProducts" sourceRef="Task_ValidateProducts" targetRef="Gateway_OrderValid" />
+    <bpmn:sequenceFlow id="Flow_InvalidOrder" sourceRef="Gateway_OrderValid" targetRef="Task_AssembleOrder" name="Rejeitado" />
+    <bpmn:sequenceFlow id="Flow_ValidOrder" sourceRef="Gateway_OrderValid" targetRef="Task_CreateOrder" name="Aprovado" />
+    <bpmn:sequenceFlow id="Flow_CreateToQueue" sourceRef="Task_CreateOrder" targetRef="Task_ExposeOrderQueue" />
+    <bpmn:sequenceFlow id="Flow_QueueToCustomer" sourceRef="Task_ExposeOrderQueue" targetRef="Gateway_AdminOrder" />
+    <bpmn:sequenceFlow id="Flow_AdminOrderYes" sourceRef="Gateway_AdminOrder" targetRef="Task_ReturnMenu" name="Sim" />
+    <bpmn:sequenceFlow id="Flow_AdminOrderNo" sourceRef="Gateway_AdminOrder" targetRef="Task_ReceivePix" name="Nao" />
+    <bpmn:sequenceFlow id="Flow_ReturnToAssemble" sourceRef="Task_ReturnMenu" targetRef="Task_AssembleOrder" name="Novo pedido" />
+    <bpmn:sequenceFlow id="Flow_QueueToDashboard" sourceRef="Task_ExposeOrderQueue" targetRef="Task_MonitorQueue" />
+    <bpmn:sequenceFlow id="Flow_PaymentSync" sourceRef="Task_NotifyPaymentStatus" targetRef="Task_MonitorQueue" />
+    <bpmn:sequenceFlow id="Flow_PrepareToConfirm" sourceRef="Task_PrepareOrder" targetRef="Task_ConfirmDelivery" />
+    <bpmn:sequenceFlow id="Flow_ConfirmToEnd" sourceRef="Task_ConfirmDelivery" targetRef="End_OrderDelivered" />
+    <bpmn:sequenceFlow id="Flow_AdminStart" sourceRef="Start_AdminOps" targetRef="Task_RegisterStore" />
+    <bpmn:sequenceFlow id="Flow_RegisterToLogin" sourceRef="Task_RegisterStore" targetRef="Task_LoginDashboard" />
+    <bpmn:sequenceFlow id="Flow_LoginToCatalog" sourceRef="Task_LoginDashboard" targetRef="Task_ManageCatalog" />
+    <bpmn:sequenceFlow id="Flow_CatalogToStatus" sourceRef="Task_ManageCatalog" targetRef="Task_UpdateStoreStatus" />
+    <bpmn:sequenceFlow id="Flow_StatusToQueue" sourceRef="Task_UpdateStoreStatus" targetRef="Task_MonitorQueue" />
+    <bpmn:sequenceFlow id="Flow_MonitorToPrepare" sourceRef="Task_MonitorQueue" targetRef="Task_PrepareOrder" />
+    <bpmn:sequenceFlow id="Flow_QueueBackPayment" sourceRef="Task_ExposeOrderQueue" targetRef="Task_NotifyPaymentStatus" />
   </bpmn:process>
 
   <bpmndi:BPMNDiagram id="BPMNDiagram_ChamaNoEspeto">
-    <bpmndi:BPMNPlane id="BPMNPlane_ChamaNoEspeto" bpmnElement="ChamaNoEspeto"/>
+    <bpmndi:BPMNPlane id="BPMNPlane_ChamaNoEspeto" bpmnElement="ChamaNoEspeto"><bpmndi:BPMNShape id="DI_Start_Registration" bpmnElement="Start_Registration"><dc:Bounds x="120" y="120" width="36" height="36" /></bpmndi:BPMNShape><bpmndi:BPMNShape id="DI_Start_CustomerJourney" bpmnElement="Start_CustomerJourney"><dc:Bounds x="380" y="120" width="36" height="36" /></bpmndi:BPMNShape><bpmndi:BPMNShape id="DI_Start_AdminOps" bpmnElement="Start_AdminOps"><dc:Bounds x="640" y="120" width="36" height="36" /></bpmndi:BPMNShape><bpmndi:BPMNShape id="DI_End_OrderDelivered" bpmnElement="End_OrderDelivered"><dc:Bounds x="120" y="270" width="36" height="36" /></bpmndi:BPMNShape><bpmndi:BPMNShape id="DI_Task_SubmitRegistration" bpmnElement="Task_SubmitRegistration"><dc:Bounds x="380" y="270" width="140" height="80" /></bpmndi:BPMNShape><bpmndi:BPMNShape id="DI_Task_ConfirmEmail" bpmnElement="Task_ConfirmEmail"><dc:Bounds x="640" y="270" width="140" height="80" /></bpmndi:BPMNShape><bpmndi:BPMNShape id="DI_Task_RedirectPayment" bpmnElement="Task_RedirectPayment"><dc:Bounds x="120" y="420" width="140" height="80" /></bpmndi:BPMNShape><bpmndi:BPMNShape id="DI_Task_AccessStore" bpmnElement="Task_AccessStore"><dc:Bounds x="380" y="420" width="140" height="80" /></bpmndi:BPMNShape><bpmndi:BPMNShape id="DI_Task_AssembleOrder" bpmnElement="Task_AssembleOrder"><dc:Bounds x="640" y="420" width="140" height="80" /></bpmndi:BPMNShape><bpmndi:BPMNShape id="DI_Task_SendOrder" bpmnElement="Task_SendOrder"><dc:Bounds x="120" y="570" width="140" height="80" /></bpmndi:BPMNShape><bpmndi:BPMNShape id="DI_Task_ReceivePix" bpmnElement="Task_ReceivePix"><dc:Bounds x="380" y="570" width="140" height="80" /></bpmndi:BPMNShape><bpmndi:BPMNShape id="DI_Task_ReturnMenu" bpmnElement="Task_ReturnMenu"><dc:Bounds x="640" y="570" width="140" height="80" /></bpmndi:BPMNShape><bpmndi:BPMNShape id="DI_Task_RegisterStore" bpmnElement="Task_RegisterStore"><dc:Bounds x="120" y="720" width="140" height="80" /></bpmndi:BPMNShape><bpmndi:BPMNShape id="DI_Task_LoginDashboard" bpmnElement="Task_LoginDashboard"><dc:Bounds x="380" y="720" width="140" height="80" /></bpmndi:BPMNShape><bpmndi:BPMNShape id="DI_Task_ManageCatalog" bpmnElement="Task_ManageCatalog"><dc:Bounds x="640" y="720" width="140" height="80" /></bpmndi:BPMNShape><bpmndi:BPMNShape id="DI_Task_UpdateStoreStatus" bpmnElement="Task_UpdateStoreStatus"><dc:Bounds x="120" y="870" width="140" height="80" /></bpmndi:BPMNShape><bpmndi:BPMNShape id="DI_Task_MonitorQueue" bpmnElement="Task_MonitorQueue"><dc:Bounds x="380" y="870" width="140" height="80" /></bpmndi:BPMNShape><bpmndi:BPMNShape id="DI_Task_PrepareOrder" bpmnElement="Task_PrepareOrder"><dc:Bounds x="640" y="870" width="140" height="80" /></bpmndi:BPMNShape><bpmndi:BPMNShape id="DI_Task_ConfirmDelivery" bpmnElement="Task_ConfirmDelivery"><dc:Bounds x="120" y="1020" width="140" height="80" /></bpmndi:BPMNShape><bpmndi:BPMNShape id="DI_Task_CreateUser" bpmnElement="Task_CreateUser"><dc:Bounds x="380" y="1020" width="140" height="80" /></bpmndi:BPMNShape><bpmndi:BPMNShape id="DI_Task_GenerateSlug" bpmnElement="Task_GenerateSlug"><dc:Bounds x="640" y="1020" width="140" height="80" /></bpmndi:BPMNShape><bpmndi:BPMNShape id="DI_Task_CreateStoreClosed" bpmnElement="Task_CreateStoreClosed"><dc:Bounds x="120" y="1170" width="140" height="80" /></bpmndi:BPMNShape><bpmndi:BPMNShape id="DI_Task_CreateSubscriptionPending" bpmnElement="Task_CreateSubscriptionPending"><dc:Bounds x="380" y="1170" width="140" height="80" /></bpmndi:BPMNShape><bpmndi:BPMNShape id="DI_Task_CreatePayment" bpmnElement="Task_CreatePayment"><dc:Bounds x="640" y="1170" width="140" height="80" /></bpmndi:BPMNShape><bpmndi:BPMNShape id="DI_Task_SendEmailConfirmation" bpmnElement="Task_SendEmailConfirmation"><dc:Bounds x="120" y="1320" width="140" height="80" /></bpmndi:BPMNShape><bpmndi:BPMNShape id="DI_Task_SendPendingPaymentEmail" bpmnElement="Task_SendPendingPaymentEmail"><dc:Bounds x="380" y="1320" width="140" height="80" /></bpmndi:BPMNShape><bpmndi:BPMNShape id="DI_Task_WebhookApproved" bpmnElement="Task_WebhookApproved"><dc:Bounds x="640" y="1320" width="140" height="80" /></bpmndi:BPMNShape><bpmndi:BPMNShape id="DI_Task_ConfirmPayment" bpmnElement="Task_ConfirmPayment"><dc:Bounds x="120" y="1470" width="140" height="80" /></bpmndi:BPMNShape><bpmndi:BPMNShape id="DI_Task_ActivateSubscription" bpmnElement="Task_ActivateSubscription"><dc:Bounds x="380" y="1470" width="140" height="80" /></bpmndi:BPMNShape><bpmndi:BPMNShape id="DI_Task_OpenStore" bpmnElement="Task_OpenStore"><dc:Bounds x="640" y="1470" width="140" height="80" /></bpmndi:BPMNShape><bpmndi:BPMNShape id="DI_Task_SendActivationEmail" bpmnElement="Task_SendActivationEmail"><dc:Bounds x="120" y="1620" width="140" height="80" /></bpmndi:BPMNShape><bpmndi:BPMNShape id="DI_Task_ValidateStore" bpmnElement="Task_ValidateStore"><dc:Bounds x="380" y="1620" width="140" height="80" /></bpmndi:BPMNShape><bpmndi:BPMNShape id="DI_Task_ValidateProducts" bpmnElement="Task_ValidateProducts"><dc:Bounds x="640" y="1620" width="140" height="80" /></bpmndi:BPMNShape><bpmndi:BPMNShape id="DI_Task_CreateOrder" bpmnElement="Task_CreateOrder"><dc:Bounds x="120" y="1770" width="140" height="80" /></bpmndi:BPMNShape><bpmndi:BPMNShape id="DI_Task_ExposeOrderQueue" bpmnElement="Task_ExposeOrderQueue"><dc:Bounds x="380" y="1770" width="140" height="80" /></bpmndi:BPMNShape><bpmndi:BPMNShape id="DI_Task_NotifyPaymentStatus" bpmnElement="Task_NotifyPaymentStatus"><dc:Bounds x="640" y="1770" width="140" height="80" /></bpmndi:BPMNShape><bpmndi:BPMNShape id="DI_Gateway_AdminOrder" bpmnElement="Gateway_AdminOrder"><dc:Bounds x="120" y="1920" width="50" height="50" /></bpmndi:BPMNShape><bpmndi:BPMNShape id="DI_Gateway_OrderValid" bpmnElement="Gateway_OrderValid"><dc:Bounds x="380" y="1920" width="50" height="50" /></bpmndi:BPMNShape><bpmndi:BPMNEdge id="DI_Flow_RegisterStart" bpmnElement="Flow_RegisterStart"><di:waypoint x="156" y="138.0" /><di:waypoint x="380" y="310.0" /></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="DI_Flow_SubmitToCreateUser" bpmnElement="Flow_SubmitToCreateUser"><di:waypoint x="520" y="310.0" /><di:waypoint x="380" y="1060.0" /></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="DI_Flow_CreateUserToSlug" bpmnElement="Flow_CreateUserToSlug"><di:waypoint x="520" y="1060.0" /><di:waypoint x="640" y="1060.0" /></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="DI_Flow_SlugToStore" bpmnElement="Flow_SlugToStore"><di:waypoint x="780" y="1060.0" /><di:waypoint x="120" y="1210.0" /></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="DI_Flow_StoreToSubscription" bpmnElement="Flow_StoreToSubscription"><di:waypoint x="260" y="1210.0" /><di:waypoint x="380" y="1210.0" /></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="DI_Flow_SubscriptionToPayment" bpmnElement="Flow_SubscriptionToPayment"><di:waypoint x="520" y="1210.0" /><di:waypoint x="640" y="1210.0" /></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="DI_Flow_PaymentToEmailConfirm" bpmnElement="Flow_PaymentToEmailConfirm"><di:waypoint x="780" y="1210.0" /><di:waypoint x="120" y="1360.0" /></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="DI_Flow_EmailConfirmToUser" bpmnElement="Flow_EmailConfirmToUser"><di:waypoint x="260" y="1360.0" /><di:waypoint x="640" y="310.0" /></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="DI_Flow_ConfirmToPendingEmail" bpmnElement="Flow_ConfirmToPendingEmail"><di:waypoint x="780" y="310.0" /><di:waypoint x="380" y="1360.0" /></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="DI_Flow_PendingToRedirect" bpmnElement="Flow_PendingToRedirect"><di:waypoint x="520" y="1360.0" /><di:waypoint x="120" y="460.0" /></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="DI_Flow_WebhookApproved" bpmnElement="Flow_WebhookApproved"><di:waypoint x="260" y="460.0" /><di:waypoint x="640" y="1360.0" /></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="DI_Flow_WebhookToConfirm" bpmnElement="Flow_WebhookToConfirm"><di:waypoint x="780" y="1360.0" /><di:waypoint x="120" y="1510.0" /></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="DI_Flow_ConfirmToActivate" bpmnElement="Flow_ConfirmToActivate"><di:waypoint x="260" y="1510.0" /><di:waypoint x="380" y="1510.0" /></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="DI_Flow_ActivateToOpenStore" bpmnElement="Flow_ActivateToOpenStore"><di:waypoint x="520" y="1510.0" /><di:waypoint x="640" y="1510.0" /></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="DI_Flow_OpenToActivationEmail" bpmnElement="Flow_OpenToActivationEmail"><di:waypoint x="780" y="1510.0" /><di:waypoint x="120" y="1660.0" /></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="DI_Flow_StartToAccess" bpmnElement="Flow_StartToAccess"><di:waypoint x="416" y="138.0" /><di:waypoint x="380" y="460.0" /></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="DI_Flow_AccessToAssemble" bpmnElement="Flow_AccessToAssemble"><di:waypoint x="520" y="460.0" /><di:waypoint x="640" y="460.0" /></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="DI_Flow_AssembleToSend" bpmnElement="Flow_AssembleToSend"><di:waypoint x="780" y="460.0" /><di:waypoint x="120" y="610.0" /></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="DI_Flow_SendToBackend" bpmnElement="Flow_SendToBackend"><di:waypoint x="260" y="610.0" /><di:waypoint x="380" y="1660.0" /></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="DI_Flow_ValidateStore" bpmnElement="Flow_ValidateStore"><di:waypoint x="520" y="1660.0" /><di:waypoint x="640" y="1660.0" /></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="DI_Flow_ValidateProducts" bpmnElement="Flow_ValidateProducts"><di:waypoint x="780" y="1660.0" /><di:waypoint x="380" y="1945.0" /></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="DI_Flow_InvalidOrder" bpmnElement="Flow_InvalidOrder"><di:waypoint x="430" y="1945.0" /><di:waypoint x="640" y="460.0" /></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="DI_Flow_ValidOrder" bpmnElement="Flow_ValidOrder"><di:waypoint x="430" y="1945.0" /><di:waypoint x="120" y="1810.0" /></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="DI_Flow_CreateToQueue" bpmnElement="Flow_CreateToQueue"><di:waypoint x="260" y="1810.0" /><di:waypoint x="380" y="1810.0" /></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="DI_Flow_QueueToCustomer" bpmnElement="Flow_QueueToCustomer"><di:waypoint x="520" y="1810.0" /><di:waypoint x="120" y="1945.0" /></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="DI_Flow_AdminOrderYes" bpmnElement="Flow_AdminOrderYes"><di:waypoint x="170" y="1945.0" /><di:waypoint x="640" y="610.0" /></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="DI_Flow_AdminOrderNo" bpmnElement="Flow_AdminOrderNo"><di:waypoint x="170" y="1945.0" /><di:waypoint x="380" y="610.0" /></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="DI_Flow_ReturnToAssemble" bpmnElement="Flow_ReturnToAssemble"><di:waypoint x="780" y="610.0" /><di:waypoint x="640" y="460.0" /></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="DI_Flow_QueueToDashboard" bpmnElement="Flow_QueueToDashboard"><di:waypoint x="520" y="1810.0" /><di:waypoint x="380" y="910.0" /></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="DI_Flow_PaymentSync" bpmnElement="Flow_PaymentSync"><di:waypoint x="780" y="1810.0" /><di:waypoint x="380" y="910.0" /></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="DI_Flow_PrepareToConfirm" bpmnElement="Flow_PrepareToConfirm"><di:waypoint x="780" y="910.0" /><di:waypoint x="120" y="1060.0" /></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="DI_Flow_ConfirmToEnd" bpmnElement="Flow_ConfirmToEnd"><di:waypoint x="260" y="1060.0" /><di:waypoint x="120" y="288.0" /></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="DI_Flow_AdminStart" bpmnElement="Flow_AdminStart"><di:waypoint x="676" y="138.0" /><di:waypoint x="120" y="760.0" /></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="DI_Flow_RegisterToLogin" bpmnElement="Flow_RegisterToLogin"><di:waypoint x="260" y="760.0" /><di:waypoint x="380" y="760.0" /></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="DI_Flow_LoginToCatalog" bpmnElement="Flow_LoginToCatalog"><di:waypoint x="520" y="760.0" /><di:waypoint x="640" y="760.0" /></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="DI_Flow_CatalogToStatus" bpmnElement="Flow_CatalogToStatus"><di:waypoint x="780" y="760.0" /><di:waypoint x="120" y="910.0" /></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="DI_Flow_StatusToQueue" bpmnElement="Flow_StatusToQueue"><di:waypoint x="260" y="910.0" /><di:waypoint x="380" y="910.0" /></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="DI_Flow_MonitorToPrepare" bpmnElement="Flow_MonitorToPrepare"><di:waypoint x="520" y="910.0" /><di:waypoint x="640" y="910.0" /></bpmndi:BPMNEdge><bpmndi:BPMNEdge id="DI_Flow_QueueBackPayment" bpmnElement="Flow_QueueBackPayment"><di:waypoint x="520" y="1810.0" /><di:waypoint x="640" y="1810.0" /></bpmndi:BPMNEdge></bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>

@@ -180,13 +180,13 @@ flowchart TD
   E --> F[Gerar pagamento MP]
   F --> G[Enviar email confirmacao]
   G --> H[Confirmar e-mail /verify-email]
-  H --> I[Criar pagamento]
-  I --> J[Enviar email pagamento pendente]
-  I --> K[Redirect /payment/:id]
-  L[Webhook MP aprovado] --> M[Confirmar pagamento]
-  M --> N[Assinatura ACTIVE + datas]
-  M --> O[Loja open=true]
-  M --> P[Enviar email de ativacao]
+  H --> I[Enviar email pagamento pendente]
+  I --> J[Redirect /payment/:id]
+  J --> K[Webhook MP aprovado]
+  K --> L[Confirmar pagamento]
+  L --> M[Assinatura ACTIVE + datas]
+  M --> N[Loja open=true]
+  N --> O[Enviar email de ativacao]
 ```
 
 ## Deploy no EC2 (resumo rapido)
