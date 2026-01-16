@@ -224,7 +224,7 @@ export function StorePage() {
         const raw = localStorage.getItem(`lastOrder:${storeSlug}`);
         if (raw) {
           const parsed = JSON.parse(raw);
-          const shouldShow = parsed?.id && parsed?.type !== 'table';
+          const shouldShow = parsed?.id;
           setLastPublicOrderId(shouldShow ? parsed.id : '');
         } else {
           setLastPublicOrderId('');
@@ -450,12 +450,10 @@ export function StorePage() {
         pixKey,
         table: customer.table,
       });
-      if (customer.type !== 'table') {
-        localStorage.setItem(
-          `lastOrder:${storeSlug}`,
-          JSON.stringify({ id: demoId, createdAt: Date.now(), type: customer.type })
-        );
-      }
+      localStorage.setItem(
+        `lastOrder:${storeSlug}`,
+        JSON.stringify({ id: demoId, createdAt: Date.now(), type: customer.type })
+      );
       sessionStorage.setItem(
         `demo:order:${demoId}`,
         JSON.stringify({
@@ -568,7 +566,7 @@ export function StorePage() {
       pixKey,
       table: customer.table,
     });
-    if (createdOrder?.id && !user?.token && customer.type !== 'table') {
+    if (createdOrder?.id && !user?.token) {
       localStorage.setItem(
         `lastOrder:${storeSlug}`,
         JSON.stringify({ id: createdOrder.id, createdAt: Date.now(), type: customer.type })
