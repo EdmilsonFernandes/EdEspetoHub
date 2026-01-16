@@ -18,6 +18,7 @@ export const GrillQueue = () => {
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState({});
+  const [activeTab, setActiveTab] = useState<'queue' | 'completed'>('queue');
   const [currentTime, setCurrentTime] = useState(Date.now());
   const [error, setError] = useState('');
   const [updating, setUpdating] = useState<string | null>(null);
@@ -395,11 +396,32 @@ export const GrillQueue = () => {
         <div className="flex flex-wrap items-center gap-2 text-gray-700 font-semibold">
           <ChefHat className="text-brand-primary" />
           Fila do Churrasqueiro
-          <span className="ml-2 px-2 py-0.5 rounded-full text-xs font-bold bg-brand-primary text-white">
-            {sortedQueue.length}
-          </span>
         </div>
         <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2">
+          <div className="flex flex-wrap gap-2 order-2 sm:order-none">
+            {[
+              { id: 'queue', label: 'Fila', count: sortedQueue.length },
+              { id: 'completed', label: 'Finalizados hoje', count: completedToday.length },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id as 'queue' | 'completed')}
+                className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition ${
+                  activeTab === tab.id
+                    ? 'bg-brand-primary text-white shadow-sm'
+                    : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                }`}
+              >
+                {tab.label}
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                  activeTab === tab.id ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
+                }`}>
+                  {tab.count}
+                </span>
+              </button>
+            ))}
+          </div>
           <div className="relative w-full sm:w-auto" data-queue-actions>
             <button
               type="button"
@@ -453,311 +475,304 @@ export const GrillQueue = () => {
         </div>
       </div>
 
-      {/* LISTA */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-        {sortedQueue.map((order, index) => (
-          <div
-            key={order.id}
-            className="relative w-full max-w-full bg-gradient-to-br from-white via-white to-slate-50 p-4 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md transition"
-          >
-            {/* HEADER DO CARD */}
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
-              <div className="relative flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1 text-[11px] text-gray-600 uppercase font-bold">
-                  <Hash size={14} className="text-brand-primary" /> Fila
-                  <span className={`ml-1 px-2.5 py-1 rounded-full text-xs font-black shadow-sm ${getPriorityTone(index + 1)}`}>
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-                </div>
+      {activeTab === 'queue' && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 xl:gap-4">
+          {sortedQueue.map((order, index) => (
+            <div
+              key={order.id}
+              className="relative w-full max-w-full bg-gradient-to-br from-white via-white to-slate-50 p-3 sm:p-4 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md transition"
+            >
+              {/* HEADER DO CARD */}
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
+                <div className="relative flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1 text-[11px] text-gray-600 uppercase font-bold">
+                    <Hash size={14} className="text-brand-primary" /> Fila
+                    <span className={`ml-1 px-2.5 py-1 rounded-full text-xs font-black shadow-sm ${getPriorityTone(index + 1)}`}>
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                  </div>
 
-                <p className="text-sm text-gray-500">
-                  {formatDateTime(order.createdAt)}
-                </p>
+                  <p className="text-sm text-gray-500">
+                    {formatDateTime(order.createdAt)}
+                  </p>
 
-                <h3 className="text-lg font-bold text-gray-800 truncate">
-                  Cliente: {order.customerName || order.name || "Cliente"}
-                </h3>
+                  <h3 className="text-lg font-bold text-gray-800 truncate">
+                    Cliente: {order.customerName || order.name || "Cliente"}
+                  </h3>
 
-                <p className="text-xs text-gray-500 uppercase break-words">
-                  {order.type === "table" && order.table ? (
-                    <span className="font-semibold text-gray-800">Mesa {order.table}</span>
-                  ) : (
-                    <>
-                      {formatOrderType(order.type)}
-                      {order.table && (
-                        <span className="font-semibold text-gray-800"> · Mesa {order.table}</span>
-                      )}
-                    </>
-                  )}
-                </p>
-                {order.phone && (
-                  <p className="text-xs text-gray-500 break-words">{order.phone}</p>
-                )}
-
-                <p className="text-xs text-gray-500 uppercase mt-1 inline-flex flex-wrap items-center gap-2">
-                  Pagamento:
-                  {(() => {
-                    const paymentMeta = getPaymentMethodMeta(order.payment);
-                    return (
+                  <p className="text-xs text-gray-500 uppercase break-words">
+                    {order.type === "table" && order.table ? (
+                      <span className="font-semibold text-gray-800">Mesa {order.table}</span>
+                    ) : (
                       <>
-                        {paymentMeta.icon && (
-                          <img
-                            src={paymentMeta.icon}
-                            alt={paymentMeta.label}
-                            className="h-4 w-4 object-contain"
-                          />
+                        {formatOrderType(order.type)}
+                        {order.table && (
+                          <span className="font-semibold text-gray-800"> · Mesa {order.table}</span>
                         )}
-                        <span>{paymentMeta.label}</span>
                       </>
-                    );
-                  })()}
-                </p>
-              </div>
+                    )}
+                  </p>
+                  {order.phone && (
+                    <p className="text-xs text-gray-500 break-words">{order.phone}</p>
+                  )}
 
-              <div className="flex flex-row sm:flex-col items-center sm:items-end gap-2">
-                <span
-                  className={`px-2 py-1 text-xs font-bold rounded ${getStatusStyles(order.status).className}`}
-                >
-                  {getStatusStyles(order.status).label}
-                </span>
-                <div className="px-3 py-1 rounded-full bg-brand-primary text-white font-black flex items-center gap-2 shadow-sm text-xs">
-                  <Clock size={12} className="text-white" />
-                  <span className="tabular-nums">
-                    {elapsedTime[order.id] || "0s"}
+                  <p className="text-xs text-gray-500 uppercase mt-1 inline-flex flex-wrap items-center gap-2">
+                    Pagamento:
+                    {(() => {
+                      const paymentMeta = getPaymentMethodMeta(order.payment);
+                      return (
+                        <>
+                          {paymentMeta.icon && (
+                            <img
+                              src={paymentMeta.icon}
+                              alt={paymentMeta.label}
+                              className="h-4 w-4 object-contain"
+                            />
+                          )}
+                          <span>{paymentMeta.label}</span>
+                        </>
+                      );
+                    })()}
+                  </p>
+                </div>
+
+                <div className="flex flex-row sm:flex-col items-center sm:items-end gap-2">
+                  <span
+                    className={`px-2 py-1 text-xs font-bold rounded ${getStatusStyles(order.status).className}`}
+                  >
+                    {getStatusStyles(order.status).label}
                   </span>
+                  <div className="px-3 py-1 rounded-full bg-brand-primary text-white font-black flex items-center gap-2 shadow-sm text-xs">
+                    <Clock size={12} className="text-white" />
+                    <span className="tabular-nums">
+                      {elapsedTime[order.id] || "0s"}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* LISTA DE ITENS */}
-            <div className="mt-4 space-y-2">
-              {getOrderedItems(order.id, order.items || []).map((item) => (
-                <div
-                  key={item.id}
-                  className="flex justify-between text-sm text-gray-700 items-center gap-3"
-                >
-                  <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <button
-                        onClick={() => handleQuantityChange(order.id, item.id, -1)}
-                        className="p-1 rounded-full bg-gray-100 hover:bg-gray-200"
-                      >
-                        <Minus size={14} />
-                      </button>
+              {/* LISTA DE ITENS */}
+              <div className="mt-4 space-y-2">
+                {getOrderedItems(order.id, order.items || []).map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex justify-between text-sm text-gray-700 items-center gap-3"
+                  >
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <button
+                          onClick={() => handleQuantityChange(order.id, item.id, -1)}
+                          className="p-1 rounded-full bg-gray-100 hover:bg-gray-200"
+                        >
+                          <Minus size={14} />
+                        </button>
 
-                      <span className="font-bold text-gray-800 w-8 text-center">
-                        {item.qty}
-                      </span>
-
-                      <button
-                        onClick={() => handleQuantityChange(order.id, item.id, 1)}
-                        className="p-1 rounded-full bg-gray-100 hover:bg-gray-200"
-                      >
-                        <Plus size={14} />
-                      </button>
-                    </div>
-
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className="w-10 h-10 rounded-lg overflow-hidden border border-gray-200 bg-gray-100 flex-shrink-0">
-                        {item.imageUrl || productsById.get(item.productId || item.id)?.imageUrl ? (
-                          <img
-                            src={resolveAssetUrl(item.imageUrl || productsById.get(item.productId || item.id)?.imageUrl)}
-                            alt={item.name}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-[10px] text-gray-400">
-                            🍖
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex flex-col min-w-0">
-                        <span className="truncate" title={item.name}>
-                          {item.name}
+                        <span className="font-bold text-gray-800 w-8 text-center">
+                          {item.qty}
                         </span>
-                        <div className="flex flex-wrap gap-1 mt-1">
-                          {item?.cookingPoint && (
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800 border border-amber-200">
-                              {item.cookingPoint}
-                            </span>
+
+                        <button
+                          onClick={() => handleQuantityChange(order.id, item.id, 1)}
+                          className="p-1 rounded-full bg-gray-100 hover:bg-gray-200"
+                        >
+                          <Plus size={14} />
+                        </button>
+                      </div>
+
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="w-10 h-10 rounded-lg overflow-hidden border border-gray-200 bg-gray-100 flex-shrink-0">
+                          {item.imageUrl || productsById.get(item.productId || item.id)?.imageUrl ? (
+                            <img
+                              src={resolveAssetUrl(item.imageUrl || productsById.get(item.productId || item.id)?.imageUrl)}
+                              alt={item.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-[10px] text-gray-400">
+                              🍖
+                            </div>
                           )}
-                          {item?.passSkewer && (
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-fuchsia-100 text-fuchsia-700 border border-fuchsia-200">
-                              passar varinha
-                            </span>
-                          )}
+                        </div>
+                        <div className="flex flex-col min-w-0">
+                          <span className="truncate" title={item.name}>
+                            {item.name}
+                          </span>
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {item?.cookingPoint && (
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800 border border-amber-200">
+                                {item.cookingPoint}
+                              </span>
+                            )}
+                            {item?.passSkewer && (
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-fuchsia-100 text-fuchsia-700 border border-fuchsia-200">
+                                passar varinha
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
 
-                  <span className="font-semibold flex-shrink-0">
-                    {formatCurrency((item.unitPrice ?? (item.price && item.qty ? item.price / item.qty : item.price) ?? 0) * item.qty)}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            {/* ADICIONAR ITEM */}
-            <div className="mt-3 flex gap-2 items-center">
-              <select
-                value={selectedProducts[order.id] || ""}
-                onChange={(e) =>
-                  setSelectedProducts((prev) => ({
-                    ...prev,
-                    [order.id]: e.target.value,
-                  }))
-                }
-                className="flex-1 border border-gray-200 rounded-lg p-2 text-sm"
-              >
-                <option value="">Adicionar item...</option>
-                {products.map((product) => (
-                  <option key={product.id} value={product.id}>
-                    {product.name} – {formatCurrency(product.price)}
-                  </option>
-                ))}
-              </select>
-
-              <button
-                onClick={() => handleAddItem(order.id)}
-                className="px-3 py-2 rounded-lg bg-brand-primary text-white text-xs font-bold flex items-center gap-1 hover:opacity-90"
-              >
-                <Plus size={14} /> Incluir
-              </button>
-            </div>
-
-            {renderTimeline(order.status)}
-
-            {/* TOTAL + BOTÕES */}
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mt-4">
-              <div className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600">
-                Total
-                <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-sm font-bold">
-                  {formatCurrency(order.total || 0)}
-                </span>
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                {order.status === "pending" && (
-                  <button
-                    onClick={() => handleAdvance(order.id, "preparing")}
-                    disabled={updating === order.id}
-                    className="px-3 py-2 rounded-lg bg-amber-100 text-amber-800 text-xs font-bold flex items-center gap-1 disabled:opacity-60"
-                  >
-                    <Clock size={16} /> Iniciar preparo
-                  </button>
-                )}
-
-                <button
-                  onClick={() => handleAdvance(order.id, "done")}
-                  disabled={updating === order.id}
-                  className="px-3 py-2 rounded-lg bg-green-100 text-green-800 text-xs font-bold flex items-center gap-1 disabled:opacity-60"
-                >
-                  <CheckSquare size={16} /> Marcar pronto
-                </button>
-              </div>
-            </div>
-          </div>
-        ))}
-
-        {sortedQueue.length === 0 && !loading && (
-          <div className="col-span-full text-center text-gray-500 py-12 bg-white rounded-xl border border-dashed">
-            Nenhum pedido aguardando.
-          </div>
-        )}
-      </div>
-
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 sm:p-6">
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-          <div>
-            <h3 className="text-lg font-bold text-slate-800">Finalizados hoje</h3>
-            <p className="text-xs text-slate-500">Pedidos prontos para entrega</p>
-          </div>
-          <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-semibold">
-            {completedToday.length}
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-          {completedToday.map((order) => (
-            <div key={order.id} className="w-full max-w-full rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <div className="flex items-start justify-between gap-2 mb-3">
-                <div>
-                  <p className="text-sm font-semibold text-slate-700">Pedido #{String(order.id).slice(0, 8)}</p>
-                  <p className="text-xs text-slate-400">{formatDateTime(order.createdAt)}</p>
-                </div>
-                <span className="px-2 py-1 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-700">
-                  Pronto
-                </span>
-              </div>
-
-              <div className="text-xs text-slate-600 space-y-1">
-                <p className="font-semibold text-slate-800">
-                  {order.customerName || order.name || 'Cliente'}
-                </p>
-                <p className="uppercase">
-                  {order.type === "table" && order.table ? (
-                    <span className="font-semibold text-slate-800">Mesa {order.table}</span>
-                  ) : (
-                    <>
-                      {formatOrderType(order.type)}
-                      {order.table && <span className="font-semibold text-slate-800"> · Mesa {order.table}</span>}
-                    </>
-                  )}
-                </p>
-                {order.phone && <p>{order.phone}</p>}
-                <div className="flex items-center gap-2">
-                  {(() => {
-                    const paymentMeta = getPaymentMethodMeta(order.payment);
-                    return (
-                      <>
-                        {paymentMeta.icon && (
-                          <img src={paymentMeta.icon} alt={paymentMeta.label} className="h-4 w-4 object-contain" />
-                        )}
-                        <span>{paymentMeta.label}</span>
-                      </>
-                    );
-                  })()}
-                </div>
-              </div>
-
-              <div className="mt-3 space-y-2">
-                {(order.items || []).slice(0, 3).map((item) => (
-                  <div key={item.id} className="flex items-center justify-between text-xs text-slate-600">
-                    <span className="truncate">{item.qty}x {item.name}</span>
-                    <span className="font-semibold text-slate-700">
+                    <span className="font-semibold flex-shrink-0">
                       {formatCurrency((item.unitPrice ?? (item.price && item.qty ? item.price / item.qty : item.price) ?? 0) * item.qty)}
                     </span>
                   </div>
                 ))}
-                {(order.items || []).length > 3 && (
-                  <p className="text-[11px] text-slate-400">
-                    + {(order.items || []).length - 3} itens
-                  </p>
-                )}
               </div>
 
-              <div className="mt-3 flex items-center justify-between">
-                <span className="text-sm font-bold text-emerald-700">
-                  {formatCurrency(order.total || 0)}
-                </span>
-                <a
-                  href={`/pedido/${order.id}`}
-                  className="text-xs font-semibold text-brand-primary hover:underline"
+              {/* ADICIONAR ITEM */}
+              <div className="mt-3 flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
+                <select
+                  value={selectedProducts[order.id] || ""}
+                  onChange={(e) =>
+                    setSelectedProducts((prev) => ({
+                      ...prev,
+                      [order.id]: e.target.value,
+                    }))
+                  }
+                  className="flex-1 border border-gray-200 rounded-lg p-2 text-sm"
                 >
-                  Ver pedido
-                </a>
+                  <option value="">Adicionar item...</option>
+                  {products.map((product) => (
+                    <option key={product.id} value={product.id}>
+                      {product.name} – {formatCurrency(product.price)}
+                    </option>
+                  ))}
+                </select>
+
+                <button
+                  onClick={() => handleAddItem(order.id)}
+                  className="w-full sm:w-auto px-3 py-2 rounded-lg bg-brand-primary text-white text-xs font-bold flex items-center justify-center gap-1 hover:opacity-90"
+                >
+                  <Plus size={14} /> Incluir
+                </button>
+              </div>
+
+              {renderTimeline(order.status)}
+
+              {/* TOTAL + BOTÕES */}
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mt-4">
+                <div className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600">
+                  Total
+                  <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-sm font-bold">
+                    {formatCurrency(order.total || 0)}
+                  </span>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  {order.status === "pending" && (
+                    <button
+                      onClick={() => handleAdvance(order.id, "preparing")}
+                      disabled={updating === order.id}
+                      className="px-3 py-2 rounded-lg bg-amber-100 text-amber-800 text-xs font-bold flex items-center gap-1 disabled:opacity-60"
+                    >
+                      <Clock size={16} /> Iniciar preparo
+                    </button>
+                  )}
+
+                  <button
+                    onClick={() => handleAdvance(order.id, "done")}
+                    disabled={updating === order.id}
+                    className="px-3 py-2 rounded-lg bg-green-100 text-green-800 text-xs font-bold flex items-center gap-1 disabled:opacity-60"
+                  >
+                    <CheckSquare size={16} /> Marcar pronto
+                  </button>
+                </div>
               </div>
             </div>
           ))}
 
-          {completedToday.length === 0 && (
-            <div className="col-span-full text-center text-slate-500 py-8 border border-dashed rounded-xl bg-slate-50">
-              Nenhum pedido finalizado hoje.
+          {sortedQueue.length === 0 && !loading && (
+            <div className="col-span-full text-center text-gray-500 py-12 bg-white rounded-xl border border-dashed">
+              Nenhum pedido aguardando.
             </div>
           )}
         </div>
-      </div>
+      )}
+
+      {activeTab === 'completed' && (
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 sm:p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+            {completedToday.map((order) => (
+              <div key={order.id} className="w-full max-w-full rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <div className="flex items-start justify-between gap-2 mb-3">
+                  <div>
+                    <p className="text-sm font-semibold text-slate-700">Pedido #{String(order.id).slice(0, 8)}</p>
+                    <p className="text-xs text-slate-400">{formatDateTime(order.createdAt)}</p>
+                  </div>
+                  <span className="px-2 py-1 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-700">
+                    Pronto
+                  </span>
+                </div>
+
+                <div className="text-xs text-slate-600 space-y-1">
+                  <p className="font-semibold text-slate-800">
+                    {order.customerName || order.name || 'Cliente'}
+                  </p>
+                  <p className="uppercase">
+                    {order.type === "table" && order.table ? (
+                      <span className="font-semibold text-slate-800">Mesa {order.table}</span>
+                    ) : (
+                      <>
+                        {formatOrderType(order.type)}
+                        {order.table && <span className="font-semibold text-slate-800"> · Mesa {order.table}</span>}
+                      </>
+                    )}
+                  </p>
+                  {order.phone && <p>{order.phone}</p>}
+                  <div className="flex items-center gap-2">
+                    {(() => {
+                      const paymentMeta = getPaymentMethodMeta(order.payment);
+                      return (
+                        <>
+                          {paymentMeta.icon && (
+                            <img src={paymentMeta.icon} alt={paymentMeta.label} className="h-4 w-4 object-contain" />
+                          )}
+                          <span>{paymentMeta.label}</span>
+                        </>
+                      );
+                    })()}
+                  </div>
+                </div>
+
+                <div className="mt-3 space-y-2">
+                  {(order.items || []).slice(0, 3).map((item) => (
+                    <div key={item.id} className="flex items-center justify-between text-xs text-slate-600">
+                      <span className="truncate">{item.qty}x {item.name}</span>
+                      <span className="font-semibold text-slate-700">
+                        {formatCurrency((item.unitPrice ?? (item.price && item.qty ? item.price / item.qty : item.price) ?? 0) * item.qty)}
+                      </span>
+                    </div>
+                  ))}
+                  {(order.items || []).length > 3 && (
+                    <p className="text-[11px] text-slate-400">
+                      + {(order.items || []).length - 3} itens
+                    </p>
+                  )}
+                </div>
+
+                <div className="mt-3 flex items-center justify-between">
+                  <span className="text-sm font-bold text-emerald-700">
+                    {formatCurrency(order.total || 0)}
+                  </span>
+                  <a
+                    href={`/pedido/${order.id}`}
+                    className="text-xs font-semibold text-brand-primary hover:underline"
+                  >
+                    Ver pedido
+                  </a>
+                </div>
+              </div>
+            ))}
+
+            {completedToday.length === 0 && (
+              <div className="col-span-full text-center text-slate-500 py-8 border border-dashed rounded-xl bg-slate-50">
+                Nenhum pedido finalizado hoje.
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {error && (
         <div className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg p-3">{error}</div>
