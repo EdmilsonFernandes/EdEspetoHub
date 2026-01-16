@@ -441,7 +441,7 @@ export const CartView = ({
       </div>
 
       {/* Resumo */}
-      <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-6">
+      <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-6 transition-all hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99]">
         <h2 className="font-bold text-gray-800 mb-3 sm:mb-4 text-base sm:text-lg">Resumo</h2>
 
         {cartItems.map((item) => (
@@ -481,7 +481,7 @@ export const CartView = ({
       </div>
 
       {/* Forma de Pagamento */}
-      <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-6">
+      <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-6 transition-all hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99]">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-bold text-gray-800 text-base sm:text-lg flex items-center gap-2">
             <CreditCard size={18} className="text-brand-primary" /> Forma de Pagamento
@@ -533,7 +533,7 @@ export const CartView = ({
         </div>
       </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99]">
         <button
           type="button"
           onClick={() => setShowTips((prev) => !prev)}
