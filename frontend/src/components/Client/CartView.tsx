@@ -2,6 +2,7 @@
 import React, { useMemo, useState } from "react";
 import {
   ChevronLeft,
+  ChevronDown,
   Bike,
   Home,
   UtensilsCrossed,
@@ -31,6 +32,7 @@ export const CartView = ({
   const [suggestionsOpen, setSuggestionsOpen] = useState(false);
   const [cepLoading, setCepLoading] = useState(false);
   const [cepError, setCepError] = useState("");
+  const [showTips, setShowTips] = useState(false);
 
   const visibleOrderTypes = Array.isArray(allowedOrderTypes) && allowedOrderTypes.length
     ? allowedOrderTypes
@@ -518,15 +520,30 @@ export const CartView = ({
         </div>
       </div>
 
-      <div className="text-[11px] sm:text-xs text-gray-500 bg-gray-50 border border-gray-100 rounded-lg p-2.5 sm:p-3 leading-relaxed">
-        {isPickup &&
-          "Pagamento via Pix será gerado automaticamente e enviado junto com o pedido."}
-        {isDelivery &&
-          "Você finaliza o pedido agora e paga na entrega ou conforme combinado."}
-        {isPix &&
-          "O QR Code do Pix aparecerá após finalizar o pedido."}
-        {!isDelivery && !isPickup && !isPix &&
-          "Pedido será direcionado para atendimento na mesa."}
+      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <button
+          type="button"
+          onClick={() => setShowTips((prev) => !prev)}
+          className="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-slate-700"
+        >
+          Dicas do pagamento
+          <ChevronDown
+            size={18}
+            className={`transition-transform ${showTips ? "rotate-180" : ""}`}
+          />
+        </button>
+        {showTips && (
+          <div className="px-4 pb-4 text-[11px] sm:text-xs text-gray-500 leading-relaxed space-y-2">
+            {isPickup &&
+              "Pagamento via Pix será gerado automaticamente e enviado junto com o pedido."}
+            {isDelivery &&
+              "Você finaliza o pedido agora e paga na entrega ou conforme combinado."}
+            {isPix &&
+              "O QR Code do Pix aparecerá após finalizar o pedido."}
+            {!isDelivery && !isPickup && !isPix &&
+              "Pedido será direcionado para atendimento na mesa."}
+          </div>
+        )}
       </div>
 
       {/* Botão Finalizar */}
