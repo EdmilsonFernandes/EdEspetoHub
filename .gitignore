@@ -75,4 +75,4 @@ logs/
 *.log
 
 # uploads
-backend/uploads/
+backend/uploads/products/
