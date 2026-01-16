@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   ChevronLeft,
   ChevronDown,
@@ -33,6 +33,7 @@ export const CartView = ({
   const [cepLoading, setCepLoading] = useState(false);
   const [cepError, setCepError] = useState("");
   const [showTips, setShowTips] = useState(false);
+  const [summaryCompact, setSummaryCompact] = useState(false);
 
   const visibleOrderTypes = Array.isArray(allowedOrderTypes) && allowedOrderTypes.length
     ? allowedOrderTypes
@@ -157,6 +158,15 @@ export const CartView = ({
     return `https://www.openstreetmap.org/search?query=${encodeURIComponent(address)}`;
   }, [customer, isDelivery]);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      setSummaryCompact(window.scrollY > 24);
+    };
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
     <div className="animate-in slide-in-from-right">
       {/* voltar */}
@@ -168,7 +178,7 @@ export const CartView = ({
       </button>
 
       {/* Resumo compacto (mobile) */}
-      <div className="sm:hidden mb-4 rounded-2xl border border-slate-200 bg-white/90 shadow-sm px-4 py-2.5 flex items-center justify-between sticky top-2 z-40 backdrop-blur-sm">
+      <div className={`sm:hidden mb-4 rounded-2xl border border-slate-200 bg-white/90 shadow-sm px-4 ${summaryCompact ? 'py-2' : 'py-2.5'} flex items-center justify-between sticky top-2 z-40 backdrop-blur-sm transition-all`}>
         <div>
           <p className="text-[11px] uppercase tracking-[0.3em] text-slate-400">Resumo rapido</p>
           <p className="text-sm font-semibold text-slate-800">
