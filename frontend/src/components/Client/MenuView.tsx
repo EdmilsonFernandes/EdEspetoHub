@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from "react";
-import { Instagram, LayoutDashboard, Plus, Clock, MapPin, Search } from "lucide-react";
+import { Instagram, LayoutDashboard, Plus, Clock, MapPin, Search, Info } from "lucide-react";
 import { formatCurrency } from "../../utils/format";
 import { ProductModal } from "../Cart/ProductModal";
 
@@ -27,7 +27,8 @@ const Header = ({
   todayHoursLabel,
   onOpenQueue,
   onOpenAdmin,
-  compact
+  compact,
+  onOpenInfo
 }) => {
   const storeSlug = branding?.espetoId || "";
   const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
@@ -96,6 +97,19 @@ const Header = ({
 
       {/* Buttons - Responsive */}
       <div className="w-full sm:w-auto flex flex-row items-center justify-end gap-2 order-last sm:order-none sm:flex-shrink-0">
+        {compact && onOpenInfo && (
+          <button
+            type="button"
+            onClick={onOpenInfo}
+            className="px-2.5 py-1.5 rounded-full text-xs font-semibold border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition"
+            aria-label="Informacoes da loja"
+          >
+            <span className="flex items-center gap-1">
+              <Info size={12} />
+              Info
+            </span>
+          </button>
+        )}
         {onOpenQueue && (
           <div className="flex items-center rounded-full border border-slate-200 bg-white p-0.5">
             <button
@@ -143,6 +157,7 @@ export const MenuView = ({
   showHeader = true,
   onOpenQueue,
   onOpenAdmin,
+  onOpenInfo,
   compactHeader = false
 }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -246,6 +261,7 @@ export const MenuView = ({
           onOpenQueue={onOpenQueue}
           onOpenAdmin={onOpenAdmin}
           compact={compactHeader}
+          onOpenInfo={onOpenInfo}
         />
       )}
 
