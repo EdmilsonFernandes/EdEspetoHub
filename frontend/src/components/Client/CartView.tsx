@@ -271,7 +271,7 @@ export const CartView = ({
           {/* WhatsApp */}
           <div className="rounded-xl sm:rounded-2xl border border-gray-100 p-3 sm:p-4">
             <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-              WhatsApp
+              WhatsApp {customer.type === "table" ? "(opcional)" : ""}
             </label>
             <input
               type="tel"
@@ -280,6 +280,11 @@ export const CartView = ({
               placeholder="(12) 90000-0000"
               className="w-full border-b-2 border-gray-100 py-2.5 sm:py-3 text-base sm:text-lg outline-none focus:border-brand-primary placeholder:text-gray-300 bg-transparent"
             />
+            {customer.type === "table" && (
+              <p className="mt-1 text-[11px] text-gray-400">
+                Para pedidos na mesa, o telefone pode ficar em branco.
+              </p>
+            )}
           </div>
 
           {/* Tipo de pedido */}

@@ -394,8 +394,9 @@ export function StorePage() {
       alert('Loja fechada no momento. Tente novamente durante o horario de atendimento.');
       return;
     }
-    if (!customer.name || !customer.phone) {
-      alert('Preencha Nome e Telefone');
+    const requiresPhone = customer.type !== 'table';
+    if (!customer.name || (requiresPhone && !customer.phone)) {
+      alert(requiresPhone ? 'Preencha Nome e Telefone' : 'Preencha o Nome');
       return;
     }
 
@@ -493,19 +494,22 @@ export function StorePage() {
 
     const shouldNotifyOwner = !isStoreAdmin && (customer.type === 'pickup' || customer.type === 'table');
     if (shouldNotifyOwner) {
-      const itemsList = Object.values(cart)
-        .map((item) => `▪ ${item.qty}x ${item.name} ${formatItemOptions(item)}`.trim())
-        .join('\n');
+    const itemsList = Object.values(cart)
+      .map((item) => `▪ ${item.qty}x ${item.name} ${formatItemOptions(item)}`.trim())
+      .join('\n');
+    const customerLabel = customer.phone
+      ? `👤 *${customer.name}* (${customer.phone})`
+      : `👤 *${customer.name}*`;
 
-      const messageLines = [
-        `*NOVO PEDIDO - ${branding?.brandName || 'Chama no Espeto'}*`,
-        storeSlug ? `🏷️ *Loja:* ${storeSlug}` : '',
-        storeAddress ? `📍 *Endereço da loja:* ${storeAddress}` : '',
-        '------------------',
-        `👤 *${customer.name}* (${customer.phone})`,
-        `🛒 *Tipo:* ${customer.type}`,
-        customer.table ? `🪑 *Mesa:* ${customer.table}` : '',
-        payment ? `💳 Pagamento: ${formatPaymentMethod(payment)}` : '',
+    const messageLines = [
+      `*NOVO PEDIDO - ${branding?.brandName || 'Chama no Espeto'}*`,
+      storeSlug ? `🏷️ *Loja:* ${storeSlug}` : '',
+      storeAddress ? `📍 *Endereço da loja:* ${storeAddress}` : '',
+      '------------------',
+      customerLabel,
+      `🛒 *Tipo:* ${customer.type}`,
+      customer.table ? `🪑 *Mesa:* ${customer.table}` : '',
+      payment ? `💳 Pagamento: ${formatPaymentMethod(payment)}` : '',
         customer.address ? `📍 End: ${customer.address}` : '',
         '------------------',
         itemsList,

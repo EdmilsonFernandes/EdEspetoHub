@@ -333,6 +333,22 @@ export const GrillQueue = () => {
     [queue]
   );
 
+  const completedToday = useMemo(() => {
+    const today = new Date();
+    const isSameDay = (value) => {
+      if (!value) return false;
+      const date = new Date(value);
+      return (
+        date.getFullYear() === today.getFullYear() &&
+        date.getMonth() === today.getMonth() &&
+        date.getDate() === today.getDate()
+      );
+    };
+    return [...queue]
+      .filter((order) => order.status === 'done' && isSameDay(order.createdAt))
+      .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  }, [queue]);
+
   const getStatusStyles = (status) => {
     if (status === "preparing") {
       return { label: "Em preparo", className: "bg-amber-100 text-amber-700" };
@@ -442,7 +458,7 @@ export const GrillQueue = () => {
         {sortedQueue.map((order, index) => (
           <div
             key={order.id}
-            className="relative bg-white p-4 rounded-xl shadow-sm border border-gray-100"
+            className="relative bg-gradient-to-br from-white via-white to-slate-50 p-4 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md transition"
           >
             {/* HEADER DO CARD */}
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
@@ -643,6 +659,92 @@ export const GrillQueue = () => {
             Nenhum pedido aguardando.
           </div>
         )}
+      </div>
+
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 sm:p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <div>
+            <h3 className="text-lg font-bold text-slate-800">Finalizados hoje</h3>
+            <p className="text-xs text-slate-500">Pedidos prontos para entrega</p>
+          </div>
+          <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-semibold">
+            {completedToday.length}
+          </span>
+        </div>
+
+        <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {completedToday.map((order) => (
+            <div key={order.id} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <div className="flex items-start justify-between gap-2 mb-3">
+                <div>
+                  <p className="text-sm font-semibold text-slate-700">Pedido #{String(order.id).slice(0, 8)}</p>
+                  <p className="text-xs text-slate-400">{formatDateTime(order.createdAt)}</p>
+                </div>
+                <span className="px-2 py-1 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-700">
+                  Pronto
+                </span>
+              </div>
+
+              <div className="text-xs text-slate-600 space-y-1">
+                <p className="font-semibold text-slate-800">
+                  {order.customerName || order.name || 'Cliente'}
+                </p>
+                <p className="uppercase">
+                  {formatOrderType(order.type)}
+                  {order.table && <span className="font-semibold text-slate-800"> · Mesa {order.table}</span>}
+                </p>
+                {order.phone && <p>{order.phone}</p>}
+                <div className="flex items-center gap-2">
+                  {(() => {
+                    const paymentMeta = getPaymentMethodMeta(order.payment);
+                    return (
+                      <>
+                        {paymentMeta.icon && (
+                          <img src={paymentMeta.icon} alt={paymentMeta.label} className="h-4 w-4 object-contain" />
+                        )}
+                        <span>{paymentMeta.label}</span>
+                      </>
+                    );
+                  })()}
+                </div>
+              </div>
+
+              <div className="mt-3 space-y-2">
+                {(order.items || []).slice(0, 3).map((item) => (
+                  <div key={item.id} className="flex items-center justify-between text-xs text-slate-600">
+                    <span className="truncate">{item.qty}x {item.name}</span>
+                    <span className="font-semibold text-slate-700">
+                      {formatCurrency((item.unitPrice ?? (item.price && item.qty ? item.price / item.qty : item.price) ?? 0) * item.qty)}
+                    </span>
+                  </div>
+                ))}
+                {(order.items || []).length > 3 && (
+                  <p className="text-[11px] text-slate-400">
+                    + {(order.items || []).length - 3} itens
+                  </p>
+                )}
+              </div>
+
+              <div className="mt-3 flex items-center justify-between">
+                <span className="text-sm font-bold text-emerald-700">
+                  {formatCurrency(order.total || 0)}
+                </span>
+                <a
+                  href={`/pedido/${order.id}`}
+                  className="text-xs font-semibold text-brand-primary hover:underline"
+                >
+                  Ver pedido
+                </a>
+              </div>
+            </div>
+          ))}
+
+          {completedToday.length === 0 && (
+            <div className="col-span-full text-center text-slate-500 py-8 border border-dashed rounded-xl bg-slate-50">
+              Nenhum pedido finalizado hoje.
+            </div>
+          )}
+        </div>
       </div>
 
       {error && (
