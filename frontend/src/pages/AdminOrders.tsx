@@ -78,13 +78,14 @@ export function AdminOrders() {
         acc.all += 1;
         return acc;
       },
-      { all: 0, pending: 0, preparing: 0, done: 0 }
+      { all: 0, pending: 0, preparing: 0, done: 0, cancelled: 0 }
     );
   }, [orders]);
 
   const statusStyles = (status) => {
     if (status === 'preparing') return 'bg-amber-100 text-amber-800';
     if (status === 'done') return 'bg-green-100 text-green-800';
+    if (status === 'cancelled') return 'bg-slate-100 text-slate-600';
     return 'bg-red-100 text-red-700';
   };
   const formatItemOptions = (item) => {

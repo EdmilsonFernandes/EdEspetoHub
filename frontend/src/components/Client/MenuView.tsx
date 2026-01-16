@@ -221,6 +221,17 @@ export const MenuView = ({
     return ordered.filter((category) => category.items.length > 0);
   }, [products]);
 
+  const itemQtyMap = useMemo(() => {
+    const map = new Map();
+    Object.values(cart || {}).forEach((entry: any) => {
+      if (!entry?.id) return;
+      const key = String(entry.id);
+      const current = map.get(key) || 0;
+      map.set(key, current + (entry.qty || 0));
+    });
+    return map;
+  }, [cart]);
+
   const filteredGrouped = useMemo(() => {
     const normalized = query.trim().toLowerCase();
     if (!normalized) return grouped;
@@ -514,8 +525,13 @@ export const MenuView = ({
                       onUpdateCart(item, 1);
                     }}
                     title="Adicionar"
-                    className="w-10 h-10 rounded-2xl bg-brand-primary text-white flex items-center justify-center hover:opacity-90 shadow-md active:scale-95 transition"
+                    className="relative w-10 h-10 rounded-2xl bg-brand-primary text-white flex items-center justify-center hover:opacity-90 shadow-md active:scale-95 transition"
                   >
+                    {itemQtyMap.get(String(item.id)) > 0 && (
+                      <span className="absolute -top-1 -right-1 min-w-[18px] h-5 px-1 rounded-full bg-white text-brand-primary text-[10px] font-bold border border-brand-primary flex items-center justify-center shadow-sm">
+                        {itemQtyMap.get(String(item.id))}
+                      </span>
+                    )}
                     <Plus size={18} />
                   </button>
                 </div>

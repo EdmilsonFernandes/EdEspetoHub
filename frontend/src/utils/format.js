@@ -47,6 +47,7 @@ export const formatOrderStatus = (status) => {
     pending: 'Pendente',
     preparing: 'Preparando',
     done: 'Finalizado',
+    cancelled: 'Cancelado',
   };
 
   return map[status] || 'Indefinido';

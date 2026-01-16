@@ -250,14 +250,21 @@ export const GrillQueue = () => {
       0
     );
 
-    setQueue((prev) =>
-      prev.map((order) =>
-        order.id === orderId ? { ...order, items: sanitizedItems, total: nextTotal } : order
-      )
-    );
+    if (sanitizedItems.length === 0) {
+      setQueue((prev) => prev.filter((order) => order.id !== orderId));
+    } else {
+      setQueue((prev) =>
+        prev.map((order) =>
+          order.id === orderId ? { ...order, items: sanitizedItems, total: nextTotal } : order
+        )
+      );
+    }
 
     try {
       await orderService.updateItems(orderId, sanitizedItems, nextTotal);
+      if (sanitizedItems.length === 0) {
+        await orderService.updateStatus(orderId, 'cancelled');
+      }
     } catch (err) {
       console.error('Erro ao atualizar itens', err);
       setError('Nao foi possivel atualizar os itens. Atualize a fila.');
