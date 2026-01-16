@@ -466,10 +466,10 @@ export const MenuView = ({
               {category.items.map((item) => (
                 <div
                   key={item.id}
-                  className="group bg-white/95 rounded-2xl shadow-sm border border-slate-100 p-3 flex gap-3 items-center hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99] transition cursor-pointer"
+                  className="group bg-white/95 rounded-2xl shadow-sm border border-slate-100 p-2.5 sm:p-3 flex gap-3 items-center hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99] transition cursor-pointer"
                   onClick={() => openProductModal(item)}
                 >
-                  <div className="w-16 h-16 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-200">
+                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-200">
                     {item.imageUrl ? (
                       <img
                         src={item.imageUrl}
@@ -499,7 +499,7 @@ export const MenuView = ({
                     </div>
                     {isEspetoCategory(item.category) && (
                       <div className="inline-flex items-center gap-2 text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full">
-                        Clique para escolher o ponto da carne
+                        Toque para escolher o ponto da carne
                       </div>
                     )}
                   </div>
@@ -508,7 +508,7 @@ export const MenuView = ({
                     onClick={(e) => {
                       e.stopPropagation();
                       if (isEspetoCategory(item.category)) {
-                        openProductModal(item);
+                        onUpdateCart(item, 1, { cookingPoint: "ao ponto", passSkewer: false });
                         return;
                       }
                       onUpdateCart(item, 1);
