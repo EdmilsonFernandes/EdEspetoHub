@@ -21,7 +21,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja' }: Props) {
     return localStorage.getItem('adminHeader:details') === 'true';
   });
 
-  const storeName = branding?.brandName || auth?.store?.name;
+  const storeName = auth?.store?.name || branding?.brandName;
   const storeSlug = auth?.store?.slug;
   const storeUrl = storeSlug ? `https://www.chamanoespeto.com.br/${storeSlug}` : '';
   const socialLinks = auth?.store?.settings?.socialLinks || [];
