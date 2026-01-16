@@ -287,6 +287,20 @@ export function StorePage() {
   }, [storeAddress]);
 
   useEffect(() => {
+    if (!storeSlug) return;
+    const cached = localStorage.getItem(`store:coords:${storeSlug}`);
+    if (!cached) return;
+    try {
+      const parsed = JSON.parse(cached);
+      if (parsed?.lat && parsed?.lon) {
+        setMapCoords(parsed);
+      }
+    } catch (error) {
+      console.error('Falha ao ler cache do mapa', error);
+    }
+  }, [storeSlug]);
+
+  useEffect(() => {
     if (!showInfoSheet || !storeAddress || mapCoords || mapLoading) return;
     const controller = new AbortController();
     const loadCoords = async () => {
@@ -299,7 +313,11 @@ export function StorePage() {
         if (!response.ok) return;
         const data = await response.json();
         if (Array.isArray(data) && data[0]?.lat && data[0]?.lon) {
-          setMapCoords({ lat: data[0].lat, lon: data[0].lon });
+          const next = { lat: data[0].lat, lon: data[0].lon };
+          setMapCoords(next);
+          if (storeSlug) {
+            localStorage.setItem(`store:coords:${storeSlug}`, JSON.stringify(next));
+          }
         }
       } catch (error) {
         if (error?.name !== 'AbortError') {
@@ -311,7 +329,7 @@ export function StorePage() {
     };
     loadCoords();
     return () => controller.abort();
-  }, [showInfoSheet, storeAddress, mapCoords, mapLoading]);
+  }, [showInfoSheet, storeAddress, mapCoords, mapLoading, storeSlug]);
 
   const updateCart = (item, qty, options) => {
     const cookingPoint = options?.cookingPoint ?? item?.cookingPoint;
@@ -955,8 +973,16 @@ export function StorePage() {
                         loading="lazy"
                       />
                     ) : (
-                      <div className="h-40 flex items-center justify-center text-xs text-slate-500">
-                        {mapLoading ? 'Carregando mapa...' : 'Mapa indisponivel'}
+                      <div className="h-40 flex flex-col items-center justify-center gap-2 text-xs text-slate-500">
+                        <span>{mapLoading ? 'Carregando mapa...' : 'Mapa indisponivel'}</span>
+                        <a
+                          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(storeAddress)}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-3 py-1.5 rounded-full text-[11px] font-semibold border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 transition"
+                        >
+                          Abrir mapa
+                        </a>
                       </div>
                     )}
                   </div>
