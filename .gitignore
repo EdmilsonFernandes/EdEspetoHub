@@ -73,3 +73,6 @@ build/
 # ========================
 logs/
 *.log
+
+# uploads
+backend/uploads/
