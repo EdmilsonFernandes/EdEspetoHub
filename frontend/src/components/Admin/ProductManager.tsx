@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useMemo, useRef, useState } from 'react';
-import { Image as ImageIcon, Edit, Trash2, Save, Plus, Flame, Wine, Package, MoreHorizontal } from 'lucide-react';
+import { Image as ImageIcon, Edit, Trash2, Save, Plus, Flame, Wine, Package, MoreHorizontal, X } from 'lucide-react';
 import { productService } from '../../services/productService';
 import { formatCurrency } from '../../utils/format';
 import { useToast } from '../../contexts/ToastContext';
@@ -34,6 +34,14 @@ export const ProductManager = ({ products, onProductsChange }) => {
   const { showToast } = useToast();
   const formRef = useRef<HTMLDivElement | null>(null);
   const [editing, setEditing] = useState(null);
+  const [inlineEditId, setInlineEditId] = useState<string | null>(null);
+  const [inlineForm, setInlineForm] = useState({
+    name: '',
+    price: '',
+    category: initialForm.category,
+    description: '',
+    imageUrl: '',
+  });
   const [formData, setFormData] = useState(initialForm);
   const [imageMode, setImageMode] = useState('url');
   const [imagePreview, setImagePreview] = useState('');
@@ -88,7 +96,6 @@ export const ProductManager = ({ products, onProductsChange }) => {
     setSaving(true);
     const payload = {
       ...formData,
-      id: editing?.id,
       price: parseFloat(formData.price),
       imageFile: imageMode === 'upload' ? formData.imageFile : undefined,
       imageUrl: imageMode === 'url' ? formData.imageUrl : undefined,
@@ -97,7 +104,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
 
     try {
       await productService.save(payload);
-      showToast(editing ? 'Produto atualizado com sucesso' : 'Produto adicionado com sucesso', 'success');
+      showToast('Produto adicionado com sucesso', 'success');
       resetForm();
       await refreshProducts();
     } catch (err) {
@@ -108,23 +115,41 @@ export const ProductManager = ({ products, onProductsChange }) => {
   };
 
   const handleEdit = (product) => {
-    const categoryKey = normalizeCategory(product.category || initialForm.category);
-    const isKnown = categoryOptions.some((entry) => entry.id === categoryKey);
-    setCategorySelect(isKnown ? categoryKey : '__custom__');
-    setCustomCategory(isKnown ? '' : categoryKey);
-    setShowCustomInput(!isKnown);
-    setEditing(product);
-    setFormData({
-      ...product,
-      category: categoryKey,
-      imageFile: '',
+    setInlineEditId(product.id);
+    setInlineForm({
+      name: product.name || '',
+      price: product.price != null ? String(product.price) : '',
+      category: product.category || initialForm.category,
       description: product.description ?? product.desc ?? '',
+      imageUrl: product.imageUrl || '',
     });
-    setImageMode('url');
-    setImagePreview(product?.imageUrl || '');
-    if (formRef.current) {
-      formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const handleInlineSave = async () => {
+    if (!inlineEditId) return;
+    if (!inlineForm.name || !inlineForm.price) return;
+    setSaving(true);
+    try {
+      await productService.save({
+        id: inlineEditId,
+        name: inlineForm.name,
+        price: parseFloat(inlineForm.price),
+        category: inlineForm.category,
+        description: inlineForm.description || undefined,
+        imageUrl: inlineForm.imageUrl || undefined,
+      });
+      showToast('Produto atualizado com sucesso', 'success');
+      setInlineEditId(null);
+      await refreshProducts();
+    } catch (error) {
+      showToast('Não foi possível salvar o produto', 'error');
+    } finally {
+      setSaving(false);
     }
+  };
+
+  const handleInlineCancel = () => {
+    setInlineEditId(null);
   };
 
   const handleUpload = (file) => {
@@ -147,8 +172,8 @@ export const ProductManager = ({ products, onProductsChange }) => {
     <div className="space-y-6">
       <div ref={formRef} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
         <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
-          {editing ? <Edit size={20} /> : <Plus size={20} />}
-          {editing ? 'Editar Produto' : 'Novo Produto'}
+          <Plus size={20} />
+          Novo Produto
         </h3>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -360,17 +385,15 @@ export const ProductManager = ({ products, onProductsChange }) => {
               disabled={saving}
             >
               <Save size={18} />
-              {saving ? 'Salvando...' : editing ? 'Atualizar Produto' : 'Adicionar Produto'}
+              {saving ? 'Salvando...' : 'Adicionar Produto'}
             </button>
-            {editing && (
-              <button
-                type="button"
-                onClick={resetForm}
-                className="bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-200 transition"
-              >
-                Cancelar
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={resetForm}
+              className="bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-200 transition"
+            >
+              Limpar
+            </button>
           </div>
         </form>
       </div>
@@ -398,47 +421,92 @@ export const ProductManager = ({ products, onProductsChange }) => {
                     </div>
                   )}
                 </td>
-                <td className="p-4 font-medium">{product.name}</td>
-                <td className="p-4">
-                  <div className="flex items-center gap-2">
-                    {(() => {
-                      const Icon = getCategoryIcon(product.category);
-                      return <Icon size={16} className="text-brand-primary" />;
-                    })()}
-                    <span className="text-sm text-gray-600">{formatCategoryLabel(product.category)}</span>
-                  </div>
-                </td>
-                <td className="p-4 text-brand-primary font-bold">{formatCurrency(product.price)}</td>
-                <td className="p-4 text-right space-x-2">
-                  <button onClick={() => handleEdit(product)} className="text-brand-primary hover:bg-brand-primary-soft p-2 rounded">
-                    <Edit size={18} />
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (!window.confirm('Excluir produto?')) return;
-                      setSaving(true);
-                      productService
-                        .delete(product.id)
-                        .then(async () => {
-                          showToast('Produto removido', 'success');
-                          await refreshProducts();
-                        })
-                        .catch(async (error) => {
-                          const message = (error?.message || '').toString();
-                          if (error?.code === 'PROD-001' || error?.status === 404 || message.includes('Produto')) {
-                            showToast('Produto removido', 'success');
-                            await refreshProducts();
-                            return;
-                          }
-                          showToast('Não foi possível remover o produto', 'error');
-                        })
-                        .finally(() => setSaving(false));
-                    }}
-                    className="text-red-600 hover:bg-red-50 p-2 rounded"
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                </td>
+                {inlineEditId === product.id ? (
+                  <>
+                    <td className="p-4">
+                      <input
+                        className="w-full p-2 border border-gray-200 rounded-lg text-sm"
+                        value={inlineForm.name}
+                        onChange={(e) => setInlineForm((prev) => ({ ...prev, name: e.target.value }))}
+                      />
+                    </td>
+                    <td className="p-4">
+                      <input
+                        className="w-full p-2 border border-gray-200 rounded-lg text-sm"
+                        value={inlineForm.category}
+                        onChange={(e) => setInlineForm((prev) => ({ ...prev, category: e.target.value }))}
+                      />
+                    </td>
+                    <td className="p-4">
+                      <input
+                        className="w-full p-2 border border-gray-200 rounded-lg text-sm"
+                        type="number"
+                        step="0.01"
+                        value={inlineForm.price}
+                        onChange={(e) => setInlineForm((prev) => ({ ...prev, price: e.target.value }))}
+                      />
+                    </td>
+                    <td className="p-4 text-right space-x-2">
+                      <button
+                        onClick={handleInlineSave}
+                        className="text-emerald-600 hover:bg-emerald-50 p-2 rounded"
+                        disabled={saving}
+                      >
+                        <Save size={18} />
+                      </button>
+                      <button
+                        onClick={handleInlineCancel}
+                        className="text-slate-600 hover:bg-slate-100 p-2 rounded"
+                      >
+                        <X size={18} />
+                      </button>
+                    </td>
+                  </>
+                ) : (
+                  <>
+                    <td className="p-4 font-medium">{product.name}</td>
+                    <td className="p-4">
+                      <div className="flex items-center gap-2">
+                        {(() => {
+                          const Icon = getCategoryIcon(product.category);
+                          return <Icon size={16} className="text-brand-primary" />;
+                        })()}
+                        <span className="text-sm text-gray-600">{formatCategoryLabel(product.category)}</span>
+                      </div>
+                    </td>
+                    <td className="p-4 text-brand-primary font-bold">{formatCurrency(product.price)}</td>
+                    <td className="p-4 text-right space-x-2">
+                      <button onClick={() => handleEdit(product)} className="text-brand-primary hover:bg-brand-primary-soft p-2 rounded">
+                        <Edit size={18} />
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (!window.confirm('Excluir produto?')) return;
+                          setSaving(true);
+                          productService
+                            .delete(product.id)
+                            .then(async () => {
+                              showToast('Produto removido', 'success');
+                              await refreshProducts();
+                            })
+                            .catch(async (error) => {
+                              const message = (error?.message || '').toString();
+                              if (error?.code === 'PROD-001' || error?.status === 404 || message.includes('Produto')) {
+                                showToast('Produto removido', 'success');
+                                await refreshProducts();
+                                return;
+                              }
+                              showToast('Não foi possível remover o produto', 'error');
+                            })
+                            .finally(() => setSaving(false));
+                        }}
+                        className="text-red-600 hover:bg-red-50 p-2 rounded"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </td>
+                  </>
+                )}
               </tr>
             ))}
           </tbody>
