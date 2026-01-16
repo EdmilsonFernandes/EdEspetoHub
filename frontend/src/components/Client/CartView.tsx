@@ -437,7 +437,7 @@ export const CartView = ({
       </div>
 
       {/* Resumo */}
-      <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-6 mb-20 sm:mb-24">
+      <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-6">
         <h2 className="font-bold text-gray-800 mb-3 sm:mb-4 text-base sm:text-lg">Resumo</h2>
 
         {cartItems.map((item) => (
@@ -474,16 +474,6 @@ export const CartView = ({
           </div>
         )}
 
-        <div className="mt-3 text-[11px] sm:text-xs text-gray-500 bg-gray-50 border border-gray-100 rounded-lg p-2.5 sm:p-3 leading-relaxed">
-          {isPickup &&
-            "Pagamento via Pix será gerado automaticamente e enviado junto com o pedido."}
-          {isDelivery &&
-            "Você finaliza o pedido agora e paga na entrega ou conforme combinado."}
-          {isPix &&
-            "O QR Code do Pix aparecerá após finalizar o pedido."}
-          {!isDelivery && !isPickup && !isPix &&
-            "Pedido será direcionado para atendimento na mesa."}
-        </div>
       </div>
 
       {/* Forma de Pagamento */}
@@ -526,6 +516,17 @@ export const CartView = ({
             </button>
           ))}
         </div>
+      </div>
+
+      <div className="text-[11px] sm:text-xs text-gray-500 bg-gray-50 border border-gray-100 rounded-lg p-2.5 sm:p-3 leading-relaxed">
+        {isPickup &&
+          "Pagamento via Pix será gerado automaticamente e enviado junto com o pedido."}
+        {isDelivery &&
+          "Você finaliza o pedido agora e paga na entrega ou conforme combinado."}
+        {isPix &&
+          "O QR Code do Pix aparecerá após finalizar o pedido."}
+        {!isDelivery && !isPickup && !isPix &&
+          "Pedido será direcionado para atendimento na mesa."}
       </div>
 
       {/* Botão Finalizar */}

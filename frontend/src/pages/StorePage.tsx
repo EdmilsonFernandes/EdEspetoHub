@@ -892,7 +892,7 @@ export function StorePage() {
               >
                 {Object.values(cart).reduce((acc, item) => acc + item.qty, 0)}
               </span>
-              <span className="font-bold truncate">Ver sacola</span>
+              <span className="font-bold truncate">Ver pedido</span>
             </div>
             <span className="font-bold text-base sm:text-lg ml-2 flex-shrink-0">{formatCurrency(cartTotal)}</span>
           </button>
