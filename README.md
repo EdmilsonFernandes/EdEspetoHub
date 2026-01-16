@@ -173,21 +173,41 @@ Demo:
 
 ```mermaid
 flowchart TD
-  A[Cadastro /api/auth/register] --> B[Criar usuario]
-  B --> C[Gerar slug unico]
-  C --> D[Criar loja open=false]
-  D --> E[Assinatura PENDING]
-  E --> F[Gerar pagamento MP]
-  F --> G[Enviar email confirmacao]
-  G --> H[Confirmar e-mail /verify-email]
-  H --> I[Enviar email pagamento pendente]
-  I --> J[Redirect /payment/:id]
-  J --> K[Webhook MP aprovado]
-  K --> L[Confirmar pagamento]
-  L --> M[Assinatura ACTIVE + datas]
-  M --> N[Loja open=true]
-  N --> O[Enviar email de ativacao]
+  subgraph Cadastro_e_Pagamento
+    A[Cadastro /api/auth/register] --> B[Criar usuario]
+    B --> C[Gerar slug unico]
+    C --> D[Criar loja open=false]
+    D --> E[Assinatura PENDING]
+    E --> F[Gerar pagamento MP]
+    F --> G[Enviar email confirmacao]
+    G --> H[Confirmar e-mail /verify-email]
+    H --> I[Enviar email pagamento pendente]
+    I --> J[Redirect /payment/:id]
+    J --> K[Webhook MP aprovado]
+    K --> L[Confirmar pagamento]
+    L --> M[Assinatura ACTIVE + datas]
+    M --> N[Loja open=true]
+    N --> O[Enviar email de ativacao]
+  end
+  subgraph Pedido_e_Operacao
+    P[Cliente acessa loja online] --> Q[Abrir loja pelo slug]
+    Q --> R[Montar e revisar pedido]
+    R --> S[Enviar pedido]
+    S --> T[Validar loja]
+    T --> U[Validar itens e calcular total]
+    U --> V{Pedido valido?}
+    V -->|Rejeitado| R
+    V -->|Aprovado| W[Persistir pedido e itens]
+    W --> X[Expor pedido na fila]
+    X --> Y{Pedido criado por admin?}
+    Y -->|Nao| Z[Receber resumo + link]
+    Y -->|Sim| AA[Voltar para o cardapio]
+  end
 ```
+
+Arquivos BPMN (layout legivel por lanes):
+- `docs/bpmn/chama-no-espeto-signup.bpmn`
+- `docs/bpmn/chama-no-espeto-orders.bpmn`
 
 ## Deploy no EC2 (resumo rapido)
 
