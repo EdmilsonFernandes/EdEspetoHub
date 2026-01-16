@@ -97,6 +97,7 @@ const OrdersView = ({ orders, products, storeSlug }) => {
             { id: 'pending', label: 'Pendentes', count: statusCounts.pending },
             { id: 'preparing', label: 'Em preparo', count: statusCounts.preparing },
             { id: 'done', label: 'Finalizados', count: statusCounts.done },
+            { id: 'cancelled', label: 'Cancelados', count: statusCounts.cancelled },
           ].map((filter) => (
             <button
               key={filter.id}
