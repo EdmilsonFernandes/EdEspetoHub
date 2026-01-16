@@ -43,6 +43,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
     description: '',
     imageUrl: '',
   });
+  const [inlineImageFile, setInlineImageFile] = useState('');
   const [formData, setFormData] = useState(initialForm);
   const [imageMode, setImageMode] = useState('url');
   const [imagePreview, setImagePreview] = useState('');
@@ -137,11 +138,13 @@ export const ProductManager = ({ products, onProductsChange }) => {
         price: parseFloat(inlineForm.price),
         category: inlineForm.category,
         description: inlineForm.description || undefined,
-        imageUrl: inlineForm.imageUrl || undefined,
+        imageUrl: inlineImageFile ? undefined : inlineForm.imageUrl || undefined,
+        imageFile: inlineImageFile || undefined,
       });
       showToast('Produto atualizado com sucesso', 'success');
       setInlineEditId(null);
       setInlineDetailsId(null);
+      setInlineImageFile('');
       await refreshProducts();
     } catch (error) {
       showToast('Não foi possível salvar o produto', 'error');
@@ -153,6 +156,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
   const handleInlineCancel = () => {
     setInlineEditId(null);
     setInlineDetailsId(null);
+    setInlineImageFile('');
   };
 
   const handleUpload = (file) => {
@@ -549,9 +553,43 @@ export const ProductManager = ({ products, onProductsChange }) => {
                           value={inlineForm.imageUrl}
                           onChange={(e) => setInlineForm((prev) => ({ ...prev, imageUrl: e.target.value }))}
                         />
+                        <div className="flex items-center gap-2">
+                          <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">
+                            Upload
+                          </label>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+                              const reader = new FileReader();
+                              reader.onload = () => {
+                                const result = reader.result?.toString() || '';
+                                setInlineImageFile(result);
+                                setInlineForm((prev) => ({ ...prev, imageUrl: '' }));
+                              };
+                              reader.readAsDataURL(file);
+                            }}
+                            className="text-xs"
+                          />
+                          {inlineImageFile && (
+                            <button
+                              type="button"
+                              onClick={() => setInlineImageFile('')}
+                              className="text-xs font-semibold text-red-600 hover:underline"
+                            >
+                              Limpar
+                            </button>
+                          )}
+                        </div>
                         <div className="rounded-xl border border-gray-200 overflow-hidden bg-gray-50 h-32 flex items-center justify-center">
-                          {inlineForm.imageUrl ? (
-                            <img src={inlineForm.imageUrl} alt="Preview" className="w-full h-full object-cover" />
+                          {inlineImageFile || inlineForm.imageUrl ? (
+                            <img
+                              src={inlineImageFile || inlineForm.imageUrl}
+                              alt="Preview"
+                              className="w-full h-full object-cover"
+                            />
                           ) : (
                             <span className="text-xs text-gray-400">Sem imagem</span>
                           )}
