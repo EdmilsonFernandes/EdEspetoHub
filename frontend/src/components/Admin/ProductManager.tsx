@@ -594,17 +594,17 @@ export const ProductManager = ({ products, onProductsChange }) => {
                               </button>
                             )}
                           </div>
-                          <div className="rounded-xl border border-gray-200 overflow-hidden bg-gray-50 h-32 flex items-center justify-center">
-                            {inlineImageFile || inlineForm.imageUrl ? (
-                              <img
-                                src={inlineImageFile || inlineForm.imageUrl}
-                                alt="Preview"
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <span className="text-xs text-gray-400">Sem imagem</span>
-                            )}
-                          </div>
+                        <div className="rounded-xl border border-gray-200 overflow-hidden bg-gray-50 h-32 flex items-center justify-center">
+                          {inlineImageFile || inlineForm.imageUrl ? (
+                            <img
+                              src={inlineImageFile || inlineForm.imageUrl}
+                              alt="Preview"
+                              className="w-full h-full object-contain"
+                            />
+                          ) : (
+                            <span className="text-xs text-gray-400">Sem imagem</span>
+                          )}
+                        </div>
                         </div>
                       </div>
                     </td>
