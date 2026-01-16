@@ -35,6 +35,7 @@ export function StorePage() {
   const [storeSubscription, setStoreSubscription] = useState(null);
   const autoTrackRef = useRef(false);
   const [lastPublicOrderId, setLastPublicOrderId] = useState('');
+  const [recentPublicOrders, setRecentPublicOrders] = useState([]);
   const [isMobile, setIsMobile] = useState(false);
   const [showInfoSheet, setShowInfoSheet] = useState(false);
   const [copiedAddress, setCopiedAddress] = useState(false);
@@ -231,6 +232,22 @@ export function StorePage() {
         }
       } catch {
         setLastPublicOrderId('');
+      }
+
+      try {
+        const rawList = localStorage.getItem(`lastOrders:${storeSlug}`);
+        if (rawList) {
+          const parsedList = JSON.parse(rawList);
+          if (Array.isArray(parsedList)) {
+            setRecentPublicOrders(parsedList.slice(0, 3));
+          } else {
+            setRecentPublicOrders([]);
+          }
+        } else {
+          setRecentPublicOrders([]);
+        }
+      } catch {
+        setRecentPublicOrders([]);
       }
     }
 
@@ -567,11 +584,19 @@ export function StorePage() {
       table: customer.table,
     });
     if (createdOrder?.id && !user?.token) {
-      localStorage.setItem(
-        `lastOrder:${storeSlug}`,
-        JSON.stringify({ id: createdOrder.id, createdAt: Date.now(), type: customer.type })
-      );
+      const entry = { id: createdOrder.id, createdAt: Date.now(), type: customer.type };
+      localStorage.setItem(`lastOrder:${storeSlug}`, JSON.stringify(entry));
       setLastPublicOrderId(createdOrder.id);
+      try {
+        const rawList = localStorage.getItem(`lastOrders:${storeSlug}`);
+        const parsedList = rawList ? JSON.parse(rawList) : [];
+        const list = Array.isArray(parsedList) ? parsedList : [];
+        const next = [entry, ...list.filter((item) => item?.id !== entry.id)].slice(0, 3);
+        localStorage.setItem(`lastOrders:${storeSlug}`, JSON.stringify(next));
+        setRecentPublicOrders(next);
+      } catch {
+        setRecentPublicOrders([entry]);
+      }
     }
     setView(isStoreAdmin ? 'menu' : 'success');
   };
@@ -818,11 +843,24 @@ export function StorePage() {
           </div>
         ) : !showInactiveState && !showClosedState && view === 'menu' && products.length > 0 && (
           <div className="space-y-4">
-            {!user?.token && lastPublicOrderId && (
-              <div className="mx-3 sm:mx-6 rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                <span>Deseja continuar acompanhando seu ultimo pedido?</span>
+            {!user?.token && recentPublicOrders.length > 0 && (
+              <div className="mx-3 sm:mx-6 rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div className="space-y-1">
+                  <span className="font-semibold">Acompanhar pedidos recentes</span>
+                  <div className="flex flex-wrap gap-2">
+                    {recentPublicOrders.map((entry) => (
+                      <button
+                        key={entry.id}
+                        onClick={() => navigate(`/pedido/${entry.id}`)}
+                        className="px-2.5 py-1 rounded-full bg-white text-emerald-700 text-[11px] font-semibold border border-emerald-200 hover:bg-emerald-100"
+                      >
+                        #{formatOrderDisplayId(entry.id, storeSlug)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 <button
-                  onClick={() => navigate(`/pedido/${lastPublicOrderId}`)}
+                  onClick={() => navigate(`/pedido/${recentPublicOrders[0].id}`)}
                   className="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:opacity-90"
                 >
                   Acompanhar agora
