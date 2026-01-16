@@ -504,9 +504,16 @@ export const MenuView = ({
                           <p className="text-xs text-slate-500 line-clamp-1">{item.description}</p>
                         )}
                       </div>
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold bg-brand-primary-soft text-brand-primary">
-                        {formatCurrency(item.price)}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold bg-brand-primary-soft text-brand-primary">
+                          {formatCurrency(item.price)}
+                        </span>
+                        {itemQtyMap.get(String(item.id)) > 0 && (
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            {itemQtyMap.get(String(item.id))}x
+                          </span>
+                        )}
+                      </div>
                     </div>
                     {isEspetoCategory(item.category) && (
                       <div className="inline-flex items-center gap-2 text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full">
