@@ -2,9 +2,9 @@
 
 Aplicação web para pedidos e gestão do restaurante de espetinhos Datony. O projeto traz duas experiências principais:
 
-- **Loja do cliente**: montagem e edição do pedido, envio para WhatsApp e pagamento via chave Pix.
-- **Painel interno**: dashboard com métricas, CRUD de produtos, fila do churrasqueiro (atualização a cada 5s) e histórico de pedidos.
-- **Acompanhar pedido**: pagina publica em `/pedido/:orderId` com status, fila e branding da loja.
+- **Loja do cliente**: montagem e edição do pedido, info da loja no mobile (sheet), WhatsApp e link de acompanhamento (quando publico).
+- **Painel interno**: dashboard com métricas, CRUD de produtos, fila do churrasqueiro (atualização a cada 5s), pagamentos e histórico.
+- **Acompanhar pedido**: pagina publica em `/pedido/:orderId` com status, fila, detalhes e branding da loja.
 
 ## Estrutura de pastas
 
@@ -140,6 +140,7 @@ Cadastro (UX):
 Assinaturas:
 - Job diario marca expiracao e envia avisos em D-3, D-1 e D-0.
 - Renovacao ocorre pelo painel `/admin/renewal` com escolha de plano.
+- Pagamentos expirados/failed geram novo link ao renovar.
 
 SEO basico:
 - `robots.txt` aponta para o sitemap.
@@ -148,6 +149,11 @@ SEO basico:
 Trial:
 - Periodo gratis configuravel via `site_settings` (`trial_days`).
 - Loja ativa apos confirmacao de e-mail, sem cobrar durante o trial.
+
+Vitrine (mobile):
+- Header compacto com botao "Info" da loja.
+- Sheet com endereco, WhatsApp, Instagram e horarios.
+- Mapa estatico gratuito via OpenStreetMap.
 
 Demo:
 - Vitrine demo em `/chamanoespeto/demo`.

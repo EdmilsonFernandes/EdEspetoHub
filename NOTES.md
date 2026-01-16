@@ -6,6 +6,8 @@
   - Hero concentra status/horario/WhatsApp.
   - "Id da loja" usa slug.
   - Cores primaria/secundaria aplicadas corretamente.
+- Mobile: header compacto + botao "Info" com sheet de endereco/WhatsApp/Instagram/horarios.
+- Mapa estatico gratuito (OpenStreetMap) no mobile com cache de coordenadas.
 - Fila do churrasqueiro usa o mesmo header do admin e mantem tema/cores.
 - Admin:
   - Header unico para todas as telas (Dashboard, Pedidos, Fila).
@@ -21,6 +23,7 @@
   - Clientes recentes antes de digitar.
   - Mesa com selecao rapida (1-12) + campo "outra mesa".
   - Visual "iFood-like" no bloco de dados do pedido.
+- Pedido feito por admin volta para o cardapio (nao envia WhatsApp/tracking).
 - Som na fila:
   - Ligado por padrao, salva preferencia.
   - Botao "Testar som".
@@ -49,6 +52,8 @@
   - Linha do tempo do usuario mostra apenas status + data.
   - Admin login sem valores predefinidos.
   - Sessao expirada limpa `adminSession` e redireciona pro login.
+  - Logos de pagamento (Pix/Cartao/Mercado Pago) em telas publicas e admin.
+  - Renovacao gera novo link se pagamento expirou/failed.
 - Demo:
   - Vitrine demo em `/chamanoespeto/demo`.
   - Admin demo em `/admin/demo` com dados locais (localStorage).
@@ -70,6 +75,7 @@
   - Tipos de pedido configuraveis (entrega, retirada, mesa).
 - Vitrine:
   - Banner "Acompanhar pedido" apenas para publico e nao aparece em pedidos de mesa.
+  - Botao "Info" abre sheet com endereco, contatos e horarios.
 
 ## Arquivos principais mexidos
 - frontend/src/components/Client/MenuView.tsx
@@ -93,6 +99,8 @@
 - frontend/src/pages/ForgotPassword.tsx
 - frontend/src/pages/ResetPassword.tsx
 - frontend/src/services/authService.ts
+- frontend/src/pages/StorePage.tsx
+- frontend/src/components/Client/MenuView.tsx
 
 ## Observacoes importantes
 - Som so toca apos interacao do usuario (limitacao do navegador).

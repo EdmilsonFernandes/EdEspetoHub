@@ -7,7 +7,9 @@
         <bpmn:flowNodeRef>Task_AccessStore</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Task_AssembleOrder</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Task_SendOrder</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_AdminOrder</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Task_ReceivePix</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_ReturnMenu</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>End_OrderDelivered</bpmn:flowNodeRef>
       </bpmn:lane>
       <bpmn:lane id="Lane_API" name="API / Backend">
@@ -36,7 +38,9 @@
     <bpmn:task id="Task_SendOrder" name="Enviar pedido (POST /stores/:slug/orders)">
       <bpmn:outgoing>Flow_SendToBackend</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:task id="Task_ReceivePix" name="Receber chave Pix e resumo"/>
+    <bpmn:exclusiveGateway id="Gateway_AdminOrder" name="Pedido criado por admin?"/>
+    <bpmn:task id="Task_ReceivePix" name="Receber resumo + link de acompanhamento"/>
+    <bpmn:task id="Task_ReturnMenu" name="Voltar para o cardapio"/>
     <bpmn:endEvent id="End_OrderDelivered" name="Pedido entregue / retirada"/>
 
     <bpmn:startEvent id="Start_AdminOps" name="Operação diária"/>
@@ -53,7 +57,7 @@
     <bpmn:exclusiveGateway id="Gateway_OrderValid" name="Pedido válido?"/>
     <bpmn:task id="Task_CreateOrder" name="Persistir pedido e itens"/>
     <bpmn:task id="Task_ExposeOrderQueue" name="Expor pedido na fila"/>
-    <bpmn:task id="Task_NotifyPaymentStatus" name="Retornar status/pagamento ao painel"/>
+    <bpmn:task id="Task_NotifyPaymentStatus" name="Gerar notificacoes (WhatsApp/links)"/>
 
     <bpmn:sequenceFlow id="Flow_StartToAccess" sourceRef="Start_CustomerJourney" targetRef="Task_AccessStore"/>
     <bpmn:sequenceFlow id="Flow_AccessToAssemble" sourceRef="Task_AccessStore" targetRef="Task_AssembleOrder"/>
@@ -64,7 +68,10 @@
     <bpmn:sequenceFlow id="Flow_InvalidOrder" sourceRef="Gateway_OrderValid" targetRef="Task_AssembleOrder" name="Rejeitado"/>
     <bpmn:sequenceFlow id="Flow_ValidOrder" sourceRef="Gateway_OrderValid" targetRef="Task_CreateOrder" name="Aprovado"/>
     <bpmn:sequenceFlow id="Flow_CreateToQueue" sourceRef="Task_CreateOrder" targetRef="Task_ExposeOrderQueue"/>
-    <bpmn:sequenceFlow id="Flow_QueueToCustomer" sourceRef="Task_ExposeOrderQueue" targetRef="Task_ReceivePix"/>
+    <bpmn:sequenceFlow id="Flow_QueueToCustomer" sourceRef="Task_ExposeOrderQueue" targetRef="Gateway_AdminOrder"/>
+    <bpmn:sequenceFlow id="Flow_AdminOrderYes" sourceRef="Gateway_AdminOrder" targetRef="Task_ReturnMenu" name="Sim"/>
+    <bpmn:sequenceFlow id="Flow_AdminOrderNo" sourceRef="Gateway_AdminOrder" targetRef="Task_ReceivePix" name="Nao"/>
+    <bpmn:sequenceFlow id="Flow_ReturnToAssemble" sourceRef="Task_ReturnMenu" targetRef="Task_AssembleOrder" name="Novo pedido"/>
     <bpmn:sequenceFlow id="Flow_QueueToDashboard" sourceRef="Task_ExposeOrderQueue" targetRef="Task_MonitorQueue"/>
     <bpmn:sequenceFlow id="Flow_PaymentSync" sourceRef="Task_NotifyPaymentStatus" targetRef="Task_MonitorQueue"/>
     <bpmn:sequenceFlow id="Flow_PrepareToConfirm" sourceRef="Task_PrepareOrder" targetRef="Task_ConfirmDelivery"/>
