@@ -127,6 +127,10 @@ export function StorePage() {
         }
       };
     }
+    return undefined;
+  }, []);
+
+  useEffect(() => {
     const savedSession = localStorage.getItem('adminSession');
     if (savedSession) {
       const parsedSession = JSON.parse(savedSession);
