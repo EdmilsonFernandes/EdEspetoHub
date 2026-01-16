@@ -371,10 +371,10 @@ export const GrillQueue = () => {
             {sortedQueue.length}
           </span>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2">
           <button
             onClick={handleToggleSound}
-            className="flex items-center gap-2 text-sm px-3 py-2 rounded-lg bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
+            className="flex items-center gap-2 text-sm px-3 py-2 rounded-lg bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 w-full sm:w-auto"
           >
             {soundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
             {soundEnabled ? "Som ligado" : "Som desligado"}
@@ -386,13 +386,13 @@ export const GrillQueue = () => {
               }
               ensureAudioContext().then(() => playNewOrderSound()).catch(() => {});
             }}
-            className="flex items-center gap-2 text-sm px-3 py-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200"
+            className="flex items-center gap-2 text-sm px-3 py-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 w-full sm:w-auto"
           >
             Testar som
           </button>
           <button
             onClick={loadQueue}
-            className="flex items-center gap-2 text-sm px-3 py-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200"
+            className="flex items-center gap-2 text-sm px-3 py-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 w-full sm:w-auto"
           >
             <RefreshCcw size={16} /> Atualizar
           </button>
@@ -407,7 +407,7 @@ export const GrillQueue = () => {
             className="relative bg-white p-4 rounded-xl shadow-sm border border-gray-100"
           >
             {/* HEADER DO CARD */}
-            <div className="flex justify-between items-start">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
               <div className="relative flex-1">
                 <div className="flex items-center gap-2 mb-1 text-[11px] text-gray-600 uppercase font-bold">
                   <Hash size={14} className="text-brand-primary" /> Fila
@@ -454,7 +454,7 @@ export const GrillQueue = () => {
                 </p>
               </div>
 
-              <div className="flex flex-col items-end gap-2">
+              <div className="flex flex-row sm:flex-col items-center sm:items-end gap-2">
                 <span
                   className={`px-2 py-1 text-xs font-bold rounded ${getStatusStyles(order.status).className}`}
                 >
