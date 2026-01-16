@@ -268,10 +268,10 @@ export const CartView = ({
                 <button
                   key={type}
                   onClick={() => onChangeCustomer({ ...customer, type })}
-                  className={`flex-1 py-2.5 sm:py-3 rounded-2xl border flex flex-col items-center justify-center gap-1 transition-all ${
+                  className={`flex-1 py-2.5 sm:py-3 rounded-2xl border flex flex-col items-center justify-center gap-1 transition-all active:scale-[0.98] ${
                     customer.type === type
                       ? "border-brand-primary bg-gradient-to-br from-brand-primary-soft/70 to-white text-brand-primary shadow-md"
-                      : "border-gray-100 text-gray-500 hover:border-brand-primary hover:shadow-sm"
+                      : "border-gray-100 text-gray-500 hover:border-brand-primary hover:shadow-sm hover:-translate-y-0.5"
                   }`}
                 >
                   <span className={`h-9 w-9 rounded-xl flex items-center justify-center ${customer.type === type ? 'bg-brand-primary text-white' : 'bg-slate-100 text-slate-600'}`}>
@@ -500,10 +500,10 @@ export const CartView = ({
             <button
               key={method.id}
               onClick={() => onChangePayment(method.id)}
-              className={`rounded-2xl p-3 text-left transition-all border ${
+              className={`rounded-2xl p-3 text-left transition-all border active:scale-[0.98] ${
                 paymentMethod === method.id
                   ? "border-brand-primary bg-gradient-to-br from-brand-primary-soft/70 to-white text-brand-primary shadow-md"
-                  : "border-gray-100 text-gray-500 hover:border-brand-primary hover:shadow-sm"
+                  : "border-gray-100 text-gray-500 hover:border-brand-primary hover:shadow-sm hover:-translate-y-0.5"
               }`}
             >
               {(() => {
