@@ -476,62 +476,62 @@ export const GrillQueue = () => {
                   key={item.id}
                   className="flex justify-between text-sm text-gray-700 items-center gap-3"
                 >
-                  <div className="flex flex-wrap items-center gap-2">
-                    <button
-                      onClick={() => handleQuantityChange(order.id, item.id, -1)}
-                      className="p-1 rounded-full bg-gray-100 hover:bg-gray-200"
-                    >
-                      <Minus size={14} />
-                    </button>
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <button
+                        onClick={() => handleQuantityChange(order.id, item.id, -1)}
+                        className="p-1 rounded-full bg-gray-100 hover:bg-gray-200"
+                      >
+                        <Minus size={14} />
+                      </button>
 
-                    <span className="font-bold text-gray-800 w-8 text-center">
-                      {item.qty}
-                    </span>
+                      <span className="font-bold text-gray-800 w-8 text-center">
+                        {item.qty}
+                      </span>
 
-                    <button
-                      onClick={() => handleQuantityChange(order.id, item.id, 1)}
-                      className="p-1 rounded-full bg-gray-100 hover:bg-gray-200"
-                    >
-                      <Plus size={14} />
-                    </button>
+                      <button
+                        onClick={() => handleQuantityChange(order.id, item.id, 1)}
+                        className="p-1 rounded-full bg-gray-100 hover:bg-gray-200"
+                      >
+                        <Plus size={14} />
+                      </button>
+                    </div>
 
-                    <div className="flex flex-col">
-                      <div className="flex items-center gap-2">
-                        <div className="w-10 h-10 rounded-lg overflow-hidden border border-gray-200 bg-gray-100 flex-shrink-0">
-                          {item.imageUrl || productsById.get(item.productId || item.id)?.imageUrl ? (
-                            <img
-                              src={resolveAssetUrl(item.imageUrl || productsById.get(item.productId || item.id)?.imageUrl)}
-                              alt={item.name}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-[10px] text-gray-400">
-                              🍖
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="max-w-[160px] sm:max-w-[220px] truncate" title={item.name}>
-                            {item.name}
-                          </span>
-                          <div className="flex flex-wrap gap-1 mt-1">
-                            {item?.cookingPoint && (
-                              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800 border border-amber-200">
-                                {item.cookingPoint}
-                              </span>
-                            )}
-                            {item?.passSkewer && (
-                              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-fuchsia-100 text-fuchsia-700 border border-fuchsia-200">
-                                passar varinha
-                              </span>
-                            )}
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="w-10 h-10 rounded-lg overflow-hidden border border-gray-200 bg-gray-100 flex-shrink-0">
+                        {item.imageUrl || productsById.get(item.productId || item.id)?.imageUrl ? (
+                          <img
+                            src={resolveAssetUrl(item.imageUrl || productsById.get(item.productId || item.id)?.imageUrl)}
+                            alt={item.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-[10px] text-gray-400">
+                            🍖
                           </div>
+                        )}
+                      </div>
+                      <div className="flex flex-col min-w-0">
+                        <span className="truncate" title={item.name}>
+                          {item.name}
+                        </span>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {item?.cookingPoint && (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800 border border-amber-200">
+                              {item.cookingPoint}
+                            </span>
+                          )}
+                          {item?.passSkewer && (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-fuchsia-100 text-fuchsia-700 border border-fuchsia-200">
+                              passar varinha
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <span className="font-semibold">
+                  <span className="font-semibold flex-shrink-0">
                     {formatCurrency((item.unitPrice ?? (item.price && item.qty ? item.price / item.qty : item.price) ?? 0) * item.qty)}
                   </span>
                 </div>
