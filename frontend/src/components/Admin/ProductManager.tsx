@@ -418,192 +418,194 @@ export const ProductManager = ({ products, onProductsChange }) => {
           </thead>
           <tbody className="divide-y">
             {products.map((product) => (
-              <tr key={product.id} className="hover:bg-gray-50">
-                <td className="p-4">
-                  {product.imageUrl ? (
-                    <img src={product.imageUrl} className="w-10 h-10 rounded object-cover" alt="" />
-                  ) : (
-                    <div className="w-10 h-10 bg-gray-200 rounded flex items-center justify-center">
-                      <ImageIcon size={16} className="text-gray-400" />
-                    </div>
-                  )}
-                </td>
-                {inlineEditId === product.id ? (
-                  <>
-                    <td className="p-4">
-                      <input
-                        className="w-full p-2 border border-gray-200 rounded-lg text-sm"
-                        value={inlineForm.name}
-                        onChange={(e) => setInlineForm((prev) => ({ ...prev, name: e.target.value }))}
-                      />
-                    </td>
-                    <td className="p-4">
-                      <input
-                        className="w-full p-2 border border-gray-200 rounded-lg text-sm"
-                        value={inlineForm.category}
-                        onChange={(e) => setInlineForm((prev) => ({ ...prev, category: e.target.value }))}
-                      />
-                    </td>
-                    <td className="p-4">
-                      <input
-                        className="w-full p-2 border border-gray-200 rounded-lg text-sm"
-                        type="number"
-                        step="0.01"
-                        value={inlineForm.price}
-                        onChange={(e) => setInlineForm((prev) => ({ ...prev, price: e.target.value }))}
-                      />
-                    </td>
-                    <td className="p-4 text-right space-x-2">
-                      <button
-                        onClick={handleInlineSave}
-                        className="text-emerald-600 hover:bg-emerald-50 p-2 rounded"
-                        disabled={saving}
-                      >
-                        <Save size={18} />
-                      </button>
-                      <button
-                        onClick={() => setInlineDetailsId((prev) => (prev === product.id ? null : product.id))}
-                        className="text-brand-primary hover:bg-brand-primary-soft p-2 rounded"
-                      >
-                        <ImagePlus size={18} />
-                      </button>
-                      <button
-                        onClick={handleInlineCancel}
-                        className="text-slate-600 hover:bg-slate-100 p-2 rounded"
-                      >
-                        <X size={18} />
-                      </button>
-                    </td>
-                  </>
-                ) : (
-                  <>
-                    <td className="p-4 font-medium">{product.name}</td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-2">
-                        {(() => {
-                          const Icon = getCategoryIcon(product.category);
-                          return <Icon size={16} className="text-brand-primary" />;
-                        })()}
-                        <span className="text-sm text-gray-600">{formatCategoryLabel(product.category)}</span>
+              <React.Fragment key={product.id}>
+                <tr className="hover:bg-gray-50">
+                  <td className="p-4">
+                    {product.imageUrl ? (
+                      <img src={product.imageUrl} className="w-10 h-10 rounded object-cover" alt="" />
+                    ) : (
+                      <div className="w-10 h-10 bg-gray-200 rounded flex items-center justify-center">
+                        <ImageIcon size={16} className="text-gray-400" />
                       </div>
-                    </td>
-                    <td className="p-4 text-brand-primary font-bold">{formatCurrency(product.price)}</td>
-                    <td className="p-4 text-right space-x-2">
-                      <button onClick={() => handleEdit(product)} className="text-brand-primary hover:bg-brand-primary-soft p-2 rounded">
-                        <Edit size={18} />
-                      </button>
-                      <button
-                        onClick={() => setInlineDetailsId((prev) => (prev === product.id ? null : product.id))}
-                        className="text-slate-600 hover:bg-slate-100 p-2 rounded"
-                        title="Detalhes"
-                      >
-                        <ImagePlus size={18} />
-                      </button>
-                      <button
-                        onClick={() => {
-                          if (!window.confirm('Excluir produto?')) return;
-                          setSaving(true);
-                          productService
-                            .delete(product.id)
-                            .then(async () => {
-                              showToast('Produto removido', 'success');
-                              await refreshProducts();
-                            })
-                            .catch(async (error) => {
-                              const message = (error?.message || '').toString();
-                              if (error?.code === 'PROD-001' || error?.status === 404 || message.includes('Produto')) {
+                    )}
+                  </td>
+                  {inlineEditId === product.id ? (
+                    <>
+                      <td className="p-4">
+                        <input
+                          className="w-full p-2 border border-gray-200 rounded-lg text-sm"
+                          value={inlineForm.name}
+                          onChange={(e) => setInlineForm((prev) => ({ ...prev, name: e.target.value }))}
+                        />
+                      </td>
+                      <td className="p-4">
+                        <input
+                          className="w-full p-2 border border-gray-200 rounded-lg text-sm"
+                          value={inlineForm.category}
+                          onChange={(e) => setInlineForm((prev) => ({ ...prev, category: e.target.value }))}
+                        />
+                      </td>
+                      <td className="p-4">
+                        <input
+                          className="w-full p-2 border border-gray-200 rounded-lg text-sm"
+                          type="number"
+                          step="0.01"
+                          value={inlineForm.price}
+                          onChange={(e) => setInlineForm((prev) => ({ ...prev, price: e.target.value }))}
+                        />
+                      </td>
+                      <td className="p-4 text-right space-x-2">
+                        <button
+                          onClick={handleInlineSave}
+                          className="text-emerald-600 hover:bg-emerald-50 p-2 rounded"
+                          disabled={saving}
+                        >
+                          <Save size={18} />
+                        </button>
+                        <button
+                          onClick={() => setInlineDetailsId((prev) => (prev === product.id ? null : product.id))}
+                          className="text-brand-primary hover:bg-brand-primary-soft p-2 rounded"
+                        >
+                          <ImagePlus size={18} />
+                        </button>
+                        <button
+                          onClick={handleInlineCancel}
+                          className="text-slate-600 hover:bg-slate-100 p-2 rounded"
+                        >
+                          <X size={18} />
+                        </button>
+                      </td>
+                    </>
+                  ) : (
+                    <>
+                      <td className="p-4 font-medium">{product.name}</td>
+                      <td className="p-4">
+                        <div className="flex items-center gap-2">
+                          {(() => {
+                            const Icon = getCategoryIcon(product.category);
+                            return <Icon size={16} className="text-brand-primary" />;
+                          })()}
+                          <span className="text-sm text-gray-600">{formatCategoryLabel(product.category)}</span>
+                        </div>
+                      </td>
+                      <td className="p-4 text-brand-primary font-bold">{formatCurrency(product.price)}</td>
+                      <td className="p-4 text-right space-x-2">
+                        <button onClick={() => handleEdit(product)} className="text-brand-primary hover:bg-brand-primary-soft p-2 rounded">
+                          <Edit size={18} />
+                        </button>
+                        <button
+                          onClick={() => setInlineDetailsId((prev) => (prev === product.id ? null : product.id))}
+                          className="text-slate-600 hover:bg-slate-100 p-2 rounded"
+                          title="Detalhes"
+                        >
+                          <ImagePlus size={18} />
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (!window.confirm('Excluir produto?')) return;
+                            setSaving(true);
+                            productService
+                              .delete(product.id)
+                              .then(async () => {
                                 showToast('Produto removido', 'success');
                                 await refreshProducts();
-                                return;
-                              }
-                              showToast('Não foi possível remover o produto', 'error');
-                            })
-                            .finally(() => setSaving(false));
-                        }}
-                        className="text-red-600 hover:bg-red-50 p-2 rounded"
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                    </td>
-                  </>
-                )}
-              </tr>
-              {inlineDetailsId === product.id && (
-                <tr className="bg-slate-50">
-                  <td colSpan={5} className="px-4 pb-4">
-                    <div className="grid gap-4 md:grid-cols-[1.2fr_0.8fr] bg-white rounded-xl border border-slate-200 p-4">
-                      <div className="space-y-3">
-                        <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">
-                          Descrição
-                        </label>
-                        <textarea
-                          className="w-full p-3 border border-gray-200 rounded-lg text-sm min-h-[120px]"
-                          placeholder="Descreva o produto..."
-                          value={inlineForm.description}
-                          onChange={(e) => setInlineForm((prev) => ({ ...prev, description: e.target.value }))}
-                        />
-                      </div>
-                      <div className="space-y-3">
-                        <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">
-                          Imagem (URL)
-                        </label>
-                        <input
-                          className="w-full p-3 border border-gray-200 rounded-lg text-sm"
-                          placeholder="https://..."
-                          value={inlineForm.imageUrl}
-                          onChange={(e) => setInlineForm((prev) => ({ ...prev, imageUrl: e.target.value }))}
-                        />
-                        <div className="flex items-center gap-2">
+                              })
+                              .catch(async (error) => {
+                                const message = (error?.message || '').toString();
+                                if (error?.code === 'PROD-001' || error?.status === 404 || message.includes('Produto')) {
+                                  showToast('Produto removido', 'success');
+                                  await refreshProducts();
+                                  return;
+                                }
+                                showToast('Não foi possível remover o produto', 'error');
+                              })
+                              .finally(() => setSaving(false));
+                          }}
+                          className="text-red-600 hover:bg-red-50 p-2 rounded"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </td>
+                    </>
+                  )}
+                </tr>
+                {inlineDetailsId === product.id && (
+                  <tr className="bg-slate-50">
+                    <td colSpan={5} className="px-4 pb-4">
+                      <div className="grid gap-4 md:grid-cols-[1.2fr_0.8fr] bg-white rounded-xl border border-slate-200 p-4">
+                        <div className="space-y-3">
                           <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">
-                            Upload
+                            Descrição
+                          </label>
+                          <textarea
+                            className="w-full p-3 border border-gray-200 rounded-lg text-sm min-h-[120px]"
+                            placeholder="Descreva o produto..."
+                            value={inlineForm.description}
+                            onChange={(e) => setInlineForm((prev) => ({ ...prev, description: e.target.value }))}
+                          />
+                        </div>
+                        <div className="space-y-3">
+                          <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">
+                            Imagem (URL)
                           </label>
                           <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (!file) return;
-                              if (file.size > 3 * 1024 * 1024) {
-                                showToast('Imagem acima de 3MB. Reduza e tente novamente.', 'error');
-                                e.target.value = '';
-                                return;
-                              }
-                              const reader = new FileReader();
-                              reader.onload = () => {
-                                const result = reader.result?.toString() || '';
-                                setInlineImageFile(result);
-                                setInlineForm((prev) => ({ ...prev, imageUrl: '' }));
-                              };
-                              reader.readAsDataURL(file);
-                            }}
-                            className="text-xs"
+                            className="w-full p-3 border border-gray-200 rounded-lg text-sm"
+                            placeholder="https://..."
+                            value={inlineForm.imageUrl}
+                            onChange={(e) => setInlineForm((prev) => ({ ...prev, imageUrl: e.target.value }))}
                           />
-                          {inlineImageFile && (
-                            <button
-                              type="button"
-                              onClick={() => setInlineImageFile('')}
-                              className="text-xs font-semibold text-red-600 hover:underline"
-                            >
-                              Limpar
-                            </button>
-                          )}
-                        </div>
-                        <div className="rounded-xl border border-gray-200 overflow-hidden bg-gray-50 h-32 flex items-center justify-center">
-                          {inlineImageFile || inlineForm.imageUrl ? (
-                            <img
-                              src={inlineImageFile || inlineForm.imageUrl}
-                              alt="Preview"
-                              className="w-full h-full object-cover"
+                          <div className="flex items-center gap-2">
+                            <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">
+                              Upload
+                            </label>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                if (file.size > 3 * 1024 * 1024) {
+                                  showToast('Imagem acima de 3MB. Reduza e tente novamente.', 'error');
+                                  e.target.value = '';
+                                  return;
+                                }
+                                const reader = new FileReader();
+                                reader.onload = () => {
+                                  const result = reader.result?.toString() || '';
+                                  setInlineImageFile(result);
+                                  setInlineForm((prev) => ({ ...prev, imageUrl: '' }));
+                                };
+                                reader.readAsDataURL(file);
+                              }}
+                              className="text-xs"
                             />
-                          ) : (
-                            <span className="text-xs text-gray-400">Sem imagem</span>
-                          )}
+                            {inlineImageFile && (
+                              <button
+                                type="button"
+                                onClick={() => setInlineImageFile('')}
+                                className="text-xs font-semibold text-red-600 hover:underline"
+                              >
+                                Limpar
+                              </button>
+                            )}
+                          </div>
+                          <div className="rounded-xl border border-gray-200 overflow-hidden bg-gray-50 h-32 flex items-center justify-center">
+                            {inlineImageFile || inlineForm.imageUrl ? (
+                              <img
+                                src={inlineImageFile || inlineForm.imageUrl}
+                                alt="Preview"
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <span className="text-xs text-gray-400">Sem imagem</span>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </td>
-                </tr>
-              )}
+                    </td>
+                  </tr>
+                )}
+              </React.Fragment>
             ))}
           </tbody>
         </table>
