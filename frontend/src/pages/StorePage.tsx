@@ -39,6 +39,8 @@ export function StorePage() {
   const [showInfoSheet, setShowInfoSheet] = useState(false);
   const [copiedAddress, setCopiedAddress] = useState(false);
   const [copiedPhone, setCopiedPhone] = useState(false);
+  const [mapCoords, setMapCoords] = useState(null);
+  const [mapLoading, setMapLoading] = useState(false);
   const customersStorageKey = useMemo(
     () => `customers:${storeSlug || defaultBranding.espetoId}`,
     [storeSlug]
@@ -279,6 +281,37 @@ export function StorePage() {
       setLastPublicOrderId('');
     }
   }, [user?.token]);
+
+  useEffect(() => {
+    setMapCoords(null);
+  }, [storeAddress]);
+
+  useEffect(() => {
+    if (!showInfoSheet || !storeAddress || mapCoords || mapLoading) return;
+    const controller = new AbortController();
+    const loadCoords = async () => {
+      setMapLoading(true);
+      try {
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(storeAddress)}`,
+          { signal: controller.signal }
+        );
+        if (!response.ok) return;
+        const data = await response.json();
+        if (Array.isArray(data) && data[0]?.lat && data[0]?.lon) {
+          setMapCoords({ lat: data[0].lat, lon: data[0].lon });
+        }
+      } catch (error) {
+        if (error?.name !== 'AbortError') {
+          console.error('Falha ao carregar mapa', error);
+        }
+      } finally {
+        setMapLoading(false);
+      }
+    };
+    loadCoords();
+    return () => controller.abort();
+  }, [showInfoSheet, storeAddress, mapCoords, mapLoading]);
 
   const updateCart = (item, qty, options) => {
     const cookingPoint = options?.cookingPoint ?? item?.cookingPoint;
@@ -914,12 +947,18 @@ export function StorePage() {
                     </button>
                   </div>
                   <div className="rounded-xl overflow-hidden border border-slate-200 bg-white sm:hidden">
-                    <iframe
-                      title="Mapa da loja"
-                      src={`https://maps.google.com/maps?q=${encodeURIComponent(storeAddress)}&z=16&output=embed`}
-                      className="w-full h-40"
-                      loading="lazy"
-                    />
+                    {mapCoords ? (
+                      <img
+                        src={`https://staticmap.openstreetmap.de/staticmap.php?center=${mapCoords.lat},${mapCoords.lon}&zoom=16&size=600x300&markers=${mapCoords.lat},${mapCoords.lon},red-pushpin`}
+                        alt="Mapa da loja"
+                        className="w-full h-40 object-cover"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="h-40 flex items-center justify-center text-xs text-slate-500">
+                        {mapLoading ? 'Carregando mapa...' : 'Mapa indisponivel'}
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
