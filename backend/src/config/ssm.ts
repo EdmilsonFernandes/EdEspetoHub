@@ -13,7 +13,6 @@
 
 import { SSMClient, GetParameterCommand } from '@aws-sdk/client-ssm';
 import fs from 'fs';
-
 /**
  * Parses json.
  *
@@ -27,7 +26,6 @@ const parseJson = (raw: string) => {
     return null;
   }
 };
-
 /**
  * Loads ssm env.
  *

@@ -29,7 +29,7 @@ export type PaymentProvider = 'MERCADO_PAGO' | 'MOCK';
 
 @Entity({ name: 'payments' })
 /**
- * Represents Payment.
+ * Provides Payment functionality.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2025-12-17

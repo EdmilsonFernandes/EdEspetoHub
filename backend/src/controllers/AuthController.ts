@@ -20,9 +20,8 @@ import { respondWithSuccess } from '../errors/respondWithSuccess';
 
 const authService = new AuthService();
 const log = logger.child({ scope: 'AuthController' });
-
 /**
- * Represents AuthController.
+ * Provides AuthController functionality.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2025-12-17
@@ -54,6 +53,9 @@ export class AuthController
     }
   }
 
+
+
+
   /**
    * Executes login logic.
    *
@@ -75,6 +77,9 @@ export class AuthController
       return respondWithError(req, res, error, 401);
     }
   }
+
+
+
 
   /**
    * Executes admin login logic.
@@ -99,6 +104,9 @@ export class AuthController
     }
   }
 
+
+
+
   /**
    * Executes super admin login logic.
    *
@@ -120,6 +128,9 @@ export class AuthController
       return respondWithError(req, res, error, 401);
     }
   }
+
+
+
 
   /**
    * Executes forgot password logic.
@@ -144,6 +155,9 @@ export class AuthController
     }
   }
 
+
+
+
   /**
    * Executes reset password logic.
    *
@@ -167,6 +181,9 @@ export class AuthController
     }
   }
 
+
+
+
   /**
    * Verifies email.
    *
@@ -189,6 +206,9 @@ export class AuthController
       return respondWithError(req, res, error, 400);
     }
   }
+
+
+
 
   /**
    * Executes resend verification logic.

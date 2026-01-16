@@ -19,9 +19,8 @@ import { ProductRepository } from '../repositories/ProductRepository';
 import { StoreRepository } from '../repositories/StoreRepository';
 import { AppDataSource } from '../config/database';
 import { AppError } from '../errors/AppError';
-
 /**
- * Represents OrderService.
+ * Provides OrderService functionality.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2025-12-17
@@ -47,6 +46,9 @@ export class OrderService
     }
   }
 
+
+
+
   /**
    * Executes create logic.
    *
@@ -61,6 +63,9 @@ export class OrderService
     const order = await this.buildOrder(input, store);
     return this.orderRepository.save(order);
   }
+
+
+
 
   /**
    * Creates by slug.
@@ -77,6 +82,9 @@ export class OrderService
     return this.orderRepository.save(order);
   }
 
+
+
+
   /**
    * Lists by store id.
    *
@@ -90,6 +98,9 @@ export class OrderService
     return this.orderRepository.findByStoreId(store!.id);
   }
 
+
+
+
   /**
    * Lists by store slug.
    *
@@ -102,6 +113,9 @@ export class OrderService
     this.ensureStoreAccess(store, authStoreId);
     return this.orderRepository.findByStoreId(store!.id);
   }
+
+
+
 
   /**
    * Updates status.
@@ -118,6 +132,9 @@ export class OrderService
     order.status = status;
     return this.orderRepository.save(order);
   }
+
+
+
 
   /**
    * Updates items.
@@ -168,6 +185,9 @@ export class OrderService
     return this.orderRepository.save(order);
   }
 
+
+
+
   /**
    * Gets public by id.
    *
@@ -194,6 +214,9 @@ export class OrderService
 
     return { order, queuePosition, queueSize };
   }
+
+
+
 
   /**
    * Builds order.

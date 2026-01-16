@@ -24,16 +24,14 @@ const DEFAULT_PLANS: Array<Pick<Plan, 'name' | 'displayName' | 'price' | 'durati
 ];
 
 const LEGACY_PLANS: PlanName[] = ['monthly', 'yearly'];
-
 /**
- * Represents PlanService.
+ * Provides PlanService functionality.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2025-12-17
  */
 export class PlanService {
   private planRepository = new PlanRepository();
-
   /**
    * Lists enabled.
    *
@@ -53,6 +51,12 @@ export class PlanService {
    */
   async ensureSeededPlans() {
     const existing = await this.planRepository.findAll();
+    /**
+     * Handles by name.
+     *
+     * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+     * @date 2025-12-17
+     */
     const byName = new Map(existing.map((plan) => [plan.name, plan]));
 
     for (const seed of DEFAULT_PLANS) {

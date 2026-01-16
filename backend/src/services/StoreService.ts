@@ -22,9 +22,8 @@ import { EntityManager } from 'typeorm';
 import { saveBase64Image } from '../utils/imageStorage';
 import { sanitizeSocialLinks } from '../utils/socialLinks';
 import { AppError } from '../errors/AppError';
-
 /**
- * Represents StoreService.
+ * Provides StoreService functionality.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2025-12-17

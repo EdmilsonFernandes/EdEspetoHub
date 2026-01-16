@@ -22,7 +22,6 @@ const storeService = new StoreService();
 const subscriptionService = new SubscriptionService();
 const DEMO_SLUGS = new Set([ 'demo', 'test-store' ]);
 const log = logger.child({ scope: 'StoreController' });
-
 /**
  * Builds demo store.
  *
@@ -69,9 +68,8 @@ const buildDemoStore = (slug: string) => {
     openNow: true,
   };
 };
-
 /**
- * Represents StoreController.
+ * Provides StoreController functionality.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2025-12-17
@@ -96,7 +94,12 @@ export class StoreController {
     const now = new Date();
     const day = now.getDay();
     const minutes = now.getHours() * 60 + now.getMinutes();
-
+    /**
+     * Handles day entry.
+     *
+     * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+     * @date 2025-12-17
+     */
     const dayEntry = openingHours.find((entry: any) => Number(entry?.day) === day);
     if (!dayEntry || dayEntry?.enabled === false) return false;
 
@@ -118,6 +121,9 @@ export class StoreController {
       return minutes >= start && minutes < end;
     });
   }
+
+
+
 
   /**
    * Lists portfolio.
@@ -155,6 +161,9 @@ export class StoreController {
       return respondWithError(_req, res, error, 400);
     }
   }
+
+
+
   /**
    * Gets by slug.
    *
@@ -195,6 +204,9 @@ export class StoreController {
     }
   }
 
+
+
+
   /**
    * Executes update logic.
    *
@@ -212,6 +224,9 @@ export class StoreController {
       return respondWithError(req, res, error, 400);
     }
   }
+
+
+
 
   /**
    * Updates status.

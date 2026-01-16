@@ -34,7 +34,7 @@ export type SubscriptionStatus =
 
 @Entity({ name: 'subscriptions' })
 /**
- * Represents Subscription.
+ * Provides Subscription functionality.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2025-12-17

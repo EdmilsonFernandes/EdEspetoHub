@@ -15,9 +15,8 @@ import { SubscriptionService } from '../services/SubscriptionService';
 import { logger } from '../utils/logger';
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
-
 /**
- * Executes schedule subscription expiration job logic.
+ * Handles schedule subscription expiration job.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2025-12-17
@@ -25,9 +24,8 @@ const DAY_IN_MS = 24 * 60 * 60 * 1000;
 export const scheduleSubscriptionExpirationJob = () => {
   const service = new SubscriptionService();
   const log = logger.child({ scope: 'SubscriptionJob' });
-
   /**
-   * Executes run logic.
+   * Handles run.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -37,7 +35,12 @@ export const scheduleSubscriptionExpirationJob = () => {
   };
 
   run().catch((error) => log.error('Erro ao executar verificação de assinatura', { error }));
-
+  /**
+   * Sets interval.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
   setInterval(() => {
     run().catch((error) => log.error('Erro ao executar verificação de assinatura', { error }));
   }, DAY_IN_MS);

@@ -21,9 +21,8 @@ type EmailPayload = {
   text: string;
   html?: string;
 };
-
 /**
- * Represents EmailService.
+ * Provides EmailService functionality.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2026-01-06
@@ -65,7 +64,7 @@ export class EmailService {
   }
 
   /**
-   * Executes send logic.
+   * Sends data.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2026-01-06

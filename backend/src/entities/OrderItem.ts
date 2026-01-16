@@ -17,7 +17,7 @@ import { Product } from './Product';
 
 @Entity({ name: 'order_items' })
 /**
- * Represents OrderItem.
+ * Provides OrderItem functionality.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2025-12-17

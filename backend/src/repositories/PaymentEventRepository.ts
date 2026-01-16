@@ -14,18 +14,16 @@
 import { Repository } from 'typeorm';
 import { AppDataSource } from '../config/database';
 import { PaymentEvent } from '../entities/PaymentEvent';
-
 /**
- * Represents PaymentEventRepository.
+ * Provides PaymentEventRepository functionality.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2026-01-06
  */
 export class PaymentEventRepository {
   private repository: Repository<PaymentEvent>;
-
   /**
-   * Creates a new PaymentEventRepository.
+   * Creates a new instance.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2026-01-06
@@ -35,7 +33,7 @@ export class PaymentEventRepository {
   }
 
   /**
-   * Executes create logic.
+   * Creates data.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2026-01-06
@@ -45,7 +43,7 @@ export class PaymentEventRepository {
   }
 
   /**
-   * Executes save logic.
+   * Saves data.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2026-01-06
@@ -55,13 +53,7 @@ export class PaymentEventRepository {
   }
 
   /**
-   * Executes find recent logic.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2026-01-06
-   */
-  /**
-   * Finds recent.
+   * Handles find recent.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2026-01-06
@@ -76,13 +68,7 @@ export class PaymentEventRepository {
   }
 
   /**
-   * Executes find by payment id logic.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2026-01-06
-   */
-  /**
-   * Finds by payment id.
+   * Handles find by payment id.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2026-01-06
@@ -98,13 +84,7 @@ export class PaymentEventRepository {
   }
 
   /**
-   * Executes find by store id logic.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2026-01-06
-   */
-  /**
-   * Finds by store id.
+   * Handles find by store id.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2026-01-06

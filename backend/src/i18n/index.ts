@@ -21,9 +21,8 @@ const messages = {
 };
 
 type Lang = keyof typeof messages;
-
 /**
- * Normalizes lang.
+ * Handles normalize lang.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2026-01-12
@@ -37,12 +36,16 @@ const normalizeLang = (value?: string | string[]) => {
   if (normalized.startsWith('en')) return 'en';
   return 'pt';
 };
-
+/**
+ * Handles resolve lang.
+ *
+ * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @date 2026-01-12
+ */
 export const resolveLang = (req: Request): Lang => {
   const header = (req.headers['x-lang'] as string | undefined) || req.headers['accept-language'];
   return normalizeLang(header) as Lang;
 };
-
 /**
  * Gets message.
  *

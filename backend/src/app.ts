@@ -18,9 +18,8 @@ import path from 'path';
 import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
 import { loadSsmEnv } from './config/ssm';
-
 /**
- * Executes bootstrap logic.
+ * Handles bootstrap.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2025-12-17

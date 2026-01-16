@@ -14,18 +14,16 @@
 import { Repository } from 'typeorm';
 import { AppDataSource } from '../config/database';
 import { Payment } from '../entities/Payment';
-
 /**
- * Represents PaymentRepository.
+ * Provides PaymentRepository functionality.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2025-12-17
  */
 export class PaymentRepository {
   private repository: Repository<Payment>;
-
   /**
-   * Creates a new PaymentRepository.
+   * Creates a new instance.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -35,7 +33,7 @@ export class PaymentRepository {
   }
 
   /**
-   * Executes create logic.
+   * Creates data.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -45,7 +43,7 @@ export class PaymentRepository {
   }
 
   /**
-   * Executes save logic.
+   * Saves data.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -55,13 +53,7 @@ export class PaymentRepository {
   }
 
   /**
-   * Executes find by id logic.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2025-12-17
-   */
-  /**
-   * Finds by id.
+   * Handles find by id.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -71,13 +63,7 @@ export class PaymentRepository {
   }
 
   /**
-   * Executes find latest by store id logic.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2025-12-17
-   */
-  /**
-   * Finds latest by store id.
+   * Handles find latest by store id.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -90,13 +76,7 @@ export class PaymentRepository {
   }
 
   /**
-   * Executes find latest pending by store id logic.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2025-12-17
-   */
-  /**
-   * Finds latest pending by store id.
+   * Handles find latest pending by store id.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -110,7 +90,7 @@ export class PaymentRepository {
   }
 
   /**
-   * Executes sum paid amounts logic.
+   * Handles sum paid amounts.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -125,7 +105,7 @@ export class PaymentRepository {
   }
 
   /**
-   * Counts by status.
+   * Handles count by status.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -138,13 +118,7 @@ export class PaymentRepository {
   }
 
   /**
-   * Executes find recent logic.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2025-12-17
-   */
-  /**
-   * Finds recent.
+   * Handles find recent.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -158,7 +132,7 @@ export class PaymentRepository {
   }
 
   /**
-   * Counts recent by store id.
+   * Handles count recent by store id.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -172,7 +146,7 @@ export class PaymentRepository {
   }
 
   /**
-   * Lists payments by store id.
+   * Handles find by store id.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17

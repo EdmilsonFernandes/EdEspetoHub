@@ -26,9 +26,8 @@ import { PaymentRepository } from '../repositories/PaymentRepository';
 import { logger } from '../utils/logger';
 import { AppError } from '../errors/AppError';
 import { MercadoPagoService } from './MercadoPagoService';
-
 /**
- * Represents SubscriptionService.
+ * Provides SubscriptionService functionality.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2025-12-17
@@ -42,9 +41,8 @@ export class SubscriptionService {
   private paymentRepository = new PaymentRepository();
   private mercadoPago = new MercadoPagoService();
   private log = logger.child({ scope: 'SubscriptionService' });
-
   /**
-   * Executes create logic.
+   * Creates data.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -55,6 +53,12 @@ export class SubscriptionService {
     if (!store) throw new AppError('STORE-001', 404);
 
     const plan = await this.planRepository.findById(input.planId);
+    /**
+     * Handles resolved plan.
+     *
+     * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+     * @date 2025-12-17
+     */
     const resolvedPlan = plan || (await this.planRepository.findAll()).find((p) => p.id === input.planId);
     if (!resolvedPlan) throw new AppError('SUB-003', 400);
 
@@ -121,7 +125,7 @@ export class SubscriptionService {
   }
 
   /**
-   * Executes renew logic.
+   * Handles renew.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -138,6 +142,12 @@ export class SubscriptionService {
     let plan = subscription.plan;
     if (input.planId && input.planId !== subscription.plan.id) {
       const otherPlan = await this.planRepository.findById(input.planId);
+      /**
+       * Handles resolved.
+       *
+       * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+       * @date 2025-12-17
+       */
       const resolved = otherPlan || (await this.planRepository.findAll()).find((p) => p.id === input.planId);
       if (!resolved || !resolved.enabled) throw new AppError('SUB-003', 400);
       plan = resolved;
@@ -215,6 +225,9 @@ export class SubscriptionService {
       });
     });
   }
+
+
+
 
   /**
    * Checks if a pending payment is still valid.
@@ -310,7 +323,7 @@ export class SubscriptionService {
   }
 
   /**
-   * Executes suspend logic.
+   * Handles suspend.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -323,7 +336,7 @@ export class SubscriptionService {
   }
 
   /**
-   * Executes activate logic.
+   * Handles activate.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -336,7 +349,7 @@ export class SubscriptionService {
   }
 
   /**
-   * Executes assert store is active logic.
+   * Handles assert store is active.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -347,13 +360,7 @@ export class SubscriptionService {
   }
 
   /**
-   * Executes is active subscription logic.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2025-12-17
-   */
-  /**
-   * Checks active subscription.
+   * Handles is active subscription.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -363,7 +370,7 @@ export class SubscriptionService {
   }
 
   /**
-   * Executes add days logic.
+   * Adds days.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -375,7 +382,7 @@ export class SubscriptionService {
   }
 
   /**
-   * Resolves status.
+   * Handles resolve status.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -400,13 +407,7 @@ export class SubscriptionService {
   }
 
   /**
-   * Executes is subscription active logic.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2025-12-17
-   */
-  /**
-   * Checks subscription active.
+   * Handles is subscription active.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17

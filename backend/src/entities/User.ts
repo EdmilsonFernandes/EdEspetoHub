@@ -16,7 +16,7 @@ import { Store } from './Store';
 
 @Entity({ name: 'users' })
 /**
- * Represents User.
+ * Provides User functionality.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2025-12-17

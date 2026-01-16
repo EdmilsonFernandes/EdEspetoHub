@@ -25,9 +25,8 @@ import { PaymentEventRepository } from '../repositories/PaymentEventRepository';
 import { EmailService } from './EmailService';
 import { logger } from '../utils/logger';
 import { AppError } from '../errors/AppError';
-
 /**
- * Represents PaymentService.
+ * Provides PaymentService functionality.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2025-12-17
@@ -38,7 +37,7 @@ export class PaymentService {
   private emailService = new EmailService();
   private log = logger.child({ scope: 'PaymentService' });
   /**
-   * Normalizes qr code.
+   * Handles normalize qr code.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -48,6 +47,9 @@ export class PaymentService {
     if (qrCode.startsWith('data:image')) return qrCode;
     return `data:image/png;base64,${qrCode}`;
   }
+
+
+
   /**
    * Sends activation email.
    *
@@ -57,6 +59,9 @@ export class PaymentService {
   private async sendActivationEmail(email: string, slug: string) {
     await this.emailService.sendActivationEmail(email, slug);
   }
+
+
+
 
   /**
    * Creates payment.
@@ -162,7 +167,7 @@ export class PaymentService {
   }
 
   /**
-   * Executes confirm payment logic.
+   * Handles confirm payment.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -224,7 +229,7 @@ export class PaymentService {
   }
 
   /**
-   * Executes confirm mercado pago payment logic.
+   * Handles confirm mercado pago payment.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -244,7 +249,7 @@ export class PaymentService {
   }
 
   /**
-   * Executes reprocess by payment id logic.
+   * Handles reprocess by payment id.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -274,6 +279,9 @@ export class PaymentService {
     return this.applyMercadoPagoStatus(mpPayment);
   }
 
+
+
+
   /**
    * Updates payment status.
    *
@@ -292,6 +300,9 @@ export class PaymentService {
       this.log.warn('Payment marked as failed', { paymentId, providerStatus });
     }
   }
+
+
+
 
   /**
    * Executes apply mercado pago status logic.
@@ -357,7 +368,7 @@ export class PaymentService {
   }
 
   /**
-   * Executes add days logic.
+   * Adds days.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -369,13 +380,7 @@ export class PaymentService {
   }
 
   /**
-   * Executes find by id logic.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2025-12-17
-   */
-  /**
-   * Finds by id.
+   * Handles find by id.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17

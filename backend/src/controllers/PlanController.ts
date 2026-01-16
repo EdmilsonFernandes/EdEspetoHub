@@ -18,9 +18,8 @@ import { respondWithError } from '../errors/respondWithError';
 
 const planService = new PlanService();
 const log = logger.child({ scope: 'PlanController' });
-
 /**
- * Represents PlanController.
+ * Provides PlanController functionality.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2025-12-17

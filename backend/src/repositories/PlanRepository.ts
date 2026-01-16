@@ -14,18 +14,16 @@
 import { Repository } from 'typeorm';
 import { AppDataSource } from '../config/database';
 import { Plan, PlanName } from '../entities/Plan';
-
 /**
- * Represents PlanRepository.
+ * Provides PlanRepository functionality.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2025-12-17
  */
 export class PlanRepository {
   private repository: Repository<Plan>;
-
   /**
-   * Creates a new PlanRepository.
+   * Creates a new instance.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -35,7 +33,7 @@ export class PlanRepository {
   }
 
   /**
-   * Executes create logic.
+   * Creates data.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -45,7 +43,7 @@ export class PlanRepository {
   }
 
   /**
-   * Executes save logic.
+   * Saves data.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -55,13 +53,7 @@ export class PlanRepository {
   }
 
   /**
-   * Executes find by id logic.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2025-12-17
-   */
-  /**
-   * Finds by id.
+   * Handles find by id.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -71,13 +63,7 @@ export class PlanRepository {
   }
 
   /**
-   * Executes find enabled logic.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2025-12-17
-   */
-  /**
-   * Finds enabled.
+   * Handles find enabled.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -87,13 +73,7 @@ export class PlanRepository {
   }
 
   /**
-   * Executes find by name logic.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2025-12-17
-   */
-  /**
-   * Finds by name.
+   * Handles find by name.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -103,13 +83,7 @@ export class PlanRepository {
   }
 
   /**
-   * Executes find all logic.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2025-12-17
-   */
-  /**
-   * Finds all.
+   * Handles find all.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17

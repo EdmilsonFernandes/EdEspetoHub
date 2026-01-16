@@ -60,7 +60,8 @@
 - Acompanhamento publico:
   - Pagina `/pedido/:orderId` com timeline, status e fila.
   - Branding da loja aplicado (logo, cores, titulo, favicon).
-  - Ultimo pedido do usuario publico fica salvo em `localStorage` (inclusive mesa) e habilita CTA "Acompanhar agora" na vitrine.
+  - Ultimos 3 pedidos do usuario publico ficam salvos em `localStorage` e habilitam CTA com selecao na vitrine.
+  - Numero exibido usa prefixo do slug (3 letras) + 8 primeiros chars do ID.
   - Entrega finaliza em "Saiu para entrega" (sem status de motoboy).
   - Tempo total destacado ao finalizar.
 - Checkout (entrega):

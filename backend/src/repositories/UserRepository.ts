@@ -14,18 +14,16 @@
 import { Repository } from 'typeorm';
 import { AppDataSource } from '../config/database';
 import { User } from '../entities/User';
-
 /**
- * Represents UserRepository.
+ * Provides UserRepository functionality.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2025-12-17
  */
 export class UserRepository {
   private repository: Repository<User>;
-
   /**
-   * Creates a new UserRepository.
+   * Creates a new instance.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -35,7 +33,7 @@ export class UserRepository {
   }
 
   /**
-   * Executes create logic.
+   * Creates data.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -45,7 +43,7 @@ export class UserRepository {
   }
 
   /**
-   * Executes save logic.
+   * Saves data.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -55,13 +53,7 @@ export class UserRepository {
   }
 
   /**
-   * Executes find by email logic.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2025-12-17
-   */
-  /**
-   * Finds by email.
+   * Handles find by email.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -71,13 +63,7 @@ export class UserRepository {
   }
 
   /**
-   * Executes find by id logic.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2025-12-17
-   */
-  /**
-   * Finds by id.
+   * Handles find by id.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17

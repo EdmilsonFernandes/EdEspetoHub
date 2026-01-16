@@ -21,9 +21,8 @@ import { respondWithError } from '../errors/respondWithError';
 const subscriptionService = new SubscriptionService();
 const paymentRepository = new PaymentRepository();
 const log = logger.child({ scope: 'SubscriptionController' });
-
 /**
- * Represents SubscriptionController.
+ * Provides SubscriptionController functionality.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2025-12-17
@@ -46,6 +45,9 @@ export class SubscriptionController {
       return respondWithError(req, res, error, 400);
     }
   }
+
+
+
 
   /**
    * Gets by store.
@@ -71,6 +73,9 @@ export class SubscriptionController {
     }
   }
 
+
+
+
   /**
    * Executes renew logic.
    *
@@ -88,6 +93,9 @@ export class SubscriptionController {
       return respondWithError(req, res, error, 400);
     }
   }
+
+
+
 
   /**
    * Updates status.
@@ -110,6 +118,9 @@ export class SubscriptionController {
       return respondWithError(req, res, error, 400);
     }
   }
+
+
+
 
   /**
    * Creates renewal payment.

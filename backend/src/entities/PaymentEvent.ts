@@ -16,7 +16,7 @@ import { Payment } from './Payment';
 
 @Entity({ name: 'payment_events' })
 /**
- * Represents PaymentEvent.
+ * Provides PaymentEvent functionality.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2026-01-06

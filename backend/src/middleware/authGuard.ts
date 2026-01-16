@@ -51,7 +51,7 @@ declare global
 }
 
 /**
- * Executes require auth logic.
+ * Handles require auth.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2025-12-22
@@ -75,9 +75,8 @@ export const requireAuth = (req: Request, res: Response, next: NextFunction) =>
     return respondWithError(req, res, new AppError('AUTH-002', 401), 401);
   }
 };
-
 /**
- * Executes require role logic.
+ * Handles require role.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2025-12-22

@@ -15,7 +15,7 @@ import { Column, CreateDateColumn, Entity, PrimaryColumn, UpdateDateColumn } fro
 
 @Entity({ name: 'site_settings' })
 /**
- * Represents SiteSetting.
+ * Provides SiteSetting functionality.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2026-01-08

@@ -22,9 +22,8 @@ const subscriptionService = new SubscriptionService();
 
 const GRACE_HOURS = 24;
 const GRACE_MS = GRACE_HOURS * 60 * 60 * 1000;
-
 /**
- * Resolves store params.
+ * Handles resolve store params.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2025-12-17
@@ -46,6 +45,12 @@ const resolveStoreParams = (req: Request) =>
 };
 
 // 🔐 extrai role se houver token
+/**
+ * Gets role from auth header.
+ *
+ * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @date 2025-12-17
+ */
 const getRoleFromAuthHeader = (req: Request): string | null =>
 {
   const auth = req.headers.authorization;

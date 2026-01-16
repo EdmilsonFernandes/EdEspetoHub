@@ -13,16 +13,14 @@
 
 import { AppDataSource } from '../config/database';
 import { SiteSetting } from '../entities/SiteSetting';
-
 /**
- * Represents SettingsService.
+ * Provides SettingsService functionality.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2026-01-08
  */
 export class SettingsService {
   private repository = AppDataSource.getRepository(SiteSetting);
-
   /**
    * Gets value.
    *
@@ -48,7 +46,7 @@ export class SettingsService {
   }
 
   /**
-   * Executes set value logic.
+   * Sets value.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2026-01-08

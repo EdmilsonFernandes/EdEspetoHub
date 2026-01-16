@@ -15,15 +15,13 @@ import fs from 'fs/promises';
 import path from 'path';
 
 const UPLOADS_DIR = path.join(process.cwd(), 'uploads');
-
 /**
- * Resolves target dir.
+ * Handles resolve target dir.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2025-12-22
  */
 const resolveTargetDir = (folder: string) => path.join(UPLOADS_DIR, folder);
-
 /**
  * Ensures dir.
  *

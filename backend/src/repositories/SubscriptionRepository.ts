@@ -14,18 +14,16 @@
 import { Repository } from 'typeorm';
 import { AppDataSource } from '../config/database';
 import { Subscription } from '../entities/Subscription';
-
 /**
- * Represents SubscriptionRepository.
+ * Provides SubscriptionRepository functionality.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2025-12-17
  */
 export class SubscriptionRepository {
   private repository: Repository<Subscription>;
-
   /**
-   * Creates a new SubscriptionRepository.
+   * Creates a new instance.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -35,7 +33,7 @@ export class SubscriptionRepository {
   }
 
   /**
-   * Executes create logic.
+   * Creates data.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -45,7 +43,7 @@ export class SubscriptionRepository {
   }
 
   /**
-   * Executes save logic.
+   * Saves data.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -55,13 +53,7 @@ export class SubscriptionRepository {
   }
 
   /**
-   * Executes find latest by store id logic.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2025-12-17
-   */
-  /**
-   * Finds latest by store id.
+   * Handles find latest by store id.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -75,13 +67,7 @@ export class SubscriptionRepository {
   }
 
   /**
-   * Executes find by id logic.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2025-12-17
-   */
-  /**
-   * Finds by id.
+   * Handles find by id.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -91,13 +77,7 @@ export class SubscriptionRepository {
   }
 
   /**
-   * Executes find all logic.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2025-12-17
-   */
-  /**
-   * Finds all.
+   * Handles find all.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -105,6 +85,9 @@ export class SubscriptionRepository {
   findAll() {
     return this.repository.find({ relations: ['store', 'plan'] });
   }
+
+
+
 
   /**
    * Counts subscriptions by status list.
@@ -120,6 +103,9 @@ export class SubscriptionRepository {
       .getCount();
   }
 
+
+
+
   /**
    * Counts active subscriptions updated since a date.
    *
@@ -134,6 +120,9 @@ export class SubscriptionRepository {
       .andWhere('s.updated_at >= :since', { since })
       .getCount();
   }
+
+
+
 
   /**
    * Counts subscriptions started since a date.

@@ -39,7 +39,7 @@
       <bpmn:outgoing>Flow_SendToBackend</bpmn:outgoing>
     </bpmn:task>
     <bpmn:exclusiveGateway id="Gateway_AdminOrder" name="Pedido criado por admin?"/>
-    <bpmn:task id="Task_ReceivePix" name="Receber resumo + link de acompanhamento"/>
+    <bpmn:task id="Task_ReceivePix" name="Receber resumo + link (salvar ultimos 3 pedidos)"/>
     <bpmn:task id="Task_ReturnMenu" name="Voltar para o cardapio"/>
     <bpmn:endEvent id="End_OrderDelivered" name="Pedido entregue / retirada"/>
 

@@ -16,7 +16,7 @@ import { User } from './User';
 
 @Entity({ name: 'password_resets' })
 /**
- * Represents PasswordReset.
+ * Provides PasswordReset functionality.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2026-01-06

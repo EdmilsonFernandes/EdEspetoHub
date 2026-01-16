@@ -38,9 +38,8 @@ import { normalizeDocument, validateDocument } from '../utils/documents';
 import { logger } from '../utils/logger';
 import { AppError } from '../errors/AppError';
 import { PlatformAdmin } from '../entities/PlatformAdmin';
-
 /**
- * Represents AuthService.
+ * Provides AuthService functionality.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2025-12-17
@@ -92,6 +91,9 @@ export class AuthService
 
     return { token };
   }
+
+
+
 
   /**
    * Executes register logic.
@@ -157,6 +159,12 @@ export class AuthService
       throw new AppError('AUTH-009', 400);
     }
 
+    /**
+     * Handles result.
+     *
+     * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+     * @date 2025-12-17
+     */
     const result = await AppDataSource.transaction(async (manager) =>
     {
       const userRepo = manager.getRepository(User);
@@ -269,6 +277,9 @@ export class AuthService
     };
   }
 
+
+
+
   /**
    * Executes login logic.
    *
@@ -320,6 +331,9 @@ export class AuthService
 
     return { user: sanitizedUser, store: sanitizedStore, token };
   }
+
+
+
 
   /**
    * Executes admin login logic.
@@ -390,6 +404,9 @@ export class AuthService
     };
   }
 
+
+
+
   /**
    * Executes request password reset logic.
    *
@@ -432,7 +449,7 @@ export class AuthService
   }
 
   /**
-   * Executes resend verification email logic.
+   * Handles resend verification email.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -452,6 +469,9 @@ export class AuthService
     await this.sendVerificationEmail(user);
     return { code: 'AUTH-S002' };
   }
+
+
+
 
   /**
    * Executes reset password logic.
@@ -486,7 +506,7 @@ export class AuthService
   }
 
   /**
-   * Verifies email.
+   * Handles verify email.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
@@ -590,6 +610,9 @@ export class AuthService
   }
 
 
+
+
+
   /**
    * Generates token.
    *
@@ -600,6 +623,9 @@ export class AuthService
   {
     return jwt.sign({ sub: userId, storeId }, env.jwtSecret, { expiresIn: '12h' });
   }
+
+
+
 
   /**
    * Executes add days logic.
@@ -613,6 +639,9 @@ export class AuthService
     result.setDate(result.getDate() + days);
     return result;
   }
+
+
+
 
   /**
    * Executes throw pending payment logic.
@@ -628,6 +657,9 @@ export class AuthService
       paymentLink: payment?.paymentLink || null,
     });
   }
+
+
+
 
   /**
    * Sends verification email.
@@ -668,6 +700,9 @@ export class AuthService
     await this.emailService.sendEmailVerification(user.email, link);
   }
 
+
+
+
   /**
    * Executes notify signup logic.
    *
@@ -690,6 +725,9 @@ export class AuthService
       createdAt: new Date(),
     });
   }
+
+
+
 
   /**
    * Sends payment email.
@@ -750,6 +788,9 @@ export class AuthService
     `;
     this.emailService.send({ to: email, subject, text, html });
   }
+
+
+
 
   /**
    * Generates unique slug.

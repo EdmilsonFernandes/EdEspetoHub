@@ -19,7 +19,12 @@ const levelRank: Record<LogLevel, number> = {
   warn: 30,
   error: 40,
 };
-
+/**
+ * Handles resolve level.
+ *
+ * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @date 2026-01-09
+ */
 const resolveLevel = (): LogLevel => {
   const raw = (process.env.LOG_LEVEL || '').toLowerCase();
   if (raw === 'debug' || raw === 'info' || raw === 'warn' || raw === 'error') {
@@ -35,7 +40,6 @@ const logDir = process.env.LOG_DIR || 'logs';
 let currentDate = new Date().toISOString().slice(0, 10);
 let appStream: import('fs').WriteStream | null = null;
 let errorStream: import('fs').WriteStream | null = null;
-
 /**
  * Ensures streams.
  *
@@ -56,9 +60,8 @@ const ensureStreams = async () => {
     errorStream = fs.createWriteStream(path.join(logDir, `error-${currentDate}.log`), { flags: 'a' });
   }
 };
-
 /**
- * Executes write to file logic.
+ * Handles write to file.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2026-01-09
@@ -87,9 +90,8 @@ const redactKeys = new Set([
   'smtp_pass',
   'mp_access_token',
 ]);
-
 /**
- * Normalizes error.
+ * Handles normalize error.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2026-01-09
@@ -102,9 +104,8 @@ const normalizeError = (value: unknown) => {
     stack: value.stack,
   };
 };
-
 /**
- * Executes sanitize meta logic.
+ * Handles sanitize meta.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2026-01-09
@@ -125,9 +126,8 @@ const sanitizeMeta = (meta?: Record<string, any>) => {
   }
   return cleaned;
 };
-
 /**
- * Represents Logger.
+ * Provides Logger functionality.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2026-01-09
@@ -135,9 +135,8 @@ const sanitizeMeta = (meta?: Record<string, any>) => {
 export class Logger {
   private context?: string;
   private baseMeta: Record<string, any>;
-
   /**
-   * Creates a new Logger.
+   * Creates a new instance.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2026-01-09
@@ -148,7 +147,7 @@ export class Logger {
   }
 
   /**
-   * Executes child logic.
+   * Handles child.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2026-01-09
@@ -159,7 +158,7 @@ export class Logger {
   }
 
   /**
-   * Executes log logic.
+   * Handles log.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2026-01-09
@@ -192,7 +191,7 @@ export class Logger {
   }
 
   /**
-   * Executes debug logic.
+   * Handles debug.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2026-01-09
@@ -202,7 +201,7 @@ export class Logger {
   }
 
   /**
-   * Executes info logic.
+   * Handles info.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2026-01-09
@@ -212,7 +211,7 @@ export class Logger {
   }
 
   /**
-   * Executes warn logic.
+   * Handles warn.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2026-01-09
@@ -222,7 +221,7 @@ export class Logger {
   }
 
   /**
-   * Executes error logic.
+   * Handles error.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2026-01-09

@@ -17,9 +17,8 @@ import { logger } from '../utils/logger';
 
 const accessLogRepository = new AccessLogRepository();
 const log = logger.child({ scope: 'AccessLogger' });
-
 /**
- * Executes access logger logic.
+ * Handles access logger.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2026-01-15

@@ -14,9 +14,8 @@
 import 'reflect-metadata';
 import { AppDataSource } from '../config/database';
 import { logger } from '../utils/logger';
-
 /**
- * Executes reset logic.
+ * Handles reset.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2025-12-17

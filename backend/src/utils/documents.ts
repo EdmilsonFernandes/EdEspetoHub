@@ -1,34 +1,19 @@
-/*
- * Chama no espeto CONFIDENTIAL
- * ------------------
- * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
- *
- * This file, project or its parts can not be copied and/or distributed without
- * the express permission of Chama no espeto.
- *
- * @file: documents.ts
- * @Date: 2026-01-08
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
- */
-
 /**
- * Executes only digits logic.
+ * Handles only digits.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2026-01-08
  */
 const onlyDigits = (value: string) => value.replace(/\D/g, '');
-
 /**
- * Checks repeated.
+ * Handles is repeated.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2026-01-08
  */
 const isRepeated = (value: string) => /^(\d)\1+$/.test(value);
-
 /**
- * Executes validate cpf logic.
+ * Validates cpf.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2026-01-08
@@ -48,9 +33,8 @@ const validateCpf = (cpf: string) => {
   if (mod === 10) mod = 0;
   return mod === numbers[10];
 };
-
 /**
- * Executes validate cnpj logic.
+ * Validates cnpj.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2026-01-08
@@ -60,7 +44,7 @@ const validateCnpj = (cnpj: string) => {
   if (digits.length !== 14 || isRepeated(digits)) return false;
   const numbers = digits.split('').map(Number);
   /**
-   * Executes calc logic.
+   * Handles calc.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2026-01-08
@@ -80,17 +64,15 @@ const validateCnpj = (cnpj: string) => {
   const digit2 = calc(numbers.slice(0, 13));
   return digit2 === numbers[13];
 };
-
 /**
- * Normalizes document.
+ * Handles normalize document.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2026-01-08
  */
 export const normalizeDocument = (value?: string) => (value ? onlyDigits(value) : '');
-
 /**
- * Executes validate document logic.
+ * Validates document.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2026-01-08

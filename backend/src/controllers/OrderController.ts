@@ -19,9 +19,8 @@ import { respondWithError } from '../errors/respondWithError';
 
 const orderService = new OrderService();
 const log = logger.child({ scope: 'OrderController' });
-
 /**
- * Represents OrderController.
+ * Provides OrderController functionality.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2025-12-17
@@ -45,6 +44,9 @@ export class OrderController {
     }
   }
 
+
+
+
   /**
    * Executes list logic.
    *
@@ -61,6 +63,9 @@ export class OrderController {
       return respondWithError(req, res, error, 400);
     }
   }
+
+
+
 
   /**
    * Creates by slug.
@@ -80,6 +85,9 @@ export class OrderController {
     }
   }
 
+
+
+
   /**
    * Lists by slug.
    *
@@ -96,6 +104,9 @@ export class OrderController {
       return respondWithError(req, res, error, 400);
     }
   }
+
+
+
 
   /**
    * Updates status.
@@ -116,6 +127,9 @@ export class OrderController {
     }
   }
 
+
+
+
   /**
    * Updates items.
    *
@@ -133,6 +147,9 @@ export class OrderController {
       return respondWithError(req, res, error, 400);
     }
   }
+
+
+
 
   /**
    * Gets public.

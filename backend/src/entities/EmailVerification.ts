@@ -16,10 +16,10 @@ import { User } from './User';
 
 @Entity({ name: 'email_verifications' })
 /**
- * Represents EmailVerification.
+ * Provides EmailVerification functionality.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
- * @date 2026-01-06
+ * @date 2026-01-07
  */
 export class EmailVerification {
   @PrimaryGeneratedColumn('uuid')

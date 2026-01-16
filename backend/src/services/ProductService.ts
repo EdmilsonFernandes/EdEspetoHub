@@ -16,9 +16,8 @@ import { ProductRepository } from '../repositories/ProductRepository';
 import { StoreRepository } from '../repositories/StoreRepository';
 import { saveBase64Image } from '../utils/imageStorage';
 import { AppError } from '../errors/AppError';
-
 /**
- * Represents ProductService.
+ * Provides ProductService functionality.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2025-12-17
@@ -42,6 +41,9 @@ export class ProductService
       throw new AppError('AUTH-003', 403);
     }
   }
+
+
+
 
   /**
    * Executes create logic.
@@ -69,6 +71,9 @@ export class ProductService
     return this.productRepository.save(product);
   }
 
+
+
+
   /**
    * Lists by store id.
    *
@@ -82,6 +87,9 @@ export class ProductService
     return this.productRepository.findByStoreId(store!.id);
   }
 
+
+
+
   /**
    * Lists by store slug.
    *
@@ -94,6 +102,9 @@ export class ProductService
     this.ensureStoreAccess(store, authStoreId);
     return this.productRepository.findByStoreId(store!.id);
   }
+
+
+
 
   /**
    * Executes update logic.
@@ -118,6 +129,9 @@ export class ProductService
 
     return this.productRepository.save(product);
   }
+
+
+
 
   /**
    * Executes remove logic.

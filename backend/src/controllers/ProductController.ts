@@ -56,9 +56,8 @@ const demoProducts = [
     imageUrl: '/chama-no-espeto.jpeg',
   },
 ];
-
 /**
- * Represents ProductController.
+ * Provides ProductController functionality.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2025-12-17
@@ -85,6 +84,9 @@ export class ProductController {
     }
   }
 
+
+
+
   /**
    * Executes list logic.
    *
@@ -101,6 +103,9 @@ export class ProductController {
       return respondWithError(req, res, error, 400);
     }
   }
+
+
+
 
   /**
    * Lists by slug.
@@ -122,6 +127,9 @@ export class ProductController {
     }
   }
 
+
+
+
   /**
    * Lists public by slug.
    *
@@ -141,6 +149,9 @@ export class ProductController {
       return respondWithError(req, res, error, 400);
     }
   }
+
+
+
 
   /**
    * Executes update logic.
@@ -164,6 +175,9 @@ export class ProductController {
       return respondWithError(req, res, error, 400);
     }
   }
+
+
+
 
   /**
    * Executes remove logic.

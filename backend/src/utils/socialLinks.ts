@@ -18,7 +18,7 @@ export interface SocialLink
 }
 
 /**
- * Executes sanitize social links logic.
+ * Handles sanitize social links.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2025-12-22

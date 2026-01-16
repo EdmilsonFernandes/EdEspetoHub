@@ -31,9 +31,8 @@ const orderRepository = new OrderRepository();
 const subscriptionRepository = new SubscriptionRepository();
 const accessLogRepository = new AccessLogRepository();
 const log = logger.child({ scope: 'PlatformAdminController' });
-
 /**
- * Represents PlatformAdminController.
+ * Provides PlatformAdminController functionality.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2025-12-17
@@ -67,6 +66,9 @@ export class PlatformAdminController {
     }
   }
 
+
+
+
   /**
    * Executes overview logic.
    *
@@ -98,6 +100,12 @@ export class PlatformAdminController {
       const ordersRevenueLast7Days = await orderRepository.sumRevenueSince(sevenDaysAgo);
       const ordersRevenueLast30Days = await orderRepository.sumRevenueSince(thirtyDaysAgo);
       const orderAggregates = await orderRepository.aggregateByStore();
+      /**
+       * Handles order aggregate map.
+       *
+       * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+       * @date 2025-12-17
+       */
       const orderAggregateMap = new Map(orderAggregates.map((row) => [ row.storeId, row ]));
       const churnedStores = await subscriptionRepository.countByStatuses([ 'EXPIRED', 'SUSPENDED' ]);
       const activeUpdated = await subscriptionRepository.countActiveUpdatedSince(thirtyDaysAgo);
@@ -121,7 +129,12 @@ export class PlatformAdminController {
           { name: row.productName, quantity: Number(row.quantity || 0) },
         ])
       );
-
+      /**
+       * Handles store metrics.
+       *
+       * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+       * @date 2025-12-17
+       */
       const storeMetrics = enriched.map((store) => {
         const aggregate = orderAggregateMap.get(store.id);
         const totalOrders = aggregate?.ordersCount || 0;
@@ -220,6 +233,9 @@ export class PlatformAdminController {
     }
   }
 
+
+
+
   /**
    * Executes suspend store logic.
    *
@@ -238,6 +254,9 @@ export class PlatformAdminController {
     }
   }
 
+
+
+
   /**
    * Executes reactivate store logic.
    *
@@ -255,6 +274,9 @@ export class PlatformAdminController {
       return respondWithError(req, res, error, 400);
     }
   }
+
+
+
 
   /**
    * Lists payment events.
@@ -281,6 +303,9 @@ export class PlatformAdminController {
       return respondWithError(req, res, error, 400);
     }
   }
+
+
+
 
   /**
    * Lists access logs.

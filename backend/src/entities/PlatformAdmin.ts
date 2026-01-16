@@ -15,7 +15,7 @@ import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from 'typeor
 
 @Entity({ name: 'platform_admins' })
 /**
- * Represents PlatformAdmin.
+ * Provides PlatformAdmin functionality.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2026-01-15

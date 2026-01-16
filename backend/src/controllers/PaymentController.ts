@@ -28,9 +28,8 @@ const paymentService = new PaymentService();
 const subscriptionService = new SubscriptionService();
 const paymentEventRepository = new PaymentEventRepository();
 const log = logger.child({ scope: 'PaymentController' });
-
 /**
- * Represents PaymentController.
+ * Provides PaymentController functionality.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2025-12-17
@@ -66,6 +65,9 @@ export class PaymentController {
     }
   }
 
+
+
+
   /**
    * Executes mercado pago webhook logic.
    *
@@ -82,6 +84,12 @@ export class PaymentController {
         return respondWithError(req, res, new AppError('PAY-007', 401), 401);
       }
 
+      /**
+       * Handles parts.
+       *
+       * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+       * @date 2025-12-17
+       */
       const parts = signature.split(',').reduce((acc, chunk) => {
         const [key, value] = chunk.split('=');
         acc[key?.trim()] = value?.trim();
@@ -123,6 +131,9 @@ export class PaymentController {
     }
   }
 
+
+
+
   /**
    * Gets by id.
    *
@@ -162,6 +173,9 @@ export class PaymentController {
     }
   }
 
+
+
+
   /**
    * Gets events.
    *
@@ -176,6 +190,12 @@ export class PaymentController {
     try {
       log.debug('Payment events request', { paymentId, limit, offset });
       const events = await paymentEventRepository.findByPaymentId(paymentId, limit, offset);
+      /**
+       * Handles payload.
+       *
+       * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+       * @date 2025-12-17
+       */
       const payload = events.map((event) => ({
         id: event.id,
         status: event.status,
@@ -189,6 +209,9 @@ export class PaymentController {
       return respondWithError(req, res, error, 500);
     }
   }
+
+
+
 
   /**
    * Lists payments by store.
@@ -212,6 +235,12 @@ export class PaymentController {
         take: limit,
         relations: ['subscription', 'subscription.plan', 'store', 'user'],
       });
+      /**
+       * Handles payload.
+       *
+       * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+       * @date 2025-12-17
+       */
       const payload = payments.map((payment) => ({
         id: payment.id,
         status: payment.status,
@@ -228,6 +257,9 @@ export class PaymentController {
       return respondWithError(req, res, error, 500);
     }
   }
+
+
+
 
   /**
    * Executes reprocess logic.
@@ -249,6 +281,9 @@ export class PaymentController {
       return respondWithError(req, res, error, 400);
     }
   }
+
+
+
 
   /**
    * Creates a new renewal payment from a failed/expired payment.

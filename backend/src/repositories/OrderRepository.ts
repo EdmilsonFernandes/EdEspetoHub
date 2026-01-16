@@ -14,9 +14,8 @@
 import { Repository } from 'typeorm';
 import { AppDataSource } from '../config/database';
 import { Order } from '../entities/Order';
-
 /**
- * Represents OrderRepository.
+ * Provides OrderRepository functionality.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2025-12-17
@@ -36,6 +35,9 @@ export class OrderRepository
     this.repository = AppDataSource.getRepository(Order);
   }
 
+
+
+
   /**
    * Executes create logic.
    *
@@ -47,6 +49,9 @@ export class OrderRepository
     return this.repository.create(data);
   }
 
+
+
+
   /**
    * Executes save logic.
    *
@@ -57,6 +62,9 @@ export class OrderRepository
   {
     return this.repository.save(order);
   }
+
+
+
 
   /**
    * Executes find by store id logic.
@@ -78,6 +86,9 @@ export class OrderRepository
     });
   }
 
+
+
+
   /**
    * Executes find by id logic.
    *
@@ -98,6 +109,9 @@ export class OrderRepository
     });
   }
 
+
+
+
   /**
    * Counts by store and statuses.
    *
@@ -112,6 +126,9 @@ export class OrderRepository
       .andWhere('o.status IN (:...statuses)', { statuses })
       .getCount();
   }
+
+
+
 
   /**
    * Counts queue ahead.
@@ -128,6 +145,9 @@ export class OrderRepository
       .andWhere('o.created_at <= :createdAt', { createdAt })
       .getCount();
   }
+
+
+
 
   /**
    * Executes find queue by store id logic.
@@ -149,6 +169,9 @@ export class OrderRepository
     });
   }
 
+
+
+
   /**
    * Counts all orders.
    *
@@ -159,6 +182,9 @@ export class OrderRepository
   {
     return this.repository.count();
   }
+
+
+
 
   /**
    * Counts orders since a date.
@@ -173,6 +199,9 @@ export class OrderRepository
       .where('o.created_at >= :since', { since })
       .getCount();
   }
+
+
+
 
   /**
    * Aggregates orders by store.
@@ -199,6 +228,9 @@ export class OrderRepository
     }));
   }
 
+
+
+
   /**
    * Sums total revenue from orders.
    *
@@ -213,6 +245,9 @@ export class OrderRepository
       .getRawOne();
     return Number(row?.sum || 0);
   }
+
+
+
 
   /**
    * Sums revenue from orders since a date.

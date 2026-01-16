@@ -26,7 +26,7 @@ export type PlanName =
 
 @Entity({ name: 'plans' })
 /**
- * Represents Plan.
+ * Provides Plan functionality.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2025-12-17

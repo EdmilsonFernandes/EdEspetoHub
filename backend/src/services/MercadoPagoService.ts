@@ -49,16 +49,14 @@ type CreatePaymentInput = {
     name: string;
   };
 };
-
 /**
- * Executes has credentials logic.
+ * Handles has credentials.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2026-01-06
  */
 const hasCredentials = () =>
   Boolean(env.mercadoPago.accessToken && env.mercadoPago.publicKey);
-
 /**
  * Builds headers.
  *
@@ -70,9 +68,8 @@ const buildHeaders = () => ({
   'Content-Type': 'application/json',
   'X-Idempotency-Key': crypto.randomUUID(),
 });
-
 /**
- * Represents MercadoPagoService.
+ * Provides MercadoPagoService functionality.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2026-01-06
@@ -80,7 +77,7 @@ const buildHeaders = () => ({
 export class MercadoPagoService {
   private log = logger.child({ scope: 'MercadoPagoService' });
   /**
-   * Executes debug log logic.
+   * Handles debug log.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2026-01-06
@@ -122,6 +119,12 @@ export class MercadoPagoService {
     this.debugLog('GET payment', { url, paymentId });
     const response = await fetch(url, { headers: buildHeaders() });
     if (!response.ok) {
+      /**
+       * Handles body.
+       *
+       * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+       * @date 2026-01-06
+       */
       const body = await response.text().catch(() => '');
       this.log.error('GET payment failed', { status: response.status, body });
       throw new AppError('PAY-004', 400);
@@ -135,6 +138,9 @@ export class MercadoPagoService {
      */
     return (await response.json()) as MercadoPagoPaymentResponse;
   }
+
+
+
 
   /**
    * Creates card preference.
@@ -168,6 +174,12 @@ export class MercadoPagoService {
     });
 
     if (!response.ok) {
+      /**
+       * Handles body text.
+       *
+       * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+       * @date 2026-01-06
+       */
       const bodyText = await response.text().catch(() => '');
       this.log.error('POST preference failed', { status: response.status, body: bodyText });
       throw new AppError('PAY-004', 400);
@@ -182,6 +194,9 @@ export class MercadoPagoService {
       providerId: data.id,
     };
   }
+
+
+
 
   /**
    * Creates boleto preference.
@@ -222,6 +237,12 @@ export class MercadoPagoService {
     });
 
     if (!response.ok) {
+      /**
+       * Handles body text.
+       *
+       * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+       * @date 2026-01-06
+       */
       const bodyText = await response.text().catch(() => '');
       this.log.error('POST boleto preference failed', { status: response.status, body: bodyText });
       throw new AppError('PAY-004', 400);
@@ -236,6 +257,9 @@ export class MercadoPagoService {
       providerId: data.id,
     };
   }
+
+
+
 
   /**
    * Creates pix payment.
@@ -265,6 +289,12 @@ export class MercadoPagoService {
     });
 
     if (!response.ok) {
+      /**
+       * Handles body text.
+       *
+       * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+       * @date 2026-01-06
+       */
       const bodyText = await response.text().catch(() => '');
       this.log.error('POST pix failed', { status: response.status, body: bodyText });
       throw new AppError('PAY-004', 400);

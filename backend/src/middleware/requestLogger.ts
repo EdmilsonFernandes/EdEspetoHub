@@ -13,9 +13,8 @@
 
 import { Request, Response, NextFunction } from 'express';
 import { logger } from '../utils/logger';
-
 /**
- * Executes request logger logic.
+ * Handles request logger.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2026-01-09

@@ -5,7 +5,8 @@ Aplicação web para pedidos e gestão do restaurante de espetinhos Datony. O pr
 - **Loja do cliente**: montagem e edição do pedido, info da loja no mobile (sheet), WhatsApp e link de acompanhamento (publico com persistencia via `localStorage`).
 - **Painel interno**: dashboard com métricas, CRUD de produtos, fila do churrasqueiro (atualização a cada 5s), pagamentos e histórico.
 - **Acompanhar pedido**: pagina publica em `/pedido/:orderId` com status, fila, detalhes e branding da loja.
-  - Ultimo pedido do usuario publico e salvo em `localStorage` para reabrir o acompanhamento (inclusive mesa).
+  - Ultimos 3 pedidos publicos ficam em `localStorage` para reabrir o acompanhamento (inclusive mesa).
+  - Numero exibido usa prefixo do slug (3 letras) + 8 primeiros chars do ID.
 
 ## Estrutura de pastas
 
@@ -17,6 +18,7 @@ Aplicação web para pedidos e gestão do restaurante de espetinhos Datony. O pr
 
 - Todo arquivo `backend/src/**/*.ts` deve conter o cabecalho CONFIDENTIAL com `@file`, `@Date` e `@author`.
 - Classes e metodos no backend devem ter TSDoc em ingles com nome e data.
+- Deixar uma linha em branco entre metodos.
 - A data deve refletir a criacao do arquivo (git diff-filter=A).
 
 ## Visão geral do stack

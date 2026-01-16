@@ -14,9 +14,8 @@
 import { Repository } from 'typeorm';
 import { AppDataSource } from '../config/database';
 import { Product } from '../entities/Product';
-
 /**
- * Represents ProductRepository.
+ * Provides ProductRepository functionality.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2025-12-17
@@ -36,6 +35,9 @@ export class ProductRepository
     this.repository = AppDataSource.getRepository(Product);
   }
 
+
+
+
   /**
    * Executes create logic.
    *
@@ -46,6 +48,9 @@ export class ProductRepository
   {
     return this.repository.create(data);
   }
+
+
+
 
   /**
    * Executes save logic.
@@ -58,6 +63,9 @@ export class ProductRepository
     return this.repository.save(product);
   }
 
+
+
+
   /**
    * Executes delete logic.
    *
@@ -68,6 +76,9 @@ export class ProductRepository
   {
     return this.repository.delete(id);
   }
+
+
+
 
   /**
    * Executes find by store id logic.
@@ -88,6 +99,9 @@ export class ProductRepository
       order: { createdAt: 'DESC' as any },
     });
   }
+
+
+
 
   /**
    * Executes find by id logic.

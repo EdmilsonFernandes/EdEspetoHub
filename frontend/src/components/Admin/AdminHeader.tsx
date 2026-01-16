@@ -115,7 +115,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja' }: Props) {
         <div>
           <p className="text-sm uppercase tracking-wide font-semibold opacity-90">{contextLabel}</p>
           <h1 className="text-xl font-black leading-tight">{storeName}</h1>
-          <div className={`${showMobileDetails ? 'block' : 'hidden'} md:block mt-2 flex flex-wrap items-center gap-2 text-xs`}>
+          <div className={`${showMobileDetails ? 'block' : 'hidden'} md:block mt-2 flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 text-xs`}>
             {storeSlug && (
               <a
                 href={storeUrl}

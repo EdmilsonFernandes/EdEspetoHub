@@ -12,9 +12,8 @@
  */
 
 import { AppDataSource } from '../config/database';
-
 /**
- * Executes run migrations logic.
+ * Handles run migrations.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2026-01-05

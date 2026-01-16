@@ -27,18 +27,16 @@ type AccessLogFilters = {
   limit?: number;
   offset?: number;
 };
-
 /**
- * Represents AccessLogRepository.
+ * Provides AccessLogRepository functionality.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2026-01-15
  */
 export class AccessLogRepository {
   private repository: Repository<AccessLog>;
-
   /**
-   * Creates a new AccessLogRepository.
+   * Creates a new instance.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2026-01-15
@@ -48,7 +46,7 @@ export class AccessLogRepository {
   }
 
   /**
-   * Executes save logic.
+   * Saves data.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2026-01-15
@@ -58,7 +56,7 @@ export class AccessLogRepository {
   }
 
   /**
-   * Lists access logs with filters.
+   * Lists data.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2026-01-15
