@@ -160,26 +160,26 @@ export const CartView = ({
       {/* voltar */}
       <button
         onClick={onBack}
-        className="mb-6 flex items-center text-brand-primary font-semibold hover:opacity-80"
+        className="mb-4 sm:mb-6 flex items-center text-brand-primary font-semibold hover:opacity-80 text-sm sm:text-base"
       >
         <ChevronLeft size={20} /> Continuar comprando
       </button>
 
       {/* Dados do cliente */}
-      <div className="bg-white rounded-3xl shadow-sm p-6 mb-6 border border-gray-100">
-        <div className="flex items-center justify-between mb-6">
+      <div className="bg-white rounded-3xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-6 border border-gray-100">
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
           <div>
-            <h2 className="font-bold text-gray-800 text-lg">Detalhes do Pedido</h2>
-            <p className="text-sm text-gray-500">Complete as infos para enviarmos seu pedido.</p>
+            <h2 className="font-bold text-gray-800 text-base sm:text-lg">Detalhes do Pedido</h2>
+            <p className="text-xs text-gray-500 hidden sm:block">Complete as infos para enviarmos seu pedido.</p>
           </div>
           <span className="text-xs font-semibold text-brand-primary bg-brand-primary-soft px-3 py-1 rounded-full">
             Etapa 1/2
           </span>
         </div>
 
-        <div className="space-y-5">
+        <div className="space-y-4 sm:space-y-5">
           {/* Nome */}
-          <div className="rounded-2xl border border-gray-100 p-4">
+          <div className="rounded-xl sm:rounded-2xl border border-gray-100 p-3 sm:p-4">
             <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">
               Seu Nome
             </label>
@@ -196,7 +196,7 @@ export const CartView = ({
                   allowCustomerAutocomplete && setTimeout(() => setSuggestionsOpen(false), 150)
                 }
                 placeholder="Ex: João Silva"
-                className="w-full border-b-2 border-gray-100 py-3 pl-9 text-lg outline-none focus:border-brand-primary placeholder:text-gray-300 bg-transparent"
+                className="w-full border-b-2 border-gray-100 py-2.5 sm:py-3 pl-9 text-base sm:text-lg outline-none focus:border-brand-primary placeholder:text-gray-300 bg-transparent"
               />
               <Search size={18} className="absolute left-0 top-1/2 -translate-y-1/2 text-gray-300" />
               {allowCustomerAutocomplete && suggestionsOpen && filteredCustomers.length > 0 && (
@@ -243,7 +243,7 @@ export const CartView = ({
           </div>
 
           {/* WhatsApp */}
-          <div className="rounded-2xl border border-gray-100 p-4">
+          <div className="rounded-xl sm:rounded-2xl border border-gray-100 p-3 sm:p-4">
             <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">
               WhatsApp
             </label>
@@ -252,29 +252,29 @@ export const CartView = ({
               value={customer.phone}
               onChange={(e) => handlePhoneChange(e.target.value)}
               placeholder="(12) 90000-0000"
-              className="w-full border-b-2 border-gray-100 py-3 text-lg outline-none focus:border-brand-primary placeholder:text-gray-300 bg-transparent"
+              className="w-full border-b-2 border-gray-100 py-2.5 sm:py-3 text-base sm:text-lg outline-none focus:border-brand-primary placeholder:text-gray-300 bg-transparent"
             />
           </div>
 
           {/* Tipo de pedido */}
-          <div className="rounded-2xl border border-gray-100 p-4">
+          <div className="rounded-xl sm:rounded-2xl border border-gray-100 p-3 sm:p-4">
             <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
               Tipo de pedido
             </p>
-            <div className="flex gap-3">
+            <div className="flex gap-2 sm:gap-3">
               {visibleOrderTypes.map((type) => (
                 <button
                   key={type}
                   onClick={() => onChangeCustomer({ ...customer, type })}
-                  className={`flex-1 py-3 rounded-xl border-2 flex flex-col items-center justify-center gap-1 transition-all ${
+                  className={`flex-1 py-2.5 sm:py-3 rounded-xl border-2 flex flex-col items-center justify-center gap-1 transition-all ${
                     customer.type === type
                       ? "border-brand-primary bg-brand-primary-soft text-brand-primary font-bold"
                       : "border-gray-100 text-gray-400 grayscale"
                   }`}
                 >
-                  {type === "delivery" && <Bike size={20} />}
-                  {type === "pickup" && <Home size={20} />}
-                  {type === "table" && <UtensilsCrossed size={20} />}
+                  {type === "delivery" && <Bike size={18} />}
+                  {type === "pickup" && <Home size={18} />}
+                  {type === "table" && <UtensilsCrossed size={18} />}
                   <span className="text-[10px] uppercase font-bold tracking-wide">
                     {type === "table"
                       ? "Mesa"
@@ -289,7 +289,7 @@ export const CartView = ({
 
           {/* Endereço */}
           {customer.type === "delivery" && (
-            <div className="rounded-2xl border border-gray-100 p-4">
+            <div className="rounded-xl sm:rounded-2xl border border-gray-100 p-3 sm:p-4">
               <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
                 Endereço de entrega
               </p>
@@ -304,7 +304,7 @@ export const CartView = ({
                         onBlur={handleCepLookup}
                         disabled={cepLoading}
                         placeholder="00000-000"
-                        className="w-full p-3 rounded-xl bg-gray-50 border border-gray-100 text-gray-700 outline-none focus:ring-2 focus:ring-brand-primary disabled:opacity-60"
+                        className="w-full p-2.5 sm:p-3 rounded-xl bg-gray-50 border border-gray-100 text-gray-700 outline-none focus:ring-2 focus:ring-brand-primary disabled:opacity-60"
                       />
                     </div>
                     <div className="flex items-end">
@@ -312,7 +312,7 @@ export const CartView = ({
                         type="button"
                         onClick={handleCepLookup}
                         disabled={cepLoading}
-                        className="w-full px-3 py-3 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-60"
+                        className="w-full px-3 py-2.5 sm:py-3 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-60"
                       >
                         {cepLoading ? "Buscando..." : "Buscar CEP"}
                       </button>
@@ -326,7 +326,7 @@ export const CartView = ({
                         value={customer.street || ""}
                         onChange={(e) => updateDeliveryField("street", e.target.value)}
                         placeholder="Rua, avenida"
-                        className="w-full p-3 rounded-xl bg-gray-50 border border-gray-100 text-gray-700 outline-none focus:ring-2 focus:ring-brand-primary"
+                        className="w-full p-2.5 sm:p-3 rounded-xl bg-gray-50 border border-gray-100 text-gray-700 outline-none focus:ring-2 focus:ring-brand-primary"
                       />
                     </div>
                     <div>
@@ -335,7 +335,7 @@ export const CartView = ({
                         value={customer.number || ""}
                         onChange={(e) => updateDeliveryField("number", e.target.value)}
                         placeholder="Numero"
-                        className="w-full p-3 rounded-xl bg-gray-50 border border-gray-100 text-gray-700 outline-none focus:ring-2 focus:ring-brand-primary"
+                        className="w-full p-2.5 sm:p-3 rounded-xl bg-gray-50 border border-gray-100 text-gray-700 outline-none focus:ring-2 focus:ring-brand-primary"
                       />
                     </div>
                   </div>
@@ -346,7 +346,7 @@ export const CartView = ({
                         value={customer.neighborhood || ""}
                         onChange={(e) => updateDeliveryField("neighborhood", e.target.value)}
                         placeholder="Bairro"
-                        className="w-full p-3 rounded-xl bg-gray-50 border border-gray-100 text-gray-700 outline-none focus:ring-2 focus:ring-brand-primary"
+                        className="w-full p-2.5 sm:p-3 rounded-xl bg-gray-50 border border-gray-100 text-gray-700 outline-none focus:ring-2 focus:ring-brand-primary"
                       />
                     </div>
                     <div>
@@ -355,7 +355,7 @@ export const CartView = ({
                         value={customer.complement || ""}
                         onChange={(e) => updateDeliveryField("complement", e.target.value)}
                         placeholder="Apto, bloco, referencia"
-                        className="w-full p-3 rounded-xl bg-gray-50 border border-gray-100 text-gray-700 outline-none focus:ring-2 focus:ring-brand-primary"
+                        className="w-full p-2.5 sm:p-3 rounded-xl bg-gray-50 border border-gray-100 text-gray-700 outline-none focus:ring-2 focus:ring-brand-primary"
                       />
                     </div>
                   </div>
@@ -366,7 +366,7 @@ export const CartView = ({
                         value={customer.city || ""}
                         onChange={(e) => updateDeliveryField("city", e.target.value)}
                         placeholder="Cidade"
-                        className="w-full p-3 rounded-xl bg-gray-50 border border-gray-100 text-gray-700 outline-none focus:ring-2 focus:ring-brand-primary"
+                        className="w-full p-2.5 sm:p-3 rounded-xl bg-gray-50 border border-gray-100 text-gray-700 outline-none focus:ring-2 focus:ring-brand-primary"
                       />
                     </div>
                     <div>
@@ -375,7 +375,7 @@ export const CartView = ({
                         value={customer.state || ""}
                         onChange={(e) => updateDeliveryField("state", e.target.value)}
                         placeholder="UF"
-                        className="w-full p-3 rounded-xl bg-gray-50 border border-gray-100 text-gray-700 outline-none focus:ring-2 focus:ring-brand-primary"
+                        className="w-full p-2.5 sm:p-3 rounded-xl bg-gray-50 border border-gray-100 text-gray-700 outline-none focus:ring-2 focus:ring-brand-primary"
                       />
                     </div>
                   </div>
@@ -402,7 +402,7 @@ export const CartView = ({
           )}
 
           {customer.type === "table" && (
-            <div className="rounded-2xl border border-gray-100 p-4 space-y-3">
+            <div className="rounded-xl sm:rounded-2xl border border-gray-100 p-3 sm:p-4 space-y-3">
               <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">
                 Escolha a mesa
               </p>
@@ -429,7 +429,7 @@ export const CartView = ({
                 }
                 inputMode="numeric"
                 placeholder="Outra mesa (ex: 18)"
-                className="w-full p-4 rounded-xl bg-gray-50 border border-gray-100 text-gray-700 outline-none focus:ring-2 focus:ring-brand-primary"
+                className="w-full p-3 sm:p-4 rounded-xl bg-gray-50 border border-gray-100 text-gray-700 outline-none focus:ring-2 focus:ring-brand-primary"
               />
             </div>
           )}
@@ -437,20 +437,20 @@ export const CartView = ({
       </div>
 
       {/* Resumo */}
-      <div className="bg-white rounded-2xl shadow-sm p-6 mb-24">
-        <h2 className="font-bold text-gray-800 mb-4 text-lg">Resumo</h2>
+      <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-6 mb-20 sm:mb-24">
+        <h2 className="font-bold text-gray-800 mb-3 sm:mb-4 text-base sm:text-lg">Resumo</h2>
 
         {cartItems.map((item) => (
           <div
             key={item.key || item.id}
-            className="flex justify-between items-center py-3 border-b border-gray-50 last:border-0"
+            className="flex justify-between items-center py-2 sm:py-3 border-b border-gray-50 last:border-0"
           >
             <div className="flex items-center gap-3">
               <span className="bg-brand-primary-soft text-brand-primary font-bold w-6 h-6 rounded flex items-center justify-center text-xs">
                 {item.qty}
               </span>
               <div className="flex flex-col">
-                <span className="text-gray-700 font-medium">{item.name}</span>
+                <span className="text-gray-700 font-medium text-sm sm:text-base">{item.name}</span>
                 {formatItemOptions(item) && (
                   <span className="text-[11px] text-gray-500">{formatItemOptions(item)}</span>
                 )}
@@ -462,9 +462,9 @@ export const CartView = ({
           </div>
         ))}
 
-        <div className="flex justify-between items-center pt-6 mt-2">
+        <div className="flex justify-between items-center pt-4 sm:pt-6 mt-1 sm:mt-2">
           <span className="text-gray-500 font-medium">Total a Pagar</span>
-          <span className="text-3xl font-black text-gray-800">
+          <span className="text-2xl sm:text-3xl font-black text-gray-800">
             {formatCurrency(total)}
           </span>
         </div>
@@ -474,7 +474,7 @@ export const CartView = ({
           </div>
         )}
 
-        <div className="mt-3 text-xs text-gray-500 bg-gray-50 border border-gray-100 rounded-lg p-3 leading-relaxed">
+        <div className="mt-3 text-[11px] sm:text-xs text-gray-500 bg-gray-50 border border-gray-100 rounded-lg p-2.5 sm:p-3 leading-relaxed">
           {isPickup &&
             "Pagamento via Pix será gerado automaticamente e enviado junto com o pedido."}
           {isDelivery &&
@@ -487,8 +487,8 @@ export const CartView = ({
       </div>
 
       {/* Forma de Pagamento */}
-      <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
-        <h2 className="font-bold text-gray-800 mb-4 text-lg flex items-center gap-2">
+      <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-6">
+        <h2 className="font-bold text-gray-800 mb-3 sm:mb-4 text-base sm:text-lg flex items-center gap-2">
           <CreditCard size={18} className="text-brand-primary" /> Forma de Pagamento
         </h2>
 
