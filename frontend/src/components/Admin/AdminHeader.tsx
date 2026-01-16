@@ -21,8 +21,15 @@ export function AdminHeader({ contextLabel = 'Painel da Loja' }: Props) {
     return localStorage.getItem('adminHeader:details') === 'true';
   });
 
-  const storeName = auth?.store?.name || branding?.brandName;
   const storeSlug = auth?.store?.slug;
+  const storeNameFromAuth = auth?.store?.name;
+  const storeName =
+    storeNameFromAuth &&
+    storeSlug &&
+    storeNameFromAuth.toLowerCase() === storeSlug.toLowerCase() &&
+    branding?.brandName
+      ? branding.brandName
+      : storeNameFromAuth || branding?.brandName;
   const storeUrl = storeSlug ? `https://www.chamanoespeto.com.br/${storeSlug}` : '';
   const socialLinks = auth?.store?.settings?.socialLinks || [];
   const instagramLink = socialLinks.find((link) => link?.type === 'instagram')?.value;
@@ -91,9 +98,14 @@ export function AdminHeader({ contextLabel = 'Painel da Loja' }: Props) {
           <h1 className="text-xl font-black leading-tight">{storeName}</h1>
           <div className={`${showMobileDetails ? 'block' : 'hidden'} md:block`}>
             {storeSlug && (
-              <p className="text-xs opacity-80">
+              <a
+                href={storeUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="text-xs opacity-80 hover:opacity-100 underline-offset-2 hover:underline"
+              >
                 Site: {storeUrl.replace('https://', '')}
-              </p>
+              </a>
             )}
             {instagramHandle && (
               <a
