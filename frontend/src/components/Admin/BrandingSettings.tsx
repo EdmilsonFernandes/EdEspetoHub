@@ -23,7 +23,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug }) => {
   return (
 
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-      <div className="p-6 border-b bg-gray-50/70">
+      <div className="p-6 border-b bg-gradient-to-r from-white via-white to-red-50/60">
         <h3 className="text-lg font-bold text-gray-800 mb-1">Identidade visual</h3>
         <p className="text-sm text-gray-500">Deixe a loja com a cara do seu churrasco.</p>
       </div>
@@ -36,7 +36,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug }) => {
               type="text"
               value={branding.brandName}
               onChange={(e) => handleChange("brandName", e.target.value)}
-              className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
+              className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
               placeholder="Ex: Churras do Lucas"
             />
           </div>
@@ -49,7 +49,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug }) => {
                 type="text"
                 value={branding.instagram}
                 onChange={(e) => handleChange("instagram", e.target.value.replace("@", ""))}
-                className="w-full border border-gray-200 rounded-xl p-3 pl-8 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
+                className="w-full border border-gray-200 rounded-xl p-3 pl-8 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
                 placeholder="meuchurras"
               />
             </div>
@@ -57,11 +57,11 @@ export const BrandingSettings = ({ branding, onChange, storeSlug }) => {
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-gray-700">Descricao da loja</label>
+          <label className="text-sm font-semibold text-gray-700">Descrição da loja</label>
           <textarea
             value={branding.description || ""}
             onChange={(e) => handleChange("description", e.target.value)}
-            className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors min-h-[110px]"
+            className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors min-h-[110px]"
             placeholder="Uma frase curta para o portfolio."
             maxLength={220}
           />
@@ -75,7 +75,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug }) => {
           <label className="text-sm font-semibold text-gray-700">Logo da loja</label>
           <div className="flex items-start gap-4">
             <label className="flex-1 cursor-pointer">
-              <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 hover:border-red-400 transition-colors text-center">
+              <div className="border-2 border-dashed border-gray-300 rounded-2xl p-4 hover:border-brand-primary transition-colors text-center bg-white/70">
                 <svg className="w-8 h-8 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
@@ -100,7 +100,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug }) => {
               />
             </label>
             {logoPreview && (
-              <div className="w-24 h-24 rounded-xl overflow-hidden border-2 border-gray-200 flex-shrink-0 relative group">
+              <div className="w-28 h-28 rounded-2xl overflow-hidden border-2 border-gray-200 flex-shrink-0 relative group shadow-sm">
                 <img
                   src={logoPreview}
                   alt="Logo atual"
@@ -129,7 +129,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug }) => {
               type="color"
               value={branding.primaryColor}
               onChange={(e) => handleChange("primaryColor", e.target.value)}
-              className="w-16 h-16 cursor-pointer block"
+              className="w-16 h-16 cursor-pointer block rounded-2xl border border-gray-200 shadow-sm"
             />
             <div className="flex flex-wrap gap-2">
               {primaryPalette.map((color) => (
@@ -137,8 +137,8 @@ export const BrandingSettings = ({ branding, onChange, storeSlug }) => {
                   key={color}
                   type="button"
                   onClick={() => handleChange("primaryColor", color)}
-                  className={`w-8 h-8 rounded-full border-2 transition-all ${
-                    branding.primaryColor === color ? 'border-gray-900 scale-110' : 'border-gray-200 hover:scale-105'
+                  className={`w-9 h-9 rounded-full border-2 transition-all shadow-sm ${
+                    branding.primaryColor === color ? 'border-gray-900 scale-110 ring-2 ring-gray-300' : 'border-gray-200 hover:scale-105'
                   }`}
                   style={{ backgroundColor: color }}
                 />
@@ -153,7 +153,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug }) => {
               type="color"
               value={branding.secondaryColor}
               onChange={(e) => handleChange("secondaryColor", e.target.value)}
-              className="w-16 h-16 cursor-pointer block"
+              className="w-16 h-16 cursor-pointer block rounded-2xl border border-gray-200 shadow-sm"
             />
             <div className="flex flex-wrap gap-2">
               {secondaryPalette.map((color) => (
@@ -161,8 +161,8 @@ export const BrandingSettings = ({ branding, onChange, storeSlug }) => {
                   key={color}
                   type="button"
                   onClick={() => handleChange("secondaryColor", color)}
-                  className={`w-8 h-8 rounded-full border-2 transition-all ${
-                    branding.secondaryColor === color ? 'border-gray-900 scale-110' : 'border-gray-200 hover:scale-105'
+                  className={`w-9 h-9 rounded-full border-2 transition-all shadow-sm ${
+                    branding.secondaryColor === color ? 'border-gray-900 scale-110 ring-2 ring-gray-300' : 'border-gray-200 hover:scale-105'
                   }`}
                   style={{ backgroundColor: color }}
                 />
@@ -178,7 +178,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug }) => {
             type="text"
             value={storeSlug || ""}
             readOnly
-            className="w-full border border-gray-200 rounded-xl p-3 bg-gray-50 text-gray-500 cursor-not-allowed"
+            className="w-full border border-gray-200 rounded-xl p-3 bg-gray-50/80 text-gray-500 cursor-not-allowed"
           />
           <p className="text-xs text-gray-500">Use esse slug para acessar o painel e a vitrine.</p>
         </div>
@@ -188,11 +188,11 @@ export const BrandingSettings = ({ branding, onChange, storeSlug }) => {
         <h4 className="font-semibold text-gray-700 mb-3">Pré-visualização</h4>
         <div className="flex items-center gap-3">
           <div
-            className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold shadow-sm"
+            className="w-14 h-14 rounded-2xl flex items-center justify-center text-white font-bold shadow-md"
             style={{ backgroundColor: branding.primaryColor }}
           >
             {logoPreview ? (
-              <img src={logoPreview} alt={branding.brandName} className="w-full h-full object-cover rounded-xl" />
+              <img src={logoPreview} alt={branding.brandName} className="w-full h-full object-cover rounded-2xl" />
             ) : (
               previewInitials || "ES"
             )}
