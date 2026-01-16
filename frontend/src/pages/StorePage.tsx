@@ -35,6 +35,7 @@ export function StorePage() {
   const [storeSubscription, setStoreSubscription] = useState(null);
   const autoTrackRef = useRef(false);
   const [lastPublicOrderId, setLastPublicOrderId] = useState('');
+  const [isMobile, setIsMobile] = useState(false);
   const customersStorageKey = useMemo(
     () => `customers:${storeSlug || defaultBranding.espetoId}`,
     [storeSlug]
@@ -109,6 +110,23 @@ export function StorePage() {
   };
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const media = window.matchMedia('(max-width: 640px)');
+      const handleMedia = () => setIsMobile(media.matches);
+      handleMedia();
+      if (media.addEventListener) {
+        media.addEventListener('change', handleMedia);
+      } else {
+        media.addListener(handleMedia);
+      }
+      return () => {
+        if (media.removeEventListener) {
+          media.removeEventListener('change', handleMedia);
+        } else {
+          media.removeListener(handleMedia);
+        }
+      };
+    }
     const savedSession = localStorage.getItem('adminSession');
     if (savedSession) {
       const parsedSession = JSON.parse(savedSession);
@@ -402,7 +420,7 @@ export function StorePage() {
           createdAt: Date.now(),
         })
       );
-      setView('success');
+      setView(isStoreAdmin ? 'menu' : 'success');
       return;
     }
 
@@ -415,7 +433,7 @@ export function StorePage() {
     localStorage.setItem(customersStorageKey, JSON.stringify(nextCustomers));
     customerService.fetchAll().then(setCustomers).catch(() => {});
 
-    const shouldNotifyOwner = customer.type === 'pickup' || customer.type === 'table';
+    const shouldNotifyOwner = !isStoreAdmin && (customer.type === 'pickup' || customer.type === 'table');
     if (shouldNotifyOwner) {
       const itemsList = Object.values(cart)
         .map((item) => `▪ ${item.qty}x ${item.name} ${formatItemOptions(item)}`.trim())
@@ -469,7 +487,7 @@ export function StorePage() {
           ? sanitizedPhone
           : `55${sanitizedPhone}`
         : '';
-    if (customerNumber) {
+    if (customerNumber && !isStoreAdmin) {
       window.open(
         `https://wa.me/${customerNumber}?text=${encodeURIComponent(customerMessageLines)}`,
         '_blank'
@@ -495,7 +513,7 @@ export function StorePage() {
       );
       setLastPublicOrderId(createdOrder.id);
     }
-    setView('success');
+    setView(isStoreAdmin ? 'menu' : 'success');
   };
 
   const requireAdminSession = () => {
@@ -764,6 +782,7 @@ export function StorePage() {
               whatsappNumber={storePhone}
               todayHoursLabel={todayHoursLabel}
               storeAddress={storeAddress}
+              compactHeader={isMobile}
             />
           </div>
         )}

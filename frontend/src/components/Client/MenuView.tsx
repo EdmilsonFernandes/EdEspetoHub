@@ -19,7 +19,16 @@ const isEspetoCategory = (category) => {
   return normalized.includes("espeto");
 };
 
-const Header = ({ branding, instagramHandle, whatsappNumber, isOpenNow, todayHoursLabel, onOpenQueue, onOpenAdmin }) => {
+const Header = ({
+  branding,
+  instagramHandle,
+  whatsappNumber,
+  isOpenNow,
+  todayHoursLabel,
+  onOpenQueue,
+  onOpenAdmin,
+  compact
+}) => {
   const storeSlug = branding?.espetoId || "";
   const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
   const storeUrl = storeSlug ? `${baseUrl}/chamanoespeto/${storeSlug}` : "";
@@ -31,32 +40,37 @@ const Header = ({ branding, instagramHandle, whatsappNumber, isOpenNow, todayHou
     .toUpperCase();
 
   return (
-    <div className="w-full bg-white/95 backdrop-blur shadow-md px-3 sm:px-4 py-3 sm:py-4 flex items-center gap-2 sm:gap-4 sticky top-0 z-50 border-b border-gray-100 flex-wrap sm:flex-nowrap">
+    <div className={`w-full bg-white/95 backdrop-blur shadow-md px-3 sm:px-4 ${compact ? 'py-2' : 'py-3 sm:py-4'} flex items-center gap-2 sm:gap-4 sticky top-0 z-50 border-b border-gray-100 flex-wrap sm:flex-nowrap`}>
       <div
         className="absolute top-0 left-0 right-0 h-1"
         style={{ backgroundImage: "linear-gradient(120deg, var(--color-primary), var(--color-secondary))" }}
       />
 
       {/* LOGO OFICIAL */}
-      <div
-        className="w-10 h-10 sm:w-14 sm:h-14 rounded-full overflow-hidden border shadow-sm bg-white flex-shrink-0 flex items-center justify-center"
-        style={{ borderColor: branding?.primaryColor, color: branding?.primaryColor, backgroundColor: '#fff' }}
-      >
-        {branding?.logoUrl ? (
-          <img
-            src={branding.logoUrl}
-            alt={branding.brandName}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <span className="font-bold text-sm sm:text-lg">{previewInitials || "ES"}</span>
-        )}
-      </div>
+      {!compact && (
+        <div
+          className="w-10 h-10 sm:w-14 sm:h-14 rounded-full overflow-hidden border shadow-sm bg-white flex-shrink-0 flex items-center justify-center"
+          style={{ borderColor: branding?.primaryColor, color: branding?.primaryColor, backgroundColor: '#fff' }}
+        >
+          {branding?.logoUrl ? (
+            <img
+              src={branding.logoUrl}
+              alt={branding.brandName}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <span className="font-bold text-sm sm:text-lg">{previewInitials || "ES"}</span>
+          )}
+        </div>
+      )}
 
       {/* Nome + infos */}
       <div className="flex-1 leading-tight min-w-0">
-        <h1 className="text-base sm:text-xl font-bold text-gray-900 truncate">{branding?.brandName || "Seu Espeto"}</h1>
-        <div className="mt-0.5 sm:mt-1 flex flex-wrap items-center gap-1 sm:gap-2 text-xs text-slate-500">
+        <h1 className={`${compact ? 'text-sm' : 'text-base sm:text-xl'} font-bold text-gray-900 truncate`}>
+          {branding?.brandName || "Seu Espeto"}
+        </h1>
+        {!compact && (
+          <div className="mt-0.5 sm:mt-1 flex flex-wrap items-center gap-1 sm:gap-2 text-xs text-slate-500">
           {storeSlug && (
             <span className="hidden sm:inline-flex items-center gap-2 px-2.5 py-1 rounded-full border border-slate-200 bg-white text-slate-600 text-[11px] uppercase tracking-wide">
               <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
@@ -76,20 +90,23 @@ const Header = ({ branding, instagramHandle, whatsappNumber, isOpenNow, todayHou
               <span className="sm:hidden">{instagramHandle}</span>
             </a>
           )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Buttons - Responsive */}
-      <div className="w-full sm:w-auto flex flex-col sm:flex-row items-end sm:items-center gap-1.5 sm:gap-2 order-last sm:order-none sm:flex-shrink-0">
+      <div className="w-full sm:w-auto flex flex-row items-center justify-end gap-2 order-last sm:order-none sm:flex-shrink-0">
         {onOpenQueue && (
           <button
             onClick={onOpenQueue}
-            className="hidden md:flex flex-1 md:flex-none px-2 sm:px-3 py-1.5 sm:py-2 rounded-full text-xs font-semibold bg-brand-secondary text-white shadow-sm hover:shadow-md transition items-center gap-1 whitespace-nowrap"
+            className={`px-2 sm:px-3 py-1.5 sm:py-2 rounded-full text-xs font-semibold ${
+              compact
+                ? 'border border-brand-secondary text-brand-secondary'
+                : 'bg-brand-secondary text-white shadow-sm hover:shadow-md'
+            } transition flex items-center gap-1 whitespace-nowrap`}
           >
-            <ChefHat size={12} className="hidden lg:block" />
-            <ChefHat size={11} className="lg:hidden" />
-            <span className="hidden lg:inline">Visao do churrasqueiro</span>
-            <span className="hidden md:inline lg:hidden text-[10px]">Churrasqueiro</span>
+            <ChefHat size={12} />
+            {!compact && <span className="hidden md:inline">Visao do churrasqueiro</span>}
           </button>
         )}
         {onOpenAdmin && (
@@ -97,9 +114,8 @@ const Header = ({ branding, instagramHandle, whatsappNumber, isOpenNow, todayHou
             onClick={onOpenAdmin}
             className="px-2 sm:px-3 py-1.5 sm:py-2 rounded-full text-xs font-semibold border border-brand-secondary text-brand-secondary hover:bg-brand-secondary-soft transition flex items-center gap-1 whitespace-nowrap"
           >
-            <LayoutDashboard size={12} className="hidden sm:block" />
-            <LayoutDashboard size={10} className="sm:hidden" />
-            <span className="hidden sm:inline">Admin</span>
+            <LayoutDashboard size={12} />
+            {!compact && <span className="hidden sm:inline">Admin</span>}
           </button>
         )}
       </div>
@@ -122,7 +138,8 @@ export const MenuView = ({
   storeAddress,
   showHeader = true,
   onOpenQueue,
-  onOpenAdmin
+  onOpenAdmin,
+  compactHeader = false
 }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -224,6 +241,7 @@ export const MenuView = ({
           todayHoursLabel={todayHoursLabel}
           onOpenQueue={onOpenQueue}
           onOpenAdmin={onOpenAdmin}
+          compact={compactHeader}
         />
       )}
 
