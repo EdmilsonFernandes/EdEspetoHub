@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from "react";
-import { ChefHat, Instagram, LayoutDashboard, Link, Plus, X, Clock, MapPin, CreditCard, DollarSign, Zap, Search } from "lucide-react";
+import { Instagram, LayoutDashboard, Plus, Clock, MapPin, Search } from "lucide-react";
 import { formatCurrency } from "../../utils/format";
 import { ProductModal } from "../Cart/ProductModal";
 
@@ -97,17 +97,21 @@ const Header = ({
       {/* Buttons - Responsive */}
       <div className="w-full sm:w-auto flex flex-row items-center justify-end gap-2 order-last sm:order-none sm:flex-shrink-0">
         {onOpenQueue && (
-          <button
-            onClick={onOpenQueue}
-            className={`px-2 sm:px-3 py-1.5 sm:py-2 rounded-full text-xs font-semibold ${
-              compact
-                ? 'border border-brand-secondary text-brand-secondary'
-                : 'bg-brand-secondary text-white shadow-sm hover:shadow-md'
-            } transition flex items-center gap-1 whitespace-nowrap`}
-          >
-            <ChefHat size={12} />
-            {!compact && <span className="hidden md:inline">Visao do churrasqueiro</span>}
-          </button>
+          <div className="flex items-center rounded-full border border-slate-200 bg-white p-0.5">
+            <button
+              type="button"
+              className="px-3 py-1.5 rounded-full text-xs font-semibold bg-brand-primary text-white"
+            >
+              Vitrine
+            </button>
+            <button
+              type="button"
+              onClick={onOpenQueue}
+              className="px-3 py-1.5 rounded-full text-xs font-semibold text-slate-600 hover:text-slate-900"
+            >
+              Churrasqueiro
+            </button>
+          </div>
         )}
         {onOpenAdmin && (
           <button
@@ -261,7 +265,35 @@ export const MenuView = ({
           />
           <div className="relative space-y-4">
             {/* Main Header Section */}
-            <div className="space-y-2">
+            {compactHeader ? (
+              <div className="space-y-2">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-500">
+                  Cardapio
+                </p>
+                <h2 className="text-lg font-black text-slate-900">
+                  {branding?.brandName || "Seu Espeto"}
+                </h2>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span
+                    className={`px-3 py-1.5 rounded-full font-semibold text-xs flex items-center gap-2 ${
+                      isOpenNow
+                        ? "bg-emerald-100 text-emerald-700"
+                        : "bg-red-100 text-red-700"
+                    }`}
+                  >
+                    <span className={`w-2 h-2 rounded-full ${isOpenNow ? "bg-emerald-600" : "bg-red-600"}`} />
+                    {isOpenNow ? "Aberto agora" : "Fechado no momento"}
+                  </span>
+                  {todayHoursLabel && todayHoursLabel !== "Fechado hoje" && (
+                    <span className="px-3 py-1.5 rounded-full border border-slate-200 text-slate-600 bg-white font-semibold text-xs flex items-center gap-2">
+                      <Clock size={14} />
+                      {todayHoursLabel}
+                    </span>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-2">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-500">
                   Bem-vindo ao nosso cardápio
@@ -290,9 +322,10 @@ export const MenuView = ({
                   </span>
                 )}
               </div>
-            </div>
+              </div>
+            )}
 
-            {storeAddress && (
+            {!compactHeader && storeAddress && (
               <div className="rounded-2xl border border-slate-200 bg-white/90 p-4">
                 <a
                   href={googleMapsUrl}
@@ -333,7 +366,8 @@ export const MenuView = ({
             )}
 
             {/* CTA Buttons */}
-            <div className="flex flex-wrap items-center gap-2 w-full pt-1">
+            {!compactHeader && (
+              <div className="flex flex-wrap items-center gap-2 w-full pt-1">
               {normalizeWhatsApp(whatsappNumber) && (
                 <a
                   href={`https://wa.me/${normalizeWhatsApp(whatsappNumber)}`}
@@ -364,7 +398,8 @@ export const MenuView = ({
                   <span>Instagram</span>
                 </a>
               )}
-            </div>
+              </div>
+            )}
             <div className="relative">
               <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
