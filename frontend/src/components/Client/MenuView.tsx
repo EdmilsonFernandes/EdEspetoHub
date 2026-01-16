@@ -32,7 +32,7 @@ const Header = ({
 }) => {
   const storeSlug = branding?.espetoId || "";
   const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
-  const storeUrl = storeSlug ? `${baseUrl}/chamanoespeto/${storeSlug}` : "";
+  const storeUrl = storeSlug ? `${baseUrl}/${storeSlug}` : "";
   const previewInitials = branding?.brandName
     ?.split(" ")
     .map((part) => part[0])
@@ -73,10 +73,15 @@ const Header = ({
         {!compact && (
           <div className="mt-0.5 sm:mt-1 flex flex-wrap items-center gap-1 sm:gap-2 text-xs text-slate-500">
           {storeSlug && (
-            <span className="hidden sm:inline-flex items-center gap-2 px-2.5 py-1 rounded-full border border-slate-200 bg-white text-slate-600 text-[11px] uppercase tracking-wide">
+            <a
+              href={storeUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="hidden sm:inline-flex items-center gap-2 px-2.5 py-1 rounded-full border border-slate-200 bg-white text-slate-600 text-[11px] uppercase tracking-wide hover:border-slate-300 hover:text-slate-800 transition"
+            >
               <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-              Id: <span className="font-semibold normal-case">{storeSlug}</span>
-            </span>
+              Site: <span className="font-semibold normal-case">{storeUrl.replace(/^https?:\/\//, '')}</span>
+            </a>
           )}
           {instagramHandle && (
             <a

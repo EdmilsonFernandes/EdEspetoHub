@@ -23,6 +23,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja' }: Props) {
 
   const storeName = branding?.brandName || auth?.store?.name;
   const storeSlug = auth?.store?.slug;
+  const storeUrl = storeSlug ? `https://www.chamanoespeto.com.br/${storeSlug}` : '';
   const socialLinks = auth?.store?.settings?.socialLinks || [];
   const instagramLink = socialLinks.find((link) => link?.type === 'instagram')?.value;
   const instagramHandle = instagramLink ? `@${instagramLink.replace('@', '')}` : '';
@@ -89,7 +90,11 @@ export function AdminHeader({ contextLabel = 'Painel da Loja' }: Props) {
           <p className="text-sm uppercase tracking-wide font-semibold opacity-90">{contextLabel}</p>
           <h1 className="text-xl font-black leading-tight">{storeName}</h1>
           <div className={`${showMobileDetails ? 'block' : 'hidden'} md:block`}>
-            {storeSlug && <p className="text-xs opacity-80">Id da loja: {storeSlug}</p>}
+            {storeSlug && (
+              <p className="text-xs opacity-80">
+                Site: {storeUrl.replace('https://', '')}
+              </p>
+            )}
             {instagramHandle && (
               <a
                 href={`https://instagram.com/${instagramHandle.replace('@', '')}`}
