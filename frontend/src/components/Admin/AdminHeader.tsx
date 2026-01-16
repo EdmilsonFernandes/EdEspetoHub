@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { subscriptionService } from '../../services/subscriptionService';
+import { storeService } from '../../services/storeService';
 import { PlanBadge } from '../PlanBadge';
 
 type Props = {
@@ -23,13 +24,15 @@ export function AdminHeader({ contextLabel = 'Painel da Loja' }: Props) {
 
   const storeSlug = auth?.store?.slug;
   const storeNameFromAuth = auth?.store?.name;
+  const [storeNameOverride, setStoreNameOverride] = useState('');
   const storeName =
-    storeNameFromAuth &&
+    storeNameOverride ||
+    (storeNameFromAuth &&
     storeSlug &&
     storeNameFromAuth.toLowerCase() === storeSlug.toLowerCase() &&
     branding?.brandName
       ? branding.brandName
-      : storeNameFromAuth || branding?.brandName;
+      : storeNameFromAuth || branding?.brandName);
   const storeUrl = storeSlug ? `https://www.chamanoespeto.com.br/${storeSlug}` : '';
   const socialLinks = auth?.store?.settings?.socialLinks || [];
   const instagramLink = socialLinks.find((link) => link?.type === 'instagram')?.value;
@@ -74,6 +77,22 @@ export function AdminHeader({ contextLabel = 'Painel da Loja' }: Props) {
     loadPlan();
   }, [auth?.store?.id]);
 
+  useEffect(() => {
+    if (!storeSlug) return;
+    if (storeNameFromAuth && storeNameFromAuth.toLowerCase() !== storeSlug.toLowerCase()) {
+      setStoreNameOverride('');
+      return;
+    }
+    storeService
+      .fetchBySlug(storeSlug)
+      .then((store) => {
+        if (store?.name) {
+          setStoreNameOverride(store.name);
+        }
+      })
+      .catch(() => {});
+  }, [storeSlug, storeNameFromAuth]);
+
   return (
     <header
       className="p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4"
@@ -96,13 +115,13 @@ export function AdminHeader({ contextLabel = 'Painel da Loja' }: Props) {
         <div>
           <p className="text-sm uppercase tracking-wide font-semibold opacity-90">{contextLabel}</p>
           <h1 className="text-xl font-black leading-tight">{storeName}</h1>
-          <div className={`${showMobileDetails ? 'block' : 'hidden'} md:block`}>
+          <div className={`${showMobileDetails ? 'block' : 'hidden'} md:block mt-1 flex flex-col gap-1 text-xs`}>
             {storeSlug && (
               <a
                 href={storeUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="text-xs opacity-80 hover:opacity-100 underline-offset-2 hover:underline"
+                className="opacity-90 hover:opacity-100 underline-offset-2 hover:underline"
               >
                 Site: {storeUrl.replace('https://', '')}
               </a>
@@ -112,7 +131,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja' }: Props) {
                 href={`https://instagram.com/${instagramHandle.replace('@', '')}`}
                 target="_blank"
                 rel="noreferrer"
-                className="text-xs opacity-80 hover:opacity-100"
+                className="opacity-90 hover:opacity-100"
               >
                 Instagram {instagramHandle}
               </a>
