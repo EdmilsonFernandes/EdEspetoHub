@@ -266,41 +266,42 @@ export const MenuView = ({
           <div className="relative space-y-4">
             {/* Main Header Section */}
             {compactHeader ? (
-              <div className="space-y-2">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-500">
-                  Cardapio
-                </p>
-                <h2 className="text-lg font-black text-slate-900">
-                  {branding?.brandName || "Seu Espeto"}
-                </h2>
-                <div className="flex flex-wrap items-center gap-2">
-                  <span
-                    className={`px-3 py-1.5 rounded-full font-semibold text-xs flex items-center gap-2 ${
-                      isOpenNow
-                        ? "bg-emerald-100 text-emerald-700"
-                        : "bg-red-100 text-red-700"
-                    }`}
-                  >
-                    <span className={`w-2 h-2 rounded-full ${isOpenNow ? "bg-emerald-600" : "bg-red-600"}`} />
-                    {isOpenNow ? "Aberto agora" : "Fechado no momento"}
+              <div className="flex flex-wrap items-center gap-2">
+                <span
+                  className={`px-3 py-1.5 rounded-full font-semibold text-xs flex items-center gap-2 ${
+                    isOpenNow
+                      ? "bg-emerald-100 text-emerald-700"
+                      : "bg-red-100 text-red-700"
+                  }`}
+                >
+                  <span className={`w-2 h-2 rounded-full ${isOpenNow ? "bg-emerald-600" : "bg-red-600"}`} />
+                  {isOpenNow ? "Aberto agora" : "Fechado no momento"}
+                </span>
+                {todayHoursLabel && todayHoursLabel !== "Fechado hoje" && (
+                  <span className="px-3 py-1.5 rounded-full border border-slate-200 text-slate-600 bg-white font-semibold text-xs flex items-center gap-2">
+                    <Clock size={14} />
+                    {todayHoursLabel}
                   </span>
-                  {todayHoursLabel && todayHoursLabel !== "Fechado hoje" && (
-                    <span className="px-3 py-1.5 rounded-full border border-slate-200 text-slate-600 bg-white font-semibold text-xs flex items-center gap-2">
-                      <Clock size={14} />
-                      {todayHoursLabel}
-                    </span>
-                  )}
-                </div>
+                )}
               </div>
             ) : (
               <div className="space-y-2">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-500">
-                  Bem-vindo ao nosso cardápio
-                </p>
-                <h2 className="text-xl sm:text-2xl font-black text-slate-900 mt-1">
-                  {branding?.brandName || "Seu Espeto"}
-                </h2>
+                {!showHeader && (
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-500">
+                    Bem-vindo ao nosso cardápio
+                  </p>
+                )}
+                {!showHeader && (
+                  <h2 className="text-xl sm:text-2xl font-black text-slate-900 mt-1">
+                    {branding?.brandName || "Seu Espeto"}
+                  </h2>
+                )}
+                {showHeader && (
+                  <p className="text-sm font-semibold text-slate-600">
+                    Escolha seu pedido
+                  </p>
+                )}
               </div>
 
               {/* Status & Hours */}
