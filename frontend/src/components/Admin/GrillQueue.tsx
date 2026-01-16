@@ -689,13 +689,15 @@ export const GrillQueue = () => {
                     </button>
                   )}
 
-                  <button
-                    onClick={() => handleAdvance(order.id, "done")}
-                    disabled={updating === order.id}
-                    className="px-3 py-2 rounded-lg bg-green-100 text-green-800 text-xs font-bold flex items-center gap-1 disabled:opacity-60"
-                  >
-                    <CheckSquare size={16} /> Marcar pronto
-                  </button>
+                  {order.status === "preparing" && (
+                    <button
+                      onClick={() => handleAdvance(order.id, "done")}
+                      disabled={updating === order.id}
+                      className="px-3 py-2 rounded-lg bg-green-100 text-green-800 text-xs font-bold flex items-center gap-1 disabled:opacity-60"
+                    >
+                      <CheckSquare size={16} /> Marcar pronto
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
