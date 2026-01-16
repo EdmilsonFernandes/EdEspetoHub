@@ -480,41 +480,52 @@ export const CartView = ({
 
       {/* Forma de Pagamento */}
       <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-6">
-        <h2 className="font-bold text-gray-800 mb-3 sm:mb-4 text-base sm:text-lg flex items-center gap-2">
-          <CreditCard size={18} className="text-brand-primary" /> Forma de Pagamento
-        </h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-bold text-gray-800 text-base sm:text-lg flex items-center gap-2">
+            <CreditCard size={18} className="text-brand-primary" /> Forma de Pagamento
+          </h2>
+          <span className="text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-full">
+            Seguro e rapido
+          </span>
+        </div>
 
         <div className="grid grid-cols-3 gap-3">
           {[
-            { id: "pix", label: "Pix", description: "Registro rápido" },
-            { id: "debito", label: "Débito", description: "Pagamento no local" },
-            { id: "credito", label: "Crédito", description: "Pagamento no local" }
+            { id: "pix", label: "Pix", description: "Registro rapido" },
+            { id: "debito", label: "Débito", description: "Pague no local" },
+            { id: "credito", label: "Crédito", description: "Pague no local" }
           ].map((method) => (
             <button
               key={method.id}
               onClick={() => onChangePayment(method.id)}
-              className={`border-2 rounded-xl p-3 text-left transition-all ${
+              className={`rounded-2xl p-3 text-left transition-all border ${
                 paymentMethod === method.id
-                  ? "border-brand-primary bg-brand-primary-soft text-brand-primary"
-                  : "border-gray-100 text-gray-500 hover:border-brand-primary"
+                  ? "border-brand-primary bg-gradient-to-br from-brand-primary-soft/70 to-white text-brand-primary shadow-md"
+                  : "border-gray-100 text-gray-500 hover:border-brand-primary hover:shadow-sm"
               }`}
             >
               {(() => {
                 const methodMeta = getPaymentMethodMeta(method.id);
                 return (
                   <div className="flex items-center gap-2 font-bold">
-                    {methodMeta.icon && (
-                      <img
-                        src={methodMeta.icon}
-                        alt={methodMeta.label}
-                        className="h-5 w-5 object-contain"
-                      />
-                    )}
-                    <span>{method.label}</span>
+                    <span className={`h-9 w-9 rounded-xl flex items-center justify-center ${paymentMethod === method.id ? 'bg-brand-primary text-white' : 'bg-slate-100 text-slate-600'}`}>
+                      {methodMeta.icon ? (
+                        <img
+                          src={methodMeta.icon}
+                          alt={methodMeta.label}
+                          className="h-5 w-5 object-contain"
+                        />
+                      ) : (
+                        <CreditCard size={16} />
+                      )}
+                    </span>
+                    <div className="space-y-0.5">
+                      <div className="text-sm font-semibold">{method.label}</div>
+                      <div className="text-[11px] text-gray-500">{method.description}</div>
+                    </div>
                   </div>
                 );
               })()}
-              <div className="text-xs text-gray-500">{method.description}</div>
             </button>
           ))}
         </div>
