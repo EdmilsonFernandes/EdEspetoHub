@@ -50,6 +50,7 @@ const handleResponse = async (response: Response) =>
     }
     const message = payload?.message || response.statusText;
     const error: any = new Error(message);
+    error.status = response.status;
     if (payload?.code) error.code = payload.code;
     if (payload?.details) error.details = payload.details;
     throw error;

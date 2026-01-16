@@ -420,7 +420,8 @@ export const ProductManager = ({ products, onProductsChange }) => {
                           await refreshProducts();
                         })
                         .catch(async (error) => {
-                          if (error?.code === 'PROD-001') {
+                          const message = (error?.message || '').toString();
+                          if (error?.code === 'PROD-001' || error?.status === 404 || message.includes('Produto')) {
                             showToast('Produto removido', 'success');
                             await refreshProducts();
                             return;
