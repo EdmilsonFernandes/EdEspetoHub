@@ -1,6 +1,3 @@
-// @ts-nocheck
-import React from 'react';
-
 export function Hero() {
   return (
     <div className="w-full relative">
