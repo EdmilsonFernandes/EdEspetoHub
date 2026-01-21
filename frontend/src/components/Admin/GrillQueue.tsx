@@ -14,6 +14,7 @@ import {
   X
 } from "@phosphor-icons/react";
 import { orderService } from "../../services/orderService";
+import { storeService } from "../../services/storeService";
 import { productService } from "../../services/productService";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
 import {
@@ -25,23 +26,15 @@ import {
   formatOrderType,
 } from "../../utils/format";
 import { getPaymentMethodMeta } from "../../utils/paymentAssets";
+import { useAuth } from "../../contexts/AuthContext";
 
 export const GrillQueue = () => {
+  const { auth } = useAuth();
   const [queue, setQueue] = useState([]);
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState({});
-  const getStorePixKey = () => {
-    if (typeof window === 'undefined') return '';
-    const raw = localStorage.getItem('adminSession');
-    if (!raw) return '';
-    try {
-      const parsed = JSON.parse(raw);
-      return parsed?.store?.settings?.pixKey || '';
-    } catch {
-      return '';
-    }
-  };
+  const [storePixKey, setStorePixKey] = useState('');
   const storeSlug = useMemo(() => {
     if (typeof window === 'undefined') return '';
     const raw = localStorage.getItem('adminSession');
@@ -68,6 +61,26 @@ export const GrillQueue = () => {
   const previousIdsRef = useRef<string[]>([]);
   const audioContextRef = useRef<AudioContext | null>(null);
   const itemOrderRef = useRef<Map<string, Map<string, number>>>(new Map());
+  useEffect(() => {
+    const sessionPixKey = auth?.store?.settings?.pixKey || '';
+    if (sessionPixKey) {
+      setStorePixKey(sessionPixKey);
+      return;
+    }
+    if (!storeSlug) return;
+    const loadPixKey = async () => {
+      try {
+        const store = await storeService.fetchBySlug(storeSlug);
+        const fetchedKey = store?.settings?.pixKey || '';
+        if (fetchedKey) {
+          setStorePixKey(fetchedKey);
+        }
+      } catch (error) {
+        console.error('Falha ao carregar chave Pix', error);
+      }
+    };
+    loadPixKey();
+  }, [auth?.store?.settings?.pixKey, storeSlug]);
   const formatItemOptions = (item) => {
     const labels = [];
     if (item?.cookingPoint) labels.push(item.cookingPoint);
@@ -295,7 +308,7 @@ export const GrillQueue = () => {
       table: order.table || null,
       payment: order.payment,
       phone: order.phone || '',
-      pixKey: getStorePixKey(),
+      pixKey: storePixKey,
     });
   };
 
