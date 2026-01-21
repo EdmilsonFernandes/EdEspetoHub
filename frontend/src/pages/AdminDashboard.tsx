@@ -332,6 +332,7 @@ const OrdersView = ({ orders, products, storeSlug }) => {
 };
 
 const PaymentsView = ({ subscription, loading, error, payments }) => {
+  const [showAllHistory, setShowAllHistory] = useState(false);
   const plan = subscription?.plan;
   const planLabel = plan?.displayName || plan?.name || 'Plano não identificado';
   const priceValue = subscription?.latestPaymentAmount ?? plan?.price ?? 0;
@@ -452,10 +453,23 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
         </div>
         {Array.isArray(payments) && payments.length > 0 && (
           <div className="pt-2 border-t border-slate-200">
-            <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Historico de pagamentos</p>
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Historico de pagamentos</p>
+              <label className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600">
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 rounded border-slate-300 text-brand-primary focus:ring-brand-primary"
+                  checked={showAllHistory}
+                  onChange={(event) => setShowAllHistory(event.target.checked)}
+                />
+                Mostrar falhados
+              </label>
+            </div>
             <div className="mt-3 space-y-2">
               {payments
-                .filter((payment) => (payment.status || '').toUpperCase() === 'PAID')
+                .filter((payment) =>
+                  showAllHistory ? true : (payment.status || '').toUpperCase() === 'PAID',
+                )
                 .slice(0, 6)
                 .map((payment) => (
                   <div key={payment.id} className="flex items-center justify-between text-sm">
@@ -507,7 +521,8 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
                 </div>
               ))}
             </div>
-            {payments.filter((payment) => (payment.status || '').toUpperCase() === 'PAID').length === 0 && (
+            {!showAllHistory &&
+              payments.filter((payment) => (payment.status || '').toUpperCase() === 'PAID').length === 0 && (
               <p className="mt-3 text-xs text-slate-500">Nenhum pagamento aprovado ainda.</p>
             )}
           </div>
