@@ -182,7 +182,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja' }: Props) {
               <button
                 key={item.path}
                 onClick={() => navigate(item.path)}
-                className="px-3 py-2 rounded-md text-[11px] sm:text-xs font-semibold hover:bg-white/20 transition flex flex-col sm:flex-row items-center gap-1.5 text-center"
+                className="px-3 py-2 rounded-md text-[11px] sm:text-xs font-semibold hover:bg-white/20 transition hover:-translate-y-0.5 active:scale-95 flex flex-col sm:flex-row items-center gap-1.5 text-center"
                 title={item.label}
               >
                 <Icon size={14} />
@@ -200,7 +200,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja' }: Props) {
               <button
                 key={item.path}
                 onClick={() => navigate(item.path)}
-                className="px-3 py-2 rounded-lg text-[11px] sm:text-xs font-semibold bg-white/15 hover:bg-white/25 transition flex flex-col sm:flex-row items-center gap-1.5 text-center"
+                className="px-3 py-2 rounded-lg text-[11px] sm:text-xs font-semibold bg-white/15 hover:bg-white/25 transition hover:-translate-y-0.5 active:scale-95 flex flex-col sm:flex-row items-center gap-1.5 text-center"
                 title={item.label}
               >
                 <Icon size={14} />
@@ -216,7 +216,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja' }: Props) {
             logout();
             navigate('/admin');
           }}
-          className="px-3 py-2 rounded-lg text-[11px] sm:text-xs font-semibold bg-red-500/20 hover:bg-red-500/30 transition flex flex-col sm:flex-row items-center gap-1.5 border border-red-300/20 w-full sm:w-auto text-center"
+          className="px-3 py-2 rounded-lg text-[11px] sm:text-xs font-semibold bg-red-500/20 hover:bg-red-500/30 transition hover:-translate-y-0.5 active:scale-95 flex flex-col sm:flex-row items-center gap-1.5 border border-red-300/20 w-full sm:w-auto text-center"
           title="Sair do sistema"
         >
           <LogOut size={14} />
