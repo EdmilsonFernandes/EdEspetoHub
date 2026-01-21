@@ -46,12 +46,6 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                   >
                     Criar loja
                   </button>
-                  <button
-                    onClick={goToDemoGuide}
-                    className="hidden md:inline-block px-3 py-2 sm:px-4 text-sm rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors"
-                  >
-                    Ver demo guiada
-                  </button>
                 </>
               )}
               {auth && (
@@ -75,10 +69,9 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
               </button>
               <button
                 onClick={() => navigate('/admin')}
-                className="hidden md:inline-block px-3 py-2 sm:px-4 text-sm rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all"
+                className="px-3 py-2 sm:px-4 text-sm rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all"
               >
-                <span className="hidden sm:inline">Admin</span>
-                <span className="sm:hidden">Admin</span>
+                <span>Admin</span>
               </button>
               <button
                 onClick={toggleTheme}

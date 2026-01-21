@@ -104,16 +104,16 @@ export function LandingPage() {
             7 dias grátis + sem cartão
           </span>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-[56px] font-semibold text-gray-900 dark:text-white leading-tight tracking-tight">
-            Crie sites de pedidos de
+            Crie seu cardápio online para
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-red-600">
               {' '}
-              churrasco{' '}
+              espetos e porções{' '}
             </span>
-            personalizados
+            em minutos
           </h1>
           <p className="text-base sm:text-lg text-gray-600 dark:text-gray-300 leading-relaxed max-w-3xl mx-auto">
-            Configure a identidade visual do seu espeto, publique um link exclusivo e teste tudo grátis por 7 dias. Ao
-            finalizar o periodo, você escolhe o plano para continuar.
+            Monte a identidade da sua loja, publique um link exclusivo e receba pedidos de espetos, porções e bebidas em
+            um só lugar. Teste grátis por 7 dias e ative o plano quando quiser.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
             <button
@@ -121,12 +121,6 @@ export function LandingPage() {
               className="cursor-pointer px-8 py-4 text-lg rounded-xl bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold hover:from-red-600 hover:to-red-700 transition-all shadow-lg"
             >
               🚀 Criar minha loja agora
-            </button>
-            <button
-              onClick={goToDemoGuide}
-              className="cursor-pointer px-8 py-4 text-lg rounded-xl border-2 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-            >
-              👀 Ver demo guiada
             </button>
             <button
               onClick={() => setTourOpen(true)}
