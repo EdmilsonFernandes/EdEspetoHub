@@ -189,6 +189,12 @@ export const DashboardView = ({ orders = [], customers = [] }) => {
     });
   }, [customers, customerQuery]);
 
+  const sortedCustomers = useMemo(() => {
+    return [...filteredCustomers].sort((a, b) =>
+      String(a.name || "").localeCompare(String(b.name || ""), "pt-BR", { sensitivity: "base" })
+    );
+  }, [filteredCustomers]);
+
   const exportCustomers = () => {
     const headers = [
       { key: "nome", label: "Nome" },
@@ -439,7 +445,7 @@ export const DashboardView = ({ orders = [], customers = [] }) => {
 
         <div className="max-h-80 overflow-y-auto pr-1">
           <div className="grid gap-3 sm:grid-cols-2">
-            {filteredCustomers.map((customer) => {
+            {sortedCustomers.map((customer) => {
               const initials = String(customer.name || 'CL')
                 .split(' ')
                 .filter(Boolean)
@@ -468,7 +474,7 @@ export const DashboardView = ({ orders = [], customers = [] }) => {
             })}
           </div>
 
-          {filteredCustomers.length === 0 && (
+          {sortedCustomers.length === 0 && (
             <div className="text-center text-gray-400 py-6 text-sm">
               Nenhum cliente encontrado.
             </div>
