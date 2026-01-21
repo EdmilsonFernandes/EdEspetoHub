@@ -11,6 +11,7 @@ import { applyBrandTheme } from '../utils/brandTheme';
 const statusLabels: Record<string, string> = {
   pending: 'Recebido',
   preparing: 'Em preparo',
+  ready: 'Pronto para retirada',
   done: 'Pronto',
   delivered: 'Entregue',
 };
@@ -127,6 +128,7 @@ export function OrderTracking() {
   const statusLabel = useMemo(() => {
     if (isDelivery && (status === 'done' || status === 'delivered')) return 'Saiu para entrega';
     if (order?.type === 'table' && status === 'done') return 'Pronto para servir';
+    if (order?.type === 'pickup' && status === 'ready') return 'Pronto para retirada';
     return statusLabels[status] || status;
   }, [isDelivery, order?.type, status]);
   const isReady = status === 'done' || status === 'delivered';
@@ -225,6 +227,14 @@ export function OrderTracking() {
         { id: 'pending', label: 'Recebido' },
         { id: 'preparing', label: 'Em preparo' },
         { id: 'done', label: 'Saiu para entrega' },
+      ];
+    }
+    if (order?.type === 'pickup') {
+      return [
+        { id: 'pending', label: 'Recebido' },
+        { id: 'preparing', label: 'Em preparo' },
+        { id: 'ready', label: 'Pronto para retirada' },
+        { id: 'done', label: 'Pago' },
       ];
     }
     return [

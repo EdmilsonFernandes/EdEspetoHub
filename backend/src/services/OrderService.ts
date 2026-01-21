@@ -198,7 +198,7 @@ export class OrderService
   {
     const order = await this.orderRepository.findById(orderId);
     if (!order) return null;
-    const queueStatuses = [ 'pending', 'preparing' ];
+    const queueStatuses = [ 'pending', 'preparing', 'ready' ];
     let queuePosition: number | null = null;
     let queueSize: number | null = null;
 

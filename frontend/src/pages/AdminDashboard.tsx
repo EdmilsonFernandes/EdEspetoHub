@@ -80,12 +80,13 @@ const OrdersView = ({ orders, products, storeSlug }) => {
         acc.all += 1;
         return acc;
       },
-      { all: 0, pending: 0, preparing: 0, done: 0, cancelled: 0 }
+      { all: 0, pending: 0, preparing: 0, ready: 0, done: 0, cancelled: 0 }
     );
   }, [orders]);
 
   const statusStyles = (status) => {
     if (status === 'preparing') return 'bg-amber-100 text-amber-800';
+    if (status === 'ready') return 'bg-sky-100 text-sky-700';
     if (status === 'done') return 'bg-green-100 text-green-800';
     if (status === 'cancelled') return 'bg-slate-100 text-slate-600';
     return 'bg-red-100 text-red-700';
@@ -107,6 +108,7 @@ const OrdersView = ({ orders, products, storeSlug }) => {
             { id: 'all', label: 'Todos', count: statusCounts.all },
             { id: 'pending', label: 'Pendentes', count: statusCounts.pending },
             { id: 'preparing', label: 'Em preparo', count: statusCounts.preparing },
+            { id: 'ready', label: 'Aguardando retirada', count: statusCounts.ready },
             { id: 'done', label: 'Finalizados', count: statusCounts.done },
             { id: 'cancelled', label: 'Cancelados', count: statusCounts.cancelled },
           ].map((filter) => (
