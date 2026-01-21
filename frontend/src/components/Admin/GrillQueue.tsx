@@ -664,7 +664,7 @@ export const GrillQueue = () => {
               </div>
 
               {/* ADICIONAR ITEM */}
-              <div className="mt-3 flex flex-col sm:flex-row gap-2 items-stretch sm:items-center bg-white/70 border border-slate-200/70 rounded-2xl p-1.5">
+              <div className="mt-3 flex flex-row gap-2 items-center bg-white/70 border border-slate-200/70 rounded-2xl p-1.5">
                 <select
                   value={selectedProducts[order.id] || ""}
                   onChange={(e) =>
@@ -673,7 +673,7 @@ export const GrillQueue = () => {
                       [order.id]: e.target.value,
                     }))
                   }
-                  className="flex-1 border border-gray-200 rounded-lg p-2 text-sm bg-white"
+                  className="flex-1 border border-gray-200 rounded-lg px-2 py-1.5 text-xs bg-white"
                 >
                   <option value="">Adicionar item...</option>
                   {products.map((product) => (
@@ -685,9 +685,10 @@ export const GrillQueue = () => {
 
                 <button
                   onClick={() => handleAddItem(order.id)}
-                  className="w-full sm:w-auto px-3 py-2 rounded-lg bg-brand-primary text-white text-xs font-bold flex items-center justify-center gap-1 hover:opacity-90 transition-all hover:-translate-y-0.5 active:scale-95"
+                  className="w-10 h-10 sm:w-auto sm:px-3 sm:py-2 rounded-lg bg-brand-primary text-white text-xs font-bold flex items-center justify-center gap-1 hover:opacity-90 transition-all hover:-translate-y-0.5 active:scale-95"
                 >
-                  <Plus size={14} /> Incluir
+                  <Plus size={14} />
+                  <span className="hidden sm:inline">Incluir</span>
                 </button>
               </div>
 
