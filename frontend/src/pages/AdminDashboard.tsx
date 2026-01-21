@@ -28,7 +28,7 @@ const OrdersView = ({ orders, products, storeSlug }) => {
   const [dateFilter, setDateFilter] = useState('');
   const [periodFilter, setPeriodFilter] = useState('all');
   const [ordersPage, setOrdersPage] = useState(1);
-  const ordersPageSize = 9;
+  const [ordersPageSize, setOrdersPageSize] = useState(9);
   const productsById = useMemo(() => {
     const map = new Map();
     (products || []).forEach((product) => map.set(product.id, product));
@@ -81,7 +81,7 @@ const OrdersView = ({ orders, products, storeSlug }) => {
 
   useEffect(() => {
     setOrdersPage(1);
-  }, [statusFilter, query, dateFilter, periodFilter]);
+  }, [statusFilter, query, dateFilter, periodFilter, ordersPageSize]);
 
   useEffect(() => {
     if (ordersPage > ordersTotalPages) {
@@ -288,8 +288,22 @@ const OrdersView = ({ orders, products, storeSlug }) => {
           ))}
           {filteredOrders.length > ordersPageSize && (
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="text-xs text-slate-500">
-                Pagina {ordersPage} de {ordersTotalPages}
+              <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
+                <span>Pagina {ordersPage} de {ordersTotalPages}</span>
+                <label className="flex items-center gap-2">
+                  <span>Por pagina</span>
+                  <select
+                    value={ordersPageSize}
+                    onChange={(event) => setOrdersPageSize(Number(event.target.value))}
+                    className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-600 focus:ring-2 focus:ring-brand-primary"
+                  >
+                    {[5, 9, 12, 15].map((size) => (
+                      <option key={size} value={size}>
+                        {size}
+                      </option>
+                    ))}
+                  </select>
+                </label>
               </div>
               <div className="flex items-center gap-2">
                 <button

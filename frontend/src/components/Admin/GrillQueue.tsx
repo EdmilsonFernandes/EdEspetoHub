@@ -49,6 +49,7 @@ export const GrillQueue = () => {
   }, []);
   const [activeTab, setActiveTab] = useState<'queue' | 'completed'>('queue');
   const [completedPage, setCompletedPage] = useState(1);
+  const [completedPageSize, setCompletedPageSize] = useState(9);
   const [currentTime, setCurrentTime] = useState(Date.now());
   const [confirmModal, setConfirmModal] = useState(null);
   const [pixCopied, setPixCopied] = useState(false);
@@ -424,7 +425,6 @@ export const GrillQueue = () => {
       .filter((order) => order.status === 'done' && isSameDay(order.createdAt))
       .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
   }, [queue]);
-  const completedPageSize = 9;
   const completedTotalPages = Math.max(1, Math.ceil(completedToday.length / completedPageSize));
   const pagedCompleted = useMemo(() => {
     const start = (completedPage - 1) * completedPageSize;
@@ -436,6 +436,9 @@ export const GrillQueue = () => {
       setCompletedPage(1);
     }
   }, [activeTab]);
+  useEffect(() => {
+    setCompletedPage(1);
+  }, [completedPageSize]);
 
   useEffect(() => {
     if (completedPage > completedTotalPages) {
@@ -1069,8 +1072,22 @@ export const GrillQueue = () => {
           </div>
           {completedToday.length > completedPageSize && (
             <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
-              <div className="text-xs text-slate-500">
-                Pagina {completedPage} de {completedTotalPages}
+              <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
+                <span>Pagina {completedPage} de {completedTotalPages}</span>
+                <label className="flex items-center gap-2">
+                  <span>Por pagina</span>
+                  <select
+                    value={completedPageSize}
+                    onChange={(event) => setCompletedPageSize(Number(event.target.value))}
+                    className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-600 focus:ring-2 focus:ring-brand-primary"
+                  >
+                    {[5, 9, 12, 15].map((size) => (
+                      <option key={size} value={size}>
+                        {size}
+                      </option>
+                    ))}
+                  </select>
+                </label>
               </div>
               <div className="flex items-center gap-2">
                 <button
