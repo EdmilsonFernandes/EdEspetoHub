@@ -172,6 +172,7 @@ export function OrderTracking() {
     `Pedido #${formatOrderDisplayId(order?.id, storeSlug)} - ${storeName}`,
     orderItemsText ? `Itens:\n${orderItemsText}` : '',
     `Total: ${formatCurrency(order?.total || 0)}`,
+    isPixPayment && pixKey ? `Pix: ${pixKey}` : '',
     trackingLink ? `Acompanhar: ${trackingLink}` : '',
   ]
     .filter(Boolean)
