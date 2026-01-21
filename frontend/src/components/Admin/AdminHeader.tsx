@@ -28,12 +28,8 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
   const [storeNameOverride, setStoreNameOverride] = useState('');
   const storeName =
     storeNameOverride ||
-    (storeNameFromAuth &&
-    storeSlug &&
-    storeNameFromAuth.toLowerCase() === storeSlug.toLowerCase() &&
-    branding?.brandName
-      ? branding.brandName
-      : storeNameFromAuth || branding?.brandName);
+    storeNameFromAuth ||
+    branding?.brandName;
   const storeUrl = storeSlug ? `https://www.chamanoespeto.com.br/${storeSlug}` : '';
   const storeDescription = auth?.store?.settings?.description || '';
   const socialLinks = auth?.store?.settings?.socialLinks || [];
