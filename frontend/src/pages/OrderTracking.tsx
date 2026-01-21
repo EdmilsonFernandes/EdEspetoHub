@@ -45,6 +45,7 @@ export function OrderTracking() {
   const [polling, setPolling] = useState(true);
   const [elapsedMs, setElapsedMs] = useState(0);
   const [prepStart, setPrepStart] = useState<number | null>(null);
+  const [pixCopied, setPixCopied] = useState(false);
 
   useEffect(() => {
     if (!orderId) return;
@@ -138,6 +139,14 @@ export function OrderTracking() {
   const customerPhone = order?.phone;
   const paymentValue = order?.paymentMethod || order?.payment;
   const paymentMeta = paymentValue ? getPaymentMethodMeta(paymentValue) : null;
+  const pixKey =
+    order?.store?.settings?.pixKey ||
+    order?.pixKey ||
+    '';
+  const isPixPayment = (paymentValue || '').toString().trim().toLowerCase() === 'pix';
+  const pixQrUrl = pixKey
+    ? `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(pixKey)}`
+    : '';
   const estimateMinutes =
     typeof queuePosition === 'number' && queuePosition > 0 ? Math.max(15, queuePosition * 15) : null;
   const estimatedReadyAt = useMemo(() => {
@@ -192,6 +201,11 @@ export function OrderTracking() {
     favicon.setAttribute('href', storeLogo);
     document.head.appendChild(favicon);
   }, [order?.store?.settings, storeLogo, storeName]);
+
+  useEffect(() => {
+    if (!order?.id) return;
+    setPixCopied(false);
+  }, [order?.id]);
 
   useEffect(() => {
     if (!order?.createdAt) return;
@@ -483,6 +497,47 @@ export function OrderTracking() {
                         <MapPin size={16} weight="duotone" className="text-gray-400 mt-0.5" />
                         <span>{order.address}</span>
                       </p>
+                    )}
+                    {isPixPayment && (
+                      <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold text-slate-700">Pagamento via Pix</span>
+                          <span className="text-xs text-slate-400">Use o QR Code ou chave</span>
+                        </div>
+                        {pixKey ? (
+                          <>
+                            <div className="flex items-center justify-center">
+                              <img
+                                src={pixQrUrl}
+                                alt="QR Code Pix"
+                                className="w-40 h-40 rounded-xl bg-white border border-slate-200 object-contain"
+                              />
+                            </div>
+                            <div className="rounded-xl bg-white border border-slate-200 p-3 break-all text-xs text-slate-600">
+                              {pixKey}
+                            </div>
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                try {
+                                  await navigator.clipboard.writeText(pixKey);
+                                  setPixCopied(true);
+                                  window.setTimeout(() => setPixCopied(false), 2000);
+                                } catch (err) {
+                                  console.error('Falha ao copiar Pix', err);
+                                }
+                              }}
+                              className="w-full px-3 py-2 rounded-lg border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-100"
+                            >
+                              {pixCopied ? 'Copiado!' : 'Copiar chave Pix'}
+                            </button>
+                          </>
+                        ) : (
+                          <div className="text-xs text-slate-500">
+                            A chave Pix da loja ainda não foi cadastrada.
+                          </div>
+                        )}
+                      </div>
                     )}
                   {(customerWhatsappLink || storeWhatsappLink) && (
                     <div className="flex flex-col gap-2">
