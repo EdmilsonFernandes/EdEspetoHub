@@ -146,18 +146,10 @@ export class StoreService
       }
 
       // 🧠 REGRA DE NOME / SLUG
-      if (data.name && !data.slug)
+      // Slug nao deve ser alterado fora da criacao da loja.
+      if (data.name)
       {
         store.name = data.name;
-        store.slug = await this.generateUniqueSlug(data.name, manager);
-      } else
-      {
-        store.name = data.name ?? store.name;
-
-        if (data.slug)
-        {
-          store.slug = await this.generateUniqueSlug(data.slug, manager);
-        }
       }
 
       // 🧠 SETTINGS (garantia)
