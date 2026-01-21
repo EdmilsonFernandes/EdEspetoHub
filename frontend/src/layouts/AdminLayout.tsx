@@ -37,15 +37,21 @@ export function AdminLayout({
           <AdminHeader contextLabel={contextLabel} onToggleHeader={handleToggleHeader} />
         )}
         {!shouldShowHeader && showHeader && (
-          <div className="flex justify-center">
-            <button
-              type="button"
-              onClick={handleToggleHeader}
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-full bg-white border border-slate-200 text-xs font-semibold text-slate-600 shadow-sm hover:bg-slate-50 transition-all hover:-translate-y-0.5 active:scale-95"
-            >
-              <ChevronDown size={14} />
-              Mostrar topo
-            </button>
+          <div className="sticky top-3 z-10">
+            <div className="mx-auto max-w-md bg-white/90 backdrop-blur rounded-full border border-slate-200 shadow-md px-3 py-2 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
+                <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                Modo foco da fila
+              </div>
+              <button
+                type="button"
+                onClick={handleToggleHeader}
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900 text-white text-xs font-semibold shadow-sm hover:opacity-90 transition-all hover:-translate-y-0.5 active:scale-95"
+              >
+                <ChevronDown size={14} className="rotate-180" />
+                Mostrar topo
+              </button>
+            </div>
           </div>
         )}
         {children}
