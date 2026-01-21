@@ -86,6 +86,16 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
       .catch(() => {});
   }, [storeSlug, storeNameFromAuth]);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handler = () => {
+      setShowMobileDetails(false);
+      localStorage.setItem('adminHeader:details', 'false');
+    };
+    window.addEventListener('adminHeader:toggle', handler);
+    return () => window.removeEventListener('adminHeader:toggle', handler);
+  }, []);
+
   return (
     <header
       className="p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4"
@@ -175,7 +185,13 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
         {onToggleHeader && (
           <button
             type="button"
-            onClick={onToggleHeader}
+            onClick={() => {
+              setShowMobileDetails(false);
+              if (typeof window !== 'undefined') {
+                localStorage.setItem('adminHeader:details', 'false');
+              }
+              onToggleHeader();
+            }}
             className="px-3 py-2 rounded-lg text-[11px] sm:text-xs font-semibold bg-white/15 hover:bg-white/25 transition hover:-translate-y-0.5 active:scale-95 flex items-center gap-1.5 text-center"
             title="Ocultar topo"
           >
