@@ -438,7 +438,7 @@ export function CreateStore() {
           <form className="space-y-6" onSubmit={handleCreateStore}>
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-gray-800 mb-4">Informações pessoais</h3>
-              <div className="space-y-4 rounded-2xl border border-gray-100 bg-gray-50/70 p-4">
+              <div className="space-y-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-gray-700">Nome completo</label>
                   <input
@@ -661,7 +661,7 @@ export function CreateStore() {
 
             <div className="pt-6 border-t border-gray-100">
               <h3 className="text-lg font-semibold text-gray-800 mb-4">Configurações da loja</h3>
-              <div className="space-y-4 rounded-2xl border border-gray-100 bg-gray-50/70 p-4">
+              <div className="space-y-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700">Nome da loja</label>
               <input
@@ -707,7 +707,12 @@ export function CreateStore() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-700">Chave Pix da loja</label>
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-semibold text-gray-700">Chave Pix da loja</label>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700 border border-amber-200">
+                  novo
+                </span>
+              </div>
               <input
                 value={registerForm.pixKey}
                 onChange={(e) => setRegisterForm((prev) => ({ ...prev, pixKey: e.target.value }))}
@@ -840,7 +845,16 @@ export function CreateStore() {
             </div>
 
             <div className="pt-6 border-t border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Selecione um plano</h3>
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
+                <h3 className="text-lg font-semibold text-gray-900">Selecione um plano</h3>
+                <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
+                  7 dias grátis
+                </span>
+              </div>
+              <p className="text-sm text-gray-500 mb-4">
+                Comece pelo teste gratuito e escolha o plano ideal depois.
+              </p>
+              <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm space-y-6">
               <div className="flex items-center justify-center gap-4 mb-6">
                 <span className={`text-sm font-semibold ${!isAnnual ? 'text-gray-900' : 'text-gray-500'}`}>
                   Mensal
@@ -983,6 +997,7 @@ export function CreateStore() {
                   </div>
                 </div>
               )}
+              </div>
             </div>
 
             <div ref={termsRef} className="pt-6 border-t border-gray-100 space-y-3">
