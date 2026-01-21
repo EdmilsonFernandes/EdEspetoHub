@@ -513,7 +513,7 @@ export const GrillQueue = () => {
           {sortedQueue.map((order, index) => (
             <div
               key={order.id}
-              className="relative w-full max-w-full p-3 sm:p-4 rounded-3xl border border-slate-200 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.45)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_50px_-30px_rgba(15,23,42,0.55)] overflow-hidden"
+              className="relative w-full max-w-full p-2.5 sm:p-3 rounded-3xl border border-slate-200 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.45)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_50px_-30px_rgba(15,23,42,0.55)] overflow-hidden"
               style={{
                 background:
                   'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.9) 60%, rgba(226,232,240,0.6) 100%)',
@@ -522,7 +522,7 @@ export const GrillQueue = () => {
               <div className="absolute -top-12 -right-12 w-24 h-24 rounded-full bg-brand-primary/10 blur-2xl" />
               <div className="absolute -bottom-10 -left-10 w-24 h-24 rounded-full bg-brand-secondary/10 blur-2xl" />
               {/* HEADER DO CARD */}
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2.5">
                 <div className="relative flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1 text-[11px] text-gray-600 uppercase font-bold">
                     <Hash size={14} className="text-brand-primary" /> Fila
@@ -531,14 +531,14 @@ export const GrillQueue = () => {
                     </span>
                   </div>
 
-                <p className="text-sm text-gray-500">
+                <p className="text-xs text-gray-500">
                   {formatDateTime(order.createdAt)}
                 </p>
                 <p className="text-xs font-semibold text-slate-500">
                   Pedido #{formatOrderDisplayId(order.id, storeSlug)}
                 </p>
 
-                  <h3 className="text-lg font-bold text-gray-800 truncate">
+                  <h3 className="text-base font-bold text-gray-800 truncate">
                     Cliente: {order.customerName || order.name || "Cliente"}
                   </h3>
 
@@ -595,11 +595,11 @@ export const GrillQueue = () => {
               </div>
 
               {/* LISTA DE ITENS */}
-              <div className="mt-4 space-y-2">
+              <div className="mt-3 space-y-2">
                 {getOrderedItems(order.id, order.items || []).map((item) => (
                   <div
                     key={item.id}
-                    className="flex justify-between text-sm text-gray-700 items-center gap-3 bg-white/70 border border-slate-200/60 rounded-2xl px-3 py-2"
+                    className="flex justify-between text-xs text-gray-700 items-center gap-3 bg-white/70 border border-slate-200/60 rounded-2xl px-2.5 py-1.5"
                   >
                     <div className="flex items-center gap-3 min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-shrink-0">
@@ -623,7 +623,7 @@ export const GrillQueue = () => {
                       </div>
 
                       <div className="flex items-center gap-2 min-w-0">
-                        <div className="w-10 h-10 rounded-lg overflow-hidden border border-gray-200 bg-gray-100 flex-shrink-0">
+                        <div className="w-9 h-9 rounded-lg overflow-hidden border border-gray-200 bg-gray-100 flex-shrink-0">
                           {item.imageUrl || productsById.get(item.productId || item.id)?.imageUrl ? (
                             <img
                               src={resolveAssetUrl(item.imageUrl || productsById.get(item.productId || item.id)?.imageUrl)}
@@ -664,7 +664,7 @@ export const GrillQueue = () => {
               </div>
 
               {/* ADICIONAR ITEM */}
-              <div className="mt-3 flex flex-col sm:flex-row gap-2 items-stretch sm:items-center bg-white/70 border border-slate-200/70 rounded-2xl p-2">
+              <div className="mt-3 flex flex-col sm:flex-row gap-2 items-stretch sm:items-center bg-white/70 border border-slate-200/70 rounded-2xl p-1.5">
                 <select
                   value={selectedProducts[order.id] || ""}
                   onChange={(e) =>

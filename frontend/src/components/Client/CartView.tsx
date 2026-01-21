@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ChevronLeft,
   ChevronDown,
@@ -34,6 +34,7 @@ export const CartView = ({
   const [cepError, setCepError] = useState("");
   const [showTips, setShowTips] = useState(false);
   const [summaryCompact, setSummaryCompact] = useState(false);
+  const nameInputRef = useRef<HTMLInputElement | null>(null);
 
   const visibleOrderTypes = Array.isArray(allowedOrderTypes) && allowedOrderTypes.length
     ? allowedOrderTypes
@@ -167,6 +168,12 @@ export const CartView = ({
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  useEffect(() => {
+    if (nameInputRef.current) {
+      nameInputRef.current.focus();
+    }
+  }, []);
+
   return (
     <div className="animate-in slide-in-from-right">
       {/* voltar */}
@@ -211,6 +218,7 @@ export const CartView = ({
             </label>
             <div className="relative mt-2">
               <input
+                ref={nameInputRef}
                 value={customer.name}
                 onChange={(e) => handleNameChange(e.target.value)}
                 onFocus={() =>
