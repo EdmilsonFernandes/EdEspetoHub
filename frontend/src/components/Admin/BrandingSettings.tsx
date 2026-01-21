@@ -57,6 +57,18 @@ export const BrandingSettings = ({ branding, onChange, storeSlug }) => {
         </div>
 
         <div className="space-y-2">
+          <label className="text-sm font-semibold text-gray-700">Chave Pix da loja</label>
+          <input
+            type="text"
+            value={branding.pixKey || ''}
+            onChange={(e) => handleChange("pixKey", e.target.value)}
+            className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
+            placeholder="Ex: +5511999999999 ou email@pix.com"
+          />
+          <p className="text-xs text-gray-500">Usada para gerar o QR Code na confirmação de pagamento.</p>
+        </div>
+
+        <div className="space-y-2">
           <label className="text-sm font-semibold text-gray-700">Descrição da loja</label>
           <textarea
             value={branding.description || ""}

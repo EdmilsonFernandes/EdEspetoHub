@@ -491,6 +491,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     description: session?.store?.settings?.description || '',
     primaryColor: session?.store?.settings?.primaryColor || '#b91c1c',
     secondaryColor: session?.store?.settings?.secondaryColor || '#111827',
+    pixKey: session?.store?.settings?.pixKey || '',
     instagram: instagramHandle?.replace('@', '') || '',
   }));
   const [savingBranding, setSavingBranding] = useState(false);
@@ -533,6 +534,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       description: session?.store?.settings?.description || '',
       primaryColor: session?.store?.settings?.primaryColor || '#b91c1c',
       secondaryColor: session?.store?.settings?.secondaryColor || '#111827',
+      pixKey: session?.store?.settings?.pixKey || '',
       instagram: instagramHandle?.replace('@', '') || '',
     });
   }, [
@@ -541,6 +543,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     session?.store?.settings?.description,
     session?.store?.settings?.primaryColor,
     session?.store?.settings?.secondaryColor,
+    session?.store?.settings?.pixKey,
     instagramHandle,
   ]);
 
@@ -653,6 +656,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         description: brandingDraft.description || undefined,
         primaryColor: brandingDraft.primaryColor,
         secondaryColor: brandingDraft.secondaryColor,
+        pixKey: brandingDraft.pixKey ?? '',
         socialLinks: brandingDraft.instagram ? [{ type: 'instagram', value: brandingDraft.instagram }] : [],
       };
       const updated = await storeService.update(storeId, payload);

@@ -39,6 +39,9 @@ export class StoreSettings
   @Column({ name: 'secondary_color', nullable: true })
   secondaryColor?: string;
 
+  @Column({ name: 'pix_key', nullable: true })
+  pixKey?: string;
+
   @Column({
     name: 'social_links',
     type: 'jsonb',

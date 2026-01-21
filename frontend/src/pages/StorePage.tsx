@@ -30,6 +30,7 @@ export function StorePage() {
   const [storePhone, setStorePhone] = useState('');
   const [storeAddress, setStoreAddress] = useState('');
   const [storeDescription, setStoreDescription] = useState('');
+  const [storePixKey, setStorePixKey] = useState('');
   const [openingHours, setOpeningHours] = useState([]);
   const [orderTypes, setOrderTypes] = useState([ 'delivery', 'pickup', 'table' ]);
   const [storeSubscription, setStoreSubscription] = useState(null);
@@ -194,6 +195,7 @@ export function StorePage() {
           setStorePhone(data.owner?.phone || '');
           setStoreAddress(data.owner?.address || '');
           setStoreDescription(data.settings?.description || '');
+          setStorePixKey(data.settings?.pixKey || '');
           setStoreOpenNow(isStoreOpenNow(normalizedHours));
           setStoreSubscription(data.subscription || null);
           applyStoreMeta(data);
@@ -459,7 +461,7 @@ export function StorePage() {
 
     const sanitizedPhone = customer.phone.replace(/\D/g, '');
     const sanitizedPhoneKey = sanitizedPhone.length >= 10 ? `+55${sanitizedPhone}` : '';
-    const pixKey = PIX_KEY || sanitizedPhoneKey;
+    const pixKey = storePixKey || PIX_KEY || sanitizedPhoneKey;
 
     const order = {
       customerName: customer.name,

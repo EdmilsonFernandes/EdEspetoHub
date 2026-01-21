@@ -159,6 +159,9 @@ export class StoreService
       store.settings.secondaryColor =
         data.secondaryColor ?? store.settings.secondaryColor;
 
+      store.settings.pixKey =
+        data.pixKey ?? store.settings.pixKey;
+
       if (data.socialLinks)
       {
         store.settings.socialLinks = sanitizeSocialLinks(data.socialLinks);

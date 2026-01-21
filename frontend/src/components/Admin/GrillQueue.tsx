@@ -31,6 +31,17 @@ export const GrillQueue = () => {
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState({});
+  const getStorePixKey = () => {
+    if (typeof window === 'undefined') return '';
+    const raw = localStorage.getItem('adminSession');
+    if (!raw) return '';
+    try {
+      const parsed = JSON.parse(raw);
+      return parsed?.store?.settings?.pixKey || '';
+    } catch {
+      return '';
+    }
+  };
   const storeSlug = useMemo(() => {
     if (typeof window === 'undefined') return '';
     const raw = localStorage.getItem('adminSession');
@@ -45,6 +56,7 @@ export const GrillQueue = () => {
   const [activeTab, setActiveTab] = useState<'queue' | 'completed'>('queue');
   const [currentTime, setCurrentTime] = useState(Date.now());
   const [confirmModal, setConfirmModal] = useState(null);
+  const [pixCopied, setPixCopied] = useState(false);
   const [error, setError] = useState('');
   const [updating, setUpdating] = useState<string | null>(null);
   const [soundEnabled, setSoundEnabled] = useState(() => {
@@ -283,8 +295,14 @@ export const GrillQueue = () => {
       table: order.table || null,
       payment: order.payment,
       phone: order.phone || '',
+      pixKey: getStorePixKey(),
     });
   };
+
+  useEffect(() => {
+    if (!confirmModal) return;
+    setPixCopied(false);
+  }, [confirmModal]);
 
   const handleConfirmPaid = async () => {
     if (!confirmModal?.id) return;
@@ -798,6 +816,15 @@ export const GrillQueue = () => {
       {confirmModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 px-4">
           <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl border border-slate-200">
+            {(() => {
+              const normalizedPayment = (confirmModal.payment || '').toString().trim().toLowerCase();
+              const isPixPayment = normalizedPayment === 'pix';
+              const pixKey = (confirmModal.pixKey || '').toString().trim();
+              const pixQrUrl = pixKey
+                ? `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(pixKey)}`
+                : '';
+              return (
+                <>
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Confirmar pagamento</p>
@@ -841,6 +868,47 @@ export const GrillQueue = () => {
                 </span>
               </div>
             </div>
+            {isPixPayment && (
+              <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-slate-700">Pix do lojista</span>
+                  <span className="text-xs text-slate-400">Confirmação rápida</span>
+                </div>
+                {pixKey ? (
+                  <div className="mt-3 space-y-3">
+                    <div className="flex items-center justify-center">
+                      <img
+                        src={pixQrUrl}
+                        alt="QR Code Pix"
+                        className="w-40 h-40 rounded-xl bg-white border border-slate-200 object-contain"
+                      />
+                    </div>
+                    <div className="rounded-xl bg-white border border-slate-200 p-3 break-all text-xs text-slate-600">
+                      {pixKey}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        try {
+                          await navigator.clipboard.writeText(pixKey);
+                          setPixCopied(true);
+                          window.setTimeout(() => setPixCopied(false), 2000);
+                        } catch (err) {
+                          console.error('Falha ao copiar Pix', err);
+                        }
+                      }}
+                      className="w-full px-4 py-2 rounded-lg border border-slate-200 text-slate-700 text-sm font-semibold hover:bg-slate-100 transition-all hover:-translate-y-0.5 active:scale-95"
+                    >
+                      {pixCopied ? 'Copiado!' : 'Copiar chave Pix'}
+                    </button>
+                  </div>
+                ) : (
+                  <div className="mt-3 rounded-xl border border-dashed border-slate-200 bg-white p-3 text-xs text-slate-500">
+                    Cadastre a chave Pix em Configurações para gerar o QR Code.
+                  </div>
+                )}
+              </div>
+            )}
             <div className="mt-6 flex flex-col sm:flex-row gap-2">
               <button
                 type="button"
@@ -857,6 +925,9 @@ export const GrillQueue = () => {
                 Pagamento recebido
               </button>
             </div>
+                </>
+              );
+            })()}
           </div>
         </div>
       )}
