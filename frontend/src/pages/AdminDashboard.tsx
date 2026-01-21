@@ -611,7 +611,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as typeof activeTab)}
-                className={`cursor-pointer px-3 sm:px-4 py-2 rounded-lg text-[11px] sm:text-sm font-semibold transition-all active:scale-95 flex flex-col sm:flex-row items-center gap-1.5 sm:gap-2 text-center min-w-[92px] sm:min-w-0 border ${
+                className={`cursor-pointer px-3 sm:px-4 py-2 rounded-lg text-[11px] sm:text-sm font-semibold transition-all active:scale-95 hover:-translate-y-0.5 flex flex-col sm:flex-row items-center gap-1.5 sm:gap-2 text-center min-w-[92px] sm:min-w-0 border ${
                   activeTab === tab.id
                     ? 'bg-brand-primary text-white border-brand-primary ring-2 ring-brand-primary/25 shadow-[0_8px_18px_rgba(15,23,42,0.16)]'
                     : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:text-slate-900 hover:shadow-sm'
