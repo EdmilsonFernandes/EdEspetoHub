@@ -20,6 +20,7 @@ export interface CreateStoreDto {
   description?: string;
   primaryColor: string;
   secondaryColor?: string;
+  pixKey?: string;
   socialLinks?: { type: string; value: string }[];
   openingHours?: any[];
   orderTypes?: string[];
