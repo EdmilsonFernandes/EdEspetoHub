@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { LogOut, Globe, Instagram } from 'lucide-react';
+import { SignOut, Globe, InstagramLogo } from '@phosphor-icons/react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -115,7 +115,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
                 rel="noreferrer"
                 className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 border border-white/20 opacity-95 hover:opacity-100 hover:bg-white/20 transition w-full sm:w-auto min-w-0"
               >
-                <Globe size={12} />
+                <Globe size={12} weight="duotone" />
                 <span className="truncate">{storeUrl.replace('https://', '')}</span>
               </a>
             )}
@@ -126,7 +126,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
                 rel="noreferrer"
                 className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 border border-white/20 opacity-95 hover:opacity-100 hover:bg-white/20 transition w-full sm:w-auto min-w-0"
               >
-                <Instagram size={12} />
+                <InstagramLogo size={12} weight="duotone" />
                 <span className="truncate">{instagramHandle}</span>
               </a>
             )}
@@ -186,7 +186,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
           className="px-3 py-2 rounded-lg text-[11px] sm:text-xs font-semibold bg-red-500/20 hover:bg-red-500/30 transition hover:-translate-y-0.5 active:scale-95 flex flex-col sm:flex-row items-center gap-1.5 border border-red-300/20 w-full sm:w-auto text-center"
           title="Sair do sistema"
         >
-          <LogOut size={14} />
+          <SignOut size={14} weight="duotone" />
           <span className="leading-tight">Sair</span>
         </button>
       </div>
@@ -215,7 +215,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
                   className="flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2"
                 >
                   <span className="flex items-center gap-2">
-                    <Globe size={14} className="text-slate-500" />
+                    <Globe size={14} weight="duotone" className="text-slate-500" />
                     {storeUrl.replace('https://', '')}
                   </span>
                   <span className="text-xs text-slate-400">Abrir</span>
@@ -229,7 +229,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
                   className="flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2"
                 >
                   <span className="flex items-center gap-2">
-                    <Instagram size={14} className="text-slate-500" />
+                    <InstagramLogo size={14} weight="duotone" className="text-slate-500" />
                     {instagramHandle}
                   </span>
                   <span className="text-xs text-slate-400">Abrir</span>

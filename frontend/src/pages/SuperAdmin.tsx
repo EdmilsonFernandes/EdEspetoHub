@@ -1,23 +1,23 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  RefreshCw,
-  TrendingUp,
-  Store,
+  ArrowClockwise,
+  TrendUp,
+  Storefront,
   CheckCircle,
-  AlertCircle,
-  DollarSign,
+  WarningCircle,
+  CurrencyDollar,
   CreditCard,
   Clock,
-  BarChart3,
-  Filter,
-  Download,
-  Trash2,
+  ChartBar,
+  Funnel,
+  DownloadSimple,
+  Trash,
   Eye,
-  ChevronLeft,
-  ChevronRight,
-  Search,
-} from 'lucide-react';
+  CaretLeft,
+  CaretRight,
+  MagnifyingGlass,
+} from '@phosphor-icons/react';
 import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
 import { superAdminService } from '../services/superAdminService';
 import { formatCurrency, formatPlanName } from '../utils/format';
@@ -721,7 +721,7 @@ export function SuperAdmin() {
             onClick={() => loadOverview(token)}
             className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 flex items-center gap-2"
           >
-            <RefreshCw size={16} />
+            <ArrowClockwise size={16} weight="duotone" />
             Atualizar
           </button>
           <button
@@ -962,7 +962,7 @@ export function SuperAdmin() {
             <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-xs uppercase text-slate-400 font-semibold">Pedidos 7 dias</p>
-                <BarChart3 size={18} className="text-brand-primary" />
+                <ChartBar size={18} weight="duotone" className="text-brand-primary" />
               </div>
               <p className="text-2xl font-black text-slate-800">{ordersLast7Days}</p>
               <p className="text-xs text-slate-400 mt-1">Ultimos 30 dias: {ordersLast30Days}</p>
@@ -978,7 +978,7 @@ export function SuperAdmin() {
             <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-xs uppercase text-slate-400 font-semibold">Lojas expirando</p>
-                <AlertCircle size={18} className="text-amber-600" />
+                <WarningCircle size={18} weight="duotone" className="text-amber-600" />
               </div>
               <p className="text-2xl font-black text-amber-600">{summary.expiringSubscriptions}</p>
               <p className="text-xs text-slate-400 mt-1">Em risco: {expiringSoon.length}</p>
@@ -986,7 +986,7 @@ export function SuperAdmin() {
             <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-xs uppercase text-slate-400 font-semibold">Receita por ativa</p>
-                <DollarSign size={18} className="text-brand-primary" />
+                <CurrencyDollar size={18} weight="duotone" className="text-brand-primary" />
               </div>
               <p className="text-2xl font-black text-slate-800">{formatCurrency(revenuePerActive)}</p>
               <p className="text-xs text-slate-400 mt-1">Media por loja ativa</p>
@@ -994,7 +994,7 @@ export function SuperAdmin() {
             <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-xs uppercase text-slate-400 font-semibold">Receita pedidos</p>
-                <DollarSign size={18} className="text-emerald-600" />
+                <CurrencyDollar size={18} weight="duotone" className="text-emerald-600" />
               </div>
               <p className="text-2xl font-black text-slate-800">{formatCurrency(ordersRevenueTotal)}</p>
               <p className="text-xs text-slate-400 mt-1">
@@ -1004,7 +1004,7 @@ export function SuperAdmin() {
             <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-xs uppercase text-slate-400 font-semibold">Pedidos por loja</p>
-                <BarChart3 size={18} className="text-slate-500" />
+                <ChartBar size={18} weight="duotone" className="text-slate-500" />
               </div>
               <p className="text-2xl font-black text-slate-800">{ordersPerStore.toFixed(1)}</p>
               <p className="text-xs text-slate-400 mt-1">Media global por loja</p>
@@ -1012,7 +1012,7 @@ export function SuperAdmin() {
             <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-xs uppercase text-slate-400 font-semibold">Ticket medio global</p>
-                <DollarSign size={18} className="text-slate-600" />
+                <CurrencyDollar size={18} weight="duotone" className="text-slate-600" />
               </div>
               <p className="text-2xl font-black text-slate-800">{formatCurrency(avgTicketGlobal)}</p>
               <p className="text-xs text-slate-400 mt-1">Receita / pedidos</p>
@@ -1032,14 +1032,14 @@ export function SuperAdmin() {
           <div id="rankings" className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <TrendingUp size={18} className="text-emerald-600" />
+                <TrendUp size={18} weight="duotone" className="text-emerald-600" />
                 <h3 className="text-lg font-bold text-slate-800">Rankings da plataforma</h3>
               </div>
               <button
                 onClick={() => toggleSection('rankings')}
                 className="px-3 py-1 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 flex items-center gap-1"
               >
-                <ChevronRight
+                <CaretRight weight="bold"
                   size={14}
                   className={`transition-transform ${sectionsOpen.rankings ? 'rotate-90' : ''}`}
                 />
@@ -1051,7 +1051,7 @@ export function SuperAdmin() {
                 <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
-                      <TrendingUp size={18} className="text-emerald-600" />
+                      <TrendUp size={18} weight="duotone" className="text-emerald-600" />
                       <h3 className="text-lg font-bold text-slate-800">Top lojas por receita</h3>
                     </div>
                   </div>
@@ -1079,7 +1079,7 @@ export function SuperAdmin() {
                 <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
-                      <BarChart3 size={18} className="text-slate-600" />
+                      <ChartBar size={18} weight="duotone" className="text-slate-600" />
                       <h3 className="text-lg font-bold text-slate-800">Top lojas por pedidos</h3>
                     </div>
                   </div>
@@ -1114,14 +1114,14 @@ export function SuperAdmin() {
         <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <BarChart3 size={20} className="text-slate-700" />
+              <ChartBar size={20} weight="duotone" className="text-slate-700" />
               <h2 className="text-lg font-bold text-slate-800">Receita por mês</h2>
             </div>
             <button
               onClick={() => toggleSection('charts')}
               className="px-3 py-1 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 flex items-center gap-1"
             >
-              <ChevronRight
+              <CaretRight weight="bold"
                 size={14}
                 className={`transition-transform ${sectionsOpen.charts ? 'rotate-90' : ''}`}
               />
@@ -1157,14 +1157,14 @@ export function SuperAdmin() {
         <div id="stores" className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm overflow-x-auto">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <Store size={18} className="text-slate-700" />
+              <Storefront size={18} weight="duotone" className="text-slate-700" />
               <h2 className="text-lg font-bold text-slate-800">Lojas e performance</h2>
             </div>
             <button
               onClick={() => toggleSection('stores')}
               className="px-3 py-1 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 flex items-center gap-1"
             >
-              <ChevronRight
+              <CaretRight weight="bold"
                 size={14}
                 className={`transition-transform ${sectionsOpen.stores ? 'rotate-90' : ''}`}
               />
@@ -1255,7 +1255,7 @@ export function SuperAdmin() {
                 onClick={() => toggleSection('payments')}
                 className="px-3 py-2 rounded-lg text-xs font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50 flex items-center gap-1"
               >
-                <ChevronRight
+                <CaretRight weight="bold"
                   size={14}
                   className={`transition-transform ${sectionsOpen.payments ? 'rotate-90' : ''}`}
                 />
@@ -1265,14 +1265,14 @@ export function SuperAdmin() {
                 onClick={resetFilters}
                 className="px-3 py-2 rounded-lg text-sm font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50 flex items-center gap-1"
               >
-                <Trash2 size={14} />
+                <Trash size={14} weight="duotone" />
                 Limpar filtros
               </button>
               <button
                 onClick={exportPaymentsCsv}
                 className="px-3 py-2 rounded-lg text-sm font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50 flex items-center gap-1"
               >
-                <Download size={14} />
+                <DownloadSimple size={14} weight="duotone" />
                 Exportar CSV
               </button>
             </div>
@@ -1281,7 +1281,7 @@ export function SuperAdmin() {
             <>
           <div className="flex flex-wrap gap-2 mb-3">
             <div className="flex items-center px-3 py-2 rounded-lg border border-slate-200 bg-white">
-              <Search size={16} className="text-slate-400" />
+              <MagnifyingGlass size={16} weight="bold" className="text-slate-400" />
               <input
                 type="text"
                 value={paymentQuery}
@@ -1457,14 +1457,14 @@ export function SuperAdmin() {
                   className="px-3 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 flex items-center gap-1"
                   disabled={paymentsPage === 1}
                 >
-                  <ChevronLeft size={16} />
+                  <CaretLeft weight="bold" size={16} />
                 </button>
                 <button
                   onClick={() => setPaymentsPage((prev) => Math.min(totalPages, prev + 1))}
                   className="px-3 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 flex items-center gap-1"
                   disabled={paymentsPage === totalPages}
                 >
-                  <ChevronRight size={16} />
+                  <CaretRight weight="bold" size={16} />
                 </button>
               </div>
             </div>
@@ -1481,7 +1481,7 @@ export function SuperAdmin() {
         <div id="logs" className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm overflow-x-auto">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <Filter size={18} className="text-slate-700" />
+              <Funnel size={18} weight="duotone" className="text-slate-700" />
               <h2 className="text-lg font-bold text-slate-800">Logs de acesso</h2>
             </div>
             <div className="flex items-center gap-2">
@@ -1489,7 +1489,7 @@ export function SuperAdmin() {
                 onClick={() => toggleSection('logs')}
                 className="px-3 py-2 rounded-lg text-xs font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50 flex items-center gap-1"
               >
-                <ChevronRight
+                <CaretRight weight="bold"
                   size={14}
                   className={`transition-transform ${sectionsOpen.logs ? 'rotate-90' : ''}`}
                 />
@@ -1499,7 +1499,7 @@ export function SuperAdmin() {
                 onClick={() => loadAccessLogs(accessLogsPage)}
                 className="px-3 py-2 rounded-lg text-sm font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50 flex items-center gap-1"
               >
-                <RefreshCw size={14} />
+                <ArrowClockwise size={14} weight="duotone" />
                 Atualizar
               </button>
             </div>
@@ -1508,7 +1508,7 @@ export function SuperAdmin() {
             <>
           <div className="flex flex-wrap gap-2 mb-3">
             <div className="flex items-center px-3 py-2 rounded-lg border border-slate-200 bg-white">
-              <Search size={16} className="text-slate-400" />
+              <MagnifyingGlass size={16} weight="bold" className="text-slate-400" />
               <input
                 type="text"
                 value={accessLogQuery}
@@ -1610,14 +1610,14 @@ export function SuperAdmin() {
                   className="px-3 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 flex items-center gap-1"
                   disabled={accessLogsPage === 1}
                 >
-                  <ChevronLeft size={16} />
+                  <CaretLeft weight="bold" size={16} />
                 </button>
                 <button
                   onClick={() => setAccessLogsPage((prev) => Math.min(accessLogsTotalPages, prev + 1))}
                   className="px-3 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 flex items-center gap-1"
                   disabled={accessLogsPage === accessLogsTotalPages}
                 >
-                  <ChevronRight size={16} />
+                  <CaretRight weight="bold" size={16} />
                 </button>
               </div>
             </div>
@@ -1634,7 +1634,7 @@ export function SuperAdmin() {
         <div id="events" className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm overflow-x-auto">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <RefreshCw size={20} className="text-slate-700" />
+              <ArrowClockwise size={20} weight="duotone" className="text-slate-700" />
               <h2 className="text-lg font-bold text-slate-800">Eventos de pagamento</h2>
             </div>
             <div className="flex items-center gap-2">
@@ -1642,7 +1642,7 @@ export function SuperAdmin() {
                 onClick={() => toggleSection('events')}
                 className="px-3 py-2 rounded-lg text-xs font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50 flex items-center gap-1"
               >
-                <ChevronRight
+                <CaretRight weight="bold"
                   size={14}
                   className={`transition-transform ${sectionsOpen.events ? 'rotate-90' : ''}`}
                 />
@@ -1652,7 +1652,7 @@ export function SuperAdmin() {
                 onClick={exportEventsCsv}
                 className="px-3 py-2 rounded-lg text-sm font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50 flex items-center gap-1"
               >
-                <Download size={14} />
+                <DownloadSimple size={14} weight="duotone" />
                 Exportar CSV
               </button>
             </div>
@@ -1749,14 +1749,14 @@ export function SuperAdmin() {
                 className="px-3 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 flex items-center gap-1"
                 disabled={eventsPage === 1}
               >
-                <ChevronLeft size={16} />
+                <CaretLeft weight="bold" size={16} />
               </button>
               <button
                 onClick={() => setEventsPage((prev) => prev + 1)}
                 className="px-3 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 flex items-center gap-1"
                 disabled={filteredEvents.length < EVENTS_PAGE_SIZE}
               >
-                <ChevronRight size={16} />
+                <CaretRight weight="bold" size={16} />
               </button>
             </div>
           </div>

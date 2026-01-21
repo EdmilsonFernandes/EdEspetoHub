@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-import { Plus, X } from "lucide-react";
+import { Plus, X } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 import { formatCurrency } from "../../utils/format";
 
@@ -63,7 +63,7 @@ export const ProductModal = ({ product, isOpen, onClose, onAddToCart }: ProductM
             onClick={handleClose}
             className="absolute top-4 right-4 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center shadow-lg z-10"
           >
-            <X size={16} />
+            <X size={16} weight="bold" />
           </button>
 
           {product?.imageUrl ? (
@@ -125,7 +125,7 @@ export const ProductModal = ({ product, isOpen, onClose, onAddToCart }: ProductM
             }}
             className="w-full bg-brand-primary text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-brand-primary/90 transition"
           >
-            <Plus size={18} />
+            <Plus size={18} weight="bold" />
             Adicionar ao pedido
           </button>
         </div>

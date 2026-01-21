@@ -3,7 +3,7 @@ import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
-import { Moon, Sun, LogOut } from 'lucide-react';
+import { Moon, Sun, SignOut } from '@phosphor-icons/react';
 
 interface LandingPageLayoutProps {
   children: React.ReactNode;
@@ -62,7 +62,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                   }}
                   className="px-3 py-2 sm:px-4 text-sm rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition-all flex items-center gap-1.5"
                 >
-                  <LogOut size={16} />
+                  <SignOut size={16} weight="bold" />
                   <span className="hidden sm:inline">Sair</span>
                 </button>
               )}
@@ -85,7 +85,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                 className="cursor-pointer p-2 rounded-lg dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                 aria-label="Toggle theme"
               >
-                {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
+                {theme === 'light' ? <Moon size={18} weight="duotone" /> : <Sun size={18} weight="duotone" />}
               </button>
             </div>
           </div>

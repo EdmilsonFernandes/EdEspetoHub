@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { BarChart3, BookOpen, ChefHat, CreditCard, Package, Settings, ShoppingCart } from 'lucide-react';
+import { ChartBar, BookOpen, ChefHat, CreditCard, Package, Gear, ShoppingCart } from '@phosphor-icons/react';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AdminLayout } from '../layouts/AdminLayout';
@@ -679,12 +679,12 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         <div className="flex justify-center">
           <div className="bg-white rounded-xl border border-slate-200 p-2 shadow-sm flex flex-wrap justify-center gap-2 w-full max-w-5xl">
           {[
-            { id: 'resumo', label: 'Resumo', shortLabel: 'Resumo', icon: BarChart3 },
+            { id: 'resumo', label: 'Resumo', shortLabel: 'Resumo', icon: ChartBar },
             { id: 'pedidos', label: 'Pedidos', shortLabel: 'Pedidos', icon: ShoppingCart },
             { id: 'produtos', label: 'Produtos', shortLabel: 'Produtos', icon: Package },
             { id: 'pagamentos', label: 'Pagamentos', shortLabel: 'Pag.', icon: CreditCard },
             { id: 'cardapio', label: 'Cardápio', shortLabel: 'Cardápio', icon: BookOpen },
-            { id: 'config', label: 'Configurações', shortLabel: 'Config', icon: Settings },
+            { id: 'config', label: 'Configurações', shortLabel: 'Config', icon: Gear },
             { id: 'fila', label: 'Fila do churrasqueiro', shortLabel: 'Fila', icon: ChefHat },
           ].map((tab) => {
             const Icon = tab.icon;
@@ -704,7 +704,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                     : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:text-slate-900 hover:shadow-sm'
                 }`}
               >
-                <Icon size={16} />
+                <Icon size={16} weight="duotone" />
                 <span className="leading-tight">
                   <span className="sm:hidden">{tab.shortLabel || tab.label}</span>
                   <span className="hidden sm:inline">{tab.label}</span>

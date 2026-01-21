@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { ChefHat } from 'lucide-react';
+import { ChefHat } from '@phosphor-icons/react';
 import { GrillQueue } from '../components/Admin/GrillQueue';
 import { getPersistedBranding, defaultBranding } from '../constants';
 import { applyBrandTheme } from '../utils/brandTheme';
@@ -36,7 +36,7 @@ export function OrdersQueue() {
               className="w-16 h-16 rounded-2xl flex items-center justify-center text-white mx-auto"
               style={{ backgroundColor: branding.primaryColor }}
             >
-              <ChefHat size={24} />
+              <ChefHat size={24} weight="duotone" />
             </div>
             <h3 className="text-xl font-bold text-gray-800">Acesso restrito</h3>
             <p className="text-gray-600">Faça login para acessar a visão do churrasqueiro.</p>
@@ -69,7 +69,7 @@ export function OrdersQueue() {
               className="w-10 h-10 rounded-xl flex items-center justify-center text-white"
               style={{ backgroundColor: branding.primaryColor }}
             >
-              <ChefHat size={20} />
+              <ChefHat size={20} weight="duotone" />
             </div>
             <h3 className="text-xl font-bold">Visão do Churrasqueiro</h3>
           </div>

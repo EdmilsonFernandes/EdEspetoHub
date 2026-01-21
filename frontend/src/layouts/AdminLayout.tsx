@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useMemo, useState } from 'react';
 import { AdminHeader } from '../components/Admin/AdminHeader';
-import { ChevronDown } from 'lucide-react';
+import { CaretDown } from '@phosphor-icons/react';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -49,7 +49,7 @@ export function AdminLayout({
                 onClick={handleToggleHeader}
                 className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900 text-white text-xs font-semibold shadow-sm hover:opacity-90 transition-all hover:-translate-y-0.5 active:scale-95"
               >
-                <ChevronDown size={14} className="rotate-180" />
+                <CaretDown size={14} weight="duotone" className="rotate-180" />
                 Mostrar painel
               </button>
             </div>

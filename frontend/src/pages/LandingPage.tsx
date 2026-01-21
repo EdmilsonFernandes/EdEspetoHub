@@ -1,7 +1,17 @@
 // @ts-nocheck
 import { useEffect, useMemo, useState } from 'react';
 import { Hero } from '../components/Hero';
-import { Palette, MonitorCog, Smartphone, Rocket, Ham, ShoppingCart, ChefHat, BarChart3, Sparkles } from 'lucide-react';
+import {
+  Palette,
+  Monitor,
+  DeviceMobile,
+  Rocket,
+  Hamburger,
+  ShoppingCart,
+  ChefHat,
+  ChartBar,
+  Sparkle,
+} from '@phosphor-icons/react';
 import { DemoTour } from '../components/Landing/DemoTour';
 import { platformService } from '../services/platformService';
 import { planService } from '../services/planService';
@@ -151,7 +161,7 @@ export function LandingPage() {
         <div className="grid md:grid-cols-3 gap-6">
           <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-lg hover:shadow-xl transition-all">
             <div className="w-12 h-12 rounded-2xl bg-red-500 text-white flex items-center justify-center mb-4">
-              <MonitorCog />
+              <Monitor weight="duotone" />
             </div>
             <p className="text-sm font-semibold text-red-500">Passo 1</p>
             <h3 className="text-xl font-bold text-gray-900 dark:text-white mt-2">Cadastre produtos</h3>
@@ -167,7 +177,7 @@ export function LandingPage() {
           </div>
           <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-lg hover:shadow-xl transition-all">
             <div className="w-12 h-12 rounded-2xl bg-red-600 text-white flex items-center justify-center mb-4">
-              <ShoppingCart />
+              <ShoppingCart weight="duotone" />
             </div>
             <p className="text-sm font-semibold text-red-500">Passo 2</p>
             <h3 className="text-xl font-bold text-gray-900 dark:text-white mt-2">Receba pedidos</h3>
@@ -183,7 +193,7 @@ export function LandingPage() {
           </div>
           <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-lg hover:shadow-xl transition-all">
             <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-gray-700 text-white flex items-center justify-center mb-4">
-              <ChefHat />
+              <ChefHat weight="duotone" />
             </div>
             <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">Passo 3</p>
             <h3 className="text-xl font-bold text-gray-900 dark:text-white mt-2">Visão do churrasqueiro + dashboard</h3>
@@ -200,18 +210,18 @@ export function LandingPage() {
         </div>
         <div className="mt-10 flex items-center justify-center gap-6 text-sm text-gray-500 dark:text-gray-400">
           <div className="flex items-center gap-2">
-            <ChefHat size={16} />
+            <ChefHat size={16} weight="duotone" />
             Fila atualiza a cada 5s
           </div>
           <div className="flex items-center gap-2">
-            <BarChart3 size={16} />
+            <ChartBar size={16} weight="duotone" />
             Dashboard com metricas
           </div>
           <button
             onClick={() => setTourOpen(true)}
             className="flex items-center gap-2 px-3 py-1.5 rounded-full border-2 border-red-500 text-red-500 hover:bg-red-50 dark:hover:bg-red-950 transition-colors font-semibold"
           >
-            <Sparkles size={14} />
+            <Sparkle size={14} weight="duotone" />
             Tour interativo
           </button>
         </div>
@@ -231,28 +241,28 @@ export function LandingPage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="p-6 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm hover:shadow-md transition-all">
               <div className="w-12 h-12 bg-red-500 rounded-xl flex items-center justify-center mb-4">
-                <Palette className="text-white text-2xl" />
+                <Palette className="text-white text-2xl" weight="duotone" />
               </div>
               <p className="font-bold text-gray-900 dark:text-white mb-2 text-lg">Identidade visual flexível</p>
               <p className="text-sm text-gray-600 dark:text-gray-400">Logo, cores e slug exclusivo por loja.</p>
             </div>
             <div className="p-6 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm hover:shadow-md transition-all">
               <div className="w-12 h-12 bg-red-500 rounded-xl flex items-center justify-center mb-4">
-                <MonitorCog className="text-white text-2xl" />
+                <Monitor className="text-white text-2xl" weight="duotone" />
               </div>
               <p className="font-bold text-gray-900 dark:text-white mb-2 text-lg">Gestão completa</p>
               <p className="text-sm text-gray-600 dark:text-gray-400">Produtos, status e fila do churrasqueiro.</p>
             </div>
             <div className="p-6 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm hover:shadow-md transition-all">
               <div className="w-12 h-12 bg-red-500 rounded-xl flex items-center justify-center mb-4">
-                <Smartphone className="text-white text-2xl" />
+                <DeviceMobile className="text-white text-2xl" weight="duotone" />
               </div>
               <p className="font-bold text-gray-900 dark:text-white mb-2 text-lg">Mobile-first</p>
               <p className="text-sm text-gray-600 dark:text-gray-400">Otimizado para celular e tablet.</p>
             </div>
             <div className="p-6 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm hover:shadow-md transition-all">
               <div className="w-12 h-12 bg-red-500 rounded-xl flex items-center justify-center mb-4">
-                <Rocket className="text-white text-2xl" />
+                <Rocket className="text-white text-2xl" weight="duotone" />
               </div>
               <p className="font-bold text-gray-900 dark:text-white mb-2 text-lg">Setup rápido</p>
               <p className="text-sm text-gray-600 dark:text-gray-400">Sua loja online em minutos.</p>
@@ -265,7 +275,7 @@ export function LandingPage() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
         <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl shadow-xl p-8 sm:p-12 text-center">
           <div className="w-20 h-20 bg-red-500 rounded-2xl flex items-center justify-center mx-auto shadow-lg mb-6">
-            <Ham className="text-white text-9xl" />
+            <Hamburger className="text-white text-9xl" weight="duotone" />
           </div>
           <h2 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white mb-4">Tudo que você precisa</h2>
           <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">

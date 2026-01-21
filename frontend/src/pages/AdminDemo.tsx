@@ -1,7 +1,14 @@
 // @ts-nocheck
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Image as ImageIcon, Edit, Trash2, Save, Plus, RotateCcw } from 'lucide-react';
+import {
+  ImageSquare,
+  PencilSimple,
+  Trash,
+  FloppyDisk,
+  Plus,
+  ArrowCounterClockwise,
+} from '@phosphor-icons/react';
 import { formatCurrency } from '../utils/format';
 
 const demoStorageKey = 'adminDemoProducts';
@@ -164,7 +171,7 @@ export function AdminDemo() {
                 }}
                 className="px-3 py-2 text-sm rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 flex items-center gap-2"
               >
-                <RotateCcw size={16} /> Reset demo
+                <ArrowCounterClockwise size={16} weight="duotone" /> Reset demo
               </button>
               <button
                 onClick={() => navigate('/create')}
@@ -184,7 +191,7 @@ export function AdminDemo() {
 
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
           <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
-            {editing ? <Edit size={20} /> : <Plus size={20} />}
+            {editing ? <PencilSimple size={20} weight="duotone" /> : <Plus size={20} weight="duotone" />}
             {editing ? 'Editar Produto' : 'Novo Produto'}
           </h3>
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -290,7 +297,7 @@ export function AdminDemo() {
 
             <div className="md:col-span-2 flex gap-2">
               <button type="submit" className="bg-brand-primary text-white px-6 py-3 rounded-lg font-bold flex-1 flex justify-center items-center gap-2 hover:opacity-90">
-                <Save size={18} /> Salvar
+                <FloppyDisk size={18} weight="duotone" /> Salvar
               </button>
               {editing && (
                 <button
@@ -324,7 +331,7 @@ export function AdminDemo() {
                       <img src={product.imageUrl} className="w-10 h-10 rounded object-cover" alt="" />
                     ) : (
                       <div className="w-10 h-10 bg-gray-200 rounded flex items-center justify-center">
-                        <ImageIcon size={16} className="text-gray-400" />
+                        <ImageSquare size={16} weight="duotone" className="text-gray-400" />
                       </div>
                     )}
                   </td>
@@ -333,7 +340,7 @@ export function AdminDemo() {
                   <td className="p-4 text-brand-primary font-bold">{formatCurrency(product.price)}</td>
                   <td className="p-4 text-right space-x-2">
                     <button onClick={() => handleEdit(product)} className="text-brand-primary hover:bg-brand-primary-soft p-2 rounded">
-                      <Edit size={18} />
+                      <PencilSimple size={18} weight="duotone" />
                     </button>
                     <button
                       onClick={() => {
@@ -343,7 +350,7 @@ export function AdminDemo() {
                       }}
                       className="text-red-600 hover:bg-red-50 p-2 rounded"
                     >
-                      <Trash2 size={18} />
+                      <Trash size={18} weight="duotone" />
                     </button>
                   </td>
                 </tr>

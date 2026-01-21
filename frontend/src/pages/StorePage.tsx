@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ShoppingCart, Send } from 'lucide-react';
+import { ShoppingCart, PaperPlaneTilt } from '@phosphor-icons/react';
 import { productService } from '../services/productService';
 import { orderService } from '../services/orderService';
 import { customerService } from '../services/customerService';
@@ -1015,7 +1015,7 @@ export function StorePage() {
           style={{ backgroundColor: branding.primaryColor }}
           onClick={checkout}
         >
-          <Send size={20} />
+          <PaperPlaneTilt size={20} weight="duotone" />
         </div>
       )}
 

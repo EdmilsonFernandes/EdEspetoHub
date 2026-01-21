@@ -1,6 +1,18 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { CheckSquare, Clock, ChefHat, RefreshCcw, Plus, Minus, Hash, Volume2, VolumeX, MoreVertical, X } from "lucide-react";
+import {
+  CheckSquare,
+  Clock,
+  ChefHat,
+  ArrowsClockwise,
+  Plus,
+  Minus,
+  Hash,
+  SpeakerHigh,
+  SpeakerX,
+  DotsThreeVertical,
+  X
+} from "@phosphor-icons/react";
 import { orderService } from "../../services/orderService";
 import { productService } from "../../services/productService";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
@@ -436,7 +448,7 @@ export const GrillQueue = () => {
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-2 text-gray-700 font-semibold">
-          <ChefHat className="text-brand-primary" />
+          <ChefHat className="text-brand-primary" weight="duotone" />
           Fila do Churrasqueiro
           <span className="px-2.5 py-1 rounded-full bg-brand-primary/10 text-brand-primary text-xs font-bold">
             {activeTab === 'queue' ? sortedQueue.length : completedToday.length} pedidos
@@ -469,7 +481,7 @@ export const GrillQueue = () => {
               className="flex items-center justify-between gap-2 text-sm px-3 py-2 rounded-lg bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 w-full sm:w-auto transition-all hover:-translate-y-0.5 active:scale-95"
             >
               <span className="flex items-center gap-2">
-                <MoreVertical size={16} />
+                <DotsThreeVertical size={16} weight="duotone" />
                 Acoes rapidas
               </span>
               <span className="text-xs text-gray-400">{soundEnabled ? "Som on" : "Som off"}</span>
@@ -483,7 +495,7 @@ export const GrillQueue = () => {
                   }}
                   className="w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                 >
-                  {soundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
+                  {soundEnabled ? <SpeakerHigh size={16} weight="duotone" /> : <SpeakerX size={16} weight="duotone" />}
                   {soundEnabled ? "Som ligado" : "Som desligado"}
                 </button>
                 <button
@@ -496,7 +508,7 @@ export const GrillQueue = () => {
                   }}
                   className="w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                 >
-                  <Volume2 size={16} />
+                  <SpeakerHigh size={16} weight="duotone" />
                   Testar som
                 </button>
                 <button
@@ -506,7 +518,7 @@ export const GrillQueue = () => {
                   }}
                   className="w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                 >
-                  <RefreshCcw size={16} />
+                  <ArrowsClockwise size={16} weight="duotone" />
                   Atualizar fila
                 </button>
               </div>
@@ -532,7 +544,7 @@ export const GrillQueue = () => {
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2.5">
                 <div className="relative flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1 text-[10px] text-gray-600 uppercase font-bold">
-                    <Hash size={14} className="text-brand-primary" /> Fila
+                    <Hash size={14} weight="duotone" className="text-brand-primary" /> Fila
                     <span className={`ml-1 px-2.5 py-1 rounded-full text-xs font-black shadow-sm ${getPriorityTone(index + 1)}`}>
                       {String(index + 1).padStart(2, "0")}
                     </span>
@@ -593,7 +605,7 @@ export const GrillQueue = () => {
                     {getStatusStyles(order.status).label}
                   </span>
                   <div className="px-2.5 py-0.5 rounded-full bg-brand-primary text-white font-black flex items-center gap-1.5 shadow-sm text-[11px] ring-2 ring-white/40">
-                    <Clock size={11} className="text-white" />
+                    <Clock size={11} weight="duotone" className="text-white" />
                     <span className="tabular-nums text-[11px]">
                       {elapsedTime[order.id] || "0s"}
                     </span>
@@ -614,7 +626,7 @@ export const GrillQueue = () => {
                           onClick={() => handleQuantityChange(order.id, item.id, -1)}
                           className="p-1 rounded-full bg-gray-100 hover:bg-gray-200"
                         >
-                          <Minus size={14} />
+                          <Minus size={14} weight="duotone" />
                         </button>
 
                         <span className="font-bold text-gray-800 w-7 text-center text-[11px]">
@@ -625,7 +637,7 @@ export const GrillQueue = () => {
                           onClick={() => handleQuantityChange(order.id, item.id, 1)}
                           className="p-1 rounded-full bg-gray-100 hover:bg-gray-200"
                         >
-                          <Plus size={14} />
+                          <Plus size={14} weight="duotone" />
                         </button>
                       </div>
 
@@ -694,7 +706,7 @@ export const GrillQueue = () => {
                   onClick={() => handleAddItem(order.id)}
                   className="w-10 h-10 sm:w-auto sm:px-3 sm:py-2 rounded-lg bg-brand-primary text-white text-xs font-bold flex items-center justify-center gap-1 hover:opacity-90 transition-all hover:-translate-y-0.5 active:scale-95"
                 >
-                  <Plus size={14} />
+                  <Plus size={14} weight="duotone" />
                   <span className="hidden sm:inline">Incluir</span>
                 </button>
               </div>
@@ -721,7 +733,7 @@ export const GrillQueue = () => {
                       disabled={updating === order.id}
                       className="w-full sm:w-auto px-3 py-2 rounded-lg bg-amber-500 text-white text-xs font-bold flex items-center justify-center gap-1 disabled:opacity-60 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95"
                     >
-                      <Clock size={16} /> Iniciar preparo
+                      <Clock size={16} weight="duotone" /> Iniciar preparo
                     </button>
                   </div>
                 )}
@@ -736,7 +748,7 @@ export const GrillQueue = () => {
                       disabled={updating === order.id}
                       className="w-full sm:w-auto px-3 py-2 rounded-lg bg-emerald-600 text-white text-xs font-bold flex items-center justify-center gap-1 disabled:opacity-60 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95"
                     >
-                      <CheckSquare size={16} /> Marcar pronto
+                      <CheckSquare size={16} weight="duotone" /> Marcar pronto
                     </button>
                   </div>
                 )}
@@ -751,7 +763,7 @@ export const GrillQueue = () => {
                       disabled={updating === order.id}
                       className="w-full sm:w-auto px-3 py-2 rounded-lg bg-sky-600 text-white text-xs font-bold flex items-center justify-center gap-1 disabled:opacity-60 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95"
                     >
-                      <CheckSquare size={16} /> Pronto p/ retirada
+                      <CheckSquare size={16} weight="duotone" /> Pronto p/ retirada
                     </button>
                   </div>
                 )}
@@ -766,7 +778,7 @@ export const GrillQueue = () => {
                       disabled={updating === order.id}
                       className="w-full sm:w-auto px-3 py-2 rounded-lg bg-emerald-600 text-white text-xs font-bold flex items-center justify-center gap-1 disabled:opacity-60 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95"
                     >
-                      <CheckSquare size={16} /> Confirmar pagamento
+                      <CheckSquare size={16} weight="duotone" /> Confirmar pagamento
                     </button>
                   </div>
                 )}
@@ -796,7 +808,7 @@ export const GrillQueue = () => {
                 onClick={() => setConfirmModal(null)}
                 className="text-slate-400 hover:text-slate-600 transition-all hover:-translate-y-0.5 active:scale-95"
               >
-                <X size={18} />
+                <X size={18} weight="duotone" />
               </button>
             </div>
             <div className="mt-4 space-y-3 text-sm text-slate-600">

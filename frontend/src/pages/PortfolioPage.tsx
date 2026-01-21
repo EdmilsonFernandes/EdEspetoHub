@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowUpRight, Search, X } from "lucide-react";
+import { ArrowUpRight, MagnifyingGlass, X } from "@phosphor-icons/react";
 import { LandingPageLayout } from "../layouts/LandingPageLayout";
 import { storeService } from "../services/storeService";
 import { resolveAssetUrl } from "../utils/resolveAssetUrl";
@@ -176,7 +176,7 @@ export function PortfolioPage() {
                 Buscar loja
               </label>
               <div className="mt-2 relative">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <MagnifyingGlass size={16} weight="bold" className="text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
@@ -233,7 +233,7 @@ export function PortfolioPage() {
                         <span className="rounded-full bg-white/85 px-3 py-1 text-[11px] font-semibold text-emerald-700 shadow-sm">
                           Loja ativa
                         </span>
-                        <ArrowUpRight className="w-5 h-5 text-white/80 transition-transform group-hover:translate-x-1" />
+                        <ArrowUpRight size={20} weight="bold" className="text-white/80 transition-transform group-hover:translate-x-1" />
                       </div>
                       <div className="relative mt-6 flex items-center gap-4">
                         <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-white shadow-lg bg-white flex items-center justify-center text-lg font-bold text-slate-700">
@@ -254,7 +254,7 @@ export function PortfolioPage() {
                       <p className="text-sm text-slate-600 line-clamp-3">{description}</p>
                       <div className="inline-flex items-center gap-2 text-sm font-semibold text-red-600">
                         Visitar loja
-                        <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                        <ArrowUpRight size={16} weight="bold" className="transition-transform group-hover:translate-x-1" />
                       </div>
                     </div>
                   </Link>
@@ -389,7 +389,7 @@ export function PortfolioPage() {
                 className="h-9 w-9 rounded-full border border-slate-200 text-slate-500 hover:text-slate-700 hover:bg-slate-50 flex items-center justify-center"
                 aria-label="Fechar"
               >
-                <X className="w-4 h-4" />
+                <X size={16} weight="bold" />
               </button>
             </div>
             <div className="p-5">

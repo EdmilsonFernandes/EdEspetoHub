@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useState, useRef, useEffect } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { CaretDown } from '@phosphor-icons/react';
 import { BILLING_OPTIONS, PLAN_TIERS } from '../constants/planCatalog';
 import { formatCurrency, formatDate } from '../utils/format';
 
@@ -82,7 +82,7 @@ export const PlanBadge = ({ planName, displayName, variant = 'light', details })
       >
         <span className="uppercase tracking-wide">{titleLabel}</span>
         {billing && <span className="text-[10px] font-bold opacity-80">{billing.label}</span>}
-        <ChevronDown size={14} className={`opacity-70 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <CaretDown size={14} weight="duotone" className={`opacity-70 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {isOpen && (

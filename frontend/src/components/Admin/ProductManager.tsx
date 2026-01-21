@@ -1,16 +1,28 @@
 // @ts-nocheck
 import React, { useMemo, useRef, useState } from 'react';
-import { Image as ImageIcon, Edit, Trash2, Save, Plus, Flame, Wine, Package, MoreHorizontal, X, ImagePlus } from 'lucide-react';
+import {
+  Image as ImageIcon,
+  PencilSimple,
+  Trash,
+  FloppyDisk,
+  Plus,
+  Fire,
+  Wine,
+  Package,
+  DotsThree,
+  X,
+  ImageSquare
+} from '@phosphor-icons/react';
 import { productService } from '../../services/productService';
 import { formatCurrency } from '../../utils/format';
 import { useToast } from '../../contexts/ToastContext';
 
 const initialForm = { name: '', price: '', category: 'espetos', imageUrl: '', imageFile: '', description: '' };
 const defaultCategories = [
-  { id: 'espetos', label: 'Espetos', icon: Flame },
+  { id: 'espetos', label: 'Espetos', icon: Fire },
   { id: 'bebidas', label: 'Bebidas', icon: Wine },
   { id: 'porcoes', label: 'Porções', icon: Package },
-  { id: 'outros', label: 'Outros', icon: MoreHorizontal },
+  { id: 'outros', label: 'Outros', icon: DotsThree },
 ];
 
 const normalizeCategory = (value = '') => value.toString().trim().toLowerCase();
@@ -27,7 +39,7 @@ const formatCategoryLabel = (value = '') => {
 const getCategoryIcon = (categoryId = '') => {
   const normalized = normalizeCategory(categoryId);
   const known = defaultCategories.find((entry) => entry.id === normalized);
-  return known?.icon || MoreHorizontal;
+  return known?.icon || DotsThree;
 };
 
 export const ProductManager = ({ products, onProductsChange }) => {
@@ -69,7 +81,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
     const extras = Array.from(unique)
       .filter((entry) => !defaultCategories.find((item) => item.id === entry))
       .sort()
-      .map((entry) => ({ id: entry, label: formatCategoryLabel(entry), icon: MoreHorizontal }));
+      .map((entry) => ({ id: entry, label: formatCategoryLabel(entry), icon: DotsThree }));
     return [ ...known, ...extras ];
   }, [products]);
 
@@ -227,7 +239,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
         <div className="flex flex-wrap items-start justify-between gap-3 mb-6">
           <div>
             <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-              <Plus size={20} className="text-brand-primary" />
+              <Plus size={20} weight="duotone" className="text-brand-primary" />
               Cadastro de produto
             </h3>
             <p className="text-xs text-slate-500 mt-1">Cadastre itens do cardápio com foto, preço e categoria.</p>
@@ -286,7 +298,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
-                    <Icon size={16} />
+                    <Icon size={16} weight="duotone" />
                     {option.label}
                   </button>
                 );
@@ -307,7 +319,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
                     : 'border-gray-300 border-dashed text-gray-600 hover:border-brand-primary hover:text-brand-primary'
                 }`}
               >
-                <Plus size={16} />
+                <Plus size={16} weight="duotone" />
                 Nova
               </button>
             </div>
@@ -382,7 +394,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
                       }}
                       className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg transition-all hover:-translate-y-0.5 active:scale-95 shadow-lg"
                     >
-                      <Trash2 size={18} />
+                      <Trash size={18} weight="duotone" />
                     </button>
                   </div>
                 )}
@@ -395,7 +407,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
                 {!imagePreview && (
                   <label className="relative flex flex-col items-center justify-center w-full p-6 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-brand-primary hover:bg-brand-primary/5 transition">
                     <div className="flex flex-col items-center justify-center">
-                      <ImageIcon size={24} className="text-gray-400 mb-2" />
+                    <ImageIcon size={24} weight="duotone" className="text-gray-400 mb-2" />
                       <p className="text-sm font-semibold text-gray-700">Arraste uma imagem aqui</p>
                       <p className="text-xs text-gray-500">ou clique para selecionar</p>
                     </div>
@@ -422,7 +434,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
                       }}
                       className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg transition-all hover:-translate-y-0.5 active:scale-95 shadow-lg"
                     >
-                      <Trash2 size={18} />
+                      <Trash size={18} weight="duotone" />
                     </button>
                   </div>
                 )}
@@ -447,7 +459,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
               className="bg-brand-primary text-white px-6 py-3 rounded-lg font-semibold flex-1 flex justify-center items-center gap-2 hover:bg-brand-primary/90 transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-60"
               disabled={saving}
             >
-              <Save size={18} />
+              <FloppyDisk size={18} weight="duotone" />
               {saving ? 'Salvando...' : 'Adicionar Produto'}
             </button>
             <button
@@ -467,7 +479,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
                 <img src={previewImage} alt="Prévia do produto" className="w-full h-44 object-cover" />
               ) : (
                 <div className="h-44 flex flex-col items-center justify-center gap-2 text-xs text-slate-400">
-                  <ImageIcon size={20} />
+                  <ImageIcon size={20} weight="duotone" />
                   Adicione uma foto para destacar o produto
                 </div>
               )}
@@ -576,13 +588,13 @@ export const ProductManager = ({ products, onProductsChange }) => {
                         className="text-emerald-600 hover:bg-emerald-50 p-2 rounded transition-all hover:-translate-y-0.5 active:scale-95"
                         disabled={saving}
                         >
-                          <Save size={18} />
+                          <FloppyDisk size={18} weight="duotone" />
                         </button>
                         <button
                           onClick={() => setInlineDetailsId((prev) => (prev === product.id ? null : product.id))}
                           className="text-brand-primary hover:bg-brand-primary-soft p-2 rounded transition-all hover:-translate-y-0.5 active:scale-95"
                         >
-                          <ImagePlus size={18} />
+                          <ImageSquare size={18} weight="duotone" />
                         </button>
                         <button
                           onClick={handleInlineCancel}
@@ -610,14 +622,14 @@ export const ProductManager = ({ products, onProductsChange }) => {
                           onClick={() => handleEdit(product)}
                           className="text-brand-primary hover:bg-brand-primary-soft p-2 rounded transition-all hover:-translate-y-0.5 active:scale-95"
                         >
-                          <Edit size={18} />
+                          <PencilSimple size={18} weight="duotone" />
                         </button>
                         <button
                           onClick={() => setInlineDetailsId((prev) => (prev === product.id ? null : product.id))}
                           className="text-slate-600 hover:bg-slate-100 p-2 rounded transition-all hover:-translate-y-0.5 active:scale-95"
                           title="Detalhes"
                         >
-                          <ImagePlus size={18} />
+                          <ImageSquare size={18} weight="duotone" />
                         </button>
                         <button
                           onClick={() => {
@@ -642,7 +654,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
                           }}
                           className="text-red-600 hover:bg-red-50 p-2 rounded transition-all hover:-translate-y-0.5 active:scale-95"
                         >
-                          <Trash2 size={18} />
+                      <Trash size={18} weight="duotone" />
                         </button>
                       </td>
                     </>

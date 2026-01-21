@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from "react";
-import { Package, DollarSign } from "lucide-react";
+import { Package, CurrencyDollar } from "@phosphor-icons/react";
 import {
   BarChart,
   Bar,
@@ -228,7 +228,7 @@ export const DashboardView = ({ orders = [], customers = [] }) => {
               <p className="text-xs text-gray-500 mt-1">{firstOrderLabel}</p>
             </div>
             <div className="p-3 bg-brand-primary-soft rounded-lg text-brand-primary">
-              <DollarSign />
+              <CurrencyDollar weight="duotone" />
             </div>
           </div>
         </div>
@@ -259,7 +259,7 @@ export const DashboardView = ({ orders = [], customers = [] }) => {
               </div>
             </div>
             <div className="p-3 bg-brand-primary-soft rounded-lg text-brand-primary">
-              <DollarSign />
+              <CurrencyDollar weight="duotone" />
             </div>
           </div>
         </div>
@@ -277,7 +277,7 @@ export const DashboardView = ({ orders = [], customers = [] }) => {
               <p className="text-xs text-gray-500 mt-1">Período: {periodLabel}</p>
             </div>
             <div className="p-3 bg-brand-primary-soft rounded-lg text-brand-primary">
-              <DollarSign />
+              <CurrencyDollar weight="duotone" />
             </div>
           </div>
         </div>
@@ -297,7 +297,7 @@ export const DashboardView = ({ orders = [], customers = [] }) => {
               </p>
             </div>
             <div className="p-3 bg-brand-secondary-soft rounded-lg text-brand-secondary">
-              <Package />
+              <Package weight="duotone" />
             </div>
           </div>
         </div>

@@ -1,17 +1,17 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
-  ChevronLeft,
-  ChevronDown,
-  Bike,
-  Home,
-  UtensilsCrossed,
-  Send,
-  WalletCards,
+  ArrowLeft,
+  CaretDown,
+  Bicycle,
+  House,
+  ForkKnife,
+  PaperPlaneTilt,
+  Wallet,
   CreditCard,
-  Search,
+  MagnifyingGlass,
   User
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { formatCurrency, formatPhoneInput } from "../../utils/format";
 import { getPaymentMethodMeta } from "../../utils/paymentAssets";
 
@@ -181,7 +181,7 @@ export const CartView = ({
         onClick={onBack}
         className="mb-4 sm:mb-6 flex items-center text-brand-primary font-semibold hover:opacity-80 text-sm sm:text-base"
       >
-        <ChevronLeft size={20} /> Continuar comprando
+        <ArrowLeft size={20} weight="duotone" /> Continuar comprando
       </button>
 
       {/* Resumo compacto (mobile) */}
@@ -232,7 +232,7 @@ export const CartView = ({
                 placeholder="Ex: João Silva"
                 className="w-full border-b-2 border-gray-100 py-2.5 sm:py-3 pl-9 text-base sm:text-lg outline-none focus:border-brand-primary placeholder:text-gray-300 bg-transparent"
               />
-              <Search size={18} className="absolute left-0 top-1/2 -translate-y-1/2 text-gray-300" />
+              <MagnifyingGlass size={18} className="absolute left-0 top-1/2 -translate-y-1/2 text-gray-300" />
               {allowCustomerAutocomplete && suggestionsOpen && filteredCustomers.length > 0 && (
                 <div className="absolute z-10 mt-2 w-full bg-white border border-gray-100 rounded-xl shadow-lg overflow-hidden">
                   {filteredCustomers.slice(0, 6).map((entry) => (
@@ -244,7 +244,7 @@ export const CartView = ({
                       className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center justify-between"
                     >
                       <span className="font-semibold text-gray-800 flex items-center gap-2">
-                        <User size={14} className="text-gray-400" />
+                        <User size={14} weight="duotone" className="text-gray-400" />
                         {entry.name}
                       </span>
                       <span className="text-xs text-gray-500">{entry.phone || "Sem telefone"}</span>
@@ -312,9 +312,9 @@ export const CartView = ({
                   }`}
                 >
                   <span className={`h-9 w-9 rounded-xl flex items-center justify-center ${customer.type === type ? 'bg-brand-primary text-white' : 'bg-slate-100 text-slate-600'}`}>
-                    {type === "delivery" && <Bike size={16} />}
-                    {type === "pickup" && <Home size={16} />}
-                    {type === "table" && <UtensilsCrossed size={16} />}
+                    {type === "delivery" && <Bicycle size={16} weight="duotone" />}
+                    {type === "pickup" && <House size={16} weight="duotone" />}
+                    {type === "table" && <ForkKnife size={16} weight="duotone" />}
                   </span>
                   <span className="text-[10px] uppercase font-bold tracking-wide">
                     {type === "table"
@@ -579,9 +579,10 @@ export const CartView = ({
           className="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-slate-700"
         >
           Dicas do pagamento
-          <ChevronDown
+          <CaretDown
             size={18}
             className={`transition-transform ${showTips ? "rotate-180" : ""}`}
+            weight="duotone"
           />
         </button>
         {showTips && (
@@ -604,7 +605,7 @@ export const CartView = ({
           onClick={onCheckout}
           className="w-full bg-brand-primary text-white font-bold py-4 rounded-xl shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
         >
-          {isPickup ? <WalletCards size={20} /> : <Send size={20} />}
+          {isPickup ? <Wallet size={20} weight="duotone" /> : <PaperPlaneTilt size={20} weight="duotone" />}
           {actionLabel}
         </button>
       </div>

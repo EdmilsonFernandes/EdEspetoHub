@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React from 'react';
-import { Image, Instagram, Palette } from 'lucide-react';
+import { ImageSquare, InstagramLogo, Palette } from '@phosphor-icons/react';
 
 export function StoreIdentityCard({ branding, socialLinks = [], whatsappNumber }) {
   const storeLogo = branding?.logoUrl;
@@ -14,7 +14,7 @@ export function StoreIdentityCard({ branding, socialLinks = [], whatsappNumber }
       <div className="space-y-2 text-sm text-slate-600">
         <div className="flex items-center justify-between">
           <span className="flex items-center gap-2">
-            <Palette size={14} className="text-slate-400" />
+            <Palette size={14} weight="duotone" className="text-slate-400" />
             Cor primária
           </span>
           <span className="flex items-center gap-2 text-xs text-slate-600">
@@ -27,7 +27,7 @@ export function StoreIdentityCard({ branding, socialLinks = [], whatsappNumber }
         </div>
         <div className="flex items-center justify-between">
           <span className="flex items-center gap-2">
-            <Palette size={14} className="text-slate-400" />
+            <Palette size={14} weight="duotone" className="text-slate-400" />
             Cor secundária
           </span>
           <span className="flex items-center gap-2 text-xs text-slate-600">
@@ -40,7 +40,7 @@ export function StoreIdentityCard({ branding, socialLinks = [], whatsappNumber }
         </div>
         <div className="flex items-center justify-between">
           <span className="flex items-center gap-2">
-            <Image size={14} className="text-slate-400" />
+            <ImageSquare size={14} weight="duotone" className="text-slate-400" />
             Logo
           </span>
           {storeLogo ? (
@@ -54,7 +54,7 @@ export function StoreIdentityCard({ branding, socialLinks = [], whatsappNumber }
         </div>
         <div className="flex items-center justify-between">
           <span className="flex items-center gap-2">
-            <Instagram size={14} className="text-slate-400" />
+            <InstagramLogo size={14} weight="duotone" className="text-slate-400" />
             Instagram
           </span>
           {instagramHandle ? (

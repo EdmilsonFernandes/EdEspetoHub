@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React from "react";
-import { CheckCircle, QrCode, ArrowLeft, CreditCard } from "lucide-react";
+import { CheckCircle, QrCode, ArrowLeft, CreditCard } from "@phosphor-icons/react";
 import { formatPaymentMethod } from "../../utils/format";
 import { getPaymentMethodMeta } from "../../utils/paymentAssets";
 
@@ -21,7 +21,7 @@ const PaymentSummary = ({ paymentMethod, pixKey, phone }) => {
       <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 w-full mb-8">
         <div className="flex flex-col items-center gap-3 mb-4 text-center">
           <div className="p-3 bg-gray-50 rounded-full">
-            <QrCode size={24} className="text-gray-700" />
+            <QrCode size={24} weight="duotone" className="text-gray-700" />
           </div>
           <span className="font-bold text-gray-700">Pix para pagamento</span>
           <p className="text-xs text-gray-500">
@@ -94,7 +94,7 @@ const PaymentBadge = ({ paymentMethod }) => {
       {methodMeta.icon ? (
         <img src={methodMeta.icon} alt={label} className="h-4 w-4 object-contain" />
       ) : (
-        <CreditCard size={14} />
+        <CreditCard size={14} weight="duotone" />
       )}
       <span>Pagamento: {label}</span>
     </div>
@@ -115,7 +115,7 @@ export const SuccessView = ({
   return (
     <div className="flex flex-col items-center justify-center min-h-[80vh] text-center px-6 animate-in zoom-in">
       <div className="w-24 h-24 bg-brand-primary-soft rounded-full flex items-center justify-center mb-6 text-brand-primary shadow-sm">
-        <CheckCircle size={48} />
+        <CheckCircle size={48} weight="duotone" />
       </div>
 
       <h2 className="text-3xl font-black text-gray-800 mb-2">
@@ -144,14 +144,14 @@ export const SuccessView = ({
             onClick={onTrackOrder}
             className="flex items-center justify-center gap-2 text-white bg-emerald-600 font-bold px-6 py-3 rounded-xl transition-colors hover:opacity-90"
           >
-            <CheckCircle size={18} /> Acompanhar pedido
+            <CheckCircle size={18} weight="duotone" /> Acompanhar pedido
           </button>
         )}
         <button
           onClick={onNewOrder}
           className="flex items-center justify-center gap-2 text-white bg-brand-primary font-bold px-6 py-3 rounded-xl transition-colors hover:opacity-90"
         >
-          <ArrowLeft size={18} /> Voltar para os pedidos
+          <ArrowLeft size={18} weight="duotone" /> Voltar para os pedidos
         </button>
       </div>
     </div>

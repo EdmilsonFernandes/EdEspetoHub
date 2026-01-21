@@ -1,6 +1,14 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from "react";
-import { Instagram, LayoutDashboard, Plus, Clock, MapPin, Search, Info } from "lucide-react";
+import {
+  InstagramLogo,
+  SquaresFour,
+  Plus,
+  Clock,
+  MapPin,
+  MagnifyingGlass,
+  Info,
+} from "@phosphor-icons/react";
 import { formatCurrency } from "../../utils/format";
 import { ProductModal } from "../Cart/ProductModal";
 
@@ -90,8 +98,8 @@ const Header = ({
               rel="noreferrer"
               className="inline-flex items-center gap-1 px-2 py-1 rounded-full border border-brand-primary text-brand-primary bg-brand-primary-soft font-semibold hover:underline text-[10px] sm:text-xs"
             >
-              <Instagram size={10} className="hidden sm:block" />
-              <Instagram size={9} className="sm:hidden" />
+              <InstagramLogo size={10} weight="duotone" className="hidden sm:block" />
+              <InstagramLogo size={9} weight="duotone" className="sm:hidden" />
               <span className="hidden sm:inline">Instagram {instagramHandle}</span>
               <span className="sm:hidden">{instagramHandle}</span>
             </a>
@@ -110,7 +118,7 @@ const Header = ({
             aria-label="Informações da loja"
           >
             <span className="flex items-center gap-1">
-              <Info size={12} />
+              <Info size={12} weight="duotone" />
               Info
             </span>
           </button>
@@ -137,7 +145,7 @@ const Header = ({
             onClick={onOpenAdmin}
             className="px-2 sm:px-3 py-1.5 sm:py-2 rounded-full text-xs font-semibold border border-brand-secondary text-brand-secondary hover:bg-brand-secondary-soft transition flex items-center gap-1 whitespace-nowrap"
           >
-            <LayoutDashboard size={12} />
+            <SquaresFour size={12} weight="duotone" />
             {!compact && <span className="hidden sm:inline">Admin</span>}
           </button>
         )}
@@ -311,7 +319,7 @@ export const MenuView = ({
                 </span>
                 {todayHoursLabel && todayHoursLabel !== "Fechado hoje" && (
                   <span className="px-3 py-1.5 rounded-full border border-slate-200 text-slate-600 bg-white font-semibold text-xs flex items-center gap-2">
-                    <Clock size={14} />
+                    <Clock size={14} weight="duotone" />
                     {todayHoursLabel}
                   </span>
                 )}
@@ -367,7 +375,7 @@ export const MenuView = ({
                   className="flex items-start gap-3 hover:opacity-90 transition"
                 >
                   <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center flex-shrink-0">
-                    <MapPin size={18} />
+                    <MapPin size={18} weight="duotone" />
                   </div>
                   <div className="space-y-1">
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
@@ -427,14 +435,14 @@ export const MenuView = ({
                   rel="noreferrer"
                   className="px-3.5 py-2 rounded-full text-xs font-semibold border border-brand-primary text-white bg-brand-primary hover:opacity-90 shadow-sm items-center justify-center gap-2 transition hidden sm:flex"
                 >
-                  <Instagram size={16} />
+                  <InstagramLogo size={16} weight="duotone" />
                   <span>Instagram</span>
                 </a>
               )}
               </div>
             )}
             <div className="relative">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <MagnifyingGlass className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
@@ -544,7 +552,7 @@ export const MenuView = ({
                         {itemQtyMap.get(String(item.id))}
                       </span>
                     )}
-                    <Plus size={18} />
+                    <Plus size={18} weight="duotone" />
                   </button>
                 </div>
               ))}

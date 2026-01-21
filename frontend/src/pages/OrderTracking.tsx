@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Bike, ChefHat, CircleCheck, Clock, Loader2, MapPin } from 'lucide-react';
+import { Bicycle, ChefHat, CheckCircle, Clock, CircleNotch, MapPin } from '@phosphor-icons/react';
 import { orderService } from '../services/orderService';
 import { formatCurrency, formatDateTime, formatDuration, formatOrderDisplayId } from '../utils/format';
 import { getPaymentMethodMeta } from '../utils/paymentAssets';
@@ -275,7 +275,7 @@ export function OrderTracking() {
         <div className="bg-white border border-gray-100 rounded-3xl shadow-xl p-6 sm:p-8">
           {loading && (
             <div className="flex flex-col items-center justify-center py-12 gap-3 text-gray-500">
-              <Loader2 className="animate-spin" />
+              <CircleNotch className="animate-spin" weight="duotone" />
               Carregando seu pedido...
             </div>
           )}
@@ -302,7 +302,7 @@ export function OrderTracking() {
                           title="Saiu para entrega"
                           aria-label="Saiu para entrega"
                         >
-                          <Bike size={14} />
+                        <Bicycle size={14} weight="duotone" />
                         </span>
                       )}
                       <span
@@ -335,7 +335,7 @@ export function OrderTracking() {
                     )}
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Clock size={16} />
+                    <Clock size={16} weight="duotone" />
                     {order.createdAt ? formatDateTime(order.createdAt) : 'Agora'}
                     {elapsedMs > 0 && (
                       <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-600">
@@ -348,7 +348,7 @@ export function OrderTracking() {
 
               <div className="rounded-2xl border border-gray-100 p-4 bg-gray-50">
                 <div className="flex items-center gap-3 mb-4">
-                  <ChefHat className="text-red-500" />
+                  <ChefHat className="text-red-500" weight="duotone" />
                   <div>
                     <p className="text-sm font-semibold text-gray-800">Andamento do preparo</p>
                     <p className="text-xs text-gray-500">
@@ -385,11 +385,11 @@ export function OrderTracking() {
                         } ${step.id === currentStep && !isReady ? 'ring-2 ring-brand-primary animate-pulse' : ''}`}
                       >
                         {showBike ? (
-                          <Bike size={18} />
+                          <Bicycle size={18} weight="duotone" />
                         ) : isDone ? (
-                          <CircleCheck size={18} />
+                          <CheckCircle size={18} weight="duotone" />
                         ) : (
-                          <Clock size={18} />
+                          <Clock size={18} weight="duotone" />
                         )}
                         <span className="text-sm font-semibold">{step.label}</span>
                       </div>
@@ -480,7 +480,7 @@ export function OrderTracking() {
                     )}
                     {order.type === 'delivery' && order.address && (
                       <p className="flex items-start gap-2">
-                        <MapPin size={16} className="text-gray-400 mt-0.5" />
+                        <MapPin size={16} weight="duotone" className="text-gray-400 mt-0.5" />
                         <span>{order.address}</span>
                       </p>
                     )}

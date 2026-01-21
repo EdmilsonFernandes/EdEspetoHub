@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChefHat, ClipboardList, ShoppingCart } from 'lucide-react';
+import { ChefHat, ClipboardText, ShoppingCart } from '@phosphor-icons/react';
 
 type Props = {
   open: boolean;
@@ -19,7 +19,7 @@ export function DemoTour({ open, onClose }: Props) {
           'Defina o nome da loja, cores e cadastre seus produtos. O cardapio ja fica pronto para receber pedidos.',
         ctaLabel: 'Abrir cadastro',
         action: () => navigate('/create'),
-        icon: ClipboardList,
+        icon: ClipboardText,
         highlight: 'Identidade + produtos',
       },
       {
@@ -83,7 +83,7 @@ export function DemoTour({ open, onClose }: Props) {
                           isActive ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-200'
                         }`}
                       >
-                        <Icon size={18} />
+                        <Icon size={18} weight="duotone" />
                       </div>
                       <div>
                         <p className="text-xs text-gray-500 dark:text-gray-400">Passo {index + 1}</p>
