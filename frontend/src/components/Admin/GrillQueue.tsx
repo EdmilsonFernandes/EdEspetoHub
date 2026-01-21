@@ -905,12 +905,6 @@ export const GrillQueue = () => {
                         className="w-40 h-40 rounded-xl bg-white border border-slate-200 object-contain"
                       />
                     </div>
-                    <div className="rounded-xl bg-white border border-slate-200 p-3 break-all text-xs text-slate-600">
-                      Chave: {pixKey}
-                    </div>
-                    <div className="rounded-xl bg-white border border-slate-200 p-3 break-all text-[11px] text-slate-500">
-                      Codigo copia e cola: {pixPayload}
-                    </div>
                     <button
                       type="button"
                       onClick={async () => {
