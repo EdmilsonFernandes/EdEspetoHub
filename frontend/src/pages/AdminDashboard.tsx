@@ -454,8 +454,11 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
           <div className="pt-2 border-t border-slate-200">
             <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Historico de pagamentos</p>
             <div className="mt-3 space-y-2">
-              {payments.slice(0, 6).map((payment) => (
-                <div key={payment.id} className="flex items-center justify-between text-sm">
+              {payments
+                .filter((payment) => (payment.status || '').toUpperCase() === 'PAID')
+                .slice(0, 6)
+                .map((payment) => (
+                  <div key={payment.id} className="flex items-center justify-between text-sm">
                   <div>
                     {(() => {
                       const paymentMeta = getPaymentMethodMeta(payment.method);
@@ -490,6 +493,10 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
                     <p className="text-xs text-slate-400">
                       {payment.createdAt ? formatDateTime(payment.createdAt) : '—'}
                     </p>
+                    <p className="text-xs text-slate-500">
+                      {payment.planDisplayName || payment.planName || 'Plano'}{' '}
+                      {payment.billingCycle ? `· ${payment.billingCycle}` : ''}
+                    </p>
                   </div>
                   <div className="text-right">
                     <p className="font-semibold text-slate-900">{formatCurrency(payment.amount || 0)}</p>
@@ -500,6 +507,9 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
                 </div>
               ))}
             </div>
+            {payments.filter((payment) => (payment.status || '').toUpperCase() === 'PAID').length === 0 && (
+              <p className="mt-3 text-xs text-slate-500">Nenhum pagamento aprovado ainda.</p>
+            )}
           </div>
         )}
       </div>

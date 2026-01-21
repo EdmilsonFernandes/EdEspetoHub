@@ -250,6 +250,9 @@ export class PaymentController {
         providerId: payment.providerId,
         createdAt: payment.createdAt,
         expiresAt: payment.expiresAt,
+        planName: payment.subscription?.plan?.name || null,
+        planDisplayName: payment.subscription?.plan?.displayName || null,
+        billingCycle: payment.subscription?.plan?.billingCycle || null,
       }));
       return res.json(payload);
     } catch (error: any) {
