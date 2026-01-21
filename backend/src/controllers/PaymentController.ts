@@ -252,7 +252,7 @@ export class PaymentController {
         expiresAt: payment.expiresAt,
         planName: payment.subscription?.plan?.name || null,
         planDisplayName: payment.subscription?.plan?.displayName || null,
-        billingCycle: payment.subscription?.plan?.billingCycle || null,
+        planDurationDays: payment.subscription?.plan?.durationDays ?? null,
       }));
       return res.json(payload);
     } catch (error: any) {

@@ -22,6 +22,13 @@ import { formatCurrency, formatDateTime, formatOrderDisplayId, formatOrderStatus
 import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 
+const formatPlanCycle = (days: number) => {
+  if (!Number.isFinite(days)) return '—';
+  if (days >= 360) return 'Anual';
+  if (days >= 30) return 'Mensal';
+  return `${days} dias`;
+};
+
 const OrdersView = ({ orders, products, storeSlug }) => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [query, setQuery] = useState('');
@@ -508,8 +515,8 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
                       {payment.createdAt ? formatDateTime(payment.createdAt) : '—'}
                     </p>
                     <p className="text-xs text-slate-500">
-                      {payment.planDisplayName || payment.planName || 'Plano'}{' '}
-                      {payment.billingCycle ? `· ${payment.billingCycle}` : ''}
+                      {payment.planDisplayName || payment.planName || 'Plano'}
+                      {payment.planDurationDays ? ` · ${formatPlanCycle(payment.planDurationDays)}` : ''}
                     </p>
                   </div>
                   <div className="text-right">
