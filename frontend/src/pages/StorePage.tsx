@@ -76,10 +76,12 @@ export function StorePage() {
   const cartTotal = useMemo(() => Object.values(cart).reduce((acc, item) => acc + item.price * item.qty, 0), [cart]);
   const instagramHandle = useMemo(() => (branding.instagram ? `@${branding.instagram.replace('@', '')}` : ''), [branding.instagram]);
   const subscriptionStatus = storeSubscription?.status;
+  const isSubscriptionKnown = storeSubscription !== null && storeSubscription !== undefined;
   const isSubscriptionActive =
-    subscriptionStatus &&
-    ![ 'PENDING', 'CANCELLED', 'SUSPENDED', 'EXPIRED' ].includes(subscriptionStatus);
-  const showInactiveState = view === 'menu' && !isSubscriptionActive;
+    !isSubscriptionKnown ||
+    (subscriptionStatus &&
+      ![ 'PENDING', 'CANCELLED', 'SUSPENDED', 'EXPIRED' ].includes(subscriptionStatus));
+  const showInactiveState = view === 'menu' && isSubscriptionKnown && !isSubscriptionActive;
   const showClosedState = view === 'menu' && isSubscriptionActive && !storeOpenNow;
 
   const applyStoreMeta = (store: any) => {

@@ -8,11 +8,7 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip as RechartsTooltip,
-  Legend,
   ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
 } from "recharts";
 import { formatCurrency } from "../../utils/format";
 import { exportToCsv } from "../../utils/export";
@@ -375,34 +371,29 @@ export const DashboardView = ({ orders = [], customers = [] }) => {
               Sem produtos vendidos ainda.
             </div>
           ) : (
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={sortedTopProducts}
-                  cx="50%"
-                  cy="45%"
-                  innerRadius={55}
-                  outerRadius={75}
-                  paddingAngle={5}
-                  dataKey="qty"
-                >
-                  {sortedTopProducts.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={COLORS[index % COLORS.length]}
-                    />
-                  ))}
-                </Pie>
-                <RechartsTooltip />
-                <Legend
-                  verticalAlign="bottom"
-                  height={36}
-                  formatter={(value) =>
-                    value.length > 16 ? `${value.slice(0, 16)}...` : value
-                  }
-                />
-              </PieChart>
-            </ResponsiveContainer>
+            <div className="space-y-3">
+              {sortedTopProducts.map((product, index) => {
+                const maxQty = sortedTopProducts[0]?.qty || 1;
+                const percent = Math.max(8, Math.round((product.qty / maxQty) * 100));
+                return (
+                  <div key={`${product.name}-${index}`} className="space-y-1">
+                    <div className="flex items-center justify-between text-sm text-slate-700">
+                      <span className="font-semibold truncate">{product.name}</span>
+                      <span className="text-xs text-slate-500">{product.qty}x</span>
+                    </div>
+                    <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+                      <div
+                        className="h-full rounded-full"
+                        style={{
+                          width: `${percent}%`,
+                          background: COLORS[index % COLORS.length],
+                        }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           )}
         </div>
       </div>
