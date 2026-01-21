@@ -524,17 +524,17 @@ export const GrillQueue = () => {
               {/* HEADER DO CARD */}
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2.5">
                 <div className="relative flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1 text-[11px] text-gray-600 uppercase font-bold">
+                  <div className="flex items-center gap-2 mb-1 text-[10px] text-gray-600 uppercase font-bold">
                     <Hash size={14} className="text-brand-primary" /> Fila
                     <span className={`ml-1 px-2.5 py-1 rounded-full text-xs font-black shadow-sm ${getPriorityTone(index + 1)}`}>
                       {String(index + 1).padStart(2, "0")}
                     </span>
                   </div>
 
-                <p className="text-xs text-gray-500">
+                <p className="text-[11px] text-gray-500">
                   {formatDateTime(order.createdAt)}
                 </p>
-                <p className="text-xs font-semibold text-slate-500">
+                <p className="text-[11px] font-semibold text-slate-500">
                   Pedido #{formatOrderDisplayId(order.id, storeSlug)}
                 </p>
 
@@ -543,7 +543,7 @@ export const GrillQueue = () => {
                   </h3>
 
                   {!(order.type === "table" && order.table) && (
-                    <p className="text-xs text-gray-500 uppercase break-words">
+                    <p className="text-[11px] text-gray-500 uppercase break-words">
                       {formatOrderType(order.type)}
                       {order.table && (
                         <span className="font-semibold text-gray-800"> · Mesa {order.table}</span>
@@ -551,10 +551,10 @@ export const GrillQueue = () => {
                     </p>
                   )}
                   {order.phone && (
-                    <p className="text-xs text-gray-500 break-words">{order.phone}</p>
+                    <p className="text-[11px] text-gray-500 break-words">{order.phone}</p>
                   )}
 
-                  <p className="text-xs text-gray-500 uppercase mt-1 inline-flex flex-wrap items-center gap-2">
+                  <p className="text-[11px] text-gray-500 uppercase mt-1 inline-flex flex-wrap items-center gap-2">
                     Pagamento:
                     {(() => {
                       const paymentMeta = getPaymentMethodMeta(order.payment);
@@ -581,13 +581,13 @@ export const GrillQueue = () => {
                     </div>
                   )}
                   <span
-                    className={`px-2.5 py-1 text-xs font-bold rounded-full border ${getStatusStyles(order.status).className}`}
+                    className={`px-2 py-0.5 text-[11px] font-bold rounded-full border ${getStatusStyles(order.status).className}`}
                   >
                     {getStatusStyles(order.status).label}
                   </span>
-                  <div className="px-3 py-1 rounded-full bg-brand-primary text-white font-black flex items-center gap-2 shadow-sm text-xs ring-2 ring-white/40">
-                    <Clock size={12} className="text-white" />
-                    <span className="tabular-nums">
+                  <div className="px-2.5 py-0.5 rounded-full bg-brand-primary text-white font-black flex items-center gap-1.5 shadow-sm text-[11px] ring-2 ring-white/40">
+                    <Clock size={11} className="text-white" />
+                    <span className="tabular-nums text-[11px]">
                       {elapsedTime[order.id] || "0s"}
                     </span>
                   </div>
@@ -601,7 +601,7 @@ export const GrillQueue = () => {
                     key={item.id}
                     className="flex justify-between text-xs text-gray-700 items-center gap-3 bg-white/70 border border-slate-200/60 rounded-2xl px-2.5 py-1.5"
                   >
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="flex items-center gap-2.5 min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-shrink-0">
                         <button
                           onClick={() => handleQuantityChange(order.id, item.id, -1)}
@@ -610,7 +610,7 @@ export const GrillQueue = () => {
                           <Minus size={14} />
                         </button>
 
-                        <span className="font-bold text-gray-800 w-8 text-center">
+                        <span className="font-bold text-gray-800 w-7 text-center text-[11px]">
                           {item.qty}
                         </span>
 
@@ -637,17 +637,17 @@ export const GrillQueue = () => {
                           )}
                         </div>
                         <div className="flex flex-col min-w-0">
-                          <span className="truncate" title={item.name}>
+                          <span className="truncate text-[12px]" title={item.name}>
                             {item.name}
                           </span>
                           <div className="flex flex-wrap gap-1 mt-1">
                             {item?.cookingPoint && (
-                              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800 border border-amber-200">
+                              <span className="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-amber-100 text-amber-800 border border-amber-200">
                                 {item.cookingPoint}
                               </span>
                             )}
                             {item?.passSkewer && (
-                              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-fuchsia-100 text-fuchsia-700 border border-fuchsia-200">
+                              <span className="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-fuchsia-100 text-fuchsia-700 border border-fuchsia-200">
                                 passar varinha
                               </span>
                             )}
@@ -656,7 +656,7 @@ export const GrillQueue = () => {
                       </div>
                     </div>
 
-                    <span className="font-semibold flex-shrink-0">
+                    <span className="font-semibold flex-shrink-0 text-[11px]">
                       {formatCurrency((item.unitPrice ?? (item.price && item.qty ? item.price / item.qty : item.price) ?? 0) * item.qty)}
                     </span>
                   </div>
