@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { CheckSquare, Clock, ChefHat, RefreshCcw, Plus, Minus, Hash, Volume2, VolumeX, MoreVertical } from "lucide-react";
+import { CheckSquare, Clock, ChefHat, RefreshCcw, Plus, Minus, Hash, Volume2, VolumeX, MoreVertical, X } from "lucide-react";
 import { orderService } from "../../services/orderService";
 import { productService } from "../../services/productService";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
