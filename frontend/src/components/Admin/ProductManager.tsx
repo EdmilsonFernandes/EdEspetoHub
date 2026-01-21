@@ -51,6 +51,9 @@ export const ProductManager = ({ products, onProductsChange }) => {
   const [customCategory, setCustomCategory] = useState('');
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [page, setPage] = useState(1);
+  const pageSize = 15;
 
   const categoryOptions = useMemo(() => {
     const unique = new Set(defaultCategories.map((entry) => entry.id));
@@ -69,6 +72,37 @@ export const ProductManager = ({ products, onProductsChange }) => {
       .map((entry) => ({ id: entry, label: formatCategoryLabel(entry), icon: MoreHorizontal }));
     return [ ...known, ...extras ];
   }, [products]);
+
+  const categoryTabs = useMemo(() => {
+    const counts = new Map();
+    (products || []).forEach((product) => {
+      const key = normalizeCategory(product.category || '');
+      if (!key) return;
+      counts.set(key, (counts.get(key) || 0) + 1);
+    });
+    const tabs = [
+      { id: 'all', label: 'Todos', count: products?.length || 0 },
+      ...categoryOptions.map((entry) => ({
+        id: entry.id,
+        label: entry.label,
+        count: counts.get(entry.id) || 0,
+      })),
+    ];
+    return tabs;
+  }, [products, categoryOptions]);
+
+  const filteredProducts = useMemo(() => {
+    if (categoryFilter === 'all') return products || [];
+    return (products || []).filter(
+      (product) => normalizeCategory(product.category) === categoryFilter
+    );
+  }, [products, categoryFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / pageSize));
+  const pagedProducts = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return filteredProducts.slice(start, start + pageSize);
+  }, [filteredProducts, page]);
 
   const resetForm = () => {
     setEditing(null);
@@ -464,7 +498,27 @@ export const ProductManager = ({ products, onProductsChange }) => {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-x-auto">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="flex flex-wrap items-center gap-2 px-4 py-3 border-b border-slate-100 bg-slate-50">
+          {categoryTabs.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => {
+                setCategoryFilter(tab.id);
+                setPage(1);
+              }}
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all hover:-translate-y-0.5 active:scale-95 ${
+                categoryFilter === tab.id
+                  ? 'bg-brand-primary text-white border-brand-primary'
+                  : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
+              }`}
+            >
+              {tab.label} ({tab.count})
+            </button>
+          ))}
+        </div>
+        <div className="overflow-x-auto">
         <table className="w-full text-left min-w-[680px]">
           <thead className="bg-gray-50 border-b">
             <tr>
@@ -476,7 +530,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
             </tr>
           </thead>
           <tbody className="divide-y">
-            {products.map((product) => (
+            {pagedProducts.map((product) => (
               <React.Fragment key={product.id}>
               <tr className={`hover:bg-gray-50 ${inlineEditId === product.id ? 'bg-amber-50/60' : ''}`}>
                 <td className="p-4">
@@ -674,6 +728,33 @@ export const ProductManager = ({ products, onProductsChange }) => {
             ))}
           </tbody>
         </table>
+        </div>
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-t border-slate-100 bg-white">
+          <p className="text-xs text-slate-500">
+            Exibindo {pagedProducts.length} de {filteredProducts.length} produtos
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+              disabled={page === 1}
+              className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50 transition-all hover:-translate-y-0.5 active:scale-95"
+            >
+              Anterior
+            </button>
+            <span className="text-xs text-slate-500">
+              Página {page} de {totalPages}
+            </span>
+            <button
+              type="button"
+              onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+              disabled={page >= totalPages}
+              className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50 transition-all hover:-translate-y-0.5 active:scale-95"
+            >
+              Próxima
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
