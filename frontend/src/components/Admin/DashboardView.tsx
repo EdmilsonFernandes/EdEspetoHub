@@ -104,6 +104,11 @@ export const DashboardView = ({ orders = [], customers = [] }) => {
 
     const totalSales = ordersWithDate.reduce((acc, curr) => acc + resolveOrderTotal(curr.order), 0);
     const totalOrders = orders.length;
+    const firstOrderAt = ordersWithDate.reduce((min, entry) => {
+      if (entry.ts === null) return min;
+      if (min === null) return entry.ts;
+      return entry.ts < min ? entry.ts : min;
+    }, null as number | null);
     const periodOrders = rangeDays
       ? ordersWithDate.filter((entry) => entry.ts >= startPeriod)
       : ordersWithDate;
@@ -157,8 +162,15 @@ export const DashboardView = ({ orders = [], customers = [] }) => {
       .sort((a, b) => (a.date > b.date ? 1 : -1));
 
     const avgTicket = totalOrders > 0 ? totalSales / totalOrders : 0;
-    return { totalSales, totalOrders, topProducts, chartData, periodRevenue, monthRevenue, avgTicket };
+    return { totalSales, totalOrders, topProducts, chartData, periodRevenue, monthRevenue, avgTicket, firstOrderAt };
   }, [orders, periodDays, selectedMonth, currentMonthKey]);
+
+  const firstOrderLabel = useMemo(() => {
+    if (!stats.firstOrderAt) return "Sem pedidos ainda";
+    const date = new Date(stats.firstOrderAt);
+    if (Number.isNaN(date.getTime())) return "Sem pedidos ainda";
+    return `Desde ${date.toLocaleDateString("pt-BR")}`;
+  }, [stats.firstOrderAt]);
 
   const sortedTopProducts = useMemo(() => {
     const list = [...stats.topProducts];
@@ -205,7 +217,7 @@ export const DashboardView = ({ orders = [], customers = [] }) => {
               <h3 className="text-3xl font-black text-brand-primary">
                 {formatCurrency(stats.totalSales)}
               </h3>
-              <p className="text-xs text-gray-500 mt-1">Total desde o início</p>
+              <p className="text-xs text-gray-500 mt-1">{firstOrderLabel}</p>
             </div>
             <div className="p-3 bg-brand-primary-soft rounded-lg text-brand-primary">
               <DollarSign />
