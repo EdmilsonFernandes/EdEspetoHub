@@ -393,7 +393,7 @@ export function OrderTracking() {
                   </div>
                   <div className="mt-2 text-xs text-gray-500">{progress}% completo</div>
                 </div>
-                <div className="grid gap-3 sm:grid-cols-3">
+                <div className="flex flex-wrap gap-2 sm:grid sm:gap-3 sm:grid-cols-3">
                   {steps.map((step) => {
                     const isDone =
                       steps.findIndex((item) => item.id === step.id) <=
@@ -402,7 +402,7 @@ export function OrderTracking() {
                     return (
                       <div
                         key={step.id}
-                        className={`rounded-xl border px-4 py-3 flex items-center gap-2 ${
+                        className={`rounded-xl border px-3 py-2 flex items-center gap-2 text-xs sm:text-sm ${
                           isDone
                             ? 'border-brand-primary bg-brand-primary-soft text-brand-primary'
                             : 'border-gray-200 text-gray-500'
