@@ -50,7 +50,7 @@ export function AdminLayout({
                 className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900 text-white text-xs font-semibold shadow-sm hover:opacity-90 transition-all hover:-translate-y-0.5 active:scale-95"
               >
                 <ChevronDown size={14} className="rotate-180" />
-                Mostrar topo
+                Mostrar painel
               </button>
             </div>
           </div>

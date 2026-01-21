@@ -575,11 +575,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     return () => window.removeEventListener('adminHeader:toggle', handleToggle as EventListener);
   }, []);
 
-  const handleShowMenu = () => {
-    if (typeof window === 'undefined') return;
-    localStorage.setItem('adminHeader:visible', 'true');
-    window.dispatchEvent(new CustomEvent('adminHeader:toggle', { detail: { visible: true } }));
-  };
 
   useEffect(() => {
     if (!storeId) return;
@@ -696,17 +691,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
           })}
           </div>
         </div>
-      ) : (
-        <div className="flex justify-center">
-          <button
-            type="button"
-            onClick={handleShowMenu}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/90 backdrop-blur border border-slate-200 text-xs font-semibold text-slate-600 shadow-sm hover:bg-slate-50 transition-all hover:-translate-y-0.5 active:scale-95"
-          >
-            Mostrar menu
-          </button>
-        </div>
-      )}
+      ) : null}
 
       {activeTab === 'resumo' && <DashboardView orders={orders} customers={customers} />}
 

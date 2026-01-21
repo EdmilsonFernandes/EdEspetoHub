@@ -513,8 +513,14 @@ export const GrillQueue = () => {
           {sortedQueue.map((order, index) => (
             <div
               key={order.id}
-              className="relative w-full max-w-full bg-gradient-to-br from-white via-white to-slate-50 p-3 sm:p-4 rounded-2xl shadow-sm border border-slate-200 hover:shadow-md transition"
+              className="relative w-full max-w-full p-3 sm:p-4 rounded-3xl border border-slate-200 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.45)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_50px_-30px_rgba(15,23,42,0.55)] overflow-hidden"
+              style={{
+                background:
+                  'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.9) 60%, rgba(226,232,240,0.6) 100%)',
+              }}
             >
+              <div className="absolute -top-12 -right-12 w-24 h-24 rounded-full bg-brand-primary/10 blur-2xl" />
+              <div className="absolute -bottom-10 -left-10 w-24 h-24 rounded-full bg-brand-secondary/10 blur-2xl" />
               {/* HEADER DO CARD */}
               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
                 <div className="relative flex-1 min-w-0">
@@ -575,11 +581,11 @@ export const GrillQueue = () => {
                     </div>
                   )}
                   <span
-                    className={`px-2 py-1 text-xs font-bold rounded ${getStatusStyles(order.status).className}`}
+                    className={`px-2.5 py-1 text-xs font-bold rounded-full border ${getStatusStyles(order.status).className}`}
                   >
                     {getStatusStyles(order.status).label}
                   </span>
-                  <div className="px-3 py-1 rounded-full bg-brand-primary text-white font-black flex items-center gap-2 shadow-sm text-xs">
+                  <div className="px-3 py-1 rounded-full bg-brand-primary text-white font-black flex items-center gap-2 shadow-sm text-xs ring-2 ring-white/40">
                     <Clock size={12} className="text-white" />
                     <span className="tabular-nums">
                       {elapsedTime[order.id] || "0s"}
@@ -593,7 +599,7 @@ export const GrillQueue = () => {
                 {getOrderedItems(order.id, order.items || []).map((item) => (
                   <div
                     key={item.id}
-                    className="flex justify-between text-sm text-gray-700 items-center gap-3"
+                    className="flex justify-between text-sm text-gray-700 items-center gap-3 bg-white/70 border border-slate-200/60 rounded-2xl px-3 py-2"
                   >
                     <div className="flex items-center gap-3 min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-shrink-0">
@@ -658,7 +664,7 @@ export const GrillQueue = () => {
               </div>
 
               {/* ADICIONAR ITEM */}
-              <div className="mt-3 flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
+              <div className="mt-3 flex flex-col sm:flex-row gap-2 items-stretch sm:items-center bg-white/70 border border-slate-200/70 rounded-2xl p-2">
                 <select
                   value={selectedProducts[order.id] || ""}
                   onChange={(e) =>
@@ -667,7 +673,7 @@ export const GrillQueue = () => {
                       [order.id]: e.target.value,
                     }))
                   }
-                  className="flex-1 border border-gray-200 rounded-lg p-2 text-sm"
+                  className="flex-1 border border-gray-200 rounded-lg p-2 text-sm bg-white"
                 >
                   <option value="">Adicionar item...</option>
                   {products.map((product) => (
