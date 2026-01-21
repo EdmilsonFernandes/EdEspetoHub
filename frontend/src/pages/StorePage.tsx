@@ -39,6 +39,7 @@ export function StorePage() {
   const [isMobile, setIsMobile] = useState(false);
   const [showInfoSheet, setShowInfoSheet] = useState(false);
   const [orderNotice, setOrderNotice] = useState(null);
+  const [tableNotice, setTableNotice] = useState(null);
   const [copiedAddress, setCopiedAddress] = useState(false);
   const [copiedPhone, setCopiedPhone] = useState(false);
   const [mapCoords, setMapCoords] = useState(null);
@@ -406,6 +407,12 @@ export function StorePage() {
     window.setTimeout(() => setOrderNotice(null), 3500);
   };
 
+  const showTableNotice = (message) => {
+    if (!message) return;
+    setTableNotice({ message });
+    window.setTimeout(() => setTableNotice(null), 4000);
+  };
+
   const checkout = async () => {
     const isSubscriptionActive =
       subscriptionStatus &&
@@ -513,7 +520,7 @@ export function StorePage() {
       createdOrder = await orderService.createBySlug(order, storeSlug);
     } catch (error) {
       if (error?.code === 'ORDER-003') {
-        alert(error.message || 'Mesa já está ocupada. Finalize o pedido atual antes de criar outro.');
+        showTableNotice(error.message || 'Mesa já está ocupada. Finalize o pedido atual antes de criar outro.');
         return;
       }
       alert(error?.message || 'Não foi possível enviar o pedido.');
@@ -730,6 +737,16 @@ export function StorePage() {
                 <span className="block text-xs text-slate-300 font-medium">
                   #{formatOrderDisplayId(orderNotice.id, storeSlug)}
                 </span>
+              </div>
+            </div>
+          </div>
+        )}
+        {tableNotice && (
+          <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 px-4">
+            <div className="flex items-center gap-3 bg-rose-600 text-white px-4 py-3 rounded-2xl shadow-2xl border border-white/10">
+              <div className="w-2.5 h-2.5 rounded-full bg-white/80" />
+              <div className="text-sm font-semibold">
+                {tableNotice.message}
               </div>
             </div>
           </div>
