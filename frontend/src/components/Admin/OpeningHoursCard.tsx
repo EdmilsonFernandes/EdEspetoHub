@@ -108,11 +108,14 @@ export function OpeningHoursCard() {
           </span>
         )}
       </div>
-      <div className="space-y-3 grid grid-cols-2 gap-8">
+      <div className="space-y-3">
         {openingHours.map((entry) => (
-          <div key={entry.day} className="space-y-2">
-            <div className="flex items-center gap-3">
-              <div className="w-10 text-sm font-semibold text-slate-600">{dayLabels[entry.day]}</div>
+          <div
+            key={entry.day}
+            className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 shadow-sm"
+          >
+            <div className="flex flex-wrap items-center gap-3 justify-between">
+              <div className="text-sm font-semibold text-slate-700">{dayLabels[entry.day]}</div>
               <label className="flex items-center gap-2 text-xs text-slate-600">
                 <input
                   type="checkbox"
@@ -124,40 +127,49 @@ export function OpeningHoursCard() {
               <button
                 type="button"
                 onClick={() => addInterval(entry.day)}
-                className="ml-auto px-2 py-1 rounded-lg text-xs border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all hover:-translate-y-0.5 active:scale-95"
+                className="px-3 py-1.5 rounded-lg text-xs border border-slate-200 text-slate-600 hover:bg-slate-100 transition-all hover:-translate-y-0.5 active:scale-95"
                 disabled={!entry.enabled}
               >
                 + faixa
               </button>
             </div>
 
-            {(entry.intervals || []).map((interval, index) => (
-              <div key={`${entry.day}-${index}`} className="flex items-center gap-3 pl-12">
-                <input
-                  type="time"
-                  value={interval.start || '10:00'}
-                  onChange={(e) => updateInterval(entry.day, index, 'start', e.target.value)}
-                  className="border border-slate-200 rounded-lg px-2 py-1 text-xs"
-                  disabled={!entry.enabled}
-                />
-                <span className="text-xs text-slate-400">às</span>
-                <input
-                  type="time"
-                  value={interval.end || '22:00'}
-                  onChange={(e) => updateInterval(entry.day, index, 'end', e.target.value)}
-                  className="border border-slate-200 rounded-lg px-2 py-1 text-xs"
-                  disabled={!entry.enabled}
-                />
-                <button
-                  type="button"
-                  onClick={() => removeInterval(entry.day, index)}
-                  className="px-2 py-1 rounded-lg text-xs border border-slate-200 text-slate-500 hover:bg-slate-50 transition-all hover:-translate-y-0.5 active:scale-95"
-                  disabled={!entry.enabled}
-                >
-                  Remover
-                </button>
+            {entry.enabled ? (
+              <div className="mt-3 space-y-2">
+                {(entry.intervals || []).map((interval, index) => (
+                  <div
+                    key={`${entry.day}-${index}`}
+                    className="flex flex-wrap items-center gap-2"
+                  >
+                    <input
+                      type="time"
+                      value={interval.start || '10:00'}
+                      onChange={(e) => updateInterval(entry.day, index, 'start', e.target.value)}
+                      className="border border-slate-200 rounded-lg px-2 py-1 text-xs w-full sm:w-auto"
+                      disabled={!entry.enabled}
+                    />
+                    <span className="text-xs text-slate-400">às</span>
+                    <input
+                      type="time"
+                      value={interval.end || '22:00'}
+                      onChange={(e) => updateInterval(entry.day, index, 'end', e.target.value)}
+                      className="border border-slate-200 rounded-lg px-2 py-1 text-xs w-full sm:w-auto"
+                      disabled={!entry.enabled}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeInterval(entry.day, index)}
+                      className="px-2.5 py-1 rounded-lg text-xs border border-slate-200 text-slate-500 hover:bg-slate-100 transition-all hover:-translate-y-0.5 active:scale-95"
+                      disabled={!entry.enabled}
+                    >
+                      Remover
+                    </button>
+                  </div>
+                ))}
               </div>
-            ))}
+            ) : (
+              <p className="mt-2 text-xs text-slate-500">Fechado</p>
+            )}
           </div>
         ))}
       </div>

@@ -258,6 +258,24 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
   const priceValue = subscription?.latestPaymentAmount ?? plan?.price ?? 0;
   const methodMeta = getPaymentMethodMeta(subscription?.paymentMethod);
   const expiresLabel = subscription?.endDate ? formatDateTime(subscription.endDate) : '—';
+  const resolveDaysUntil = (value) => {
+    if (!value) return null;
+    const end = new Date(value).getTime();
+    if (!Number.isFinite(end)) return null;
+    const diffDays = Math.ceil((end - Date.now()) / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+  const expiresInDays = resolveDaysUntil(subscription?.endDate);
+  const expiresHint =
+    typeof expiresInDays === 'number'
+      ? expiresInDays > 1
+        ? `em ${expiresInDays} dias`
+        : expiresInDays === 1
+        ? 'em 1 dia'
+        : expiresInDays === 0
+        ? 'expira hoje'
+        : `expirado há ${Math.abs(expiresInDays)} dia${Math.abs(expiresInDays) === 1 ? '' : 's'}`
+      : '';
   const rawStatus = (subscription?.status || '').toUpperCase();
   const statusMap: Record<string, { label: string; tone: string }> = {
     TRIAL: { label: 'Trial ativo (7 dias)', tone: 'bg-emerald-100 text-emerald-700' },
@@ -282,6 +300,13 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
     rawStatus === 'TRIAL'
       ? 'Sem cobranca durante o trial'
       : paymentStatusMap[rawPaymentStatus] || subscription?.latestPaymentStatus || '—';
+  const historyStatusMap: Record<string, string> = {
+    PAID: 'PAGO',
+    PENDING: 'PENDENTE',
+    FAILED: 'FALHOU',
+    CANCELLED: 'CANCELADO',
+    EXPIRED: 'EXPIRADO',
+  };
 
   if (loading) {
     return <div className="py-8 text-sm text-slate-500">Carregando dados de pagamento...</div>;
@@ -334,6 +359,9 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
         <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
           <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Expira em</p>
           <p className="text-lg font-semibold text-slate-900 mt-2">{expiresLabel}</p>
+          {expiresHint && (
+            <p className="text-xs font-semibold text-slate-600 mt-1">{expiresHint}</p>
+          )}
           <p className="text-xs text-slate-500 mt-1">Ultimo pagamento: {paidAtLabel}</p>
         </div>
         {Array.isArray(payments) && payments.length > 0 && (
@@ -346,6 +374,8 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
                     {(() => {
                       const paymentMeta = getPaymentMethodMeta(payment.method);
                       const providerMeta = getPaymentProviderMeta(payment.provider);
+                      const normalizedStatus = (payment.status || '').toUpperCase();
+                      const statusLabel = historyStatusMap[normalizedStatus] || payment.status || '—';
                       return (
                         <p className="font-semibold text-slate-700 flex flex-wrap items-center gap-2">
                           {paymentMeta.icon && (
@@ -353,7 +383,7 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
                           )}
                           <span>{paymentMeta.label}</span>
                           <span className="text-slate-300">·</span>
-                          <span>{payment.status}</span>
+                          <span>{statusLabel}</span>
                           {providerMeta.icon && (
                             <>
                               <span className="text-slate-300">·</span>

@@ -118,9 +118,21 @@ export const DashboardView = ({ orders = [], customers = [] }) => {
 
     const productCount = {};
     orders.forEach((order) => {
-      (order.items || []).forEach((item) => {
-        const productName = item.name || item.productName || item.product?.name || item.title;
-        const qty = Number(item.qty ?? item.quantity ?? 0);
+      const items =
+        order.items ||
+        order.products ||
+        order.orderItems ||
+        order.itens ||
+        [];
+      if (!Array.isArray(items)) return;
+      items.forEach((item) => {
+        const productName =
+          item.name ||
+          item.productName ||
+          item.product?.name ||
+          item.title ||
+          item.label;
+        const qty = Number(item.qty ?? item.quantity ?? item.amount ?? 1);
         if (!productName || qty <= 0) return;
         productCount[productName] = (productCount[productName] || 0) + qty;
       });
@@ -371,29 +383,42 @@ export const DashboardView = ({ orders = [], customers = [] }) => {
           </button>
         </div>
 
-        <div className="max-h-72 overflow-y-auto border border-gray-100 rounded-lg">
-          <div className="grid grid-cols-2 text-xs font-bold uppercase text-gray-500 bg-gray-50 px-3 py-2">
-            <span>Cliente</span>
-            <span>Telefone</span>
+        <div className="max-h-80 overflow-y-auto pr-1">
+          <div className="grid gap-3 sm:grid-cols-2">
+            {customers.map((customer) => {
+              const initials = String(customer.name || 'CL')
+                .split(' ')
+                .filter(Boolean)
+                .slice(0, 2)
+                .map((part) => part[0]?.toUpperCase())
+                .join('');
+              return (
+                <div
+                  key={customer.id || customer.name}
+                  className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50/70 px-3 py-2"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-700">
+                      {initials || 'CL'}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-slate-800 truncate">{customer.name}</p>
+                      <p className="text-xs text-slate-500">{customer.phone ? 'Contato cadastrado' : 'Sem telefone'}</p>
+                    </div>
+                  </div>
+                  <span className="px-3 py-1 rounded-full text-[11px] font-semibold bg-white border border-slate-200 text-slate-600">
+                    {customer.phone}
+                  </span>
+                </div>
+              );
+            })}
           </div>
 
-          <div className="divide-y">
-            {customers.map((customer) => (
-              <div
-                key={customer.id || customer.name}
-                className="py-2 px-3 grid grid-cols-2 text-sm text-gray-700 items-center"
-              >
-                <span className="font-semibold truncate">{customer.name}</span>
-                <span className="text-gray-600">{customer.phone}</span>
-              </div>
-            ))}
-
-            {customers.length === 0 && (
-              <div className="text-center text-gray-400 py-6 text-sm">
-                Nenhum cliente registrado ainda.
-              </div>
-            )}
-          </div>
+          {customers.length === 0 && (
+            <div className="text-center text-gray-400 py-6 text-sm">
+              Nenhum cliente registrado ainda.
+            </div>
+          )}
         </div>
       </div>
     </div>
