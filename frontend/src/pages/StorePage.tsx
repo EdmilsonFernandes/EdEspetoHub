@@ -44,6 +44,7 @@ export function StorePage() {
   const [copiedPhone, setCopiedPhone] = useState(false);
   const [mapCoords, setMapCoords] = useState(null);
   const [mapLoading, setMapLoading] = useState(false);
+  const [mapFailed, setMapFailed] = useState(false);
   const customersStorageKey = useMemo(
     () => `customers:${storeSlug || defaultBranding.espetoId}`,
     [storeSlug]
@@ -305,6 +306,7 @@ export function StorePage() {
 
   useEffect(() => {
     setMapCoords(null);
+    setMapFailed(false);
   }, [storeAddress]);
 
   useEffect(() => {
@@ -322,7 +324,7 @@ export function StorePage() {
   }, [storeSlug]);
 
   useEffect(() => {
-    if (!showInfoSheet || !storeAddress || mapCoords || mapLoading) return;
+    if (!showInfoSheet || !storeAddress || mapCoords || mapLoading || mapFailed) return;
     const controller = new AbortController();
     const loadCoords = async () => {
       setMapLoading(true);
@@ -339,10 +341,13 @@ export function StorePage() {
           if (storeSlug) {
             localStorage.setItem(`store:coords:${storeSlug}`, JSON.stringify(next));
           }
+        } else {
+          setMapFailed(true);
         }
       } catch (error) {
         if (error?.name !== 'AbortError') {
           console.error('Falha ao carregar mapa', error);
+          setMapFailed(true);
         }
       } finally {
         setMapLoading(false);
@@ -350,7 +355,7 @@ export function StorePage() {
     };
     loadCoords();
     return () => controller.abort();
-  }, [showInfoSheet, storeAddress, mapCoords, mapLoading, storeSlug]);
+  }, [showInfoSheet, storeAddress, mapCoords, mapLoading, mapFailed, storeSlug]);
 
   const updateCart = (item, qty, options) => {
     const cookingPoint = options?.cookingPoint ?? item?.cookingPoint;
@@ -1079,7 +1084,9 @@ export function StorePage() {
                       />
                     ) : (
                       <div className="h-40 flex flex-col items-center justify-center gap-2 text-xs text-slate-500">
-                        <span>{mapLoading ? 'Carregando mapa...' : 'Mapa indisponivel'}</span>
+                        <span>
+                          {mapLoading ? 'Carregando mapa...' : 'Mapa indisponível'}
+                        </span>
                         <a
                           href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(storeAddress)}`}
                           target="_blank"
