@@ -24,6 +24,7 @@ export function AdminLayout({
       const next = !prev;
       if (typeof window !== 'undefined') {
         localStorage.setItem('adminHeader:visible', String(next));
+        window.dispatchEvent(new CustomEvent('adminHeader:toggle', { detail: { visible: next } }));
       }
       return next;
     });

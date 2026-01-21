@@ -450,6 +450,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   const [activeTab, setActiveTab] = useState<'resumo' | 'pedidos' | 'produtos' | 'config' | 'fila' | 'pagamentos'>(() => {
     return (location.state as any)?.activeTab || 'resumo';
   });
+  const [menuVisible, setMenuVisible] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    return localStorage.getItem('adminHeader:visible') !== 'false';
+  });
 
   const storeId = session?.store?.id;
   const storeSlug = session?.store?.slug;
@@ -561,6 +565,23 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   }, [storeId]);
 
   useEffect(() => {
+    const handleToggle = (event) => {
+      const next = event?.detail?.visible;
+      if (typeof next === 'boolean') {
+        setMenuVisible(next);
+      }
+    };
+    window.addEventListener('adminHeader:toggle', handleToggle as EventListener);
+    return () => window.removeEventListener('adminHeader:toggle', handleToggle as EventListener);
+  }, []);
+
+  const handleShowMenu = () => {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem('adminHeader:visible', 'true');
+    window.dispatchEvent(new CustomEvent('adminHeader:toggle', { detail: { visible: true } }));
+  };
+
+  useEffect(() => {
     if (!storeId) return;
     let active = true;
     const loadPayments = async () => {
@@ -636,17 +657,18 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
   return (
     <AdminLayout contextLabel="Painel da Loja">
-      <div className="flex justify-center">
-        <div className="bg-white rounded-xl border border-slate-200 p-2 shadow-sm flex flex-wrap justify-center gap-2 w-full max-w-5xl">
+      {menuVisible ? (
+        <div className="flex justify-center">
+          <div className="bg-white rounded-xl border border-slate-200 p-2 shadow-sm flex flex-wrap justify-center gap-2 w-full max-w-5xl">
           {[
             { id: 'resumo', label: 'Resumo', shortLabel: 'Resumo', icon: BarChart3 },
             { id: 'pedidos', label: 'Pedidos', shortLabel: 'Pedidos', icon: ShoppingCart },
-          { id: 'produtos', label: 'Produtos', shortLabel: 'Produtos', icon: Package },
-          { id: 'pagamentos', label: 'Pagamentos', shortLabel: 'Pag.', icon: CreditCard },
-          { id: 'cardapio', label: 'Cardápio', shortLabel: 'Cardápio', icon: BookOpen },
-          { id: 'config', label: 'Configurações', shortLabel: 'Config', icon: Settings },
-          { id: 'fila', label: 'Fila do churrasqueiro', shortLabel: 'Fila', icon: ChefHat },
-        ].map((tab) => {
+            { id: 'produtos', label: 'Produtos', shortLabel: 'Produtos', icon: Package },
+            { id: 'pagamentos', label: 'Pagamentos', shortLabel: 'Pag.', icon: CreditCard },
+            { id: 'cardapio', label: 'Cardápio', shortLabel: 'Cardápio', icon: BookOpen },
+            { id: 'config', label: 'Configurações', shortLabel: 'Config', icon: Settings },
+            { id: 'fila', label: 'Fila do churrasqueiro', shortLabel: 'Fila', icon: ChefHat },
+          ].map((tab) => {
             const Icon = tab.icon;
             return (
               <button
@@ -672,8 +694,19 @@ export function AdminDashboard({ session: sessionProp }: Props) {
               </button>
             );
           })}
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="flex justify-center">
+          <button
+            type="button"
+            onClick={handleShowMenu}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/90 backdrop-blur border border-slate-200 text-xs font-semibold text-slate-600 shadow-sm hover:bg-slate-50 transition-all hover:-translate-y-0.5 active:scale-95"
+          >
+            Mostrar menu
+          </button>
+        </div>
+      )}
 
       {activeTab === 'resumo' && <DashboardView orders={orders} customers={customers} />}
 
