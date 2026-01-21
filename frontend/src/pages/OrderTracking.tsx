@@ -7,6 +7,7 @@ import { formatCurrency, formatDateTime, formatDuration, formatOrderDisplayId } 
 import { getPaymentMethodMeta } from '../utils/paymentAssets';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { applyBrandTheme } from '../utils/brandTheme';
+import { buildPixPayload } from '../utils/pixPayload';
 
 const statusLabels: Record<string, string> = {
   pending: 'Recebido',
@@ -144,8 +145,16 @@ export function OrderTracking() {
     order?.pixKey ||
     '';
   const isPixPayment = (paymentValue || '').toString().trim().toLowerCase() === 'pix';
-  const pixQrUrl = pixKey
-    ? `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(pixKey)}`
+  const pixPayload = pixKey
+    ? buildPixPayload({
+        key: pixKey,
+        name: storeName,
+        amount: Number(order?.total || 0),
+        txid: order?.id ? `PEDIDO${order.id.slice(0, 8)}` : 'PEDIDO',
+      })
+    : '';
+  const pixQrUrl = pixPayload
+    ? `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(pixPayload)}`
     : '';
   const estimateMinutes =
     typeof queuePosition === 'number' && queuePosition > 0 ? Math.max(15, queuePosition * 15) : null;
@@ -515,13 +524,16 @@ export function OrderTracking() {
                               />
                             </div>
                             <div className="rounded-xl bg-white border border-slate-200 p-3 break-all text-xs text-slate-600">
-                              {pixKey}
+                              Chave: {pixKey}
+                            </div>
+                            <div className="rounded-xl bg-white border border-slate-200 p-3 break-all text-[11px] text-slate-500">
+                              Codigo copia e cola: {pixPayload}
                             </div>
                             <button
                               type="button"
                               onClick={async () => {
                                 try {
-                                  await navigator.clipboard.writeText(pixKey);
+                                  await navigator.clipboard.writeText(pixPayload || pixKey);
                                   setPixCopied(true);
                                   window.setTimeout(() => setPixCopied(false), 2000);
                                 } catch (err) {
@@ -530,7 +542,7 @@ export function OrderTracking() {
                               }}
                               className="w-full px-3 py-2 rounded-lg border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-100"
                             >
-                              {pixCopied ? 'Copiado!' : 'Copiar chave Pix'}
+                              {pixCopied ? 'Copiado!' : 'Copiar codigo Pix'}
                             </button>
                           </>
                         ) : (

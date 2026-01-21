@@ -27,6 +27,7 @@ import {
 } from "../../utils/format";
 import { getPaymentMethodMeta } from "../../utils/paymentAssets";
 import { useAuth } from "../../contexts/AuthContext";
+import { buildPixPayload } from "../../utils/pixPayload";
 
 export const GrillQueue = () => {
   const { auth } = useAuth();
@@ -833,8 +834,16 @@ export const GrillQueue = () => {
               const normalizedPayment = (confirmModal.payment || '').toString().trim().toLowerCase();
               const isPixPayment = normalizedPayment === 'pix';
               const pixKey = (confirmModal.pixKey || '').toString().trim();
-              const pixQrUrl = pixKey
-                ? `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(pixKey)}`
+              const pixPayload = pixKey
+                ? buildPixPayload({
+                    key: pixKey,
+                    name: auth?.store?.name || 'Chama no Espeto',
+                    amount: Number(confirmModal.total || 0),
+                    txid: confirmModal.id ? `PEDIDO${confirmModal.id.slice(0, 8)}` : 'PEDIDO',
+                  })
+                : '';
+              const pixQrUrl = pixPayload
+                ? `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(pixPayload)}`
                 : '';
               return (
                 <>
@@ -897,13 +906,16 @@ export const GrillQueue = () => {
                       />
                     </div>
                     <div className="rounded-xl bg-white border border-slate-200 p-3 break-all text-xs text-slate-600">
-                      {pixKey}
+                      Chave: {pixKey}
+                    </div>
+                    <div className="rounded-xl bg-white border border-slate-200 p-3 break-all text-[11px] text-slate-500">
+                      Codigo copia e cola: {pixPayload}
                     </div>
                     <button
                       type="button"
                       onClick={async () => {
                         try {
-                          await navigator.clipboard.writeText(pixKey);
+                          await navigator.clipboard.writeText(pixPayload || pixKey);
                           setPixCopied(true);
                           window.setTimeout(() => setPixCopied(false), 2000);
                         } catch (err) {
@@ -912,7 +924,7 @@ export const GrillQueue = () => {
                       }}
                       className="w-full px-4 py-2 rounded-lg border border-slate-200 text-slate-700 text-sm font-semibold hover:bg-slate-100 transition-all hover:-translate-y-0.5 active:scale-95"
                     >
-                      {pixCopied ? 'Copiado!' : 'Copiar chave Pix'}
+                      {pixCopied ? 'Copiado!' : 'Copiar codigo Pix'}
                     </button>
                   </div>
                 ) : (
