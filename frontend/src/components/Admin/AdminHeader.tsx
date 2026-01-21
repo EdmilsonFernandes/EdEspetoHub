@@ -115,16 +115,16 @@ export function AdminHeader({ contextLabel = 'Painel da Loja' }: Props) {
         <div>
           <p className="text-sm uppercase tracking-wide font-semibold opacity-90">{contextLabel}</p>
           <h1 className="text-xl font-black leading-tight">{storeName}</h1>
-          <div className={`${showMobileDetails ? 'block' : 'hidden'} md:block mt-2 flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 text-xs`}>
+          <div className={`${showMobileDetails ? 'block' : 'hidden'} md:block mt-2 flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 text-xs w-full max-w-full`}>
             {storeSlug && (
               <a
                 href={storeUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 border border-white/20 opacity-95 hover:opacity-100 hover:bg-white/20 transition"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 border border-white/20 opacity-95 hover:opacity-100 hover:bg-white/20 transition w-full sm:w-auto min-w-0"
               >
                 <Globe size={12} />
-                {storeUrl.replace('https://', '')}
+                <span className="truncate">{storeUrl.replace('https://', '')}</span>
               </a>
             )}
             {instagramHandle && (
@@ -132,10 +132,10 @@ export function AdminHeader({ contextLabel = 'Painel da Loja' }: Props) {
                 href={`https://instagram.com/${instagramHandle.replace('@', '')}`}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 border border-white/20 opacity-95 hover:opacity-100 hover:bg-white/20 transition"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 border border-white/20 opacity-95 hover:opacity-100 hover:bg-white/20 transition w-full sm:w-auto min-w-0"
               >
                 <Instagram size={12} />
-                {instagramHandle}
+                <span className="truncate">{instagramHandle}</span>
               </a>
             )}
           </div>
@@ -157,8 +157,8 @@ export function AdminHeader({ contextLabel = 'Painel da Loja' }: Props) {
           {showMobileDetails ? 'Ocultar' : 'Detalhes'}
         </button>
       </div>
-      <div className={`flex flex-wrap items-center gap-3 ${showMobileDetails ? 'flex' : 'hidden'} md:flex`}>
-        <div className="flex items-center gap-2 bg-white/10 rounded-full px-3 py-1.5 border border-white/15">
+      <div className={`w-full md:w-auto flex flex-col sm:flex-row md:items-center gap-3 ${showMobileDetails ? 'flex' : 'hidden'} md:flex`}>
+        <div className="flex items-center gap-2 bg-white/10 rounded-full px-3 py-1.5 border border-white/15 w-full sm:w-auto">
           <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center text-xs font-bold">
             {userInitials || 'AD'}
           </div>
@@ -175,36 +175,36 @@ export function AdminHeader({ contextLabel = 'Painel da Loja' }: Props) {
         />
 
         {/* Main Actions */}
-        <div className="flex items-center gap-1 bg-white/10 rounded-lg p-1">
+        <div className="flex flex-wrap items-center gap-1 bg-white/10 rounded-lg p-1 w-full sm:w-auto">
           {navigationGroups.main.map((item) => {
             const Icon = item.icon;
             return (
               <button
                 key={item.path}
                 onClick={() => navigate(item.path)}
-                className="px-3 py-2 rounded-md text-xs font-semibold hover:bg-white/20 transition flex items-center gap-1.5"
+                className="px-3 py-2 rounded-md text-[11px] sm:text-xs font-semibold hover:bg-white/20 transition flex flex-col sm:flex-row items-center gap-1.5 text-center"
                 title={item.label}
               >
                 <Icon size={14} />
-                <span className="hidden sm:inline">{item.label}</span>
+                <span className="leading-tight">{item.label}</span>
               </button>
             );
           })}
         </div>
 
         {/* Store Actions */}
-        <div className="flex items-center gap-1">
+        <div className="flex flex-wrap items-center gap-1 w-full sm:w-auto">
           {navigationGroups.store.map((item) => {
             const Icon = item.icon;
             return (
               <button
                 key={item.path}
                 onClick={() => navigate(item.path)}
-                className="px-3 py-2 rounded-lg text-xs font-semibold bg-white/15 hover:bg-white/25 transition flex items-center gap-1.5"
+                className="px-3 py-2 rounded-lg text-[11px] sm:text-xs font-semibold bg-white/15 hover:bg-white/25 transition flex flex-col sm:flex-row items-center gap-1.5 text-center"
                 title={item.label}
               >
                 <Icon size={14} />
-                <span className="hidden sm:inline">{item.label}</span>
+                <span className="leading-tight">{item.label}</span>
               </button>
             );
           })}
@@ -216,11 +216,11 @@ export function AdminHeader({ contextLabel = 'Painel da Loja' }: Props) {
             logout();
             navigate('/admin');
           }}
-          className="px-3 py-2 rounded-lg text-xs font-semibold bg-red-500/20 hover:bg-red-500/30 transition flex items-center gap-1.5 border border-red-300/20"
+          className="px-3 py-2 rounded-lg text-[11px] sm:text-xs font-semibold bg-red-500/20 hover:bg-red-500/30 transition flex flex-col sm:flex-row items-center gap-1.5 border border-red-300/20 w-full sm:w-auto text-center"
           title="Sair do sistema"
         >
           <LogOut size={14} />
-          <span className="hidden sm:inline">Sair</span>
+          <span className="leading-tight">Sair</span>
         </button>
       </div>
     </header>

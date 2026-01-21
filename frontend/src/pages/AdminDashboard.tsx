@@ -597,31 +597,34 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   return (
     <AdminLayout contextLabel="Painel da Loja">
       <div className="flex justify-center">
-        <div className="bg-white rounded-xl border border-slate-200 p-1 shadow-sm inline-flex gap-2">
-        {[
-          { id: 'resumo', label: 'Resumo', icon: BarChart3 },
-          { id: 'pedidos', label: 'Pedidos', icon: ShoppingCart },
-          { id: 'produtos', label: 'Produtos', icon: Package },
-          { id: 'pagamentos', label: 'Pagamentos', icon: CreditCard },
-          { id: 'config', label: 'Configurações', icon: Settings },
-          { id: 'fila', label: 'Fila do churrasqueiro', icon: ChefHat },
-        ].map((tab) => {
-          const Icon = tab.icon;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as typeof activeTab)}
-              className={`cursor-pointer px-4 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2 ${
-                activeTab === tab.id
-                  ? 'bg-brand-primary text-white shadow-sm'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-              }`}
-            >
-              <Icon size={16} />
-              <span className="hidden sm:inline">{tab.label}</span>
-            </button>
-          );
-        })}
+        <div className="bg-white rounded-xl border border-slate-200 p-2 shadow-sm flex flex-wrap justify-center gap-2 w-full max-w-5xl">
+          {[
+            { id: 'resumo', label: 'Resumo', shortLabel: 'Resumo', icon: BarChart3 },
+            { id: 'pedidos', label: 'Pedidos', shortLabel: 'Pedidos', icon: ShoppingCart },
+            { id: 'produtos', label: 'Produtos', shortLabel: 'Produtos', icon: Package },
+            { id: 'pagamentos', label: 'Pagamentos', shortLabel: 'Pag.', icon: CreditCard },
+            { id: 'config', label: 'Configurações', shortLabel: 'Config', icon: Settings },
+            { id: 'fila', label: 'Fila do churrasqueiro', shortLabel: 'Fila', icon: ChefHat },
+          ].map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as typeof activeTab)}
+                className={`cursor-pointer px-3 sm:px-4 py-2 rounded-lg text-[11px] sm:text-sm font-semibold transition-all active:scale-95 flex flex-col sm:flex-row items-center gap-1.5 sm:gap-2 text-center min-w-[92px] sm:min-w-0 border ${
+                  activeTab === tab.id
+                    ? 'bg-brand-primary text-white shadow-md border-brand-primary ring-2 ring-brand-primary/30'
+                    : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:text-slate-900 hover:shadow-sm'
+                }`}
+              >
+                <Icon size={16} />
+                <span className="leading-tight">
+                  <span className="sm:hidden">{tab.shortLabel || tab.label}</span>
+                  <span className="hidden sm:inline">{tab.label}</span>
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
