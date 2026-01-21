@@ -10,9 +10,10 @@ import { PlanBadge } from '../PlanBadge';
 
 type Props = {
   contextLabel?: string;
+  onToggleHeader?: () => void;
 };
 
-export function AdminHeader({ contextLabel = 'Painel da Loja' }: Props) {
+export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }: Props) {
   const navigate = useNavigate();
   const { auth, logout } = useAuth();
   const { branding } = useTheme();
@@ -164,6 +165,17 @@ export function AdminHeader({ contextLabel = 'Painel da Loja' }: Props) {
           variant="dark"
           details={planDetails}
         />
+
+        {onToggleHeader && (
+          <button
+            type="button"
+            onClick={onToggleHeader}
+            className="px-3 py-2 rounded-lg text-[11px] sm:text-xs font-semibold bg-white/15 hover:bg-white/25 transition hover:-translate-y-0.5 active:scale-95 flex items-center gap-1.5 text-center"
+            title="Ocultar topo"
+          >
+            <span className="leading-tight">Ocultar topo</span>
+          </button>
+        )}
 
         {/* Logout */}
         <button
