@@ -267,13 +267,13 @@ export const DashboardView = ({ orders = [], customers = [] }) => {
           <div className="flex justify-between items-start">
             <div>
               <p className="text-gray-500 text-sm font-bold uppercase">
-                Total Pedidos
+                Pedidos realizados
               </p>
               <h3 className="text-3xl font-black text-brand-secondary">
                 {stats.totalOrders}
               </h3>
               <p className="text-xs text-gray-500 mt-1">
-                Ticket médio: {formatCurrency(stats.avgTicket)}
+                Valor médio por pedido: {formatCurrency(stats.avgTicket)}
               </p>
             </div>
             <div className="p-3 bg-brand-secondary-soft rounded-lg text-brand-secondary">
