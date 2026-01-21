@@ -508,7 +508,17 @@ export function StorePage() {
       return;
     }
 
-    const createdOrder = await orderService.createBySlug(order, storeSlug);
+    let createdOrder;
+    try {
+      createdOrder = await orderService.createBySlug(order, storeSlug);
+    } catch (error) {
+      if (error?.code === 'ORDER-003') {
+        alert(error.message || 'Mesa já está ocupada. Finalize o pedido atual antes de criar outro.');
+        return;
+      }
+      alert(error?.message || 'Não foi possível enviar o pedido.');
+      return;
+    }
     const nextCustomers = [
       { name: customer.name, phone: customer.phone, table: customer.table },
       ...customers.filter((entry) => entry.name !== customer.name),

@@ -43,5 +43,6 @@
   "PROD-001": "Produto não encontrado.",
   "PROD-002": "Produto inválido para esta loja.",
   "ORDER-001": "Pedido não encontrado.",
-  "ORDER-002": "Tipo de pedido não permitido para esta loja."
+  "ORDER-002": "Tipo de pedido não permitido para esta loja.",
+  "ORDER-003": "Mesa já está ocupada. Finalize o pedido atual antes de criar outro."
 }

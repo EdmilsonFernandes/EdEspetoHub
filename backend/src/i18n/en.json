@@ -43,5 +43,6 @@
   "PROD-001": "Product not found.",
   "PROD-002": "Invalid product for this store.",
   "ORDER-001": "Order not found.",
-  "ORDER-002": "Order type not allowed for this store."
+  "ORDER-002": "Order type not allowed for this store.",
+  "ORDER-003": "Table is already occupied. Finish the current order before creating a new one."
 }

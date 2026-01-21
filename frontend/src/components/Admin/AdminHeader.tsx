@@ -107,7 +107,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
         <div>
           <p className="text-sm uppercase tracking-wide font-semibold opacity-90">{contextLabel}</p>
           <h1 className="text-xl font-black leading-tight">{storeName}</h1>
-          <div className={`${showMobileDetails ? 'block' : 'hidden'} md:block mt-2 flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 text-xs w-full max-w-full`}>
+          <div className="hidden md:flex mt-2 flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 text-xs w-full max-w-full">
             {storeSlug && (
               <a
                 href={storeUrl}
@@ -146,7 +146,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
           }
           className="md:hidden px-3 py-2 rounded-full text-xs font-semibold bg-white/15 hover:bg-white/25 transition border border-white/20"
         >
-          {showMobileDetails ? 'Ocultar' : 'Detalhes'}
+          {showMobileDetails ? 'Fechar info' : 'Info da loja'}
         </button>
       </div>
       <div className="w-full md:w-auto flex flex-col sm:flex-row md:items-center gap-3">
@@ -190,6 +190,55 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
           <span className="leading-tight">Sair</span>
         </button>
       </div>
+      {showMobileDetails && (
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm md:hidden flex items-end justify-center px-4 pb-6">
+          <div className="w-full max-w-md rounded-3xl bg-white p-5 shadow-2xl border border-slate-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Info da loja</p>
+                <p className="text-lg font-bold text-slate-900">{storeName}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowMobileDetails(false)}
+                className="px-3 py-1.5 rounded-full text-xs font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50 transition"
+              >
+                Fechar
+              </button>
+            </div>
+            <div className="mt-4 space-y-2 text-sm text-slate-700">
+              {storeSlug && (
+                <a
+                  href={storeUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2"
+                >
+                  <span className="flex items-center gap-2">
+                    <Globe size={14} className="text-slate-500" />
+                    {storeUrl.replace('https://', '')}
+                  </span>
+                  <span className="text-xs text-slate-400">Abrir</span>
+                </a>
+              )}
+              {instagramHandle && (
+                <a
+                  href={`https://instagram.com/${instagramHandle.replace('@', '')}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2"
+                >
+                  <span className="flex items-center gap-2">
+                    <Instagram size={14} className="text-slate-500" />
+                    {instagramHandle}
+                  </span>
+                  <span className="text-xs text-slate-400">Abrir</span>
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

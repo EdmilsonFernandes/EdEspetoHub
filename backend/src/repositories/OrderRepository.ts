@@ -150,6 +150,25 @@ export class OrderRepository
 
 
   /**
+   * Counts active orders for a table.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-17
+   */
+  countActiveByTable(storeId: string, tableNumber: string, statuses: string[])
+  {
+    return this.repository
+      .createQueryBuilder('o')
+      .where('o.store_id = :storeId', { storeId })
+      .andWhere('o.status IN (:...statuses)', { statuses })
+      .andWhere('o.table_number = :tableNumber', { tableNumber })
+      .getCount();
+  }
+
+
+
+
+  /**
    * Executes find queue by store id logic.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)

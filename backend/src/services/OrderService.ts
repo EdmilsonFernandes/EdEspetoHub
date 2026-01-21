@@ -232,6 +232,17 @@ export class OrderService
     if (!allowedTypes.includes(input.type)) {
       throw new AppError('ORDER-002', 400);
     }
+    if (input.type === 'table' && input.table) {
+      const activeStatuses = [ 'pending', 'preparing' ];
+      const activeCount = await this.orderRepository.countActiveByTable(
+        store!.id,
+        input.table,
+        activeStatuses
+      );
+      if (activeCount > 0) {
+        throw new AppError('ORDER-003', 409, { table: input.table });
+      }
+    }
     const items: OrderItem[] = [];
     let total = 0;
 

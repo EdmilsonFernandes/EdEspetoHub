@@ -426,8 +426,8 @@ export const GrillQueue = () => {
         <div className="flex flex-wrap items-center gap-2 text-gray-700 font-semibold">
           <ChefHat className="text-brand-primary" />
           Fila do Churrasqueiro
-          <span className="text-xs font-semibold text-slate-500">
-            Quantidade de pedidos: {activeTab === 'queue' ? sortedQueue.length : completedToday.length}
+          <span className="px-2.5 py-1 rounded-full bg-brand-primary/10 text-brand-primary text-xs font-bold">
+            {activeTab === 'queue' ? sortedQueue.length : completedToday.length} pedidos
           </span>
         </div>
         <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2">
