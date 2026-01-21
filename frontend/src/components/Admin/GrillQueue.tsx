@@ -48,6 +48,7 @@ export const GrillQueue = () => {
     }
   }, []);
   const [activeTab, setActiveTab] = useState<'queue' | 'completed'>('queue');
+  const [completedPage, setCompletedPage] = useState(1);
   const [currentTime, setCurrentTime] = useState(Date.now());
   const [confirmModal, setConfirmModal] = useState(null);
   const [pixCopied, setPixCopied] = useState(false);
@@ -423,6 +424,24 @@ export const GrillQueue = () => {
       .filter((order) => order.status === 'done' && isSameDay(order.createdAt))
       .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
   }, [queue]);
+  const completedPageSize = 9;
+  const completedTotalPages = Math.max(1, Math.ceil(completedToday.length / completedPageSize));
+  const pagedCompleted = useMemo(() => {
+    const start = (completedPage - 1) * completedPageSize;
+    return completedToday.slice(start, start + completedPageSize);
+  }, [completedToday, completedPage]);
+
+  useEffect(() => {
+    if (activeTab === 'completed') {
+      setCompletedPage(1);
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (completedPage > completedTotalPages) {
+      setCompletedPage(completedTotalPages);
+    }
+  }, [completedPage, completedTotalPages]);
 
   const getStatusStyles = (status) => {
     if (status === "preparing") {
@@ -954,7 +973,7 @@ export const GrillQueue = () => {
       {activeTab === 'completed' && (
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 sm:p-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-            {completedToday.map((order) => (
+            {pagedCompleted.map((order) => (
               <div
                 key={order.id}
                 className="relative w-full max-w-full rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-slate-100/70 p-4 shadow-sm overflow-hidden"
@@ -1039,6 +1058,31 @@ export const GrillQueue = () => {
               </div>
             )}
           </div>
+          {completedToday.length > completedPageSize && (
+            <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+              <div className="text-xs text-slate-500">
+                Pagina {completedPage} de {completedTotalPages}
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setCompletedPage((prev) => Math.max(1, prev - 1))}
+                  disabled={completedPage <= 1}
+                  className="px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Anterior
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCompletedPage((prev) => Math.min(completedTotalPages, prev + 1))}
+                  disabled={completedPage >= completedTotalPages}
+                  className="px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Proxima
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
