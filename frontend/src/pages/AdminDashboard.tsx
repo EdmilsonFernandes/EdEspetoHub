@@ -27,6 +27,8 @@ const OrdersView = ({ orders, products, storeSlug }) => {
   const [query, setQuery] = useState('');
   const [dateFilter, setDateFilter] = useState('');
   const [periodFilter, setPeriodFilter] = useState('all');
+  const [ordersPage, setOrdersPage] = useState(1);
+  const ordersPageSize = 9;
   const productsById = useMemo(() => {
     const map = new Map();
     (products || []).forEach((product) => map.set(product.id, product));
@@ -71,6 +73,21 @@ const OrdersView = ({ orders, products, storeSlug }) => {
       return haystack.includes(normalized);
     });
   }, [sortedOrders, statusFilter, query, dateFilter, periodFilter]);
+  const ordersTotalPages = Math.max(1, Math.ceil(filteredOrders.length / ordersPageSize));
+  const pagedOrders = useMemo(() => {
+    const start = (ordersPage - 1) * ordersPageSize;
+    return filteredOrders.slice(start, start + ordersPageSize);
+  }, [filteredOrders, ordersPage]);
+
+  useEffect(() => {
+    setOrdersPage(1);
+  }, [statusFilter, query, dateFilter, periodFilter]);
+
+  useEffect(() => {
+    if (ordersPage > ordersTotalPages) {
+      setOrdersPage(ordersTotalPages);
+    }
+  }, [ordersPage, ordersTotalPages]);
 
   const statusCounts = useMemo(() => {
     return (orders || []).reduce(
@@ -156,7 +173,7 @@ const OrdersView = ({ orders, products, storeSlug }) => {
         <div className="py-12 text-center text-slate-500">Nenhum pedido por aqui ainda.</div>
       ) : (
         <div className="space-y-4">
-          {filteredOrders.map((order, index) => (
+          {pagedOrders.map((order, index) => (
             <div
               key={order.id || `${order.customerName}-${index}`}
               className="border border-slate-200 rounded-3xl bg-white p-5 shadow-sm space-y-4"
@@ -269,6 +286,31 @@ const OrdersView = ({ orders, products, storeSlug }) => {
               )}
             </div>
           ))}
+          {filteredOrders.length > ordersPageSize && (
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="text-xs text-slate-500">
+                Pagina {ordersPage} de {ordersTotalPages}
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setOrdersPage((prev) => Math.max(1, prev - 1))}
+                  disabled={ordersPage <= 1}
+                  className="px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Anterior
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setOrdersPage((prev) => Math.min(ordersTotalPages, prev + 1))}
+                  disabled={ordersPage >= ordersTotalPages}
+                  className="px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Proxima
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
