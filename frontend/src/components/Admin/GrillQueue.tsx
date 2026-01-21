@@ -695,10 +695,10 @@ export const GrillQueue = () => {
               {renderTimeline(order.status)}
 
               {/* TOTAL + BOTÕES */}
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mt-4">
-              <div className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mt-3">
+              <div className="inline-flex items-center gap-2 text-[11px] font-semibold text-slate-600">
                 Total
-                <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-sm font-bold">
+                <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold">
                   {formatCurrency(order.total || 0)}
                 </span>
               </div>
