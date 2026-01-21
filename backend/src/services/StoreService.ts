@@ -37,9 +37,11 @@ export class StoreService
     if (!value) return undefined;
     const trimmed = value.toString().trim();
     if (!trimmed) return undefined;
+    if (/[@\\/]/.test(trimmed)) return trimmed;
     if (trimmed.startsWith('+')) return trimmed;
     const digits = trimmed.replace(/\D/g, '');
     if (!digits) return trimmed;
+    if (digits.length === 11 || digits.length === 14) return digits;
     if (digits.startsWith('55')) return `+${digits}`;
     if (digits.startsWith('0'))
     {

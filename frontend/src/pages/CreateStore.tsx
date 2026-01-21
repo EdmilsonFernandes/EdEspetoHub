@@ -55,6 +55,7 @@ export function CreateStore() {
     state: '',
     storeName: '',
     storeDescription: '',
+    pixKey: '',
     logoFile: '',
     primaryColor: '#b91c1c',
     secondaryColor: '#111827',
@@ -289,6 +290,7 @@ export function CreateStore() {
         store: {
           name: registerForm.storeName,
           description: registerForm.storeDescription,
+          pixKey: registerForm.pixKey,
           logoFile: registerForm.logoFile,
           primaryColor: registerForm.primaryColor,
           secondaryColor: registerForm.secondaryColor,
@@ -702,6 +704,17 @@ export function CreateStore() {
                 <span>Isso aparece no portfolio de lojas.</span>
                 <span>{registerForm.storeDescription.length}/220</span>
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700">Chave Pix da loja</label>
+              <input
+                value={registerForm.pixKey}
+                onChange={(e) => setRegisterForm((prev) => ({ ...prev, pixKey: e.target.value }))}
+                className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
+                placeholder="Ex: 012999999999 ou email@pix.com"
+              />
+              <p className="text-xs text-gray-500">Telefone com DDD pode começar com 0 que ajustamos para +55.</p>
             </div>
 
             <div className="space-y-2">
