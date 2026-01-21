@@ -422,7 +422,7 @@ export const GrillQueue = () => {
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id as 'queue' | 'completed')}
-                className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition ${
+                className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-all hover:-translate-y-0.5 active:scale-95 ${
                   activeTab === tab.id
                     ? 'bg-brand-primary text-white shadow-sm'
                     : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
@@ -441,7 +441,7 @@ export const GrillQueue = () => {
             <button
               type="button"
               onClick={() => setActionsOpen((prev) => !prev)}
-              className="flex items-center justify-between gap-2 text-sm px-3 py-2 rounded-lg bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 w-full sm:w-auto"
+              className="flex items-center justify-between gap-2 text-sm px-3 py-2 rounded-lg bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 w-full sm:w-auto transition-all hover:-translate-y-0.5 active:scale-95"
             >
               <span className="flex items-center gap-2">
                 <MoreVertical size={16} />
@@ -661,7 +661,7 @@ export const GrillQueue = () => {
 
                 <button
                   onClick={() => handleAddItem(order.id)}
-                  className="w-full sm:w-auto px-3 py-2 rounded-lg bg-brand-primary text-white text-xs font-bold flex items-center justify-center gap-1 hover:opacity-90"
+                  className="w-full sm:w-auto px-3 py-2 rounded-lg bg-brand-primary text-white text-xs font-bold flex items-center justify-center gap-1 hover:opacity-90 transition-all hover:-translate-y-0.5 active:scale-95"
                 >
                   <Plus size={14} /> Incluir
                 </button>
@@ -687,7 +687,7 @@ export const GrillQueue = () => {
                     <button
                       onClick={() => handleAdvance(order.id, "preparing")}
                       disabled={updating === order.id}
-                      className="w-full sm:w-auto px-3 py-2 rounded-lg bg-amber-500 text-white text-xs font-bold flex items-center justify-center gap-1 disabled:opacity-60 shadow-sm"
+                      className="w-full sm:w-auto px-3 py-2 rounded-lg bg-amber-500 text-white text-xs font-bold flex items-center justify-center gap-1 disabled:opacity-60 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95"
                     >
                       <Clock size={16} /> Iniciar preparo
                     </button>
@@ -702,7 +702,7 @@ export const GrillQueue = () => {
                     <button
                       onClick={() => handleAdvance(order.id, "done")}
                       disabled={updating === order.id}
-                      className="w-full sm:w-auto px-3 py-2 rounded-lg bg-emerald-600 text-white text-xs font-bold flex items-center justify-center gap-1 disabled:opacity-60 shadow-sm"
+                      className="w-full sm:w-auto px-3 py-2 rounded-lg bg-emerald-600 text-white text-xs font-bold flex items-center justify-center gap-1 disabled:opacity-60 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95"
                     >
                       <CheckSquare size={16} /> Marcar pronto
                     </button>

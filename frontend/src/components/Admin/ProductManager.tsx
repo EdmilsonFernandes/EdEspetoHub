@@ -226,7 +226,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
                       setShowCustomInput(false);
                       setFormData({ ...formData, category: option.id });
                     }}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-lg font-medium text-sm transition ${
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg font-medium text-sm transition-all hover:-translate-y-0.5 active:scale-95 ${
                       isSelected
                         ? 'bg-brand-primary text-white shadow-md'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -247,7 +247,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
                     setFormData({ ...formData, category: initialForm.category });
                   }
                 }}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg font-medium text-sm transition border-2 ${
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg font-medium text-sm transition-all hover:-translate-y-0.5 active:scale-95 border-2 ${
                   showCustomInput
                     ? 'border-brand-primary bg-brand-primary-soft text-brand-primary'
                     : 'border-gray-300 border-dashed text-gray-600 hover:border-brand-primary hover:text-brand-primary'
@@ -280,7 +280,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
               <button
                 type="button"
                 onClick={() => setImageMode('url')}
-                className={`px-4 py-2.5 rounded-lg text-sm font-semibold transition ${
+                className={`px-4 py-2.5 rounded-lg text-sm font-semibold transition-all hover:-translate-y-0.5 active:scale-95 ${
                   imageMode === 'url'
                     ? 'bg-brand-primary text-white shadow-md'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -291,7 +291,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
               <button
                 type="button"
                 onClick={() => setImageMode('upload')}
-                className={`px-4 py-2.5 rounded-lg text-sm font-semibold transition ${
+                className={`px-4 py-2.5 rounded-lg text-sm font-semibold transition-all hover:-translate-y-0.5 active:scale-95 ${
                   imageMode === 'upload'
                     ? 'bg-brand-primary text-white shadow-md'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -326,7 +326,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
                         setImagePreview('');
                         setFormData({ ...formData, imageUrl: '', imageFile: '' });
                       }}
-                      className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg transition shadow-lg"
+                      className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg transition-all hover:-translate-y-0.5 active:scale-95 shadow-lg"
                     >
                       <Trash2 size={18} />
                     </button>
@@ -366,7 +366,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
                         setImagePreview('');
                         setFormData({ ...formData, imageUrl: '', imageFile: '' });
                       }}
-                      className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg transition shadow-lg"
+                      className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg transition-all hover:-translate-y-0.5 active:scale-95 shadow-lg"
                     >
                       <Trash2 size={18} />
                     </button>
@@ -390,7 +390,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
           <div className="flex gap-3 pt-2">
             <button
               type="submit"
-              className="bg-brand-primary text-white px-6 py-3 rounded-lg font-semibold flex-1 flex justify-center items-center gap-2 hover:bg-brand-primary/90 transition disabled:opacity-60"
+              className="bg-brand-primary text-white px-6 py-3 rounded-lg font-semibold flex-1 flex justify-center items-center gap-2 hover:bg-brand-primary/90 transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-60"
               disabled={saving}
             >
               <Save size={18} />
@@ -399,7 +399,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
             <button
               type="button"
               onClick={resetForm}
-              className="bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-200 transition"
+              className="bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-all hover:-translate-y-0.5 active:scale-95"
             >
               Limpar
             </button>
@@ -462,20 +462,20 @@ export const ProductManager = ({ products, onProductsChange }) => {
                       </span>
                       <button
                         onClick={handleInlineSave}
-                        className="text-emerald-600 hover:bg-emerald-50 p-2 rounded"
+                        className="text-emerald-600 hover:bg-emerald-50 p-2 rounded transition-all hover:-translate-y-0.5 active:scale-95"
                         disabled={saving}
                         >
                           <Save size={18} />
                         </button>
                         <button
                           onClick={() => setInlineDetailsId((prev) => (prev === product.id ? null : product.id))}
-                          className="text-brand-primary hover:bg-brand-primary-soft p-2 rounded"
+                          className="text-brand-primary hover:bg-brand-primary-soft p-2 rounded transition-all hover:-translate-y-0.5 active:scale-95"
                         >
                           <ImagePlus size={18} />
                         </button>
                         <button
                           onClick={handleInlineCancel}
-                          className="text-slate-600 hover:bg-slate-100 p-2 rounded"
+                          className="text-slate-600 hover:bg-slate-100 p-2 rounded transition-all hover:-translate-y-0.5 active:scale-95"
                         >
                           <X size={18} />
                         </button>
@@ -495,12 +495,15 @@ export const ProductManager = ({ products, onProductsChange }) => {
                       </td>
                       <td className="p-4 text-brand-primary font-bold">{formatCurrency(product.price)}</td>
                       <td className="p-4 text-right space-x-2">
-                        <button onClick={() => handleEdit(product)} className="text-brand-primary hover:bg-brand-primary-soft p-2 rounded">
+                        <button
+                          onClick={() => handleEdit(product)}
+                          className="text-brand-primary hover:bg-brand-primary-soft p-2 rounded transition-all hover:-translate-y-0.5 active:scale-95"
+                        >
                           <Edit size={18} />
                         </button>
                         <button
                           onClick={() => setInlineDetailsId((prev) => (prev === product.id ? null : product.id))}
-                          className="text-slate-600 hover:bg-slate-100 p-2 rounded"
+                          className="text-slate-600 hover:bg-slate-100 p-2 rounded transition-all hover:-translate-y-0.5 active:scale-95"
                           title="Detalhes"
                         >
                           <ImagePlus size={18} />
@@ -526,7 +529,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
                               })
                               .finally(() => setSaving(false));
                           }}
-                          className="text-red-600 hover:bg-red-50 p-2 rounded"
+                          className="text-red-600 hover:bg-red-50 p-2 rounded transition-all hover:-translate-y-0.5 active:scale-95"
                         >
                           <Trash2 size={18} />
                         </button>

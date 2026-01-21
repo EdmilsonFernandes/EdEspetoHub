@@ -84,7 +84,7 @@ export function OrderTypeSettingsCard() {
               key={type}
               type="button"
               onClick={() => toggleType(type)}
-              className={`px-4 py-2 rounded-full text-xs font-semibold border transition ${
+              className={`px-4 py-2 rounded-full text-xs font-semibold border transition-all hover:-translate-y-0.5 active:scale-95 ${
                 active
                   ? 'bg-brand-primary text-white border-brand-primary'
                   : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
@@ -97,7 +97,7 @@ export function OrderTypeSettingsCard() {
       </div>
       <button
         onClick={saveOrderTypes}
-        className="mt-4 w-full text-white py-2 rounded-lg text-sm font-semibold bg-brand-gradient hover:opacity-90 transition"
+        className="mt-4 w-full text-white py-2 rounded-lg text-sm font-semibold bg-brand-gradient hover:opacity-90 transition-all hover:-translate-y-0.5 active:scale-95"
         disabled={saving}
       >
         {saving ? 'Salvando...' : 'Salvar tipos de pedido'}

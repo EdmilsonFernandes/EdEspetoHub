@@ -272,7 +272,7 @@ export const DashboardView = ({ orders = [], customers = [] }) => {
                 <button
                   key={option.id}
                   onClick={() => setPeriodDays(option.id)}
-                  className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border transition ${
+                  className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all hover:-translate-y-0.5 active:scale-95 ${
                     periodDays === option.id
                       ? "bg-brand-primary text-white border-brand-primary"
                       : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
@@ -365,7 +365,7 @@ export const DashboardView = ({ orders = [], customers = [] }) => {
 
           <button
             onClick={exportCustomers}
-            className="px-3 py-2 rounded-lg bg-brand-primary text-white text-xs font-semibold hover:opacity-90"
+            className="px-3 py-2 rounded-lg bg-brand-primary text-white text-xs font-semibold hover:opacity-90 transition-all hover:-translate-y-0.5 active:scale-95"
           >
             Exportar Excel (.csv)
           </button>

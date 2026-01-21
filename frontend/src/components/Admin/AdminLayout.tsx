@@ -104,7 +104,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
             </div>
             <button
               onClick={() => navigate('/admin/renewal')}
-              className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:opacity-90 shadow-sm"
+              className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:opacity-90 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95"
             >
               Garantir minha vaga
             </button>
@@ -120,7 +120,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
             </div>
             <button
               onClick={() => navigate('/admin/renewal')}
-              className="px-4 py-2 rounded-lg bg-amber-600 text-white text-sm font-semibold hover:opacity-90"
+              className="px-4 py-2 rounded-lg bg-amber-600 text-white text-sm font-semibold hover:opacity-90 transition-all hover:-translate-y-0.5 active:scale-95"
             >
               Renovar agora
             </button>

@@ -84,7 +84,7 @@ export function StoreIdentityCard({ branding, socialLinks = [], whatsappNumber }
                   console.error('Falha ao copiar', err);
                 }
               }}
-              className="px-3 py-1 rounded-full text-xs font-semibold border border-brand-primary text-brand-primary hover:bg-brand-primary-soft"
+              className="px-3 py-1 rounded-full text-xs font-semibold border border-brand-primary text-brand-primary hover:bg-brand-primary-soft transition-all hover:-translate-y-0.5 active:scale-95"
             >
               Copiar numero
             </button>

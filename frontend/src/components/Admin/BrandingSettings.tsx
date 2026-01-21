@@ -113,7 +113,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug }) => {
                     handleChange("logoUrl", "");
                     if (fileInputRef.current) fileInputRef.current.value = "";
                   }}
-                  className="absolute inset-0 bg-black/50 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                  className="absolute inset-0 bg-black/50 text-white text-xs opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center hover:-translate-y-0.5 active:scale-95"
                 >
                   Remover
                 </button>

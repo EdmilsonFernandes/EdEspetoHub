@@ -124,7 +124,7 @@ export function OpeningHoursCard() {
               <button
                 type="button"
                 onClick={() => addInterval(entry.day)}
-                className="ml-auto px-2 py-1 rounded-lg text-xs border border-slate-200 text-slate-600 hover:bg-slate-50"
+                className="ml-auto px-2 py-1 rounded-lg text-xs border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all hover:-translate-y-0.5 active:scale-95"
                 disabled={!entry.enabled}
               >
                 + faixa
@@ -151,7 +151,7 @@ export function OpeningHoursCard() {
                 <button
                   type="button"
                   onClick={() => removeInterval(entry.day, index)}
-                  className="px-2 py-1 rounded-lg text-xs border border-slate-200 text-slate-500 hover:bg-slate-50"
+                  className="px-2 py-1 rounded-lg text-xs border border-slate-200 text-slate-500 hover:bg-slate-50 transition-all hover:-translate-y-0.5 active:scale-95"
                   disabled={!entry.enabled}
                 >
                   Remover
@@ -163,7 +163,7 @@ export function OpeningHoursCard() {
       </div>
         <button
           onClick={saveOpeningHours}
-          className="mt-4 w-full text-white py-2 rounded-lg text-sm font-semibold bg-brand-gradient hover:opacity-90 transition"
+          className="mt-4 w-full text-white py-2 rounded-lg text-sm font-semibold bg-brand-gradient hover:opacity-90 transition-all hover:-translate-y-0.5 active:scale-95"
           disabled={saving}
         >
           {saving ? 'Salvando...' : 'Salvar horario'}
