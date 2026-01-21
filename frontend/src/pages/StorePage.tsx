@@ -46,6 +46,7 @@ export function StorePage() {
   const [mapCoords, setMapCoords] = useState(null);
   const [mapLoading, setMapLoading] = useState(false);
   const [mapFailed, setMapFailed] = useState(false);
+  const [mapAttempted, setMapAttempted] = useState(false);
   const customersStorageKey = useMemo(
     () => `customers:${storeSlug || defaultBranding.espetoId}`,
     [storeSlug]
@@ -309,6 +310,7 @@ export function StorePage() {
   useEffect(() => {
     setMapCoords(null);
     setMapFailed(false);
+    setMapAttempted(false);
   }, [storeAddress]);
 
   useEffect(() => {
@@ -326,9 +328,10 @@ export function StorePage() {
   }, [storeSlug]);
 
   useEffect(() => {
-    if (!showInfoSheet || !storeAddress || mapCoords || mapLoading || mapFailed) return;
+    if (!showInfoSheet || !storeAddress || mapCoords || mapLoading || mapFailed || mapAttempted) return;
     const controller = new AbortController();
     const loadCoords = async () => {
+      setMapAttempted(true);
       setMapLoading(true);
       try {
         const response = await fetch(
