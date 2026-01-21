@@ -815,7 +815,12 @@ export const GrillQueue = () => {
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 sm:p-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
             {completedToday.map((order) => (
-              <div key={order.id} className="w-full max-w-full rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <div
+                key={order.id}
+                className="relative w-full max-w-full rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-slate-100/70 p-4 shadow-sm overflow-hidden"
+              >
+                <div className="absolute -top-10 -right-10 w-20 h-20 rounded-full bg-emerald-400/10 blur-2xl" />
+                <div className="absolute -bottom-10 -left-10 w-20 h-20 rounded-full bg-brand-primary/10 blur-2xl" />
                 <div className="flex items-start justify-between gap-2 mb-3">
                   <div>
                   <p className="text-sm font-semibold text-slate-700">
@@ -823,7 +828,7 @@ export const GrillQueue = () => {
                   </p>
                     <p className="text-xs text-slate-400">{formatDateTime(order.createdAt)}</p>
                   </div>
-                  <span className="px-2 py-1 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-700">
+                  <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-700 border border-emerald-200">
                     Pronto
                   </span>
                 </div>
