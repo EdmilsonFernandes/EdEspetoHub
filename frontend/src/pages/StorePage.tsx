@@ -409,7 +409,13 @@ export function StorePage() {
 
   const showTableNotice = (message) => {
     if (!message) return;
-    setTableNotice({ message });
+    setTableNotice({ message, tone: 'warn' });
+    window.setTimeout(() => setTableNotice(null), 4000);
+  };
+
+  const showErrorNotice = (message) => {
+    if (!message) return;
+    setTableNotice({ message, tone: 'error' });
     window.setTimeout(() => setTableNotice(null), 4000);
   };
 
@@ -523,7 +529,7 @@ export function StorePage() {
         showTableNotice(error.message || 'Mesa já está ocupada. Finalize o pedido atual antes de criar outro.');
         return;
       }
-      alert(error?.message || 'Não foi possível enviar o pedido.');
+      showErrorNotice(error?.message || 'Não foi possível enviar o pedido.');
       return;
     }
     const nextCustomers = [
@@ -743,7 +749,11 @@ export function StorePage() {
         )}
         {tableNotice && (
           <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 px-4">
-            <div className="flex items-center gap-3 bg-rose-600 text-white px-4 py-3 rounded-2xl shadow-2xl border border-white/10">
+            <div
+              className={`flex items-center gap-3 px-4 py-3 rounded-2xl shadow-2xl border border-white/10 text-white ${
+                tableNotice.tone === 'error' ? 'bg-rose-600' : 'bg-amber-600'
+              }`}
+            >
               <div className="w-2.5 h-2.5 rounded-full bg-white/80" />
               <div className="text-sm font-semibold">
                 {tableNotice.message}
