@@ -38,6 +38,7 @@ export function StorePage() {
   const [recentPublicOrders, setRecentPublicOrders] = useState([]);
   const [isMobile, setIsMobile] = useState(false);
   const [showInfoSheet, setShowInfoSheet] = useState(false);
+  const [orderNotice, setOrderNotice] = useState(null);
   const [copiedAddress, setCopiedAddress] = useState(false);
   const [copiedPhone, setCopiedPhone] = useState(false);
   const [mapCoords, setMapCoords] = useState(null);
@@ -399,6 +400,12 @@ export function StorePage() {
     setCustomer(updatedCustomer);
   };
 
+  const showOrderNotice = (orderId) => {
+    if (!orderId) return;
+    setOrderNotice({ id: orderId });
+    window.setTimeout(() => setOrderNotice(null), 3500);
+  };
+
   const checkout = async () => {
     const isSubscriptionActive =
       subscriptionStatus &&
@@ -495,6 +502,9 @@ export function StorePage() {
         })
       );
       setView(isStoreAdmin ? 'menu' : 'success');
+      if (isStoreAdmin) {
+        showOrderNotice(demoId);
+      }
       return;
     }
 
@@ -599,6 +609,9 @@ export function StorePage() {
       }
     }
     setView(isStoreAdmin ? 'menu' : 'success');
+    if (isStoreAdmin) {
+      showOrderNotice(createdOrder?.id);
+    }
   };
 
   const requireAdminSession = () => {
@@ -698,6 +711,19 @@ export function StorePage() {
       )}
 
       <main className="mx-auto px-0 sm:px-4 md:px-6 lg:px-8 py-0 sm:py-6">
+        {orderNotice && (
+          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-4">
+            <div className="flex items-center gap-3 bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-2xl border border-white/10">
+              <div className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
+              <div className="text-sm font-semibold">
+                Pedido enviado para a fila
+                <span className="block text-xs text-slate-300 font-medium">
+                  #{formatOrderDisplayId(orderNotice.id, storeSlug)}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
         {showInactiveState && (
           <div className="min-h-[70vh] flex items-center justify-center">
             <div className="text-center px-4 max-w-md">
