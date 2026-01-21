@@ -102,7 +102,7 @@ const OrdersView = ({ orders, products, storeSlug }) => {
             <button
               key={filter.id}
               onClick={() => setStatusFilter(filter.id)}
-              className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition ${
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all hover:-translate-y-0.5 active:scale-95 ${
                 statusFilter === filter.id
                   ? 'bg-brand-primary text-white border-brand-primary'
                   : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
@@ -663,10 +663,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             <button
               onClick={handleSaveBranding}
               disabled={savingBranding}
-              className="px-4 py-2 rounded-lg bg-brand-primary text-white text-sm font-semibold hover:opacity-90 disabled:opacity-60"
-            >
-              {savingBranding ? 'Salvando...' : 'Salvar identidade'}
-            </button>
+            className="px-4 py-2 rounded-lg bg-brand-primary text-white text-sm font-semibold hover:opacity-90 hover:-translate-y-0.5 active:scale-95 transition-all disabled:opacity-60"
+          >
+            {savingBranding ? 'Salvando...' : 'Salvar identidade'}
+          </button>
           </div>
           <OrderTypeSettingsCard />
           <OpeningHoursCard />
