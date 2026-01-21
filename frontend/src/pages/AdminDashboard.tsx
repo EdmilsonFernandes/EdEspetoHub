@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { BarChart3, ChefHat, CreditCard, Package, Settings, ShoppingCart } from 'lucide-react';
+import { BarChart3, BookOpen, ChefHat, CreditCard, Package, Settings, ShoppingCart } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AdminLayout } from '../layouts/AdminLayout';
@@ -641,16 +641,23 @@ export function AdminDashboard({ session: sessionProp }: Props) {
           {[
             { id: 'resumo', label: 'Resumo', shortLabel: 'Resumo', icon: BarChart3 },
             { id: 'pedidos', label: 'Pedidos', shortLabel: 'Pedidos', icon: ShoppingCart },
-            { id: 'produtos', label: 'Produtos', shortLabel: 'Produtos', icon: Package },
-            { id: 'pagamentos', label: 'Pagamentos', shortLabel: 'Pag.', icon: CreditCard },
-            { id: 'config', label: 'Configurações', shortLabel: 'Config', icon: Settings },
-            { id: 'fila', label: 'Fila do churrasqueiro', shortLabel: 'Fila', icon: ChefHat },
-          ].map((tab) => {
+          { id: 'produtos', label: 'Produtos', shortLabel: 'Produtos', icon: Package },
+          { id: 'pagamentos', label: 'Pagamentos', shortLabel: 'Pag.', icon: CreditCard },
+          { id: 'cardapio', label: 'Cardápio', shortLabel: 'Cardápio', icon: BookOpen },
+          { id: 'config', label: 'Configurações', shortLabel: 'Config', icon: Settings },
+          { id: 'fila', label: 'Fila do churrasqueiro', shortLabel: 'Fila', icon: ChefHat },
+        ].map((tab) => {
             const Icon = tab.icon;
             return (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as typeof activeTab)}
+                onClick={() => {
+                  if (tab.id === 'cardapio') {
+                    if (storeSlug) navigate(`/${storeSlug}`);
+                    return;
+                  }
+                  setActiveTab(tab.id as typeof activeTab);
+                }}
                 className={`cursor-pointer px-3 sm:px-4 py-2 rounded-lg text-[11px] sm:text-sm font-semibold transition-all active:scale-95 hover:-translate-y-0.5 flex flex-col sm:flex-row items-center gap-1.5 sm:gap-2 text-center min-w-[92px] sm:min-w-0 border ${
                   activeTab === tab.id
                     ? 'bg-brand-primary text-white border-brand-primary ring-2 ring-brand-primary/25 shadow-[0_8px_18px_rgba(15,23,42,0.16)]'

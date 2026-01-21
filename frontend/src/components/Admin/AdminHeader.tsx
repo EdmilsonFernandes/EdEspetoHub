@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { LayoutDashboard, LogOut, Package, Globe, Instagram } from 'lucide-react';
+import { LogOut, Globe, Instagram } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -45,15 +45,6 @@ export function AdminHeader({ contextLabel = 'Painel da Loja' }: Props) {
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase())
     .join('');
-
-  const navigationGroups = {
-    main: [
-      { label: 'Dashboard', icon: LayoutDashboard, path: '/admin/dashboard' },
-    ],
-    store: [
-      { label: 'Vitrine', icon: Package, path: storeSlug ? `/${storeSlug}` : '/' },
-    ],
-  };
 
   useEffect(() => {
     const storeId = auth?.store?.id;
@@ -157,7 +148,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja' }: Props) {
           {showMobileDetails ? 'Ocultar' : 'Detalhes'}
         </button>
       </div>
-      <div className={`w-full md:w-auto flex flex-col sm:flex-row md:items-center gap-3 ${showMobileDetails ? 'flex' : 'hidden'} md:flex`}>
+      <div className="w-full md:w-auto flex flex-col sm:flex-row md:items-center gap-3">
         <div className="flex items-center gap-2 bg-white/10 rounded-full px-3 py-1.5 border border-white/15 w-full sm:w-auto">
           <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center text-xs font-bold">
             {userInitials || 'AD'}
@@ -173,42 +164,6 @@ export function AdminHeader({ contextLabel = 'Painel da Loja' }: Props) {
           variant="dark"
           details={planDetails}
         />
-
-        {/* Main Actions */}
-        <div className="flex flex-wrap items-center gap-1 bg-white/10 rounded-lg p-1 w-full sm:w-auto">
-          {navigationGroups.main.map((item) => {
-            const Icon = item.icon;
-            return (
-              <button
-                key={item.path}
-                onClick={() => navigate(item.path)}
-                className="px-3 py-2 rounded-md text-[11px] sm:text-xs font-semibold hover:bg-white/20 transition hover:-translate-y-0.5 active:scale-95 flex flex-col sm:flex-row items-center gap-1.5 text-center"
-                title={item.label}
-              >
-                <Icon size={14} />
-                <span className="leading-tight">{item.label}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Store Actions */}
-        <div className="flex flex-wrap items-center gap-1 w-full sm:w-auto">
-          {navigationGroups.store.map((item) => {
-            const Icon = item.icon;
-            return (
-              <button
-                key={item.path}
-                onClick={() => navigate(item.path)}
-                className="px-3 py-2 rounded-lg text-[11px] sm:text-xs font-semibold bg-white/15 hover:bg-white/25 transition hover:-translate-y-0.5 active:scale-95 flex flex-col sm:flex-row items-center gap-1.5 text-center"
-                title={item.label}
-              >
-                <Icon size={14} />
-                <span className="leading-tight">{item.label}</span>
-              </button>
-            );
-          })}
-        </div>
 
         {/* Logout */}
         <button
