@@ -32,6 +32,24 @@ export class StoreService
 {
   private subscriptionService = new SubscriptionService();
   private storeRepository = AppDataSource.getRepository(Store);
+  private normalizePixKey(value?: string)
+  {
+    if (!value) return undefined;
+    const trimmed = value.toString().trim();
+    if (!trimmed) return undefined;
+    if (trimmed.startsWith('+')) return trimmed;
+    const digits = trimmed.replace(/\D/g, '');
+    if (!digits) return trimmed;
+    if (digits.startsWith('55')) return `+${digits}`;
+    if (digits.startsWith('0'))
+    {
+      const stripped = digits.replace(/^0+/, '');
+      if (!stripped) return trimmed;
+      return `+55${stripped}`;
+    }
+    if (digits.length > 11) return `+${digits}`;
+    return trimmed;
+  }
 
   /* =========================
    * CREATE STORE
@@ -72,6 +90,7 @@ export class StoreService
         description: input.description,
         primaryColor: input.primaryColor,
         secondaryColor: input.secondaryColor,
+        pixKey: this.normalizePixKey(input.pixKey),
         socialLinks,
         openingHours: input.openingHours ?? [],
         orderTypes: input.orderTypes ?? [ 'delivery', 'pickup', 'table' ],
@@ -159,8 +178,10 @@ export class StoreService
       store.settings.secondaryColor =
         data.secondaryColor ?? store.settings.secondaryColor;
 
-      store.settings.pixKey =
-        data.pixKey ?? store.settings.pixKey;
+      if (data.pixKey !== undefined)
+      {
+        store.settings.pixKey = this.normalizePixKey(data.pixKey);
+      }
 
       if (data.socialLinks)
       {

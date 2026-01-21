@@ -65,7 +65,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug }) => {
             className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
             placeholder="Ex: +5511999999999 ou email@pix.com"
           />
-          <p className="text-xs text-gray-500">Usada para gerar o QR Code na confirmação de pagamento.</p>
+          <p className="text-xs text-gray-500">Usada para gerar o QR Code na confirmação de pagamento. Telefone com DDD pode começar com 0 que ajustamos para +55.</p>
         </div>
 
         <div className="space-y-2">
