@@ -210,7 +210,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
       </div>
       {showMobileDetails && (
         <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm md:hidden flex items-end justify-center px-4 pb-6">
-          <div className="w-full max-w-md rounded-3xl bg-white p-5 shadow-2xl border border-slate-200">
+          <div className="w-full max-w-md rounded-3xl bg-white p-5 shadow-2xl border border-slate-200 overflow-hidden">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Info da loja</p>
@@ -235,11 +235,11 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
                   href={storeUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2"
+                  className="flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 min-w-0"
                 >
-                  <span className="flex items-center gap-2">
+                  <span className="flex items-center gap-2 min-w-0">
                     <Globe size={14} weight="duotone" className="text-slate-500" />
-                    {storeUrl.replace('https://', '')}
+                    <span className="truncate">{storeUrl.replace('https://', '')}</span>
                   </span>
                   <span className="text-xs text-slate-400">Abrir</span>
                 </a>
@@ -249,11 +249,11 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
                   href={`https://instagram.com/${instagramHandle.replace('@', '')}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2"
+                  className="flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 min-w-0"
                 >
-                  <span className="flex items-center gap-2">
+                  <span className="flex items-center gap-2 min-w-0">
                     <InstagramLogo size={14} weight="duotone" className="text-slate-500" />
-                    {instagramHandle}
+                    <span className="truncate">{instagramHandle}</span>
                   </span>
                   <span className="text-xs text-slate-400">Abrir</span>
                 </a>

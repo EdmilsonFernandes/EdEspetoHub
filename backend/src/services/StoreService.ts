@@ -93,6 +93,7 @@ export class StoreService
         primaryColor: input.primaryColor,
         secondaryColor: input.secondaryColor,
         pixKey: this.normalizePixKey(input.pixKey),
+        contactEmail: input.contactEmail,
         socialLinks,
         openingHours: input.openingHours ?? [],
         orderTypes: input.orderTypes ?? [ 'delivery', 'pickup', 'table' ],
@@ -175,6 +176,10 @@ export class StoreService
       if (data.pixKey !== undefined)
       {
         store.settings.pixKey = this.normalizePixKey(data.pixKey);
+      }
+      if (data.contactEmail !== undefined)
+      {
+        store.settings.contactEmail = data.contactEmail;
       }
 
       if (data.socialLinks)

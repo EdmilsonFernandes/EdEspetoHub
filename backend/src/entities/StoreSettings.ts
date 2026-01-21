@@ -42,6 +42,9 @@ export class StoreSettings
   @Column({ name: 'pix_key', nullable: true })
   pixKey?: string;
 
+  @Column({ name: 'contact_email', nullable: true })
+  contactEmail?: string;
+
   @Column({
     name: 'social_links',
     type: 'jsonb',

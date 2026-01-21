@@ -31,6 +31,7 @@ const Header = ({
   branding,
   instagramHandle,
   whatsappNumber,
+  contactEmail,
   isOpenNow,
   todayHoursLabel,
   onOpenQueue,
@@ -164,6 +165,7 @@ export const MenuView = ({
   branding,
   instagramHandle,
   whatsappNumber,
+  contactEmail,
   isOpenNow,
   todayHoursLabel,
   storeAddress,
@@ -451,6 +453,14 @@ export const MenuView = ({
                 >
                   <InstagramLogo size={16} weight="duotone" />
                   <span>Instagram</span>
+                </a>
+              )}
+              {contactEmail && (
+                <a
+                  href={`mailto:${contactEmail}`}
+                  className="px-3.5 py-2 rounded-full text-xs font-semibold border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 transition"
+                >
+                  ✉️ Email
                 </a>
               )}
               </div>

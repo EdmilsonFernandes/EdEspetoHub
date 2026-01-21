@@ -83,6 +83,18 @@ export const BrandingSettings = ({ branding, onChange, storeSlug }) => {
           </div>
         </div>
 
+        <div className="space-y-2">
+          <label className="text-sm font-semibold text-gray-700">Email de contato</label>
+          <input
+            type="email"
+            value={branding.contactEmail || ""}
+            onChange={(e) => handleChange("contactEmail", e.target.value)}
+            className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
+            placeholder="contato@sualoja.com"
+          />
+          <p className="text-xs text-gray-500">Opcional, aparece para contato no cardápio.</p>
+        </div>
+
         <div className="space-y-3">
           <label className="text-sm font-semibold text-gray-700">Logo da loja</label>
           <div className="flex items-start gap-4">

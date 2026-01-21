@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS store_settings (
   primary_color TEXT NOT NULL DEFAULT '#b91c1c',
   secondary_color TEXT,
   pix_key TEXT,
+  contact_email TEXT,
   social_links JSONB DEFAULT '[]',
   opening_hours JSONB DEFAULT '[]'
 );
@@ -60,6 +61,8 @@ ALTER TABLE store_settings
 ADD COLUMN IF NOT EXISTS description TEXT;
 ALTER TABLE store_settings
 ADD COLUMN IF NOT EXISTS pix_key TEXT;
+ALTER TABLE store_settings
+ADD COLUMN IF NOT EXISTS contact_email TEXT;
 
 CREATE TABLE IF NOT EXISTS products (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

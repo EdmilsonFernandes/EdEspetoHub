@@ -548,6 +548,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     primaryColor: session?.store?.settings?.primaryColor || '#b91c1c',
     secondaryColor: session?.store?.settings?.secondaryColor || '#111827',
     pixKey: session?.store?.settings?.pixKey || '',
+    contactEmail: session?.store?.settings?.contactEmail || '',
     instagram: instagramHandle?.replace('@', '') || '',
   }));
   const [savingBranding, setSavingBranding] = useState(false);
@@ -591,6 +592,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       primaryColor: session?.store?.settings?.primaryColor || '#b91c1c',
       secondaryColor: session?.store?.settings?.secondaryColor || '#111827',
       pixKey: session?.store?.settings?.pixKey || '',
+      contactEmail: session?.store?.settings?.contactEmail || '',
       instagram: instagramHandle?.replace('@', '') || '',
     });
   }, [
@@ -600,6 +602,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     session?.store?.settings?.primaryColor,
     session?.store?.settings?.secondaryColor,
     session?.store?.settings?.pixKey,
+    session?.store?.settings?.contactEmail,
     instagramHandle,
   ]);
 
@@ -713,6 +716,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         primaryColor: brandingDraft.primaryColor,
         secondaryColor: brandingDraft.secondaryColor,
         pixKey: brandingDraft.pixKey ?? '',
+        contactEmail: brandingDraft.contactEmail ?? '',
         socialLinks: brandingDraft.instagram ? [{ type: 'instagram', value: brandingDraft.instagram }] : [],
       };
       const updated = await storeService.update(storeId, payload);
@@ -737,7 +741,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     <AdminLayout contextLabel="Painel da Loja">
       {menuVisible ? (
         <div className="flex justify-center">
-          <div className="bg-white rounded-xl border border-slate-200 p-2 shadow-sm flex flex-nowrap justify-start gap-2 w-full max-w-5xl overflow-x-auto no-scrollbar">
+          <div className="bg-white rounded-xl border border-slate-200 p-2 shadow-sm flex flex-wrap sm:flex-nowrap justify-center sm:justify-start gap-2 w-full max-w-5xl overflow-visible sm:overflow-x-auto no-scrollbar">
           {[
             { id: 'resumo', label: 'Resumo', shortLabel: 'Resumo', icon: ChartBar },
             { id: 'pedidos', label: 'Pedidos', shortLabel: 'Pedidos', icon: ShoppingCart },
@@ -758,16 +762,15 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                   }
                   setActiveTab(tab.id as typeof activeTab);
                 }}
-                className={`cursor-pointer px-3 sm:px-4 py-2 rounded-lg text-[11px] sm:text-sm font-semibold whitespace-nowrap transition-all active:scale-95 hover:-translate-y-0.5 flex flex-col sm:flex-row items-center gap-1.5 sm:gap-2 text-center min-w-[92px] sm:min-w-0 border ${
+                className={`cursor-pointer px-3 sm:px-4 py-2 rounded-lg text-[10px] sm:text-sm font-semibold transition-all active:scale-95 hover:-translate-y-0.5 flex flex-col sm:flex-row items-center gap-1 sm:gap-2 text-center min-w-[96px] sm:min-w-0 border ${
                   activeTab === tab.id
                     ? 'bg-brand-primary text-white border-brand-primary ring-2 ring-brand-primary/25 shadow-[0_8px_18px_rgba(15,23,42,0.16)]'
                     : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:text-slate-900 hover:shadow-sm'
                 }`}
               >
                 <Icon size={16} weight="duotone" />
-                <span className="leading-tight">
-                  <span className="sm:hidden">{tab.shortLabel || tab.label}</span>
-                  <span className="hidden sm:inline">{tab.label}</span>
+                <span className="leading-tight text-center max-w-[90px] sm:max-w-none line-clamp-2">
+                  {tab.label}
                 </span>
               </button>
             );

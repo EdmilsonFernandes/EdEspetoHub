@@ -30,6 +30,7 @@ export function StorePage() {
   const [storePhone, setStorePhone] = useState('');
   const [storeAddress, setStoreAddress] = useState('');
   const [storeDescription, setStoreDescription] = useState('');
+  const [storeEmail, setStoreEmail] = useState('');
   const [storePixKey, setStorePixKey] = useState('');
   const [openingHours, setOpeningHours] = useState([]);
   const [orderTypes, setOrderTypes] = useState([ 'delivery', 'pickup', 'table' ]);
@@ -196,6 +197,7 @@ export function StorePage() {
           setStorePhone(data.owner?.phone || '');
           setStoreAddress(data.owner?.address || '');
           setStoreDescription(data.settings?.description || '');
+          setStoreEmail(data.settings?.contactEmail || '');
           setStorePixKey(data.settings?.pixKey || '');
           setStoreOpenNow(isStoreOpenNow(normalizedHours));
           setStoreSubscription(data.subscription || null);
@@ -953,6 +955,7 @@ export function StorePage() {
               onOpenAdmin={isStoreAdmin ? () => navigate('/admin/dashboard') : undefined}
               isOpenNow={storeOpenNow}
               whatsappNumber={storePhone}
+              contactEmail={storeEmail}
               todayHoursLabel={todayHoursLabel}
               storeAddress={storeAddress}
               compactHeader={isMobile}
@@ -1137,6 +1140,22 @@ export function StorePage() {
                     >
                       {copiedPhone ? 'Telefone copiado' : 'Copiar telefone'}
                     </button>
+                  </div>
+                </div>
+              )}
+              {storeEmail && (
+                <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-3">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Email</p>
+                    <p className="text-sm font-semibold text-slate-800">{storeEmail}</p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <a
+                      href={`mailto:${storeEmail}`}
+                      className="px-3 py-2 rounded-full text-xs font-semibold border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 transition"
+                    >
+                      Enviar email
+                    </a>
                   </div>
                 </div>
               )}
