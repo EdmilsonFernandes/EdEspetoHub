@@ -307,6 +307,13 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
     CANCELLED: 'CANCELADO',
     EXPIRED: 'EXPIRADO',
   };
+  const historyToneMap: Record<string, string> = {
+    PAID: 'bg-emerald-100 text-emerald-700',
+    PENDING: 'bg-amber-100 text-amber-700',
+    FAILED: 'bg-rose-100 text-rose-700',
+    CANCELLED: 'bg-slate-100 text-slate-600',
+    EXPIRED: 'bg-slate-100 text-slate-600',
+  };
 
   if (loading) {
     return <div className="py-8 text-sm text-slate-500">Carregando dados de pagamento...</div>;
@@ -376,6 +383,7 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
                       const providerMeta = getPaymentProviderMeta(payment.provider);
                       const normalizedStatus = (payment.status || '').toUpperCase();
                       const statusLabel = historyStatusMap[normalizedStatus] || payment.status || '—';
+                      const statusTone = historyToneMap[normalizedStatus] || 'bg-slate-100 text-slate-600';
                       return (
                         <p className="font-semibold text-slate-700 flex flex-wrap items-center gap-2">
                           {paymentMeta.icon && (
@@ -383,7 +391,9 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
                           )}
                           <span>{paymentMeta.label}</span>
                           <span className="text-slate-300">·</span>
-                          <span>{statusLabel}</span>
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${statusTone}`}>
+                            {statusLabel}
+                          </span>
                           {providerMeta.icon && (
                             <>
                               <span className="text-slate-300">·</span>

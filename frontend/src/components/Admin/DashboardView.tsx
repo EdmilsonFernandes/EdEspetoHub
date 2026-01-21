@@ -24,6 +24,8 @@ export const DashboardView = ({ orders = [], customers = [] }) => {
   const nowDate = new Date();
   const currentMonthKey = `${nowDate.getFullYear()}-${String(nowDate.getMonth() + 1).padStart(2, "0")}`;
   const [selectedMonth, setSelectedMonth] = useState(currentMonthKey);
+  const [topSort, setTopSort] = useState("qty");
+  const [customerQuery, setCustomerQuery] = useState("");
   const periodLabel = periodDays === "all" ? "Todo período" : `${periodDays} dias`;
 
   const formatMonthLabel = (key) => {
@@ -141,7 +143,7 @@ export const DashboardView = ({ orders = [], customers = [] }) => {
     const topProducts = Object.entries(productCount)
       .map(([name, qty]) => ({ name, qty }))
       .sort((a, b) => b.qty - a.qty)
-      .slice(0, 5);
+      .slice(0, 8);
 
     const salesByDay = {};
     periodOrders.forEach(({ order }) => {
@@ -161,6 +163,23 @@ export const DashboardView = ({ orders = [], customers = [] }) => {
     const avgTicket = totalOrders > 0 ? totalSales / totalOrders : 0;
     return { totalSales, totalOrders, topProducts, chartData, periodRevenue, monthRevenue, avgTicket };
   }, [orders, periodDays, selectedMonth, currentMonthKey]);
+
+  const sortedTopProducts = useMemo(() => {
+    const list = [...stats.topProducts];
+    if (topSort === "name") {
+      return list.sort((a, b) => a.name.localeCompare(b.name)).slice(0, 5);
+    }
+    return list.sort((a, b) => b.qty - a.qty).slice(0, 5);
+  }, [stats.topProducts, topSort]);
+
+  const filteredCustomers = useMemo(() => {
+    const normalized = customerQuery.trim().toLowerCase();
+    if (!normalized) return customers;
+    return customers.filter((customer) => {
+      const haystack = [customer.name, customer.phone].filter(Boolean).join(" ").toLowerCase();
+      return haystack.includes(normalized);
+    });
+  }, [customers, customerQuery]);
 
   const exportCustomers = () => {
     const headers = [
@@ -325,10 +344,33 @@ export const DashboardView = ({ orders = [], customers = [] }) => {
 
         {/* Top produtos */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 h-80 overflow-hidden">
-          <h4 className="font-bold text-gray-700 mb-4">
-            Top 5 Produtos Mais Vendidos
-          </h4>
-          {stats.topProducts.length === 0 ? (
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+            <h4 className="font-bold text-gray-700">
+              Top 5 Produtos Mais Vendidos
+            </h4>
+            <div className="flex items-center gap-2 text-xs">
+              <span className="text-slate-400 uppercase tracking-wide">Ordenar</span>
+              <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-full p-1">
+                {[
+                  { id: "qty", label: "Qtd" },
+                  { id: "name", label: "Nome" },
+                ].map((option) => (
+                  <button
+                    key={option.id}
+                    onClick={() => setTopSort(option.id)}
+                    className={`px-2.5 py-1 rounded-full text-[11px] font-semibold transition-all hover:-translate-y-0.5 active:scale-95 ${
+                      topSort === option.id
+                        ? "bg-brand-primary text-white"
+                        : "text-slate-500 hover:bg-white"
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+          {sortedTopProducts.length === 0 ? (
             <div className="h-full flex items-center justify-center text-sm text-gray-400">
               Sem produtos vendidos ainda.
             </div>
@@ -336,7 +378,7 @@ export const DashboardView = ({ orders = [], customers = [] }) => {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={stats.topProducts}
+                  data={sortedTopProducts}
                   cx="50%"
                   cy="45%"
                   innerRadius={55}
@@ -344,7 +386,7 @@ export const DashboardView = ({ orders = [], customers = [] }) => {
                   paddingAngle={5}
                   dataKey="qty"
                 >
-                  {stats.topProducts.map((entry, index) => (
+                  {sortedTopProducts.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
                       fill={COLORS[index % COLORS.length]}
@@ -371,21 +413,30 @@ export const DashboardView = ({ orders = [], customers = [] }) => {
           <div>
             <h4 className="font-bold text-gray-700">Clientes</h4>
             <span className="text-sm text-gray-500">
-              {customers.length} cadastrados
+              {filteredCustomers.length} cadastrados
             </span>
           </div>
 
-          <button
-            onClick={exportCustomers}
-            className="px-3 py-2 rounded-lg bg-brand-primary text-white text-xs font-semibold hover:opacity-90 transition-all hover:-translate-y-0.5 active:scale-95"
-          >
-            Exportar Excel (.csv)
-          </button>
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+            <input
+              type="text"
+              value={customerQuery}
+              onChange={(e) => setCustomerQuery(e.target.value)}
+              placeholder="Buscar cliente ou telefone"
+              className="w-full sm:w-56 px-3 py-2 rounded-lg border border-slate-200 text-xs focus:ring-2 focus:ring-brand-primary"
+            />
+            <button
+              onClick={exportCustomers}
+              className="px-3 py-2 rounded-lg bg-brand-primary text-white text-xs font-semibold hover:opacity-90 transition-all hover:-translate-y-0.5 active:scale-95"
+            >
+              Exportar Excel (.csv)
+            </button>
+          </div>
         </div>
 
         <div className="max-h-80 overflow-y-auto pr-1">
           <div className="grid gap-3 sm:grid-cols-2">
-            {customers.map((customer) => {
+            {filteredCustomers.map((customer) => {
               const initials = String(customer.name || 'CL')
                 .split(' ')
                 .filter(Boolean)
@@ -414,9 +465,9 @@ export const DashboardView = ({ orders = [], customers = [] }) => {
             })}
           </div>
 
-          {customers.length === 0 && (
+          {filteredCustomers.length === 0 && (
             <div className="text-center text-gray-400 py-6 text-sm">
-              Nenhum cliente registrado ainda.
+              Nenhum cliente encontrado.
             </div>
           )}
         </div>
