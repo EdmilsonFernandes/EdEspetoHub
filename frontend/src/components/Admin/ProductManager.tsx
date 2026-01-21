@@ -177,14 +177,34 @@ export const ProductManager = ({ products, onProductsChange }) => {
     reader.readAsDataURL(file);
   };
 
+  const previewPrice =
+    formData.price && !Number.isNaN(Number(formData.price))
+      ? formatCurrency(Number(formData.price))
+      : '—';
+  const previewCategory =
+    categorySelect === '__custom__'
+      ? formatCategoryLabel(formData.category)
+      : formatCategoryLabel(categorySelect || initialForm.category);
+  const previewImage = imagePreview || formData.imageUrl;
+
   return (
     <div className="space-y-6">
-      <div ref={formRef} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-        <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
-          <Plus size={20} />
-          Novo Produto
-        </h3>
-        <form onSubmit={handleSubmit} className="space-y-4">
+      <div ref={formRef} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+        <div className="flex flex-wrap items-start justify-between gap-3 mb-6">
+          <div>
+            <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <Plus size={20} className="text-brand-primary" />
+              Cadastro de produto
+            </h3>
+            <p className="text-xs text-slate-500 mt-1">Cadastre itens do cardápio com foto, preço e categoria.</p>
+          </div>
+          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-brand-primary-soft text-brand-primary">
+            Novo item
+          </span>
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+          <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">Nome do Produto</label>
@@ -404,7 +424,44 @@ export const ProductManager = ({ products, onProductsChange }) => {
               Limpar
             </button>
           </div>
-        </form>
+          </form>
+
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 space-y-4">
+            <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Pré-visualização</p>
+            <div className="rounded-xl overflow-hidden border border-slate-200 bg-white">
+              {previewImage ? (
+                <img src={previewImage} alt="Prévia do produto" className="w-full h-44 object-cover" />
+              ) : (
+                <div className="h-44 flex flex-col items-center justify-center gap-2 text-xs text-slate-400">
+                  <ImageIcon size={20} />
+                  Adicione uma foto para destacar o produto
+                </div>
+              )}
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <h4 className="text-base font-semibold text-slate-900 truncate">
+                  {formData.name || 'Nome do produto'}
+                </h4>
+                <span className="text-sm font-bold text-brand-primary">{previewPrice}</span>
+              </div>
+              <span className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-semibold bg-white border border-slate-200 text-slate-600">
+                {previewCategory || 'Categoria'}
+              </span>
+              <p className="text-xs text-slate-500">
+                {formData.description || 'Adicione uma descrição curta para ajudar o cliente.'}
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-2 text-xs text-slate-500">
+              <div className="rounded-lg border border-slate-200 bg-white px-2 py-2">
+                Imagem: {imageMode === 'upload' ? 'Upload' : 'URL'}
+              </div>
+              <div className="rounded-lg border border-slate-200 bg-white px-2 py-2">
+                Status: {saving ? 'Salvando...' : 'Pronto'}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-x-auto">
