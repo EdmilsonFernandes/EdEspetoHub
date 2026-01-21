@@ -84,7 +84,7 @@ const OrdersView = ({ orders, products, storeSlug }) => {
   const pagedOrders = useMemo(() => {
     const start = (ordersPage - 1) * ordersPageSize;
     return filteredOrders.slice(start, start + ordersPageSize);
-  }, [filteredOrders, ordersPage]);
+  }, [filteredOrders, ordersPage, ordersPageSize]);
 
   useEffect(() => {
     setOrdersPage(1);
@@ -469,7 +469,7 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
                   checked={showAllHistory}
                   onChange={(event) => setShowAllHistory(event.target.checked)}
                 />
-                Mostrar falhados
+                Incluir falhados
               </label>
             </div>
             <div className="mt-3 space-y-2">
