@@ -176,6 +176,7 @@ export const MenuView = ({
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [showStoreDetails, setShowStoreDetails] = useState(false);
   const mapQuery = storeAddress ? encodeURIComponent(storeAddress) : "";
   const googleMapsUrl = mapQuery
     ? `https://www.google.com/maps/search/?api=1&query=${mapQuery}`
@@ -366,7 +367,20 @@ export const MenuView = ({
               </div>
             )}
 
-            {!compactHeader && storeAddress && (
+            {!compactHeader && (
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowStoreDetails((prev) => !prev)}
+                  className="px-3 py-1.5 rounded-full text-xs font-semibold border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 transition flex items-center gap-2"
+                >
+                  <Info size={14} weight="duotone" />
+                  {showStoreDetails ? "Ocultar detalhes" : "Detalhes da loja"}
+                </button>
+              </div>
+            )}
+
+            {!compactHeader && showStoreDetails && storeAddress && (
               <div className="rounded-2xl border border-slate-200 bg-white/90 p-4">
                 <a
                   href={googleMapsUrl}
@@ -407,7 +421,7 @@ export const MenuView = ({
             )}
 
             {/* CTA Buttons */}
-            {!compactHeader && (
+            {!compactHeader && showStoreDetails && (
               <div className="flex flex-wrap items-center gap-2 w-full pt-1">
               {normalizeWhatsApp(whatsappNumber) && (
                 <a
