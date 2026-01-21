@@ -43,7 +43,9 @@ export const DashboardView = ({ orders = [], customers = [] }) => {
     if (!key) return "";
     const date = new Date(`${key}T00:00:00`);
     if (Number.isNaN(date.getTime())) return key;
-    return date.toLocaleDateString("pt-BR");
+    const weekday = date.toLocaleDateString("pt-BR", { weekday: "short" });
+    const day = date.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+    return `${weekday} ${day}`;
   };
 
   const resolveTimestamp = (order) => {
