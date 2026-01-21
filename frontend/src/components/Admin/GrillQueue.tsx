@@ -32,6 +32,7 @@ export const GrillQueue = () => {
   }, []);
   const [activeTab, setActiveTab] = useState<'queue' | 'completed'>('queue');
   const [currentTime, setCurrentTime] = useState(Date.now());
+  const [confirmModal, setConfirmModal] = useState(null);
   const [error, setError] = useState('');
   const [updating, setUpdating] = useState<string | null>(null);
   const [soundEnabled, setSoundEnabled] = useState(() => {
@@ -260,6 +261,23 @@ export const GrillQueue = () => {
     } finally {
       setUpdating(null);
     }
+  };
+
+  const openPaymentConfirm = (order) => {
+    setConfirmModal({
+      id: order.id,
+      customerName: order.customerName || order.name || 'Cliente',
+      total: order.total || 0,
+      table: order.table || null,
+      payment: order.payment,
+      phone: order.phone || '',
+    });
+  };
+
+  const handleConfirmPaid = async () => {
+    if (!confirmModal?.id) return;
+    await handleAdvance(confirmModal.id, 'done');
+    setConfirmModal(null);
   };
 
   const applyItemsChange = async (orderId, updater) => {
@@ -700,7 +718,7 @@ export const GrillQueue = () => {
                       Pedido pronto? Clique para finalizar.
                     </div>
                     <button
-                      onClick={() => handleAdvance(order.id, "done")}
+                      onClick={() => openPaymentConfirm(order)}
                       disabled={updating === order.id}
                       className="w-full sm:w-auto px-3 py-2 rounded-lg bg-emerald-600 text-white text-xs font-bold flex items-center justify-center gap-1 disabled:opacity-60 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95"
                     >
@@ -718,6 +736,72 @@ export const GrillQueue = () => {
               Nenhum pedido aguardando.
             </div>
           )}
+        </div>
+      )}
+
+      {confirmModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 px-4">
+          <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl border border-slate-200">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Confirmar pagamento</p>
+                <h3 className="text-lg font-bold text-slate-900 mt-2">Pedido pronto para cobrar</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setConfirmModal(null)}
+                className="text-slate-400 hover:text-slate-600 transition-all hover:-translate-y-0.5 active:scale-95"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <div className="mt-4 space-y-3 text-sm text-slate-600">
+              <div className="flex items-center justify-between">
+                <span>Cliente</span>
+                <span className="font-semibold text-slate-800">{confirmModal.customerName}</span>
+              </div>
+              {confirmModal.table && (
+                <div className="flex items-center justify-between">
+                  <span>Mesa</span>
+                  <span className="font-semibold text-slate-800">Mesa {confirmModal.table}</span>
+                </div>
+              )}
+              {confirmModal.phone && (
+                <div className="flex items-center justify-between">
+                  <span>Telefone</span>
+                  <span className="font-semibold text-slate-800">{confirmModal.phone}</span>
+                </div>
+              )}
+              <div className="flex items-center justify-between">
+                <span>Pagamento</span>
+                <span className="font-semibold text-slate-800">
+                  {getPaymentMethodMeta(confirmModal.payment).label}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span>Total</span>
+                <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-sm font-bold">
+                  {formatCurrency(confirmModal.total || 0)}
+                </span>
+              </div>
+            </div>
+            <div className="mt-6 flex flex-col sm:flex-row gap-2">
+              <button
+                type="button"
+                onClick={() => setConfirmModal(null)}
+                className="w-full sm:w-auto px-4 py-2 rounded-lg border border-slate-200 text-slate-600 text-sm font-semibold hover:bg-slate-50 transition-all hover:-translate-y-0.5 active:scale-95"
+              >
+                Voltar
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmPaid}
+                className="w-full sm:w-auto px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:opacity-90 transition-all hover:-translate-y-0.5 active:scale-95"
+              >
+                Pagamento recebido
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
