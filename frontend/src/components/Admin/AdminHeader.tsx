@@ -35,6 +35,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
       ? branding.brandName
       : storeNameFromAuth || branding?.brandName);
   const storeUrl = storeSlug ? `https://www.chamanoespeto.com.br/${storeSlug}` : '';
+  const storeDescription = auth?.store?.settings?.description || '';
   const socialLinks = auth?.store?.settings?.socialLinks || [];
   const instagramLink = socialLinks.find((link) => link?.type === 'instagram')?.value;
   const instagramHandle = instagramLink ? `@${instagramLink.replace('@', '')}` : '';
@@ -107,6 +108,11 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
         <div>
           <p className="text-sm uppercase tracking-wide font-semibold opacity-90">{contextLabel}</p>
           <h1 className="text-xl font-black leading-tight">{storeName}</h1>
+          {storeDescription && (
+            <p className="mt-1 text-xs text-white/80 max-w-[420px] line-clamp-2">
+              {storeDescription}
+            </p>
+          )}
           <div className="hidden md:flex mt-2 flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 text-xs w-full max-w-full">
             {storeSlug && (
               <a
@@ -207,6 +213,11 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
               </button>
             </div>
             <div className="mt-4 space-y-2 text-sm text-slate-700">
+              {storeDescription && (
+                <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
+                  {storeDescription}
+                </div>
+              )}
               {storeSlug && (
                 <a
                   href={storeUrl}
