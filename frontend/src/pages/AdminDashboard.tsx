@@ -26,6 +26,7 @@ const OrdersView = ({ orders, products, storeSlug }) => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [query, setQuery] = useState('');
   const [dateFilter, setDateFilter] = useState('');
+  const [periodFilter, setPeriodFilter] = useState('all');
   const productsById = useMemo(() => {
     const map = new Map();
     (products || []).forEach((product) => map.set(product.id, product));
@@ -45,6 +46,16 @@ const OrdersView = ({ orders, products, storeSlug }) => {
   const filteredOrders = useMemo(() => {
     const normalized = query.trim().toLowerCase();
     return sortedOrders.filter((order) => {
+      if (periodFilter !== 'all' && !dateFilter) {
+        const periodDays = Number(periodFilter);
+        const createdAt = order.createdAt?.seconds
+          ? new Date(order.createdAt.seconds * 1000).getTime()
+          : new Date(order.createdAt).getTime();
+        if (Number.isFinite(createdAt)) {
+          const cutoff = Date.now() - periodDays * 24 * 60 * 60 * 1000;
+          if (createdAt < cutoff) return false;
+        }
+      }
       if (statusFilter !== 'all' && order.status !== statusFilter) return false;
       if (dateFilter) {
         const date = order.createdAt?.seconds ? new Date(order.createdAt.seconds * 1000) : new Date(order.createdAt);
@@ -59,7 +70,7 @@ const OrdersView = ({ orders, products, storeSlug }) => {
         .toLowerCase();
       return haystack.includes(normalized);
     });
-  }, [sortedOrders, statusFilter, query, dateFilter]);
+  }, [sortedOrders, statusFilter, query, dateFilter, periodFilter]);
 
   const statusCounts = useMemo(() => {
     return (orders || []).reduce(
@@ -113,6 +124,16 @@ const OrdersView = ({ orders, products, storeSlug }) => {
           ))}
         </div>
         <div className="flex flex-col sm:flex-row gap-2 lg:ml-auto w-full lg:w-auto">
+          <select
+            value={periodFilter}
+            onChange={(e) => setPeriodFilter(e.target.value)}
+            className="w-full sm:w-36 rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-600 focus:ring-2 focus:ring-brand-primary"
+          >
+            <option value="all">Todo período</option>
+            <option value="7">Últimos 7 dias</option>
+            <option value="30">Últimos 30 dias</option>
+            <option value="90">Últimos 90 dias</option>
+          </select>
           <input
             type="date"
             value={dateFilter}
