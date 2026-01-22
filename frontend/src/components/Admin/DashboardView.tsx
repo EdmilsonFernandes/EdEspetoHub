@@ -284,7 +284,7 @@ export const DashboardView = ({ orders = [], customers = [], setupChecklist = []
       {/* ---------- CARDS RESUMO ---------- */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Faturamento total */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
           <div className="flex justify-between items-start">
             <div>
               <p className="text-gray-500 text-sm font-bold uppercase">
@@ -302,7 +302,7 @@ export const DashboardView = ({ orders = [], customers = [], setupChecklist = []
         </div>
 
         {/* Faturamento do mês */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
           <div className="flex justify-between items-start">
             <div>
               <p className="text-gray-500 text-sm font-bold uppercase">
@@ -333,7 +333,7 @@ export const DashboardView = ({ orders = [], customers = [], setupChecklist = []
         </div>
 
         {/* Faturamento do período */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
           <div className="flex justify-between items-start">
             <div>
               <p className="text-gray-500 text-sm font-bold uppercase">
@@ -351,7 +351,7 @@ export const DashboardView = ({ orders = [], customers = [], setupChecklist = []
         </div>
 
         {/* Total Pedidos */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
           <div className="flex justify-between items-start">
             <div>
               <p className="text-gray-500 text-sm font-bold uppercase">
@@ -374,7 +374,7 @@ export const DashboardView = ({ orders = [], customers = [], setupChecklist = []
       {/* ---------- GRÁFICOS ---------- */}
       <div className="grid md:grid-cols-2 gap-6">
         {/* Faturamento por dia */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 h-80 overflow-hidden flex flex-col">
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 h-80 overflow-hidden flex flex-col">
           <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
             <h4 className="font-bold text-gray-700">Vendas por dia</h4>
             <div className="flex flex-wrap gap-2">
@@ -431,7 +431,7 @@ export const DashboardView = ({ orders = [], customers = [], setupChecklist = []
         </div>
 
         {/* Top produtos */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 h-80 overflow-hidden">
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 h-80 overflow-hidden">
           <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
             <h4 className="font-bold text-gray-700">
               Top 5 Produtos Mais Vendidos
@@ -495,7 +495,7 @@ export const DashboardView = ({ orders = [], customers = [], setupChecklist = []
       </div>
 
       {/* ---------- LISTA DE CLIENTES ---------- */}
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+      <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
         <div className="flex items-center justify-between mb-4 gap-3">
           <div>
             <h4 className="font-bold text-gray-700">Clientes</h4>
