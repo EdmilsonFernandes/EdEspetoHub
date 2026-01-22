@@ -22,6 +22,7 @@ export interface CreateStoreDto {
   secondaryColor?: string;
   pixKey?: string;
   contactEmail?: string;
+  promoMessage?: string;
   socialLinks?: { type: string; value: string }[];
   openingHours?: any[];
   orderTypes?: string[];

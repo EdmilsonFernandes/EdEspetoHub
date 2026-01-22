@@ -97,6 +97,7 @@ export class StoreService
         secondaryColor: input.secondaryColor,
         pixKey: normalizedPix ?? undefined,
         contactEmail: trimmedEmail || undefined,
+        promoMessage: input.promoMessage?.toString().trim() || undefined,
         socialLinks,
         openingHours: input.openingHours ?? [],
         orderTypes: input.orderTypes ?? [ 'delivery', 'pickup', 'table' ],
@@ -185,6 +186,11 @@ export class StoreService
       {
         const trimmedEmail = data.contactEmail?.toString().trim();
         store.settings.contactEmail = trimmedEmail || undefined;
+      }
+      if (data.promoMessage !== undefined)
+      {
+        const trimmedMessage = data.promoMessage?.toString().trim();
+        store.settings.promoMessage = trimmedMessage || undefined;
       }
 
       if (data.socialLinks)

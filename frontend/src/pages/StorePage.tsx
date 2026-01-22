@@ -34,6 +34,7 @@ export function StorePage() {
   const [storeDescription, setStoreDescription] = useState('');
   const [storeEmail, setStoreEmail] = useState('');
   const [storePixKey, setStorePixKey] = useState('');
+  const [promoMessage, setPromoMessage] = useState('');
   const [openingHours, setOpeningHours] = useState([]);
   const [orderTypes, setOrderTypes] = useState([ 'delivery', 'pickup', 'table' ]);
   const [storeSubscription, setStoreSubscription] = useState(null);
@@ -206,6 +207,7 @@ export function StorePage() {
           setStoreAddress(data.owner?.address || '');
           setStoreDescription(data.settings?.description || '');
           setStoreEmail(data.settings?.contactEmail || '');
+          setPromoMessage(data.settings?.promoMessage || '');
           setStorePixKey(data.settings?.pixKey || '');
           setStoreOpenNow(isStoreOpenNow(normalizedHours));
           setStoreSubscription(data.subscription || null);
@@ -1018,6 +1020,7 @@ export function StorePage() {
               isOpenNow={storeOpenNow}
               whatsappNumber={storePhone}
               contactEmail={storeEmail}
+              promoMessage={promoMessage}
               storeUrl={storeUrl}
               todayHoursLabel={todayHoursLabel}
               storeAddress={storeAddress}

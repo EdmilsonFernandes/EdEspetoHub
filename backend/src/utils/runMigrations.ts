@@ -44,6 +44,10 @@ export async function runMigrations() {
     ADD COLUMN IF NOT EXISTS contact_email TEXT;
   `);
   await AppDataSource.query(`
+    ALTER TABLE IF EXISTS store_settings
+    ADD COLUMN IF NOT EXISTS promo_message TEXT;
+  `);
+  await AppDataSource.query(`
     ALTER TABLE IF EXISTS orders
     ADD COLUMN IF NOT EXISTS table_number TEXT;
   `);

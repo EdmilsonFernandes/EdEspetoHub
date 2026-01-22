@@ -45,6 +45,9 @@ export class StoreSettings
   @Column({ name: 'contact_email', nullable: true })
   contactEmail?: string;
 
+  @Column({ name: 'promo_message', type: 'text', nullable: true })
+  promoMessage?: string;
+
   @Column({
     name: 'social_links',
     type: 'jsonb',

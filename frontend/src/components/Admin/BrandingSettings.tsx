@@ -95,6 +95,21 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
           <p className="text-xs text-gray-500">Opcional, aparece para contato no cardápio.</p>
         </div>
 
+        <div className="space-y-2">
+          <label className="text-sm font-semibold text-gray-700">Mensagem promocional</label>
+          <textarea
+            value={branding.promoMessage || ""}
+            onChange={(e) => handleChange("promoMessage", e.target.value)}
+            className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors min-h-[90px]"
+            placeholder="Ex: Combo do dia: 2 espetos + refri por R$ 29,90"
+            maxLength={120}
+          />
+          <div className="flex items-center justify-between text-xs text-gray-500">
+            <span>Aparece no topo do cardápio.</span>
+            <span>{(branding.promoMessage || "").length}/120</span>
+          </div>
+        </div>
+
         <div className="space-y-3">
           <label className="text-sm font-semibold text-gray-700">Logo da loja</label>
           <div className="flex items-start gap-4">

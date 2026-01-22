@@ -167,6 +167,7 @@ export const MenuView = ({
   instagramHandle,
   whatsappNumber,
   contactEmail,
+  promoMessage,
   storeUrl,
   isOpenNow,
   todayHoursLabel,
@@ -538,6 +539,12 @@ export const MenuView = ({
           </div>
         </section>
         <div id="menu-list" className="space-y-10">
+        {promoMessage && (
+          <div className="rounded-3xl border border-fuchsia-200 bg-gradient-to-r from-fuchsia-50 via-white to-pink-50 p-4 sm:p-5 shadow-sm">
+            <p className="text-[11px] uppercase tracking-[0.3em] text-fuchsia-500 font-semibold">Mensagem do dia</p>
+            <p className="text-sm font-semibold text-slate-900 mt-2">{promoMessage}</p>
+          </div>
+        )}
         {topItems.length > 0 && (
           <div className="rounded-3xl border border-slate-200 bg-white/90 p-4 sm:p-5 shadow-sm">
             <div className="flex items-center justify-between">
