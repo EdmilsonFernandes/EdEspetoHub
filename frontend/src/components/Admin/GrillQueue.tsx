@@ -118,6 +118,20 @@ export const GrillQueue = () => {
   };
   const getItemBaseKey = (item) =>
     `${item?.productId || item?.name || ''}-${item?.cookingPoint || ''}-${item?.passSkewer ? '1' : '0'}`;
+
+  const resolvePromoMeta = (item: any) => {
+    const product = productsById.get(item.productId || item.id);
+    const promoActive = Boolean(product?.promoActive);
+    const promoPrice = product?.promoPrice != null ? Number(product?.promoPrice) : null;
+    const originalPrice = product?.price != null ? Number(product.price) : null;
+    const unitPrice = item.unitPrice ?? (item.price && item.qty ? item.price / item.qty : item.price);
+    return {
+      promoActive: promoActive && !!promoPrice,
+      promoPrice,
+      originalPrice,
+      unitPrice: Number(unitPrice ?? 0),
+    };
+  };
   const assignItemKeys = (orderId, items = []) => {
     if (!orderId) return items.map((item) => ({ item, key: getItemBaseKey(item) }));
     const map = itemOrderRef.current.get(orderId) || new Map<string, number>();
@@ -794,9 +808,22 @@ export const GrillQueue = () => {
                       </div>
                     </div>
 
-                    <span className="font-semibold flex-shrink-0 text-[11px]">
-                      {formatCurrency((item.unitPrice ?? (item.price && item.qty ? item.price / item.qty : item.price) ?? 0) * item.qty)}
-                    </span>
+                    {(() => {
+                      const promoMeta = resolvePromoMeta(item);
+                      const total = promoMeta.unitPrice * item.qty;
+                      return (
+                        <span className="flex flex-col items-end flex-shrink-0 text-[11px] font-semibold">
+                          {promoMeta.promoActive && promoMeta.originalPrice ? (
+                            <span className="text-[10px] text-slate-400 line-through">
+                              {formatCurrency(promoMeta.originalPrice * item.qty)}
+                            </span>
+                          ) : null}
+                          <span className={promoMeta.promoActive ? 'text-emerald-600' : 'text-slate-700'}>
+                            {formatCurrency(total)}
+                          </span>
+                        </span>
+                      );
+                    })()}
                   </div>
                 ))}
               </div>
@@ -816,7 +843,7 @@ export const GrillQueue = () => {
                   <option value="">Adicionar item...</option>
                   {products.map((product) => (
                     <option key={product.id} value={product.id}>
-                      {product.name} – {formatCurrency(product.price)}
+                        {product.name} – {formatCurrency(product.price)}
                     </option>
                   ))}
                 </select>
@@ -982,6 +1009,11 @@ export const GrillQueue = () => {
                   {formatCurrency(confirmModal.total || 0)}
                 </span>
               </div>
+              {Array.isArray(confirmModal.items) && confirmModal.items.some((item) => resolvePromoMeta(item).promoActive) && (
+                <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
+                  Promoção aplicada no pedido.
+                </div>
+              )}
             </div>
             {isPixPayment && (
               <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
@@ -1101,7 +1133,22 @@ export const GrillQueue = () => {
                     <div key={item.id} className="flex items-center justify-between text-xs text-slate-600">
                       <span className="truncate">{item.qty}x {item.name}</span>
                       <span className="font-semibold text-slate-700">
-                        {formatCurrency((item.unitPrice ?? (item.price && item.qty ? item.price / item.qty : item.price) ?? 0) * item.qty)}
+                      {(() => {
+                        const promoMeta = resolvePromoMeta(item);
+                        const total = promoMeta.unitPrice * item.qty;
+                        return (
+                          <span className="flex flex-col items-end text-[11px] font-semibold">
+                            {promoMeta.promoActive && promoMeta.originalPrice ? (
+                              <span className="text-[10px] text-slate-400 line-through">
+                                {formatCurrency(promoMeta.originalPrice * item.qty)}
+                              </span>
+                            ) : null}
+                            <span className={promoMeta.promoActive ? 'text-emerald-600' : 'text-slate-700'}>
+                              {formatCurrency(total)}
+                            </span>
+                          </span>
+                        );
+                      })()}
                       </span>
                     </div>
                   ))}
