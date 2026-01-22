@@ -468,7 +468,7 @@ export const MenuView = ({
                   onClick={handleShareMenu}
                   className="px-3.5 py-2 rounded-full text-xs font-semibold border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 transition"
                 >
-                  📲 Compartilhar cardápio
+                📲 Compartilhar cardápio
                 </button>
               )}
               <button
@@ -533,7 +533,7 @@ export const MenuView = ({
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 className="w-full rounded-full border border-slate-200 bg-white py-2 pl-9 pr-4 text-sm focus:ring-2 focus:ring-brand-primary focus:border-brand-primary"
-                placeholder="Buscar no cardapio (ex: costela)"
+                placeholder="Buscar no cardápio (ex: costela)"
               />
             </div>
           </div>

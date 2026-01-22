@@ -368,7 +368,7 @@ export function OrderTracking() {
                     )}
                     {estimatedReadyAt && (
                       <div className="mt-2 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold">
-                        Previsao de entrega: {estimatedReadyAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                        Previsão de entrega: {estimatedReadyAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                       </div>
                     )}
                   </div>

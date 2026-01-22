@@ -701,7 +701,7 @@ export function CreateStore() {
                 maxLength={220}
               />
               <div className="flex items-center justify-between text-xs text-gray-500">
-                <span>Isso aparece no portfolio de lojas.</span>
+                <span>Isso aparece no portfólio de lojas.</span>
                 <span>{registerForm.storeDescription.length}/220</span>
               </div>
             </div>
@@ -1161,27 +1161,27 @@ export function CreateStore() {
                 <h3 className="text-base font-semibold text-slate-900">1. Plataforma e finalidade</h3>
                 <p>
                   A plataforma Chama no Espeto fornece ferramentas para criar, publicar e gerir lojas digitais.
-                  O usuário e responsável pelo conteudo, precos, ofertas e atendimento.
+                  O usuário é responsável pelo conteúdo, preços, ofertas e atendimento.
                 </p>
               </section>
               <section className="space-y-2">
                 <h3 className="text-base font-semibold text-slate-900">2. Cadastro e veracidade</h3>
                 <p>
                   Informações fornecidas devem ser verdadeiras e atualizadas. Dados incorretos podem impedir
-                  a ativacao da loja e o recebimento de pagamentos.
+                  a ativação da loja e o recebimento de pagamentos.
                 </p>
               </section>
               <section className="space-y-2">
                 <h3 className="text-base font-semibold text-slate-900">3. Pagamentos e acesso</h3>
                 <p>
-                  A ativacao completa depende da confirmacao do pagamento do plano escolhido. Boletos podem
+                  A ativação completa depende da confirmação do pagamento do plano escolhido. Boletos podem
                   levar ate 3 dias uteis para compensar.
                 </p>
               </section>
               <section className="space-y-2">
                 <h3 className="text-base font-semibold text-slate-900">4. LGPD e privacidade</h3>
                 <p>
-                  Os dados pessoais sao tratados para cadastro, autenticacao, cobranca e suporte, conforme a
+                  Os dados pessoais são tratados para cadastro, autenticação, cobrança e suporte, conforme a
                   LGPD. O usuário pode solicitar atualização ou exclusão quando aplicavel.
                 </p>
               </section>
@@ -1213,7 +1213,7 @@ export function CreateStore() {
                 !
               </div>
               <div>
-                <p className="text-base font-semibold text-slate-900">Falta uma confirmacao</p>
+                <p className="text-base font-semibold text-slate-900">Falta uma confirmação</p>
                 <p className="text-xs text-slate-500">Verifique os dados abaixo.</p>
               </div>
             </div>

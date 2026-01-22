@@ -40,8 +40,8 @@ export function TermsOfUse() {
           <section className="space-y-3 text-sm text-slate-600">
             <h2 className="text-base font-semibold text-slate-900">1. Plataforma e finalidade</h2>
             <p>
-              A plataforma Chama no Espeto oferece ferramentas para criacao e gestao de lojas digitais de
-              espetos e similares. O usuário e responsável pelo conteudo publicado, precos, ofertas e
+              A plataforma Chama no Espeto oferece ferramentas para criação e gestão de lojas digitais de
+              espetos e similares. O usuário é responsável pelo conteúdo publicado, preços, ofertas e
               atendimento aos seus clientes.
             </p>
           </section>
@@ -57,7 +57,7 @@ export function TermsOfUse() {
           <section className="space-y-3 text-sm text-slate-600">
             <h2 className="text-base font-semibold text-slate-900">3. Pagamentos e acesso</h2>
             <p>
-              O acesso completo ao painel e a publicacao da loja dependem da confirmacao do pagamento do
+              O acesso completo ao painel e a publicação da loja dependem da confirmação do pagamento do
               plano escolhido. Pagamentos por boleto podem levar ate 3 dias uteis para compensar.
             </p>
           </section>
@@ -66,14 +66,14 @@ export function TermsOfUse() {
             <h2 className="text-base font-semibold text-slate-900">4. Propriedade e conteudo</h2>
             <p>
               Todo material enviado pelo usuário (logos, textos, imagens) permanece sob sua
-              responsabilidade. A plataforma pode exibir esse conteudo para operacao do servico.
+              responsabilidade. A plataforma pode exibir esse conteúdo para operação do serviço.
             </p>
           </section>
 
           <section className="space-y-3 text-sm text-slate-600">
             <h2 className="text-base font-semibold text-slate-900">5. LGPD e privacidade</h2>
             <p>
-              Os dados pessoais sao tratados para fins de cadastro, autenticacao, cobranca e suporte,
+              Os dados pessoais são tratados para fins de cadastro, autenticação, cobrança e suporte,
               conforme a Lei Geral de Proteção de Dados (LGPD). O usuário pode solicitar atualização ou
               exclusão de dados quando aplicavel.
             </p>

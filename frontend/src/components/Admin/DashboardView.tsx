@@ -267,7 +267,7 @@ export const DashboardView = ({
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Checklist de ativacao</p>
+              <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Checklist de ativação</p>
               <h3 className="text-xl font-black text-slate-900 mt-2">Sua loja pronta para vender</h3>
               <p className="text-sm text-slate-500 mt-2">
                 Complete os passos abaixo para ativar a melhor experiencia para seus clientes.

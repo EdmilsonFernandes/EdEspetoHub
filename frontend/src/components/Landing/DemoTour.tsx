@@ -16,7 +16,7 @@ export function DemoTour({ open, onClose }: Props) {
         id: 'setup',
         title: 'Cadastro em 3 minutos',
         description:
-          'Defina o nome da loja, cores e cadastre seus produtos. O cardapio ja fica pronto para receber pedidos.',
+          'Defina o nome da loja, cores e cadastre seus produtos. O cardápio já fica pronto para receber pedidos.',
         ctaLabel: 'Abrir cadastro',
         action: () => navigate('/create'),
         icon: ClipboardText,
@@ -24,10 +24,10 @@ export function DemoTour({ open, onClose }: Props) {
       },
       {
         id: 'orders',
-        title: 'Pedido no cardapio',
+        title: 'Pedido no cardápio',
         description:
           'O cliente escolhe, finaliza o pedido e envia para você. Tudo organizado e pronto para produzir.',
-        ctaLabel: 'Abrir cardapio demo',
+        ctaLabel: 'Abrir cardápio demo',
         action: () => navigate('/chamanoespeto/demo'),
         icon: ShoppingCart,
         highlight: 'Fluxo do cliente',
@@ -36,7 +36,7 @@ export function DemoTour({ open, onClose }: Props) {
         id: 'queue',
         title: 'Visao do churrasqueiro + dashboard',
         description:
-          'A visao do churrasqueiro mostra pedidos chegando em tempo real. O dashboard mostra o resultado do dia.',
+          'A visão do churrasqueiro mostra pedidos chegando em tempo real. O dashboard mostra o resultado do dia.',
         ctaLabel: 'Abrir painel demo',
         action: () => navigate('/admin/demo'),
         icon: ChefHat,

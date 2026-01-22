@@ -160,7 +160,7 @@ export function LandingPage() {
             <p className="text-sm font-semibold text-red-500">Passo 1</p>
             <h3 className="text-xl font-bold text-gray-900 dark:text-white mt-2">Cadastre produtos</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-3">
-              Monte categorias, precos e imagens para o cardapio ficar pronto em minutos.
+              Monte categorias, preços e imagens para o cardápio ficar pronto em minutos.
             </p>
             <button
               onClick={goToAdminDemo}
@@ -182,7 +182,7 @@ export function LandingPage() {
               onClick={goToDemoStore}
               className="mt-5 w-full px-4 py-3 rounded-xl border-2 border-red-500 text-red-500 font-semibold hover:bg-red-50 dark:hover:bg-red-950 transition-colors"
             >
-              Abrir cardapio demo
+              Abrir cardápio demo
             </button>
           </div>
           <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-lg hover:shadow-xl transition-all">

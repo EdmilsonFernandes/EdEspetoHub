@@ -813,7 +813,7 @@ export function SuperAdmin() {
       {summary && (
         <div className="grid md:grid-cols-3 gap-3">
           <div className="rounded-2xl p-4 border border-emerald-100 bg-gradient-to-br from-emerald-50 via-white to-white">
-            <p className="text-xs uppercase text-emerald-600 font-semibold">Ativacao da base</p>
+            <p className="text-xs uppercase text-emerald-600 font-semibold">Ativação da base</p>
             <p className="text-2xl font-black text-emerald-700 mt-1">{activeRate.toFixed(1)}%</p>
             <p className="text-xs text-emerald-700/70 mt-1">Lojas ativas vs total</p>
           </div>
@@ -891,7 +891,7 @@ export function SuperAdmin() {
             <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm space-y-4">
               <div>
                 <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Saude da base</p>
-                <h3 className="text-lg font-bold text-slate-800">Lojas em operacao</h3>
+                <h3 className="text-lg font-bold text-slate-800">Lojas em operação</h3>
               </div>
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-3">
@@ -973,7 +973,7 @@ export function SuperAdmin() {
                 <CheckCircle size={18} className="text-emerald-600" />
               </div>
               <p className="text-2xl font-black text-emerald-600">{summary.activeSubscriptions}</p>
-              <p className="text-xs text-slate-400 mt-1">Ativacao: {activeRate.toFixed(1)}%</p>
+              <p className="text-xs text-slate-400 mt-1">Ativação: {activeRate.toFixed(1)}%</p>
             </div>
             <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
               <div className="flex items-center justify-between mb-2">

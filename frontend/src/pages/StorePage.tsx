@@ -100,7 +100,7 @@ export function StorePage() {
   const applyStoreMeta = (store: any) => {
     if (!store) return;
     const name = store.name || store.slug || 'Chama no Espeto';
-    const description = `Cardapio online e pedidos da loja ${name}.`;
+    const description = `Cardápio online e pedidos da loja ${name}.`;
     const logo = resolveAssetUrl(store.settings?.logoUrl) || '/chama-no-espeto.jpeg';
     const url = typeof window !== 'undefined' ? window.location.href : '';
 

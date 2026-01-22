@@ -127,7 +127,7 @@ export function AdminRenewal() {
               </p>
             </div>
             <div className="bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3">
-              <p className="text-xs text-slate-500">Expiracao</p>
+              <p className="text-xs text-slate-500">Expiração</p>
               <p className="text-sm font-semibold text-slate-800">{expiresLabel}</p>
             </div>
           </div>

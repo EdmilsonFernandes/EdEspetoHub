@@ -186,7 +186,7 @@ export function AdminDemo() {
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-6">
         <div className="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 text-sm text-amber-800">
-          Esta e uma area de demonstracao. Os dados ficam apenas neste navegador.
+          Esta é uma área de demonstração. Os dados ficam apenas neste navegador.
         </div>
 
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">

@@ -397,7 +397,7 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
   };
   const paymentStatus =
     rawStatus === 'TRIAL'
-      ? 'Sem cobranca durante o trial'
+      ? 'Sem cobrança durante o trial'
       : paymentStatusMap[rawPaymentStatus] || subscription?.latestPaymentStatus || '—';
   const historyStatusMap: Record<string, string> = {
     PAID: 'PAGO',
@@ -468,12 +468,12 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
           {expiresHint && (
             <p className="text-xs font-semibold text-slate-600 mt-1">{expiresHint}</p>
           )}
-          <p className="text-xs text-slate-500 mt-1">Ultimo pagamento: {paidAtLabel}</p>
+          <p className="text-xs text-slate-500 mt-1">Último pagamento: {paidAtLabel}</p>
         </div>
         {Array.isArray(payments) && payments.length > 0 && (
           <div className="pt-2 border-t border-slate-200">
             <div className="flex items-center justify-between gap-3">
-              <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Historico de pagamentos</p>
+              <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Histórico de pagamentos</p>
               <label className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600">
                 <input
                   type="checkbox"

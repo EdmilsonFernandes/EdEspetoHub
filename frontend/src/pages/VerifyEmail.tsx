@@ -23,7 +23,7 @@ export function VerifyEmail() {
   useEffect(() => {
     const token = searchParams.get('token');
     if (!token) {
-      setStatus('Confira seu e-mail e clique no link de confirmacao.');
+      setStatus('Confira seu e-mail e clique no link de confirmação.');
       return;
     }
 
@@ -69,7 +69,7 @@ export function VerifyEmail() {
         <div className="mx-auto mb-4 h-16 w-16 overflow-hidden rounded-2xl border border-slate-200 shadow-sm">
           <img src={platformLogo} alt="Chama no Espeto" className="h-full w-full object-cover" />
         </div>
-        <h1 className="text-xl font-bold text-slate-900 mb-2">Confirmacao de e-mail</h1>
+        <h1 className="text-xl font-bold text-slate-900 mb-2">Confirmação de e-mail</h1>
         {error ? (
           <p className="text-sm text-red-600">{error}</p>
         ) : (
@@ -77,7 +77,7 @@ export function VerifyEmail() {
         )}
 
         <div className="mt-4 space-y-2 text-left">
-          <label className="text-xs font-semibold text-slate-600">Reenviar confirmacao</label>
+          <label className="text-xs font-semibold text-slate-600">Reenviar confirmação</label>
           <input
             type="email"
             value={email}

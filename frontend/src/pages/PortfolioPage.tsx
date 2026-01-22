@@ -193,7 +193,7 @@ export function PortfolioPage() {
         <div className="max-w-6xl mx-auto px-4 space-y-6">
           {loading && (
             <div className="rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-500">
-              Carregando portfolio...
+              Carregando portfólio...
             </div>
           )}
 
@@ -278,7 +278,7 @@ export function PortfolioPage() {
                 Perfis de alto nivel por tras do Chama no Espeto
               </h2>
               <p className="text-sm text-slate-600">
-                Estrutura enxuta, stack moderna e foco em entrega rapida com qualidade de produto.
+                Estrutura enxuta, stack moderna e foco em entrega rápida com qualidade de produto.
               </p>
             </div>
             <div className="text-sm text-slate-500 bg-white border border-slate-200 px-4 py-2 rounded-full">
