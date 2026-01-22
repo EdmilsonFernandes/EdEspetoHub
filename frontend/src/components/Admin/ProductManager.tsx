@@ -17,7 +17,7 @@ import { productService } from '../../services/productService';
 import { formatCurrency } from '../../utils/format';
 import { useToast } from '../../contexts/ToastContext';
 
-const initialForm = { name: '', price: '', category: 'espetos', imageUrl: '', imageFile: '', description: '', isFeatured: false };
+const initialForm = { name: '', price: '', promoPrice: '', promoActive: false, category: 'espetos', imageUrl: '', imageFile: '', description: '', isFeatured: false };
 const defaultCategories = [
   { id: 'espetos', label: 'Espetos', icon: Fire },
   { id: 'bebidas', label: 'Bebidas', icon: Wine },
@@ -51,6 +51,8 @@ export const ProductManager = ({ products, onProductsChange }) => {
   const [inlineForm, setInlineForm] = useState({
     name: '',
     price: '',
+    promoPrice: '',
+    promoActive: false,
     category: initialForm.category,
     description: '',
     imageUrl: '',
@@ -146,6 +148,8 @@ export const ProductManager = ({ products, onProductsChange }) => {
     const payload = {
       ...formData,
       price: parseFloat(formData.price),
+      promoPrice: formData.promoPrice ? parseFloat(formData.promoPrice) : undefined,
+      promoActive: Boolean(formData.promoActive),
       imageFile: imageMode === 'upload' ? formData.imageFile : undefined,
       imageUrl: imageMode === 'url' ? formData.imageUrl : undefined,
       description: formData.description || undefined,
@@ -170,6 +174,8 @@ export const ProductManager = ({ products, onProductsChange }) => {
     setInlineForm({
       name: product.name || '',
       price: product.price != null ? String(product.price) : '',
+      promoPrice: product.promoPrice != null ? String(product.promoPrice) : '',
+      promoActive: Boolean(product.promoActive),
       category: product.category || initialForm.category,
       description: product.description ?? product.desc ?? '',
       imageUrl: product.imageUrl || '',
@@ -186,6 +192,8 @@ export const ProductManager = ({ products, onProductsChange }) => {
         id: inlineEditId,
         name: inlineForm.name,
         price: parseFloat(inlineForm.price),
+        promoPrice: inlineForm.promoPrice ? parseFloat(inlineForm.promoPrice) : undefined,
+        promoActive: Boolean(inlineForm.promoActive),
         category: inlineForm.category,
         description: inlineForm.description || undefined,
         imageUrl: inlineImageFile ? undefined : inlineForm.imageUrl || undefined,
@@ -230,6 +238,10 @@ export const ProductManager = ({ products, onProductsChange }) => {
     formData.price && !Number.isNaN(Number(formData.price))
       ? formatCurrency(Number(formData.price))
       : '—';
+  const previewPromoPrice =
+    formData.promoActive && formData.promoPrice && !Number.isNaN(Number(formData.promoPrice))
+      ? formatCurrency(Number(formData.promoPrice))
+      : '';
   const previewCategory =
     categorySelect === '__custom__'
       ? formatCategoryLabel(formData.category)
@@ -276,6 +288,41 @@ export const ProductManager = ({ products, onProductsChange }) => {
                 onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                 required
               />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">Preço promocional (opcional)</label>
+              <input
+                className="p-3 border border-gray-200 rounded-lg w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+                placeholder="Ex: 8.90"
+                type="number"
+                step="0.01"
+                value={formData.promoPrice}
+                onChange={(e) => setFormData({ ...formData, promoPrice: e.target.value })}
+              />
+              <p className="text-[11px] text-slate-500">Se ativo, este valor será usado no pedido.</p>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">Ativar promoção no pedido</label>
+              <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+                <div>
+                  <p className="text-xs font-semibold text-slate-700">Promoção ativa</p>
+                  <p className="text-[11px] text-slate-500">Aplica o preço promocional.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setFormData((prev) => ({ ...prev, promoActive: !prev.promoActive }))}
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition ${
+                    formData.promoActive
+                      ? 'bg-emerald-600 text-white border-emerald-600'
+                      : 'bg-white text-slate-600 border-slate-200'
+                  }`}
+                >
+                  {formData.promoActive ? 'Ativo' : 'Inativo'}
+                </button>
+              </div>
             </div>
           </div>
 
@@ -509,7 +556,18 @@ export const ProductManager = ({ products, onProductsChange }) => {
                 <h4 className="text-base font-semibold text-slate-900 truncate">
                   {formData.name || 'Nome do produto'}
                 </h4>
-                <span className="text-sm font-bold text-brand-primary">{previewPrice}</span>
+                <div className="flex items-center gap-2">
+                  {previewPromoPrice ? (
+                    <>
+                      <span className="text-xs font-semibold text-slate-400 line-through">
+                        {previewPrice}
+                      </span>
+                      <span className="text-sm font-bold text-emerald-600">{previewPromoPrice}</span>
+                    </>
+                  ) : (
+                    <span className="text-sm font-bold text-brand-primary">{previewPrice}</span>
+                  )}
+                </div>
               </div>
               {formData.isFeatured && (
                 <span className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 border border-emerald-200">
@@ -650,7 +708,20 @@ export const ProductManager = ({ products, onProductsChange }) => {
                           <span className="text-sm text-gray-600">{formatCategoryLabel(product.category)}</span>
                         </div>
                       </td>
-                      <td className="p-4 text-brand-primary font-bold">{formatCurrency(product.price)}</td>
+                      <td className="p-4">
+                        {product.promoActive && product.promoPrice ? (
+                          <div className="flex flex-col items-end">
+                            <span className="text-xs text-slate-400 line-through">
+                              {formatCurrency(product.price)}
+                            </span>
+                            <span className="text-emerald-600 font-bold">
+                              {formatCurrency(product.promoPrice)}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-brand-primary font-bold">{formatCurrency(product.price)}</span>
+                        )}
+                      </td>
                       <td className="p-4 text-right space-x-2">
                         <button
                           onClick={() => handleEdit(product)}
@@ -708,6 +779,42 @@ export const ProductManager = ({ products, onProductsChange }) => {
                             value={inlineForm.description}
                             onChange={(e) => setInlineForm((prev) => ({ ...prev, description: e.target.value }))}
                           />
+                          <div className="grid gap-3 md:grid-cols-2">
+                            <div className="space-y-1">
+                              <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-[0.2em]">
+                                Preço promocional
+                              </label>
+                              <input
+                                className="w-full p-2.5 border border-gray-200 rounded-lg text-sm"
+                                placeholder="Ex: 8.90"
+                                type="number"
+                                step="0.01"
+                                value={inlineForm.promoPrice}
+                                onChange={(e) =>
+                                  setInlineForm((prev) => ({ ...prev, promoPrice: e.target.value }))
+                                }
+                              />
+                            </div>
+                            <div className="space-y-1">
+                              <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-[0.2em]">
+                                Promoção ativa
+                              </label>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setInlineForm((prev) => ({ ...prev, promoActive: !prev.promoActive }))
+                                }
+                                className={`w-full px-3 py-2 rounded-lg text-xs font-semibold border transition ${
+                                  inlineForm.promoActive
+                                    ? 'bg-emerald-600 text-white border-emerald-600'
+                                    : 'bg-white text-slate-600 border-slate-200'
+                                }`}
+                              >
+                                {inlineForm.promoActive ? 'Ativo' : 'Inativo'}
+                              </button>
+                              <p className="text-[11px] text-slate-500">Aplica no pedido.</p>
+                            </div>
+                          </div>
                           <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
                             <div>
                               <p className="text-xs font-semibold text-slate-700">Promoção do dia</p>

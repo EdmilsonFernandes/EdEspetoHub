@@ -97,6 +97,14 @@ export function StorePage() {
   const showInactiveState = view === 'menu' && isSubscriptionKnown && !isSubscriptionActive;
   const showClosedState = view === 'menu' && isSubscriptionActive && !storeOpenNow;
 
+  const resolveItemPrice = (item) => {
+    const promoPrice = item?.promoPrice != null ? Number(item.promoPrice) : null;
+    if (item?.promoActive && promoPrice && promoPrice > 0) {
+      return promoPrice;
+    }
+    return Number(item?.price) || 0;
+  };
+
   const applyStoreMeta = (store: any) => {
     if (!store) return;
     const name = store.name || store.slug || 'Chama no Espeto';
@@ -427,11 +435,14 @@ export function StorePage() {
         delete copy[cartKey];
         return copy;
       }
+      const unitPrice = resolveItemPrice(item);
       return {
         ...previous,
         [cartKey]: {
           ...item,
           key: cartKey,
+          price: unitPrice,
+          originalPrice: item?.price,
           qty: nextQty,
           cookingPoint,
           passSkewer,

@@ -188,6 +188,13 @@ export const MenuView = ({
     ? `https://www.google.com/maps/search/?api=1&query=${mapQuery}`
     : "";
   const wazeUrl = mapQuery ? `https://waze.com/ul?q=${mapQuery}&navigate=yes` : "";
+  const resolvePromoPrice = (item) => {
+    const promoPrice = item?.promoPrice != null ? Number(item.promoPrice) : null;
+    if (item?.promoActive && promoPrice && promoPrice > 0) {
+      return promoPrice;
+    }
+    return null;
+  };
   const handleShareMenu = async () => {
     if (!storeUrl) return;
     const message = `Confira o cardápio da ${branding?.brandName || "Chama no Espeto"}: ${storeUrl}`;
@@ -592,9 +599,20 @@ export const MenuView = ({
                 )}
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-lg font-black text-amber-600">
-                  {formatCurrency(featuredProduct.price || 0)}
-                </span>
+                {resolvePromoPrice(featuredProduct) ? (
+                  <div className="flex flex-col items-end">
+                    <span className="text-xs text-slate-400 line-through">
+                      {formatCurrency(featuredProduct.price || 0)}
+                    </span>
+                    <span className="text-lg font-black text-emerald-600">
+                      {formatCurrency(resolvePromoPrice(featuredProduct))}
+                    </span>
+                  </div>
+                ) : (
+                  <span className="text-lg font-black text-amber-600">
+                    {formatCurrency(featuredProduct.price || 0)}
+                  </span>
+                )}
                 <button
                   type="button"
                   onClick={() => openProductModal(featuredProduct)}
@@ -676,9 +694,20 @@ export const MenuView = ({
                         )}
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs sm:text-sm font-extrabold bg-brand-primary/10 text-brand-primary border border-brand-primary/20 shadow-sm">
-                          {formatCurrency(item.price)}
-                        </span>
+                        {resolvePromoPrice(item) ? (
+                          <div className="flex flex-col items-end">
+                            <span className="text-[10px] font-semibold text-slate-400 line-through">
+                              {formatCurrency(item.price)}
+                            </span>
+                            <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs sm:text-sm font-extrabold bg-emerald-100 text-emerald-700 border border-emerald-200 shadow-sm">
+                              {formatCurrency(resolvePromoPrice(item))}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs sm:text-sm font-extrabold bg-brand-primary/10 text-brand-primary border border-brand-primary/20 shadow-sm">
+                            {formatCurrency(item.price)}
+                          </span>
+                        )}
                         {itemQtyMap.get(String(item.id)) > 0 && (
                           <span className="inline-flex sm:hidden items-center px-2 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                             {itemQtyMap.get(String(item.id))}x

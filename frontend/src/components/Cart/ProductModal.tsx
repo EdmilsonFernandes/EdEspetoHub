@@ -16,6 +16,10 @@ export interface ProductModalProps {
 export const ProductModal = ({ product, isOpen, onClose, onAddToCart }: ProductModalProps) => {
   const [cookingPoint, setCookingPoint] = useState("ao ponto");
   const [passSkewer, setPassSkewer] = useState(false);
+  const promoPrice =
+    product?.promoActive && product?.promoPrice && Number(product?.promoPrice) > 0
+      ? Number(product.promoPrice)
+      : null;
 
   const isEspetoCategory = (category: any) => {
   const normalized = (category || "").toString().trim().toLowerCase();
@@ -83,7 +87,16 @@ export const ProductModal = ({ product, isOpen, onClose, onAddToCart }: ProductM
         <div className="p-6 space-y-4">
           <div>
             <h3 className="text-xl font-bold text-gray-900">{product?.name}</h3>
-            <p className="text-2xl font-bold text-brand-primary mt-1">{formatCurrency(product?.price)}</p>
+            {promoPrice ? (
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-sm font-semibold text-slate-400 line-through">
+                  {formatCurrency(product?.price)}
+                </span>
+                <span className="text-2xl font-bold text-emerald-600">{formatCurrency(promoPrice)}</span>
+              </div>
+            ) : (
+              <p className="text-2xl font-bold text-brand-primary mt-1">{formatCurrency(product?.price)}</p>
+            )}
           </div>
 
           {product?.desc && (

@@ -32,6 +32,24 @@ export class OrderService
   private productRepository = new ProductRepository();
 
   /**
+   * Resolves the price used for an item.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-22
+   */
+  private resolveItemPrice(product: Awaited<ReturnType<ProductRepository[ 'findById' ]>>)
+  {
+    if (!product) return 0;
+    const promoActive = Boolean((product as any).promoActive);
+    const promoPriceRaw = (product as any).promoPrice ?? null;
+    const promoPrice = promoPriceRaw !== null && promoPriceRaw !== undefined ? Number(promoPriceRaw) : 0;
+    if (promoActive && promoPrice > 0) {
+      return promoPrice;
+    }
+    return Number((product as any).price) || 0;
+  }
+
+  /**
    * Ensures store access.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
@@ -198,7 +216,8 @@ export class OrderService
       orderItem.product = product;
       orderItem.order = order;
       orderItem.quantity = item.quantity;
-      orderItem.price = Number(product.price) * item.quantity;
+      const unitPrice = this.resolveItemPrice(product);
+      orderItem.price = unitPrice * item.quantity;
       orderItem.cookingPoint = item.cookingPoint;
       orderItem.passSkewer = Boolean(item.passSkewer);
       nextItems.push(orderItem);
@@ -283,7 +302,8 @@ export class OrderService
       const orderItem = new OrderItem();
       orderItem.product = product;
       orderItem.quantity = item.quantity;
-      orderItem.price = Number(product.price) * item.quantity;
+      const unitPrice = this.resolveItemPrice(product);
+      orderItem.price = unitPrice * item.quantity;
       orderItem.cookingPoint = item.cookingPoint;
       orderItem.passSkewer = Boolean(item.passSkewer);
       items.push(orderItem);

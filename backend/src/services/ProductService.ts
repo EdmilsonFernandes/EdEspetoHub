@@ -62,9 +62,16 @@ export class ProductService
       await this.productRepository.clearFeaturedByStoreId(safeStore.id);
     }
 
+    const promoPrice = input.promoPrice !== undefined && input.promoPrice !== null
+      ? Number(input.promoPrice)
+      : null;
+    const promoActive = Boolean(input.promoActive) && !!promoPrice && promoPrice > 0;
+
     const product = this.productRepository.create({
       name: input.name,
       price: input.price,
+      promoPrice,
+      promoActive,
       category: input.category,
       description: (input as any).description ?? (input as any).desc,
       imageUrl: uploadedImage || input.imageUrl,
@@ -128,6 +135,10 @@ export class ProductService
       await this.productRepository.clearFeaturedByStoreId(store.id);
     }
 
+    const promoPrice = data.promoPrice !== undefined && data.promoPrice !== null
+      ? Number(data.promoPrice)
+      : undefined;
+
     product.name = data.name ?? product.name;
     product.price = data.price ?? product.price;
     product.category = data.category ?? product.category;
@@ -135,6 +146,12 @@ export class ProductService
     product.imageUrl = uploadedImage ?? data.imageUrl ?? product.imageUrl;
     if (typeof data.isFeatured === 'boolean') {
       product.isFeatured = data.isFeatured;
+    }
+    if (promoPrice !== undefined) {
+      product.promoPrice = promoPrice && promoPrice > 0 ? promoPrice : null;
+    }
+    if (typeof data.promoActive === 'boolean') {
+      product.promoActive = data.promoActive && !!product.promoPrice;
     }
 
     return this.productRepository.save(product);

@@ -32,6 +32,12 @@ export class Product {
   @Column('decimal', { precision: 10, scale: 2 })
   price!: number;
 
+  @Column('decimal', { precision: 10, scale: 2, name: 'promo_price', nullable: true })
+  promoPrice?: number | null;
+
+  @Column({ name: 'promo_active', default: false })
+  promoActive!: boolean;
+
   @Column({ nullable: true })
   category?: string;
 

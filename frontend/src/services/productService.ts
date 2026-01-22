@@ -15,6 +15,8 @@ const normalizeProduct = (product: any) => {
     ...product,
     id: product.id ?? product.product_id ?? product.productId,
     imageUrl: resolveAssetUrl(product.image_url ?? product.imageUrl ?? ""),
+    promoPrice: product.promoPrice ?? product.promo_price ?? null,
+    promoActive: Boolean(product.promoActive ?? product.promo_active ?? false),
     description,
     desc: description,
   };
