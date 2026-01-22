@@ -546,14 +546,14 @@ export function LandingPage() {
 
       {selectedShot && (
         <div
-          className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-gradient-to-br from-black/70 via-black/60 to-black/80 backdrop-blur-sm flex items-center justify-center p-4"
           onClick={() => setSelectedShot(null)}
         >
           <div
-            className="max-w-5xl w-full bg-white rounded-3xl overflow-hidden shadow-2xl"
+            className="max-w-5xl w-full bg-white rounded-[32px] overflow-hidden shadow-[0_40px_120px_-50px_rgba(0,0,0,0.8)]"
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 bg-white/90">
               <div>
                 <p className="text-sm font-semibold text-slate-900">{selectedShot.title}</p>
                 <p className="text-xs text-slate-500">{selectedShot.description}</p>
@@ -561,16 +561,18 @@ export function LandingPage() {
               <button
                 type="button"
                 onClick={() => setSelectedShot(null)}
-                className="px-3 py-1 rounded-full text-xs font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50"
+                className="px-4 py-1.5 rounded-full text-xs font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50"
               >
                 Fechar
               </button>
             </div>
-            <img
-              src={selectedShot.image}
-              alt={selectedShot.title}
-              className="w-full h-[70vh] object-contain bg-slate-900"
-            />
+            <div className="bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-3 sm:p-4">
+              <img
+                src={selectedShot.image}
+                alt={selectedShot.title}
+                className="w-full h-[72vh] object-contain rounded-2xl border border-white/10 shadow-[0_18px_60px_-32px_rgba(0,0,0,0.9)]"
+              />
+            </div>
           </div>
         </div>
       )}
