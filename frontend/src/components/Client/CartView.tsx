@@ -497,9 +497,20 @@ export const CartView = ({
                 )}
               </div>
             </div>
-            <span className="font-bold text-gray-900">
-              {formatCurrency(item.price * item.qty)}
-            </span>
+            {item.originalPrice && Number(item.originalPrice) > Number(item.price) ? (
+              <span className="flex flex-col items-end gap-0.5">
+                <span className="text-[11px] line-through text-gray-400">
+                  {formatCurrency(Number(item.originalPrice) * item.qty)}
+                </span>
+                <span className="font-bold text-emerald-600">
+                  {formatCurrency(item.price * item.qty)}
+                </span>
+              </span>
+            ) : (
+              <span className="font-bold text-gray-900">
+                {formatCurrency(item.price * item.qty)}
+              </span>
+            )}
           </div>
         ))}
 

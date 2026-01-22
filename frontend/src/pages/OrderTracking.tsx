@@ -480,7 +480,18 @@ export function OrderTracking() {
                             </div>
                           </div>
                         </div>
-                        <span className="font-semibold text-gray-800">R$ {Number(item.price).toFixed(2)}</span>
+                        {item.originalPrice && Number(item.originalPrice) > Number(item.price) ? (
+                          <span className="flex flex-col items-end gap-0.5">
+                            <span className="text-[11px] line-through text-gray-400">
+                              {formatCurrency(Number(item.originalPrice) * (item.quantity || 1))}
+                            </span>
+                            <span className="font-semibold text-emerald-600">
+                              {formatCurrency(Number(item.price))}
+                            </span>
+                          </span>
+                        ) : (
+                          <span className="font-semibold text-gray-800">R$ {Number(item.price).toFixed(2)}</span>
+                        )}
                       </div>
                     ))}
                   </div>

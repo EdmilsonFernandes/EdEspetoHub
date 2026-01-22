@@ -18,21 +18,41 @@ const normalizeOrder = (order: any) => ({
     : order.createdAt,
   payment: order.payment ?? order.paymentMethod ?? order.payment_method,
   type: order.type ?? order.order_type,
-  items: (order.items || []).map((item: any) => ({
-    ...item,
-    id: item.id ?? item.item_id ?? item.orderItemId,
-    qty: item.qty ?? item.quantity ?? 0,
-    name: item.name ?? item.product?.name,
-    cookingPoint: item.cookingPoint ?? item.cooking_point,
-    passSkewer: item.passSkewer ?? item.pass_skewer ?? false,
-    unitPrice:
+  items: (order.items || []).map((item: any) => {
+    const quantity = item.qty ?? item.quantity ?? 0;
+    const computedUnit =
       item.unitPrice ??
-      item.product?.price ??
-      (item.price && item.quantity ? Number(item.price) / Number(item.quantity) : item.price) ??
-      0,
-    price: item.price ?? item.product?.price ?? 0,
-    productId: item.productId ?? item.product?.id,
-  })),
+      (item.price && quantity ? Number(item.price) / Number(quantity) : null) ??
+      item.price ??
+      null;
+    const promoActive = item.promoActive ?? item.product?.promoActive ?? false;
+    const promoPrice =
+      item.promoPrice != null
+        ? Number(item.promoPrice)
+        : item.product?.promoPrice != null
+        ? Number(item.product.promoPrice)
+        : null;
+    const originalPrice =
+      item.originalPrice != null
+        ? Number(item.originalPrice)
+        : item.product?.price != null
+        ? Number(item.product.price)
+        : null;
+    return {
+      ...item,
+      id: item.id ?? item.item_id ?? item.orderItemId,
+      qty: quantity,
+      name: item.name ?? item.product?.name,
+      cookingPoint: item.cookingPoint ?? item.cooking_point,
+      passSkewer: item.passSkewer ?? item.pass_skewer ?? false,
+      promoActive,
+      promoPrice,
+      originalPrice,
+      unitPrice: Number(computedUnit ?? 0),
+      price: item.price ?? item.product?.price ?? 0,
+      productId: item.productId ?? item.product?.id,
+    };
+  }),
 });
 
 const handleSessionError = (error: any) => {

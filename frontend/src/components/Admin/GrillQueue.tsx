@@ -121,9 +121,19 @@ export const GrillQueue = () => {
 
   const resolvePromoMeta = (item: any) => {
     const product = productsById.get(item.productId || item.id);
-    const promoActive = Boolean(product?.promoActive);
-    const promoPrice = product?.promoPrice != null ? Number(product?.promoPrice) : null;
-    const originalPrice = product?.price != null ? Number(product.price) : null;
+    const promoActive = Boolean(item.promoActive ?? product?.promoActive);
+    const promoPrice =
+      item.promoPrice != null
+        ? Number(item.promoPrice)
+        : product?.promoPrice != null
+        ? Number(product.promoPrice)
+        : null;
+    const originalPrice =
+      item.originalPrice != null
+        ? Number(item.originalPrice)
+        : product?.price != null
+        ? Number(product.price)
+        : null;
     const unitPrice = item.unitPrice ?? (item.price && item.qty ? item.price / item.qty : item.price);
     return {
       promoActive: promoActive && !!promoPrice,
