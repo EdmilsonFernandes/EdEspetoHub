@@ -12,7 +12,6 @@ import {
   ChartBar,
   Sparkle,
 } from '@phosphor-icons/react';
-import { DemoTour } from '../components/Landing/DemoTour';
 import { platformService } from '../services/platformService';
 import { planService } from '../services/planService';
 import { BILLING_OPTIONS, PLAN_TIERS, getPlanName } from '../constants/planCatalog';
@@ -25,7 +24,7 @@ export function LandingPage() {
   const [isAnnual, setIsAnnual] = useState(false);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [plans, setPlans] = useState([]);
-  const [tourOpen, setTourOpen] = useState(false);
+  const [selectedShot, setSelectedShot] = useState(null);
   const [publicMetrics, setPublicMetrics] = useState(null);
   const [ticketAverage, setTicketAverage] = useState('35');
   const [ordersPerDay, setOrdersPerDay] = useState('25');
@@ -68,22 +67,9 @@ export function LandingPage() {
     },
   ];
 
-  const goToDemoStore = () => {
-    navigate('/chamanoespeto/demo');
-  };
-
-  const goToAdminDemo = () => {
-    navigate('/admin/demo');
-  };
-  const goToDemoGuide = () => {
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem('scrollToDemoFlow', 'true');
-    }
-    navigate('/');
-  };
-  const scrollToFlow = () => {
+  const scrollToShowcase = () => {
     if (typeof document === 'undefined') return;
-    const section = document.getElementById('demo-flow');
+    const section = document.getElementById('product-showcase');
     section?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
@@ -97,15 +83,6 @@ export function LandingPage() {
       }
     };
     loadMetrics();
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const shouldScroll = sessionStorage.getItem('scrollToDemoFlow') === 'true';
-    if (shouldScroll) {
-      sessionStorage.removeItem('scrollToDemoFlow');
-      setTimeout(scrollToFlow, 50);
-    }
   }, []);
 
   useEffect(() => {
@@ -177,16 +154,10 @@ export function LandingPage() {
               🚀 Criar minha loja agora
             </button>
             <button
-              onClick={() => setTourOpen(true)}
+              onClick={scrollToShowcase}
               className="cursor-pointer px-8 py-4 text-lg rounded-xl border-2 border-transparent text-gray-700 dark:text-gray-300 font-semibold hover:text-red-600 transition-colors"
             >
-              ✨ Tour interativo
-            </button>
-            <button
-              onClick={scrollToFlow}
-              className="cursor-pointer px-8 py-4 text-lg rounded-xl border-2 border-transparent text-gray-700 dark:text-gray-300 font-semibold hover:text-red-600 transition-colors"
-            >
-              ✨ Como funciona
+              ✨ Ver telas reais
             </button>
           </div>
           {publicMetrics && (
@@ -207,92 +178,11 @@ export function LandingPage() {
 
       <Hero />
 
-      {/* Demo Flow Section */}
-      <section id="demo-flow" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
-        <div className="text-center mb-12">
-          <p className="text-xs uppercase tracking-[0.3em] text-red-500 font-bold">Demo guiada</p>
-          <h2 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white mt-3">
-            Veja o fluxo completo em 3 passos
-          </h2>
-          <p className="text-base sm:text-lg text-gray-600 dark:text-gray-300 mt-4 max-w-3xl mx-auto">
-            Primeiro você cadastra os produtos, depois faz o pedido no cardápio e, por fim, acompanha a fila do
-            churrasqueiro e as métricas no painel.
-          </p>
-        </div>
-        <div className="grid md:grid-cols-3 gap-6">
-          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-lg hover:shadow-xl transition-all">
-            <div className="w-12 h-12 rounded-2xl bg-red-500 text-white flex items-center justify-center mb-4">
-              <Monitor weight="duotone" />
-            </div>
-            <p className="text-sm font-semibold text-red-500">Passo 1</p>
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white mt-2">Cadastre produtos</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-3">
-              Monte categorias, preços e imagens para o cardápio ficar pronto em minutos.
-            </p>
-            <button
-              onClick={goToAdminDemo}
-              className="mt-5 w-full px-4 py-3 rounded-xl bg-red-500 text-white font-semibold hover:bg-red-600 transition-colors"
-            >
-              Abrir painel demo
-            </button>
-          </div>
-          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-lg hover:shadow-xl transition-all">
-            <div className="w-12 h-12 rounded-2xl bg-red-600 text-white flex items-center justify-center mb-4">
-              <ShoppingCart weight="duotone" />
-            </div>
-            <p className="text-sm font-semibold text-red-500">Passo 2</p>
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white mt-2">Receba pedidos</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-3">
-              O cliente escolhe, envia o pedido e você recebe tudo organizado no painel.
-            </p>
-            <button
-              onClick={goToDemoStore}
-              className="mt-5 w-full px-4 py-3 rounded-xl border-2 border-red-500 text-red-500 font-semibold hover:bg-red-50 dark:hover:bg-red-950 transition-colors"
-            >
-              Abrir cardápio demo
-            </button>
-          </div>
-          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-lg hover:shadow-xl transition-all">
-            <div className="w-12 h-12 rounded-2xl bg-gray-900 dark:bg-gray-700 text-white flex items-center justify-center mb-4">
-              <ChefHat weight="duotone" />
-            </div>
-            <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">Passo 3</p>
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white mt-2">Visão do churrasqueiro + dashboard</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-3">
-              A visão do churrasqueiro mostra pedidos chegando em tempo real e o dashboard entrega o resultado do dia.
-            </p>
-            <button
-              onClick={goToAdminDemo}
-              className="mt-5 w-full px-4 py-3 rounded-xl border-2 border-gray-900 text-gray-900 font-semibold hover:bg-gray-900 hover:text-white transition-colors"
-            >
-              Abrir painel demo
-            </button>
-          </div>
-        </div>
-        <div className="mt-10 flex items-center justify-center gap-6 text-sm text-gray-500 dark:text-gray-400">
-          <div className="flex items-center gap-2">
-            <ChefHat size={16} weight="duotone" />
-            Fila atualiza a cada 5s
-          </div>
-          <div className="flex items-center gap-2">
-            <ChartBar size={16} weight="duotone" />
-            Dashboard com metricas
-          </div>
-          <button
-            onClick={() => setTourOpen(true)}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-full border-2 border-red-500 text-red-500 hover:bg-red-50 dark:hover:bg-red-950 transition-colors font-semibold"
-          >
-            <Sparkle size={14} weight="duotone" />
-            Tour interativo
-          </button>
-        </div>
-      </section>
-
-      <section className="bg-gradient-to-br from-rose-50 via-white to-amber-50 border-y border-rose-100 py-16 sm:py-20">
+      <section id="product-showcase" className="bg-gradient-to-br from-rose-50 via-white to-amber-50 border-y border-rose-100 py-16 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
             <div className="max-w-2xl">
-              <p className="text-xs uppercase tracking-[0.3em] text-red-500 font-bold">Demo real</p>
+              <p className="text-xs uppercase tracking-[0.3em] text-red-500 font-bold">Produto real</p>
               <h2 className="text-3xl sm:text-4xl font-black text-gray-900 mt-3">
                 Uma experiência bonita, rápida e viciante
               </h2>
@@ -300,33 +190,20 @@ export function LandingPage() {
                 As telas abaixo são do produto real. Tudo pensado para converter pedidos e manter a operação fluida.
               </p>
             </div>
-            <div className="flex flex-wrap items-center gap-3">
-              <button
-                onClick={goToDemoStore}
-                className="px-4 py-2 rounded-full bg-white border border-red-200 text-red-600 font-semibold text-sm hover:bg-red-50 transition-colors"
-              >
-                Abrir cardápio demo
-              </button>
-              <button
-                onClick={goToAdminDemo}
-                className="px-4 py-2 rounded-full bg-gray-900 text-white font-semibold text-sm hover:bg-gray-800 transition-colors"
-              >
-                Ver painel demo
-              </button>
-            </div>
           </div>
 
-          <div className="mt-10 flex gap-6 overflow-x-auto pb-4 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6 md:overflow-visible">
+          <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {showcaseShots.map((shot) => (
               <div
                 key={shot.title}
-                className="min-w-[280px] sm:min-w-[360px] md:min-w-0 rounded-3xl border border-white/80 bg-white/90 shadow-[0_20px_60px_-35px_rgba(15,23,42,0.35)] overflow-hidden backdrop-blur"
+                className="rounded-3xl border border-white/80 bg-white/90 shadow-[0_24px_70px_-38px_rgba(15,23,42,0.35)] overflow-hidden backdrop-blur cursor-pointer hover:-translate-y-1 hover:shadow-[0_28px_80px_-38px_rgba(15,23,42,0.45)] transition"
+                onClick={() => setSelectedShot(shot)}
               >
                 <div className="relative">
                   <img
                     src={shot.image}
                     alt={shot.title}
-                    className="w-full h-56 sm:h-64 object-cover"
+                    className="w-full h-64 sm:h-72 object-cover"
                     loading="lazy"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
@@ -337,6 +214,7 @@ export function LandingPage() {
                 <div className="p-5">
                   <h3 className="text-lg font-bold text-gray-900">{shot.title}</h3>
                   <p className="text-sm text-gray-600 mt-2">{shot.description}</p>
+                  <p className="text-[11px] text-slate-400 mt-3">Clique para ampliar</p>
                 </div>
               </div>
             ))}
@@ -666,6 +544,37 @@ export function LandingPage() {
         </div>
       </section>
 
+      {selectedShot && (
+        <div
+          className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4"
+          onClick={() => setSelectedShot(null)}
+        >
+          <div
+            className="max-w-5xl w-full bg-white rounded-3xl overflow-hidden shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
+              <div>
+                <p className="text-sm font-semibold text-slate-900">{selectedShot.title}</p>
+                <p className="text-xs text-slate-500">{selectedShot.description}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedShot(null)}
+                className="px-3 py-1 rounded-full text-xs font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50"
+              >
+                Fechar
+              </button>
+            </div>
+            <img
+              src={selectedShot.image}
+              alt={selectedShot.title}
+              className="w-full h-[70vh] object-contain bg-slate-900"
+            />
+          </div>
+        </div>
+      )}
+
       <div className="h-16 sm:hidden" />
       <div className="sm:hidden fixed bottom-0 inset-x-0 z-40 px-4 pb-4">
         <div className="rounded-2xl border border-red-200 bg-white/95 backdrop-blur shadow-[0_12px_30px_rgba(15,23,42,0.18)] px-3 py-3 flex items-center gap-3">
@@ -681,8 +590,6 @@ export function LandingPage() {
           </button>
         </div>
       </div>
-
-      <DemoTour open={tourOpen} onClose={() => setTourOpen(false)} />
     </LandingPageLayout>
   );
 }
