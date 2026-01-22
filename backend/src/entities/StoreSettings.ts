@@ -28,25 +28,25 @@ export class StoreSettings
   id!: string;
 
   @Column({ name: 'logo_url', nullable: true })
-  logoUrl?: string;
+  logoUrl?: string | null;
 
   @Column({ name: 'description', type: 'text', nullable: true })
-  description?: string;
+  description?: string | null;
 
   @Column({ name: 'primary_color', default: '#b91c1c' })
   primaryColor!: string;
 
   @Column({ name: 'secondary_color', nullable: true })
-  secondaryColor?: string;
+  secondaryColor?: string | null;
 
   @Column({ name: 'pix_key', nullable: true })
-  pixKey?: string;
+  pixKey?: string | null;
 
   @Column({ name: 'contact_email', nullable: true })
-  contactEmail?: string;
+  contactEmail?: string | null;
 
   @Column({ name: 'promo_message', type: 'text', nullable: true })
-  promoMessage?: string;
+  promoMessage?: string | null;
 
   @Column({
     name: 'social_links',

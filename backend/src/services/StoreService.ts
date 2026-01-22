@@ -68,7 +68,6 @@ export class StoreService
     {
       const userRepo = manager.getRepository(User);
       const storeRepo = manager.getRepository(Store);
-      const settingsRepo = manager.getRepository(StoreSettings);
 
       // 1️⃣ Owner
       const owner = await userRepo.findOne({ where: { id: input.ownerId } });
@@ -90,7 +89,7 @@ export class StoreService
       // 3️⃣ Settings
       const normalizedPix = this.normalizePixKey(input.pixKey);
       const trimmedEmail = input.contactEmail?.toString().trim();
-      const settings = settingsRepo.create({
+      const settings = manager.create(StoreSettings, {
         logoUrl: logoUrl || input.logoUrl,
         description: input.description,
         primaryColor: input.primaryColor,
