@@ -400,7 +400,11 @@ export const DashboardView = ({ orders = [], customers = [], setupChecklist = []
           </div>
           {stats.chartData.length === 0 ? (
             <div className="flex-1 flex items-center justify-center text-sm text-gray-400">
-              Sem vendas registradas ainda.
+              <div className="text-center space-y-2">
+                <div className="text-4xl">📊</div>
+                <p className="text-sm font-semibold text-slate-600">Sem vendas registradas ainda.</p>
+                <p className="text-xs text-slate-400">As vendas do período aparecerão aqui.</p>
+              </div>
             </div>
           ) : (
             <div className="flex-1">
@@ -456,7 +460,11 @@ export const DashboardView = ({ orders = [], customers = [], setupChecklist = []
           </div>
           {sortedTopProducts.length === 0 ? (
             <div className="h-full flex items-center justify-center text-sm text-gray-400">
-              Sem produtos vendidos ainda.
+              <div className="text-center space-y-2">
+                <div className="text-4xl">🥩</div>
+                <p className="text-sm font-semibold text-slate-600">Sem produtos vendidos ainda.</p>
+                <p className="text-xs text-slate-400">Quando vender, o ranking aparece aqui.</p>
+              </div>
             </div>
           ) : (
             <div className="space-y-3">
@@ -546,7 +554,11 @@ export const DashboardView = ({ orders = [], customers = [], setupChecklist = []
 
           {sortedCustomers.length === 0 && (
             <div className="text-center text-gray-400 py-6 text-sm">
-              Nenhum cliente encontrado.
+              <div className="mx-auto max-w-sm space-y-2">
+                <div className="text-4xl">👥</div>
+                <p className="text-sm font-semibold text-slate-600">Nenhum cliente encontrado.</p>
+                <p className="text-xs text-slate-400">Assim que houver pedidos, os clientes aparecem aqui.</p>
+              </div>
             </div>
           )}
         </div>

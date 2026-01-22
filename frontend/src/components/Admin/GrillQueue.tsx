@@ -852,7 +852,13 @@ export const GrillQueue = () => {
 
           {sortedQueue.length === 0 && !loading && (
             <div className="col-span-full text-center text-gray-500 py-12 bg-white rounded-xl border border-dashed">
-              Nenhum pedido aguardando.
+              <div className="mx-auto max-w-sm space-y-2">
+                <div className="text-4xl">🔥</div>
+                <p className="text-sm font-semibold text-slate-700">Nenhum pedido aguardando.</p>
+                <p className="text-xs text-slate-500">
+                  Assim que chegar um pedido, ele aparece aqui com prioridade.
+                </p>
+              </div>
             </div>
           )}
         </div>
@@ -1066,7 +1072,13 @@ export const GrillQueue = () => {
 
             {completedToday.length === 0 && (
               <div className="col-span-full text-center text-slate-500 py-8 border border-dashed rounded-xl bg-slate-50">
-                Nenhum pedido finalizado hoje.
+                <div className="mx-auto max-w-sm space-y-2">
+                  <div className="text-4xl">✅</div>
+                  <p className="text-sm font-semibold text-slate-700">Nenhum pedido finalizado hoje.</p>
+                  <p className="text-xs text-slate-500">
+                    Os pedidos prontos vão aparecer aqui quando forem concluídos.
+                  </p>
+                </div>
               </div>
             )}
           </div>
