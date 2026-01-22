@@ -391,7 +391,13 @@ export function PaymentPage() {
                   )}
                   <div className="mt-3 space-y-2">
                     {(events || []).length === 0 ? (
-                      <p className="text-sm text-gray-500">Nenhum evento recebido ainda.</p>
+                      <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-5 text-center">
+                        <div className="text-3xl">🛰️</div>
+                        <p className="mt-2 text-sm font-semibold text-slate-700">Nenhum evento recebido ainda.</p>
+                        <p className="text-xs text-slate-500">
+                          Assim que o provedor atualizar o pagamento, ele aparece aqui.
+                        </p>
+                      </div>
                     ) : (
                       events.map((event) => (
                         <div key={event.id} className="text-sm text-gray-600 border border-gray-100 rounded-xl p-3 bg-gray-50">

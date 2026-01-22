@@ -193,7 +193,15 @@ export function AdminOrders() {
           </div>
 
           {filteredOrders.length === 0 ? (
-            <div className="py-12 text-center text-slate-500">Nenhum pedido por aqui ainda.</div>
+            <div className="py-12 text-center text-slate-500">
+              <div className="mx-auto max-w-md rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-6 py-8">
+                <div className="text-4xl">🧾</div>
+                <p className="mt-3 text-sm font-semibold text-slate-700">Nenhum pedido por aqui ainda.</p>
+                <p className="text-xs text-slate-500 mt-1">
+                  Assim que entrarem pedidos, eles aparecem aqui com status e detalhes.
+                </p>
+              </div>
+            </div>
           ) : viewMode === 'cards' ? (
             <div className="space-y-4">
               {filteredOrders.map((order, index) => (

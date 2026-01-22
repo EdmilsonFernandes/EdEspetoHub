@@ -204,8 +204,10 @@ export function PortfolioPage() {
           )}
 
           {!loading && !error && filteredStores.length === 0 && (
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-500">
-              Nenhuma loja encontrada.
+            <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-8 text-center">
+              <div className="text-4xl">🏪</div>
+              <p className="mt-3 text-sm font-semibold text-slate-700">Nenhuma loja encontrada.</p>
+              <p className="text-xs text-slate-500">Tente buscar por outro nome ou slug.</p>
             </div>
           )}
 
