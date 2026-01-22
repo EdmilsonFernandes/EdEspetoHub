@@ -590,7 +590,7 @@ export function LandingPage() {
             onClick={() => navigate('/create')}
             className="px-4 py-2 rounded-xl bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-semibold shadow hover:from-red-600 hover:to-red-700 transition-all"
           >
-            Criar minha loja
+            Criar minha loja agora
           </button>
         </div>
       </div>
