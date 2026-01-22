@@ -225,6 +225,40 @@ export function LandingPage() {
             </div>
           </div>
 
+          <div className="mt-8 rounded-[32px] border border-white/90 bg-white/90 shadow-[0_22px_70px_-45px_rgba(15,23,42,0.4)] overflow-hidden">
+            <div className="grid lg:grid-cols-[1.2fr_0.8fr] gap-6 p-5 sm:p-7">
+              <div className="rounded-3xl overflow-hidden border border-slate-200 bg-slate-50">
+                <video
+                  className="w-full h-full object-cover"
+                  poster="/marketing/menu-list.png"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  controls
+                >
+                  <source src="/marketing/marketing-demo.mp4" type="video/mp4" />
+                </video>
+              </div>
+              <div className="space-y-4">
+                <span className="inline-flex w-fit px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">
+                  Demo guiada em 40s
+                </span>
+                <h3 className="text-2xl font-black text-gray-900">Veja o fluxo completo do cliente ao churrasqueiro</h3>
+                <p className="text-sm text-gray-600 leading-relaxed">
+                  Do cardápio compacto ao pedido confirmado, fila do churrasqueiro e acompanhamento em tempo real.
+                  Tudo pensado para ser rápido no celular e elegante no desktop.
+                </p>
+                <div className="flex flex-wrap gap-2 text-xs text-slate-500">
+                  <span className="px-3 py-1 rounded-full bg-slate-50 border border-slate-200">Cardápio</span>
+                  <span className="px-3 py-1 rounded-full bg-slate-50 border border-slate-200">Checkout</span>
+                  <span className="px-3 py-1 rounded-full bg-slate-50 border border-slate-200">Fila</span>
+                  <span className="px-3 py-1 rounded-full bg-slate-50 border border-slate-200">Acompanhamento</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="mt-10 grid gap-6 md:grid-cols-2">
             {showcaseShots.map((shot) => (
               <div
