@@ -166,6 +166,7 @@ export const MenuView = ({
   instagramHandle,
   whatsappNumber,
   contactEmail,
+  storeUrl,
   isOpenNow,
   todayHoursLabel,
   storeAddress,
@@ -184,6 +185,24 @@ export const MenuView = ({
     ? `https://www.google.com/maps/search/?api=1&query=${mapQuery}`
     : "";
   const wazeUrl = mapQuery ? `https://waze.com/ul?q=${mapQuery}&navigate=yes` : "";
+  const handleShareMenu = async () => {
+    if (!storeUrl) return;
+    const message = `Confira o cardápio da ${branding?.brandName || "Chama no Espeto"}: ${storeUrl}`;
+    if (typeof navigator !== "undefined" && navigator.share) {
+      try {
+        await navigator.share({
+          title: branding?.brandName || "Cardápio",
+          text: message,
+          url: storeUrl,
+        });
+        return;
+      } catch (error) {
+        // ignore and fallback
+      }
+    }
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, "_blank");
+  };
 
   const openProductModal = (product) => {
     setSelectedProduct(product);
@@ -434,6 +453,15 @@ export const MenuView = ({
                 >
                   💬 WhatsApp
                 </a>
+              )}
+              {storeUrl && (
+                <button
+                  type="button"
+                  onClick={handleShareMenu}
+                  className="px-3.5 py-2 rounded-full text-xs font-semibold border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 transition"
+                >
+                  📲 Compartilhar cardápio
+                </button>
               )}
               <button
                 onClick={() =>

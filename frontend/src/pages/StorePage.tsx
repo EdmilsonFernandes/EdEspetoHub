@@ -60,6 +60,10 @@ export function StorePage() {
     if (!digits) return '';
     return digits.startsWith('55') ? digits : `55${digits}`;
   }, [storePhone]);
+  const storeUrl =
+    storeSlug && typeof window !== 'undefined'
+      ? `${window.location.origin}/${storeSlug}`
+      : '';
 
   const todayHoursLabel = useMemo(() => {
     if (!openingHours?.length) return '';
@@ -970,6 +974,7 @@ export function StorePage() {
               isOpenNow={storeOpenNow}
               whatsappNumber={storePhone}
               contactEmail={storeEmail}
+              storeUrl={storeUrl}
               todayHoursLabel={todayHoursLabel}
               storeAddress={storeAddress}
               compactHeader={isMobile}
