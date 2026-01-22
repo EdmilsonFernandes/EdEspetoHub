@@ -6,6 +6,8 @@
   - Hero concentra status/horario/WhatsApp.
   - "Id da loja" usa slug.
   - Cores primaria/secundaria aplicadas corretamente.
+- Landing page com vitrine real das telas (prints), modal com navegacao e CTA fixo no mobile.
+- Prova social (lojas ativas, pedidos e vendas) via endpoint publico + simulador de ganhos.
 - Mobile: header compacto + botao "Info" com sheet de endereco/WhatsApp/Instagram/horarios.
 - Mapa estatico gratuito (OpenStreetMap) no mobile com cache de coordenadas.
 - Fila do churrasqueiro usa o mesmo header do admin e mantem tema/cores.
@@ -54,9 +56,11 @@
   - Sessao expirada limpa `adminSession` e redireciona pro login.
   - Logos de pagamento (Pix/Cartao/Mercado Pago) em telas publicas e admin.
   - Renovacao gera novo link se pagamento expirou/failed.
-- Demo:
-  - Vitrine demo em `/chamanoespeto/demo`.
-  - Admin demo em `/admin/demo` com dados locais (localStorage).
+- Landing:
+  - Secao "Produto real" com galeria expandida dos prints.
+  - Modal de visualizacao com atalhos (← →) e botoes para navegar.
+  - CTA fixo no mobile para conversao.
+  - Simulador de ganhos com ticket medio e pedidos por dia.
 - Acompanhamento publico:
   - Pagina `/pedido/:orderId` com timeline, status e fila.
   - Branding da loja aplicado (logo, cores, titulo, favicon).
@@ -70,6 +74,7 @@
   - Autocomplete de cliente apenas para admin.
 - Produtos:
   - Campo de descricao persistido e exibido na vitrine.
+  - Preco promocional e promocao ativa por produto (aplica no pedido).
 - Espetos:
   - Seleciona ponto da carne e "passar varinha" por item na vitrine.
   - Opcoes aparecem no pedido (fila/admin/WhatsApp/tracking).
@@ -80,6 +85,7 @@
   - Botao "Info" abre sheet com endereco, contatos e horarios.
   - Bloco "Mais pedidos hoje" (Top 3) no topo do cardapio (carrossel no mobile).
   - Promoção do dia no topo do cardapio + badge nos itens.
+  - Produto com promocao mostra preco riscado e aplica preco promocional no pedido.
   - Botao "Compartilhar cardapio" e dicas "Salvar no celular" (iOS/Android).
   - Botao "Pedir novamente" no acompanhamento do pedido (reaplica itens no carrinho).
   - Admin: "Cardapio" no resumo com copiar link + gerar PDF.
@@ -98,16 +104,25 @@
 - frontend/src/components/Admin/DashboardView.tsx
 - frontend/src/components/Admin/GrillQueue.tsx
 - frontend/src/components/Admin/ProductManager.tsx
+- frontend/src/components/Cart/ProductModal.tsx
+- frontend/src/pages/LandingPage.tsx
+- frontend/public/marketing/*
 - backend/src/services/PaymentService.ts
 - backend/src/services/MercadoPagoService.ts
 - backend/src/services/EmailService.ts
 - backend/src/services/AuthService.ts
 - backend/src/controllers/OrderController.ts
+- backend/src/controllers/PlatformPublicController.ts
 - backend/schema.sql
+- backend/src/entities/Product.ts
+- backend/src/services/OrderService.ts
+- backend/src/services/ProductService.ts
+- backend/src/dto/CreateProductDto.ts
 - backend/src/entities/PasswordReset.ts
 - frontend/src/pages/ForgotPassword.tsx
 - frontend/src/pages/ResetPassword.tsx
 - frontend/src/services/authService.ts
+- frontend/src/services/productService.ts
 - frontend/src/pages/StorePage.tsx
 - frontend/src/components/Client/MenuView.tsx
 
@@ -118,6 +133,7 @@
 - Email real depende de SMTP valido (Gmail com senha de app).
 - Pagamento aprovado atualiza status via webhook Mercado Pago; sem HTTPS nao chega.
 - Postgres pode entrar em loop se o `pg_hba.conf` for corrompido (ex.: linha `EOF` invalida). Workaround: reescrever o arquivo no volume e resetar a senha sem apagar dados.
+- Endpoint publico de metricas: `/api/public/platform/metrics`.
 
 ## DNS / Dominio (Registro.br)
 - Ativar modo avancado em "Configurar enderecamento" -> "Modo avancado".
