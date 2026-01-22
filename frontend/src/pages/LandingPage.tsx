@@ -113,6 +113,25 @@ export function LandingPage() {
     const nextIndex = selectedIndex >= showcaseShots.length - 1 ? 0 : selectedIndex + 1;
     setSelectedShot(showcaseShots[nextIndex]);
   };
+  useEffect(() => {
+    if (!selectedShot) return;
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        handlePrevShot();
+      }
+      if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        handleNextShot();
+      }
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setSelectedShot(null);
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [selectedShot, handlePrevShot, handleNextShot]);
   const parsedTicket = Math.max(0, Number(ticketAverage) || 0);
   const parsedOrders = Math.max(0, Number(ordersPerDay) || 0);
   const monthlyEstimate = parsedTicket * parsedOrders * 30;
