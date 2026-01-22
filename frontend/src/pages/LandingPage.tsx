@@ -192,7 +192,7 @@ export function LandingPage() {
             </div>
           </div>
 
-          <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-10 grid gap-6 md:grid-cols-2">
             {showcaseShots.map((shot) => (
               <div
                 key={shot.title}
