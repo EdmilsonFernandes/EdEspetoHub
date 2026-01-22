@@ -68,6 +68,7 @@ export class StoreService
     {
       const userRepo = manager.getRepository(User);
       const storeRepo = manager.getRepository(Store);
+      const settingsRepo = manager.getRepository(StoreSettings);
 
       // 1️⃣ Owner
       const owner = await userRepo.findOne({ where: { id: input.ownerId } });
@@ -89,13 +90,13 @@ export class StoreService
       // 3️⃣ Settings
       const normalizedPix = this.normalizePixKey(input.pixKey);
       const trimmedEmail = input.contactEmail?.toString().trim();
-      const settings = manager.create(StoreSettings, {
+      const settings = settingsRepo.create({
         logoUrl: logoUrl || input.logoUrl,
         description: input.description,
         primaryColor: input.primaryColor,
         secondaryColor: input.secondaryColor,
-        pixKey: normalizedPix ?? null,
-        contactEmail: trimmedEmail || null,
+        pixKey: normalizedPix ?? undefined,
+        contactEmail: trimmedEmail || undefined,
         socialLinks,
         openingHours: input.openingHours ?? [],
         orderTypes: input.orderTypes ?? [ 'delivery', 'pickup', 'table' ],
@@ -178,12 +179,12 @@ export class StoreService
       if (data.pixKey !== undefined)
       {
         const normalizedPix = this.normalizePixKey(data.pixKey);
-        store.settings.pixKey = normalizedPix ?? null;
+        store.settings.pixKey = normalizedPix ?? undefined;
       }
       if (data.contactEmail !== undefined)
       {
         const trimmedEmail = data.contactEmail?.toString().trim();
-        store.settings.contactEmail = trimmedEmail || null;
+        store.settings.contactEmail = trimmedEmail || undefined;
       }
 
       if (data.socialLinks)
