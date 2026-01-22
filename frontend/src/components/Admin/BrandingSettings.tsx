@@ -23,12 +23,12 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
   return (
 
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-      <div className="p-6 border-b bg-gradient-to-r from-white via-white to-red-50/60">
+      <div className="p-4 sm:p-6 border-b bg-gradient-to-r from-white via-white to-red-50/60">
         <h3 className="text-lg font-bold text-gray-800 mb-1">Identidade visual</h3>
         <p className="text-sm text-gray-500">Deixe a loja com a cara do seu churrasco.</p>
       </div>
 
-      <div className="p-6 space-y-6">
+      <div className="p-4 sm:p-6 space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <label className="text-sm font-semibold text-gray-700">Nome da marca</label>
@@ -112,8 +112,8 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
 
         <div className="space-y-3">
           <label className="text-sm font-semibold text-gray-700">Logo da loja</label>
-          <div className="flex items-start gap-4">
-            <label className="flex-1 cursor-pointer">
+          <div className="flex flex-col sm:flex-row items-start gap-4">
+            <label className="flex-1 w-full cursor-pointer">
               <div className="border-2 border-dashed border-gray-300 rounded-2xl p-4 hover:border-brand-primary transition-colors text-center bg-white/70">
                 <svg className="w-8 h-8 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
@@ -139,7 +139,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
               />
             </label>
             {logoPreview && (
-              <div className="w-28 h-28 rounded-2xl overflow-hidden border-2 border-gray-200 flex-shrink-0 relative group shadow-sm">
+              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden border-2 border-gray-200 flex-shrink-0 relative group shadow-sm">
                 <img
                   src={logoPreview}
                   alt="Logo atual"
@@ -222,7 +222,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
           <p className="text-xs text-gray-500">Use esse slug para acessar o painel e a vitrine.</p>
         </div>
         {onSave && (
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
             <div className="text-xs text-slate-500">
               Salve para aplicar todas as mudanças da identidade.
             </div>
@@ -230,7 +230,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
               type="button"
               onClick={onSave}
               disabled={saving}
-              className="px-4 py-2 rounded-lg bg-brand-primary text-white text-xs font-semibold hover:opacity-90 transition-all disabled:opacity-60"
+              className="w-full sm:w-auto px-4 py-2 rounded-lg bg-brand-primary text-white text-xs font-semibold hover:opacity-90 transition-all disabled:opacity-60"
             >
               {saving ? "Salvando..." : "Salvar alterações"}
             </button>
