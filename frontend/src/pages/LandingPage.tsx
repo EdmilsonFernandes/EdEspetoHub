@@ -99,6 +99,20 @@ export function LandingPage() {
 
   const billingKey = isAnnual ? 'yearly' : 'monthly';
   const billing = BILLING_OPTIONS[billingKey];
+  const selectedIndex = useMemo(
+    () => showcaseShots.findIndex((shot) => shot.title === selectedShot?.title),
+    [showcaseShots, selectedShot]
+  );
+  const handlePrevShot = () => {
+    if (!showcaseShots.length) return;
+    const nextIndex = selectedIndex <= 0 ? showcaseShots.length - 1 : selectedIndex - 1;
+    setSelectedShot(showcaseShots[nextIndex]);
+  };
+  const handleNextShot = () => {
+    if (!showcaseShots.length) return;
+    const nextIndex = selectedIndex >= showcaseShots.length - 1 ? 0 : selectedIndex + 1;
+    setSelectedShot(showcaseShots[nextIndex]);
+  };
   const parsedTicket = Math.max(0, Number(ticketAverage) || 0);
   const parsedOrders = Math.max(0, Number(ordersPerDay) || 0);
   const monthlyEstimate = parsedTicket * parsedOrders * 30;
@@ -553,18 +567,34 @@ export function LandingPage() {
             className="max-w-5xl w-full bg-white rounded-[32px] overflow-hidden shadow-[0_40px_120px_-50px_rgba(0,0,0,0.8)]"
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 bg-white/90">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-5 py-4 border-b border-slate-100 bg-white/90">
               <div>
                 <p className="text-sm font-semibold text-slate-900">{selectedShot.title}</p>
                 <p className="text-xs text-slate-500">{selectedShot.description}</p>
               </div>
-              <button
-                type="button"
-                onClick={() => setSelectedShot(null)}
-                className="px-4 py-1.5 rounded-full text-xs font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50"
-              >
-                Fechar
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handlePrevShot}
+                  className="px-3 py-1.5 rounded-full text-xs font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50"
+                >
+                  Anterior
+                </button>
+                <button
+                  type="button"
+                  onClick={handleNextShot}
+                  className="px-3 py-1.5 rounded-full text-xs font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50"
+                >
+                  Próxima
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedShot(null)}
+                  className="px-4 py-1.5 rounded-full text-xs font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50"
+                >
+                  Fechar
+                </button>
+              </div>
             </div>
             <div className="bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-3 sm:p-4">
               <img
