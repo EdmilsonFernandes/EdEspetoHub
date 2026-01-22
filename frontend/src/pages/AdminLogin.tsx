@@ -45,7 +45,7 @@ export function AdminLogin() {
       sessionStorage.removeItem('admin:redirectSlug');
       navigate('/admin/dashboard');
     } catch (error: any) {
-      const message = error.message || 'Falha ao autenticar';
+      const message = error.message || 'Não foi possível autenticar agora.';
       if (error?.code === 'PAY-010') {
         setPendingPayment({
           paymentUrl: error?.details?.paymentUrl,

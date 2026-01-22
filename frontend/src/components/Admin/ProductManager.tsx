@@ -153,11 +153,11 @@ export const ProductManager = ({ products, onProductsChange }) => {
 
     try {
       await productService.save(payload);
-      showToast('Produto adicionado com sucesso', 'success');
+      showToast('Produto adicionado com sucesso.', 'success');
       resetForm();
       await refreshProducts();
     } catch (err) {
-      showToast('Não foi possível salvar o produto', 'error');
+      showToast('Não foi possível salvar o produto.', 'error');
     } finally {
       setSaving(false);
     }
@@ -192,13 +192,13 @@ export const ProductManager = ({ products, onProductsChange }) => {
         imageFile: inlineImageFile || undefined,
         isFeatured: inlineForm.isFeatured,
       });
-      showToast('Produto atualizado com sucesso', 'success');
+      showToast('Produto atualizado com sucesso.', 'success');
       setInlineEditId(null);
       setInlineDetailsId(null);
       setInlineImageFile('');
       await refreshProducts();
     } catch (error) {
-      showToast('Não foi possível salvar o produto', 'error');
+      showToast('Não foi possível salvar o produto.', 'error');
     } finally {
       setSaving(false);
     }
@@ -672,17 +672,17 @@ export const ProductManager = ({ products, onProductsChange }) => {
                             productService
                               .delete(product.id)
                               .then(async () => {
-                                showToast('Produto removido', 'success');
+                                showToast('Produto removido com sucesso.', 'success');
                                 await refreshProducts();
                               })
                               .catch(async (error) => {
                                 const message = (error?.message || '').toString();
                                 if (error?.code === 'PROD-001' || error?.status === 404 || message.includes('Produto')) {
-                                  showToast('Produto removido', 'success');
+                                  showToast('Produto removido com sucesso.', 'success');
                                   await refreshProducts();
                                   return;
                                 }
-                                showToast('Não foi possível remover o produto', 'error');
+                                showToast('Não foi possível remover o produto.', 'error');
                               })
                               .finally(() => setSaving(false));
                           }}

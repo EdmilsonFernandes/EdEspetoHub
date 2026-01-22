@@ -95,7 +95,7 @@ export function CreateStore() {
     {
       console.error('Falha ao processar logo', error);
       setLogoPreviewUrl('');
-      setStoreError('Não foi possível carregar o logo enviado.');
+      setStoreError('Não foi possível carregar o logo enviado agora.');
     }
   };
 
@@ -187,7 +187,7 @@ export function CreateStore() {
         complement: prev.complement || data.complemento || '',
       }));
     } catch (error) {
-      setCepError('Não foi possível consultar o CEP.');
+      setCepError('Não foi possível consultar o CEP agora.');
     } finally {
       setIsCepLoading(false);
     }
@@ -317,7 +317,7 @@ export function CreateStore() {
         navigate(result.redirectUrl);
       }
     } catch (error) {
-      setStoreError(error.message || 'Não foi possível criar sua loja');
+      setStoreError(error.message || 'Não foi possível criar sua loja agora.');
     } finally {
       setIsRegistering(false);
     }

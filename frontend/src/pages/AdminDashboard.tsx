@@ -684,7 +684,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         if (active) setSubscriptionDetails(data);
       } catch (err) {
         if (active) {
-          setSubscriptionError(err.message || 'Não foi possível carregar a assinatura.');
+          setSubscriptionError(err.message || 'Não foi possível carregar a assinatura agora.');
         }
       } finally {
         if (active) setSubscriptionLoading(false);
@@ -824,11 +824,11 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         logoUrl: updated?.settings?.logoUrl,
         brandName: updated?.name,
       });
-      showToast('Identidade salva com sucesso', 'success');
+      showToast('Identidade atualizada com sucesso.', 'success');
     } catch (err) {
       console.error('Erro ao salvar identidade', err);
-      setError('Não foi possível salvar a identidade da loja.');
-      showToast('Não foi possível salvar a identidade da loja', 'error');
+      setError('Não foi possível salvar a identidade da loja agora.');
+      showToast('Não foi possível salvar a identidade da loja agora.', 'error');
     } finally {
       setSavingBranding(false);
     }

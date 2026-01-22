@@ -18,9 +18,9 @@ export function ForgotPassword() {
     setLoading(true);
     try {
       const result = await authService.forgotPassword(email);
-      setMessage(result?.message || 'Se o e-mail existir, enviaremos instruções.');
+      setMessage(result?.message || 'Se o e-mail existir, enviaremos as instruções.');
     } catch (err) {
-      setError(err?.message || 'Não foi possível enviar o e-mail.');
+      setError(err?.message || 'Não foi possível enviar o e-mail agora.');
     } finally {
       setLoading(false);
     }

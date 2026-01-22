@@ -126,7 +126,7 @@ export function SuperAdmin() {
       const data = await superAdminService.fetchOverview(authToken);
       setOverview(data);
     } catch (err: any) {
-      const message = err.message || 'Falha ao carregar';
+      const message = err.message || 'Não foi possível carregar os dados.';
       if (message.includes('Token inválido') || message.includes('Token ausente')) {
         setSessionExpired(true);
         handleLogout();
@@ -205,9 +205,9 @@ export function SuperAdmin() {
       localStorage.setItem(STORAGE_USER_KEY, loginForm.email);
       setToken(nextToken);
       setSuperAdminUser(loginForm.email);
-      showToast('Login realizado com sucesso', 'success');
+      showToast('Login realizado com sucesso.', 'success');
     } catch (err: any) {
-      const message = err.message || 'Falha ao autenticar';
+      const message = err.message || 'Não foi possível autenticar agora.';
       setError(message);
       showToast(message, 'error');
     } finally {
@@ -454,9 +454,9 @@ export function SuperAdmin() {
     try {
       await superAdminService.reprocessPayment(token, paymentId, providerId);
       await loadOverview(token);
-      showToast('Pagamento reprocessado com sucesso', 'success');
+      showToast('Pagamento reprocessado com sucesso.', 'success');
     } catch (err: any) {
-      const message = err.message || 'Falha ao reprocessar';
+      const message = err.message || 'Não foi possível reprocessar agora.';
       showToast(message, 'error');
     } finally {
       setReprocessingId('');
@@ -482,7 +482,7 @@ export function SuperAdmin() {
       });
       setEventResults(filtered);
     } catch (err: any) {
-      showToast(err.message || 'Falha ao carregar eventos', 'error');
+      showToast(err.message || 'Não foi possível carregar os eventos.', 'error');
     } finally {
       setEventsLoading(false);
     }
@@ -517,7 +517,7 @@ export function SuperAdmin() {
       setAccessLogs(data?.data || []);
       setAccessLogsTotal(data?.total || 0);
     } catch (err: any) {
-      showToast(err.message || 'Falha ao carregar logs', 'error');
+      showToast(err.message || 'Não foi possível carregar os logs.', 'error');
     } finally {
       setAccessLogsLoading(false);
     }

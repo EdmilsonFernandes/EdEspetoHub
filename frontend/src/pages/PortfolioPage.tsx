@@ -112,7 +112,7 @@ export function PortfolioPage() {
         const data = await storeService.listPortfolio();
         if (active) setStores(Array.isArray(data) ? data : []);
       } catch (err: any) {
-        if (active) setError(err?.message || "Não foi possível carregar as lojas.");
+        if (active) setError(err?.message || "Não foi possível carregar as lojas agora.");
       } finally {
         if (active) setLoading(false);
       }

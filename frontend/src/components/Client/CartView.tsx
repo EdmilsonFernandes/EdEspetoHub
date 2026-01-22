@@ -146,7 +146,7 @@ export const CartView = ({
       next.address = buildDeliveryAddress(next);
       onChangeCustomer(next);
     } catch (error) {
-      setCepError("Não foi possível consultar o CEP.");
+      setCepError("Não foi possível consultar o CEP agora.");
     } finally {
       setCepLoading(false);
     }

@@ -85,11 +85,11 @@ export function OpeningHoursCard() {
           },
         });
       }
-      showToast('Horario salvo com sucesso', 'success');
+      showToast('Horário salvo com sucesso.', 'success');
       setLastSavedAt(Date.now());
     } catch (err) {
       console.error('Erro ao salvar horario', err);
-      showToast('Não foi possível salvar o horario', 'error');
+      showToast('Não foi possível salvar o horário.', 'error');
     } finally {
       setSaving(false);
     }

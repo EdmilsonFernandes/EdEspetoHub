@@ -39,7 +39,7 @@ export function ResetPassword() {
       setPassword('');
       setConfirm('');
     } catch (err) {
-      setError(err?.message || 'Não foi possível atualizar a senha.');
+      setError(err?.message || 'Não foi possível atualizar a senha agora.');
     } finally {
       setLoading(false);
     }

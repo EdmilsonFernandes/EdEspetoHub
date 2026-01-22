@@ -41,7 +41,7 @@ export function OrderTypeSettingsCard() {
   const saveOrderTypes = async () => {
     if (!storeId) return;
     if (!selected.length) {
-      showToast('Selecione pelo menos um tipo de pedido', 'error');
+      showToast('Selecione ao menos um tipo de pedido.', 'error');
       return;
     }
     setSaving(true);
@@ -59,10 +59,10 @@ export function OrderTypeSettingsCard() {
           },
         });
       }
-      showToast('Tipos de pedido salvos', 'success');
+      showToast('Tipos de pedido atualizados.', 'success');
     } catch (err) {
       console.error('Erro ao salvar tipos de pedido', err);
-      showToast('Não foi possível salvar os tipos de pedido', 'error');
+      showToast('Não foi possível salvar os tipos de pedido.', 'error');
     } finally {
       setSaving(false);
     }

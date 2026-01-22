@@ -594,7 +594,7 @@ export function StorePage() {
         showTableNotice(error.message || 'Mesa já está ocupada. Finalize o pedido atual antes de criar outro.');
         return;
       }
-      showErrorNotice(error?.message || 'Não foi possível enviar o pedido.');
+      showErrorNotice(error?.message || 'Não foi possível enviar o pedido agora.');
       return;
     }
     const nextCustomers = [
@@ -815,7 +815,7 @@ export function StorePage() {
                   if (!orderNotice?.id) return;
                   const link = `${window.location.origin}/pedido/${orderNotice.id}`;
                   navigator.clipboard.writeText(link);
-                  showToast('Link do pedido copiado', 'success');
+                  showToast('Link do pedido copiado.', 'success');
                 }}
                 className="ml-auto px-3 py-1.5 rounded-full text-[11px] font-semibold bg-white/10 hover:bg-white/20 border border-white/10"
               >

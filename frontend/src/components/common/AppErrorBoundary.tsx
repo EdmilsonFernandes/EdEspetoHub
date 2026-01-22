@@ -30,7 +30,7 @@ export class AppErrorBoundary extends React.Component<Props, State> {
           <div className="bg-white shadow-lg rounded-2xl p-6 max-w-md w-full text-center space-y-3">
             <h1 className="text-xl font-bold text-slate-800">Algo deu errado</h1>
             <p className="text-sm text-slate-600">
-              Não foi possível carregar o painel no momento. Recarregue a página ou tente novamente mais tarde.
+              Não foi possível carregar o painel agora. Recarregue a página ou tente novamente em instantes.
             </p>
             {this.state.error && (
               <pre className="text-xs bg-slate-100 text-left p-3 rounded-lg overflow-auto max-h-32 text-slate-700">

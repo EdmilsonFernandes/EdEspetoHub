@@ -60,7 +60,7 @@ export function PaymentPage() {
           setPolling(false);
         }
       } catch (err: any) {
-        setError(err.message || 'Não foi possível carregar o pagamento');
+        setError(err.message || 'Não foi possível carregar o pagamento no momento.');
       } finally {
         if (!silent) setIsLoading(false);
       }
@@ -314,7 +314,7 @@ export function PaymentPage() {
                               navigate(`/payment/${nextPayment.id}`);
                             }
                           } catch (err: any) {
-                            setError(err.message || 'Não foi possível gerar um novo pagamento.');
+                          setError(err.message || 'Não foi possível gerar um novo pagamento agora.');
                           } finally {
                             setRenewing(false);
                           }

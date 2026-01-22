@@ -71,7 +71,7 @@ export function OrderTracking() {
           };
           setOrder(next);
         } else {
-          setError('Pedido demo não encontrado.');
+        setError('Pedido de demonstração não encontrado.');
         }
         setLoading(false);
         return;
@@ -84,7 +84,7 @@ export function OrderTracking() {
           setPolling(false);
         }
       } catch (err: any) {
-        setError(err.message || 'Não foi possível carregar o pedido.');
+        setError(err.message || 'Não foi possível carregar o pedido agora.');
       } finally {
         if (!silent) setLoading(false);
       }

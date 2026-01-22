@@ -80,7 +80,7 @@ export function AdminRenewal() {
         navigate(`/payment/${payment.id}`);
       }
     } catch (err) {
-      setError(err.message || 'Não foi possível gerar a renovação.');
+      setError(err.message || 'Não foi possível gerar a renovação agora.');
     } finally {
       setIsSubmitting(false);
     }

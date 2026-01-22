@@ -229,7 +229,7 @@ export const GrillQueue = () => {
       setQueue(data);
     } catch (err) {
       console.error('Erro ao buscar fila', err);
-      setError('Não foi possível carregar os pedidos. Faça login novamente.');
+      setError('Não foi possível carregar os pedidos agora. Faça login novamente.');
     } finally {
       setLoading(false);
     }
@@ -317,7 +317,7 @@ export const GrillQueue = () => {
       );
     } catch (err) {
       console.error('Erro ao atualizar status', err);
-      setError('Não foi possível atualizar o status. Tente novamente.');
+      setError('Não foi possível atualizar o status agora. Tente novamente.');
     } finally {
       setUpdating(null);
     }
@@ -376,7 +376,7 @@ export const GrillQueue = () => {
       }
     } catch (err) {
       console.error('Erro ao atualizar itens', err);
-      setError('Não foi possível atualizar os itens. Atualize a fila.');
+      setError('Não foi possível atualizar os itens agora. Atualize a fila.');
     }
   };
 

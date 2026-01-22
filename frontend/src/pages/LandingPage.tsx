@@ -25,6 +25,44 @@ export function LandingPage() {
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [plans, setPlans] = useState([]);
   const [tourOpen, setTourOpen] = useState(false);
+  const showcaseShots = [
+    {
+      title: 'Cardápio que vende',
+      description: 'Visual leve, preços claros e CTA direto para pedir.',
+      tag: 'Cardápio',
+      image: '/marketing/menu-list.png',
+    },
+    {
+      title: 'Detalhe do produto',
+      description: 'Modal elegante com ponto da carne e varinha.',
+      tag: 'Produto',
+      image: '/marketing/item-modal.png',
+    },
+    {
+      title: 'Checkout rápido',
+      description: 'Resumo limpo + pagamento em segundos.',
+      tag: 'Pagamento',
+      image: '/marketing/checkout.png',
+    },
+    {
+      title: 'Fila do churrasqueiro',
+      description: 'Pedidos organizados, status e ações claras.',
+      tag: 'Operação',
+      image: '/marketing/grill-queue.png',
+    },
+    {
+      title: 'Acompanhar pedido',
+      description: 'Transparência total para o cliente.',
+      tag: 'Cliente',
+      image: '/marketing/order-tracking.png',
+    },
+    {
+      title: 'Pedido pronto',
+      description: 'Entrega com clareza e mensagem positiva.',
+      tag: 'Entrega',
+      image: '/marketing/order-ready.png',
+    },
+  ];
 
   const goToDemoStore = () => {
     navigate('/chamanoespeto/demo');
@@ -218,6 +256,62 @@ export function LandingPage() {
             <Sparkle size={14} weight="duotone" />
             Tour interativo
           </button>
+        </div>
+      </section>
+
+      <section className="bg-gradient-to-br from-rose-50 via-white to-amber-50 border-y border-rose-100 py-16 sm:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+            <div className="max-w-2xl">
+              <p className="text-xs uppercase tracking-[0.3em] text-red-500 font-bold">Demo real</p>
+              <h2 className="text-3xl sm:text-4xl font-black text-gray-900 mt-3">
+                Uma experiência bonita, rápida e viciante
+              </h2>
+              <p className="text-base sm:text-lg text-gray-600 mt-4">
+                As telas abaixo são do produto real. Tudo pensado para converter pedidos e manter a operação fluida.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                onClick={goToDemoStore}
+                className="px-4 py-2 rounded-full bg-white border border-red-200 text-red-600 font-semibold text-sm hover:bg-red-50 transition-colors"
+              >
+                Abrir cardápio demo
+              </button>
+              <button
+                onClick={goToAdminDemo}
+                className="px-4 py-2 rounded-full bg-gray-900 text-white font-semibold text-sm hover:bg-gray-800 transition-colors"
+              >
+                Ver painel demo
+              </button>
+            </div>
+          </div>
+
+          <div className="mt-10 flex gap-6 overflow-x-auto pb-4 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6 md:overflow-visible">
+            {showcaseShots.map((shot) => (
+              <div
+                key={shot.title}
+                className="min-w-[280px] sm:min-w-[360px] md:min-w-0 rounded-3xl border border-white/80 bg-white/90 shadow-[0_20px_60px_-35px_rgba(15,23,42,0.35)] overflow-hidden backdrop-blur"
+              >
+                <div className="relative">
+                  <img
+                    src={shot.image}
+                    alt={shot.title}
+                    className="w-full h-56 sm:h-64 object-cover"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
+                  <span className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-semibold bg-white/90 text-gray-700">
+                    {shot.tag}
+                  </span>
+                </div>
+                <div className="p-5">
+                  <h3 className="text-lg font-bold text-gray-900">{shot.title}</h3>
+                  <p className="text-sm text-gray-600 mt-2">{shot.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
