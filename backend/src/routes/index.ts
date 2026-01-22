@@ -19,6 +19,7 @@ import { OrderController } from '../controllers/OrderController';
 import { PlanController } from '../controllers/PlanController';
 import { SubscriptionController } from '../controllers/SubscriptionController';
 import { PlatformAdminController } from '../controllers/PlatformAdminController';
+import { PlatformPublicController } from '../controllers/PlatformPublicController';
 import { PaymentController } from '../controllers/PaymentController';
 
 import { requireAuth, requireRole } from '../middleware/authGuard';
@@ -60,6 +61,7 @@ routes.patch('/admin/stores/:storeId/suspend', requireAuth, requireRole('SUPER_A
 routes.patch('/admin/stores/:storeId/reactivate', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.reactivateStore);
 
 // Store public
+routes.get('/public/platform/metrics', PlatformPublicController.metrics);
 routes.get('/public/stores', StoreController.listPortfolio);
 routes.get('/stores/slug/:slug', StoreController.getBySlug);
 routes.get('/chamanoespeto/:slug', StoreController.getBySlug);

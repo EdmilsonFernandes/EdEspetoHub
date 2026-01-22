@@ -101,4 +101,14 @@ export class StoreRepository {
   findAll() {
     return this.repository.find({ relations: ['settings', 'owner'] });
   }
+
+  /**
+   * Counts all stores.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-22
+   */
+  countAll() {
+    return this.repository.count();
+  }
 }

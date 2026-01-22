@@ -18,6 +18,7 @@ import { planService } from '../services/planService';
 import { BILLING_OPTIONS, PLAN_TIERS, getPlanName } from '../constants/planCatalog';
 import { LandingPageLayout } from '../layouts/LandingPageLayout';
 import { useNavigate } from 'react-router-dom';
+import { formatCurrency } from '../utils/format';
 
 export function LandingPage() {
   const navigate = useNavigate();
@@ -25,6 +26,9 @@ export function LandingPage() {
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [plans, setPlans] = useState([]);
   const [tourOpen, setTourOpen] = useState(false);
+  const [publicMetrics, setPublicMetrics] = useState(null);
+  const [ticketAverage, setTicketAverage] = useState('35');
+  const [ordersPerDay, setOrdersPerDay] = useState('25');
   const showcaseShots = [
     {
       title: 'Cardápio que vende',
@@ -84,7 +88,15 @@ export function LandingPage() {
   };
 
   useEffect(() => {
-    platformService.listStores();
+    const loadMetrics = async () => {
+      try {
+        const data = await platformService.getPublicMetrics();
+        setPublicMetrics(data || null);
+      } catch (error) {
+        console.error('Falha ao carregar métricas públicas', error);
+      }
+    };
+    loadMetrics();
   }, []);
 
   useEffect(() => {
@@ -110,6 +122,10 @@ export function LandingPage() {
 
   const billingKey = isAnnual ? 'yearly' : 'monthly';
   const billing = BILLING_OPTIONS[billingKey];
+  const parsedTicket = Math.max(0, Number(ticketAverage) || 0);
+  const parsedOrders = Math.max(0, Number(ordersPerDay) || 0);
+  const monthlyEstimate = parsedTicket * parsedOrders * 30;
+  const numberFormatter = useMemo(() => new Intl.NumberFormat('pt-BR'), []);
   const plansByName = useMemo(() => {
     const map = {};
     plans.forEach(plan => {
@@ -173,6 +189,19 @@ export function LandingPage() {
               ✨ Como funciona
             </button>
           </div>
+          {publicMetrics && (
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs sm:text-sm font-semibold text-slate-600">
+              <span className="px-4 py-2 rounded-full bg-white border border-slate-200 shadow-sm">
+                {numberFormatter.format(publicMetrics.activeStores || 0)} lojas ativas
+              </span>
+              <span className="px-4 py-2 rounded-full bg-white border border-slate-200 shadow-sm">
+                {numberFormatter.format(publicMetrics.totalOrders || 0)} pedidos processados
+              </span>
+              <span className="px-4 py-2 rounded-full bg-white border border-slate-200 shadow-sm">
+                {formatCurrency(publicMetrics.totalRevenue || 0)} em vendas geradas
+              </span>
+            </div>
+          )}
         </div>
       </section>
 
@@ -311,6 +340,64 @@ export function LandingPage() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+        <div className="rounded-[32px] border border-slate-200 bg-white shadow-[0_24px_70px_-50px_rgba(15,23,42,0.5)] overflow-hidden">
+          <div className="grid lg:grid-cols-2 gap-8 p-6 sm:p-10">
+            <div className="space-y-4">
+              <p className="text-xs uppercase tracking-[0.3em] text-red-500 font-bold">Simulador</p>
+              <h2 className="text-3xl sm:text-4xl font-black text-gray-900">
+                Descubra quanto sua loja pode gerar por mês
+              </h2>
+              <p className="text-base sm:text-lg text-gray-600">
+                Faça uma conta rápida com o seu ticket médio e o volume diário de pedidos.
+              </p>
+              <div className="flex flex-wrap gap-3 text-xs text-slate-500">
+                <span className="px-3 py-1 rounded-full bg-slate-50 border border-slate-200">Base de 30 dias</span>
+                <span className="px-3 py-1 rounded-full bg-slate-50 border border-slate-200">Simulação instantânea</span>
+                <span className="px-3 py-1 rounded-full bg-slate-50 border border-slate-200">Ajuste em segundos</span>
+              </div>
+            </div>
+            <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-white to-rose-50 p-6 space-y-6">
+              <div className="grid gap-5">
+                <div>
+                  <label className="text-sm font-semibold text-slate-700">Ticket médio (R$)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={ticketAverage}
+                    onChange={(e) => setTicketAverage(e.target.value)}
+                    className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-base font-semibold text-slate-800 focus:ring-2 focus:ring-brand-primary"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-semibold text-slate-700">Pedidos por dia</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={ordersPerDay}
+                    onChange={(e) => setOrdersPerDay(e.target.value)}
+                    className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-base font-semibold text-slate-800 focus:ring-2 focus:ring-brand-primary"
+                  />
+                </div>
+              </div>
+              <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-4">
+                <p className="text-xs uppercase tracking-[0.3em] text-emerald-600 font-bold">Receita estimada</p>
+                <p className="text-3xl font-black text-emerald-700 mt-2">{formatCurrency(monthlyEstimate)}</p>
+                <p className="text-xs text-emerald-700 mt-1">estimativa mensal com base em 30 dias.</p>
+              </div>
+              <button
+                onClick={() => navigate('/create')}
+                className="w-full px-4 py-3 rounded-xl bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold shadow hover:from-red-600 hover:to-red-700 transition-all"
+              >
+                Quero esse resultado
+              </button>
+            </div>
           </div>
         </div>
       </section>
