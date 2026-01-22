@@ -8,7 +8,6 @@ import DashboardView from '../components/Admin/DashboardView';
 import { GrillQueue } from '../components/Admin/GrillQueue';
 import { OpeningHoursCard } from '../components/Admin/OpeningHoursCard';
 import { ProductManager } from '../components/Admin/ProductManager';
-import { StoreIdentityCard } from '../components/Admin/StoreIdentityCard';
 import { OrderTypeSettingsCard } from '../components/Admin/OrderTypeSettingsCard';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -910,11 +909,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
       {activeTab === 'config' && (
         <div className="space-y-4">
-            <StoreIdentityCard
-              branding={branding}
-              socialLinks={socialLinks}
-              whatsappNumber={whatsappNumber}
-            />
           <BrandingSettings
             branding={brandingDraft}
             onChange={setBrandingDraft}
@@ -922,15 +916,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             onSave={handleSaveBranding}
             saving={savingBranding}
           />
-          <div className="flex justify-end">
-            <button
-              onClick={handleSaveBranding}
-              disabled={savingBranding}
-            className="px-4 py-2 rounded-lg bg-brand-primary text-white text-sm font-semibold hover:opacity-90 hover:-translate-y-0.5 active:scale-95 transition-all disabled:opacity-60"
-          >
-            {savingBranding ? 'Salvando...' : 'Salvar identidade'}
-          </button>
-          </div>
           <OrderTypeSettingsCard />
           <OpeningHoursCard />
         </div>
