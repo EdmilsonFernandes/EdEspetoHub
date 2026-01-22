@@ -32,7 +32,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
       <div className="p-4 sm:p-6 border-b bg-gradient-to-r from-white via-white to-red-50/60">
         <h3 className="text-lg font-bold text-gray-800 mb-1">Identidade visual</h3>
-        <p className="text-sm text-gray-500">Deixe a loja com a cara do seu churrasco.</p>
+        <p className="text-sm text-gray-500">Defina a presença digital da sua marca com elegância.</p>
       </div>
 
       <div className="p-4 sm:p-6 space-y-6">
@@ -51,12 +51,12 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
           <div className={`${sectionsOpen.identity ? 'block' : 'hidden'} sm:block px-4 pb-4 sm:px-5 sm:pb-5 space-y-6`}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-gray-700">Nome da marca</label>
-            <input
-              type="text"
-              value={branding.brandName}
-              onChange={(e) => handleChange("brandName", e.target.value)}
-              className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
+          <label className="text-sm font-semibold text-gray-700">Nome da marca</label>
+          <input
+            type="text"
+            value={branding.brandName}
+            onChange={(e) => handleChange("brandName", e.target.value)}
+            className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
               placeholder="Ex: Chama do Sertao"
             />
           </div>
@@ -77,18 +77,18 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-gray-700">Descrição da marca</label>
-          <textarea
-            value={branding.description || ""}
-            onChange={(e) => handleChange("description", e.target.value)}
-            className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors min-h-[110px]"
-            placeholder="Ex: Espetos artesanais, cerveja trincando e atendimento rapido."
-            maxLength={220}
-          />
-          <div className="flex items-center justify-between text-xs text-gray-500">
-            <span>Mostra no portfolio da plataforma.</span>
-            <span>{(branding.description || "").length}/220</span>
-          </div>
+            <label className="text-sm font-semibold text-gray-700">Descrição da marca</label>
+            <textarea
+              value={branding.description || ""}
+              onChange={(e) => handleChange("description", e.target.value)}
+              className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors min-h-[110px]"
+            placeholder="Ex: Espetos artesanais, cerveja gelada e atendimento rapido."
+              maxLength={220}
+            />
+            <div className="flex items-center justify-between text-xs text-gray-500">
+              <span>Mostra no portfolio da plataforma.</span>
+              <span>{(branding.description || "").length}/220</span>
+            </div>
         </div>
 
         <div className="space-y-3">
@@ -99,8 +99,8 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
                 <svg className="w-8 h-8 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
-                <p className="text-sm text-gray-600 mb-1">Clique para enviar o logo</p>
-                <p className="text-xs text-gray-500">PNG ou JPG ate 5MB</p>
+                <p className="text-sm text-gray-600 mb-1">Envie o logo da marca</p>
+                <p className="text-xs text-gray-500">PNG ou JPG até 5MB</p>
               </div>
               <input
                 ref={fileInputRef}
@@ -167,7 +167,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
                 maxLength={120}
               />
               <div className="flex items-center justify-between text-xs text-gray-500">
-                <span>Aparece no topo do cardapio.</span>
+                <span>Aparece no topo do cardápio.</span>
                 <span>{(branding.promoMessage || "").length}/120</span>
               </div>
             </div>
@@ -196,7 +196,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
                 className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
                 placeholder="contato@chamanoespeto.com.br"
               />
-              <p className="text-xs text-gray-500">Opcional, aparece para contato no cardápio.</p>
+              <p className="text-xs text-gray-500">Opcional, aparece no cardápio para contato.</p>
             </div>
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700">Chave Pix da loja</label>
@@ -207,7 +207,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
                 className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
                 placeholder="Ex: +5511999999999 ou contato@pix.com"
               />
-              <p className="text-xs text-gray-500">Usada para gerar o QR Code na confirmacao de pagamento. Telefone com DDD pode comecar com 0 que ajustamos para +55.</p>
+              <p className="text-xs text-gray-500">Usada para gerar o QR Code na confirmação de pagamento. Telefone com DDD pode começar com 0 que ajustamos para +55.</p>
             </div>
           </div>
         </div>
@@ -247,7 +247,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
                 />
               ))}
             </div>
-            <p className="text-xs text-gray-500">A cor principal define o destaque do cardapio.</p>
+            <p className="text-xs text-gray-500">A cor principal define os destaques do cardápio.</p>
           </div>
 
           <div className="space-y-3">
