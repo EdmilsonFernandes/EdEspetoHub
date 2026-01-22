@@ -72,6 +72,7 @@ CREATE TABLE IF NOT EXISTS products (
   category TEXT,
   description TEXT,
   image_url TEXT,
+  is_featured BOOLEAN NOT NULL DEFAULT FALSE,
   active BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -105,6 +106,8 @@ CREATE TABLE IF NOT EXISTS order_items (
 
 ALTER TABLE products
 ADD COLUMN IF NOT EXISTS description TEXT;
+ALTER TABLE products
+ADD COLUMN IF NOT EXISTS is_featured BOOLEAN NOT NULL DEFAULT FALSE;
 
 ALTER TABLE order_items
 ADD COLUMN IF NOT EXISTS cooking_point TEXT;

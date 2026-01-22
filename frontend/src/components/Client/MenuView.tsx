@@ -180,6 +180,7 @@ export const MenuView = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [showStoreDetails, setShowStoreDetails] = useState(false);
+  const [showSaveHint, setShowSaveHint] = useState(false);
   const mapQuery = storeAddress ? encodeURIComponent(storeAddress) : "";
   const googleMapsUrl = mapQuery
     ? `https://www.google.com/maps/search/?api=1&query=${mapQuery}`
@@ -255,6 +256,10 @@ export const MenuView = ({
 
     return ordered.filter((category) => category.items.length > 0);
   }, [products]);
+  const featuredProduct = useMemo(
+    () => (products || []).find((item) => item.isFeatured),
+    [products]
+  );
 
   const itemQtyMap = useMemo(() => {
     const map = new Map();
@@ -464,6 +469,13 @@ export const MenuView = ({
                 </button>
               )}
               <button
+                type="button"
+                onClick={() => setShowSaveHint((prev) => !prev)}
+                className="px-3.5 py-2 rounded-full text-xs font-semibold border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 transition"
+              >
+                📌 Salvar no celular
+              </button>
+              <button
                 onClick={() =>
                   document.getElementById("menu-list")?.scrollIntoView({ behavior: "smooth", block: "start" })
                 }
@@ -493,6 +505,25 @@ export const MenuView = ({
               )}
               </div>
             )}
+            {!compactHeader && showStoreDetails && showSaveHint && (
+              <div className="rounded-2xl border border-slate-200 bg-white/90 p-4 text-xs text-slate-600">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">Salvar na tela inicial</p>
+                <div className="mt-2 grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+                    <p className="font-semibold text-slate-700">iPhone</p>
+                    <p className="text-[11px] text-slate-500">
+                      Toque em Compartilhar → Adicionar à Tela de Início.
+                    </p>
+                  </div>
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+                    <p className="font-semibold text-slate-700">Android</p>
+                    <p className="text-[11px] text-slate-500">
+                      Menu do navegador → Adicionar à tela inicial.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
             <div className="relative">
               <MagnifyingGlass className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
@@ -505,6 +536,31 @@ export const MenuView = ({
           </div>
         </section>
         <div id="menu-list" className="space-y-10">
+        {featuredProduct && (
+          <div className="rounded-3xl border border-amber-200 bg-gradient-to-r from-amber-50 via-white to-amber-50 p-4 sm:p-5 shadow-sm">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-[11px] uppercase tracking-[0.3em] text-amber-500 font-semibold">Promoção do dia</p>
+                <h3 className="text-lg font-bold text-slate-900 mt-1">{featuredProduct.name}</h3>
+                {featuredProduct.description && (
+                  <p className="text-xs text-slate-600 mt-1">{featuredProduct.description}</p>
+                )}
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-lg font-black text-amber-600">
+                  {formatCurrency(featuredProduct.price || 0)}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => openProductModal(featuredProduct)}
+                  className="px-4 py-2 rounded-full text-xs font-semibold bg-amber-500 text-white hover:bg-amber-600 transition"
+                >
+                  Ver detalhes
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         {filteredGrouped.map((category, index) => {
           const accentColors = [
             "#ef4444",
@@ -567,6 +623,11 @@ export const MenuView = ({
                         </p>
                         {item.description && (
                           <p className="text-xs text-slate-500 line-clamp-1">{item.description}</p>
+                        )}
+                        {item.isFeatured && (
+                          <span className="mt-1 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700 border border-amber-200">
+                            Promo do dia
+                          </span>
                         )}
                       </div>
                       <div className="flex items-center gap-2">

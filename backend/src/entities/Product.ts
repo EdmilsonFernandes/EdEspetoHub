@@ -41,6 +41,9 @@ export class Product {
   @Column({ name: 'image_url', nullable: true })
   imageUrl?: string;
 
+  @Column({ name: 'is_featured', default: false })
+  isFeatured!: boolean;
+
   @Column({ default: true })
   active!: boolean;
 

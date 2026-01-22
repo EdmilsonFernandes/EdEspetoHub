@@ -60,6 +60,10 @@ export async function runMigrations() {
     ADD COLUMN IF NOT EXISTS pass_skewer BOOLEAN DEFAULT FALSE;
   `);
   await AppDataSource.query(`
+    ALTER TABLE IF EXISTS products
+    ADD COLUMN IF NOT EXISTS is_featured BOOLEAN DEFAULT FALSE;
+  `);
+  await AppDataSource.query(`
     ALTER TABLE IF EXISTS plans
     ADD COLUMN IF NOT EXISTS display_name TEXT;
   `);

@@ -58,6 +58,9 @@ export class ProductService
 
     const safeStore = store!;
     const uploadedImage = await saveBase64Image(input.imageFile, `product-${safeStore.id}`, 'products');
+    if (input.isFeatured) {
+      await this.productRepository.clearFeaturedByStoreId(safeStore.id);
+    }
 
     const product = this.productRepository.create({
       name: input.name,
@@ -65,6 +68,7 @@ export class ProductService
       category: input.category,
       description: (input as any).description ?? (input as any).desc,
       imageUrl: uploadedImage || input.imageUrl,
+      isFeatured: Boolean(input.isFeatured),
       store: safeStore,
     });
 
@@ -120,12 +124,18 @@ export class ProductService
     if (!store || !product || product.store.id !== store.id) throw new AppError('PROD-001', 404);
 
     const uploadedImage = await saveBase64Image(data.imageFile, `product-${store.id}`, 'products');
+    if (data.isFeatured) {
+      await this.productRepository.clearFeaturedByStoreId(store.id);
+    }
 
     product.name = data.name ?? product.name;
     product.price = data.price ?? product.price;
     product.category = data.category ?? product.category;
     product.description = (data as any).description ?? (data as any).desc ?? product.description;
     product.imageUrl = uploadedImage ?? data.imageUrl ?? product.imageUrl;
+    if (typeof data.isFeatured === 'boolean') {
+      product.isFeatured = data.isFeatured;
+    }
 
     return this.productRepository.save(product);
   }

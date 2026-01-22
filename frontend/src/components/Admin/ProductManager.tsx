@@ -17,7 +17,7 @@ import { productService } from '../../services/productService';
 import { formatCurrency } from '../../utils/format';
 import { useToast } from '../../contexts/ToastContext';
 
-const initialForm = { name: '', price: '', category: 'espetos', imageUrl: '', imageFile: '', description: '' };
+const initialForm = { name: '', price: '', category: 'espetos', imageUrl: '', imageFile: '', description: '', isFeatured: false };
 const defaultCategories = [
   { id: 'espetos', label: 'Espetos', icon: Fire },
   { id: 'bebidas', label: 'Bebidas', icon: Wine },
@@ -54,6 +54,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
     category: initialForm.category,
     description: '',
     imageUrl: '',
+    isFeatured: false,
   });
   const [inlineImageFile, setInlineImageFile] = useState('');
   const [formData, setFormData] = useState(initialForm);
@@ -172,6 +173,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
       category: product.category || initialForm.category,
       description: product.description ?? product.desc ?? '',
       imageUrl: product.imageUrl || '',
+      isFeatured: Boolean(product.isFeatured),
     });
   };
 
@@ -188,6 +190,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
         description: inlineForm.description || undefined,
         imageUrl: inlineImageFile ? undefined : inlineForm.imageUrl || undefined,
         imageFile: inlineImageFile || undefined,
+        isFeatured: inlineForm.isFeatured,
       });
       showToast('Produto atualizado com sucesso', 'success');
       setInlineEditId(null);
@@ -452,6 +455,23 @@ export const ProductManager = ({ products, onProductsChange }) => {
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             />
           </div>
+          <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+            <div>
+              <p className="text-sm font-semibold text-slate-800">Promoção do dia</p>
+              <p className="text-xs text-slate-500">Destaque este produto no topo do cardápio.</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setFormData((prev) => ({ ...prev, isFeatured: !prev.isFeatured }))}
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition ${
+                formData.isFeatured
+                  ? 'bg-emerald-600 text-white border-emerald-600'
+                  : 'bg-white text-slate-600 border-slate-200'
+              }`}
+            >
+              {formData.isFeatured ? 'Ativo' : 'Ativar'}
+            </button>
+          </div>
 
           <div className="flex gap-3 pt-2">
             <button
@@ -491,6 +511,11 @@ export const ProductManager = ({ products, onProductsChange }) => {
                 </h4>
                 <span className="text-sm font-bold text-brand-primary">{previewPrice}</span>
               </div>
+              {formData.isFeatured && (
+                <span className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 border border-emerald-200">
+                  Promoção do dia
+                </span>
+              )}
               <span className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-semibold bg-white border border-slate-200 text-slate-600">
                 {previewCategory || 'Categoria'}
               </span>
@@ -606,7 +631,16 @@ export const ProductManager = ({ products, onProductsChange }) => {
                     </>
                   ) : (
                     <>
-                      <td className="p-4 font-medium">{product.name}</td>
+                      <td className="p-4 font-medium">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span>{product.name}</span>
+                          {product.isFeatured && (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-700 border border-emerald-200">
+                              Promo do dia
+                            </span>
+                          )}
+                        </div>
+                      </td>
                       <td className="p-4">
                         <div className="flex items-center gap-2">
                           {(() => {
@@ -674,6 +708,25 @@ export const ProductManager = ({ products, onProductsChange }) => {
                             value={inlineForm.description}
                             onChange={(e) => setInlineForm((prev) => ({ ...prev, description: e.target.value }))}
                           />
+                          <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+                            <div>
+                              <p className="text-xs font-semibold text-slate-700">Promoção do dia</p>
+                              <p className="text-[11px] text-slate-500">Destaque este produto no topo do cardápio.</p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setInlineForm((prev) => ({ ...prev, isFeatured: !prev.isFeatured }))
+                              }
+                              className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border transition ${
+                                inlineForm.isFeatured
+                                  ? 'bg-emerald-600 text-white border-emerald-600'
+                                  : 'bg-white text-slate-600 border-slate-200'
+                              }`}
+                            >
+                              {inlineForm.isFeatured ? 'Ativo' : 'Ativar'}
+                            </button>
+                          </div>
                         </div>
                         <div className="space-y-3">
                           <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">

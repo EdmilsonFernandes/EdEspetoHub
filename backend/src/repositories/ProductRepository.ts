@@ -67,6 +67,25 @@ export class ProductRepository
 
 
   /**
+   * Clears featured flag for store products.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2025-12-17
+   */
+  clearFeaturedByStoreId(storeId: string)
+  {
+    return this.repository
+      .createQueryBuilder()
+      .update(Product)
+      .set({ isFeatured: false })
+      .where('store_id = :storeId', { storeId })
+      .execute();
+  }
+
+
+
+
+  /**
    * Executes delete logic.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
