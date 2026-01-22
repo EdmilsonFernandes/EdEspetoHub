@@ -714,7 +714,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
                       </div>
                     )}
                   </td>
-                  {inlineEditId === product.id ? (
+                  {inlineEditId === product.id && !mobileEditOpen ? (
                     <>
                       <td className="p-4">
                         <input
@@ -801,13 +801,13 @@ export const ProductManager = ({ products, onProductsChange }) => {
                       </td>
                       <td className="p-4 text-right space-x-2">
                         <button
-                          onClick={() => handleEdit(product)}
+                          onClick={() => handleEditMobile(product)}
                           className="text-brand-primary hover:bg-brand-primary-soft p-2 rounded transition-all hover:-translate-y-0.5 active:scale-95"
                         >
                           <PencilSimple size={18} weight="duotone" />
                         </button>
                         <button
-                          onClick={() => setInlineDetailsId((prev) => (prev === product.id ? null : product.id))}
+                          onClick={() => handleEditMobile(product)}
                           className="text-slate-600 hover:bg-slate-100 p-2 rounded transition-all hover:-translate-y-0.5 active:scale-95"
                           title="Detalhes"
                         >
@@ -842,7 +842,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
                     </>
                   )}
                 </tr>
-                {inlineDetailsId === product.id && (
+                {inlineDetailsId === product.id && !mobileEditOpen && (
                   <tr className="bg-slate-50">
                     <td colSpan={5} className="px-4 pb-4">
                       <div className="grid gap-4 md:grid-cols-[1.2fr_0.8fr] bg-white rounded-xl border border-slate-200 p-4">
@@ -1006,12 +1006,12 @@ export const ProductManager = ({ products, onProductsChange }) => {
         </div>
       </div>
       {mobileEditOpen && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center sm:hidden">
+        <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
           <div
             className="absolute inset-0 bg-black/40"
             onClick={handleInlineCancel}
           />
-          <div className="relative w-full max-h-[90vh] overflow-y-auto rounded-t-3xl bg-white p-5 shadow-2xl">
+          <div className="relative w-full max-h-[90vh] overflow-y-auto rounded-t-3xl bg-white p-5 shadow-2xl sm:max-w-2xl sm:rounded-3xl sm:p-6">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Editar produto</p>
