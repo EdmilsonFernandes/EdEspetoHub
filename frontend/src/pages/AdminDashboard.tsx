@@ -809,8 +809,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         description: brandingDraft.description || undefined,
         primaryColor: brandingDraft.primaryColor,
         secondaryColor: brandingDraft.secondaryColor,
-        pixKey: brandingDraft.pixKey ?? '',
-        contactEmail: brandingDraft.contactEmail ?? '',
+        pixKey: brandingDraft.pixKey?.trim() ?? '',
+        contactEmail: brandingDraft.contactEmail?.trim() ?? '',
         socialLinks: brandingDraft.instagram ? [{ type: 'instagram', value: brandingDraft.instagram }] : [],
       };
       const updated = await storeService.update(storeId, payload);

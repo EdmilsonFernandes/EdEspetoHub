@@ -87,13 +87,15 @@ export class StoreService
       const socialLinks = sanitizeSocialLinks(input.socialLinks);
 
       // 3️⃣ Settings
+      const normalizedPix = this.normalizePixKey(input.pixKey);
+      const trimmedEmail = input.contactEmail?.toString().trim();
       const settings = manager.create(StoreSettings, {
         logoUrl: logoUrl || input.logoUrl,
         description: input.description,
         primaryColor: input.primaryColor,
         secondaryColor: input.secondaryColor,
-        pixKey: this.normalizePixKey(input.pixKey),
-        contactEmail: input.contactEmail,
+        pixKey: normalizedPix ?? null,
+        contactEmail: trimmedEmail || null,
         socialLinks,
         openingHours: input.openingHours ?? [],
         orderTypes: input.orderTypes ?? [ 'delivery', 'pickup', 'table' ],
@@ -175,11 +177,13 @@ export class StoreService
 
       if (data.pixKey !== undefined)
       {
-        store.settings.pixKey = this.normalizePixKey(data.pixKey);
+        const normalizedPix = this.normalizePixKey(data.pixKey);
+        store.settings.pixKey = normalizedPix ?? null;
       }
       if (data.contactEmail !== undefined)
       {
-        store.settings.contactEmail = data.contactEmail;
+        const trimmedEmail = data.contactEmail?.toString().trim();
+        store.settings.contactEmail = trimmedEmail || null;
       }
 
       if (data.socialLinks)
