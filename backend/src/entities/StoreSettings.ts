@@ -27,7 +27,7 @@ export class StoreSettings
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column({ name: 'logo_url', nullable: true })
+  @Column({ name: 'logo_url', type: 'text', nullable: true })
   logoUrl?: string | null;
 
   @Column({ name: 'description', type: 'text', nullable: true })
@@ -36,13 +36,13 @@ export class StoreSettings
   @Column({ name: 'primary_color', default: '#b91c1c' })
   primaryColor!: string;
 
-  @Column({ name: 'secondary_color', nullable: true })
+  @Column({ name: 'secondary_color', type: 'varchar', nullable: true })
   secondaryColor?: string | null;
 
-  @Column({ name: 'pix_key', nullable: true })
+  @Column({ name: 'pix_key', type: 'varchar', nullable: true })
   pixKey?: string | null;
 
-  @Column({ name: 'contact_email', nullable: true })
+  @Column({ name: 'contact_email', type: 'varchar', nullable: true })
   contactEmail?: string | null;
 
   @Column({ name: 'promo_message', type: 'text', nullable: true })
