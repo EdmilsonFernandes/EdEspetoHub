@@ -48,6 +48,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
   const [editing, setEditing] = useState(null);
   const [inlineEditId, setInlineEditId] = useState<string | null>(null);
   const [inlineDetailsId, setInlineDetailsId] = useState<string | null>(null);
+  const [mobileEditOpen, setMobileEditOpen] = useState(false);
   const [inlineForm, setInlineForm] = useState({
     name: '',
     price: '',
@@ -183,6 +184,11 @@ export const ProductManager = ({ products, onProductsChange }) => {
     });
   };
 
+  const handleEditMobile = (product) => {
+    handleEdit(product);
+    setMobileEditOpen(true);
+  };
+
   const handleInlineSave = async () => {
     if (!inlineEditId) return;
     if (!inlineForm.name || !inlineForm.price) return;
@@ -204,6 +210,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
       setInlineEditId(null);
       setInlineDetailsId(null);
       setInlineImageFile('');
+      setMobileEditOpen(false);
       await refreshProducts();
     } catch (error) {
       showToast('Não foi possível salvar o produto.', 'error');
@@ -216,6 +223,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
     setInlineEditId(null);
     setInlineDetailsId(null);
     setInlineImageFile('');
+    setMobileEditOpen(false);
   };
 
   const handleUpload = (file) => {
@@ -613,7 +621,76 @@ export const ProductManager = ({ products, onProductsChange }) => {
             </button>
           ))}
         </div>
-        <div className="overflow-x-auto">
+        <div className="sm:hidden space-y-3">
+          {pagedProducts.map((product) => (
+            <div key={product.id} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <div className="flex items-start gap-3">
+                {product.imageUrl ? (
+                  <img src={product.imageUrl} className="w-12 h-12 rounded-xl object-cover" alt="" />
+                ) : (
+                  <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
+                    <ImageIcon size={16} className="text-gray-400" />
+                  </div>
+                )}
+                <div className="flex-1">
+                  <p className="font-semibold text-gray-900">{product.name}</p>
+                  <p className="text-xs text-gray-500">{formatCategoryLabel(product.category)}</p>
+                  <div className="mt-2">
+                    {product.promoActive && product.promoPrice ? (
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs line-through text-slate-400">
+                          {formatCurrency(product.price)}
+                        </span>
+                        <span className="text-emerald-600 font-bold">
+                          {formatCurrency(product.promoPrice)}
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-brand-primary font-bold">{formatCurrency(product.price)}</span>
+                    )}
+                  </div>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleEditMobile(product)}
+                    className="px-3 py-1.5 rounded-lg bg-brand-primary text-white text-xs font-semibold"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!window.confirm('Excluir produto?')) return;
+                      setSaving(true);
+                      productService
+                        .delete(product.id)
+                        .then(async () => {
+                          showToast('Produto removido com sucesso.', 'success');
+                          await refreshProducts();
+                        })
+                        .catch(async (error) => {
+                          const message = (error?.message || '').toString();
+                          if (error?.code === 'PROD-001' || error?.status === 404 || message.includes('Produto')) {
+                            showToast('Produto removido com sucesso.', 'success');
+                            await refreshProducts();
+                            return;
+                          }
+                          showToast('Não foi possível remover o produto.', 'error');
+                        })
+                        .finally(() => setSaving(false));
+                    }}
+                    className="px-3 py-1.5 rounded-lg border border-red-200 text-red-600 text-xs font-semibold"
+                  >
+                    Excluir
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="hidden sm:block overflow-x-auto">
         <table className="w-full text-left min-w-[680px]">
           <thead className="bg-gray-50 border-b">
             <tr>
@@ -928,6 +1005,170 @@ export const ProductManager = ({ products, onProductsChange }) => {
           </div>
         </div>
       </div>
+      {mobileEditOpen && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center sm:hidden">
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={handleInlineCancel}
+          />
+          <div className="relative w-full max-h-[90vh] overflow-y-auto rounded-t-3xl bg-white p-5 shadow-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Editar produto</p>
+                <p className="text-lg font-semibold text-gray-900">{inlineForm.name || 'Produto'}</p>
+              </div>
+              <button
+                type="button"
+                onClick={handleInlineCancel}
+                className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">Nome</label>
+                <input
+                  className="w-full p-3 border border-gray-200 rounded-xl text-sm mt-2"
+                  value={inlineForm.name}
+                  onChange={(e) => setInlineForm((prev) => ({ ...prev, name: e.target.value }))}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">Preço</label>
+                  <input
+                    className="w-full p-3 border border-gray-200 rounded-xl text-sm mt-2"
+                    type="number"
+                    step="0.01"
+                    value={inlineForm.price}
+                    onChange={(e) => setInlineForm((prev) => ({ ...prev, price: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">Promo</label>
+                  <input
+                    className="w-full p-3 border border-gray-200 rounded-xl text-sm mt-2"
+                    type="number"
+                    step="0.01"
+                    value={inlineForm.promoPrice}
+                    onChange={(e) => setInlineForm((prev) => ({ ...prev, promoPrice: e.target.value }))}
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">Categoria</label>
+                <input
+                  className="w-full p-3 border border-gray-200 rounded-xl text-sm mt-2"
+                  value={inlineForm.category}
+                  onChange={(e) => setInlineForm((prev) => ({ ...prev, category: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">Descrição</label>
+                <textarea
+                  className="w-full p-3 border border-gray-200 rounded-xl text-sm mt-2 min-h-[100px]"
+                  value={inlineForm.description}
+                  onChange={(e) => setInlineForm((prev) => ({ ...prev, description: e.target.value }))}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setInlineForm((prev) => ({ ...prev, promoActive: !prev.promoActive }))}
+                  className={`py-3 rounded-xl text-sm font-semibold border ${
+                    inlineForm.promoActive
+                      ? 'bg-emerald-600 text-white border-emerald-600'
+                      : 'bg-white text-slate-600 border-slate-200'
+                  }`}
+                >
+                  {inlineForm.promoActive ? 'Promo ativa' : 'Promo inativa'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setInlineForm((prev) => ({ ...prev, isFeatured: !prev.isFeatured }))}
+                  className={`py-3 rounded-xl text-sm font-semibold border ${
+                    inlineForm.isFeatured
+                      ? 'bg-amber-500 text-white border-amber-500'
+                      : 'bg-white text-slate-600 border-slate-200'
+                  }`}
+                >
+                  {inlineForm.isFeatured ? 'Destaque ativo' : 'Ativar destaque'}
+                </button>
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">Imagem (URL)</label>
+                <input
+                  className="w-full p-3 border border-gray-200 rounded-xl text-sm mt-2"
+                  placeholder="https://..."
+                  value={inlineForm.imageUrl}
+                  onChange={(e) => setInlineForm((prev) => ({ ...prev, imageUrl: e.target.value }))}
+                />
+                <div className="mt-3 flex items-center justify-between">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      if (file.size > 3 * 1024 * 1024) {
+                        showToast('Imagem acima de 3MB. Reduza e tente novamente.', 'error');
+                        e.target.value = '';
+                        return;
+                      }
+                      const reader = new FileReader();
+                      reader.onload = () => {
+                        const result = reader.result?.toString() || '';
+                        setInlineImageFile(result);
+                        setInlineForm((prev) => ({ ...prev, imageUrl: '' }));
+                      };
+                      reader.readAsDataURL(file);
+                    }}
+                    className="text-xs"
+                  />
+                  {inlineImageFile && (
+                    <button
+                      type="button"
+                      onClick={() => setInlineImageFile('')}
+                      className="text-xs font-semibold text-red-600 hover:underline"
+                    >
+                      Limpar
+                    </button>
+                  )}
+                </div>
+                <div className="mt-3 rounded-xl border border-gray-200 overflow-hidden bg-gray-50 h-32 flex items-center justify-center">
+                  {inlineImageFile || inlineForm.imageUrl ? (
+                    <img
+                      src={inlineImageFile || inlineForm.imageUrl}
+                      alt="Preview"
+                      className="w-full h-full object-contain"
+                    />
+                  ) : (
+                    <span className="text-xs text-gray-400">Sem imagem</span>
+                  )}
+                </div>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={handleInlineCancel}
+                  className="flex-1 py-3 rounded-xl border border-gray-200 text-sm font-semibold text-slate-600"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={handleInlineSave}
+                  disabled={saving}
+                  className="flex-1 py-3 rounded-xl bg-brand-primary text-white text-sm font-semibold"
+                >
+                  Salvar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
