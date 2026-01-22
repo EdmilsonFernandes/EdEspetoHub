@@ -78,6 +78,13 @@
 - Vitrine:
   - Banner "Acompanhar pedido" para publico usando `localStorage` (inclui pedidos de mesa).
   - Botao "Info" abre sheet com endereco, contatos e horarios.
+  - Bloco "Mais pedidos hoje" (Top 3) no topo do cardapio (carrossel no mobile).
+  - Promoção do dia no topo do cardapio + badge nos itens.
+  - Botao "Compartilhar cardapio" e dicas "Salvar no celular" (iOS/Android).
+  - Botao "Pedir novamente" no acompanhamento do pedido (reaplica itens no carrinho).
+  - Admin: "Cardapio" no resumo com copiar link + gerar PDF.
+  - Fila: "Modo TV" (tela limpa + relogio + fullscreen).
+  - Configuracoes: botao "Salvar alteracoes" visivel para Pix/Email.
 
 ## Arquivos principais mexidos
 - frontend/src/components/Client/MenuView.tsx
