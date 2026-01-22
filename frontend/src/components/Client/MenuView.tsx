@@ -161,6 +161,7 @@ const Header = ({
 export const MenuView = ({
   products,
   cart,
+  topProducts,
   onUpdateCart,
   branding,
   instagramHandle,
@@ -260,6 +261,7 @@ export const MenuView = ({
     () => (products || []).find((item) => item.isFeatured),
     [products]
   );
+  const topItems = useMemo(() => (topProducts || []).slice(0, 3), [topProducts]);
 
   const itemQtyMap = useMemo(() => {
     const map = new Map();
@@ -536,6 +538,42 @@ export const MenuView = ({
           </div>
         </section>
         <div id="menu-list" className="space-y-10">
+        {topItems.length > 0 && (
+          <div className="rounded-3xl border border-slate-200 bg-white/90 p-4 sm:p-5 shadow-sm">
+            <div className="flex items-center justify-between">
+              <p className="text-[11px] uppercase tracking-[0.3em] text-slate-400 font-semibold">Mais pedidos hoje</p>
+              <span className="text-xs text-slate-500">Top {topItems.length}</span>
+            </div>
+            <div className="mt-3 grid gap-3 sm:grid-cols-3">
+              {topItems.map((item) => (
+                <button
+                  key={item.productId || item.name}
+                  type="button"
+                  onClick={() =>
+                    openProductModal(
+                      products.find((entry) => entry.id === item.productId) ||
+                        products.find((entry) => entry.name === item.name) ||
+                        item
+                    )
+                  }
+                  className="group flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-left hover:shadow-md transition"
+                >
+                  <div className="w-12 h-12 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 flex items-center justify-center text-[10px] text-slate-400">
+                    {item.imageUrl ? (
+                      <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
+                    ) : (
+                      "🍖"
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-slate-900 truncate">{item.name}</p>
+                    <p className="text-[11px] text-slate-500">{item.qty} pedidos</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         {featuredProduct && (
           <div className="rounded-3xl border border-amber-200 bg-gradient-to-r from-amber-50 via-white to-amber-50 p-4 sm:p-5 shadow-sm">
             <div className="flex flex-wrap items-center justify-between gap-3">

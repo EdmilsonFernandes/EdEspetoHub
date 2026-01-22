@@ -109,6 +109,26 @@ export class OrderController {
 
 
   /**
+   * Lists highlights by slug.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-21
+   */
+  static async listHighlightsBySlug(req: Request, res: Response) {
+    try {
+      log.debug('Order highlights by slug request', { slug: req.params.slug });
+      const items = await orderService.listTopItemsBySlug(req.params.slug, 3);
+      return res.json(items);
+    } catch (error: any) {
+      log.warn('Order highlights by slug failed', { slug: req.params.slug, error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+
+
+
+  /**
    * Updates status.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)

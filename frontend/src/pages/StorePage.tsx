@@ -37,6 +37,8 @@ export function StorePage() {
   const [openingHours, setOpeningHours] = useState([]);
   const [orderTypes, setOrderTypes] = useState([ 'delivery', 'pickup', 'table' ]);
   const [storeSubscription, setStoreSubscription] = useState(null);
+  const [topProducts, setTopProducts] = useState([]);
+  const [reorderApplied, setReorderApplied] = useState(false);
   const autoTrackRef = useRef(false);
   const [lastPublicOrderId, setLastPublicOrderId] = useState('');
   const [recentPublicOrders, setRecentPublicOrders] = useState([]);
@@ -237,6 +239,11 @@ export function StorePage() {
     loadStore(false);
     loadProducts();
     if (storeSlug) {
+      orderService.fetchHighlightsBySlug(storeSlug)
+        .then((items) => setTopProducts(items || []))
+        .catch(() => setTopProducts([]));
+    }
+    if (storeSlug) {
       try {
         const raw = localStorage.getItem(`lastOrder:${storeSlug}`);
         if (raw) {
@@ -279,6 +286,42 @@ export function StorePage() {
       document.removeEventListener('visibilitychange', handleVisibility);
     };
   }, [storeSlug]);
+
+  useEffect(() => {
+    if (reorderApplied || !storeSlug || products.length === 0) return;
+    const raw = localStorage.getItem(`reorder:${storeSlug}`);
+    if (!raw) return;
+    try {
+      const parsed = JSON.parse(raw);
+      const items = Array.isArray(parsed?.items) ? parsed.items : [];
+      if (!items.length) return;
+      const nextCart = {};
+      items.forEach((item) => {
+        const product =
+          products.find((entry) => entry.id === item.productId) ||
+          products.find((entry) => entry.name === item.name);
+        if (!product) return;
+        const cookingPoint = item.cookingPoint || '';
+        const passSkewer = Boolean(item.passSkewer);
+        const key = `${product.id}:${cookingPoint}:${passSkewer ? '1' : '0'}`;
+        nextCart[key] = {
+          ...product,
+          key,
+          qty: Number(item.quantity || item.qty || 1),
+          cookingPoint,
+          passSkewer,
+        };
+      });
+      if (Object.keys(nextCart).length) {
+        setCart(nextCart);
+        setView('cart');
+      }
+      localStorage.removeItem(`reorder:${storeSlug}`);
+      setReorderApplied(true);
+    } catch (error) {
+      console.error('Falha ao aplicar pedido repetido', error);
+    }
+  }, [products, storeSlug, reorderApplied]);
 
   useEffect(() => {
     if (!orderTypes.length) return;
@@ -964,6 +1007,7 @@ export function StorePage() {
             )}
             <MenuView
               products={products}
+              topProducts={topProducts}
               cart={cart}
               branding={branding}
               instagramHandle={instagramHandle}

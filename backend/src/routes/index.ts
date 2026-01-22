@@ -65,6 +65,7 @@ routes.get('/stores/slug/:slug', StoreController.getBySlug);
 routes.get('/chamanoespeto/:slug', StoreController.getBySlug);
 routes.get('/stores/slug/:slug/products', ProductController.listPublicBySlug);
 routes.get('/public/stores/slug/:slug/products', ProductController.listPublicBySlug);
+routes.get('/public/stores/slug/:slug/highlights', OrderController.listHighlightsBySlug);
 
 // Store admin
 routes.put('/stores/:storeId', requireAuth, requireRole('ADMIN'), StoreController.update);

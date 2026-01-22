@@ -82,6 +82,14 @@ export const orderService = {
 
     return apiClient.post(`/stores/slug/${storeSlug}/orders`, orderData);
   },
+  async fetchHighlightsBySlug(storeSlug: string)
+  {
+    if (!storeSlug)
+    {
+      return Promise.reject(new Error("Loja inválida"));
+    }
+    return apiClient.get(`/public/stores/slug/${storeSlug}/highlights`);
+  },
   async save(orderData: any, storeId?: string)
   {
     const targetStore = resolveStoreIdentifier(storeId);

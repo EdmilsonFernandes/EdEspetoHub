@@ -14,6 +14,7 @@
 import { Repository } from 'typeorm';
 import { AppDataSource } from '../config/database';
 import { Order } from '../entities/Order';
+import { OrderItem } from '../entities/OrderItem';
 /**
  * Provides OrderRepository functionality.
  *
@@ -186,6 +187,39 @@ export class OrderRepository
       where: { store: { id: storeId }, status: 'pending' },
       order: { createdAt: 'ASC' },
     });
+  }
+
+
+
+
+  /**
+   * Finds top items since a date.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-21
+   */
+  async findTopItemsByStoreSince(storeId: string, since: Date, limit = 3)
+  {
+    return AppDataSource.getRepository(OrderItem)
+      .createQueryBuilder('oi')
+      .innerJoin('oi.order', 'o')
+      .innerJoin('oi.product', 'p')
+      .select('p.id', 'productId')
+      .addSelect('p.name', 'name')
+      .addSelect('p.image_url', 'imageUrl')
+      .addSelect('p.price', 'price')
+      .addSelect('SUM(oi.quantity)', 'qty')
+      .addSelect('SUM(oi.price)', 'total')
+      .where('o.store_id = :storeId', { storeId })
+      .andWhere('o.created_at >= :since', { since })
+      .andWhere('o.status != :cancelled', { cancelled: 'cancelled' })
+      .groupBy('p.id')
+      .addGroupBy('p.name')
+      .addGroupBy('p.image_url')
+      .addGroupBy('p.price')
+      .orderBy('qty', 'DESC')
+      .limit(limit)
+      .getRawMany();
   }
 
 

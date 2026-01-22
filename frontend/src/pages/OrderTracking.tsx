@@ -192,6 +192,20 @@ export function OrderTracking() {
   const storeWhatsappLink = storePhone
     ? `https://wa.me/${normalizeWhatsApp(storePhone)}`
     : '';
+  const handleRepeatOrder = () => {
+    if (!storeSlug || !order?.items?.length) return;
+    const payload = {
+      items: order.items.map((item: any) => ({
+        productId: item.productId || item.product?.id,
+        name: item.name,
+        quantity: item.quantity ?? item.qty ?? 1,
+        cookingPoint: item.cookingPoint || '',
+        passSkewer: Boolean(item.passSkewer),
+      })),
+    };
+    localStorage.setItem(`reorder:${storeSlug}`, JSON.stringify(payload));
+    navigate(storeHomePath);
+  };
 
   useEffect(() => {
     const settings = order?.store?.settings;
@@ -569,6 +583,15 @@ export function OrderTracking() {
                         </a>
                       )}
                     </div>
+                  )}
+                  {order?.items?.length && (
+                    <button
+                      type="button"
+                      onClick={handleRepeatOrder}
+                      className="inline-flex items-center justify-center px-3 py-2 rounded-lg border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50"
+                    >
+                      Pedir novamente
+                    </button>
                   )}
                     <p>
                       <span className="font-semibold">Status:</span> {statusLabel}

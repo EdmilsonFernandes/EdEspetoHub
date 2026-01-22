@@ -118,6 +118,32 @@ export class OrderService
 
 
   /**
+   * Lists top items for today.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-21
+   */
+  async listTopItemsBySlug(slug: string, limit = 3)
+  {
+    const store = await this.storeRepository.findBySlug(slug);
+    if (!store) throw new AppError('STORE-001', 404);
+    const since = new Date();
+    since.setHours(0, 0, 0, 0);
+    const rows = await this.orderRepository.findTopItemsByStoreSince(store.id, since, limit);
+    return rows.map((row) => ({
+      productId: row.productId,
+      name: row.name,
+      imageUrl: row.imageUrl || null,
+      price: row.price ? Number(row.price) : 0,
+      qty: row.qty ? Number(row.qty) : 0,
+      total: row.total ? Number(row.total) : 0,
+    }));
+  }
+
+
+
+
+  /**
    * Updates status.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
