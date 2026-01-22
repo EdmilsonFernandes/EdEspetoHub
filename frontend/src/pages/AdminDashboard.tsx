@@ -85,6 +85,8 @@ const OrdersView = ({ orders, products, storeSlug }) => {
     const start = (ordersPage - 1) * ordersPageSize;
     return filteredOrders.slice(start, start + ordersPageSize);
   }, [filteredOrders, ordersPage, ordersPageSize]);
+  const ordersStart = filteredOrders.length === 0 ? 0 : (ordersPage - 1) * ordersPageSize + 1;
+  const ordersEnd = Math.min(filteredOrders.length, ordersPage * ordersPageSize);
 
   useEffect(() => {
     setOrdersPage(1);
@@ -293,9 +295,12 @@ const OrdersView = ({ orders, products, storeSlug }) => {
               )}
             </div>
           ))}
-          {filteredOrders.length > ordersPageSize && (
+          {filteredOrders.length > 0 && (
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
+                <span>
+                  Exibindo {ordersStart}-{ordersEnd} de {filteredOrders.length}
+                </span>
                 <span>Pagina {ordersPage} de {ordersTotalPages}</span>
                 <label className="flex items-center gap-2">
                   <span>Por pagina</span>
@@ -469,7 +474,7 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
                   checked={showAllHistory}
                   onChange={(event) => setShowAllHistory(event.target.checked)}
                 />
-                Incluir falhados
+                Mostrar falhas e pendentes
               </label>
             </div>
             <div className="mt-3 space-y-2">
