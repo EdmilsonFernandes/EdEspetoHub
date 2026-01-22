@@ -4,6 +4,7 @@ import {
   CheckSquare,
   Clock,
   ChefHat,
+  Monitor,
   ArrowsClockwise,
   Plus,
   Minus,
@@ -61,6 +62,10 @@ export const GrillQueue = () => {
     return saved ? saved === "true" : true;
   });
   const [actionsOpen, setActionsOpen] = useState(false);
+  const [tvMode, setTvMode] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem("queueTvMode") === "true";
+  });
   const previousIdsRef = useRef<string[]>([]);
   const audioContextRef = useRef<AudioContext | null>(null);
   const itemOrderRef = useRef<Map<string, Map<string, number>>>(new Map());
@@ -84,6 +89,21 @@ export const GrillQueue = () => {
     };
     loadPixKey();
   }, [auth?.store?.settings?.pixKey, storeSlug]);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    localStorage.setItem("queueTvMode", String(tvMode));
+    if (tvMode) {
+      setActiveTab("queue");
+      if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      }
+    } else if (document.fullscreenElement && document.exitFullscreen) {
+      document.exitFullscreen().catch(() => {});
+    }
+  }, [tvMode]);
+  const toggleTvMode = () => {
+    setTvMode((prev) => !prev);
+  };
   const formatItemOptions = (item) => {
     const labels = [];
     if (item?.cookingPoint) labels.push(item.cookingPoint);
@@ -498,59 +518,89 @@ export const GrillQueue = () => {
   };
 
   return (
-    <div className="space-y-4">
+    <div className={tvMode ? "space-y-6 rounded-3xl bg-slate-900/95 p-4 sm:p-6 text-white" : "space-y-4"}>
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-wrap items-center gap-2 text-gray-700 font-semibold">
-          <ChefHat className="text-brand-primary" weight="duotone" />
+        <div className={`flex flex-wrap items-center gap-2 font-semibold ${tvMode ? "text-white" : "text-gray-700"}`}>
+          <ChefHat className={tvMode ? "text-white" : "text-brand-primary"} weight="duotone" />
           Fila do Churrasqueiro
-          <span className="px-2.5 py-1 rounded-full bg-brand-primary/10 text-brand-primary text-xs font-bold">
-            {activeTab === 'queue' ? sortedQueue.length : completedToday.length} pedidos
+          <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${tvMode ? "bg-white/15 text-white" : "bg-brand-primary/10 text-brand-primary"}`}>
+            {sortedQueue.length} pedidos
           </span>
+          {tvMode && (
+            <span className="flex items-center gap-2 text-xs font-semibold text-white/70">
+              <Clock size={14} weight="duotone" />
+              {new Date(currentTime).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+            </span>
+          )}
         </div>
         <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2">
-          <div className="flex flex-wrap gap-2 order-2 sm:order-none">
-            {[
-              { id: 'queue', label: 'Fila', count: sortedQueue.length },
-              { id: 'completed', label: 'Finalizados hoje', count: completedToday.length },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id as 'queue' | 'completed')}
-                className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-all hover:-translate-y-0.5 active:scale-95 ${
-                  activeTab === tab.id
-                    ? 'bg-brand-primary text-white shadow-sm'
-                    : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
-                }`}
-              >
-                <span>{tab.label}</span>
-                <span
-                  className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+          {!tvMode && (
+            <div className="flex flex-wrap gap-2 order-2 sm:order-none">
+              {[
+                { id: 'queue', label: 'Fila', count: sortedQueue.length },
+                { id: 'completed', label: 'Finalizados hoje', count: completedToday.length },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id as 'queue' | 'completed')}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-all hover:-translate-y-0.5 active:scale-95 ${
                     activeTab === tab.id
-                      ? 'bg-white/20 text-white'
-                      : 'bg-slate-100 text-slate-600'
+                      ? 'bg-brand-primary text-white shadow-sm'
+                      : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
                   }`}
                 >
-                  {tab.count}
-                </span>
-              </button>
-            ))}
-          </div>
+                  <span>{tab.label}</span>
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                      activeTab === tab.id
+                        ? 'bg-white/20 text-white'
+                        : 'bg-slate-100 text-slate-600'
+                    }`}
+                  >
+                    {tab.count}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
           <div className="relative w-full sm:w-auto" data-queue-actions>
             <button
               type="button"
-              onClick={() => setActionsOpen((prev) => !prev)}
-              className="flex items-center justify-between gap-2 text-sm px-3 py-2 rounded-lg bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 w-full sm:w-auto transition-all hover:-translate-y-0.5 active:scale-95"
+              onClick={() => {
+                if (tvMode) {
+                  toggleTvMode();
+                  return;
+                }
+                setActionsOpen((prev) => !prev);
+              }}
+              className={`flex items-center justify-between gap-2 text-sm px-3 py-2 rounded-lg w-full sm:w-auto transition-all hover:-translate-y-0.5 active:scale-95 ${
+                tvMode
+                  ? "bg-white/15 text-white border border-white/20"
+                  : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
+              }`}
             >
               <span className="flex items-center gap-2">
-                <DotsThreeVertical size={16} weight="duotone" />
-                Acoes rapidas
+                {tvMode ? <Monitor size={16} weight="duotone" /> : <DotsThreeVertical size={16} weight="duotone" />}
+                {tvMode ? "Sair do modo TV" : "Acoes rapidas"}
               </span>
-              <span className="text-xs text-gray-400">{soundEnabled ? "Som on" : "Som off"}</span>
+              {!tvMode && (
+                <span className="text-xs text-gray-400">{soundEnabled ? "Som on" : "Som off"}</span>
+              )}
             </button>
-            {actionsOpen && (
+            {actionsOpen && !tvMode && (
               <div className="absolute right-0 mt-2 w-full sm:w-52 rounded-xl border border-gray-200 bg-white shadow-lg overflow-hidden z-20">
+                <button
+                  onClick={() => {
+                    toggleTvMode();
+                    setActionsOpen(false);
+                  }}
+                  className="w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                >
+                  <Monitor size={16} weight="duotone" />
+                  Ativar modo TV
+                </button>
                 <button
                   onClick={() => {
                     handleToggleSound();
@@ -591,7 +641,13 @@ export const GrillQueue = () => {
       </div>
 
       {activeTab === 'queue' && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3 xl:gap-4">
+        <div
+          className={`grid gap-3 xl:gap-4 ${
+            tvMode
+              ? "grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"
+              : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4"
+          }`}
+        >
           {sortedQueue.map((order, index) => (
             <div
               key={order.id}
