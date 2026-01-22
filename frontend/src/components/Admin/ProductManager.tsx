@@ -181,9 +181,15 @@ export const ProductManager = ({ products, onProductsChange }) => {
     });
   };
 
-  const handleEditMobile = (product) => {
+  const handleEditMobile = (product, focusField?: 'price' | 'promo') => {
     handleEdit(product);
     setMobileEditOpen(true);
+    if (focusField) {
+      setTimeout(() => {
+        const el = document.querySelector<HTMLInputElement>(`[data-product-edit="${focusField}"]`);
+        el?.focus();
+      }, 50);
+    }
   };
 
   const handleInlineSave = async () => {
@@ -655,6 +661,13 @@ export const ProductManager = ({ products, onProductsChange }) => {
                   </button>
                   <button
                     type="button"
+                    onClick={() => handleEditMobile(product, 'price')}
+                    className="px-3 py-1.5 rounded-lg border border-amber-200 text-amber-700 text-xs font-semibold"
+                  >
+                    Editar preço
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => {
                       if (!window.confirm('Excluir produto?')) return;
                       setSaving(true);
@@ -750,6 +763,13 @@ export const ProductManager = ({ products, onProductsChange }) => {
                       <PencilSimple size={18} weight="duotone" />
                     </button>
                     <button
+                      onClick={() => handleEditMobile(product, 'price')}
+                      className="text-amber-600 hover:bg-amber-50 p-2 rounded transition-all hover:-translate-y-0.5 active:scale-95"
+                      title="Editar preço"
+                    >
+                      R$
+                    </button>
+                    <button
                       onClick={() => {
                         if (!window.confirm('Excluir produto?')) return;
                         setSaving(true);
@@ -840,23 +860,25 @@ export const ProductManager = ({ products, onProductsChange }) => {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">Preço</label>
-                  <input
-                    className="w-full p-3 border border-gray-200 rounded-xl text-sm mt-2"
-                    type="number"
-                    step="0.01"
-                    value={inlineForm.price}
-                    onChange={(e) => setInlineForm((prev) => ({ ...prev, price: e.target.value }))}
-                  />
+                <input
+                  className="w-full p-3 border border-gray-200 rounded-xl text-sm mt-2"
+                  type="number"
+                  step="0.01"
+                  value={inlineForm.price}
+                  data-product-edit="price"
+                  onChange={(e) => setInlineForm((prev) => ({ ...prev, price: e.target.value }))}
+                />
                 </div>
                 <div>
                   <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">Promo</label>
-                  <input
-                    className="w-full p-3 border border-gray-200 rounded-xl text-sm mt-2"
-                    type="number"
-                    step="0.01"
-                    value={inlineForm.promoPrice}
-                    onChange={(e) => setInlineForm((prev) => ({ ...prev, promoPrice: e.target.value }))}
-                  />
+                <input
+                  className="w-full p-3 border border-gray-200 rounded-xl text-sm mt-2"
+                  type="number"
+                  step="0.01"
+                  value={inlineForm.promoPrice}
+                  data-product-edit="promo"
+                  onChange={(e) => setInlineForm((prev) => ({ ...prev, promoPrice: e.target.value }))}
+                />
                 </div>
               </div>
               <div>
