@@ -592,6 +592,7 @@ export function LandingPage() {
                 <p className="text-xs text-slate-500">{selectedShot.description}</p>
               </div>
               <div className="flex items-center gap-2">
+                <span className="hidden sm:inline text-[11px] text-slate-400 mr-2">Use ← → para navegar</span>
                 <button
                   type="button"
                   onClick={handlePrevShot}
