@@ -15,7 +15,13 @@ import { exportToCsv } from "../../utils/export";
 
 const COLORS = ["var(--color-primary)", "var(--color-secondary)", "#10b981", "#3b82f6"];
 
-export const DashboardView = ({ orders = [], customers = [], setupChecklist = [], storeUrl = "" }) => {
+export const DashboardView = ({
+  orders = [],
+  customers = [],
+  setupChecklist = [],
+  storeUrl = "",
+  storeName = "Chama no Espeto",
+}) => {
   const [periodDays, setPeriodDays] = useState("30");
   const [qrCopied, setQrCopied] = useState(false);
   const nowDate = new Date();
@@ -212,6 +218,49 @@ export const DashboardView = ({ orders = [], customers = [], setupChecklist = []
     exportToCsv("clientes", headers, rows);
   };
 
+  const handlePrintQr = () => {
+    if (!storeUrl || typeof window === "undefined") return;
+    const printWindow = window.open("", "_blank", "width=700,height=900");
+    if (!printWindow) return;
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=420x420&data=${encodeURIComponent(storeUrl)}`;
+    const safeStoreName = storeName.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    printWindow.document.write(`
+      <!doctype html>
+      <html lang="pt-BR">
+        <head>
+          <meta charset="utf-8" />
+          <title>QR do Cardápio - ${safeStoreName}</title>
+          <style>
+            body { margin: 0; font-family: Arial, sans-serif; background: #f8fafc; color: #0f172a; }
+            .page { padding: 40px 24px; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+            .card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 24px; padding: 32px; text-align: center; box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08); }
+            .title { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
+            .subtitle { font-size: 14px; color: #475569; margin-bottom: 24px; }
+            .qr { width: 300px; height: 300px; object-fit: contain; }
+            .link { font-size: 12px; color: #64748b; margin-top: 18px; word-break: break-all; }
+          </style>
+        </head>
+        <body>
+          <div class="page">
+            <div class="card">
+              <div class="title">Cardápio ${safeStoreName}</div>
+              <div class="subtitle">Aponte a câmera para fazer seu pedido</div>
+              <img class="qr" src="${qrUrl}" alt="QR Code do cardápio" />
+              <div class="link">${storeUrl}</div>
+            </div>
+          </div>
+          <script>
+            window.onload = () => {
+              window.focus();
+              window.print();
+            };
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in">
       {setupChecklist.length > 0 && (
@@ -309,6 +358,13 @@ export const DashboardView = ({ orders = [], customers = [], setupChecklist = []
                   className="px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50"
                 >
                   {qrCopied ? "Link copiado!" : "Copiar link do cardápio"}
+                </button>
+                <button
+                  type="button"
+                  onClick={handlePrintQr}
+                  className="px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                >
+                  Gerar PDF do cardápio
                 </button>
                 <a
                   href={storeUrl}

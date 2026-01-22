@@ -582,6 +582,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   const storeId = session?.store?.id;
   const storeSlug = session?.store?.slug;
   const storeUrl = storeSlug ? `https://www.chamanoespeto.com.br/${storeSlug}` : '';
+  const storeName = session?.store?.name || 'Chama no Espeto';
   const socialLinks = session?.store?.settings?.socialLinks || [];
   const whatsappNumber = session?.store?.owner?.phone || '';
   const instagramLink = socialLinks.find((link) => link?.type === 'instagram')?.value;
@@ -878,6 +879,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
           customers={customers}
           setupChecklist={setupChecklist}
           storeUrl={storeUrl}
+          storeName={storeName}
         />
       )}
 
