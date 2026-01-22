@@ -911,7 +911,13 @@ export function AdminDashboard({ session: sessionProp }: Props) {
               socialLinks={socialLinks}
               whatsappNumber={whatsappNumber}
             />
-          <BrandingSettings branding={brandingDraft} onChange={setBrandingDraft} storeSlug={storeSlug} />
+          <BrandingSettings
+            branding={brandingDraft}
+            onChange={setBrandingDraft}
+            storeSlug={storeSlug}
+            onSave={handleSaveBranding}
+            saving={savingBranding}
+          />
           <div className="flex justify-end">
             <button
               onClick={handleSaveBranding}

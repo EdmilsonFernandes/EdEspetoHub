@@ -5,7 +5,7 @@ import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
 const primaryPalette = [ '#dc2626', '#ea580c', '#f59e0b', '#16a34a', '#0ea5e9', '#2563eb', '#7c3aed' ];
 const secondaryPalette = [ '#111827', '#1f2937', '#334155', '#0f172a', '#0f766e', '#065f46', '#4b5563' ];
 
-export const BrandingSettings = ({ branding, onChange, storeSlug }) => {
+export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving }) => {
   const fileInputRef = useRef(null);
   const handleChange = (field, value) => {
     onChange((prev) => ({ ...prev, [field]: value }));
@@ -144,6 +144,22 @@ export const BrandingSettings = ({ branding, onChange, storeSlug }) => {
               </div>
             )}
           </div>
+        </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+          <div className="text-xs text-slate-500">
+            Clique em salvar para aplicar Pix e Email da loja.
+          </div>
+          {onSave && (
+            <button
+              type="button"
+              onClick={onSave}
+              disabled={saving}
+              className="px-4 py-2 rounded-lg bg-brand-primary text-white text-xs font-semibold hover:opacity-90 transition-all disabled:opacity-60"
+            >
+              {saving ? "Salvando..." : "Salvar alterações"}
+            </button>
+          )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
