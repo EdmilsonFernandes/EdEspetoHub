@@ -43,8 +43,8 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
             className="w-full flex items-center justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4 text-left"
           >
             <div>
-              <p className="text-sm font-semibold text-gray-800">Identidade da loja</p>
-              <p className="text-xs text-gray-500">Nome, instagram, descrição e logo.</p>
+              <p className="text-sm font-semibold text-gray-800">Identidade da Marca</p>
+              <p className="text-xs text-gray-500">Nome, Instagram, descrição e logo da sua marca.</p>
             </div>
             <span className="text-xs text-gray-500 sm:hidden">{sectionsOpen.identity ? 'Fechar' : 'Abrir'}</span>
           </button>
@@ -151,8 +151,8 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
             className="w-full flex items-center justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4 text-left"
           >
             <div>
-              <p className="text-sm font-semibold text-gray-800">Mensagem do dia</p>
-              <p className="text-xs text-gray-500">Destaque rápido para o cardápio.</p>
+              <p className="text-sm font-semibold text-gray-800">Destaque do Dia</p>
+              <p className="text-xs text-gray-500">Uma frase que vende no topo do cardápio.</p>
             </div>
             <span className="text-xs text-gray-500 sm:hidden">{sectionsOpen.promo ? 'Fechar' : 'Abrir'}</span>
           </button>
@@ -181,8 +181,8 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
             className="w-full flex items-center justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4 text-left"
           >
             <div>
-              <p className="text-sm font-semibold text-gray-800">Contato e Pix</p>
-              <p className="text-xs text-gray-500">Dados para atendimento e recebimento.</p>
+              <p className="text-sm font-semibold text-gray-800">Canais e Pagamento</p>
+              <p className="text-xs text-gray-500">Contato oficial e recebimento via Pix.</p>
             </div>
             <span className="text-xs text-gray-500 sm:hidden">{sectionsOpen.contact ? 'Fechar' : 'Abrir'}</span>
           </button>
@@ -219,8 +219,8 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
             className="w-full flex items-center justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4 text-left"
           >
             <div>
-              <p className="text-sm font-semibold text-gray-800">Cores da marca</p>
-              <p className="text-xs text-gray-500">Define o visual principal da loja.</p>
+              <p className="text-sm font-semibold text-gray-800">Cores da Identidade</p>
+              <p className="text-xs text-gray-500">Cria o clima visual da sua marca.</p>
             </div>
             <span className="text-xs text-gray-500 sm:hidden">{sectionsOpen.colors ? 'Fechar' : 'Abrir'}</span>
           </button>
@@ -284,8 +284,8 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
             className="w-full flex items-center justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4 text-left"
           >
             <div>
-              <p className="text-sm font-semibold text-gray-800">Acesso à loja</p>
-              <p className="text-xs text-gray-500">Slug fixo para abrir o cardápio.</p>
+              <p className="text-sm font-semibold text-gray-800">URL da Loja</p>
+              <p className="text-xs text-gray-500">Link público e definitivo do cardápio.</p>
             </div>
             <span className="text-xs text-gray-500 sm:hidden">{sectionsOpen.access ? 'Fechar' : 'Abrir'}</span>
           </button>
