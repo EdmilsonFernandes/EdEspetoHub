@@ -334,47 +334,40 @@ export const DashboardView = ({
       {storeUrl && (
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
           <div className="flex flex-col md:flex-row md:items-center gap-4">
-            <div className="flex items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 p-3">
-              <img
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(storeUrl)}`}
-                alt="QR Code do cardápio"
-                className="h-28 w-28 object-contain"
-              />
-            </div>
             <div className="flex-1 space-y-2">
-              <p className="text-xs uppercase tracking-[0.35em] text-slate-400">QR do cardápio</p>
-              <h3 className="text-xl font-black text-slate-900">Compartilhe o cardápio na mesa</h3>
+              <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Cardápio</p>
+              <h3 className="text-xl font-black text-slate-900">Compartilhe o cardápio com clientes</h3>
               <p className="text-sm text-slate-500">
-                Imprima o QR e cole nas mesas. O cliente acessa o cardápio e faz o pedido em segundos.
+                Gere o PDF para imprimir ou abra o cardápio no navegador.
               </p>
-              <div className="flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    navigator.clipboard.writeText(storeUrl);
-                    setQrCopied(true);
-                    setTimeout(() => setQrCopied(false), 1500);
-                  }}
-                  className="px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-                >
-                  {qrCopied ? "Link copiado!" : "Copiar link do cardápio"}
-                </button>
-                <button
-                  type="button"
-                  onClick={handlePrintQr}
-                  className="px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-                >
-                  Gerar PDF do cardápio
-                </button>
-                <a
-                  href={storeUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="px-3 py-2 rounded-lg bg-brand-primary text-white text-xs font-semibold hover:opacity-90"
-                >
-                  Abrir cardápio
-                </a>
-              </div>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText(storeUrl);
+                  setQrCopied(true);
+                  setTimeout(() => setQrCopied(false), 1500);
+                }}
+                className="px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                {qrCopied ? "Link copiado!" : "Copiar link do cardápio"}
+              </button>
+              <button
+                type="button"
+                onClick={handlePrintQr}
+                className="px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                Gerar PDF do cardápio
+              </button>
+              <a
+                href={storeUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="px-3 py-2 rounded-lg bg-brand-primary text-white text-xs font-semibold hover:opacity-90"
+              >
+                Abrir cardápio
+              </a>
             </div>
           </div>
         </div>

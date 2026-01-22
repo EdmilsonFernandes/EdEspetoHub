@@ -330,7 +330,7 @@ export const MenuView = ({
             {compactHeader ? (
               <div className="flex flex-wrap items-center gap-2">
                 <span
-                  className={`px-3 py-1.5 rounded-full font-semibold text-xs flex items-center gap-2 ${
+                  className={`px-2.5 py-1 rounded-full font-semibold text-[11px] flex items-center gap-2 ${
                     isOpenNow
                       ? "bg-emerald-100 text-emerald-700"
                       : "bg-red-100 text-red-700"
@@ -340,7 +340,7 @@ export const MenuView = ({
                   {isOpenNow ? "Aberto agora" : "Fechado no momento"}
                 </span>
                 {todayHoursLabel && todayHoursLabel !== "Fechado hoje" && (
-                  <span className="px-3 py-1.5 rounded-full border border-slate-200 text-slate-600 bg-white font-semibold text-xs flex items-center gap-2">
+                  <span className="px-2.5 py-1 rounded-full border border-slate-200 text-slate-600 bg-white font-semibold text-[11px] flex items-center gap-2">
                     <Clock size={14} weight="duotone" />
                     {todayHoursLabel}
                   </span>
@@ -355,12 +355,12 @@ export const MenuView = ({
                   </p>
                 )}
                 {!showHeader && (
-                  <h2 className="text-xl sm:text-2xl font-black text-slate-900 mt-1">
+                  <h2 className="text-lg sm:text-xl font-black text-slate-900 mt-1">
                     {branding?.brandName || "Seu Espeto"}
                   </h2>
                 )}
                 {showHeader && (
-                  <p className="text-sm font-semibold text-slate-600">
+                  <p className="text-[11px] uppercase tracking-[0.3em] font-semibold text-slate-500">
                     Escolha seu pedido
                   </p>
                 )}
@@ -369,7 +369,7 @@ export const MenuView = ({
               {/* Status & Hours */}
               <div className="flex flex-wrap items-center gap-2">
                 <span
-                  className={`px-3 py-1.5 rounded-full font-semibold text-xs flex items-center gap-2 ${
+                  className={`px-2.5 py-1 rounded-full font-semibold text-[11px] flex items-center gap-2 ${
                     isOpenNow
                       ? "bg-emerald-100 text-emerald-700"
                       : "bg-red-100 text-red-700"
@@ -379,7 +379,7 @@ export const MenuView = ({
                   {isOpenNow ? "Aberto agora" : "Fechado no momento"}
                 </span>
                 {todayHoursLabel && todayHoursLabel !== "Fechado hoje" && (
-                  <span className="px-3 py-1.5 rounded-full border border-slate-200 text-slate-600 bg-white font-semibold text-xs flex items-center gap-2">
+                  <span className="px-2.5 py-1 rounded-full border border-slate-200 text-slate-600 bg-white font-semibold text-[11px] flex items-center gap-2">
                     <Clock size={14} />
                     {todayHoursLabel}
                   </span>
