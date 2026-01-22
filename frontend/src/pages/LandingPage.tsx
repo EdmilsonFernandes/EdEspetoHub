@@ -579,6 +579,22 @@ export function LandingPage() {
         </div>
       </section>
 
+      <div className="h-16 sm:hidden" />
+      <div className="sm:hidden fixed bottom-0 inset-x-0 z-40 px-4 pb-4">
+        <div className="rounded-2xl border border-red-200 bg-white/95 backdrop-blur shadow-[0_12px_30px_rgba(15,23,42,0.18)] px-3 py-3 flex items-center gap-3">
+          <div className="flex-1">
+            <p className="text-xs font-semibold text-slate-700">7 dias grátis + sem cartão</p>
+            <p className="text-[11px] text-slate-500">Crie sua loja em minutos.</p>
+          </div>
+          <button
+            onClick={() => navigate('/create')}
+            className="px-4 py-2 rounded-xl bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-semibold shadow hover:from-red-600 hover:to-red-700 transition-all"
+          >
+            Criar minha loja
+          </button>
+        </div>
+      </div>
+
       <DemoTour open={tourOpen} onClose={() => setTourOpen(false)} />
     </LandingPageLayout>
   );
