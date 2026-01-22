@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
 
 const primaryPalette = [ '#dc2626', '#ea580c', '#f59e0b', '#16a34a', '#0ea5e9', '#2563eb', '#7c3aed' ];
@@ -7,6 +7,13 @@ const secondaryPalette = [ '#111827', '#1f2937', '#334155', '#0f172a', '#0f766e'
 
 export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving }) => {
   const fileInputRef = useRef(null);
+  const [sectionsOpen, setSectionsOpen] = useState({
+    identity: true,
+    promo: true,
+    contact: true,
+    colors: true,
+    access: true,
+  });
   const handleChange = (field, value) => {
     onChange((prev) => ({ ...prev, [field]: value }));
   };
@@ -29,7 +36,20 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
       </div>
 
       <div className="p-4 sm:p-6 space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="rounded-2xl border border-slate-200 bg-white/80">
+          <button
+            type="button"
+            onClick={() => setSectionsOpen((prev) => ({ ...prev, identity: !prev.identity }))}
+            className="w-full flex items-center justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4 text-left"
+          >
+            <div>
+              <p className="text-sm font-semibold text-gray-800">Identidade da loja</p>
+              <p className="text-xs text-gray-500">Nome, instagram, descrição e logo.</p>
+            </div>
+            <span className="text-xs text-gray-500 sm:hidden">{sectionsOpen.identity ? 'Fechar' : 'Abrir'}</span>
+          </button>
+          <div className={`${sectionsOpen.identity ? 'block' : 'hidden'} sm:block px-4 pb-4 sm:px-5 sm:pb-5 space-y-6`}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <label className="text-sm font-semibold text-gray-700">Nome da marca</label>
             <input
@@ -57,18 +77,6 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-gray-700">Chave Pix da loja</label>
-          <input
-            type="text"
-            value={branding.pixKey || ''}
-            onChange={(e) => handleChange("pixKey", e.target.value)}
-            className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
-            placeholder="Ex: +5511999999999 ou email@pix.com"
-          />
-          <p className="text-xs text-gray-500">Usada para gerar o QR Code na confirmação de pagamento. Telefone com DDD pode começar com 0 que ajustamos para +55.</p>
-        </div>
-
-        <div className="space-y-2">
           <label className="text-sm font-semibold text-gray-700">Descrição da loja</label>
           <textarea
             value={branding.description || ""}
@@ -80,33 +88,6 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
           <div className="flex items-center justify-between text-xs text-gray-500">
             <span>Mostra no portfolio da plataforma.</span>
             <span>{(branding.description || "").length}/220</span>
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-sm font-semibold text-gray-700">Email de contato</label>
-          <input
-            type="email"
-            value={branding.contactEmail || ""}
-            onChange={(e) => handleChange("contactEmail", e.target.value)}
-            className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
-            placeholder="contato@sualoja.com"
-          />
-          <p className="text-xs text-gray-500">Opcional, aparece para contato no cardápio.</p>
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-sm font-semibold text-gray-700">Mensagem promocional</label>
-          <textarea
-            value={branding.promoMessage || ""}
-            onChange={(e) => handleChange("promoMessage", e.target.value)}
-            className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors min-h-[90px]"
-            placeholder="Ex: Combo do dia: 2 espetos + refri por R$ 29,90"
-            maxLength={120}
-          />
-          <div className="flex items-center justify-between text-xs text-gray-500">
-            <span>Aparece no topo do cardápio.</span>
-            <span>{(branding.promoMessage || "").length}/120</span>
           </div>
         </div>
 
@@ -160,8 +141,91 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
             )}
           </div>
         </div>
+          </div>
+        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="rounded-2xl border border-slate-200 bg-white/80">
+          <button
+            type="button"
+            onClick={() => setSectionsOpen((prev) => ({ ...prev, promo: !prev.promo }))}
+            className="w-full flex items-center justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4 text-left"
+          >
+            <div>
+              <p className="text-sm font-semibold text-gray-800">Mensagem do dia</p>
+              <p className="text-xs text-gray-500">Destaque rápido para o cardápio.</p>
+            </div>
+            <span className="text-xs text-gray-500 sm:hidden">{sectionsOpen.promo ? 'Fechar' : 'Abrir'}</span>
+          </button>
+          <div className={`${sectionsOpen.promo ? 'block' : 'hidden'} sm:block px-4 pb-4 sm:px-5 sm:pb-5 space-y-4`}>
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700">Mensagem promocional</label>
+              <textarea
+                value={branding.promoMessage || ""}
+                onChange={(e) => handleChange("promoMessage", e.target.value)}
+                className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors min-h-[90px]"
+                placeholder="Ex: Combo do dia: 2 espetos + refri por R$ 29,90"
+                maxLength={120}
+              />
+              <div className="flex items-center justify-between text-xs text-gray-500">
+                <span>Aparece no topo do cardápio.</span>
+                <span>{(branding.promoMessage || "").length}/120</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 bg-white/80">
+          <button
+            type="button"
+            onClick={() => setSectionsOpen((prev) => ({ ...prev, contact: !prev.contact }))}
+            className="w-full flex items-center justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4 text-left"
+          >
+            <div>
+              <p className="text-sm font-semibold text-gray-800">Contato e Pix</p>
+              <p className="text-xs text-gray-500">Dados para atendimento e recebimento.</p>
+            </div>
+            <span className="text-xs text-gray-500 sm:hidden">{sectionsOpen.contact ? 'Fechar' : 'Abrir'}</span>
+          </button>
+          <div className={`${sectionsOpen.contact ? 'block' : 'hidden'} sm:block px-4 pb-4 sm:px-5 sm:pb-5 space-y-6`}>
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700">Email de contato</label>
+              <input
+                type="email"
+                value={branding.contactEmail || ""}
+                onChange={(e) => handleChange("contactEmail", e.target.value)}
+                className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
+                placeholder="contato@sualoja.com"
+              />
+              <p className="text-xs text-gray-500">Opcional, aparece para contato no cardápio.</p>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700">Chave Pix da loja</label>
+              <input
+                type="text"
+                value={branding.pixKey || ''}
+                onChange={(e) => handleChange("pixKey", e.target.value)}
+                className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
+                placeholder="Ex: +5511999999999 ou email@pix.com"
+              />
+              <p className="text-xs text-gray-500">Usada para gerar o QR Code na confirmação de pagamento. Telefone com DDD pode começar com 0 que ajustamos para +55.</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 bg-white/80">
+          <button
+            type="button"
+            onClick={() => setSectionsOpen((prev) => ({ ...prev, colors: !prev.colors }))}
+            className="w-full flex items-center justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4 text-left"
+          >
+            <div>
+              <p className="text-sm font-semibold text-gray-800">Cores da marca</p>
+              <p className="text-xs text-gray-500">Define o visual principal da loja.</p>
+            </div>
+            <span className="text-xs text-gray-500 sm:hidden">{sectionsOpen.colors ? 'Fechar' : 'Abrir'}</span>
+          </button>
+          <div className={`${sectionsOpen.colors ? 'block' : 'hidden'} sm:block px-4 pb-4 sm:px-5 sm:pb-5 space-y-6`}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-3">
             <label className="text-sm font-semibold text-gray-700">Cor principal</label>
             <input
@@ -210,16 +274,31 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
             <p className="text-xs text-gray-500">Use um tom de apoio para fundos e detalhes.</p>
           </div>
         </div>
+          </div>
+        </div>
 
-        <div className="space-y-2">
-          <label className="text-sm font-semibold text-gray-700">Slug da loja (fixo)</label>
-          <input
-            type="text"
-            value={storeSlug || ""}
-            readOnly
-            className="w-full border border-gray-200 rounded-xl p-3 bg-gray-50/80 text-gray-500 cursor-not-allowed"
-          />
-          <p className="text-xs text-gray-500">Use esse slug para acessar o painel e a vitrine.</p>
+        <div className="rounded-2xl border border-slate-200 bg-white/80">
+          <button
+            type="button"
+            onClick={() => setSectionsOpen((prev) => ({ ...prev, access: !prev.access }))}
+            className="w-full flex items-center justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4 text-left"
+          >
+            <div>
+              <p className="text-sm font-semibold text-gray-800">Acesso à loja</p>
+              <p className="text-xs text-gray-500">Slug fixo para abrir o cardápio.</p>
+            </div>
+            <span className="text-xs text-gray-500 sm:hidden">{sectionsOpen.access ? 'Fechar' : 'Abrir'}</span>
+          </button>
+          <div className={`${sectionsOpen.access ? 'block' : 'hidden'} sm:block px-4 pb-4 sm:px-5 sm:pb-5 space-y-2`}>
+            <label className="text-sm font-semibold text-gray-700">Slug da loja (fixo)</label>
+            <input
+              type="text"
+              value={storeSlug || ""}
+              readOnly
+              className="w-full border border-gray-200 rounded-xl p-3 bg-gray-50/80 text-gray-500 cursor-not-allowed"
+            />
+            <p className="text-xs text-gray-500">Use esse slug para acessar o painel e a vitrine.</p>
+          </div>
         </div>
         {onSave && (
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
