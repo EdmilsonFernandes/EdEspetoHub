@@ -544,7 +544,7 @@ export const MenuView = ({
               <p className="text-[11px] uppercase tracking-[0.3em] text-slate-400 font-semibold">Mais pedidos hoje</p>
               <span className="text-xs text-slate-500">Top {topItems.length}</span>
             </div>
-            <div className="mt-3 grid gap-3 sm:grid-cols-3">
+            <div className="mt-3 flex gap-3 overflow-x-auto pb-1 sm:grid sm:grid-cols-3 sm:gap-3 sm:overflow-visible no-scrollbar">
               {topItems.map((item) => (
                 <button
                   key={item.productId || item.name}
@@ -556,7 +556,7 @@ export const MenuView = ({
                         item
                     )
                   }
-                  className="group flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-left hover:shadow-md transition"
+                  className="group flex min-w-[220px] sm:min-w-0 items-center gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-left hover:shadow-md transition"
                 >
                   <div className="w-12 h-12 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 flex items-center justify-center text-[10px] text-slate-400">
                     {item.imageUrl ? (
