@@ -9,6 +9,7 @@ import { storeService } from '../services/storeService';
 import { MenuView } from '../components/Client/MenuView';
 import { CartView } from '../components/Client/CartView';
 import { SuccessView } from '../components/Client/SuccessView';
+import { useToast } from '../contexts/ToastContext';
 import { formatCurrency, formatOrderDisplayId, formatPaymentMethod, formatPhoneInput } from '../utils/format';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getPersistedBranding, brandingStorageKey, defaultBranding, initialCustomer, defaultPaymentMethod, DEFAULT_AREA_CODE, WHATSAPP_NUMBER, PIX_KEY } from '../constants';
@@ -17,6 +18,7 @@ import { formatOpeningHoursSummary, isStoreOpenNow, normalizeOpeningHours } from
 export function StorePage() {
   const { storeSlug } = useParams();
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [user, setUser] = useState(null);
   const [products, setProducts] = useState([]);
   const [customers, setCustomers] = useState([]);
@@ -750,7 +752,7 @@ export function StorePage() {
       <main className="mx-auto px-0 sm:px-4 md:px-6 lg:px-8 py-0 sm:py-6">
         {orderNotice && (
           <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-4">
-            <div className="flex items-center gap-3 bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-2xl border border-white/10">
+            <div className="flex flex-wrap items-center gap-3 bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-2xl border border-white/10">
               <div className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
               <div className="text-sm font-semibold">
                 Pedido enviado para a fila
@@ -758,6 +760,18 @@ export function StorePage() {
                   #{formatOrderDisplayId(orderNotice.id, storeSlug)}
                 </span>
               </div>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!orderNotice?.id) return;
+                  const link = `${window.location.origin}/pedido/${orderNotice.id}`;
+                  navigator.clipboard.writeText(link);
+                  showToast('Link do pedido copiado', 'success');
+                }}
+                className="ml-auto px-3 py-1.5 rounded-full text-[11px] font-semibold bg-white/10 hover:bg-white/20 border border-white/10"
+              >
+                Copiar link
+              </button>
             </div>
           </div>
         )}

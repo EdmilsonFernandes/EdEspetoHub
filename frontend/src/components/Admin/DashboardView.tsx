@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from "react";
-import { Package, CurrencyDollar } from "@phosphor-icons/react";
+import { Package, CurrencyDollar, CheckCircle, CircleDashed } from "@phosphor-icons/react";
 import {
   BarChart,
   Bar,
@@ -15,7 +15,7 @@ import { exportToCsv } from "../../utils/export";
 
 const COLORS = ["var(--color-primary)", "var(--color-secondary)", "#10b981", "#3b82f6"];
 
-export const DashboardView = ({ orders = [], customers = [] }) => {
+export const DashboardView = ({ orders = [], customers = [], setupChecklist = [], storeUrl = "" }) => {
   const [periodDays, setPeriodDays] = useState("30");
   const nowDate = new Date();
   const currentMonthKey = `${nowDate.getFullYear()}-${String(nowDate.getMonth() + 1).padStart(2, "0")}`;
@@ -213,6 +213,74 @@ export const DashboardView = ({ orders = [], customers = [] }) => {
 
   return (
     <div className="space-y-6 animate-in fade-in">
+      {setupChecklist.length > 0 && (
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Checklist de ativacao</p>
+              <h3 className="text-xl font-black text-slate-900 mt-2">Sua loja pronta para vender</h3>
+              <p className="text-sm text-slate-500 mt-2">
+                Complete os passos abaixo para ativar a melhor experiencia para seus clientes.
+              </p>
+            </div>
+            <div className="flex flex-col items-end gap-2">
+              <div className="text-xs text-slate-500">
+                {setupChecklist.filter((item) => item.done).length} de {setupChecklist.length} completos
+              </div>
+              {storeUrl && (
+                <a
+                  href={storeUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                >
+                  Ver minha loja
+                </a>
+              )}
+            </div>
+          </div>
+          <div className="mt-4 h-2 rounded-full bg-slate-100 overflow-hidden">
+            <div
+              className="h-full bg-brand-primary"
+              style={{
+                width: `${
+                  setupChecklist.length === 0
+                    ? 0
+                    : Math.round((setupChecklist.filter((item) => item.done).length / setupChecklist.length) * 100)
+                }%`,
+              }}
+            />
+          </div>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            {setupChecklist.map((item) => (
+              <div
+                key={item.id}
+                className={`flex items-center justify-between gap-3 rounded-xl border px-3 py-2 ${
+                  item.done ? "border-emerald-200 bg-emerald-50/50" : "border-slate-200 bg-white"
+                }`}
+              >
+                <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                  {item.done ? (
+                    <CheckCircle size={16} weight="duotone" className="text-emerald-600" />
+                  ) : (
+                    <CircleDashed size={16} weight="duotone" className="text-slate-400" />
+                  )}
+                  <span>{item.label}</span>
+                </div>
+                {!item.done && item.onClick && (
+                  <button
+                    type="button"
+                    onClick={item.onClick}
+                    className="px-2.5 py-1 rounded-full text-[11px] font-semibold text-brand-primary border border-brand-primary/40 hover:bg-brand-primary/10"
+                  >
+                    {item.action || "Completar"}
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       {/* ---------- CARDS RESUMO ---------- */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Faturamento total */}

@@ -573,6 +573,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
   const storeId = session?.store?.id;
   const storeSlug = session?.store?.slug;
+  const storeUrl = storeSlug ? `https://www.chamanoespeto.com.br/${storeSlug}` : '';
   const socialLinks = session?.store?.settings?.socialLinks || [];
   const whatsappNumber = session?.store?.owner?.phone || '';
   const instagramLink = socialLinks.find((link) => link?.type === 'instagram')?.value;
@@ -738,6 +739,53 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     return <div style={{ padding: 24 }}>Carregando painel da loja...</div>;
   }
 
+  const openingHours = session?.store?.settings?.openingHours || [];
+  const orderTypes = session?.store?.settings?.orderTypes || [];
+  const setupChecklist = [
+    {
+      id: 'logo',
+      label: 'Logo da loja',
+      done: Boolean(session?.store?.settings?.logoUrl),
+      action: 'Adicionar logo',
+      onClick: () => setActiveTab('config'),
+    },
+    {
+      id: 'description',
+      label: 'Descrição da loja',
+      done: Boolean(session?.store?.settings?.description?.trim()),
+      action: 'Adicionar descrição',
+      onClick: () => setActiveTab('config'),
+    },
+    {
+      id: 'products',
+      label: 'Produtos no cardápio',
+      done: products.length > 0,
+      action: 'Cadastrar produtos',
+      onClick: () => setActiveTab('produtos'),
+    },
+    {
+      id: 'hours',
+      label: 'Horário de funcionamento',
+      done: Array.isArray(openingHours) && openingHours.length > 0,
+      action: 'Definir horários',
+      onClick: () => setActiveTab('config'),
+    },
+    {
+      id: 'orderTypes',
+      label: 'Tipos de pedido',
+      done: Array.isArray(orderTypes) && orderTypes.length > 0,
+      action: 'Definir tipos',
+      onClick: () => setActiveTab('config'),
+    },
+    {
+      id: 'pix',
+      label: 'Pix para recebimento',
+      done: Boolean(session?.store?.settings?.pixKey),
+      action: 'Configurar Pix',
+      onClick: () => setActiveTab('config'),
+    },
+  ];
+
 
 
   const handleSaveBranding = async () => {
@@ -816,7 +864,14 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         </div>
       ) : null}
 
-      {activeTab === 'resumo' && <DashboardView orders={orders} customers={customers} />}
+      {activeTab === 'resumo' && (
+        <DashboardView
+          orders={orders}
+          customers={customers}
+          setupChecklist={setupChecklist}
+          storeUrl={storeUrl}
+        />
+      )}
 
       {activeTab === 'pedidos' && (
         <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
