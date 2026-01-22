@@ -7,6 +7,7 @@ Aplicação web para pedidos e gestão do restaurante de espetinhos Datony. O pr
 - **Acompanhar pedido**: pagina publica em `/pedido/:orderId` com status, fila, detalhes e branding da loja.
   - Ultimos 3 pedidos publicos ficam em `localStorage` para reabrir o acompanhamento (inclusive mesa).
   - Numero exibido usa prefixo do slug (3 letras) + 8 primeiros chars do ID.
+- **Promoções**: produto pode ter preço promocional ativo; vitrine, carrinho, fila e acompanhamento exibem valor original riscado + promocional.
 
 ## Estrutura de pastas
 
@@ -158,6 +159,10 @@ Vitrine (mobile):
 - Sheet com endereco, WhatsApp, Instagram e horarios.
 - Mapa estatico gratuito via OpenStreetMap.
 
+Configurações (admin):
+- Identidade visual da loja (logo, descrição, cores).
+- Canais de pagamento (chave Pix) e e-mail de contato da loja.
+
 Demo:
 - Vitrine demo em `/chamanoespeto/demo`.
 - Admin demo em `/admin/demo` com dados locais.
@@ -208,6 +213,35 @@ flowchart TD
 Arquivos BPMN (layout legivel por lanes):
 - `docs/bpmn/chama-no-espeto-signup.bpmn`
 - `docs/bpmn/chama-no-espeto-orders.bpmn`
+
+## Checklist de QA (fluxos principais)
+
+Cadastro e planos:
+- Criar conta com e-mail válido, confirmar e-mail, entrar no admin.
+- Trial de 7 dias: não gera pagamento; expirando bloqueia loja e exige renovação.
+- Renovar assinatura: só mostra planos pagos; gerar Pix/Cartão/Boleto conforme plano.
+- Pagamento expirado/failed: gera novo pagamento (não reutiliza link vencido).
+
+Vitrine / pedido:
+- Buscar item por nome, filtrar por categoria e adicionar no carrinho.
+- Produto com promoção: exibe original riscado + promo em verde (cardápio e carrinho).
+- Mesa ocupada: impedir novo pedido e mostrar aviso.
+- Pedido enviado: abre acompanhamento e salva últimos 3 pedidos no `localStorage`.
+
+Acompanhamento:
+- Status em linha única (Recebido/Em preparo/Pronto/Pago).
+- Exibe QR Pix apenas para cliente (cópia disponível).
+- Voltar leva para a loja do slug correto.
+
+Fila do churrasqueiro:
+- Cards compactos, ordem de fila e tempo corrido.
+- Promoção: mostrar preço original riscado + promo em verde.
+- “Iniciar preparo” antes de “Marcar pronto”.
+- Finalizados hoje com paginação e contagem.
+
+Configurações:
+- Atualizar logo/descrição/cores e validar persistência.
+- Alterar chave Pix e e-mail de contato (limpar campo deve salvar vazio).
 
 ## Deploy no EC2 (resumo rapido)
 
