@@ -595,7 +595,7 @@ export const GrillQueue = () => {
           {sortedQueue.map((order, index) => (
             <div
               key={order.id}
-              className="relative w-full max-w-full p-2.5 sm:p-3 rounded-3xl border border-slate-200 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.45)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_50px_-30px_rgba(15,23,42,0.55)] overflow-hidden"
+              className="relative w-full max-w-full p-2.5 sm:p-3 rounded-2xl border border-slate-200 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.45)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_50px_-30px_rgba(15,23,42,0.55)] overflow-hidden"
               style={{
                 background:
                   'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.9) 60%, rgba(226,232,240,0.6) 100%)',
@@ -866,7 +866,7 @@ export const GrillQueue = () => {
 
       {confirmModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 px-4">
-          <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl border border-slate-200">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-slate-200">
             {(() => {
               const normalizedPayment = (confirmModal.payment || '').toString().trim().toLowerCase();
               const isPixPayment = normalizedPayment === 'pix';

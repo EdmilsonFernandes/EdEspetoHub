@@ -207,7 +207,7 @@ export function AdminOrders() {
               {filteredOrders.map((order, index) => (
                 <div
                   key={order.id || `${order.customerName}-${index}`}
-                  className="border border-slate-200 rounded-3xl bg-white p-5 shadow-sm flex flex-col gap-4"
+                  className="border border-slate-200 rounded-2xl bg-white p-5 shadow-sm flex flex-col gap-4"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div>
