@@ -82,11 +82,11 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
               value={branding.description || ""}
               onChange={(e) => handleChange("description", e.target.value)}
               className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors min-h-[110px]"
-            placeholder="Ex: Espetos artesanais, cerveja gelada e atendimento rapido."
+            placeholder="Ex: Espetos artesanais, cerveja gelada e atendimento rápido."
               maxLength={220}
             />
             <div className="flex items-center justify-between text-xs text-gray-500">
-              <span>Mostra no portfolio da plataforma.</span>
+            <span>Mostra no portfólio da plataforma.</span>
               <span>{(branding.description || "").length}/220</span>
             </div>
         </div>

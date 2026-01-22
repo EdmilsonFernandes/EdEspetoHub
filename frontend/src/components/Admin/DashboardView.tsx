@@ -336,9 +336,9 @@ export const DashboardView = ({
           <div className="flex flex-col md:flex-row md:items-center gap-4">
             <div className="flex-1 space-y-2">
               <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Cardápio</p>
-              <h3 className="text-xl font-black text-slate-900">Compartilhe o cardápio com clientes</h3>
+              <h3 className="text-xl font-black text-slate-900">Compartilhe o cardápio com seus clientes</h3>
               <p className="text-sm text-slate-500">
-                Gere o PDF para imprimir ou abra o cardápio no navegador.
+                Gere um PDF para imprimir ou abra o cardápio no navegador.
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">

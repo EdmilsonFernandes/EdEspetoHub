@@ -583,7 +583,7 @@ export const GrillQueue = () => {
             >
               <span className="flex items-center gap-2">
                 {tvMode ? <Monitor size={16} weight="duotone" /> : <DotsThreeVertical size={16} weight="duotone" />}
-                {tvMode ? "Sair do modo TV" : "Acoes rapidas"}
+                {tvMode ? "Sair do modo TV" : "Ações rápidas"}
               </span>
               {!tvMode && (
                 <span className="text-xs text-gray-400">{soundEnabled ? "Som on" : "Som off"}</span>
