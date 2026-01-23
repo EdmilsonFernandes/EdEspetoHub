@@ -26,8 +26,8 @@ export function LandingPage() {
   const [plans, setPlans] = useState([]);
   const [selectedShot, setSelectedShot] = useState(null);
   const [publicMetrics, setPublicMetrics] = useState(null);
-  const [ticketAverage, setTicketAverage] = useState('35');
-  const [ordersPerDay, setOrdersPerDay] = useState('25');
+  const [ticketAverage, setTicketAverage] = useState('20');
+  const [ordersPerDay, setOrdersPerDay] = useState('15');
   const showcaseShots = [
     {
       title: 'Cardápio que vende',
