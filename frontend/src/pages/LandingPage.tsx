@@ -36,6 +36,7 @@ export function LandingPage() {
       title: 'Crie sua loja',
       role: 'Admin',
       summary: 'Cadastre dados básicos e publique seu link exclusivo.',
+      image: '/marketing/checkout.png',
       bullets: [
         'Nome, telefone e endereço da loja',
         'Identidade visual com logo e cores',
@@ -46,6 +47,7 @@ export function LandingPage() {
       title: 'Monte o cardápio',
       role: 'Admin',
       summary: 'Cadastre produtos, fotos e promoções em minutos.',
+      image: '/marketing/menu-list.png',
       bullets: [
         'Categorias e descrição completas',
         'Preço promocional + destaque',
@@ -56,6 +58,7 @@ export function LandingPage() {
       title: 'Cliente faz o pedido',
       role: 'Cliente',
       summary: 'Pedido rápido no celular com acompanhamento automático.',
+      image: '/marketing/order-tracking.png',
       bullets: [
         'Escolhe ponto da carne e varinha',
         'Recebe link de acompanhamento',
@@ -66,6 +69,7 @@ export function LandingPage() {
       title: 'Fila do churrasqueiro',
       role: 'Operação',
       summary: 'Pedido organizado, preparo e finalização sem confusão.',
+      image: '/marketing/grill-queue.png',
       bullets: [
         'Fila com status claros',
         'Tempo e prioridade visíveis',
@@ -450,6 +454,14 @@ export function LandingPage() {
               <p className="text-sm text-slate-600 mt-2">
                 {guideSteps[guideStep].summary}
               </p>
+              <div className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-slate-100">
+                <img
+                  src={guideSteps[guideStep].image}
+                  alt={guideSteps[guideStep].title}
+                  className="w-full h-48 sm:h-52 object-cover"
+                  loading="lazy"
+                />
+              </div>
               <div className="mt-6 space-y-3">
                 {guideSteps[guideStep].bullets.map((item) => (
                   <div key={item} className="flex items-start gap-3">
