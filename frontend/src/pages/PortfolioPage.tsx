@@ -326,7 +326,7 @@ export function PortfolioPage() {
                             className="px-2 py-0.5 rounded-full text-[10px] font-semibold text-white"
                             style={{ backgroundColor: primary }}
                           >
-                            Mais vendidos
+                            🔥 Mais vendidos
                           </span>
                         </div>
                         <div className="mt-3 space-y-2 text-xs text-slate-600">
