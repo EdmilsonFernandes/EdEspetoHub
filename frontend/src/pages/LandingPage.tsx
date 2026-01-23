@@ -31,6 +31,7 @@ export function LandingPage() {
   const [faqOpen, setFaqOpen] = useState(false);
   const [faqActive, setFaqActive] = useState<number | null>(0);
   const [guideStep, setGuideStep] = useState(0);
+  const [guideShot, setGuideShot] = useState(null);
   const guideSteps = [
     {
       title: 'Crie sua loja',
@@ -454,7 +455,16 @@ export function LandingPage() {
               <p className="text-sm text-slate-600 mt-2">
                 {guideSteps[guideStep].summary}
               </p>
-              <div className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-slate-100">
+              <div
+                className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 cursor-pointer hover:shadow-lg transition"
+                onClick={() =>
+                  setGuideShot({
+                    title: guideSteps[guideStep].title,
+                    description: guideSteps[guideStep].summary,
+                    image: guideSteps[guideStep].image,
+                  })
+                }
+              >
                 <img
                   src={guideSteps[guideStep].image}
                   alt={guideSteps[guideStep].title}
@@ -555,6 +565,30 @@ export function LandingPage() {
           </div>
         </div>
       </section>
+
+      {guideShot && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+          <div className="relative max-w-5xl w-full bg-white rounded-3xl overflow-hidden shadow-2xl">
+            <button
+              onClick={() => setGuideShot(null)}
+              className="absolute top-4 right-4 bg-white/90 border border-slate-200 rounded-full w-10 h-10 flex items-center justify-center font-bold text-slate-700 hover:bg-white"
+            >
+              ✕
+            </button>
+            <div className="bg-slate-900">
+              <img
+                src={guideShot.image}
+                alt={guideShot.title}
+                className="w-full max-h-[70vh] object-contain bg-slate-900"
+              />
+            </div>
+            <div className="p-5 sm:p-6">
+              <h3 className="text-xl font-black text-slate-900">{guideShot.title}</h3>
+              <p className="text-sm text-slate-600 mt-2">{guideShot.description}</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
         <div className="rounded-[32px] border border-slate-200 bg-white shadow-[0_24px_70px_-50px_rgba(15,23,42,0.5)] overflow-hidden">
