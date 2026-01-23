@@ -743,6 +743,36 @@ export function LandingPage() {
         </div>
       </section>
 
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 sm:pb-20">
+        <div className="rounded-[32px] bg-gradient-to-r from-red-600 via-red-500 to-orange-500 text-white p-8 sm:p-12 shadow-[0_26px_80px_-50px_rgba(239,68,68,0.7)]">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
+            <div className="max-w-2xl">
+              <p className="text-xs uppercase tracking-[0.3em] text-white/70 font-semibold">Pronto para vender mais?</p>
+              <h2 className="text-3xl sm:text-4xl font-black mt-3">
+                Comece hoje e veja sua fila cheia amanhã
+              </h2>
+              <p className="text-base sm:text-lg text-white/85 mt-3">
+                Ative sua loja em minutos. Sem cartão para começar e com suporte humano quando precisar.
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={() => navigate('/create')}
+                className="px-6 py-3 rounded-xl bg-white text-red-600 font-semibold shadow hover:shadow-lg transition"
+              >
+                Criar minha loja agora
+              </button>
+              <button
+                onClick={scrollToShowcase}
+                className="px-6 py-3 rounded-xl border border-white/60 text-white font-semibold hover:bg-white/10 transition"
+              >
+                Ver o produto em ação
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {selectedShot && (
         <div
           className="fixed inset-0 z-50 bg-gradient-to-br from-black/70 via-black/60 to-black/80 backdrop-blur-sm flex items-center justify-center p-4"
