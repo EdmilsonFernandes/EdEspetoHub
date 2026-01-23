@@ -52,6 +52,41 @@ export function LandingPage() {
         'No painel admin, clique em “Fila do churrasqueiro”. Ela atualiza automaticamente.',
     },
     {
+      question: 'Consigo trocar de plano depois?',
+      answer:
+        'Sim. Vá em Pagamentos > Renovar assinatura e escolha um novo plano.',
+    },
+    {
+      question: 'Como edito meu cardápio?',
+      answer:
+        'No painel admin, acesse Produtos para editar nome, preço, promoções e imagem.',
+    },
+    {
+      question: 'Como mudar horários de funcionamento?',
+      answer:
+        'Em Configurações > Horários você ajusta os dias e horários da loja.',
+    },
+    {
+      question: 'Dá para mudar a cor da loja?',
+      answer:
+        'Sim. Em Configurações > Identidade visual você altera cores, logo e descrição.',
+    },
+    {
+      question: 'Como gerar QR Code para as mesas?',
+      answer:
+        'No Resumo do admin existe o card “QR do cardápio” com opção de imprimir.',
+    },
+    {
+      question: 'Consigo ver meus ganhos?',
+      answer:
+        'Sim. No Resumo você acompanha receita total, ticket médio e vendas por dia.',
+    },
+    {
+      question: 'Suporte e ajuda',
+      answer:
+        'Chame no WhatsApp da loja ou use o e-mail de contato configurado no painel.',
+    },
+    {
       question: 'O cliente acompanha o pedido?',
       answer:
         'Sim. Após enviar, ele recebe um link para acompanhar o status em tempo real.',
