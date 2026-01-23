@@ -403,7 +403,7 @@ export function PaymentPage() {
                         onClick={async () => {
                           if (!paymentId) return;
                           if (!selectedPlanId) {
-                            setError('Selecione um plano antes de gerar o pagamento.');
+                            setError('Selecione um plano para continuar.');
                             return;
                           }
                           setRenewing(true);

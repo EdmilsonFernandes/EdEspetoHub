@@ -62,7 +62,7 @@ export function AdminRenewal() {
   const handleRenew = async () => {
     if (!storeId) return;
     if (!selectedPlanId) {
-      setError('Selecione um plano antes de gerar a renovação.');
+      setError('Selecione um plano para continuar.');
       return;
     }
     setIsSubmitting(true);
