@@ -378,7 +378,7 @@ export function LandingPage() {
             <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-white to-rose-50 p-6 space-y-6">
               <div className="grid gap-5">
                 <div>
-                  <label className="text-sm font-semibold text-slate-700">Ticket médio (R$)</label>
+                  <label className="text-sm font-semibold text-slate-700">Valor médio por pedido (R$)</label>
                   <input
                     type="number"
                     min="0"
