@@ -296,7 +296,7 @@ export class PaymentController {
    */
   static async renewFromPayment(req: Request, res: Response) {
     const { paymentId } = req.params;
-    const { paymentMethod } = req.body || {};
+    const { paymentMethod, planId: requestedPlanId } = req.body || {};
 
     try {
       const payment = await paymentService.findById(paymentId);
@@ -311,7 +311,7 @@ export class PaymentController {
       }
 
       const method = (paymentMethod || payment.method || 'PIX') as PaymentMethod;
-      const planId = payment.subscription?.plan?.id;
+      const planId = requestedPlanId || payment.subscription?.plan?.id;
       const storeId = payment.store?.id;
       if (!planId || !storeId) {
         return respondWithError(req, res, new AppError('PAY-008', 400), 400);

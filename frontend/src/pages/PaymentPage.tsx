@@ -2,6 +2,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { paymentService } from '../services/paymentService';
+import { planService } from '../services/planService';
+import { BILLING_OPTIONS, PLAN_TIERS, getPlanName } from '../constants/planCatalog';
 import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
 
 export function PaymentPage() {
@@ -17,6 +19,9 @@ export function PaymentPage() {
   const [pixCopied, setPixCopied] = useState(false);
   const [renewMethod, setRenewMethod] = useState('PIX');
   const [renewing, setRenewing] = useState(false);
+  const [plans, setPlans] = useState([]);
+  const [selectedPlanId, setSelectedPlanId] = useState('');
+  const [isAnnual, setIsAnnual] = useState(false);
   const EVENTS_PAGE_SIZE = 25;
   const platformLogo = '/chama-no-espeto.jpeg';
   const redirectRef = useRef(false);
@@ -77,6 +82,32 @@ export function PaymentPage() {
     };
   }, [paymentId]);
 
+  useEffect(() => {
+    if (!paymentId) return;
+    const loadPlans = async () => {
+      try {
+        const data = await planService.list();
+        const planList = Array.isArray(data) ? data : [];
+        setPlans(planList);
+        if (!planList.length) return;
+        const currentPlanId = payment?.subscription?.plan?.id;
+        if (currentPlanId) {
+          setSelectedPlanId(currentPlanId);
+          const currentPlan = planList.find((plan) => plan.id === currentPlanId);
+          if (currentPlan?.name?.includes('_yearly')) {
+            setIsAnnual(true);
+          }
+          return;
+        }
+        const defaultPlan = planList.find((plan) => plan.name === getPlanName('basic', 'monthly'));
+        setSelectedPlanId(defaultPlan?.id || planList[0].id);
+      } catch (err) {
+        console.error('Falha ao carregar planos', err);
+      }
+    };
+    loadPlans();
+  }, [paymentId, payment?.subscription?.plan?.id]);
+
   const isPaid = payment?.status === 'PAID';
   const isFailed = payment?.status === 'FAILED';
   const isExpired = payment?.expiresAt ? new Date(payment.expiresAt) <= new Date() : false;
@@ -103,6 +134,23 @@ export function PaymentPage() {
   const adminUrl = storeSlug ? `${baseUrl}/admin?slug=${encodeURIComponent(storeSlug)}` : `${baseUrl}/admin`;
   const methodMeta = getPaymentMethodMeta(payment?.method);
   const providerMeta = getPaymentProviderMeta(payment?.provider);
+  const billingKey = isAnnual ? 'yearly' : 'monthly';
+  const billing = BILLING_OPTIONS[billingKey];
+  const plansByName = plans.reduce((acc, plan) => {
+    acc[plan.name] = plan;
+    return acc;
+  }, {});
+
+  useEffect(() => {
+    if (!plans.length || !needsRenew) return;
+    const currentPlan = plans.find((plan) => plan.id === selectedPlanId);
+    const isCurrentCycle = currentPlan?.name?.endsWith(`_${billingKey}`);
+    if (isCurrentCycle) return;
+    const fallback = PLAN_TIERS
+      .map((tier) => plansByName[getPlanName(tier.key, billingKey)]?.id)
+      .find(Boolean);
+    if (fallback) setSelectedPlanId(fallback);
+  }, [billingKey, plans, plansByName, selectedPlanId, needsRenew]);
 
   useEffect(() => {
     if (!isPaid || !isVerified || redirectRef.current) return;
@@ -250,6 +298,47 @@ export function PaymentPage() {
                     </p>
                   ) : needsRenew ? (
                     <>
+                      <div className="w-full space-y-3">
+                        <div className="flex items-center justify-between w-full gap-2">
+                          <p className="text-sm font-semibold text-gray-700">Escolha um plano</p>
+                          <div className="flex items-center gap-2">
+                            <span className={`text-xs font-semibold ${!isAnnual ? 'text-gray-900' : 'text-gray-500'}`}>Mensal</span>
+                            <button
+                              type="button"
+                              onClick={() => setIsAnnual(!isAnnual)}
+                              className={`relative inline-flex h-7 w-14 items-center rounded-full transition-colors ${isAnnual ? 'bg-red-500' : 'bg-gray-300'}`}
+                            >
+                              <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${isAnnual ? 'translate-x-8' : 'translate-x-1'}`} />
+                            </button>
+                            <span className={`text-xs font-semibold ${isAnnual ? 'text-gray-900' : 'text-gray-500'}`}>Anual</span>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                          {PLAN_TIERS.map((tier) => {
+                            const planKey = getPlanName(tier.key, billingKey);
+                            const plan = plansByName[planKey];
+                            const price = plan ? Number(plan.price) : billing.priceByTier[tier.key];
+                            const isSelected = plan?.id && selectedPlanId === plan.id;
+                            const isDisabled = !plan?.id;
+                            return (
+                              <button
+                                type="button"
+                                key={planKey}
+                                onClick={() => plan?.id && setSelectedPlanId(plan.id)}
+                                disabled={isDisabled}
+                                className={`border rounded-2xl px-3 py-3 text-left transition-all ${isSelected
+                                  ? 'border-red-500 shadow-lg bg-red-50'
+                                  : 'border-gray-200 hover:border-red-200'
+                                  } ${isDisabled ? 'opacity-60 cursor-not-allowed' : ''}`}
+                              >
+                                <p className="text-[11px] uppercase font-semibold text-gray-500">{tier.label}</p>
+                                <p className="text-lg font-bold text-gray-900">R$ {Number(price).toFixed(2)}</p>
+                                <p className="text-[11px] text-gray-500">{billing.period}</p>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
                       <p className="text-sm font-semibold text-gray-700 text-center">
                         Escolha uma forma para gerar um novo pagamento
                       </p>
@@ -309,7 +398,10 @@ export function PaymentPage() {
                           setRenewing(true);
                           setError('');
                           try {
-                            const nextPayment = await paymentService.renew(paymentId, { paymentMethod: renewMethod });
+                            const nextPayment = await paymentService.renew(paymentId, {
+                              paymentMethod: renewMethod,
+                              planId: selectedPlanId,
+                            });
                             if (nextPayment?.id) {
                               navigate(`/payment/${nextPayment.id}`);
                             }
