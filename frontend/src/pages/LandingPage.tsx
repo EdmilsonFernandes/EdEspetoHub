@@ -567,8 +567,14 @@ export function LandingPage() {
       </section>
 
       {guideShot && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
-          <div className="relative max-w-5xl w-full bg-white rounded-3xl overflow-hidden shadow-2xl">
+        <div
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4"
+          onClick={() => setGuideShot(null)}
+        >
+          <div
+            className="relative max-w-5xl w-full bg-white rounded-3xl overflow-hidden shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
             <button
               onClick={() => setGuideShot(null)}
               className="absolute top-4 right-4 bg-white/90 border border-slate-200 rounded-full w-10 h-10 flex items-center justify-center font-bold text-slate-700 hover:bg-white"
