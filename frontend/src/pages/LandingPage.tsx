@@ -88,6 +88,17 @@ export function LandingPage() {
         'Pagamento confirmado no final',
       ],
     },
+    {
+      title: 'Resumo do dashboard',
+      role: 'Admin',
+      summary: 'Acompanhe vendas, ticket médio e top produtos em um painel claro.',
+      image: '/marketing/dashboard.png',
+      bullets: [
+        'Visão geral de pedidos e receita',
+        'Top produtos mais vendidos',
+        'Dados prontos para decisões rápidas',
+      ],
+    },
   ];
   const faqItems = [
     {
