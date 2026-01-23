@@ -22,6 +22,7 @@ export const DashboardView = ({
   storeUrl = "",
   storeName = "Chama no Espeto",
 }) => {
+  const [qrCopied, setQrCopied] = useState(false);
   const [periodDays, setPeriodDays] = useState("30");
   const nowDate = new Date();
   const currentMonthKey = `${nowDate.getFullYear()}-${String(nowDate.getMonth() + 1).padStart(2, "0")}`;
@@ -217,6 +218,49 @@ export const DashboardView = ({
     exportToCsv("clientes", headers, rows);
   };
 
+  const handlePrintQr = () => {
+    if (!storeUrl || typeof window === "undefined") return;
+    const printWindow = window.open("", "_blank", "width=700,height=900");
+    if (!printWindow) return;
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=420x420&data=${encodeURIComponent(storeUrl)}`;
+    const safeStoreName = storeName.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    printWindow.document.write(`
+      <!doctype html>
+      <html lang="pt-BR">
+        <head>
+          <meta charset="utf-8" />
+          <title>QR do Cardápio - ${safeStoreName}</title>
+          <style>
+            body { margin: 0; font-family: Arial, sans-serif; background: #f8fafc; color: #0f172a; }
+            .page { padding: 40px 24px; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+            .card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 24px; padding: 32px; text-align: center; box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08); }
+            .title { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
+            .subtitle { font-size: 14px; color: #475569; margin-bottom: 24px; }
+            .qr { width: 300px; height: 300px; object-fit: contain; }
+            .link { font-size: 12px; color: #64748b; margin-top: 18px; word-break: break-all; }
+          </style>
+        </head>
+        <body>
+          <div class="page">
+            <div class="card">
+              <div class="title">Cardápio ${safeStoreName}</div>
+              <div class="subtitle">Aponte a câmera para fazer seu pedido</div>
+              <img class="qr" src="${qrUrl}" alt="QR Code do cardápio" />
+              <div class="link">${storeUrl}</div>
+            </div>
+          </div>
+          <script>
+            window.onload = () => {
+              window.focus();
+              window.print();
+            };
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
 
   return (
     <div className="space-y-6 animate-in fade-in">
@@ -285,6 +329,48 @@ export const DashboardView = ({
                 )}
               </div>
             ))}
+          </div>
+        </div>
+      )}
+      {storeUrl && (
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+          <div className="flex flex-col md:flex-row md:items-center gap-5">
+            <div className="flex-1 space-y-2">
+              <p className="text-xs uppercase tracking-[0.35em] text-slate-400">QR do cardápio</p>
+              <h3 className="text-xl font-black text-slate-900">Imprima e coloque nas mesas</h3>
+              <p className="text-sm text-slate-500">
+                O cliente aponta a câmera, abre o cardápio e faz o pedido em segundos.
+              </p>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="w-24 h-24 rounded-2xl border border-slate-200 bg-slate-50 flex items-center justify-center overflow-hidden">
+                <img
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(storeUrl)}`}
+                  alt="QR do cardápio"
+                  className="w-full h-full object-contain"
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(storeUrl);
+                    setQrCopied(true);
+                    setTimeout(() => setQrCopied(false), 1500);
+                  }}
+                  className="px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                >
+                  {qrCopied ? "Link copiado!" : "Copiar link"}
+                </button>
+                <button
+                  type="button"
+                  onClick={handlePrintQr}
+                  className="px-3 py-2 rounded-lg bg-brand-primary text-white text-xs font-semibold hover:opacity-90"
+                >
+                  Gerar PDF
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
