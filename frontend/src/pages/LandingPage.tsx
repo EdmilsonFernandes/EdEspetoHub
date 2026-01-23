@@ -30,6 +30,49 @@ export function LandingPage() {
   const [ordersPerDay, setOrdersPerDay] = useState('15');
   const [faqOpen, setFaqOpen] = useState(false);
   const [faqActive, setFaqActive] = useState<number | null>(0);
+  const [guideStep, setGuideStep] = useState(0);
+  const guideSteps = [
+    {
+      title: 'Crie sua loja',
+      role: 'Admin',
+      summary: 'Cadastre dados básicos e publique seu link exclusivo.',
+      bullets: [
+        'Nome, telefone e endereço da loja',
+        'Identidade visual com logo e cores',
+        'Link público pronto para divulgar',
+      ],
+    },
+    {
+      title: 'Monte o cardápio',
+      role: 'Admin',
+      summary: 'Cadastre produtos, fotos e promoções em minutos.',
+      bullets: [
+        'Categorias e descrição completas',
+        'Preço promocional + destaque',
+        'Tudo atualiza em tempo real',
+      ],
+    },
+    {
+      title: 'Cliente faz o pedido',
+      role: 'Cliente',
+      summary: 'Pedido rápido no celular com acompanhamento automático.',
+      bullets: [
+        'Escolhe ponto da carne e varinha',
+        'Recebe link de acompanhamento',
+        'Atualizações visuais de status',
+      ],
+    },
+    {
+      title: 'Fila do churrasqueiro',
+      role: 'Operação',
+      summary: 'Pedido organizado, preparo e finalização sem confusão.',
+      bullets: [
+        'Fila com status claros',
+        'Tempo e prioridade visíveis',
+        'Pagamento confirmado no final',
+      ],
+    },
+  ];
   const faqItems = [
     {
       question: 'Como crio minha loja?',
@@ -338,6 +381,86 @@ export function LandingPage() {
                   {label}
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-slate-900 text-white py-14 sm:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+            <div>
+              <p className="text-xs uppercase tracking-[0.3em] text-amber-300 font-bold">Guia do usuario</p>
+              <h2 className="text-3xl sm:text-4xl font-black mt-3">
+                Entenda o fluxo completo antes de criar sua loja
+              </h2>
+              <p className="text-base sm:text-lg text-slate-300 mt-3 max-w-2xl">
+                Clique nas etapas para ver o que acontece em cada tela. O sistema foi feito para reduzir
+                tempo de atendimento e aumentar pedidos no balcão e nas mesas.
+              </p>
+            </div>
+            <button
+              onClick={() => navigate('/create')}
+              className="px-6 py-3 rounded-xl bg-white text-slate-900 font-semibold hover:bg-slate-100 transition"
+            >
+              Quero começar agora
+            </button>
+          </div>
+
+          <div className="mt-10 grid lg:grid-cols-[0.45fr_0.55fr] gap-6">
+            <div className="space-y-3">
+              {guideSteps.map((step, index) => (
+                <button
+                  key={step.title}
+                  type="button"
+                  onClick={() => setGuideStep(index)}
+                  className={`w-full text-left px-4 py-4 rounded-2xl border transition ${
+                    guideStep === index
+                      ? 'bg-white text-slate-900 border-white shadow-[0_12px_30px_-18px_rgba(0,0,0,0.45)]'
+                      : 'bg-slate-800/60 text-slate-200 border-slate-700 hover:border-amber-300'
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.25em] text-amber-300 font-semibold">
+                        {step.role}
+                      </p>
+                      <h3 className="text-lg font-bold mt-2">{step.title}</h3>
+                    </div>
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                        guideStep === index ? 'bg-amber-100 text-amber-800' : 'bg-slate-700 text-slate-200'
+                      }`}
+                    >
+                      {index + 1}
+                    </span>
+                  </div>
+                  <p className="text-sm mt-3 text-slate-300">
+                    {step.summary}
+                  </p>
+                </button>
+              ))}
+            </div>
+
+            <div className="rounded-[28px] bg-white text-slate-900 p-6 sm:p-8 shadow-[0_25px_80px_-40px_rgba(0,0,0,0.55)]">
+              <p className="text-xs uppercase tracking-[0.3em] text-slate-400 font-semibold">
+                Etapa {guideStep + 1} de {guideSteps.length}
+              </p>
+              <h3 className="text-2xl font-black mt-3">{guideSteps[guideStep].title}</h3>
+              <p className="text-sm text-slate-600 mt-2">
+                {guideSteps[guideStep].summary}
+              </p>
+              <div className="mt-6 space-y-3">
+                {guideSteps[guideStep].bullets.map((item) => (
+                  <div key={item} className="flex items-start gap-3">
+                    <span className="mt-1 w-2.5 h-2.5 rounded-full bg-red-500" />
+                    <p className="text-sm text-slate-700">{item}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs text-slate-600">
+                Dica: combine o link da loja com o QR Code do cardápio para acelerar pedidos no salão.
+              </div>
             </div>
           </div>
         </div>
