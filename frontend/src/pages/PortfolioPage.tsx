@@ -254,6 +254,26 @@ export function PortfolioPage() {
                     </div>
                     <div className="p-6 space-y-4">
                       <p className="text-sm text-slate-600 line-clamp-3">{description}</p>
+                      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                        <p className="text-[11px] uppercase tracking-[0.3em] text-slate-400">Mini cardápio</p>
+                        <div className="mt-3 space-y-2 text-xs text-slate-600">
+                          {[
+                            { label: 'Espetos', price: 'R$ 8,90' },
+                            { label: 'Porções', price: 'R$ 24,90' },
+                            { label: 'Bebidas', price: 'R$ 6,00' },
+                          ].map((item) => (
+                            <div key={item.label} className="flex items-center justify-between">
+                              <span className="font-semibold text-slate-700">{item.label}</span>
+                              <span
+                                className="px-2 py-0.5 rounded-full text-[10px] font-semibold text-white"
+                                style={{ backgroundColor: primary }}
+                              >
+                                {item.price}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                       <div className="inline-flex items-center gap-2 text-sm font-semibold text-red-600">
                         Visitar loja
                         <ArrowUpRight size={16} weight="bold" className="transition-transform group-hover:translate-x-1" />

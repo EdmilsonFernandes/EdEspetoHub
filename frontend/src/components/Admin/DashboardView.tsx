@@ -508,14 +508,14 @@ export const DashboardView = ({
               <p className="text-gray-500 text-sm font-bold uppercase">
                 Pedidos realizados
               </p>
-              <h3 className="text-3xl font-black text-brand-secondary">
+              <h3 className="text-3xl font-black text-brand-primary">
                 {stats.totalOrders}
               </h3>
               <p className="text-xs text-gray-500 mt-1">
                 Valor médio por pedido: {formatCurrency(stats.avgTicket)}
               </p>
             </div>
-            <div className="p-3 bg-brand-secondary-soft rounded-lg text-brand-secondary">
+            <div className="p-3 bg-brand-primary-soft rounded-lg text-brand-primary">
               <Package weight="duotone" />
             </div>
           </div>
@@ -523,8 +523,8 @@ export const DashboardView = ({
 
       </div>
 
-      <div className="grid lg:grid-cols-[1.4fr_0.6fr] gap-6">
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 lg:col-span-2">
+      <div className="grid lg:grid-cols-[1.2fr_0.8fr] gap-6">
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Divulgação</p>
@@ -537,7 +537,7 @@ export const DashboardView = ({
               UTM automático
             </div>
           </div>
-          <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_220px]">
+          <div className="mt-5">
             <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
             <div className="grid gap-3 xl:grid-cols-[1.2fr_0.9fr_0.9fr_0.9fr] items-end">
               <div>
@@ -624,45 +624,43 @@ export const DashboardView = ({
               ))}
             </div>
           </div>
-            <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-3">
-              <p className="text-[11px] uppercase tracking-[0.3em] text-slate-400">Última campanha</p>
-              <div className="space-y-2 text-xs text-slate-600">
-                <div className="flex items-center justify-between">
-                  <span>Canal</span>
-                  <span className="font-semibold text-slate-800">{utmSource || '—'}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span>Formato</span>
-                  <span className="font-semibold text-slate-800">{utmMedium || '—'}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span>Campanha</span>
-                  <span className="font-semibold text-slate-800">{utmCampaign || '—'}</span>
-                </div>
-              </div>
-              <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-3 py-2 text-[11px] text-slate-500">
-                Compartilhe o link e acompanhe as origens abaixo.
-              </div>
-              <button
-                type="button"
-                onClick={() => copyUtm()}
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
-              >
-                {qrCopied ? 'Link copiado!' : 'Copiar link UTM'}
-              </button>
-              <p className="text-[10px] text-slate-400 break-all">
-                {utmUrl || storeUrl}
-              </p>
-            </div>
-          </div>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 lg:col-start-2">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-gray-500 text-sm font-bold uppercase">
-                Acessos no link
-              </p>
+        <div className="space-y-4">
+          <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+            <p className="text-[11px] uppercase tracking-[0.3em] text-slate-400">Última campanha</p>
+            <div className="mt-3 space-y-2 text-xs text-slate-600">
+              <div className="flex items-center justify-between">
+                <span>Canal</span>
+                <span className="font-semibold text-slate-800">{utmSource || '—'}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span>Formato</span>
+                <span className="font-semibold text-slate-800">{utmMedium || '—'}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span>Campanha</span>
+                <span className="font-semibold text-slate-800">{utmCampaign || '—'}</span>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => copyUtm()}
+              className="mt-3 w-full px-3 py-2 rounded-lg border border-slate-200 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
+            >
+              {qrCopied ? 'Link copiado!' : 'Copiar link UTM'}
+            </button>
+            <p className="mt-2 text-[10px] text-slate-400 break-all">
+              {utmUrl || storeUrl}
+            </p>
+          </div>
+
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-gray-500 text-sm font-bold uppercase">
+                  Acessos no link
+                </p>
               <h3 className="text-3xl font-black text-brand-primary">
                 {linkStatsTotal}
               </h3>
@@ -686,6 +684,7 @@ export const DashboardView = ({
               <LinkSimple weight="duotone" />
             </div>
           </div>
+        </div>
         </div>
       </div>
 
