@@ -82,7 +82,7 @@ export function AdminLayout({
                 {storeSlug && (
                   <a
                     href={`/${storeSlug}`}
-                    className="px-3 py-1.5 rounded-full text-slate-600 hover:bg-white transition"
+                    className="px-3 py-1.5 rounded-full bg-white text-slate-900 border border-slate-200 shadow-sm hover:shadow-md transition"
                   >
                     Cardápio
                   </a>
