@@ -361,7 +361,7 @@ export function LandingPage() {
             </button>
             <button
               onClick={scrollToShowcase}
-              className="cursor-pointer px-8 py-4 text-lg rounded-xl border-2 border-slate-200 bg-white/80 text-gray-700 dark:text-gray-300 font-semibold hover:text-red-600 hover:border-red-200 transition-colors shadow-sm"
+              className="cursor-pointer px-8 py-4 text-lg rounded-xl border-2 border-slate-200 bg-white/90 text-gray-700 font-semibold hover:text-red-600 hover:border-red-200 transition-colors shadow-sm dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:border-red-400"
             >
               ✨ Ver telas reais
             </button>
