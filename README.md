@@ -9,6 +9,10 @@ Aplicação web para pedidos e gestão do restaurante de espetinhos Datony. O pr
   - Numero exibido usa prefixo do slug (3 letras) + 8 primeiros chars do ID.
 - **Promoções**: produto pode ter preço promocional ativo; vitrine, carrinho, fila e acompanhamento exibem valor original riscado + promocional.
 
+## Guia do usuario
+
+- docs/user-guide.md
+
 ## Estrutura de pastas
 
 - `frontend/`: aplicação React (Create React App) servida pelo nginx em produção.
