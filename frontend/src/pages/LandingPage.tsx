@@ -999,6 +999,11 @@ export function LandingPage() {
                 className="w-full h-[60vh] sm:h-[72vh] object-contain rounded-2xl border border-white/10 shadow-[0_18px_60px_-32px_rgba(0,0,0,0.9)]"
               />
             </div>
+            <div className="px-4 pb-2 sm:hidden">
+              <div className="rounded-full border border-slate-200 bg-white px-3 py-1 text-[11px] text-slate-500 text-center">
+                Arraste para navegar
+              </div>
+            </div>
             {lightbox?.shots?.length > 1 && (
               <div className="px-4 pb-4">
                 <div className="flex items-center gap-2 overflow-x-auto pb-2">
