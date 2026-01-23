@@ -1,0 +1,188 @@
+# Projeto Chama no Espeto - Contexto Atual
+
+## Estado atual (resumo rapido)
+- Vitrine premium com hero novo, cards e categorias refinadas.
+  - Header simplificado: identidade + acoes.
+  - Hero concentra status/horario/WhatsApp.
+  - "Id da loja" usa slug.
+  - Cores primaria/secundaria aplicadas corretamente.
+- Landing page com vitrine real das telas (prints), modal com navegacao e CTA fixo no mobile.
+- Prova social (lojas ativas, pedidos e vendas) via endpoint publico + simulador de ganhos.
+- Mobile: header compacto + botao "Info" com sheet de endereco/WhatsApp/Instagram/horarios.
+- Mapa estatico gratuito (OpenStreetMap) no mobile com cache de coordenadas.
+- Fila do churrasqueiro usa o mesmo header do admin e mantem tema/cores.
+- Admin:
+  - Header unico para todas as telas (Dashboard, Pedidos, Fila).
+  - Tela de pedidos limpa (so lista).
+  - Dashboard com receita total/mes/periodo, ticket medio, grafico melhorado e filtro 30/60/90/tudo.
+- Cadastro:
+  - Agora pede CPF/CNPJ, aceita termos/LGPD e endereco separado com CEP (via ViaCEP).
+  - Termos de uso em modal premium (nao perde dados ao abrir).
+  - Paleta de cores por escolha visual (sem expor codigo hex).
+  - Preview do logo corrigido com upload.
+- Checkout:
+  - Autocomplete de cliente (3+ letras) com preenchimento automatico do telefone.
+  - Clientes recentes antes de digitar.
+  - Mesa com selecao rapida (1-12) + campo "outra mesa".
+  - Visual "iFood-like" no bloco de dados do pedido.
+- Pedido feito por admin volta para o cardapio (nao envia WhatsApp/tracking).
+- Som na fila:
+  - Ligado por padrao, salva preferencia.
+  - Botao "Testar som".
+- Mercado Pago:
+  - Integracao com webhook, QR normalizado.
+  - Idempotency key adicionada.
+  - Cai em mock apenas se MP falhar.
+- Email:
+  - SMTP (Gmail com senha de app).
+  - Reset de senha + paginas `ForgotPassword` e `ResetPassword`.
+  - Email de confirmacao mais premium (header com gradiente).
+  - Email de ativacao com logo e links.
+- Assinaturas:
+  - Avisos por e-mail em D-3, D-1 e D-0.
+  - `reminder_stage` evita envio duplicado.
+  - Renovacao no admin com escolha de plano e pagamento.
+  - Admin expirada cai em `/admin/renewal`.
+- Trial:
+  - Periodo gratis configuravel via `site_settings` (`trial_days`).
+  - Confirmou e-mail, loja ativa e envia e-mail de ativacao.
+  - Banner premium no admin mostra dias restantes e CTA de renovacao.
+- SEO:
+  - Meta tags dinamicas por loja (OG/Twitter + favicon do cliente).
+  - `sitemap.xml` e `robots.txt` com sitemap.
+- Pagamento:
+  - Linha do tempo do usuario mostra apenas status + data.
+  - Admin login sem valores predefinidos.
+  - Sessao expirada limpa `adminSession` e redireciona pro login.
+  - Logos de pagamento (Pix/Cartao/Mercado Pago) em telas publicas e admin.
+  - Renovacao gera novo link se pagamento expirou/failed.
+- Landing:
+  - Secao "Produto real" com galeria expandida dos prints.
+  - Modal de visualizacao com atalhos (← →) e botoes para navegar.
+  - CTA fixo no mobile para conversao.
+  - Simulador de ganhos com ticket medio e pedidos por dia.
+- Acompanhamento publico:
+  - Pagina `/pedido/:orderId` com timeline, status e fila.
+  - Branding da loja aplicado (logo, cores, titulo, favicon).
+  - Ultimos 3 pedidos do usuario publico ficam salvos em `localStorage` e habilitam CTA com selecao na vitrine.
+  - Numero exibido usa prefixo do slug (3 letras) + 8 primeiros chars do ID.
+  - Entrega finaliza em "Saiu para entrega" (sem status de motoboy).
+  - Tempo total destacado ao finalizar.
+- Checkout (entrega):
+  - Endereco separado com CEP + ViaCEP.
+  - Link de mapa (OpenStreetMap) em vez de iframe.
+  - Autocomplete de cliente apenas para admin.
+- Produtos:
+  - Campo de descricao persistido e exibido na vitrine.
+  - Preco promocional e promocao ativa por produto (aplica no pedido).
+- Espetos:
+  - Seleciona ponto da carne e "passar varinha" por item na vitrine.
+  - Opcoes aparecem no pedido (fila/admin/WhatsApp/tracking).
+- Loja:
+  - Tipos de pedido configuraveis (entrega, retirada, mesa).
+- Vitrine:
+  - Banner "Acompanhar pedido" para publico usando `localStorage` (inclui pedidos de mesa).
+  - Botao "Info" abre sheet com endereco, contatos e horarios.
+  - Bloco "Mais pedidos hoje" (Top 3) no topo do cardapio (carrossel no mobile).
+  - Promoção do dia no topo do cardapio + badge nos itens.
+  - Produto com promocao mostra preco riscado e aplica preco promocional no pedido.
+  - Botao "Compartilhar cardapio" e dicas "Salvar no celular" (iOS/Android).
+  - Botao "Pedir novamente" no acompanhamento do pedido (reaplica itens no carrinho).
+  - Admin: "Cardapio" no resumo com copiar link + gerar PDF.
+  - Fila: "Modo TV" (tela limpa + relogio + fullscreen).
+  - Configuracoes: botao "Salvar alteracoes" visivel para Pix/Email.
+
+## Arquivos principais mexidos
+- frontend/src/components/Client/MenuView.tsx
+- frontend/src/components/Client/CartView.tsx
+- frontend/src/pages/OrdersQueue.tsx
+- frontend/src/pages/OrderTracking.tsx
+- frontend/src/components/Admin/AdminHeader.tsx
+- frontend/src/pages/AdminDashboard.tsx
+- frontend/src/pages/AdminOrders.tsx
+- frontend/src/pages/AdminQueue.tsx
+- frontend/src/components/Admin/DashboardView.tsx
+- frontend/src/components/Admin/GrillQueue.tsx
+- frontend/src/components/Admin/ProductManager.tsx
+- frontend/src/components/Cart/ProductModal.tsx
+- frontend/src/pages/LandingPage.tsx
+- frontend/public/marketing/*
+- backend/src/services/PaymentService.ts
+- backend/src/services/MercadoPagoService.ts
+- backend/src/services/EmailService.ts
+- backend/src/services/AuthService.ts
+- backend/src/controllers/OrderController.ts
+- backend/src/controllers/PlatformPublicController.ts
+- backend/schema.sql
+- backend/src/entities/Product.ts
+- backend/src/services/OrderService.ts
+- backend/src/services/ProductService.ts
+- backend/src/dto/CreateProductDto.ts
+- backend/src/entities/PasswordReset.ts
+- frontend/src/pages/ForgotPassword.tsx
+- frontend/src/pages/ResetPassword.tsx
+- frontend/src/services/authService.ts
+- frontend/src/services/productService.ts
+- frontend/src/pages/StorePage.tsx
+- frontend/src/components/Client/MenuView.tsx
+
+## Observacoes importantes
+- Som so toca apos interacao do usuario (limitacao do navegador).
+- Mercado Pago exige chave PIX cadastrada (em teste pode bloquear).
+- Admin login bloqueado se pagamento pendente.
+- Email real depende de SMTP valido (Gmail com senha de app).
+- Pagamento aprovado atualiza status via webhook Mercado Pago; sem HTTPS nao chega.
+- Postgres pode entrar em loop se o `pg_hba.conf` for corrompido (ex.: linha `EOF` invalida). Workaround: reescrever o arquivo no volume e resetar a senha sem apagar dados.
+- Endpoint publico de metricas: `/api/public/platform/metrics`.
+
+## DNS / Dominio (Registro.br)
+- Ativar modo avancado em "Configurar enderecamento" -> "Modo avancado".
+- Se a tabela mostrar "Dominio em transicao", aguardar alguns minutos e recarregar.
+- Quando liberar, criar registros:
+  - A @ -> Elastic IP
+  - A www -> Elastic IP (ou CNAME www -> @)
+- Propagacao pode levar minutos ate horas.
+
+## Deploy EC2 (resumo tecnico)
+- Nginx como reverse proxy para HTTPS.
+  - `/` -> `http://127.0.0.1:8080`
+  - `/api/` -> `http://127.0.0.1:4000/api/`
+  - `/uploads/` -> `http://127.0.0.1:4000/uploads/`
+- Nginx precisa de `client_max_body_size 20m` para upload de logo.
+- Certbot configurado para `chamanoespeto.com.br` e `www.chamanoespeto.com.br`.
+- Docker Compose usa `.env.prod` com `FRONTEND_PORT=8080` (front fica atras do Nginx).
+- Arquivo de exemplo do Nginx: `docs/nginx/chamanoespeto.conf`.
+
+## Workaround Postgres (pg_hba.conf corrompido)
+Sintoma: container `chamanoespeto-postgres` reiniciando com "invalid connection type \"EOF\"".
+
+1) Descobrir o volume:
+```bash
+docker volume ls | grep postgres
+```
+
+2) Reescrever `pg_hba.conf` em modo trust:
+```bash
+docker stop chamanoespeto-postgres
+docker run --rm -v edespetohub_postgres-data:/var/lib/postgresql/data alpine \
+  sh -c "printf 'local all all trust\nhost all all all trust\n' > /var/lib/postgresql/data/pg_hba.conf"
+docker start chamanoespeto-postgres
+```
+
+3) Resetar senha e voltar para scram:
+```bash
+docker exec -it chamanoespeto-postgres psql -U postgres -d postgres -c "ALTER USER postgres WITH PASSWORD 'postgres';"
+docker run --rm -v edespetohub_postgres-data:/var/lib/postgresql/data alpine \
+  sh -c "printf 'local all all scram-sha-256\nhost all all all scram-sha-256\n' > /var/lib/postgresql/data/pg_hba.conf"
+docker restart chamanoespeto-postgres
+docker restart chamanoespeto-api
+```
+
+## Mercado Pago (producao)
+- Variaveis obrigatorias no `backend/.env.docker`:
+  - `MP_ACCESS_TOKEN`
+  - `MP_PUBLIC_KEY`
+  - `MP_WEBHOOK_SECRET`
+  - `MP_WEBHOOK_URL=https://www.chamanoespeto.com.br/api/webhooks/mercadopago`
+- Webhook exige HTTPS valido.
+- Painel MP: eventos de Pagamentos ativados.

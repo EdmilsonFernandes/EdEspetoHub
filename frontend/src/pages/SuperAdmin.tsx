@@ -1,0 +1,1789 @@
+// @ts-nocheck
+import React, { useEffect, useMemo, useState } from 'react';
+import {
+  ArrowClockwise,
+  TrendUp,
+  Storefront,
+  CheckCircle,
+  WarningCircle,
+  CurrencyDollar,
+  CreditCard,
+  Clock,
+  ChartBar,
+  Funnel,
+  DownloadSimple,
+  Trash,
+  Eye,
+  CaretLeft,
+  CaretRight,
+  MagnifyingGlass,
+} from '@phosphor-icons/react';
+import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
+import { superAdminService } from '../services/superAdminService';
+import { formatCurrency, formatPlanName } from '../utils/format';
+import { exportToCsv } from '../utils/export';
+import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import Lottie from 'lottie-react';
+import fireAnimation from '../assets/fire.json';
+import { useToast } from '../contexts/ToastContext';
+import { AuthLayout } from '../layouts/AuthLayout';
+import { AdminLayout } from '../layouts/AdminLayout';
+
+const STORAGE_KEY = 'superAdminToken';
+const STORAGE_USER_KEY = 'superAdminUser';
+const FILTERS_KEY = 'superAdminPaymentFilters';
+const EVENTS_FILTERS_KEY = 'superAdminEventFilters';
+const EVENTS_PAGE_SIZE = 25;
+const PAYMENTS_PER_PAGE = 10;
+
+const readFilters = () => {
+  try {
+    return JSON.parse(localStorage.getItem(FILTERS_KEY) || '{}');
+  } catch {
+    return {};
+  }
+};
+
+const formatDate = (value?: string) => {
+  if (!value) return '-';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '-';
+  return date.toLocaleDateString('pt-BR');
+};
+
+const daysUntil = (value?: string) => {
+  if (!value) return '-';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '-';
+  const diffMs = date.getTime() - Date.now();
+  return Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+};
+
+const statusStyle = (status?: string) => {
+  if (status === 'ACTIVE') return 'bg-emerald-100 text-emerald-700';
+  if (status === 'EXPIRING') return 'bg-amber-100 text-amber-800';
+  if (status === 'EXPIRED') return 'bg-red-100 text-red-700';
+  if (status === 'SUSPENDED') return 'bg-slate-200 text-slate-700';
+  return 'bg-slate-100 text-slate-600';
+};
+
+export function SuperAdmin() {
+  const { showToast } = useToast();
+  const [token, setToken] = useState(() => localStorage.getItem(STORAGE_KEY) || '');
+  const [superAdminUser, setSuperAdminUser] = useState(() => localStorage.getItem(STORAGE_USER_KEY) || '');
+  const [overview, setOverview] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [loginForm, setLoginForm] = useState({ email: '', password: '' });
+  const [error, setError] = useState('');
+  const [sessionExpired, setSessionExpired] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [paymentQuery, setPaymentQuery] = useState(() => readFilters().paymentQuery || '');
+  const [paymentStatusFilter, setPaymentStatusFilter] = useState(() => readFilters().paymentStatusFilter || 'all');
+  const [paymentMethodFilter, setPaymentMethodFilter] = useState(() => readFilters().paymentMethodFilter || 'all');
+  const [paymentProviderFilter, setPaymentProviderFilter] = useState(() => readFilters().paymentProviderFilter || 'all');
+  const [reprocessingId, setReprocessingId] = useState('');
+  const [eventStoreFilter, setEventStoreFilter] = useState('all');
+  const [eventStatusFilter, setEventStatusFilter] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem(EVENTS_FILTERS_KEY) || '{}')?.eventStatusFilter || 'all';
+    } catch {
+      return 'all';
+    }
+  });
+  const [selectedEventPayload, setSelectedEventPayload] = useState(null);
+  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [openPaymentPayloadId, setOpenPaymentPayloadId] = useState('');
+  const [dateRange, setDateRange] = useState(() => readFilters().dateRange || '30');
+  const [minAmount, setMinAmount] = useState(() => readFilters().minAmount || '');
+  const [maxAmount, setMaxAmount] = useState(() => readFilters().maxAmount || '');
+  const [paymentsPage, setPaymentsPage] = useState(1);
+  const [eventsPage, setEventsPage] = useState(1);
+  const [eventsLoading, setEventsLoading] = useState(false);
+  const [eventResults, setEventResults] = useState([]);
+  const [accessLogs, setAccessLogs] = useState([]);
+  const [accessLogsTotal, setAccessLogsTotal] = useState(0);
+  const [accessLogsPage, setAccessLogsPage] = useState(1);
+  const [accessLogsLoading, setAccessLogsLoading] = useState(false);
+  const [accessLogQuery, setAccessLogQuery] = useState('');
+  const [accessLogRole, setAccessLogRole] = useState('all');
+  const [accessLogMethod, setAccessLogMethod] = useState('all');
+  const [accessLogStatus, setAccessLogStatus] = useState('all');
+  const [accessLogStore, setAccessLogStore] = useState('all');
+  const [sectionsOpen, setSectionsOpen] = useState({
+    charts: true,
+    rankings: true,
+    stores: true,
+    payments: true,
+    logs: false,
+    events: false,
+  });
+  const [activeSection, setActiveSection] = useState('executive');
+
+  const loadOverview = async (authToken: string) => {
+    setLoading(true);
+    setError('');
+    try {
+      const data = await superAdminService.fetchOverview(authToken);
+      setOverview(data);
+    } catch (err: any) {
+      const message = err.message || 'Não foi possível carregar os dados.';
+      if (message.includes('Token inválido') || message.includes('Token ausente')) {
+        setSessionExpired(true);
+        handleLogout();
+      } else {
+        showToast(message, 'error');
+        setOverview(null);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const toggleSection = (key: keyof typeof sectionsOpen) => {
+    setSectionsOpen((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  useEffect(() => {
+    const sectionIds = [ 'executive', 'rankings', 'stores', 'payments', 'logs', 'events' ];
+    const elements = sectionIds
+      .map((id) => document.getElementById(id))
+      .filter(Boolean) as HTMLElement[];
+    if (!elements.length) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+        if (visible[0]?.target?.id) {
+          setActiveSection(visible[0].target.id);
+        }
+      },
+      { rootMargin: '-30% 0px -60% 0px', threshold: [ 0.1, 0.4, 0.7 ] }
+    );
+
+    elements.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (token) {
+      loadOverview(token);
+    }
+  }, [token]);
+
+  useEffect(() => {
+    if (!token || !autoRefresh) return;
+    const interval = window.setInterval(() => loadOverview(token), 15000);
+    return () => window.clearInterval(interval);
+  }, [token, autoRefresh]);
+
+  useEffect(() => {
+    localStorage.setItem(
+      FILTERS_KEY,
+      JSON.stringify({
+        paymentQuery,
+        paymentStatusFilter,
+        paymentMethodFilter,
+        paymentProviderFilter,
+        dateRange,
+        minAmount,
+        maxAmount,
+      })
+    );
+  }, [paymentQuery, paymentStatusFilter, paymentMethodFilter, paymentProviderFilter, dateRange, minAmount, maxAmount]);
+
+  const handleLogin = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setError('');
+    setSessionExpired(false);
+    setLoading(true);
+    try {
+      const data = await superAdminService.login(loginForm.email, loginForm.password);
+      const nextToken = data.token;
+      localStorage.setItem(STORAGE_KEY, nextToken);
+      localStorage.setItem(STORAGE_USER_KEY, loginForm.email);
+      setToken(nextToken);
+      setSuperAdminUser(loginForm.email);
+      showToast('Login realizado com sucesso.', 'success');
+    } catch (err: any) {
+      const message = err.message || 'Não foi possível autenticar agora.';
+      setError(message);
+      showToast(message, 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(STORAGE_USER_KEY);
+    setToken('');
+    setOverview(null);
+    setSuperAdminUser('');
+  };
+
+  const summary = overview?.summary;
+  const stores = overview?.stores || [];
+  const payments = overview?.payments || [];
+  const paymentEvents = overview?.paymentEvents || [];
+  const rankings = overview?.rankings || { byRevenue: [], byOrders: [] };
+  const paidRevenueValue = summary?.paidRevenue ? Number(summary.paidRevenue) : 0;
+  const ordersRevenueTotal = summary?.ordersRevenueTotal ? Number(summary.ordersRevenueTotal) : 0;
+  const ordersRevenueLast7Days = summary?.ordersRevenueLast7Days ? Number(summary.ordersRevenueLast7Days) : 0;
+  const ordersRevenueLast30Days = summary?.ordersRevenueLast30Days ? Number(summary.ordersRevenueLast30Days) : 0;
+  const churnedStores = summary?.churnedStores || 0;
+  const reactivatedStores = summary?.reactivatedStores || 0;
+  const totalOrders = summary?.totalOrders || 0;
+  const ordersLast7Days = summary?.ordersLast7Days || 0;
+  const ordersLast30Days = summary?.ordersLast30Days || 0;
+  const paymentEventByPayment = useMemo(() => {
+    const map = new Map();
+    paymentEvents.forEach((event: any) => {
+      const paymentId = event.payment?.id;
+      if (!paymentId) return;
+      if (!map.has(paymentId)) {
+        map.set(paymentId, event);
+      }
+    });
+    return map;
+  }, [paymentEvents]);
+
+  const storeNameById = useMemo(() => {
+    const map = new Map();
+    stores.forEach((store: any) => {
+      map.set(store.id, store.name);
+    });
+    return map;
+  }, [stores]);
+
+  const revenueByMonth = useMemo(() => {
+    const map = new Map<string, number>();
+    payments.forEach((payment: any) => {
+      if (payment.status !== 'PAID') return;
+      const date = payment.createdAt ? new Date(payment.createdAt) : null;
+      if (!date || Number.isNaN(date.getTime())) return;
+      const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      const current = map.get(key) || 0;
+      map.set(key, current + Number(payment.amount || 0));
+    });
+
+    return Array.from(map.entries())
+      .sort(([a], [b]) => (a > b ? 1 : -1))
+      .map(([month, total]) => ({
+        month,
+        total: Number(total.toFixed(2)),
+      }));
+  }, [payments]);
+
+  const statusBadge = (status: string) => {
+    if (status === 'PAID') return 'bg-emerald-100 text-emerald-700';
+    if (status === 'PENDING') return 'bg-amber-100 text-amber-800';
+    if (status === 'FAILED') return 'bg-red-100 text-red-700';
+    return 'bg-slate-100 text-slate-600';
+  };
+
+  const eventBadge = (status: string) => {
+    if (status === 'approved') return 'bg-emerald-100 text-emerald-700';
+    if (status === 'pending') return 'bg-amber-100 text-amber-800';
+    if (status === 'rejected' || status === 'cancelled') return 'bg-red-100 text-red-700';
+    if (status === 'refunded' || status === 'charged_back') return 'bg-purple-100 text-purple-700';
+    return 'bg-slate-100 text-slate-600';
+  };
+
+  const filteredPayments = useMemo(() => {
+    const normalized = paymentQuery.trim().toLowerCase();
+    const now = Date.now();
+    const rangeDays = dateRange === 'all' ? null : Number(dateRange);
+    const minValue = minAmount ? Number(minAmount) : null;
+    const maxValue = maxAmount ? Number(maxAmount) : null;
+    return payments.filter((payment: any) => {
+      if (paymentStatusFilter !== 'all' && payment.status !== paymentStatusFilter) return false;
+      if (paymentMethodFilter !== 'all' && payment.method !== paymentMethodFilter) return false;
+      if (paymentProviderFilter !== 'all' && payment.provider !== paymentProviderFilter) return false;
+      if (rangeDays !== null) {
+        const created = payment.createdAt ? new Date(payment.createdAt).getTime() : 0;
+        if (!Number.isFinite(created)) return false;
+        const diffDays = (now - created) / (1000 * 60 * 60 * 24);
+        if (diffDays > rangeDays) return false;
+      }
+      const amountValue = Number(payment.amount || 0);
+      if (minValue !== null && amountValue < minValue) return false;
+      if (maxValue !== null && amountValue > maxValue) return false;
+      if (!normalized) return true;
+      const haystack = [
+        payment.store?.name,
+        payment.store?.slug,
+        payment.user?.email,
+        payment.id,
+        payment.providerId,
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+      return haystack.includes(normalized);
+    });
+  }, [payments, paymentQuery, paymentStatusFilter, paymentMethodFilter, paymentProviderFilter, dateRange, minAmount, maxAmount]);
+
+  useEffect(() => {
+    setPaymentsPage(1);
+  }, [paymentQuery, paymentStatusFilter, paymentMethodFilter, paymentProviderFilter, dateRange, minAmount, maxAmount]);
+
+  useEffect(() => {
+    setEventsPage(1);
+  }, [eventStoreFilter, eventStatusFilter]);
+
+  useEffect(() => {
+    localStorage.setItem(
+      EVENTS_FILTERS_KEY,
+      JSON.stringify({ eventStatusFilter })
+    );
+  }, [eventStatusFilter]);
+
+  const paginatedPayments = useMemo(() => {
+    const start = (paymentsPage - 1) * PAYMENTS_PER_PAGE;
+    return filteredPayments.slice(start, start + PAYMENTS_PER_PAGE);
+  }, [filteredPayments, paymentsPage]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredPayments.length / PAYMENTS_PER_PAGE));
+  const accessLogsTotalPages = Math.max(1, Math.ceil(accessLogsTotal / 25));
+
+  const filteredEvents = useMemo(() => {
+    return eventResults;
+  }, [eventResults]);
+
+  const filteredTotal = useMemo(() => {
+    return filteredPayments.reduce((acc: number, payment: any) => acc + Number(payment.amount || 0), 0);
+  }, [filteredPayments]);
+
+  const periodTotal = useMemo(() => {
+    const now = Date.now();
+    const rangeDays = dateRange === 'all' ? null : Number(dateRange);
+    return payments.reduce((acc: number, payment: any) => {
+      if (payment.status !== 'PAID') return acc;
+      if (rangeDays === null) return acc + Number(payment.amount || 0);
+      const created = payment.createdAt ? new Date(payment.createdAt).getTime() : 0;
+      if (!Number.isFinite(created)) return acc;
+      const diffDays = (now - created) / (1000 * 60 * 60 * 24);
+      if (diffDays > rangeDays) return acc;
+      return acc + Number(payment.amount || 0);
+    }, 0);
+  }, [payments, dateRange]);
+
+  const storeHealth = useMemo(() => {
+    const counts = {
+      active: 0,
+      trial: 0,
+      expiring: 0,
+      expired: 0,
+      suspended: 0,
+      pending: 0,
+      open: 0,
+      closed: 0,
+    };
+
+    stores.forEach((store: any) => {
+      if (store.open) counts.open += 1;
+      else counts.closed += 1;
+      const status = store.subscription?.status || 'PENDING';
+      if (status === 'ACTIVE') counts.active += 1;
+      else if (status === 'TRIAL') counts.trial += 1;
+      else if (status === 'EXPIRING') counts.expiring += 1;
+      else if (status === 'EXPIRED') counts.expired += 1;
+      else if (status === 'SUSPENDED') counts.suspended += 1;
+      else counts.pending += 1;
+    });
+
+    return counts;
+  }, [stores]);
+
+  const expiringSoon = useMemo(() => {
+    return stores
+      .map((store: any) => {
+        const endDate = store.subscription?.endDate;
+        if (!endDate) return null;
+        const daysLeft = daysUntil(endDate);
+        if (typeof daysLeft !== 'number' || daysLeft < 0 || daysLeft > 7) return null;
+        return {
+          id: store.id,
+          name: store.name,
+          slug: store.slug,
+          daysLeft,
+          endDate,
+          status: store.subscription?.status || 'PENDING',
+        };
+      })
+      .filter(Boolean)
+      .sort((a: any, b: any) => a.daysLeft - b.daysLeft)
+      .slice(0, 6);
+  }, [stores]);
+
+  const recentStores = useMemo(() => {
+    const now = Date.now();
+    return stores.filter((store: any) => {
+      const createdAt = store.createdAt ? new Date(store.createdAt).getTime() : 0;
+      if (!Number.isFinite(createdAt)) return false;
+      const diffDays = (now - createdAt) / (1000 * 60 * 60 * 24);
+      return diffDays <= 7;
+    }).length;
+  }, [stores]);
+
+  const revenuePerActive = useMemo(() => {
+    if (!storeHealth.active) return 0;
+    return paidRevenueValue / storeHealth.active;
+  }, [paidRevenueValue, storeHealth.active]);
+
+  const ordersPerStore = useMemo(() => {
+    if (!summary?.totalStores) return 0;
+    return totalOrders / summary.totalStores;
+  }, [summary?.totalStores, totalOrders]);
+
+  const avgTicketGlobal = useMemo(() => {
+    if (!totalOrders) return 0;
+    return ordersRevenueTotal / totalOrders;
+  }, [ordersRevenueTotal, totalOrders]);
+
+  const activeRate = useMemo(() => {
+    if (!summary?.totalStores) return 0;
+    return (summary.activeSubscriptions / summary.totalStores) * 100;
+  }, [summary?.totalStores, summary?.activeSubscriptions]);
+
+  const handleReprocess = async (paymentId: string, providerId?: string) => {
+    if (!token) return;
+    setReprocessingId(paymentId);
+    try {
+      await superAdminService.reprocessPayment(token, paymentId, providerId);
+      await loadOverview(token);
+      showToast('Pagamento reprocessado com sucesso.', 'success');
+    } catch (err: any) {
+      const message = err.message || 'Não foi possível reprocessar agora.';
+      showToast(message, 'error');
+    } finally {
+      setReprocessingId('');
+    }
+  };
+
+  const loadEvents = async (page = eventsPage, storeId = eventStoreFilter) => {
+    if (!token) return;
+    setEventsLoading(true);
+    try {
+      const offset = (page - 1) * EVENTS_PAGE_SIZE;
+      const storeParam = storeId === 'all' ? undefined : storeId;
+      const data = await superAdminService.fetchPaymentEvents(
+        token,
+        undefined,
+        EVENTS_PAGE_SIZE,
+        offset,
+        storeParam
+      );
+      const filtered = (data || []).filter((event: any) => {
+        if (eventStatusFilter === 'all') return true;
+        return event.status === eventStatusFilter;
+      });
+      setEventResults(filtered);
+    } catch (err: any) {
+      showToast(err.message || 'Não foi possível carregar os eventos.', 'error');
+    } finally {
+      setEventsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!token) return;
+    loadEvents(eventsPage, eventStoreFilter);
+  }, [token, eventsPage, eventStoreFilter, eventStatusFilter]);
+
+  useEffect(() => {
+    if (!token || !autoRefresh) return;
+    const interval = window.setInterval(() => loadEvents(eventsPage, eventStoreFilter), 15000);
+    return () => window.clearInterval(interval);
+  }, [token, autoRefresh, eventsPage, eventStoreFilter]);
+
+  const loadAccessLogs = async (page = accessLogsPage) => {
+    if (!token) return;
+    setAccessLogsLoading(true);
+    try {
+      const offset = (page - 1) * 25;
+      const filters: Record<string, string> = {
+        limit: '25',
+        offset: String(offset),
+      };
+      if (accessLogQuery) filters.search = accessLogQuery;
+      if (accessLogRole !== 'all') filters.role = accessLogRole;
+      if (accessLogMethod !== 'all') filters.method = accessLogMethod;
+      if (accessLogStatus !== 'all') filters.status = accessLogStatus;
+      if (accessLogStore !== 'all') filters.storeId = accessLogStore;
+      const data = await superAdminService.fetchAccessLogs(token, filters);
+      setAccessLogs(data?.data || []);
+      setAccessLogsTotal(data?.total || 0);
+    } catch (err: any) {
+      showToast(err.message || 'Não foi possível carregar os logs.', 'error');
+    } finally {
+      setAccessLogsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!token) return;
+    loadAccessLogs(accessLogsPage);
+  }, [token, accessLogsPage, accessLogQuery, accessLogRole, accessLogMethod, accessLogStatus, accessLogStore]);
+
+  useEffect(() => {
+    if (!token || !autoRefresh) return;
+    const interval = window.setInterval(() => loadAccessLogs(accessLogsPage), 20000);
+    return () => window.clearInterval(interval);
+  }, [token, autoRefresh, accessLogsPage, accessLogQuery, accessLogRole, accessLogMethod, accessLogStatus, accessLogStore]);
+
+  useEffect(() => {
+    setAccessLogsPage(1);
+  }, [accessLogQuery, accessLogRole, accessLogMethod, accessLogStatus, accessLogStore]);
+
+  const exportPaymentsCsv = () => {
+    const headers = [
+      { key: 'date', label: 'Data' },
+      { key: 'store', label: 'Loja' },
+      { key: 'slug', label: 'Slug' },
+      { key: 'method', label: 'Metodo' },
+      { key: 'status', label: 'Status' },
+      { key: 'provider', label: 'Provider' },
+      { key: 'providerId', label: 'Provider ID' },
+      { key: 'amount', label: 'Valor' },
+    ];
+
+    const rows = filteredPayments.map((payment: any) => ({
+      date: payment.createdAt ? new Date(payment.createdAt).toLocaleString('pt-BR') : '-',
+      store: payment.store?.name || '-',
+      slug: payment.store?.slug || '-',
+      method: payment.method,
+      status: payment.status,
+      provider: payment.provider || '-',
+      providerId: payment.providerId || '-',
+      amount: Number(payment.amount || 0).toFixed(2),
+    }));
+
+    exportToCsv('pagamentos', headers, rows);
+  };
+
+  const exportEventsCsv = () => {
+    const headers = [
+      { key: 'date', label: 'Data' },
+      { key: 'paymentId', label: 'Pagamento' },
+      { key: 'status', label: 'Status' },
+      { key: 'provider', label: 'Provider' },
+    ];
+
+    const rows = filteredEvents.map((event: any) => ({
+      date: event.createdAt ? new Date(event.createdAt).toLocaleString('pt-BR') : '-',
+      paymentId: event.payment?.id || '-',
+      status: event.status,
+      provider: event.provider,
+    }));
+
+    exportToCsv('eventos-pagamento', headers, rows);
+  };
+
+  const resetFilters = () => {
+    setPaymentQuery('');
+    setPaymentStatusFilter('all');
+    setPaymentMethodFilter('all');
+    setPaymentProviderFilter('all');
+    setDateRange('30');
+    setMinAmount('');
+    setMaxAmount('');
+  };
+
+  const paidRevenue = useMemo(() => {
+    return summary?.paidRevenue ? formatCurrency(summary.paidRevenue) : formatCurrency(0);
+  }, [summary?.paidRevenue]);
+
+  const platformLogo = '/logo.svg';
+
+  if (!token) {
+    return (
+      <AuthLayout>
+          <form
+            onSubmit={handleLogin}
+           className="space-y-6"
+          >
+            <div className="text-center">
+              <h2 className="text-2xl sm:text-3xl font-black text-gray-800 mb-1">Super Admin</h2>
+              <p className="text-sm text-gray-500">Acesso da plataforma</p>
+              <p className="text-sm text-gray-500">Entre com suas credenciais de super administrador.</p>
+            </div>
+
+            {sessionExpired && (
+              <div className="flex items-center gap-3 text-sm text-slate-700 bg-amber-50 border border-amber-200 p-4 rounded-xl">
+                <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
+                Sessao expirada. Entre novamente.
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700">Usuário</label>
+                <input
+                  type="text"
+                  value={loginForm.email}
+                  onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
+                  className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
+                  placeholder="Digite seu usuário"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700">Senha</label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={loginForm.password}
+                    onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
+                    className="w-full border border-gray-200 rounded-xl p-3 pr-10 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
+                    placeholder="Sua senha de acesso"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                    aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                  >
+                    {showPassword ? (
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                      </svg>
+                    ) : (
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading || !loginForm.email || !loginForm.password}
+              className="w-full text-white py-3 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 bg-brand-gradient hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {loading ? '⏳ Entrando...' : '🔐 Entrar no painel'}
+            </button>
+          </form>
+      </AuthLayout>
+    );
+  }
+
+  return (
+    <AdminLayout contextLabel="Plataforma" showHeader={false}>
+      <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white/80 backdrop-blur px-4 py-4 sm:px-6 sm:py-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="absolute -right-20 -top-16 w-64 h-64 rounded-full bg-brand-primary/10 blur-3xl" />
+        <div className="absolute right-24 -bottom-20 w-56 h-56 rounded-full bg-emerald-400/10 blur-3xl" />
+        <div className="relative flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl border border-slate-200 bg-white shadow-sm flex items-center justify-center">
+            <img src={platformLogo} alt="Chama no Espeto" className="w-7 h-7 object-contain" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl sm:text-3xl font-black text-slate-800">Super Admin</h1>
+              <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-900 text-white">
+                Master Console
+              </span>
+            </div>
+            <p className="text-sm text-slate-500">Visão executiva da plataforma</p>
+          </div>
+        </div>
+        <div className="relative flex gap-2">
+          <div className="flex items-center gap-2 px-3 py-2 rounded-full border border-slate-200 bg-white/80 shadow-sm">
+            <div className="w-7 h-7 rounded-full bg-slate-900 text-white text-xs font-bold flex items-center justify-center">
+              {superAdminUser ? superAdminUser.slice(0, 2).toUpperCase() : 'SA'}
+            </div>
+            <div className="text-xs leading-tight">
+              <div className="font-semibold text-slate-800">{superAdminUser || 'Super Admin'}</div>
+              <div className="text-slate-500">SUPER_ADMIN</div>
+            </div>
+          </div>
+          <div className="flex gap-2 items-center">
+            <span className="text-sm font-semibold text-slate-600">Auto-refresh</span>
+            <button
+              onClick={() => setAutoRefresh((prev) => !prev)}
+              className={`relative inline-flex h-6 w-12 items-center rounded-full transition-colors ${
+                autoRefresh ? 'bg-brand-primary' : 'bg-slate-300'
+              }`}
+              title={autoRefresh ? 'Auto-refresh ON' : 'Auto-refresh OFF'}
+            >
+              <span
+                className={`h-4 w-4 transform rounded-full bg-white transition-transform flex items-center justify-center ${
+                  autoRefresh ? 'translate-x-7' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </div>
+          <button
+            onClick={() => loadOverview(token)}
+            className="px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 flex items-center gap-2"
+          >
+            <ArrowClockwise size={16} weight="duotone" />
+            Atualizar
+          </button>
+          <button
+            onClick={handleLogout}
+            className="px-4 py-2 rounded-lg bg-slate-900 text-white hover:bg-slate-800"
+          >
+            Sair
+          </button>
+        </div>
+      </div>
+
+      <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3 bg-white/90 backdrop-blur border-b border-slate-200">
+        <div className="flex flex-wrap gap-2 text-xs font-semibold text-slate-700">
+          <a
+            href="#executive"
+            onClick={() => setActiveSection('executive')}
+            className={`px-3 py-1.5 rounded-full border border-slate-200 shadow-sm transition ${
+              activeSection === 'executive'
+                ? 'bg-gradient-to-r from-slate-900 to-slate-700 text-white'
+                : 'bg-white text-slate-700 hover:-translate-y-0.5 hover:shadow-md'
+            }`}
+            aria-current={activeSection === 'executive' ? 'true' : 'false'}
+          >
+            Resumo
+          </a>
+          <a
+            href="#rankings"
+            onClick={() => setActiveSection('rankings')}
+            className={`px-3 py-1.5 rounded-full border border-slate-200 shadow-sm transition ${
+              activeSection === 'rankings'
+                ? 'bg-slate-900 text-white'
+                : 'bg-white text-slate-700 hover:-translate-y-0.5 hover:shadow-md'
+            }`}
+            aria-current={activeSection === 'rankings' ? 'true' : 'false'}
+          >
+            Rankings
+          </a>
+          <a
+            href="#stores"
+            onClick={() => setActiveSection('stores')}
+            className={`px-3 py-1.5 rounded-full border border-slate-200 shadow-sm transition ${
+              activeSection === 'stores'
+                ? 'bg-slate-900 text-white'
+                : 'bg-white text-slate-700 hover:-translate-y-0.5 hover:shadow-md'
+            }`}
+            aria-current={activeSection === 'stores' ? 'true' : 'false'}
+          >
+            Lojas
+          </a>
+          <a
+            href="#payments"
+            onClick={() => setActiveSection('payments')}
+            className={`px-3 py-1.5 rounded-full border border-slate-200 shadow-sm transition ${
+              activeSection === 'payments'
+                ? 'bg-slate-900 text-white'
+                : 'bg-white text-slate-700 hover:-translate-y-0.5 hover:shadow-md'
+            }`}
+            aria-current={activeSection === 'payments' ? 'true' : 'false'}
+          >
+            Pagamentos
+          </a>
+          <a
+            href="#logs"
+            onClick={() => setActiveSection('logs')}
+            className={`px-3 py-1.5 rounded-full border border-slate-200 shadow-sm transition ${
+              activeSection === 'logs'
+                ? 'bg-slate-900 text-white'
+                : 'bg-white text-slate-700 hover:-translate-y-0.5 hover:shadow-md'
+            }`}
+            aria-current={activeSection === 'logs' ? 'true' : 'false'}
+          >
+            Logs
+          </a>
+          <a
+            href="#events"
+            onClick={() => setActiveSection('events')}
+            className={`px-3 py-1.5 rounded-full border border-slate-200 shadow-sm transition ${
+              activeSection === 'events'
+                ? 'bg-slate-900 text-white'
+                : 'bg-white text-slate-700 hover:-translate-y-0.5 hover:shadow-md'
+            }`}
+            aria-current={activeSection === 'events' ? 'true' : 'false'}
+          >
+            Eventos
+          </a>
+        </div>
+      </div>
+
+      {summary && (
+        <div className="grid md:grid-cols-3 gap-3">
+          <div className="rounded-2xl p-4 border border-emerald-100 bg-gradient-to-br from-emerald-50 via-white to-white">
+            <p className="text-xs uppercase text-emerald-600 font-semibold">Ativação da base</p>
+            <p className="text-2xl font-black text-emerald-700 mt-1">{activeRate.toFixed(1)}%</p>
+            <p className="text-xs text-emerald-700/70 mt-1">Lojas ativas vs total</p>
+          </div>
+          <div className="rounded-2xl p-4 border border-slate-200 bg-gradient-to-br from-slate-50 via-white to-white">
+            <p className="text-xs uppercase text-slate-500 font-semibold">Ticket medio global</p>
+            <p className="text-2xl font-black text-slate-800 mt-1">{formatCurrency(avgTicketGlobal)}</p>
+            <p className="text-xs text-slate-500 mt-1">Receita por pedido</p>
+          </div>
+          <div className="rounded-2xl p-4 border border-blue-100 bg-gradient-to-br from-blue-50 via-white to-white">
+            <p className="text-xs uppercase text-blue-600 font-semibold">Receita por loja ativa</p>
+            <p className="text-2xl font-black text-blue-700 mt-1">{formatCurrency(revenuePerActive)}</p>
+            <p className="text-xs text-blue-700/70 mt-1">Eficiência da base ativa</p>
+          </div>
+        </div>
+      )}
+
+        {loading && <div className="text-sm text-slate-500">Carregando...</div>}
+
+        {summary && (
+          <div id="executive" className="grid lg:grid-cols-[2.1fr,1fr] gap-4">
+            <div className="relative overflow-hidden rounded-3xl bg-slate-900 text-white p-6 shadow-lg">
+              <div className="absolute -right-20 -top-20 w-64 h-64 rounded-full bg-brand-primary/20 blur-3xl" />
+              <div className="absolute right-16 bottom-0 w-40 h-40 rounded-full bg-emerald-400/20 blur-2xl" />
+              <div className="relative space-y-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.2em] text-slate-300">Panorama da plataforma</p>
+                    <h2 className="text-2xl font-black">Resumo executivo</h2>
+                  </div>
+                  <span className="px-3 py-1 rounded-full text-xs font-semibold bg-white/10 text-white">
+                    Atualizado agora
+                  </span>
+                </div>
+                <div className="grid sm:grid-cols-3 gap-4">
+                  <div className="rounded-2xl bg-white/10 p-4 border border-white/10">
+                    <p className="text-xs text-slate-300 uppercase">Receita confirmada</p>
+                    <p className="text-2xl font-black mt-1">{paidRevenue}</p>
+                    <p className="text-xs text-slate-300 mt-2">Periodo: {formatCurrency(periodTotal)}</p>
+                  </div>
+                  <div className="rounded-2xl bg-white/10 p-4 border border-white/10">
+                    <p className="text-xs text-slate-300 uppercase">Receita recorrente estimada (mês)</p>
+                    <p className="text-2xl font-black mt-1">{formatCurrency(summary.mrrProjected || 0)}</p>
+                    <p className="text-xs text-slate-300 mt-2">
+                      {summary.monthlyPlans} mensal · {summary.yearlyPlans} anual
+                    </p>
+                  </div>
+                  <div className="rounded-2xl bg-white/10 p-4 border border-white/10">
+                    <p className="text-xs text-slate-300 uppercase">Pedidos totais</p>
+                    <p className="text-2xl font-black mt-1">{totalOrders}</p>
+                    <p className="text-xs text-slate-300 mt-2">
+                      +{ordersLast7Days} nos ultimos 7 dias
+                    </p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-3 text-xs text-slate-200">
+                  <span className="px-3 py-1 rounded-full bg-white/10 border border-white/10">
+                    {summary.totalStores} lojas criadas
+                  </span>
+                  <span className="px-3 py-1 rounded-full bg-white/10 border border-white/10">
+                    {storeHealth.open} abertas · {storeHealth.closed} fechadas
+                  </span>
+                  <span className="px-3 py-1 rounded-full bg-white/10 border border-white/10">
+                    {formatCurrency(revenuePerActive)} por loja ativa
+                  </span>
+                  <span className="px-3 py-1 rounded-full bg-white/10 border border-white/10">
+                    {formatCurrency(ordersRevenueLast30Days)} receita pedidos (30d)
+                  </span>
+                  <span className="px-3 py-1 rounded-full bg-white/10 border border-white/10">
+                    {recentStores} novas lojas na semana
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm space-y-4">
+              <div>
+                <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Saude da base</p>
+                <h3 className="text-lg font-bold text-slate-800">Lojas em operação</h3>
+              </div>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-3">
+                  <p className="text-xs text-emerald-700 uppercase">Ativas</p>
+                  <p className="text-xl font-black text-emerald-700">{storeHealth.active}</p>
+                </div>
+                <div className="rounded-2xl border border-blue-100 bg-blue-50 p-3">
+                  <p className="text-xs text-blue-700 uppercase">Trial</p>
+                  <p className="text-xl font-black text-blue-700">{storeHealth.trial}</p>
+                </div>
+                <div className="rounded-2xl border border-amber-100 bg-amber-50 p-3">
+                  <p className="text-xs text-amber-700 uppercase">Expirando</p>
+                  <p className="text-xl font-black text-amber-700">{storeHealth.expiring}</p>
+                </div>
+                <div className="rounded-2xl border border-red-100 bg-red-50 p-3">
+                  <p className="text-xs text-red-700 uppercase">Expiradas</p>
+                  <p className="text-xl font-black text-red-700">{storeHealth.expired}</p>
+                </div>
+              </div>
+              <div className="rounded-2xl border border-slate-200 p-3">
+                <p className="text-xs uppercase text-slate-400">Pagamentos</p>
+                <div className="flex items-center justify-between mt-2">
+                  <span className="text-sm text-slate-600">Pagos</span>
+                  <span className="font-bold text-emerald-600">{summary.paidPayments}</span>
+                </div>
+                <div className="flex items-center justify-between mt-1">
+                  <span className="text-sm text-slate-600">Pendentes</span>
+                  <span className="font-bold text-amber-600">{summary.pendingPayments}</span>
+                </div>
+              </div>
+              <div className="rounded-2xl border border-slate-200 p-3">
+                <p className="text-xs uppercase text-slate-400">Churn & retomadas</p>
+                <div className="flex items-center justify-between mt-2">
+                  <span className="text-sm text-slate-600">Churn (exp/susp)</span>
+                  <span className="font-bold text-red-600">{churnedStores}</span>
+                </div>
+                <div className="flex items-center justify-between mt-1">
+                  <span className="text-sm text-slate-600">Reativadas (30d)</span>
+                  <span className="font-bold text-emerald-600">{reactivatedStores}</span>
+                </div>
+              </div>
+              <div>
+                <p className="text-xs uppercase text-slate-400">Expirando em ate 7 dias</p>
+                {expiringSoon.length === 0 ? (
+                  <p className="text-sm text-slate-500 mt-2">Nenhuma loja em risco imediato.</p>
+                ) : (
+                  <div className="mt-2 space-y-2">
+                    {expiringSoon.map((store: any) => (
+                      <div key={store.id} className="flex items-center justify-between text-sm">
+                        <div>
+                          <p className="font-semibold text-slate-700">{store.name}</p>
+                          <p className="text-xs text-slate-400">{store.slug}</p>
+                        </div>
+                        <span className="px-2 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">
+                          {store.daysLeft}d
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {summary && (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs uppercase text-slate-400 font-semibold">Pedidos 7 dias</p>
+                <ChartBar size={18} weight="duotone" className="text-brand-primary" />
+              </div>
+              <p className="text-2xl font-black text-slate-800">{ordersLast7Days}</p>
+              <p className="text-xs text-slate-400 mt-1">Ultimos 30 dias: {ordersLast30Days}</p>
+            </div>
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs uppercase text-slate-400 font-semibold">Lojas ativas</p>
+                <CheckCircle size={18} className="text-emerald-600" />
+              </div>
+              <p className="text-2xl font-black text-emerald-600">{summary.activeSubscriptions}</p>
+              <p className="text-xs text-slate-400 mt-1">Ativação: {activeRate.toFixed(1)}%</p>
+            </div>
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs uppercase text-slate-400 font-semibold">Lojas expirando</p>
+                <WarningCircle size={18} weight="duotone" className="text-amber-600" />
+              </div>
+              <p className="text-2xl font-black text-amber-600">{summary.expiringSubscriptions}</p>
+              <p className="text-xs text-slate-400 mt-1">Em risco: {expiringSoon.length}</p>
+            </div>
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs uppercase text-slate-400 font-semibold">Receita por ativa</p>
+                <CurrencyDollar size={18} weight="duotone" className="text-brand-primary" />
+              </div>
+              <p className="text-2xl font-black text-slate-800">{formatCurrency(revenuePerActive)}</p>
+              <p className="text-xs text-slate-400 mt-1">Media por loja ativa</p>
+            </div>
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs uppercase text-slate-400 font-semibold">Receita pedidos</p>
+                <CurrencyDollar size={18} weight="duotone" className="text-emerald-600" />
+              </div>
+              <p className="text-2xl font-black text-slate-800">{formatCurrency(ordersRevenueTotal)}</p>
+              <p className="text-xs text-slate-400 mt-1">
+                {formatCurrency(ordersRevenueLast7Days)} (7d) · {formatCurrency(ordersRevenueLast30Days)} (30d)
+              </p>
+            </div>
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs uppercase text-slate-400 font-semibold">Pedidos por loja</p>
+                <ChartBar size={18} weight="duotone" className="text-slate-500" />
+              </div>
+              <p className="text-2xl font-black text-slate-800">{ordersPerStore.toFixed(1)}</p>
+              <p className="text-xs text-slate-400 mt-1">Media global por loja</p>
+            </div>
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs uppercase text-slate-400 font-semibold">Ticket medio global</p>
+                <CurrencyDollar size={18} weight="duotone" className="text-slate-600" />
+              </div>
+              <p className="text-2xl font-black text-slate-800">{formatCurrency(avgTicketGlobal)}</p>
+              <p className="text-xs text-slate-400 mt-1">Receita / pedidos</p>
+            </div>
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs uppercase text-slate-400 font-semibold">Saude da base</p>
+                <CheckCircle size={18} className="text-emerald-600" />
+              </div>
+              <p className="text-2xl font-black text-slate-800">{activeRate.toFixed(1)}%</p>
+              <p className="text-xs text-slate-400 mt-1">Lojas ativas vs total</p>
+            </div>
+          </div>
+        )}
+
+        {summary && (
+          <div id="rankings" className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <TrendUp size={18} weight="duotone" className="text-emerald-600" />
+                <h3 className="text-lg font-bold text-slate-800">Rankings da plataforma</h3>
+              </div>
+              <button
+                onClick={() => toggleSection('rankings')}
+                className="px-3 py-1 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 flex items-center gap-1"
+              >
+                <CaretRight weight="bold"
+                  size={14}
+                  className={`transition-transform ${sectionsOpen.rankings ? 'rotate-90' : ''}`}
+                />
+                {sectionsOpen.rankings ? 'Ocultar' : 'Mostrar'}
+              </button>
+            </div>
+            {sectionsOpen.rankings ? (
+              <div className="grid lg:grid-cols-2 gap-4 mt-4">
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <TrendUp size={18} weight="duotone" className="text-emerald-600" />
+                      <h3 className="text-lg font-bold text-slate-800">Top lojas por receita</h3>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    {rankings.byRevenue?.length ? (
+                      rankings.byRevenue.map((store: any, index: number) => (
+                        <div key={store.id} className="flex items-center justify-between text-sm">
+                          <div>
+                            <p className="font-semibold text-slate-700">
+                              {index + 1}. {store.name}
+                            </p>
+                            <p className="text-xs text-slate-400">{store.slug}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-bold text-emerald-600">{formatCurrency(store.totalRevenue || 0)}</p>
+                            <p className="text-xs text-slate-400">{store.totalOrders || 0} pedidos</p>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-slate-500">Sem dados suficientes.</p>
+                    )}
+                  </div>
+                </div>
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <ChartBar size={18} weight="duotone" className="text-slate-600" />
+                      <h3 className="text-lg font-bold text-slate-800">Top lojas por pedidos</h3>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    {rankings.byOrders?.length ? (
+                      rankings.byOrders.map((store: any, index: number) => (
+                        <div key={store.id} className="flex items-center justify-between text-sm">
+                          <div>
+                            <p className="font-semibold text-slate-700">
+                              {index + 1}. {store.name}
+                            </p>
+                            <p className="text-xs text-slate-400">{store.slug}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-bold text-slate-700">{store.totalOrders || 0} pedidos</p>
+                            <p className="text-xs text-slate-400">{formatCurrency(store.totalRevenue || 0)}</p>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-slate-500">Sem dados suficientes.</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-sm text-slate-500 mt-3">Rankings ocultos.</div>
+            )}
+          </div>
+        )}
+
+        <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <ChartBar size={20} weight="duotone" className="text-slate-700" />
+              <h2 className="text-lg font-bold text-slate-800">Receita por mês</h2>
+            </div>
+            <button
+              onClick={() => toggleSection('charts')}
+              className="px-3 py-1 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 flex items-center gap-1"
+            >
+              <CaretRight weight="bold"
+                size={14}
+                className={`transition-transform ${sectionsOpen.charts ? 'rotate-90' : ''}`}
+              />
+              {sectionsOpen.charts ? 'Ocultar' : 'Mostrar'}
+            </button>
+          </div>
+          {sectionsOpen.charts ? (
+            revenueByMonth.length === 0 ? (
+              <div className="text-sm text-slate-500">Nenhuma receita paga registrada.</div>
+            ) : (
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={revenueByMonth}>
+                    <XAxis dataKey="month" fontSize={12} />
+                    <YAxis fontSize={12} />
+                    <Tooltip formatter={(value) => formatCurrency(value)} />
+                    <Bar dataKey="total" fill="var(--color-primary)" radius={[6, 6, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            )
+          ) : (
+            <div className="text-sm text-slate-500">Grafico oculto.</div>
+          )}
+        </div>
+
+        <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+          <p className="text-sm text-slate-500">
+            Receita paga no periodo selecionado: <span className="font-semibold">{formatCurrency(periodTotal)}</span>
+          </p>
+        </div>
+
+        <div id="stores" className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm overflow-x-auto">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Storefront size={18} weight="duotone" className="text-slate-700" />
+              <h2 className="text-lg font-bold text-slate-800">Lojas e performance</h2>
+            </div>
+            <button
+              onClick={() => toggleSection('stores')}
+              className="px-3 py-1 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 flex items-center gap-1"
+            >
+              <CaretRight weight="bold"
+                size={14}
+                className={`transition-transform ${sectionsOpen.stores ? 'rotate-90' : ''}`}
+              />
+              {sectionsOpen.stores ? 'Ocultar' : 'Mostrar'}
+            </button>
+          </div>
+          {sectionsOpen.stores ? (
+            <>
+              <table className="min-w-full text-sm">
+                <thead className="text-xs uppercase text-slate-400 border-b">
+                  <tr>
+                    <th className="py-2 pr-4 text-left">Loja</th>
+                    <th className="py-2 pr-4 text-left">Plano</th>
+                    <th className="py-2 pr-4 text-left">Status</th>
+                    <th className="py-2 pr-4 text-left">Criada</th>
+                    <th className="py-2 pr-4 text-left">Expira</th>
+                    <th className="py-2 pr-4 text-left">Dias</th>
+                    <th className="py-2 pr-4 text-left">Pedidos</th>
+                    <th className="py-2 pr-4 text-left">Receita pedidos</th>
+                    <th className="py-2 pr-4 text-left">Mais vendido</th>
+                    <th className="py-2 pr-4 text-left">Pagamento</th>
+                    <th className="py-2 text-right">Valor</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {stores.map((store: any) => {
+                    const planName =
+                      store.subscription?.plan?.displayName ||
+                      formatPlanName(store.subscription?.plan?.name || '-');
+                    const planPrice = store.subscription?.plan?.price || 0;
+                    const status = store.subscription?.status || 'PENDING';
+                    const endDate = store.subscription?.endDate;
+                    const remaining = daysUntil(endDate);
+                    const paymentStatus = store.latestPayment?.status || '-';
+                    const ordersCount = store.orderMetrics?.totalOrders || 0;
+                    const ordersRevenue = store.orderMetrics?.totalRevenue || 0;
+                    const topProduct = store.topProduct?.name || '-';
+                    const topProductQty = store.topProduct?.quantity || 0;
+                    return (
+                      <tr key={store.id}>
+                        <td className="py-3 pr-4">
+                          <div className="font-semibold text-slate-700">{store.name}</div>
+                          <div className="text-xs text-slate-400">{store.slug}</div>
+                        </td>
+                        <td className="py-3 pr-4 capitalize">{planName}</td>
+                        <td className="py-3 pr-4">
+                          <span className={`px-2 py-1 rounded-full text-xs font-semibold ${statusStyle(status)}`}>
+                            {status}
+                          </span>
+                        </td>
+                        <td className="py-3 pr-4">{formatDate(store.createdAt)}</td>
+                        <td className="py-3 pr-4">{formatDate(endDate)}</td>
+                        <td className="py-3 pr-4">{remaining}</td>
+                        <td className="py-3 pr-4 font-semibold text-slate-700">{ordersCount}</td>
+                        <td className="py-3 pr-4 text-slate-700">{formatCurrency(ordersRevenue)}</td>
+                        <td className="py-3 pr-4">
+                          <div className="text-slate-700">{topProduct}</div>
+                          {topProductQty ? (
+                            <div className="text-xs text-slate-400">{topProductQty} vendas</div>
+                          ) : null}
+                        </td>
+                        <td className="py-3 pr-4">{paymentStatus}</td>
+                        <td className="py-3 text-right font-semibold text-brand-primary">
+                          {formatCurrency(planPrice)}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+              {stores.length === 0 && (
+                <div className="text-center text-slate-500 py-8">Nenhuma loja encontrada.</div>
+              )}
+            </>
+          ) : (
+            <div className="text-sm text-slate-500">Tabela ocultada.</div>
+          )}
+        </div>
+
+        <div id="payments" className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm overflow-x-auto">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <CreditCard size={20} className="text-slate-700" />
+              <h2 className="text-lg font-bold text-slate-800">Pagamentos recentes</h2>
+            </div>
+            <div className="flex gap-2 items-center">
+              <button
+                onClick={() => toggleSection('payments')}
+                className="px-3 py-2 rounded-lg text-xs font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50 flex items-center gap-1"
+              >
+                <CaretRight weight="bold"
+                  size={14}
+                  className={`transition-transform ${sectionsOpen.payments ? 'rotate-90' : ''}`}
+                />
+                {sectionsOpen.payments ? 'Ocultar' : 'Mostrar'}
+              </button>
+              <button
+                onClick={resetFilters}
+                className="px-3 py-2 rounded-lg text-sm font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50 flex items-center gap-1"
+              >
+                <Trash size={14} weight="duotone" />
+                Limpar filtros
+              </button>
+              <button
+                onClick={exportPaymentsCsv}
+                className="px-3 py-2 rounded-lg text-sm font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50 flex items-center gap-1"
+              >
+                <DownloadSimple size={14} weight="duotone" />
+                Exportar CSV
+              </button>
+            </div>
+          </div>
+          {sectionsOpen.payments ? (
+            <>
+          <div className="flex flex-wrap gap-2 mb-3">
+            <div className="flex items-center px-3 py-2 rounded-lg border border-slate-200 bg-white">
+              <MagnifyingGlass size={16} weight="bold" className="text-slate-400" />
+              <input
+                type="text"
+                value={paymentQuery}
+                onChange={(event) => setPaymentQuery(event.target.value)}
+                placeholder="Buscar por loja, email, providerId..."
+                className="ml-2 bg-transparent outline-none text-sm w-48"
+              />
+            </div>
+            <select
+              value={dateRange}
+              onChange={(event) => setDateRange(event.target.value)}
+              className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none flex items-center gap-2"
+            >
+              <option value="7">Últimos 7 dias</option>
+              <option value="30">Últimos 30 dias</option>
+              <option value="90">Últimos 90 dias</option>
+              <option value="all">Todo período</option>
+            </select>
+            <input
+              type="number"
+              value={minAmount}
+              onChange={(event) => setMinAmount(event.target.value)}
+              placeholder="Min R$"
+              className="w-24 px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none"
+            />
+            <input
+              type="number"
+              value={maxAmount}
+              onChange={(event) => setMaxAmount(event.target.value)}
+              placeholder="Max R$"
+              className="w-24 px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none"
+            />
+            <select
+              value={paymentStatusFilter}
+              onChange={(event) => setPaymentStatusFilter(event.target.value)}
+              className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none"
+            >
+              <option value="all">Status: Todos</option>
+              <option value="PAID">Pago</option>
+              <option value="PENDING">Pendente</option>
+              <option value="FAILED">Falhou</option>
+            </select>
+            <select
+              value={paymentMethodFilter}
+              onChange={(event) => setPaymentMethodFilter(event.target.value)}
+              className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none"
+            >
+              <option value="all">Metodo: Todos</option>
+              <option value="PIX">Pix</option>
+              <option value="CREDIT_CARD">Cartão</option>
+              <option value="BOLETO">Boleto</option>
+            </select>
+            <select
+              value={paymentProviderFilter}
+              onChange={(event) => setPaymentProviderFilter(event.target.value)}
+              className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none"
+            >
+              <option value="all">Provider: Todos</option>
+              <option value="MERCADO_PAGO">Mercado Pago</option>
+              <option value="MOCK">Mock</option>
+            </select>
+          </div>
+          <table className="min-w-full text-sm">
+            <thead className="text-xs uppercase text-slate-400 border-b">
+              <tr>
+                <th className="py-2 pr-4 text-left">Data</th>
+                <th className="py-2 pr-4 text-left">Loja</th>
+                <th className="py-2 pr-4 text-left">Metodo</th>
+                <th className="py-2 pr-4 text-left">Status</th>
+                <th className="py-2 pr-4 text-left">Provider</th>
+                <th className="py-2 text-right">Valor</th>
+                <th className="py-2 text-right">Acoes</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {paginatedPayments.map((payment: any) => {
+                const latestEvent = paymentEventByPayment.get(payment.id);
+                const isOpen = openPaymentPayloadId === payment.id;
+                return (
+                  <React.Fragment key={payment.id}>
+                    <tr>
+                      <td className="py-3 pr-4">{formatDate(payment.createdAt)}</td>
+                      <td className="py-3 pr-4">
+                        <div className="font-semibold text-slate-700">{payment.store?.name || '-'}</div>
+                        <div className="text-xs text-slate-400">{payment.store?.slug || '-'}</div>
+                      </td>
+                      <td className="py-3 pr-4">
+                        {(() => {
+                          const paymentMeta = getPaymentMethodMeta(payment.method);
+                          return (
+                            <span className="inline-flex items-center gap-2 text-slate-700">
+                              {paymentMeta.icon && (
+                                <img
+                                  src={paymentMeta.icon}
+                                  alt={paymentMeta.label}
+                                  className="h-4 w-4 object-contain"
+                                />
+                              )}
+                              {paymentMeta.label}
+                            </span>
+                          );
+                        })()}
+                      </td>
+                      <td className="py-3 pr-4">
+                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${statusBadge(payment.status)}`}>
+                          {payment.status}
+                        </span>
+                      </td>
+                      <td className="py-3 pr-4">
+                        {(() => {
+                          const providerMeta = getPaymentProviderMeta(payment.provider);
+                          return (
+                            <span className="inline-flex items-center gap-2 text-slate-700">
+                              {providerMeta.icon && (
+                                <img
+                                  src={providerMeta.icon}
+                                  alt={providerMeta.label}
+                                  className="h-4 w-4 object-contain"
+                                />
+                              )}
+                              {providerMeta.label}
+                            </span>
+                          );
+                        })()}
+                      </td>
+                      <td className="py-3 text-right font-semibold text-brand-primary">
+                        {formatCurrency(payment.amount || 0)}
+                      </td>
+                      <td className="py-3 pl-4 text-right space-x-2">
+                        <button
+                          onClick={() =>
+                            setOpenPaymentPayloadId(isOpen ? '' : payment.id)
+                          }
+                          className="px-3 py-1 rounded-lg text-xs font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50"
+                          disabled={!latestEvent?.payload}
+                        >
+                          {isOpen ? 'Fechar payload' : 'Ver payload'}
+                        </button>
+                        <button
+                          onClick={() => handleReprocess(payment.id, payment.providerId)}
+                          disabled={reprocessingId === payment.id || payment.provider !== 'MERCADO_PAGO'}
+                          className="px-3 py-1 rounded-lg text-xs font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-60"
+                        >
+                          {reprocessingId === payment.id ? 'Reprocessando...' : 'Reprocessar'}
+                        </button>
+                      </td>
+                    </tr>
+                    {isOpen && latestEvent?.payload && (
+                      <tr>
+                        <td colSpan={7} className="pb-4">
+                          <div className="bg-slate-900 text-slate-100 text-xs p-4 rounded-xl overflow-auto max-h-60">
+                            <pre>{JSON.stringify(latestEvent.payload, null, 2)}</pre>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </tbody>
+          </table>
+          {payments.length === 0 && (
+            <div className="text-center text-slate-500 py-8">Nenhum pagamento encontrado.</div>
+          )}
+          {filteredPayments.length > PAYMENTS_PER_PAGE && (
+            <div className="flex items-center justify-between mt-4 text-sm text-slate-600">
+              <span>
+                Pagina {paymentsPage} de {totalPages}
+              </span>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setPaymentsPage((prev) => Math.max(1, prev - 1))}
+                  className="px-3 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 flex items-center gap-1"
+                  disabled={paymentsPage === 1}
+                >
+                  <CaretLeft weight="bold" size={16} />
+                </button>
+                <button
+                  onClick={() => setPaymentsPage((prev) => Math.min(totalPages, prev + 1))}
+                  className="px-3 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 flex items-center gap-1"
+                  disabled={paymentsPage === totalPages}
+                >
+                  <CaretRight weight="bold" size={16} />
+                </button>
+              </div>
+            </div>
+          )}
+          <div className="mt-3 text-sm text-slate-600">
+            Total filtrado: <span className="font-semibold">{formatCurrency(filteredTotal)}</span>
+          </div>
+          </>
+          ) : (
+            <div className="text-sm text-slate-500">Tabela de pagamentos oculta.</div>
+          )}
+        </div>
+
+        <div id="logs" className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm overflow-x-auto">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Funnel size={18} weight="duotone" className="text-slate-700" />
+              <h2 className="text-lg font-bold text-slate-800">Logs de acesso</h2>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => toggleSection('logs')}
+                className="px-3 py-2 rounded-lg text-xs font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50 flex items-center gap-1"
+              >
+                <CaretRight weight="bold"
+                  size={14}
+                  className={`transition-transform ${sectionsOpen.logs ? 'rotate-90' : ''}`}
+                />
+                {sectionsOpen.logs ? 'Ocultar' : 'Mostrar'}
+              </button>
+              <button
+                onClick={() => loadAccessLogs(accessLogsPage)}
+                className="px-3 py-2 rounded-lg text-sm font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50 flex items-center gap-1"
+              >
+                <ArrowClockwise size={14} weight="duotone" />
+                Atualizar
+              </button>
+            </div>
+          </div>
+          {sectionsOpen.logs ? (
+            <>
+          <div className="flex flex-wrap gap-2 mb-3">
+            <div className="flex items-center px-3 py-2 rounded-lg border border-slate-200 bg-white">
+              <MagnifyingGlass size={16} weight="bold" className="text-slate-400" />
+              <input
+                type="text"
+                value={accessLogQuery}
+                onChange={(event) => setAccessLogQuery(event.target.value)}
+                placeholder="Buscar rota ou user-agent..."
+                className="ml-2 bg-transparent outline-none text-sm w-48"
+              />
+            </div>
+            <select
+              value={accessLogRole}
+              onChange={(event) => setAccessLogRole(event.target.value)}
+              className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none"
+            >
+              <option value="all">Role: Todas</option>
+              <option value="SUPER_ADMIN">Super admin</option>
+              <option value="ADMIN">Admin</option>
+              <option value="CHURRASQUEIRO">Churrasqueiro</option>
+            </select>
+            <select
+              value={accessLogMethod}
+              onChange={(event) => setAccessLogMethod(event.target.value)}
+              className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none"
+            >
+              <option value="all">Metodo: Todos</option>
+              <option value="GET">GET</option>
+              <option value="POST">POST</option>
+              <option value="PATCH">PATCH</option>
+              <option value="PUT">PUT</option>
+              <option value="DELETE">DELETE</option>
+            </select>
+            <select
+              value={accessLogStatus}
+              onChange={(event) => setAccessLogStatus(event.target.value)}
+              className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none"
+            >
+              <option value="all">Status: Todos</option>
+              <option value="200">200</option>
+              <option value="201">201</option>
+              <option value="204">204</option>
+              <option value="400">400</option>
+              <option value="401">401</option>
+              <option value="403">403</option>
+              <option value="404">404</option>
+              <option value="500">500</option>
+            </select>
+            <select
+              value={accessLogStore}
+              onChange={(event) => setAccessLogStore(event.target.value)}
+              className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none"
+            >
+              <option value="all">Loja: Todas</option>
+              {stores.map((store: any) => (
+                <option key={store.id} value={store.id}>
+                  {store.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <table className="min-w-full text-sm">
+            <thead className="text-xs uppercase text-slate-400 border-b">
+              <tr>
+                <th className="py-2 pr-4 text-left">Data</th>
+                <th className="py-2 pr-4 text-left">Role</th>
+                <th className="py-2 pr-4 text-left">Usuário</th>
+                <th className="py-2 pr-4 text-left">Loja</th>
+                <th className="py-2 pr-4 text-left">Metodo</th>
+                <th className="py-2 pr-4 text-left">Rota</th>
+                <th className="py-2 pr-4 text-left">Status</th>
+                <th className="py-2 pr-4 text-left">IP</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {accessLogs.map((entry: any) => (
+                <tr key={entry.id}>
+                  <td className="py-3 pr-4">{formatDate(entry.createdAt)}</td>
+                  <td className="py-3 pr-4">{entry.role}</td>
+                  <td className="py-3 pr-4 text-xs text-slate-500">{entry.userId}</td>
+                  <td className="py-3 pr-4">{entry.storeId ? storeNameById.get(entry.storeId) || '-' : '-'}</td>
+                  <td className="py-3 pr-4">{entry.method}</td>
+                  <td className="py-3 pr-4 text-xs text-slate-500">{entry.path}</td>
+                  <td className="py-3 pr-4">{entry.status}</td>
+                  <td className="py-3 pr-4 text-xs text-slate-500">{entry.ipAddress || '-'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {accessLogsLoading && <div className="text-center text-slate-500 py-6">Carregando...</div>}
+          {!accessLogsLoading && accessLogs.length === 0 && (
+            <div className="text-center text-slate-500 py-8">Nenhum log encontrado.</div>
+          )}
+          {accessLogsTotal > 25 && (
+            <div className="flex items-center justify-between mt-4 text-sm text-slate-600">
+              <span>
+                Pagina {accessLogsPage} de {accessLogsTotalPages}
+              </span>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setAccessLogsPage((prev) => Math.max(1, prev - 1))}
+                  className="px-3 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 flex items-center gap-1"
+                  disabled={accessLogsPage === 1}
+                >
+                  <CaretLeft weight="bold" size={16} />
+                </button>
+                <button
+                  onClick={() => setAccessLogsPage((prev) => Math.min(accessLogsTotalPages, prev + 1))}
+                  className="px-3 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 flex items-center gap-1"
+                  disabled={accessLogsPage === accessLogsTotalPages}
+                >
+                  <CaretRight weight="bold" size={16} />
+                </button>
+              </div>
+            </div>
+          )}
+          <div className="mt-3 text-sm text-slate-600">
+            Total de logs: <span className="font-semibold">{accessLogsTotal}</span>
+          </div>
+          </>
+          ) : (
+            <div className="text-sm text-slate-500">Logs ocultos.</div>
+          )}
+        </div>
+
+        <div id="events" className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm overflow-x-auto">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <ArrowClockwise size={20} weight="duotone" className="text-slate-700" />
+              <h2 className="text-lg font-bold text-slate-800">Eventos de pagamento</h2>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => toggleSection('events')}
+                className="px-3 py-2 rounded-lg text-xs font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50 flex items-center gap-1"
+              >
+                <CaretRight weight="bold"
+                  size={14}
+                  className={`transition-transform ${sectionsOpen.events ? 'rotate-90' : ''}`}
+                />
+                {sectionsOpen.events ? 'Ocultar' : 'Mostrar'}
+              </button>
+              <button
+                onClick={exportEventsCsv}
+                className="px-3 py-2 rounded-lg text-sm font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50 flex items-center gap-1"
+              >
+                <DownloadSimple size={14} weight="duotone" />
+                Exportar CSV
+              </button>
+            </div>
+          </div>
+          {sectionsOpen.events ? (
+            <>
+          <div className="flex flex-wrap gap-2 mb-3">
+            <select
+              value={eventStoreFilter}
+              onChange={(event) => setEventStoreFilter(event.target.value)}
+              className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none"
+            >
+              <option value="all">Todas as lojas</option>
+              {stores.map((store: any) => (
+                <option key={store.id} value={store.id}>
+                  {store.name}
+                </option>
+              ))}
+            </select>
+            <select
+              value={eventStatusFilter}
+              onChange={(event) => setEventStatusFilter(event.target.value)}
+              className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none"
+            >
+              <option value="all">Status: Todos</option>
+              <option value="approved">Aprovado</option>
+              <option value="pending">Pendente</option>
+              <option value="rejected">Rejeitado</option>
+              <option value="cancelled">Cancelado</option>
+              <option value="charged_back">Chargeback</option>
+              <option value="refunded">Reembolsado</option>
+              <option value="failed">Falhou</option>
+            </select>
+          </div>
+          <table className="min-w-full text-sm">
+            <thead className="text-xs uppercase text-slate-400 border-b">
+              <tr>
+                <th className="py-2 pr-4 text-left">Data</th>
+                <th className="py-2 pr-4 text-left">Pagamento</th>
+                <th className="py-2 pr-4 text-left">Status</th>
+                <th className="py-2 pr-4 text-left">Provider</th>
+                <th className="py-2 pr-4 text-left">Payload</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {filteredEvents.map((event: any) => (
+                <tr key={event.id}>
+                  <td className="py-3 pr-4">{formatDate(event.createdAt)}</td>
+                  <td className="py-3 pr-4">{event.payment?.id || '-'}</td>
+                  <td className="py-3 pr-4">
+                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${eventBadge(event.status)}`}>
+                      {event.status}
+                    </span>
+                  </td>
+                  <td className="py-3 pr-4">
+                    {(() => {
+                      const providerMeta = getPaymentProviderMeta(event.provider);
+                      return (
+                        <span className="inline-flex items-center gap-2 text-slate-700">
+                          {providerMeta.icon && (
+                            <img
+                              src={providerMeta.icon}
+                              alt={providerMeta.label}
+                              className="h-4 w-4 object-contain"
+                            />
+                          )}
+                          {providerMeta.label}
+                        </span>
+                      );
+                    })()}
+                  </td>
+                  <td className="py-3 pr-4">
+                    <button
+                      onClick={() => setSelectedEventPayload(event.payload || {})}
+                      className="text-xs font-semibold text-brand-primary hover:underline flex items-center gap-1"
+                    >
+                      <Eye size={14} />
+                      Ver payload
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {eventsLoading && <div className="text-center text-slate-500 py-6">Carregando...</div>}
+          {!eventsLoading && filteredEvents.length === 0 && (
+            <div className="text-center text-slate-500 py-8">Nenhum evento encontrado.</div>
+          )}
+          <div className="flex items-center justify-between mt-4 text-sm text-slate-600">
+            <span>Pagina {eventsPage}</span>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setEventsPage((prev) => Math.max(1, prev - 1))}
+                className="px-3 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 flex items-center gap-1"
+                disabled={eventsPage === 1}
+              >
+                <CaretLeft weight="bold" size={16} />
+              </button>
+              <button
+                onClick={() => setEventsPage((prev) => prev + 1)}
+                className="px-3 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 flex items-center gap-1"
+                disabled={filteredEvents.length < EVENTS_PAGE_SIZE}
+              >
+                <CaretRight weight="bold" size={16} />
+              </button>
+            </div>
+          </div>
+          </>
+          ) : (
+            <div className="text-sm text-slate-500">Eventos ocultos.</div>
+          )}
+        </div>
+
+      {selectedEventPayload && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-3xl p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold text-slate-800">Payload do webhook</h3>
+              <button
+                onClick={() => setSelectedEventPayload(null)}
+                className="px-3 py-1 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50"
+              >
+                Fechar
+              </button>
+            </div>
+            <pre className="bg-slate-900 text-slate-100 text-xs p-4 rounded-xl overflow-auto max-h-[60vh]">
+              {JSON.stringify(selectedEventPayload, null, 2)}
+            </pre>
+          </div>
+        </div>
+      )}
+    </AdminLayout>
+  );
+}

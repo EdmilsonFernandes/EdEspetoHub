@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title>Espetinho Datony</title>
+  <desc>Minimal skewer logo for Espetinho Datony</desc>
+  <defs>
+    <linearGradient id="skewer" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ef4444" />
+      <stop offset="100%" stop-color="#b91c1c" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="#111827" />
+  <rect x="18" y="14" width="28" height="36" rx="6" fill="url(#skewer)" />
+  <path d="M22 22h20M22 32h20M22 42h20" stroke="#fef3c7" stroke-width="3" stroke-linecap="round" />
+  <circle cx="32" cy="54" r="3" fill="#fef3c7" />
+</svg>

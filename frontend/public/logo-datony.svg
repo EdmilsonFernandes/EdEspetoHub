@@ -1,0 +1,26 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- Fundo branco circular -->
+  <circle cx="256" cy="256" r="245" fill="white" stroke="#b30000" stroke-width="22"></circle>
+
+  <!-- Linha curva (espeto estilizado) -->
+  <path d="M110 260 C180 230, 300 230, 390 170" stroke="#b30000" stroke-width="10" fill="none" stroke-linecap="round"></path>
+
+  <!-- Garfo / chama estilizada -->
+  <path d="M350 150
+           C360 130, 380 130, 390 150
+           C380 135, 360 135, 350 150 Z" fill="#b30000"></path>
+
+  <path d="M365 155
+           C375 135, 395 135, 405 155
+           C395 140, 375 140, 365 155 Z" fill="#b30000"></path>
+
+  <!-- Texto Espetinho -->
+  <text x="50%" y="300" text-anchor="middle" font-family="Georgia, serif" font-size="60" fill="#000000">
+    Espetinho
+  </text>
+  <!-- Texto Datony -->
+  <text x="50%" y="360" text-anchor="middle" font-family="Georgia, serif" font-size="65" fill="#b30000" font-weight="bold">
+    Datony
+  </text>
+</svg>

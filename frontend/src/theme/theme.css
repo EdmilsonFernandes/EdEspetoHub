@@ -1,0 +1,30 @@
+:root {
+  --primary-color: #b91c1c;
+  --secondary-color: #111827;
+  --text-color: #0f172a;
+  --bg-color: #f8fafc;
+}
+
+body {
+  background: var(--bg-color);
+  color: var(--text-color);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.button {
+  background: var(--primary-color);
+  color: #fff;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.badge-secondary {
+  background: var(--secondary-color);
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 12px;
+  display: inline-block;
+}

@@ -1,0 +1,159 @@
+// @ts-nocheck
+import React from "react";
+import { CheckCircle, QrCode, ArrowLeft, CreditCard } from "@phosphor-icons/react";
+import { formatPaymentMethod } from "../../utils/format";
+import { getPaymentMethodMeta } from "../../utils/paymentAssets";
+
+// Chave Pix fixa (mock)
+const PIX_KEY_MOCK =
+  "00020126580014BR.GOV.BCB.PIX0136123e4567-e89b-12d3-a456-426614174000520400005303986540510.005802BR5913EspetinhoDatony6008SaoPaulo62070503***6304";
+
+// Componente responsável por exibir o pagamento (Pix ou retirada)
+const PaymentSummary = ({ paymentMethod, pixKey, phone }) => {
+  if (paymentMethod === "pix") {
+    const qrData = pixKey || phone || PIX_KEY_MOCK;
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(
+      qrData
+    )}`;
+
+
+    return (
+      <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 w-full mb-8">
+        <div className="flex flex-col items-center gap-3 mb-4 text-center">
+          <div className="p-3 bg-gray-50 rounded-full">
+            <QrCode size={24} weight="duotone" className="text-gray-700" />
+          </div>
+          <span className="font-bold text-gray-700">Pix para pagamento</span>
+          <p className="text-xs text-gray-500">
+            Use o QR Code ou copie a chave abaixo.
+          </p>
+        </div>
+
+        <div className="flex justify-center mb-4">
+          <img
+            src={qrUrl}
+            alt="QR Code Pix"
+            className="w-48 h-48 rounded-lg border"
+          />
+        </div>
+
+        <div className="bg-gray-50 p-4 rounded-xl font-mono text-xs text-gray-700 break-all select-all border border-gray-200">
+          {qrData}
+        </div>
+
+        <button
+          onClick={() => navigator.clipboard.writeText(qrData)}
+          className="w-full mt-4 py-3 bg-brand-primary text-white rounded-xl font-bold text-sm hover:opacity-90 transition-colors"
+        >
+          Copiar chave Pix
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 w-full mb-8 text-left">
+      <h3 className="font-bold text-gray-800 mb-2">Pagamento na entrega/retirada</h3>
+      <p className="text-sm text-gray-600 flex flex-wrap items-center gap-2">
+        Forma registrada:
+        {(() => {
+          const methodMeta = getPaymentMethodMeta(paymentMethod);
+          return (
+            <span className="font-bold uppercase inline-flex items-center gap-2">
+              {methodMeta.icon && (
+                <img
+                  src={methodMeta.icon}
+                  alt={methodMeta.label}
+                  className="h-4 w-4 object-contain"
+                />
+              )}
+              {formatPaymentMethod(paymentMethod)}
+            </span>
+          );
+        })()}
+        . Quando seu pedido estiver pronto, finalize o pagamento no local.
+      </p>
+    </div>
+  );
+};
+
+const PaymentBadge = ({ paymentMethod }) => {
+  const method = (paymentMethod || "").toLowerCase();
+  const isPix = method === "pix";
+  const isDebit = method === "debito";
+  const label = formatPaymentMethod(paymentMethod);
+  const methodMeta = getPaymentMethodMeta(paymentMethod);
+  const tone = isPix
+    ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+    : isDebit
+    ? "bg-sky-50 text-sky-700 border-sky-200"
+    : "bg-indigo-50 text-indigo-700 border-indigo-200";
+
+  return (
+    <div className={`inline-flex items-center gap-2 px-3 py-2 rounded-full border text-xs font-semibold ${tone}`}>
+      {methodMeta.icon ? (
+        <img src={methodMeta.icon} alt={label} className="h-4 w-4 object-contain" />
+      ) : (
+        <CreditCard size={14} weight="duotone" />
+      )}
+      <span>Pagamento: {label}</span>
+    </div>
+  );
+};
+
+// Tela final de sucesso do pedido
+export const SuccessView = ({
+  orderType,
+  paymentMethod,
+  onNewOrder,
+  pixKey,
+  phone,
+  table,
+  orderId,
+  onTrackOrder,
+}) => {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[80vh] text-center px-6 animate-in zoom-in">
+      <div className="w-24 h-24 bg-brand-primary-soft rounded-full flex items-center justify-center mb-6 text-brand-primary shadow-sm">
+        <CheckCircle size={48} weight="duotone" />
+      </div>
+
+      <h2 className="text-3xl font-black text-gray-800 mb-2">
+        Pedido Realizado!
+      </h2>
+
+      <p className="text-gray-500 mb-8 max-w-xs mx-auto leading-relaxed">
+        {orderType === "delivery"
+          ? "Recebemos seu pedido de entrega. Avisaremos quando sair para entrega."
+          : orderType === "table"
+          ? `Seu pedido foi recebido e seguirá para a produção. Mesa ${table || "-"}.`
+          : "Seu pedido foi recebido e seguirá para a produção."}
+      </p>
+
+      <PaymentBadge paymentMethod={paymentMethod} />
+
+      <PaymentSummary
+        paymentMethod={paymentMethod}
+        pixKey={pixKey}
+        phone={phone}
+      />
+
+      <div className="flex flex-col sm:flex-row gap-3">
+        {orderId && (
+          <button
+            onClick={onTrackOrder}
+            className="flex items-center justify-center gap-2 text-white bg-emerald-600 font-bold px-6 py-3 rounded-xl transition-colors hover:opacity-90"
+          >
+            <CheckCircle size={18} weight="duotone" /> Acompanhar pedido
+          </button>
+        )}
+        <button
+          onClick={onNewOrder}
+          className="flex items-center justify-center gap-2 text-white bg-brand-primary font-bold px-6 py-3 rounded-xl transition-colors hover:opacity-90"
+        >
+          <ArrowLeft size={18} weight="duotone" /> Voltar para os pedidos
+        </button>
+      </div>
+    </div>
+  );
+};
