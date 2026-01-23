@@ -138,57 +138,79 @@ export function PortfolioPage() {
       active = false;
     };
 
-    slugs.forEach((slug) => {
-      if (menuBySlug[slug]) return;
+    const buildFallbackItems = (products: any[]) =>
+      (products || [])
+        .slice(0, 3)
+        .map((product: { promoPrice?: number; promoActive?: boolean; price?: number; name?: string }) => {
+          const promoPrice = product?.promoPrice != null ? Number(product.promoPrice) : null;
+          const price = product?.promoActive && promoPrice && promoPrice > 0
+            ? promoPrice
+            : Number(product?.price) || 0;
+          return { name: product?.name || "Produto", price };
+        });
+
+    const loadMenu = async (slug: string) => {
       setMenuBySlug((prev) => ({
         ...prev,
-        [slug]: { items: [], loading: true },
+        [slug]: prev[slug] ?? { items: [], loading: true },
       }));
-      orderService
-        .fetchHighlightsBySlug(slug)
-        .then((highlights) => {
-          if (!active) return;
-          const items = (highlights || []).slice(0, 3).map((item: { name?: string; price?: number }) => ({
+
+      try {
+        const highlights = await orderService.fetchHighlightsBySlug(slug);
+        const items = (Array.isArray(highlights) ? highlights : [])
+          .slice(0, 3)
+          .map((item: { name?: string; price?: number }) => ({
             name: item?.name || "Produto",
             price: Number(item?.price) || 0,
           }));
-          if (items.length) {
+
+        if (items.length) {
+          if (active) {
             setMenuBySlug((prev) => ({
               ...prev,
               [slug]: { items, loading: false },
             }));
-            return;
           }
-          return productService.listPublicBySlug(slug).then((products: any[]) => {
-            if (!active) return;
-            const fallbackItems = (products || [])
-              .slice(0, 3)
-              .map((product: { promoPrice?: number; promoActive?: boolean; price?: number; name?: string }) => {
-                const promoPrice = product?.promoPrice != null ? Number(product.promoPrice) : null;
-                const price = product?.promoActive && promoPrice && promoPrice > 0
-                  ? promoPrice
-                  : Number(product?.price) || 0;
-                return { name: product?.name || "Produto", price };
-              });
+          return;
+        }
+
+        const products = await productService.listPublicBySlug(slug);
+        const fallbackItems = buildFallbackItems(products);
+        if (active) {
+          setMenuBySlug((prev) => ({
+            ...prev,
+            [slug]: { items: fallbackItems, loading: false },
+          }));
+        }
+      } catch (error) {
+        if (!active) return;
+        try {
+          const products = await productService.listPublicBySlug(slug);
+          const fallbackItems = buildFallbackItems(products);
+          if (active) {
             setMenuBySlug((prev) => ({
               ...prev,
               [slug]: { items: fallbackItems, loading: false },
             }));
-          });
-        })
-        .catch(() => {
+          }
+        } catch {
           if (!active) return;
           setMenuBySlug((prev) => ({
             ...prev,
             [slug]: { items: [], loading: false },
           }));
-        });
+        }
+      }
+    };
+
+    slugs.forEach((slug) => {
+      loadMenu(slug);
     });
 
     return () => {
       active = false;
     };
-  }, [stores, menuBySlug]);
+  }, [stores]);
 
   const filteredStores = useMemo(() => {
     const normalized = query.trim().toLowerCase();
