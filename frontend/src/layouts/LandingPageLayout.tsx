@@ -67,6 +67,13 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                 <span className="hidden sm:inline">Portfólio</span>
                 <span className="sm:hidden">Portfólio</span>
               </button>
+              <a
+                href="/#guia-usuario"
+                className="px-3 py-2 sm:px-4 text-sm rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors"
+              >
+                <span className="hidden sm:inline">Guia</span>
+                <span className="sm:hidden">Guia</span>
+              </a>
               <button
                 onClick={() => navigate('/admin')}
                 className="px-3 py-2 sm:px-4 text-sm rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all"
