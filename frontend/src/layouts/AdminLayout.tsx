@@ -42,16 +42,25 @@ export function AdminLayout({
             <div className="mx-auto max-w-md bg-white/90 backdrop-blur rounded-full border border-slate-200 shadow-md px-3 py-2 flex items-center justify-between gap-3">
               <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
                 <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                Modo foco da fila
+                Modo foco ativo
               </div>
-              <button
-                type="button"
-                onClick={handleToggleHeader}
-                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900 text-white text-xs font-semibold shadow-sm hover:opacity-90 transition-all hover:-translate-y-0.5 active:scale-95"
-              >
-                <CaretDown size={14} weight="duotone" className="rotate-180" />
-                Mostrar painel
-              </button>
+              <div className="flex items-center rounded-full bg-slate-100 border border-slate-200 p-0.5 text-[11px] font-semibold">
+                <button
+                  type="button"
+                  className="px-3 py-1.5 rounded-full bg-slate-900 text-white shadow-sm"
+                  title="Modo foco da fila"
+                >
+                  Fila foco
+                </button>
+                <button
+                  type="button"
+                  onClick={handleToggleHeader}
+                  className="px-3 py-1.5 rounded-full text-slate-600 hover:bg-white transition flex items-center gap-1.5"
+                >
+                  <CaretDown size={14} weight="duotone" className="rotate-180" />
+                  Mostrar painel
+                </button>
+              </div>
             </div>
           </div>
         )}

@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { SignOut, Globe, InstagramLogo } from '@phosphor-icons/react';
+import { SignOut, Globe, InstagramLogo, Sparkle } from '@phosphor-icons/react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -179,20 +179,30 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
         />
 
         {onToggleHeader && (
-          <button
-            type="button"
-            onClick={() => {
-              setShowMobileDetails(false);
-              if (typeof window !== 'undefined') {
-                localStorage.setItem('adminHeader:details', 'false');
-              }
-              onToggleHeader();
-            }}
-            className="px-3 py-2 rounded-lg text-[11px] sm:text-xs font-semibold bg-white/15 hover:bg-white/25 transition hover:-translate-y-0.5 active:scale-95 flex items-center gap-1.5 text-center"
-            title="Ocultar topo"
-          >
-            <span className="leading-tight">Ocultar topo</span>
-          </button>
+          <div className="flex items-center rounded-full bg-white/10 border border-white/20 p-0.5 text-[11px] sm:text-xs font-semibold">
+            <button
+              type="button"
+              className="px-3 py-1.5 rounded-full bg-white/20 text-white shadow-sm"
+              title="Painel"
+            >
+              Painel
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setShowMobileDetails(false);
+                if (typeof window !== 'undefined') {
+                  localStorage.setItem('adminHeader:details', 'false');
+                }
+                onToggleHeader();
+              }}
+              className="px-3 py-1.5 rounded-full text-white/80 hover:text-white hover:bg-white/15 transition flex items-center gap-1.5"
+              title="Modo foco da fila"
+            >
+              <Sparkle size={12} weight="duotone" />
+              Modo foco
+            </button>
+          </div>
         )}
 
         {/* Logout */}
