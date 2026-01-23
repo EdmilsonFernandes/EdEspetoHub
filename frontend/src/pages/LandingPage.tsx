@@ -991,7 +991,7 @@ export function LandingPage() {
                       <img
                         src={shot.image}
                         alt={shot.title}
-                        className="h-16 w-24 object-cover rounded-xl"
+                        className="h-12 w-20 sm:h-16 sm:w-24 object-cover rounded-xl"
                         loading="lazy"
                       />
                     </button>
