@@ -280,6 +280,69 @@ export function LandingPage() {
 
       <Hero />
 
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
+        <div className="grid lg:grid-cols-[1.2fr_0.8fr] gap-8">
+          <div>
+            <p className="text-xs uppercase tracking-[0.3em] text-red-500 font-bold">Como funciona</p>
+            <h2 className="text-3xl sm:text-4xl font-black text-gray-900 mt-3">
+              Em 3 passos, sua operação roda sozinha
+            </h2>
+            <p className="text-base sm:text-lg text-gray-600 mt-3 max-w-xl">
+              Você cria, publica e começa a receber pedidos no mesmo dia. O cliente acompanha e o churrasqueiro recebe tudo organizado.
+            </p>
+            <div className="mt-6 space-y-4">
+              {[
+                {
+                  title: 'Crie sua loja',
+                  desc: 'Cadastre dados básicos, escolha cores e publique seu link.',
+                },
+                {
+                  title: 'Monte o cardápio',
+                  desc: 'Adicione produtos, fotos e promoções em minutos.',
+                },
+                {
+                  title: 'Receba pedidos',
+                  desc: 'Fila do churrasqueiro atualiza sozinha e o cliente acompanha.',
+                },
+              ].map((step, index) => (
+                <div key={step.title} className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-full bg-red-500 text-white font-black flex items-center justify-center shadow-sm">
+                    {index + 1}
+                  </div>
+                  <div>
+                    <p className="text-base font-semibold text-gray-900">{step.title}</p>
+                    <p className="text-sm text-gray-600">{step.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-6 flex flex-wrap gap-3 text-xs text-slate-600">
+              <span className="px-3 py-1 rounded-full bg-slate-50 border border-slate-200">Sem cartão</span>
+              <span className="px-3 py-1 rounded-full bg-slate-50 border border-slate-200">Cancelamento fácil</span>
+              <span className="px-3 py-1 rounded-full bg-slate-50 border border-slate-200">Suporte humano</span>
+            </div>
+          </div>
+          <div className="rounded-[28px] border border-slate-200 bg-gradient-to-br from-white via-white to-rose-50 p-6 shadow-[0_20px_70px_-45px_rgba(15,23,42,0.5)]">
+            <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Para quem é</p>
+            <h3 className="text-xl font-black text-gray-900 mt-3">Feito para quem vende rápido</h3>
+            <p className="text-sm text-gray-600 mt-2">
+              Espetos, porções, bebidas e combos. Ideal para operações com fluxo alto.
+            </p>
+            <div className="mt-5 grid grid-cols-2 gap-3 text-sm font-semibold text-slate-700">
+              {['Churrasqueiros', 'Quiosques', 'Food trucks', 'Restaurantes'].map((label) => (
+                <div
+                  key={label}
+                  className="rounded-xl border border-slate-200 bg-white px-3 py-2 flex items-center gap-2 shadow-sm"
+                >
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                  {label}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section id="product-showcase" className="bg-gradient-to-br from-rose-50 via-white to-amber-50 border-y border-rose-100 py-16 sm:py-20">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10">
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
