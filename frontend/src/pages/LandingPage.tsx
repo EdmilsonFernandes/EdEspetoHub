@@ -11,6 +11,9 @@ import {
   ChefHat,
   ChartBar,
   Sparkle,
+  Storefront,
+  Truck,
+  ForkKnife,
 } from '@phosphor-icons/react';
 import { platformService } from '../services/platformService';
 import { planService } from '../services/planService';
@@ -34,6 +37,12 @@ export function LandingPage() {
   const [lightbox, setLightbox] = useState(null);
   const touchStartRef = useRef({ x: 0, y: 0 });
   const touchActiveRef = useRef(false);
+  const audienceItems = [
+    { label: 'Churrasqueiros', icon: ChefHat, tone: 'bg-amber-100 text-amber-700' },
+    { label: 'Quiosques', icon: Storefront, tone: 'bg-emerald-100 text-emerald-700' },
+    { label: 'Food trucks', icon: Truck, tone: 'bg-sky-100 text-sky-700' },
+    { label: 'Restaurantes', icon: ForkKnife, tone: 'bg-rose-100 text-rose-700' },
+  ];
   const guideSteps = [
     {
       title: 'Crie sua loja',
@@ -438,13 +447,15 @@ export function LandingPage() {
               Espetos, porções, bebidas e combos. Ideal para operações com fluxo alto.
             </p>
             <div className="mt-5 grid grid-cols-2 gap-3 text-sm font-semibold text-slate-700">
-              {['Churrasqueiros', 'Quiosques', 'Food trucks', 'Restaurantes'].map((label) => (
+              {audienceItems.map((item) => (
                 <div
-                  key={label}
+                  key={item.label}
                   className="rounded-xl border border-slate-200 bg-white px-3 py-2 flex items-center gap-2 shadow-sm"
                 >
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                  {label}
+                  <span className={`inline-flex h-9 w-9 items-center justify-center rounded-xl ${item.tone}`}>
+                    <item.icon size={18} weight="fill" />
+                  </span>
+                  <span>{item.label}</span>
                 </div>
               ))}
             </div>
