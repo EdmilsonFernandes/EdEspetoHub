@@ -395,6 +395,10 @@ export function PaymentPage() {
                         type="button"
                         onClick={async () => {
                           if (!paymentId) return;
+                          if (!selectedPlanId) {
+                            setError('Selecione um plano antes de gerar o pagamento.');
+                            return;
+                          }
                           setRenewing(true);
                           setError('');
                           try {
@@ -411,8 +415,8 @@ export function PaymentPage() {
                             setRenewing(false);
                           }
                         }}
-                        className="px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:opacity-90"
-                        disabled={renewing}
+                        className="px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
+                        disabled={renewing || !selectedPlanId}
                       >
                         {renewing ? 'Gerando...' : 'Gerar novo pagamento'}
                       </button>
