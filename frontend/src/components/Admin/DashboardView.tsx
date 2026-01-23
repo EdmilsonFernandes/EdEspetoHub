@@ -650,6 +650,9 @@ export const DashboardView = ({
               >
                 {qrCopied ? 'Link copiado!' : 'Copiar link UTM'}
               </button>
+              <p className="text-[10px] text-slate-400 break-all">
+                {utmUrl || storeUrl}
+              </p>
             </div>
           </div>
         </div>
