@@ -523,8 +523,8 @@ export const DashboardView = ({
 
       </div>
 
-      <div className="grid xl:grid-cols-[1.4fr_0.6fr] gap-6">
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+      <div className="grid lg:grid-cols-[1.4fr_0.6fr] gap-6">
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 lg:col-span-2">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Divulgação</p>
@@ -625,7 +625,7 @@ export const DashboardView = ({
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 lg:col-start-2">
           <div className="flex justify-between items-start">
             <div>
               <p className="text-gray-500 text-sm font-bold uppercase">
