@@ -61,6 +61,10 @@ export function AdminRenewal() {
 
   const handleRenew = async () => {
     if (!storeId) return;
+    if (!selectedPlanId) {
+      setError('Selecione um plano antes de gerar a renovação.');
+      return;
+    }
     setIsSubmitting(true);
     setError('');
     try {
@@ -166,7 +170,9 @@ export function AdminRenewal() {
                     key={planKey}
                     onClick={() => plan?.id && setSelectedPlanId(plan.id)}
                     disabled={isDisabled}
-                    className={`border rounded-2xl p-4 text-left transition-all relative ${isSelected
+                    className={`border rounded-2xl p-4 text-left transition-all relative ${
+                      !selectedPlanId && !isSelected ? 'border-red-200 bg-red-50/40' : ''
+                    } ${isSelected
                       ? 'border-red-500 shadow-lg bg-red-50'
                       : 'border-gray-200 hover:border-red-200'
                       } ${isDisabled ? 'opacity-60 cursor-not-allowed' : ''}`}
@@ -189,6 +195,11 @@ export function AdminRenewal() {
                 );
               })}
             </div>
+            {!selectedPlanId && (
+              <p className="text-xs text-red-500 font-semibold">
+                Selecione um plano para continuar.
+              </p>
+            )}
           </div>
 
           <div className="space-y-3">
