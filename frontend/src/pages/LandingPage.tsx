@@ -249,6 +249,18 @@ export function LandingPage() {
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
   }, [selectedShot, handlePrevShot, handleNextShot]);
+
+  useEffect(() => {
+    if (!guideShot) return;
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setGuideShot(null);
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [guideShot]);
   const parsedTicket = Math.max(0, Number(ticketAverage) || 0);
   const parsedOrders = Math.max(0, Number(ordersPerDay) || 0);
   const monthlyEstimate = parsedTicket * parsedOrders * 30;
