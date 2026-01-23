@@ -21,6 +21,8 @@ export const DashboardView = ({
   setupChecklist = [],
   storeUrl = "",
   storeName = "Chama no Espeto",
+  storeLogo = "",
+  storeDescription = "",
 }) => {
   const [qrCopied, setQrCopied] = useState(false);
   const [periodDays, setPeriodDays] = useState("30");
@@ -266,15 +268,24 @@ export const DashboardView = ({
     <div className="space-y-6 animate-in fade-in">
       {setupChecklist.length > 0 && (
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Checklist de ativação</p>
-              <h3 className="text-xl font-black text-slate-900 mt-2">Sua loja pronta para vender</h3>
-              <p className="text-sm text-slate-500 mt-2">
-                Complete os passos abaixo para ativar a melhor experiencia para seus clientes.
-              </p>
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded-2xl bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center">
+                {storeLogo ? (
+                  <img src={storeLogo} alt={storeName} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-xl font-black text-slate-500">🍢</span>
+                )}
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Checklist de ativação</p>
+                <h3 className="text-xl font-black text-slate-900 mt-1">{storeName}</h3>
+                <p className="text-sm text-slate-500 mt-1">
+                  {storeDescription || "Complete os passos abaixo para ativar a melhor experiência para seus clientes."}
+                </p>
+              </div>
             </div>
-            <div className="flex flex-col items-end gap-2">
+            <div className="flex flex-col items-start lg:items-end gap-3">
               <div className="text-xs text-slate-500">
                 {setupChecklist.filter((item) => item.done).length} de {setupChecklist.length} completos
               </div>
@@ -283,14 +294,14 @@ export const DashboardView = ({
                   href={storeUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                  className="px-4 py-2 rounded-xl bg-brand-primary text-white text-xs font-semibold shadow-sm hover:opacity-90"
                 >
                   Ver minha loja
                 </a>
               )}
             </div>
           </div>
-          <div className="mt-4 h-2 rounded-full bg-slate-100 overflow-hidden">
+          <div className="mt-5 h-2.5 rounded-full bg-slate-100 overflow-hidden">
             <div
               className="h-full bg-brand-primary"
               style={{

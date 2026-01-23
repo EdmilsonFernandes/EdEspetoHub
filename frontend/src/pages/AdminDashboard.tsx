@@ -883,6 +883,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
           setupChecklist={setupChecklist}
           storeUrl={storeUrl}
           storeName={storeName}
+          storeLogo={brandingDraft.logoUrl}
+          storeDescription={brandingDraft.description}
         />
       )}
 
