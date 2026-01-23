@@ -974,6 +974,31 @@ export function LandingPage() {
                 className="w-full h-[72vh] object-contain rounded-2xl border border-white/10 shadow-[0_18px_60px_-32px_rgba(0,0,0,0.9)]"
               />
             </div>
+            {lightbox?.shots?.length > 1 && (
+              <div className="px-4 pb-4">
+                <div className="flex items-center gap-2 overflow-x-auto pb-2">
+                  {lightbox.shots.map((shot, index) => (
+                    <button
+                      key={`${shot.title}-${index}`}
+                      type="button"
+                      onClick={() => setLightbox({ shots: lightbox.shots, index, label: lightbox.label })}
+                      className={`flex-shrink-0 rounded-xl border ${
+                        index === selectedIndex
+                          ? 'border-brand-primary ring-2 ring-brand-primary/40'
+                          : 'border-slate-200'
+                      }`}
+                    >
+                      <img
+                        src={shot.image}
+                        alt={shot.title}
+                        className="h-16 w-24 object-cover rounded-xl"
+                        loading="lazy"
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
