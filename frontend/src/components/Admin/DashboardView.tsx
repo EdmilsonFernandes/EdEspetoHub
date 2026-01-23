@@ -537,7 +537,8 @@ export const DashboardView = ({
               UTM automático
             </div>
           </div>
-          <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
+          <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_220px]">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
             <div className="grid gap-3 xl:grid-cols-[1.2fr_0.9fr_0.9fr_0.9fr] items-end">
               <div>
                 <p className="text-[11px] uppercase tracking-wide text-slate-400">Campanha</p>
@@ -621,6 +622,27 @@ export const DashboardView = ({
                   {preset.label}
                 </button>
               ))}
+            </div>
+          </div>
+            <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-3">
+              <p className="text-[11px] uppercase tracking-[0.3em] text-slate-400">Última campanha</p>
+              <div className="space-y-2 text-xs text-slate-600">
+                <div className="flex items-center justify-between">
+                  <span>Canal</span>
+                  <span className="font-semibold text-slate-800">{utmSource || '—'}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>Formato</span>
+                  <span className="font-semibold text-slate-800">{utmMedium || '—'}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>Campanha</span>
+                  <span className="font-semibold text-slate-800">{utmCampaign || '—'}</span>
+                </div>
+              </div>
+              <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-3 py-2 text-[11px] text-slate-500">
+                Compartilhe o link e acompanhe as origens abaixo.
+              </div>
             </div>
           </div>
         </div>
