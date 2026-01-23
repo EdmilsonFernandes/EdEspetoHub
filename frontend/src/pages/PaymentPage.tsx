@@ -313,8 +313,8 @@ export function PaymentPage() {
                             <span className={`text-xs font-semibold ${isAnnual ? 'text-gray-900' : 'text-gray-500'}`}>Anual</span>
                           </div>
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                          {PLAN_TIERS.map((tier) => {
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        {PLAN_TIERS.map((tier) => {
                             const planKey = getPlanName(tier.key, billingKey);
                             const plan = plansByName[planKey];
                             const price = plan ? Number(plan.price) : billing.priceByTier[tier.key];
@@ -339,8 +339,13 @@ export function PaymentPage() {
                               </button>
                             );
                           })}
-                        </div>
                       </div>
+                      {!selectedPlanId && (
+                        <p className="text-xs text-red-500 font-semibold">
+                          Selecione um plano para continuar.
+                        </p>
+                      )}
+                    </div>
                       <p className="text-sm font-semibold text-gray-700 text-center">
                         Escolha uma forma para gerar um novo pagamento
                       </p>
