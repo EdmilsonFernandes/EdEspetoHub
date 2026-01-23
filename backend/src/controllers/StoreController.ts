@@ -208,6 +208,71 @@ export class StoreController {
 
 
   /**
+   * Tracks store link hit.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-22
+   */
+  static async trackLink(req: Request, res: Response)
+  {
+    try
+    {
+      if (DEMO_SLUGS.has(req.params.slug))
+      {
+        return res.json({ success: true });
+      }
+      const store = await storeService.getBySlug(req.params.slug);
+      if (!store)
+      {
+        return res.json({ success: false });
+      }
+      const source = (req.body?.utm_source || req.query?.utm_source || '').toString().trim();
+      const medium = (req.body?.utm_medium || req.query?.utm_medium || '').toString().trim();
+      const campaign = (req.body?.utm_campaign || req.query?.utm_campaign || '').toString().trim();
+      const referrer = (req.headers.referer || req.headers.referrer || '').toString();
+      await storeService.trackLinkHit(store.id, {
+        source,
+        medium,
+        campaign,
+        referrer,
+      });
+      return res.json({ success: true });
+    }
+    catch (error: any)
+    {
+      log.warn('Store link track failed', { slug: req.params.slug, error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+
+
+  /**
+   * Gets store link stats.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-22
+   */
+  static async getLinkStats(req: Request, res: Response)
+  {
+    try
+    {
+      const storeId = req.params.storeId;
+      if (!storeId) throw new AppError('STORE-001', 404);
+      const days = Number(req.query?.days || 7);
+      const stats = await storeService.getLinkStats(storeId, days);
+      return res.json(stats);
+    }
+    catch (error: any)
+    {
+      log.warn('Store link stats failed', { storeId: req.params.storeId, error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+
+
+  /**
    * Executes update logic.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)

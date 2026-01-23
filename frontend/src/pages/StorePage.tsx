@@ -41,8 +41,10 @@ export function StorePage() {
   const [topProducts, setTopProducts] = useState([]);
   const [reorderApplied, setReorderApplied] = useState(false);
   const autoTrackRef = useRef(false);
+  const reorderTtlMs = 30 * 24 * 60 * 60 * 1000;
   const [lastPublicOrderId, setLastPublicOrderId] = useState('');
   const [recentPublicOrders, setRecentPublicOrders] = useState([]);
+  const [lastOrderItems, setLastOrderItems] = useState([]);
   const [isMobile, setIsMobile] = useState(false);
   const [showInfoSheet, setShowInfoSheet] = useState(false);
   const [orderNotice, setOrderNotice] = useState(null);
@@ -282,6 +284,26 @@ export function StorePage() {
       } catch {
         setRecentPublicOrders([]);
       }
+
+      try {
+        const rawItems = localStorage.getItem(`lastOrderItems:${storeSlug}`);
+        if (rawItems) {
+          const parsedItems = JSON.parse(rawItems);
+          const savedAt = Number(parsedItems?.savedAt || 0);
+          const isFresh = savedAt && Date.now() - savedAt < reorderTtlMs;
+          const items = Array.isArray(parsedItems?.items) ? parsedItems.items : [];
+          if (items.length && isFresh) {
+            setLastOrderItems(items);
+          } else {
+            localStorage.removeItem(`lastOrderItems:${storeSlug}`);
+            setLastOrderItems([]);
+          }
+        } else {
+          setLastOrderItems([]);
+        }
+      } catch {
+        setLastOrderItems([]);
+      }
     }
 
     const handleVisibility = () => {
@@ -295,6 +317,19 @@ export function StorePage() {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibility);
     };
+  }, [storeSlug]);
+
+  useEffect(() => {
+    if (!storeSlug || typeof window === 'undefined') return;
+    if (autoTrackRef.current) return;
+    autoTrackRef.current = true;
+    const params = new URLSearchParams(window.location.search || '');
+    const payload = {
+      utm_source: params.get('utm_source') || params.get('source') || '',
+      utm_medium: params.get('utm_medium') || '',
+      utm_campaign: params.get('utm_campaign') || '',
+    };
+    storeService.trackPublicVisit(storeSlug, payload).catch(() => {});
   }, [storeSlug]);
 
   useEffect(() => {
@@ -706,6 +741,18 @@ export function StorePage() {
       } catch {
         setRecentPublicOrders([entry]);
       }
+      const lastItemsPayload = {
+        savedAt: Date.now(),
+        items: Object.values(cart).map((item: any) => ({
+          productId: item.id,
+          name: item.name,
+          quantity: item.qty,
+          cookingPoint: item.cookingPoint || '',
+          passSkewer: Boolean(item.passSkewer),
+        })),
+      };
+      localStorage.setItem(`lastOrderItems:${storeSlug}`, JSON.stringify(lastItemsPayload));
+      setLastOrderItems(lastItemsPayload.items);
     }
     setView(isStoreAdmin ? 'menu' : 'success');
     if (isStoreAdmin) {
@@ -719,6 +766,12 @@ export function StorePage() {
       return;
     }
     navigate(storeSlug ? `/admin/dashboard` : '/admin', { state: { activeTab: 'fila' } });
+  };
+  const handleRepeatFromMenu = () => {
+    if (!storeSlug || !lastOrderItems.length) return;
+    localStorage.setItem(`reorder:${storeSlug}`, JSON.stringify({ items: lastOrderItems }));
+    setReorderApplied(false);
+    setView('cart');
   };
   const goToDemoGuide = () => {
     if (typeof window !== 'undefined') {
@@ -1010,12 +1063,22 @@ export function StorePage() {
                     ))}
                   </div>
                 </div>
-                <button
-                  onClick={() => navigate(`/pedido/${recentPublicOrders[0].id}`)}
-                  className="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:opacity-90"
-                >
-                  Acompanhar agora
-                </button>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => navigate(`/pedido/${recentPublicOrders[0].id}`)}
+                    className="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:opacity-90"
+                  >
+                    Acompanhar agora
+                  </button>
+                  {lastOrderItems.length > 0 && (
+                    <button
+                      onClick={handleRepeatFromMenu}
+                      className="px-3 py-1.5 rounded-lg border border-emerald-300 text-emerald-700 text-xs font-semibold hover:bg-emerald-100"
+                    >
+                      Pedir novamente
+                    </button>
+                  )}
+                </div>
               </div>
             )}
             <MenuView

@@ -29,6 +29,7 @@ import { EmailVerification } from '../entities/EmailVerification';
 import { SiteSetting } from '../entities/SiteSetting';
 import { PlatformAdmin } from '../entities/PlatformAdmin';
 import { AccessLog } from '../entities/AccessLog';
+import { StoreLinkHit } from '../entities/StoreLinkHit';
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -38,7 +39,7 @@ export const AppDataSource = new DataSource({
   password: env.database.password,
   database: env.database.database,
   synchronize: false,
-  entities: [ User, Store, StoreSettings, Product, Order, OrderItem, Plan, Subscription, Payment, PaymentEvent, PasswordReset, EmailVerification, SiteSetting, PlatformAdmin, AccessLog ],
+  entities: [ User, Store, StoreSettings, Product, Order, OrderItem, Plan, Subscription, Payment, PaymentEvent, PasswordReset, EmailVerification, SiteSetting, PlatformAdmin, AccessLog, StoreLinkHit ],
   migrations: [],
   logging: [ 'error' ]
   //logging: [ 'error', 'query' ]

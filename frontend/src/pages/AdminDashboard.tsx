@@ -568,6 +568,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   const [error, setError] = useState('');
   const [subscriptionDetails, setSubscriptionDetails] = useState<any>(null);
   const [paymentsHistory, setPaymentsHistory] = useState<any[]>([]);
+  const [linkStats, setLinkStats] = useState<any>(null);
   const [subscriptionError, setSubscriptionError] = useState('');
   const [subscriptionLoading, setSubscriptionLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'resumo' | 'pedidos' | 'produtos' | 'config' | 'fila' | 'pagamentos'>(() => {
@@ -745,6 +746,24 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     };
   }, [storeId]);
 
+  useEffect(() => {
+    if (!storeId) return;
+    let active = true;
+    const loadLinkStats = async () => {
+      try {
+        const data = await storeService.getLinkStats(storeId, 30);
+        if (active) setLinkStats(data);
+      } catch (error) {
+        console.error('Não foi possível carregar estatísticas do link', error);
+        if (active) setLinkStats(null);
+      }
+    };
+    loadLinkStats();
+    return () => {
+      active = false;
+    };
+  }, [storeId]);
+
   /* =========================
    * CLIENTES PARA RELATÓRIO
    * ========================= */
@@ -903,6 +922,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
           storeName={storeName}
           storeLogo={brandingDraft.logoUrl}
           storeDescription={brandingDraft.description}
+          linkStats={linkStats}
         />
       )}
 

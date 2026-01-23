@@ -63,6 +63,7 @@ routes.patch('/admin/stores/:storeId/reactivate', requireAuth, requireRole('SUPE
 // Store public
 routes.get('/public/platform/metrics', PlatformPublicController.metrics);
 routes.get('/public/stores', StoreController.listPortfolio);
+routes.post('/public/stores/slug/:slug/track', StoreController.trackLink);
 routes.get('/stores/slug/:slug', StoreController.getBySlug);
 routes.get('/chamanoespeto/:slug', StoreController.getBySlug);
 routes.get('/stores/slug/:slug/products', ProductController.listPublicBySlug);
@@ -72,6 +73,7 @@ routes.get('/public/stores/slug/:slug/highlights', OrderController.listHighlight
 // Store admin
 routes.put('/stores/:storeId', requireAuth, requireRole('ADMIN'), StoreController.update);
 routes.put('/stores/:storeId/status', requireAuth, requireRole('ADMIN'), StoreController.updateStatus);
+routes.get('/stores/:storeId/link-stats', requireAuth, requireRole('ADMIN'), StoreController.getLinkStats);
 
 // Products admin (cadastro não depende de assinatura)
 routes.post('/stores/:storeId/products', requireAuth, requireRole('ADMIN'), ProductController.create);

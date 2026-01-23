@@ -18,6 +18,7 @@ import { slugify } from '../utils/slugify';
 import { SubscriptionService } from './SubscriptionService';
 import { Store } from '../entities/Store';
 import { User } from '../entities/User';
+import { StoreLinkHit } from '../entities/StoreLinkHit';
 import { EntityManager } from 'typeorm';
 import { saveBase64Image } from '../utils/imageStorage';
 import { sanitizeSocialLinks } from '../utils/socialLinks';
@@ -287,5 +288,56 @@ export class StoreService
     }
 
     return candidate;
+  }
+
+  /**
+   * Tracks store link hit.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-22
+   */
+  async trackLinkHit(storeId: string, payload: { source?: string; medium?: string; campaign?: string; referrer?: string })
+  {
+    const repo = AppDataSource.getRepository(StoreLinkHit);
+    const entry = repo.create({
+      storeId,
+      utmSource: payload.source || null,
+      utmMedium: payload.medium || null,
+      utmCampaign: payload.campaign || null,
+      referrer: payload.referrer || null,
+    });
+    await repo.save(entry);
+    return entry;
+  }
+
+  /**
+   * Gets link stats.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-22
+   */
+  async getLinkStats(storeId: string, days: number)
+  {
+    const safeDays = Math.max(1, Math.min(90, Number(days) || 7));
+    const rows = await AppDataSource.query(
+      `
+      SELECT
+        COALESCE(NULLIF(utm_source, ''), 'direto') AS source,
+        COUNT(*)::int AS total
+      FROM store_link_hits
+      WHERE store_id = $1
+        AND created_at >= NOW() - $2::interval
+      GROUP BY source
+      ORDER BY total DESC
+      `,
+      [ storeId, `${safeDays} days` ]
+    );
+    const total = rows.reduce((sum: number, row: any) => sum + Number(row.total || 0), 0);
+    return {
+      total,
+      days: safeDays,
+      sources: rows,
+      topSource: rows[0]?.source || 'direto',
+    };
   }
 }

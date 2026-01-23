@@ -183,4 +183,21 @@ export async function runMigrations() {
   await AppDataSource.query(`
     CREATE INDEX IF NOT EXISTS idx_access_logs_store_id ON access_logs(store_id);
   `);
+  await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS store_link_hits (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+      utm_source TEXT,
+      utm_medium TEXT,
+      utm_campaign TEXT,
+      referrer TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_store_link_hits_store_id ON store_link_hits(store_id);
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_store_link_hits_created_at ON store_link_hits(created_at DESC);
+  `);
 }

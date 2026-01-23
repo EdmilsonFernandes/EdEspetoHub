@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from "react";
-import { Package, CurrencyDollar, CheckCircle, CircleDashed } from "@phosphor-icons/react";
+import { Package, CurrencyDollar, CheckCircle, CircleDashed, LinkSimple } from "@phosphor-icons/react";
 import {
   BarChart,
   Bar,
@@ -23,6 +23,7 @@ export const DashboardView = ({
   storeName = "Chama no Espeto",
   storeLogo = "",
   storeDescription = "",
+  linkStats = null,
 }) => {
   const [qrCopied, setQrCopied] = useState(false);
   const [periodDays, setPeriodDays] = useState("30");
@@ -32,6 +33,9 @@ export const DashboardView = ({
   const [topSort, setTopSort] = useState("qty");
   const [customerQuery, setCustomerQuery] = useState("");
   const periodLabel = periodDays === "all" ? "Todo período" : `${periodDays} dias`;
+  const linkStatsLabel = linkStats?.days ? `${linkStats.days} dias` : "7 dias";
+  const linkStatsTotal = linkStats?.total ?? 0;
+  const linkStatsSource = linkStats?.topSource || "direto";
 
   const formatMonthLabel = (key) => {
     if (!key) return "";
@@ -386,7 +390,7 @@ export const DashboardView = ({
         </div>
       )}
       {/* ---------- CARDS RESUMO ---------- */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {/* Faturamento total */}
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
           <div className="flex justify-between items-start">
@@ -470,6 +474,25 @@ export const DashboardView = ({
             </div>
             <div className="p-3 bg-brand-secondary-soft rounded-lg text-brand-secondary">
               <Package weight="duotone" />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-gray-500 text-sm font-bold uppercase">
+                Acessos no link
+              </p>
+              <h3 className="text-3xl font-black text-brand-secondary">
+                {linkStatsTotal}
+              </h3>
+              <p className="text-xs text-gray-500 mt-1">
+                {linkStatsLabel} · Origem: {linkStatsSource}
+              </p>
+            </div>
+            <div className="p-3 bg-brand-secondary-soft rounded-lg text-brand-secondary">
+              <LinkSimple weight="duotone" />
             </div>
           </div>
         </div>

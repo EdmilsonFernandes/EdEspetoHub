@@ -246,6 +246,16 @@ CREATE TABLE IF NOT EXISTS access_logs (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS store_link_hits (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+  utm_source TEXT,
+  utm_medium TEXT,
+  utm_campaign TEXT,
+  referrer TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 CREATE INDEX IF NOT EXISTS idx_access_logs_created_at ON access_logs(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_access_logs_role ON access_logs(role);
 CREATE INDEX IF NOT EXISTS idx_access_logs_store_id ON access_logs(store_id);
