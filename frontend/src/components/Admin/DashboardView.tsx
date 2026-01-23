@@ -523,7 +523,7 @@ export const DashboardView = ({
 
       </div>
 
-      <div className="grid lg:grid-cols-[1.2fr_0.8fr] gap-6">
+      <div className="grid xl:grid-cols-[1.4fr_0.6fr] gap-6">
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
           <div className="flex items-center justify-between">
             <div>
@@ -537,8 +537,18 @@ export const DashboardView = ({
               UTM automático
             </div>
           </div>
-          <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 space-y-4">
-            <div className="grid gap-3 sm:grid-cols-2">
+          <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
+            <div className="grid gap-3 xl:grid-cols-[1.2fr_0.9fr_0.9fr_0.9fr] items-end">
+              <div>
+                <p className="text-[11px] uppercase tracking-wide text-slate-400">Campanha</p>
+                <input
+                  type="text"
+                  value={utmCampaign}
+                  onChange={(event) => setUtmCampaign(event.target.value)}
+                  placeholder="ex: chamanoespeto"
+                  className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:ring-2 focus:ring-brand-primary"
+                />
+              </div>
               <div>
                 <p className="text-[11px] uppercase tracking-wide text-slate-400">Canal</p>
                 <div className="mt-2 flex flex-wrap gap-2">
@@ -577,53 +587,40 @@ export const DashboardView = ({
                   ))}
                 </div>
               </div>
-            </div>
-            <div>
-              <p className="text-[11px] uppercase tracking-wide text-slate-400">Campanha</p>
-              <input
-                type="text"
-                value={utmCampaign}
-                onChange={(event) => setUtmCampaign(event.target.value)}
-                placeholder="ex: chamanoespeto"
-                className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:ring-2 focus:ring-brand-primary"
-              />
-            </div>
-            <div className="flex flex-col sm:flex-row gap-2">
-              <button
-                type="button"
-                onClick={() => copyUtm()}
-                className="px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-              >
-                {qrCopied ? 'Link copiado!' : 'Copiar link'}
-              </button>
-              <button
-                type="button"
-                onClick={() => window.open(utmUrl || storeUrl, '_blank')}
-                className="px-3 py-2 rounded-lg bg-brand-primary text-white text-xs font-semibold hover:opacity-90"
-              >
-                Abrir link
-              </button>
-            </div>
-            <div className="rounded-xl border border-dashed border-slate-200 bg-white px-3 py-3">
-              <p className="text-[11px] uppercase tracking-wide text-slate-400">Atalhos rápidos</p>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {[
-                  { label: 'Instagram', utmSource: 'instagram', utmMedium: 'bio' },
-                  { label: 'WhatsApp', utmSource: 'whatsapp', utmMedium: 'status' },
-                  { label: 'Facebook', utmSource: 'facebook', utmMedium: 'feed' },
-                  { label: 'Google Ads', utmSource: 'google', utmMedium: 'cpc' },
-                  { label: 'TikTok', utmSource: 'tiktok', utmMedium: 'video' },
-                ].map((preset) => (
-                  <button
-                    key={preset.label}
-                    type="button"
-                    onClick={() => copyUtm({ utmSource: preset.utmSource, utmMedium: preset.utmMedium })}
-                    className="px-3 py-1.5 rounded-full text-[11px] font-semibold border border-slate-200 text-slate-600 hover:bg-slate-100"
-                  >
-                    {preset.label}
-                  </button>
-                ))}
+              <div className="flex flex-col gap-2">
+                <button
+                  type="button"
+                  onClick={() => copyUtm()}
+                  className="px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                >
+                  {qrCopied ? 'Link copiado!' : 'Copiar link'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => window.open(utmUrl || storeUrl, '_blank')}
+                  className="px-3 py-2 rounded-lg bg-brand-primary text-white text-xs font-semibold hover:opacity-90"
+                >
+                  Abrir link
+                </button>
               </div>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {[
+                { label: 'Instagram', utmSource: 'instagram', utmMedium: 'bio' },
+                { label: 'WhatsApp', utmSource: 'whatsapp', utmMedium: 'status' },
+                { label: 'Facebook', utmSource: 'facebook', utmMedium: 'feed' },
+                { label: 'Google Ads', utmSource: 'google', utmMedium: 'cpc' },
+                { label: 'TikTok', utmSource: 'tiktok', utmMedium: 'video' },
+              ].map((preset) => (
+                <button
+                  key={preset.label}
+                  type="button"
+                  onClick={() => copyUtm({ utmSource: preset.utmSource, utmMedium: preset.utmMedium })}
+                  className="px-3 py-1.5 rounded-full text-[11px] font-semibold border border-slate-200 text-slate-600 hover:bg-slate-100"
+                >
+                  {preset.label}
+                </button>
+              ))}
             </div>
           </div>
         </div>
