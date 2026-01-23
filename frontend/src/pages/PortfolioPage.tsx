@@ -320,7 +320,7 @@ export function PortfolioPage() {
                     <div className="p-6 space-y-4">
                       <p className="text-sm text-slate-600 line-clamp-3">{description}</p>
                       <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                        <p className="text-[11px] uppercase tracking-[0.3em] text-slate-400">Mini cardápio</p>
+                        <p className="text-[11px] uppercase tracking-[0.3em] text-slate-400">Top 3 do dia</p>
                         <div className="mt-3 space-y-2 text-xs text-slate-600">
                           {menuInfo?.loading && (
                             <div className="text-xs text-slate-400">Carregando produtos...</div>
