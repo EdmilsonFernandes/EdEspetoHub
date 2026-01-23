@@ -971,7 +971,7 @@ export function LandingPage() {
               <img
                 src={activeShot.image}
                 alt={activeShot.title}
-                className="w-full h-[72vh] object-contain rounded-2xl border border-white/10 shadow-[0_18px_60px_-32px_rgba(0,0,0,0.9)]"
+                className="w-full h-[60vh] sm:h-[72vh] object-contain rounded-2xl border border-white/10 shadow-[0_18px_60px_-32px_rgba(0,0,0,0.9)]"
               />
             </div>
             {lightbox?.shots?.length > 1 && (
