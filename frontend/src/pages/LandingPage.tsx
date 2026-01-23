@@ -28,6 +28,40 @@ export function LandingPage() {
   const [publicMetrics, setPublicMetrics] = useState(null);
   const [ticketAverage, setTicketAverage] = useState('20');
   const [ordersPerDay, setOrdersPerDay] = useState('15');
+  const [faqOpen, setFaqOpen] = useState(false);
+  const [faqActive, setFaqActive] = useState<number | null>(0);
+  const faqItems = [
+    {
+      question: 'Como crio minha loja?',
+      answer:
+        'Clique em “Criar minha loja”, preencha os dados e confirme o e-mail. Você já entra no trial de 7 dias.',
+    },
+    {
+      question: 'O que acontece depois do trial de 7 dias?',
+      answer:
+        'A loja fica inativa até renovar. Basta escolher um plano e gerar o pagamento.',
+    },
+    {
+      question: 'Quais são as formas de pagamento?',
+      answer:
+        'Pix, cartão e boleto (conforme disponibilidade do Mercado Pago).',
+    },
+    {
+      question: 'Como vejo a fila do churrasqueiro?',
+      answer:
+        'No painel admin, clique em “Fila do churrasqueiro”. Ela atualiza automaticamente.',
+    },
+    {
+      question: 'O cliente acompanha o pedido?',
+      answer:
+        'Sim. Após enviar, ele recebe um link para acompanhar o status em tempo real.',
+    },
+    {
+      question: 'Posso editar cardápio e promoções?',
+      answer:
+        'Sim. Você edita produtos, fotos, preço promocional e destaque direto no painel.',
+    },
+  ];
   const showcaseShots = [
     {
       title: 'Cardápio que vende',
@@ -660,6 +694,52 @@ export function LandingPage() {
           </div>
         </div>
       )}
+
+      <div className="fixed bottom-24 right-4 z-40 flex flex-col items-end gap-3">
+        {faqOpen && (
+          <div className="w-[320px] sm:w-[360px] rounded-3xl border border-slate-200 bg-white shadow-[0_24px_70px_-40px_rgba(15,23,42,0.45)] overflow-hidden">
+            <div className="px-5 py-4 bg-gradient-to-r from-red-600 to-red-500 text-white">
+              <p className="text-xs uppercase tracking-[0.3em] text-white/70">Ajuda rápida</p>
+              <h3 className="text-lg font-bold">Tire dúvidas em segundos</h3>
+            </div>
+            <div className="p-4 space-y-3 max-h-[320px] overflow-y-auto">
+              {faqItems.map((item, index) => (
+                <button
+                  key={item.question}
+                  type="button"
+                  onClick={() => setFaqActive((prev) => (prev === index ? null : index))}
+                  className="w-full text-left rounded-2xl border border-slate-100 bg-slate-50/80 px-4 py-3 hover:bg-slate-100 transition"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-sm font-semibold text-slate-900">{item.question}</p>
+                    <span className="text-xs text-slate-400">{faqActive === index ? '−' : '+'}</span>
+                  </div>
+                  {faqActive === index && (
+                    <p className="text-xs text-slate-600 mt-2 leading-relaxed">{item.answer}</p>
+                  )}
+                </button>
+              ))}
+            </div>
+            <div className="px-4 pb-4">
+              <button
+                type="button"
+                onClick={() => setFaqOpen(false)}
+                className="w-full px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 border border-slate-200 hover:bg-slate-50"
+              >
+                Fechar FAQ
+              </button>
+            </div>
+          </div>
+        )}
+        <button
+          type="button"
+          onClick={() => setFaqOpen((prev) => !prev)}
+          className="inline-flex items-center gap-2 rounded-full bg-slate-900 text-white px-4 py-3 shadow-[0_14px_30px_-18px_rgba(15,23,42,0.7)] hover:bg-slate-800 transition"
+        >
+          <span className="text-lg">💬</span>
+          <span className="text-sm font-semibold">{faqOpen ? 'Fechar' : 'Dúvidas?'}</span>
+        </button>
+      </div>
 
       <div className="h-16 sm:hidden" />
       <div className="sm:hidden fixed bottom-0 inset-x-0 z-40 px-4 pb-4">
