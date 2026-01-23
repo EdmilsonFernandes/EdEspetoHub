@@ -29,6 +29,7 @@ export function LandingPage() {
   const [ordersPerDay, setOrdersPerDay] = useState('15');
   const [faqOpen, setFaqOpen] = useState(false);
   const [faqActive, setFaqActive] = useState<number | null>(0);
+  const [faqCategory, setFaqCategory] = useState('Planos');
   const [guideStep, setGuideStep] = useState(0);
   const [lightbox, setLightbox] = useState(null);
   const touchStartRef = useRef({ x: 0, y: 0 });
@@ -81,71 +82,89 @@ export function LandingPage() {
   ];
   const faqItems = [
     {
+      category: 'Planos',
       question: 'Como crio minha loja?',
       answer:
         'Clique em “Criar minha loja”, preencha os dados e confirme o e-mail. Você já entra no trial de 7 dias.',
     },
     {
+      category: 'Planos',
       question: 'O que acontece depois do trial de 7 dias?',
       answer:
         'A loja fica inativa até renovar. Basta escolher um plano e gerar o pagamento.',
     },
     {
+      category: 'Pagamentos',
       question: 'Quais são as formas de pagamento?',
       answer:
         'Pix, cartão e boleto (conforme disponibilidade do Mercado Pago).',
     },
     {
+      category: 'Operação',
       question: 'Como vejo a fila do churrasqueiro?',
       answer:
         'No painel admin, clique em “Fila do churrasqueiro”. Ela atualiza automaticamente.',
     },
     {
+      category: 'Planos',
       question: 'Consigo trocar de plano depois?',
       answer:
         'Sim. Vá em Pagamentos > Renovar assinatura e escolha um novo plano.',
     },
     {
+      category: 'Operação',
       question: 'Como edito meu cardápio?',
       answer:
         'No painel admin, acesse Produtos para editar nome, preço, promoções e imagem.',
     },
     {
+      category: 'Operação',
       question: 'Como mudar horários de funcionamento?',
       answer:
         'Em Configurações > Horários você ajusta os dias e horários da loja.',
     },
     {
+      category: 'Operação',
       question: 'Dá para mudar a cor da loja?',
       answer:
         'Sim. Em Configurações > Identidade visual você altera cores, logo e descrição.',
     },
     {
+      category: 'Operação',
       question: 'Como gerar QR Code para as mesas?',
       answer:
         'No Resumo do admin existe o card “QR do cardápio” com opção de imprimir.',
     },
     {
+      category: 'Operação',
       question: 'Consigo ver meus ganhos?',
       answer:
         'Sim. No Resumo você acompanha receita total, ticket médio e vendas por dia.',
     },
     {
+      category: 'Suporte',
       question: 'Suporte e ajuda',
       answer:
         'Chame no WhatsApp da loja ou use o e-mail de contato configurado no painel.',
     },
     {
+      category: 'Operação',
       question: 'O cliente acompanha o pedido?',
       answer:
         'Sim. Após enviar, ele recebe um link para acompanhar o status em tempo real.',
     },
     {
+      category: 'Operação',
       question: 'Posso editar cardápio e promoções?',
       answer:
         'Sim. Você edita produtos, fotos, preço promocional e destaque direto no painel.',
     },
   ];
+  const faqCategories = ['Planos', 'Operação', 'Pagamentos', 'Suporte'];
+  const filteredFaqItems = useMemo(
+    () => faqItems.filter((item) => item.category === faqCategory),
+    [faqItems, faqCategory]
+  );
   const showcaseShots = [
     {
       title: 'Cardápio que vende',
@@ -214,6 +233,10 @@ export function LandingPage() {
     };
     loadPlans();
   }, []);
+
+  useEffect(() => {
+    setFaqActive(null);
+  }, [faqCategory]);
 
   const billingKey = isAnnual ? 'yearly' : 'monthly';
   const billing = BILLING_OPTIONS[billingKey];
@@ -312,7 +335,7 @@ export function LandingPage() {
   return (
     <LandingPageLayout>
       {/* Hero Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 lg:py-20">
         <div className="text-center space-y-6">
           <span className="animate-bounce inline-flex items-center px-4 py-1.5 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-bold rounded-full uppercase tracking-[0.2em] shadow-lg">
             7 dias grátis + sem cartão
@@ -338,7 +361,7 @@ export function LandingPage() {
             </button>
             <button
               onClick={scrollToShowcase}
-              className="cursor-pointer px-8 py-4 text-lg rounded-xl border-2 border-transparent text-gray-700 dark:text-gray-300 font-semibold hover:text-red-600 transition-colors"
+              className="cursor-pointer px-8 py-4 text-lg rounded-xl border-2 border-slate-200 bg-white/80 text-gray-700 dark:text-gray-300 font-semibold hover:text-red-600 hover:border-red-200 transition-colors shadow-sm"
             >
               ✨ Ver telas reais
             </button>
@@ -376,26 +399,31 @@ export function LandingPage() {
                 {
                   title: 'Crie sua loja',
                   desc: 'Cadastre dados básicos, escolha cores e publique seu link.',
+                  icon: Palette,
                 },
                 {
                   title: 'Monte o cardápio',
                   desc: 'Adicione produtos, fotos e promoções em minutos.',
+                  icon: ShoppingCart,
                 },
                 {
                   title: 'Receba pedidos',
                   desc: 'Fila do churrasqueiro atualiza sozinha e o cliente acompanha.',
+                  icon: ChefHat,
                 },
-              ].map((step, index) => (
+              ].map((step, index) => {
+                const Icon = step.icon;
+                return (
                 <div key={step.title} className="flex items-start gap-4">
                   <div className="w-10 h-10 rounded-full bg-red-500 text-white font-black flex items-center justify-center shadow-sm">
-                    {index + 1}
+                    <Icon size={18} weight="duotone" />
                   </div>
                   <div>
                     <p className="text-base font-semibold text-gray-900">{step.title}</p>
                     <p className="text-sm text-gray-600">{step.desc}</p>
                   </div>
                 </div>
-              ))}
+              )})}
             </div>
             <div className="mt-6 flex flex-wrap gap-3 text-xs text-slate-600">
               <span className="px-3 py-1 rounded-full bg-slate-50 border border-slate-200">Sem cartão</span>
@@ -424,7 +452,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section className="bg-slate-900 text-white py-14 sm:py-20">
+      <section id="guia-usuario" className="bg-slate-900 text-white py-14 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
             <div>
@@ -454,7 +482,7 @@ export function LandingPage() {
                   onClick={() => setGuideStep(index)}
                   className={`w-full text-left px-4 py-4 rounded-2xl border transition ${
                     guideStep === index
-                      ? 'bg-white text-slate-900 border-white shadow-[0_12px_30px_-18px_rgba(0,0,0,0.45)]'
+                      ? 'bg-white text-slate-900 border-white shadow-[0_12px_30px_-18px_rgba(0,0,0,0.45)] ring-2 ring-amber-200/70'
                       : 'bg-slate-800/60 text-slate-200 border-slate-700 hover:border-amber-300'
                   }`}
                 >
@@ -463,7 +491,14 @@ export function LandingPage() {
                       <p className="text-xs uppercase tracking-[0.25em] text-amber-300 font-semibold">
                         {step.role}
                       </p>
-                      <h3 className="text-lg font-bold mt-2">{step.title}</h3>
+                      <div className="flex flex-wrap items-center gap-2 mt-2">
+                        <h3 className="text-lg font-bold">{step.title}</h3>
+                        {guideStep === index && (
+                          <span className="px-2 py-1 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800">
+                            Você está aqui
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-semibold ${
@@ -574,7 +609,7 @@ export function LandingPage() {
                   <img
                     src={shot.image}
                     alt={shot.title}
-                    className="w-full h-64 sm:h-72 object-cover"
+                    className="w-full h-56 sm:h-64 lg:h-72 object-cover"
                     loading="lazy"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
@@ -945,6 +980,37 @@ export function LandingPage() {
         </div>
       </section>
 
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-10">
+        <div className="rounded-3xl border border-slate-200 bg-white/80 backdrop-blur px-6 py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 text-sm text-slate-600">
+          <div className="flex items-center gap-2">
+            <span className="text-xs uppercase tracking-[0.3em] text-slate-400">Guia rápido</span>
+            <span className="text-slate-500">Tudo em minutos</span>
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <a
+              href="#guia-usuario"
+              className="px-3 py-1.5 rounded-full border border-slate-200 bg-white text-xs font-semibold text-slate-600 hover:bg-slate-50"
+            >
+              Guia do usuário
+            </a>
+            <a
+              href="/terms"
+              className="px-3 py-1.5 rounded-full border border-slate-200 bg-white text-xs font-semibold text-slate-600 hover:bg-slate-50"
+            >
+              Termos
+            </a>
+            <a
+              href="https://wa.me/5512997822784"
+              target="_blank"
+              rel="noreferrer"
+              className="px-3 py-1.5 rounded-full border border-emerald-200 bg-emerald-50 text-xs font-semibold text-emerald-700 hover:bg-emerald-100"
+            >
+              WhatsApp
+            </a>
+          </div>
+        </div>
+      </section>
+
       {lightbox && activeShot && (
         <div
           className="fixed inset-0 z-50 bg-gradient-to-br from-black/70 via-black/60 to-black/80 backdrop-blur-sm flex items-center justify-center p-4"
@@ -1040,8 +1106,26 @@ export function LandingPage() {
               <p className="text-xs uppercase tracking-[0.3em] text-white/70">Ajuda rápida</p>
               <h3 className="text-lg font-bold">Tire dúvidas em segundos</h3>
             </div>
+            <div className="px-4 pt-3">
+              <div className="flex flex-wrap gap-2">
+                {faqCategories.map((category) => (
+                  <button
+                    key={category}
+                    type="button"
+                    onClick={() => setFaqCategory(category)}
+                    className={`px-3 py-1.5 rounded-full text-[11px] font-semibold border transition ${
+                      faqCategory === category
+                        ? 'bg-red-500 text-white border-red-500'
+                        : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                    }`}
+                  >
+                    {category}
+                  </button>
+                ))}
+              </div>
+            </div>
             <div className="p-4 space-y-3 max-h-[320px] overflow-y-auto">
-              {faqItems.map((item, index) => (
+              {filteredFaqItems.map((item, index) => (
                 <button
                   key={item.question}
                   type="button"
