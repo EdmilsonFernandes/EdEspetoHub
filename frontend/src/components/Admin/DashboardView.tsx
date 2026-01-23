@@ -26,6 +26,7 @@ export const DashboardView = ({
   linkStats = null,
 }) => {
   const [qrCopied, setQrCopied] = useState(false);
+  const utmStorageKey = useMemo(() => (storeUrl ? `utm:store:${storeUrl}` : "utm:store"), [storeUrl]);
   const [utmSource, setUtmSource] = useState("instagram");
   const [utmMedium, setUtmMedium] = useState("bio");
   const [utmCampaign, setUtmCampaign] = useState("organico");
@@ -51,6 +52,30 @@ export const DashboardView = ({
     const query = params.toString();
     return query ? `${storeUrl}?${query}` : storeUrl;
   }, [storeUrl, utmSource, utmMedium, utmCampaign]);
+
+  useEffect(() => {
+    if (!storeUrl) return;
+    const cached = localStorage.getItem(utmStorageKey);
+    if (!cached) return;
+    try {
+      const parsed = JSON.parse(cached);
+      if (parsed?.utmSource) setUtmSource(parsed.utmSource);
+      if (parsed?.utmMedium) setUtmMedium(parsed.utmMedium);
+      if (parsed?.utmCampaign) setUtmCampaign(parsed.utmCampaign);
+    } catch {
+      // ignore storage errors
+    }
+  }, [storeUrl, utmStorageKey]);
+
+  useEffect(() => {
+    if (!storeUrl) return;
+    const payload = {
+      utmSource,
+      utmMedium,
+      utmCampaign,
+    };
+    localStorage.setItem(utmStorageKey, JSON.stringify(payload));
+  }, [utmSource, utmMedium, utmCampaign, storeUrl, utmStorageKey]);
 
   const formatMonthLabel = (key) => {
     if (!key) return "";
@@ -417,11 +442,7 @@ export const DashboardView = ({
                 <div className="flex flex-col sm:flex-row gap-2">
                   <button
                     type="button"
-                    onClick={() => {
-                      navigator.clipboard.writeText(utmUrl || storeUrl);
-                      setQrCopied(true);
-                      setTimeout(() => setQrCopied(false), 1500);
-                    }}
+                    onClick={() => copyUtm()}
                     className="px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50"
                   >
                     {qrCopied ? "Link copiado!" : "Copiar link com UTM"}
@@ -432,6 +453,22 @@ export const DashboardView = ({
                     className="px-3 py-2 rounded-lg bg-brand-primary text-white text-xs font-semibold hover:opacity-90"
                   >
                     Abrir link
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => copyUtm({ utmSource: "instagram", utmMedium: "bio" })}
+                    className="px-3 py-1.5 rounded-full text-[11px] font-semibold border border-slate-200 text-slate-600 hover:bg-slate-100"
+                  >
+                    Copiar link Instagram
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => copyUtm({ utmSource: "whatsapp", utmMedium: "status" })}
+                    className="px-3 py-1.5 rounded-full text-[11px] font-semibold border border-slate-200 text-slate-600 hover:bg-slate-100"
+                  >
+                    Copiar link WhatsApp
                   </button>
                 </div>
                 <p className="text-[11px] text-slate-500">
@@ -789,3 +826,18 @@ export const DashboardView = ({
 };
 
 export default DashboardView;
+  const copyUtm = async (overrides = {}) => {
+    if (!storeUrl) return;
+    const params = new URLSearchParams();
+    const source = overrides.utmSource ?? utmSource;
+    const medium = overrides.utmMedium ?? utmMedium;
+    const campaign = overrides.utmCampaign ?? utmCampaign;
+    if (source) params.set("utm_source", source);
+    if (medium) params.set("utm_medium", medium);
+    if (campaign) params.set("utm_campaign", campaign);
+    const query = params.toString();
+    const url = query ? `${storeUrl}?${query}` : storeUrl;
+    await navigator.clipboard.writeText(url);
+    setQrCopied(true);
+    setTimeout(() => setQrCopied(false), 1500);
+  };
