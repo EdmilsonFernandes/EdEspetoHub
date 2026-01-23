@@ -577,6 +577,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     if (typeof window === 'undefined') return true;
     return localStorage.getItem('adminHeader:visible') !== 'false';
   });
+  const prevTabRef = useRef(activeTab);
 
   const storeId = session?.store?.id;
   const storeSlug = session?.store?.slug;
@@ -706,8 +707,25 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       }
     };
     window.addEventListener('adminHeader:toggle', handleToggle as EventListener);
+    window.addEventListener('adminHeader:set', handleToggle as EventListener);
     return () => window.removeEventListener('adminHeader:toggle', handleToggle as EventListener);
   }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const prev = prevTabRef.current;
+    const hideForTab = (tabId: typeof activeTab) => tabId === 'fila';
+    if (activeTab !== prev) {
+      if (hideForTab(activeTab)) {
+        localStorage.setItem('adminHeader:visible', 'false');
+        window.dispatchEvent(new CustomEvent('adminHeader:set', { detail: { visible: false } }));
+      } else if (hideForTab(prev) && !hideForTab(activeTab)) {
+        localStorage.setItem('adminHeader:visible', 'true');
+        window.dispatchEvent(new CustomEvent('adminHeader:set', { detail: { visible: true } }));
+      }
+      prevTabRef.current = activeTab;
+    }
+  }, [activeTab]);
 
 
   useEffect(() => {

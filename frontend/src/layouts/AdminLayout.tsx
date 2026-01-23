@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { AdminHeader } from '../components/Admin/AdminHeader';
 import { CaretDown } from '@phosphor-icons/react';
 
@@ -19,6 +19,17 @@ export function AdminLayout({
     const stored = localStorage.getItem('adminHeader:visible');
     return stored ? stored === 'true' : true;
   });
+  const storeSlug = useMemo(() => {
+    if (typeof window === 'undefined') return '';
+    try {
+      const raw = localStorage.getItem('adminSession');
+      if (!raw) return '';
+      const parsed = JSON.parse(raw);
+      return parsed?.store?.slug || '';
+    } catch (error) {
+      return '';
+    }
+  }, []);
   const handleToggleHeader = () => {
     setHeaderVisible((prev) => {
       const next = !prev;
@@ -29,6 +40,22 @@ export function AdminLayout({
       return next;
     });
   };
+  useEffect(() => {
+    const handleSet = (event: any) => {
+      const next = event?.detail?.visible;
+      if (typeof next === 'boolean') {
+        setHeaderVisible(next);
+      }
+    };
+    if (typeof window !== 'undefined') {
+      window.addEventListener('adminHeader:set', handleSet as EventListener);
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('adminHeader:set', handleSet as EventListener);
+      }
+    };
+  }, []);
   const shouldShowHeader = useMemo(() => showHeader && headerVisible, [showHeader, headerVisible]);
 
   return (
@@ -52,6 +79,14 @@ export function AdminLayout({
                 >
                   Fila foco
                 </button>
+                {storeSlug && (
+                  <a
+                    href={`/${storeSlug}`}
+                    className="px-3 py-1.5 rounded-full text-slate-600 hover:bg-white transition"
+                  >
+                    Cardápio
+                  </a>
+                )}
                 <button
                   type="button"
                   onClick={handleToggleHeader}
