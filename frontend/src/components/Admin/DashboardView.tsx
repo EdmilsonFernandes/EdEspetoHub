@@ -643,6 +643,13 @@ export const DashboardView = ({
               <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-3 py-2 text-[11px] text-slate-500">
                 Compartilhe o link e acompanhe as origens abaixo.
               </div>
+              <button
+                type="button"
+                onClick={() => copyUtm()}
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                {qrCopied ? 'Link copiado!' : 'Copiar link UTM'}
+              </button>
             </div>
           </div>
         </div>
