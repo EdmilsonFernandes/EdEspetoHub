@@ -354,12 +354,20 @@ export const MenuView = ({
                   <span className={`w-2 h-2 rounded-full ${isOpenNow ? "bg-emerald-600" : "bg-red-600"}`} />
                   {isOpenNow ? "Aberto agora" : "Fechado no momento"}
                 </span>
-                {todayHoursLabel && todayHoursLabel !== "Fechado hoje" && (
-                  <span className="px-2.5 py-1 rounded-full border border-slate-200 text-slate-600 bg-white font-semibold text-[11px] flex items-center gap-2">
-                    <Clock size={14} weight="duotone" />
-                    {todayHoursLabel}
-                  </span>
-                )}
+                {todayHoursLabel ? (
+                  todayHoursLabel !== "Fechado hoje" ? (
+                    <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/90 border border-slate-200 text-[11px] font-semibold text-slate-700 shadow-sm">
+                      <Clock size={13} className="text-slate-500" />
+                      <span className="uppercase tracking-[0.2em] text-[9px] text-slate-400">Hoje</span>
+                      <span className="font-bold">{todayHoursLabel}</span>
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-rose-50 border border-rose-200 text-[11px] font-semibold text-rose-700 shadow-sm">
+                      <Clock size={13} className="text-rose-500" />
+                      <span className="font-bold">Fechado hoje</span>
+                    </span>
+                  )
+                ) : null}
               </div>
             ) : (
               <div className="space-y-2">
@@ -393,12 +401,20 @@ export const MenuView = ({
                   <span className={`w-2 h-2 rounded-full ${isOpenNow ? "bg-emerald-600" : "bg-red-600"}`} />
                   {isOpenNow ? "Aberto agora" : "Fechado no momento"}
                 </span>
-                {todayHoursLabel && todayHoursLabel !== "Fechado hoje" && (
-                  <span className="px-2.5 py-1 rounded-full border border-slate-200 text-slate-600 bg-white font-semibold text-[11px] flex items-center gap-2">
-                    <Clock size={14} />
-                    {todayHoursLabel}
-                  </span>
-                )}
+                {todayHoursLabel ? (
+                  todayHoursLabel !== "Fechado hoje" ? (
+                    <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/90 border border-slate-200 text-[11px] font-semibold text-slate-700 shadow-sm">
+                      <Clock size={13} className="text-slate-500" />
+                      <span className="uppercase tracking-[0.2em] text-[9px] text-slate-400">Hoje</span>
+                      <span className="font-bold">{todayHoursLabel}</span>
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-rose-50 border border-rose-200 text-[11px] font-semibold text-rose-700 shadow-sm">
+                      <Clock size={13} className="text-rose-500" />
+                      <span className="font-bold">Fechado hoje</span>
+                    </span>
+                  )
+                ) : null}
               </div>
               </div>
             )}
