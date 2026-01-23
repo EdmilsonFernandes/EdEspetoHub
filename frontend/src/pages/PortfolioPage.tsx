@@ -131,7 +131,9 @@ export function PortfolioPage() {
 
   useEffect(() => {
     let active = true;
-    const slugs = stores.map((store) => store.slug).filter(Boolean);
+    const slugs = stores
+      .map((store) => store.slug)
+      .filter((slug): slug is string => Boolean(slug));
     if (!slugs.length) return () => {
       active = false;
     };
@@ -146,7 +148,7 @@ export function PortfolioPage() {
         .fetchHighlightsBySlug(slug)
         .then((highlights) => {
           if (!active) return;
-          const items = (highlights || []).slice(0, 3).map((item) => ({
+          const items = (highlights || []).slice(0, 3).map((item: { name?: string; price?: number }) => ({
             name: item?.name || "Produto",
             price: Number(item?.price) || 0,
           }));
@@ -157,11 +159,11 @@ export function PortfolioPage() {
             }));
             return;
           }
-          return productService.listPublicBySlug(slug).then((products) => {
+          return productService.listPublicBySlug(slug).then((products: any[]) => {
             if (!active) return;
             const fallbackItems = (products || [])
               .slice(0, 3)
-              .map((product) => {
+              .map((product: { promoPrice?: number; promoActive?: boolean; price?: number; name?: string }) => {
                 const promoPrice = product?.promoPrice != null ? Number(product.promoPrice) : null;
                 const price = product?.promoActive && promoPrice && promoPrice > 0
                   ? promoPrice
