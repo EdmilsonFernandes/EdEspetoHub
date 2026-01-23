@@ -4,6 +4,7 @@ import { ArrowUpRight, MagnifyingGlass, X } from "@phosphor-icons/react";
 import { LandingPageLayout } from "../layouts/LandingPageLayout";
 import { storeService } from "../services/storeService";
 import { productService } from "../services/productService";
+import { orderService } from "../services/orderService";
 import { resolveAssetUrl } from "../utils/resolveAssetUrl";
 import { formatCurrency } from "../utils/format";
 
@@ -141,23 +142,37 @@ export function PortfolioPage() {
         ...prev,
         [slug]: { items: [], loading: true },
       }));
-      productService
-        .listPublicBySlug(slug)
-        .then((products) => {
+      orderService
+        .fetchHighlightsBySlug(slug)
+        .then((highlights) => {
           if (!active) return;
-          const items = (products || [])
-            .slice(0, 3)
-            .map((product) => {
-              const promoPrice = product?.promoPrice != null ? Number(product.promoPrice) : null;
-              const price = product?.promoActive && promoPrice && promoPrice > 0
-                ? promoPrice
-                : Number(product?.price) || 0;
-              return { name: product?.name || "Produto", price };
-            });
-          setMenuBySlug((prev) => ({
-            ...prev,
-            [slug]: { items, loading: false },
+          const items = (highlights || []).slice(0, 3).map((item) => ({
+            name: item?.name || "Produto",
+            price: Number(item?.price) || 0,
           }));
+          if (items.length) {
+            setMenuBySlug((prev) => ({
+              ...prev,
+              [slug]: { items, loading: false },
+            }));
+            return;
+          }
+          return productService.listPublicBySlug(slug).then((products) => {
+            if (!active) return;
+            const fallbackItems = (products || [])
+              .slice(0, 3)
+              .map((product) => {
+                const promoPrice = product?.promoPrice != null ? Number(product.promoPrice) : null;
+                const price = product?.promoActive && promoPrice && promoPrice > 0
+                  ? promoPrice
+                  : Number(product?.price) || 0;
+                return { name: product?.name || "Produto", price };
+              });
+            setMenuBySlug((prev) => ({
+              ...prev,
+              [slug]: { items: fallbackItems, loading: false },
+            }));
+          });
         })
         .catch(() => {
           if (!active) return;
