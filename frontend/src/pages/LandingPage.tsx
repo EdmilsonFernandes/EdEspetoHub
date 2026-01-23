@@ -31,6 +31,8 @@ export function LandingPage() {
   const [faqActive, setFaqActive] = useState<number | null>(0);
   const [guideStep, setGuideStep] = useState(0);
   const [lightbox, setLightbox] = useState(null);
+  const touchStartRef = useRef({ x: 0, y: 0 });
+  const touchActiveRef = useRef(false);
   const guideSteps = [
     {
       title: 'Crie sua loja',
@@ -239,6 +241,27 @@ export function LandingPage() {
   const openLightbox = (shots, index = 0, label = '') => {
     if (!shots?.length) return;
     setLightbox({ shots, index, label });
+  };
+  const handleTouchStart = (event) => {
+    const touch = event.touches?.[0];
+    if (!touch) return;
+    touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+    touchActiveRef.current = true;
+  };
+  const handleTouchEnd = (event) => {
+    if (!touchActiveRef.current) return;
+    const touch = event.changedTouches?.[0];
+    if (!touch) return;
+    const deltaX = touch.clientX - touchStartRef.current.x;
+    const deltaY = touch.clientY - touchStartRef.current.y;
+    touchActiveRef.current = false;
+    if (Math.abs(deltaX) < 50) return;
+    if (Math.abs(deltaX) < Math.abs(deltaY) * 1.5) return;
+    if (deltaX > 0) {
+      handlePrevShot();
+    } else {
+      handleNextShot();
+    }
   };
   useEffect(() => {
     if (!lightbox) return;
@@ -930,6 +953,8 @@ export function LandingPage() {
           <div
             className="max-w-5xl w-full bg-white rounded-[32px] overflow-hidden shadow-[0_40px_120px_-50px_rgba(0,0,0,0.8)]"
             onClick={(event) => event.stopPropagation()}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
           >
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-5 py-4 border-b border-slate-100 bg-white/90">
                 <div>
