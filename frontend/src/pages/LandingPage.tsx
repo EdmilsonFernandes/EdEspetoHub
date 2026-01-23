@@ -236,9 +236,9 @@ export function LandingPage() {
     const nextIndex = selectedIndex >= lightbox.shots.length - 1 ? 0 : selectedIndex + 1;
     setLightbox({ shots: lightbox.shots, index: nextIndex });
   };
-  const openLightbox = (shots, index = 0) => {
+  const openLightbox = (shots, index = 0, label = '') => {
     if (!shots?.length) return;
-    setLightbox({ shots, index });
+    setLightbox({ shots, index, label });
   };
   useEffect(() => {
     if (!lightbox) return;
@@ -467,7 +467,7 @@ export function LandingPage() {
               </p>
               <div
                 className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 cursor-pointer hover:shadow-lg transition"
-                onClick={() => openLightbox(guideShots, guideStep)}
+                onClick={() => openLightbox(guideShots, guideStep, 'Guia do usuário')}
               >
                 <img
                   src={guideSteps[guideStep].image}
@@ -545,7 +545,7 @@ export function LandingPage() {
               <div
                 key={shot.title}
                 className="rounded-3xl border border-white/80 bg-white/90 shadow-[0_24px_70px_-38px_rgba(15,23,42,0.35)] overflow-hidden backdrop-blur cursor-pointer hover:-translate-y-1 hover:shadow-[0_28px_80px_-38px_rgba(15,23,42,0.45)] transition"
-                onClick={() => openLightbox(showcaseShots, index)}
+                onClick={() => openLightbox(showcaseShots, index, 'Produto real')}
               >
                 <div className="relative">
                   <img
@@ -931,13 +931,19 @@ export function LandingPage() {
             className="max-w-5xl w-full bg-white rounded-[32px] overflow-hidden shadow-[0_40px_120px_-50px_rgba(0,0,0,0.8)]"
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-5 py-4 border-b border-slate-100 bg-white/90">
-              <div>
-                <p className="text-sm font-semibold text-slate-900">{activeShot.title}</p>
-                <p className="text-xs text-slate-500">{activeShot.description}</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="hidden sm:inline text-[11px] text-slate-400 mr-2">Use ← → para navegar</span>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-5 py-4 border-b border-slate-100 bg-white/90">
+                <div>
+                  {lightbox?.label && (
+                    <p className="text-[11px] uppercase tracking-[0.3em] text-slate-400">{lightbox.label}</p>
+                  )}
+                  <p className="text-sm font-semibold text-slate-900">{activeShot.title}</p>
+                  <p className="text-xs text-slate-500">{activeShot.description}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="hidden sm:inline text-[11px] text-slate-400 mr-2">
+                    {selectedIndex + 1}/{lightbox?.shots?.length || 0}
+                  </span>
+                  <span className="hidden sm:inline text-[11px] text-slate-400 mr-2">Use ← → para navegar</span>
                 <button
                   type="button"
                   onClick={handlePrevShot}
