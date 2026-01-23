@@ -326,7 +326,9 @@ export function PaymentPage() {
                                 key={planKey}
                                 onClick={() => plan?.id && setSelectedPlanId(plan.id)}
                                 disabled={isDisabled}
-                                className={`border rounded-2xl px-3 py-3 text-left transition-all ${isSelected
+                                className={`border rounded-2xl px-3 py-3 text-left transition-all ${
+                                  !selectedPlanId && !isSelected ? 'border-red-200 bg-red-50/40' : ''
+                                } ${isSelected
                                   ? 'border-red-500 shadow-lg bg-red-50'
                                   : 'border-gray-200 hover:border-red-200'
                                   } ${isDisabled ? 'opacity-60 cursor-not-allowed' : ''}`}
