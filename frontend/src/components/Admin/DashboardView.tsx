@@ -456,20 +456,22 @@ export const DashboardView = ({
                   </button>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={() => copyUtm({ utmSource: "instagram", utmMedium: "bio" })}
-                    className="px-3 py-1.5 rounded-full text-[11px] font-semibold border border-slate-200 text-slate-600 hover:bg-slate-100"
-                  >
-                    Copiar link Instagram
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => copyUtm({ utmSource: "whatsapp", utmMedium: "status" })}
-                    className="px-3 py-1.5 rounded-full text-[11px] font-semibold border border-slate-200 text-slate-600 hover:bg-slate-100"
-                  >
-                    Copiar link WhatsApp
-                  </button>
+                  {[
+                    { label: "Instagram", utmSource: "instagram", utmMedium: "bio" },
+                    { label: "WhatsApp", utmSource: "whatsapp", utmMedium: "status" },
+                    { label: "Facebook", utmSource: "facebook", utmMedium: "feed" },
+                    { label: "Google Ads", utmSource: "google", utmMedium: "cpc" },
+                    { label: "TikTok", utmSource: "tiktok", utmMedium: "video" },
+                  ].map((preset) => (
+                    <button
+                      key={preset.label}
+                      type="button"
+                      onClick={() => copyUtm({ utmSource: preset.utmSource, utmMedium: preset.utmMedium })}
+                      className="px-3 py-1.5 rounded-full text-[11px] font-semibold border border-slate-200 text-slate-600 hover:bg-slate-100"
+                    >
+                      Copiar link {preset.label}
+                    </button>
+                  ))}
                 </div>
                 <p className="text-[11px] text-slate-500">
                   Link pronto para compartilhar no Instagram, WhatsApp ou anúncios.
