@@ -26,6 +26,9 @@ export const DashboardView = ({
   linkStats = null,
 }) => {
   const [qrCopied, setQrCopied] = useState(false);
+  const [utmSource, setUtmSource] = useState("instagram");
+  const [utmMedium, setUtmMedium] = useState("bio");
+  const [utmCampaign, setUtmCampaign] = useState("organico");
   const [periodDays, setPeriodDays] = useState("30");
   const nowDate = new Date();
   const currentMonthKey = `${nowDate.getFullYear()}-${String(nowDate.getMonth() + 1).padStart(2, "0")}`;
@@ -36,6 +39,18 @@ export const DashboardView = ({
   const linkStatsLabel = linkStats?.days ? `${linkStats.days} dias` : "7 dias";
   const linkStatsTotal = linkStats?.total ?? 0;
   const linkStatsSource = linkStats?.topSource || "direto";
+  const linkStatsTop = Array.isArray(linkStats?.sources)
+    ? linkStats.sources.slice(0, 3)
+    : [];
+  const utmUrl = useMemo(() => {
+    if (!storeUrl) return "";
+    const params = new URLSearchParams();
+    if (utmSource) params.set("utm_source", utmSource);
+    if (utmMedium) params.set("utm_medium", utmMedium);
+    if (utmCampaign) params.set("utm_campaign", utmCampaign);
+    const query = params.toString();
+    return query ? `${storeUrl}?${query}` : storeUrl;
+  }, [storeUrl, utmSource, utmMedium, utmCampaign]);
 
   const formatMonthLabel = (key) => {
     if (!key) return "";
@@ -349,13 +364,80 @@ export const DashboardView = ({
       )}
       {storeUrl && (
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-          <div className="flex flex-col md:flex-row md:items-center gap-5">
+          <div className="flex flex-col lg:flex-row lg:items-center gap-5">
             <div className="flex-1 space-y-2">
               <p className="text-xs uppercase tracking-[0.35em] text-slate-400">QR do cardápio</p>
               <h3 className="text-xl font-black text-slate-900">Imprima e coloque nas mesas</h3>
               <p className="text-sm text-slate-500">
                 O cliente aponta a câmera, abre o cardápio e faz o pedido em segundos.
               </p>
+              <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 space-y-3">
+                <div className="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.28em] text-slate-400">
+                  Link de divulgação automático
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {["instagram", "whatsapp", "google", "outros"].map((option) => (
+                    <button
+                      key={option}
+                      type="button"
+                      onClick={() => setUtmSource(option)}
+                      className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition ${
+                        utmSource === option
+                          ? "bg-brand-primary text-white border-brand-primary"
+                          : "bg-white text-slate-600 border-slate-200 hover:bg-slate-100"
+                      }`}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {["bio", "link", "anuncio", "promo"].map((option) => (
+                    <button
+                      key={option}
+                      type="button"
+                      onClick={() => setUtmMedium(option)}
+                      className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition ${
+                        utmMedium === option
+                          ? "bg-brand-secondary text-white border-brand-secondary"
+                          : "bg-white text-slate-600 border-slate-200 hover:bg-slate-100"
+                      }`}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+                <input
+                  type="text"
+                  value={utmCampaign}
+                  onChange={(event) => setUtmCampaign(event.target.value)}
+                  placeholder="Campanha (ex: janeiro)"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:ring-2 focus:ring-brand-primary"
+                />
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(utmUrl || storeUrl);
+                      setQrCopied(true);
+                      setTimeout(() => setQrCopied(false), 1500);
+                    }}
+                    className="px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                  >
+                    {qrCopied ? "Link copiado!" : "Copiar link com UTM"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => window.open(utmUrl || storeUrl, "_blank")}
+                    className="px-3 py-2 rounded-lg bg-brand-primary text-white text-xs font-semibold hover:opacity-90"
+                  >
+                    Abrir link
+                  </button>
+                </div>
+                <p className="text-[11px] text-slate-500">
+                  Link pronto para compartilhar no Instagram, WhatsApp ou anúncios.
+                </p>
+              </div>
             </div>
             <div className="flex items-center gap-4">
               <div className="w-24 h-24 rounded-2xl border border-slate-200 bg-slate-50 flex items-center justify-center overflow-hidden">
@@ -490,6 +572,18 @@ export const DashboardView = ({
               <p className="text-xs text-gray-500 mt-1">
                 {linkStatsLabel} · Origem: {linkStatsSource}
               </p>
+              {linkStatsTop.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {linkStatsTop.map((entry) => (
+                    <span
+                      key={entry.source}
+                      className="px-2 py-1 rounded-full bg-slate-100 text-[11px] font-semibold text-slate-600"
+                    >
+                      {entry.source} · {entry.total}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
             <div className="p-3 bg-brand-secondary-soft rounded-lg text-brand-secondary">
               <LinkSimple weight="duotone" />
