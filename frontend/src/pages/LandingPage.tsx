@@ -24,14 +24,13 @@ export function LandingPage() {
   const [isAnnual, setIsAnnual] = useState(false);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [plans, setPlans] = useState([]);
-  const [selectedShot, setSelectedShot] = useState(null);
   const [publicMetrics, setPublicMetrics] = useState(null);
   const [ticketAverage, setTicketAverage] = useState('20');
   const [ordersPerDay, setOrdersPerDay] = useState('15');
   const [faqOpen, setFaqOpen] = useState(false);
   const [faqActive, setFaqActive] = useState<number | null>(0);
   const [guideStep, setGuideStep] = useState(0);
-  const [guideShot, setGuideShot] = useState(null);
+  const [lightbox, setLightbox] = useState(null);
   const guideSteps = [
     {
       title: 'Crie sua loja',
@@ -216,22 +215,33 @@ export function LandingPage() {
 
   const billingKey = isAnnual ? 'yearly' : 'monthly';
   const billing = BILLING_OPTIONS[billingKey];
-  const selectedIndex = useMemo(
-    () => showcaseShots.findIndex((shot) => shot.title === selectedShot?.title),
-    [showcaseShots, selectedShot]
+  const guideShots = useMemo(
+    () =>
+      guideSteps.map((step) => ({
+        title: step.title,
+        description: step.summary,
+        image: step.image,
+      })),
+    [guideSteps]
   );
+  const activeShot = lightbox?.shots?.[lightbox.index];
+  const selectedIndex = lightbox?.index ?? 0;
   const handlePrevShot = () => {
-    if (!showcaseShots.length) return;
-    const nextIndex = selectedIndex <= 0 ? showcaseShots.length - 1 : selectedIndex - 1;
-    setSelectedShot(showcaseShots[nextIndex]);
+    if (!lightbox?.shots?.length) return;
+    const nextIndex = selectedIndex <= 0 ? lightbox.shots.length - 1 : selectedIndex - 1;
+    setLightbox({ shots: lightbox.shots, index: nextIndex });
   };
   const handleNextShot = () => {
-    if (!showcaseShots.length) return;
-    const nextIndex = selectedIndex >= showcaseShots.length - 1 ? 0 : selectedIndex + 1;
-    setSelectedShot(showcaseShots[nextIndex]);
+    if (!lightbox?.shots?.length) return;
+    const nextIndex = selectedIndex >= lightbox.shots.length - 1 ? 0 : selectedIndex + 1;
+    setLightbox({ shots: lightbox.shots, index: nextIndex });
+  };
+  const openLightbox = (shots, index = 0) => {
+    if (!shots?.length) return;
+    setLightbox({ shots, index });
   };
   useEffect(() => {
-    if (!selectedShot) return;
+    if (!lightbox) return;
     const handleKey = (event: KeyboardEvent) => {
       if (event.key === 'ArrowLeft') {
         event.preventDefault();
@@ -243,24 +253,12 @@ export function LandingPage() {
       }
       if (event.key === 'Escape') {
         event.preventDefault();
-        setSelectedShot(null);
+        setLightbox(null);
       }
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [selectedShot, handlePrevShot, handleNextShot]);
-
-  useEffect(() => {
-    if (!guideShot) return;
-    const handleKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        event.preventDefault();
-        setGuideShot(null);
-      }
-    };
-    window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
-  }, [guideShot]);
+  }, [lightbox, handlePrevShot, handleNextShot]);
   const parsedTicket = Math.max(0, Number(ticketAverage) || 0);
   const parsedOrders = Math.max(0, Number(ordersPerDay) || 0);
   const monthlyEstimate = parsedTicket * parsedOrders * 30;
@@ -469,13 +467,7 @@ export function LandingPage() {
               </p>
               <div
                 className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 cursor-pointer hover:shadow-lg transition"
-                onClick={() =>
-                  setGuideShot({
-                    title: guideSteps[guideStep].title,
-                    description: guideSteps[guideStep].summary,
-                    image: guideSteps[guideStep].image,
-                  })
-                }
+                onClick={() => openLightbox(guideShots, guideStep)}
               >
                 <img
                   src={guideSteps[guideStep].image}
@@ -549,11 +541,11 @@ export function LandingPage() {
           </div>
 
           <div className="mt-10 grid gap-6 md:grid-cols-2">
-            {showcaseShots.map((shot) => (
+            {showcaseShots.map((shot, index) => (
               <div
                 key={shot.title}
                 className="rounded-3xl border border-white/80 bg-white/90 shadow-[0_24px_70px_-38px_rgba(15,23,42,0.35)] overflow-hidden backdrop-blur cursor-pointer hover:-translate-y-1 hover:shadow-[0_28px_80px_-38px_rgba(15,23,42,0.45)] transition"
-                onClick={() => setSelectedShot(shot)}
+                onClick={() => openLightbox(showcaseShots, index)}
               >
                 <div className="relative">
                   <img
@@ -577,36 +569,6 @@ export function LandingPage() {
           </div>
         </div>
       </section>
-
-      {guideShot && (
-        <div
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4"
-          onClick={() => setGuideShot(null)}
-        >
-          <div
-            className="relative max-w-5xl w-full bg-white rounded-3xl overflow-hidden shadow-2xl"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <button
-              onClick={() => setGuideShot(null)}
-              className="absolute top-4 right-4 bg-white/90 border border-slate-200 rounded-full w-10 h-10 flex items-center justify-center font-bold text-slate-700 hover:bg-white"
-            >
-              ✕
-            </button>
-            <div className="bg-slate-900">
-              <img
-                src={guideShot.image}
-                alt={guideShot.title}
-                className="w-full max-h-[70vh] object-contain bg-slate-900"
-              />
-            </div>
-            <div className="p-5 sm:p-6">
-              <h3 className="text-xl font-black text-slate-900">{guideShot.title}</h3>
-              <p className="text-sm text-slate-600 mt-2">{guideShot.description}</p>
-            </div>
-          </div>
-        </div>
-      )}
 
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
         <div className="rounded-[32px] border border-slate-200 bg-white shadow-[0_24px_70px_-50px_rgba(15,23,42,0.5)] overflow-hidden">
@@ -960,10 +922,10 @@ export function LandingPage() {
         </div>
       </section>
 
-      {selectedShot && (
+      {lightbox && activeShot && (
         <div
           className="fixed inset-0 z-50 bg-gradient-to-br from-black/70 via-black/60 to-black/80 backdrop-blur-sm flex items-center justify-center p-4"
-          onClick={() => setSelectedShot(null)}
+          onClick={() => setLightbox(null)}
         >
           <div
             className="max-w-5xl w-full bg-white rounded-[32px] overflow-hidden shadow-[0_40px_120px_-50px_rgba(0,0,0,0.8)]"
@@ -971,8 +933,8 @@ export function LandingPage() {
           >
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-5 py-4 border-b border-slate-100 bg-white/90">
               <div>
-                <p className="text-sm font-semibold text-slate-900">{selectedShot.title}</p>
-                <p className="text-xs text-slate-500">{selectedShot.description}</p>
+                <p className="text-sm font-semibold text-slate-900">{activeShot.title}</p>
+                <p className="text-xs text-slate-500">{activeShot.description}</p>
               </div>
               <div className="flex items-center gap-2">
                 <span className="hidden sm:inline text-[11px] text-slate-400 mr-2">Use ← → para navegar</span>
@@ -992,7 +954,7 @@ export function LandingPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setSelectedShot(null)}
+                  onClick={() => setLightbox(null)}
                   className="px-4 py-1.5 rounded-full text-xs font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50"
                 >
                   Fechar
@@ -1001,8 +963,8 @@ export function LandingPage() {
             </div>
             <div className="bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-3 sm:p-4">
               <img
-                src={selectedShot.image}
-                alt={selectedShot.title}
+                src={activeShot.image}
+                alt={activeShot.title}
                 className="w-full h-[72vh] object-contain rounded-2xl border border-white/10 shadow-[0_18px_60px_-32px_rgba(0,0,0,0.9)]"
               />
             </div>
