@@ -3,7 +3,9 @@ import { Link } from "react-router-dom";
 import { ArrowUpRight, MagnifyingGlass, X } from "@phosphor-icons/react";
 import { LandingPageLayout } from "../layouts/LandingPageLayout";
 import { storeService } from "../services/storeService";
+import { productService } from "../services/productService";
 import { resolveAssetUrl } from "../utils/resolveAssetUrl";
+import { formatCurrency } from "../utils/format";
 
 /**
  * Type definition for a team member. Adding this type allows TypeScript to
@@ -103,6 +105,7 @@ export function PortfolioPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [profilePreview, setProfilePreview] = useState<{ name: string; image: string } | null>(null);
+  const [menuBySlug, setMenuBySlug] = useState<Record<string, { items: { name: string; price: number }[]; loading: boolean }>>({});
 
   useEffect(() => {
     let active = true;
@@ -124,6 +127,51 @@ export function PortfolioPage() {
       active = false;
     };
   }, []);
+
+  useEffect(() => {
+    let active = true;
+    const slugs = stores.map((store) => store.slug).filter(Boolean);
+    if (!slugs.length) return () => {
+      active = false;
+    };
+
+    slugs.forEach((slug) => {
+      if (menuBySlug[slug]) return;
+      setMenuBySlug((prev) => ({
+        ...prev,
+        [slug]: { items: [], loading: true },
+      }));
+      productService
+        .listPublicBySlug(slug)
+        .then((products) => {
+          if (!active) return;
+          const items = (products || [])
+            .slice(0, 3)
+            .map((product) => {
+              const promoPrice = product?.promoPrice != null ? Number(product.promoPrice) : null;
+              const price = product?.promoActive && promoPrice && promoPrice > 0
+                ? promoPrice
+                : Number(product?.price) || 0;
+              return { name: product?.name || "Produto", price };
+            });
+          setMenuBySlug((prev) => ({
+            ...prev,
+            [slug]: { items, loading: false },
+          }));
+        })
+        .catch(() => {
+          if (!active) return;
+          setMenuBySlug((prev) => ({
+            ...prev,
+            [slug]: { items: [], loading: false },
+          }));
+        });
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [stores, menuBySlug]);
 
   const filteredStores = useMemo(() => {
     const normalized = query.trim().toLowerCase();
@@ -218,6 +266,8 @@ export function PortfolioPage() {
                 const description = store?.settings?.description || "Loja ativa no Chama no Espeto.";
                 const primary = store?.settings?.primaryColor || "#dc2626";
                 const secondary = store?.settings?.secondaryColor || "#111827";
+                const slug = store?.slug || "";
+                const menuInfo = slug ? menuBySlug[slug] : null;
                 return (
                   <Link
                     key={store.id || store.slug}
@@ -257,18 +307,20 @@ export function PortfolioPage() {
                       <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                         <p className="text-[11px] uppercase tracking-[0.3em] text-slate-400">Mini cardápio</p>
                         <div className="mt-3 space-y-2 text-xs text-slate-600">
-                          {[
-                            { label: 'Espetos', price: 'R$ 8,90' },
-                            { label: 'Porções', price: 'R$ 24,90' },
-                            { label: 'Bebidas', price: 'R$ 6,00' },
-                          ].map((item) => (
-                            <div key={item.label} className="flex items-center justify-between">
-                              <span className="font-semibold text-slate-700">{item.label}</span>
+                          {menuInfo?.loading && (
+                            <div className="text-xs text-slate-400">Carregando produtos...</div>
+                          )}
+                          {!menuInfo?.loading && menuInfo?.items?.length === 0 && (
+                            <div className="text-xs text-slate-400">Sem produtos cadastrados.</div>
+                          )}
+                          {menuInfo?.items?.map((item) => (
+                            <div key={item.name} className="flex items-center justify-between">
+                              <span className="font-semibold text-slate-700">{item.name}</span>
                               <span
                                 className="px-2 py-0.5 rounded-full text-[10px] font-semibold text-white"
                                 style={{ backgroundColor: primary }}
                               >
-                                {item.price}
+                                {formatCurrency(item.price)}
                               </span>
                             </div>
                           ))}
