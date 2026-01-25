@@ -66,6 +66,29 @@ const getCategoryIcon = (categoryId = '') => {
   return known?.icon || DotsThree;
 };
 
+const dayLabels: Record<string, string> = {
+  mon: 'Seg',
+  tue: 'Ter',
+  wed: 'Qua',
+  thu: 'Qui',
+  fri: 'Sex',
+  sat: 'Sáb',
+  sun: 'Dom',
+};
+
+const formatAvailabilityDays = (availabilityDays?: Record<string, boolean> | null) => {
+  if (!availabilityDays || Object.keys(availabilityDays).length === 0) {
+    return 'Todos os dias';
+  }
+  const activeDays = Object.entries(availabilityDays)
+    .filter(([, enabled]) => Boolean(enabled))
+    .map(([key]) => dayLabels[key] || key);
+  if (!activeDays.length) {
+    return 'Todos os dias';
+  }
+  return activeDays.join(', ');
+};
+
 const normalizeAvailabilityState = (value) => {
   if (!value || typeof value !== 'object') return { ...defaultAvailability };
   return WEEK_DAYS.reduce((acc, day) => {
@@ -748,6 +771,9 @@ export const ProductManager = ({ products, onProductsChange }) => {
                     </span>
                   </div>
                   <p className="text-xs text-gray-500">{formatCategoryLabel(product.category)}</p>
+                  <p className="text-[11px] text-slate-500">
+                    Dias: {formatAvailabilityDays(product.availabilityDays)}
+                  </p>
                   <div className="mt-2">
                     {product.promoActive && product.promoPrice ? (
                       <div className="flex items-center gap-2">
@@ -830,6 +856,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
               <th className="p-4 font-bold text-gray-600">Categoria</th>
               <th className="p-4 font-bold text-gray-600">Preço</th>
               <th className="p-4 font-bold text-gray-600">Status</th>
+              <th className="p-4 font-bold text-gray-600">Dias</th>
               <th className="p-4 font-bold text-gray-600 text-right">Ações</th>
             </tr>
           </thead>
@@ -892,6 +919,11 @@ export const ProductManager = ({ products, onProductsChange }) => {
                       }`}
                     >
                       {product.active === false ? 'Inativo' : 'Ativo'}
+                    </span>
+                  </td>
+                  <td className="p-4">
+                    <span className="text-xs text-slate-600">
+                      {formatAvailabilityDays(product.availabilityDays)}
                     </span>
                   </td>
                   <td className="p-4 text-right space-x-2">
