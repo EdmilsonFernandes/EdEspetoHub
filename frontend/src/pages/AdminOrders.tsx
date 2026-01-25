@@ -83,8 +83,10 @@ export function AdminOrders() {
   }, [orders]);
 
   const statusStyles = (status) => {
-    if (status === 'preparing') return 'bg-amber-100 text-amber-800';
-    if (status === 'done') return 'bg-green-100 text-green-800';
+    if (status === 'pending') return 'bg-amber-100 text-amber-800';
+    if (status === 'preparing') return 'bg-sky-100 text-sky-700';
+    if (status === 'ready') return 'bg-violet-100 text-violet-700';
+    if (status === 'done') return 'bg-emerald-100 text-emerald-800';
     if (status === 'cancelled') return 'bg-slate-100 text-slate-600';
     return 'bg-red-100 text-red-700';
   };

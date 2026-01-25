@@ -169,6 +169,12 @@ export const MenuView = ({
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [showStoreDetails, setShowStoreDetails] = useState(false);
+  const mapQuery = storeAddress ? encodeURIComponent(storeAddress) : "";
+  const googleMapsUrl = mapQuery
+    ? `https://www.google.com/maps/search/?api=1&query=${mapQuery}`
+    : "";
+  const wazeUrl = mapQuery ? `https://waze.com/ul?q=${mapQuery}&navigate=yes` : "";
   const resolvePromoPrice = (item) => {
     const promoPrice = item?.promoPrice != null ? Number(item.promoPrice) : null;
     if (item?.promoActive && promoPrice && promoPrice > 0) {
@@ -309,6 +315,58 @@ export const MenuView = ({
                 <h2 className="text-lg sm:text-xl font-black text-slate-900 mt-1">
                   {branding?.brandName || "Seu Espeto"}
                 </h2>
+              </div>
+            )}
+
+            {!compactHeader && storeAddress && (
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowStoreDetails((prev) => !prev)}
+                  className="px-3 py-1.5 rounded-full text-xs font-semibold border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 transition"
+                >
+                  {showStoreDetails ? "Ocultar detalhes" : "Detalhes da loja"}
+                </button>
+              </div>
+            )}
+
+            {!compactHeader && showStoreDetails && storeAddress && (
+              <div className="rounded-2xl border border-slate-200 bg-white/90 p-4">
+                <a
+                  href={googleMapsUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-start gap-3 hover:opacity-90 transition"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center flex-shrink-0">
+                    <MapPin size={18} weight="duotone" />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                      Endereço da loja
+                    </p>
+                    <p className="text-sm font-semibold text-slate-900">{storeAddress}</p>
+                    <p className="text-xs text-slate-500">Toque para abrir no mapa</p>
+                  </div>
+                </a>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <a
+                    href={googleMapsUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-3 py-2 rounded-full text-xs font-semibold border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 transition"
+                  >
+                    Abrir no Google Maps
+                  </a>
+                  <a
+                    href={wazeUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-3 py-2 rounded-full text-xs font-semibold border border-brand-primary text-brand-primary bg-brand-primary-soft hover:opacity-90 transition"
+                  >
+                    Abrir no Waze
+                  </a>
+                </div>
               </div>
             )}
 
