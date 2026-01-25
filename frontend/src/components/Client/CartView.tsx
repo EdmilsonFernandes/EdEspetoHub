@@ -228,6 +228,9 @@ export const CartView = ({
   const deliveryDebug = useMemo(() => {
     if (!isDelivery) return null;
     const hasAddressParts = Boolean(customer.street || customer.city || customer.state || customer.cep);
+    const distanceLabel = deliveryCheck?.status === "idle" && normalizedStoreAddress
+      ? "aguardando coordenadas"
+      : deliveryCheck?.status || "idle";
     return [
       {
         label: "Loja",
@@ -239,7 +242,7 @@ export const CartView = ({
       },
       {
         label: "Distância",
-        value: deliveryCheck?.status || "idle",
+        value: distanceLabel,
       },
     ];
   }, [

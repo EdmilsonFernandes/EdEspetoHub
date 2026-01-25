@@ -498,6 +498,7 @@ export function StorePage() {
 
   useEffect(() => {
     if (!storeAddress || storeCoords || !storeSlug) return;
+    let attempts = 0;
     const controller = new AbortController();
     const loadCoords = async () => {
       try {
@@ -510,10 +511,15 @@ export function StorePage() {
           const next = { lat: Number(data[0].lat), lon: Number(data[0].lon) };
           setStoreCoords(next);
           localStorage.setItem(`store:coords:${storeSlug}`, JSON.stringify(next));
+          return;
         }
       } catch (error) {
         if (error?.name === 'AbortError') return;
         console.error('Falha ao carregar coordenadas da loja', error);
+      }
+      attempts += 1;
+      if (attempts < 3) {
+        window.setTimeout(loadCoords, 1200);
       }
     };
     loadCoords();
