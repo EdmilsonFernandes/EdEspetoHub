@@ -171,6 +171,18 @@ export const MenuView = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [showStoreDetails, setShowStoreDetails] = useState(false);
+  const formatStoreAddress = (address = "") => {
+    const raw = address.toString().trim();
+    if (!raw) return { line1: "", line2: "", cep: "" };
+    const parts = raw.split("|").map((part) => part.trim()).filter(Boolean);
+    const cepPart = parts.find((part) => /cep/i.test(part));
+    const cep = cepPart ? cepPart.replace(/cep/i, "").replace(/[:\-]/g, "").trim() : "";
+    const filtered = parts.filter((part) => part !== cepPart);
+    const line1 = filtered[0] || raw;
+    const line2 = filtered.slice(1).join(" · ");
+    return { line1, line2, cep };
+  };
+  const formattedAddress = formatStoreAddress(storeAddress);
   const mapQuery = storeAddress ? encodeURIComponent(storeAddress) : "";
   const googleMapsUrl = mapQuery
     ? `https://www.google.com/maps/search/?api=1&query=${mapQuery}`
@@ -346,7 +358,15 @@ export const MenuView = ({
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                       Endereço da loja
                     </p>
-                    <p className="text-sm font-semibold text-slate-900">{storeAddress}</p>
+                    <div className="text-sm font-semibold text-slate-900">
+                      <p>{formattedAddress.line1}</p>
+                      {formattedAddress.line2 && (
+                        <p className="text-xs font-medium text-slate-600">{formattedAddress.line2}</p>
+                      )}
+                      {formattedAddress.cep && (
+                        <p className="text-xs text-slate-500">CEP {formattedAddress.cep}</p>
+                      )}
+                    </div>
                     <p className="text-xs text-slate-500">Toque para abrir no mapa</p>
                   </div>
                 </a>
