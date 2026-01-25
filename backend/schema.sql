@@ -48,6 +48,8 @@ CREATE TABLE IF NOT EXISTS store_settings (
   pix_key TEXT,
   contact_email TEXT,
   promo_message TEXT,
+  delivery_radius_km NUMERIC(10,2),
+  delivery_fee NUMERIC(10,2),
   social_links JSONB DEFAULT '[]',
   opening_hours JSONB DEFAULT '[]'
 );
@@ -66,6 +68,10 @@ ALTER TABLE store_settings
 ADD COLUMN IF NOT EXISTS contact_email TEXT;
 ALTER TABLE store_settings
 ADD COLUMN IF NOT EXISTS promo_message TEXT;
+ALTER TABLE store_settings
+ADD COLUMN IF NOT EXISTS delivery_radius_km NUMERIC(10,2);
+ALTER TABLE store_settings
+ADD COLUMN IF NOT EXISTS delivery_fee NUMERIC(10,2);
 
 CREATE TABLE IF NOT EXISTS products (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -92,6 +98,8 @@ CREATE TABLE IF NOT EXISTS orders (
   type TEXT NOT NULL DEFAULT 'delivery',
   status TEXT NOT NULL DEFAULT 'pending',
   payment_method TEXT,
+  cash_tendered NUMERIC(10,2),
+  delivery_fee NUMERIC(10,2),
   total NUMERIC(10,2) NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -100,6 +108,8 @@ ALTER TABLE orders
 ADD COLUMN IF NOT EXISTS table_number TEXT;
 ALTER TABLE orders
 ADD COLUMN IF NOT EXISTS cash_tendered NUMERIC(10,2);
+ALTER TABLE orders
+ADD COLUMN IF NOT EXISTS delivery_fee NUMERIC(10,2);
 
 CREATE TABLE IF NOT EXISTS order_items (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

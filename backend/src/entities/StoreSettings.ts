@@ -48,6 +48,12 @@ export class StoreSettings
   @Column({ name: 'promo_message', type: 'text', nullable: true })
   promoMessage?: string | null;
 
+  @Column('decimal', { name: 'delivery_radius_km', precision: 10, scale: 2, nullable: true })
+  deliveryRadiusKm?: number | null;
+
+  @Column('decimal', { name: 'delivery_fee', precision: 10, scale: 2, nullable: true })
+  deliveryFee?: number | null;
+
   @Column({
     name: 'social_links',
     type: 'jsonb',

@@ -26,6 +26,7 @@ export interface CreateOrderDto {
   type: string;
   paymentMethod?: string;
   cashTendered?: number;
+  deliveryFee?: number;
   items: CreateOrderItemInput[];
   storeId: string;
 }

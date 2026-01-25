@@ -48,12 +48,24 @@ export async function runMigrations() {
     ADD COLUMN IF NOT EXISTS promo_message TEXT;
   `);
   await AppDataSource.query(`
+    ALTER TABLE IF EXISTS store_settings
+    ADD COLUMN IF NOT EXISTS delivery_radius_km NUMERIC(10,2);
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS store_settings
+    ADD COLUMN IF NOT EXISTS delivery_fee NUMERIC(10,2);
+  `);
+  await AppDataSource.query(`
     ALTER TABLE IF EXISTS orders
     ADD COLUMN IF NOT EXISTS table_number TEXT;
   `);
   await AppDataSource.query(`
     ALTER TABLE IF EXISTS orders
     ADD COLUMN IF NOT EXISTS cash_tendered NUMERIC(10,2);
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS orders
+    ADD COLUMN IF NOT EXISTS delivery_fee NUMERIC(10,2);
   `);
   await AppDataSource.query(`
     ALTER TABLE IF EXISTS products

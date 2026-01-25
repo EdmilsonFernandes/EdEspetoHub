@@ -224,8 +224,11 @@ export class OrderService
       total += orderItem.price;
     }
 
+    const deliveryFee = order.deliveryFee ? Number(order.deliveryFee) : 0;
+    const deliveryFeeValue = Number.isNaN(deliveryFee) ? 0 : deliveryFee;
+
     order.items = nextItems;
-    order.total = total;
+    order.total = total + deliveryFeeValue;
 
     return this.orderRepository.save(order);
   }
@@ -314,6 +317,13 @@ export class OrderService
       input.paymentMethod === 'dinheiro' && input.cashTendered !== undefined && input.cashTendered !== null
         ? Number(input.cashTendered)
         : null;
+    const deliveryFee =
+      input.type === 'delivery' && input.deliveryFee !== undefined && input.deliveryFee !== null
+        ? Number(input.deliveryFee)
+        : null;
+    const deliveryFeeValue = !Number.isNaN(Number(deliveryFee)) && Number(deliveryFee) > 0
+      ? Number(deliveryFee)
+      : 0;
 
     return this.orderRepository.create({
       customerName: input.customerName,
@@ -323,8 +333,9 @@ export class OrderService
       type: input.type,
       paymentMethod: input.paymentMethod,
       cashTendered,
+      deliveryFee: deliveryFeeValue || null,
       items,
-      total,
+      total: total + deliveryFeeValue,
       store: store!,
     } as Order);
   }

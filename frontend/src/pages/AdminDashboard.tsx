@@ -599,6 +599,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     contactEmail: session?.store?.settings?.contactEmail || '',
     promoMessage: session?.store?.settings?.promoMessage || '',
     instagram: instagramHandle?.replace('@', '') || '',
+    deliveryRadiusKm: session?.store?.settings?.deliveryRadiusKm || '',
+    deliveryFee: session?.store?.settings?.deliveryFee || '',
   }));
   const [savingBranding, setSavingBranding] = useState(false);
 
@@ -644,6 +646,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       contactEmail: session?.store?.settings?.contactEmail || '',
       promoMessage: session?.store?.settings?.promoMessage || '',
       instagram: instagramHandle?.replace('@', '') || '',
+      deliveryRadiusKm: session?.store?.settings?.deliveryRadiusKm || '',
+      deliveryFee: session?.store?.settings?.deliveryFee || '',
     });
   }, [
     session?.store?.name,
@@ -654,6 +658,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     session?.store?.settings?.pixKey,
     session?.store?.settings?.contactEmail,
     session?.store?.settings?.promoMessage,
+    session?.store?.settings?.deliveryRadiusKm,
+    session?.store?.settings?.deliveryFee,
     instagramHandle,
   ]);
 
@@ -851,6 +857,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         pixKey: brandingDraft.pixKey?.trim() ?? '',
         contactEmail: brandingDraft.contactEmail?.trim() ?? '',
         promoMessage: brandingDraft.promoMessage?.trim() ?? '',
+        deliveryRadiusKm: brandingDraft.deliveryRadiusKm,
+        deliveryFee: brandingDraft.deliveryFee,
         socialLinks: brandingDraft.instagram ? [{ type: 'instagram', value: brandingDraft.instagram }] : [],
       };
       const updated = await storeService.update(storeId, payload);

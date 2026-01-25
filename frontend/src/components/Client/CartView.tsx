@@ -22,6 +22,11 @@ export const CartView = ({
   paymentMethod,
   allowCustomerAutocomplete = false,
   allowedOrderTypes = [ "delivery", "pickup", "table" ],
+  deliveryRadiusKm = null,
+  deliveryFee = 0,
+  deliveryCheck = { status: "idle", distanceKm: null },
+  checkoutDisabled = false,
+  checkoutDisabledReason = "",
   onChangeCustomer,
   onChangePayment,
   onCheckout,
@@ -29,6 +34,13 @@ export const CartView = ({
 }) => {
   const cartItems = Object.values(cart);
   const total = cartItems.reduce((acc, item) => acc + item.price * item.qty, 0);
+  const normalizeNumber = (value) => {
+    if (value === null || value === undefined) return null;
+    const raw = value.toString().trim();
+    if (!raw) return null;
+    const parsed = Number(raw.replace(",", "."));
+    return Number.isNaN(parsed) ? null : parsed;
+  };
   const [suggestionsOpen, setSuggestionsOpen] = useState(false);
   const [cepLoading, setCepLoading] = useState(false);
   const [cepError, setCepError] = useState("");
@@ -45,6 +57,9 @@ export const CartView = ({
   const isCredit = paymentMethod === "credito";
   const isDebit = paymentMethod === "debito";
   const isCash = paymentMethod === "dinheiro";
+  const deliveryFeeValue = isDelivery ? normalizeNumber(deliveryFee) || 0 : 0;
+  const radiusValue = normalizeNumber(deliveryRadiusKm);
+  const totalWithFee = total + deliveryFeeValue;
 
   const actionLabel = useMemo(() => {
     if (isPickup && isPix) return "Gerar Pix e enviar pedido";
@@ -161,6 +176,50 @@ export const CartView = ({
     return `https://www.openstreetmap.org/search?query=${encodeURIComponent(address)}`;
   }, [customer, isDelivery]);
 
+  const deliveryStatus = useMemo(() => {
+    if (!isDelivery) return null;
+    if (!radiusValue) {
+      return {
+        tone: "bg-emerald-50 text-emerald-700 border-emerald-200",
+        label: "Entrega liberada (sem limite de raio).",
+      };
+    }
+    if (deliveryCheck?.status === "loading") {
+      return {
+        tone: "bg-slate-50 text-slate-600 border-slate-200",
+        label: "Calculando a distância do endereço...",
+      };
+    }
+    if (deliveryCheck?.status === "out") {
+      const distanceLabel = deliveryCheck?.distanceKm
+        ? `${deliveryCheck.distanceKm.toFixed(1)} km`
+        : "fora do limite";
+      return {
+        tone: "bg-rose-50 text-rose-700 border-rose-200",
+        label: `Endereço fora do raio (${distanceLabel} / ${radiusValue} km).`,
+      };
+    }
+    if (deliveryCheck?.status === "error") {
+      return {
+        tone: "bg-amber-50 text-amber-700 border-amber-200",
+        label: "Não foi possível validar o endereço de entrega.",
+      };
+    }
+    if (deliveryCheck?.status === "ok") {
+      const distanceLabel = deliveryCheck?.distanceKm
+        ? `${deliveryCheck.distanceKm.toFixed(1)} km`
+        : "dentro do raio";
+      return {
+        tone: "bg-emerald-50 text-emerald-700 border-emerald-200",
+        label: `Dentro do raio (${distanceLabel} / ${radiusValue} km).`,
+      };
+    }
+    return {
+      tone: "bg-slate-50 text-slate-600 border-slate-200",
+      label: "Informe o endereço para validar a entrega.",
+    };
+  }, [deliveryCheck?.distanceKm, deliveryCheck?.status, isDelivery, radiusValue]);
+
   useEffect(() => {
     const handleScroll = () => {
       setSummaryCompact(window.scrollY > 24);
@@ -196,7 +255,7 @@ export const CartView = ({
         </div>
         <div className="text-right">
           <p className="text-[11px] text-slate-400">Total</p>
-          <p className="text-base font-bold text-slate-900">{formatCurrency(total)}</p>
+          <p className="text-base font-bold text-slate-900">{formatCurrency(totalWithFee)}</p>
         </div>
       </div>
 
@@ -441,6 +500,11 @@ export const CartView = ({
                   </div>
                 </div>
               </div>
+              {deliveryStatus && (
+                <div className={`mt-3 rounded-xl border px-3 py-2 text-xs font-semibold ${deliveryStatus.tone}`}>
+                  {deliveryStatus.label}
+                </div>
+              )}
             </div>
           )}
 
@@ -516,10 +580,17 @@ export const CartView = ({
           </div>
         ))}
 
+        {isDelivery && deliveryFeeValue > 0 && (
+          <div className="flex justify-between items-center pt-4 text-sm text-slate-600">
+            <span>Frete</span>
+            <span className="font-semibold text-slate-800">{formatCurrency(deliveryFeeValue)}</span>
+          </div>
+        )}
+
         <div className="flex justify-between items-center pt-4 sm:pt-6 mt-1 sm:mt-2">
           <span className="text-gray-500 font-medium">Total a Pagar</span>
           <span className="text-2xl sm:text-3xl font-black text-gray-800">
-            {formatCurrency(total)}
+            {formatCurrency(totalWithFee)}
           </span>
         </div>
         {customer.type === "table" && customer.table && (
@@ -619,11 +690,19 @@ export const CartView = ({
       <div className="fixed bottom-0 left-0 right-0 p-4 border-t border-gray-100 max-w-lg mx-auto z-40">
         <button
           onClick={onCheckout}
-          className="w-full bg-brand-primary text-white font-bold py-4 rounded-xl shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
+          disabled={checkoutDisabled}
+          className={`w-full font-bold py-4 rounded-xl shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2 ${
+            checkoutDisabled
+              ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+              : "bg-brand-primary text-white cursor-pointer"
+          }`}
         >
           {isPickup ? <Wallet size={20} weight="duotone" /> : <PaperPlaneTilt size={20} weight="duotone" />}
           {actionLabel}
         </button>
+        {checkoutDisabled && checkoutDisabledReason && (
+          <p className="mt-2 text-center text-[11px] text-rose-600 font-semibold">{checkoutDisabledReason}</p>
+        )}
       </div>
     </div>
   );

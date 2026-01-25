@@ -33,6 +33,16 @@ export class StoreService
 {
   private subscriptionService = new SubscriptionService();
   private storeRepository = AppDataSource.getRepository(Store);
+  private parseNumber(value?: any): number | null | undefined
+  {
+    if (value === undefined) return undefined;
+    if (value === null) return null;
+    const raw = value.toString().trim();
+    if (!raw) return null;
+    const parsed = Number(raw.replace(',', '.'));
+    if (Number.isNaN(parsed)) return null;
+    return parsed;
+  }
   private normalizePixKey(value?: string)
   {
     if (!value) return undefined;
@@ -86,6 +96,8 @@ export class StoreService
       const logoUrl = await saveBase64Image(input.logoFile, `store-${input.ownerId}`);
 
       const socialLinks = sanitizeSocialLinks(input.socialLinks);
+      const deliveryRadiusKm = this.parseNumber(input.deliveryRadiusKm);
+      const deliveryFee = this.parseNumber(input.deliveryFee);
 
       // 3️⃣ Settings
       const normalizedPix = this.normalizePixKey(input.pixKey);
@@ -98,6 +110,8 @@ export class StoreService
         pixKey: normalizedPix ?? null,
         contactEmail: trimmedEmail || null,
         promoMessage: input.promoMessage?.toString().trim() || null,
+        deliveryRadiusKm: deliveryRadiusKm ?? null,
+        deliveryFee: deliveryFee ?? null,
         socialLinks,
         openingHours: input.openingHours ?? [],
         orderTypes: input.orderTypes ?? [ 'delivery', 'pickup', 'table' ],
@@ -191,6 +205,14 @@ export class StoreService
       {
         const trimmedMessage = data.promoMessage?.toString().trim();
         store.settings.promoMessage = trimmedMessage || null;
+      }
+      if (data.deliveryRadiusKm !== undefined)
+      {
+        store.settings.deliveryRadiusKm = this.parseNumber(data.deliveryRadiusKm) ?? null;
+      }
+      if (data.deliveryFee !== undefined)
+      {
+        store.settings.deliveryFee = this.parseNumber(data.deliveryFee) ?? null;
       }
 
       if (data.socialLinks)

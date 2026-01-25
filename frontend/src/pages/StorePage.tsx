@@ -34,6 +34,8 @@ export function StorePage() {
   const [storeDescription, setStoreDescription] = useState('');
   const [storeEmail, setStoreEmail] = useState('');
   const [storePixKey, setStorePixKey] = useState('');
+  const [deliveryRadiusKm, setDeliveryRadiusKm] = useState('');
+  const [deliveryFee, setDeliveryFee] = useState('');
   const [promoMessage, setPromoMessage] = useState('');
   const [openingHours, setOpeningHours] = useState([]);
   const [orderTypes, setOrderTypes] = useState([ 'delivery', 'pickup', 'table' ]);
@@ -52,6 +54,8 @@ export function StorePage() {
   const [copiedAddress, setCopiedAddress] = useState(false);
   const [copiedPhone, setCopiedPhone] = useState(false);
   const [mapCoords, setMapCoords] = useState(null);
+  const [storeCoords, setStoreCoords] = useState(null);
+  const [deliveryCheck, setDeliveryCheck] = useState({ status: 'idle', distanceKm: null });
   const [mapLoading, setMapLoading] = useState(false);
   const [mapFailed, setMapFailed] = useState(false);
   const [mapAttempted, setMapAttempted] = useState(false);
@@ -65,6 +69,33 @@ export function StorePage() {
     if (!digits) return '';
     return digits.startsWith('55') ? digits : `55${digits}`;
   }, [storePhone]);
+
+  const getNumeric = (value) => {
+    if (value === null || value === undefined) return null;
+    const raw = value.toString().trim();
+    if (!raw) return null;
+    const parsed = Number(raw.replace(',', '.'));
+    return Number.isNaN(parsed) ? null : parsed;
+  };
+
+  const haversineDistanceKm = (a, b) => {
+    if (!a || !b) return null;
+    const toRad = (val) => (val * Math.PI) / 180;
+    const lat1 = Number(a.lat);
+    const lon1 = Number(a.lon);
+    const lat2 = Number(b.lat);
+    const lon2 = Number(b.lon);
+    if ([lat1, lon1, lat2, lon2].some((v) => Number.isNaN(v))) return null;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const radLat1 = toRad(lat1);
+    const radLat2 = toRad(lat2);
+    const aVal =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(radLat1) * Math.cos(radLat2);
+    const cVal = 2 * Math.atan2(Math.sqrt(aVal), Math.sqrt(1 - aVal));
+    return 6371 * cVal;
+  };
 
   const storeUrl =
     storeSlug && typeof window !== 'undefined'
@@ -89,7 +120,25 @@ export function StorePage() {
     Boolean(storeSlug) &&
     user.store.slug === storeSlug;
 
-  const cartTotal = useMemo(() => Object.values(cart).reduce((acc, item) => acc + item.price * item.qty, 0), [cart]);
+  const cartItemsTotal = useMemo(
+    () => Object.values(cart).reduce((acc, item) => acc + item.price * item.qty, 0),
+    [cart]
+  );
+  const deliveryRadiusValue = useMemo(() => {
+    const value = getNumeric(deliveryRadiusKm);
+    if (!value || value <= 0) return null;
+    return value;
+  }, [deliveryRadiusKm]);
+  const deliveryFeeValue = useMemo(() => {
+    if (customer.type !== 'delivery') return 0;
+    const value = getNumeric(deliveryFee);
+    if (!value || value <= 0) return 0;
+    return value;
+  }, [customer.type, deliveryFee]);
+  const orderTotal = useMemo(
+    () => cartItemsTotal + deliveryFeeValue,
+    [cartItemsTotal, deliveryFeeValue]
+  );
   const instagramHandle = useMemo(() => (branding.instagram ? `@${branding.instagram.replace('@', '')}` : ''), [branding.instagram]);
   const subscriptionStatus = storeSubscription?.status;
   const isSubscriptionKnown = storeSubscription !== null && storeSubscription !== undefined;
@@ -99,6 +148,24 @@ export function StorePage() {
       ![ 'PENDING', 'CANCELLED', 'SUSPENDED', 'EXPIRED' ].includes(subscriptionStatus));
   const showInactiveState = view === 'menu' && isSubscriptionKnown && !isSubscriptionActive;
   const showClosedState = view === 'menu' && isSubscriptionActive && !storeOpenNow;
+  const deliveryValidation = useMemo(() => {
+    if (customer.type !== 'delivery' || !deliveryRadiusValue) {
+      return { blocked: false, reason: '' };
+    }
+    if (deliveryCheck.status === 'loading') {
+      return { blocked: true, reason: 'Validando distância de entrega...' };
+    }
+    if (deliveryCheck.status === 'out') {
+      return { blocked: true, reason: 'Endereço fora do raio de entrega.' };
+    }
+    if (deliveryCheck.status === 'error') {
+      return { blocked: true, reason: 'Não foi possível validar a entrega.' };
+    }
+    if (deliveryCheck.status === 'idle') {
+      return { blocked: true, reason: 'Informe o endereço para validar a entrega.' };
+    }
+    return { blocked: false, reason: '' };
+  }, [customer.type, deliveryCheck.status, deliveryRadiusValue]);
 
   const resolveItemPrice = (item) => {
     const promoPrice = item?.promoPrice != null ? Number(item.promoPrice) : null;
@@ -220,6 +287,8 @@ export function StorePage() {
           setStoreEmail(data.settings?.contactEmail || '');
           setPromoMessage(data.settings?.promoMessage || '');
           setStorePixKey(data.settings?.pixKey || '');
+          setDeliveryRadiusKm(data.settings?.deliveryRadiusKm ?? '');
+          setDeliveryFee(data.settings?.deliveryFee ?? '');
           setStoreOpenNow(isStoreOpenNow(normalizedHours));
           setStoreSubscription(data.subscription || null);
           applyStoreMeta(data);
@@ -406,6 +475,7 @@ export function StorePage() {
 
   useEffect(() => {
     setMapCoords(null);
+    setStoreCoords(null);
     setMapFailed(false);
     setMapAttempted(false);
   }, [storeAddress]);
@@ -418,11 +488,37 @@ export function StorePage() {
       const parsed = JSON.parse(cached);
       if (parsed?.lat && parsed?.lon) {
         setMapCoords(parsed);
+        setStoreCoords(parsed);
       }
     } catch (error) {
       console.error('Falha ao ler cache do mapa', error);
     }
   }, [storeSlug]);
+
+  useEffect(() => {
+    if (!storeAddress || storeCoords || !storeSlug) return;
+    const controller = new AbortController();
+    const loadCoords = async () => {
+      try {
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(storeAddress)}`,
+          { signal: controller.signal }
+        );
+        const data = await response.json();
+        if (Array.isArray(data) && data.length > 0) {
+          const next = { lat: Number(data[0].lat), lon: Number(data[0].lon) };
+          setStoreCoords(next);
+          setMapCoords((prev) => prev || next);
+          localStorage.setItem(`store:coords:${storeSlug}`, JSON.stringify(next));
+        }
+      } catch (error) {
+        if (error?.name === 'AbortError') return;
+        console.error('Falha ao carregar coordenadas da loja', error);
+      }
+    };
+    loadCoords();
+    return () => controller.abort();
+  }, [storeAddress, storeCoords, storeSlug]);
 
   useEffect(() => {
     if (!showInfoSheet || !storeAddress || mapCoords || mapLoading || mapFailed || mapAttempted) return;
@@ -458,6 +554,79 @@ export function StorePage() {
     loadCoords();
     return () => controller.abort();
   }, [showInfoSheet, storeAddress, mapCoords, mapLoading, mapFailed, storeSlug]);
+
+  useEffect(() => {
+    if (customer.type !== 'delivery') {
+      setDeliveryCheck({ status: 'idle', distanceKm: null });
+      return;
+    }
+    if (!deliveryRadiusValue) {
+      setDeliveryCheck({ status: 'ok', distanceKm: null });
+      return;
+    }
+    const address = customer.address?.trim() || '';
+    if (!address || !storeCoords) {
+      setDeliveryCheck({ status: 'idle', distanceKm: null });
+      return;
+    }
+    setDeliveryCheck((prev) => (prev.status === 'loading' ? prev : { status: 'loading', distanceKm: null }));
+
+    const normalized = address.toLowerCase().replace(/\s+/g, ' ').trim();
+    const cacheKey = storeSlug ? `delivery:coords:${storeSlug}:${normalized}` : '';
+    if (cacheKey) {
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          const distance = haversineDistanceKm(storeCoords, parsed);
+          if (distance !== null) {
+            setDeliveryCheck({
+              status: distance <= deliveryRadiusValue ? 'ok' : 'out',
+              distanceKm: distance,
+            });
+            return;
+          }
+        } catch (error) {
+          console.error('Falha ao ler cache de entrega', error);
+        }
+      }
+    }
+
+    const controller = new AbortController();
+    const timeout = window.setTimeout(async () => {
+      try {
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(address)}`,
+          { signal: controller.signal }
+        );
+        const data = await response.json();
+        if (Array.isArray(data) && data[0]?.lat && data[0]?.lon) {
+          const coords = { lat: Number(data[0].lat), lon: Number(data[0].lon) };
+          if (cacheKey) {
+            localStorage.setItem(cacheKey, JSON.stringify(coords));
+          }
+          const distance = haversineDistanceKm(storeCoords, coords);
+          if (distance !== null) {
+            setDeliveryCheck({
+              status: distance <= deliveryRadiusValue ? 'ok' : 'out',
+              distanceKm: distance,
+            });
+            return;
+          }
+        }
+        setDeliveryCheck({ status: 'error', distanceKm: null });
+      } catch (error) {
+        if (error?.name === 'AbortError') return;
+        console.error('Falha ao validar entrega', error);
+        setDeliveryCheck({ status: 'error', distanceKm: null });
+      }
+    }, 700);
+
+    return () => {
+      controller.abort();
+      window.clearTimeout(timeout);
+    };
+  }, [customer.type, customer.address, deliveryRadiusValue, storeCoords, storeSlug]);
 
   const updateCart = (item, qty, options) => {
     const cookingPoint = options?.cookingPoint ?? item?.cookingPoint;
@@ -559,6 +728,21 @@ export function StorePage() {
       return;
     }
 
+    if (customer.type === 'delivery' && deliveryRadiusValue) {
+      if (deliveryCheck.status === 'loading') {
+        showErrorNotice('Validando distância de entrega. Aguarde um instante.');
+        return;
+      }
+      if (deliveryCheck.status === 'out') {
+        showErrorNotice('Endereço fora do raio de entrega da loja.');
+        return;
+      }
+      if (deliveryCheck.status !== 'ok') {
+        showErrorNotice('Não foi possível validar a entrega. Revise o endereço.');
+        return;
+      }
+    }
+
     const isPickup = customer.type === 'pickup';
     const payment = paymentMethod;
 
@@ -573,6 +757,7 @@ export function StorePage() {
       table: customer.table,
       type: customer.type,
       paymentMethod: payment,
+      deliveryFee: customer.type === 'delivery' && deliveryFeeValue > 0 ? deliveryFeeValue : undefined,
       items: Object.values(cart).map((item) => ({
         productId: item.id,
         quantity: item.qty,
@@ -621,7 +806,8 @@ export function StorePage() {
             passSkewer: item.passSkewer,
           })),
           phone: customer.phone,
-          total: cartTotal,
+          deliveryFee: customer.type === 'delivery' && deliveryFeeValue > 0 ? deliveryFeeValue : null,
+          total: orderTotal,
           store: { name: 'Chama no Espeto Demo', slug: storeSlug },
           createdAt: Date.now(),
         })
@@ -674,7 +860,8 @@ export function StorePage() {
         '------------------',
         itemsList,
         '------------------',
-        `💰 *TOTAL: ${formatCurrency(cartTotal)}*`,
+        deliveryFeeValue > 0 ? `🚚 Frete: ${formatCurrency(deliveryFeeValue)}` : '',
+        `💰 *TOTAL: ${formatCurrency(orderTotal)}*`,
         payment === 'pix' && pixKey ? `💳 Pagamento via PIX: ${pixKey}` : '',
         payment === 'pix'
           ? PIX_KEY
@@ -698,7 +885,8 @@ export function StorePage() {
     const customerMessageLines = [
       `Pedido #${formatOrderDisplayId(createdOrder?.id, storeSlug)} - ${branding?.brandName || 'Chama no Espeto'}`,
       customerItemsList ? `Itens:\n${customerItemsList}` : '',
-      `Total: ${formatCurrency(cartTotal)}`,
+      deliveryFeeValue > 0 ? `Frete: ${formatCurrency(deliveryFeeValue)}` : '',
+      `Total: ${formatCurrency(orderTotal)}`,
       trackingLink ? `Acompanhar: ${trackingLink}` : '',
     ]
       .filter(Boolean)
@@ -1111,6 +1299,11 @@ export function StorePage() {
             paymentMethod={paymentMethod}
             allowedOrderTypes={orderTypes}
             allowCustomerAutocomplete={Boolean(user?.token)}
+            deliveryRadiusKm={deliveryRadiusValue}
+            deliveryFee={deliveryFeeValue}
+            deliveryCheck={deliveryCheck}
+            checkoutDisabled={deliveryValidation.blocked}
+            checkoutDisabledReason={deliveryValidation.reason}
             onChangeCustomer={handleCustomerChange}
             onChangePayment={setPaymentMethod}
             onCheckout={checkout}
@@ -1152,7 +1345,7 @@ export function StorePage() {
               </span>
               <span className="font-bold truncate">Ver pedido</span>
             </div>
-            <span className="font-bold text-base sm:text-lg ml-2 flex-shrink-0">{formatCurrency(cartTotal)}</span>
+            <span className="font-bold text-base sm:text-lg ml-2 flex-shrink-0">{formatCurrency(orderTotal)}</span>
           </button>
         </div>
       )}

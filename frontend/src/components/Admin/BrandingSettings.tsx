@@ -11,6 +11,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
     identity: true,
     promo: true,
     contact: true,
+    delivery: true,
     colors: true,
     access: true,
   });
@@ -208,6 +209,50 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
                 placeholder="Ex: +5511999999999 ou contato@pix.com"
               />
               <p className="text-xs text-gray-500">Usada para gerar o QR Code na confirmação de pagamento. Telefone com DDD pode começar com 0 que ajustamos para +55.</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 bg-white/80">
+          <button
+            type="button"
+            onClick={() => setSectionsOpen((prev) => ({ ...prev, delivery: !prev.delivery }))}
+            className="w-full flex items-center justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4 text-left"
+          >
+            <div>
+              <p className="text-sm font-semibold text-gray-800">Entrega por raio</p>
+              <p className="text-xs text-gray-500">Defina até onde você entrega e o valor do frete.</p>
+            </div>
+            <span className="text-xs text-gray-500 sm:hidden">{sectionsOpen.delivery ? 'Fechar' : 'Abrir'}</span>
+          </button>
+          <div className={`${sectionsOpen.delivery ? 'block' : 'hidden'} sm:block px-4 pb-4 sm:px-5 sm:pb-5 space-y-5`}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700">Raio de entrega (km)</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  value={branding.deliveryRadiusKm ?? ''}
+                  onChange={(e) => handleChange("deliveryRadiusKm", e.target.value)}
+                  className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
+                  placeholder="Ex: 20"
+                />
+                <p className="text-xs text-gray-500">Deixe vazio para aceitar entregas sem limite.</p>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700">Frete fixo (R$)</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  value={branding.deliveryFee ?? ''}
+                  onChange={(e) => handleChange("deliveryFee", e.target.value)}
+                  className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
+                  placeholder="Ex: 5,00"
+                />
+                <p className="text-xs text-gray-500">Mostrado no checkout quando o cliente escolhe entrega.</p>
+              </div>
             </div>
           </div>
         </div>

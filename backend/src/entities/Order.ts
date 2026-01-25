@@ -58,6 +58,9 @@ export class Order {
   @Column('decimal', { name: 'cash_tendered', precision: 10, scale: 2, nullable: true })
   cashTendered?: number | null;
 
+  @Column('decimal', { name: 'delivery_fee', precision: 10, scale: 2, nullable: true })
+  deliveryFee?: number | null;
+
   @Column('decimal', { precision: 10, scale: 2 })
   total!: number;
 
