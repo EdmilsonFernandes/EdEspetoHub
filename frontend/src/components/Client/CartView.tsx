@@ -138,6 +138,9 @@ export const CartView = ({
     const next = { ...customer, [field]: value };
     next.address = buildDeliveryAddress(next);
     onChangeCustomer(next);
+    if (field === "cep") {
+      setCepError("");
+    }
   };
 
   const handleCepLookup = async () => {
@@ -154,11 +157,11 @@ export const CartView = ({
       }
       const next = {
         ...customer,
-        street: customer.street || data.logradouro || "",
-        neighborhood: customer.neighborhood || data.bairro || "",
-        city: customer.city || data.localidade || "",
-        state: customer.state || data.uf || "",
-        complement: customer.complement || data.complemento || "",
+        street: data.logradouro || "",
+        neighborhood: data.bairro || "",
+        city: data.localidade || "",
+        state: data.uf || "",
+        complement: data.complemento || "",
       };
       next.address = buildDeliveryAddress(next);
       onChangeCustomer(next);
