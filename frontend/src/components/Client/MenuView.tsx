@@ -2,12 +2,10 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
   InstagramLogo,
+  WhatsappLogo,
   SquaresFour,
   Plus,
-  Clock,
-  MapPin,
   MagnifyingGlass,
-  Info,
 } from "@phosphor-icons/react";
 import { formatCurrency } from "../../utils/format";
 import { ProductModal } from "../Cart/ProductModal";
@@ -31,13 +29,9 @@ const Header = ({
   branding,
   instagramHandle,
   whatsappNumber,
-  contactEmail,
-  isOpenNow,
-  todayHoursLabel,
   onOpenQueue,
   onOpenAdmin,
-  compact,
-  onOpenInfo
+  compact
 }) => {
   const storeSlug = branding?.espetoId || "";
   const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
@@ -105,25 +99,25 @@ const Header = ({
               <span className="sm:hidden">{instagramHandle}</span>
             </a>
           )}
-          </div>
+          {normalizeWhatsApp(whatsappNumber) && (
+            <a
+              href={`https://wa.me/${normalizeWhatsApp(whatsappNumber)}`}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1 px-2 py-1 rounded-full border border-emerald-200 text-emerald-700 bg-emerald-50 font-semibold hover:underline text-[10px] sm:text-xs"
+            >
+              <WhatsappLogo size={10} weight="duotone" className="hidden sm:block" />
+              <WhatsappLogo size={9} weight="duotone" className="sm:hidden" />
+              <span className="hidden sm:inline">WhatsApp</span>
+              <span className="sm:hidden">Whats</span>
+            </a>
+          )}
+        </div>
         )}
       </div>
 
       {/* Buttons - Responsive */}
       <div className="w-full sm:w-auto flex flex-row items-center justify-end gap-2 order-last sm:order-none sm:flex-shrink-0">
-        {compact && onOpenInfo && (
-          <button
-            type="button"
-            onClick={onOpenInfo}
-            className="px-2.5 py-1.5 rounded-full text-xs font-semibold border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition"
-            aria-label="Informações da loja"
-          >
-            <span className="flex items-center gap-1">
-              <Info size={12} weight="duotone" />
-              Info
-            </span>
-          </button>
-        )}
         {onOpenQueue && (
           <div className="flex items-center rounded-full border border-slate-200 bg-white p-0.5">
             <button
@@ -166,52 +160,21 @@ export const MenuView = ({
   branding,
   instagramHandle,
   whatsappNumber,
-  contactEmail,
   promoMessage,
-  storeUrl,
-  isOpenNow,
-  todayHoursLabel,
-  storeAddress,
   showHeader = true,
   onOpenQueue,
   onOpenAdmin,
-  onOpenInfo,
   compactHeader = false
 }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [showStoreDetails, setShowStoreDetails] = useState(false);
-  const [showSaveHint, setShowSaveHint] = useState(false);
-  const mapQuery = storeAddress ? encodeURIComponent(storeAddress) : "";
-  const googleMapsUrl = mapQuery
-    ? `https://www.google.com/maps/search/?api=1&query=${mapQuery}`
-    : "";
-  const wazeUrl = mapQuery ? `https://waze.com/ul?q=${mapQuery}&navigate=yes` : "";
   const resolvePromoPrice = (item) => {
     const promoPrice = item?.promoPrice != null ? Number(item.promoPrice) : null;
     if (item?.promoActive && promoPrice && promoPrice > 0) {
       return promoPrice;
     }
     return null;
-  };
-  const handleShareMenu = async () => {
-    if (!storeUrl) return;
-    const message = `Confira o cardápio da ${branding?.brandName || "Chama no Espeto"}: ${storeUrl}`;
-    if (typeof navigator !== "undefined" && navigator.share) {
-      try {
-        await navigator.share({
-          title: branding?.brandName || "Cardápio",
-          text: message,
-          url: storeUrl,
-        });
-        return;
-      } catch (error) {
-        // ignore and fallback
-      }
-    }
-    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, "_blank");
   };
 
   const openProductModal = (product) => {
@@ -317,12 +280,9 @@ export const MenuView = ({
           branding={branding}
           instagramHandle={instagramHandle}
           whatsappNumber={whatsappNumber}
-          isOpenNow={isOpenNow}
-          todayHoursLabel={todayHoursLabel}
           onOpenQueue={onOpenQueue}
           onOpenAdmin={onOpenAdmin}
           compact={compactHeader}
-          onOpenInfo={onOpenInfo}
         />
       )}
 
@@ -341,215 +301,17 @@ export const MenuView = ({
             }}
           />
           <div className="relative space-y-4">
-            {/* Main Header Section */}
-            {compactHeader ? (
-              <div className="flex flex-wrap items-center gap-2">
-                <span
-                  className={`px-2.5 py-1 rounded-full font-semibold text-[11px] flex items-center gap-2 ${
-                    isOpenNow
-                      ? "bg-emerald-100 text-emerald-700"
-                      : "bg-red-100 text-red-700"
-                  }`}
-                >
-                  <span className={`w-2 h-2 rounded-full ${isOpenNow ? "bg-emerald-600" : "bg-red-600"}`} />
-                  {isOpenNow ? "Aberto agora" : "Fechado no momento"}
-                </span>
-                {todayHoursLabel ? (
-                  todayHoursLabel !== "Fechado hoje" ? (
-                    <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/90 border border-slate-200 text-[11px] font-semibold text-slate-700 shadow-sm">
-                      <Clock size={13} className="text-slate-500" />
-                      <span className="uppercase tracking-[0.2em] text-[9px] text-slate-400">Hoje</span>
-                      <span className="font-bold">{todayHoursLabel}</span>
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-rose-50 border border-rose-200 text-[11px] font-semibold text-rose-700 shadow-sm">
-                      <Clock size={13} className="text-rose-500" />
-                      <span className="font-bold">Fechado hoje</span>
-                    </span>
-                  )
-                ) : null}
-              </div>
-            ) : (
-              <div className="space-y-2">
+            {!showHeader && (
               <div>
-                {!showHeader && (
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-500">
-                    Bem-vindo ao nosso cardápio
-                  </p>
-                )}
-                {!showHeader && (
-                  <h2 className="text-lg sm:text-xl font-black text-slate-900 mt-1">
-                    {branding?.brandName || "Seu Espeto"}
-                  </h2>
-                )}
-                {showHeader && (
-                  <p className="text-[11px] uppercase tracking-[0.3em] font-semibold text-slate-500">
-                    Escolha seu pedido
-                  </p>
-                )}
-              </div>
-
-              {/* Status & Hours */}
-              <div className="flex flex-wrap items-center gap-2">
-                <span
-                  className={`px-2.5 py-1 rounded-full font-semibold text-[11px] flex items-center gap-2 ${
-                    isOpenNow
-                      ? "bg-emerald-100 text-emerald-700"
-                      : "bg-red-100 text-red-700"
-                  }`}
-                >
-                  <span className={`w-2 h-2 rounded-full ${isOpenNow ? "bg-emerald-600" : "bg-red-600"}`} />
-                  {isOpenNow ? "Aberto agora" : "Fechado no momento"}
-                </span>
-                {todayHoursLabel ? (
-                  todayHoursLabel !== "Fechado hoje" ? (
-                    <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/90 border border-slate-200 text-[11px] font-semibold text-slate-700 shadow-sm">
-                      <Clock size={13} className="text-slate-500" />
-                      <span className="uppercase tracking-[0.2em] text-[9px] text-slate-400">Hoje</span>
-                      <span className="font-bold">{todayHoursLabel}</span>
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-rose-50 border border-rose-200 text-[11px] font-semibold text-rose-700 shadow-sm">
-                      <Clock size={13} className="text-rose-500" />
-                      <span className="font-bold">Fechado hoje</span>
-                    </span>
-                  )
-                ) : null}
-              </div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-500">
+                  Bem-vindo ao nosso cardápio
+                </p>
+                <h2 className="text-lg sm:text-xl font-black text-slate-900 mt-1">
+                  {branding?.brandName || "Seu Espeto"}
+                </h2>
               </div>
             )}
 
-            {!compactHeader && (
-              <div className="flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowStoreDetails((prev) => !prev)}
-                  className="px-3 py-1.5 rounded-full text-xs font-semibold border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 transition flex items-center gap-2"
-                >
-                  <Info size={14} weight="duotone" />
-                  {showStoreDetails ? "Ocultar detalhes" : "Detalhes da loja"}
-                </button>
-              </div>
-            )}
-
-            {!compactHeader && showStoreDetails && storeAddress && (
-              <div className="rounded-2xl border border-slate-200 bg-white/90 p-4">
-                <a
-                  href={googleMapsUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-start gap-3 hover:opacity-90 transition"
-                >
-                  <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center flex-shrink-0">
-                    <MapPin size={18} weight="duotone" />
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                      Endereço da loja
-                    </p>
-                    <p className="text-sm font-semibold text-slate-900">{storeAddress}</p>
-                    <p className="text-xs text-slate-500">Toque para abrir no mapa</p>
-                  </div>
-                </a>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <a
-                    href={googleMapsUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="px-3 py-2 rounded-full text-xs font-semibold border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 transition"
-                  >
-                    Abrir no Google Maps
-                  </a>
-                  <a
-                    href={wazeUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="px-3 py-2 rounded-full text-xs font-semibold border border-brand-primary text-brand-primary bg-brand-primary-soft hover:opacity-90 transition"
-                  >
-                    Abrir no Waze
-                  </a>
-                </div>
-              </div>
-            )}
-
-            {/* CTA Buttons */}
-            {!compactHeader && showStoreDetails && (
-              <div className="flex flex-wrap items-center gap-2 w-full pt-1">
-              {normalizeWhatsApp(whatsappNumber) && (
-                <a
-                  href={`https://wa.me/${normalizeWhatsApp(whatsappNumber)}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="px-3.5 py-2 rounded-full text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm text-center transition"
-                >
-                  💬 WhatsApp
-                </a>
-              )}
-              {storeUrl && (
-                <button
-                  type="button"
-                  onClick={handleShareMenu}
-                  className="px-3.5 py-2 rounded-full text-xs font-semibold border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 transition"
-                >
-                📲 Compartilhar cardápio
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={() => setShowSaveHint((prev) => !prev)}
-                className="px-3.5 py-2 rounded-full text-xs font-semibold border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 transition"
-              >
-                📌 Salvar no celular
-              </button>
-              <button
-                onClick={() =>
-                  document.getElementById("menu-list")?.scrollIntoView({ behavior: "smooth", block: "start" })
-                }
-                className="px-3.5 py-2 rounded-full text-xs font-semibold border border-slate-300 text-slate-700 hover:bg-slate-50 transition"
-                type="button"
-              >
-                📋 Ver cardápio
-              </button>
-              {instagramHandle && (
-                <a
-                  href={`https://instagram.com/${instagramHandle.replace("@", "")}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="px-3.5 py-2 rounded-full text-xs font-semibold border border-brand-primary text-white bg-brand-primary hover:opacity-90 shadow-sm items-center justify-center gap-2 transition hidden sm:flex"
-                >
-                  <InstagramLogo size={16} weight="duotone" />
-                  <span>Instagram</span>
-                </a>
-              )}
-              {contactEmail && (
-                <a
-                  href={`mailto:${contactEmail}`}
-                  className="px-3.5 py-2 rounded-full text-xs font-semibold border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 transition"
-                >
-                  ✉️ Email
-                </a>
-              )}
-              </div>
-            )}
-            {!compactHeader && showStoreDetails && showSaveHint && (
-              <div className="rounded-2xl border border-slate-200 bg-white/90 p-4 text-xs text-slate-600">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">Salvar na tela inicial</p>
-                <div className="mt-2 grid gap-3 sm:grid-cols-2">
-                  <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
-                    <p className="font-semibold text-slate-700">iPhone</p>
-                    <p className="text-[11px] text-slate-500">
-                      Toque em Compartilhar → Adicionar à Tela de Início.
-                    </p>
-                  </div>
-                  <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
-                    <p className="font-semibold text-slate-700">Android</p>
-                    <p className="text-[11px] text-slate-500">
-                      Menu do navegador → Adicionar à tela inicial.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
             <div className="relative">
               <MagnifyingGlass className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input

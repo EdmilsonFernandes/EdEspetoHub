@@ -200,6 +200,17 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
               <p className="text-xs text-gray-500">Opcional, aparece no cardápio para contato.</p>
             </div>
             <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700">Endereço da loja</label>
+              <input
+                type="text"
+                value={branding.address || ""}
+                onChange={(e) => handleChange("address", e.target.value)}
+                className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
+                placeholder="Rua, numero, bairro, cidade - UF"
+              />
+              <p className="text-xs text-gray-500">Usado para mostrar localização e validação de entrega.</p>
+            </div>
+            <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700">Chave Pix da loja</label>
               <input
                 type="text"

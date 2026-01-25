@@ -156,7 +156,7 @@ export class StoreService
 
       const store = await storeRepo.findOne({
         where: { id: storeId },
-        relations: [ 'settings' ],
+        relations: [ 'settings', 'owner' ],
       });
 
       if (!store)
@@ -228,6 +228,14 @@ export class StoreService
       if (data.orderTypes)
       {
         store.settings.orderTypes = data.orderTypes;
+      }
+
+      if (data.address !== undefined && store.owner)
+      {
+        const trimmedAddress = data.address?.toString().trim();
+        store.owner.address = trimmedAddress || null;
+        const userRepo = manager.getRepository(User);
+        await userRepo.save(store.owner);
       }
 
       return storeRepo.save(store);

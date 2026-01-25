@@ -32,7 +32,6 @@ export function StorePage() {
   const [storePhone, setStorePhone] = useState('');
   const [storeAddress, setStoreAddress] = useState('');
   const [storeDescription, setStoreDescription] = useState('');
-  const [storeEmail, setStoreEmail] = useState('');
   const [storePixKey, setStorePixKey] = useState('');
   const [deliveryRadiusKm, setDeliveryRadiusKm] = useState('');
   const [deliveryFee, setDeliveryFee] = useState('');
@@ -48,17 +47,10 @@ export function StorePage() {
   const [recentPublicOrders, setRecentPublicOrders] = useState([]);
   const [lastOrderItems, setLastOrderItems] = useState([]);
   const [isMobile, setIsMobile] = useState(false);
-  const [showInfoSheet, setShowInfoSheet] = useState(false);
   const [orderNotice, setOrderNotice] = useState(null);
   const [tableNotice, setTableNotice] = useState(null);
-  const [copiedAddress, setCopiedAddress] = useState(false);
-  const [copiedPhone, setCopiedPhone] = useState(false);
-  const [mapCoords, setMapCoords] = useState(null);
   const [storeCoords, setStoreCoords] = useState(null);
   const [deliveryCheck, setDeliveryCheck] = useState({ status: 'idle', distanceKm: null });
-  const [mapLoading, setMapLoading] = useState(false);
-  const [mapFailed, setMapFailed] = useState(false);
-  const [mapAttempted, setMapAttempted] = useState(false);
   const customersStorageKey = useMemo(
     () => `customers:${storeSlug || defaultBranding.espetoId}`,
     [storeSlug]
@@ -284,7 +276,6 @@ export function StorePage() {
           setStorePhone(data.owner?.phone || '');
           setStoreAddress(data.owner?.address || '');
           setStoreDescription(data.settings?.description || '');
-          setStoreEmail(data.settings?.contactEmail || '');
           setPromoMessage(data.settings?.promoMessage || '');
           setStorePixKey(data.settings?.pixKey || '');
           setDeliveryRadiusKm(data.settings?.deliveryRadiusKm ?? '');
@@ -474,10 +465,7 @@ export function StorePage() {
   }, [user?.token]);
 
   useEffect(() => {
-    setMapCoords(null);
     setStoreCoords(null);
-    setMapFailed(false);
-    setMapAttempted(false);
   }, [storeAddress]);
 
   useEffect(() => {
@@ -487,7 +475,6 @@ export function StorePage() {
     try {
       const parsed = JSON.parse(cached);
       if (parsed?.lat && parsed?.lon) {
-        setMapCoords(parsed);
         setStoreCoords(parsed);
       }
     } catch (error) {
@@ -508,7 +495,6 @@ export function StorePage() {
         if (Array.isArray(data) && data.length > 0) {
           const next = { lat: Number(data[0].lat), lon: Number(data[0].lon) };
           setStoreCoords(next);
-          setMapCoords((prev) => prev || next);
           localStorage.setItem(`store:coords:${storeSlug}`, JSON.stringify(next));
         }
       } catch (error) {
@@ -520,40 +506,6 @@ export function StorePage() {
     return () => controller.abort();
   }, [storeAddress, storeCoords, storeSlug]);
 
-  useEffect(() => {
-    if (!showInfoSheet || !storeAddress || mapCoords || mapLoading || mapFailed || mapAttempted) return;
-    const controller = new AbortController();
-    const loadCoords = async () => {
-      setMapAttempted(true);
-      setMapLoading(true);
-      try {
-        const response = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(storeAddress)}`,
-          { signal: controller.signal }
-        );
-        if (!response.ok) return;
-        const data = await response.json();
-        if (Array.isArray(data) && data[0]?.lat && data[0]?.lon) {
-          const next = { lat: data[0].lat, lon: data[0].lon };
-          setMapCoords(next);
-          if (storeSlug) {
-            localStorage.setItem(`store:coords:${storeSlug}`, JSON.stringify(next));
-          }
-        } else {
-          setMapFailed(true);
-        }
-      } catch (error) {
-        if (error?.name !== 'AbortError') {
-          console.error('Falha ao carregar mapa', error);
-          setMapFailed(true);
-        }
-      } finally {
-        setMapLoading(false);
-      }
-    };
-    loadCoords();
-    return () => controller.abort();
-  }, [showInfoSheet, storeAddress, mapCoords, mapLoading, mapFailed, storeSlug]);
 
   useEffect(() => {
     if (customer.type !== 'delivery') {
@@ -1281,13 +1233,10 @@ export function StorePage() {
               onOpenAdmin={isStoreAdmin ? () => navigate('/admin/dashboard') : undefined}
               isOpenNow={storeOpenNow}
               whatsappNumber={storePhone}
-              contactEmail={storeEmail}
               promoMessage={promoMessage}
-              storeUrl={storeUrl}
               todayHoursLabel={todayHoursLabel}
               storeAddress={storeAddress}
               compactHeader={isMobile}
-              onOpenInfo={() => setShowInfoSheet(true)}
             />
           </div>
         )}
@@ -1360,169 +1309,6 @@ export function StorePage() {
         </div>
       )}
 
-      {showInfoSheet && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-900/40 backdrop-blur-sm">
-          <div className="w-full sm:max-w-lg bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl border border-slate-200 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-              <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Info da loja</p>
-                <h3 className="text-lg font-bold text-slate-900">{branding?.brandName || 'Chama no Espeto'}</h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowInfoSheet(false)}
-                className="px-3 py-1.5 rounded-full text-xs font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50"
-              >
-                Fechar
-              </button>
-            </div>
-            <div className="p-5 space-y-4">
-              {storeAddress && (
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 space-y-3">
-                  <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Endereço</p>
-                  <p className="text-sm font-semibold text-slate-800">{storeAddress}</p>
-                  <div className="flex flex-wrap gap-2">
-                    <a
-                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(storeAddress)}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="px-3 py-2 rounded-full text-xs font-semibold border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 transition"
-                    >
-                      Abrir no Google Maps
-                    </a>
-                    <a
-                      href={`https://waze.com/ul?q=${encodeURIComponent(storeAddress)}&navigate=yes`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="px-3 py-2 rounded-full text-xs font-semibold border border-brand-primary text-brand-primary bg-brand-primary-soft hover:opacity-90 transition"
-                    >
-                      Abrir no Waze
-                    </a>
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        if (!storeAddress) return;
-                        try {
-                          await navigator.clipboard.writeText(storeAddress);
-                          setCopiedAddress(true);
-                          window.setTimeout(() => setCopiedAddress(false), 2000);
-                        } catch (error) {
-                          console.error('Falha ao copiar endereco', error);
-                        }
-                      }}
-                      className="px-3 py-2 rounded-full text-xs font-semibold border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 transition"
-                    >
-                      {copiedAddress ? 'Endereço copiado' : 'Copiar endereco'}
-                    </button>
-                  </div>
-                  <div className="rounded-xl overflow-hidden border border-slate-200 bg-white sm:hidden">
-                    {mapCoords ? (
-                      <img
-                        src={`https://staticmap.openstreetmap.de/staticmap.php?center=${mapCoords.lat},${mapCoords.lon}&zoom=16&size=600x300&markers=${mapCoords.lat},${mapCoords.lon},red-pushpin`}
-                        alt="Mapa da loja"
-                        className="w-full h-40 object-cover"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="h-40 flex flex-col items-center justify-center gap-2 text-xs text-slate-500">
-                        <span>
-                          {mapLoading ? 'Carregando mapa...' : 'Mapa indisponível'}
-                        </span>
-                        <a
-                          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(storeAddress)}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="px-3 py-1.5 rounded-full text-[11px] font-semibold border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 transition"
-                        >
-                          Abrir mapa
-                        </a>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {resolvedWhatsApp && (
-                <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-3">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.25em] text-slate-400">WhatsApp</p>
-                    <p className="text-sm font-semibold text-slate-800">{formatPhoneInput(storePhone)}</p>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <a
-                      href={`https://wa.me/${resolvedWhatsApp}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="px-3 py-2 rounded-full text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 transition"
-                    >
-                      Conversar
-                    </a>
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        if (!storePhone) return;
-                        try {
-                          await navigator.clipboard.writeText(storePhone);
-                          setCopiedPhone(true);
-                          window.setTimeout(() => setCopiedPhone(false), 2000);
-                        } catch (error) {
-                          console.error('Falha ao copiar telefone', error);
-                        }
-                      }}
-                      className="px-3 py-2 rounded-full text-xs font-semibold border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 transition"
-                    >
-                      {copiedPhone ? 'Telefone copiado' : 'Copiar telefone'}
-                    </button>
-                  </div>
-                </div>
-              )}
-              {storeEmail && (
-                <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-3">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Email</p>
-                    <p className="text-sm font-semibold text-slate-800">{storeEmail}</p>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <a
-                      href={`mailto:${storeEmail}`}
-                      className="px-3 py-2 rounded-full text-xs font-semibold border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 transition"
-                    >
-                      Enviar email
-                    </a>
-                  </div>
-                </div>
-              )}
-
-              {instagramHandle && (
-                <a
-                  href={`https://instagram.com/${instagramHandle.replace('@', '')}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="rounded-2xl border border-slate-200 bg-white p-4 flex items-center justify-between text-slate-700 hover:bg-slate-50 transition"
-                >
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Instagram</p>
-                    <p className="text-sm font-semibold">{instagramHandle}</p>
-                  </div>
-                  <span className="text-xs font-semibold text-brand-primary">Visitar</span>
-                </a>
-              )}
-
-              {weeklyHours?.length > 0 && (
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 space-y-2">
-                  <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Horarios</p>
-                  <p className="text-sm font-semibold text-slate-800">{todayHoursLabel || 'Confira abaixo'}</p>
-                  <div className="text-xs text-slate-500 space-y-1">
-                    {weeklyHours.map((line) => (
-                      <p key={line}>{line}</p>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
