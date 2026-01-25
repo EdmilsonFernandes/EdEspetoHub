@@ -987,6 +987,7 @@ export const GrillQueue = () => {
               const cashValue = Number((cashConfirmValue || '').toString().replace(',', '.'));
               const cashValid = !isCashPayment || (cashConfirmValue && !Number.isNaN(cashValue) && cashValue >= totalValue);
               const changeValue = isCashPayment && cashValid ? cashValue - totalValue : 0;
+              const cashShortcuts = [20, 50, 100, 200];
               return (
                 <>
             <div className="flex items-start justify-between gap-3">
@@ -1080,6 +1081,18 @@ export const GrillQueue = () => {
                 <div className="flex items-center justify-between">
                   <span className="font-semibold">Pagamento em dinheiro</span>
                   <span className="text-xs text-amber-600">Informe para calcular o troco</span>
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {cashShortcuts.map((value) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setCashConfirmValue(String(value))}
+                      className="rounded-full border border-amber-200 bg-white px-3 py-1 text-xs font-semibold text-amber-700 hover:bg-amber-100 transition-all hover:-translate-y-0.5 active:scale-95"
+                    >
+                      R$ {value}
+                    </button>
+                  ))}
                 </div>
                 <div className="mt-3 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
                   <label className="text-xs font-semibold text-amber-700">
