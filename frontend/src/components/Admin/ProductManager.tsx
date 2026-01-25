@@ -16,7 +16,7 @@ import { productService } from '../../services/productService';
 import { formatCurrency } from '../../utils/format';
 import { useToast } from '../../contexts/ToastContext';
 
-const initialForm = { name: '', price: '', promoPrice: '', promoActive: false, category: 'espetos', imageUrl: '', imageFile: '', description: '', isFeatured: false };
+const initialForm = { name: '', price: '', promoPrice: '', promoActive: false, category: 'espetos', imageUrl: '', imageFile: '', description: '', isFeatured: false, active: true };
 const defaultCategories = [
   { id: 'espetos', label: 'Espetos', icon: Fire },
   { id: 'bebidas', label: 'Bebidas', icon: Wine },
@@ -56,6 +56,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
     description: '',
     imageUrl: '',
     isFeatured: false,
+    active: true,
   });
   const [inlineImageFile, setInlineImageFile] = useState('');
   const [formData, setFormData] = useState(initialForm);
@@ -178,6 +179,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
       description: product.description ?? product.desc ?? '',
       imageUrl: product.imageUrl || '',
       isFeatured: Boolean(product.isFeatured),
+      active: product.active !== false,
     });
   };
 
@@ -208,6 +210,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
         imageUrl: inlineImageFile ? undefined : inlineForm.imageUrl || undefined,
         imageFile: inlineImageFile || undefined,
         isFeatured: inlineForm.isFeatured,
+        active: inlineForm.active,
       });
       showToast('Produto atualizado com sucesso.', 'success');
       setInlineEditId(null);
@@ -225,6 +228,26 @@ export const ProductManager = ({ products, onProductsChange }) => {
     setInlineEditId(null);
     setInlineImageFile('');
     setMobileEditOpen(false);
+  };
+
+  const handleToggleActive = async (product) => {
+    if (!product?.id) return;
+    setSaving(true);
+    try {
+      await productService.save({
+        id: product.id,
+        active: !product.active,
+      });
+      showToast(
+        product.active ? 'Produto desativado.' : 'Produto ativado.',
+        'success'
+      );
+      await refreshProducts();
+    } catch (error) {
+      showToast('Não foi possível atualizar o status do produto.', 'error');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleUpload = (file) => {
@@ -634,7 +657,18 @@ export const ProductManager = ({ products, onProductsChange }) => {
                   </div>
                 )}
                 <div className="flex-1">
-                  <p className="font-semibold text-gray-900">{product.name}</p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="font-semibold text-gray-900">{product.name}</p>
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
+                        product.active === false
+                          ? 'bg-slate-100 text-slate-500 border-slate-200'
+                          : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                      }`}
+                    >
+                      {product.active === false ? 'Inativo' : 'Ativo'}
+                    </span>
+                  </div>
                   <p className="text-xs text-gray-500">{formatCategoryLabel(product.category)}</p>
                   <div className="mt-2">
                     {product.promoActive && product.promoPrice ? (
@@ -665,6 +699,17 @@ export const ProductManager = ({ products, onProductsChange }) => {
                     className="px-3 py-1.5 rounded-lg border border-amber-200 text-amber-700 text-xs font-semibold"
                   >
                     Editar preço
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleToggleActive(product)}
+                    className={`px-3 py-1.5 rounded-lg border text-xs font-semibold ${
+                      product.active === false
+                        ? 'border-emerald-200 text-emerald-700'
+                        : 'border-slate-200 text-slate-600'
+                    }`}
+                  >
+                    {product.active === false ? 'Ativar' : 'Desativar'}
                   </button>
                   <button
                     type="button"
@@ -706,13 +751,18 @@ export const ProductManager = ({ products, onProductsChange }) => {
               <th className="p-4 font-bold text-gray-600">Nome</th>
               <th className="p-4 font-bold text-gray-600">Categoria</th>
               <th className="p-4 font-bold text-gray-600">Preço</th>
+              <th className="p-4 font-bold text-gray-600">Status</th>
               <th className="p-4 font-bold text-gray-600 text-right">Ações</th>
             </tr>
           </thead>
           <tbody className="divide-y">
             {pagedProducts.map((product) => (
               <React.Fragment key={product.id}>
-              <tr className={`hover:bg-gray-50 ${inlineEditId === product.id ? 'bg-amber-50/60' : ''}`}>
+              <tr
+                className={`hover:bg-gray-50 ${
+                  inlineEditId === product.id ? 'bg-amber-50/60' : ''
+                } ${product.active === false ? 'opacity-70' : ''}`}
+              >
                 <td className="p-4">
                   {product.imageUrl ? (
                     <img src={product.imageUrl} className="w-10 h-10 rounded object-cover" alt="" />
@@ -755,6 +805,17 @@ export const ProductManager = ({ products, onProductsChange }) => {
                       <span className="text-brand-primary font-bold">{formatCurrency(product.price)}</span>
                     )}
                   </td>
+                  <td className="p-4">
+                    <span
+                      className={`px-2.5 py-1 rounded-full text-[10px] font-semibold border ${
+                        product.active === false
+                          ? 'bg-slate-100 text-slate-500 border-slate-200'
+                          : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                      }`}
+                    >
+                      {product.active === false ? 'Inativo' : 'Ativo'}
+                    </span>
+                  </td>
                   <td className="p-4 text-right space-x-2">
                     <button
                       onClick={() => handleEditMobile(product)}
@@ -768,6 +829,17 @@ export const ProductManager = ({ products, onProductsChange }) => {
                       title="Editar preço"
                     >
                       R$
+                    </button>
+                    <button
+                      onClick={() => handleToggleActive(product)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:-translate-y-0.5 active:scale-95 ${
+                        product.active === false
+                          ? 'text-emerald-700 border border-emerald-200 hover:bg-emerald-50'
+                          : 'text-slate-600 border border-slate-200 hover:bg-slate-100'
+                      }`}
+                      title={product.active === false ? 'Ativar produto' : 'Desativar produto'}
+                    >
+                      {product.active === false ? 'Ativar' : 'Pausar'}
                     </button>
                     <button
                       onClick={() => {

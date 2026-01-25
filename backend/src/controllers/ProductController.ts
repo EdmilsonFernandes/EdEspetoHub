@@ -142,7 +142,7 @@ export class ProductController {
         return res.json(demoProducts);
       }
       log.debug('Product public list request', { slug: req.params.slug });
-      const products = await productService.listByStoreSlug(req.params.slug);
+      const products = await productService.listActiveByStoreSlug(req.params.slug);
       return res.json(products);
     } catch (error: any) {
       log.warn('Product public list failed', { slug: req.params.slug, error });

@@ -517,6 +517,12 @@ export function OrderTracking() {
                         <span>{paymentMeta.label}</span>
                       </p>
                     )}
+                    {order.payment?.toString().toLowerCase() === 'dinheiro' && order.cashTendered ? (
+                      <p>
+                        <span className="font-semibold">Troco para:</span>{' '}
+                        {formatCurrency(Number(order.cashTendered))}
+                      </p>
+                    ) : null}
                     {order.phone && (
                       <p>
                         <span className="font-semibold">Telefone:</span> {order.phone}

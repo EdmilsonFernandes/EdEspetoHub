@@ -17,6 +17,7 @@ const normalizeOrder = (order: any) => ({
     ? new Date(order.created_at).getTime()
     : order.createdAt,
   payment: order.payment ?? order.paymentMethod ?? order.payment_method,
+  cashTendered: order.cashTendered ?? order.cash_tendered ?? null,
   type: order.type ?? order.order_type,
   items: (order.items || []).map((item: any) => {
     const quantity = item.qty ?? item.quantity ?? 0;

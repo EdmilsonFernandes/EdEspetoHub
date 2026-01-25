@@ -17,6 +17,7 @@ const normalizeProduct = (product: any) => {
     imageUrl: resolveAssetUrl(product.image_url ?? product.imageUrl ?? ""),
     promoPrice: product.promoPrice ?? product.promo_price ?? null,
     promoActive: Boolean(product.promoActive ?? product.promo_active ?? false),
+    active: product.active ?? product.is_active ?? true,
     description,
     desc: description,
   };
@@ -117,7 +118,7 @@ export const productService = {
 
   async listPublicBySlug(slug: string)
   {
-    const data = await apiClient.get(`/stores/slug/${slug}/products`);
+    const data = await apiClient.get(`/public/stores/slug/${slug}/products`);
     return data.map(normalizeProduct);
   },
 

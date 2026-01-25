@@ -52,8 +52,16 @@ export async function runMigrations() {
     ADD COLUMN IF NOT EXISTS table_number TEXT;
   `);
   await AppDataSource.query(`
+    ALTER TABLE IF EXISTS orders
+    ADD COLUMN IF NOT EXISTS cash_tendered NUMERIC(10,2);
+  `);
+  await AppDataSource.query(`
     ALTER TABLE IF EXISTS products
     ADD COLUMN IF NOT EXISTS description TEXT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS products
+    ADD COLUMN IF NOT EXISTS active BOOLEAN NOT NULL DEFAULT TRUE;
   `);
   await AppDataSource.query(`
     ALTER TABLE IF EXISTS order_items

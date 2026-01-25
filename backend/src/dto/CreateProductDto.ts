@@ -21,5 +21,6 @@ export interface CreateProductDto {
   imageUrl?: string;
   imageFile?: string | null;
   isFeatured?: boolean;
+  active?: boolean;
   storeId: string;
 }

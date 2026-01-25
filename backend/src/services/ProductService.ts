@@ -76,6 +76,7 @@ export class ProductService
       description: (input as any).description ?? (input as any).desc,
       imageUrl: uploadedImage || input.imageUrl,
       isFeatured: Boolean(input.isFeatured),
+      active: input.active === false ? false : true,
       store: safeStore,
     });
 
@@ -118,6 +119,22 @@ export class ProductService
 
 
   /**
+   * Lists active by store slug.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-23
+   */
+  async listActiveByStoreSlug(slug: string)
+  {
+    const store = await this.storeRepository.findBySlug(slug);
+    if (!store) throw new AppError('STORE-001', 404);
+    return this.productRepository.findActiveByStoreId(store.id);
+  }
+
+
+
+
+  /**
    * Executes update logic.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
@@ -146,6 +163,9 @@ export class ProductService
     product.imageUrl = uploadedImage ?? data.imageUrl ?? product.imageUrl;
     if (typeof data.isFeatured === 'boolean') {
       product.isFeatured = data.isFeatured;
+    }
+    if (typeof data.active === 'boolean') {
+      product.active = data.active;
     }
     if (promoPrice !== undefined) {
       product.promoPrice = promoPrice && promoPrice > 0 ? promoPrice : null;

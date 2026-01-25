@@ -64,6 +64,8 @@ export const formatPaymentMethod = (payment) => {
     credit: 'Crédito',
     credit_card: 'Crédito',
     boleto: 'Boleto',
+    dinheiro: 'Dinheiro',
+    cash: 'Dinheiro',
   };
 
   return map[normalized] || 'Não informado';

@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { useEffect, useState } from 'react';
+import { Bicycle, ForkKnife, House } from '@phosphor-icons/react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { storeService } from '../../services/storeService';
@@ -10,6 +11,11 @@ const labels = {
   delivery: 'Entrega',
   pickup: 'Retirada',
   table: 'Mesa',
+};
+const icons = {
+  delivery: Bicycle,
+  pickup: House,
+  table: ForkKnife,
 };
 
 export function OrderTypeSettingsCard() {
@@ -79,17 +85,25 @@ export function OrderTypeSettingsCard() {
       <div className="flex flex-wrap gap-2">
         {DEFAULT_TYPES.map((type) => {
           const active = selected.includes(type);
+          const Icon = icons[type];
           return (
             <button
               key={type}
               type="button"
               onClick={() => toggleType(type)}
-              className={`px-4 py-2 rounded-full text-xs font-semibold border transition-all hover:-translate-y-0.5 active:scale-95 ${
+              className={`px-4 py-2 rounded-full text-xs font-semibold border transition-all hover:-translate-y-0.5 active:scale-95 inline-flex items-center gap-2 ${
                 active
                   ? 'bg-brand-primary text-white border-brand-primary'
                   : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
               }`}
             >
+              <span
+                className={`h-7 w-7 rounded-full flex items-center justify-center ${
+                  active ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'
+                }`}
+              >
+                <Icon size={14} weight="duotone" />
+              </span>
               {labels[type]}
             </button>
           );

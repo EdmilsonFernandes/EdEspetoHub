@@ -26,6 +26,7 @@ export function StorePage() {
   const [cart, setCart] = useState({});
   const [customer, setCustomer] = useState(initialCustomer);
   const [paymentMethod, setPaymentMethod] = useState(defaultPaymentMethod);
+  const [cashTendered, setCashTendered] = useState('');
   const [lastOrder, setLastOrder] = useState(null);
   const [branding, setBranding] = useState(() => getPersistedBranding(storeSlug || defaultBranding.espetoId));
   const [storeOpenNow, setStoreOpenNow] = useState(true);
@@ -65,6 +66,12 @@ export function StorePage() {
     if (!digits) return '';
     return digits.startsWith('55') ? digits : `55${digits}`;
   }, [storePhone]);
+
+  useEffect(() => {
+    if (paymentMethod !== 'dinheiro' && cashTendered) {
+      setCashTendered('');
+    }
+  }, [paymentMethod, cashTendered]);
   const storeUrl =
     storeSlug && typeof window !== 'undefined'
       ? `${window.location.origin}/${storeSlug}`
@@ -565,6 +572,11 @@ export function StorePage() {
     const sanitizedPhoneKey = sanitizedPhone.length >= 10 ? `+55${sanitizedPhone}` : '';
     const pixKey = storePixKey || PIX_KEY || sanitizedPhoneKey;
 
+    const parsedCash =
+      payment === 'dinheiro' && cashTendered
+        ? Number(cashTendered.toString().replace(',', '.'))
+        : null;
+
     const order = {
       customerName: customer.name,
       phone: customer.phone,
@@ -572,6 +584,7 @@ export function StorePage() {
       table: customer.table,
       type: customer.type,
       paymentMethod: payment,
+      cashTendered: parsedCash && !Number.isNaN(parsedCash) ? parsedCash : undefined,
       items: Object.values(cart).map((item) => ({
         productId: item.id,
         quantity: item.qty,
@@ -590,6 +603,7 @@ export function StorePage() {
       setCart({});
       setCustomer(initialCustomer);
       setPaymentMethod(defaultPaymentMethod);
+      setCashTendered('');
       setLastOrder({
         id: demoId,
         type: customer.type,
@@ -597,6 +611,7 @@ export function StorePage() {
         phone: sanitizedPhoneKey || customer.phone,
         pixKey,
         table: customer.table,
+        cashTendered: parsedCash && !Number.isNaN(parsedCash) ? parsedCash : null,
       });
       localStorage.setItem(
         `lastOrder:${storeSlug}`,
@@ -611,6 +626,7 @@ export function StorePage() {
           table: customer.table,
           customerName: customer.name,
           paymentMethod: payment,
+          cashTendered: parsedCash && !Number.isNaN(parsedCash) ? parsedCash : null,
           items: Object.values(cart).map((item) => ({
             id: item.id,
             name: item.name,
@@ -669,6 +685,9 @@ export function StorePage() {
       `🛒 *Tipo:* ${customer.type}`,
       customer.table ? `🪑 *Mesa:* ${customer.table}` : '',
       payment ? `💳 Pagamento: ${formatPaymentMethod(payment)}` : '',
+        payment === 'dinheiro' && parsedCash
+          ? `💵 Troco para: ${formatCurrency(parsedCash)}`
+          : '',
         customer.address ? `📍 End: ${customer.address}` : '',
         '------------------',
         itemsList,
@@ -698,6 +717,9 @@ export function StorePage() {
       `Pedido #${formatOrderDisplayId(createdOrder?.id, storeSlug)} - ${branding?.brandName || 'Chama no Espeto'}`,
       customerItemsList ? `Itens:\n${customerItemsList}` : '',
       `Total: ${formatCurrency(cartTotal)}`,
+      payment === 'dinheiro' && parsedCash
+        ? `Troco para: ${formatCurrency(parsedCash)}`
+        : '',
       trackingLink ? `Acompanhar: ${trackingLink}` : '',
     ]
       .filter(Boolean)
@@ -718,11 +740,13 @@ export function StorePage() {
     setCart({});
     setCustomer(initialCustomer);
     setPaymentMethod(defaultPaymentMethod);
+    setCashTendered('');
 
     setLastOrder({
       id: createdOrder?.id,
       type: customer.type,
       payment,
+      cashTendered: parsedCash && !Number.isNaN(parsedCash) ? parsedCash : null,
       phone: sanitizedPhoneKey || customer.phone,
       pixKey,
       table: customer.table,
@@ -1109,10 +1133,12 @@ export function StorePage() {
             customer={customer}
             customers={customers}
             paymentMethod={paymentMethod}
+            cashTendered={cashTendered}
             allowedOrderTypes={orderTypes}
             allowCustomerAutocomplete={Boolean(user?.token)}
             onChangeCustomer={handleCustomerChange}
             onChangePayment={setPaymentMethod}
+            onChangeCashTendered={setCashTendered}
             onCheckout={checkout}
             onBack={() => setView('menu')}
           />
@@ -1126,6 +1152,7 @@ export function StorePage() {
               phone={lastOrder?.phone}
               table={lastOrder?.table}
               orderId={lastOrder?.id}
+              cashTendered={lastOrder?.cashTendered}
               onTrackOrder={() => {
                 if (lastOrder?.id) {
                   navigate(`/pedido/${lastOrder.id}`);

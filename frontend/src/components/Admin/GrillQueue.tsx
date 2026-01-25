@@ -734,6 +734,11 @@ export const GrillQueue = () => {
                       );
                     })()}
                   </p>
+                  {order.payment?.toString().toLowerCase() === 'dinheiro' && order.cashTendered ? (
+                    <p className="text-[11px] text-emerald-700 font-semibold">
+                      Troco para: {formatCurrency(Number(order.cashTendered))}
+                    </p>
+                  ) : null}
                 </div>
 
                 <div className="flex flex-row sm:flex-col items-center sm:items-end gap-2">

@@ -310,6 +310,11 @@ export class OrderService
       total += orderItem.price;
     }
 
+    const cashTendered =
+      input.paymentMethod === 'dinheiro' && input.cashTendered !== undefined && input.cashTendered !== null
+        ? Number(input.cashTendered)
+        : null;
+
     return this.orderRepository.create({
       customerName: input.customerName,
       phone: input.phone,
@@ -317,6 +322,7 @@ export class OrderService
       table: input.table,
       type: input.type,
       paymentMethod: input.paymentMethod,
+      cashTendered,
       items,
       total,
       store: store!,

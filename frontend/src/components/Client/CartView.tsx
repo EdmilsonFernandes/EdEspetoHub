@@ -20,10 +20,12 @@ export const CartView = ({
   customer,
   customers = [],
   paymentMethod,
+  cashTendered,
   allowCustomerAutocomplete = false,
   allowedOrderTypes = [ "delivery", "pickup", "table" ],
   onChangeCustomer,
   onChangePayment,
+  onChangeCashTendered,
   onCheckout,
   onBack
 }) => {
@@ -44,6 +46,12 @@ export const CartView = ({
   const isPix = paymentMethod === "pix";
   const isCredit = paymentMethod === "credito";
   const isDebit = paymentMethod === "debito";
+  const isCash = paymentMethod === "dinheiro";
+  const cashValue = Number((cashTendered || '').toString().replace(',', '.'));
+  const changeAmount =
+    isCash && cashTendered && !Number.isNaN(cashValue) && cashValue > total
+      ? cashValue - total
+      : 0;
 
   const actionLabel = useMemo(() => {
     if (isPickup && isPix) return "Gerar Pix e enviar pedido";
@@ -52,9 +60,10 @@ export const CartView = ({
     if (isDelivery) return "Finalizar pedido para entrega";
     if (isCredit) return "Finalizar pedido (Crédito)";
     if (isDebit) return "Finalizar pedido (Débito)";
+    if (isCash) return "Finalizar pedido (Dinheiro)";
     if (isPix) return "Finalizar pedido (Pix)";
     return "Finalizar pedido na mesa";
-  }, [isDelivery, isPickup, isPix, isCredit, isDebit]);
+  }, [isDelivery, isPickup, isPix, isCredit, isDebit, isCash]);
 
   const handlePhoneChange = (nextValue) => {
     const formatted = formatPhoneInput(nextValue);
@@ -539,11 +548,12 @@ export const CartView = ({
           </span>
         </div>
 
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
             { id: "pix", label: "Pix", description: "Registro rápido" },
             { id: "debito", label: "Débito", description: "Pague no local" },
-            { id: "credito", label: "Crédito", description: "Pague no local" }
+            { id: "credito", label: "Crédito", description: "Pague no local" },
+            { id: "dinheiro", label: "Dinheiro", description: "Troco opcional" }
           ].map((method) => (
             <button
               key={method.id}
@@ -581,6 +591,34 @@ export const CartView = ({
             </button>
           ))}
         </div>
+        {isCash && (
+          <div className="mt-4 rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4">
+            <p className="text-xs uppercase tracking-[0.3em] text-emerald-500 font-semibold">
+              Troco (opcional)
+            </p>
+            <div className="mt-2 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+              <label className="text-xs font-semibold text-emerald-700">
+                Vai pagar com qual valor em dinheiro?
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={cashTendered || ''}
+                  onChange={(e) => onChangeCashTendered?.(e.target.value)}
+                  placeholder="Ex: 50,00"
+                  className="mt-2 w-full rounded-xl border border-emerald-200 bg-white px-3 py-2 text-sm text-emerald-700 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200"
+                />
+              </label>
+              <div className="rounded-xl border border-emerald-200 bg-white px-4 py-3 text-sm font-semibold text-emerald-700">
+                {changeAmount > 0
+                  ? `Troco: ${formatCurrency(changeAmount)}`
+                  : 'Sem troco'}
+              </div>
+            </div>
+            <p className="mt-2 text-[11px] text-emerald-600">
+              Informe somente se precisar de troco. O churrasqueiro já recebe esse valor.
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="rounded-2xl border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99]">
@@ -604,7 +642,9 @@ export const CartView = ({
               "Você finaliza o pedido agora e paga na entrega ou conforme combinado."}
             {isPix &&
               "O QR Code do Pix aparecerá após finalizar o pedido."}
-            {!isDelivery && !isPickup && !isPix &&
+            {isCash &&
+              "Se for pagar em dinheiro e precisar de troco, informe o valor."}
+            {!isDelivery && !isPickup && !isPix && !isCash &&
               "Pedido será direcionado para atendimento na mesa."}
           </div>
         )}
