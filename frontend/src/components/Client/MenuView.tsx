@@ -6,6 +6,7 @@ import {
   SquaresFour,
   Plus,
   MagnifyingGlass,
+  MapPin,
 } from "@phosphor-icons/react";
 import { formatCurrency } from "../../utils/format";
 import { ProductModal } from "../Cart/ProductModal";
