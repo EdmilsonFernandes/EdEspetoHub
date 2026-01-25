@@ -169,12 +169,6 @@ export const CartView = ({
     }
   };
 
-  const mapLink = useMemo(() => {
-    if (!isDelivery) return "";
-    const address = buildDeliveryAddress(customer).trim();
-    if (address.length < 8) return "";
-    return `https://www.openstreetmap.org/search?query=${encodeURIComponent(address)}`;
-  }, [customer, isDelivery]);
 
   const deliveryStatus = useMemo(() => {
     if (!isDelivery) return null;
@@ -395,7 +389,7 @@ export const CartView = ({
               <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
                 Endereço de entrega
               </p>
-              <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-4">
+              <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-4">
                 <div className="space-y-3">
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div className="sm:col-span-2">
@@ -482,29 +476,31 @@ export const CartView = ({
                     </div>
                   </div>
                 </div>
-                <div className="rounded-xl border border-gray-100 bg-white overflow-hidden">
-                  <div className="px-3 py-3 text-xs text-gray-500 bg-gray-50 flex items-center justify-between">
-                    <span>Visualizar no mapa</span>
-                    {mapLink ? (
-                      <a
-                        href={mapLink}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-brand-primary font-semibold"
-                      >
-                        Abrir
-                      </a>
-                    ) : (
-                      <span className="text-gray-400">Digite o endereco</span>
-                    )}
+                <div className="rounded-xl border border-slate-200 bg-white/80 p-4 space-y-3">
+                  <div>
+                    <p className="text-[11px] uppercase tracking-[0.25em] text-slate-400">Entrega</p>
+                    <p className="text-sm font-semibold text-slate-800">
+                      {radiusValue ? `Até ${radiusValue} km` : 'Sem limite de raio'}
+                    </p>
                   </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-slate-500">Frete</span>
+                    <span className="font-semibold text-slate-800">
+                      {deliveryFeeValue > 0 ? formatCurrency(deliveryFeeValue) : 'Grátis'}
+                    </span>
+                  </div>
+                  {customer.address && (
+                    <div className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-[11px] text-slate-600">
+                      {customer.address}
+                    </div>
+                  )}
+                  {deliveryStatus && (
+                    <div className={`rounded-lg border px-3 py-2 text-xs font-semibold ${deliveryStatus.tone}`}>
+                      {deliveryStatus.label}
+                    </div>
+                  )}
                 </div>
               </div>
-              {deliveryStatus && (
-                <div className={`mt-3 rounded-xl border px-3 py-2 text-xs font-semibold ${deliveryStatus.tone}`}>
-                  {deliveryStatus.label}
-                </div>
-              )}
             </div>
           )}
 

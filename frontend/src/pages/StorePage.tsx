@@ -127,6 +127,17 @@ export function StorePage() {
     if (!value || value <= 0) return 0;
     return value;
   }, [customer.type, deliveryFee]);
+  const deliveryAddress = useMemo(() => {
+    if (customer.type !== 'delivery') return customer.address || '';
+    const parts = [
+      customer.street && `${customer.street}, ${customer.number || 's/n'}`,
+      customer.complement,
+      customer.neighborhood,
+      customer.city && customer.state ? `${customer.city} - ${customer.state}` : customer.city,
+      customer.cep && `CEP ${customer.cep}`,
+    ].filter(Boolean);
+    return parts.join(' | ') || customer.address || '';
+  }, [customer, customer.type]);
   const orderTotal = useMemo(
     () => cartItemsTotal + deliveryFeeValue,
     [cartItemsTotal, deliveryFeeValue]
@@ -147,6 +158,9 @@ export function StorePage() {
     if (deliveryCheck.status === 'loading') {
       return { blocked: true, reason: 'Validando distância de entrega...' };
     }
+    if (deliveryCheck.status === 'idle' && !storeCoords) {
+      return { blocked: true, reason: 'Endereço da loja ainda não configurado.' };
+    }
     if (deliveryCheck.status === 'out') {
       return { blocked: true, reason: 'Endereço fora do raio de entrega.' };
     }
@@ -157,7 +171,7 @@ export function StorePage() {
       return { blocked: true, reason: 'Informe o endereço para validar a entrega.' };
     }
     return { blocked: false, reason: '' };
-  }, [customer.type, deliveryCheck.status, deliveryRadiusValue]);
+  }, [customer.type, deliveryCheck.status, deliveryRadiusValue, storeCoords]);
 
   const resolveItemPrice = (item) => {
     const promoPrice = item?.promoPrice != null ? Number(item.promoPrice) : null;
@@ -516,7 +530,7 @@ export function StorePage() {
       setDeliveryCheck({ status: 'ok', distanceKm: null });
       return;
     }
-    const address = customer.address?.trim() || '';
+    const address = deliveryAddress?.trim() || '';
     if (!address || !storeCoords) {
       setDeliveryCheck({ status: 'idle', distanceKm: null });
       return;
@@ -578,7 +592,7 @@ export function StorePage() {
       controller.abort();
       window.clearTimeout(timeout);
     };
-  }, [customer.type, customer.address, deliveryRadiusValue, storeCoords, storeSlug]);
+  }, [customer.type, deliveryAddress, deliveryRadiusValue, storeCoords, storeSlug]);
 
   const updateCart = (item, qty, options) => {
     const cookingPoint = options?.cookingPoint ?? item?.cookingPoint;
@@ -705,7 +719,7 @@ export function StorePage() {
     const order = {
       customerName: customer.name,
       phone: customer.phone,
-      address: customer.address,
+      address: deliveryAddress || customer.address,
       table: customer.table,
       type: customer.type,
       paymentMethod: payment,
