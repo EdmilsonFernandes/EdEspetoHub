@@ -233,7 +233,7 @@ export class StoreService
       if (data.address !== undefined && store.owner)
       {
         const trimmedAddress = data.address?.toString().trim();
-        store.owner.address = trimmedAddress || null;
+        store.owner.address = trimmedAddress || undefined;
         const userRepo = manager.getRepository(User);
         await userRepo.save(store.owner);
       }
