@@ -33,17 +33,17 @@ export const formatDuration = (milliseconds: number | null | undefined) => {
 };
 
 export const formatOrderType = (type?: string) => {
-  const map = {
+  const map: Record<string, string> = {
     delivery: 'Entrega',
     pickup: 'Retirada',
     table: 'Mesa',
   };
 
-  return map[type] || 'Não informado';
+  return (type && map[type]) || 'Não informado';
 };
 
 export const formatOrderStatus = (status?: string) => {
-  const map = {
+  const map: Record<string, string> = {
     pending: 'Pendente',
     preparing: 'Preparando',
     ready: 'Aguardando retirada',
@@ -51,12 +51,12 @@ export const formatOrderStatus = (status?: string) => {
     cancelled: 'Cancelado',
   };
 
-  return map[status] || 'Indefinido';
+  return (status && map[status]) || 'Indefinido';
 };
 
 export const formatPaymentMethod = (payment?: string) => {
   const normalized = (payment || '').toString().toLowerCase();
-  const map = {
+  const map: Record<string, string> = {
     pix: 'Pix',
     debito: 'Débito',
     debit: 'Débito',
