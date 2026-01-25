@@ -501,6 +501,12 @@ export const GrillQueue = () => {
     }
     return { label: "Aguardando", className: "bg-red-100 text-red-700" };
   };
+  const timelineStyles = {
+    pending: { dot: "bg-amber-500", text: "text-amber-700" },
+    preparing: { dot: "bg-sky-500", text: "text-sky-700" },
+    ready: { dot: "bg-violet-500", text: "text-violet-700" },
+    done: { dot: "bg-emerald-500", text: "text-emerald-700" },
+  };
 
   const renderTimeline = (status, orderType) => {
     const steps =
@@ -530,10 +536,18 @@ export const GrillQueue = () => {
           <div key={step.key} className="flex items-center gap-2">
             <div
               className={`w-2.5 h-2.5 rounded-full ${
-                isActive(step.key) ? "bg-brand-primary" : "bg-gray-300"
+                isActive(step.key)
+                  ? timelineStyles[step.key]?.dot || "bg-brand-primary"
+                  : "bg-gray-300"
               }`}
             />
-            <span className={isActive(step.key) ? "text-gray-700 font-semibold" : ""}>
+            <span
+              className={
+                isActive(step.key)
+                  ? `${timelineStyles[step.key]?.text || "text-gray-700"} font-semibold`
+                  : ""
+              }
+            >
               {step.label}
             </span>
             {index < steps.length - 1 && <span className="text-gray-300">•</span>}

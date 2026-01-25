@@ -23,6 +23,29 @@ const typeLabels: Record<string, string> = {
   table: 'Comer no local',
 };
 
+const stepStyles: Record<string, { done: string; idle: string }> = {
+  pending: {
+    done: 'bg-amber-100 text-amber-800 border-amber-200',
+    idle: 'bg-white text-amber-600 border-amber-100',
+  },
+  preparing: {
+    done: 'bg-sky-100 text-sky-700 border-sky-200',
+    idle: 'bg-white text-sky-600 border-sky-100',
+  },
+  ready: {
+    done: 'bg-violet-100 text-violet-700 border-violet-200',
+    idle: 'bg-white text-violet-600 border-violet-100',
+  },
+  done: {
+    done: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+    idle: 'bg-white text-emerald-600 border-emerald-100',
+  },
+  delivered: {
+    done: 'bg-emerald-100 text-emerald-700 border-emerald-200',
+    idle: 'bg-white text-emerald-600 border-emerald-100',
+  },
+};
+
 const normalizeWhatsApp = (value?: string) => {
   if (!value) return '';
   const digits = value.toString().replace(/\D/g, '');
@@ -350,8 +373,8 @@ export function OrderTracking() {
                             : 'bg-brand-primary-soft text-brand-primary animate-pulse'
                         }`}
                       >
-                        {isReady ? 'Finalizado' : 'Em andamento'}
-                      </span>
+                      {isReady ? 'Finalizado' : 'Em andamento'}
+                    </span>
                     </div>
                     <p className="text-sm text-gray-500 mt-2">
                       {storeName} • {typeLabel}
@@ -413,13 +436,13 @@ export function OrderTracking() {
                       steps.findIndex((item) => item.id === step.id) <=
                       steps.findIndex((item) => item.id === currentStep);
                     const showBike = isDelivery && step.id === 'done';
+                    const styleKey = step.id === 'ready' ? 'ready' : step.id;
+                    const stepTone = stepStyles[styleKey] || stepStyles.pending;
                     return (
                       <div
                         key={step.id}
                         className={`rounded-xl border px-3 py-2 flex items-center gap-2 text-xs sm:text-sm whitespace-nowrap ${
-                          isDone
-                            ? 'border-brand-primary bg-brand-primary-soft text-brand-primary'
-                            : 'border-gray-200 text-gray-500'
+                          isDone ? stepTone.done : stepTone.idle
                         } ${step.id === currentStep && !isReady ? 'ring-2 ring-brand-primary animate-pulse' : ''}`}
                       >
                         {showBike ? (
