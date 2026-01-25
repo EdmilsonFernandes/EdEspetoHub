@@ -22,5 +22,6 @@ export interface CreateProductDto {
   imageFile?: string | null;
   isFeatured?: boolean;
   active?: boolean;
+  availabilityDays?: Record<string, boolean> | null;
   storeId: string;
 }

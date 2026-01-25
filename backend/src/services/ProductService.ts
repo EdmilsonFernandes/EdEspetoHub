@@ -15,6 +15,7 @@ import { CreateProductDto } from '../dto/CreateProductDto';
 import { ProductRepository } from '../repositories/ProductRepository';
 import { StoreRepository } from '../repositories/StoreRepository';
 import { saveBase64Image } from '../utils/imageStorage';
+import { isProductAvailableToday, normalizeAvailabilityDays } from '../utils/productAvailability';
 import { AppError } from '../errors/AppError';
 /**
  * Provides ProductService functionality.
@@ -66,6 +67,7 @@ export class ProductService
       ? Number(input.promoPrice)
       : null;
     const promoActive = Boolean(input.promoActive) && !!promoPrice && promoPrice > 0;
+    const availabilityDays = normalizeAvailabilityDays(input.availabilityDays);
 
     const product = this.productRepository.create({
       name: input.name,
@@ -77,6 +79,7 @@ export class ProductService
       imageUrl: uploadedImage || input.imageUrl,
       isFeatured: Boolean(input.isFeatured),
       active: input.active === false ? false : true,
+      availabilityDays,
       store: safeStore,
     });
 
@@ -128,7 +131,8 @@ export class ProductService
   {
     const store = await this.storeRepository.findBySlug(slug);
     if (!store) throw new AppError('STORE-001', 404);
-    return this.productRepository.findActiveByStoreId(store.id);
+    const products = await this.productRepository.findActiveByStoreId(store.id);
+    return products.filter((product) => isProductAvailableToday(product));
   }
 
 
@@ -166,6 +170,9 @@ export class ProductService
     }
     if (typeof data.active === 'boolean') {
       product.active = data.active;
+    }
+    if (data.availabilityDays !== undefined) {
+      product.availabilityDays = normalizeAvailabilityDays(data.availabilityDays);
     }
     if (promoPrice !== undefined) {
       product.promoPrice = promoPrice && promoPrice > 0 ? promoPrice : null;

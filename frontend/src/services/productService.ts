@@ -18,6 +18,7 @@ const normalizeProduct = (product: any) => {
     promoPrice: product.promoPrice ?? product.promo_price ?? null,
     promoActive: Boolean(product.promoActive ?? product.promo_active ?? false),
     active: product.active ?? product.is_active ?? true,
+    availabilityDays: product.availabilityDays ?? product.availability_days ?? null,
     description,
     desc: description,
   };

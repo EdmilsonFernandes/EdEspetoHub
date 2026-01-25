@@ -16,7 +16,32 @@ import { productService } from '../../services/productService';
 import { formatCurrency } from '../../utils/format';
 import { useToast } from '../../contexts/ToastContext';
 
-const initialForm = { name: '', price: '', promoPrice: '', promoActive: false, category: 'espetos', imageUrl: '', imageFile: '', description: '', isFeatured: false, active: true };
+const WEEK_DAYS = [
+  { key: 'mon', label: 'Seg' },
+  { key: 'tue', label: 'Ter' },
+  { key: 'wed', label: 'Qua' },
+  { key: 'thu', label: 'Qui' },
+  { key: 'fri', label: 'Sex' },
+  { key: 'sat', label: 'Sáb' },
+  { key: 'sun', label: 'Dom' },
+];
+const defaultAvailability = WEEK_DAYS.reduce((acc, day) => {
+  acc[day.key] = false;
+  return acc;
+}, {});
+const initialForm = {
+  name: '',
+  price: '',
+  promoPrice: '',
+  promoActive: false,
+  category: 'espetos',
+  imageUrl: '',
+  imageFile: '',
+  description: '',
+  isFeatured: false,
+  active: true,
+  availabilityDays: { ...defaultAvailability },
+};
 const defaultCategories = [
   { id: 'espetos', label: 'Espetos', icon: Fire },
   { id: 'bebidas', label: 'Bebidas', icon: Wine },
@@ -41,6 +66,21 @@ const getCategoryIcon = (categoryId = '') => {
   return known?.icon || DotsThree;
 };
 
+const normalizeAvailabilityState = (value) => {
+  if (!value || typeof value !== 'object') return { ...defaultAvailability };
+  return WEEK_DAYS.reduce((acc, day) => {
+    acc[day.key] = Boolean(value[day.key]);
+    return acc;
+  }, {});
+};
+
+const buildAvailabilityPayload = (value) => {
+  const normalized = normalizeAvailabilityState(value);
+  const hasAny = Object.values(normalized).some(Boolean);
+  if (!hasAny) return null;
+  return normalized;
+};
+
 export const ProductManager = ({ products, onProductsChange }) => {
   const { showToast } = useToast();
   const formRef = useRef<HTMLDivElement | null>(null);
@@ -57,6 +97,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
     imageUrl: '',
     isFeatured: false,
     active: true,
+    availabilityDays: { ...defaultAvailability },
   });
   const [inlineImageFile, setInlineImageFile] = useState('');
   const [formData, setFormData] = useState(initialForm);
@@ -153,6 +194,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
       imageFile: imageMode === 'upload' ? formData.imageFile : undefined,
       imageUrl: imageMode === 'url' ? formData.imageUrl : undefined,
       description: formData.description || undefined,
+      availabilityDays: buildAvailabilityPayload(formData.availabilityDays),
     };
 
     try {
@@ -180,6 +222,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
       imageUrl: product.imageUrl || '',
       isFeatured: Boolean(product.isFeatured),
       active: product.active !== false,
+      availabilityDays: normalizeAvailabilityState(product.availabilityDays),
     });
   };
 
@@ -211,6 +254,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
         imageFile: inlineImageFile || undefined,
         isFeatured: inlineForm.isFeatured,
         active: inlineForm.active,
+        availabilityDays: buildAvailabilityPayload(inlineForm.availabilityDays),
       });
       showToast('Produto atualizado com sucesso.', 'success');
       setInlineEditId(null);
@@ -533,6 +577,40 @@ export const ProductManager = ({ products, onProductsChange }) => {
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">Dias de exibição</label>
+            <div className="grid grid-cols-7 gap-2">
+              {WEEK_DAYS.map((day) => (
+                <label
+                  key={day.key}
+                  className={`flex flex-col items-center gap-1 rounded-xl border px-2 py-2 text-xs font-semibold transition ${
+                    formData.availabilityDays?.[day.key]
+                      ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                      : 'border-slate-200 bg-white text-slate-600'
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    className="accent-emerald-600"
+                    checked={Boolean(formData.availabilityDays?.[day.key])}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        availabilityDays: {
+                          ...normalizeAvailabilityState(prev.availabilityDays),
+                          [day.key]: e.target.checked,
+                        },
+                      }))
+                    }
+                  />
+                  {day.label}
+                </label>
+              ))}
+            </div>
+            <p className="text-xs text-slate-500">
+              Se nenhum dia for marcado, o produto aparece todos os dias.
+            </p>
           </div>
           <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
             <div>
@@ -968,6 +1046,40 @@ export const ProductManager = ({ products, onProductsChange }) => {
                   value={inlineForm.description}
                   onChange={(e) => setInlineForm((prev) => ({ ...prev, description: e.target.value }))}
                 />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">Dias de exibição</label>
+                <div className="mt-3 grid grid-cols-7 gap-2">
+                  {WEEK_DAYS.map((day) => (
+                    <label
+                      key={day.key}
+                      className={`flex flex-col items-center gap-1 rounded-xl border px-2 py-2 text-[10px] font-semibold transition ${
+                        inlineForm.availabilityDays?.[day.key]
+                          ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                          : 'border-slate-200 bg-white text-slate-600'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        className="accent-emerald-600"
+                        checked={Boolean(inlineForm.availabilityDays?.[day.key])}
+                        onChange={(e) =>
+                          setInlineForm((prev) => ({
+                            ...prev,
+                            availabilityDays: {
+                              ...normalizeAvailabilityState(prev.availabilityDays),
+                              [day.key]: e.target.checked,
+                            },
+                          }))
+                        }
+                      />
+                      {day.label}
+                    </label>
+                  ))}
+                </div>
+                <p className="mt-2 text-[11px] text-slate-500">
+                  Se nenhum dia for marcado, o produto aparece todos os dias.
+                </p>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <button

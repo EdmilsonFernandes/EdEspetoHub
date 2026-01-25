@@ -100,6 +100,10 @@ export async function runMigrations() {
     ADD COLUMN IF NOT EXISTS promo_active BOOLEAN NOT NULL DEFAULT FALSE;
   `);
   await AppDataSource.query(`
+    ALTER TABLE IF EXISTS products
+    ADD COLUMN IF NOT EXISTS availability_days JSONB;
+  `);
+  await AppDataSource.query(`
     ALTER TABLE IF EXISTS plans
     ADD COLUMN IF NOT EXISTS display_name TEXT;
   `);

@@ -88,6 +88,7 @@ CREATE TABLE IF NOT EXISTS products (
   image_url TEXT,
   is_featured BOOLEAN NOT NULL DEFAULT FALSE,
   active BOOLEAN NOT NULL DEFAULT TRUE,
+  availability_days JSONB,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -134,6 +135,8 @@ ALTER TABLE products
 ADD COLUMN IF NOT EXISTS promo_price NUMERIC(10,2);
 ALTER TABLE products
 ADD COLUMN IF NOT EXISTS promo_active BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE products
+ADD COLUMN IF NOT EXISTS availability_days JSONB;
 
 ALTER TABLE order_items
 ADD COLUMN IF NOT EXISTS cooking_point TEXT;
