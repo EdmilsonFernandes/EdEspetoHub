@@ -1265,6 +1265,7 @@ export function StorePage() {
             deliveryRadiusKm={deliveryRadiusValue}
             deliveryFee={deliveryFeeValue}
             deliveryCheck={deliveryCheck}
+            storeAddress={storeAddress}
             checkoutDisabled={deliveryValidation.blocked}
             checkoutDisabledReason={deliveryValidation.reason}
             onChangeCustomer={handleCustomerChange}

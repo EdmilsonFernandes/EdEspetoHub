@@ -25,6 +25,7 @@ export const CartView = ({
   deliveryRadiusKm = null,
   deliveryFee = 0,
   deliveryCheck = { status: "idle", distanceKm: null },
+  storeAddress = "",
   checkoutDisabled = false,
   checkoutDisabledReason = "",
   onChangeCustomer,
@@ -173,8 +174,15 @@ export const CartView = ({
   };
 
 
+  const normalizedStoreAddress = (storeAddress || "").toString().trim();
   const deliveryStatus = useMemo(() => {
     if (!isDelivery) return null;
+    if (!normalizedStoreAddress) {
+      return {
+        tone: "bg-amber-50 text-amber-700 border-amber-200",
+        label: "Endereço da loja indisponível para validar a entrega.",
+      };
+    }
     if (!radiusValue) {
       return {
         tone: "bg-emerald-50 text-emerald-700 border-emerald-200",
@@ -215,7 +223,34 @@ export const CartView = ({
       tone: "bg-slate-50 text-slate-600 border-slate-200",
       label: "Informe o endereço para validar a entrega.",
     };
-  }, [deliveryCheck?.distanceKm, deliveryCheck?.status, isDelivery, radiusValue]);
+  }, [deliveryCheck?.distanceKm, deliveryCheck?.status, isDelivery, normalizedStoreAddress, radiusValue]);
+
+  const deliveryDebug = useMemo(() => {
+    if (!isDelivery) return null;
+    const hasAddressParts = Boolean(customer.street || customer.city || customer.state || customer.cep);
+    return [
+      {
+        label: "Loja",
+        value: normalizedStoreAddress ? "OK" : "Sem endereço",
+      },
+      {
+        label: "Cliente",
+        value: hasAddressParts ? "OK" : "Incompleto",
+      },
+      {
+        label: "Distância",
+        value: deliveryCheck?.status || "idle",
+      },
+    ];
+  }, [
+    customer.city,
+    customer.cep,
+    customer.state,
+    customer.street,
+    deliveryCheck?.status,
+    isDelivery,
+    normalizedStoreAddress,
+  ]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -500,6 +535,19 @@ export const CartView = ({
                   {deliveryStatus && (
                     <div className={`rounded-lg border px-3 py-2 text-xs font-semibold ${deliveryStatus.tone}`}>
                       {deliveryStatus.label}
+                    </div>
+                  )}
+                  {deliveryDebug && (
+                    <div className="rounded-lg border border-slate-100 bg-white px-3 py-2">
+                      <p className="text-[10px] uppercase tracking-[0.2em] text-slate-400 mb-2">Status da validação</p>
+                      <div className="space-y-1 text-[11px] text-slate-600">
+                        {deliveryDebug.map((row) => (
+                          <div key={row.label} className="flex items-center justify-between">
+                            <span>{row.label}</span>
+                            <span className="font-semibold text-slate-800">{row.value}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
