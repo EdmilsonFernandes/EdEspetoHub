@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React from "react";
 import { CheckCircle, QrCode, ArrowLeft, CreditCard } from "@phosphor-icons/react";
-import { formatCurrency, formatPaymentMethod } from "../../utils/format";
+import { formatPaymentMethod } from "../../utils/format";
 import { getPaymentMethodMeta } from "../../utils/paymentAssets";
 
 // Chave Pix fixa (mock)
@@ -9,7 +9,7 @@ const PIX_KEY_MOCK =
   "00020126580014BR.GOV.BCB.PIX0136123e4567-e89b-12d3-a456-426614174000520400005303986540510.005802BR5913EspetinhoDatony6008SaoPaulo62070503***6304";
 
 // Componente responsável por exibir o pagamento (Pix ou retirada)
-const PaymentSummary = ({ paymentMethod, pixKey, phone, cashTendered }) => {
+const PaymentSummary = ({ paymentMethod, pixKey, phone }) => {
   if (paymentMethod === "pix") {
     const qrData = pixKey || phone || PIX_KEY_MOCK;
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(
@@ -73,11 +73,6 @@ const PaymentSummary = ({ paymentMethod, pixKey, phone, cashTendered }) => {
         })()}
         . Quando seu pedido estiver pronto, finalize o pagamento no local.
       </p>
-      {paymentMethod === "dinheiro" && cashTendered ? (
-        <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-          Troco para: {formatCurrency(Number(cashTendered))}
-        </div>
-      ) : null}
     </div>
   );
 };
@@ -118,7 +113,6 @@ export const SuccessView = ({
   phone,
   table,
   orderId,
-  cashTendered,
   onTrackOrder,
 }) => {
   return (
@@ -145,7 +139,6 @@ export const SuccessView = ({
         paymentMethod={paymentMethod}
         pixKey={pixKey}
         phone={phone}
-        cashTendered={cashTendered}
       />
 
       <div className="flex flex-col sm:flex-row gap-3">

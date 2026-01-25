@@ -37,6 +37,7 @@ export const GrillQueue = () => {
   const [products, setProducts] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState({});
   const [storePixKey, setStorePixKey] = useState('');
+  const [cashConfirmValue, setCashConfirmValue] = useState('');
   const storeSlug = useMemo(() => {
     if (typeof window === 'undefined') return '';
     const raw = localStorage.getItem('adminSession');
@@ -348,6 +349,7 @@ export const GrillQueue = () => {
   };
 
   const openPaymentConfirm = (order) => {
+    setCashConfirmValue('');
     setConfirmModal({
       id: order.id,
       customerName: order.customerName || order.name || 'Cliente',
@@ -968,6 +970,7 @@ export const GrillQueue = () => {
             {(() => {
               const normalizedPayment = (confirmModal.payment || '').toString().trim().toLowerCase();
               const isPixPayment = normalizedPayment === 'pix';
+              const isCashPayment = normalizedPayment === 'dinheiro';
               const pixKey = (confirmModal.pixKey || '').toString().trim();
               const pixPayload = pixKey
                 ? buildPixPayload({
@@ -980,6 +983,10 @@ export const GrillQueue = () => {
               const pixQrUrl = pixPayload
                 ? `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(pixPayload)}`
                 : '';
+              const totalValue = Number(confirmModal.total || 0);
+              const cashValue = Number((cashConfirmValue || '').toString().replace(',', '.'));
+              const cashValid = !isCashPayment || (cashConfirmValue && !Number.isNaN(cashValue) && cashValue >= totalValue);
+              const changeValue = isCashPayment && cashValid ? cashValue - totalValue : 0;
               return (
                 <>
             <div className="flex items-start justify-between gap-3">
@@ -1068,6 +1075,37 @@ export const GrillQueue = () => {
                 )}
               </div>
             )}
+            {isCashPayment && (
+              <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700">
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold">Pagamento em dinheiro</span>
+                  <span className="text-xs text-amber-600">Informe para calcular o troco</span>
+                </div>
+                <div className="mt-3 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+                  <label className="text-xs font-semibold text-amber-700">
+                    Valor recebido
+                    <input
+                      type="text"
+                      inputMode="decimal"
+                      value={cashConfirmValue}
+                      onChange={(event) => setCashConfirmValue(event.target.value)}
+                      placeholder="Ex: 50,00"
+                      className="mt-2 w-full rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm text-amber-800 focus:border-amber-400 focus:ring-2 focus:ring-amber-200"
+                    />
+                  </label>
+                  <div className="rounded-xl border border-amber-200 bg-white px-4 py-3 text-sm font-semibold text-amber-700">
+                    {cashValid
+                      ? `Troco: ${formatCurrency(changeValue)}`
+                      : 'Informe um valor válido'}
+                  </div>
+                </div>
+                {!cashValid && (
+                  <p className="mt-2 text-[11px] text-amber-700">
+                    O valor recebido precisa ser maior ou igual ao total.
+                  </p>
+                )}
+              </div>
+            )}
             <div className="mt-6 flex flex-col sm:flex-row gap-2">
               <button
                 type="button"
@@ -1079,6 +1117,7 @@ export const GrillQueue = () => {
               <button
                 type="button"
                 onClick={handleConfirmPaid}
+                disabled={!cashValid}
                 className="w-full sm:w-auto px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:opacity-90 transition-all hover:-translate-y-0.5 active:scale-95"
               >
                 Pagamento recebido
