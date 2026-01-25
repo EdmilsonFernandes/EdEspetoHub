@@ -98,6 +98,7 @@ export class StoreService
       const socialLinks = sanitizeSocialLinks(input.socialLinks);
       const deliveryRadiusKm = this.parseNumber(input.deliveryRadiusKm);
       const deliveryFee = this.parseNumber(input.deliveryFee);
+      const trimmedAddress = input.address?.toString().trim();
 
       // 3️⃣ Settings
       const normalizedPix = this.normalizePixKey(input.pixKey);
@@ -105,6 +106,7 @@ export class StoreService
       const settings = manager.create(StoreSettings, {
         logoUrl: logoUrl || input.logoUrl,
         description: input.description,
+        address: trimmedAddress || owner.address || null,
         primaryColor: input.primaryColor,
         secondaryColor: input.secondaryColor,
         pixKey: normalizedPix ?? null,
@@ -124,6 +126,11 @@ export class StoreService
         owner,
         settings,
       });
+
+      if (trimmedAddress && owner.address !== trimmedAddress) {
+        owner.address = trimmedAddress;
+        await userRepo.save(owner);
+      }
 
       return storeRepo.save(store);
     });
@@ -233,6 +240,7 @@ export class StoreService
       if (data.address !== undefined && store.owner)
       {
         const trimmedAddress = data.address?.toString().trim();
+        store.settings.address = trimmedAddress || null;
         store.owner.address = trimmedAddress || undefined;
         const userRepo = manager.getRepository(User);
         await userRepo.save(store.owner);

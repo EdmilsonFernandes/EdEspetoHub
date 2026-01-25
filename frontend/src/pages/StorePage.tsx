@@ -288,7 +288,7 @@ export function StorePage() {
             : [ 'delivery', 'pickup', 'table' ];
           setOrderTypes(allowedTypes);
           setStorePhone(data.owner?.phone || '');
-          setStoreAddress(data.owner?.address || '');
+          setStoreAddress(data.settings?.address || data.owner?.address || '');
           setStoreDescription(data.settings?.description || '');
           setPromoMessage(data.settings?.promoMessage || '');
           setStorePixKey(data.settings?.pixKey || '');

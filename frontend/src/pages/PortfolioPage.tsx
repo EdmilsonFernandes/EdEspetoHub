@@ -39,6 +39,16 @@ type PortfolioStore = {
   } | null;
 };
 
+type MenuItem = {
+  name: string;
+  price: number;
+};
+
+type MenuInfo = {
+  items: MenuItem[];
+  loading: boolean;
+};
+
 export function PortfolioPage() {
   const teamMembers: TeamMember[] = [
     {
@@ -106,7 +116,7 @@ export function PortfolioPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [profilePreview, setProfilePreview] = useState<{ name: string; image: string } | null>(null);
-  const [menuBySlug, setMenuBySlug] = useState<Record<string, { items: { name: string; price: number }[]; loading: boolean }>>({});
+  const [menuBySlug, setMenuBySlug] = useState<Record<string, MenuInfo>>({});
 
   useEffect(() => {
     let active = true;
@@ -114,7 +124,15 @@ export function PortfolioPage() {
       try {
         setLoading(true);
         const data = await storeService.listPortfolio();
-        if (active) setStores(Array.isArray(data) ? data : []);
+        if (active) {
+          const normalized = (Array.isArray(data) ? data : []).map((store) => ({
+            ...store,
+            name: store?.name || '',
+            slug: store?.slug || '',
+            settings: store?.settings ?? null,
+          }));
+          setStores(normalized);
+        }
       } catch (err: any) {
         if (active) setError(err?.message || "Não foi possível carregar as lojas agora.");
       } finally {
@@ -150,6 +168,7 @@ export function PortfolioPage() {
         });
 
     const loadMenu = async (slug: string) => {
+      if (!slug) return;
       setMenuBySlug((prev) => ({
         ...prev,
         [slug]: prev[slug] ?? { items: [], loading: true },
@@ -360,7 +379,7 @@ export function PortfolioPage() {
                           {!menuInfo?.loading && menuInfo?.items?.length === 0 && (
                             <div className="text-xs text-slate-400">Sem produtos cadastrados.</div>
                           )}
-                          {menuInfo?.items?.map((item) => (
+                          {menuInfo?.items?.map((item: MenuItem) => (
                             <div key={item.name} className="flex items-center justify-between">
                               <span className="font-semibold text-slate-700">{item.name}</span>
                               <span

@@ -1,26 +1,26 @@
-export const formatCurrency = (value) => {
+export const formatCurrency = (value: number | string | null | undefined) => {
   const numeric = Number(value);
   const safeValue = Number.isFinite(numeric) ? numeric : 0;
   return safeValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 };
 
-export const formatDateTime = (timestamp) => {
+export const formatDateTime = (timestamp: Date | number | string | { seconds: number } | null | undefined) => {
   if (!timestamp) return '';
-  if (timestamp.seconds) {
+  if (typeof timestamp === 'object' && 'seconds' in timestamp) {
     return new Date(timestamp.seconds * 1000).toLocaleString('pt-BR');
   }
   return new Date(timestamp).toLocaleString('pt-BR');
 };
 
-export const formatDate = (timestamp) => {
+export const formatDate = (timestamp: Date | number | string | { seconds: number } | null | undefined) => {
   if (!timestamp) return '';
-  if (timestamp.seconds) {
+  if (typeof timestamp === 'object' && 'seconds' in timestamp) {
     return new Date(timestamp.seconds * 1000).toLocaleDateString('pt-BR');
   }
   return new Date(timestamp).toLocaleDateString('pt-BR');
 };
 
-export const formatDuration = (milliseconds) => {
+export const formatDuration = (milliseconds: number | null | undefined) => {
   if (!milliseconds || Number.isNaN(milliseconds)) return '0s';
   const totalSeconds = Math.max(0, Math.floor(milliseconds / 1000));
   const hours = Math.floor(totalSeconds / 3600);
@@ -32,7 +32,7 @@ export const formatDuration = (milliseconds) => {
   return `${seconds}s`;
 };
 
-export const formatOrderType = (type) => {
+export const formatOrderType = (type?: string) => {
   const map = {
     delivery: 'Entrega',
     pickup: 'Retirada',
@@ -42,7 +42,7 @@ export const formatOrderType = (type) => {
   return map[type] || 'Não informado';
 };
 
-export const formatOrderStatus = (status) => {
+export const formatOrderStatus = (status?: string) => {
   const map = {
     pending: 'Pendente',
     preparing: 'Preparando',
@@ -54,7 +54,7 @@ export const formatOrderStatus = (status) => {
   return map[status] || 'Indefinido';
 };
 
-export const formatPaymentMethod = (payment) => {
+export const formatPaymentMethod = (payment?: string) => {
   const normalized = (payment || '').toString().toLowerCase();
   const map = {
     pix: 'Pix',
@@ -114,7 +114,7 @@ export const formatPhoneInput = (value = '', defaultAreaCode = '12') => {
   return `(${ddd}) `;
 };
 
-export const formatOrderDisplayId = (orderId, storeSlug = '') => {
+export const formatOrderDisplayId = (orderId?: string, storeSlug = '') => {
   if (!orderId) return '';
   const shortId = String(orderId).slice(0, 8);
   const prefix = storeSlug ? String(storeSlug).replace(/[^a-zA-Z0-9]/g, '').slice(0, 3).toUpperCase() : '';
