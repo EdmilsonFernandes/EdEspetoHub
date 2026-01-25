@@ -868,36 +868,42 @@ export const DashboardView = ({
           </div>
         </div>
 
-        <div className="max-h-80 overflow-y-auto pr-1">
-          <div className="grid gap-3 sm:grid-cols-2">
-            {sortedCustomers.map((customer) => {
-              const initials = String(customer.name || 'CL')
-                .split(' ')
-                .filter(Boolean)
-                .slice(0, 2)
-                .map((part) => part[0]?.toUpperCase())
-                .join('');
-              return (
-                <div
-                  key={customer.id || customer.name}
-                  className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50/70 px-3 py-2"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-xs font-bold text-slate-700">
-                      {initials || 'CL'}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-slate-800 truncate">{customer.name}</p>
-                      <p className="text-xs text-slate-500">{customer.phone ? 'Contato cadastrado' : 'Sem telefone'}</p>
-                    </div>
+        <div className="max-h-80 overflow-y-auto pr-1 space-y-3">
+          {sortedCustomers.map((customer) => {
+            const initials = String(customer.name || 'CL')
+              .split(' ')
+              .filter(Boolean)
+              .slice(0, 2)
+              .map((part) => part[0]?.toUpperCase())
+              .join('');
+            return (
+              <div
+                key={customer.id || customer.name}
+                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-11 h-11 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center text-sm font-bold text-slate-700">
+                    {initials || 'CL'}
                   </div>
-                  <span className="px-3 py-1 rounded-full text-[11px] font-semibold bg-white border border-slate-200 text-slate-600">
-                    {customer.phone}
-                  </span>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-slate-800 truncate">{customer.name}</p>
+                    <p className="text-xs text-slate-500">
+                      {customer.phone ? 'Contato cadastrado' : 'Sem telefone'}
+                    </p>
+                  </div>
                 </div>
-              );
-            })}
-          </div>
+                <span
+                  className={`px-3 py-1 rounded-full text-[11px] font-semibold border ${
+                    customer.phone
+                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                      : 'bg-slate-50 text-slate-500 border-slate-200'
+                  }`}
+                >
+                  {customer.phone || 'Sem telefone'}
+                </span>
+              </div>
+            );
+          })}
 
           {sortedCustomers.length === 0 && (
             <div className="text-center text-gray-400 py-6 text-sm">
