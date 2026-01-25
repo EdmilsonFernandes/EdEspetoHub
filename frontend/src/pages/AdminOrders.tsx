@@ -204,114 +204,183 @@ export function AdminOrders() {
             </div>
           ) : viewMode === 'cards' ? (
             <div className="space-y-4">
-              {filteredOrders.map((order, index) => (
-                <div
-                  key={order.id || `${order.customerName}-${index}`}
-                  className="border border-slate-200 rounded-2xl bg-white p-5 shadow-sm flex flex-col gap-4"
-                >
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                    <div>
-                      <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                        <span className="px-2.5 py-1 rounded-full border border-slate-200 bg-slate-50 font-semibold">
-                          Pedido #{shortId(order.id)}
-                        </span>
-                        <span>{formatDateTime(order.createdAt)}</span>
-                      </div>
-                      <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                        <span>
-                          {formatOrderType(order.type)}
-                          {order.table ? ` · Mesa ${order.table}` : ''}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusStyles(order.status)}`}>
-                        {formatOrderStatus(order.status)}
-                      </span>
-                      <span className="text-sm font-bold text-brand-primary">
-                        {formatCurrency(order.total || 0)}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="grid sm:grid-cols-3 gap-3 text-sm text-slate-600">
-                    <div>
-                      <p className="text-xs uppercase text-slate-400">Cliente</p>
-                      <p className="font-semibold text-slate-700">{order.customerName || order.name || 'Cliente'}</p>
-                      <p className="text-xs text-slate-500">{order.phone || '-'}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs uppercase text-slate-400">Pagamento</p>
-                      {(() => {
-                        const paymentMeta = getPaymentMethodMeta(order.payment);
-                        return (
-                          <p className="font-semibold text-slate-700 inline-flex items-center gap-2">
-                            {paymentMeta.icon && (
-                              <img
-                                src={paymentMeta.icon}
-                                alt={paymentMeta.label}
-                                className="h-4 w-4 object-contain"
-                              />
-                            )}
-                            {paymentMeta.label}
+              <div className="sm:hidden space-y-3">
+                {filteredOrders.map((order, index) => {
+                  const paymentMeta = getPaymentMethodMeta(order.payment);
+                  const previewItems = (order.items || []).slice(0, 2);
+                  const remaining = (order.items || []).length - previewItems.length;
+                  return (
+                    <div
+                      key={order.id || `${order.customerName}-${index}`}
+                      className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm space-y-3"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2 text-[11px] text-slate-500">
+                            <span className="px-2 py-0.5 rounded-full border border-slate-200 bg-slate-50 font-semibold">
+                              Pedido #{shortId(order.id)}
+                            </span>
+                            <span>{formatDateTime(order.createdAt)}</span>
+                          </div>
+                          <p className="text-sm font-semibold text-slate-800">
+                            {order.customerName || order.name || 'Cliente'}
                           </p>
-                        );
-                      })()}
+                          <p className="text-xs text-slate-500">
+                            {formatOrderType(order.type)}
+                            {order.table ? ` · Mesa ${order.table}` : ''}
+                          </p>
+                        </div>
+                        <div className="flex flex-col items-end gap-2">
+                          <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ${statusStyles(order.status)}`}>
+                            {formatOrderStatus(order.status)}
+                          </span>
+                          <span className="text-base font-bold text-brand-primary">
+                            {formatCurrency(order.total || 0)}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-slate-600">
+                        {paymentMeta.icon && (
+                          <img src={paymentMeta.icon} alt={paymentMeta.label} className="h-4 w-4 object-contain" />
+                        )}
+                        <span className="font-semibold">{paymentMeta.label}</span>
+                        <span className="text-slate-400">•</span>
+                        <span>{order.phone || 'Sem telefone'}</span>
+                      </div>
+                      {previewItems.length > 0 && (
+                        <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3 text-xs text-slate-600 space-y-2">
+                          {previewItems.map((item) => (
+                            <div key={item.id || item.name} className="flex items-center justify-between gap-2">
+                              <span className="font-semibold text-slate-700">
+                                {item.qty}x {item.name}
+                              </span>
+                              <span className="font-semibold">
+                                {formatCurrency((item.unitPrice ?? item.price ?? 0) * item.qty)}
+                              </span>
+                            </div>
+                          ))}
+                          {remaining > 0 && (
+                            <div className="text-[11px] text-slate-400">
+                              + {remaining} item(ns)
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
-                    <div>
-                      <p className="text-xs uppercase text-slate-400">Endereço</p>
-                      <p className="font-semibold text-slate-700">{order.address || '-'}</p>
-                    </div>
-                  </div>
+                  );
+                })}
+              </div>
 
-                  {(order.items || []).length > 0 && (
-                    <div className="border-t border-slate-100 pt-3">
-                      <p className="text-xs uppercase text-slate-400 mb-2">Itens</p>
-                      <div className="grid sm:grid-cols-2 gap-2 text-sm text-slate-700">
-                        {order.items.map((item) => (
-                          <div key={item.id || item.name} className="flex items-center justify-between gap-3">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-lg overflow-hidden border border-slate-200 bg-slate-100 flex-shrink-0">
-                                {item.imageUrl ? (
-                                  <img
-                                    src={resolveAssetUrl(item.imageUrl)}
-                                    alt={item.name}
-                                    className="w-full h-full object-cover"
-                                  />
-                                ) : (
-                                  <div className="w-full h-full flex items-center justify-center text-[10px] text-slate-400">
-                                    🍖
-                                  </div>
-                                )}
-                              </div>
-                              <div className="flex flex-col">
-                                <span className="font-semibold">
-                                  {item.qty}x {item.name}
-                                </span>
-                                <div className="flex flex-wrap gap-1 mt-1">
-                                  {item?.cookingPoint && (
-                                    <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800 border border-amber-200">
-                                      {item.cookingPoint}
-                                    </span>
-                                  )}
-                                  {item?.passSkewer && (
-                                    <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-fuchsia-100 text-fuchsia-700 border border-fuchsia-200">
-                                      passar varinha
-                                    </span>
+              <div className="hidden sm:block space-y-4">
+                {filteredOrders.map((order, index) => (
+                  <div
+                    key={order.id || `${order.customerName}-${index}`}
+                    className="border border-slate-200 rounded-2xl bg-white p-5 shadow-sm flex flex-col gap-4"
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                          <span className="px-2.5 py-1 rounded-full border border-slate-200 bg-slate-50 font-semibold">
+                            Pedido #{shortId(order.id)}
+                          </span>
+                          <span>{formatDateTime(order.createdAt)}</span>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                          <span>
+                            {formatOrderType(order.type)}
+                            {order.table ? ` · Mesa ${order.table}` : ''}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusStyles(order.status)}`}>
+                          {formatOrderStatus(order.status)}
+                        </span>
+                        <span className="text-sm font-bold text-brand-primary">
+                          {formatCurrency(order.total || 0)}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="grid sm:grid-cols-3 gap-3 text-sm text-slate-600">
+                      <div>
+                        <p className="text-xs uppercase text-slate-400">Cliente</p>
+                        <p className="font-semibold text-slate-700">{order.customerName || order.name || 'Cliente'}</p>
+                        <p className="text-xs text-slate-500">{order.phone || '-'}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs uppercase text-slate-400">Pagamento</p>
+                        {(() => {
+                          const paymentMeta = getPaymentMethodMeta(order.payment);
+                          return (
+                            <p className="font-semibold text-slate-700 inline-flex items-center gap-2">
+                              {paymentMeta.icon && (
+                                <img
+                                  src={paymentMeta.icon}
+                                  alt={paymentMeta.label}
+                                  className="h-4 w-4 object-contain"
+                                />
+                              )}
+                              {paymentMeta.label}
+                            </p>
+                          );
+                        })()}
+                      </div>
+                      <div>
+                        <p className="text-xs uppercase text-slate-400">Endereço</p>
+                        <p className="font-semibold text-slate-700">{order.address || '-'}</p>
+                      </div>
+                    </div>
+
+                    {(order.items || []).length > 0 && (
+                      <div className="border-t border-slate-100 pt-3">
+                        <p className="text-xs uppercase text-slate-400 mb-2">Itens</p>
+                        <div className="grid sm:grid-cols-2 gap-2 text-sm text-slate-700">
+                          {order.items.map((item) => (
+                            <div key={item.id || item.name} className="flex items-center justify-between gap-3">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-lg overflow-hidden border border-slate-200 bg-slate-100 flex-shrink-0">
+                                  {item.imageUrl ? (
+                                    <img
+                                      src={resolveAssetUrl(item.imageUrl)}
+                                      alt={item.name}
+                                      className="w-full h-full object-cover"
+                                    />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-[10px] text-slate-400">
+                                      🍖
+                                    </div>
                                   )}
                                 </div>
+                                <div className="flex flex-col">
+                                  <span className="font-semibold">
+                                    {item.qty}x {item.name}
+                                  </span>
+                                  <div className="flex flex-wrap gap-1 mt-1">
+                                    {item?.cookingPoint && (
+                                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800 border border-amber-200">
+                                        {item.cookingPoint}
+                                      </span>
+                                    )}
+                                    {item?.passSkewer && (
+                                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-fuchsia-100 text-fuchsia-700 border border-fuchsia-200">
+                                        passar varinha
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
                               </div>
+                              <span className="font-semibold">
+                                {formatCurrency((item.unitPrice ?? item.price ?? 0) * item.qty)}
+                              </span>
                             </div>
-                            <span className="font-semibold">
-                              {formatCurrency((item.unitPrice ?? item.price ?? 0) * item.qty)}
-                            </span>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </div>
-              ))}
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           ) : (
             <div className="overflow-x-auto">
