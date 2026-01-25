@@ -161,6 +161,7 @@ export const MenuView = ({
   instagramHandle,
   whatsappNumber,
   promoMessage,
+  storeAddress,
   showHeader = true,
   onOpenQueue,
   onOpenAdmin,
