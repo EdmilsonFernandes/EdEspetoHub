@@ -41,7 +41,7 @@ export const loadSsmEnv = async () => {
   const raw = response.Parameter?.Value;
   if (!raw) return;
 
-  let parsed: Record<string, string>;
+  let parsed: Record<string, unknown>;
   try {
     parsed = JSON.parse(raw);
   } catch (error) {
@@ -53,10 +53,17 @@ export const loadSsmEnv = async () => {
   const reservedKeys = new Set([ 'PORT', 'CORS_ORIGIN' ]);
   Object.entries(parsed).forEach(([key, value]) => {
     if (reservedKeys.has(key)) return;
+    const normalizedValue = value == null ? undefined : String(value).trim();
+    if (!normalizedValue) return;
     if (override || !process.env[key]) {
-      process.env[key] = value;
+      process.env[key] = normalizedValue;
     }
   });
 
-  console.log('[maps] SSM env loaded', { parameter: name, keys: Object.keys(parsed).length });
+  console.log('[maps] SSM env loaded', {
+    parameter: name,
+    keys: Object.keys(parsed).length,
+    hasGoogleMapsApiKey: Boolean(process.env.GOOGLE_MAPS_API_KEY),
+    hasGoogleMapsJsKey: Boolean(process.env.VITE_GOOGLE_MAPS_JS_KEY),
+  });
 };
