@@ -962,16 +962,18 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       )}
 
       {activeTab === 'config' && (
-        <div className="space-y-4">
-          <BrandingSettings
-            branding={brandingDraft}
-            onChange={setBrandingDraft}
-            storeSlug={storeSlug}
-            onSave={handleSaveBranding}
-            saving={savingBranding}
-          />
-          <OrderTypeSettingsCard />
-          <OpeningHoursCard />
+        <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 sm:p-5 shadow-sm">
+          <div className="space-y-4">
+            <BrandingSettings
+              branding={brandingDraft}
+              onChange={setBrandingDraft}
+              storeSlug={storeSlug}
+              onSave={handleSaveBranding}
+              saving={savingBranding}
+            />
+            <OrderTypeSettingsCard />
+            <OpeningHoursCard />
+          </div>
         </div>
       )}
 
