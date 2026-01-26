@@ -748,16 +748,22 @@ export const GrillQueue = () => {
             const orderAgeMs = order?.createdAt ? Date.now() - new Date(order.createdAt).getTime() : 0;
             const isLate = orderAgeMs > 10 * 60 * 1000;
             const isNew = newOrderIds.includes(order.id);
+            const statusAccent =
+              order.status === "pending"
+                ? "border-l-amber-400 bg-gradient-to-br from-amber-50/70 via-white to-amber-50/30"
+                : order.status === "preparing"
+                ? "border-l-sky-400 bg-gradient-to-br from-sky-50/70 via-white to-sky-50/30"
+                : order.status === "ready"
+                ? "border-l-violet-400 bg-gradient-to-br from-violet-50/70 via-white to-violet-50/30"
+                : order.status === "done"
+                ? "border-l-emerald-400 bg-gradient-to-br from-emerald-50/70 via-white to-emerald-50/30"
+                : "border-l-slate-300 bg-gradient-to-br from-slate-50 via-white to-slate-50";
             return (
             <div
               key={order.id}
-              className={`relative w-full max-w-full p-2.5 sm:p-3 rounded-2xl border shadow-[0_18px_40px_-30px_rgba(15,23,42,0.45)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_50px_-30px_rgba(15,23,42,0.55)] overflow-hidden ${
+              className={`relative w-full max-w-full p-2.5 sm:p-3 rounded-2xl border border-l-4 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.45)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_50px_-30px_rgba(15,23,42,0.55)] overflow-hidden ${
                 isNew ? 'ring-2 ring-emerald-300/80' : ''
-              } ${isLate ? 'border-rose-200 bg-rose-50/60' : 'border-slate-200'}`}
-              style={{
-                background:
-                  'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.9) 60%, rgba(226,232,240,0.6) 100%)',
-              }}
+              } ${isLate ? 'border-rose-200 bg-rose-50/60' : statusAccent}`}
             >
               <div className="absolute -top-12 -right-12 w-24 h-24 rounded-full bg-brand-primary/10 blur-2xl" />
               <div className="absolute -bottom-10 -left-10 w-24 h-24 rounded-full bg-brand-secondary/10 blur-2xl" />
