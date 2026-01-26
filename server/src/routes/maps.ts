@@ -20,6 +20,38 @@ type GeocodeResult = {
   formattedAddress: string;
 };
 
+const normalizeAddress = (address: string) => {
+  return address
+    .replace(/\|/g, ', ')
+    .replace(/\bcep\b[:\s-]*/gi, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+};
+
+const stripZipFromAddress = (address: string) => {
+  return address
+    .replace(/\b\d{5}-?\d{3}\b/g, '')
+    .replace(/\s{2,}/g, ' ')
+    .replace(/,\s*,/g, ',')
+    .trim();
+};
+
+const geocodeAddress = async (address: string, apiKey: string) => {
+  const url = new URL('https://maps.googleapis.com/maps/api/geocode/json');
+  url.searchParams.set('address', address);
+  url.searchParams.set('key', apiKey);
+  url.searchParams.set('region', 'br');
+  url.searchParams.set('language', 'pt-BR');
+
+  const response = await fetch(url.toString());
+  if (!response.ok) {
+    return { ok: false, status: response.status, data: null as any };
+  }
+
+  const data = await response.json();
+  return { ok: true, status: response.status, data };
+};
+
 const router = Router();
 
 router.get('/js-key', (_req, res) => {
@@ -42,17 +74,23 @@ router.post('/geocode', async (req, res) => {
       return res.status(500).json({ message: 'Chave do Google Maps não configurada.' });
     }
 
-    const url = new URL('https://maps.googleapis.com/maps/api/geocode/json');
-    url.searchParams.set('address', address);
-    url.searchParams.set('key', apiKey);
-
-    const response = await fetch(url.toString());
-    if (!response.ok) {
+    const normalizedAddress = normalizeAddress(address);
+    const primary = await geocodeAddress(normalizedAddress, apiKey);
+    if (!primary.ok) {
       return res.status(500).json({ message: 'Falha ao consultar o Google Geocoding.' });
     }
 
-    const data = await response.json();
-    const result = data?.results?.[0];
+    let result = primary.data?.results?.[0];
+    if (!result) {
+      const fallbackAddress = stripZipFromAddress(normalizedAddress);
+      if (fallbackAddress && fallbackAddress !== normalizedAddress) {
+        const secondary = await geocodeAddress(fallbackAddress, apiKey);
+        if (secondary.ok) {
+          result = secondary.data?.results?.[0];
+        }
+      }
+    }
+
     if (!result?.geometry?.location) {
       return res.status(400).json({ message: 'Endereço não encontrado.' });
     }
