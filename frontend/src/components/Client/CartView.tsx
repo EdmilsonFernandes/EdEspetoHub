@@ -93,7 +93,6 @@ export const CartView = ({
           entry.name?.toLowerCase().includes(normalizedQuery)
         )
       : [];
-  const recentCustomers = allowCustomerAutocomplete ? customers.slice(0, 6) : [];
 
   const handleNameChange = (value) => {
     const next = { ...customer, name: value };
@@ -361,27 +360,6 @@ export const CartView = ({
                 </div>
               )}
             </div>
-            {allowCustomerAutocomplete &&
-              normalizedQuery.length < 3 &&
-              recentCustomers.length > 0 && (
-              <div className="mt-3">
-                <p className="text-[11px] text-gray-400 uppercase tracking-wider font-semibold mb-2">
-                  Clientes recentes
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {recentCustomers.map((entry) => (
-                    <button
-                      key={entry.id || entry.name}
-                      type="button"
-                      onClick={() => handleSelectCustomer(entry)}
-                      className="px-3 py-1.5 rounded-full text-xs font-semibold border border-gray-200 text-gray-600 hover:bg-gray-50"
-                    >
-                      {entry.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
 
           {/* WhatsApp */}

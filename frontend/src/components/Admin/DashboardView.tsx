@@ -37,6 +37,23 @@ export const DashboardView = ({
   const [selectedMonth, setSelectedMonth] = useState(currentMonthKey);
   const [topSort, setTopSort] = useState("qty");
   const [customerQuery, setCustomerQuery] = useState("");
+  const [editingCustomerKey, setEditingCustomerKey] = useState(null);
+  const [editingName, setEditingName] = useState("");
+  const [editingPhone, setEditingPhone] = useState("");
+  const [hiddenCustomers, setHiddenCustomers] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("customer-hidden") || "{}");
+    } catch {
+      return {};
+    }
+  });
+  const [customerOverrides, setCustomerOverrides] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("customer-overrides") || "{}");
+    } catch {
+      return {};
+    }
+  });
   const periodLabel = periodDays === "all" ? "Todo período" : `${periodDays} dias`;
   const linkStatsLabel = linkStats?.days ? `${linkStats.days} dias` : "7 dias";
   const linkStatsTotal = linkStats?.total ?? 0;
@@ -44,6 +61,18 @@ export const DashboardView = ({
   const linkStatsTop = Array.isArray(linkStats?.sources)
     ? linkStats.sources.slice(0, 3)
     : [];
+  const normalizeCustomerKey = (customer) =>
+    `${(customer?.name || "").toString().trim().toLowerCase()}|${(customer?.phone || "").toString().trim().toLowerCase()}`;
+  const applyOverride = (customer) => {
+    const key = normalizeCustomerKey(customer);
+    const override = customerOverrides[key];
+    return {
+      ...customer,
+      __key: key,
+      name: override?.name ?? customer.name,
+      phone: override?.phone ?? customer.phone,
+    };
+  };
   const utmUrl = useMemo(() => {
     if (!storeUrl) return "";
     const params = new URLSearchParams();
@@ -238,12 +267,15 @@ export const DashboardView = ({
 
   const filteredCustomers = useMemo(() => {
     const normalized = customerQuery.trim().toLowerCase();
-    if (!normalized) return customers;
-    return customers.filter((customer) => {
+    const visible = customers
+      .map(applyOverride)
+      .filter((customer) => !hiddenCustomers[customer.__key]);
+    if (!normalized) return visible;
+    return visible.filter((customer) => {
       const haystack = [customer.name, customer.phone].filter(Boolean).join(" ").toLowerCase();
       return haystack.includes(normalized);
     });
-  }, [customers, customerQuery]);
+  }, [customers, customerQuery, hiddenCustomers, customerOverrides]);
 
   const sortedCustomers = useMemo(() => {
     return [...filteredCustomers].sort((a, b) =>
@@ -257,12 +289,40 @@ export const DashboardView = ({
       { key: "telefone", label: "Telefone" },
     ];
 
-    const rows = customers.map((c) => ({
+    const rows = sortedCustomers.map((c) => ({
       nome: c.name,
       telefone: c.phone,
     }));
 
     exportToCsv("clientes", headers, rows);
+  };
+
+  const startEditCustomer = (customer) => {
+    const key = customer?.__key || normalizeCustomerKey(customer);
+    setEditingCustomerKey(key);
+    setEditingName(customer.name || "");
+    setEditingPhone(customer.phone || "");
+  };
+
+  const saveCustomerEdit = () => {
+    if (!editingCustomerKey) return;
+    const next = {
+      ...customerOverrides,
+      [editingCustomerKey]: {
+        name: editingName.trim(),
+        phone: editingPhone.trim(),
+      },
+    };
+    setCustomerOverrides(next);
+    localStorage.setItem("customer-overrides", JSON.stringify(next));
+    setEditingCustomerKey(null);
+  };
+
+  const hideCustomer = (customer) => {
+    const key = customer?.__key || normalizeCustomerKey(customer);
+    const next = { ...hiddenCustomers, [key]: true };
+    setHiddenCustomers(next);
+    localStorage.setItem("customer-hidden", JSON.stringify(next));
   };
 
   const handlePrintQr = () => {
@@ -885,31 +945,89 @@ export const DashboardView = ({
             const accentTone = customer.phone
               ? 'border-l-emerald-400 bg-gradient-to-r from-emerald-50/70 to-white'
               : 'border-l-slate-300 bg-gradient-to-r from-slate-50 to-white';
+            const customerKey = customer.__key || normalizeCustomerKey(customer);
+            const isEditing = editingCustomerKey === customerKey;
             return (
               <div
                 key={customer.id || customer.name}
                 className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-2xl border border-slate-200 border-l-4 px-4 py-3 shadow-sm ${accentTone}`}
               >
-                <div className="flex items-center gap-3 min-w-0">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
                   <div className="w-11 h-11 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center text-sm font-bold text-slate-700">
                     {initials || 'CL'}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-slate-800 truncate">{customer.name}</p>
-                    <p className="text-xs text-slate-500">
-                      {customer.phone ? 'Contato cadastrado' : 'Sem telefone'}
-                    </p>
+                    {isEditing ? (
+                      <div className="space-y-2">
+                        <input
+                          value={editingName}
+                          onChange={(event) => setEditingName(event.target.value)}
+                          placeholder="Nome do cliente"
+                          className="w-full rounded-lg border border-slate-200 px-2 py-1 text-xs focus:ring-2 focus:ring-brand-primary"
+                        />
+                        <input
+                          value={editingPhone}
+                          onChange={(event) => setEditingPhone(event.target.value)}
+                          placeholder="Telefone"
+                          className="w-full rounded-lg border border-slate-200 px-2 py-1 text-xs focus:ring-2 focus:ring-brand-primary"
+                        />
+                      </div>
+                    ) : (
+                      <>
+                        <p className="text-sm font-semibold text-slate-800 truncate">{customer.name}</p>
+                        <p className="text-xs text-slate-500">
+                          {customer.phone ? 'Contato cadastrado' : 'Sem telefone'}
+                        </p>
+                      </>
+                    )}
                   </div>
                 </div>
-                <span
-                  className={`px-3 py-1 rounded-full text-[11px] font-semibold border ${
-                    customer.phone
-                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                      : 'bg-slate-50 text-slate-500 border-slate-200'
-                  }`}
-                >
-                  {customer.phone || 'Sem telefone'}
-                </span>
+                <div className="flex items-center gap-2">
+                  {isEditing ? (
+                    <>
+                      <button
+                        type="button"
+                        onClick={saveCustomerEdit}
+                        className="px-3 py-1.5 rounded-full text-[11px] font-semibold bg-brand-primary text-white"
+                      >
+                        Salvar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setEditingCustomerKey(null)}
+                        className="px-3 py-1.5 rounded-full text-[11px] font-semibold border border-slate-200 text-slate-500"
+                      >
+                        Cancelar
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <span
+                        className={`px-3 py-1 rounded-full text-[11px] font-semibold border ${
+                          customer.phone
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                            : 'bg-slate-50 text-slate-500 border-slate-200'
+                        }`}
+                      >
+                        {customer.phone || 'Sem telefone'}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => startEditCustomer(customer)}
+                        className="px-3 py-1 rounded-full text-[11px] font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => hideCustomer(customer)}
+                        className="px-3 py-1 rounded-full text-[11px] font-semibold border border-rose-200 text-rose-600 hover:bg-rose-50"
+                      >
+                        Excluir
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
             );
           })}
