@@ -580,6 +580,14 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     return localStorage.getItem('adminHeader:visible') !== 'false';
   });
   const prevTabRef = useRef(activeTab);
+  const mobileNavItems = [
+    { id: 'resumo', label: 'Resumo', icon: ChartBar },
+    { id: 'pedidos', label: 'Pedidos', icon: ShoppingCart },
+    { id: 'produtos', label: 'Produtos', icon: Package },
+    { id: 'pagamentos', label: 'Pag.', icon: CreditCard },
+    { id: 'fila', label: 'Fila', icon: ChefHat },
+    { id: 'config', label: 'Config', icon: Gear },
+  ];
 
   const storeId = session?.store?.id;
   const storeSlug = session?.store?.slug;
@@ -940,60 +948,85 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         />
       )}
 
-      {activeTab === 'pedidos' && (
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-          <OrdersView orders={orders} products={products} storeSlug={storeSlug} />
-        </div>
-      )}
+      <div className="pb-24 sm:pb-0">
+        {activeTab === 'pedidos' && (
+          <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+            <OrdersView orders={orders} products={products} storeSlug={storeSlug} />
+          </div>
+        )}
 
-      {activeTab === 'produtos' && (
-        <ProductManager products={products} onProductsChange={setProducts} />
-      )}
+        {activeTab === 'produtos' && (
+          <ProductManager products={products} onProductsChange={setProducts} />
+        )}
 
-      {activeTab === 'pagamentos' && (
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-          <PaymentsView
-            subscription={subscriptionDetails}
-            loading={subscriptionLoading}
-            error={subscriptionError}
-            payments={paymentsHistory}
-          />
-        </div>
-      )}
-
-      {activeTab === 'config' && (
-        <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 sm:p-5 shadow-sm">
-          <div className="space-y-4 pb-24 sm:pb-4">
-            <BrandingSettings
-              branding={brandingDraft}
-              onChange={setBrandingDraft}
-              storeSlug={storeSlug}
-              onSave={handleSaveBranding}
-              saving={savingBranding}
+        {activeTab === 'pagamentos' && (
+          <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+            <PaymentsView
+              subscription={subscriptionDetails}
+              loading={subscriptionLoading}
+              error={subscriptionError}
+              payments={paymentsHistory}
             />
-            <OrderTypeSettingsCard />
-            <OpeningHoursCard />
           </div>
-          <div className="sm:hidden fixed bottom-4 left-0 right-0 px-4 z-30">
-            <button
-              type="button"
-              onClick={handleSaveBranding}
-              disabled={savingBranding}
-              className="w-full rounded-2xl bg-brand-gradient text-white py-4 text-sm font-semibold shadow-lg hover:opacity-90 disabled:opacity-60"
-            >
-              {savingBranding ? 'Salvando...' : 'Salvar alterações'}
-            </button>
-          </div>
-        </div>
-      )}
+        )}
 
-      {activeTab === 'fila' && (
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-          <GrillQueue />
-        </div>
-      )}
+        {activeTab === 'config' && (
+          <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 sm:p-5 shadow-sm">
+            <div className="space-y-4 pb-24 sm:pb-4">
+              <BrandingSettings
+                branding={brandingDraft}
+                onChange={setBrandingDraft}
+                storeSlug={storeSlug}
+                onSave={handleSaveBranding}
+                saving={savingBranding}
+              />
+              <OrderTypeSettingsCard />
+              <OpeningHoursCard />
+            </div>
+            <div className="sm:hidden fixed bottom-4 left-0 right-0 px-4 z-30">
+              <button
+                type="button"
+                onClick={handleSaveBranding}
+                disabled={savingBranding}
+                className="w-full rounded-2xl bg-brand-gradient text-white py-4 text-sm font-semibold shadow-lg hover:opacity-90 disabled:opacity-60"
+              >
+                {savingBranding ? 'Salvando...' : 'Salvar alterações'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'fila' && (
+          <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+            <GrillQueue />
+          </div>
+        )}
+      </div>
 
       {error && <p className="text-red-600 text-sm">{error}</p>}
+      <div className="sm:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-slate-200 bg-white/95 backdrop-blur">
+        <div className="grid grid-cols-6 gap-1 px-2 py-2">
+          {mobileNavItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setActiveTab(item.id as typeof activeTab)}
+                className={`flex flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[10px] font-semibold transition ${
+                  isActive
+                    ? 'bg-brand-primary text-white'
+                    : 'text-slate-500 hover:bg-slate-100'
+                }`}
+              >
+                <Icon size={16} weight="duotone" />
+                <span>{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
     </AdminLayout>
   );
 }
