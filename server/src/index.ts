@@ -14,8 +14,8 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import mapsRouter from './routes/maps';
-import { loadSsmEnv } from './config/ssm';
+import mapsRouter from './routes/maps.js';
+import { loadSsmEnv } from './config/ssm.js';
 
 dotenv.config();
 

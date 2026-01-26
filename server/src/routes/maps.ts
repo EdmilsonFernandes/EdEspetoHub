@@ -12,7 +12,7 @@
  */
 
 import { Router } from 'express';
-import { isValidAddress, isValidCoordinates, parseDurationSeconds } from '../utils/validation';
+import { isValidAddress, isValidCoordinates, parseDurationSeconds } from '../utils/validation.js';
 
 type GeocodeResult = {
   lat: number;
