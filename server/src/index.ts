@@ -15,8 +15,11 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import mapsRouter from './routes/maps';
+import { loadSsmEnv } from './config/ssm';
 
 dotenv.config();
+
+await loadSsmEnv();
 
 const app = express();
 const port = Number(process.env.PORT || 5050);

@@ -10,6 +10,7 @@ services:
       - "${FRONTEND_PORT:-8080}:80"
     depends_on:
       - api
+      - maps
     restart: always
 
   api:
@@ -25,6 +26,17 @@ services:
       - "4000:4000"
     depends_on:
       - postgres
+    restart: always
+
+  maps:
+    container_name: chamanoespeto-maps
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    env_file:
+      - ./server/.env.docker
+    ports:
+      - "5051:5050"
     restart: always
 
   postgres:
