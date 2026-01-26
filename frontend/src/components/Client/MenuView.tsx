@@ -170,6 +170,7 @@ export const MenuView = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [showStoreDetails, setShowStoreDetails] = useState(false);
+  const categoryRefs = React.useRef({});
   const formatStoreAddress = (address = "") => {
     const raw = address.toString().trim();
     if (!raw) return { line1: "", line2: "", cep: "" };
@@ -286,6 +287,19 @@ export const MenuView = ({
       })
       .filter((category) => category.items.length > 0);
   }, [grouped, query]);
+
+  const registerCategoryRef = (key) => (node) => {
+    if (node) {
+      categoryRefs.current[key] = node;
+    }
+  };
+
+  const scrollToCategory = (key) => {
+    const target = categoryRefs.current[key];
+    if (target?.scrollIntoView) {
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
   return (
     <div
@@ -413,6 +427,30 @@ export const MenuView = ({
             </div>
           </div>
         </section>
+        {filteredGrouped.length > 1 && (
+          <div
+            className={`sticky ${showHeader ? "top-16 sm:top-[88px]" : "top-3"} z-40 -mx-4 px-4 pb-2`}
+          >
+            <div className="rounded-2xl border border-slate-200 bg-white/90 shadow-sm px-3 py-2 backdrop-blur">
+              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+                {filteredGrouped.map((category) => (
+                  <button
+                    key={category.key}
+                    type="button"
+                    onClick={() => scrollToCategory(category.key)}
+                    className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-semibold text-slate-600 hover:border-brand-primary hover:text-brand-primary transition"
+                  >
+                    {category.label}
+                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] text-slate-500">
+                      {category.items.length}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
         <div id="menu-list" className="space-y-10">
         {promoMessage && (
           <div className="rounded-3xl border border-fuchsia-200 bg-gradient-to-r from-fuchsia-50 via-white to-pink-50 p-4 sm:p-5 shadow-sm">
@@ -503,7 +541,7 @@ export const MenuView = ({
           ];
           const accent = accentColors[index % accentColors.length];
           return (
-          <div key={category.key} className="space-y-3">
+          <div key={category.key} className="space-y-3" id={`cat-${category.key}`} ref={registerCategoryRef(category.key)}>
 
             {/* Título da categoria */}
             <div
