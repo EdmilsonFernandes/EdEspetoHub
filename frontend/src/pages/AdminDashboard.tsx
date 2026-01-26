@@ -919,12 +919,15 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                     return;
                   }
                   setActiveTab(tab.id as typeof activeTab);
+                  setNavPulse(tab.id);
+                  window.setTimeout(() => setNavPulse(null), 260);
                 }}
                 className={`cursor-pointer px-3 sm:px-4 py-2 rounded-lg text-[10px] sm:text-sm font-semibold transition-all active:scale-95 hover:-translate-y-0.5 flex flex-col sm:flex-row items-center gap-1 sm:gap-2 text-center min-w-[96px] sm:min-w-0 border ${
                   activeTab === tab.id
                     ? 'bg-brand-primary text-white border-brand-primary ring-2 ring-brand-primary/25 shadow-[0_8px_18px_rgba(15,23,42,0.16)]'
                     : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:text-slate-900 hover:shadow-sm'
                 }`}
+                style={activeTab === tab.id && navPulse === tab.id ? { animation: 'navPop 220ms ease' } : undefined}
               >
                 <Icon size={16} weight="duotone" />
                 <span className="leading-tight text-center max-w-[90px] sm:max-w-none line-clamp-2">
