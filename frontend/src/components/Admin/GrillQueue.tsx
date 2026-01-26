@@ -63,6 +63,7 @@ export const GrillQueue = () => {
   const [error, setError] = useState('');
   const [updating, setUpdating] = useState<string | null>(null);
   const [ctaPulseId, setCtaPulseId] = useState<string | null>(null);
+  const [newOrderIds, setNewOrderIds] = useState<string[]>([]);
   const [soundEnabled, setSoundEnabled] = useState(() => {
     if (typeof window === "undefined") return true;
     const saved = localStorage.getItem("queueSoundEnabled");
@@ -252,9 +253,12 @@ export const GrillQueue = () => {
       const data = await orderService.fetchQueue();
       const nextIds = (data || []).map((order) => order.id);
       const previousIds = previousIdsRef.current;
-      const hasNew = nextIds.some((id) => !previousIds.includes(id));
+      const incoming = nextIds.filter((id) => !previousIds.includes(id));
+      const hasNew = incoming.length > 0;
       if (hasNew) {
         playNewOrderSound();
+        setNewOrderIds(incoming);
+        window.setTimeout(() => setNewOrderIds([]), 4000);
       }
       previousIdsRef.current = nextIds;
       setQueue(data);
@@ -483,6 +487,24 @@ export const GrillQueue = () => {
     return completedToday.slice(start, start + completedPageSize);
   }, [completedToday, completedPage]);
 
+  const queueMetrics = useMemo(() => {
+    const now = Date.now();
+    const withAges = sortedQueue.map((order) => {
+      const createdAt = order?.createdAt ? new Date(order.createdAt).getTime() : now;
+      const ageMs = Math.max(0, now - createdAt);
+      return { ...order, ageMs };
+    });
+    const pending = withAges.filter((o) => o.status === 'pending').length;
+    const preparing = withAges.filter((o) => o.status === 'preparing').length;
+    const ready = withAges.filter((o) => o.status === 'ready').length;
+    const avgMs =
+      withAges.length > 0
+        ? withAges.reduce((acc, cur) => acc + cur.ageMs, 0) / withAges.length
+        : 0;
+    const oldest = withAges.reduce((acc, cur) => (cur.ageMs > acc ? cur.ageMs : acc), 0);
+    return { pending, preparing, ready, avgMs, oldest };
+  }, [sortedQueue, currentTime]);
+
   useEffect(() => {
     if (activeTab === 'completed') {
       setCompletedPage(1);
@@ -582,6 +604,25 @@ export const GrillQueue = () => {
           <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${tvMode ? "bg-white/15 text-white" : "bg-brand-primary/10 text-brand-primary"}`}>
             {sortedQueue.length} pedidos
           </span>
+          {!tvMode && (
+            <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold text-slate-500">
+              <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+                Pendentes: {queueMetrics.pending}
+              </span>
+              <span className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">
+                Em preparo: {queueMetrics.preparing}
+              </span>
+              <span className="px-2 py-0.5 rounded-full bg-sky-50 text-sky-700">
+                Aguardando: {queueMetrics.ready}
+              </span>
+              <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">
+                Média: {formatDuration(queueMetrics.avgMs)}
+              </span>
+              <span className="px-2 py-0.5 rounded-full bg-rose-50 text-rose-700">
+                Mais antigo: {formatDuration(queueMetrics.oldest)}
+              </span>
+            </div>
+          )}
           {tvMode && (
             <span className="flex items-center gap-2 text-xs font-semibold text-white/70">
               <Clock size={14} weight="duotone" />
@@ -703,10 +744,16 @@ export const GrillQueue = () => {
               : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4"
           }`}
         >
-          {sortedQueue.map((order, index) => (
+          {sortedQueue.map((order, index) => {
+            const orderAgeMs = order?.createdAt ? Date.now() - new Date(order.createdAt).getTime() : 0;
+            const isLate = orderAgeMs > 10 * 60 * 1000;
+            const isNew = newOrderIds.includes(order.id);
+            return (
             <div
               key={order.id}
-              className="relative w-full max-w-full p-2.5 sm:p-3 rounded-2xl border border-slate-200 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.45)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_50px_-30px_rgba(15,23,42,0.55)] overflow-hidden"
+              className={`relative w-full max-w-full p-2.5 sm:p-3 rounded-2xl border shadow-[0_18px_40px_-30px_rgba(15,23,42,0.45)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_50px_-30px_rgba(15,23,42,0.55)] overflow-hidden ${
+                isNew ? 'ring-2 ring-emerald-300/80' : ''
+              } ${isLate ? 'border-rose-200 bg-rose-50/60' : 'border-slate-200'}`}
               style={{
                 background:
                   'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.9) 60%, rgba(226,232,240,0.6) 100%)',
@@ -745,6 +792,11 @@ export const GrillQueue = () => {
                   )}
                   {order.phone && (
                     <p className="text-[11px] text-gray-500 break-words">{order.phone}</p>
+                  )}
+                  {isLate && (
+                    <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-rose-100 text-rose-700 text-[10px] font-bold px-2 py-0.5 border border-rose-200">
+                      Atrasado
+                    </span>
                   )}
 
                   <p className="text-[11px] text-gray-500 uppercase mt-1 inline-flex flex-wrap items-center gap-2">
@@ -1003,7 +1055,8 @@ export const GrillQueue = () => {
               </div>
             </div>
             </div>
-          ))}
+          );
+          })}
 
           {sortedQueue.length === 0 && !loading && (
             <div className="col-span-full text-center text-gray-500 py-12 bg-white rounded-xl border border-dashed">
