@@ -896,7 +896,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   return (
     <AdminLayout contextLabel="Painel da Loja">
       {menuVisible ? (
-        <div className="flex justify-center">
+        <div className="hidden sm:flex justify-center">
           <div className="bg-white rounded-xl border border-slate-200 p-2 shadow-sm flex flex-wrap sm:flex-nowrap justify-center sm:justify-start gap-2 w-full max-w-5xl overflow-visible sm:overflow-x-auto no-scrollbar">
           {[
             { id: 'resumo', label: 'Resumo', shortLabel: 'Resumo', icon: ChartBar },
@@ -1004,8 +1004,11 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       </div>
 
       {error && <p className="text-red-600 text-sm">{error}</p>}
-      <div className="sm:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-slate-200 bg-white">
-        <div className="grid grid-cols-6 gap-1 px-2 py-2">
+      <div
+        className="sm:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-slate-200 bg-white/95 backdrop-blur"
+        style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 0.5rem)' }}
+      >
+        <div className="grid grid-cols-6 gap-1 px-2 pt-2">
           {mobileNavItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
