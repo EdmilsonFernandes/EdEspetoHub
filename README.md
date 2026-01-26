@@ -138,6 +138,13 @@ Serviços locais:
 - **Backend (geocode/rota)**: use `GOOGLE_MAPS_API_KEY` com restricao por IP/servidor.
   - Habilitar **Geocoding API** e **Routes API**.
 
+### Estrutura
+- `server/`: microservico de mapas (Express + TypeScript).
+- `frontend/`: renderiza o mapa com `@googlemaps/js-api-loader`.
+- Endpoints locais:
+  - `POST /api/maps/geocode` → `{ lat, lng, formattedAddress }`
+  - `POST /api/maps/route` → `{ distanceKm, durationMin }`
+
 ### Variaveis de ambiente
 
 Front (`frontend/.env`):
@@ -155,6 +162,18 @@ CORS_ORIGIN=http://localhost:3000
 GOOGLE_MAPS_API_KEY=xxx
 ```
 
+Produção (Docker):
+```
+server/.env.docker:
+PORT=5050
+CORS_ORIGIN=https://www.chamanoespeto.com.br
+SSM_PARAMETER_NAME=/chamanoespeto/prod
+AWS_REGION=us-east-2
+SSM_OVERRIDE=true
+GOOGLE_MAPS_API_KEY=
+```
+O `GOOGLE_MAPS_API_KEY` vem do SSM (JSON).
+
 ### Rodar local (Vite + Maps server)
 
 ```bash
@@ -171,7 +190,9 @@ Rotas:
 - Tela de teste: `http://localhost:3000/maps`
 
 ### Producao
-- Configure proxy para `/api/maps` apontar para o maps server.
+- `docker-compose` sobe o serviço `maps`.
+- Nginx faz proxy `/api/maps` → `maps:5050`.
+- Para subir tudo: `docker compose --env-file .env.prod up --build -d`.
 
 ## Criar primeira loja (seed de planos)
 
