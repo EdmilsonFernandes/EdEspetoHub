@@ -408,8 +408,8 @@ export const ProductManager = ({ products, onProductsChange }) => {
           </span>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid gap-6">
+          <form onSubmit={handleSubmit} className="space-y-4 w-full">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">Nome do Produto</label>
