@@ -48,8 +48,13 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
     onChange((prev) => ({ ...prev, [field]: value }));
   };
   const handleAddressChange = (field, value) => {
+    const normalizeCep = (input = "") => {
+      const digits = input.toString().replace(/\D/g, "").slice(0, 8);
+      if (digits.length <= 5) return digits;
+      return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+    };
     setAddressForm((prev) => {
-      const next = { ...prev, [field]: value };
+      const next = { ...prev, [field]: field === "cep" ? normalizeCep(value) : value };
       const parts = [
         next.street && `${next.street}${next.number ? `, ${next.number}` : ""}`,
         next.neighborhood,
