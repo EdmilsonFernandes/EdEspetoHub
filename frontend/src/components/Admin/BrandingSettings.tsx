@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
 
 const primaryPalette = [ '#dc2626', '#ea580c', '#f59e0b', '#16a34a', '#0ea5e9', '#2563eb', '#7c3aed' ];
@@ -15,8 +15,51 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
     colors: true,
     access: true,
   });
+  const parseAddress = (value = "") => {
+    const raw = value.toString();
+    const parts = raw.split("|").map((part) => part.trim()).filter(Boolean);
+    const cepPart = parts.find((part) => /cep/i.test(part));
+    const cep = cepPart ? cepPart.replace(/cep/i, "").replace(/[:\-]/g, "").trim() : "";
+    const streetPart = parts[0] || "";
+    const streetMatch = streetPart.match(/^(.*?)(?:,\s*([^,]+))?$/);
+    const street = (streetMatch?.[1] || "").trim();
+    const number = (streetMatch?.[2] || "").trim();
+    const neighborhood = parts[1] || "";
+    const cityState = parts[2] || "";
+    const cityStateMatch = cityState.match(/^(.*?)(?:\s*-\s*([A-Za-z]{2}))?$/);
+    const city = (cityStateMatch?.[1] || "").trim();
+    const state = (cityStateMatch?.[2] || "").trim();
+    return {
+      cep,
+      street,
+      number,
+      neighborhood,
+      complement: parts[3] && !/cep/i.test(parts[3]) ? parts[3] : "",
+      city,
+      state,
+    };
+  };
+  const [addressForm, setAddressForm] = useState(() => parseAddress(branding.address || ""));
+
+  useEffect(() => {
+    setAddressForm(parseAddress(branding.address || ""));
+  }, [branding.address]);
   const handleChange = (field, value) => {
     onChange((prev) => ({ ...prev, [field]: value }));
+  };
+  const handleAddressChange = (field, value) => {
+    setAddressForm((prev) => {
+      const next = { ...prev, [field]: value };
+      const parts = [
+        next.street && `${next.street}${next.number ? `, ${next.number}` : ""}`,
+        next.neighborhood,
+        next.city && next.state ? `${next.city} - ${next.state}` : next.city,
+        next.complement,
+        next.cep && `CEP ${next.cep}`,
+      ].filter(Boolean);
+      handleChange("address", parts.join(" | "));
+      return next;
+    });
   };
 
   const previewInitials = branding.brandName
@@ -201,13 +244,84 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
             </div>
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700">Endereço da loja</label>
-              <input
-                type="text"
-                value={branding.address || ""}
-                onChange={(e) => handleChange("address", e.target.value)}
-                className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
-                placeholder="Rua, numero, bairro, cidade - UF"
-              />
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="sm:col-span-1">
+                  <label className="text-xs font-semibold text-gray-500">CEP</label>
+                  <input
+                    type="text"
+                    value={addressForm.cep || ""}
+                    onChange={(e) => handleAddressChange("cep", e.target.value)}
+                    className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
+                    placeholder="00000-000"
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="text-xs font-semibold text-gray-500">Rua / Avenida</label>
+                  <input
+                    type="text"
+                    value={addressForm.street || ""}
+                    onChange={(e) => handleAddressChange("street", e.target.value)}
+                    className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
+                    placeholder="Rua, avenida"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-semibold text-gray-500">Número</label>
+                  <input
+                    type="text"
+                    value={addressForm.number || ""}
+                    onChange={(e) => handleAddressChange("number", e.target.value)}
+                    className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
+                    placeholder="Número"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-gray-500">Bairro</label>
+                  <input
+                    type="text"
+                    value={addressForm.neighborhood || ""}
+                    onChange={(e) => handleAddressChange("neighborhood", e.target.value)}
+                    className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
+                    placeholder="Bairro"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-semibold text-gray-500">Complemento</label>
+                  <input
+                    type="text"
+                    value={addressForm.complement || ""}
+                    onChange={(e) => handleAddressChange("complement", e.target.value)}
+                    className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
+                    placeholder="Apto, bloco, referência"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-semibold text-gray-500">Cidade</label>
+                    <input
+                      type="text"
+                      value={addressForm.city || ""}
+                      onChange={(e) => handleAddressChange("city", e.target.value)}
+                      className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
+                      placeholder="Cidade"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-gray-500">UF</label>
+                    <input
+                      type="text"
+                      value={addressForm.state || ""}
+                      onChange={(e) => handleAddressChange("state", e.target.value)}
+                      className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
+                      placeholder="UF"
+                    />
+                  </div>
+                </div>
+              </div>
               <p className="text-xs text-gray-500">Usado para mostrar localização e validação de entrega.</p>
             </div>
             <div className="space-y-2">
