@@ -10,7 +10,10 @@ import {
   Wallet,
   CreditCard,
   MagnifyingGlass,
-  User
+  User,
+  Truck,
+  MapPinLine,
+  Clock
 } from "@phosphor-icons/react";
 import { formatCurrency, formatPhoneInput } from "../../utils/format";
 import { getPaymentMethodMeta } from "../../utils/paymentAssets";
@@ -538,11 +541,17 @@ export const CartView = ({
                       </p>
                     </div>
                     <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-semibold px-2 py-1">
+                      <Truck size={12} weight="duotone" />
                       Frete
                     </span>
                   </div>
                   <div className="rounded-xl border border-emerald-100 bg-white px-3 py-2 flex items-center justify-between">
-                    <span className="text-xs font-semibold text-slate-500">Valor do frete</span>
+                    <span className="text-xs font-semibold text-slate-500 inline-flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                        <Truck size={12} weight="duotone" />
+                      </span>
+                      Valor do frete
+                    </span>
                     <span className={`text-sm font-bold ${deliveryFeeValue > 0 ? 'text-emerald-600' : 'text-slate-600'}`}>
                       {deliveryFeeValue > 0 ? formatCurrency(deliveryFeeValue) : 'Grátis'}
                     </span>
@@ -558,17 +567,25 @@ export const CartView = ({
                         origin={{ lat: Number(storeCoords.lat), lng: Number(storeCoords.lng) }}
                         destination={{ lat: Number(deliveryCoords.lat), lng: Number(deliveryCoords.lng) }}
                       />
-                      <div className="mt-2 flex items-center justify-between text-[11px] text-slate-600">
-                        <span>Distância</span>
-                        <span className="font-semibold text-slate-800">
-                          {deliveryCheck?.distanceKm ? `${deliveryCheck.distanceKm.toFixed(1)} km` : "-"}
-                        </span>
-                      </div>
-                      <div className="mt-1 flex items-center justify-between text-[11px] text-slate-600">
-                        <span>Tempo estimado</span>
-                        <span className="font-semibold text-slate-800">
-                          {deliveryCheck?.durationMin ? `${deliveryCheck.durationMin} min` : "-"}
-                        </span>
+                      <div className="mt-2 grid grid-cols-2 gap-2 text-[11px] text-slate-600">
+                        <div className="flex items-center justify-between rounded-lg border border-slate-100 bg-slate-50 px-2 py-1.5">
+                          <span className="inline-flex items-center gap-1">
+                            <MapPinLine size={12} weight="duotone" />
+                            Distância
+                          </span>
+                          <span className="font-semibold text-slate-800">
+                            {deliveryCheck?.distanceKm ? `${deliveryCheck.distanceKm.toFixed(1)} km` : "-"}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between rounded-lg border border-slate-100 bg-slate-50 px-2 py-1.5">
+                          <span className="inline-flex items-center gap-1">
+                            <Clock size={12} weight="duotone" />
+                            Tempo
+                          </span>
+                          <span className="font-semibold text-slate-800">
+                            {deliveryCheck?.durationMin ? `${deliveryCheck.durationMin} min` : "-"}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -669,7 +686,10 @@ export const CartView = ({
 
         {isDelivery && deliveryFeeValue > 0 && (
           <div className="flex justify-between items-center pt-4 text-sm text-slate-600">
-            <span>Frete</span>
+            <span className="inline-flex items-center gap-2">
+              <Truck size={14} weight="duotone" className="text-emerald-500" />
+              Frete
+            </span>
             <span className="font-semibold text-slate-800">{formatCurrency(deliveryFeeValue)}</span>
           </div>
         )}
