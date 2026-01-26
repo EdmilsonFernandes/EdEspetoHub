@@ -579,6 +579,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     if (typeof window === 'undefined') return true;
     return localStorage.getItem('adminHeader:visible') !== 'false';
   });
+  const [navPulse, setNavPulse] = useState<string | null>(null);
   const prevTabRef = useRef(activeTab);
   const mobileNavItems = [
     { id: 'resumo', label: 'Resumo', icon: ChartBar },
@@ -895,6 +896,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
   return (
     <AdminLayout contextLabel="Painel da Loja">
+      <style>{`@keyframes navPop{0%{transform:scale(1)}50%{transform:scale(1.08)}100%{transform:scale(1)}}`}</style>
       {menuVisible ? (
         <div className="hidden sm:flex justify-center">
           <div className="bg-white rounded-xl border border-slate-200 p-2 shadow-sm flex flex-wrap sm:flex-nowrap justify-center sm:justify-start gap-2 w-full max-w-5xl overflow-visible sm:overflow-x-auto no-scrollbar">
@@ -1017,13 +1019,18 @@ export function AdminDashboard({ session: sessionProp }: Props) {
               <button
                 key={item.id}
                 type="button"
-                onClick={() => setActiveTab(item.id as typeof activeTab)}
-              className={`flex flex-col items-center justify-center gap-1 rounded-xl px-1 py-1.5 text-[10px] font-semibold transition active:scale-95 ${
-                isActive
+                onClick={() => {
+                  setActiveTab(item.id as typeof activeTab);
+                  setNavPulse(item.id);
+                  window.setTimeout(() => setNavPulse(null), 260);
+                }}
+                className={`flex flex-col items-center justify-center gap-1 rounded-xl px-1 py-1.5 text-[10px] font-semibold transition active:scale-95 ${
+                  isActive
                     ? 'bg-brand-primary text-white shadow-[0_12px_22px_rgba(239,68,68,0.4)] scale-[1.05]'
                     : 'text-slate-500 hover:bg-slate-100'
-              }`}
-            >
+                }`}
+                style={isActive && navPulse === item.id ? { animation: 'navPop 220ms ease' } : undefined}
+              >
               <Icon size={16} weight={isActive ? 'fill' : 'duotone'} />
               <span className={`${isActive ? 'font-bold' : 'font-semibold'}`}>{item.label}</span>
             </button>
