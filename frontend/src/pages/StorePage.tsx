@@ -1238,6 +1238,7 @@ export function StorePage() {
               promoMessage={promoMessage}
               todayHoursLabel={todayHoursLabel}
               storeAddress={storeAddress}
+              storeCoords={storeCoords}
               compactHeader={isMobile}
             />
           </div>

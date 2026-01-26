@@ -10,6 +10,7 @@ import {
 } from "@phosphor-icons/react";
 import { formatCurrency } from "../../utils/format";
 import { ProductModal } from "../Cart/ProductModal";
+import { GoogleMapView } from "../GoogleMapView";
 
 // =======================================
 // HEADER PREMIUM COM LOGO OFICIAL
@@ -163,6 +164,7 @@ export const MenuView = ({
   whatsappNumber,
   promoMessage,
   storeAddress,
+  storeCoords,
   showHeader = true,
   onOpenQueue,
   onOpenAdmin,
@@ -189,6 +191,9 @@ export const MenuView = ({
     ? `https://www.google.com/maps/search/?api=1&query=${mapQuery}`
     : "";
   const wazeUrl = mapQuery ? `https://waze.com/ul?q=${mapQuery}&navigate=yes` : "";
+  const mapMarkers = storeCoords
+    ? [{ lat: Number(storeCoords.lat), lng: Number(storeCoords.lng), label: "Loja" }]
+    : [];
   const resolvePromoPrice = (item) => {
     const promoPrice = item?.promoPrice != null ? Number(item.promoPrice) : null;
     if (item?.promoActive && promoPrice && promoPrice > 0) {
@@ -345,7 +350,7 @@ export const MenuView = ({
             )}
 
             {!compactHeader && showStoreDetails && storeAddress && (
-              <div className="rounded-2xl border border-slate-200 bg-white/90 p-4">
+              <div className="rounded-2xl border border-slate-200 bg-white/90 p-4 space-y-4">
                 <a
                   href={googleMapsUrl}
                   target="_blank"
@@ -371,6 +376,9 @@ export const MenuView = ({
                     <p className="text-xs text-slate-500">Toque para abrir no mapa</p>
                   </div>
                 </a>
+                {mapMarkers.length > 0 && (
+                  <GoogleMapView markers={mapMarkers} zoom={15} />
+                )}
                 <div className="mt-3 flex flex-wrap gap-2">
                   <a
                     href={googleMapsUrl}
