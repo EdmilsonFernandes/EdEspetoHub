@@ -3,11 +3,13 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Bicycle, ChefHat, CheckCircle, Clock, CircleNotch, MapPin } from '@phosphor-icons/react';
 import { orderService } from '../services/orderService';
+import { mapsService } from '../services/mapsService';
 import { formatCurrency, formatDateTime, formatDuration, formatOrderDisplayId } from '../utils/format';
 import { getPaymentMethodMeta } from '../utils/paymentAssets';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { applyBrandTheme } from '../utils/brandTheme';
 import { buildPixPayload } from '../utils/pixPayload';
+import { GoogleRouteMapView } from '../components/GoogleRouteMapView';
 
 const statusLabels: Record<string, string> = {
   pending: 'Recebido',
@@ -60,6 +62,15 @@ const buildDemoStatus = (createdAt: number) => {
   return 'pending';
 };
 
+const normalizeAddressForMaps = (address?: string) => {
+  if (!address) return '';
+  return address
+    .replace(/\|/g, ', ')
+    .replace(/\bcep\b[:\s-]*/gi, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+};
+
 export function OrderTracking() {
   const { orderId } = useParams();
   const navigate = useNavigate();
@@ -70,6 +81,10 @@ export function OrderTracking() {
   const [elapsedMs, setElapsedMs] = useState(0);
   const [prepStart, setPrepStart] = useState<number | null>(null);
   const [pixCopied, setPixCopied] = useState(false);
+  const [storeCoords, setStoreCoords] = useState(null);
+  const [deliveryCoords, setDeliveryCoords] = useState(null);
+  const [deliveryRoute, setDeliveryRoute] = useState(null);
+  const [routeLoading, setRouteLoading] = useState(false);
 
   useEffect(() => {
     if (!orderId) return;
@@ -185,6 +200,11 @@ export function OrderTracking() {
     if (status !== 'preparing' || !estimateMinutes || !prepStart) return null;
     return new Date(prepStart + estimateMinutes * 60 * 1000);
   }, [estimateMinutes, prepStart, status]);
+  const deliveryEta = useMemo(() => {
+    if (!deliveryRoute?.durationMin) return null;
+    const base = order?.updatedAt ? new Date(order.updatedAt).getTime() : Date.now();
+    return new Date(base + Number(deliveryRoute.durationMin) * 60 * 1000);
+  }, [deliveryRoute?.durationMin, order?.updatedAt]);
   const formatItemOptions = (item: any) => {
     const labels = [];
     if (item?.cookingPoint) labels.push(item.cookingPoint);
@@ -281,6 +301,72 @@ export function OrderTracking() {
     sessionStorage.setItem(storageKey, String(now));
     setPrepStart(now);
   }, [order?.id, status]);
+
+  useEffect(() => {
+    const isDeliveryOrder = order?.type === 'delivery';
+    if (!isDeliveryOrder) {
+      setStoreCoords(null);
+      setDeliveryCoords(null);
+      setDeliveryRoute(null);
+      setRouteLoading(false);
+      return;
+    }
+
+    const rawStoreAddress = order?.store?.settings?.address || order?.store?.owner?.address || '';
+    const rawDeliveryAddress = order?.address || '';
+    const storeAddress = normalizeAddressForMaps(rawStoreAddress);
+    const deliveryAddress = normalizeAddressForMaps(rawDeliveryAddress);
+    if (!storeAddress || !deliveryAddress) return;
+
+    const cacheKey = order?.id ? `order-route:${order.id}` : '';
+    if (cacheKey) {
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          if (parsed?.storeCoords && parsed?.deliveryCoords && parsed?.route) {
+            setStoreCoords(parsed.storeCoords);
+            setDeliveryCoords(parsed.deliveryCoords);
+            setDeliveryRoute(parsed.route);
+            return;
+          }
+        } catch (error) {
+          console.error('Falha ao ler cache de rota', error);
+        }
+      }
+    }
+
+    let active = true;
+    setRouteLoading(true);
+    Promise.all([mapsService.geocode(storeAddress), mapsService.geocode(deliveryAddress)])
+      .then(async ([storeGeo, deliveryGeo]) => {
+        if (!active) return;
+        const nextStore = { lat: Number(storeGeo.lat), lng: Number(storeGeo.lng) };
+        const nextDelivery = { lat: Number(deliveryGeo.lat), lng: Number(deliveryGeo.lng) };
+        setStoreCoords(nextStore);
+        setDeliveryCoords(nextDelivery);
+        const route = await mapsService.route(nextStore, nextDelivery);
+        if (!active) return;
+        setDeliveryRoute(route);
+        if (cacheKey) {
+          localStorage.setItem(cacheKey, JSON.stringify({
+            storeCoords: nextStore,
+            deliveryCoords: nextDelivery,
+            route,
+          }));
+        }
+      })
+      .catch((error) => {
+        console.error('Falha ao calcular rota', error);
+      })
+      .finally(() => {
+        if (active) setRouteLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [order?.address, order?.id, order?.store?.settings?.address, order?.store?.owner?.address, order?.type]);
 
   const steps = useMemo(() => {
     if (isDelivery) {
@@ -621,6 +707,33 @@ export function OrderTracking() {
                         >
                           Falar com a loja no WhatsApp
                         </a>
+                      )}
+                    </div>
+                  )}
+                  {order.type === 'delivery' && storeCoords?.lat && deliveryCoords?.lat && (
+                    <div className="rounded-2xl border border-slate-200 bg-white p-3 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-semibold text-slate-600">Rota da entrega</span>
+                        {deliveryRoute?.distanceKm ? (
+                          <span className="text-xs font-semibold text-emerald-600">
+                            {deliveryRoute.distanceKm.toFixed(1)} km
+                          </span>
+                        ) : null}
+                      </div>
+                      <GoogleRouteMapView
+                        origin={{ lat: Number(storeCoords.lat), lng: Number(storeCoords.lng) }}
+                        destination={{ lat: Number(deliveryCoords.lat), lng: Number(deliveryCoords.lng) }}
+                      />
+                      <div className="flex items-center justify-between text-xs text-slate-600">
+                        <span>Tempo estimado (moto)</span>
+                        <span className="font-semibold text-slate-800">
+                          {deliveryRoute?.durationMin ? `${deliveryRoute.durationMin} min` : routeLoading ? 'Calculando...' : '-'}
+                        </span>
+                      </div>
+                      {deliveryEta && (
+                        <div className="text-xs font-semibold text-emerald-700">
+                          Previsão de chegada: {deliveryEta.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                        </div>
                       )}
                     </div>
                   )}
