@@ -53,6 +53,7 @@ export const CartView = ({
   const [cepError, setCepError] = useState("");
   const [showTips, setShowTips] = useState(false);
   const [summaryCompact, setSummaryCompact] = useState(false);
+  const [ctaPulse, setCtaPulse] = useState(false);
   const nameInputRef = useRef<HTMLInputElement | null>(null);
 
   const visibleOrderTypes = Array.isArray(allowedOrderTypes) && allowedOrderTypes.length
@@ -282,6 +283,7 @@ export const CartView = ({
 
   return (
     <div className="animate-in slide-in-from-right">
+      <style>{`@keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}`}</style>
       {/* voltar */}
       <button
         onClick={onBack}
@@ -796,13 +798,18 @@ export const CartView = ({
       {/* Botão Finalizar */}
       <div className="fixed bottom-0 left-0 right-0 p-4 border-t border-gray-100 max-w-lg mx-auto z-40">
         <button
-          onClick={onCheckout}
+          onClick={() => {
+            setCtaPulse(true);
+            window.setTimeout(() => setCtaPulse(false), 220);
+            onCheckout();
+          }}
           disabled={checkoutDisabled}
           className={`w-full font-bold py-4 rounded-xl shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2 ${
             checkoutDisabled
               ? "bg-gray-300 text-gray-600 cursor-not-allowed"
               : "bg-brand-primary text-white cursor-pointer"
           }`}
+          style={ctaPulse ? { animation: 'btnPop 220ms ease' } : undefined}
         >
           {isPickup ? <Wallet size={20} weight="duotone" /> : <PaperPlaneTilt size={20} weight="duotone" />}
           {actionLabel}

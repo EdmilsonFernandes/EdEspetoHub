@@ -85,6 +85,7 @@ export function OrderTracking() {
   const [deliveryCoords, setDeliveryCoords] = useState(null);
   const [deliveryRoute, setDeliveryRoute] = useState(null);
   const [routeLoading, setRouteLoading] = useState(false);
+  const [ctaPulse, setCtaPulse] = useState(false);
 
   useEffect(() => {
     if (!orderId) return;
@@ -398,6 +399,7 @@ export function OrderTracking() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      <style>{`@keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}`}</style>
       <header className="bg-white/95 backdrop-blur-sm shadow-sm sticky top-0 z-50">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-20">
@@ -743,8 +745,13 @@ export function OrderTracking() {
                   {order?.items?.length && (
                     <button
                       type="button"
-                      onClick={handleRepeatOrder}
+                      onClick={() => {
+                        setCtaPulse(true);
+                        window.setTimeout(() => setCtaPulse(false), 220);
+                        handleRepeatOrder();
+                      }}
                       className="inline-flex items-center justify-center px-3 py-2 rounded-lg border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50"
+                      style={ctaPulse ? { animation: 'btnPop 220ms ease' } : undefined}
                     >
                       Pedir novamente
                     </button>
