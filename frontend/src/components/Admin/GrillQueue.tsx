@@ -31,6 +31,11 @@ import { useAuth } from "../../contexts/AuthContext";
 import { buildPixPayload } from "../../utils/pixPayload";
 
 export const GrillQueue = () => {
+  // Tap feedback animation
+  const pulseCta = (key: string) => {
+    setCtaPulseId(key);
+    window.setTimeout(() => setCtaPulseId(null), 220);
+  };
   const { auth } = useAuth();
   const [queue, setQueue] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -57,6 +62,7 @@ export const GrillQueue = () => {
   const [pixCopied, setPixCopied] = useState(false);
   const [error, setError] = useState('');
   const [updating, setUpdating] = useState<string | null>(null);
+  const [ctaPulseId, setCtaPulseId] = useState<string | null>(null);
   const [soundEnabled, setSoundEnabled] = useState(() => {
     if (typeof window === "undefined") return true;
     const saved = localStorage.getItem("queueSoundEnabled");
@@ -567,6 +573,7 @@ export const GrillQueue = () => {
 
   return (
     <div className={tvMode ? "space-y-6 rounded-3xl bg-slate-900/95 p-4 sm:p-6 text-white" : "space-y-4"}>
+      <style>{`@keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}`}</style>
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className={`flex flex-wrap items-center gap-2 font-semibold ${tvMode ? "text-white" : "text-gray-700"}`}>
@@ -914,8 +921,9 @@ export const GrillQueue = () => {
                       Clique em iniciar preparo para começar.
                     </div>
                     <button
-                      onClick={() => handleAdvance(order.id, "preparing")}
+                      onClick={() => { pulseCta(order.id + '-prep'); handleAdvance(order.id, "preparing"); }}
                       disabled={updating === order.id}
+                      style={ctaPulseId === order.id + '-prep' ? { animation: 'btnPop 220ms ease' } : undefined}
                       className="w-full sm:w-auto px-3 py-2 rounded-lg bg-amber-500 text-white text-xs font-bold flex items-center justify-center gap-1 disabled:opacity-60 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95"
                     >
                       <Clock size={16} weight="duotone" /> Iniciar preparo
@@ -929,8 +937,9 @@ export const GrillQueue = () => {
                       Pedido pronto? Aguarde o motoboy.
                     </div>
                     <button
-                      onClick={() => handleAdvance(order.id, "ready")}
+                      onClick={() => { pulseCta(order.id + '-ready'); handleAdvance(order.id, "ready"); }}
                       disabled={updating === order.id}
+                      style={ctaPulseId === order.id + '-ready' ? { animation: 'btnPop 220ms ease' } : undefined}
                       className="w-full sm:w-auto px-3 py-2 rounded-lg bg-sky-600 text-white text-xs font-bold flex items-center justify-center gap-1 disabled:opacity-60 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95"
                     >
                       <CheckSquare size={16} weight="duotone" /> Aguardar motoboy
@@ -944,8 +953,9 @@ export const GrillQueue = () => {
                       Pedido pronto? Clique para finalizar.
                     </div>
                     <button
-                      onClick={() => openPaymentConfirm(order)}
+                      onClick={() => { pulseCta(order.id + '-pay'); openPaymentConfirm(order); }}
                       disabled={updating === order.id}
+                      style={ctaPulseId === order.id + '-pay' ? { animation: 'btnPop 220ms ease' } : undefined}
                       className="w-full sm:w-auto px-3 py-2 rounded-lg bg-emerald-600 text-white text-xs font-bold flex items-center justify-center gap-1 disabled:opacity-60 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95"
                     >
                       <CheckSquare size={16} weight="duotone" /> Marcar pronto
@@ -959,8 +969,9 @@ export const GrillQueue = () => {
                       Pedido pronto para retirada.
                     </div>
                     <button
-                      onClick={() => handleAdvance(order.id, "ready")}
+                      onClick={() => { pulseCta(order.id + '-ready'); handleAdvance(order.id, "ready"); }}
                       disabled={updating === order.id}
+                      style={ctaPulseId === order.id + '-ready' ? { animation: 'btnPop 220ms ease' } : undefined}
                       className="w-full sm:w-auto px-3 py-2 rounded-lg bg-sky-600 text-white text-xs font-bold flex items-center justify-center gap-1 disabled:opacity-60 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95"
                     >
                       <CheckSquare size={16} weight="duotone" /> Pronto p/ retirada
@@ -980,8 +991,9 @@ export const GrillQueue = () => {
                         : "Cliente chegou? Confirme o pagamento."}
                     </div>
                     <button
-                      onClick={() => openPaymentConfirm(order)}
+                      onClick={() => { pulseCta(order.id + '-pay'); openPaymentConfirm(order); }}
                       disabled={updating === order.id}
+                      style={ctaPulseId === order.id + '-pay' ? { animation: 'btnPop 220ms ease' } : undefined}
                       className="w-full sm:w-auto px-3 py-2 rounded-lg bg-emerald-600 text-white text-xs font-bold flex items-center justify-center gap-1 disabled:opacity-60 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95"
                     >
                       <CheckSquare size={16} weight="duotone" /> {order.type === "delivery" ? "Saiu para entrega" : "Confirmar pagamento"}
