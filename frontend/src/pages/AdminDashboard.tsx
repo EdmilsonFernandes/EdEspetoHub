@@ -1005,10 +1005,11 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
       {error && <p className="text-red-600 text-sm">{error}</p>}
       <div
-        className="sm:hidden fixed bottom-3 left-3 right-3 z-40 rounded-2xl border border-slate-200 bg-white/95 backdrop-blur shadow-[0_12px_30px_rgba(15,23,42,0.18)]"
+        className="sm:hidden fixed bottom-3 left-3 right-3 z-40 rounded-2xl border border-slate-200 bg-white/95 backdrop-blur shadow-[0_12px_30px_rgba(15,23,42,0.18)] overflow-hidden"
         style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 0.75rem)' }}
       >
-        <div className="grid grid-cols-6 gap-1 px-2 pt-2 pb-1">
+        <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-white/70 via-white/30 to-transparent" />
+        <div className="relative grid grid-cols-6 gap-1 px-2 pt-2 pb-1">
           {mobileNavItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -1017,17 +1018,17 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                 key={item.id}
                 type="button"
                 onClick={() => setActiveTab(item.id as typeof activeTab)}
-              className={`flex flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[10px] font-semibold transition active:scale-95 ${
+              className={`flex flex-col items-center justify-center gap-1 rounded-xl px-1 py-1.5 text-[10px] font-semibold transition active:scale-95 ${
                 isActive
-                    ? 'bg-brand-primary text-white shadow-[0_10px_20px_rgba(239,68,68,0.35)] scale-[1.03]'
+                    ? 'bg-brand-primary text-white shadow-[0_12px_22px_rgba(239,68,68,0.4)] scale-[1.05]'
                     : 'text-slate-500 hover:bg-slate-100'
               }`}
             >
-                <Icon size={18} weight={isActive ? 'fill' : 'duotone'} />
-                <span className={`${isActive ? 'font-bold' : 'font-semibold'}`}>{item.label}</span>
-              </button>
-            );
-          })}
+              <Icon size={16} weight={isActive ? 'fill' : 'duotone'} />
+              <span className={`${isActive ? 'font-bold' : 'font-semibold'}`}>{item.label}</span>
+            </button>
+          );
+        })}
         </div>
       </div>
       {storeSlug && (
