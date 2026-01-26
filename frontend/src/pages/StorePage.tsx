@@ -543,37 +543,32 @@ export function StorePage() {
     const normalized = address.toLowerCase().replace(/\s+/g, ' ').trim();
     const cacheKey = storeSlug ? `delivery:coords:${storeSlug}:${normalized}` : '';
     const resolveCachedRoute = async () => {
-      if (!cacheKey) return false;
+      if (!cacheKey) return null;
       const cached = localStorage.getItem(cacheKey);
-      if (!cached) return false;
+      if (!cached) return null;
       try {
         const parsed = JSON.parse(cached);
         if (parsed?.lat && (parsed?.lng || parsed?.lon)) {
           const coords = { lat: Number(parsed.lat), lng: Number(parsed.lng ?? parsed.lon) };
           setDeliveryCoords(coords);
-          const route = await mapsService.route(storeCoords, coords);
-          setDeliveryCheck({
-            status: route.distanceKm <= deliveryRadiusValue ? 'ok' : 'out',
-            distanceKm: route.distanceKm,
-            durationMin: route.durationMin,
-          });
-          return true;
+          return coords;
         }
       } catch (error) {
         console.error('Falha ao ler cache de entrega', error);
       }
-      return false;
+      return null;
     };
 
     const timeout = window.setTimeout(async () => {
       try {
-        const resolved = await resolveCachedRoute();
-        if (resolved) return;
-        const geo = await mapsService.geocode(address);
-        const coords = { lat: Number(geo.lat), lng: Number(geo.lng) };
-        setDeliveryCoords(coords);
-        if (cacheKey) {
-          localStorage.setItem(cacheKey, JSON.stringify(coords));
+        let coords = await resolveCachedRoute();
+        if (!coords) {
+          const geo = await mapsService.geocode(address);
+          coords = { lat: Number(geo.lat), lng: Number(geo.lng) };
+          setDeliveryCoords(coords);
+          if (cacheKey) {
+            localStorage.setItem(cacheKey, JSON.stringify(coords));
+          }
         }
         const route = await mapsService.route(storeCoords, coords);
         setDeliveryCheck({
