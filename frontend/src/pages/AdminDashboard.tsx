@@ -1004,7 +1004,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       </div>
 
       {error && <p className="text-red-600 text-sm">{error}</p>}
-      <div className="sm:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-slate-200 bg-white/95 backdrop-blur">
+      <div className="sm:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-slate-200 bg-white">
         <div className="grid grid-cols-6 gap-1 px-2 py-2">
           {mobileNavItems.map((item) => {
             const Icon = item.icon;

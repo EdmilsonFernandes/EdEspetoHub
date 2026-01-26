@@ -18,10 +18,8 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
   const { auth, logout } = useAuth();
   const { branding } = useTheme();
   const [planDetails, setPlanDetails] = useState(null);
-  const [showMobileDetails, setShowMobileDetails] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    return localStorage.getItem('adminHeader:details') === 'true';
-  });
+  const [isMobile, setIsMobile] = useState(false);
+  const [showMobileDetails, setShowMobileDetails] = useState(false);
 
   const storeSlug = auth?.store?.slug;
   const storeNameFromAuth = auth?.store?.name;
@@ -43,6 +41,26 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase())
     .join('');
+  const showDetails = !isMobile || showMobileDetails;
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const media = window.matchMedia('(max-width: 767px)');
+    const handleChange = () => setIsMobile(media.matches);
+    handleChange();
+    if (media.addEventListener) {
+      media.addEventListener('change', handleChange);
+    } else {
+      media.addListener(handleChange);
+    }
+    return () => {
+      if (media.removeEventListener) {
+        media.removeEventListener('change', handleChange);
+      } else {
+        media.removeListener(handleChange);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const storeId = auth?.store?.id;
@@ -84,10 +102,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const handler = () => {
-      setShowMobileDetails(false);
-      localStorage.setItem('adminHeader:details', 'false');
-    };
+    const handler = () => setShowMobileDetails(false);
     window.addEventListener('adminHeader:toggle', handler);
     return () => window.removeEventListener('adminHeader:toggle', handler);
   }, []);
@@ -114,12 +129,12 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
         <div>
           <p className="text-sm uppercase tracking-wide font-semibold opacity-90">{contextLabel}</p>
           <h1 className="text-xl font-black leading-tight">{storeName}</h1>
-          {storeDescription && (
+          {showDetails && storeDescription && (
             <p className="mt-1 text-xs text-white/80 max-w-[420px] line-clamp-2">
               {storeDescription}
             </p>
           )}
-          <div className="hidden md:flex mt-2 flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 text-xs w-full max-w-full">
+          <div className={`${showMobileDetails ? 'flex' : 'hidden'} md:flex mt-2 flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 text-xs w-full max-w-full`}>
             {storeSlug && (
               <a
                 href={storeUrl}
@@ -147,36 +162,32 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
         </div>
         <button
           type="button"
-          onClick={() =>
-            setShowMobileDetails((prev) => {
-              const next = !prev;
-              if (typeof window !== 'undefined') {
-                localStorage.setItem('adminHeader:details', String(next));
-              }
-              return next;
-            })
-          }
+          onClick={() => setShowMobileDetails((prev) => !prev)}
           className="md:hidden px-3 py-2 rounded-full text-xs font-semibold bg-white/15 hover:bg-white/25 transition border border-white/20"
         >
-          {showMobileDetails ? 'Fechar info' : 'Info da loja'}
+          {showMobileDetails ? 'Fechar' : 'Ver detalhes'}
         </button>
       </div>
-      <div className="w-full md:w-auto flex flex-col sm:flex-row md:items-center gap-3">
-        <div className="flex items-center gap-2 bg-white/10 rounded-full px-3 py-1.5 border border-white/15 w-full sm:w-auto">
-          <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center text-xs font-bold">
-            {userInitials || 'AD'}
+        <div className="w-full md:w-auto flex flex-col sm:flex-row md:items-center gap-3">
+        {showDetails && (
+          <div className="flex items-center gap-2 bg-white/10 rounded-full px-3 py-1.5 border border-white/15 w-full sm:w-auto">
+            <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center text-xs font-bold">
+              {userInitials || 'AD'}
+            </div>
+            <div className="flex flex-col leading-tight">
+              <span className="text-xs font-semibold">{userName}</span>
+              <span className="text-[10px] opacity-80">{userRole}</span>
+            </div>
           </div>
-          <div className="flex flex-col leading-tight">
-            <span className="text-xs font-semibold">{userName}</span>
-            <span className="text-[10px] opacity-80">{userRole}</span>
-          </div>
-        </div>
-        <PlanBadge
-          planName={planDetails?.planName}
-          displayName={planDetails?.displayName}
-          variant="dark"
-          details={planDetails}
-        />
+        )}
+        {showDetails && (
+          <PlanBadge
+            planName={planDetails?.planName}
+            displayName={planDetails?.displayName}
+            variant="dark"
+            details={planDetails}
+          />
+        )}
 
         {onToggleHeader && (
           <div className="flex items-center rounded-full bg-white/10 border border-white/20 p-0.5 text-[11px] sm:text-xs font-semibold">
@@ -191,16 +202,13 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
               type="button"
               onClick={() => {
                 setShowMobileDetails(false);
-                if (typeof window !== 'undefined') {
-                  localStorage.setItem('adminHeader:details', 'false');
-                }
                 onToggleHeader();
               }}
               className="px-3 py-1.5 rounded-full text-white/80 hover:text-white hover:bg-white/15 transition flex items-center gap-1.5"
-              title="Modo foco da fila"
+              title="Modo cozinha"
             >
               <Sparkle size={12} weight="duotone" />
-              Modo foco
+              Modo cozinha
             </button>
           </div>
         )}
