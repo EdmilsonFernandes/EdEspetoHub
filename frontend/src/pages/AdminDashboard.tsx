@@ -212,7 +212,7 @@ const OrdersView = ({ orders, products, storeSlug }) => {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusStyles(order.status)}`}>
-                    {formatOrderStatus(order.status)}
+                    {formatOrderStatus(order.status, order.type)}
                   </span>
                   <span className="text-sm font-bold text-brand-primary">
                     {formatCurrency(order.total || 0)}

@@ -12,9 +12,10 @@ type GoogleRouteMapViewProps = {
   origin: RouteCoords;
   destination: RouteCoords;
   zoom?: number;
+  compact?: boolean;
 };
 
-export function GoogleRouteMapView({ origin, destination, zoom = 13 }: GoogleRouteMapViewProps) {
+export function GoogleRouteMapView({ origin, destination, zoom = 13, compact = false }: GoogleRouteMapViewProps) {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<any>(null);
   const directionsRef = useRef<any>(null);
@@ -104,8 +105,10 @@ export function GoogleRouteMapView({ origin, destination, zoom = 13 }: GoogleRou
     );
   }
 
+  const heightClass = compact ? 'h-[160px] sm:h-[180px]' : 'h-[220px] sm:h-[260px]';
+
   return (
-    <div className="w-full h-[220px] sm:h-[260px] rounded-2xl overflow-hidden border border-slate-200">
+    <div className={`w-full ${heightClass} rounded-2xl overflow-hidden border border-slate-200`}>
       <div ref={mapRef} className="w-full h-full" />
     </div>
   );

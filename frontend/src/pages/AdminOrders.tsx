@@ -234,7 +234,7 @@ export function AdminOrders() {
                         </div>
                         <div className="flex flex-col items-end gap-2">
                           <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ${statusStyles(order.status)}`}>
-                            {formatOrderStatus(order.status)}
+                            {formatOrderStatus(order.status, order.type)}
                           </span>
                           <span className="text-base font-bold text-brand-primary">
                             {formatCurrency(order.total || 0)}
@@ -296,7 +296,7 @@ export function AdminOrders() {
                       </div>
                       <div className="flex items-center gap-2">
                         <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusStyles(order.status)}`}>
-                          {formatOrderStatus(order.status)}
+                          {formatOrderStatus(order.status, order.type)}
                         </span>
                         <span className="text-sm font-bold text-brand-primary">
                           {formatCurrency(order.total || 0)}
@@ -439,7 +439,7 @@ export function AdminOrders() {
                       </td>
                       <td className="py-3 pr-4">
                         <span className={`px-2 py-1 rounded-full text-xs font-semibold ${statusStyles(order.status)}`}>
-                          {formatOrderStatus(order.status)}
+                          {formatOrderStatus(order.status, order.type)}
                         </span>
                       </td>
                       <td className="py-3 text-right font-semibold text-brand-primary">

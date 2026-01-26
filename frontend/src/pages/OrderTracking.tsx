@@ -725,6 +725,7 @@ export function OrderTracking() {
                       <GoogleRouteMapView
                         origin={{ lat: Number(storeCoords.lat), lng: Number(storeCoords.lng) }}
                         destination={{ lat: Number(deliveryCoords.lat), lng: Number(deliveryCoords.lng) }}
+                        compact
                       />
                       <div className="flex items-center justify-between text-xs text-slate-600">
                         <span>Tempo estimado</span>

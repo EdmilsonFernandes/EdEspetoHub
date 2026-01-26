@@ -42,12 +42,14 @@ export const formatOrderType = (type?: string) => {
   return (type && map[type]) || 'Não informado';
 };
 
-export const formatOrderStatus = (status?: string) => {
+export const formatOrderStatus = (status?: string, type?: string) => {
+  const normalizedType = (type || '').toString().toLowerCase();
   const map: Record<string, string> = {
     pending: 'Pendente',
     preparing: 'Preparando',
-    ready: 'Aguardando retirada',
-    done: 'Finalizado',
+    ready: normalizedType === 'delivery' ? 'Aguardando motoboy' : 'Aguardando retirada',
+    done: normalizedType === 'delivery' ? 'Saiu para entrega' : 'Finalizado',
+    delivered: 'Entregue',
     cancelled: 'Cancelado',
   };
 
