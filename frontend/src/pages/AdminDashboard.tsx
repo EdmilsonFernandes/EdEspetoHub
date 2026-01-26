@@ -1005,10 +1005,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
       {error && <p className="text-red-600 text-sm">{error}</p>}
       <div
-        className="sm:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-slate-200 bg-white/95 backdrop-blur shadow-[0_-8px_24px_rgba(15,23,42,0.12)]"
+        className="sm:hidden fixed bottom-3 left-3 right-3 z-40 rounded-2xl border border-slate-200 bg-white/95 backdrop-blur shadow-[0_12px_30px_rgba(15,23,42,0.18)]"
         style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 0.75rem)' }}
       >
-        <div className="grid grid-cols-6 gap-1 px-2 pt-2">
+        <div className="grid grid-cols-6 gap-1 px-2 pt-2 pb-1">
           {mobileNavItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
