@@ -492,12 +492,13 @@ export const GrillQueue = () => {
     }
   }, [completedPage, completedTotalPages]);
 
-  const getStatusStyles = (status) => {
+  const getStatusStyles = (status, orderType) => {
     if (status === "preparing") {
       return { label: "Em preparo", className: "bg-amber-100 text-amber-700" };
     }
     if (status === "ready") {
-      return { label: "Aguardando retirada", className: "bg-sky-100 text-sky-700" };
+      const label = orderType === "delivery" ? "Aguardando motoboy" : "Aguardando retirada";
+      return { label, className: "bg-sky-100 text-sky-700" };
     }
     return { label: "Aguardando", className: "bg-red-100 text-red-700" };
   };
@@ -516,6 +517,13 @@ export const GrillQueue = () => {
             { key: "preparing", label: "Em preparo" },
             { key: "ready", label: "Pronto p/ retirada" },
             { key: "done", label: "Pago" },
+          ]
+        : orderType === "delivery"
+        ? [
+            { key: "pending", label: "Recebido" },
+            { key: "preparing", label: "Em preparo" },
+            { key: "ready", label: "Aguardando motoboy" },
+            { key: "done", label: "Saiu para entrega" },
           ]
         : [
             { key: "pending", label: "Recebido" },
@@ -764,9 +772,9 @@ export const GrillQueue = () => {
                     </div>
                   )}
                   <span
-                    className={`px-2 py-0.5 text-[11px] font-bold rounded-full border ${getStatusStyles(order.status).className}`}
+                    className={`px-2 py-0.5 text-[11px] font-bold rounded-full border ${getStatusStyles(order.status, order.type).className}`}
                   >
-                    {getStatusStyles(order.status).label}
+                    {getStatusStyles(order.status, order.type).label}
                   </span>
                   <div className="px-2.5 py-0.5 rounded-full bg-brand-primary text-white font-black flex items-center gap-1.5 shadow-sm text-[11px] ring-2 ring-white/40">
                     <Clock size={11} weight="duotone" className="text-white" />
@@ -915,7 +923,22 @@ export const GrillQueue = () => {
                   </div>
                 )}
 
-                {order.status === "preparing" && order.type !== "pickup" && (
+                {order.status === "preparing" && order.type === "delivery" && (
+                  <div className="w-full sm:w-auto">
+                    <div className="mb-2 text-[11px] font-semibold text-sky-700 bg-sky-50 border border-sky-100 rounded-lg px-2.5 py-1">
+                      Pedido pronto? Aguarde o motoboy.
+                    </div>
+                    <button
+                      onClick={() => handleAdvance(order.id, "ready")}
+                      disabled={updating === order.id}
+                      className="w-full sm:w-auto px-3 py-2 rounded-lg bg-sky-600 text-white text-xs font-bold flex items-center justify-center gap-1 disabled:opacity-60 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95"
+                    >
+                      <CheckSquare size={16} weight="duotone" /> Aguardar motoboy
+                    </button>
+                  </div>
+                )}
+
+                {order.status === "preparing" && order.type !== "pickup" && order.type !== "delivery" && (
                   <div className="w-full sm:w-auto">
                     <div className="mb-2 text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-lg px-2.5 py-1">
                       Pedido pronto? Clique para finalizar.
@@ -947,15 +970,21 @@ export const GrillQueue = () => {
 
                 {order.status === "ready" && (
                   <div className="w-full sm:w-auto">
-                    <div className="mb-2 text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-lg px-2.5 py-1">
-                      Cliente chegou? Confirme o pagamento.
+                    <div className={`mb-2 text-[11px] font-semibold border rounded-lg px-2.5 py-1 ${
+                      order.type === "delivery"
+                        ? "text-emerald-700 bg-emerald-50 border-emerald-100"
+                        : "text-emerald-700 bg-emerald-50 border-emerald-100"
+                    }`}>
+                      {order.type === "delivery"
+                        ? "Motoboy saiu? Confirme o pagamento."
+                        : "Cliente chegou? Confirme o pagamento."}
                     </div>
                     <button
                       onClick={() => openPaymentConfirm(order)}
                       disabled={updating === order.id}
                       className="w-full sm:w-auto px-3 py-2 rounded-lg bg-emerald-600 text-white text-xs font-bold flex items-center justify-center gap-1 disabled:opacity-60 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95"
                     >
-                      <CheckSquare size={16} weight="duotone" /> Confirmar pagamento
+                      <CheckSquare size={16} weight="duotone" /> {order.type === "delivery" ? "Saiu para entrega" : "Confirmar pagamento"}
                     </button>
                   </div>
                 )}

@@ -167,6 +167,7 @@ export function OrderTracking() {
     resolveAssetUrl(order?.store?.settings?.logoUrl) || '/chama-no-espeto.jpeg';
   const statusLabel = useMemo(() => {
     if (isDelivery && (status === 'done' || status === 'delivered')) return 'Saiu para entrega';
+    if (isDelivery && status === 'ready') return 'Aguardando motoboy';
     if (order?.type === 'table' && status === 'done') return 'Pronto para servir';
     if (order?.type === 'pickup' && status === 'ready') return 'Pronto para retirada';
     return statusLabels[status] || status;
@@ -373,6 +374,7 @@ export function OrderTracking() {
       return [
         { id: 'pending', label: 'Recebido' },
         { id: 'preparing', label: 'Em preparo' },
+        { id: 'ready', label: 'Aguardando motoboy' },
         { id: 'done', label: 'Saiu para entrega' },
       ];
     }
