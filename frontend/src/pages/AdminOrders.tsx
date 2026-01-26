@@ -90,6 +90,14 @@ export function AdminOrders() {
     if (status === 'cancelled') return 'bg-slate-100 text-slate-600';
     return 'bg-red-100 text-red-700';
   };
+  const statusAccent = (status) => {
+    if (status === 'pending') return 'border-l-amber-400 bg-gradient-to-r from-amber-50/70 to-white';
+    if (status === 'preparing') return 'border-l-sky-400 bg-gradient-to-r from-sky-50/70 to-white';
+    if (status === 'ready') return 'border-l-violet-400 bg-gradient-to-r from-violet-50/70 to-white';
+    if (status === 'done') return 'border-l-emerald-400 bg-gradient-to-r from-emerald-50/70 to-white';
+    if (status === 'cancelled') return 'border-l-slate-300 bg-gradient-to-r from-slate-50 to-white';
+    return 'border-l-rose-400 bg-gradient-to-r from-rose-50/70 to-white';
+  };
   const formatItemOptions = (item) => {
     const labels = [];
     if (item?.cookingPoint) labels.push(item.cookingPoint);
@@ -214,7 +222,7 @@ export function AdminOrders() {
                   return (
                     <div
                       key={order.id || `${order.customerName}-${index}`}
-                      className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm space-y-3"
+                      className={`rounded-2xl border border-slate-200 border-l-4 ${statusAccent(order.status)} p-4 shadow-sm space-y-3`}
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="space-y-1">
@@ -277,7 +285,7 @@ export function AdminOrders() {
                 {filteredOrders.map((order, index) => (
                   <div
                     key={order.id || `${order.customerName}-${index}`}
-                    className="border border-slate-200 rounded-2xl bg-white p-5 shadow-sm flex flex-col gap-4"
+                    className={`border border-slate-200 border-l-4 ${statusAccent(order.status)} rounded-2xl p-5 shadow-sm flex flex-col gap-4`}
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                       <div>

@@ -49,6 +49,24 @@ const defaultCategories = [
   { id: 'outros', label: 'Outros', icon: DotsThree },
 ];
 
+const categoryAccentClasses: Record<string, string> = {
+  espetos: 'border-l-rose-400',
+  bebidas: 'border-l-sky-400',
+  porcoes: 'border-l-amber-400',
+  outros: 'border-l-slate-300',
+};
+const categoryDotClasses: Record<string, string> = {
+  espetos: 'bg-rose-400',
+  bebidas: 'bg-sky-400',
+  porcoes: 'bg-amber-400',
+  outros: 'bg-slate-400',
+};
+
+const resolveCategoryAccent = (value = '') =>
+  categoryAccentClasses[normalizeCategory(value)] || 'border-l-slate-300';
+const resolveCategoryDot = (value = '') =>
+  categoryDotClasses[normalizeCategory(value)] || 'bg-slate-400';
+
 const normalizeCategory = (value = '') => value.toString().trim().toLowerCase();
 const formatCategoryLabel = (value = '') => {
   const normalized = normalizeCategory(value);
@@ -87,6 +105,46 @@ const formatAvailabilityDays = (availabilityDays?: Record<string, boolean> | nul
     return 'Todos os dias';
   }
   return activeDays.join(', ');
+};
+
+const availabilityDayMeta = [
+  { key: 'mon', label: 'Seg', tone: 'bg-blue-50 text-blue-700 border-blue-200' },
+  { key: 'tue', label: 'Ter', tone: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+  { key: 'wed', label: 'Qua', tone: 'bg-violet-50 text-violet-700 border-violet-200' },
+  { key: 'thu', label: 'Qui', tone: 'bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200' },
+  { key: 'fri', label: 'Sex', tone: 'bg-rose-50 text-rose-700 border-rose-200' },
+  { key: 'sat', label: 'Sáb', tone: 'bg-amber-50 text-amber-700 border-amber-200' },
+  { key: 'sun', label: 'Dom', tone: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+];
+
+const renderAvailabilityBadges = (availabilityDays?: Record<string, boolean> | null) => {
+  if (!availabilityDays || Object.keys(availabilityDays).length === 0) {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-1 text-[10px] font-semibold text-emerald-700">
+        Todos os dias
+      </span>
+    );
+  }
+  const active = availabilityDayMeta.filter((day) => availabilityDays?.[day.key]);
+  if (!active.length) {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2 py-1 text-[10px] font-semibold text-amber-700">
+        Nenhum dia
+      </span>
+    );
+  }
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {active.map((day) => (
+        <span
+          key={day.key}
+          className={`inline-flex items-center rounded-full border px-2 py-1 text-[10px] font-semibold ${day.tone}`}
+        >
+          {day.label}
+        </span>
+      ))}
+    </div>
+  );
 };
 
 const normalizeAvailabilityState = (value) => {
@@ -748,7 +806,10 @@ export const ProductManager = ({ products, onProductsChange }) => {
         </div>
         <div className="sm:hidden space-y-3">
           {pagedProducts.map((product) => (
-            <div key={product.id} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div
+              key={product.id}
+              className={`rounded-2xl border border-slate-200 ${resolveCategoryAccent(product.category)} border-l-4 bg-white p-4 shadow-sm`}
+            >
               <div className="flex items-start gap-3">
                 {product.imageUrl ? (
                   <img src={product.imageUrl} className="w-12 h-12 rounded-xl object-cover" alt="" />
@@ -771,9 +832,9 @@ export const ProductManager = ({ products, onProductsChange }) => {
                     </span>
                   </div>
                   <p className="text-xs text-gray-500">{formatCategoryLabel(product.category)}</p>
-                  <p className="text-[11px] text-slate-500">
-                    Dias: {formatAvailabilityDays(product.availabilityDays)}
-                  </p>
+                  <div className="mt-1">
+                    {renderAvailabilityBadges(product.availabilityDays)}
+                  </div>
                   <div className="mt-2">
                     {product.promoActive && product.promoPrice ? (
                       <div className="flex items-center gap-2">
@@ -879,6 +940,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
                   </td>
                   <td className="p-4 font-medium">
                     <div className="flex flex-wrap items-center gap-2">
+                      <span className={`inline-flex h-2 w-2 rounded-full ${resolveCategoryDot(product.category)}`} />
                       <span>{product.name}</span>
                       {product.isFeatured && (
                         <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-700 border border-emerald-200">
@@ -922,9 +984,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
                     </span>
                   </td>
                   <td className="p-4">
-                    <span className="text-xs text-slate-600">
-                      {formatAvailabilityDays(product.availabilityDays)}
-                    </span>
+                    {renderAvailabilityBadges(product.availabilityDays)}
                   </td>
                   <td className="p-4 text-right space-x-2">
                     <button
