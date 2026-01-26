@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { SignOut, Globe, InstagramLogo, Sparkle } from '@phosphor-icons/react';
+import { SignOut, Globe, Sparkle } from '@phosphor-icons/react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -153,7 +153,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
                 rel="noreferrer"
                 className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 border border-white/20 opacity-95 hover:opacity-100 hover:bg-white/20 transition w-full sm:w-auto min-w-0"
               >
-                <InstagramLogo size={12} weight="duotone" />
+                <img src="/insta.avif" alt="Instagram" className="h-4 w-4 rounded-full" />
                 <span className="truncate">{instagramHandle}</span>
               </a>
             )}
@@ -270,7 +270,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
                   className="flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 min-w-0"
                 >
                   <span className="flex items-center gap-2 min-w-0">
-                    <InstagramLogo size={14} weight="duotone" className="text-slate-500" />
+                    <img src="/insta.avif" alt="Instagram" className="h-4 w-4 rounded-full" />
                     <span className="truncate">{instagramHandle}</span>
                   </span>
                   <span className="text-xs text-slate-400">Abrir</span>

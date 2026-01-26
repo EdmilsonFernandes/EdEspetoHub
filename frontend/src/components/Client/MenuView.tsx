@@ -1,8 +1,6 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from "react";
 import {
-  InstagramLogo,
-  WhatsappLogo,
   SquaresFour,
   Plus,
   MagnifyingGlass,
@@ -95,8 +93,7 @@ const Header = ({
               rel="noreferrer"
               className="inline-flex items-center gap-1 px-2 py-1 rounded-full border border-brand-primary text-brand-primary bg-brand-primary-soft font-semibold hover:underline text-[10px] sm:text-xs"
             >
-              <InstagramLogo size={10} weight="duotone" className="hidden sm:block" />
-              <InstagramLogo size={9} weight="duotone" className="sm:hidden" />
+              <img src="/insta.avif" alt="Instagram" className="h-3 w-3 sm:h-3.5 sm:w-3.5 rounded-full" />
               <span className="hidden sm:inline">Instagram {instagramHandle}</span>
               <span className="sm:hidden">{instagramHandle}</span>
             </a>
@@ -108,8 +105,7 @@ const Header = ({
               rel="noreferrer"
               className="inline-flex items-center gap-1 px-2 py-1 rounded-full border border-emerald-200 text-emerald-700 bg-emerald-50 font-semibold hover:underline text-[10px] sm:text-xs"
             >
-              <WhatsappLogo size={10} weight="duotone" className="hidden sm:block" />
-              <WhatsappLogo size={9} weight="duotone" className="sm:hidden" />
+              <img src="/whatspp.jpg" alt="WhatsApp" className="h-3 w-3 sm:h-3.5 sm:w-3.5 rounded-full" />
               <span className="hidden sm:inline">WhatsApp</span>
               <span className="sm:hidden">Whats</span>
             </a>
