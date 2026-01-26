@@ -778,7 +778,7 @@ export const DashboardView = ({
         </div>
 
         {/* Top produtos */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 h-80 overflow-hidden">
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 border-l-4 border-l-indigo-400 h-80 overflow-hidden">
           <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
             <h4 className="font-bold text-gray-700">
               Top 5 Produtos Mais Vendidos
@@ -819,9 +819,15 @@ export const DashboardView = ({
                 const maxQty = sortedTopProducts[0]?.qty || 1;
                 const percent = Math.max(8, Math.round((product.qty / maxQty) * 100));
                 return (
-                  <div key={`${product.name}-${index}`} className="space-y-1">
+                  <div key={`${product.name}-${index}`} className="space-y-1 rounded-xl border border-slate-200 bg-gradient-to-r from-white via-slate-50 to-white px-3 py-2">
                     <div className="flex items-center justify-between text-sm text-slate-700">
-                      <span className="font-semibold truncate">{product.name}</span>
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span
+                          className="h-2.5 w-2.5 rounded-full"
+                          style={{ background: COLORS[index % COLORS.length] }}
+                        />
+                        <span className="font-semibold truncate">{product.name}</span>
+                      </div>
                       <span className="text-xs text-slate-500">{product.qty}x</span>
                     </div>
                     <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
