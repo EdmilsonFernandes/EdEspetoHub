@@ -377,16 +377,17 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
         : `expirado há ${Math.abs(expiresInDays)} dia${Math.abs(expiresInDays) === 1 ? '' : 's'}`
       : '';
   const rawStatus = (subscription?.status || '').toUpperCase();
-  const statusMap: Record<string, { label: string; tone: string }> = {
-    TRIAL: { label: 'Trial ativo (7 dias)', tone: 'bg-emerald-100 text-emerald-700' },
-    ACTIVE: { label: 'Assinatura ativa', tone: 'bg-emerald-100 text-emerald-700' },
-    PENDING: { label: 'Aguardando pagamento', tone: 'bg-amber-100 text-amber-700' },
-    EXPIRED: { label: 'Assinatura expirada', tone: 'bg-rose-100 text-rose-700' },
-    SUSPENDED: { label: 'Assinatura suspensa', tone: 'bg-rose-100 text-rose-700' },
-    CANCELLED: { label: 'Assinatura cancelada', tone: 'bg-slate-100 text-slate-600' },
+  const statusMap: Record<string, { label: string; tone: string; accent: string }> = {
+    TRIAL: { label: 'Trial ativo (7 dias)', tone: 'bg-emerald-100 text-emerald-700', accent: 'border-l-emerald-400 bg-gradient-to-r from-emerald-50/70 to-white' },
+    ACTIVE: { label: 'Assinatura ativa', tone: 'bg-emerald-100 text-emerald-700', accent: 'border-l-emerald-400 bg-gradient-to-r from-emerald-50/70 to-white' },
+    PENDING: { label: 'Aguardando pagamento', tone: 'bg-amber-100 text-amber-700', accent: 'border-l-amber-400 bg-gradient-to-r from-amber-50/70 to-white' },
+    EXPIRED: { label: 'Assinatura expirada', tone: 'bg-rose-100 text-rose-700', accent: 'border-l-rose-400 bg-gradient-to-r from-rose-50/70 to-white' },
+    SUSPENDED: { label: 'Assinatura suspensa', tone: 'bg-rose-100 text-rose-700', accent: 'border-l-rose-400 bg-gradient-to-r from-rose-50/70 to-white' },
+    CANCELLED: { label: 'Assinatura cancelada', tone: 'bg-slate-100 text-slate-600', accent: 'border-l-slate-300 bg-gradient-to-r from-slate-50 to-white' },
   };
   const statusLabel = statusMap[rawStatus]?.label || subscription?.status || '—';
   const statusTone = statusMap[rawStatus]?.tone || 'bg-slate-100 text-slate-600';
+  const statusAccent = statusMap[rawStatus]?.accent || 'border-l-slate-200 bg-white';
   const paidAtLabel = subscription?.latestPaymentAt ? formatDateTime(subscription.latestPaymentAt) : '—';
   const rawPaymentStatus = (subscription?.latestPaymentStatus || '').toUpperCase();
   const paymentStatusMap: Record<string, string> = {
@@ -414,6 +415,13 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
     CANCELLED: 'bg-slate-100 text-slate-600',
     EXPIRED: 'bg-slate-100 text-slate-600',
   };
+  const historyAccentMap: Record<string, string> = {
+    PAID: 'border-l-emerald-400 bg-gradient-to-r from-emerald-50/70 to-white',
+    PENDING: 'border-l-amber-400 bg-gradient-to-r from-amber-50/70 to-white',
+    FAILED: 'border-l-rose-400 bg-gradient-to-r from-rose-50/70 to-white',
+    CANCELLED: 'border-l-slate-300 bg-gradient-to-r from-slate-50 to-white',
+    EXPIRED: 'border-l-slate-300 bg-gradient-to-r from-slate-50 to-white',
+  };
 
   if (loading) {
     return <div className="py-8 text-sm text-slate-500">Carregando dados de pagamento...</div>;
@@ -429,7 +437,7 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
 
   return (
     <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
-      <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_20px_60px_-50px_rgba(15,23,42,0.45)] space-y-6">
+      <div className={`rounded-3xl border border-slate-200 border-l-4 ${statusAccent} p-6 shadow-[0_20px_60px_-50px_rgba(15,23,42,0.45)] space-y-6`}>
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Plano atual</p>
@@ -440,12 +448,12 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
           </span>
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+          <div className="rounded-2xl border border-slate-200 border-l-4 border-l-rose-400 bg-slate-50 p-4">
             <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Valor</p>
             <p className="text-lg font-semibold text-slate-900 mt-2">{formatCurrency(priceValue)}</p>
             <p className="text-xs text-slate-500 mt-1">Plano {plan?.billingCycle || 'mensal'}</p>
           </div>
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+          <div className="rounded-2xl border border-slate-200 border-l-4 border-l-sky-400 bg-slate-50 p-4">
             <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Forma de pagamento</p>
             <p className="text-lg font-semibold text-slate-900 mt-2 inline-flex items-center gap-2">
               {methodMeta.icon && (
@@ -458,12 +466,12 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
         </div>
       </div>
 
-      <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_20px_60px_-50px_rgba(15,23,42,0.35)] space-y-4">
+      <div className="rounded-3xl border border-slate-200 border-l-4 border-l-violet-400 bg-white p-6 shadow-[0_20px_60px_-50px_rgba(15,23,42,0.35)] space-y-4">
         <div>
           <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Ciclo</p>
           <h3 className="text-lg font-bold text-slate-900 mt-2">Próximo vencimento</h3>
         </div>
-        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+        <div className="rounded-2xl border border-slate-200 border-l-4 border-l-emerald-400 bg-slate-50 p-4">
           <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Expira em</p>
           <p className="text-lg font-semibold text-slate-900 mt-2">{expiresLabel}</p>
           {expiresHint && (
@@ -491,13 +499,15 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
                   showAllHistory ? true : (payment.status || '').toUpperCase() === 'PAID',
                 )
                 .slice(0, 6)
-                .map((payment) => (
-                  <div key={payment.id} className="flex items-center justify-between text-sm">
+                .map((payment) => {
+                  const normalizedStatus = (payment.status || '').toUpperCase();
+                  const rowAccent = historyAccentMap[normalizedStatus] || 'border-l-slate-200 bg-white';
+                  return (
+                  <div key={payment.id} className={`flex items-center justify-between text-sm rounded-2xl border border-slate-200 border-l-4 px-3 py-2 ${rowAccent}`}>
                   <div>
                     {(() => {
                       const paymentMeta = getPaymentMethodMeta(payment.method);
                       const providerMeta = getPaymentProviderMeta(payment.provider);
-                      const normalizedStatus = (payment.status || '').toUpperCase();
                       const statusLabel = historyStatusMap[normalizedStatus] || payment.status || '—';
                       const statusTone = historyToneMap[normalizedStatus] || 'bg-slate-100 text-slate-600';
                       return (
@@ -539,7 +549,7 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
                     </p>
                   </div>
                 </div>
-              ))}
+              )})}
             </div>
             {!showAllHistory &&
               payments.filter((payment) => (payment.status || '').toUpperCase() === 'PAID').length === 0 && (
@@ -1010,11 +1020,11 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
       {error && <p className="text-red-600 text-sm">{error}</p>}
       <div
-        className="sm:hidden fixed bottom-3 left-3 right-3 z-40 rounded-2xl border border-slate-200 bg-white/95 backdrop-blur shadow-[0_12px_30px_rgba(15,23,42,0.18)] overflow-hidden"
-        style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 0.75rem)' }}
+        className="sm:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-slate-200 bg-white/95 backdrop-blur shadow-[0_-12px_30px_rgba(15,23,42,0.18)]"
+        style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 0.5rem)' }}
       >
-        <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-white/70 via-white/30 to-transparent" />
-        <div className="relative grid grid-cols-6 gap-1 px-2 pt-2 pb-1">
+        <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-white/70 via-white/30 to-transparent" />
+        <div className="relative grid grid-cols-6 gap-1 px-3 pt-2 pb-1 max-w-lg mx-auto">
           {mobileNavItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -1027,7 +1037,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                   setNavPulse(item.id);
                   window.setTimeout(() => setNavPulse(null), 260);
                 }}
-                className={`flex flex-col items-center justify-center gap-1 rounded-xl px-1 py-1.5 text-[10px] font-semibold transition active:scale-95 ${
+                className={`flex flex-col items-center justify-center gap-1 rounded-2xl px-1 py-2 text-[10px] font-semibold transition active:scale-95 ${
                   isActive
                     ? 'bg-brand-primary text-white shadow-[0_12px_22px_rgba(239,68,68,0.4)] scale-[1.05]'
                     : 'text-slate-500 hover:bg-slate-100'

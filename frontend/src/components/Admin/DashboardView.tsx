@@ -876,10 +876,13 @@ export const DashboardView = ({
               .slice(0, 2)
               .map((part) => part[0]?.toUpperCase())
               .join('');
+            const accentTone = customer.phone
+              ? 'border-l-emerald-400 bg-gradient-to-r from-emerald-50/70 to-white'
+              : 'border-l-slate-300 bg-gradient-to-r from-slate-50 to-white';
             return (
               <div
                 key={customer.id || customer.name}
-                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm"
+                className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-2xl border border-slate-200 border-l-4 px-4 py-3 shadow-sm ${accentTone}`}
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-11 h-11 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center text-sm font-bold text-slate-700">
