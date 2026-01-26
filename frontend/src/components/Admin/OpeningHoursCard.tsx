@@ -96,11 +96,14 @@ export function OpeningHoursCard() {
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+    <div className="bg-white rounded-2xl border border-slate-200 border-l-4 border-l-teal-500 p-5 shadow-sm">
       <div className="flex items-center justify-between mb-3">
-        <div>
-          <h3 className="text-lg font-bold text-slate-800">Horario de funcionamento</h3>
-          <p className="text-xs text-slate-500">Atualize os horarios visiveis na vitrine.</p>
+        <div className="flex items-center gap-2">
+          <span className="h-2.5 w-2.5 rounded-full bg-teal-500" />
+          <div>
+            <h3 className="text-lg font-bold text-slate-800">Horario de funcionamento</h3>
+            <p className="text-xs text-slate-500">Atualize os horarios visiveis na vitrine.</p>
+          </div>
         </div>
         {lastSavedAt && (
           <span className="text-xs text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-1 rounded-full">

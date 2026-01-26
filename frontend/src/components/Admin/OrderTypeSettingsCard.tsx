@@ -75,11 +75,14 @@ export function OrderTypeSettingsCard() {
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+    <div className="bg-white rounded-2xl border border-slate-200 border-l-4 border-l-indigo-500 p-5 shadow-sm">
       <div className="flex items-center justify-between mb-3">
-        <div>
-          <h3 className="text-lg font-bold text-slate-800">Tipos de pedido</h3>
-          <p className="text-xs text-slate-500">Escolha como o cliente pode comprar na vitrine.</p>
+        <div className="flex items-center gap-2">
+          <span className="h-2.5 w-2.5 rounded-full bg-indigo-500" />
+          <div>
+            <h3 className="text-lg font-bold text-slate-800">Tipos de pedido</h3>
+            <p className="text-xs text-slate-500">Escolha como o cliente pode comprar na vitrine.</p>
+          </div>
         </div>
       </div>
       <div className="flex flex-wrap gap-2">

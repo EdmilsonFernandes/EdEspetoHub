@@ -85,13 +85,14 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
       </div>
 
       <div className="p-4 sm:p-6 space-y-6">
-        <div className="rounded-2xl border border-slate-200 bg-white/80">
+        <div className="rounded-2xl border border-slate-200 border-l-4 border-l-rose-500 bg-white/80">
           <button
             type="button"
             onClick={() => setSectionsOpen((prev) => ({ ...prev, identity: !prev.identity }))}
             className="w-full flex items-center justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4 text-left"
           >
-            <div>
+            <div className="flex items-center gap-2">
+              <span className="h-2.5 w-2.5 rounded-full bg-rose-500" />
               <p className="text-sm font-semibold text-gray-800">Identidade da Marca</p>
               <p className="text-xs text-gray-500">Nome, Instagram, descrição e logo da sua marca.</p>
             </div>
@@ -193,13 +194,14 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white/80">
+        <div className="rounded-2xl border border-slate-200 border-l-4 border-l-amber-500 bg-white/80">
           <button
             type="button"
             onClick={() => setSectionsOpen((prev) => ({ ...prev, promo: !prev.promo }))}
             className="w-full flex items-center justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4 text-left"
           >
-            <div>
+            <div className="flex items-center gap-2">
+              <span className="h-2.5 w-2.5 rounded-full bg-amber-500" />
               <p className="text-sm font-semibold text-gray-800">Destaque do Dia</p>
               <p className="text-xs text-gray-500">Uma frase que vende no topo do cardápio.</p>
             </div>
@@ -223,13 +225,14 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white/80">
+        <div className="rounded-2xl border border-slate-200 border-l-4 border-l-sky-500 bg-white/80">
           <button
             type="button"
             onClick={() => setSectionsOpen((prev) => ({ ...prev, contact: !prev.contact }))}
             className="w-full flex items-center justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4 text-left"
           >
-            <div>
+            <div className="flex items-center gap-2">
+              <span className="h-2.5 w-2.5 rounded-full bg-sky-500" />
               <p className="text-sm font-semibold text-gray-800">Canais e Pagamento</p>
               <p className="text-xs text-gray-500">Contato oficial e recebimento via Pix.</p>
             </div>
@@ -343,13 +346,14 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white/80">
+        <div className="rounded-2xl border border-slate-200 border-l-4 border-l-emerald-500 bg-white/80">
           <button
             type="button"
             onClick={() => setSectionsOpen((prev) => ({ ...prev, delivery: !prev.delivery }))}
             className="w-full flex items-center justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4 text-left"
           >
-            <div>
+            <div className="flex items-center gap-2">
+              <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
               <p className="text-sm font-semibold text-gray-800">Entrega por raio</p>
               <p className="text-xs text-gray-500">Defina até onde você entrega e o valor do frete.</p>
             </div>
@@ -387,13 +391,14 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white/80">
+        <div className="rounded-2xl border border-slate-200 border-l-4 border-l-violet-500 bg-white/80">
           <button
             type="button"
             onClick={() => setSectionsOpen((prev) => ({ ...prev, colors: !prev.colors }))}
             className="w-full flex items-center justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4 text-left"
           >
-            <div>
+            <div className="flex items-center gap-2">
+              <span className="h-2.5 w-2.5 rounded-full bg-violet-500" />
               <p className="text-sm font-semibold text-gray-800">Cores da Identidade</p>
               <p className="text-xs text-gray-500">Cria o clima visual da sua marca.</p>
             </div>
@@ -452,13 +457,14 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white/80">
+        <div className="rounded-2xl border border-slate-200 border-l-4 border-l-slate-500 bg-white/80">
           <button
             type="button"
             onClick={() => setSectionsOpen((prev) => ({ ...prev, access: !prev.access }))}
             className="w-full flex items-center justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4 text-left"
           >
-            <div>
+            <div className="flex items-center gap-2">
+              <span className="h-2.5 w-2.5 rounded-full bg-slate-500" />
               <p className="text-sm font-semibold text-gray-800">URL da Loja</p>
               <p className="text-xs text-gray-500">Link público e definitivo do cardápio.</p>
             </div>
