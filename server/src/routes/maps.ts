@@ -80,11 +80,18 @@ router.post('/geocode', async (req, res) => {
       return res.status(500).json({ message: 'Falha ao consultar o Google Geocoding.' });
     }
 
+    if (primary.data?.status && primary.data.status !== 'OK') {
+      console.warn('[maps] geocode status', primary.data.status, primary.data.error_message || '');
+    }
+
     let result = primary.data?.results?.[0];
     if (!result) {
       const fallbackAddress = stripZipFromAddress(normalizedAddress);
       if (fallbackAddress && fallbackAddress !== normalizedAddress) {
         const secondary = await geocodeAddress(fallbackAddress, apiKey);
+        if (secondary.data?.status && secondary.data.status !== 'OK') {
+          console.warn('[maps] geocode fallback status', secondary.data.status, secondary.data.error_message || '');
+        }
         if (secondary.ok) {
           result = secondary.data?.results?.[0];
         }
