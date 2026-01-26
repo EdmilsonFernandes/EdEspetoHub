@@ -55,7 +55,7 @@ const geocodeAddress = async (address: string, apiKey: string) => {
 const router = Router();
 
 router.get('/js-key', (_req, res) => {
-  const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+  const apiKey = process.env.VITE_GOOGLE_MAPS_JS_KEY;
   if (!apiKey) {
     return res.status(500).json({ message: 'Chave do Google Maps não configurada.' });
   }

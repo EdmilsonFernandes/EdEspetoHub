@@ -350,52 +350,60 @@ export const MenuView = ({
             )}
 
             {!compactHeader && showStoreDetails && storeAddress && (
-              <div className="rounded-2xl border border-slate-200 bg-white/90 p-4 space-y-4">
-                <a
-                  href={googleMapsUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-start gap-3 hover:opacity-90 transition"
-                >
-                  <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center flex-shrink-0">
-                    <MapPin size={18} weight="duotone" />
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                      Endereço da loja
-                    </p>
-                    <div className="text-sm font-semibold text-slate-900">
-                      <p>{formattedAddress.line1}</p>
-                      {formattedAddress.line2 && (
-                        <p className="text-xs font-medium text-slate-600">{formattedAddress.line2}</p>
-                      )}
-                      {formattedAddress.cep && (
-                        <p className="text-xs text-slate-500">CEP {formattedAddress.cep}</p>
-                      )}
+              <div className="rounded-2xl border border-slate-200 bg-white/90 p-4">
+                <div className="flex flex-col gap-4 sm:grid sm:grid-cols-[1.1fr_0.9fr] sm:items-start">
+                  <div className="space-y-3">
+                    <a
+                      href={googleMapsUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-start gap-3 hover:opacity-90 transition"
+                    >
+                      <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center flex-shrink-0">
+                        <MapPin size={18} weight="duotone" />
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                          Endereço da loja
+                        </p>
+                        <div className="text-sm font-semibold text-slate-900">
+                          <p>{formattedAddress.line1}</p>
+                          {formattedAddress.line2 && (
+                            <p className="text-xs font-medium text-slate-600">{formattedAddress.line2}</p>
+                          )}
+                          {formattedAddress.cep && (
+                            <p className="text-xs text-slate-500">CEP {formattedAddress.cep}</p>
+                          )}
+                        </div>
+                        <p className="text-xs text-slate-500">Toque para abrir no mapa</p>
+                      </div>
+                    </a>
+                    <div className="flex flex-wrap gap-2">
+                      <a
+                        href={googleMapsUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="px-3 py-2 rounded-full text-xs font-semibold border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 transition"
+                      >
+                        Abrir no Google Maps
+                      </a>
+                      <a
+                        href={wazeUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="px-3 py-2 rounded-full text-xs font-semibold border border-brand-primary text-brand-primary bg-brand-primary-soft hover:opacity-90 transition"
+                      >
+                        Abrir no Waze
+                      </a>
                     </div>
-                    <p className="text-xs text-slate-500">Toque para abrir no mapa</p>
                   </div>
-                </a>
-                {mapMarkers.length > 0 && (
-                  <GoogleMapView markers={mapMarkers} zoom={15} />
-                )}
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <a
-                    href={googleMapsUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="px-3 py-2 rounded-full text-xs font-semibold border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 transition"
-                  >
-                    Abrir no Google Maps
-                  </a>
-                  <a
-                    href={wazeUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="px-3 py-2 rounded-full text-xs font-semibold border border-brand-primary text-brand-primary bg-brand-primary-soft hover:opacity-90 transition"
-                  >
-                    Abrir no Waze
-                  </a>
+                  {mapMarkers.length > 0 && (
+                    <div className="rounded-2xl border border-slate-200 bg-white p-2">
+                      <div className="min-h-[200px] sm:min-h-[220px]">
+                        <GoogleMapView markers={mapMarkers} zoom={15} />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}

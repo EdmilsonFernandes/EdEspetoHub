@@ -259,7 +259,7 @@ export const CartView = ({
   ]);
 
   const showRouteMap = Boolean(storeCoords?.lat && deliveryCoords?.lat);
-  const showDeliveryStatus = deliveryStatus && (!showRouteMap || deliveryCheck?.status !== "ok");
+  const showDeliveryStatus = deliveryStatus && deliveryCheck?.status !== "ok";
   const showDeliveryDebug = deliveryDebug && deliveryCheck?.status !== "ok";
 
   useEffect(() => {
