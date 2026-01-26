@@ -15,3 +15,4 @@ export { ForgotPassword } from './ForgotPassword';
 export { ResetPassword } from './ResetPassword';
 export { VerifyEmail } from './VerifyEmail';
 export { OrderTracking } from './OrderTracking';
+export { AddressDistance } from './AddressDistance';

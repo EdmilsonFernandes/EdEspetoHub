@@ -5,6 +5,12 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 3000,
-    open: true
+    open: true,
+    proxy: {
+      '/api/maps': {
+        target: 'http://localhost:5050',
+        changeOrigin: true,
+      },
+    },
   }
 })

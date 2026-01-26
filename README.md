@@ -125,6 +125,54 @@ Serviços locais:
 - Front-end: `http://localhost:3000`
 - API: `http://localhost:4000`
 
+## Google Maps Platform (migracao do mapa)
+
+### APIs necessarias (Google Cloud)
+- Maps JavaScript API
+- Geocoding API
+- Routes API
+
+### Chaves e restricoes
+- **Front (apenas mapa)**: use `VITE_GOOGLE_MAPS_JS_KEY` com restricao por dominio.
+  - Habilitar somente **Maps JavaScript API** nessa chave.
+- **Backend (geocode/rota)**: use `GOOGLE_MAPS_API_KEY` com restricao por IP/servidor.
+  - Habilitar **Geocoding API** e **Routes API**.
+
+### Variaveis de ambiente
+
+Front (`frontend/.env`):
+```
+VITE_GOOGLE_MAPS_JS_KEY=xxx
+VITE_STORE_ORIGIN_LAT=-23.55052
+VITE_STORE_ORIGIN_LNG=-46.633308
+VITE_STORE_ORIGIN_LABEL=Loja
+```
+
+Backend maps server (`server/.env`):
+```
+PORT=5050
+CORS_ORIGIN=http://localhost:3000
+GOOGLE_MAPS_API_KEY=xxx
+```
+
+### Rodar local (Vite + Maps server)
+
+```bash
+npm install
+cd server && npm install
+cd ../frontend && npm install
+cd ..
+npm run dev
+```
+
+Rotas:
+- Front: `http://localhost:3000`
+- Maps server: `http://localhost:5050`
+- Tela de teste: `http://localhost:3000/maps`
+
+### Producao
+- Configure proxy para `/api/maps` apontar para o maps server.
+
 ## Criar primeira loja (seed de planos)
 
 ```bash

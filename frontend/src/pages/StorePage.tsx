@@ -6,6 +6,7 @@ import { productService } from '../services/productService';
 import { orderService } from '../services/orderService';
 import { customerService } from '../services/customerService';
 import { storeService } from '../services/storeService';
+import { mapsService } from '../services/mapsService';
 import { MenuView } from '../components/Client/MenuView';
 import { CartView } from '../components/Client/CartView';
 import { SuccessView } from '../components/Client/SuccessView';
@@ -50,7 +51,7 @@ export function StorePage() {
   const [orderNotice, setOrderNotice] = useState(null);
   const [tableNotice, setTableNotice] = useState(null);
   const [storeCoords, setStoreCoords] = useState(null);
-  const [deliveryCheck, setDeliveryCheck] = useState({ status: 'idle', distanceKm: null });
+  const [deliveryCheck, setDeliveryCheck] = useState({ status: 'idle', distanceKm: null, durationMin: null });
   const customersStorageKey = useMemo(
     () => `customers:${storeSlug || defaultBranding.espetoId}`,
     [storeSlug]
@@ -74,9 +75,9 @@ export function StorePage() {
     if (!a || !b) return null;
     const toRad = (val) => (val * Math.PI) / 180;
     const lat1 = Number(a.lat);
-    const lon1 = Number(a.lon);
+    const lon1 = Number(a.lng ?? a.lon);
     const lat2 = Number(b.lat);
-    const lon2 = Number(b.lon);
+    const lon2 = Number(b.lng ?? b.lon);
     if ([lat1, lon1, lat2, lon2].some((v) => Number.isNaN(v))) return null;
     const dLat = toRad(lat2 - lat1);
     const dLon = toRad(lon2 - lon1);
@@ -488,8 +489,8 @@ export function StorePage() {
     if (!cached) return;
     try {
       const parsed = JSON.parse(cached);
-      if (parsed?.lat && parsed?.lon) {
-        setStoreCoords(parsed);
+      if (parsed?.lat && (parsed?.lng || parsed?.lon)) {
+        setStoreCoords({ lat: Number(parsed.lat), lng: Number(parsed.lng ?? parsed.lon) });
       }
     } catch (error) {
       console.error('Falha ao ler cache do mapa', error);
@@ -499,22 +500,14 @@ export function StorePage() {
   useEffect(() => {
     if (!storeAddress || storeCoords || !storeSlug) return;
     let attempts = 0;
-    const controller = new AbortController();
     const loadCoords = async () => {
       try {
-        const response = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(storeAddress)}`,
-          { signal: controller.signal }
-        );
-        const data = await response.json();
-        if (Array.isArray(data) && data.length > 0) {
-          const next = { lat: Number(data[0].lat), lon: Number(data[0].lon) };
-          setStoreCoords(next);
-          localStorage.setItem(`store:coords:${storeSlug}`, JSON.stringify(next));
-          return;
-        }
+        const data = await mapsService.geocode(storeAddress);
+        const next = { lat: Number(data.lat), lng: Number(data.lng) };
+        setStoreCoords(next);
+        localStorage.setItem(`store:coords:${storeSlug}`, JSON.stringify(next));
+        return;
       } catch (error) {
-        if (error?.name === 'AbortError') return;
         console.error('Falha ao carregar coordenadas da loja', error);
       }
       attempts += 1;
@@ -523,7 +516,6 @@ export function StorePage() {
       }
     };
     loadCoords();
-    return () => controller.abort();
   }, [storeAddress, storeCoords, storeSlug]);
 
 
@@ -550,11 +542,13 @@ export function StorePage() {
       if (cached) {
         try {
           const parsed = JSON.parse(cached);
-          const distance = haversineDistanceKm(storeCoords, parsed);
-          if (distance !== null) {
+          if (parsed?.lat && (parsed?.lng || parsed?.lon)) {
+            const coords = { lat: Number(parsed.lat), lng: Number(parsed.lng ?? parsed.lon) };
+            const route = await mapsService.route(storeCoords, coords);
             setDeliveryCheck({
-              status: distance <= deliveryRadiusValue ? 'ok' : 'out',
-              distanceKm: distance,
+              status: route.distanceKm <= deliveryRadiusValue ? 'ok' : 'out',
+              distanceKm: route.distanceKm,
+              durationMin: route.durationMin,
             });
             return;
           }
@@ -564,38 +558,26 @@ export function StorePage() {
       }
     }
 
-    const controller = new AbortController();
     const timeout = window.setTimeout(async () => {
       try {
-        const response = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(address)}`,
-          { signal: controller.signal }
-        );
-        const data = await response.json();
-        if (Array.isArray(data) && data[0]?.lat && data[0]?.lon) {
-          const coords = { lat: Number(data[0].lat), lon: Number(data[0].lon) };
-          if (cacheKey) {
-            localStorage.setItem(cacheKey, JSON.stringify(coords));
-          }
-          const distance = haversineDistanceKm(storeCoords, coords);
-          if (distance !== null) {
-            setDeliveryCheck({
-              status: distance <= deliveryRadiusValue ? 'ok' : 'out',
-              distanceKm: distance,
-            });
-            return;
-          }
+        const geo = await mapsService.geocode(address);
+        const coords = { lat: Number(geo.lat), lng: Number(geo.lng) };
+        if (cacheKey) {
+          localStorage.setItem(cacheKey, JSON.stringify(coords));
         }
-        setDeliveryCheck({ status: 'error', distanceKm: null });
+        const route = await mapsService.route(storeCoords, coords);
+        setDeliveryCheck({
+          status: route.distanceKm <= deliveryRadiusValue ? 'ok' : 'out',
+          distanceKm: route.distanceKm,
+          durationMin: route.durationMin,
+        });
       } catch (error) {
-        if (error?.name === 'AbortError') return;
         console.error('Falha ao validar entrega', error);
         setDeliveryCheck({ status: 'error', distanceKm: null });
       }
     }, 700);
 
     return () => {
-      controller.abort();
       window.clearTimeout(timeout);
     };
   }, [customer.type, deliveryAddress, deliveryRadiusValue, storeCoords, storeSlug]);

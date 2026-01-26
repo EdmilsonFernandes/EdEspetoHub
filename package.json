@@ -1,0 +1,12 @@
+{
+  "name": "edespetohub",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently -k \"npm --prefix frontend run dev\" \"npm --prefix server run dev\"",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev:maps": "npm --prefix server run dev"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
