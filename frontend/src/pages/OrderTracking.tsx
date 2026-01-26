@@ -725,7 +725,7 @@ export function OrderTracking() {
                         destination={{ lat: Number(deliveryCoords.lat), lng: Number(deliveryCoords.lng) }}
                       />
                       <div className="flex items-center justify-between text-xs text-slate-600">
-                        <span>Tempo estimado (moto)</span>
+                        <span>Tempo estimado (trânsito)</span>
                         <span className="font-semibold text-slate-800">
                           {deliveryRoute?.durationMin ? `${deliveryRoute.durationMin} min` : routeLoading ? 'Calculando...' : '-'}
                         </span>
