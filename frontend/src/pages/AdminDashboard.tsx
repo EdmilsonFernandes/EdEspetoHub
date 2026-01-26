@@ -1014,19 +1014,28 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                 key={item.id}
                 type="button"
                 onClick={() => setActiveTab(item.id as typeof activeTab)}
-                className={`flex flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[10px] font-semibold transition ${
+                className={`flex flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[10px] font-semibold transition active:scale-95 ${
                   isActive
-                    ? 'bg-brand-primary text-white'
+                    ? 'bg-brand-primary text-white shadow-[0_8px_18px_rgba(239,68,68,0.35)] scale-[1.02]'
                     : 'text-slate-500 hover:bg-slate-100'
                 }`}
               >
-                <Icon size={16} weight="duotone" />
-                <span>{item.label}</span>
+                <Icon size={18} weight={isActive ? 'fill' : 'duotone'} />
+                <span className={`${isActive ? 'font-bold' : 'font-semibold'}`}>{item.label}</span>
               </button>
             );
           })}
         </div>
       </div>
+      {storeSlug && (
+        <button
+          type="button"
+          onClick={() => navigate(`/${storeSlug}`)}
+          className="sm:hidden fixed bottom-20 right-4 z-50 rounded-full bg-brand-gradient text-white px-4 py-3 text-xs font-semibold shadow-[0_12px_30px_rgba(15,23,42,0.25)] active:scale-95"
+        >
+          Cardápio
+        </button>
+      )}
     </AdminLayout>
   );
 }
