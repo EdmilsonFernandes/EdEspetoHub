@@ -399,9 +399,7 @@ export const MenuView = ({
                   </div>
                   {mapMarkers.length > 0 && (
                     <div className="rounded-2xl border border-slate-200 bg-white p-2">
-                      <div className="min-h-[200px] sm:min-h-[220px]">
-                        <GoogleMapView markers={mapMarkers} zoom={15} />
-                      </div>
+                      <GoogleMapView markers={mapMarkers} zoom={15} />
                     </div>
                   )}
                 </div>

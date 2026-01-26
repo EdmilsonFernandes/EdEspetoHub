@@ -79,6 +79,13 @@ export function GoogleMapView({ markers, zoom = 12 }: GoogleMapViewProps) {
           mapInstanceRef.current.setCenter({ lat: markers[0].lat, lng: markers[0].lng });
           mapInstanceRef.current.setZoom(zoom);
         }
+
+        // Ensure map renders after container becomes visible.
+        window.setTimeout(() => {
+          if (mapInstanceRef.current) {
+            google.maps.event.trigger(mapInstanceRef.current, 'resize');
+          }
+        }, 0);
       })
       .catch((error) => {
         console.error('Google Maps load failed', error);
@@ -98,7 +105,7 @@ export function GoogleMapView({ markers, zoom = 12 }: GoogleMapViewProps) {
   }
 
   return (
-    <div className="w-full h-full min-h-[280px] rounded-2xl overflow-hidden border border-slate-200">
+    <div className="w-full h-[220px] sm:h-[260px] rounded-2xl overflow-hidden border border-slate-200">
       <div ref={mapRef} className="w-full h-full" />
     </div>
   );

@@ -78,6 +78,11 @@ export function GoogleRouteMapView({ origin, destination, zoom = 13 }: GoogleRou
           (result, status) => {
             if (status === 'OK' && result) {
               directionsRef.current.setDirections(result);
+              window.setTimeout(() => {
+                if (mapInstanceRef.current) {
+                  google.maps.event.trigger(mapInstanceRef.current, 'resize');
+                }
+              }, 0);
             }
           }
         );
@@ -100,8 +105,8 @@ export function GoogleRouteMapView({ origin, destination, zoom = 13 }: GoogleRou
   }
 
   return (
-    <div className="w-full min-h-[240px] rounded-2xl overflow-hidden border border-slate-200">
-      <div ref={mapRef} className="w-full h-full min-h-[240px]" />
+    <div className="w-full h-[220px] sm:h-[260px] rounded-2xl overflow-hidden border border-slate-200">
+      <div ref={mapRef} className="w-full h-full" />
     </div>
   );
 }
