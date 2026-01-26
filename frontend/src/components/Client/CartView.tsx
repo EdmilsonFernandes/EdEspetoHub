@@ -86,21 +86,30 @@ export const CartView = ({
     onChangeCustomer({ ...customer, phone: formatted });
   };
 
-  const normalizedQuery = customer.name?.trim().toLowerCase() || "";
+  const normalizeText = (value = "") =>
+    value
+      .toString()
+      .trim()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+
+  const normalizedQuery = normalizeText(customer.name);
   const filteredCustomers =
-    allowCustomerAutocomplete && normalizedQuery.length >= 3
-      ? customers.filter((entry) =>
-          entry.name?.toLowerCase().includes(normalizedQuery)
-        )
+    allowCustomerAutocomplete && normalizedQuery.length >= 2
+      ? customers.filter((entry) => {
+          const haystack = `${entry.name || ""} ${entry.phone || ""}`;
+          return normalizeText(haystack).includes(normalizedQuery);
+        })
       : [];
 
   const handleNameChange = (value) => {
     const next = { ...customer, name: value };
     if (allowCustomerAutocomplete) {
-      const normalized = value.trim().toLowerCase();
-      if (normalized.length >= 3) {
+      const normalized = normalizeText(value);
+      if (normalized.length >= 2) {
         const match = customers.find(
-          (entry) => entry.name?.trim().toLowerCase() === normalized
+          (entry) => normalizeText(entry.name) === normalized
         );
         if (match?.phone) {
           next.phone = formatPhoneInput(match.phone);

@@ -589,6 +589,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     if (typeof window === 'undefined') return true;
     return localStorage.getItem('adminHeader:visible') !== 'false';
   });
+  const [mobileNavCollapsed, setMobileNavCollapsed] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return localStorage.getItem('adminMobileNav:collapsed') === 'true';
+  });
   const [navPulse, setNavPulse] = useState<string | null>(null);
   const prevTabRef = useRef(activeTab);
   const mobileNavItems = [
@@ -757,6 +761,11 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       prevTabRef.current = activeTab;
     }
   }, [activeTab]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem('adminMobileNav:collapsed', String(mobileNavCollapsed));
+  }, [mobileNavCollapsed]);
 
 
   useEffect(() => {
@@ -1019,38 +1028,56 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       </div>
 
       {error && <p className="text-red-600 text-sm">{error}</p>}
-      <div
-        className="sm:hidden fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/98 backdrop-blur rounded-none"
-        style={{ paddingBottom: 'env(safe-area-inset-bottom)', transform: 'translateZ(0)' }}
-      >
-        <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-white/80 via-white/40 to-transparent" />
-        <div className="relative grid grid-cols-6 gap-1 px-3 pt-2 pb-2 max-w-lg mx-auto">
-          {mobileNavItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = activeTab === item.id;
-            return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => {
-                  setActiveTab(item.id as typeof activeTab);
-                  setNavPulse(item.id);
-                  window.setTimeout(() => setNavPulse(null), 260);
-                }}
-                className={`flex flex-col items-center justify-center gap-1 rounded-2xl px-1 py-2 text-[10px] font-semibold transition active:scale-95 ${
-                  isActive
-                    ? 'bg-brand-primary text-white shadow-[0_12px_22px_rgba(239,68,68,0.4)] scale-[1.05]'
-                    : 'text-slate-500 hover:bg-slate-100'
-                }`}
-                style={isActive && navPulse === item.id ? { animation: 'navPop 220ms ease' } : undefined}
-              >
-              <Icon size={16} weight={isActive ? 'fill' : 'duotone'} />
-              <span className={`${isActive ? 'font-bold' : 'font-semibold'}`}>{item.label}</span>
-            </button>
-          );
-        })}
+      {!mobileNavCollapsed && (
+        <div
+          className="sm:hidden fixed inset-x-0 bottom-0 z-40 border-t border-slate-800 bg-slate-900/95 text-white backdrop-blur"
+          style={{ paddingBottom: 'env(safe-area-inset-bottom)', transform: 'translateZ(0)' }}
+        >
+          <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-slate-950/70 via-slate-900/40 to-transparent" />
+          <div className="relative grid grid-cols-6 gap-1 px-3 pt-2 pb-2 max-w-lg mx-auto">
+            {mobileNavItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => {
+                    setActiveTab(item.id as typeof activeTab);
+                    setNavPulse(item.id);
+                    window.setTimeout(() => setNavPulse(null), 260);
+                  }}
+                  className={`flex flex-col items-center justify-center gap-1 rounded-2xl px-1 py-2 text-[10px] font-semibold transition active:scale-95 ${
+                    isActive
+                      ? 'bg-brand-primary text-white shadow-[0_12px_22px_rgba(239,68,68,0.4)] scale-[1.05]'
+                      : 'text-slate-200 hover:bg-slate-800/60'
+                  }`}
+                  style={isActive && navPulse === item.id ? { animation: 'navPop 220ms ease' } : undefined}
+                >
+                <Icon size={16} weight={isActive ? 'fill' : 'duotone'} />
+                <span className={`${isActive ? 'font-bold' : 'font-semibold'}`}>{item.label}</span>
+              </button>
+            );
+          })}
+          </div>
+          <button
+            type="button"
+            onClick={() => setMobileNavCollapsed(true)}
+            className="absolute -top-4 right-4 rounded-full bg-slate-900 text-white border border-slate-700 px-3 py-1 text-[10px] font-semibold shadow-lg"
+          >
+            Ocultar
+          </button>
         </div>
-      </div>
+      )}
+      {mobileNavCollapsed && (
+        <button
+          type="button"
+          onClick={() => setMobileNavCollapsed(false)}
+          className="sm:hidden fixed bottom-3 left-1/2 -translate-x-1/2 z-40 rounded-full bg-slate-900 text-white border border-slate-700 px-4 py-2 text-xs font-semibold shadow-lg"
+        >
+          Menu
+        </button>
+      )}
       {storeSlug && (
         <button
           type="button"

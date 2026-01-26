@@ -391,19 +391,6 @@ export const ProductManager = ({ products, onProductsChange }) => {
     reader.readAsDataURL(file);
   };
 
-  const previewPrice =
-    formData.price && !Number.isNaN(Number(formData.price))
-      ? formatCurrency(Number(formData.price))
-      : '—';
-  const previewPromoPrice =
-    formData.promoActive && formData.promoPrice && !Number.isNaN(Number(formData.promoPrice))
-      ? formatCurrency(Number(formData.promoPrice))
-      : '';
-  const previewCategory =
-    categorySelect === '__custom__'
-      ? formatCategoryLabel(formData.category)
-      : formatCategoryLabel(categorySelect || initialForm.category);
-  const previewImage = imagePreview || formData.imageUrl;
 
   return (
     <div className="space-y-6">
@@ -730,57 +717,6 @@ export const ProductManager = ({ products, onProductsChange }) => {
           </div>
           </form>
 
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 space-y-4">
-            <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Pré-visualização</p>
-            <div className="rounded-xl overflow-hidden border border-slate-200 bg-white">
-              {previewImage ? (
-                <img src={previewImage} alt="Prévia do produto" className="w-full h-44 object-cover" />
-              ) : (
-                <div className="h-44 flex flex-col items-center justify-center gap-2 text-xs text-slate-400">
-                  <ImageIcon size={20} weight="duotone" />
-                  Adicione uma foto para destacar o produto
-                </div>
-              )}
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between gap-2">
-                <h4 className="text-base font-semibold text-slate-900 truncate">
-                  {formData.name || 'Nome do produto'}
-                </h4>
-                <div className="flex items-center gap-2">
-                  {previewPromoPrice ? (
-                    <>
-                      <span className="text-xs font-semibold text-slate-400 line-through">
-                        {previewPrice}
-                      </span>
-                      <span className="text-sm font-bold text-emerald-600">{previewPromoPrice}</span>
-                    </>
-                  ) : (
-                    <span className="text-sm font-bold text-brand-primary">{previewPrice}</span>
-                  )}
-                </div>
-              </div>
-              {formData.isFeatured && (
-                <span className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 border border-emerald-200">
-                  Promoção do dia
-                </span>
-              )}
-              <span className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-semibold bg-white border border-slate-200 text-slate-600">
-                {previewCategory || 'Categoria'}
-              </span>
-              <p className="text-xs text-slate-500">
-                {formData.description || 'Adicione uma descrição curta para ajudar o cliente.'}
-              </p>
-            </div>
-            <div className="grid grid-cols-2 gap-2 text-xs text-slate-500">
-              <div className="rounded-lg border border-slate-200 bg-white px-2 py-2">
-                Imagem: {imageMode === 'upload' ? 'Upload' : 'URL'}
-              </div>
-              <div className="rounded-lg border border-slate-200 bg-white px-2 py-2">
-                Status: {saving ? 'Salvando...' : 'Pronto'}
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 

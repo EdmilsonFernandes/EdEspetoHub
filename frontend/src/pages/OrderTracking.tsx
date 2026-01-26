@@ -566,9 +566,9 @@ export function OrderTracking() {
                     {(order.items || []).map((item) => (
                       <div key={item.id || item.productId} className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-3">
-                          {item.imageUrl ? (
+                          {item.imageUrl || item.image || item.product?.imageUrl ? (
                             <img
-                              src={resolveAssetUrl(item.imageUrl)}
+                              src={resolveAssetUrl(item.imageUrl || item.image || item.product?.imageUrl)}
                               alt={item.name}
                               className="w-11 h-11 rounded-xl object-cover border border-gray-200"
                             />
