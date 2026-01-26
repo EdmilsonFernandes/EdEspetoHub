@@ -51,6 +51,7 @@ export function StorePage() {
   const [orderNotice, setOrderNotice] = useState(null);
   const [tableNotice, setTableNotice] = useState(null);
   const [storeCoords, setStoreCoords] = useState(null);
+  const [deliveryCoords, setDeliveryCoords] = useState(null);
   const [deliveryCheck, setDeliveryCheck] = useState({ status: 'idle', distanceKm: null, durationMin: null });
   const customersStorageKey = useMemo(
     () => `customers:${storeSlug || defaultBranding.espetoId}`,
@@ -521,19 +522,23 @@ export function StorePage() {
 
   useEffect(() => {
     if (customer.type !== 'delivery') {
-      setDeliveryCheck({ status: 'idle', distanceKm: null });
+      setDeliveryCheck({ status: 'idle', distanceKm: null, durationMin: null });
+      setDeliveryCoords(null);
       return;
     }
     if (!deliveryRadiusValue) {
-      setDeliveryCheck({ status: 'ok', distanceKm: null });
+      setDeliveryCheck({ status: 'ok', distanceKm: null, durationMin: null });
       return;
     }
     const address = deliveryAddress?.trim() || '';
     if (!address || !storeCoords) {
-      setDeliveryCheck({ status: 'idle', distanceKm: null });
+      setDeliveryCheck({ status: 'idle', distanceKm: null, durationMin: null });
+      setDeliveryCoords(null);
       return;
     }
-    setDeliveryCheck((prev) => (prev.status === 'loading' ? prev : { status: 'loading', distanceKm: null }));
+    setDeliveryCheck((prev) =>
+      prev.status === 'loading' ? prev : { status: 'loading', distanceKm: null, durationMin: null }
+    );
 
     const normalized = address.toLowerCase().replace(/\s+/g, ' ').trim();
     const cacheKey = storeSlug ? `delivery:coords:${storeSlug}:${normalized}` : '';
@@ -545,6 +550,7 @@ export function StorePage() {
         const parsed = JSON.parse(cached);
         if (parsed?.lat && (parsed?.lng || parsed?.lon)) {
           const coords = { lat: Number(parsed.lat), lng: Number(parsed.lng ?? parsed.lon) };
+          setDeliveryCoords(coords);
           const route = await mapsService.route(storeCoords, coords);
           setDeliveryCheck({
             status: route.distanceKm <= deliveryRadiusValue ? 'ok' : 'out',
@@ -565,6 +571,7 @@ export function StorePage() {
         if (resolved) return;
         const geo = await mapsService.geocode(address);
         const coords = { lat: Number(geo.lat), lng: Number(geo.lng) };
+        setDeliveryCoords(coords);
         if (cacheKey) {
           localStorage.setItem(cacheKey, JSON.stringify(coords));
         }
@@ -576,7 +583,8 @@ export function StorePage() {
         });
       } catch (error) {
         console.error('Falha ao validar entrega', error);
-        setDeliveryCheck({ status: 'error', distanceKm: null });
+        setDeliveryCheck({ status: 'error', distanceKm: null, durationMin: null });
+        setDeliveryCoords(null);
       }
     }, 700);
 
@@ -1258,6 +1266,8 @@ export function StorePage() {
             deliveryFee={deliveryFeeValue}
             deliveryCheck={deliveryCheck}
             storeAddress={storeAddress}
+            storeCoords={storeCoords}
+            deliveryCoords={deliveryCoords}
             checkoutDisabled={deliveryValidation.blocked}
             checkoutDisabledReason={deliveryValidation.reason}
             onChangeCustomer={handleCustomerChange}

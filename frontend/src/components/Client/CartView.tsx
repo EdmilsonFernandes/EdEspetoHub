@@ -14,6 +14,7 @@ import {
 } from "@phosphor-icons/react";
 import { formatCurrency, formatPhoneInput } from "../../utils/format";
 import { getPaymentMethodMeta } from "../../utils/paymentAssets";
+import { GoogleRouteMapView } from "../GoogleRouteMapView";
 
 export const CartView = ({
   cart,
@@ -24,8 +25,10 @@ export const CartView = ({
   allowedOrderTypes = [ "delivery", "pickup", "table" ],
   deliveryRadiusKm = null,
   deliveryFee = 0,
-  deliveryCheck = { status: "idle", distanceKm: null },
+  deliveryCheck = { status: "idle", distanceKm: null, durationMin: null },
   storeAddress = "",
+  storeCoords = null,
+  deliveryCoords = null,
   checkoutDisabled = false,
   checkoutDisabledReason = "",
   onChangeCustomer,
@@ -254,6 +257,10 @@ export const CartView = ({
     isDelivery,
     normalizedStoreAddress,
   ]);
+
+  const showRouteMap = Boolean(storeCoords?.lat && deliveryCoords?.lat);
+  const showDeliveryStatus = deliveryStatus && (!showRouteMap || deliveryCheck?.status !== "ok");
+  const showDeliveryDebug = deliveryDebug && deliveryCheck?.status !== "ok";
 
   useEffect(() => {
     const handleScroll = () => {
@@ -545,12 +552,32 @@ export const CartView = ({
                       {customer.address}
                     </div>
                   )}
-                  {deliveryStatus && (
+                  {showRouteMap && (
+                    <div className="rounded-xl border border-slate-200 bg-white p-2">
+                      <GoogleRouteMapView
+                        origin={{ lat: Number(storeCoords.lat), lng: Number(storeCoords.lng) }}
+                        destination={{ lat: Number(deliveryCoords.lat), lng: Number(deliveryCoords.lng) }}
+                      />
+                      <div className="mt-2 flex items-center justify-between text-[11px] text-slate-600">
+                        <span>Distância</span>
+                        <span className="font-semibold text-slate-800">
+                          {deliveryCheck?.distanceKm ? `${deliveryCheck.distanceKm.toFixed(1)} km` : "-"}
+                        </span>
+                      </div>
+                      <div className="mt-1 flex items-center justify-between text-[11px] text-slate-600">
+                        <span>Tempo estimado</span>
+                        <span className="font-semibold text-slate-800">
+                          {deliveryCheck?.durationMin ? `${deliveryCheck.durationMin} min` : "-"}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                  {showDeliveryStatus && (
                     <div className={`rounded-xl border px-3 py-2 text-xs font-semibold ${deliveryStatus.tone}`}>
                       {deliveryStatus.label}
                     </div>
                   )}
-                  {deliveryDebug && (
+                  {showDeliveryDebug && (
                     <div className="rounded-xl border border-slate-100 bg-white px-3 py-2">
                       <p className="text-[10px] uppercase tracking-[0.2em] text-slate-400 mb-2">Status da validação</p>
                       <div className="space-y-1 text-[11px] text-slate-600">
