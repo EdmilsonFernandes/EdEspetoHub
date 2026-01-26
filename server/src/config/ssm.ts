@@ -50,7 +50,9 @@ export const loadSsmEnv = async () => {
   }
 
   const override = shouldOverride();
+  const reservedKeys = new Set([ 'PORT', 'CORS_ORIGIN' ]);
   Object.entries(parsed).forEach(([key, value]) => {
+    if (reservedKeys.has(key)) return;
     if (override || !process.env[key]) {
       process.env[key] = value;
     }
