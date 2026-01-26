@@ -9,11 +9,11 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
   const fileInputRef = useRef(null);
   const [sectionsOpen, setSectionsOpen] = useState({
     identity: true,
-    promo: true,
-    contact: true,
-    delivery: true,
-    colors: true,
-    access: true,
+    promo: false,
+    contact: false,
+    delivery: false,
+    colors: false,
+    access: false,
   });
   const parseAddress = (value = "") => {
     const raw = value.toString();
@@ -476,7 +476,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
           </div>
         </div>
         {onSave && (
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+          <div className="hidden sm:flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
             <div className="text-xs text-slate-500">
               Salve para aplicar todas as mudanças da identidade.
             </div>

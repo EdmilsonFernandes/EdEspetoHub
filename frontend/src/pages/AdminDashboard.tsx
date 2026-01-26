@@ -963,7 +963,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
       {activeTab === 'config' && (
         <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 sm:p-5 shadow-sm">
-          <div className="space-y-4">
+          <div className="space-y-4 pb-24 sm:pb-4">
             <BrandingSettings
               branding={brandingDraft}
               onChange={setBrandingDraft}
@@ -973,6 +973,16 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             />
             <OrderTypeSettingsCard />
             <OpeningHoursCard />
+          </div>
+          <div className="sm:hidden fixed bottom-4 left-0 right-0 px-4 z-30">
+            <button
+              type="button"
+              onClick={handleSaveBranding}
+              disabled={savingBranding}
+              className="w-full rounded-2xl bg-brand-gradient text-white py-4 text-sm font-semibold shadow-lg hover:opacity-90 disabled:opacity-60"
+            >
+              {savingBranding ? 'Salvando...' : 'Salvar alterações'}
+            </button>
           </div>
         </div>
       )}
