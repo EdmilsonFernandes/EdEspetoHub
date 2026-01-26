@@ -1,6 +1,7 @@
 // @ts-nocheck
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Loader } from '@googlemaps/js-api-loader';
+import { mapsService } from '../services/mapsService';
 
 type RouteCoords = {
   lat: number;
@@ -13,23 +14,41 @@ type GoogleRouteMapViewProps = {
   zoom?: number;
 };
 
-const loader = new Loader({
-  apiKey: import.meta.env.VITE_GOOGLE_MAPS_JS_KEY || '',
-  version: 'weekly',
-});
-
 export function GoogleRouteMapView({ origin, destination, zoom = 13 }: GoogleRouteMapViewProps) {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<any>(null);
   const directionsRef = useRef<any>(null);
-  const hasKey = Boolean(import.meta.env.VITE_GOOGLE_MAPS_JS_KEY);
+  const loaderRef = useRef<Loader | null>(null);
+  const [apiKey, setApiKey] = useState<string | null>(
+    import.meta.env.VITE_GOOGLE_MAPS_JS_KEY || null
+  );
 
   useEffect(() => {
-    if (!hasKey) return () => {};
+    if (!apiKey) {
+      let active = true;
+      mapsService.getJsKey().then((key) => {
+        if (active) setApiKey(key);
+      });
+      return () => {
+        active = false;
+      };
+    }
+    return () => {};
+  }, [apiKey]);
+
+  useEffect(() => {
+    if (!apiKey) return () => {};
     let active = true;
     if (!mapRef.current) return () => {};
 
-    loader
+    if (!loaderRef.current) {
+      loaderRef.current = new Loader({
+        apiKey,
+        version: 'weekly',
+      });
+    }
+
+    loaderRef.current
       .load()
       .then(() => {
         if (!active || !mapRef.current) return;
@@ -70,12 +89,12 @@ export function GoogleRouteMapView({ origin, destination, zoom = 13 }: GoogleRou
     return () => {
       active = false;
     };
-  }, [origin, destination, zoom, hasKey]);
+  }, [origin, destination, zoom, apiKey]);
 
-  if (!hasKey) {
+  if (!apiKey) {
     return (
       <div className="w-full min-h-[240px] rounded-2xl border border-dashed border-slate-200 bg-slate-50 flex items-center justify-center text-sm text-slate-500">
-        Configure `VITE_GOOGLE_MAPS_JS_KEY` para exibir o mapa.
+        Carregando mapa...
       </div>
     );
   }

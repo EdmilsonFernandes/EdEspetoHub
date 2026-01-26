@@ -22,6 +22,14 @@ type GeocodeResult = {
 
 const router = Router();
 
+router.get('/js-key', (_req, res) => {
+  const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+  if (!apiKey) {
+    return res.status(500).json({ message: 'Chave do Google Maps não configurada.' });
+  }
+  return res.json({ key: apiKey });
+});
+
 router.post('/geocode', async (req, res) => {
   try {
     const address = (req.body?.address || '').toString();
