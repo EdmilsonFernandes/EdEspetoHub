@@ -14,6 +14,7 @@ import {
   Storefront,
   Truck,
   ForkKnife,
+  Wine,
 } from '@phosphor-icons/react';
 import { platformService } from '../services/platformService';
 import { planService } from '../services/planService';
@@ -42,6 +43,7 @@ export function LandingPage() {
     { label: 'Quiosques', icon: Storefront, tone: 'bg-emerald-100 text-emerald-700' },
     { label: 'Food trucks', icon: Truck, tone: 'bg-sky-100 text-sky-700' },
     { label: 'Restaurantes', icon: ForkKnife, tone: 'bg-rose-100 text-rose-700' },
+    { label: 'Adegas', icon: Wine, tone: 'bg-violet-100 text-violet-700' },
   ];
   const guideSteps = [
     {

@@ -1007,7 +1007,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
               <OrderTypeSettingsCard />
               <OpeningHoursCard />
             </div>
-            <div className="sm:hidden fixed bottom-4 left-0 right-0 px-4 z-30">
+            <div
+              className="sm:hidden fixed left-0 right-0 px-4 z-50"
+              style={{ bottom: "calc(env(safe-area-inset-bottom) + 72px)" }}
+            >
               <button
                 type="button"
                 onClick={handleSaveBranding}
