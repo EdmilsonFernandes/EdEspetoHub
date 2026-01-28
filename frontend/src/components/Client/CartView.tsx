@@ -521,12 +521,12 @@ export const CartView = ({
                     </div>
                   </div>
                 </div>
-                <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-white to-emerald-50/60 p-4 space-y-3 shadow-sm">
-                  <div className="flex items-start justify-between gap-2">
+                <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-white to-emerald-50/60 p-4 space-y-4 shadow-sm">
+                  <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="text-[11px] uppercase tracking-[0.25em] text-slate-400">Entrega</p>
                       <p className="text-sm font-semibold text-slate-800">
-                        {radiusValue ? `Até ${radiusValue} km` : 'Sem limite de raio'}
+                        {radiusValue ? `Raio até ${radiusValue} km` : 'Sem limite de raio'}
                       </p>
                     </div>
                     <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-semibold px-2 py-1">
@@ -534,20 +534,37 @@ export const CartView = ({
                       Frete
                     </span>
                   </div>
-                  <div className="rounded-xl border border-emerald-100 bg-white px-3 py-2 flex items-center justify-between">
-                    <span className="text-xs font-semibold text-slate-500 inline-flex items-center gap-2">
-                      <span className="w-6 h-6 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                        <Truck size={12} weight="duotone" />
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="rounded-xl border border-emerald-100 bg-white px-3 py-2 flex flex-col gap-1">
+                      <span className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Valor do frete</span>
+                      <span className={`text-sm font-bold ${deliveryFeeValue > 0 ? 'text-emerald-600' : 'text-slate-600'}`}>
+                        {deliveryFeeValue > 0 ? formatCurrency(deliveryFeeValue) : 'Grátis'}
                       </span>
-                      Valor do frete
+                    </div>
+                    <div className="rounded-xl border border-slate-100 bg-white px-3 py-2 flex flex-col gap-1">
+                      <span className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Distância</span>
+                      <span className="text-sm font-semibold text-slate-800">
+                        {deliveryCheck?.distanceKm ? `${deliveryCheck.distanceKm.toFixed(1)} km` : "-"}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="rounded-xl border border-slate-100 bg-white px-3 py-2 flex items-center justify-between text-sm">
+                    <span className="font-semibold text-slate-600 inline-flex items-center gap-2">
+                      <Clock size={14} weight="duotone" />
+                      Tempo de rota
                     </span>
-                    <span className={`text-sm font-bold ${deliveryFeeValue > 0 ? 'text-emerald-600' : 'text-slate-600'}`}>
-                      {deliveryFeeValue > 0 ? formatCurrency(deliveryFeeValue) : 'Grátis'}
+                    <span className="font-semibold text-slate-800">
+                      {deliveryCheck?.durationMin ? `${deliveryCheck.durationMin} min` : "-"}
                     </span>
                   </div>
                   {customer.address && (
                     <div className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-[11px] text-slate-600">
                       {customer.address}
+                    </div>
+                  )}
+                  {showDeliveryStatus && (
+                    <div className={`rounded-xl border px-3 py-2 text-sm font-semibold ${deliveryStatus.tone}`}>
+                      {deliveryStatus.label}
                     </div>
                   )}
                   {showRouteMap && (
@@ -556,31 +573,6 @@ export const CartView = ({
                         origin={{ lat: Number(storeCoords.lat), lng: Number(storeCoords.lng) }}
                         destination={{ lat: Number(deliveryCoords.lat), lng: Number(deliveryCoords.lng) }}
                       />
-                      <div className="mt-2 grid grid-cols-2 gap-2 text-[11px] text-slate-600">
-                        <div className="flex items-center justify-between rounded-lg border border-slate-100 bg-slate-50 px-2 py-1.5">
-                          <span className="inline-flex items-center gap-1">
-                            <MapPinLine size={12} weight="duotone" />
-                            Distância
-                          </span>
-                          <span className="font-semibold text-slate-800">
-                            {deliveryCheck?.distanceKm ? `${deliveryCheck.distanceKm.toFixed(1)} km` : "-"}
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between rounded-lg border border-slate-100 bg-slate-50 px-2 py-1.5">
-                          <span className="inline-flex items-center gap-1">
-                            <Clock size={12} weight="duotone" />
-                            Tempo
-                          </span>
-                          <span className="font-semibold text-slate-800">
-                            {deliveryCheck?.durationMin ? `${deliveryCheck.durationMin} min` : "-"}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  {showDeliveryStatus && (
-                    <div className={`rounded-xl border px-3 py-2 text-sm font-semibold ${deliveryStatus.tone}`}>
-                      {deliveryStatus.label}
                     </div>
                   )}
                   {showDeliveryDebug && (
