@@ -431,21 +431,22 @@ export function OrderTracking() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <style>{`@keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}`}</style>
-      <header className="bg-white/95 backdrop-blur-sm shadow-sm sticky top-0 z-50">
+      <header className="sticky top-0 z-50 border-b border-white/60 bg-white/80 backdrop-blur-xl shadow-[0_18px_36px_-28px_rgba(15,23,42,0.5)]">
+        <div className="h-1 bg-[linear-gradient(90deg,#ef4444,#f97316,#f59e0b)]" />
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 sm:h-20">
+          <div className="flex items-center justify-between py-3 sm:py-4">
             <button onClick={handleBack} className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl overflow-hidden shadow border border-white bg-white">
+              <div className="w-11 h-11 rounded-2xl overflow-hidden shadow-[0_14px_26px_-18px_rgba(239,68,68,0.7)] border border-white bg-white">
                 <img src={storeLogo} alt={storeName} className="w-full h-full object-cover" />
               </div>
-              <div className="hidden sm:block text-left">
-                <p className="text-lg font-bold text-gray-900">{storeName}</p>
-                <p className="text-sm text-gray-500">Acompanhar pedido</p>
+              <div className="hidden sm:block text-left leading-tight">
+                <p className="text-lg font-black text-gray-900">{storeName}</p>
+                <p className="text-xs text-gray-500 uppercase tracking-[0.25em]">Acompanhar pedido</p>
               </div>
             </button>
             <button
               onClick={handleBack}
-              className="px-3 py-2 sm:px-4 text-sm rounded-lg border-2 border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors"
+              className="px-3 py-2 sm:px-4 text-sm rounded-full border border-slate-200 text-gray-700 hover:bg-gray-50 transition-colors"
             >
               Voltar
             </button>

@@ -44,16 +44,18 @@ const Header = ({
     .toUpperCase();
 
   return (
-    <div className={`w-full bg-white/95 backdrop-blur shadow-md px-3 sm:px-4 ${compact ? 'py-2.5' : 'py-3.5 sm:py-4'} flex items-center gap-2 sm:gap-4 sticky top-0 z-50 border-b border-gray-100 flex-wrap sm:flex-nowrap rounded-b-2xl`}>
-      <div
-        className="absolute top-0 left-0 right-0 h-1"
-        style={{ backgroundImage: "linear-gradient(120deg, var(--color-primary), var(--color-secondary))" }}
-      />
+    <div className={`w-full sticky top-0 z-50 ${compact ? 'pb-2' : 'pb-3'} pt-2`}>
+      <div className="max-w-6xl mx-auto px-3 sm:px-4">
+        <div className={`relative w-full bg-white/90 backdrop-blur-xl shadow-[0_18px_40px_-26px_rgba(15,23,42,0.45)] px-3 sm:px-4 ${compact ? 'py-2.5' : 'py-3.5 sm:py-4'} flex items-center gap-2 sm:gap-4 flex-wrap sm:flex-nowrap rounded-3xl border border-white/70`}>
+          <div
+            className="absolute top-0 left-4 right-4 h-1 rounded-full"
+            style={{ backgroundImage: "linear-gradient(120deg, var(--color-primary), var(--color-secondary))" }}
+          />
 
       {/* LOGO OFICIAL */}
       {( !compact || (compact && branding?.logoUrl) ) && (
         <div
-          className={`${compact ? 'w-8 h-8' : 'w-10 h-10 sm:w-14 sm:h-14'} rounded-full overflow-hidden border shadow-sm bg-white flex-shrink-0 flex items-center justify-center`}
+          className={`${compact ? 'w-8 h-8' : 'w-10 h-10 sm:w-14 sm:h-14'} rounded-2xl overflow-hidden border shadow-[0_14px_30px_-20px_rgba(239,68,68,0.6)] bg-white flex-shrink-0 flex items-center justify-center`}
           style={{ borderColor: branding?.primaryColor, color: branding?.primaryColor, backgroundColor: '#fff' }}
         >
           {branding?.logoUrl ? (
@@ -70,11 +72,11 @@ const Header = ({
 
       {/* Nome + infos */}
       <div className="flex-1 leading-tight min-w-0">
-        <h1 className={`${compact ? 'text-sm' : 'text-base sm:text-xl'} font-bold text-gray-900 truncate`}>
+        <h1 className={`${compact ? 'text-sm' : 'text-base sm:text-xl'} font-black text-gray-900 truncate`}>
           {branding?.brandName || "Seu Espeto"}
         </h1>
         {!compact && (
-          <div className="mt-0.5 sm:mt-1 flex flex-wrap items-center gap-1 sm:gap-2 text-xs text-slate-500">
+          <div className="mt-1 flex flex-wrap items-center gap-1 sm:gap-2 text-xs text-slate-500">
           {storeSlug && (
             <a
               href={storeUrl}
@@ -117,10 +119,10 @@ const Header = ({
       {/* Buttons - Responsive */}
       <div className="w-full sm:w-auto flex flex-row items-center justify-end gap-2 order-last sm:order-none sm:flex-shrink-0">
         {onOpenQueue && (
-          <div className="flex items-center rounded-full border border-slate-200 bg-white p-0.5 shadow-sm">
+          <div className="flex items-center rounded-full border border-slate-200 bg-white p-0.5 shadow-[0_12px_24px_-20px_rgba(15,23,42,0.35)]">
             <button
               type="button"
-              className="px-3 py-1.5 rounded-full text-xs font-semibold bg-brand-primary text-white"
+              className="px-3 py-1.5 rounded-full text-xs font-semibold bg-brand-primary text-white shadow-sm"
             >
               Cardápio
             </button>
@@ -142,6 +144,8 @@ const Header = ({
             {!compact && <span className="hidden sm:inline">Admin</span>}
           </button>
         )}
+      </div>
+        </div>
       </div>
     </div>
   );

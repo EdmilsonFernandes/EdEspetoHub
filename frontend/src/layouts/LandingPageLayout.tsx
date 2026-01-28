@@ -22,31 +22,28 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
   };
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
-      <header className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm shadow-sm sticky top-0 z-50">
+      <header className="sticky top-0 z-50 border-b border-white/60 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl shadow-[0_20px_40px_-30px_rgba(15,23,42,0.45)]">
+        <div className="h-1 bg-[linear-gradient(90deg,#ef4444,#f97316,#f59e0b)]" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 sm:h-20">
-            <a
-              href="https://www.chamanoespeto.com.br"
-              className="flex items-center gap-3"
-            >
-              <div className="h-10 w-10">
+          <div className="flex items-center justify-between py-3 sm:py-4">
+            <a href="https://www.chamanoespeto.com.br" className="flex items-center gap-3">
+              <div className="h-11 w-11 rounded-2xl bg-white shadow-[0_12px_24px_-16px_rgba(239,68,68,0.8)] ring-1 ring-red-200 overflow-hidden">
                 <img src="/logo.svg" alt="Chama no Espeto" className="h-full w-full object-cover" draggable={false} />
               </div>
-              <div className="hidden sm:block">
-                <p className="text-2xl font-black text-gray-900 dark:text-white">Chama no Espeto</p>
+              <div className="hidden sm:block leading-tight">
+                <p className="text-xl font-black text-gray-900 dark:text-white">Chama no Espeto</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Pedidos, produção e vendas em um só lugar</p>
               </div>
             </a>
 
             <div className="flex items-center gap-2 sm:gap-3">
               {!auth && (
-                <>
-                  <button
-                    onClick={() => navigate('/create')}
-                    className="px-4 py-2 text-sm rounded-lg bg-red-600 text-white font-semibold shadow-[0_10px_30px_-20px_rgba(220,38,38,0.8)] hover:bg-red-700 transition-colors"
-                  >
-                    Criar loja
-                  </button>
-                </>
+                <button
+                  onClick={() => navigate('/create')}
+                  className="px-4 py-2 text-sm rounded-full bg-brand-gradient text-white font-semibold shadow-[0_16px_30px_-20px_rgba(239,68,68,0.9)] hover:opacity-90 transition"
+                >
+                  Criar loja
+                </button>
               )}
               {auth && (
                 <button
@@ -54,7 +51,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                     logout();
                     navigate('/');
                   }}
-                  className="px-3 py-2 sm:px-4 text-sm rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition-all flex items-center gap-1.5"
+                  className="px-3 py-2 sm:px-4 text-sm rounded-full border border-red-200 text-red-600 hover:bg-red-50 transition-all flex items-center gap-1.5"
                 >
                   <SignOut size={16} weight="bold" />
                   <span className="hidden sm:inline">Sair</span>
@@ -62,27 +59,25 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
               )}
               <button
                 onClick={() => navigate('/portfolio')}
-                className="px-3 py-2 sm:px-4 text-sm rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors"
+                className="px-3 py-2 sm:px-4 text-sm rounded-full text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors"
               >
-                <span className="hidden sm:inline">Portfólio</span>
-                <span className="sm:hidden">Portfólio</span>
+                Portfólio
               </button>
               <a
                 href="/#guia-usuario"
-                className="px-3 py-2 sm:px-4 text-sm rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors"
+                className="px-3 py-2 sm:px-4 text-sm rounded-full text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors"
               >
-                <span className="hidden sm:inline">Guia</span>
-                <span className="sm:hidden">Guia</span>
+                Guia
               </a>
               <button
                 onClick={() => navigate('/admin')}
-                className="px-3 py-2 sm:px-4 text-sm rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all"
+                className="px-3 py-2 sm:px-4 text-sm rounded-full border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all"
               >
-                <span>Admin</span>
+                Admin
               </button>
               <button
                 onClick={toggleTheme}
-                className="cursor-pointer p-2 rounded-lg dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                className="cursor-pointer p-2 rounded-full border border-slate-200/60 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                 aria-label="Toggle theme"
               >
                 {theme === 'light' ? <Moon size={18} weight="duotone" /> : <Sun size={18} weight="duotone" />}
