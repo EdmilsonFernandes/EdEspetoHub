@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { SignOut, Globe, Sparkle } from '@phosphor-icons/react';
+import { SignOut, Globe, Sparkle, ShieldCheck } from '@phosphor-icons/react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -113,7 +113,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
 
   return (
     <header
-      className="p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4"
+      className="rounded-3xl border border-slate-200 shadow-lg overflow-hidden"
       style={{
         background: `linear-gradient(120deg, ${branding?.primaryColor || 'var(--color-primary)'} 0%, ${
           branding?.secondaryColor || 'var(--color-secondary)'
@@ -121,114 +121,126 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
         color: '#fff',
       }}
     >
-      <div className="flex items-center gap-3 w-full md:w-auto justify-between">
+      <div className="px-5 pt-5 pb-4 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div className="flex items-start gap-4">
+          <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center overflow-hidden shadow-md">
+            {branding?.logoUrl ? (
+              <img src={branding.logoUrl} alt={storeName} className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-2xl font-black">{storeName?.slice(0, 2)?.toUpperCase() || 'CE'}</span>
+            )}
+          </div>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <p className="text-[11px] uppercase tracking-[0.35em] font-semibold opacity-90">{contextLabel}</p>
+              {planDetails?.planExempt && (
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-[0.2em] bg-emerald-100 text-emerald-700">
+                  VIP
+                </span>
+              )}
+            </div>
+            <h1 className="text-2xl font-black leading-tight">{storeName}</h1>
+            {showDetails && storeDescription && (
+              <p className="text-sm text-white/85 max-w-[520px] line-clamp-2">
+                {storeDescription}
+              </p>
+            )}
+            <div className={`${showMobileDetails ? 'flex' : 'hidden'} lg:flex flex-wrap items-center gap-2 text-xs`}>
+              {storeSlug && (
+                <a
+                  href={storeUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 border border-white/20 opacity-95 hover:opacity-100 hover:bg-white/20 transition"
+                >
+                  <Globe size={12} weight="duotone" />
+                  <span className="truncate">{storeUrl.replace('https://', '')}</span>
+                </a>
+              )}
+              {instagramHandle && (
+                <a
+                  href={`https://instagram.com/${instagramHandle.replace('@', '')}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 border border-white/20 opacity-95 hover:opacity-100 hover:bg-white/20 transition"
+                >
+                  <img src="/insta.avif" alt="Instagram" className="h-4 w-4 rounded-full" />
+                  <span className="truncate">{instagramHandle}</span>
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
         <div className="flex items-center gap-3">
-        <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center overflow-hidden">
-          {branding?.logoUrl ? (
-            <img src={branding.logoUrl} alt={storeName} className="w-full h-full object-cover" />
-          ) : (
-            <span className="text-xl font-black">{storeName?.slice(0, 2)?.toUpperCase() || 'CE'}</span>
+          <button
+            type="button"
+            onClick={() => setShowMobileDetails((prev) => !prev)}
+            className="lg:hidden px-3 py-2 rounded-full text-xs font-semibold bg-white/15 hover:bg-white/25 transition border border-white/20"
+          >
+            {showMobileDetails ? 'Fechar' : 'Detalhes'}
+          </button>
+          {showDetails && (
+            <div className="hidden lg:flex items-center gap-2 bg-white/10 rounded-full px-3 py-1.5 border border-white/15">
+              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-xs font-bold">
+                {userInitials || 'AD'}
+              </div>
+              <div className="flex flex-col leading-tight">
+                <span className="text-xs font-semibold">{userName}</span>
+                <span className="text-[10px] opacity-80">{userRole}</span>
+              </div>
+            </div>
+          )}
+          {showDetails && (
+            <PlanBadge
+              planName={planDetails?.planName}
+              displayName={planDetails?.displayName}
+              variant="dark"
+              details={planDetails}
+            />
           )}
         </div>
-        <div>
-          <p className="text-sm uppercase tracking-wide font-semibold opacity-90">{contextLabel}</p>
-          <h1 className="text-xl font-black leading-tight">{storeName}</h1>
-          {showDetails && storeDescription && (
-            <p className="mt-1 text-xs text-white/80 max-w-[420px] line-clamp-2">
-              {storeDescription}
-            </p>
-          )}
-          <div className={`${showMobileDetails ? 'flex' : 'hidden'} md:flex mt-2 flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 text-xs w-full max-w-full`}>
-            {storeSlug && (
-              <a
-                href={storeUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 border border-white/20 opacity-95 hover:opacity-100 hover:bg-white/20 transition w-full sm:w-auto min-w-0"
-              >
-                <Globe size={12} weight="duotone" />
-                <span className="truncate">{storeUrl.replace('https://', '')}</span>
-              </a>
-            )}
-            {instagramHandle && (
-              <a
-                href={`https://instagram.com/${instagramHandle.replace('@', '')}`}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 border border-white/20 opacity-95 hover:opacity-100 hover:bg-white/20 transition w-full sm:w-auto min-w-0"
-              >
-                <img src="/insta.avif" alt="Instagram" className="h-4 w-4 rounded-full" />
-                <span className="truncate">{instagramHandle}</span>
-              </a>
-            )}
-          </div>
-        </div>
-        </div>
-        <button
-          type="button"
-          onClick={() => setShowMobileDetails((prev) => !prev)}
-          className="md:hidden px-3 py-2 rounded-full text-xs font-semibold bg-white/15 hover:bg-white/25 transition border border-white/20"
-        >
-          {showMobileDetails ? 'Fechar' : 'Ver detalhes'}
-        </button>
       </div>
-        <div className="w-full md:w-auto flex flex-col sm:flex-row md:items-center gap-3">
+      <div className="px-5 pb-5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
         {showDetails && (
-          <div className="flex items-center gap-2 bg-white/10 rounded-full px-3 py-1.5 border border-white/15 w-full sm:w-auto">
-            <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center text-xs font-bold">
-              {userInitials || 'AD'}
-            </div>
-            <div className="flex flex-col leading-tight">
-              <span className="text-xs font-semibold">{userName}</span>
-              <span className="text-[10px] opacity-80">{userRole}</span>
-            </div>
+          <div className="flex items-center gap-2 text-xs font-semibold bg-white/10 border border-white/20 rounded-full px-2 py-1.5 w-fit">
+            <ShieldCheck size={14} weight="duotone" />
+            {planDetails?.planExempt ? 'Cliente VIP (isento de plano)' : 'Assinatura ativa'}
           </div>
         )}
-        {showDetails && (
-          <PlanBadge
-            planName={planDetails?.planName}
-            displayName={planDetails?.displayName}
-            variant="dark"
-            details={planDetails}
-          />
-        )}
-
-        {onToggleHeader && (
-          <div className="flex items-center rounded-full bg-white/10 border border-white/20 p-0.5 text-[11px] sm:text-xs font-semibold">
-            <button
-              type="button"
-              className="px-3 py-1.5 rounded-full bg-white/20 text-white shadow-sm"
-              title="Painel"
-            >
-              Painel
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setShowMobileDetails(false);
-                onToggleHeader();
-              }}
-              className="px-3 py-1.5 rounded-full text-white/80 hover:text-white hover:bg-white/15 transition flex items-center gap-1.5"
-              title="Modo cozinha"
-            >
-              <Sparkle size={12} weight="duotone" />
-              Modo cozinha
-            </button>
-          </div>
-        )}
-
-        {/* Logout */}
-        <button
-          onClick={() => {
-            logout();
-            navigate('/admin');
-          }}
-          className="px-3 py-2 rounded-lg text-[11px] sm:text-xs font-semibold bg-red-500/20 hover:bg-red-500/30 transition hover:-translate-y-0.5 active:scale-95 flex flex-col sm:flex-row items-center gap-1.5 border border-red-300/20 w-full sm:w-auto text-center"
-          title="Sair do sistema"
-        >
-          <SignOut size={14} weight="duotone" />
-          <span className="leading-tight">Sair</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          {onToggleHeader && (
+            <div className="flex items-center rounded-full bg-white/10 border border-white/20 p-0.5 text-[11px] sm:text-xs font-semibold">
+              <button
+                type="button"
+                className="px-3 py-1.5 rounded-full bg-white/20 text-white shadow-sm"
+                onClick={() => {
+                  window.dispatchEvent(new CustomEvent('adminHeader:set', { detail: { visible: true } }));
+                }}
+              >
+                Mostrar painel
+              </button>
+              <button
+                type="button"
+                className="px-3 py-1.5 rounded-full text-white/80 hover:text-white hover:bg-white/15 transition flex items-center gap-1.5"
+                onClick={() => {
+                  window.dispatchEvent(new CustomEvent('adminHeader:set', { detail: { visible: false } }));
+                }}
+              >
+                <Sparkle size={12} weight="duotone" />
+                Modo foco
+              </button>
+            </div>
+          )}
+          <button
+            onClick={() => {
+              logout();
+              navigate('/admin');
+            }}
+            className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-full bg-white/15 hover:bg-white/25 border border-white/20 text-xs font-semibold"
+          >
+            <SignOut size={14} weight="duotone" /> Sair
+          </button>
+        </div>
       </div>
       {showMobileDetails && (
         <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm md:hidden flex items-end justify-center px-4 pb-6">
