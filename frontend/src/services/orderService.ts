@@ -239,4 +239,8 @@ export const orderService = {
   {
     return apiClient.get(`/orders/${orderId}/public`);
   },
+
+  async getTrackingV2(orderId: string) {
+    return apiClient.get(`/v2/orders/${orderId}/tracking`);
+  },
 };

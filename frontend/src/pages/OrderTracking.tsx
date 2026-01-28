@@ -84,6 +84,8 @@ export function OrderTracking() {
   const [storeCoords, setStoreCoords] = useState(null);
   const [deliveryCoords, setDeliveryCoords] = useState(null);
   const [deliveryRoute, setDeliveryRoute] = useState(null);
+  const [trackingV2, setTrackingV2] = useState(null);
+  const [trackingLoading, setTrackingLoading] = useState(false);
   const [routeLoading, setRouteLoading] = useState(false);
   const [ctaPulse, setCtaPulse] = useState(false);
 
@@ -138,6 +140,24 @@ export function OrderTracking() {
       if (interval) window.clearInterval(interval);
     };
   }, [orderId, polling]);
+
+  useEffect(() => {
+    if (!orderId) return;
+    let active = true;
+    setTrackingLoading(true);
+    orderService
+      .getTrackingV2(orderId)
+      .then((data) => {
+        if (active) setTrackingV2(data);
+      })
+      .catch(() => null)
+      .finally(() => {
+        if (active) setTrackingLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [orderId]);
 
   const status = order?.status || 'pending';
   const typeLabel = typeLabels[order?.type] || 'Pedido';
@@ -196,12 +216,21 @@ export function OrderTracking() {
   const pixQrUrl = pixPayload
     ? `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(pixPayload)}`
     : '';
-  const estimateMinutes =
-    typeof queuePosition === 'number' && queuePosition > 0 ? Math.max(15, queuePosition * 15) : null;
+  const etaDetails = trackingV2?.eta || order?.eta || null;
+  const etaTotalMinutes = etaDetails?.totalMinutes
+    ? Number(etaDetails.totalMinutes)
+    : typeof queuePosition === 'number' && queuePosition > 0
+      ? Math.max(15, queuePosition * 15)
+      : null;
+  const etaWindowMin = etaDetails?.windowMin ? Number(etaDetails.windowMin) : null;
+  const etaWindowMax = etaDetails?.windowMax ? Number(etaDetails.windowMax) : null;
+  const estimateMinutes = etaTotalMinutes;
   const estimatedReadyAt = useMemo(() => {
-    if (status !== 'preparing' || !estimateMinutes || !prepStart) return null;
-    return new Date(prepStart + estimateMinutes * 60 * 1000);
-  }, [estimateMinutes, prepStart, status]);
+    if (!estimateMinutes || !order?.createdAt) return null;
+    const base = new Date(order.createdAt).getTime();
+    if (!Number.isFinite(base)) return null;
+    return new Date(base + estimateMinutes * 60 * 1000);
+  }, [estimateMinutes, order?.createdAt]);
   const deliveryEta = useMemo(() => {
     if (!deliveryRoute?.durationMin) return null;
     const base = order?.updatedAt ? new Date(order.updatedAt).getTime() : Date.now();
@@ -476,7 +505,12 @@ export function OrderTracking() {
                     )}
                     {estimateMinutes && !isReady && (
                       <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold animate-pulse">
-                        Estimativa: ~{estimateMinutes} min
+                        Estimativa total: ~{estimateMinutes} min
+                      </div>
+                    )}
+                    {etaWindowMin && etaWindowMax && !isReady && (
+                      <div className="mt-2 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 text-xs font-semibold">
+                        Janela prevista: {etaWindowMin}–{etaWindowMax} min
                       </div>
                     )}
                     {estimatedReadyAt && (
@@ -740,6 +774,48 @@ export function OrderTracking() {
                           Previsão de chegada: {deliveryEta.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                         </div>
                       )}
+                      {etaDetails && (
+                        <div className="rounded-xl border border-slate-100 bg-slate-50 p-3 space-y-2">
+                          <div className="flex items-center justify-between text-xs font-semibold text-slate-700">
+                            <span>Tempo total estimado</span>
+                            <span className="text-slate-900">
+                              {etaTotalMinutes ? `~${etaTotalMinutes} min` : '-'}
+                            </span>
+                          </div>
+                          {(etaDetails.prepMinutes !== undefined || etaDetails.queueMinutes !== undefined) && (
+                            <div className="flex flex-wrap gap-2 text-[11px] font-semibold text-slate-600">
+                              {etaDetails.prepMinutes !== undefined && (
+                                <span className="px-2 py-1 rounded-full bg-white border border-slate-200">
+                                  Preparo: {etaDetails.prepMinutes} min
+                                </span>
+                              )}
+                              {etaDetails.queueMinutes !== undefined && (
+                                <span className="px-2 py-1 rounded-full bg-white border border-slate-200">
+                                  Fila: {etaDetails.queueMinutes} min
+                                </span>
+                              )}
+                              {etaDetails.travelMinutes !== undefined && etaDetails.travelMinutes !== null && (
+                                <span className="px-2 py-1 rounded-full bg-white border border-slate-200">
+                                  Rota: {etaDetails.travelMinutes} min
+                                </span>
+                              )}
+                              {etaDetails.bufferMinutes !== undefined && (
+                                <span className="px-2 py-1 rounded-full bg-white border border-slate-200">
+                                  Buffer: {etaDetails.bufferMinutes} min
+                                </span>
+                              )}
+                            </div>
+                          )}
+                          {etaWindowMin && etaWindowMax && (
+                            <div className="text-[11px] text-slate-500">
+                              Janela prevista: {etaWindowMin}–{etaWindowMax} min
+                            </div>
+                          )}
+                          {trackingLoading && (
+                            <div className="text-[11px] text-slate-400">Atualizando ETA...</div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   )}
                   {order?.items?.length && (
@@ -771,7 +847,12 @@ export function OrderTracking() {
                     )}
                     {estimateMinutes && !isReady && (
                       <p>
-                        <span className="font-semibold">Estimativa:</span> ~{estimateMinutes} min
+                        <span className="font-semibold">Estimativa total:</span> ~{estimateMinutes} min
+                      </p>
+                    )}
+                    {etaWindowMin && etaWindowMax && !isReady && (
+                      <p>
+                        <span className="font-semibold">Janela prevista:</span> {etaWindowMin}–{etaWindowMax} min
                       </p>
                     )}
                   </div>
