@@ -1103,7 +1103,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         <button
           type="button"
           onClick={() => setMobileNavCollapsed(false)}
-          className="sm:hidden fixed bottom-3 left-1/2 -translate-x-1/2 z-40 rounded-full bg-slate-900 text-white border border-slate-700 px-4 py-2 text-xs font-semibold shadow-lg inline-flex items-center gap-2"
+          className="sm:hidden fixed left-1/2 -translate-x-1/2 z-40 rounded-full bg-slate-900 text-white border border-slate-700 px-4 py-2 text-xs font-semibold shadow-lg inline-flex items-center gap-2"
+          style={{ bottom: 'calc(env(safe-area-inset-bottom) + 8px)' }}
         >
           <CaretUp size={14} weight="bold" />
           Menu
