@@ -13,11 +13,14 @@
 
 import { Request, Response } from 'express';
 import { OrderService } from '../services/OrderService';
+import { OrderEtaServiceV2 } from '../services/OrderEtaServiceV2';
 import { logger } from '../utils/logger';
 import { AppError } from '../errors/AppError';
 import { respondWithError } from '../errors/respondWithError';
+import { env } from '../config/env';
 
 const orderService = new OrderService();
+const orderEtaServiceV2 = new OrderEtaServiceV2();
 const log = logger.child({ scope: 'OrderController' });
 /**
  * Provides OrderController functionality.
@@ -184,8 +187,11 @@ export class OrderController {
       const result = await orderService.getPublicById(orderId);
       if (!result) return respondWithError(req, res, new AppError('ORDER-001', 404), 404);
       const { order, queuePosition, queueSize } = result;
+      const correlationId = typeof req.headers[ 'x-correlation-id' ] === 'string'
+        ? req.headers[ 'x-correlation-id' ]
+        : undefined;
 
-      return res.json({
+      const responsePayload: any = {
         id: order.id,
         status: order.status,
         type: order.type,
@@ -224,9 +230,89 @@ export class OrderController {
                   : null,
             }
           : null,
-      });
+      };
+
+      if (env.etaV2.enabled) {
+        const eta = await orderEtaServiceV2.calculateForOrder(order, queuePosition, correlationId);
+        responsePayload.eta = {
+          totalMinutes: eta.totalMinutes,
+          windowMin: eta.windowMin,
+          windowMax: eta.windowMax,
+          breakdown: {
+            prepMinutes: eta.prepMinutes,
+            queueMinutes: eta.queueMinutes,
+            travelMinutes: eta.travelMinutes,
+            bufferMinutes: eta.bufferMinutes,
+          },
+          travel: {
+            distanceKm: eta.distanceKm,
+            travelMinutes: eta.travelMinutes,
+          },
+          confidence: eta.confidence,
+          algoVersion: eta.algoVersion,
+        };
+      }
+
+      return res.json(responsePayload);
     } catch (error: any) {
       log.warn('Order public get failed', { orderId, error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+
+
+
+  /**
+   * Gets order tracking (V2).
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-28
+   */
+  static async getTrackingV2(req: Request, res: Response) {
+    const { orderId } = req.params;
+    try {
+      log.debug('Order tracking v2 request', { orderId });
+      const result = await orderService.getPublicById(orderId);
+      if (!result) return respondWithError(req, res, new AppError('ORDER-001', 404), 404);
+      const { order, queuePosition, queueSize } = result;
+      const correlationId = typeof req.headers[ 'x-correlation-id' ] === 'string'
+        ? req.headers[ 'x-correlation-id' ]
+        : undefined;
+      const eta = await orderEtaServiceV2.calculateForOrder(order, queuePosition, correlationId);
+
+      return res.json({
+        id: order.id,
+        status: order.status,
+        type: order.type,
+        createdAt: order.createdAt,
+        storeId: order.store?.id || null,
+        queuePosition,
+        queueSize,
+        timeline: [
+          {
+            status: order.status,
+            at: order.createdAt,
+          },
+        ],
+        eta: {
+          totalMinutes: eta.totalMinutes,
+          windowMin: eta.windowMin,
+          windowMax: eta.windowMax,
+          prepMinutes: eta.prepMinutes,
+          queueMinutes: eta.queueMinutes,
+          travelMinutes: eta.travelMinutes,
+          bufferMinutes: eta.bufferMinutes,
+          confidence: eta.confidence,
+          algoVersion: eta.algoVersion,
+        },
+        travel: {
+          distanceKm: eta.distanceKm,
+          travelMinutes: eta.travelMinutes,
+        },
+      });
+    } catch (error: any) {
+      log.warn('Order tracking v2 failed', { orderId, error });
       return respondWithError(req, res, error, 400);
     }
   }

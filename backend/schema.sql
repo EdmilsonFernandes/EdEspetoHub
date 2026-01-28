@@ -49,6 +49,11 @@ CREATE TABLE IF NOT EXISTS store_settings (
   pix_key TEXT,
   contact_email TEXT,
   promo_message TEXT,
+  prep_base_minutes INT,
+  prep_per_item_minutes INT,
+  queue_capacity_per_hour INT,
+  queue_buffer_minutes INT,
+  eta_buffer_minutes INT,
   plan_exempt BOOLEAN NOT NULL DEFAULT FALSE,
   plan_exempt_label TEXT,
   delivery_radius_km NUMERIC(10,2),
@@ -73,6 +78,16 @@ ALTER TABLE store_settings
 ADD COLUMN IF NOT EXISTS contact_email TEXT;
 ALTER TABLE store_settings
 ADD COLUMN IF NOT EXISTS promo_message TEXT;
+ALTER TABLE store_settings
+ADD COLUMN IF NOT EXISTS prep_base_minutes INT;
+ALTER TABLE store_settings
+ADD COLUMN IF NOT EXISTS prep_per_item_minutes INT;
+ALTER TABLE store_settings
+ADD COLUMN IF NOT EXISTS queue_capacity_per_hour INT;
+ALTER TABLE store_settings
+ADD COLUMN IF NOT EXISTS queue_buffer_minutes INT;
+ALTER TABLE store_settings
+ADD COLUMN IF NOT EXISTS eta_buffer_minutes INT;
 ALTER TABLE store_settings
 ADD COLUMN IF NOT EXISTS plan_exempt BOOLEAN DEFAULT FALSE;
 ALTER TABLE store_settings
@@ -164,6 +179,29 @@ CREATE TABLE IF NOT EXISTS plans (
   enabled BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS order_eta_estimates (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+  store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+  algo_version TEXT NOT NULL,
+  prep_minutes INT NOT NULL,
+  queue_minutes INT NOT NULL,
+  travel_minutes INT,
+  buffer_minutes INT NOT NULL,
+  total_minutes INT NOT NULL,
+  window_min INT NOT NULL,
+  window_max INT NOT NULL,
+  distance_km NUMERIC(10,2),
+  confidence TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_order_eta_estimates_order_id
+  ON order_eta_estimates(order_id);
+CREATE INDEX IF NOT EXISTS idx_order_eta_estimates_store_id
+  ON order_eta_estimates(store_id);
 
 CREATE TABLE IF NOT EXISTS subscriptions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

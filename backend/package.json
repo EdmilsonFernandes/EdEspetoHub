@@ -7,7 +7,7 @@
     "start": "node dist/app.js",
     "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
     "db:reset": "ts-node src/scripts/resetDatabase.ts",
-    "test": "ts-node src/utils/productAvailability.test.ts"
+    "test": "ts-node src/utils/productAvailability.test.ts && ts-node src/services/OrderEtaServiceV2.test.ts"
   },
   "dependencies": {
     "@aws-sdk/client-ssm": "^3.967.0",

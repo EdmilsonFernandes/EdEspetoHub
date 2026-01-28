@@ -51,6 +51,21 @@ export class StoreSettings
   @Column({ name: 'promo_message', type: 'text', nullable: true })
   promoMessage?: string | null;
 
+  @Column({ name: 'prep_base_minutes', type: 'int', nullable: true })
+  prepBaseMinutes?: number | null;
+
+  @Column({ name: 'prep_per_item_minutes', type: 'int', nullable: true })
+  prepPerItemMinutes?: number | null;
+
+  @Column({ name: 'queue_capacity_per_hour', type: 'int', nullable: true })
+  queueCapacityPerHour?: number | null;
+
+  @Column({ name: 'queue_buffer_minutes', type: 'int', nullable: true })
+  queueBufferMinutes?: number | null;
+
+  @Column({ name: 'eta_buffer_minutes', type: 'int', nullable: true })
+  etaBufferMinutes?: number | null;
+
   @Column({ name: 'plan_exempt', type: 'boolean', default: false })
   planExempt!: boolean;
 

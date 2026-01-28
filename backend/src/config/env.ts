@@ -63,4 +63,21 @@ export const env = {
     password: process.env.PGPASSWORD || 'postgres',
     database: process.env.PGDATABASE || 'espetinho',
   },
+  etaV2: {
+    enabled: process.env.ENABLE_ORDER_ETA_V2 === 'true',
+    mapsBaseUrl: process.env.MAPS_BASE_URL || 'http://maps:5050/api/maps',
+    defaultPrepMinutes: process.env.DEFAULT_PREP_MINUTES ? Number(process.env.DEFAULT_PREP_MINUTES) : 15,
+    defaultPrepPerItemMinutes: process.env.DEFAULT_PREP_PER_ITEM_MINUTES
+      ? Number(process.env.DEFAULT_PREP_PER_ITEM_MINUTES)
+      : 2,
+    defaultQueueMinutesPerOrder: process.env.DEFAULT_QUEUE_MINUTES_PER_ORDER
+      ? Number(process.env.DEFAULT_QUEUE_MINUTES_PER_ORDER)
+      : 5,
+    defaultQueueBufferMinutes: process.env.DEFAULT_QUEUE_BUFFER_MINUTES
+      ? Number(process.env.DEFAULT_QUEUE_BUFFER_MINUTES)
+      : 0,
+    defaultEtaBufferMinutes: process.env.DEFAULT_ETA_BUFFER_MINUTES
+      ? Number(process.env.DEFAULT_ETA_BUFFER_MINUTES)
+      : 3,
+  },
 };

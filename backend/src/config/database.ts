@@ -20,6 +20,7 @@ import { StoreSettings } from '../entities/StoreSettings';
 import { Product } from '../entities/Product';
 import { Order } from '../entities/Order';
 import { OrderItem } from '../entities/OrderItem';
+import { OrderEtaEstimate } from '../entities/OrderEtaEstimate';
 import { Plan } from '../entities/Plan';
 import { Subscription } from '../entities/Subscription';
 import { Payment } from '../entities/Payment';
@@ -39,7 +40,7 @@ export const AppDataSource = new DataSource({
   password: env.database.password,
   database: env.database.database,
   synchronize: false,
-  entities: [ User, Store, StoreSettings, Product, Order, OrderItem, Plan, Subscription, Payment, PaymentEvent, PasswordReset, EmailVerification, SiteSetting, PlatformAdmin, AccessLog, StoreLinkHit ],
+  entities: [ User, Store, StoreSettings, Product, Order, OrderItem, OrderEtaEstimate, Plan, Subscription, Payment, PaymentEvent, PasswordReset, EmailVerification, SiteSetting, PlatformAdmin, AccessLog, StoreLinkHit ],
   migrations: [],
   logging: [ 'error' ]
   //logging: [ 'error', 'query' ]

@@ -462,6 +462,111 @@ Endpoints principais:
 - `GET /api/stores/slug/:slug/products` — catálogo público por loja (vitrine).
 - `GET /api/stores/:storeId/orders`, `POST /api/stores/:storeId/orders` — pedidos e fila.
 - `GET /api/orders/:orderId/public` — acompanhamento publico do pedido (status + dados da loja).
+- `GET /api/v2/orders/:orderId/tracking` — tracking v2 com ETA total + breakdown (prep/fila/rota).
+
+### ETA V2 (entrega total)
+
+O sistema diferencia:
+
+- **travelMinutes**: somente tempo de deslocamento (rota).
+- **totalMinutes**: preparo + fila + deslocamento + buffer.
+
+Para ativar no endpoint público atual (`/api/orders/:orderId/public`) sem quebrar payloads, use:
+
+```
+ENABLE_ORDER_ETA_V2=true
+```
+
+Quando habilitado, o `/api/orders/:orderId/public` passa a incluir o campo opcional `eta`.
+O tracking completo está sempre disponível via `/api/v2/orders/:orderId/tracking`.
+
+Variáveis de configuração (backend):
+
+```
+ENABLE_ORDER_ETA_V2=true
+MAPS_BASE_URL=http://maps:5050/api/maps
+DEFAULT_PREP_MINUTES=15
+DEFAULT_PREP_PER_ITEM_MINUTES=2
+DEFAULT_QUEUE_MINUTES_PER_ORDER=5
+DEFAULT_QUEUE_BUFFER_MINUTES=0
+DEFAULT_ETA_BUFFER_MINUTES=3
+```
+
+Exemplo (v1) — **inalterado**:
+
+```json
+{
+  "id": "order-id",
+  "status": "pending",
+  "type": "delivery",
+  "total": 42.5,
+  "queuePosition": 1,
+  "queueSize": 3,
+  "items": []
+}
+```
+
+Exemplo (v1 + flag ENABLE_ORDER_ETA_V2):
+
+```json
+{
+  "id": "order-id",
+  "status": "pending",
+  "type": "delivery",
+  "total": 42.5,
+  "queuePosition": 1,
+  "queueSize": 3,
+  "items": [],
+  "eta": {
+    "totalMinutes": 28,
+    "windowMin": 22,
+    "windowMax": 34,
+    "breakdown": {
+      "prepMinutes": 17,
+      "queueMinutes": 5,
+      "travelMinutes": 3,
+      "bufferMinutes": 3
+    },
+    "travel": {
+      "distanceKm": 1.4,
+      "travelMinutes": 3
+    },
+    "confidence": "high",
+    "algoVersion": "eta_v2.0"
+  }
+}
+```
+
+Exemplo (v2 tracking):
+
+```json
+{
+  "id": "order-id",
+  "status": "pending",
+  "type": "delivery",
+  "createdAt": "2026-01-28T12:00:00.000Z",
+  "queuePosition": 1,
+  "queueSize": 3,
+  "timeline": [
+    { "status": "pending", "at": "2026-01-28T12:00:00.000Z" }
+  ],
+  "eta": {
+    "totalMinutes": 28,
+    "windowMin": 22,
+    "windowMax": 34,
+    "prepMinutes": 17,
+    "queueMinutes": 5,
+    "travelMinutes": 3,
+    "bufferMinutes": 3,
+    "confidence": "high",
+    "algoVersion": "eta_v2.0"
+  },
+  "travel": {
+    "distanceKm": 1.4,
+    "travelMinutes": 3
+  }
+}
+```
 
 ### 3. Front-end React (pasta `frontend/`)
 
