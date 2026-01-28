@@ -49,6 +49,8 @@ CREATE TABLE IF NOT EXISTS store_settings (
   pix_key TEXT,
   contact_email TEXT,
   promo_message TEXT,
+  plan_exempt BOOLEAN NOT NULL DEFAULT FALSE,
+  plan_exempt_label TEXT,
   delivery_radius_km NUMERIC(10,2),
   delivery_fee NUMERIC(10,2),
   social_links JSONB DEFAULT '[]',
@@ -71,6 +73,10 @@ ALTER TABLE store_settings
 ADD COLUMN IF NOT EXISTS contact_email TEXT;
 ALTER TABLE store_settings
 ADD COLUMN IF NOT EXISTS promo_message TEXT;
+ALTER TABLE store_settings
+ADD COLUMN IF NOT EXISTS plan_exempt BOOLEAN DEFAULT FALSE;
+ALTER TABLE store_settings
+ADD COLUMN IF NOT EXISTS plan_exempt_label TEXT;
 ALTER TABLE store_settings
 ADD COLUMN IF NOT EXISTS delivery_radius_km NUMERIC(10,2);
 ALTER TABLE store_settings

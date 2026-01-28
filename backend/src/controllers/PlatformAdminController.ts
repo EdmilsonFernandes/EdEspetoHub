@@ -22,6 +22,8 @@ import { SubscriptionRepository } from '../repositories/SubscriptionRepository';
 import { AccessLogRepository } from '../repositories/AccessLogRepository';
 import { logger } from '../utils/logger';
 import { respondWithError } from '../errors/respondWithError';
+import { AppError } from '../errors/AppError';
+import { StoreSettings } from '../entities/StoreSettings';
 
 const storeRepository = new StoreRepository();
 const subscriptionService = new SubscriptionService();
@@ -39,6 +41,31 @@ const log = logger.child({ scope: 'PlatformAdminController' });
  */
 export class PlatformAdminController {
   /**
+   * Builds VIP subscription payload.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-28
+   */
+  private static buildVipSubscription(store: any) {
+    const label = store?.settings?.planExemptLabel || 'Cliente VIP';
+    return {
+      id: `vip-${store?.id || 'store'}`,
+      status: 'ACTIVE',
+      startDate: store?.createdAt || null,
+      endDate: null,
+      autoRenew: false,
+      plan: {
+        id: 'vip',
+        name: 'vip',
+        displayName: label,
+        price: 0,
+        durationDays: null,
+      },
+      planExempt: true,
+      planExemptLabel: label,
+    };
+  }
+  /**
    * Lists stores.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
@@ -52,9 +79,12 @@ export class PlatformAdminController {
         stores.map(async (store) => {
           const subscription = await subscriptionService.getCurrentByStore(store.id);
           const latestPayment = await paymentRepository.findLatestByStoreId(store.id);
+          const vipSubscription = store.settings?.planExempt
+            ? PlatformAdminController.buildVipSubscription(store)
+            : null;
           return {
             ...store,
-            subscription,
+            subscription: vipSubscription || subscription,
             latestPayment,
           };
         })
@@ -83,7 +113,10 @@ export class PlatformAdminController {
         stores.map(async (store) => {
           const subscription = await subscriptionService.getCurrentByStore(store.id);
           const latestPayment = await paymentRepository.findLatestByStoreId(store.id);
-          return { ...store, subscription, latestPayment };
+          const vipSubscription = store.settings?.planExempt
+            ? PlatformAdminController.buildVipSubscription(store)
+            : null;
+          return { ...store, subscription: vipSubscription || subscription, latestPayment };
         })
       );
 
@@ -144,6 +177,7 @@ export class PlatformAdminController {
           id: store.id,
           name: store.name,
           slug: store.slug,
+          isVip: Boolean(store.settings?.planExempt),
           totalOrders,
           totalRevenue,
           avgTicket,
@@ -271,6 +305,56 @@ export class PlatformAdminController {
       return res.json(subscription);
     } catch (error: any) {
       log.warn('Admin reactivate store failed', { subscriptionId, error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  /**
+   * Updates VIP plan exemption.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-28
+   */
+  static async updatePlanExempt(req: Request, res: Response) {
+    const storeId = req.params.storeId;
+    const planExempt = Boolean(req.body?.planExempt);
+    const label = req.body?.planExemptLabel?.toString().trim();
+
+    try {
+      log.info('Admin plan exempt update request', { storeId, planExempt });
+      const store = await storeRepository.findById(storeId);
+      if (!store) return respondWithError(req, res, new AppError('STORE-001', 404), 404);
+
+      if (!store.settings) {
+        store.settings = AppDataSource.getRepository(StoreSettings).create();
+      }
+
+      store.settings.planExempt = planExempt;
+      store.settings.planExemptLabel = planExempt ? (label || 'Cliente VIP') : null;
+      if (planExempt) {
+        store.open = true;
+      }
+
+      await storeRepository.save(store);
+
+      const subscription = planExempt ? null : await subscriptionService.getCurrentByStore(store.id);
+      const hasValidPlan = subscriptionService.isActiveSubscription(subscription);
+      if (!planExempt && !subscription) {
+        store.open = false;
+        await storeRepository.save(store);
+      }
+
+      return res.json({
+        storeId: store.id,
+        planExempt: store.settings.planExempt,
+        planExemptLabel: store.settings.planExemptLabel,
+        hasValidPlan,
+        shouldOpenRenewal: !planExempt && !hasValidPlan,
+        lastPlanId: subscription?.plan?.id || null,
+        lastPlanName: subscription?.plan?.name || null,
+      });
+    } catch (error: any) {
+      log.warn('Admin plan exempt update failed', { storeId, error });
       return respondWithError(req, res, error, 400);
     }
   }

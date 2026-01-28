@@ -62,7 +62,7 @@ export class SubscriptionRepository {
     return this.repository.findOne({
       where: { store: { id: storeId } },
       order: { endDate: 'DESC' },
-      relations: ['store', 'plan'],
+      relations: ['store', 'store.settings', 'plan'],
     });
   }
 

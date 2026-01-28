@@ -482,7 +482,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
           </div>
         </div>
         {onSave && (
-          <div className="hidden sm:flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
             <div className="text-xs text-slate-500">
               Salve para aplicar todas as mudanças da identidade.
             </div>

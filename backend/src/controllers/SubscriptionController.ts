@@ -14,12 +14,14 @@
 import { Request, Response } from 'express';
 import { SubscriptionService } from '../services/SubscriptionService';
 import { PaymentRepository } from '../repositories/PaymentRepository';
+import { StoreRepository } from '../repositories/StoreRepository';
 import { logger } from '../utils/logger';
 import { AppError } from '../errors/AppError';
 import { respondWithError } from '../errors/respondWithError';
 
 const subscriptionService = new SubscriptionService();
 const paymentRepository = new PaymentRepository();
+const storeRepository = new StoreRepository();
 const log = logger.child({ scope: 'SubscriptionController' });
 /**
  * Provides SubscriptionController functionality.
@@ -59,10 +61,25 @@ export class SubscriptionController {
     try {
       log.debug('Subscription get request', { storeId: req.params.storeId });
       const subscription = await subscriptionService.getCurrentByStore(req.params.storeId);
-      if (!subscription) return respondWithError(req, res, new AppError('SUB-001', 404), 404);
+      const store = await storeRepository.findById(req.params.storeId);
+      const planExempt = Boolean(store?.settings?.planExempt);
+      const planExemptLabel = store?.settings?.planExemptLabel || 'Cliente VIP';
+      if (!subscription && !planExempt) {
+        return respondWithError(req, res, new AppError('SUB-001', 404), 404);
+      }
       const latestPayment = await paymentRepository.findLatestByStoreId(req.params.storeId);
+      const payload = subscription || {
+        id: `vip-${req.params.storeId}`,
+        status: 'ACTIVE',
+        startDate: store?.createdAt ?? null,
+        endDate: null,
+        autoRenew: false,
+        plan: { id: 'vip', name: 'vip', displayName: planExemptLabel, price: 0, durationDays: null },
+      };
       return res.json({
-        ...subscription,
+        ...payload,
+        planExempt,
+        planExemptLabel: planExempt ? planExemptLabel : null,
         latestPaymentAt: latestPayment?.createdAt ?? null,
         latestPaymentStatus: latestPayment?.status ?? null,
         latestPaymentAmount: latestPayment?.amount ?? null,

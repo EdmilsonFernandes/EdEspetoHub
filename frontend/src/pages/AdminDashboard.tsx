@@ -354,7 +354,9 @@ const OrdersView = ({ orders, products, storeSlug }) => {
 const PaymentsView = ({ subscription, loading, error, payments }) => {
   const [showAllHistory, setShowAllHistory] = useState(false);
   const plan = subscription?.plan;
-  const planLabel = plan?.displayName || plan?.name || 'Plano não identificado';
+  const planLabel = subscription?.planExempt
+    ? subscription?.planExemptLabel || 'Cliente VIP'
+    : plan?.displayName || plan?.name || 'Plano não identificado';
   const priceValue = subscription?.latestPaymentAmount ?? plan?.price ?? 0;
   const methodMeta = getPaymentMethodMeta(subscription?.paymentMethod);
   const expiresLabel = subscription?.endDate ? formatDateTime(subscription.endDate) : '—';
@@ -441,7 +443,14 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Plano atual</p>
-            <h3 className="text-2xl font-bold text-slate-900 mt-2">{planLabel}</h3>
+            <div className="flex items-center gap-2 mt-2">
+              <h3 className="text-2xl font-bold text-slate-900">{planLabel}</h3>
+              {subscription?.planExempt && (
+                <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-[0.2em] bg-emerald-100 text-emerald-700">
+                  VIP
+                </span>
+              )}
+            </div>
           </div>
           <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusTone}`}>
             {statusLabel}
@@ -451,7 +460,9 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
           <div className="rounded-2xl border border-slate-200 border-l-4 border-l-rose-400 bg-slate-50 p-4">
             <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Valor</p>
             <p className="text-lg font-semibold text-slate-900 mt-2">{formatCurrency(priceValue)}</p>
-            <p className="text-xs text-slate-500 mt-1">Plano {plan?.billingCycle || 'mensal'}</p>
+            <p className="text-xs text-slate-500 mt-1">
+              {subscription?.planExempt ? 'Plano isento' : `Plano ${plan?.billingCycle || 'mensal'}`}
+            </p>
           </div>
           <div className="rounded-2xl border border-slate-200 border-l-4 border-l-sky-400 bg-slate-50 p-4">
             <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Forma de pagamento</p>
@@ -733,6 +744,19 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       active = false;
     };
   }, [storeId]);
+
+  useEffect(() => {
+    if (!subscriptionDetails || !auth?.user) return;
+    const status = (subscriptionDetails.status || '').toUpperCase();
+    const blocked = [ 'EXPIRED', 'SUSPENDED', 'CANCELLED' ];
+    const shouldRenew =
+      !subscriptionDetails.planExempt &&
+      (blocked.includes(status) || status === 'PENDING');
+
+    if (shouldRenew && auth.user.role === 'ADMIN') {
+      navigate('/admin/renewal');
+    }
+  }, [subscriptionDetails, auth?.user, navigate]);
 
   useEffect(() => {
     const handleToggle = (event) => {

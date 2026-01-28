@@ -53,6 +53,14 @@ export async function runMigrations() {
   `);
   await AppDataSource.query(`
     ALTER TABLE IF EXISTS store_settings
+    ADD COLUMN IF NOT EXISTS plan_exempt BOOLEAN DEFAULT FALSE;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS store_settings
+    ADD COLUMN IF NOT EXISTS plan_exempt_label TEXT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS store_settings
     ADD COLUMN IF NOT EXISTS delivery_radius_km NUMERIC(10,2);
   `);
   await AppDataSource.query(`

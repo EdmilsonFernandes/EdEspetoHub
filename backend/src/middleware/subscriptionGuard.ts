@@ -17,8 +17,10 @@ import { env } from '../config/env';
 import { SubscriptionService } from '../services/SubscriptionService';
 import { AppError } from '../errors/AppError';
 import { respondWithError } from '../errors/respondWithError';
+import { StoreRepository } from '../repositories/StoreRepository';
 
 const subscriptionService = new SubscriptionService();
+const storeRepository = new StoreRepository();
 
 const GRACE_HOURS = 24;
 const GRACE_MS = GRACE_HOURS * 60 * 60 * 1000;
@@ -88,6 +90,15 @@ export const requireActiveSubscription = async (
 
   try
   {
+    const store = storeId
+      ? await storeRepository.findById(storeId)
+      : await storeRepository.findBySlug(slug!);
+
+    if (store?.settings?.planExempt)
+    {
+      return next();
+    }
+
     const subscription = storeId
       ? await subscriptionService.getCurrentByStore(storeId)
       : await subscriptionService.getCurrentByStoreSlug(slug!);

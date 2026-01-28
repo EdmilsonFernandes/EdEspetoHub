@@ -51,6 +51,12 @@ export class StoreSettings
   @Column({ name: 'promo_message', type: 'text', nullable: true })
   promoMessage?: string | null;
 
+  @Column({ name: 'plan_exempt', type: 'boolean', default: false })
+  planExempt!: boolean;
+
+  @Column({ name: 'plan_exempt_label', type: 'text', nullable: true })
+  planExemptLabel?: string | null;
+
   @Column('decimal', { name: 'delivery_radius_km', precision: 10, scale: 2, nullable: true })
   deliveryRadiusKm?: number | null;
 

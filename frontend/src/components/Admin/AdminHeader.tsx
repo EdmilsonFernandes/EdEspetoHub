@@ -69,13 +69,17 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
       try {
         const subscription = await subscriptionService.getByStore(storeId);
         setPlanDetails({
-          planName: subscription?.plan?.name || '',
-          displayName: subscription?.plan?.displayName || '',
+          planName: subscription?.planExempt ? 'vip' : subscription?.plan?.name || '',
+          displayName: subscription?.planExempt
+            ? subscription?.planExemptLabel || 'Cliente VIP'
+            : subscription?.plan?.displayName || '',
           startDate: subscription?.startDate || null,
           endDate: subscription?.endDate || null,
           latestPaymentAt: subscription?.latestPaymentAt || null,
           latestPaymentStatus: subscription?.latestPaymentStatus || null,
           latestPaymentAmount: subscription?.latestPaymentAmount || null,
+          planExempt: Boolean(subscription?.planExempt),
+          planExemptLabel: subscription?.planExemptLabel || null,
         });
       } catch (error) {
         console.error('Falha ao carregar plano da loja', error);

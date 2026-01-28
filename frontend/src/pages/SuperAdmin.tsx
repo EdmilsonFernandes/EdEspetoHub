@@ -109,6 +109,8 @@ export function SuperAdmin() {
   const [accessLogMethod, setAccessLogMethod] = useState('all');
   const [accessLogStatus, setAccessLogStatus] = useState('all');
   const [accessLogStore, setAccessLogStore] = useState('all');
+  const [vipLabels, setVipLabels] = useState({});
+  const [vipFilter, setVipFilter] = useState('all');
   const [sectionsOpen, setSectionsOpen] = useState({
     charts: true,
     rankings: true,
@@ -171,6 +173,15 @@ export function SuperAdmin() {
       loadOverview(token);
     }
   }, [token]);
+
+  useEffect(() => {
+    if (!stores?.length) return;
+    const map = {};
+    stores.forEach((store: any) => {
+      map[store.id] = store.settings?.planExemptLabel || 'Cliente VIP';
+    });
+    setVipLabels((prev) => ({ ...map, ...prev }));
+  }, [stores]);
 
   useEffect(() => {
     if (!token || !autoRefresh) return;
@@ -253,6 +264,14 @@ export function SuperAdmin() {
     const map = new Map();
     stores.forEach((store: any) => {
       map.set(store.id, store.name);
+    });
+    return map;
+  }, [stores]);
+
+  const storeVipById = useMemo(() => {
+    const map = new Map();
+    stores.forEach((store: any) => {
+      map.set(store.id, Boolean(store.settings?.planExempt));
     });
     return map;
   }, [stores]);
@@ -380,11 +399,13 @@ export function SuperAdmin() {
       pending: 0,
       open: 0,
       closed: 0,
+      vip: 0,
     };
 
     stores.forEach((store: any) => {
       if (store.open) counts.open += 1;
       else counts.closed += 1;
+      if (store.settings?.planExempt) counts.vip += 1;
       const status = store.subscription?.status || 'PENDING';
       if (status === 'ACTIVE') counts.active += 1;
       else if (status === 'TRIAL') counts.trial += 1;
@@ -396,6 +417,16 @@ export function SuperAdmin() {
 
     return counts;
   }, [stores]);
+
+  const filteredStores = useMemo(() => {
+    if (vipFilter === 'vip') {
+      return stores.filter((store: any) => Boolean(store.settings?.planExempt));
+    }
+    if (vipFilter === 'nonvip') {
+      return stores.filter((store: any) => !store.settings?.planExempt);
+    }
+    return stores;
+  }, [stores, vipFilter]);
 
   const expiringSoon = useMemo(() => {
     return stores
@@ -485,6 +516,30 @@ export function SuperAdmin() {
       showToast(err.message || 'Não foi possível carregar os eventos.', 'error');
     } finally {
       setEventsLoading(false);
+    }
+  };
+
+  const handleVipToggle = async (store: any, nextValue: boolean) => {
+    if (!token) return;
+    const label = (vipLabels[store.id] || '').toString().trim();
+    try {
+      const response = await superAdminService.updatePlanExempt(token, store.id, {
+        planExempt: nextValue,
+        planExemptLabel: label || 'Cliente VIP',
+      });
+      await loadOverview(token);
+      if (!nextValue) {
+        showToast(
+          response?.shouldOpenRenewal
+            ? 'VIP removido. Loja precisa renovar o plano.'
+            : 'VIP removido. Loja voltou ao último plano.',
+          'success'
+        );
+      } else {
+        showToast('Loja marcada como Cliente VIP.', 'success');
+      }
+    } catch (error: any) {
+      showToast(error?.message || 'Não foi possível atualizar o VIP.', 'error');
     }
   };
 
@@ -872,6 +927,9 @@ export function SuperAdmin() {
                   <span className="px-3 py-1 rounded-full bg-white/10 border border-white/10">
                     {summary.totalStores} lojas criadas
                   </span>
+                  <span className="px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-300/40 text-emerald-100">
+                    {storeHealth.vip} lojas VIP
+                  </span>
                   <span className="px-3 py-1 rounded-full bg-white/10 border border-white/10">
                     {storeHealth.open} abertas · {storeHealth.closed} fechadas
                   </span>
@@ -909,6 +967,10 @@ export function SuperAdmin() {
                 <div className="rounded-2xl border border-red-100 bg-red-50 p-3">
                   <p className="text-xs text-red-700 uppercase">Expiradas</p>
                   <p className="text-xl font-black text-red-700">{storeHealth.expired}</p>
+                </div>
+                <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-3">
+                  <p className="text-xs text-emerald-700 uppercase">VIP</p>
+                  <p className="text-xl font-black text-emerald-700">{storeHealth.vip}</p>
                 </div>
               </div>
               <div className="rounded-2xl border border-slate-200 p-3">
@@ -974,6 +1036,14 @@ export function SuperAdmin() {
               </div>
               <p className="text-2xl font-black text-emerald-600">{summary.activeSubscriptions}</p>
               <p className="text-xs text-slate-400 mt-1">Ativação: {activeRate.toFixed(1)}%</p>
+            </div>
+            <div className="bg-white border border-emerald-200 rounded-2xl p-4 shadow-sm">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs uppercase text-emerald-600 font-semibold">Lojas VIP</p>
+                <CheckCircle size={18} weight="duotone" className="text-emerald-600" />
+              </div>
+              <p className="text-2xl font-black text-emerald-700">{storeHealth.vip}</p>
+              <p className="text-xs text-emerald-600/70 mt-1">Isentas de plano</p>
             </div>
             <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
               <div className="flex items-center justify-between mb-2">
@@ -1062,6 +1132,11 @@ export function SuperAdmin() {
                           <div>
                             <p className="font-semibold text-slate-700">
                               {index + 1}. {store.name}
+                              {store.isVip && (
+                                <span className="ml-2 px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-[0.2em] bg-emerald-100 text-emerald-700">
+                                  VIP
+                                </span>
+                              )}
                             </p>
                             <p className="text-xs text-slate-400">{store.slug}</p>
                           </div>
@@ -1090,6 +1165,11 @@ export function SuperAdmin() {
                           <div>
                             <p className="font-semibold text-slate-700">
                               {index + 1}. {store.name}
+                              {store.isVip && (
+                                <span className="ml-2 px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-[0.2em] bg-emerald-100 text-emerald-700">
+                                  VIP
+                                </span>
+                              )}
                             </p>
                             <p className="text-xs text-slate-400">{store.slug}</p>
                           </div>
@@ -1173,11 +1253,47 @@ export function SuperAdmin() {
           </div>
           {sectionsOpen.stores ? (
             <>
+              <div className="flex flex-wrap items-center gap-2 mb-3">
+                <button
+                  type="button"
+                  onClick={() => setVipFilter('all')}
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${
+                    vipFilter === 'all'
+                      ? 'bg-slate-900 text-white border-slate-900'
+                      : 'bg-white text-slate-600 border-slate-200'
+                  }`}
+                >
+                  Todas
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setVipFilter('vip')}
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${
+                    vipFilter === 'vip'
+                      ? 'bg-emerald-500 text-white border-emerald-500'
+                      : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                  }`}
+                >
+                  VIP
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setVipFilter('nonvip')}
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${
+                    vipFilter === 'nonvip'
+                      ? 'bg-slate-700 text-white border-slate-700'
+                      : 'bg-slate-100 text-slate-600 border-slate-200'
+                  }`}
+                >
+                  Sem VIP
+                </button>
+              </div>
               <table className="min-w-full text-sm">
                 <thead className="text-xs uppercase text-slate-400 border-b">
                   <tr>
                     <th className="py-2 pr-4 text-left">Loja</th>
                     <th className="py-2 pr-4 text-left">Plano</th>
+                    <th className="py-2 pr-4 text-left">VIP</th>
                     <th className="py-2 pr-4 text-left">Status</th>
                     <th className="py-2 pr-4 text-left">Criada</th>
                     <th className="py-2 pr-4 text-left">Expira</th>
@@ -1190,8 +1306,10 @@ export function SuperAdmin() {
                   </tr>
                 </thead>
                 <tbody className="divide-y">
-                  {stores.map((store: any) => {
+                  {filteredStores.map((store: any) => {
+                    const isVip = Boolean(store.settings?.planExempt);
                     const planName =
+                      (isVip ? store.settings?.planExemptLabel || 'Cliente VIP' : null) ||
                       store.subscription?.plan?.displayName ||
                       formatPlanName(store.subscription?.plan?.name || '-');
                     const planPrice = store.subscription?.plan?.price || 0;
@@ -1206,10 +1324,41 @@ export function SuperAdmin() {
                     return (
                       <tr key={store.id}>
                         <td className="py-3 pr-4">
-                          <div className="font-semibold text-slate-700">{store.name}</div>
+                          <div className="flex items-center gap-2">
+                            <div className="font-semibold text-slate-700">{store.name}</div>
+                            {isVip && (
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-[0.2em] bg-emerald-100 text-emerald-700">
+                                VIP
+                              </span>
+                            )}
+                          </div>
                           <div className="text-xs text-slate-400">{store.slug}</div>
                         </td>
                         <td className="py-3 pr-4 capitalize">{planName}</td>
+                        <td className="py-3 pr-4">
+                          <div className="flex flex-col gap-2 min-w-[160px]">
+                            <button
+                              type="button"
+                              onClick={() => handleVipToggle(store, !isVip)}
+                              className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition ${
+                                isVip
+                                  ? 'bg-emerald-500/10 text-emerald-700 border-emerald-200'
+                                  : 'bg-slate-100 text-slate-600 border-slate-200'
+                              }`}
+                            >
+                              {isVip ? 'Cliente VIP' : 'Ativar VIP'}
+                            </button>
+                            <input
+                              type="text"
+                              value={vipLabels[store.id] || ''}
+                              onChange={(event) =>
+                                setVipLabels((prev) => ({ ...prev, [store.id]: event.target.value }))
+                              }
+                              placeholder="Label VIP (ex: Cliente VIP)"
+                              className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs text-slate-700"
+                            />
+                          </div>
+                        </td>
                         <td className="py-3 pr-4">
                           <span className={`px-2 py-1 rounded-full text-xs font-semibold ${statusStyle(status)}`}>
                             {status}
@@ -1235,7 +1384,7 @@ export function SuperAdmin() {
                   })}
                 </tbody>
               </table>
-              {stores.length === 0 && (
+              {filteredStores.length === 0 && (
                 <div className="text-center text-slate-500 py-8">Nenhuma loja encontrada.</div>
               )}
             </>
@@ -1365,7 +1514,14 @@ export function SuperAdmin() {
                     <tr>
                       <td className="py-3 pr-4">{formatDate(payment.createdAt)}</td>
                       <td className="py-3 pr-4">
-                        <div className="font-semibold text-slate-700">{payment.store?.name || '-'}</div>
+                        <div className="font-semibold text-slate-700 flex items-center gap-2">
+                          {payment.store?.name || '-'}
+                          {storeVipById.get(payment.store?.id) && (
+                            <span className="px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-[0.2em] bg-emerald-100 text-emerald-700">
+                              VIP
+                            </span>
+                          )}
+                        </div>
                         <div className="text-xs text-slate-400">{payment.store?.slug || '-'}</div>
                       </td>
                       <td className="py-3 pr-4">

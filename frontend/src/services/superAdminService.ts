@@ -82,4 +82,15 @@ export const superAdminService = {
     });
     return handleResponse(response);
   },
+  async updatePlanExempt(token: string, storeId: string, payload: { planExempt: boolean; planExemptLabel?: string }) {
+    const response = await fetch(buildUrl(`/admin/stores/${storeId}/plan-exempt`), {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+    return handleResponse(response);
+  },
 };

@@ -97,7 +97,8 @@ export class SubscriptionService {
       await this.subscriptionRepository.save(subscription);
     }
 
-    const isActive = this.isSubscriptionActive(subscription);
+    const isVip = Boolean(subscription.store?.settings?.planExempt);
+    const isActive = isVip || this.isSubscriptionActive(subscription);
 
     if (isActive && subscription.store && !subscription.store.open) {
       subscription.store.open = true;

@@ -59,6 +59,7 @@ routes.get('/admin/access-logs', requireAuth, requireRole('SUPER_ADMIN'), Platfo
 routes.post('/admin/payments/:paymentId/reprocess', requireAuth, requireRole('SUPER_ADMIN'), PaymentController.reprocess);
 routes.patch('/admin/stores/:storeId/suspend', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.suspendStore);
 routes.patch('/admin/stores/:storeId/reactivate', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.reactivateStore);
+routes.patch('/admin/stores/:storeId/plan-exempt', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.updatePlanExempt);
 
 // Store public
 routes.get('/public/platform/metrics', PlatformPublicController.metrics);
