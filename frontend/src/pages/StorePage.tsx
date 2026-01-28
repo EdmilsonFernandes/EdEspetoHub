@@ -164,7 +164,7 @@ export function StorePage() {
       return { blocked: true, reason: 'Endereço da loja ainda não configurado.' };
     }
     if (deliveryCheck.status === 'out') {
-      return { blocked: true, reason: 'Endereço fora do raio de entrega.' };
+      return { blocked: true, reason: 'Esse endereço está fora do raio de entrega da loja.' };
     }
     if (deliveryCheck.status === 'error') {
       return { blocked: true, reason: 'Não foi possível validar a entrega.' };
@@ -694,7 +694,7 @@ export function StorePage() {
         return;
       }
       if (deliveryCheck.status === 'out') {
-        showErrorNotice('Endereço fora do raio de entrega da loja.');
+        showErrorNotice('Esse endereço está fora do raio de entrega da loja.');
         return;
       }
       if (deliveryCheck.status !== 'ok') {

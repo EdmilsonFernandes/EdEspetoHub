@@ -216,7 +216,7 @@ export const CartView = ({
         : "fora do limite";
       return {
         tone: "bg-rose-50 text-rose-700 border-rose-200",
-        label: `Endereço fora do raio (${distanceLabel} / ${radiusValue} km).`,
+        label: `Ops! A loja entrega até ${radiusValue} km. Seu endereço está a ${distanceLabel}.`,
       };
     }
     if (deliveryCheck?.status === "error") {
