@@ -175,15 +175,6 @@ export function SuperAdmin() {
   }, [token]);
 
   useEffect(() => {
-    if (!stores?.length) return;
-    const map = {};
-    stores.forEach((store: any) => {
-      map[store.id] = store.settings?.planExemptLabel || 'Cliente VIP';
-    });
-    setVipLabels((prev) => ({ ...map, ...prev }));
-  }, [stores]);
-
-  useEffect(() => {
     if (!token || !autoRefresh) return;
     const interval = window.setInterval(() => loadOverview(token), 15000);
     return () => window.clearInterval(interval);
@@ -260,6 +251,15 @@ export function SuperAdmin() {
     });
     return map;
   }, [paymentEvents]);
+
+  useEffect(() => {
+    if (!safeStores.length) return;
+    const map = {};
+    safeStores.forEach((store: any) => {
+      map[store.id] = store.settings?.planExemptLabel || 'Cliente VIP';
+    });
+    setVipLabels((prev) => ({ ...map, ...prev }));
+  }, [safeStores]);
 
   const storeNameById = useMemo(() => {
     const map = new Map();
