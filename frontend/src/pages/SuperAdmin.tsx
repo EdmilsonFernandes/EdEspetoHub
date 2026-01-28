@@ -236,6 +236,7 @@ export function SuperAdmin() {
 
   const summary = overview?.summary;
   const stores = overview?.stores || [];
+  const safeStores = Array.isArray(stores) ? stores : [];
   const payments = overview?.payments || [];
   const paymentEvents = overview?.paymentEvents || [];
   const rankings = overview?.rankings || { byRevenue: [], byOrders: [] };
@@ -262,19 +263,19 @@ export function SuperAdmin() {
 
   const storeNameById = useMemo(() => {
     const map = new Map();
-    stores.forEach((store: any) => {
+    safeStores.forEach((store: any) => {
       map.set(store.id, store.name);
     });
     return map;
-  }, [stores]);
+  }, [safeStores]);
 
   const storeVipById = useMemo(() => {
     const map = new Map();
-    stores.forEach((store: any) => {
+    safeStores.forEach((store: any) => {
       map.set(store.id, Boolean(store.settings?.planExempt));
     });
     return map;
-  }, [stores]);
+  }, [safeStores]);
 
   const revenueByMonth = useMemo(() => {
     const map = new Map<string, number>();
@@ -402,7 +403,7 @@ export function SuperAdmin() {
       vip: 0,
     };
 
-    stores.forEach((store: any) => {
+    safeStores.forEach((store: any) => {
       if (store.open) counts.open += 1;
       else counts.closed += 1;
       if (store.settings?.planExempt) counts.vip += 1;
@@ -416,20 +417,20 @@ export function SuperAdmin() {
     });
 
     return counts;
-  }, [stores]);
+  }, [safeStores]);
 
   const filteredStores = useMemo(() => {
     if (vipFilter === 'vip') {
-      return stores.filter((store: any) => Boolean(store.settings?.planExempt));
+      return safeStores.filter((store: any) => Boolean(store.settings?.planExempt));
     }
     if (vipFilter === 'nonvip') {
-      return stores.filter((store: any) => !store.settings?.planExempt);
+      return safeStores.filter((store: any) => !store.settings?.planExempt);
     }
-    return stores;
-  }, [stores, vipFilter]);
+    return safeStores;
+  }, [safeStores, vipFilter]);
 
   const expiringSoon = useMemo(() => {
-    return stores
+    return safeStores
       .map((store: any) => {
         const endDate = store.subscription?.endDate;
         if (!endDate) return null;
@@ -447,17 +448,17 @@ export function SuperAdmin() {
       .filter(Boolean)
       .sort((a: any, b: any) => a.daysLeft - b.daysLeft)
       .slice(0, 6);
-  }, [stores]);
+  }, [safeStores]);
 
   const recentStores = useMemo(() => {
     const now = Date.now();
-    return stores.filter((store: any) => {
+    return safeStores.filter((store: any) => {
       const createdAt = store.createdAt ? new Date(store.createdAt).getTime() : 0;
       if (!Number.isFinite(createdAt)) return false;
       const diffDays = (now - createdAt) / (1000 * 60 * 60 * 24);
       return diffDays <= 7;
     }).length;
-  }, [stores]);
+  }, [safeStores]);
 
   const revenuePerActive = useMemo(() => {
     if (!storeHealth.active) return 0;
