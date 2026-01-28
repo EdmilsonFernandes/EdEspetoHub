@@ -600,7 +600,7 @@ export const GrillQueue = () => {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className={`flex flex-wrap items-center gap-2 font-semibold ${tvMode ? "text-white" : "text-gray-700"}`}>
           <ChefHat className={tvMode ? "text-white" : "text-brand-primary"} weight="duotone" />
-          Fila do Churrasqueiro
+          Fila de Produção
           <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${tvMode ? "bg-white/15 text-white" : "bg-brand-primary/10 text-brand-primary"}`}>
             {sortedQueue.length} pedidos
           </span>

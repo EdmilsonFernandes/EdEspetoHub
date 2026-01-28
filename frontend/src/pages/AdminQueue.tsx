@@ -14,7 +14,7 @@ export function AdminQueue() {
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="max-w-5xl mx-auto py-8 px-4 space-y-6">
-        <AdminHeader contextLabel="Fila do Churrasqueiro" />
+        <AdminHeader contextLabel="Fila de Produção" />
 
         <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
           <GrillQueue />

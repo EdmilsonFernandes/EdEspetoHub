@@ -44,7 +44,7 @@ const Header = ({
     .toUpperCase();
 
   return (
-    <div className={`w-full bg-white/95 backdrop-blur shadow-md px-3 sm:px-4 ${compact ? 'py-2' : 'py-3 sm:py-4'} flex items-center gap-2 sm:gap-4 sticky top-0 z-50 border-b border-gray-100 flex-wrap sm:flex-nowrap`}>
+    <div className={`w-full bg-white/95 backdrop-blur shadow-md px-3 sm:px-4 ${compact ? 'py-2.5' : 'py-3.5 sm:py-4'} flex items-center gap-2 sm:gap-4 sticky top-0 z-50 border-b border-gray-100 flex-wrap sm:flex-nowrap rounded-b-2xl`}>
       <div
         className="absolute top-0 left-0 right-0 h-1"
         style={{ backgroundImage: "linear-gradient(120deg, var(--color-primary), var(--color-secondary))" }}
@@ -117,19 +117,19 @@ const Header = ({
       {/* Buttons - Responsive */}
       <div className="w-full sm:w-auto flex flex-row items-center justify-end gap-2 order-last sm:order-none sm:flex-shrink-0">
         {onOpenQueue && (
-          <div className="flex items-center rounded-full border border-slate-200 bg-white p-0.5">
+          <div className="flex items-center rounded-full border border-slate-200 bg-white p-0.5 shadow-sm">
             <button
               type="button"
               className="px-3 py-1.5 rounded-full text-xs font-semibold bg-brand-primary text-white"
             >
-              Cardapio
+              Cardápio
             </button>
             <button
               type="button"
               onClick={onOpenQueue}
               className="px-3 py-1.5 rounded-full text-xs font-semibold text-slate-600 hover:text-slate-900"
             >
-              Churrasqueiro
+              Produção
             </button>
           </div>
         )}

@@ -62,7 +62,7 @@ export function OrdersQueue() {
       }}
     >
       <div className="max-w-4xl mx-auto space-y-6 p-4">
-        <AdminHeader contextLabel="Fila do Churrasqueiro" />
+        <AdminHeader contextLabel="Fila de Produção" />
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
           <div className="flex items-center gap-3 text-gray-700 font-semibold mb-4">
             <div 
@@ -71,7 +71,7 @@ export function OrdersQueue() {
             >
               <ChefHat size={20} weight="duotone" />
             </div>
-            <h3 className="text-xl font-bold">Visão do Churrasqueiro</h3>
+            <h3 className="text-xl font-bold">Visão da Produção</h3>
           </div>
           <GrillQueue />
         </div>
