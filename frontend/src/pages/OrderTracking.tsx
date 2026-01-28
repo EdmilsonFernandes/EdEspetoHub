@@ -205,6 +205,8 @@ export function OrderTracking() {
     order?.pixKey ||
     '';
   const isPixPayment = (paymentValue || '').toString().trim().toLowerCase() === 'pix';
+  const hasDeliveryFee =
+    order?.deliveryFee !== null && order?.deliveryFee !== undefined && order?.type === 'delivery';
   const pixPayload = pixKey
     ? buildPixPayload({
         key: pixKey,
@@ -642,7 +644,7 @@ export function OrderTracking() {
                       </div>
                     ))}
                   </div>
-                  {order.type === 'delivery' && order.deliveryFee ? (
+                  {hasDeliveryFee ? (
                     <div className="mt-5 flex items-center justify-between text-xs font-semibold text-slate-600 border-t border-gray-100 pt-4">
                       <span>Frete</span>
                       <span className="px-2 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
@@ -694,6 +696,12 @@ export function OrderTracking() {
                         <span>{order.address}</span>
                       </p>
                     )}
+                    {hasDeliveryFee ? (
+                      <p className="flex items-center gap-2">
+                        <span className="font-semibold">Frete:</span>
+                        <span className="text-emerald-700 font-semibold">{formatCurrency(order.deliveryFee)}</span>
+                      </p>
+                    ) : null}
                     {isPixPayment && (
                       <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 space-y-3">
                         <div className="flex items-center justify-between">
