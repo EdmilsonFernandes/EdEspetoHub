@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { ChartBar, BookOpen, ChefHat, CreditCard, Package, Gear, ShoppingCart } from '@phosphor-icons/react';
+import { ChartBar, BookOpen, ChefHat, CreditCard, Package, Gear, ShoppingCart, CaretDown, CaretUp } from '@phosphor-icons/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AdminLayout } from '../layouts/AdminLayout';
@@ -601,8 +601,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     return localStorage.getItem('adminHeader:visible') !== 'false';
   });
   const [mobileNavCollapsed, setMobileNavCollapsed] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    return localStorage.getItem('adminMobileNav:collapsed') === 'true';
+    if (typeof window === 'undefined') return true;
+    const stored = localStorage.getItem('adminMobileNav:collapsed');
+    if (stored === null) return true;
+    return stored === 'true';
   });
   const [navPulse, setNavPulse] = useState<string | null>(null);
   const prevTabRef = useRef(activeTab);
@@ -1057,7 +1059,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       {error && <p className="text-red-600 text-sm">{error}</p>}
       {!mobileNavCollapsed && (
         <div
-          className="sm:hidden fixed inset-x-0 bottom-0 z-40 border-t border-slate-800 bg-slate-900/95 text-white backdrop-blur"
+          className="sm:hidden fixed inset-x-0 bottom-0 z-40 border-t border-slate-800 bg-slate-900/95 text-white backdrop-blur rounded-t-2xl shadow-2xl"
           style={{ paddingBottom: 'env(safe-area-inset-bottom)', transform: 'translateZ(0)' }}
         >
           <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-slate-950/70 via-slate-900/40 to-transparent" />
@@ -1090,9 +1092,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
           <button
             type="button"
             onClick={() => setMobileNavCollapsed(true)}
-            className="absolute -top-4 right-4 rounded-full bg-slate-900 text-white border border-slate-700 px-3 py-1 text-[10px] font-semibold shadow-lg"
+            className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-slate-900 text-white border border-slate-700 px-3 py-1 text-[10px] font-semibold shadow-lg inline-flex items-center gap-1"
           >
-            Ocultar
+            <CaretDown size={12} weight="bold" />
+            Ocultar menu
           </button>
         </div>
       )}
@@ -1100,8 +1103,9 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         <button
           type="button"
           onClick={() => setMobileNavCollapsed(false)}
-          className="sm:hidden fixed bottom-3 left-1/2 -translate-x-1/2 z-40 rounded-full bg-slate-900 text-white border border-slate-700 px-4 py-2 text-xs font-semibold shadow-lg"
+          className="sm:hidden fixed bottom-3 left-1/2 -translate-x-1/2 z-40 rounded-full bg-slate-900 text-white border border-slate-700 px-4 py-2 text-xs font-semibold shadow-lg inline-flex items-center gap-2"
         >
+          <CaretUp size={14} weight="bold" />
           Menu
         </button>
       )}
