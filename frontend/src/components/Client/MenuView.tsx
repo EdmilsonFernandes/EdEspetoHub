@@ -326,7 +326,7 @@ export const MenuView = ({
       )}
 
       <div className="space-y-8 p-4">
-        <section className="relative overflow-hidden rounded-2xl border border-slate-100 bg-white/90 p-4 shadow-sm">
+        <section className="relative overflow-hidden rounded-2xl premium-card-glass p-4">
           <div
             className="absolute -top-24 -right-20 h-56 w-56 rounded-full opacity-20"
             style={{
@@ -364,7 +364,7 @@ export const MenuView = ({
             )}
 
             {!compactHeader && showStoreDetails && storeAddress && (
-              <div className="rounded-2xl border border-slate-200 bg-white/90 p-4">
+              <div className="rounded-2xl premium-card-glass p-4">
                 <div className="flex flex-col gap-4 sm:grid sm:grid-cols-[1.1fr_0.9fr] sm:items-start">
                   <div className="space-y-3">
                     <a
@@ -412,7 +412,7 @@ export const MenuView = ({
                     </div>
                   </div>
                   {mapMarkers.length > 0 && (
-                    <div className="rounded-2xl border border-slate-200 bg-white p-2">
+                    <div className="rounded-2xl premium-card p-2">
                       <GoogleMapView markers={mapMarkers} zoom={15} />
                     </div>
                   )}
@@ -435,7 +435,7 @@ export const MenuView = ({
           <div
             className={`sticky ${showHeader ? "top-16 sm:top-[88px]" : "top-3"} z-40 -mx-4 px-4 pb-2`}
           >
-            <div className="rounded-2xl border border-slate-200 bg-white/90 shadow-sm px-3 py-2 backdrop-blur">
+            <div className="rounded-2xl premium-card-glass px-3 py-2">
               <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
                 {filteredGrouped.map((category) => (
                   <button
@@ -457,13 +457,13 @@ export const MenuView = ({
 
         <div id="menu-list" className="space-y-10">
         {promoMessage && (
-          <div className="rounded-3xl border border-fuchsia-200 bg-gradient-to-r from-fuchsia-50 via-white to-pink-50 p-4 sm:p-5 shadow-sm">
+          <div className="rounded-3xl premium-card-soft p-4 sm:p-5">
             <p className="text-[11px] uppercase tracking-[0.3em] text-fuchsia-500 font-semibold">Mensagem do dia</p>
             <p className="text-sm font-semibold text-slate-900 mt-2">{promoMessage}</p>
           </div>
         )}
         {topItems.length > 0 && (
-          <div className="rounded-3xl border border-slate-200 bg-white/90 p-4 sm:p-5 shadow-sm">
+          <div className="rounded-3xl premium-card-glass p-4 sm:p-5">
             <div className="flex items-center justify-between">
               <p className="text-[11px] uppercase tracking-[0.3em] text-slate-400 font-semibold">Mais pedidos hoje</p>
               <span className="text-xs text-slate-500">Top {topItems.length}</span>
@@ -480,7 +480,7 @@ export const MenuView = ({
                         item
                     )
                   }
-                  className="group flex min-w-[220px] sm:min-w-0 items-center gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-left hover:shadow-md transition"
+                  className="group flex min-w-[220px] sm:min-w-0 items-center gap-3 rounded-2xl premium-card px-3 py-2 text-left transition"
                 >
                   <div className="w-12 h-12 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 flex items-center justify-center text-[10px] text-slate-400">
                     {item.imageUrl ? (
@@ -499,7 +499,7 @@ export const MenuView = ({
           </div>
         )}
         {featuredProduct && (
-          <div className="rounded-3xl border border-amber-200 bg-gradient-to-r from-amber-50 via-white to-amber-50 p-4 sm:p-5 shadow-sm">
+          <div className="rounded-3xl premium-card-soft p-4 sm:p-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p className="text-[11px] uppercase tracking-[0.3em] text-amber-500 font-semibold">Promoção do dia</p>
@@ -549,7 +549,7 @@ export const MenuView = ({
 
             {/* Título da categoria */}
             <div
-              className="px-4 py-2 rounded-2xl border border-slate-100 bg-white/90 shadow-sm flex items-center justify-between"
+              className="px-4 py-2 rounded-2xl premium-card-glass flex items-center justify-between"
               style={{ borderColor: "color-mix(in srgb, var(--color-primary) 20%, #e2e8f0)" }}
             >
               <div className="flex items-center gap-3">
@@ -571,7 +571,7 @@ export const MenuView = ({
               {category.items.map((item) => (
                 <div
                   key={item.id}
-                  className="group bg-white/95 rounded-2xl shadow-sm border border-slate-100 p-2.5 sm:p-3 flex gap-3 items-center hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99] transition cursor-pointer"
+                  className="group bg-white/95 rounded-2xl premium-card p-2.5 sm:p-3 flex gap-3 items-center hover:-translate-y-0.5 active:scale-[0.99] transition cursor-pointer"
                   onClick={() => openProductModal(item)}
                 >
                   <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-200">
@@ -662,7 +662,7 @@ export const MenuView = ({
         );
         })}
         {filteredGrouped.length === 0 && (
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-500">
+          <div className="rounded-2xl premium-card p-6 text-sm text-slate-500">
             Nenhum item encontrado.
           </div>
         )}

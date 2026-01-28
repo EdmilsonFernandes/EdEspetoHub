@@ -1113,7 +1113,7 @@ export function StorePage() {
                       <p className="text-sm text-slate-500">Horario de hoje: {todayHoursLabel}</p>
                     )}
                     {storeDescription && (
-                      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                      <div className="rounded-2xl premium-card-soft p-4 text-sm text-slate-600">
                         <p className="text-xs uppercase tracking-[0.25em] text-slate-400 mb-2">Sobre a loja</p>
                         <p>{storeDescription}</p>
                       </div>
@@ -1128,7 +1128,7 @@ export function StorePage() {
                     </div>
                   </div>
                   <div className="rounded-3xl border border-slate-200 bg-white/80 p-5 space-y-4">
-                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600 space-y-2">
+                    <div className="rounded-2xl premium-card-soft p-4 text-sm text-slate-600 space-y-2">
                       <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Contato</p>
                       {instagramHandle && (
                         <a
@@ -1149,7 +1149,7 @@ export function StorePage() {
                       )}
                     </div>
                     {weeklyHours.length > 0 && (
-                      <div className="rounded-2xl border border-slate-200 bg-white p-4 text-xs text-slate-600">
+                      <div className="rounded-2xl premium-card p-4 text-xs text-slate-600">
                         <p className="text-xs font-semibold text-slate-700 mb-2">Horarios da semana</p>
                         <div className="grid sm:grid-cols-2 gap-2">
                           {weeklyHours.map((line) => (

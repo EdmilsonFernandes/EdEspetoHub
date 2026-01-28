@@ -301,7 +301,7 @@ export const CartView = ({
       </button>
 
       {/* Resumo compacto (mobile) */}
-      <div className={`sm:hidden mb-4 rounded-2xl border border-slate-200 bg-white/90 shadow-sm px-4 ${summaryCompact ? 'py-2' : 'py-2.5'} flex items-center justify-between sticky top-2 z-40 backdrop-blur-sm transition-all`}>
+      <div className={`sm:hidden mb-4 rounded-2xl premium-card-glass px-4 ${summaryCompact ? 'py-2' : 'py-2.5'} flex items-center justify-between sticky top-2 z-40 transition-all`}>
         <div>
           <p className="text-[11px] uppercase tracking-[0.3em] text-slate-400">Resumo rápido</p>
           <p className="text-sm font-semibold text-slate-800">
@@ -315,7 +315,7 @@ export const CartView = ({
       </div>
 
       {/* Dados do cliente */}
-      <div className="bg-white rounded-3xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-6 border border-gray-100">
+      <div className="bg-white rounded-3xl premium-card p-4 sm:p-6 mb-4 sm:mb-6">
         <div className="flex items-center justify-between mb-4 sm:mb-6">
           <div>
             <h2 className="font-bold text-gray-800 text-base sm:text-lg">Detalhes do Pedido</h2>
@@ -425,7 +425,7 @@ export const CartView = ({
 
           {/* Endereço */}
           {customer.type === "delivery" && (
-            <div className="rounded-2xl border border-slate-200 bg-white p-3 sm:p-4 shadow-sm">
+            <div className="rounded-2xl premium-card p-3 sm:p-4">
               <div className="flex items-center justify-between mb-3">
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
                   Endereço de entrega
@@ -521,7 +521,7 @@ export const CartView = ({
                     </div>
                   </div>
                 </div>
-                <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-white to-emerald-50/60 p-4 space-y-4 shadow-sm">
+                <div className="rounded-2xl premium-card-soft p-4 space-y-4">
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Entrega</p>
@@ -629,7 +629,7 @@ export const CartView = ({
       </div>
 
       {/* Resumo */}
-      <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-6 transition-all hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99]">
+      <div className="bg-white rounded-2xl premium-card p-4 sm:p-6 mb-4 sm:mb-6 transition-all hover:-translate-y-0.5 active:scale-[0.99]">
         <h2 className="font-bold text-gray-800 mb-3 sm:mb-4 text-base sm:text-lg">Resumo</h2>
 
         {cartItems.map((item) => (
@@ -690,7 +690,7 @@ export const CartView = ({
       </div>
 
       {/* Forma de Pagamento */}
-      <div className="bg-white rounded-2xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-6 transition-all hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99]">
+      <div className="bg-white rounded-2xl premium-card p-4 sm:p-6 mb-4 sm:mb-6 transition-all hover:-translate-y-0.5 active:scale-[0.99]">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-bold text-gray-800 text-base sm:text-lg flex items-center gap-2">
             <CreditCard size={18} className="text-brand-primary" /> Forma de Pagamento
@@ -745,7 +745,7 @@ export const CartView = ({
         </div>
       </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99]">
+      <div className="rounded-2xl premium-card transition-all hover:-translate-y-0.5 active:scale-[0.99]">
         <button
           type="button"
           onClick={() => setShowTips((prev) => !prev)}

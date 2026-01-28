@@ -1000,7 +1000,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
       <div className="pb-24 sm:pb-0">
         {activeTab === 'pedidos' && (
-          <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <div className="bg-white rounded-2xl premium-card p-5">
             <OrdersView orders={orders} products={products} storeSlug={storeSlug} />
           </div>
         )}
@@ -1010,7 +1010,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         )}
 
         {activeTab === 'pagamentos' && (
-          <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <div className="bg-white rounded-2xl premium-card p-5">
             <PaymentsView
               subscription={subscriptionDetails}
               loading={subscriptionLoading}
@@ -1021,7 +1021,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         )}
 
         {activeTab === 'config' && (
-          <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 sm:p-5 shadow-sm">
+          <div className="rounded-3xl premium-card-soft p-4 sm:p-5">
             <div className="space-y-4 pb-24 sm:pb-4">
               <BrandingSettings
                 branding={brandingDraft}
@@ -1050,7 +1050,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         )}
 
         {activeTab === 'fila' && (
-          <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <div className="bg-white rounded-2xl premium-card p-5">
             <GrillQueue />
           </div>
         )}

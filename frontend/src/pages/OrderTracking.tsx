@@ -471,7 +471,7 @@ export function OrderTracking() {
 
           {!loading && !error && order && (
             <div className="space-y-6">
-              <div className="rounded-3xl border border-gray-100 bg-gradient-to-br from-white via-gray-50 to-white p-5 sm:p-6 shadow-lg">
+              <div className="rounded-3xl premium-card-soft p-5 sm:p-6">
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                   <div>
                     <p className="text-xs uppercase tracking-[0.3em] text-gray-400">
@@ -587,7 +587,7 @@ export function OrderTracking() {
               </div>
 
               <div className="grid sm:grid-cols-2 gap-4">
-                <div className="rounded-3xl border border-gray-100 p-5 bg-white shadow-sm">
+                <div className="rounded-3xl premium-card p-5">
                   <div className="flex items-center justify-between gap-3 mb-4">
                     <p className="text-sm font-semibold text-gray-900">Resumo do pedido</p>
                     {paymentMeta?.label && (
@@ -660,7 +660,7 @@ export function OrderTracking() {
                     </span>
                   </div>
                 </div>
-                <div className="rounded-3xl border border-gray-100 p-5 space-y-3 bg-white shadow-sm">
+                <div className="rounded-3xl premium-card p-5 space-y-3">
                   <p className="text-sm font-semibold text-gray-900">Informações</p>
                   <div className="text-sm text-gray-600 space-y-2">
                     <p>
