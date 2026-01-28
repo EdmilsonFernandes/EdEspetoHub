@@ -236,7 +236,7 @@ export const CartView = ({
     }
     return {
       tone: "bg-slate-50 text-slate-600 border-slate-200",
-      label: "Informe o endereço para validar a entrega.",
+      label: "Preencha o endereço para validar a entrega.",
     };
   }, [deliveryCheck?.distanceKm, deliveryCheck?.status, isDelivery, normalizedStoreAddress, radiusValue]);
 
@@ -579,13 +579,13 @@ export const CartView = ({
                     </div>
                   )}
                   {showDeliveryStatus && (
-                    <div className={`rounded-xl border px-3 py-2 text-xs font-semibold ${deliveryStatus.tone}`}>
+                    <div className={`rounded-xl border px-3 py-2 text-sm font-semibold ${deliveryStatus.tone}`}>
                       {deliveryStatus.label}
                     </div>
                   )}
                   {showDeliveryDebug && (
                     <div className="rounded-xl border border-slate-100 bg-white px-3 py-2">
-                      <p className="text-[10px] uppercase tracking-[0.2em] text-slate-400 mb-2">Status da validação</p>
+                      <p className="text-[10px] uppercase tracking-[0.2em] text-slate-400 mb-2">Validação da entrega</p>
                       <div className="space-y-1 text-[11px] text-slate-600">
                         {deliveryDebug.map((row) => (
                           <div key={row.label} className="flex items-center justify-between">

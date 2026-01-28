@@ -505,7 +505,7 @@ export function OrderTracking() {
                     )}
                     {estimateMinutes && !isReady && (
                       <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold animate-pulse">
-                        Estimativa total: ~{estimateMinutes} min
+                        Previsão de entrega: ~{estimateMinutes} min
                       </div>
                     )}
                     {etaWindowMin && etaWindowMax && !isReady && (
@@ -642,7 +642,15 @@ export function OrderTracking() {
                       </div>
                     ))}
                   </div>
-                  <div className="mt-5 flex items-center justify-between text-sm font-semibold text-gray-800 border-t border-gray-100 pt-4">
+                  {order.type === 'delivery' && order.deliveryFee ? (
+                    <div className="mt-5 flex items-center justify-between text-xs font-semibold text-slate-600 border-t border-gray-100 pt-4">
+                      <span>Frete</span>
+                      <span className="px-2 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                        {formatCurrency(order.deliveryFee)}
+                      </span>
+                    </div>
+                  ) : null}
+                  <div className="mt-2 flex items-center justify-between text-sm font-semibold text-gray-800">
                     <span>Total</span>
                     <span className="text-base px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
                       {formatCurrency(order.total || 0)}
@@ -840,14 +848,9 @@ export function OrderTracking() {
                         <span className="font-semibold">Tempo total:</span> {formatDuration(elapsedMs)}
                       </p>
                     )}
-                    {typeof queuePosition === 'number' && typeof queueSize === 'number' && (
-                      <p>
-                        <span className="font-semibold">Posicao na fila:</span> {queuePosition} de {queueSize}
-                      </p>
-                    )}
                     {estimateMinutes && !isReady && (
                       <p>
-                        <span className="font-semibold">Estimativa total:</span> ~{estimateMinutes} min
+                        <span className="font-semibold">Previsão de entrega:</span> ~{estimateMinutes} min
                       </p>
                     )}
                     {etaWindowMin && etaWindowMax && !isReady && (

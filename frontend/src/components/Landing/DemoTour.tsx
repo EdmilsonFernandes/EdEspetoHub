@@ -34,9 +34,9 @@ export function DemoTour({ open, onClose }: Props) {
       },
       {
         id: 'queue',
-        title: 'Visao do churrasqueiro + dashboard',
+        title: 'Visão da produção + dashboard',
         description:
-          'A visão do churrasqueiro mostra pedidos chegando em tempo real. O dashboard mostra o resultado do dia.',
+          'A visão da produção mostra pedidos chegando em tempo real. O dashboard mostra o resultado do dia.',
         ctaLabel: 'Abrir painel demo',
         action: () => navigate('/admin/demo'),
         icon: ChefHat,

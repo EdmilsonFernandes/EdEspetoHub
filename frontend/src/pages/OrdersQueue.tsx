@@ -39,7 +39,7 @@ export function OrdersQueue() {
               <ChefHat size={24} weight="duotone" />
             </div>
             <h3 className="text-xl font-bold text-gray-800">Acesso restrito</h3>
-            <p className="text-gray-600">Faça login para acessar a visão do churrasqueiro.</p>
+            <p className="text-gray-600">Faça login para acessar a visão da produção.</p>
             <button
               onClick={() => navigate('/admin')}
               className="w-full py-3 text-white rounded-xl font-semibold hover:opacity-90 transition-all shadow-lg"

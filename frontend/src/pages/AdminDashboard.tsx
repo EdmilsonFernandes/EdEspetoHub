@@ -950,7 +950,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             { id: 'pagamentos', label: 'Pagamentos', shortLabel: 'Pag.', icon: CreditCard },
             { id: 'cardapio', label: 'Cardápio', shortLabel: 'Cardápio', icon: BookOpen },
             { id: 'config', label: 'Configurações', shortLabel: 'Config', icon: Gear },
-            { id: 'fila', label: 'Fila do churrasqueiro', shortLabel: 'Fila', icon: ChefHat },
+            { id: 'fila', label: 'Fila de Produção', shortLabel: 'Fila', icon: ChefHat },
           ].map((tab) => {
             const Icon = tab.icon;
             return (

@@ -966,7 +966,15 @@ export const GrillQueue = () => {
               {/* TOTAL + BOTÕES */}
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mt-3">
               <div className="inline-flex items-center gap-2 text-[11px] font-semibold text-slate-600">
-                Total
+                {order.type === "delivery" && order.deliveryFee ? (
+                  <span className="inline-flex items-center gap-2 text-[11px] font-semibold text-slate-500">
+                    Frete
+                    <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 text-[11px] font-bold">
+                      {formatCurrency(order.deliveryFee)}
+                    </span>
+                  </span>
+                ) : null}
+                <span>Total</span>
                 <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold">
                   {formatCurrency(order.total || 0)}
                 </span>

@@ -21,7 +21,7 @@ export function Hero() {
                 <p className="mt-1 text-sm font-semibold text-slate-900 dark:text-white">Sua vitrine publicada e organizada</p>
               </div>
               <div className="rounded-2xl border border-slate-200/70 dark:border-slate-700/70 bg-white dark:bg-gray-800 p-4 shadow-[0_14px_32px_-24px_rgba(15,23,42,0.6)] dark:shadow-[0_14px_32px_-24px_rgba(0,0,0,0.8)]">
-                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Fila do churrasqueiro</p>
+                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Fila de Produção</p>
                 <p className="mt-1 text-sm font-semibold text-slate-900 dark:text-white">Controle total do preparo</p>
               </div>
               <div className="rounded-2xl border border-slate-200/70 dark:border-slate-700/70 bg-white dark:bg-gray-800 p-4 shadow-[0_14px_32px_-24px_rgba(15,23,42,0.6)] dark:shadow-[0_14px_32px_-24px_rgba(0,0,0,0.8)]">

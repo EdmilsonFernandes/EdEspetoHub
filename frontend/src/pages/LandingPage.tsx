@@ -80,7 +80,7 @@ export function LandingPage() {
       ],
     },
     {
-      title: 'Fila do churrasqueiro',
+      title: 'Fila de Produção',
       role: 'Operação',
       summary: 'Pedido organizado, preparo e finalização sem confusão.',
       image: '/marketing/grill-queue.png',
@@ -123,9 +123,9 @@ export function LandingPage() {
     },
     {
       category: 'Operação',
-      question: 'Como vejo a fila do churrasqueiro?',
+      question: 'Como vejo a fila de produção?',
       answer:
-        'No painel admin, clique em “Fila do churrasqueiro”. Ela atualiza automaticamente.',
+        'No painel admin, clique em “Fila de Produção”. Ela atualiza automaticamente.',
     },
     {
       category: 'Planos',
@@ -207,7 +207,7 @@ export function LandingPage() {
       image: '/marketing/checkout.png',
     },
     {
-      title: 'Fila do churrasqueiro',
+      title: 'Fila de Produção',
       description: 'Pedidos organizados, status e ações claras.',
       tag: 'Operação',
       image: '/marketing/grill-queue.png',
@@ -414,7 +414,7 @@ export function LandingPage() {
               Em 3 passos, sua operação roda sozinha
             </h2>
             <p className="text-base sm:text-lg text-gray-600 mt-3 max-w-xl">
-              Você cria, publica e começa a receber pedidos no mesmo dia. O cliente acompanha e o churrasqueiro recebe tudo organizado.
+              Você cria, publica e começa a receber pedidos no mesmo dia. O cliente acompanha e a produção recebe tudo organizado.
             </p>
             <div className="mt-6 space-y-4">
               {[
@@ -430,7 +430,7 @@ export function LandingPage() {
                 },
                 {
                   title: 'Receba pedidos',
-                  desc: 'Fila do churrasqueiro atualiza sozinha e o cliente acompanha.',
+                  desc: 'Fila de Produção atualiza sozinha e o cliente acompanha.',
                   icon: ChefHat,
                 },
               ].map((step, index) => {
@@ -607,9 +607,9 @@ export function LandingPage() {
                 <span className="inline-flex w-fit px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">
                   Demo guiada em 40s
                 </span>
-                <h3 className="text-2xl font-black text-gray-900">Veja o fluxo completo do cliente ao churrasqueiro</h3>
+                <h3 className="text-2xl font-black text-gray-900">Veja o fluxo completo do cliente à produção</h3>
                 <p className="text-sm text-gray-600 leading-relaxed">
-                  Do cardápio compacto ao pedido confirmado, fila do churrasqueiro e acompanhamento em tempo real.
+                  Do cardápio compacto ao pedido confirmado, fila de produção e acompanhamento em tempo real.
                   Tudo pensado para ser rápido no celular e elegante no desktop.
                 </p>
                 <div className="flex flex-wrap gap-2 text-xs text-slate-500">
@@ -734,7 +734,7 @@ export function LandingPage() {
                 <Monitor className="text-white text-2xl" weight="duotone" />
               </div>
               <p className="font-bold text-gray-900 dark:text-white mb-2 text-lg">Gestão completa</p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Produtos, status e fila do churrasqueiro.</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Produtos, status e fila de produção.</p>
             </div>
             <div className="p-6 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm hover:shadow-md transition-all">
               <div className="w-12 h-12 bg-red-500 rounded-xl flex items-center justify-center mb-4">
@@ -782,7 +782,7 @@ export function LandingPage() {
             </div>
             <div className="flex items-center gap-3 text-gray-700 dark:text-gray-300">
               <span className="text-red-600 dark:text-red-500 text-xl font-bold">✓</span>
-              <span>Fila do churrasqueiro</span>
+              <span>Fila de Produção</span>
             </div>
           </div>
         </div>
@@ -845,7 +845,7 @@ export function LandingPage() {
                 'Cardápio personalizado',
                 'Integração com WhatsApp',
                 'Painel administrativo',
-                'Fila do churrasqueiro',
+                'Fila de Produção',
               ],
               popular: false,
               isTest: true,

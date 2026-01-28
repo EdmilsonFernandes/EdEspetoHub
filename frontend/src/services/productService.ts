@@ -40,7 +40,7 @@ const handleSessionError = (error: any) => {
   }
 };
 
-// 🔐 fonte única da loja (admin/churrasqueiro)
+// 🔐 fonte única da loja (admin/produção)
 const getStoreIdentifierFromSession = (): string | null =>
 {
   const raw = localStorage.getItem("adminSession");
