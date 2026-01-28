@@ -1341,13 +1341,13 @@ export function SuperAdmin() {
                             <button
                               type="button"
                               onClick={() => handleVipToggle(store, !isVip)}
-                              className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition ${
+                              className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition shadow-sm flex items-center justify-center gap-2 ${
                                 isVip
-                                  ? 'bg-emerald-500/10 text-emerald-700 border-emerald-200'
-                                  : 'bg-slate-100 text-slate-600 border-slate-200'
+                                  ? 'bg-emerald-500 text-white border-emerald-500 hover:bg-emerald-600'
+                                  : 'bg-slate-900 text-white border-slate-900 hover:bg-slate-800'
                               }`}
                             >
-                              {isVip ? 'Cliente VIP' : 'Ativar VIP'}
+                              <span className="uppercase tracking-[0.2em] text-[10px]">{isVip ? 'VIP Ativo' : 'Ativar VIP'}</span>
                             </button>
                             <input
                               type="text"
@@ -1356,7 +1356,7 @@ export function SuperAdmin() {
                                 setVipLabels((prev) => ({ ...prev, [store.id]: event.target.value }))
                               }
                               placeholder="Label VIP (ex: Cliente VIP)"
-                              className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs text-slate-700"
+                              className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs text-slate-700 bg-white"
                             />
                           </div>
                         </td>

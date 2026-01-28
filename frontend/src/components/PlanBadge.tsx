@@ -52,6 +52,7 @@ export const PlanBadge = ({ planName, displayName, variant = 'light', details })
   const styleKey = planDetails?.tierKey || 'basic';
   const style = PLAN_STYLES[styleKey];
   const billing = planDetails?.billingKey ? BILLING_OPTIONS[planDetails.billingKey] : null;
+  const isVip = Boolean(details?.planExempt);
   const badgeTone =
     variant === 'dark'
       ? 'bg-white/15 text-white ring-white/25 shadow-black/20'
@@ -77,15 +78,19 @@ export const PlanBadge = ({ planName, displayName, variant = 'light', details })
   return (
     <div className="relative" ref={detailsRef}>
       <button
-        onClick={() => setIsOpen(!isOpen)}
-        className={`list-none cursor-pointer select-none rounded-full px-3 py-1.5 text-xs font-semibold ring-1 shadow-md flex items-center gap-2 ${badgeTone} transition-all`}
+        onClick={() => !isVip && setIsOpen(!isOpen)}
+        className={`list-none cursor-pointer select-none rounded-full px-3 py-1.5 text-xs font-semibold ring-1 shadow-md flex items-center gap-2 ${
+          isVip ? 'bg-emerald-500/20 text-emerald-50 ring-emerald-200/40 shadow-emerald-500/30' : badgeTone
+        } transition-all`}
       >
         <span className="uppercase tracking-wide">{titleLabel}</span>
-        {billing && <span className="text-[10px] font-bold opacity-80">{billing.label}</span>}
-        <CaretDown size={14} weight="duotone" className={`opacity-70 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        {!isVip && billing && <span className="text-[10px] font-bold opacity-80">{billing.label}</span>}
+        {!isVip && (
+          <CaretDown size={14} weight="duotone" className={`opacity-70 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        )}
       </button>
 
-      {isOpen && (
+      {isOpen && !isVip && (
         <div
           className={`absolute right-0 mt-3 w-64 rounded-2xl border border-white/20 bg-white p-4 text-gray-700 shadow-xl backdrop-blur-lg z-50 ${
             variant === 'dark' ? 'bg-white/95' : ''
@@ -108,7 +113,7 @@ export const PlanBadge = ({ planName, displayName, variant = 'light', details })
               </li>
             ))}
           </ul>
-          {details?.startDate || details?.endDate || details?.latestPaymentAt ? (
+          {details?.startDate || (!details?.planExempt && (details?.endDate || details?.latestPaymentAt)) ? (
             <div className="mt-3 border-t border-gray-100 pt-3 text-[11px] text-gray-500 space-y-1">
               {details?.startDate && (
                 <div className="flex items-center justify-between">
@@ -116,7 +121,7 @@ export const PlanBadge = ({ planName, displayName, variant = 'light', details })
                   <span className="font-semibold text-gray-700">{formatDate(details.startDate)}</span>
                 </div>
               )}
-              {details?.latestPaymentAt && (
+              {!details?.planExempt && details?.latestPaymentAt && (
                 <div className="flex items-center justify-between">
                   <span>Ultimo pagamento</span>
                   <span className="font-semibold text-gray-700">
@@ -124,7 +129,7 @@ export const PlanBadge = ({ planName, displayName, variant = 'light', details })
                   </span>
                 </div>
               )}
-              {details?.latestPaymentAmount && (
+              {!details?.planExempt && details?.latestPaymentAmount && (
                 <div className="flex items-center justify-between">
                   <span>Valor pago</span>
                   <span className="font-semibold text-gray-700">
@@ -132,7 +137,7 @@ export const PlanBadge = ({ planName, displayName, variant = 'light', details })
                   </span>
                 </div>
               )}
-              {details?.endDate && (
+              {!details?.planExempt && details?.endDate && (
                 <div className="flex items-center justify-between">
                   <span>Expira em</span>
                   <span className="font-semibold text-gray-700">{formatDate(details.endDate)}</span>
