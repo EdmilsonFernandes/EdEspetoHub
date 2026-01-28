@@ -64,7 +64,7 @@ export const env = {
     database: process.env.PGDATABASE || 'espetinho',
   },
   etaV2: {
-    enabled: process.env.ENABLE_ORDER_ETA_V2 === 'true',
+    enabled: process.env.ENABLE_ORDER_ETA_V2 !== 'false',
     mapsBaseUrl: process.env.MAPS_BASE_URL || 'http://maps:5050/api/maps',
     defaultPrepMinutes: process.env.DEFAULT_PREP_MINUTES ? Number(process.env.DEFAULT_PREP_MINUTES) : 15,
     defaultPrepPerItemMinutes: process.env.DEFAULT_PREP_PER_ITEM_MINUTES
