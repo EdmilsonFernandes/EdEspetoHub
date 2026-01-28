@@ -524,8 +524,8 @@ export const CartView = ({
                 <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-white to-emerald-50/60 p-4 space-y-4 shadow-sm">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="text-[11px] uppercase tracking-[0.25em] text-slate-400">Entrega</p>
-                      <p className="text-sm font-semibold text-slate-800">
+                      <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Entrega</p>
+                      <p className="text-base font-semibold text-slate-800">
                         {radiusValue ? `Raio até ${radiusValue} km` : 'Sem limite de raio'}
                       </p>
                     </div>
@@ -536,19 +536,19 @@ export const CartView = ({
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div className="rounded-xl border border-emerald-100 bg-white px-3 py-2 flex flex-col gap-1">
-                      <span className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Valor do frete</span>
-                      <span className={`text-sm font-bold ${deliveryFeeValue > 0 ? 'text-emerald-600' : 'text-slate-600'}`}>
+                      <span className="text-xs uppercase tracking-[0.2em] text-slate-400">Valor do frete</span>
+                      <span className={`text-base font-bold ${deliveryFeeValue > 0 ? 'text-emerald-600' : 'text-slate-600'}`}>
                         {deliveryFeeValue > 0 ? formatCurrency(deliveryFeeValue) : 'Grátis'}
                       </span>
                     </div>
                     <div className="rounded-xl border border-slate-100 bg-white px-3 py-2 flex flex-col gap-1">
-                      <span className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Distância</span>
-                      <span className="text-sm font-semibold text-slate-800">
+                      <span className="text-xs uppercase tracking-[0.2em] text-slate-400">Distância</span>
+                      <span className="text-base font-semibold text-slate-800">
                         {deliveryCheck?.distanceKm ? `${deliveryCheck.distanceKm.toFixed(1)} km` : "-"}
                       </span>
                     </div>
                   </div>
-                  <div className="rounded-xl border border-slate-100 bg-white px-3 py-2 flex items-center justify-between text-sm">
+                  <div className="rounded-xl border border-slate-100 bg-white px-3 py-2 flex items-center justify-between text-base">
                     <span className="font-semibold text-slate-600 inline-flex items-center gap-2">
                       <Clock size={14} weight="duotone" />
                       Tempo de rota
@@ -558,12 +558,12 @@ export const CartView = ({
                     </span>
                   </div>
                   {customer.address && (
-                    <div className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-[11px] text-slate-600">
+                    <div className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-sm text-slate-600">
                       {customer.address}
                     </div>
                   )}
                   {showDeliveryStatus && (
-                    <div className={`rounded-xl border px-3 py-2 text-sm font-semibold ${deliveryStatus.tone}`}>
+                    <div className={`rounded-xl border px-3 py-2 text-base font-semibold ${deliveryStatus.tone}`}>
                       {deliveryStatus.label}
                     </div>
                   )}
@@ -577,8 +577,8 @@ export const CartView = ({
                   )}
                   {showDeliveryDebug && (
                     <div className="rounded-xl border border-slate-100 bg-white px-3 py-2">
-                      <p className="text-[10px] uppercase tracking-[0.2em] text-slate-400 mb-2">Validação da entrega</p>
-                      <div className="space-y-1 text-[11px] text-slate-600">
+                      <p className="text-xs uppercase tracking-[0.2em] text-slate-400 mb-2">Validação da entrega</p>
+                      <div className="space-y-1 text-sm text-slate-600">
                         {deliveryDebug.map((row) => (
                           <div key={row.label} className="flex items-center justify-between">
                             <span>{row.label}</span>
