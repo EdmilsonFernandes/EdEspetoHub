@@ -10,6 +10,7 @@ export function AdminMotoboys() {
   const [userId, setUserId] = useState('');
   const [motoboyId, setMotoboyId] = useState('');
   const [motoboys, setMotoboys] = useState<any[]>([]);
+  const [requests, setRequests] = useState<any[]>([]);
   const [documentsByMotoboy, setDocumentsByMotoboy] = useState<Record<string, any[]>>({});
   const [docsLoadingId, setDocsLoadingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -54,6 +55,32 @@ export function AdminMotoboys() {
     }
   };
 
+  const loadRequests = async () => {
+    if (!storeId) return;
+    try {
+      const data = await motoboyAdminService.listRequests(storeId);
+      setRequests(Array.isArray(data) ? data : []);
+    } catch (error: any) {
+      showToast(error?.message || 'Não foi possível carregar solicitações.', 'error');
+    }
+  };
+
+  const reviewRequest = async (requestId: string, status: 'approve' | 'reject') => {
+    if (!storeId) return;
+    try {
+      if (status === 'approve') {
+        await motoboyAdminService.approveRequest(storeId, requestId);
+      } else {
+        await motoboyAdminService.rejectRequest(storeId, requestId);
+      }
+      showToast('Solicitação atualizada.', 'success');
+      loadRequests();
+      loadMotoboys();
+    } catch (error: any) {
+      showToast(error?.message || 'Não foi possível atualizar solicitação.', 'error');
+    }
+  };
+
   const loadDocuments = async (motoboyIdToLoad: string) => {
     if (!storeId || !motoboyIdToLoad) return;
     setDocsLoadingId(motoboyIdToLoad);
@@ -87,6 +114,7 @@ export function AdminMotoboys() {
 
   useEffect(() => {
     loadMotoboys();
+    loadRequests();
   }, [storeId]);
 
   if (!storeId) {
@@ -165,6 +193,59 @@ export function AdminMotoboys() {
             Suspender
           </button>
         </div>
+      </div>
+
+      <div className="premium-card p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-semibold text-slate-700">Solicitações de vínculo</p>
+            <p className="text-xs text-slate-500">Motoboys que pediram para entrar na sua loja.</p>
+          </div>
+          <button
+            type="button"
+            onClick={loadRequests}
+            className="px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600"
+          >
+            Atualizar
+          </button>
+        </div>
+        {requests.filter((request) => request.status === 'PENDING').length === 0 ? (
+          <p className="text-sm text-slate-500">Nenhuma solicitação pendente.</p>
+        ) : (
+          <div className="grid gap-3">
+            {requests.filter((request) => request.status === 'PENDING').map((request) => (
+              <div key={request.id} className="rounded-xl border border-slate-100 p-3 flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-slate-800">
+                      {request.motoboyUser?.fullName || 'Entregador'}
+                    </p>
+                    <p className="text-xs text-slate-500">{request.motoboyUser?.email || '-'}</p>
+                  </div>
+                  <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700">
+                    {request.status || 'PENDING'}
+                  </span>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => reviewRequest(request.id, 'approve')}
+                    className="px-3 py-1.5 rounded-lg bg-emerald-500 text-white font-semibold"
+                  >
+                    Aprovar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => reviewRequest(request.id, 'reject')}
+                    className="px-3 py-1.5 rounded-lg bg-rose-500 text-white font-semibold"
+                  >
+                    Rejeitar
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="premium-card p-4 space-y-3">

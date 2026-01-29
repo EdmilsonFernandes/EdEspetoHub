@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { motoboyService } from '../services/motoboyService';
+import { storeService } from '../services/storeService';
 import { OrderCard } from '../components/Motoboy/OrderCard';
 import { ConfirmPaymentModal } from '../components/Motoboy/ConfirmPaymentModal';
 import { useToast } from '../contexts/ToastContext';
@@ -11,6 +12,10 @@ export function MotoboyCurrent() {
   const [docType, setDocType] = useState('CNH');
   const [docFile, setDocFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [stores, setStores] = useState<any[]>([]);
+  const [requests, setRequests] = useState<any[]>([]);
+  const [selectedStores, setSelectedStores] = useState<string[]>([]);
+  const [requesting, setRequesting] = useState(false);
   const { showToast } = useToast();
 
   const load = async () => {
@@ -36,6 +41,31 @@ export function MotoboyCurrent() {
 
   useEffect(() => {
     load();
+  }, []);
+
+  useEffect(() => {
+    const loadStores = async () => {
+      try {
+        const data = await storeService.listPortfolio();
+        const list = Array.isArray(data) ? data.filter((store) => store.open) : [];
+        setStores(list);
+      } catch (error: any) {
+        showToast(error?.message || 'Não foi possível carregar lojas.', 'error');
+      }
+    };
+    loadStores();
+  }, [showToast]);
+
+  useEffect(() => {
+    const loadRequests = async () => {
+      try {
+        const data = await motoboyService.listStoreRequests();
+        setRequests(Array.isArray(data) ? data : []);
+      } catch (error: any) {
+        // ignore to not block motoboy screen
+      }
+    };
+    loadRequests();
   }, []);
 
   const activeOrder = useMemo(() => {
@@ -103,6 +133,32 @@ export function MotoboyCurrent() {
     }
   };
 
+  const toggleStore = (storeId: string) => {
+    setSelectedStores((prev) => {
+      if (prev.includes(storeId)) return prev.filter((id) => id !== storeId);
+      return [ ...prev, storeId ];
+    });
+  };
+
+  const handleRequestStores = async () => {
+    if (!selectedStores.length) {
+      showToast('Selecione ao menos uma loja.', 'error');
+      return;
+    }
+    setRequesting(true);
+    try {
+      await motoboyService.createStoreRequests(selectedStores);
+      showToast('Solicitação enviada. Aguarde aprovação.', 'success');
+      setSelectedStores([]);
+      const data = await motoboyService.listStoreRequests();
+      setRequests(Array.isArray(data) ? data : []);
+    } catch (error: any) {
+      showToast(error?.message || 'Não foi possível enviar solicitação.', 'error');
+    } finally {
+      setRequesting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 px-4 py-6 space-y-4">
       <div>
@@ -141,6 +197,52 @@ export function MotoboyCurrent() {
             {uploading ? 'Enviando...' : 'Enviar documento'}
           </button>
         </div>
+      </div>
+
+      <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-3">
+        <div>
+          <p className="text-sm font-semibold text-slate-700">Solicitar vínculo</p>
+          <p className="text-xs text-slate-500">Escolha as lojas que deseja atender.</p>
+        </div>
+        <div className="grid gap-2">
+          {stores.length === 0 ? (
+            <p className="text-xs text-slate-500">Nenhuma loja disponível.</p>
+          ) : (
+            stores.map((store) => {
+              const isSelected = selectedStores.includes(store.id);
+              const alreadyRequested = requests.some((req) => req.storeId === store.id && req.status === 'PENDING');
+              const approved = requests.some((req) => req.storeId === store.id && req.status === 'APPROVED');
+              return (
+                <button
+                  type="button"
+                  key={store.id}
+                  onClick={() => toggleStore(store.id)}
+                  disabled={alreadyRequested || approved}
+                  className={`flex items-center justify-between rounded-xl border px-3 py-2 text-sm font-semibold ${
+                    approved
+                      ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                      : alreadyRequested
+                      ? 'border-amber-200 bg-amber-50 text-amber-700'
+                      : isSelected
+                      ? 'border-slate-900 bg-slate-900 text-white'
+                      : 'border-slate-200 bg-white text-slate-700'
+                  }`}
+                >
+                  <span>{store.name}</span>
+                  {approved ? 'Aprovado' : alreadyRequested ? 'Pendente' : isSelected ? 'Selecionado' : 'Selecionar'}
+                </button>
+              );
+            })
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={handleRequestStores}
+          disabled={requesting}
+          className="w-full rounded-lg bg-brand-primary px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+        >
+          {requesting ? 'Enviando...' : 'Enviar solicitação'}
+        </button>
       </div>
 
       {!activeOrder ? (

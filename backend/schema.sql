@@ -246,6 +246,17 @@ CREATE TABLE IF NOT EXISTS motoboy_documents (
   reviewed_at TIMESTAMPTZ
 );
 
+CREATE TABLE IF NOT EXISTS motoboy_store_requests (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  motoboy_id UUID NOT NULL REFERENCES motoboys(id) ON DELETE CASCADE,
+  store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+  status TEXT NOT NULL DEFAULT 'PENDING',
+  decided_by_user_id UUID REFERENCES users(id),
+  decided_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE(motoboy_id, store_id)
+);
+
 CREATE TABLE IF NOT EXISTS subscriptions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,

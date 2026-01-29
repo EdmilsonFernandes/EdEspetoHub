@@ -16,6 +16,7 @@ import { Motoboy } from '../entities/Motoboy';
 import { MotoboyRepository } from '../repositories/MotoboyRepository';
 import { MotoboyStoreRepository } from '../repositories/MotoboyStoreRepository';
 import { MotoboyDocument } from '../entities/MotoboyDocument';
+import { MotoboyStoreRequest } from '../entities/MotoboyStoreRequest';
 import { saveBase64Image } from '../utils/imageStorage';
 import { StoreRepository } from '../repositories/StoreRepository';
 import { UserRepository } from '../repositories/UserRepository';
@@ -249,5 +250,122 @@ export class MotoboyService {
     document.reviewedByUserId = ownerId;
     await repo.save(document);
     return document;
+  }
+
+  /**
+   * Creates store requests for motoboy.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-29
+   */
+  async createStoreRequests(motoboy: Motoboy, storeIds: string[]) {
+    if (!Array.isArray(storeIds) || storeIds.length === 0) throw new AppError('MOTO-024', 400);
+    const repo = AppDataSource.getRepository(MotoboyStoreRequest);
+    const created: MotoboyStoreRequest[] = [];
+
+    for (const storeId of storeIds) {
+      const store = await this.storeRepository.findById(storeId);
+      if (!store) continue;
+
+      const existing = await repo.findOne({ where: { motoboyId: motoboy.id, storeId } });
+      if (existing) {
+        if (existing.status === 'REJECTED') {
+          existing.status = 'PENDING';
+          existing.decidedAt = null;
+          existing.decidedByUserId = null;
+          await repo.save(existing);
+        }
+        continue;
+      }
+
+      const request = repo.create({
+        motoboyId: motoboy.id,
+        storeId,
+        status: 'PENDING',
+      });
+      created.push(await repo.save(request));
+    }
+
+    return created;
+  }
+
+  /**
+   * Lists store requests for motoboy.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-29
+   */
+  async listStoreRequests(motoboy: Motoboy) {
+    const repo = AppDataSource.getRepository(MotoboyStoreRequest);
+    return repo.find({
+      where: { motoboyId: motoboy.id },
+      relations: [ 'store' ],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  /**
+   * Lists pending store requests for a store owner.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-29
+   */
+  async listRequestsForStore(storeId: string, ownerId: string) {
+    const store = await this.storeRepository.findByIdWithOwner(storeId);
+    if (!store) throw new AppError('STORE-001', 404);
+    if (store.ownerId !== ownerId) throw new AppError('AUTH-003', 403);
+
+    const repo = AppDataSource.getRepository(MotoboyStoreRequest);
+    return repo.find({
+      where: { storeId },
+      relations: [ 'motoboy', 'motoboy.user' ],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  /**
+   * Reviews a store request (approve/reject).
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-29
+   */
+  async reviewStoreRequest(storeId: string, requestId: string, ownerId: string, status: string) {
+    const store = await this.storeRepository.findByIdWithOwner(storeId);
+    if (!store) throw new AppError('STORE-001', 404);
+    if (store.ownerId !== ownerId) throw new AppError('AUTH-003', 403);
+
+    const repo = AppDataSource.getRepository(MotoboyStoreRequest);
+    const request = await repo.findOne({ where: { id: requestId, storeId }, relations: [ 'motoboy' ] });
+    if (!request) throw new AppError('MOTO-025', 404);
+
+    request.status = status;
+    request.decidedAt = new Date();
+    request.decidedByUserId = ownerId;
+    await repo.save(request);
+
+    if (status === 'APPROVED' && request.motoboyId) {
+      const existingLink = await this.motoboyStoreRepository.findLink(request.motoboyId, storeId);
+      if (existingLink) {
+        existingLink.active = true;
+        await this.motoboyStoreRepository.save(existingLink);
+      } else {
+        const link = this.motoboyStoreRepository.create({
+          motoboyId: request.motoboyId,
+          storeId,
+          active: true,
+        });
+        await this.motoboyStoreRepository.save(link);
+      }
+
+      const motoboy = await this.motoboyRepository.findById(request.motoboyId);
+      if (motoboy && motoboy.status !== 'ACTIVE') {
+        motoboy.status = 'ACTIVE';
+        motoboy.approvedByUserId = ownerId;
+        motoboy.approvedAt = new Date();
+        await this.motoboyRepository.save(motoboy);
+      }
+    }
+
+    return request;
   }
 }

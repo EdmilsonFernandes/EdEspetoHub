@@ -63,6 +63,51 @@ export class MotoboyController {
   }
 
   /**
+   * Lists store requests for motoboy.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-29
+   */
+  static async listStoreRequests(req: Request, res: Response) {
+    try {
+      const motoboy = await motoboyService.getMotoboyByUserId(req.auth?.sub || '');
+      const requests = await motoboyService.listStoreRequests(motoboy);
+      return res.json(
+        requests.map((request) => ({
+          id: request.id,
+          storeId: request.storeId,
+          status: request.status,
+          createdAt: request.createdAt,
+          store: request.store
+            ? { id: request.store.id, name: request.store.name, slug: request.store.slug }
+            : null,
+        }))
+      );
+    } catch (error: any) {
+      log.warn('Motoboy store requests failed', { error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  /**
+   * Creates store requests for motoboy.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-29
+   */
+  static async createStoreRequest(req: Request, res: Response) {
+    try {
+      const motoboy = await motoboyService.getMotoboyByUserId(req.auth?.sub || '');
+      const storeIds = req.body?.storeIds || [];
+      const result = await motoboyService.createStoreRequests(motoboy, storeIds);
+      return res.status(201).json(result);
+    } catch (error: any) {
+      log.warn('Motoboy create store request failed', { error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  /**
    * Lists motoboys linked to a store.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
@@ -318,6 +363,81 @@ export class MotoboyController {
       return res.json(motoboy);
     } catch (error: any) {
       log.warn('Motoboy suspend failed', { error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  /**
+   * Lists store requests for a store owner.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-29
+   */
+  static async listStoreRequestsForStore(req: Request, res: Response) {
+    try {
+      const requests = await motoboyService.listRequestsForStore(req.params.storeId, req.auth?.sub || '');
+      return res.json(
+        requests.map((request) => ({
+          id: request.id,
+          storeId: request.storeId,
+          status: request.status,
+          createdAt: request.createdAt,
+          motoboyId: request.motoboyId,
+          motoboyStatus: request.motoboy?.status,
+          motoboyUser: request.motoboy?.user
+            ? {
+                id: request.motoboy.user.id,
+                fullName: request.motoboy.user.fullName,
+                email: request.motoboy.user.email,
+                phone: request.motoboy.user.phone,
+              }
+            : null,
+        }))
+      );
+    } catch (error: any) {
+      log.warn('Store request list failed', { error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  /**
+   * Approves a store request.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-29
+   */
+  static async approveStoreRequest(req: Request, res: Response) {
+    try {
+      const request = await motoboyService.reviewStoreRequest(
+        req.params.storeId,
+        req.params.requestId,
+        req.auth?.sub || '',
+        'APPROVED'
+      );
+      return res.json(request);
+    } catch (error: any) {
+      log.warn('Approve store request failed', { error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  /**
+   * Rejects a store request.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-29
+   */
+  static async rejectStoreRequest(req: Request, res: Response) {
+    try {
+      const request = await motoboyService.reviewStoreRequest(
+        req.params.storeId,
+        req.params.requestId,
+        req.auth?.sub || '',
+        'REJECTED'
+      );
+      return res.json(request);
+    } catch (error: any) {
+      log.warn('Reject store request failed', { error });
       return respondWithError(req, res, error, 400);
     }
   }

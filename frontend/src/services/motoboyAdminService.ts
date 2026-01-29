@@ -28,4 +28,13 @@ export const motoboyAdminService = {
   async rejectDocument(storeId: string, motoboyId: string, documentId: string) {
     return apiClient.post(`/stores/${storeId}/motoboys/${motoboyId}/documents/${documentId}/reject`, {});
   },
+  async listRequests(storeId: string) {
+    return apiClient.get(`/stores/${storeId}/motoboy-requests`);
+  },
+  async approveRequest(storeId: string, requestId: string) {
+    return apiClient.post(`/stores/${storeId}/motoboy-requests/${requestId}/approve`, {});
+  },
+  async rejectRequest(storeId: string, requestId: string) {
+    return apiClient.post(`/stores/${storeId}/motoboy-requests/${requestId}/reject`, {});
+  },
 };

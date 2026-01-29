@@ -24,4 +24,10 @@ export const motoboyService = {
   async uploadDocument(payload: { docType: string; fileBase64: string }) {
     return apiClient.post('/motoboy/documents', payload);
   },
+  async listStoreRequests() {
+    return apiClient.get('/motoboy/store-requests');
+  },
+  async createStoreRequests(storeIds: string[]) {
+    return apiClient.post('/motoboy/store-requests', { storeIds });
+  },
 };
