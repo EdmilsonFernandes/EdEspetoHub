@@ -449,7 +449,7 @@ export class MotoboyService {
   async listRequestsForStore(storeId: string, ownerId: string) {
     const store = await this.storeRepository.findByIdWithOwner(storeId);
     if (!store) throw new AppError('STORE-001', 404);
-    if (store.ownerId !== ownerId) throw new AppError('AUTH-003', 403);
+    if (store.owner?.id !== ownerId) throw new AppError('AUTH-003', 403);
 
     const repo = AppDataSource.getRepository(MotoboyStoreRequest);
     return repo.find({
@@ -468,7 +468,7 @@ export class MotoboyService {
   async reviewStoreRequest(storeId: string, requestId: string, ownerId: string, status: string) {
     const store = await this.storeRepository.findByIdWithOwner(storeId);
     if (!store) throw new AppError('STORE-001', 404);
-    if (store.ownerId !== ownerId) throw new AppError('AUTH-003', 403);
+    if (store.owner?.id !== ownerId) throw new AppError('AUTH-003', 403);
 
     const repo = AppDataSource.getRepository(MotoboyStoreRequest);
     const request = await repo.findOne({ where: { id: requestId, storeId }, relations: [ 'motoboy' ] });

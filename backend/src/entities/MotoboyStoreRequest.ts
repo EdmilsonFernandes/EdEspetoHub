@@ -24,16 +24,16 @@ import { User } from './User';
 @Entity('motoboy_store_requests')
 export class MotoboyStoreRequest {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @Column({ name: 'motoboy_id' })
-  motoboyId: string;
+  motoboyId!: string;
 
   @Column({ name: 'store_id' })
-  storeId: string;
+  storeId!: string;
 
   @Column({ default: 'PENDING' })
-  status: string;
+  status!: string;
 
   @Column({ name: 'decided_by_user_id', nullable: true })
   decidedByUserId?: string | null;
@@ -42,7 +42,7 @@ export class MotoboyStoreRequest {
   decidedAt?: Date | null;
 
   @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
+  createdAt!: Date;
 
   @ManyToOne(() => Motoboy)
   @JoinColumn({ name: 'motoboy_id' })
