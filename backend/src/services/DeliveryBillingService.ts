@@ -135,12 +135,14 @@ export class DeliveryBillingService {
     });
 
     if (mpPayment) {
+      const expiresAt =
+        'expiresAt' in mpPayment ? mpPayment.expiresAt || null : null;
       cycle.provider = 'MERCADO_PAGO';
       cycle.providerId = mpPayment.providerId || null;
       cycle.paymentLink = mpPayment.paymentLink || null;
       cycle.qrCodeBase64 = mpPayment.qrCodeBase64 || null;
       cycle.qrCodeText = mpPayment.qrCodeText || null;
-      cycle.expiresAt = mpPayment.expiresAt || null;
+      cycle.expiresAt = expiresAt;
     }
 
     const repo = AppDataSource.getRepository(DeliveryBillingCycle);
