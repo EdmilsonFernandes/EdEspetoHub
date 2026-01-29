@@ -48,6 +48,7 @@ export class MotoboyOrderService {
     return AppDataSource.getRepository(Order)
       .createQueryBuilder('o')
       .leftJoinAndSelect('o.store', 'store')
+      .leftJoinAndSelect('store.settings', 'settings')
       .leftJoinAndSelect('o.items', 'items')
       .leftJoinAndSelect('items.product', 'product')
       .where('o.type = :type', { type: 'delivery' })
