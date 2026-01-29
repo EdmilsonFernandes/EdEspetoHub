@@ -38,6 +38,7 @@ export function MotoboyCurrent() {
     { key: 'SELFIE', label: 'Selfie segurando a CNH', help: 'Foto clara do rosto com o documento.' },
     { key: 'CRLV', label: 'Documento do veículo (CRLV)', help: 'Opcional para moto ou carro.' },
   ];
+  const requiredDocs = ['CNH', 'SELFIE'];
 
   const load = async () => {
     try {
@@ -82,15 +83,16 @@ export function MotoboyCurrent() {
     loadStores();
   }, [showToast]);
 
+  const loadRequests = async () => {
+    try {
+      const data = await motoboyService.listStoreRequests();
+      setRequests(Array.isArray(data) ? data : []);
+    } catch (error: any) {
+      // ignore to not block motoboy screen
+    }
+  };
+
   useEffect(() => {
-    const loadRequests = async () => {
-      try {
-        const data = await motoboyService.listStoreRequests();
-        setRequests(Array.isArray(data) ? data : []);
-      } catch (error: any) {
-        // ignore to not block motoboy screen
-      }
-    };
     loadRequests();
   }, []);
 
@@ -137,6 +139,11 @@ export function MotoboyCurrent() {
     });
     return map;
   }, [documents]);
+
+  const hasAllRequiredDocs = useMemo(
+    () => requiredDocs.every((key) => documentsByType.has(key)),
+    [documentsByType, requiredDocs]
+  );
 
   const hasApprovedRequest = useMemo(
     () => requests.some((req) => req.status === 'APPROVED'),
@@ -304,49 +311,76 @@ export function MotoboyCurrent() {
           {documentTypes.map((doc) => {
             const current = documentsByType.get(doc.key);
             return (
-              <div key={doc.key} className="rounded-xl border border-slate-100 p-3 space-y-2">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-semibold text-slate-800">{doc.label}</p>
-                    <p className="text-xs text-slate-500">{doc.help}</p>
-                  </div>
-                  {current && (
-                    <span
-                      className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
-                        current.status === 'APPROVED'
-                          ? 'bg-emerald-100 text-emerald-700'
-                          : current.status === 'REJECTED'
-                          ? 'bg-rose-100 text-rose-700'
-                          : 'bg-amber-100 text-amber-700'
-                      }`}
+              <div key={doc.key} className="rounded-xl border border-slate-100 p-3">
+                <div className="grid gap-3 sm:grid-cols-[1.1fr_0.9fr]">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-semibold text-slate-800">{doc.label}</p>
+                        <p className="text-xs text-slate-500">{doc.help}</p>
+                      </div>
+                      {current && (
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                            current.status === 'APPROVED'
+                              ? 'bg-emerald-100 text-emerald-700'
+                              : current.status === 'REJECTED'
+                              ? 'bg-rose-100 text-rose-700'
+                              : 'bg-amber-100 text-amber-700'
+                          }`}
+                        >
+                          {current.status === 'APPROVED'
+                            ? 'Aprovado'
+                            : current.status === 'REJECTED'
+                            ? 'Recusado'
+                            : 'Pendente'}
+                        </span>
+                      )}
+                    </div>
+                    {current?.uploadedAt && (
+                      <p className="text-[11px] text-slate-500">
+                        Enviado em {new Date(current.uploadedAt).toLocaleString('pt-BR')}
+                      </p>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(event) =>
+                        setDocFiles((prev) => ({ ...prev, [doc.key]: event.target.files?.[0] || null }))
+                      }
+                      className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleUploadDocument(doc.key)}
+                      disabled={uploading}
+                      className="w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
                     >
-                      {current.status === 'APPROVED'
-                        ? 'Aprovado'
-                        : current.status === 'REJECTED'
-                        ? 'Recusado'
-                        : 'Pendente'}
-                    </span>
-                  )}
+                      {uploading ? 'Enviando...' : 'Enviar documento'}
+                    </button>
+                  </div>
+                  <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-3 text-center text-xs text-slate-500 flex flex-col items-center justify-center">
+                    {current?.fileKey ? (
+                      <>
+                        <img
+                          src={current.fileKey}
+                          alt={doc.label}
+                          className="w-full h-32 object-cover rounded-lg border border-slate-200"
+                        />
+                        <a
+                          href={current.fileKey}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="mt-2 text-xs text-brand-primary underline"
+                        >
+                          Ver arquivo
+                        </a>
+                      </>
+                    ) : (
+                      <span>Nenhum arquivo enviado</span>
+                    )}
+                  </div>
                 </div>
-                {current?.uploadedAt && (
-                  <p className="text-[11px] text-slate-500">
-                    Enviado em {new Date(current.uploadedAt).toLocaleString('pt-BR')}
-                  </p>
-                )}
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(event) => setDocFiles((prev) => ({ ...prev, [doc.key]: event.target.files?.[0] || null }))}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-                />
-                <button
-                  type="button"
-                  onClick={() => handleUploadDocument(doc.key)}
-                  disabled={uploading}
-                  className="w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
-                >
-                  {uploading ? 'Enviando...' : 'Enviar documento'}
-                </button>
               </div>
             );
           })}
@@ -394,12 +428,17 @@ export function MotoboyCurrent() {
           <p className="text-xs text-slate-500">Dados básicos do veículo e da região atendida.</p>
         </div>
         <div className="grid gap-2 sm:grid-cols-2">
-          <input
+          <select
             value={profileDraft.vehicleType}
             onChange={(event) => setProfileDraft((prev: any) => ({ ...prev, vehicleType: event.target.value }))}
-            placeholder="Tipo de veículo (moto, bike...)"
             className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-          />
+          >
+            <option value="">Tipo de veículo</option>
+            <option value="MOTO">Moto</option>
+            <option value="BIKE">Bicicleta</option>
+            <option value="CARRO">Carro</option>
+            <option value="OUTRO">Outro</option>
+          </select>
           <input
             value={profileDraft.vehiclePlate}
             onChange={(event) => setProfileDraft((prev: any) => ({ ...prev, vehiclePlate: event.target.value }))}
@@ -455,6 +494,11 @@ export function MotoboyCurrent() {
           <p className="text-sm font-semibold text-slate-700">Solicitar vínculo</p>
           <p className="text-xs text-slate-500">Escolha as lojas que deseja atender.</p>
         </div>
+        {!hasAllRequiredDocs && (
+          <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
+            Envie CNH e Selfie antes de solicitar vínculo com lojas.
+          </div>
+        )}
         {requests.length > 0 && (
           <div className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-xs text-slate-600 space-y-1">
             {requests.map((req) => (
@@ -517,8 +561,15 @@ export function MotoboyCurrent() {
         </div>
         <button
           type="button"
+          onClick={loadRequests}
+          className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700"
+        >
+          Atualizar status
+        </button>
+        <button
+          type="button"
           onClick={handleRequestStores}
-          disabled={requesting}
+          disabled={requesting || !hasAllRequiredDocs}
           className="w-full rounded-lg bg-brand-primary px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
         >
           {requesting ? 'Enviando...' : 'Enviar solicitação'}

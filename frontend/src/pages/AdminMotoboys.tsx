@@ -211,39 +211,51 @@ export function AdminMotoboys() {
                 {Array.isArray(documentsByMotoboy[link.motoboyId]) && documentsByMotoboy[link.motoboyId].length > 0 && (
                   <div className="mt-2 space-y-2">
                     {documentsByMotoboy[link.motoboyId].map((doc: any) => (
-                      <div
-                        key={doc.id}
-                        className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-xs flex flex-col gap-2"
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="font-semibold text-slate-700">{doc.docType || 'DOC'}</span>
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-200 text-slate-700">
-                            {doc.status || 'PENDING'}
-                          </span>
-                        </div>
-                        <a
-                          href={doc.fileKey}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-brand-primary underline"
-                        >
-                          Ver arquivo
-                        </a>
-                        <div className="flex gap-2">
-                          <button
-                            type="button"
-                            onClick={() => handleReviewDocument(link.motoboyId, doc.id, 'approve')}
-                            className="px-3 py-1.5 rounded-lg bg-emerald-500 text-white font-semibold"
-                          >
-                            Aprovar
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleReviewDocument(link.motoboyId, doc.id, 'reject')}
-                            className="px-3 py-1.5 rounded-lg bg-rose-500 text-white font-semibold"
-                          >
-                            Rejeitar
-                          </button>
+                      <div key={doc.id} className="rounded-lg border border-slate-100 bg-slate-50 p-3 text-xs">
+                        <div className="grid gap-3 sm:grid-cols-[1.1fr_0.9fr]">
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span className="font-semibold text-slate-700">{doc.docType || 'DOC'}</span>
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-200 text-slate-700">
+                                {doc.status || 'PENDING'}
+                              </span>
+                            </div>
+                            <a
+                              href={doc.fileKey}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-brand-primary underline"
+                            >
+                              Ver arquivo
+                            </a>
+                            <div className="flex gap-2">
+                              <button
+                                type="button"
+                                onClick={() => handleReviewDocument(link.motoboyId, doc.id, 'approve')}
+                                className="px-3 py-1.5 rounded-lg bg-emerald-500 text-white font-semibold"
+                              >
+                                Aprovar
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleReviewDocument(link.motoboyId, doc.id, 'reject')}
+                                className="px-3 py-1.5 rounded-lg bg-rose-500 text-white font-semibold"
+                              >
+                                Rejeitar
+                              </button>
+                            </div>
+                          </div>
+                          <div className="rounded-xl border border-dashed border-slate-200 bg-white p-2 flex items-center justify-center">
+                            {doc.fileKey ? (
+                              <img
+                                src={doc.fileKey}
+                                alt={doc.docType}
+                                className="w-full h-28 object-cover rounded-lg border border-slate-200"
+                              />
+                            ) : (
+                              <span className="text-[11px] text-slate-400">Sem prévia</span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     ))}
