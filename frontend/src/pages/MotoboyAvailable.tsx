@@ -10,8 +10,12 @@ export function MotoboyAvailable() {
   const [loading, setLoading] = useState(true);
   const [pendingCount, setPendingCount] = useState(0);
   const [blocked, setBlocked] = useState(false);
+  const [profile, setProfile] = useState<any | null>(null);
+  const [documents, setDocuments] = useState<any[]>([]);
+  const [requests, setRequests] = useState<any[]>([]);
   const { showToast } = useToast();
   const navigate = useNavigate();
+  const requiredDocs = ['CNH', 'SELFIE'];
 
   const loadOrders = async () => {
     setLoading(true);
@@ -39,14 +43,53 @@ export function MotoboyAvailable() {
     const loadRequests = async () => {
       try {
         const data = await motoboyService.listStoreRequests();
-        const requests = Array.isArray(data) ? data : [];
-        setPendingCount(requests.filter((req) => req.status === 'PENDING').length);
+        const list = Array.isArray(data) ? data : [];
+        setRequests(list);
+        setPendingCount(list.filter((req) => req.status === 'PENDING').length);
       } catch {
         setPendingCount(0);
       }
     };
     loadRequests();
   }, []);
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const data = await motoboyService.getProfile();
+        setProfile(data || null);
+      } catch {
+        setProfile(null);
+      }
+    };
+    loadProfile();
+  }, []);
+
+  useEffect(() => {
+    const loadDocs = async () => {
+      try {
+        const data = await motoboyService.listDocuments();
+        setDocuments(Array.isArray(data) ? data : []);
+      } catch {
+        setDocuments([]);
+      }
+    };
+    loadDocs();
+  }, []);
+
+  const documentsByType = new Map(
+    documents.map((doc: any) => [String(doc.docType || '').toUpperCase(), doc])
+  );
+  const hasAllRequiredDocs = requiredDocs.every((key) => documentsByType.has(key));
+  const approvedStores = requests.filter((req) => req.status === 'APPROVED');
+  const statusLabel = (() => {
+    if (profile?.status === 'SUSPENDED') return 'Cadastro suspenso';
+    if (profile?.status === 'REJECTED') return 'Cadastro recusado';
+    if (profile?.status === 'PENDING_VERIFICATION') return 'Cadastro em análise';
+    if (profile?.status === 'ACTIVE' && approvedStores.length === 0) return 'Sem vínculo aprovado';
+    if (profile?.status === 'ACTIVE') return 'Cadastro ativo';
+    return 'Cadastro pendente';
+  })();
 
   const handleAccept = async (orderId: string) => {
     try {
@@ -77,12 +120,20 @@ export function MotoboyAvailable() {
         title="Pedidos disponíveis"
         subtitle="Aceite e inicie sua rota."
         rightAction={
-          <button
-            onClick={loadOrders}
-            className="px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600"
-          >
-            Atualizar
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => navigate('/motoboy/current')}
+              className="px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600"
+            >
+              Meu perfil
+            </button>
+            <button
+              onClick={loadOrders}
+              className="px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600"
+            >
+              Atualizar
+            </button>
+          </div>
         }
       />
       {blocked && (
@@ -100,10 +151,39 @@ export function MotoboyAvailable() {
         </button>
       )}
 
+      <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-2">
+        <p className="text-sm font-semibold text-slate-700">Status do entregador</p>
+        <p className="text-xs text-slate-500">{statusLabel}</p>
+        <div className="flex flex-wrap gap-2 text-xs">
+          <span
+            className={`px-2.5 py-1 rounded-full font-semibold ${
+              hasAllRequiredDocs ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+            }`}
+          >
+            Documentos {hasAllRequiredDocs ? 'OK' : 'pendentes'}
+          </span>
+          <span className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 font-semibold">
+            Lojas aprovadas: {approvedStores.length}
+          </span>
+        </div>
+        {!hasAllRequiredDocs && (
+          <p className="text-[11px] text-amber-600">
+            Complete CNH e Selfie para solicitar vínculo e receber pedidos.
+          </p>
+        )}
+        {approvedStores.length === 0 && (
+          <p className="text-[11px] text-slate-500">
+            Pedidos só aparecem após a loja aprovar seu vínculo.
+          </p>
+        )}
+      </div>
+
       {loading ? (
         <div className="text-center text-sm text-slate-500">Carregando...</div>
       ) : orders.length === 0 ? (
-        <div className="text-center text-sm text-slate-500">Nenhum pedido aguardando entregador.</div>
+        <div className="text-center text-sm text-slate-500">
+          Nenhum pedido aguardando entregador. A loja precisa marcar o pedido como “Aguardando entregador”.
+        </div>
       ) : (
         <div className="grid gap-4">
           {orders.map((order) => (
