@@ -141,10 +141,6 @@ export function MotoboyCurrent() {
     () => requests.some((req) => req.status === 'APPROVED'),
     [requests]
   );
-  const hasPendingRequest = useMemo(
-    () => requests.some((req) => req.status === 'PENDING'),
-    [requests]
-  );
   const statusLabel = useMemo(() => {
     if (profile?.status === 'SUSPENDED') return 'Cadastro suspenso';
     if (profile?.status === 'REJECTED') return 'Cadastro recusado';
