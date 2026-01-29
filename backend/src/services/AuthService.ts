@@ -143,6 +143,10 @@ export class AuthService
         const exists = await userRepo.findOne({ where: { email: normalizedEmail } });
         if (exists)
         {
+          if (exists.userRole && exists.userRole !== 'MOTOBOY')
+          {
+            throw new AppError('AUTH-015', 409);
+          }
           throw new AppError('AUTH-011', 409);
         }
 

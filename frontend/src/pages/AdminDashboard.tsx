@@ -961,7 +961,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       <style>{`@keyframes navPop{0%{transform:scale(1)}50%{transform:scale(1.08)}100%{transform:scale(1)}}`}</style>
       {menuVisible ? (
         <div className="hidden sm:flex justify-center">
-          <div className="bg-white rounded-xl border border-slate-200 p-2 shadow-sm flex flex-wrap sm:flex-nowrap justify-center sm:justify-start gap-2 w-full max-w-5xl overflow-visible sm:overflow-x-auto no-scrollbar">
+          <div className="bg-white rounded-xl border border-slate-200 p-2 shadow-sm flex flex-wrap md:flex-nowrap justify-center md:justify-start gap-2 w-full max-w-6xl overflow-x-auto no-scrollbar">
           {[
             { id: 'resumo', label: 'Resumo', shortLabel: 'Resumo', icon: ChartBar },
             { id: 'pedidos', label: 'Pedidos', shortLabel: 'Pedidos', icon: ShoppingCart },

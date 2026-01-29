@@ -36,7 +36,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
               </div>
             </a>
 
-            <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-end">
               {!auth && (
                 <button
                   onClick={() => navigate('/create')}
@@ -45,6 +45,12 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                   Criar loja
                 </button>
               )}
+              <button
+                onClick={() => navigate('/motoboy/login')}
+                className="px-3 py-2 sm:px-4 text-sm rounded-full border border-emerald-200 text-emerald-700 hover:bg-emerald-50 transition-all"
+              >
+                Entrar entregador
+              </button>
               {auth && (
                 <button
                   onClick={() => {

@@ -47,9 +47,14 @@ export function MotoboyRegister() {
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4 overflow-x-hidden">
       <div className="w-full max-w-md bg-white rounded-2xl border border-slate-200 shadow-lg p-6 space-y-4 overflow-hidden">
-        <div className="text-center">
-          <h1 className="text-2xl font-black text-slate-800">Cadastro de Entregador</h1>
-          <p className="text-sm text-slate-500">Crie sua conta para fazer entregas.</p>
+        <div className="flex flex-col items-center gap-3 text-center">
+          <div className="h-14 w-14 rounded-2xl bg-white ring-1 ring-red-200 shadow-[0_16px_30px_-20px_rgba(239,68,68,0.6)] overflow-hidden">
+            <img src="/logo.svg" alt="Chama no Espeto" className="h-full w-full object-cover" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-black text-slate-800">Cadastro de Entregador</h1>
+            <p className="text-sm text-slate-500">Crie sua conta e envie o pedido para as lojas.</p>
+          </div>
         </div>
         <form onSubmit={handleSubmit} className="space-y-3">
           <input
@@ -87,7 +92,13 @@ export function MotoboyRegister() {
               onChange={(e) => setForm({ ...form, termsAccepted: e.target.checked })}
               className="mt-1"
             />
-            Aceito os termos de uso.
+            <span>
+              Aceito os{' '}
+              <a href="/terms" className="text-brand-primary font-semibold underline">
+                termos de uso
+              </a>
+              .
+            </span>
           </label>
           <label className="flex items-start gap-2 text-xs text-slate-600">
             <input
@@ -96,7 +107,13 @@ export function MotoboyRegister() {
               onChange={(e) => setForm({ ...form, lgpdAccepted: e.target.checked })}
               className="mt-1"
             />
-            Aceito o uso dos meus dados conforme LGPD.
+            <span>
+              Aceito o uso dos meus dados conforme{' '}
+              <a href="/terms" className="text-brand-primary font-semibold underline">
+                LGPD
+              </a>
+              .
+            </span>
           </label>
           <button
             type="submit"

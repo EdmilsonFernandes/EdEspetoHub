@@ -12,6 +12,7 @@
   "AUTH-009": "Invalid CPF or CNPJ.",
   "AUTH-010": "CPF/CNPJ already registered.",
   "AUTH-011": "Email already registered.",
+  "AUTH-015": "This email is already linked to a store. Use another email for the delivery account.",
   "AUTH-012": "Accept the terms and privacy policy.",
   "AUTH-013": "Select a plan to continue.",
   "AUTH-014": "Invalid payment method.",

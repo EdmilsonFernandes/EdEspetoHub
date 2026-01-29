@@ -12,6 +12,7 @@
   "AUTH-009": "CPF ou CNPJ inválido.",
   "AUTH-010": "CPF/CNPJ já cadastrado.",
   "AUTH-011": "E-mail já cadastrado.",
+  "AUTH-015": "Este e-mail já está vinculado a uma loja. Use outro e-mail para o entregador.",
   "AUTH-012": "Aceite os termos de uso e política de privacidade.",
   "AUTH-013": "Selecione um plano para continuar.",
   "AUTH-014": "Método de pagamento inválido.",

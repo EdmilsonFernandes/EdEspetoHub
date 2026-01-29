@@ -116,6 +116,12 @@ export function LandingPage() {
         'O entregador cria uma conta própria e solicita vínculo com as lojas que deseja atender. O responsável da loja aprova e, a partir daí, ele já recebe pedidos de entrega.',
     },
     {
+      category: 'Operação',
+      question: 'Como cadastro entregadores para a minha loja?',
+      answer:
+        'No painel Admin > Entregadores, você vê solicitações pendentes e aprova com um clique. Também pode suspender ou remover vínculo a qualquer momento.',
+    },
+    {
       category: 'Planos',
       question: 'O que acontece depois do trial de 7 dias?',
       answer:
