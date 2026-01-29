@@ -144,6 +144,21 @@ export function MotoboyCurrent() {
     () => requiredDocs.every((key) => documentsByType.has(key)),
     [documentsByType, requiredDocs]
   );
+  const requiredDocsPending = useMemo(() => {
+    return requiredDocs.filter((key) => {
+      const doc = documentsByType.get(key);
+      return !doc || doc.status !== 'APPROVED';
+    });
+  }, [documentsByType, requiredDocs]);
+
+  const vehicleIcon = useMemo(() => {
+    const type = String(profileDraft.vehicleType || profile?.vehicleType || '').toUpperCase();
+    if (type === 'MOTO') return '🛵';
+    if (type === 'BIKE') return '🚲';
+    if (type === 'CARRO') return '🚗';
+    if (type === 'OUTRO') return '🚚';
+    return '🚀';
+  }, [profileDraft.vehicleType, profile?.vehicleType]);
 
   const hasApprovedRequest = useMemo(
     () => requests.some((req) => req.status === 'APPROVED'),
@@ -305,10 +320,33 @@ export function MotoboyCurrent() {
         </div>
       )}
       {!blocked && profile?.status && (
-        <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600">
-          Status do entregador: <span className="font-semibold text-slate-800">{statusLabel}</span>
+        <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600 space-y-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="font-semibold text-slate-800">{statusLabel}</span>
+            <span
+              className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                hasAllRequiredDocs ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+              }`}
+            >
+              {hasAllRequiredDocs ? 'Docs OK' : 'Docs pendentes'}
+            </span>
+            {hasApprovedRequest ? (
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-700">
+                Vínculo aprovado
+              </span>
+            ) : (
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600">
+                Sem vínculo aprovado
+              </span>
+            )}
+          </div>
           {profile?.status === 'ACTIVE' && !hasApprovedRequest && (
-            <span className="block text-xs text-slate-500 mt-1">Solicite vínculo com lojas para receber pedidos.</span>
+            <span className="block text-xs text-slate-500">Solicite vínculo com lojas para receber pedidos.</span>
+          )}
+          {requiredDocsPending.length > 0 && (
+            <span className="block text-xs text-amber-600">
+              Pendências: {requiredDocsPending.join(', ')}.
+            </span>
           )}
         </div>
       )}
@@ -402,6 +440,10 @@ export function MotoboyCurrent() {
         <div>
           <p className="text-sm font-semibold text-slate-700">Perfil do entregador</p>
           <p className="text-xs text-slate-500">Dados básicos do veículo e da região atendida.</p>
+        </div>
+        <div className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-xs text-slate-600 flex items-center gap-2">
+          <span className="text-base">{vehicleIcon}</span>
+          <span>Preencha os dados para acelerar aprovações e vínculos.</span>
         </div>
         <div className="grid gap-2 sm:grid-cols-2">
           <select

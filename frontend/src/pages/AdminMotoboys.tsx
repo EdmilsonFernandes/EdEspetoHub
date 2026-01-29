@@ -210,6 +210,17 @@ export function AdminMotoboys() {
                   <span>ID: {link.motoboyId}</span>
                   <span>Vínculo: {link.active ? 'Ativo' : 'Inativo'}</span>
                 </div>
+                {Array.isArray(documentsByMotoboy[link.motoboyId]) && (
+                  <div className="text-[11px] text-slate-500">
+                    {documentsByMotoboy[link.motoboyId].filter((doc: any) => doc.status !== 'APPROVED').length > 0 ? (
+                      <span className="text-amber-700">
+                        Documentos pendentes: {documentsByMotoboy[link.motoboyId].filter((doc: any) => doc.status !== 'APPROVED').length}
+                      </span>
+                    ) : (
+                      <span className="text-emerald-700">Documentos aprovados.</span>
+                    )}
+                  </div>
+                )}
                 <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
