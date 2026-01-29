@@ -72,7 +72,7 @@ const handleResponse = async (response: Response) =>
 const request = async (path: string, options: any = {}) =>
 {
   const url = buildUrl(path);
-  const isMotoboyRoute = normalizedPath.startsWith('/motoboy');
+  const isMotoboyRoute = path.startsWith('/motoboy') || path.startsWith('motoboy');
   const token = isMotoboyRoute ? getMotoboyToken() : getAdminToken();
 
   const finalOptions: any = {
@@ -98,7 +98,7 @@ const request = async (path: string, options: any = {}) =>
 const rawRequest = async (path: string, options: any = {}) =>
 {
   const url = buildUrl(path);
-  const isMotoboyRoute = normalizedPath.startsWith('/motoboy');
+  const isMotoboyRoute = path.startsWith('/motoboy') || path.startsWith('motoboy');
   const token = isMotoboyRoute ? getMotoboyToken() : getAdminToken();
 
   const finalOptions: any = {
