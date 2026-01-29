@@ -31,7 +31,9 @@ const Header = ({
   whatsappNumber,
   onOpenQueue,
   onOpenAdmin,
-  compact
+  compact,
+  isOpenNow,
+  todayHoursLabel
 }) => {
   const storeSlug = branding?.espetoId || "";
   const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
@@ -75,6 +77,23 @@ const Header = ({
         <h1 className={`${compact ? 'text-sm' : 'text-base sm:text-xl'} font-black text-gray-900 truncate`}>
           {branding?.brandName || "Seu Espeto"}
         </h1>
+        <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
+          <span
+            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-semibold ${
+              isOpenNow
+                ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
+                : 'bg-amber-100 text-amber-800 border border-amber-200'
+            }`}
+          >
+            <span className={`h-1.5 w-1.5 rounded-full ${isOpenNow ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+            {isOpenNow ? 'Aberto agora' : 'Fechado no momento'}
+          </span>
+          {todayHoursLabel && (
+            <span className="inline-flex items-center rounded-full bg-slate-100 text-slate-600 border border-slate-200 px-2.5 py-1 text-[10px] font-semibold">
+              Hoje {todayHoursLabel}
+            </span>
+          )}
+        </div>
         {!compact && (
           <div className="mt-1 flex flex-wrap items-center gap-1 sm:gap-2 text-xs text-slate-500">
           {storeSlug && (
@@ -165,6 +184,8 @@ export const MenuView = ({
   promoMessage,
   storeAddress,
   storeCoords,
+  isOpenNow,
+  todayHoursLabel,
   showHeader = true,
   onOpenQueue,
   onOpenAdmin,
@@ -322,6 +343,8 @@ export const MenuView = ({
           onOpenQueue={onOpenQueue}
           onOpenAdmin={onOpenAdmin}
           compact={compactHeader}
+          isOpenNow={isOpenNow}
+          todayHoursLabel={todayHoursLabel}
         />
       )}
 
