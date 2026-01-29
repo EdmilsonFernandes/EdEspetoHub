@@ -140,10 +140,11 @@ export class AuthService
       {
         const userRepo = manager.getRepository(User);
 
-        const exists = await userRepo.findOne({ where: { email: normalizedEmail } });
+        const exists = await userRepo.findOne({ where: { email: normalizedEmail }, relations: [ 'stores' ] });
         if (exists)
         {
-          if (exists.userRole && exists.userRole !== 'MOTOBOY')
+          const isStoreOwner = Array.isArray((exists as any).stores) && (exists as any).stores.length > 0;
+          if (isStoreOwner || (exists.userRole && exists.userRole !== 'MOTOBOY'))
           {
             throw new AppError('AUTH-015', 409);
           }
