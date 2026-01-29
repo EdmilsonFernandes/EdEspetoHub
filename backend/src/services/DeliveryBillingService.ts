@@ -135,8 +135,14 @@ export class DeliveryBillingService {
     });
 
     if (mpPayment) {
-      const expiresAt =
+      const rawExpires =
         'expiresAt' in mpPayment ? mpPayment.expiresAt || null : null;
+      const expiresAt =
+        typeof rawExpires === 'string'
+          ? new Date(rawExpires)
+          : rawExpires instanceof Date
+          ? rawExpires
+          : null;
       cycle.provider = 'MERCADO_PAGO';
       cycle.providerId = mpPayment.providerId || null;
       cycle.paymentLink = mpPayment.paymentLink || null;
