@@ -1,5 +1,3 @@
-import React from 'react';
-
 const STATUS_STYLES: Record<string, string> = {
   paid: 'bg-emerald-100 text-emerald-700',
   pending: 'bg-amber-100 text-amber-700',

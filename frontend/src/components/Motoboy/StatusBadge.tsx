@@ -1,5 +1,3 @@
-import React from 'react';
-
 const STATUS_STYLES: Record<string, string> = {
   pending: 'bg-amber-100 text-amber-800',
   preparing: 'bg-sky-100 text-sky-700',
