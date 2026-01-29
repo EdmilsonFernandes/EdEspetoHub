@@ -109,6 +109,7 @@ export class AuthService
       planId: input?.planId,
       paymentMethod: input?.paymentMethod,
     });
+    const accountType = (input?.accountType || input?.user?.accountType || 'STORE_OWNER').toString().toUpperCase();
     const userPayload = input.user ?? {
       fullName: input.fullName,
       email: input.email,
@@ -122,6 +123,66 @@ export class AuthService
     const normalizedEmail = userPayload.email
       .trim()
       .toLowerCase();
+
+    if (!input.termsAccepted || !input.lgpdAccepted)
+    {
+      throw new AppError('AUTH-012', 400);
+    }
+
+    if (accountType === 'MOTOBOY')
+    {
+      if (!userPayload.fullName || !userPayload.email || !userPayload.password)
+      {
+        throw new AppError('AUTH-008', 400);
+      }
+
+      const result = await AppDataSource.transaction(async (manager) =>
+      {
+        const userRepo = manager.getRepository(User);
+
+        const exists = await userRepo.findOne({ where: { email: normalizedEmail } });
+        if (exists)
+        {
+          throw new AppError('AUTH-011', 409);
+        }
+
+        const hashed = await bcrypt.hash(userPayload.password, 10);
+        const user = userRepo.create({
+          fullName: userPayload.fullName,
+          email: normalizedEmail,
+          password: hashed,
+          phone: userPayload.phone,
+          address: userPayload.address,
+          termsAcceptedAt: new Date(),
+          lgpdAcceptedAt: new Date(),
+          userRole: 'MOTOBOY',
+        });
+        await userRepo.save(user);
+
+        return { user };
+      });
+
+      await this.sendVerificationEmail(result.user);
+      this.log.info('Register motoboy success', { userId: result.user.id });
+
+      const token = jwt.sign(
+        { sub: result.user.id, role: 'MOTOBOY' },
+        env.jwtSecret,
+        { expiresIn: '12h' }
+      );
+
+      return {
+        success: true,
+        user: { id: result.user.id },
+        store: null,
+        storeStatus: null,
+        subscriptionStatus: null,
+        trialExpiresAt: null,
+        payment: null,
+        token,
+        redirectUrl: `/verify-email`,
+      };
+    }
 
     const storePayload = input.store ?? {
       name: input.storeName,
@@ -141,11 +202,6 @@ export class AuthService
     if (!input.planId)
     {
       throw new AppError('AUTH-013', 400);
-    }
-
-    if (!input.termsAccepted || !input.lgpdAccepted)
-    {
-      throw new AppError('AUTH-012', 400);
     }
 
     if (!userPayload.document || !userPayload.documentType)
@@ -196,6 +252,7 @@ export class AuthService
         documentType: userPayload.documentType,
         termsAcceptedAt: new Date(),
         lgpdAcceptedAt: new Date(),
+        userRole: 'STORE_OWNER',
       });
       await userRepo.save(user);
 
@@ -304,6 +361,7 @@ export class AuthService
       email: user.email,
       phone: user.phone,
       address: user.address,
+      role: user.userRole || 'STORE_OWNER',
     };
 
     const sanitizedStore = firstStore

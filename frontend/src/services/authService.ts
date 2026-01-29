@@ -34,6 +34,10 @@ export const authService = {
         });
         return response;
     },
+    async registerMotoboy(payload: any) {
+        const response = await apiClient.post("/auth/register", payload);
+        return response;
+    },
     async resendVerification(email: string) {
         const response = await apiClient.post("/auth/resend-verification", {
             email,

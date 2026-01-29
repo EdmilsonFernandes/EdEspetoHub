@@ -168,6 +168,10 @@ export async function runMigrations() {
     ADD COLUMN IF NOT EXISTS lgpd_accepted_at TIMESTAMPTZ;
   `);
   await AppDataSource.query(`
+    ALTER TABLE IF EXISTS users
+    ADD COLUMN IF NOT EXISTS user_role TEXT NOT NULL DEFAULT 'STORE_OWNER';
+  `);
+  await AppDataSource.query(`
     CREATE TABLE IF NOT EXISTS email_verifications (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
       user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,

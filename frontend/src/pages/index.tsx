@@ -21,3 +21,4 @@ export { MotoboyAvailable } from './MotoboyAvailable';
 export { MotoboyCurrent } from './MotoboyCurrent';
 export { MotoboyHistory } from './MotoboyHistory';
 export { MotoboyLogin } from './MotoboyLogin';
+export { MotoboyRegister } from './MotoboyRegister';

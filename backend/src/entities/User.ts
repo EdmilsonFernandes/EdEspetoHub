@@ -58,6 +58,9 @@ export class User {
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 
+  @Column({ name: 'user_role', default: 'STORE_OWNER' })
+  userRole!: string;
+
   @OneToMany(() => Store, (store) => store.owner)
   stores!: Store[];
 }

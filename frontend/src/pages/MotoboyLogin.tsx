@@ -55,6 +55,13 @@ export function MotoboyLogin() {
           >
             Entrar
           </button>
+          <button
+            type="button"
+            onClick={() => navigate('/motoboy/register')}
+            className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700"
+          >
+            Criar conta de entregador
+          </button>
         </form>
       </div>
     </div>
