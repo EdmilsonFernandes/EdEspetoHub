@@ -3,6 +3,7 @@ import { motoboyService } from '../services/motoboyService';
 import { OrderCard } from '../components/Motoboy/OrderCard';
 import { useToast } from '../contexts/ToastContext';
 import { useNavigate } from 'react-router-dom';
+import { MotoboyHeader } from '../components/Motoboy/MotoboyHeader';
 
 export function MotoboyHistory() {
   const [orders, setOrders] = useState<any[]>([]);
@@ -58,10 +59,7 @@ export function MotoboyHistory() {
 
   return (
     <div className="min-h-screen bg-slate-50 px-4 py-6 space-y-4">
-      <div>
-        <h1 className="text-xl font-black text-slate-800">Histórico de entregas</h1>
-        <p className="text-sm text-slate-500">Pedidos finalizados recentemente.</p>
-      </div>
+      <MotoboyHeader title="Histórico de entregas" subtitle="Pedidos finalizados recentemente." />
       {blocked && (
         <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
           Seu cadastro está em análise. Aguarde aprovação para visualizar histórico.

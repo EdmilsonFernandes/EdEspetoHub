@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
 import { useToast } from '../contexts/ToastContext';
+import { MotoboyHeader } from '../components/Motoboy/MotoboyHeader';
 
 export function MotoboyRegister() {
   const navigate = useNavigate();
@@ -45,17 +46,9 @@ export function MotoboyRegister() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4 overflow-x-hidden">
-      <div className="w-full max-w-md bg-white rounded-2xl border border-slate-200 shadow-lg p-6 space-y-4 overflow-hidden">
-        <div className="flex flex-col items-center gap-3 text-center">
-          <div className="h-14 w-14 rounded-2xl bg-white ring-1 ring-red-200 shadow-[0_16px_30px_-20px_rgba(239,68,68,0.6)] overflow-hidden">
-            <img src="/logo.svg" alt="Chama no Espeto" className="h-full w-full object-cover" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-black text-slate-800">Cadastro de Entregador</h1>
-            <p className="text-sm text-slate-500">Crie sua conta e envie o pedido para as lojas.</p>
-          </div>
-        </div>
+    <div className="min-h-screen bg-slate-50 px-4 py-6 sm:py-10 space-y-6 overflow-x-hidden">
+      <MotoboyHeader title="Cadastro" subtitle="Crie sua conta e receba solicitações das lojas." />
+      <div className="w-full max-w-md mx-auto bg-white rounded-2xl border border-slate-200 shadow-lg p-6 space-y-4 overflow-hidden">
         <form onSubmit={handleSubmit} className="space-y-3">
           <input
             type="text"

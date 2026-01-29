@@ -5,6 +5,7 @@ import { OrderCard } from '../components/Motoboy/OrderCard';
 import { ConfirmPaymentModal } from '../components/Motoboy/ConfirmPaymentModal';
 import { useToast } from '../contexts/ToastContext';
 import { useNavigate } from 'react-router-dom';
+import { MotoboyHeader } from '../components/Motoboy/MotoboyHeader';
 
 export function MotoboyCurrent() {
   const [orders, setOrders] = useState<any[]>([]);
@@ -266,19 +267,19 @@ export function MotoboyCurrent() {
 
   return (
     <div className="min-h-screen bg-slate-50 px-4 py-6 space-y-4">
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-black text-slate-800">Entrega atual</h1>
-          <p className="text-sm text-slate-500">Acompanhe pedidos e documentos.</p>
-        </div>
-        <button
-          type="button"
-          onClick={() => navigate('/motoboy/available')}
-          className="px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600"
-        >
-          Voltar
-        </button>
-      </div>
+      <MotoboyHeader
+        title="Entrega atual"
+        subtitle="Acompanhe pedidos e documentos."
+        rightAction={
+          <button
+            type="button"
+            onClick={() => navigate('/motoboy/available')}
+            className="px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600"
+          >
+            Voltar
+          </button>
+        }
+      />
 
       {blocked && (
         <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
