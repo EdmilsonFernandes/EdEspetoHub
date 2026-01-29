@@ -184,7 +184,7 @@ export class MotoboyService {
   async listByStore(storeId: string, ownerId: string) {
     const store = await this.storeRepository.findByIdWithOwner(storeId);
     if (!store) throw new AppError('STORE-001', 404);
-    if (store.ownerId !== ownerId) throw new AppError('AUTH-003', 403);
+    if (store.owner?.id !== ownerId) throw new AppError('AUTH-003', 403);
 
     return this.motoboyStoreRepository.listByStoreId(storeId);
   }
@@ -223,7 +223,7 @@ export class MotoboyService {
   async listDocuments(storeId: string, motoboyId: string, ownerId: string) {
     const store = await this.storeRepository.findByIdWithOwner(storeId);
     if (!store) throw new AppError('STORE-001', 404);
-    if (store.ownerId !== ownerId) throw new AppError('AUTH-003', 403);
+    if (store.owner?.id !== ownerId) throw new AppError('AUTH-003', 403);
 
     const repo = AppDataSource.getRepository(MotoboyDocument);
     return repo.find({ where: { motoboyId }, order: { uploadedAt: 'DESC' } });
@@ -238,7 +238,7 @@ export class MotoboyService {
   async reviewDocument(storeId: string, motoboyId: string, documentId: string, ownerId: string, status: string) {
     const store = await this.storeRepository.findByIdWithOwner(storeId);
     if (!store) throw new AppError('STORE-001', 404);
-    if (store.ownerId !== ownerId) throw new AppError('AUTH-003', 403);
+    if (store.owner?.id !== ownerId) throw new AppError('AUTH-003', 403);
 
     const repo = AppDataSource.getRepository(MotoboyDocument);
     const document = await repo.findOne({ where: { id: documentId, motoboyId } });

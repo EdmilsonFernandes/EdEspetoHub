@@ -16,7 +16,6 @@ import { MotoboyService } from '../services/MotoboyService';
 import { MotoboyOrderService } from '../services/MotoboyOrderService';
 import { respondWithError } from '../errors/respondWithError';
 import { logger } from '../utils/logger';
-import { handleControllerError } from '../utils/handleControllerError';
 
 const motoboyService = new MotoboyService();
 const motoboyOrderService = new MotoboyOrderService();
@@ -73,7 +72,7 @@ export class MotoboyController {
         }))
       );
     } catch (error) {
-      return handleControllerError(error, res);
+      return respondWithError(req, res, error, 400);
     }
   }
 
@@ -89,7 +88,7 @@ export class MotoboyController {
       const result = await motoboyService.uploadDocument(motoboy, req.body);
       return res.status(201).json(result);
     } catch (error) {
-      return handleControllerError(error, res);
+      return respondWithError(req, res, error, 400);
     }
   }
 
@@ -104,7 +103,7 @@ export class MotoboyController {
       const documents = await motoboyService.listDocuments(req.params.storeId, req.params.motoboyId, req.auth?.sub || '');
       return res.json(documents);
     } catch (error) {
-      return handleControllerError(error, res);
+      return respondWithError(req, res, error, 400);
     }
   }
 
@@ -125,7 +124,7 @@ export class MotoboyController {
       );
       return res.json(document);
     } catch (error) {
-      return handleControllerError(error, res);
+      return respondWithError(req, res, error, 400);
     }
   }
 
@@ -146,7 +145,7 @@ export class MotoboyController {
       );
       return res.json(document);
     } catch (error) {
-      return handleControllerError(error, res);
+      return respondWithError(req, res, error, 400);
     }
   }
 

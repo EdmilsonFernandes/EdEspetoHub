@@ -23,22 +23,22 @@ import { User } from './User';
 @Entity('motoboy_documents')
 export class MotoboyDocument {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @Column({ name: 'motoboy_id' })
-  motoboyId: string;
+  motoboyId!: string;
 
   @Column({ name: 'doc_type' })
-  docType: string;
+  docType!: string;
 
   @Column({ name: 'file_key' })
-  fileKey: string;
+  fileKey!: string;
 
   @Column({ default: 'PENDING' })
-  status: string;
+  status!: string;
 
   @Column({ name: 'uploaded_at', type: 'timestamptz', default: () => 'NOW()' })
-  uploadedAt: Date;
+  uploadedAt!: Date;
 
   @Column({ name: 'reviewed_by_user_id', nullable: true })
   reviewedByUserId?: string | null;
@@ -48,7 +48,7 @@ export class MotoboyDocument {
 
   @ManyToOne(() => Motoboy, (motoboy) => motoboy.documents)
   @JoinColumn({ name: 'motoboy_id' })
-  motoboy: Motoboy;
+  motoboy!: Motoboy;
 
   @ManyToOne(() => User)
   @JoinColumn({ name: 'reviewed_by_user_id' })
