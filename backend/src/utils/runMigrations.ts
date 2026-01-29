@@ -172,6 +172,12 @@ export async function runMigrations() {
     ADD COLUMN IF NOT EXISTS user_role TEXT NOT NULL DEFAULT 'STORE_OWNER';
   `);
   await AppDataSource.query(`
+    UPDATE users
+    SET user_role = 'STORE_OWNER'
+    WHERE user_role IS NULL
+      AND id IN (SELECT owner_id FROM stores);
+  `);
+  await AppDataSource.query(`
     CREATE TABLE IF NOT EXISTS email_verifications (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
       user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,

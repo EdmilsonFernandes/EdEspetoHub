@@ -79,7 +79,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                 onClick={() => navigate('/admin')}
                 className="px-3 py-2 sm:px-4 text-sm rounded-full border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all"
               >
-                Admin
+                Admin loja
               </button>
               <button
                 onClick={toggleTheme}

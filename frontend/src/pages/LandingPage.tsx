@@ -400,6 +400,20 @@ export function LandingPage() {
               ✨ Ver telas reais
             </button>
           </div>
+          <div className="flex flex-wrap justify-center gap-3 text-xs sm:text-sm font-semibold text-slate-600">
+            <button
+              onClick={() => navigate('/admin')}
+              className="px-3 py-2 rounded-full border border-slate-200 bg-white/90 hover:text-red-600 hover:border-red-200 transition-colors"
+            >
+              Admin da loja
+            </button>
+            <button
+              onClick={() => navigate('/motoboy/register')}
+              className="px-3 py-2 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors"
+            >
+              Sou entregador
+            </button>
+          </div>
           {publicMetrics && (
             <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs sm:text-sm font-semibold text-slate-600">
               <span className="px-4 py-2 rounded-full bg-white border border-slate-200 shadow-sm">
