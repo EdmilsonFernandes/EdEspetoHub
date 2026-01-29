@@ -608,6 +608,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     return stored === 'true';
   });
   const [navPulse, setNavPulse] = useState<string | null>(null);
+  const [pendingMotoboyRequests, setPendingMotoboyRequests] = useState(0);
   const prevTabRef = useRef(activeTab);
   const mobileNavItems = [
     { id: 'resumo', label: 'Resumo', icon: ChartBar },
@@ -642,6 +643,20 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     deliveryRadiusKm: session?.store?.settings?.deliveryRadiusKm || '',
     deliveryFee: session?.store?.settings?.deliveryFee || '',
   }));
+
+  useEffect(() => {
+    if (!storeId) return;
+    const loadRequests = async () => {
+      try {
+        const data = await motoboyAdminService.listRequests(storeId);
+        const list = Array.isArray(data) ? data : [];
+        setPendingMotoboyRequests(list.filter((req) => req.status === 'PENDING').length);
+      } catch {
+        setPendingMotoboyRequests(0);
+      }
+    };
+    loadRequests();
+  }, [storeId]);
   const [savingBranding, setSavingBranding] = useState(false);
 
   const updateAuthStore = (updates) => {
@@ -958,6 +973,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             { id: 'fila', label: 'Fila de Produção', shortLabel: 'Fila', icon: ChefHat },
           ].map((tab) => {
             const Icon = tab.icon;
+            const isMotoboy = tab.id === 'motoboys';
             return (
               <button
                 key={tab.id}
@@ -977,7 +993,14 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                 }`}
                 style={activeTab === tab.id && navPulse === tab.id ? { animation: 'navPop 220ms ease' } : undefined}
               >
-                <Icon size={16} weight="duotone" />
+                <div className="relative">
+                  <Icon size={16} weight="duotone" />
+                  {isMotoboy && pendingMotoboyRequests > 0 && (
+                    <span className="absolute -top-2 -right-2 rounded-full bg-amber-500 text-white text-[9px] font-semibold px-1.5 py-0.5">
+                      {pendingMotoboyRequests}
+                    </span>
+                  )}
+                </div>
                 <span className="leading-tight text-center max-w-[90px] sm:max-w-none line-clamp-2">
                   {tab.label}
                 </span>
@@ -1076,6 +1099,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             {mobileNavItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
+              const isMotoboy = item.id === 'motoboys';
               return (
                 <button
                   key={item.id}
@@ -1092,7 +1116,14 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                   }`}
                   style={isActive && navPulse === item.id ? { animation: 'navPop 220ms ease' } : undefined}
                 >
-                <Icon size={16} weight={isActive ? 'fill' : 'duotone'} />
+                <div className="relative">
+                  <Icon size={16} weight={isActive ? 'fill' : 'duotone'} />
+                  {isMotoboy && pendingMotoboyRequests > 0 && (
+                    <span className="absolute -top-2 -right-2 rounded-full bg-amber-500 text-white text-[9px] font-semibold px-1.5 py-0.5">
+                      {pendingMotoboyRequests}
+                    </span>
+                  )}
+                </div>
                 <span className={`${isActive ? 'font-bold' : 'font-semibold'}`}>{item.label}</span>
               </button>
             );
