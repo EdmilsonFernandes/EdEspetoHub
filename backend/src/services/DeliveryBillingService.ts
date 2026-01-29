@@ -136,12 +136,12 @@ export class DeliveryBillingService {
 
     if (mpPayment) {
       const rawExpires =
-        'expiresAt' in mpPayment ? mpPayment.expiresAt || null : null;
+        'expiresAt' in mpPayment ? (mpPayment as any).expiresAt || null : null;
       const expiresAt =
         typeof rawExpires === 'string'
           ? new Date(rawExpires)
-          : rawExpires instanceof Date
-          ? rawExpires
+          : rawExpires && typeof rawExpires === 'object'
+          ? new Date(rawExpires as any)
           : null;
       cycle.provider = 'MERCADO_PAGO';
       cycle.providerId = mpPayment.providerId || null;
