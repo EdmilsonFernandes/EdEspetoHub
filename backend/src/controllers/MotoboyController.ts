@@ -16,6 +16,7 @@ import { MotoboyService } from '../services/MotoboyService';
 import { MotoboyOrderService } from '../services/MotoboyOrderService';
 import { respondWithError } from '../errors/respondWithError';
 import { logger } from '../utils/logger';
+import { handleControllerError } from '../utils/handleControllerError';
 
 const motoboyService = new MotoboyService();
 const motoboyOrderService = new MotoboyOrderService();
@@ -71,6 +72,79 @@ export class MotoboyController {
           createdAt: link.createdAt,
         }))
       );
+    } catch (error) {
+      return handleControllerError(error, res);
+    }
+  }
+
+  /**
+   * Uploads a motoboy document (selfie/CPF/CNH).
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-29
+   */
+  static async uploadDocument(req: Request, res: Response) {
+    try {
+      const motoboy = await motoboyService.getMotoboyByUserId(req.auth?.sub || '');
+      const result = await motoboyService.uploadDocument(motoboy, req.body);
+      return res.status(201).json(result);
+    } catch (error) {
+      return handleControllerError(error, res);
+    }
+  }
+
+  /**
+   * Lists documents for a motoboy.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-29
+   */
+  static async listDocuments(req: Request, res: Response) {
+    try {
+      const documents = await motoboyService.listDocuments(req.params.storeId, req.params.motoboyId, req.auth?.sub || '');
+      return res.json(documents);
+    } catch (error) {
+      return handleControllerError(error, res);
+    }
+  }
+
+  /**
+   * Approves a motoboy document.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-29
+   */
+  static async approveDocument(req: Request, res: Response) {
+    try {
+      const document = await motoboyService.reviewDocument(
+        req.params.storeId,
+        req.params.motoboyId,
+        req.params.documentId,
+        req.auth?.sub || '',
+        'APPROVED'
+      );
+      return res.json(document);
+    } catch (error) {
+      return handleControllerError(error, res);
+    }
+  }
+
+  /**
+   * Rejects a motoboy document.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-29
+   */
+  static async rejectDocument(req: Request, res: Response) {
+    try {
+      const document = await motoboyService.reviewDocument(
+        req.params.storeId,
+        req.params.motoboyId,
+        req.params.documentId,
+        req.auth?.sub || '',
+        'REJECTED'
+      );
+      return res.json(document);
     } catch (error) {
       return handleControllerError(error, res);
     }

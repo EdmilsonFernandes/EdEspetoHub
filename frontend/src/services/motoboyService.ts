@@ -18,4 +18,7 @@ export const motoboyService = {
   async finishOrder(orderId: string) {
     return apiClient.post(`/motoboy/orders/${orderId}/finish`, {});
   },
+  async uploadDocument(payload: { docType: string; fileBase64: string }) {
+    return apiClient.post('/motoboy/documents', payload);
+  },
 };

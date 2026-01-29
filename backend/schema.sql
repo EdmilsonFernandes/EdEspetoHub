@@ -234,6 +234,17 @@ CREATE TABLE IF NOT EXISTS order_deliveries (
   payment_confirmed_by_motoboy_id UUID REFERENCES motoboys(id) ON DELETE RESTRICT
 );
 
+CREATE TABLE IF NOT EXISTS motoboy_documents (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  motoboy_id UUID NOT NULL REFERENCES motoboys(id) ON DELETE CASCADE,
+  doc_type TEXT NOT NULL,
+  file_key TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'PENDING',
+  uploaded_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  reviewed_by_user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  reviewed_at TIMESTAMPTZ
+);
+
 CREATE TABLE IF NOT EXISTS subscriptions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,

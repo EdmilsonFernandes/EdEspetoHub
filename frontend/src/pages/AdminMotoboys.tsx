@@ -10,6 +10,8 @@ export function AdminMotoboys() {
   const [userId, setUserId] = useState('');
   const [motoboyId, setMotoboyId] = useState('');
   const [motoboys, setMotoboys] = useState<any[]>([]);
+  const [documentsByMotoboy, setDocumentsByMotoboy] = useState<Record<string, any[]>>({});
+  const [docsLoadingId, setDocsLoadingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const storeId = auth?.store?.id || '';
 
@@ -49,6 +51,37 @@ export function AdminMotoboys() {
       showToast(error?.message || 'Não foi possível carregar entregadores.', 'error');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadDocuments = async (motoboyIdToLoad: string) => {
+    if (!storeId || !motoboyIdToLoad) return;
+    setDocsLoadingId(motoboyIdToLoad);
+    try {
+      const data = await motoboyAdminService.listDocuments(storeId, motoboyIdToLoad);
+      setDocumentsByMotoboy((prev) => ({
+        ...prev,
+        [motoboyIdToLoad]: Array.isArray(data) ? data : [],
+      }));
+    } catch (error: any) {
+      showToast(error?.message || 'Não foi possível carregar documentos.', 'error');
+    } finally {
+      setDocsLoadingId(null);
+    }
+  };
+
+  const handleReviewDocument = async (motoboyIdToReview: string, documentId: string, status: 'approve' | 'reject') => {
+    if (!storeId) return;
+    try {
+      if (status === 'approve') {
+        await motoboyAdminService.approveDocument(storeId, motoboyIdToReview, documentId);
+      } else {
+        await motoboyAdminService.rejectDocument(storeId, motoboyIdToReview, documentId);
+      }
+      showToast('Documento atualizado.', 'success');
+      loadDocuments(motoboyIdToReview);
+    } catch (error: any) {
+      showToast(error?.message || 'Não foi possível atualizar o documento.', 'error');
     }
   };
 
@@ -171,6 +204,56 @@ export function AdminMotoboys() {
                   <span>ID: {link.motoboyId}</span>
                   <span>Vínculo: {link.active ? 'Ativo' : 'Inativo'}</span>
                 </div>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => loadDocuments(link.motoboyId)}
+                    className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600"
+                  >
+                    {docsLoadingId === link.motoboyId ? 'Carregando documentos...' : 'Ver documentos'}
+                  </button>
+                </div>
+                {Array.isArray(documentsByMotoboy[link.motoboyId]) && documentsByMotoboy[link.motoboyId].length > 0 && (
+                  <div className="mt-2 space-y-2">
+                    {documentsByMotoboy[link.motoboyId].map((doc: any) => (
+                      <div
+                        key={doc.id}
+                        className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-xs flex flex-col gap-2"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold text-slate-700">{doc.docType || 'DOC'}</span>
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-200 text-slate-700">
+                            {doc.status || 'PENDING'}
+                          </span>
+                        </div>
+                        <a
+                          href={doc.fileKey}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-brand-primary underline"
+                        >
+                          Ver arquivo
+                        </a>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleReviewDocument(link.motoboyId, doc.id, 'approve')}
+                            className="px-3 py-1.5 rounded-lg bg-emerald-500 text-white font-semibold"
+                          >
+                            Aprovar
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleReviewDocument(link.motoboyId, doc.id, 'reject')}
+                            className="px-3 py-1.5 rounded-lg bg-rose-500 text-white font-semibold"
+                          >
+                            Rejeitar
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
           </div>

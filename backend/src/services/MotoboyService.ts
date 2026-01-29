@@ -15,8 +15,11 @@ import { AppError } from '../errors/AppError';
 import { Motoboy } from '../entities/Motoboy';
 import { MotoboyRepository } from '../repositories/MotoboyRepository';
 import { MotoboyStoreRepository } from '../repositories/MotoboyStoreRepository';
+import { MotoboyDocument } from '../entities/MotoboyDocument';
+import { saveBase64Image } from '../utils/imageStorage';
 import { StoreRepository } from '../repositories/StoreRepository';
 import { UserRepository } from '../repositories/UserRepository';
+import { AppDataSource } from '../config/database';
 /**
  * Provides MotoboyService functionality.
  *
@@ -39,6 +42,18 @@ export class MotoboyService {
     const motoboy = await this.motoboyRepository.findByUserId(userId);
     if (!motoboy) throw new AppError('MOTO-001', 403);
     if (motoboy.status !== 'ACTIVE') throw new AppError('MOTO-002', 403);
+    return motoboy;
+  }
+
+  /**
+   * Gets motoboy profile by user id (any status).
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-29
+   */
+  async getMotoboyByUserId(userId: string) {
+    const motoboy = await this.motoboyRepository.findByUserId(userId);
+    if (!motoboy) throw new AppError('MOTO-001', 403);
     return motoboy;
   }
 
@@ -172,5 +187,67 @@ export class MotoboyService {
     if (store.ownerId !== ownerId) throw new AppError('AUTH-003', 403);
 
     return this.motoboyStoreRepository.listByStoreId(storeId);
+  }
+
+  /**
+   * Uploads a motoboy document.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-29
+   */
+  async uploadDocument(motoboy: Motoboy, input: { docType?: string; fileBase64?: string }) {
+    const docType = (input?.docType || '').toUpperCase();
+    if (!docType) throw new AppError('MOTO-020', 400);
+    if (!input?.fileBase64) throw new AppError('MOTO-021', 400);
+
+    const fileKey = await saveBase64Image(input.fileBase64, `motoboy-${motoboy.id}`, 'motoboys');
+    if (!fileKey) throw new AppError('MOTO-022', 400);
+
+    const repo = AppDataSource.getRepository(MotoboyDocument);
+    const document = repo.create({
+      motoboyId: motoboy.id,
+      docType,
+      fileKey,
+      status: 'PENDING',
+    });
+    await repo.save(document);
+    return document;
+  }
+
+  /**
+   * Lists documents for a motoboy.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-29
+   */
+  async listDocuments(storeId: string, motoboyId: string, ownerId: string) {
+    const store = await this.storeRepository.findByIdWithOwner(storeId);
+    if (!store) throw new AppError('STORE-001', 404);
+    if (store.ownerId !== ownerId) throw new AppError('AUTH-003', 403);
+
+    const repo = AppDataSource.getRepository(MotoboyDocument);
+    return repo.find({ where: { motoboyId }, order: { uploadedAt: 'DESC' } });
+  }
+
+  /**
+   * Reviews a motoboy document.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-29
+   */
+  async reviewDocument(storeId: string, motoboyId: string, documentId: string, ownerId: string, status: string) {
+    const store = await this.storeRepository.findByIdWithOwner(storeId);
+    if (!store) throw new AppError('STORE-001', 404);
+    if (store.ownerId !== ownerId) throw new AppError('AUTH-003', 403);
+
+    const repo = AppDataSource.getRepository(MotoboyDocument);
+    const document = await repo.findOne({ where: { id: documentId, motoboyId } });
+    if (!document) throw new AppError('MOTO-023', 404);
+
+    document.status = status;
+    document.reviewedAt = new Date();
+    document.reviewedByUserId = ownerId;
+    await repo.save(document);
+    return document;
   }
 }

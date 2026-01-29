@@ -101,6 +101,7 @@ routes.post('/motoboy/orders/:orderId/accept', requireAuth, MotoboyController.ac
 routes.post('/motoboy/orders/:orderId/confirm-payment', requireAuth, MotoboyController.confirmPayment);
 routes.post('/motoboy/orders/:orderId/delivered', requireAuth, MotoboyController.markDelivered);
 routes.post('/motoboy/orders/:orderId/finish', requireAuth, MotoboyController.finishOrder);
+routes.post('/motoboy/documents', requireAuth, MotoboyController.uploadDocument);
 
 // Store owner motoboy management
 routes.get('/stores/:storeId/motoboys', requireAuth, requireRole('ADMIN'), MotoboyController.listByStore);
@@ -109,5 +110,23 @@ routes.post('/stores/:storeId/motoboys/:motoboyId/link', requireAuth, requireRol
 routes.post('/stores/:storeId/motoboys/:motoboyId/unlink', requireAuth, requireRole('ADMIN'), MotoboyController.unlinkStore);
 routes.post('/stores/:storeId/motoboys/:motoboyId/approve', requireAuth, requireRole('ADMIN'), MotoboyController.approve);
 routes.post('/stores/:storeId/motoboys/:motoboyId/suspend', requireAuth, requireRole('ADMIN'), MotoboyController.suspend);
+routes.get(
+  '/stores/:storeId/motoboys/:motoboyId/documents',
+  requireAuth,
+  requireRole('ADMIN'),
+  MotoboyController.listDocuments
+);
+routes.post(
+  '/stores/:storeId/motoboys/:motoboyId/documents/:documentId/approve',
+  requireAuth,
+  requireRole('ADMIN'),
+  MotoboyController.approveDocument
+);
+routes.post(
+  '/stores/:storeId/motoboys/:motoboyId/documents/:documentId/reject',
+  requireAuth,
+  requireRole('ADMIN'),
+  MotoboyController.rejectDocument
+);
 
 export default routes;

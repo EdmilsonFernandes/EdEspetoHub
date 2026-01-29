@@ -17,10 +17,12 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { User } from './User';
+import { MotoboyDocument } from './MotoboyDocument';
 
 @Entity({ name: 'motoboys' })
 /**
@@ -62,4 +64,7 @@ export class Motoboy {
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
+
+  @OneToMany(() => MotoboyDocument, (doc) => doc.motoboy)
+  documents?: MotoboyDocument[];
 }
