@@ -526,7 +526,7 @@ export function SuperAdmin() {
           'success'
         );
       } else {
-        showToast('Loja marcada como Cliente VIP.', 'success');
+        showToast('Loja marcada como isenta de plano.', 'success');
       }
     } catch (error: any) {
       showToast(error?.message || 'Não foi possível atualizar o VIP.', 'error');

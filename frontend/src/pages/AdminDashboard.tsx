@@ -355,7 +355,7 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
   const [showAllHistory, setShowAllHistory] = useState(false);
   const plan = subscription?.plan;
   const planLabel = subscription?.planExempt
-    ? subscription?.planExemptLabel || 'Cliente VIP'
+    ? 'Isento de plano'
     : plan?.displayName || plan?.name || 'Plano não identificado';
   const priceValue = subscription?.latestPaymentAmount ?? plan?.price ?? 0;
   const methodMeta = getPaymentMethodMeta(subscription?.paymentMethod);

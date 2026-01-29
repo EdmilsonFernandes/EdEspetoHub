@@ -71,7 +71,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
         setPlanDetails({
           planName: subscription?.planExempt ? 'vip' : subscription?.plan?.name || '',
           displayName: subscription?.planExempt
-            ? subscription?.planExemptLabel || 'Cliente VIP'
+            ? 'Isento de plano'
             : subscription?.plan?.displayName || '',
           startDate: subscription?.startDate || null,
           endDate: subscription?.endDate || null,
@@ -206,7 +206,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
         {showDetails && (
           <div className="flex items-center gap-2 text-xs font-semibold bg-white/10 border border-white/20 rounded-full px-2 py-1.5 w-fit">
             <ShieldCheck size={14} weight="duotone" />
-            {planDetails?.planExempt ? 'Cliente VIP (isento de plano)' : 'Assinatura ativa'}
+            {planDetails?.planExempt ? 'Isento de plano' : 'Assinatura ativa'}
           </div>
         )}
         <div className="flex flex-wrap items-center gap-2">
