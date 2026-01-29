@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motoboyService } from '../services/motoboyService';
 import { OrderCard } from '../components/Motoboy/OrderCard';
 import { useToast } from '../contexts/ToastContext';
@@ -6,7 +7,9 @@ import { useToast } from '../contexts/ToastContext';
 export function MotoboyAvailable() {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [pendingCount, setPendingCount] = useState(0);
   const { showToast } = useToast();
+  const navigate = useNavigate();
 
   const loadOrders = async () => {
     setLoading(true);
@@ -22,6 +25,19 @@ export function MotoboyAvailable() {
 
   useEffect(() => {
     loadOrders();
+  }, []);
+
+  useEffect(() => {
+    const loadRequests = async () => {
+      try {
+        const data = await motoboyService.listStoreRequests();
+        const requests = Array.isArray(data) ? data : [];
+        setPendingCount(requests.filter((req) => req.status === 'PENDING').length);
+      } catch {
+        setPendingCount(0);
+      }
+    };
+    loadRequests();
   }, []);
 
   const handleAccept = async (orderId: string) => {
@@ -61,6 +77,15 @@ export function MotoboyAvailable() {
           Atualizar
         </button>
       </div>
+      {pendingCount > 0 && (
+        <button
+          type="button"
+          onClick={() => navigate('/motoboy/current')}
+          className="w-full rounded-xl border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-semibold text-amber-700"
+        >
+          {pendingCount} solicitação{pendingCount === 1 ? '' : 'es'} pendente{pendingCount === 1 ? '' : 's'} de vínculo
+        </button>
+      )}
 
       {loading ? (
         <div className="text-center text-sm text-slate-500">Carregando...</div>

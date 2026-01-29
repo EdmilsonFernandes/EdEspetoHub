@@ -15,6 +15,7 @@ export function AdminMotoboys() {
   const [docsLoadingId, setDocsLoadingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const storeId = auth?.store?.id || '';
+  const pendingRequests = requests.filter((request) => request.status === 'PENDING');
 
   const canSubmit = useMemo(() => Boolean(storeId) && (email || userId), [storeId, email, userId]);
 
@@ -201,6 +202,11 @@ export function AdminMotoboys() {
             <p className="text-sm font-semibold text-slate-700">Solicitações de vínculo</p>
             <p className="text-xs text-slate-500">Motoboys que pediram para entrar na sua loja.</p>
           </div>
+          {pendingRequests.length > 0 && (
+            <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700">
+              {pendingRequests.length} pendente{pendingRequests.length === 1 ? '' : 's'}
+            </span>
+          )}
           <button
             type="button"
             onClick={loadRequests}
@@ -209,11 +215,11 @@ export function AdminMotoboys() {
             Atualizar
           </button>
         </div>
-        {requests.filter((request) => request.status === 'PENDING').length === 0 ? (
+        {pendingRequests.length === 0 ? (
           <p className="text-sm text-slate-500">Nenhuma solicitação pendente.</p>
         ) : (
           <div className="grid gap-3">
-            {requests.filter((request) => request.status === 'PENDING').map((request) => (
+            {pendingRequests.map((request) => (
               <div key={request.id} className="rounded-xl border border-slate-100 p-3 flex flex-col gap-2">
                 <div className="flex items-center justify-between">
                   <div>

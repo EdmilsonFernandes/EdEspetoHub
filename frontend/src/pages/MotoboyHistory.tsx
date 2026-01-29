@@ -2,11 +2,14 @@ import { useEffect, useState } from 'react';
 import { motoboyService } from '../services/motoboyService';
 import { OrderCard } from '../components/Motoboy/OrderCard';
 import { useToast } from '../contexts/ToastContext';
+import { useNavigate } from 'react-router-dom';
 
 export function MotoboyHistory() {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [pendingCount, setPendingCount] = useState(0);
   const { showToast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const load = async () => {
@@ -24,6 +27,19 @@ export function MotoboyHistory() {
     load();
   }, [showToast]);
 
+  useEffect(() => {
+    const loadRequests = async () => {
+      try {
+        const data = await motoboyService.listStoreRequests();
+        const requests = Array.isArray(data) ? data : [];
+        setPendingCount(requests.filter((req) => req.status === 'PENDING').length);
+      } catch {
+        setPendingCount(0);
+      }
+    };
+    loadRequests();
+  }, []);
+
   const todayKey = new Date().toDateString();
   const totalToday = orders.reduce((acc, order) => {
     const createdAt = order.createdAt ? new Date(order.createdAt).toDateString() : '';
@@ -39,6 +55,15 @@ export function MotoboyHistory() {
         <h1 className="text-xl font-black text-slate-800">Histórico de entregas</h1>
         <p className="text-sm text-slate-500">Pedidos finalizados recentemente.</p>
       </div>
+      {pendingCount > 0 && (
+        <button
+          type="button"
+          onClick={() => navigate('/motoboy/current')}
+          className="w-full rounded-xl border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-semibold text-amber-700"
+        >
+          {pendingCount} solicitação{pendingCount === 1 ? '' : 'es'} pendente{pendingCount === 1 ? '' : 's'} de vínculo
+        </button>
+      )}
 
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="rounded-2xl border border-slate-200 bg-white p-4">
