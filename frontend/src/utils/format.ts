@@ -47,9 +47,13 @@ export const formatOrderStatus = (status?: string, type?: string) => {
   const map: Record<string, string> = {
     pending: 'Pendente',
     preparing: 'Preparando',
-    ready: normalizedType === 'delivery' ? 'Aguardando motoboy' : 'Aguardando retirada',
+    ready: normalizedType === 'delivery' ? 'Aguardando entregador' : 'Aguardando retirada',
+    waiting_for_motoboy: 'Aguardando entregador',
+    in_delivery: 'Em rota',
+    ready_for_delivery: 'Pronto para entrega',
     done: normalizedType === 'delivery' ? 'Saiu para entrega' : 'Finalizado',
     delivered: 'Entregue',
+    finished: 'Finalizado',
     cancelled: 'Cancelado',
   };
 

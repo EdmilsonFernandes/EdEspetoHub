@@ -14,7 +14,7 @@ export const defaultBranding = {
   logoUrl: '/logo.svg',
   primaryColor: '#b91c1c',
   accentColor: '#111827',
-  tagline: 'Crie seu site de pedidos de churrasco em minutos',
+  tagline: 'Crie seu site de pedidos online em minutos',
   instagram: '',
 };
 

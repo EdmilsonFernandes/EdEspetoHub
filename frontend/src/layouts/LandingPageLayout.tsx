@@ -96,7 +96,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
               <div className="flex items-center gap-3 mb-4">
                 <span className="text-xl font-black text-white">Chama no Espeto</span>
               </div>
-              <p className="text-sm text-gray-400">Plataforma completa para gestão de pedidos de churrasco online.</p>
+              <p className="text-sm text-gray-400">Plataforma completa para gestão de pedidos e entregas online.</p>
             </div>
             <div>
               <h3 className="font-bold text-white mb-3">Links Rápidos</h3>

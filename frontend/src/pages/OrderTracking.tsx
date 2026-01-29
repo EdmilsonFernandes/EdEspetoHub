@@ -107,8 +107,6 @@ export function OrderTracking() {
           const next = {
             ...parsed,
             status,
-            queuePosition: parsed.queuePosition ?? 1,
-            queueSize: parsed.queueSize ?? 4,
           };
           setOrder(next);
         } else {
@@ -188,14 +186,15 @@ export function OrderTracking() {
     resolveAssetUrl(order?.store?.settings?.logoUrl) || '/chama-no-espeto.jpeg';
   const statusLabel = useMemo(() => {
     if (isDelivery && (status === 'done' || status === 'delivered')) return 'Saiu para entrega';
-    if (isDelivery && status === 'ready') return 'Aguardando motoboy';
+    if (isDelivery && status === 'waiting_for_motoboy') return 'Aguardando entregador';
+    if (isDelivery && status === 'in_delivery') return 'Em rota';
+    if (isDelivery && status === 'ready_for_delivery') return 'Pronto para entrega';
+    if (isDelivery && status === 'ready') return 'Aguardando entregador';
     if (order?.type === 'table' && status === 'done') return 'Pronto para servir';
     if (order?.type === 'pickup' && status === 'ready') return 'Pronto para retirada';
     return statusLabels[status] || status;
   }, [isDelivery, order?.type, status]);
   const isReady = status === 'done' || status === 'delivered';
-  const queuePosition = order?.queuePosition;
-  const queueSize = order?.queueSize;
   const storePhone = order?.store?.phone;
   const customerPhone = order?.phone;
   const paymentValue = order?.paymentMethod || order?.payment;
@@ -221,12 +220,11 @@ export function OrderTracking() {
   const etaDetails = trackingV2?.eta || order?.eta || null;
   const etaTotalMinutes = etaDetails?.totalMinutes
     ? Number(etaDetails.totalMinutes)
-    : typeof queuePosition === 'number' && queuePosition > 0
-      ? Math.max(15, queuePosition * 15)
-      : null;
+    : null;
   const etaWindowMin = etaDetails?.windowMin ? Number(etaDetails.windowMin) : null;
   const etaWindowMax = etaDetails?.windowMax ? Number(etaDetails.windowMax) : null;
   const estimateMinutes = etaTotalMinutes;
+  const deliveryFeeValue = hasDeliveryFee ? Number(order?.deliveryFee || 0) : null;
   const estimatedReadyAt = useMemo(() => {
     if (!estimateMinutes || !order?.createdAt) return null;
     const base = new Date(order.createdAt).getTime();
@@ -406,7 +404,7 @@ export function OrderTracking() {
       return [
         { id: 'pending', label: 'Recebido' },
         { id: 'preparing', label: 'Em preparo' },
-        { id: 'ready', label: 'Aguardando motoboy' },
+        { id: 'ready', label: 'Aguardando entregador' },
         { id: 'done', label: 'Saiu para entrega' },
       ];
     }
@@ -859,14 +857,19 @@ export function OrderTracking() {
                     )}
                     {estimateMinutes && !isReady && (
                       <p>
-                        <span className="font-semibold">Previsão de entrega:</span> ~{estimateMinutes} min
+                        <span className="font-semibold">Previsão total:</span> ~{estimateMinutes} min
                       </p>
                     )}
-                    {etaWindowMin && etaWindowMax && !isReady && (
-                      <p>
-                        <span className="font-semibold">Janela prevista:</span> {etaWindowMin}–{etaWindowMax} min
-                      </p>
-                    )}
+                  {etaWindowMin && etaWindowMax && !isReady && (
+                    <p>
+                      <span className="font-semibold">Janela prevista:</span> {etaWindowMin}–{etaWindowMax} min
+                    </p>
+                  )}
+                  {deliveryFeeValue !== null && (
+                    <p>
+                      <span className="font-semibold">Frete:</span> {formatCurrency(deliveryFeeValue)}
+                    </p>
+                  )}
                   </div>
                   {isReady && (
                     <div className="rounded-xl border border-green-200 bg-green-50 p-3 text-sm text-green-700">

@@ -104,6 +104,12 @@ export function AdminOrders() {
     if (item?.passSkewer) labels.push('passar varinha');
     return labels.length ? `(${labels.join(' • ')})` : '';
   };
+  const formatPaymentStatus = (status) => {
+    const normalized = (status || '').toString().toUpperCase();
+    if (normalized === 'PAID') return 'Pago';
+    if (normalized === 'PENDING') return 'Pendente';
+    return normalized || 'Pendente';
+  };
   const shortId = (value) => formatOrderDisplayId(value, storeSlug);
 
   const clearFilters = () => {
@@ -323,22 +329,30 @@ export function AdminOrders() {
                         {(() => {
                           const paymentMeta = getPaymentMethodMeta(order.payment);
                           return (
-                            <p className="font-semibold text-slate-700 inline-flex items-center gap-2">
-                              {paymentMeta.icon && (
-                                <img
-                                  src={paymentMeta.icon}
-                                  alt={paymentMeta.label}
-                                  className="h-4 w-4 object-contain"
-                                />
-                              )}
-                              {paymentMeta.label}
-                            </p>
+                            <div className="flex flex-col gap-1">
+                              <p className="font-semibold text-slate-700 inline-flex items-center gap-2">
+                                {paymentMeta.icon && (
+                                  <img
+                                    src={paymentMeta.icon}
+                                    alt={paymentMeta.label}
+                                    className="h-4 w-4 object-contain"
+                                  />
+                                )}
+                                {paymentMeta.label}
+                              </p>
+                              <span className="text-xs text-slate-500">
+                                {formatPaymentStatus(order.paymentStatus)}
+                              </span>
+                            </div>
                           );
                         })()}
                       </div>
                       <div>
                         <p className="text-xs uppercase text-slate-400">Endereço</p>
                         <p className="font-semibold text-slate-700">{order.address || '-'}</p>
+                        {order.type === 'delivery' && order.deliveryFee !== null && order.deliveryFee !== undefined && (
+                          <p className="text-xs text-slate-500">Frete: {formatCurrency(order.deliveryFee)}</p>
+                        )}
                       </div>
                     </div>
 

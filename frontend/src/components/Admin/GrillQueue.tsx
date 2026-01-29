@@ -525,7 +525,7 @@ export const GrillQueue = () => {
       return { label: "Em preparo", className: "bg-amber-100 text-amber-700" };
     }
     if (status === "ready") {
-      const label = orderType === "delivery" ? "Aguardando motoboy" : "Aguardando retirada";
+      const label = orderType === "delivery" ? "Aguardando entregador" : "Aguardando retirada";
       return { label, className: "bg-sky-100 text-sky-700" };
     }
     return { label: "Aguardando", className: "bg-red-100 text-red-700" };
@@ -550,7 +550,7 @@ export const GrillQueue = () => {
         ? [
             { key: "pending", label: "Recebido" },
             { key: "preparing", label: "Em preparo" },
-            { key: "ready", label: "Aguardando motoboy" },
+            { key: "ready", label: "Aguardando entregador" },
             { key: "done", label: "Saiu para entrega" },
           ]
         : [
@@ -1000,7 +1000,7 @@ export const GrillQueue = () => {
                 {order.status === "preparing" && order.type === "delivery" && (
                   <div className="w-full sm:w-auto">
                     <div className="mb-2 text-[11px] font-semibold text-sky-700 bg-sky-50 border border-sky-100 rounded-lg px-2.5 py-1">
-                      Pedido pronto? Aguarde o motoboy.
+                      Pedido pronto? Aguarde o entregador.
                     </div>
                     <button
                       onClick={() => { pulseCta(order.id + '-ready'); handleAdvance(order.id, "ready"); }}
@@ -1008,7 +1008,7 @@ export const GrillQueue = () => {
                       style={ctaPulseId === order.id + '-ready' ? { animation: 'btnPop 220ms ease' } : undefined}
                       className="w-full sm:w-auto px-3 py-2 rounded-lg bg-sky-600 text-white text-xs font-bold flex items-center justify-center gap-1 disabled:opacity-60 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95"
                     >
-                      <CheckSquare size={16} weight="duotone" /> Aguardar motoboy
+                      <CheckSquare size={16} weight="duotone" /> Aguardar entregador
                     </button>
                   </div>
                 )}

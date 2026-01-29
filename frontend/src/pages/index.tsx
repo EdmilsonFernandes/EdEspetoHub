@@ -16,3 +16,8 @@ export { ResetPassword } from './ResetPassword';
 export { VerifyEmail } from './VerifyEmail';
 export { OrderTracking } from './OrderTracking';
 export { AddressDistance } from './AddressDistance';
+export { AdminMotoboys } from './AdminMotoboys';
+export { MotoboyAvailable } from './MotoboyAvailable';
+export { MotoboyCurrent } from './MotoboyCurrent';
+export { MotoboyHistory } from './MotoboyHistory';
+export { MotoboyLogin } from './MotoboyLogin';

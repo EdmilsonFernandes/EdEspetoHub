@@ -1,10 +1,11 @@
 // @ts-nocheck
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { LandingPage, CreateStore, AdminLogin, StorePage, OrdersQueue, AdminDashboard, AdminOrders, AdminQueue, AdminRenewal, AdminDemo, PaymentPage, SuperAdmin, ForgotPassword, ResetPassword, VerifyEmail, TermsOfUse, OrderTracking, AddressDistance } from './pages';
+import { LandingPage, CreateStore, AdminLogin, StorePage, OrdersQueue, AdminDashboard, AdminOrders, AdminQueue, AdminRenewal, AdminDemo, PaymentPage, SuperAdmin, ForgotPassword, ResetPassword, VerifyEmail, TermsOfUse, OrderTracking, AddressDistance, AdminMotoboys, MotoboyAvailable, MotoboyCurrent, MotoboyHistory, MotoboyLogin } from './pages';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { ToastProvider } from './contexts/ToastContext';
 import { AdminRoute } from './components/Admin/AdminRoute';
+import { MotoboyRoute } from './components/Motoboy/MotoboyRoute';
 import { AdminLayout } from './components/Admin/AdminLayout';
 import { AppErrorBoundary } from './components/common/AppErrorBoundary';
 import './index.css';
@@ -61,6 +62,18 @@ function App() {
               }
             />
             <Route
+              path="/admin/motoboys"
+              element={
+                <AppErrorBoundary>
+                  <AdminRoute>
+                    <AdminLayout>
+                      <AdminMotoboys />
+                    </AdminLayout>
+                  </AdminRoute>
+                </AppErrorBoundary>
+              }
+            />
+            <Route
               path="/admin/renewal"
               element={
                 <AppErrorBoundary>
@@ -87,6 +100,37 @@ function App() {
             <Route path="/payment/:paymentId" element={<PaymentPage />} />
             <Route path="/superadmin" element={<SuperAdmin />} />
             <Route path="/maps" element={<AddressDistance />} />
+            <Route path="/motoboy/login" element={<MotoboyLogin />} />
+            <Route
+              path="/motoboy/available"
+              element={
+                <AppErrorBoundary>
+                  <MotoboyRoute>
+                    <MotoboyAvailable />
+                  </MotoboyRoute>
+                </AppErrorBoundary>
+              }
+            />
+            <Route
+              path="/motoboy/current"
+              element={
+                <AppErrorBoundary>
+                  <MotoboyRoute>
+                    <MotoboyCurrent />
+                  </MotoboyRoute>
+                </AppErrorBoundary>
+              }
+            />
+            <Route
+              path="/motoboy/history"
+              element={
+                <AppErrorBoundary>
+                  <MotoboyRoute>
+                    <MotoboyHistory />
+                  </MotoboyRoute>
+                </AppErrorBoundary>
+              }
+            />
           </Routes>
         </Router>
       </ToastProvider>

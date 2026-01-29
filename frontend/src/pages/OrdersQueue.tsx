@@ -1,13 +1,14 @@
 // @ts-nocheck
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { ChefHat } from '@phosphor-icons/react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { ChefHat, Truck } from '@phosphor-icons/react';
 import { GrillQueue } from '../components/Admin/GrillQueue';
 import { getPersistedBranding, defaultBranding } from '../constants';
 import { applyBrandTheme } from '../utils/brandTheme';
 import { AdminHeader } from '../components/Admin/AdminHeader';
 
 export function OrdersQueue() {
+  const navigate = useNavigate();
   const { storeSlug } = useParams();
   const [user, setUser] = useState(null);
   const [branding, setBranding] = useState(() => getPersistedBranding(storeSlug || defaultBranding.espetoId));
@@ -39,7 +40,7 @@ export function OrdersQueue() {
               <ChefHat size={24} weight="duotone" />
             </div>
             <h3 className="text-xl font-bold text-gray-800">Acesso restrito</h3>
-            <p className="text-gray-600">Faça login para acessar a visão da produção.</p>
+            <p className="text-gray-600">Faça login para acessar a visão da operação.</p>
             <button
               onClick={() => navigate('/admin')}
               className="w-full py-3 text-white rounded-xl font-semibold hover:opacity-90 transition-all shadow-lg"
@@ -69,9 +70,9 @@ export function OrdersQueue() {
               className="w-10 h-10 rounded-xl flex items-center justify-center text-white"
               style={{ backgroundColor: branding.primaryColor }}
             >
-              <ChefHat size={20} weight="duotone" />
+              <Truck size={20} weight="duotone" />
             </div>
-            <h3 className="text-xl font-bold">Visão da Produção</h3>
+            <h3 className="text-xl font-bold">Visão da Operação</h3>
           </div>
           <GrillQueue />
         </div>

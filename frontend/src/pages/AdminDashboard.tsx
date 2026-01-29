@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { ChartBar, BookOpen, ChefHat, CreditCard, Package, Gear, ShoppingCart, CaretDown, CaretUp } from '@phosphor-icons/react';
+import { ChartBar, BookOpen, ChefHat, CreditCard, Package, Gear, ShoppingCart, CaretDown, CaretUp, Scooter } from '@phosphor-icons/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AdminLayout } from '../layouts/AdminLayout';
@@ -9,6 +9,7 @@ import { GrillQueue } from '../components/Admin/GrillQueue';
 import { OpeningHoursCard } from '../components/Admin/OpeningHoursCard';
 import { ProductManager } from '../components/Admin/ProductManager';
 import { OrderTypeSettingsCard } from '../components/Admin/OrderTypeSettingsCard';
+import { AdminMotoboys } from './AdminMotoboys';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useToast } from '../contexts/ToastContext';
@@ -593,7 +594,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   const [linkStats, setLinkStats] = useState<any>(null);
   const [subscriptionError, setSubscriptionError] = useState('');
   const [subscriptionLoading, setSubscriptionLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'resumo' | 'pedidos' | 'produtos' | 'config' | 'fila' | 'pagamentos'>(() => {
+  const [activeTab, setActiveTab] = useState<'resumo' | 'pedidos' | 'produtos' | 'config' | 'fila' | 'pagamentos' | 'motoboys'>(() => {
     return (location.state as any)?.activeTab || 'resumo';
   });
   const [menuVisible, setMenuVisible] = useState(() => {
@@ -614,6 +615,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     { id: 'produtos', label: 'Produtos', icon: Package },
     { id: 'pagamentos', label: 'Pag.', icon: CreditCard },
     { id: 'fila', label: 'Fila', icon: ChefHat },
+    { id: 'motoboys', label: 'Entrega', icon: Scooter },
     { id: 'config', label: 'Config', icon: Gear },
   ];
 
@@ -951,6 +953,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             { id: 'produtos', label: 'Produtos', shortLabel: 'Produtos', icon: Package },
             { id: 'pagamentos', label: 'Pagamentos', shortLabel: 'Pag.', icon: CreditCard },
             { id: 'cardapio', label: 'Cardápio', shortLabel: 'Cardápio', icon: BookOpen },
+            { id: 'motoboys', label: 'Entregadores', shortLabel: 'Entrega', icon: Scooter },
             { id: 'config', label: 'Configurações', shortLabel: 'Config', icon: Gear },
             { id: 'fila', label: 'Fila de Produção', shortLabel: 'Fila', icon: ChefHat },
           ].map((tab) => {
@@ -1054,13 +1057,19 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             <GrillQueue />
           </div>
         )}
+
+        {activeTab === 'motoboys' && (
+          <div className="rounded-2xl premium-card p-5">
+            <AdminMotoboys />
+          </div>
+        )}
       </div>
 
       {error && <p className="text-red-600 text-sm">{error}</p>}
       {!mobileNavCollapsed && (
         <div
-          className="sm:hidden fixed inset-x-0 bottom-0 z-40 border-t border-slate-800 bg-slate-900/95 text-white backdrop-blur rounded-t-2xl shadow-2xl"
-          style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 4px)', transform: 'translateZ(0)' }}
+          className="sm:hidden fixed inset-x-0 bottom-0 z-40 border-t border-slate-800 bg-slate-900 text-white backdrop-blur rounded-t-2xl shadow-2xl"
+          style={{ paddingBottom: 'env(safe-area-inset-bottom)', transform: 'translateZ(0)' }}
         >
           <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-slate-950/70 via-slate-900/40 to-transparent" />
           <div className="relative grid grid-cols-6 gap-1 px-3 pt-2 pb-2 max-w-lg mx-auto">
@@ -1118,7 +1127,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         <button
           type="button"
           onClick={() => navigate(`/${storeSlug}`)}
-          className="sm:hidden fixed bottom-20 right-4 z-50 rounded-full bg-brand-gradient text-white px-4 py-3 text-xs font-semibold shadow-[0_12px_30px_rgba(15,23,42,0.25)] active:scale-95"
+          className="sm:hidden fixed right-4 z-50 rounded-full bg-brand-gradient text-white px-4 py-3 text-xs font-semibold shadow-[0_12px_30px_rgba(15,23,42,0.25)] active:scale-95"
+          style={{ bottom: mobileNavCollapsed ? '64px' : '104px' }}
         >
           Cardápio
         </button>

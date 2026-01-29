@@ -19,6 +19,7 @@ const normalizeOrder = (order: any) => ({
   payment: order.payment ?? order.paymentMethod ?? order.payment_method,
   cashTendered: order.cashTendered ?? order.cash_tendered ?? null,
   deliveryFee: order.deliveryFee ?? order.delivery_fee ?? null,
+  paymentStatus: order.paymentStatus ?? order.payment_status ?? 'PENDING',
   type: order.type ?? order.order_type,
   items: (order.items || []).map((item: any) => {
     const quantity = item.qty ?? item.quantity ?? 0;
