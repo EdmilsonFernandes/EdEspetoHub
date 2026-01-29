@@ -167,7 +167,7 @@ export class AuthService
         return { user };
       });
 
-      await this.sendVerificationEmail(result.user);
+      await this.sendMotoboyVerificationEmail(result.user);
       this.log.info('Register motoboy success', { userId: result.user.id });
 
       const token = jwt.sign(
@@ -529,7 +529,11 @@ export class AuthService
       return { code: 'AUTH-S005' };
     }
 
-    await this.sendVerificationEmail(user);
+    if (user.userRole === 'MOTOBOY') {
+      await this.sendMotoboyVerificationEmail(user);
+    } else {
+      await this.sendVerificationEmail(user);
+    }
     return { code: 'AUTH-S002' };
   }
 
@@ -761,6 +765,45 @@ export class AuthService
 
     const link = `${env.appUrl}/verify-email?token=${encodeURIComponent(token)}`;
     await this.emailService.sendEmailVerification(user.email, link);
+  }
+
+  /**
+   * Sends motoboy verification email.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-29
+   */
+  private async sendMotoboyVerificationEmail(user: User) {
+    const token = jwt.sign(
+      {
+        sub: user.id,
+        type: 'email-verify',
+        jti: crypto.randomBytes(16).toString('hex'),
+      },
+      env.jwtSecret,
+      { expiresIn: '24h' }
+    );
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const verificationRepo = AppDataSource.getRepository(EmailVerification);
+
+    await verificationRepo
+      .createQueryBuilder()
+      .update()
+      .set({ usedAt: new Date() })
+      .where('user_id = :userId AND used_at IS NULL', { userId: user.id })
+      .execute();
+
+    await verificationRepo.save(
+      verificationRepo.create({
+        user,
+        tokenHash,
+        expiresAt,
+      })
+    );
+
+    const link = `${env.appUrl}/verify-email?token=${encodeURIComponent(token)}`;
+    await this.emailService.sendMotoboyVerification(user.email, link);
   }
 
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
 import { useAuth } from '../contexts/AuthContext';
@@ -9,7 +9,7 @@ export function MotoboyLogin() {
   const { setAuth } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = async (event: React.FormEvent) => {
+  const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     setError('');
     try {
@@ -23,11 +23,16 @@ export function MotoboyLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4 overflow-x-hidden">
       <div className="w-full max-w-md bg-white rounded-2xl border border-slate-200 shadow-lg p-6 space-y-4">
-        <div className="text-center">
-          <h1 className="text-2xl font-black text-slate-800">Área do Entregador</h1>
-          <p className="text-sm text-slate-500">Entre para acessar as entregas.</p>
+        <div className="flex flex-col items-center gap-3 text-center">
+          <div className="h-14 w-14 rounded-2xl bg-white ring-1 ring-red-200 shadow-[0_16px_30px_-20px_rgba(239,68,68,0.6)] overflow-hidden">
+            <img src="/logo.svg" alt="Chama no Espeto" className="h-full w-full object-cover" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-black text-slate-800">Área do Entregador</h1>
+            <p className="text-sm text-slate-500">Entre para acessar as entregas.</p>
+          </div>
         </div>
         {error && (
           <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">

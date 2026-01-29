@@ -307,6 +307,34 @@ export async function runMigrations() {
     );
   `);
   await AppDataSource.query(`
+    ALTER TABLE IF EXISTS motoboys
+    ADD COLUMN IF NOT EXISTS vehicle_type TEXT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS motoboys
+    ADD COLUMN IF NOT EXISTS vehicle_plate TEXT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS motoboys
+    ADD COLUMN IF NOT EXISTS vehicle_model TEXT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS motoboys
+    ADD COLUMN IF NOT EXISTS vehicle_color TEXT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS motoboys
+    ADD COLUMN IF NOT EXISTS city TEXT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS motoboys
+    ADD COLUMN IF NOT EXISTS state TEXT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS motoboys
+    ADD COLUMN IF NOT EXISTS address TEXT;
+  `);
+  await AppDataSource.query(`
     CREATE TABLE IF NOT EXISTS motoboy_stores (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
       motoboy_id UUID NOT NULL REFERENCES motoboys(id) ON DELETE CASCADE,

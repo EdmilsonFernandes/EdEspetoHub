@@ -8,6 +8,7 @@ export function MotoboyAvailable() {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [pendingCount, setPendingCount] = useState(0);
+  const [blocked, setBlocked] = useState(false);
   const { showToast } = useToast();
   const navigate = useNavigate();
 
@@ -16,8 +17,14 @@ export function MotoboyAvailable() {
     try {
       const data = await motoboyService.listAvailableOrders();
       setOrders(Array.isArray(data) ? data : []);
+      setBlocked(false);
     } catch (error: any) {
-      showToast(error?.message || 'Não foi possível carregar pedidos.', 'error');
+      if (error?.status === 403) {
+        setBlocked(true);
+        setOrders([]);
+      } else {
+        showToast(error?.message || 'Não foi possível carregar pedidos.', 'error');
+      }
     } finally {
       setLoading(false);
     }
@@ -77,6 +84,11 @@ export function MotoboyAvailable() {
           Atualizar
         </button>
       </div>
+      {blocked && (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+          Seu cadastro está em análise. Envie os documentos obrigatórios e aguarde a aprovação.
+        </div>
+      )}
       {pendingCount > 0 && (
         <button
           type="button"

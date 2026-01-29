@@ -138,6 +138,40 @@ export class EmailService {
   }
 
   /**
+   * Sends motoboy verification email.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-29
+   */
+  async sendMotoboyVerification(email: string, link: string) {
+    const loginUrl = `${env.appUrl}/motoboy/login`;
+    const subject = 'Confirme seu e-mail de entregador - Chama no Espeto';
+    const text = [
+      'Confirme seu e-mail para ativar sua conta de entregador.',
+      `Link de confirmação: ${link}`,
+      `Depois, acesse: ${loginUrl}`,
+    ].join('\n');
+    const logoUrl = this.getLogoUrl();
+    const html = `
+      <div style="font-family: Arial, sans-serif; background: #f8fafc; padding: 24px;">
+        <div style="max-width: 560px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 18px; overflow: hidden;">
+          <div style="padding: 24px; background: linear-gradient(135deg, #0f172a 0%, #ef4444 70%, #f97316 100%);">
+            <img src="${logoUrl}" alt="Chama no Espeto" style="width: 96px; height: 96px; border-radius: 16px; border: 2px solid rgba(255,255,255,0.5);" />
+            <p style="margin: 12px 0 0; color: #ffffff; font-size: 18px; font-weight: 700;">Ative seu cadastro de entregador</p>
+            <p style="margin: 4px 0 0; color: rgba(255,255,255,0.9); font-size: 13px;">Confirme seu e-mail para receber solicitações das lojas</p>
+          </div>
+          <div style="padding: 24px;">
+            <p style="margin: 0 0 16px; color: #475569;">Clique no botão para confirmar seu e-mail e concluir o cadastro.</p>
+            <a href="${link}" style="display: inline-block; padding: 12px 18px; background: #dc2626; color: #ffffff; text-decoration: none; border-radius: 10px; font-weight: 700;">Confirmar e-mail</a>
+            <p style="margin: 16px 0 0; color: #64748b; font-size: 12px;">Depois de confirmar, acesse: ${loginUrl}</p>
+          </div>
+        </div>
+      </div>
+    `;
+    await this.send({ to: email, subject, text, html });
+  }
+
+  /**
    * Sends activation email.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
 import { useToast } from '../contexts/ToastContext';
@@ -16,7 +16,7 @@ export function MotoboyRegister() {
   });
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (event: React.FormEvent) => {
+  const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     if (!form.termsAccepted || !form.lgpdAccepted) {
       showToast('Aceite os termos e LGPD para continuar.', 'error');

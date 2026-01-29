@@ -90,6 +90,40 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
               </button>
             </div>
           </div>
+          <div className="sm:hidden pb-3">
+            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+              <button
+                onClick={() => navigate('/create')}
+                className="px-3 py-2 text-xs rounded-full bg-brand-gradient text-white font-semibold whitespace-nowrap"
+              >
+                Criar loja
+              </button>
+              <button
+                onClick={() => navigate('/admin')}
+                className="px-3 py-2 text-xs rounded-full border border-slate-200 text-slate-600 whitespace-nowrap"
+              >
+                Admin loja
+              </button>
+              <button
+                onClick={() => navigate('/motoboy/login')}
+                className="px-3 py-2 text-xs rounded-full border border-emerald-200 text-emerald-700 whitespace-nowrap"
+              >
+                Entregador
+              </button>
+              <button
+                onClick={() => navigate('/portfolio')}
+                className="px-3 py-2 text-xs rounded-full text-slate-600 border border-slate-200 whitespace-nowrap"
+              >
+                Portfólio
+              </button>
+              <a
+                href="/#guia-usuario"
+                className="px-3 py-2 text-xs rounded-full text-slate-600 border border-slate-200 whitespace-nowrap"
+              >
+                Guia
+              </a>
+            </div>
+          </div>
         </div>
       </header>
 

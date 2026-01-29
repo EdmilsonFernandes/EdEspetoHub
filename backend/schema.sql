@@ -214,6 +214,13 @@ CREATE TABLE IF NOT EXISTS motoboys (
   created_by_user_id UUID REFERENCES users(id),
   approved_by_user_id UUID REFERENCES users(id),
   approved_at TIMESTAMPTZ,
+  vehicle_type TEXT,
+  vehicle_plate TEXT,
+  vehicle_model TEXT,
+  vehicle_color TEXT,
+  city TEXT,
+  state TEXT,
+  address TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 

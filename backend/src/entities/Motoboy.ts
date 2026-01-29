@@ -62,6 +62,27 @@ export class Motoboy {
   @Column({ name: 'approved_at', type: 'timestamptz', nullable: true })
   approvedAt?: Date | null;
 
+  @Column({ name: 'vehicle_type', nullable: true })
+  vehicleType?: string | null;
+
+  @Column({ name: 'vehicle_plate', nullable: true })
+  vehiclePlate?: string | null;
+
+  @Column({ name: 'vehicle_model', nullable: true })
+  vehicleModel?: string | null;
+
+  @Column({ name: 'vehicle_color', nullable: true })
+  vehicleColor?: string | null;
+
+  @Column({ name: 'city', nullable: true })
+  city?: string | null;
+
+  @Column({ name: 'state', nullable: true })
+  state?: string | null;
+
+  @Column({ name: 'address', nullable: true })
+  address?: string | null;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 

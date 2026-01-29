@@ -156,6 +156,53 @@ export class MotoboyController {
   }
 
   /**
+   * Lists documents for motoboy itself.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-29
+   */
+  static async listOwnDocuments(req: Request, res: Response) {
+    try {
+      const motoboy = await motoboyService.getMotoboyByUserId(req.auth?.sub || '');
+      const documents = await motoboyService.listOwnDocuments(motoboy);
+      return res.json(documents);
+    } catch (error) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  /**
+   * Gets motoboy profile.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-29
+   */
+  static async getProfile(req: Request, res: Response) {
+    try {
+      const motoboy = await motoboyService.getMotoboyByUserId(req.auth?.sub || '');
+      return res.json(motoboy);
+    } catch (error) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  /**
+   * Updates motoboy profile.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-29
+   */
+  static async updateProfile(req: Request, res: Response) {
+    try {
+      const motoboy = await motoboyService.getMotoboyByUserId(req.auth?.sub || '');
+      const updated = await motoboyService.updateProfile(motoboy, req.body || {});
+      return res.json(updated);
+    } catch (error) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  /**
    * Lists documents for a motoboy.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)

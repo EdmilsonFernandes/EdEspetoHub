@@ -219,6 +219,10 @@ Motoboy:
 - `POST /motoboy/orders/:orderId/confirm-payment`
 - `POST /motoboy/orders/:orderId/delivered`
 - `POST /motoboy/orders/:orderId/finish`
+- `GET /motoboy/profile`
+- `PUT /motoboy/profile`
+- `GET /motoboy/documents`
+- `POST /motoboy/documents`
 
 Responsavel (dono da loja):
 - `POST /stores/:storeId/motoboys`
@@ -629,6 +633,7 @@ Com a API em execução, a loja fica acessível em:
 - Admin pedidos: `http://localhost:3000/admin/orders`
 - Fila do churrasqueiro: `http://localhost:3000/admin/queue`
 - Admin entregadores: `http://localhost:3000/admin/motoboys`
+- Motoboy cadastro: `http://localhost:3000/motoboy/register`
 - Motoboy login: `http://localhost:3000/motoboy/login`
 - Motoboy pedidos disponíveis: `http://localhost:3000/motoboy/available`
 - Motoboy entrega atual: `http://localhost:3000/motoboy/current`
@@ -668,6 +673,7 @@ Rotas úteis no front (Docker):
 - Admin pedidos: `http://localhost:8080/admin/orders`
 - Fila de produção: `http://localhost:8080/admin/queue`
 - Admin entregadores: `http://localhost:8080/admin/motoboys`
+- Motoboy cadastro: `http://localhost:8080/motoboy/register`
 - Motoboy login: `http://localhost:8080/motoboy/login`
 - Motoboy pedidos disponíveis: `http://localhost:8080/motoboy/available`
 - Motoboy entrega atual: `http://localhost:8080/motoboy/current`

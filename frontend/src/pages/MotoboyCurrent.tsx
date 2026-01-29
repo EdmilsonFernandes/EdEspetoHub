@@ -4,24 +4,45 @@ import { storeService } from '../services/storeService';
 import { OrderCard } from '../components/Motoboy/OrderCard';
 import { ConfirmPaymentModal } from '../components/Motoboy/ConfirmPaymentModal';
 import { useToast } from '../contexts/ToastContext';
+import { useNavigate } from 'react-router-dom';
 
 export function MotoboyCurrent() {
   const [orders, setOrders] = useState<any[]>([]);
   const [selected, setSelected] = useState<any | null>(null);
   const [showPayment, setShowPayment] = useState(false);
-  const [docType, setDocType] = useState('CNH');
-  const [docFile, setDocFile] = useState<File | null>(null);
+  const [docFiles, setDocFiles] = useState<Record<string, File | null>>({});
+  const [documents, setDocuments] = useState<any[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [blocked, setBlocked] = useState(false);
+  const [profile, setProfile] = useState<any | null>(null);
+  const [profileDraft, setProfileDraft] = useState<any>({
+    vehicleType: '',
+    vehiclePlate: '',
+    vehicleModel: '',
+    vehicleColor: '',
+    city: '',
+    state: '',
+    address: '',
+  });
+  const [savingProfile, setSavingProfile] = useState(false);
   const [stores, setStores] = useState<any[]>([]);
   const [requests, setRequests] = useState<any[]>([]);
   const [selectedStores, setSelectedStores] = useState<string[]>([]);
   const [requesting, setRequesting] = useState(false);
   const { showToast } = useToast();
+  const navigate = useNavigate();
+
+  const documentTypes = [
+    { key: 'CNH', label: 'CNH', help: 'Foto frente e verso em um único arquivo.' },
+    { key: 'SELFIE', label: 'Selfie segurando a CNH', help: 'Foto clara do rosto com o documento.' },
+    { key: 'CRLV', label: 'Documento do veículo (CRLV)', help: 'Opcional para moto ou carro.' },
+  ];
 
   const load = async () => {
     try {
       const data = await motoboyService.listAvailableOrders();
       const parsed = Array.isArray(data) ? data : [];
+      setBlocked(false);
       const stored = (() => {
         try {
           const raw = localStorage.getItem('motoboy:currentOrder');
@@ -35,7 +56,12 @@ export function MotoboyCurrent() {
       }
       setOrders(parsed);
     } catch (error: any) {
-      showToast(error?.message || 'Não foi possível carregar pedidos.', 'error');
+      if (error?.status === 403) {
+        setBlocked(true);
+        setOrders([]);
+      } else {
+        showToast(error?.message || 'Não foi possível carregar pedidos.', 'error');
+      }
     }
   };
 
@@ -47,8 +73,7 @@ export function MotoboyCurrent() {
     const loadStores = async () => {
       try {
         const data = await storeService.listPortfolio();
-        const list = Array.isArray(data) ? data.filter((store) => store.open) : [];
-        setStores(list);
+        setStores(Array.isArray(data) ? data : []);
       } catch (error: any) {
         showToast(error?.message || 'Não foi possível carregar lojas.', 'error');
       }
@@ -67,6 +92,50 @@ export function MotoboyCurrent() {
     };
     loadRequests();
   }, []);
+
+  useEffect(() => {
+    const loadDocuments = async () => {
+      try {
+        const data = await motoboyService.listDocuments();
+        setDocuments(Array.isArray(data) ? data : []);
+      } catch (error: any) {
+        // ignore
+      }
+    };
+    loadDocuments();
+  }, []);
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const data = await motoboyService.getProfile();
+        setProfile(data || null);
+        setProfileDraft({
+          vehicleType: data?.vehicleType || '',
+          vehiclePlate: data?.vehiclePlate || '',
+          vehicleModel: data?.vehicleModel || '',
+          vehicleColor: data?.vehicleColor || '',
+          city: data?.city || '',
+          state: data?.state || '',
+          address: data?.address || '',
+        });
+      } catch {
+        // ignore
+      }
+    };
+    loadProfile();
+  }, []);
+
+  const documentsByType = useMemo(() => {
+    const map = new Map<string, any>();
+    documents.forEach((doc) => {
+      const key = (doc.docType || '').toUpperCase();
+      if (!map.has(key)) {
+        map.set(key, doc);
+      }
+    });
+    return map;
+  }, [documents]);
 
   const activeOrder = useMemo(() => {
     return (
@@ -110,8 +179,9 @@ export function MotoboyCurrent() {
     }
   };
 
-  const handleUploadDocument = async () => {
-    if (!docFile) {
+  const handleUploadDocument = async (docType: string) => {
+    const file = docFiles[docType];
+    if (!file) {
       showToast('Selecione um arquivo para enviar.', 'error');
       return;
     }
@@ -121,11 +191,13 @@ export function MotoboyCurrent() {
       const fileBase64: string = await new Promise((resolve, reject) => {
         reader.onerror = () => reject(new Error('Falha ao ler arquivo.'));
         reader.onload = () => resolve(String(reader.result || ''));
-        reader.readAsDataURL(docFile);
+        reader.readAsDataURL(file);
       });
       await motoboyService.uploadDocument({ docType, fileBase64 });
-      showToast('Documento enviado. Aguarde aprovação.', 'success');
-      setDocFile(null);
+      showToast(`${docType} enviado. Aguarde aprovação.`, 'success');
+      setDocFiles((prev) => ({ ...prev, [docType]: null }));
+      const data = await motoboyService.listDocuments();
+      setDocuments(Array.isArray(data) ? data : []);
     } catch (error: any) {
       showToast(error?.message || 'Não foi possível enviar o documento.', 'error');
     } finally {
@@ -159,44 +231,167 @@ export function MotoboyCurrent() {
     }
   };
 
+  const handleSaveProfile = async () => {
+    setSavingProfile(true);
+    try {
+      const updated = await motoboyService.updateProfile({
+        vehicleType: profileDraft.vehicleType || null,
+        vehiclePlate: profileDraft.vehiclePlate || null,
+        vehicleModel: profileDraft.vehicleModel || null,
+        vehicleColor: profileDraft.vehicleColor || null,
+        city: profileDraft.city || null,
+        state: profileDraft.state || null,
+        address: profileDraft.address || null,
+      });
+      setProfile(updated || null);
+      showToast('Perfil atualizado.', 'success');
+    } catch (error: any) {
+      showToast(error?.message || 'Não foi possível salvar o perfil.', 'error');
+    } finally {
+      setSavingProfile(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 px-4 py-6 space-y-4">
-      <div>
-        <h1 className="text-xl font-black text-slate-800">Entrega atual</h1>
-        <p className="text-sm text-slate-500">Acompanhe o pedido em rota.</p>
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-black text-slate-800">Entrega atual</h1>
+          <p className="text-sm text-slate-500">Acompanhe pedidos e documentos.</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => navigate('/motoboy/available')}
+          className="px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600"
+        >
+          Voltar
+        </button>
       </div>
+
+      {blocked && (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+          Seu cadastro está em análise. Envie os documentos obrigatórios e aguarde a aprovação da loja.
+        </div>
+      )}
 
       <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-3">
         <div>
           <p className="text-sm font-semibold text-slate-700">Enviar documentos</p>
-          <p className="text-xs text-slate-500">Envie CNH e selfie para liberar seu acesso.</p>
+          <p className="text-xs text-slate-500">Envie CNH, selfie e documento do veículo para aprovação.</p>
         </div>
-        <div className="grid gap-2">
-          <select
-            value={docType}
-            onChange={(event) => setDocType(event.target.value)}
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-          >
-            <option value="CNH">CNH</option>
-            <option value="SELFIE">SELFIE</option>
-            <option value="CRLV">Documento da moto (CRLV)</option>
-            <option value="OTHER">Outro</option>
-          </select>
+        <div className="grid gap-3">
+          {documentTypes.map((doc) => {
+            const current = documentsByType.get(doc.key);
+            return (
+              <div key={doc.key} className="rounded-xl border border-slate-100 p-3 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-slate-800">{doc.label}</p>
+                    <p className="text-xs text-slate-500">{doc.help}</p>
+                  </div>
+                  {current && (
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                        current.status === 'APPROVED'
+                          ? 'bg-emerald-100 text-emerald-700'
+                          : current.status === 'REJECTED'
+                          ? 'bg-rose-100 text-rose-700'
+                          : 'bg-amber-100 text-amber-700'
+                      }`}
+                    >
+                      {current.status === 'APPROVED'
+                        ? 'Aprovado'
+                        : current.status === 'REJECTED'
+                        ? 'Recusado'
+                        : 'Pendente'}
+                    </span>
+                  )}
+                </div>
+                {current?.uploadedAt && (
+                  <p className="text-[11px] text-slate-500">
+                    Enviado em {new Date(current.uploadedAt).toLocaleString('pt-BR')}
+                  </p>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(event) => setDocFiles((prev) => ({ ...prev, [doc.key]: event.target.files?.[0] || null }))}
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleUploadDocument(doc.key)}
+                  disabled={uploading}
+                  className="w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+                >
+                  {uploading ? 'Enviando...' : 'Enviar documento'}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-3">
+        <div>
+          <p className="text-sm font-semibold text-slate-700">Perfil do entregador</p>
+          <p className="text-xs text-slate-500">Dados básicos do veículo e da região atendida.</p>
+        </div>
+        <div className="grid gap-2 sm:grid-cols-2">
           <input
-            type="file"
-            accept="image/*"
-            onChange={(event) => setDocFile(event.target.files?.[0] || null)}
+            value={profileDraft.vehicleType}
+            onChange={(event) => setProfileDraft((prev: any) => ({ ...prev, vehicleType: event.target.value }))}
+            placeholder="Tipo de veículo (moto, bike...)"
             className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
           />
-          <button
-            type="button"
-            onClick={handleUploadDocument}
-            disabled={uploading}
-            className="w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
-          >
-            {uploading ? 'Enviando...' : 'Enviar documento'}
-          </button>
+          <input
+            value={profileDraft.vehiclePlate}
+            onChange={(event) => setProfileDraft((prev: any) => ({ ...prev, vehiclePlate: event.target.value }))}
+            placeholder="Placa"
+            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+          />
+          <input
+            value={profileDraft.vehicleModel}
+            onChange={(event) => setProfileDraft((prev: any) => ({ ...prev, vehicleModel: event.target.value }))}
+            placeholder="Modelo"
+            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+          />
+          <input
+            value={profileDraft.vehicleColor}
+            onChange={(event) => setProfileDraft((prev: any) => ({ ...prev, vehicleColor: event.target.value }))}
+            placeholder="Cor"
+            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+          />
+          <input
+            value={profileDraft.city}
+            onChange={(event) => setProfileDraft((prev: any) => ({ ...prev, city: event.target.value }))}
+            placeholder="Cidade"
+            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+          />
+          <input
+            value={profileDraft.state}
+            onChange={(event) => setProfileDraft((prev: any) => ({ ...prev, state: event.target.value }))}
+            placeholder="UF"
+            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+          />
+          <input
+            value={profileDraft.address}
+            onChange={(event) => setProfileDraft((prev: any) => ({ ...prev, address: event.target.value }))}
+            placeholder="Endereço"
+            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm sm:col-span-2"
+          />
         </div>
+        <button
+          type="button"
+          onClick={handleSaveProfile}
+          disabled={savingProfile}
+          className="w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+        >
+          {savingProfile ? 'Salvando...' : 'Salvar perfil'}
+        </button>
+        {profile?.status && (
+          <p className="text-[11px] text-slate-500">Status do cadastro: {profile.status}</p>
+        )}
       </div>
 
       <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-3">
@@ -252,7 +447,12 @@ export function MotoboyCurrent() {
                       : 'border-slate-200 bg-white text-slate-700'
                   }`}
                 >
-                  <span>{store.name}</span>
+                  <div className="flex flex-col items-start">
+                    <span>{store.name}</span>
+                    <span className="text-[10px] font-medium text-slate-500">
+                      {store.open ? 'Ativa agora' : 'Loja fechada'}
+                    </span>
+                  </div>
                   {approved ? 'Aprovado' : alreadyRequested ? 'Pendente' : isSelected ? 'Selecionado' : 'Selecionar'}
                 </button>
               );

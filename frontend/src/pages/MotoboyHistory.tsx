@@ -8,6 +8,7 @@ export function MotoboyHistory() {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
+  const [blocked, setBlocked] = useState(false);
   const { showToast } = useToast();
   const navigate = useNavigate();
 
@@ -17,8 +18,14 @@ export function MotoboyHistory() {
         setLoading(true);
         const data = await motoboyService.listHistory(30);
         setOrders(Array.isArray(data) ? data : []);
+        setBlocked(false);
       } catch (error: any) {
-        showToast(error?.message || 'Não foi possível carregar histórico.', 'error');
+        if (error?.status === 403) {
+          setBlocked(true);
+          setOrders([]);
+        } else {
+          showToast(error?.message || 'Não foi possível carregar histórico.', 'error');
+        }
       } finally {
         setLoading(false);
       }
@@ -55,6 +62,11 @@ export function MotoboyHistory() {
         <h1 className="text-xl font-black text-slate-800">Histórico de entregas</h1>
         <p className="text-sm text-slate-500">Pedidos finalizados recentemente.</p>
       </div>
+      {blocked && (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+          Seu cadastro está em análise. Aguarde aprovação para visualizar histórico.
+        </div>
+      )}
       {pendingCount > 0 && (
         <button
           type="button"

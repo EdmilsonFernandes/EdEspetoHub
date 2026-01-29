@@ -105,6 +105,34 @@ export class MotoboyService {
   }
 
   /**
+   * Updates motoboy profile data.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-29
+   */
+  async updateProfile(
+    motoboy: Motoboy,
+    input: {
+      vehicleType?: string | null;
+      vehiclePlate?: string | null;
+      vehicleModel?: string | null;
+      vehicleColor?: string | null;
+      city?: string | null;
+      state?: string | null;
+      address?: string | null;
+    }
+  ) {
+    motoboy.vehicleType = input.vehicleType ?? motoboy.vehicleType ?? null;
+    motoboy.vehiclePlate = input.vehiclePlate ?? motoboy.vehiclePlate ?? null;
+    motoboy.vehicleModel = input.vehicleModel ?? motoboy.vehicleModel ?? null;
+    motoboy.vehicleColor = input.vehicleColor ?? motoboy.vehicleColor ?? null;
+    motoboy.city = input.city ?? motoboy.city ?? null;
+    motoboy.state = input.state ?? motoboy.state ?? null;
+    motoboy.address = input.address ?? motoboy.address ?? null;
+    return this.motoboyRepository.save(motoboy);
+  }
+
+  /**
    * Gets or creates motoboy profile for a user.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
@@ -357,6 +385,17 @@ export class MotoboyService {
 
     const repo = AppDataSource.getRepository(MotoboyDocument);
     return repo.find({ where: { motoboyId }, order: { uploadedAt: 'DESC' } });
+  }
+
+  /**
+   * Lists documents for motoboy itself.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-29
+   */
+  async listOwnDocuments(motoboy: Motoboy) {
+    const repo = AppDataSource.getRepository(MotoboyDocument);
+    return repo.find({ where: { motoboyId: motoboy.id }, order: { uploadedAt: 'DESC' } });
   }
 
   /**

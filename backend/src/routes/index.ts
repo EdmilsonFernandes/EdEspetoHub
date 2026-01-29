@@ -104,6 +104,9 @@ routes.post('/motoboy/orders/:orderId/confirm-payment', requireAuth, MotoboyCont
 routes.post('/motoboy/orders/:orderId/delivered', requireAuth, MotoboyController.markDelivered);
 routes.post('/motoboy/orders/:orderId/finish', requireAuth, MotoboyController.finishOrder);
 routes.post('/motoboy/documents', requireAuth, MotoboyController.uploadDocument);
+routes.get('/motoboy/documents', requireAuth, MotoboyController.listOwnDocuments);
+routes.get('/motoboy/profile', requireAuth, MotoboyController.getProfile);
+routes.put('/motoboy/profile', requireAuth, MotoboyController.updateProfile);
 routes.get('/motoboy/store-requests', requireAuth, MotoboyController.listStoreRequests);
 routes.post('/motoboy/store-requests', requireAuth, MotoboyController.createStoreRequest);
 

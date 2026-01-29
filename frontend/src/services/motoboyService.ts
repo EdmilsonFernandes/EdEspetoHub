@@ -24,6 +24,23 @@ export const motoboyService = {
   async uploadDocument(payload: { docType: string; fileBase64: string }) {
     return apiClient.post('/motoboy/documents', payload);
   },
+  async listDocuments() {
+    return apiClient.get('/motoboy/documents');
+  },
+  async getProfile() {
+    return apiClient.get('/motoboy/profile');
+  },
+  async updateProfile(payload: {
+    vehicleType?: string | null;
+    vehiclePlate?: string | null;
+    vehicleModel?: string | null;
+    vehicleColor?: string | null;
+    city?: string | null;
+    state?: string | null;
+    address?: string | null;
+  }) {
+    return apiClient.put('/motoboy/profile', payload);
+  },
   async listStoreRequests() {
     return apiClient.get('/motoboy/store-requests');
   },
