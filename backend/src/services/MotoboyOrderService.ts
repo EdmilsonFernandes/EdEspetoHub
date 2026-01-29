@@ -19,6 +19,7 @@ import { Motoboy } from '../entities/Motoboy';
 import { OrderRepository } from '../repositories/OrderRepository';
 import { OrderDeliveryRepository } from '../repositories/OrderDeliveryRepository';
 import { MotoboyStoreRepository } from '../repositories/MotoboyStoreRepository';
+import { DeliveryBillingService } from './DeliveryBillingService';
 /**
  * Provides MotoboyOrderService functionality.
  *
@@ -29,6 +30,7 @@ export class MotoboyOrderService {
   private orderRepository = new OrderRepository();
   private orderDeliveryRepository = new OrderDeliveryRepository();
   private motoboyStoreRepository = new MotoboyStoreRepository();
+  private deliveryBillingService = new DeliveryBillingService();
 
   private isDeliveryOrder(order: Order) {
     return order.type === 'delivery';
@@ -185,12 +187,13 @@ export class MotoboyOrderService {
     }
 
     order.status = 'delivered';
-    await this.orderRepository.save(order);
+    const saved = await this.orderRepository.save(order);
 
     delivery.deliveredAt = new Date();
     await this.orderDeliveryRepository.save(delivery);
 
-    return order;
+    await this.deliveryBillingService.recordDelivery(saved);
+    return saved;
   }
 
   /**
@@ -211,7 +214,8 @@ export class MotoboyOrderService {
     }
 
     order.status = 'finished';
-    await this.orderRepository.save(order);
-    return order;
+    const saved = await this.orderRepository.save(order);
+    await this.deliveryBillingService.recordDelivery(saved);
+    return saved;
   }
 }

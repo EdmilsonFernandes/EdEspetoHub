@@ -25,6 +25,7 @@ import { PaymentEventRepository } from '../repositories/PaymentEventRepository';
 import { EmailService } from './EmailService';
 import { logger } from '../utils/logger';
 import { AppError } from '../errors/AppError';
+import { DeliveryBillingService } from './DeliveryBillingService';
 /**
  * Provides PaymentService functionality.
  *
@@ -35,6 +36,7 @@ export class PaymentService {
   private mercadoPago = new MercadoPagoService();
   private paymentEventRepository = new PaymentEventRepository();
   private emailService = new EmailService();
+  private deliveryBillingService = new DeliveryBillingService();
   private log = logger.child({ scope: 'PaymentService' });
   /**
    * Handles normalize qr code.
@@ -313,6 +315,15 @@ export class PaymentService {
   private async applyMercadoPagoStatus(mpPayment: any) {
     if (mpPayment.external_reference) {
       const paymentId = String(mpPayment.external_reference);
+      if (paymentId.startsWith('delivery_cycle:')) {
+        const cycleId = paymentId.replace('delivery_cycle:', '');
+        if (mpPayment.status === 'approved') {
+          await this.deliveryBillingService.markPaidFromWebhook(cycleId, mpPayment);
+        } else {
+          await this.deliveryBillingService.markFailedFromWebhook(cycleId, mpPayment);
+        }
+        return { status: mpPayment.status };
+      }
       await this.paymentEventRepository.save(
         this.paymentEventRepository.create({
           payment: { id: paymentId } as any,

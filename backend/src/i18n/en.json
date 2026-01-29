@@ -13,6 +13,7 @@
   "AUTH-010": "CPF/CNPJ already registered.",
   "AUTH-011": "Email already registered.",
   "AUTH-015": "This email is already linked to a store. Use another email for the delivery account.",
+  "BILL-001": "Delivery fees pending. Please pay to continue.",
   "AUTH-012": "Accept the terms and privacy policy.",
   "AUTH-013": "Select a plan to continue.",
   "AUTH-014": "Invalid payment method.",

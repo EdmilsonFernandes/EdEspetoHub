@@ -18,9 +18,11 @@ import { SubscriptionService } from '../services/SubscriptionService';
 import { AppError } from '../errors/AppError';
 import { respondWithError } from '../errors/respondWithError';
 import { StoreRepository } from '../repositories/StoreRepository';
+import { DeliveryBillingService } from '../services/DeliveryBillingService';
 
 const subscriptionService = new SubscriptionService();
 const storeRepository = new StoreRepository();
+const deliveryBillingService = new DeliveryBillingService();
 
 const GRACE_HOURS = 24;
 const GRACE_MS = GRACE_HOURS * 60 * 60 * 1000;
@@ -93,6 +95,19 @@ export const requireActiveSubscription = async (
     const store = storeId
       ? await storeRepository.findById(storeId)
       : await storeRepository.findBySlug(slug!);
+
+    const storeIdentifier = store?.id || storeId;
+    if (storeIdentifier) {
+      const blockedByDelivery = await deliveryBillingService.isStoreBlocked(storeIdentifier);
+      if (blockedByDelivery) {
+        return respondWithError(
+          req,
+          res,
+          new AppError('BILL-001', 403),
+          403
+        );
+      }
+    }
 
     if (store?.settings?.planExempt)
     {

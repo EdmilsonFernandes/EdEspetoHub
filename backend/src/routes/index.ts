@@ -22,6 +22,7 @@ import { PlatformAdminController } from '../controllers/PlatformAdminController'
 import { PlatformPublicController } from '../controllers/PlatformPublicController';
 import { PaymentController } from '../controllers/PaymentController';
 import { MotoboyController } from '../controllers/MotoboyController';
+import { DeliveryBillingController } from '../controllers/DeliveryBillingController';
 
 import { requireAuth, requireRole } from '../middleware/authGuard';
 import { requireActiveSubscription } from '../middleware/subscriptionGuard';
@@ -126,6 +127,10 @@ routes.post(
   requireRole('ADMIN'),
   MotoboyController.rejectStoreRequest
 );
+
+// Delivery billing (motoboy fees)
+routes.get('/stores/:storeId/delivery-billing', requireAuth, requireRole('ADMIN'), DeliveryBillingController.getCurrent);
+routes.post('/stores/:storeId/delivery-billing/pay', requireAuth, requireRole('ADMIN'), DeliveryBillingController.pay);
 routes.get(
   '/stores/:storeId/motoboys/:motoboyId/documents',
   requireAuth,

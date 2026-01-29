@@ -19,6 +19,7 @@ import { ProductRepository } from '../repositories/ProductRepository';
 import { StoreRepository } from '../repositories/StoreRepository';
 import { AppDataSource } from '../config/database';
 import { AppError } from '../errors/AppError';
+import { DeliveryBillingService } from './DeliveryBillingService';
 /**
  * Provides OrderService functionality.
  *
@@ -30,6 +31,7 @@ export class OrderService
   private orderRepository = new OrderRepository();
   private storeRepository = new StoreRepository();
   private productRepository = new ProductRepository();
+  private deliveryBillingService = new DeliveryBillingService();
 
   /**
    * Resolves the price used for an item.
@@ -199,7 +201,11 @@ export class OrderService
     }
 
     order.status = status;
-    return this.orderRepository.save(order);
+    const saved = await this.orderRepository.save(order);
+    if (order.type === 'delivery' && [ 'delivered', 'finished' ].includes(status)) {
+      await this.deliveryBillingService.recordDelivery(saved);
+    }
+    return saved;
   }
 
 

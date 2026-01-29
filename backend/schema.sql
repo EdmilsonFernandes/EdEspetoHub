@@ -270,6 +270,50 @@ CREATE TABLE IF NOT EXISTS motoboy_audit_logs (
 CREATE INDEX IF NOT EXISTS idx_motoboy_audit_logs_store_id ON motoboy_audit_logs(store_id);
 CREATE INDEX IF NOT EXISTS idx_motoboy_audit_logs_motoboy_id ON motoboy_audit_logs(motoboy_id);
 
+CREATE TABLE IF NOT EXISTS delivery_billing_cycles (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+  status TEXT NOT NULL DEFAULT 'OPEN',
+  start_date TIMESTAMPTZ NOT NULL,
+  end_date TIMESTAMPTZ NOT NULL,
+  delivery_count INT NOT NULL DEFAULT 0,
+  subtotal NUMERIC(10,2) NOT NULL DEFAULT 0,
+  penalty_amount NUMERIC(10,2) NOT NULL DEFAULT 0,
+  total_due NUMERIC(10,2) NOT NULL DEFAULT 0,
+  fee_rate NUMERIC(6,4) NOT NULL DEFAULT 0.03,
+  min_fee NUMERIC(10,2) NOT NULL DEFAULT 0.50,
+  cycle_days INT NOT NULL DEFAULT 30,
+  penalty_daily_rate NUMERIC(6,4) NOT NULL DEFAULT 0.04,
+  penalty_cap_rate NUMERIC(6,4) NOT NULL DEFAULT 1.0,
+  payment_method TEXT NOT NULL DEFAULT 'PIX',
+  payment_status TEXT NOT NULL DEFAULT 'PENDING',
+  provider TEXT,
+  provider_id TEXT,
+  payment_link TEXT,
+  qr_code_base64 TEXT,
+  qr_code_text TEXT,
+  expires_at TIMESTAMPTZ,
+  closed_at TIMESTAMPTZ,
+  paid_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_delivery_billing_cycles_store ON delivery_billing_cycles(store_id);
+CREATE INDEX IF NOT EXISTS idx_delivery_billing_cycles_status ON delivery_billing_cycles(status);
+
+CREATE TABLE IF NOT EXISTS delivery_billing_charges (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  cycle_id UUID NOT NULL REFERENCES delivery_billing_cycles(id) ON DELETE CASCADE,
+  order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+  delivery_fee NUMERIC(10,2) NOT NULL DEFAULT 0,
+  charge_amount NUMERIC(10,2) NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE(order_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_delivery_billing_charges_cycle ON delivery_billing_charges(cycle_id);
+
 CREATE TABLE IF NOT EXISTS subscriptions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
