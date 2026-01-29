@@ -219,7 +219,13 @@ export function MotoboyCurrent() {
       const data = await motoboyService.listDocuments();
       setDocuments(Array.isArray(data) ? data : []);
     } catch (error: any) {
-      showToast(error?.message || 'Não foi possível enviar o documento.', 'error');
+      if (error?.code === 'AUTH-003') {
+        showToast('Conta sem permissão para enviar documentos.', 'error');
+      } else if (error?.code === 'MOTO-001') {
+        showToast('Conta não está registrada como entregador.', 'error');
+      } else {
+        showToast(error?.message || 'Não foi possível enviar o documento.', 'error');
+      }
     } finally {
       setUploading(false);
     }
@@ -386,41 +392,6 @@ export function MotoboyCurrent() {
           })}
         </div>
       </div>
-
-      {documents.length > 0 && (
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-3">
-          <div>
-            <p className="text-sm font-semibold text-slate-700">Seus documentos enviados</p>
-            <p className="text-xs text-slate-500">Confira o que já foi enviado e o status de aprovação.</p>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {documents.map((doc) => (
-              <div key={doc.id} className="rounded-xl border border-slate-100 p-3 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-slate-600">{doc.docType}</span>
-                  <span
-                    className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
-                      doc.status === 'APPROVED'
-                        ? 'bg-emerald-100 text-emerald-700'
-                        : doc.status === 'REJECTED'
-                        ? 'bg-rose-100 text-rose-700'
-                        : 'bg-amber-100 text-amber-700'
-                    }`}
-                  >
-                    {doc.status === 'APPROVED' ? 'Aprovado' : doc.status === 'REJECTED' ? 'Recusado' : 'Pendente'}
-                  </span>
-                </div>
-                <div className="rounded-lg overflow-hidden border border-slate-200 bg-slate-50">
-                  <img src={doc.fileKey} alt={doc.docType} className="w-full h-32 object-cover" />
-                </div>
-                <a href={doc.fileKey} target="_blank" rel="noreferrer" className="text-xs text-brand-primary underline">
-                  Ver em tela cheia
-                </a>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-3">
         <div>
