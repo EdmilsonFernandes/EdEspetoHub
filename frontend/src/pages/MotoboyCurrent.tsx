@@ -251,7 +251,12 @@ export function MotoboyCurrent() {
       const data = await motoboyService.listStoreRequests();
       setRequests(Array.isArray(data) ? data : []);
     } catch (error: any) {
-      showToast(error?.message || 'Não foi possível enviar solicitação.', 'error');
+      if (error?.code === 'AUTH-003') {
+        showToast('Faça login como entregador para solicitar vínculo.', 'error');
+        navigate('/motoboy/login');
+      } else {
+        showToast(error?.message || 'Não foi possível enviar solicitação.', 'error');
+      }
     } finally {
       setRequesting(false);
     }
@@ -502,6 +507,8 @@ export function MotoboyCurrent() {
               const isSelected = selectedStores.includes(store.id);
               const alreadyRequested = requests.some((req) => req.storeId === store.id && req.status === 'PENDING');
               const approved = requests.some((req) => req.storeId === store.id && req.status === 'APPROVED');
+              const statusLabel =
+                store.open === true ? 'Ativa agora' : store.open === false ? 'Loja fechada' : 'Status indisponível';
               return (
                 <button
                   type="button"
@@ -521,7 +528,7 @@ export function MotoboyCurrent() {
                   <div className="flex flex-col items-start">
                     <span>{store.name}</span>
                     <span className="text-[10px] font-medium text-slate-500">
-                      {store.open ? 'Ativa agora' : 'Loja fechada'}
+                      {statusLabel}
                     </span>
                   </div>
                   {approved ? 'Aprovado' : alreadyRequested ? 'Pendente' : isSelected ? 'Selecionado' : 'Selecionar'}

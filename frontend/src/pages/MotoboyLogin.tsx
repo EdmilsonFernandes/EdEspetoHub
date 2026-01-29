@@ -15,6 +15,11 @@ export function MotoboyLogin() {
     setError('');
     try {
       const session = await authService.login(form.email, form.password);
+      const role = String(session?.user?.role || '').toUpperCase();
+      if (role !== 'MOTOBOY') {
+        setError('Esta conta não é de entregador.');
+        return;
+      }
       const sessionData = { token: session.token, user: session.user, store: session.store };
       setAuth(sessionData);
       navigate('/motoboy/current');

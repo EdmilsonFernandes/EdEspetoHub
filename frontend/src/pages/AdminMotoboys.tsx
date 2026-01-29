@@ -84,6 +84,17 @@ export function AdminMotoboys() {
     }
   };
 
+  const handleUnlink = async (motoboyIdToUnlink: string) => {
+    if (!storeId) return;
+    try {
+      await motoboyAdminService.unlink(storeId, motoboyIdToUnlink);
+      showToast('Vínculo removido.', 'success');
+      loadMotoboys();
+    } catch (error: any) {
+      showToast(error?.message || 'Não foi possível remover o vínculo.', 'error');
+    }
+  };
+
   useEffect(() => {
     loadMotoboys();
     loadRequests();
@@ -206,6 +217,13 @@ export function AdminMotoboys() {
                     className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600"
                   >
                     {docsLoadingId === link.motoboyId ? 'Carregando documentos...' : 'Ver documentos'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleUnlink(link.motoboyId)}
+                    className="px-3 py-1.5 rounded-lg border border-rose-200 text-xs font-semibold text-rose-600"
+                  >
+                    Remover vínculo
                   </button>
                 </div>
                 {Array.isArray(documentsByMotoboy[link.motoboyId]) && documentsByMotoboy[link.motoboyId].length > 0 && (
