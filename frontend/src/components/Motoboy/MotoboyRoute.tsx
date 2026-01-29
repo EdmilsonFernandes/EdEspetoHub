@@ -6,14 +6,26 @@ import { motoboyService } from '../../services/motoboyService';
 export function MotoboyRoute({ children }: { children: React.ReactNode }) {
   const { auth, hydrated } = useAuth();
   const [allowed, setAllowed] = useState<boolean | null>(null);
+  const motoboySession = (() => {
+    try {
+      const raw = localStorage.getItem('motoboySession');
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  })();
+  const motoboyToken = motoboySession?.token;
+  const motoboyRole = String(motoboySession?.user?.role || '').toUpperCase();
 
   useEffect(() => {
     if (!hydrated) return;
-    if (!auth?.token) {
+    const token = motoboyToken || auth?.token;
+    const role = motoboyToken ? motoboyRole : String(auth?.user?.role || '').toUpperCase();
+    if (!token) {
       setAllowed(false);
       return;
     }
-    if (String(auth?.user?.role || '').toUpperCase() !== 'MOTOBOY') {
+    if (role !== 'MOTOBOY') {
       setAllowed(false);
       return;
     }
@@ -32,7 +44,7 @@ export function MotoboyRoute({ children }: { children: React.ReactNode }) {
     };
 
     check();
-  }, [auth?.token, hydrated]);
+  }, [auth?.token, hydrated, motoboyToken, motoboyRole]);
 
   if (!hydrated) {
     return (

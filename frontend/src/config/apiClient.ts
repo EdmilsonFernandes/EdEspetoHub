@@ -16,7 +16,7 @@ const getLang = (): string => {
 };
 
 // 🔐 recupera token do adminSession
-const getToken = (): string | null =>
+const getAdminToken = (): string | null =>
 {
   try
   {
@@ -26,6 +26,17 @@ const getToken = (): string | null =>
     return parsed?.token ?? null;
   } catch
   {
+    return null;
+  }
+};
+
+const getMotoboyToken = (): string | null => {
+  try {
+    const raw = localStorage.getItem('motoboySession');
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed?.token ?? null;
+  } catch {
     return null;
   }
 };
@@ -61,7 +72,8 @@ const handleResponse = async (response: Response) =>
 const request = async (path: string, options: any = {}) =>
 {
   const url = buildUrl(path);
-  const token = getToken();
+  const isMotoboyRoute = normalizedPath.startsWith('/motoboy');
+  const token = isMotoboyRoute ? getMotoboyToken() : getAdminToken();
 
   const finalOptions: any = {
     ...options,
@@ -86,7 +98,8 @@ const request = async (path: string, options: any = {}) =>
 const rawRequest = async (path: string, options: any = {}) =>
 {
   const url = buildUrl(path);
-  const token = getToken();
+  const isMotoboyRoute = normalizedPath.startsWith('/motoboy');
+  const token = isMotoboyRoute ? getMotoboyToken() : getAdminToken();
 
   const finalOptions: any = {
     ...options,

@@ -21,6 +21,7 @@ export function MotoboyLogin() {
         return;
       }
       const sessionData = { token: session.token, user: session.user, store: session.store };
+      localStorage.setItem('motoboySession', JSON.stringify(sessionData));
       setAuth(sessionData);
       navigate('/motoboy/current');
     } catch (err: any) {
