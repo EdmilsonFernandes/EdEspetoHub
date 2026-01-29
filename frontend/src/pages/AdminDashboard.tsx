@@ -1069,7 +1069,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       {!mobileNavCollapsed && (
         <div
           className="sm:hidden fixed inset-x-0 bottom-0 z-40 border-t border-slate-800 bg-slate-900 text-white backdrop-blur rounded-t-2xl shadow-2xl"
-          style={{ paddingBottom: 'env(safe-area-inset-bottom)', transform: 'translateZ(0)' }}
+          style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 6px)', transform: 'translateZ(0)' }}
         >
           <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-slate-950/70 via-slate-900/40 to-transparent" />
           <div className="relative grid grid-cols-6 gap-1 px-3 pt-2 pb-2 max-w-lg mx-auto">
@@ -1111,12 +1111,12 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       {mobileNavCollapsed && (
         <div
           className="sm:hidden fixed inset-x-0 bottom-0 z-40 flex items-center justify-center"
-          style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+          style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 6px)' }}
         >
           <button
             type="button"
             onClick={() => setMobileNavCollapsed(false)}
-            className="rounded-full bg-slate-900 text-white border border-slate-700 px-4 py-2 text-xs font-semibold shadow-lg inline-flex items-center gap-2 mb-2"
+            className="rounded-full bg-slate-900 text-white border border-slate-700 px-4 py-2 text-xs font-semibold shadow-lg inline-flex items-center gap-2"
           >
             <CaretUp size={14} weight="bold" />
             Menu

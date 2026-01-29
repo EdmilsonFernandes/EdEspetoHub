@@ -79,9 +79,21 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
   return (
 
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-      <div className="p-4 sm:p-6 border-b bg-gradient-to-r from-white via-white to-red-50/60">
-        <h3 className="text-lg font-bold text-gray-800 mb-1">Identidade visual</h3>
-        <p className="text-sm text-gray-500">Defina a presença digital da sua marca com elegância.</p>
+      <div className="p-4 sm:p-6 border-b bg-gradient-to-r from-white via-white to-red-50/60 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h3 className="text-lg font-bold text-gray-800 mb-1">Identidade visual</h3>
+          <p className="text-sm text-gray-500">Defina a presença digital da sua marca com elegância.</p>
+        </div>
+        {onSave && (
+          <button
+            type="button"
+            onClick={onSave}
+            disabled={saving}
+            className="w-full sm:w-auto px-4 py-2 rounded-lg bg-brand-primary text-white text-xs font-semibold hover:opacity-90 transition-all disabled:opacity-60"
+          >
+            {saving ? "Salvando..." : "Salvar identidade"}
+          </button>
+        )}
       </div>
 
       <div className="p-4 sm:p-6 space-y-6">

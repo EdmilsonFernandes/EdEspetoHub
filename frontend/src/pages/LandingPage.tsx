@@ -457,7 +457,7 @@ export function LandingPage() {
             <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Para quem é</p>
             <h3 className="text-xl font-black text-gray-900 mt-3">Feito para quem vende rápido</h3>
             <p className="text-sm text-gray-600 mt-2">
-              Espetos, porções, bebidas e combos. Ideal para operações com fluxo alto.
+              Espetos, porções, bebidas, combos e adegas. Ideal para operações com fluxo alto.
             </p>
             <div className="mt-5 grid grid-cols-2 gap-3 text-sm font-semibold text-slate-700">
               {audienceItems.map((item) => (
