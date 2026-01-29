@@ -4,6 +4,9 @@ export const motoboyService = {
   async listAvailableOrders() {
     return apiClient.get('/motoboy/orders/available');
   },
+  async listHistory(days = 7) {
+    return apiClient.get(`/motoboy/orders/history?days=${days}`);
+  },
   async acceptOrder(orderId: string) {
     return apiClient.post(`/motoboy/orders/${orderId}/accept`, {});
   },

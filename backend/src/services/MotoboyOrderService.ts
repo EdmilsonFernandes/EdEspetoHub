@@ -56,6 +56,42 @@ export class MotoboyOrderService {
   }
 
   /**
+   * Lists delivery history for a motoboy.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-29
+   */
+  async listHistory(motoboy: Motoboy, days = 7) {
+    const since = new Date();
+    since.setDate(since.getDate() - Math.max(days, 1));
+
+    const repo = AppDataSource.getRepository(Order);
+    const orders = await repo
+      .createQueryBuilder('o')
+      .innerJoin(OrderDelivery, 'od', 'od.order_id = o.id')
+      .leftJoinAndSelect('o.store', 'store')
+      .where('od.motoboy_id = :motoboyId', { motoboyId: motoboy.id })
+      .andWhere('o.status IN (:...statuses)', { statuses: [ 'delivered', 'finished' ] })
+      .andWhere('o.created_at >= :since', { since })
+      .orderBy('o.created_at', 'DESC')
+      .getMany();
+
+    return orders.map((order) => ({
+      id: order.id,
+      store: order.store ? { id: order.store.id, name: order.store.name } : null,
+      customerName: order.customerName,
+      phone: order.phone,
+      address: order.address,
+      status: order.status,
+      paymentMethod: order.paymentMethod,
+      paymentStatus: order.paymentStatus,
+      total: order.total,
+      deliveryFee: order.deliveryFee,
+      createdAt: order.createdAt,
+    }));
+  }
+
+  /**
    * Accepts an order for delivery.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)

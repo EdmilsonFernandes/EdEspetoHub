@@ -45,6 +45,24 @@ export class MotoboyController {
   }
 
   /**
+   * Lists motoboy delivery history.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-29
+   */
+  static async listHistory(req: Request, res: Response) {
+    try {
+      const motoboy = await motoboyService.getActiveMotoboyByUserId(req.auth?.sub || '');
+      const days = Number(req.query?.days || 7);
+      const orders = await motoboyOrderService.listHistory(motoboy, Number.isFinite(days) ? days : 7);
+      return res.json(orders);
+    } catch (error: any) {
+      log.warn('Motoboy history failed', { error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  /**
    * Lists motoboys linked to a store.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
