@@ -23,6 +23,10 @@ export function MotoboyRegister() {
       showToast('Aceite os termos e LGPD para continuar.', 'error');
       return;
     }
+    if (!form.email || !form.email.includes('@')) {
+      showToast('Informe um e-mail válido.', 'error');
+      return;
+    }
     setLoading(true);
     try {
       await authService.registerMotoboy({
@@ -39,7 +43,13 @@ export function MotoboyRegister() {
       showToast('Cadastro criado. Verifique seu e-mail.', 'success');
       navigate('/motoboy/login');
     } catch (error: any) {
-      showToast(error?.message || 'Não foi possível cadastrar.', 'error');
+      if (error?.code === 'AUTH-015') {
+        showToast('Esse e-mail já é dono de loja. Use outro para o entregador.', 'error');
+      } else if (error?.code === 'AUTH-011') {
+        showToast('E-mail já cadastrado. Faça login ou use outro.', 'error');
+      } else {
+        showToast(error?.message || 'Não foi possível cadastrar.', 'error');
+      }
     } finally {
       setLoading(false);
     }
@@ -48,7 +58,10 @@ export function MotoboyRegister() {
   return (
     <div className="min-h-screen bg-slate-50 px-4 py-6 sm:py-10 space-y-6 overflow-x-hidden">
       <MotoboyHeader title="Cadastro" subtitle="Crie sua conta e receba solicitações das lojas." />
-      <div className="w-full max-w-md mx-auto bg-white rounded-2xl border border-slate-200 shadow-lg p-6 space-y-4 overflow-hidden">
+      <div className="w-full max-w-md mx-auto bg-white rounded-2xl border border-slate-200 shadow-lg p-6 space-y-4 overflow-hidden min-w-0">
+        <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
+          Use um e-mail diferente do cadastro de lojista.
+        </div>
         <form onSubmit={handleSubmit} className="space-y-3">
           <input
             type="text"
@@ -87,7 +100,7 @@ export function MotoboyRegister() {
             />
             <span>
               Aceito os{' '}
-              <a href="/terms" className="text-brand-primary font-semibold underline">
+              <a href="/terms" target="_blank" rel="noreferrer" className="text-brand-primary font-semibold underline">
                 termos de uso
               </a>
               .
@@ -102,7 +115,7 @@ export function MotoboyRegister() {
             />
             <span>
               Aceito o uso dos meus dados conforme{' '}
-              <a href="/terms" className="text-brand-primary font-semibold underline">
+              <a href="/terms#lgpd" target="_blank" rel="noreferrer" className="text-brand-primary font-semibold underline">
                 LGPD
               </a>
               .

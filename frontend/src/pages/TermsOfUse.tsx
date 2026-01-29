@@ -70,7 +70,7 @@ export function TermsOfUse() {
           )}
 
           <div className="border-t border-slate-200 pt-6">
-            <h2 className="text-base font-semibold text-slate-900 mb-3">LGPD</h2>
+            <h2 id="lgpd" className="text-base font-semibold text-slate-900 mb-3">LGPD</h2>
             {loading ? (
               <p className="text-sm text-slate-500">Carregando política de dados...</p>
             ) : lgpdContent ? (
