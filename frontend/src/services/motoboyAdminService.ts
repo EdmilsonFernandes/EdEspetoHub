@@ -1,6 +1,9 @@
 import { apiClient } from '../config/apiClient';
 
 export const motoboyAdminService = {
+  async list(storeId: string) {
+    return apiClient.get(`/stores/${storeId}/motoboys`);
+  },
   async create(storeId: string, payload: { userId?: string; email?: string }) {
     return apiClient.post(`/stores/${storeId}/motoboys`, payload);
   },

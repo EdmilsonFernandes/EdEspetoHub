@@ -45,6 +45,38 @@ export class MotoboyController {
   }
 
   /**
+   * Lists motoboys linked to a store.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-29
+   */
+  static async listByStore(req: Request, res: Response) {
+    try {
+      const links = await motoboyService.listByStore(req.params.storeId, req.auth?.sub || '');
+      return res.json(
+        links.map((link) => ({
+          id: link.id,
+          active: link.active,
+          storeId: link.storeId,
+          motoboyId: link.motoboyId,
+          motoboyStatus: link.motoboy?.status,
+          motoboyUser: link.motoboy?.user
+            ? {
+                id: link.motoboy.user.id,
+                fullName: link.motoboy.user.fullName,
+                email: link.motoboy.user.email,
+                phone: link.motoboy.user.phone,
+              }
+            : null,
+          createdAt: link.createdAt,
+        }))
+      );
+    } catch (error) {
+      return handleControllerError(error, res);
+    }
+  }
+
+  /**
    * Accepts order for delivery.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)

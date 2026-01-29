@@ -103,6 +103,7 @@ routes.post('/motoboy/orders/:orderId/delivered', requireAuth, MotoboyController
 routes.post('/motoboy/orders/:orderId/finish', requireAuth, MotoboyController.finishOrder);
 
 // Store owner motoboy management
+routes.get('/stores/:storeId/motoboys', requireAuth, requireRole('ADMIN'), MotoboyController.listByStore);
 routes.post('/stores/:storeId/motoboys', requireAuth, requireRole('ADMIN'), MotoboyController.createForStore);
 routes.post('/stores/:storeId/motoboys/:motoboyId/link', requireAuth, requireRole('ADMIN'), MotoboyController.linkStore);
 routes.post('/stores/:storeId/motoboys/:motoboyId/unlink', requireAuth, requireRole('ADMIN'), MotoboyController.unlinkStore);

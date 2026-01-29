@@ -159,4 +159,18 @@ export class MotoboyService {
   async listStoreIds(motoboyId: string) {
     return this.motoboyStoreRepository.listStoreIds(motoboyId);
   }
+
+  /**
+   * Lists motoboys linked to a store.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-29
+   */
+  async listByStore(storeId: string, ownerId: string) {
+    const store = await this.storeRepository.findByIdWithOwner(storeId);
+    if (!store) throw new AppError('STORE-001', 404);
+    if (store.ownerId !== ownerId) throw new AppError('AUTH-003', 403);
+
+    return this.motoboyStoreRepository.listByStoreId(storeId);
+  }
 }

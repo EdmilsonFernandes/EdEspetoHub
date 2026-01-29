@@ -83,4 +83,14 @@ export class MotoboyStoreRepository {
     const rows = await this.repository.find({ where: { motoboyId, active: true } });
     return rows.map((row) => row.storeId);
   }
+
+  /**
+   * Lists motoboy links by store.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-29
+   */
+  listByStoreId(storeId: string) {
+    return this.repository.find({ where: { storeId }, relations: [ 'motoboy', 'motoboy.user' ] });
+  }
 }
