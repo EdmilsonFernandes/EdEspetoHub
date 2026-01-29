@@ -12,6 +12,9 @@ type Props = {
 export function OrderCard({ order, compact, actions }: Props) {
   const createdAt = order?.createdAt || order?.created_at;
   const address = order?.address || order?.deliveryAddress || '-';
+  const storeName = order?.store?.name || order?.storeName;
+  const storeSlug = order?.store?.slug || order?.storeSlug;
+  const storeAddress = order?.store?.settings?.address || order?.store?.address || order?.storeAddress;
 
   return (
     <div className="premium-card p-4 space-y-3">
@@ -27,6 +30,18 @@ export function OrderCard({ order, compact, actions }: Props) {
         <p className="text-sm font-semibold text-slate-800">{order?.customerName || order?.customer_name}</p>
         {order?.phone && <p className="text-xs text-slate-500">{order.phone}</p>}
       </div>
+
+      {!compact && (storeName || storeAddress) && (
+        <div className="text-xs text-slate-500">
+          <p className="font-semibold text-slate-600">Retirada na loja</p>
+          <p>{storeName || 'Loja'}</p>
+          {(storeAddress || storeSlug) && (
+            <p className="text-[11px] text-slate-400">
+              {storeAddress || (storeSlug ? `/${storeSlug}` : '')}
+            </p>
+          )}
+        </div>
+      )}
 
       {!compact && (
         <div className="text-xs text-slate-500">
