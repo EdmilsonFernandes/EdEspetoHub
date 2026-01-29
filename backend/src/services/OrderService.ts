@@ -173,6 +173,31 @@ export class OrderService
     if (!order) throw new AppError('ORDER-001', 404);
     this.ensureStoreAccess(order.store, authStoreId);
 
+    const deliveryStatuses = new Set([
+      'ready_for_delivery',
+      'waiting_for_motoboy',
+      'in_delivery',
+      'delivered',
+      'finished',
+    ]);
+    if (order.type !== 'delivery' && deliveryStatuses.has(status)) {
+      throw new AppError('ORDER-004', 400);
+    }
+    if (order.type === 'delivery' && deliveryStatuses.has(status)) {
+      const transitions: Record<string, string[]> = {
+        pending: [ 'preparing' ],
+        preparing: [ 'ready_for_delivery' ],
+        ready_for_delivery: [ 'waiting_for_motoboy', 'in_delivery' ],
+        waiting_for_motoboy: [ 'in_delivery' ],
+        in_delivery: [ 'delivered', 'finished' ],
+        delivered: [ 'finished' ],
+      };
+      const allowedNext = transitions[order.status] || [];
+      if (!allowedNext.includes(status)) {
+        throw new AppError('ORDER-004', 400);
+      }
+    }
+
     order.status = status;
     return this.orderRepository.save(order);
   }
@@ -317,6 +342,8 @@ export class OrderService
       input.paymentMethod === 'dinheiro' && input.cashTendered !== undefined && input.cashTendered !== null
         ? Number(input.cashTendered)
         : null;
+    const normalizedPaymentStatus = (input.paymentStatus || '').toString().trim().toUpperCase();
+    const paymentStatus = normalizedPaymentStatus === 'PAID' ? 'PAID' : 'PENDING';
     const deliveryFee =
       input.type === 'delivery' && input.deliveryFee !== undefined && input.deliveryFee !== null
         ? Number(input.deliveryFee)
@@ -332,6 +359,7 @@ export class OrderService
       table: input.table,
       type: input.type,
       paymentMethod: input.paymentMethod,
+      paymentStatus,
       cashTendered,
       deliveryFee: deliveryFeeValue || null,
       items,

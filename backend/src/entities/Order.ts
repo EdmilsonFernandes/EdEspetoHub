@@ -55,6 +55,9 @@ export class Order {
   @Column({ name: 'payment_method', nullable: true })
   paymentMethod?: string;
 
+  @Column({ name: 'payment_status', default: 'PENDING' })
+  paymentStatus!: string;
+
   @Column('decimal', { name: 'cash_tendered', precision: 10, scale: 2, nullable: true })
   cashTendered?: number | null;
 

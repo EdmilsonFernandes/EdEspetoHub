@@ -200,6 +200,7 @@ export class OrderController {
         phone: order.phone,
         address: order.address,
         paymentMethod: order.paymentMethod,
+        paymentStatus: order.paymentStatus,
         total: order.total,
         createdAt: order.createdAt,
         queuePosition,

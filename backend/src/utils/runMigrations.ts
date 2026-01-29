@@ -100,6 +100,10 @@ export async function runMigrations() {
     ADD COLUMN IF NOT EXISTS delivery_fee NUMERIC(10,2);
   `);
   await AppDataSource.query(`
+    ALTER TABLE IF EXISTS orders
+    ADD COLUMN IF NOT EXISTS payment_status TEXT NOT NULL DEFAULT 'PENDING';
+  `);
+  await AppDataSource.query(`
     ALTER TABLE IF EXISTS products
     ADD COLUMN IF NOT EXISTS description TEXT;
   `);
@@ -280,5 +284,36 @@ export async function runMigrations() {
   `);
   await AppDataSource.query(`
     CREATE INDEX IF NOT EXISTS idx_order_eta_estimates_store_id ON order_eta_estimates(store_id);
+  `);
+  await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS motoboys (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      user_id UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+      status TEXT NOT NULL DEFAULT 'PENDING_VERIFICATION',
+      created_by_user_id UUID REFERENCES users(id),
+      approved_by_user_id UUID REFERENCES users(id),
+      approved_at TIMESTAMPTZ,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+  await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS motoboy_stores (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      motoboy_id UUID NOT NULL REFERENCES motoboys(id) ON DELETE CASCADE,
+      store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+      active BOOLEAN NOT NULL DEFAULT TRUE,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      UNIQUE(motoboy_id, store_id)
+    );
+  `);
+  await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS order_deliveries (
+      order_id UUID PRIMARY KEY REFERENCES orders(id) ON DELETE CASCADE,
+      motoboy_id UUID NOT NULL REFERENCES motoboys(id) ON DELETE RESTRICT,
+      assigned_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      delivered_at TIMESTAMPTZ,
+      payment_confirmed_at TIMESTAMPTZ,
+      payment_confirmed_by_motoboy_id UUID REFERENCES motoboys(id) ON DELETE RESTRICT
+    );
   `);
 }

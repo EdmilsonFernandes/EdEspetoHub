@@ -21,6 +21,7 @@ import { SubscriptionController } from '../controllers/SubscriptionController';
 import { PlatformAdminController } from '../controllers/PlatformAdminController';
 import { PlatformPublicController } from '../controllers/PlatformPublicController';
 import { PaymentController } from '../controllers/PaymentController';
+import { MotoboyController } from '../controllers/MotoboyController';
 
 import { requireAuth, requireRole } from '../middleware/authGuard';
 import { requireActiveSubscription } from '../middleware/subscriptionGuard';
@@ -93,5 +94,19 @@ routes.patch('/orders/:orderId/status', requireAuth, requireRole('ADMIN', 'CHURR
 routes.patch('/orders/:orderId', requireAuth, requireRole('ADMIN', 'CHURRASQUEIRO'), OrderController.updateItems);
 routes.get('/orders/:orderId/public', OrderController.getPublic);
 routes.get('/v2/orders/:orderId/tracking', OrderController.getTrackingV2);
+
+// Motoboy
+routes.get('/motoboy/orders/available', requireAuth, MotoboyController.listAvailableOrders);
+routes.post('/motoboy/orders/:orderId/accept', requireAuth, MotoboyController.acceptOrder);
+routes.post('/motoboy/orders/:orderId/confirm-payment', requireAuth, MotoboyController.confirmPayment);
+routes.post('/motoboy/orders/:orderId/delivered', requireAuth, MotoboyController.markDelivered);
+routes.post('/motoboy/orders/:orderId/finish', requireAuth, MotoboyController.finishOrder);
+
+// Store owner motoboy management
+routes.post('/stores/:storeId/motoboys', requireAuth, requireRole('ADMIN'), MotoboyController.createForStore);
+routes.post('/stores/:storeId/motoboys/:motoboyId/link', requireAuth, requireRole('ADMIN'), MotoboyController.linkStore);
+routes.post('/stores/:storeId/motoboys/:motoboyId/unlink', requireAuth, requireRole('ADMIN'), MotoboyController.unlinkStore);
+routes.post('/stores/:storeId/motoboys/:motoboyId/approve', requireAuth, requireRole('ADMIN'), MotoboyController.approve);
+routes.post('/stores/:storeId/motoboys/:motoboyId/suspend', requireAuth, requireRole('ADMIN'), MotoboyController.suspend);
 
 export default routes;

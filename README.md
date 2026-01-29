@@ -194,6 +194,44 @@ Rotas:
 - Nginx faz proxy `/api/maps` → `maps:5050`.
 - Para subir tudo: `docker compose --env-file .env.prod up --build -d`.
 
+## Modulo de entrega + motoboy (novo)
+
+### O que entrou (sem quebrar o que ja existe)
+- Fluxo de delivery com motoboy (atribuir, aceitar, entregar e confirmar pagamento).
+- Novos status de pedido (apenas `type='delivery'`):
+  - `pending` → `preparing` → `ready_for_delivery` → `waiting_for_motoboy` → `in_delivery` → `delivered` → `finished`
+- Novo campo em `orders`: `payment_status` (`PENDING` | `PAID`).
+- Novas tabelas:
+  - `motoboys`
+  - `motoboy_stores`
+  - `order_deliveries`
+
+### Regras principais
+- Motoboy so ve pedidos das lojas associadas (N:N).
+- Motoboy so atua se `motoboys.status = ACTIVE`.
+- Pagamento em dinheiro/cartao fica `PENDING` ate o motoboy confirmar.
+- Aceite de pedido e feito com transacao (conflito 409 se ja aceito).
+
+### Endpoints (novos)
+Motoboy:
+- `GET /motoboy/orders/available`
+- `POST /motoboy/orders/:orderId/accept`
+- `POST /motoboy/orders/:orderId/confirm-payment`
+- `POST /motoboy/orders/:orderId/delivered`
+- `POST /motoboy/orders/:orderId/finish`
+
+Responsavel (dono da loja):
+- `POST /stores/:storeId/motoboys`
+- `POST /stores/:storeId/motoboys/:motoboyId/link`
+- `POST /stores/:storeId/motoboys/:motoboyId/unlink`
+- `POST /stores/:storeId/motoboys/:motoboyId/approve`
+- `POST /stores/:storeId/motoboys/:motoboyId/suspend`
+
+### Compatibilidade
+- Nenhum endpoint antigo foi removido.
+- Campos novos sao opcionais.
+- `orders.payment_status` tem default `PENDING`.
+
 ## Criar primeira loja (seed de planos)
 
 ```bash

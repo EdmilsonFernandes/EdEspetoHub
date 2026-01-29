@@ -123,6 +123,7 @@ CREATE TABLE IF NOT EXISTS orders (
   type TEXT NOT NULL DEFAULT 'delivery',
   status TEXT NOT NULL DEFAULT 'pending',
   payment_method TEXT,
+  payment_status TEXT NOT NULL DEFAULT 'PENDING',
   cash_tendered NUMERIC(10,2),
   delivery_fee NUMERIC(10,2),
   total NUMERIC(10,2) NOT NULL,
@@ -135,6 +136,8 @@ ALTER TABLE orders
 ADD COLUMN IF NOT EXISTS cash_tendered NUMERIC(10,2);
 ALTER TABLE orders
 ADD COLUMN IF NOT EXISTS delivery_fee NUMERIC(10,2);
+ALTER TABLE orders
+ADD COLUMN IF NOT EXISTS payment_status TEXT NOT NULL DEFAULT 'PENDING';
 
 CREATE TABLE IF NOT EXISTS order_items (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -202,6 +205,34 @@ CREATE INDEX IF NOT EXISTS idx_order_eta_estimates_order_id
   ON order_eta_estimates(order_id);
 CREATE INDEX IF NOT EXISTS idx_order_eta_estimates_store_id
   ON order_eta_estimates(store_id);
+
+CREATE TABLE IF NOT EXISTS motoboys (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+  status TEXT NOT NULL DEFAULT 'PENDING_VERIFICATION',
+  created_by_user_id UUID REFERENCES users(id),
+  approved_by_user_id UUID REFERENCES users(id),
+  approved_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS motoboy_stores (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  motoboy_id UUID NOT NULL REFERENCES motoboys(id) ON DELETE CASCADE,
+  store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+  active BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE(motoboy_id, store_id)
+);
+
+CREATE TABLE IF NOT EXISTS order_deliveries (
+  order_id UUID PRIMARY KEY REFERENCES orders(id) ON DELETE CASCADE,
+  motoboy_id UUID NOT NULL REFERENCES motoboys(id) ON DELETE RESTRICT,
+  assigned_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  delivered_at TIMESTAMPTZ,
+  payment_confirmed_at TIMESTAMPTZ,
+  payment_confirmed_by_motoboy_id UUID REFERENCES motoboys(id) ON DELETE RESTRICT
+);
 
 CREATE TABLE IF NOT EXISTS subscriptions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
