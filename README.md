@@ -223,6 +223,24 @@ Motoboy:
 - `PUT /motoboy/profile`
 - `GET /motoboy/documents`
 - `POST /motoboy/documents`
+- `GET /motoboy/profile`
+- `PUT /motoboy/profile`
+
+Conteudo legal (publico):
+- `GET /legal/terms`
+- `GET /legal/lgpd`
+
+Admin (SUPER_ADMIN):
+- `POST /admin/site-settings` (key/value)
+
+Chaves uteis em `site_settings`:
+- `legal.terms`
+- `legal.lgpd`
+- `email_templates.store_verification.subject|text|html`
+- `email_templates.motoboy_verification.subject|text|html`
+- `email_templates.password_reset.subject|text|html`
+- `email_templates.activation.subject|text|html`
+- `email_templates.subscription_reminder.subject|text|html`
 
 Responsavel (dono da loja):
 - `POST /stores/:storeId/motoboys`

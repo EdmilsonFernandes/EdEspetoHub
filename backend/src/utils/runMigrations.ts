@@ -196,6 +196,13 @@ export async function runMigrations() {
     );
   `);
   await AppDataSource.query(`
+    INSERT INTO site_settings (key, value)
+    VALUES
+      ('legal.terms', '<h2>Termos de uso</h2><p>Atualize os termos no painel do super admin.</p>'),
+      ('legal.lgpd', '<h2>LGPD</h2><p>Atualize a política LGPD no painel do super admin.</p>')
+    ON CONFLICT (key) DO NOTHING;
+  `);
+  await AppDataSource.query(`
     CREATE INDEX IF NOT EXISTS idx_email_verifications_user ON email_verifications(user_id);
   `);
   await AppDataSource.query(`

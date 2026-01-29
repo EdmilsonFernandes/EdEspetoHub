@@ -1,10 +1,31 @@
-// @ts-nocheck
-import React from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { apiClient } from '../config/apiClient';
 
 export function TermsOfUse() {
   const navigate = useNavigate();
   const platformLogo = '/chama-no-espeto.jpeg';
+  const [termsContent, setTermsContent] = useState('');
+  const [lgpdContent, setLgpdContent] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const [terms, lgpd] = await Promise.all([
+          apiClient.get('/legal/terms'),
+          apiClient.get('/legal/lgpd'),
+        ]);
+        setTermsContent(terms?.content || '');
+        setLgpdContent(lgpd?.content || '');
+      } catch {
+        // ignore
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -37,63 +58,30 @@ export function TermsOfUse() {
             </p>
           </div>
 
-          <section className="space-y-3 text-sm text-slate-600">
-            <h2 className="text-base font-semibold text-slate-900">1. Plataforma e finalidade</h2>
-            <p>
-              A plataforma Chama no Espeto oferece ferramentas para criação e gestão de lojas digitais de
-              espetos e similares. O usuário é responsável pelo conteúdo publicado, preços, ofertas e
-              atendimento aos seus clientes.
-            </p>
-          </section>
+          {loading ? (
+            <p className="text-sm text-slate-500">Carregando termos...</p>
+          ) : termsContent ? (
+            <div
+              className="prose prose-slate max-w-none text-sm"
+              dangerouslySetInnerHTML={{ __html: termsContent }}
+            />
+          ) : (
+            <p className="text-sm text-slate-500">Termos indisponíveis no momento.</p>
+          )}
 
-          <section className="space-y-3 text-sm text-slate-600">
-            <h2 className="text-base font-semibold text-slate-900">2. Cadastro e veracidade</h2>
-            <p>
-              O usuário deve fornecer informações verdadeiras e atualizadas. Dados incorretos podem impedir
-              o uso da plataforma e o recebimento de pagamentos.
-            </p>
-          </section>
-
-          <section className="space-y-3 text-sm text-slate-600">
-            <h2 className="text-base font-semibold text-slate-900">3. Pagamentos e acesso</h2>
-            <p>
-              O acesso completo ao painel e a publicação da loja dependem da confirmação do pagamento do
-              plano escolhido. Pagamentos por boleto podem levar ate 3 dias uteis para compensar.
-            </p>
-          </section>
-
-          <section className="space-y-3 text-sm text-slate-600">
-            <h2 className="text-base font-semibold text-slate-900">4. Propriedade e conteudo</h2>
-            <p>
-              Todo material enviado pelo usuário (logos, textos, imagens) permanece sob sua
-              responsabilidade. A plataforma pode exibir esse conteúdo para operação do serviço.
-            </p>
-          </section>
-
-          <section className="space-y-3 text-sm text-slate-600">
-            <h2 className="text-base font-semibold text-slate-900">5. LGPD e privacidade</h2>
-            <p>
-              Os dados pessoais são tratados para fins de cadastro, autenticação, cobrança e suporte,
-              conforme a Lei Geral de Proteção de Dados (LGPD). O usuário pode solicitar atualização ou
-              exclusão de dados quando aplicavel.
-            </p>
-          </section>
-
-          <section className="space-y-3 text-sm text-slate-600">
-            <h2 className="text-base font-semibold text-slate-900">6. Evolucao do produto</h2>
-            <p>
-              A plataforma pode ser atualizada, modificada ou descontinuada a qualquer momento para melhoria
-              do servico. Mudancas relevantes poderao ser comunicadas por e-mail.
-            </p>
-          </section>
-
-          <section className="space-y-3 text-sm text-slate-600">
-            <h2 className="text-base font-semibold text-slate-900">7. Uso adequado</h2>
-            <p>
-              E proibido utilizar a plataforma para fins ilegais, fraudulentos ou que violem direitos de
-              terceiros. Contas que descumprirem estes termos podem ser suspensas.
-            </p>
-          </section>
+          <div className="border-t border-slate-200 pt-6">
+            <h2 className="text-base font-semibold text-slate-900 mb-3">LGPD</h2>
+            {loading ? (
+              <p className="text-sm text-slate-500">Carregando política de dados...</p>
+            ) : lgpdContent ? (
+              <div
+                className="prose prose-slate max-w-none text-sm"
+                dangerouslySetInnerHTML={{ __html: lgpdContent }}
+              />
+            ) : (
+              <p className="text-sm text-slate-500">Política LGPD indisponível no momento.</p>
+            )}
+          </div>
         </div>
       </main>
     </div>

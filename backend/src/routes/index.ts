@@ -22,6 +22,7 @@ import { PlatformAdminController } from '../controllers/PlatformAdminController'
 import { PlatformPublicController } from '../controllers/PlatformPublicController';
 import { PaymentController } from '../controllers/PaymentController';
 import { MotoboyController } from '../controllers/MotoboyController';
+import { LegalController } from '../controllers/LegalController';
 import { DeliveryBillingController } from '../controllers/DeliveryBillingController';
 
 import { requireAuth, requireRole } from '../middleware/authGuard';
@@ -109,6 +110,11 @@ routes.get('/motoboy/profile', requireAuth, MotoboyController.getProfile);
 routes.put('/motoboy/profile', requireAuth, MotoboyController.updateProfile);
 routes.get('/motoboy/store-requests', requireAuth, MotoboyController.listStoreRequests);
 routes.post('/motoboy/store-requests', requireAuth, MotoboyController.createStoreRequest);
+
+// Legal content (public)
+routes.get('/legal/terms', LegalController.getTerms);
+routes.get('/legal/lgpd', LegalController.getLgpd);
+routes.post('/admin/site-settings', requireAuth, requireRole('SUPER_ADMIN'), LegalController.setSetting);
 
 // Store owner motoboy management
 routes.get('/stores/:storeId/motoboys', requireAuth, requireRole('ADMIN'), MotoboyController.listByStore);
