@@ -11,8 +11,10 @@ export function AdminMotoboys() {
   const [documentsByMotoboy, setDocumentsByMotoboy] = useState<Record<string, any[]>>({});
   const [docsLoadingId, setDocsLoadingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showInactive, setShowInactive] = useState(false);
   const storeId = auth?.store?.id || '';
   const pendingRequests = requests.filter((request) => request.status === 'PENDING');
+  const filteredMotoboys = showInactive ? motoboys : motoboys.filter((link) => link.active);
 
   const loadMotoboys = async () => {
     if (!storeId) return;
@@ -189,11 +191,11 @@ export function AdminMotoboys() {
         </div>
         {loading ? (
           <p className="text-sm text-slate-500">Carregando...</p>
-        ) : motoboys.length === 0 ? (
+        ) : filteredMotoboys.length === 0 ? (
           <p className="text-sm text-slate-500">Nenhum entregador vinculado ainda.</p>
         ) : (
           <div className="grid gap-3">
-            {motoboys.map((link) => (
+            {filteredMotoboys.map((link) => (
               <div key={link.id} className="rounded-xl border border-slate-100 p-3 flex flex-col gap-2">
                 <div className="flex items-center justify-between">
                   <div>
@@ -202,9 +204,16 @@ export function AdminMotoboys() {
                     </p>
                     <p className="text-xs text-slate-500">{link.motoboyUser?.email || '-'}</p>
                   </div>
-                  <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600">
-                    {link.motoboyStatus || 'PENDING'}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600">
+                      {link.motoboyStatus || 'PENDING'}
+                    </span>
+                    {!link.active && (
+                      <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-rose-100 text-rose-700">
+                        Vínculo inativo
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div className="text-xs text-slate-500 flex flex-wrap gap-2">
                   <span>ID: {link.motoboyId}</span>
@@ -294,6 +303,18 @@ export function AdminMotoboys() {
             ))}
           </div>
         )}
+        <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-xs text-slate-600">
+          <span>Mostrar vínculos inativos</span>
+          <button
+            type="button"
+            onClick={() => setShowInactive((prev) => !prev)}
+            className={`px-3 py-1 rounded-full text-[10px] font-semibold border ${
+              showInactive ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-slate-200'
+            }`}
+          >
+            {showInactive ? 'Visível' : 'Oculto'}
+          </button>
+        </div>
       </div>
     </div>
   );

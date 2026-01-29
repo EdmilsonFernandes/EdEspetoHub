@@ -13,6 +13,10 @@ export function MotoboyRoute({ children }: { children: React.ReactNode }) {
       setAllowed(false);
       return;
     }
+    if (String(auth?.user?.role || '').toUpperCase() !== 'MOTOBOY') {
+      setAllowed(false);
+      return;
+    }
 
     const check = async () => {
       try {
