@@ -137,6 +137,22 @@ export function MotoboyCurrent() {
     return map;
   }, [documents]);
 
+  const hasApprovedRequest = useMemo(
+    () => requests.some((req) => req.status === 'APPROVED'),
+    [requests]
+  );
+  const hasPendingRequest = useMemo(
+    () => requests.some((req) => req.status === 'PENDING'),
+    [requests]
+  );
+  const statusLabel = useMemo(() => {
+    if (profile?.status === 'SUSPENDED') return 'Cadastro suspenso';
+    if (profile?.status === 'REJECTED') return 'Cadastro recusado';
+    if (profile?.status === 'PENDING_VERIFICATION') return 'Cadastro em análise';
+    if (profile?.status === 'ACTIVE' && !hasApprovedRequest) return 'Sem vínculo aprovado';
+    return 'Cadastro ativo';
+  }, [profile?.status, hasApprovedRequest]);
+
   const activeOrder = useMemo(() => {
     return (
       orders.find((order) => ['in_delivery', 'ready_for_delivery', 'waiting_for_motoboy'].includes(order.status)) ||
@@ -270,7 +286,15 @@ export function MotoboyCurrent() {
 
       {blocked && (
         <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
-          Seu cadastro está em análise. Envie os documentos obrigatórios e aguarde a aprovação da loja.
+          {statusLabel}. Envie os documentos obrigatórios e aguarde aprovação das lojas.
+        </div>
+      )}
+      {!blocked && profile?.status && (
+        <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600">
+          Status do entregador: <span className="font-semibold text-slate-800">{statusLabel}</span>
+          {profile?.status === 'ACTIVE' && !hasApprovedRequest && (
+            <span className="block text-xs text-slate-500 mt-1">Solicite vínculo com lojas para receber pedidos.</span>
+          )}
         </div>
       )}
 
@@ -331,6 +355,41 @@ export function MotoboyCurrent() {
           })}
         </div>
       </div>
+
+      {documents.length > 0 && (
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-3">
+          <div>
+            <p className="text-sm font-semibold text-slate-700">Seus documentos enviados</p>
+            <p className="text-xs text-slate-500">Confira o que já foi enviado e o status de aprovação.</p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {documents.map((doc) => (
+              <div key={doc.id} className="rounded-xl border border-slate-100 p-3 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-slate-600">{doc.docType}</span>
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                      doc.status === 'APPROVED'
+                        ? 'bg-emerald-100 text-emerald-700'
+                        : doc.status === 'REJECTED'
+                        ? 'bg-rose-100 text-rose-700'
+                        : 'bg-amber-100 text-amber-700'
+                    }`}
+                  >
+                    {doc.status === 'APPROVED' ? 'Aprovado' : doc.status === 'REJECTED' ? 'Recusado' : 'Pendente'}
+                  </span>
+                </div>
+                <div className="rounded-lg overflow-hidden border border-slate-200 bg-slate-50">
+                  <img src={doc.fileKey} alt={doc.docType} className="w-full h-32 object-cover" />
+                </div>
+                <a href={doc.fileKey} target="_blank" rel="noreferrer" className="text-xs text-brand-primary underline">
+                  Ver em tela cheia
+                </a>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-3">
         <div>
