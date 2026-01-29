@@ -14,16 +14,6 @@ export function AdminMotoboys() {
   const storeId = auth?.store?.id || '';
   const pendingRequests = requests.filter((request) => request.status === 'PENDING');
 
-  const runAction = async (action: () => Promise<any>, message: string) => {
-    try {
-      await action();
-      showToast(message, 'success');
-      loadMotoboys();
-    } catch (error: any) {
-      showToast(error?.message || 'Não foi possível concluir a ação.', 'error');
-    }
-  };
-
   const loadMotoboys = async () => {
     if (!storeId) return;
     setLoading(true);
