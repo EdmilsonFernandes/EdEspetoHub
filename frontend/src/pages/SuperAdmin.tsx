@@ -109,7 +109,6 @@ export function SuperAdmin() {
   const [accessLogMethod, setAccessLogMethod] = useState('all');
   const [accessLogStatus, setAccessLogStatus] = useState('all');
   const [accessLogStore, setAccessLogStore] = useState('all');
-  const [vipLabels, setVipLabels] = useState({});
   const [vipFilter, setVipFilter] = useState('all');
   const [sectionsOpen, setSectionsOpen] = useState({
     charts: true,
@@ -251,15 +250,6 @@ export function SuperAdmin() {
     });
     return map;
   }, [paymentEvents]);
-
-  useEffect(() => {
-    if (!safeStores.length) return;
-    const map = {};
-    safeStores.forEach((store: any) => {
-      map[store.id] = store.settings?.planExemptLabel || 'Cliente VIP';
-    });
-    setVipLabels((prev) => ({ ...map, ...prev }));
-  }, [safeStores]);
 
   const storeNameById = useMemo(() => {
     const map = new Map();
@@ -522,11 +512,10 @@ export function SuperAdmin() {
 
   const handleVipToggle = async (store: any, nextValue: boolean) => {
     if (!token) return;
-    const label = (vipLabels[store.id] || '').toString().trim();
     try {
       const response = await superAdminService.updatePlanExempt(token, store.id, {
         planExempt: nextValue,
-        planExemptLabel: label || 'Cliente VIP',
+        planExemptLabel: 'Isento de plano',
       });
       await loadOverview(token);
       if (!nextValue) {
@@ -1310,8 +1299,8 @@ export function SuperAdmin() {
                   {filteredStores.map((store: any) => {
                     const isVip = Boolean(store.settings?.planExempt);
                     const planName =
-                      (isVip ? store.settings?.planExemptLabel || 'Cliente VIP' : null) ||
-                      store.subscription?.plan?.displayName ||
+                      (isVip ? 'Isento de plano' : null) ||
+                        store.subscription?.plan?.displayName ||
                       formatPlanName(store.subscription?.plan?.name || '-');
                     const planPrice = store.subscription?.plan?.price || 0;
                     const status = store.subscription?.status || 'PENDING';
@@ -1349,15 +1338,6 @@ export function SuperAdmin() {
                             >
                               <span className="uppercase tracking-[0.2em] text-[10px]">{isVip ? 'VIP Ativo' : 'Ativar VIP'}</span>
                             </button>
-                            <input
-                              type="text"
-                              value={vipLabels[store.id] || ''}
-                              onChange={(event) =>
-                                setVipLabels((prev) => ({ ...prev, [store.id]: event.target.value }))
-                              }
-                              placeholder="Label VIP (ex: Cliente VIP)"
-                              className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs text-slate-700 bg-white"
-                            />
                           </div>
                         </td>
                         <td className="py-3 pr-4">

@@ -121,8 +121,8 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
         color: '#fff',
       }}
     >
-      <div className="absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.45),_transparent_55%)]" />
-      <div className="absolute top-0 left-8 right-8 h-1 rounded-full bg-white/40" />
+      <div className="pointer-events-none absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.45),_transparent_55%)]" />
+      <div className="pointer-events-none absolute top-0 left-8 right-8 h-1 rounded-full bg-white/40" />
       <div className="px-5 pt-5 pb-4 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div className="flex items-start gap-4">
           <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center overflow-hidden shadow-[0_16px_30px_-18px_rgba(0,0,0,0.35)] ring-1 ring-white/30">
