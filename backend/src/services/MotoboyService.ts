@@ -21,6 +21,9 @@ import { saveBase64Image } from '../utils/imageStorage';
 import { StoreRepository } from '../repositories/StoreRepository';
 import { UserRepository } from '../repositories/UserRepository';
 import { AppDataSource } from '../config/database';
+import { MotoboyAuditLog } from '../entities/MotoboyAuditLog';
+import { EmailService } from './EmailService';
+import { env } from '../config/env';
 /**
  * Provides MotoboyService functionality.
  *
@@ -32,6 +35,49 @@ export class MotoboyService {
   private motoboyStoreRepository = new MotoboyStoreRepository();
   private storeRepository = new StoreRepository();
   private userRepository = new UserRepository();
+  private emailService = new EmailService();
+
+  private async logAudit(input: {
+    storeId?: string | null;
+    motoboyId?: string | null;
+    action: string;
+    performedByUserId?: string | null;
+    metadata?: Record<string, any> | null;
+  }) {
+    const repo = AppDataSource.getRepository(MotoboyAuditLog);
+    const log = repo.create({
+      storeId: input.storeId || null,
+      motoboyId: input.motoboyId || null,
+      action: input.action,
+      performedByUserId: input.performedByUserId || null,
+      metadata: input.metadata || null,
+    });
+    await repo.save(log);
+  }
+
+  private async notifyMotoboyByEmail(motoboyId: string, subject: string, message: string) {
+    const motoboy = await this.motoboyRepository.findById(motoboyId);
+    if (!motoboy?.user?.email) return;
+    await this.emailService.send({
+      to: motoboy.user.email,
+      subject,
+      text: message,
+      html: `<p>${message}</p>`,
+    });
+  }
+
+  private async notifyMotoboyByWhatsapp(motoboyId: string, message: string) {
+    const notifyUrl = env.whatsapp.notifyUrl;
+    if (!notifyUrl) return;
+    const motoboy = await this.motoboyRepository.findById(motoboyId);
+    const phone = motoboy?.user?.phone;
+    if (!phone) return;
+    await fetch(notifyUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ to: phone, message }),
+    });
+  }
 
   /**
    * Gets active motoboy by user id.
@@ -111,6 +157,13 @@ export class MotoboyService {
       motoboy = await this.motoboyRepository.save(motoboy);
     }
 
+    await this.logAudit({
+      storeId,
+      motoboyId: motoboy.id,
+      action: 'MOTOBOY_PROFILE_CREATED',
+      performedByUserId: createdByUserId,
+      metadata: { userId: motoboy.userId },
+    });
     return motoboy;
   }
 
@@ -128,7 +181,14 @@ export class MotoboyService {
     const existing = await this.motoboyStoreRepository.findLink(motoboyId, storeId);
     if (existing) {
       existing.active = true;
-      return this.motoboyStoreRepository.save(existing);
+      const saved = await this.motoboyStoreRepository.save(existing);
+      await this.logAudit({
+        storeId,
+        motoboyId,
+        action: 'MOTOBOY_LINK_REACTIVATED',
+        performedByUserId: userId,
+      });
+      return saved;
     }
 
     const link = this.motoboyStoreRepository.create({
@@ -136,7 +196,14 @@ export class MotoboyService {
       storeId,
       active: true,
     });
-    return this.motoboyStoreRepository.save(link);
+    const saved = await this.motoboyStoreRepository.save(link);
+    await this.logAudit({
+      storeId,
+      motoboyId,
+      action: 'MOTOBOY_LINK_CREATED',
+      performedByUserId: userId,
+    });
+    return saved;
   }
 
   /**
@@ -153,7 +220,14 @@ export class MotoboyService {
     const existing = await this.motoboyStoreRepository.findLink(motoboyId, storeId);
     if (!existing) throw new AppError('MOTO-004', 404);
     existing.active = false;
-    return this.motoboyStoreRepository.save(existing);
+    const saved = await this.motoboyStoreRepository.save(existing);
+    await this.logAudit({
+      storeId,
+      motoboyId,
+      action: 'MOTOBOY_LINK_DISABLED',
+      performedByUserId: userId,
+    });
+    return saved;
   }
 
   /**
@@ -172,7 +246,20 @@ export class MotoboyService {
     motoboy.status = 'ACTIVE';
     motoboy.approvedByUserId = userId;
     motoboy.approvedAt = new Date();
-    return this.motoboyRepository.save(motoboy);
+    const saved = await this.motoboyRepository.save(motoboy);
+    await this.logAudit({
+      storeId,
+      motoboyId,
+      action: 'MOTOBOY_APPROVED',
+      performedByUserId: userId,
+    });
+    await this.notifyMotoboyByEmail(
+      motoboyId,
+      'Cadastro aprovado',
+      `Seu cadastro de entregador foi aprovado. Você já pode aceitar pedidos.`
+    );
+    await this.notifyMotoboyByWhatsapp(motoboyId, 'Seu cadastro de entregador foi aprovado. Você já pode aceitar pedidos.');
+    return saved;
   }
 
   /**
@@ -189,7 +276,23 @@ export class MotoboyService {
     const motoboy = await this.motoboyRepository.findById(motoboyId);
     if (!motoboy) throw new AppError('MOTO-005', 404);
     motoboy.status = 'SUSPENDED';
-    return this.motoboyRepository.save(motoboy);
+    const saved = await this.motoboyRepository.save(motoboy);
+    await this.logAudit({
+      storeId,
+      motoboyId,
+      action: 'MOTOBOY_SUSPENDED',
+      performedByUserId: userId,
+    });
+    await this.notifyMotoboyByEmail(
+      motoboyId,
+      'Cadastro suspenso',
+      'Seu cadastro de entregador foi suspenso. Entre em contato com a loja responsável.'
+    );
+    await this.notifyMotoboyByWhatsapp(
+      motoboyId,
+      'Seu cadastro de entregador foi suspenso. Entre em contato com a loja responsável.'
+    );
+    return saved;
   }
 
   /**
@@ -309,7 +412,14 @@ export class MotoboyService {
         storeId,
         status: 'PENDING',
       });
-      created.push(await repo.save(request));
+      const saved = await repo.save(request);
+      created.push(saved);
+      await this.logAudit({
+        storeId,
+        motoboyId: motoboy.id,
+        action: 'MOTOBOY_REQUEST_CREATED',
+        performedByUserId: motoboy.userId,
+      });
     }
 
     return created;
@@ -369,6 +479,14 @@ export class MotoboyService {
     request.decidedByUserId = ownerId;
     await repo.save(request);
 
+    await this.logAudit({
+      storeId,
+      motoboyId: request.motoboyId,
+      action: status === 'APPROVED' ? 'MOTOBOY_REQUEST_APPROVED' : 'MOTOBOY_REQUEST_REJECTED',
+      performedByUserId: ownerId,
+      metadata: { requestId },
+    });
+
     if (status === 'APPROVED' && request.motoboyId) {
       const existingLink = await this.motoboyStoreRepository.findLink(request.motoboyId, storeId);
       if (existingLink) {
@@ -390,6 +508,26 @@ export class MotoboyService {
         motoboy.approvedAt = new Date();
         await this.motoboyRepository.save(motoboy);
       }
+
+      await this.notifyMotoboyByEmail(
+        request.motoboyId,
+        'Vínculo aprovado',
+        `Sua solicitação para entregar nesta loja foi aprovada. Você já pode aceitar pedidos.`
+      );
+      await this.notifyMotoboyByWhatsapp(
+        request.motoboyId,
+        'Sua solicitação para entregar nesta loja foi aprovada. Você já pode aceitar pedidos.'
+      );
+    } else if (status === 'REJECTED' && request.motoboyId) {
+      await this.notifyMotoboyByEmail(
+        request.motoboyId,
+        'Solicitação rejeitada',
+        'Sua solicitação para entregar nesta loja foi rejeitada.'
+      );
+      await this.notifyMotoboyByWhatsapp(
+        request.motoboyId,
+        'Sua solicitação para entregar nesta loja foi rejeitada.'
+      );
     }
 
     return request;

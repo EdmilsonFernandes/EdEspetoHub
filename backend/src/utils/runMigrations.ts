@@ -344,4 +344,21 @@ export async function runMigrations() {
       UNIQUE(motoboy_id, store_id)
     );
   `);
+  await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS motoboy_audit_logs (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      store_id UUID REFERENCES stores(id) ON DELETE SET NULL,
+      motoboy_id UUID REFERENCES motoboys(id) ON DELETE SET NULL,
+      action TEXT NOT NULL,
+      performed_by_user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+      metadata JSONB,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_motoboy_audit_logs_store_id ON motoboy_audit_logs(store_id);
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_motoboy_audit_logs_motoboy_id ON motoboy_audit_logs(motoboy_id);
+  `);
 }

@@ -80,4 +80,7 @@ export const env = {
       ? Number(process.env.DEFAULT_ETA_BUFFER_MINUTES)
       : 3,
   },
+  whatsapp: {
+    notifyUrl: process.env.WHATSAPP_NOTIFY_URL || '',
+  },
 };
