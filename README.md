@@ -628,6 +628,11 @@ Com a API em execução, a loja fica acessível em:
 - Vitrine (cliente): `http://localhost:3000/<slug>` (ex: `http://localhost:3000/lojadoedmilson`)
 - Admin pedidos: `http://localhost:3000/admin/orders`
 - Fila do churrasqueiro: `http://localhost:3000/admin/queue`
+- Admin entregadores: `http://localhost:3000/admin/motoboys`
+- Motoboy login: `http://localhost:3000/motoboy/login`
+- Motoboy pedidos disponíveis: `http://localhost:3000/motoboy/available`
+- Motoboy entrega atual: `http://localhost:3000/motoboy/current`
+- Motoboy histórico: `http://localhost:3000/motoboy/history`
 
 ### 4. pgAdmin (opcional, local)
 
@@ -656,6 +661,17 @@ Serviços expostos:
 - API: http://localhost:4000 (Swagger em `/api/docs`)
 - PostgreSQL: porta 5432 (volume `postgres-data`)
 - pgAdmin: http://localhost:5050
+
+Rotas úteis no front (Docker):
+
+- Vitrine (cliente): `http://localhost:8080/<slug>`
+- Admin pedidos: `http://localhost:8080/admin/orders`
+- Fila de produção: `http://localhost:8080/admin/queue`
+- Admin entregadores: `http://localhost:8080/admin/motoboys`
+- Motoboy login: `http://localhost:8080/motoboy/login`
+- Motoboy pedidos disponíveis: `http://localhost:8080/motoboy/available`
+- Motoboy entrega atual: `http://localhost:8080/motoboy/current`
+- Motoboy histórico: `http://localhost:8080/motoboy/history`
 
 ### Rodar com portas de produção (porta 80)
 
