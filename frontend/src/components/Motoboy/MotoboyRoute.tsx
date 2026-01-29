@@ -16,7 +16,7 @@ export function MotoboyRoute({ children }: { children: React.ReactNode }) {
 
     const check = async () => {
       try {
-        await motoboyService.listAvailableOrders();
+        await motoboyService.listStoreRequests();
         setAllowed(true);
       } catch (error: any) {
         if (error?.status === 403) {

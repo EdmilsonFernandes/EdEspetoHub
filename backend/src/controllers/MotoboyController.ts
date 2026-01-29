@@ -70,7 +70,7 @@ export class MotoboyController {
    */
   static async listStoreRequests(req: Request, res: Response) {
     try {
-      const motoboy = await motoboyService.getMotoboyByUserId(req.auth?.sub || '');
+      const motoboy = await motoboyService.getOrCreateMotoboyByUserId(req.auth?.sub || '');
       const requests = await motoboyService.listStoreRequests(motoboy);
       return res.json(
         requests.map((request) => ({
@@ -97,7 +97,7 @@ export class MotoboyController {
    */
   static async createStoreRequest(req: Request, res: Response) {
     try {
-      const motoboy = await motoboyService.getMotoboyByUserId(req.auth?.sub || '');
+      const motoboy = await motoboyService.getOrCreateMotoboyByUserId(req.auth?.sub || '');
       const storeIds = req.body?.storeIds || [];
       const result = await motoboyService.createStoreRequests(motoboy, storeIds);
       return res.status(201).json(result);

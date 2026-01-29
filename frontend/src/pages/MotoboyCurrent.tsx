@@ -204,6 +204,30 @@ export function MotoboyCurrent() {
           <p className="text-sm font-semibold text-slate-700">Solicitar vínculo</p>
           <p className="text-xs text-slate-500">Escolha as lojas que deseja atender.</p>
         </div>
+        {requests.length > 0 && (
+          <div className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-xs text-slate-600 space-y-1">
+            {requests.map((req) => (
+              <div key={req.id} className="flex items-center justify-between gap-2">
+                <span>{req.store?.name || 'Loja'}</span>
+                <span
+                  className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                    req.status === 'APPROVED'
+                      ? 'bg-emerald-100 text-emerald-700'
+                      : req.status === 'REJECTED'
+                      ? 'bg-rose-100 text-rose-700'
+                      : 'bg-amber-100 text-amber-700'
+                  }`}
+                >
+                  {req.status === 'APPROVED'
+                    ? 'Aprovado'
+                    : req.status === 'REJECTED'
+                    ? 'Recusado'
+                    : 'Pendente'}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
         <div className="grid gap-2">
           {stores.length === 0 ? (
             <p className="text-xs text-slate-500">Nenhuma loja disponível.</p>

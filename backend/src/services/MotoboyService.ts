@@ -59,6 +59,32 @@ export class MotoboyService {
   }
 
   /**
+   * Gets or creates motoboy profile for a user.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-29
+   */
+  async getOrCreateMotoboyByUserId(userId: string) {
+    const user = await this.userRepository.findById(userId);
+    if (!user) throw new AppError('USER-001', 404);
+    if ((user as any).userRole && (user as any).userRole !== 'MOTOBOY') {
+      throw new AppError('AUTH-003', 403);
+    }
+
+    let motoboy = await this.motoboyRepository.findByUserId(userId);
+    if (!motoboy) {
+      motoboy = this.motoboyRepository.create({
+        userId,
+        status: 'PENDING_VERIFICATION',
+        createdByUserId: userId,
+      } as Motoboy);
+      motoboy = await this.motoboyRepository.save(motoboy);
+    }
+
+    return motoboy;
+  }
+
+  /**
    * Creates or returns motoboy profile.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)

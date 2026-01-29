@@ -16,7 +16,7 @@ export function MotoboyLogin() {
       const session = await authService.login(form.email, form.password);
       const sessionData = { token: session.token, user: session.user, store: session.store };
       setAuth(sessionData);
-      navigate('/motoboy/available');
+      navigate('/motoboy/current');
     } catch (err: any) {
       setError(err?.message || 'Não foi possível entrar agora.');
     }

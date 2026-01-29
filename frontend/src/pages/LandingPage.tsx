@@ -110,6 +110,12 @@ export function LandingPage() {
         'Clique em “Criar minha loja”, preencha os dados e confirme o e-mail. Você já entra no trial de 7 dias.',
     },
     {
+      category: 'Operação',
+      question: 'Como funciona o entregador (motoboy)?',
+      answer:
+        'O entregador cria uma conta própria e solicita vínculo com as lojas que deseja atender. O responsável da loja aprova e, a partir daí, ele já recebe pedidos de entrega.',
+    },
+    {
       category: 'Planos',
       question: 'O que acontece depois do trial de 7 dias?',
       answer:
@@ -471,6 +477,21 @@ export function LandingPage() {
                   <span>{item.label}</span>
                 </div>
               ))}
+            </div>
+            <div className="mt-5 rounded-2xl border border-slate-200 bg-white/80 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold text-slate-800">Área do entregador</p>
+                <p className="text-xs text-slate-500">
+                  Motoboys solicitam vínculo e entregam com controle total.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => navigate('/motoboy/register')}
+                className="px-4 py-2 rounded-lg bg-slate-900 text-white text-xs font-semibold hover:opacity-90"
+              >
+                Sou entregador
+              </button>
             </div>
           </div>
         </div>
