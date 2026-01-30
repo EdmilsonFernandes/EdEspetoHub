@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { CheckCircle, Clock, Storefront } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 import { motoboyService } from '../services/motoboyService';
 import { OrderCard } from '../components/Motoboy/OrderCard';
@@ -150,6 +151,36 @@ export function MotoboyAvailable() {
           {pendingCount} solicitação{pendingCount === 1 ? '' : 'es'} pendente{pendingCount === 1 ? '' : 's'} de vínculo
         </button>
       )}
+
+      <div className="grid gap-3 sm:grid-cols-3">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 flex items-center gap-3">
+          <div className="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
+            <CheckCircle size={20} weight="duotone" />
+          </div>
+          <div>
+            <p className="text-xs text-slate-500">Status</p>
+            <p className="text-sm font-semibold text-slate-800">{profile?.status || 'Pendente'}</p>
+          </div>
+        </div>
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 flex items-center gap-3">
+          <div className="h-10 w-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
+            <Storefront size={20} weight="duotone" />
+          </div>
+          <div>
+            <p className="text-xs text-slate-500">Lojas aprovadas</p>
+            <p className="text-sm font-semibold text-slate-800">{approvedStores.length}</p>
+          </div>
+        </div>
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 flex items-center gap-3">
+          <div className="h-10 w-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">
+            <Clock size={20} weight="duotone" />
+          </div>
+          <div>
+            <p className="text-xs text-slate-500">Pedidos agora</p>
+            <p className="text-sm font-semibold text-slate-800">{orders.length}</p>
+          </div>
+        </div>
+      </div>
 
       <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-2">
         <p className="text-sm font-semibold text-slate-700">Status do entregador</p>

@@ -1017,7 +1017,7 @@ export const GrillQueue = () => {
                 {order.status === "preparing" && order.type === "delivery" && (
                   <div className="w-full sm:w-auto">
                     <div className="mb-2 text-[11px] font-semibold text-sky-700 bg-sky-50 border border-sky-100 rounded-lg px-2.5 py-1">
-                      Pedido pronto? Aguarde o entregador.
+                      Pedido pronto? Marque como pronto para chamar o entregador.
                     </div>
                     {activeMotoboysCount === 0 && (
                       <div className="mb-2 text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-2.5 py-1">
@@ -1025,10 +1025,31 @@ export const GrillQueue = () => {
                       </div>
                     )}
                     <button
-                      onClick={() => { pulseCta(order.id + '-ready'); handleAdvance(order.id, "waiting_for_motoboy"); }}
+                      onClick={() => { pulseCta(order.id + '-ready'); handleAdvance(order.id, "ready_for_delivery"); }}
                       disabled={updating === order.id}
                       style={ctaPulseId === order.id + '-ready' ? { animation: 'btnPop 220ms ease' } : undefined}
                       className="w-full sm:w-auto px-3 py-2 rounded-lg bg-sky-600 text-white text-xs font-bold flex items-center justify-center gap-1 disabled:opacity-60 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95"
+                    >
+                      <CheckSquare size={16} weight="duotone" /> Marcar pronto
+                    </button>
+                  </div>
+                )}
+
+                {order.status === "ready_for_delivery" && order.type === "delivery" && (
+                  <div className="w-full sm:w-auto">
+                    <div className="mb-2 text-[11px] font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100 rounded-lg px-2.5 py-1">
+                      Pedido pronto. Chame o entregador para retirada.
+                    </div>
+                    {activeMotoboysCount === 0 && (
+                      <div className="mb-2 text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-2.5 py-1">
+                        Nenhum entregador ativo. Ative um vínculo em “Entregadores”.
+                      </div>
+                    )}
+                    <button
+                      onClick={() => { pulseCta(order.id + '-wait'); handleAdvance(order.id, "waiting_for_motoboy"); }}
+                      disabled={updating === order.id}
+                      style={ctaPulseId === order.id + '-wait' ? { animation: 'btnPop 220ms ease' } : undefined}
+                      className="w-full sm:w-auto px-3 py-2 rounded-lg bg-indigo-600 text-white text-xs font-bold flex items-center justify-center gap-1 disabled:opacity-60 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95"
                     >
                       <CheckSquare size={16} weight="duotone" /> Aguardar entregador
                     </button>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { ChartLineUp, Wallet } from '@phosphor-icons/react';
 import { motoboyService } from '../services/motoboyService';
 import { OrderCard } from '../components/Motoboy/OrderCard';
 import { useToast } from '../contexts/ToastContext';
@@ -76,19 +77,29 @@ export function MotoboyHistory() {
       )}
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <div className="rounded-2xl border border-slate-200 bg-white p-4">
-          <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Total do dia</p>
-          <p className="text-2xl font-black text-emerald-600 mt-2">
-            {totalToday.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-          </p>
-          <p className="text-xs text-slate-500 mt-1">Somatório do frete entregue hoje</p>
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 flex items-center justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Total do dia</p>
+            <p className="text-2xl font-black text-emerald-600 mt-2">
+              {totalToday.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+            </p>
+            <p className="text-xs text-slate-500 mt-1">Somatório do frete entregue hoje</p>
+          </div>
+          <div className="h-12 w-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <Wallet size={22} weight="duotone" />
+          </div>
         </div>
-        <div className="rounded-2xl border border-slate-200 bg-white p-4">
-          <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Últimos 30 dias</p>
-          <p className="text-2xl font-black text-slate-800 mt-2">
-            {totalMonth.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-          </p>
-          <p className="text-xs text-slate-500 mt-1">{orders.length} entregas concluídas</p>
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 flex items-center justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Últimos 30 dias</p>
+            <p className="text-2xl font-black text-slate-800 mt-2">
+              {totalMonth.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+            </p>
+            <p className="text-xs text-slate-500 mt-1">{orders.length} entregas concluídas</p>
+          </div>
+          <div className="h-12 w-12 rounded-2xl bg-slate-100 text-slate-700 flex items-center justify-center">
+            <ChartLineUp size={22} weight="duotone" />
+          </div>
         </div>
       </div>
 
