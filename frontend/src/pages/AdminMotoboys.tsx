@@ -238,6 +238,24 @@ export function AdminMotoboys() {
                   >
                     {docsLoadingId === link.motoboyId ? 'Carregando documentos...' : 'Ver documentos'}
                   </button>
+                  {!link.active && (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        if (!storeId) return;
+                        try {
+                          await motoboyAdminService.link(storeId, link.motoboyId);
+                          showToast('Vínculo reativado.', 'success');
+                          loadMotoboys();
+                        } catch (error: any) {
+                          showToast(error?.message || 'Não foi possível reativar vínculo.', 'error');
+                        }
+                      }}
+                      className="px-3 py-1.5 rounded-lg border border-emerald-200 text-xs font-semibold text-emerald-700"
+                    >
+                      Reativar vínculo
+                    </button>
+                  )}
                   <button
                     type="button"
                     onClick={() => handleUnlink(link.motoboyId)}
