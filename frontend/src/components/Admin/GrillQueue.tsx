@@ -1025,7 +1025,7 @@ export const GrillQueue = () => {
                       </div>
                     )}
                     <button
-                      onClick={() => { pulseCta(order.id + '-ready'); handleAdvance(order.id, "ready"); }}
+                      onClick={() => { pulseCta(order.id + '-ready'); handleAdvance(order.id, "waiting_for_motoboy"); }}
                       disabled={updating === order.id}
                       style={ctaPulseId === order.id + '-ready' ? { animation: 'btnPop 220ms ease' } : undefined}
                       className="w-full sm:w-auto px-3 py-2 rounded-lg bg-sky-600 text-white text-xs font-bold flex items-center justify-center gap-1 disabled:opacity-60 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95"
