@@ -362,11 +362,7 @@ export const GrillQueue = () => {
     try {
       setUpdating(orderId);
       await orderService.updateStatus(orderId, status);
-      setQueue((prev) =>
-        prev.map((order) =>
-          order.id === orderId ? { ...order, status } : order
-        )
-      );
+      await loadQueue();
     } catch (err) {
       console.error('Erro ao atualizar status', err);
       setError('Não foi possível atualizar o status agora. Tente novamente.');
