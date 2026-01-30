@@ -188,7 +188,7 @@ export class OrderService
     if (order.type === 'delivery' && deliveryStatuses.has(status)) {
       const transitions: Record<string, string[]> = {
         pending: [ 'preparing' ],
-        preparing: [ 'ready_for_delivery' ],
+        preparing: [ 'ready_for_delivery', 'waiting_for_motoboy' ],
         ready_for_delivery: [ 'waiting_for_motoboy', 'in_delivery' ],
         waiting_for_motoboy: [ 'in_delivery' ],
         in_delivery: [ 'delivered', 'finished' ],
