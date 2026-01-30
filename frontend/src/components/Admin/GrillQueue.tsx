@@ -17,6 +17,7 @@ import {
 import { orderService } from "../../services/orderService";
 import { storeService } from "../../services/storeService";
 import { productService } from "../../services/productService";
+import { motoboyAdminService } from "../../services/motoboyAdminService";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
 import {
   formatCurrency,
@@ -70,6 +71,7 @@ export const GrillQueue = () => {
     return saved ? saved === "true" : true;
   });
   const [actionsOpen, setActionsOpen] = useState(false);
+  const [activeMotoboysCount, setActiveMotoboysCount] = useState(0);
   const [tvMode, setTvMode] = useState(() => {
     if (typeof window === "undefined") return false;
     return localStorage.getItem("queueTvMode") === "true";
@@ -97,6 +99,21 @@ export const GrillQueue = () => {
     };
     loadPixKey();
   }, [auth?.store?.settings?.pixKey, storeSlug]);
+
+  useEffect(() => {
+    const loadMotoboys = async () => {
+      const storeId = auth?.store?.id;
+      if (!storeId) return;
+      try {
+        const data = await motoboyAdminService.list(storeId);
+        const links = Array.isArray(data) ? data : [];
+        setActiveMotoboysCount(links.filter((link) => link.active).length);
+      } catch {
+        setActiveMotoboysCount(0);
+      }
+    };
+    loadMotoboys();
+  }, [auth?.store?.id]);
   useEffect(() => {
     if (typeof window === "undefined") return;
     localStorage.setItem("queueTvMode", String(tvMode));
@@ -1002,6 +1019,11 @@ export const GrillQueue = () => {
                     <div className="mb-2 text-[11px] font-semibold text-sky-700 bg-sky-50 border border-sky-100 rounded-lg px-2.5 py-1">
                       Pedido pronto? Aguarde o entregador.
                     </div>
+                    {activeMotoboysCount === 0 && (
+                      <div className="mb-2 text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-2.5 py-1">
+                        Nenhum entregador ativo. Ative um vínculo em “Entregadores”.
+                      </div>
+                    )}
                     <button
                       onClick={() => { pulseCta(order.id + '-ready'); handleAdvance(order.id, "ready"); }}
                       disabled={updating === order.id}

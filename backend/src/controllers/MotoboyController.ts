@@ -71,6 +71,7 @@ export class MotoboyController {
   static async listStoreRequests(req: Request, res: Response) {
     try {
       const motoboy = await motoboyService.getOrCreateMotoboyByUserId(req.auth?.sub || '');
+      const activeStoreIds = await motoboyService.listStoreIds(motoboy.id);
       const requests = await motoboyService.listStoreRequests(motoboy);
       return res.json(
         requests.map((request) => ({
@@ -78,6 +79,7 @@ export class MotoboyController {
           storeId: request.storeId,
           status: request.status,
           createdAt: request.createdAt,
+          linkActive: activeStoreIds.includes(request.storeId),
           store: request.store
             ? { id: request.store.id, name: request.store.name, slug: request.store.slug }
             : null,

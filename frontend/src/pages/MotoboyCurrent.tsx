@@ -525,14 +525,18 @@ export function MotoboyCurrent() {
                 <span
                   className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
                     req.status === 'APPROVED'
-                      ? 'bg-emerald-100 text-emerald-700'
+                      ? req.linkActive
+                        ? 'bg-emerald-100 text-emerald-700'
+                        : 'bg-rose-100 text-rose-700'
                       : req.status === 'REJECTED'
                       ? 'bg-rose-100 text-rose-700'
                       : 'bg-amber-100 text-amber-700'
                   }`}
                 >
                   {req.status === 'APPROVED'
-                    ? 'Aprovado'
+                    ? req.linkActive
+                      ? 'Aprovado'
+                      : 'Vínculo inativo'
                     : req.status === 'REJECTED'
                     ? 'Recusado'
                     : 'Pendente'}
