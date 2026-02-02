@@ -1185,7 +1185,7 @@ export function LandingPage() {
         </div>
       )}
 
-      <div className="fixed bottom-24 right-4 z-40 flex flex-col items-end gap-3">
+      <div className="fixed bottom-4 right-4 z-40 flex flex-col items-end gap-3 sm:bottom-6 sm:right-6">
         {faqOpen && (
           <div className="w-[320px] sm:w-[360px] rounded-3xl border border-slate-200 bg-white shadow-[0_24px_70px_-40px_rgba(15,23,42,0.45)] overflow-hidden">
             <div className="px-5 py-4 bg-gradient-to-r from-red-600 to-red-500 text-white dark:from-red-700 dark:to-red-600">
@@ -1250,8 +1250,8 @@ export function LandingPage() {
         </button>
       </div>
 
-      <div className="h-16 sm:hidden" />
-      <div className="sm:hidden fixed bottom-0 inset-x-0 z-40 px-4 pb-4">
+      <div className="h-20 sm:hidden" />
+      <div className="sm:hidden fixed bottom-0 inset-x-0 z-50 px-4 pb-4">
         <div className="rounded-2xl border border-red-200 dark:border-red-800 bg-white/95 dark:bg-slate-800/95 backdrop-blur shadow-[0_12px_30px_rgba(15,23,42,0.18)] px-3 py-3 flex items-center gap-3">
           <div className="flex-1">
             <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">7 dias grátis + sem cartão</p>

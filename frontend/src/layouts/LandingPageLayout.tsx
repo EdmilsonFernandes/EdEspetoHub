@@ -40,7 +40,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
               {!auth && (
                 <button
                   onClick={() => navigate('/create')}
-                  className="px-4 py-2 text-sm rounded-full bg-brand-gradient text-white font-semibold shadow-[0_16px_30px_-20px_rgba(239,68,68,0.9)] hover:opacity-90 transition"
+                  className="hidden sm:inline-flex px-4 py-2 text-sm rounded-full bg-brand-gradient text-white font-semibold shadow-[0_16px_30px_-20px_rgba(239,68,68,0.9)] hover:opacity-90 transition"
                 >
                   Criar loja
                 </button>
@@ -71,13 +71,13 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
               </button>
               <a
                 href="/#guia-usuario"
-                className="px-3 py-2 sm:px-4 text-sm rounded-full text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                className="hidden sm:inline-flex px-3 py-2 sm:px-4 text-sm rounded-full text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
               >
                 Guia
               </a>
               <button
                 onClick={() => navigate('/admin')}
-                className="px-3 py-2 sm:px-4 text-sm rounded-full border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
+                className="hidden sm:inline-flex px-3 py-2 sm:px-4 text-sm rounded-full border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
               >
                 Admin loja
               </button>
@@ -94,7 +94,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
               <button
                 onClick={() => navigate('/create')}
-                className="px-3 py-2 text-xs rounded-full bg-brand-gradient text-white font-semibold whitespace-nowrap"
+                className="px-3 py-2 text-xs rounded-full bg-brand-gradient text-white font-semibold whitespace-nowrap shadow-sm"
               >
                 Criar loja
               </button>
@@ -102,19 +102,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                 onClick={() => navigate('/admin')}
                 className="px-3 py-2 text-xs rounded-full border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 whitespace-nowrap"
               >
-                Admin loja
-              </button>
-              <button
-                onClick={() => navigate('/motoboy/login')}
-                className="px-3 py-2 text-xs rounded-full border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-200 whitespace-nowrap"
-              >
-                Entregador
-              </button>
-              <button
-                onClick={() => navigate('/portfolio')}
-                className="px-3 py-2 text-xs rounded-full text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 whitespace-nowrap"
-              >
-                Portfólio
+                Admin
               </button>
               <a
                 href="/#guia-usuario"
