@@ -47,7 +47,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
               )}
               <button
                 onClick={() => navigate('/motoboy/login')}
-                className="px-3 py-2 sm:px-4 text-sm rounded-full border border-emerald-200 text-emerald-700 hover:bg-emerald-50 transition-all"
+                className="px-3 py-2 sm:px-4 text-sm rounded-full border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-200 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 transition-all"
               >
                 Entrar entregador
               </button>
@@ -57,7 +57,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                     logout();
                     navigate('/');
                   }}
-                  className="px-3 py-2 sm:px-4 text-sm rounded-full border border-red-200 text-red-600 hover:bg-red-50 transition-all flex items-center gap-1.5"
+                  className="px-3 py-2 sm:px-4 text-sm rounded-full border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-950/50 transition-all flex items-center gap-1.5"
                 >
                   <SignOut size={16} weight="bold" />
                   <span className="hidden sm:inline">Sair</span>
@@ -65,19 +65,19 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
               )}
               <button
                 onClick={() => navigate('/portfolio')}
-                className="px-3 py-2 sm:px-4 text-sm rounded-full text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors"
+                className="px-3 py-2 sm:px-4 text-sm rounded-full text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
               >
                 Portfólio
               </button>
               <a
                 href="/#guia-usuario"
-                className="px-3 py-2 sm:px-4 text-sm rounded-full text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors"
+                className="px-3 py-2 sm:px-4 text-sm rounded-full text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
               >
                 Guia
               </a>
               <button
                 onClick={() => navigate('/admin')}
-                className="px-3 py-2 sm:px-4 text-sm rounded-full border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all"
+                className="px-3 py-2 sm:px-4 text-sm rounded-full border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
               >
                 Admin loja
               </button>
@@ -100,25 +100,25 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
               </button>
               <button
                 onClick={() => navigate('/admin')}
-                className="px-3 py-2 text-xs rounded-full border border-slate-200 text-slate-600 whitespace-nowrap"
+                className="px-3 py-2 text-xs rounded-full border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 whitespace-nowrap"
               >
                 Admin loja
               </button>
               <button
                 onClick={() => navigate('/motoboy/login')}
-                className="px-3 py-2 text-xs rounded-full border border-emerald-200 text-emerald-700 whitespace-nowrap"
+                className="px-3 py-2 text-xs rounded-full border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-200 whitespace-nowrap"
               >
                 Entregador
               </button>
               <button
                 onClick={() => navigate('/portfolio')}
-                className="px-3 py-2 text-xs rounded-full text-slate-600 border border-slate-200 whitespace-nowrap"
+                className="px-3 py-2 text-xs rounded-full text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 whitespace-nowrap"
               >
                 Portfólio
               </button>
               <a
                 href="/#guia-usuario"
-                className="px-3 py-2 text-xs rounded-full text-slate-600 border border-slate-200 whitespace-nowrap"
+                className="px-3 py-2 text-xs rounded-full text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 whitespace-nowrap"
               >
                 Guia
               </a>
