@@ -184,6 +184,16 @@ CREATE TABLE IF NOT EXISTS plans (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+INSERT INTO plans (name, display_name, price, promo_price, duration_days, enabled)
+VALUES
+  ('basic_monthly', 'Basic Mensal', 49.90, NULL, 30, true),
+  ('pro_monthly', 'Pro Mensal', 79.90, NULL, 30, true),
+  ('premium_monthly', 'Premium Mensal', 119.90, NULL, 30, true),
+  ('basic_yearly', 'Basic Anual', 39.90, NULL, 365, true),
+  ('pro_yearly', 'Pro Anual', 59.90, NULL, 365, true),
+  ('premium_yearly', 'Premium Anual', 89.90, NULL, 365, true)
+ON CONFLICT (name) DO NOTHING;
+
 CREATE TABLE IF NOT EXISTS order_eta_estimates (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
