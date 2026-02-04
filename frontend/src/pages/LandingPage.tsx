@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { TouchEvent } from 'react';
 import { Hero } from '../components/Hero';
 import {
   Palette,
@@ -8,8 +9,6 @@ import {
   Hamburger,
   ShoppingCart,
   ChefHat,
-  ChartBar,
-  Sparkle,
   Storefront,
   Truck,
   ForkKnife,
@@ -23,18 +22,56 @@ import { useNavigate } from 'react-router-dom';
 import { formatCurrency } from '../utils/format';
 
 export function LandingPage() {
+  type LightboxShot = {
+    title: string;
+    description: string;
+    image: string;
+    tag?: string;
+  };
+
+  type LightboxState = {
+    shots: LightboxShot[];
+    index: number;
+    label?: string;
+  };
+
+  type PublicMetrics = {
+    activeStores?: number;
+    totalOrders?: number;
+    totalRevenue?: number;
+  };
+
+  type Plan = {
+    id?: string;
+    name: string;
+    displayName?: string;
+    price?: number | null;
+  };
+
+  type CurrentPlan = {
+    name: string;
+    price: number;
+    hasPrice: boolean;
+    period: string;
+    features: string[];
+    popular?: boolean;
+    savings?: string;
+    id?: string;
+    isTest?: boolean;
+  };
+
   const navigate = useNavigate();
   const [isAnnual, setIsAnnual] = useState(false);
   const [carouselIndex, setCarouselIndex] = useState(0);
-  const [plans, setPlans] = useState([]);
-  const [publicMetrics, setPublicMetrics] = useState(null);
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [publicMetrics, setPublicMetrics] = useState<PublicMetrics | null>(null);
   const [ticketAverage, setTicketAverage] = useState('20');
   const [ordersPerDay, setOrdersPerDay] = useState('15');
   const [faqOpen, setFaqOpen] = useState(false);
   const [faqActive, setFaqActive] = useState<number | null>(0);
   const [faqCategory, setFaqCategory] = useState('Planos');
   const [guideStep, setGuideStep] = useState(0);
-  const [lightbox, setLightbox] = useState(null);
+  const [lightbox, setLightbox] = useState<LightboxState | null>(null);
   const touchStartRef = useRef({ x: 0, y: 0 });
   const touchActiveRef = useRef(false);
   const audienceItems = [
@@ -282,29 +319,30 @@ export function LandingPage() {
       })),
     [guideSteps]
   );
-  const activeShot = lightbox?.shots?.[lightbox.index];
+  const activeShot = lightbox ? lightbox.shots[lightbox.index] : undefined;
+  const lightboxShots = lightbox?.shots ?? [];
   const selectedIndex = lightbox?.index ?? 0;
   const handlePrevShot = useCallback(() => {
     if (!lightbox?.shots?.length) return;
     const nextIndex = selectedIndex <= 0 ? lightbox.shots.length - 1 : selectedIndex - 1;
-    setLightbox({ shots: lightbox.shots, index: nextIndex });
+    setLightbox({ shots: lightbox.shots, index: nextIndex, label: lightbox.label });
   }, [lightbox, selectedIndex]);
   const handleNextShot = useCallback(() => {
     if (!lightbox?.shots?.length) return;
     const nextIndex = selectedIndex >= lightbox.shots.length - 1 ? 0 : selectedIndex + 1;
-    setLightbox({ shots: lightbox.shots, index: nextIndex });
+    setLightbox({ shots: lightbox.shots, index: nextIndex, label: lightbox.label });
   }, [lightbox, selectedIndex]);
-  const openLightbox = (shots, index = 0, label = '') => {
+  const openLightbox = (shots: LightboxShot[], index = 0, label = '') => {
     if (!shots?.length) return;
     setLightbox({ shots, index, label });
   };
-  const handleTouchStart = (event) => {
+  const handleTouchStart = (event: TouchEvent<HTMLDivElement>) => {
     const touch = event.touches?.[0];
     if (!touch) return;
     touchStartRef.current = { x: touch.clientX, y: touch.clientY };
     touchActiveRef.current = true;
   };
-  const handleTouchEnd = (event) => {
+  const handleTouchEnd = (event: TouchEvent<HTMLDivElement>) => {
     if (!touchActiveRef.current) return;
     const touch = event.changedTouches?.[0];
     if (!touch) return;
@@ -343,13 +381,13 @@ export function LandingPage() {
   const monthlyEstimate = parsedTicket * parsedOrders * 30;
   const numberFormatter = useMemo(() => new Intl.NumberFormat('pt-BR'), []);
   const plansByName = useMemo(() => {
-    const map = {};
-    plans.forEach(plan => {
+    const map: Record<string, Plan> = {};
+    plans.forEach((plan) => {
       map[plan.name] = plan;
     });
     return map;
   }, [plans]);
-  const currentPlans = PLAN_TIERS.map(tier => {
+  const currentPlans: CurrentPlan[] = PLAN_TIERS.map(tier => {
     const planKey = getPlanName(tier.key, billingKey);
     const plan = plansByName[planKey];
     const price = plan?.price ?? null;
@@ -360,7 +398,7 @@ export function LandingPage() {
       period: billing.period,
       features: tier.features,
       popular: tier.popular,
-      savings: billing.savings,
+      savings: 'savings' in billing ? billing.savings : undefined,
       id: plan?.id,
     };
   });
@@ -460,7 +498,7 @@ export function LandingPage() {
                   desc: 'Fila de Produção atualiza sozinha e o cliente acompanha.',
                   icon: ChefHat,
                 },
-              ].map((step, index) => {
+              ].map((step) => {
                 const Icon = step.icon;
                 return (
                 <div key={step.title} className="flex items-start gap-4">
@@ -1118,7 +1156,7 @@ export function LandingPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="hidden sm:inline text-[11px] text-slate-400 mr-2">
-                    {selectedIndex + 1}/{lightbox?.shots?.length || 0}
+                    {selectedIndex + 1}/{lightboxShots.length}
                   </span>
                   <span className="hidden sm:inline text-[11px] text-slate-400 mr-2">Use ← → para navegar</span>
                 <button
@@ -1156,14 +1194,14 @@ export function LandingPage() {
                 Arraste para navegar
               </div>
             </div>
-            {lightbox?.shots?.length > 1 && (
+            {lightboxShots.length > 1 && (
               <div className="px-4 pb-4">
                 <div className="flex items-center gap-2 overflow-x-auto pb-2">
-                  {lightbox.shots.map((shot, index) => (
+                  {lightboxShots.map((shot, index) => (
                     <button
                       key={`${shot.title}-${index}`}
                       type="button"
-                      onClick={() => setLightbox({ shots: lightbox.shots, index, label: lightbox.label })}
+                      onClick={() => setLightbox({ shots: lightboxShots, index, label: lightbox?.label })}
                       className={`flex-shrink-0 rounded-xl border ${
                         index === selectedIndex
                           ? 'border-brand-primary ring-2 ring-brand-primary/40'

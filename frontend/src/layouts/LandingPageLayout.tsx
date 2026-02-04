@@ -36,7 +36,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
               </div>
             </a>
 
-            <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-end">
+            <div className="hidden sm:flex items-center gap-2 sm:gap-3 flex-wrap justify-end">
               {!auth && (
                 <button
                   onClick={() => navigate('/create')}
@@ -99,10 +99,22 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                 Criar loja
               </button>
               <button
+                onClick={() => navigate('/motoboy/login')}
+                className="px-3 py-2 text-xs rounded-full border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-200 whitespace-nowrap"
+              >
+                Entrar entregador
+              </button>
+              <button
                 onClick={() => navigate('/admin')}
                 className="px-3 py-2 text-xs rounded-full border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 whitespace-nowrap"
               >
                 Admin
+              </button>
+              <button
+                onClick={() => navigate('/portfolio')}
+                className="px-3 py-2 text-xs rounded-full border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 whitespace-nowrap"
+              >
+                Portfólio
               </button>
               <a
                 href="/#guia-usuario"
@@ -110,6 +122,13 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
               >
                 Guia
               </a>
+              <button
+                onClick={toggleTheme}
+                className="cursor-pointer px-3 py-2 text-xs rounded-full border border-slate-200/60 text-gray-700 dark:text-gray-300 whitespace-nowrap"
+                aria-label="Toggle theme"
+              >
+                {theme === 'light' ? 'Modo escuro' : 'Modo claro'}
+              </button>
             </div>
           </div>
         </div>

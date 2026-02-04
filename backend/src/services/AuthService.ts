@@ -290,7 +290,23 @@ export class AuthService
       });
       await storeRepo.save(store);
 
-      const plan = await planRepo.findOne({ where: { id: input.planId } });
+      let resolvedPlanId = input.planId;
+      if (resolvedPlanId === 'test-plan-7days') {
+        const preferred = await planRepo.findOne({ where: { name: 'basic_monthly', enabled: true } });
+        if (preferred) {
+          resolvedPlanId = preferred.id;
+        } else {
+          const fallback = await planRepo.findOne({
+            where: { enabled: true },
+            order: { price: 'ASC' },
+          });
+          resolvedPlanId = fallback?.id;
+        }
+      }
+
+      const plan = resolvedPlanId
+        ? await planRepo.findOne({ where: { id: resolvedPlanId } })
+        : null;
       if (!plan || !plan.enabled)
       {
         throw new AppError('SUB-003', 400);

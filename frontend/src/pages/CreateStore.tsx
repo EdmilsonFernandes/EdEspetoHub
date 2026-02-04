@@ -234,6 +234,13 @@ export function CreateStore() {
     return acc;
   }, {});
 
+  const resolveEffectivePlanId = () => {
+    if (selectedPlanId !== 'test-plan-7days') return selectedPlanId;
+    const preferred = plansByName[getPlanName('basic', billingKey)]?.id;
+    const fallback = plans?.[0]?.id;
+    return preferred || fallback || selectedPlanId;
+  };
+
   useEffect(() => {
     // Don't modify test plan selection
     if (selectedPlanId === 'test-plan-7days') return;
@@ -277,6 +284,12 @@ export function CreateStore() {
         return;
       }
       setIsRegistering(true);
+      const effectivePlanId = resolveEffectivePlanId();
+      if (effectivePlanId === 'test-plan-7days') {
+        setStoreError('Não foi possível identificar um plano válido. Atualize a página e tente novamente.');
+        return;
+      }
+
       const payload = {
         user: {
           fullName: registerForm.fullName,
@@ -296,7 +309,7 @@ export function CreateStore() {
           secondaryColor: registerForm.secondaryColor,
           socialLinks: registerForm.socialLinks.filter((link) => link.value),
         },
-        planId: selectedPlanId,
+        planId: effectivePlanId,
         paymentMethod,
         termsAccepted,
         lgpdAccepted,
