@@ -144,6 +144,17 @@ export async function runMigrations() {
     ADD COLUMN IF NOT EXISTS promo_price NUMERIC(10,2);
   `);
   await AppDataSource.query(`
+    INSERT INTO plans (name, display_name, price, promo_price, duration_days, enabled)
+    VALUES
+      ('basic_monthly', 'Basic Mensal', 49.90, NULL, 30, true),
+      ('pro_monthly', 'Pro Mensal', 79.90, NULL, 30, true),
+      ('premium_monthly', 'Premium Mensal', 119.90, NULL, 30, true),
+      ('basic_yearly', 'Basic Anual', 39.90, NULL, 365, true),
+      ('pro_yearly', 'Pro Anual', 59.90, NULL, 365, true),
+      ('premium_yearly', 'Premium Anual', 89.90, NULL, 365, true)
+    ON CONFLICT (name) DO NOTHING;
+  `);
+  await AppDataSource.query(`
     ALTER TABLE IF EXISTS payments
     ADD COLUMN IF NOT EXISTS qr_code_text TEXT;
   `);
