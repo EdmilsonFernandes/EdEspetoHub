@@ -1,10 +1,22 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
-import { ArrowUpRight, MagnifyingGlass, X } from "@phosphor-icons/react";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  ArrowRight,
+  ArrowUpRight,
+  BookOpen,
+  ChartBar,
+  CheckCircle,
+  CreditCard,
+  Lightning,
+  MagnifyingGlass,
+  Storefront,
+  X,
+} from "@phosphor-icons/react";
 import { LandingPageLayout } from "../layouts/LandingPageLayout";
 import { storeService } from "../services/storeService";
 import { productService } from "../services/productService";
 import { orderService } from "../services/orderService";
+import { platformService } from "../services/platformService";
 import { resolveAssetUrl } from "../utils/resolveAssetUrl";
 import { formatCurrency } from "../utils/format";
 
@@ -50,6 +62,23 @@ type MenuInfo = {
 };
 
 export function PortfolioPage() {
+  const navigate = useNavigate();
+  // Used by the mobile sticky CTA (simple anchor without router).
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const el = document.getElementById("top");
+    if (!el) {
+      const anchor = document.createElement("div");
+      anchor.id = "top";
+      anchor.style.position = "absolute";
+      anchor.style.top = "0";
+      anchor.style.left = "0";
+      anchor.style.height = "1px";
+      anchor.style.width = "1px";
+      document.body.prepend(anchor);
+    }
+  }, []);
+
   const teamMembers: TeamMember[] = [
     {
       name: "Edmilson Lopes Fernandes",
@@ -117,6 +146,14 @@ export function PortfolioPage() {
   const [error, setError] = useState("");
   const [profilePreview, setProfilePreview] = useState<{ name: string; image: string } | null>(null);
   const [menuBySlug, setMenuBySlug] = useState<Record<string, MenuInfo>>({});
+  const [metrics, setMetrics] = useState<{
+    totalStores?: number;
+    activeStores?: number;
+    totalOrders?: number;
+    totalRevenue?: number;
+    updatedAt?: string;
+  } | null>(null);
+  const [metricsLoading, setMetricsLoading] = useState(true);
 
   useEffect(() => {
     let active = true;
@@ -142,6 +179,33 @@ export function PortfolioPage() {
 
     loadPortfolio();
 
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    const loadMetrics = async () => {
+      try {
+        setMetricsLoading(true);
+        const data = await platformService.getPublicMetrics();
+        if (!active) return;
+        setMetrics({
+          totalStores: Number(data?.totalStores) || 0,
+          activeStores: Number(data?.activeStores) || 0,
+          totalOrders: Number(data?.totalOrders) || 0,
+          totalRevenue: Number(data?.totalRevenue) || 0,
+          updatedAt: data?.updatedAt,
+        });
+      } catch {
+        if (!active) return;
+        setMetrics(null);
+      } finally {
+        if (active) setMetricsLoading(false);
+      }
+    };
+    loadMetrics();
     return () => {
       active = false;
     };
@@ -249,6 +313,14 @@ export function PortfolioPage() {
       .slice(0, 2)
       .toUpperCase();
 
+  const formatCompact = (value: number) => {
+    const numeric = Number(value) || 0;
+    return new Intl.NumberFormat("pt-BR", {
+      notation: "compact",
+      maximumFractionDigits: 1,
+    }).format(numeric);
+  };
+
   useEffect(() => {
     if (!profilePreview) return;
     const handleKey = (event: KeyboardEvent) => {
@@ -263,34 +335,172 @@ export function PortfolioPage() {
   return (
     <LandingPageLayout>
       <section className="relative overflow-hidden bg-white">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(239,68,68,0.12),_transparent_60%)]" />
-        <div className="max-w-6xl mx-auto px-4 py-16 sm:py-20 relative">
-          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
-            <div className="space-y-4 max-w-2xl">
-              <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.35em] text-red-600">
-                Portfolio de lojas
-              </span>
-              <h1 className="text-3xl sm:text-5xl font-black text-slate-900">
-                Lojas ativas que ja vendem com o Chama no Espeto
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(239,68,68,0.14),_transparent_62%)]" />
+        <div className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-orange-200/40 blur-3xl" />
+        <div className="absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-red-200/30 blur-3xl" />
+
+        <div className="max-w-6xl mx-auto px-4 py-14 sm:py-20 relative">
+          <div className="grid gap-10 lg:grid-cols-12 lg:items-center">
+            <div className="lg:col-span-7 space-y-5">
+              <div className="inline-flex items-center gap-2 rounded-full border border-red-100 bg-red-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-red-700">
+                <Lightning size={14} weight="duotone" />
+                Cardapio online + pedidos + produção
+              </div>
+              <h1 className="text-3xl sm:text-5xl font-black text-slate-900 leading-[1.06]">
+                Um site que vende, com painel que organiza a cozinha.
               </h1>
-              <p className="text-slate-600 text-sm sm:text-base">
-                Explore as vitrines publicas e veja como cada loja personalizou sua experiencia.
+              <p className="text-slate-600 text-sm sm:text-base max-w-xl">
+                Veja lojas reais usando a plataforma e entenda como transformar seu cardápio em pedidos,
+                com identidade da sua marca e experiência mobile premium.
               </p>
-            </div>
-            <div className="w-full lg:w-80">
-              <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.25em]">
-                Buscar loja
-              </label>
-              <div className="mt-2 relative">
-                <MagnifyingGlass size={16} weight="bold" className="text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                <input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  className="w-full rounded-full border border-slate-200 bg-white py-3 pl-9 pr-4 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                  placeholder="Digite o nome ou slug"
-                />
+
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button
+                  type="button"
+                  onClick={() => navigate("/create")}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-5 py-3 text-sm font-bold text-white shadow-[0_18px_40px_-28px_rgba(239,68,68,0.9)] hover:opacity-95 active:scale-[0.99] transition"
+                >
+                  Criar minha loja
+                  <ArrowRight size={18} weight="bold" />
+                </button>
+                <a
+                  href="/#produto-real"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-800 hover:bg-slate-50 active:scale-[0.99] transition"
+                >
+                  Ver produto real
+                  <ArrowUpRight size={18} weight="bold" />
+                </a>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 pt-2">
+                {[
+                  { label: "Mobile-first", icon: CheckCircle },
+                  { label: "Personalizacao por loja", icon: Storefront },
+                  { label: "Fila e operação", icon: ChartBar },
+                  { label: "Pagamentos", icon: CreditCard },
+                ].map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <div
+                      key={item.label}
+                      className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-xs font-semibold text-slate-700 flex items-center gap-2 shadow-sm"
+                    >
+                      <span className="h-8 w-8 rounded-xl bg-slate-900 text-white grid place-items-center">
+                        <Icon size={16} weight="duotone" />
+                      </span>
+                      {item.label}
+                    </div>
+                  );
+                })}
               </div>
             </div>
+
+            <div className="lg:col-span-5">
+              <div className="rounded-3xl border border-slate-200 bg-white shadow-[0_24px_60px_-36px_rgba(15,23,42,0.6)] overflow-hidden">
+                <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/60">
+                  <p className="text-[11px] uppercase tracking-[0.35em] text-slate-500 font-semibold">
+                    Resultados (publico)
+                  </p>
+                  <p className="text-lg font-black text-slate-900">Indicadores da plataforma</p>
+                  <p className="text-xs text-slate-500 mt-1">
+                    {metrics?.updatedAt ? `Atualizado em ${new Date(metrics.updatedAt).toLocaleString("pt-BR")}` : "Atualizacao periodica"}
+                  </p>
+                </div>
+                <div className="p-6 grid grid-cols-2 gap-4">
+                  {[
+                    { label: "Lojas cadastradas", value: metrics?.totalStores ?? 0 },
+                    { label: "Lojas ativas", value: metrics?.activeStores ?? 0 },
+                    { label: "Pedidos", value: metrics?.totalOrders ?? 0 },
+                    { label: "Vendas", value: metrics?.totalRevenue ?? 0, currency: true },
+                  ].map((item) => (
+                    <div key={item.label} className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                      <p className="text-[11px] uppercase tracking-[0.25em] text-slate-400 font-semibold">
+                        {item.label}
+                      </p>
+                      <p className="mt-2 text-2xl font-black text-slate-900">
+                        {metricsLoading
+                          ? "—"
+                          : item.currency
+                          ? formatCurrency(Number(item.value) || 0)
+                          : formatCompact(Number(item.value) || 0)}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-10">
+            <div className="rounded-3xl border border-slate-200 bg-white shadow-sm p-5 sm:p-6 grid gap-4 lg:grid-cols-3 lg:items-center">
+              <div className="lg:col-span-2">
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-[0.3em]">
+                  Portfólio de lojas
+                </p>
+                <p className="text-lg font-black text-slate-900 mt-1">
+                  Explore vitrines reais antes de cadastrar.
+                </p>
+                <p className="text-sm text-slate-600 mt-2">
+                  Busque pelo nome/slug e abra a vitrine para ver identidade, produtos e comportamento no mobile.
+                </p>
+              </div>
+              <div className="w-full">
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.25em]">
+                  Buscar loja
+                </label>
+                <div className="mt-2 relative">
+                  <MagnifyingGlass
+                    size={16}
+                    weight="bold"
+                    className="text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"
+                  />
+                  <input
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-9 pr-4 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                    placeholder="Digite o nome ou slug"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-slate-50 py-14">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="grid gap-6 md:grid-cols-3">
+            {[
+              {
+                title: "1. Personalize",
+                description: "Logo, cores, descricoes, Pix e horarios. A vitrine fica com a cara da sua loja.",
+                icon: Storefront,
+              },
+              {
+                title: "2. Cadastre produtos",
+                description: "Itens, categorias, promocao do dia e disponibilidade por dia da semana.",
+                icon: BookOpen,
+              },
+              {
+                title: "3. Venda e organize",
+                description: "Pedidos, fila da cozinha, acompanhamento do cliente e historico.",
+                icon: ChartBar,
+              },
+            ].map((step) => {
+              const Icon = step.icon;
+              return (
+                <div
+                  key={step.title}
+                  className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
+                >
+                  <div className="h-12 w-12 rounded-2xl bg-slate-900 text-white grid place-items-center shadow-sm">
+                    <Icon size={20} weight="duotone" />
+                  </div>
+                  <h3 className="mt-4 text-lg font-black text-slate-900">{step.title}</h3>
+                  <p className="mt-2 text-sm text-slate-600">{step.description}</p>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -311,8 +521,10 @@ export function PortfolioPage() {
 
           {!loading && !error && filteredStores.length === 0 && (
             <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-8 text-center">
-              <div className="text-4xl">🏪</div>
-              <p className="mt-3 text-sm font-semibold text-slate-700">Nenhuma loja encontrada.</p>
+              <div className="mx-auto h-14 w-14 rounded-3xl bg-slate-900 text-white grid place-items-center shadow-sm">
+                <Storefront size={22} weight="duotone" />
+              </div>
+              <p className="mt-4 text-sm font-semibold text-slate-700">Nenhuma loja encontrada.</p>
               <p className="text-xs text-slate-500">Tente buscar por outro nome ou slug.</p>
             </div>
           )}
@@ -369,7 +581,7 @@ export function PortfolioPage() {
                             className="px-2 py-0.5 rounded-full text-[10px] font-semibold text-white"
                             style={{ backgroundColor: primary }}
                           >
-                            🔥 Mais vendidos
+                            Mais vendidos
                           </span>
                         </div>
                         <div className="mt-3 space-y-2 text-xs text-slate-600">
@@ -402,6 +614,62 @@ export function PortfolioPage() {
               })}
             </div>
           )}
+        </div>
+      </section>
+
+      <section className="bg-white py-16">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="rounded-3xl border border-slate-200 bg-slate-50/60 p-7 sm:p-10 overflow-hidden relative">
+            <div className="absolute inset-0 opacity-25 bg-[radial-gradient(circle_at_top,_rgba(239,68,68,0.25),_transparent_60%)]" />
+            <div className="relative grid gap-8 lg:grid-cols-12 lg:items-center">
+              <div className="lg:col-span-7 space-y-3">
+                <p className="text-[11px] uppercase tracking-[0.35em] text-red-700 font-semibold">
+                  Pronto para colocar no ar
+                </p>
+                <h2 className="text-2xl sm:text-4xl font-black text-slate-900 leading-tight">
+                  Se sua vitrine parecer boa no celular, ela vende mais.
+                </h2>
+                <p className="text-sm text-slate-600 max-w-xl">
+                  O foco aqui é conversao: produto bem apresentado, carrinho simples, checkout objetivo e acompanhamento do pedido.
+                </p>
+              </div>
+              <div className="lg:col-span-5">
+                <div className="grid gap-3">
+                  {[
+                    "Vitrine com identidade da sua loja (logo/cores)",
+                    "Promoções com preço riscado e destaque",
+                    "Fila da cozinha e painel interno",
+                    "Tracking público do pedido",
+                  ].map((item) => (
+                    <div key={item} className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                      <span className="mt-0.5 h-8 w-8 rounded-xl bg-slate-900 text-white grid place-items-center">
+                        <CheckCircle size={16} weight="duotone" />
+                      </span>
+                      <span className="text-sm font-semibold text-slate-800">{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="lg:col-span-12 pt-2 flex flex-col sm:flex-row gap-3">
+                <button
+                  type="button"
+                  onClick={() => navigate("/create")}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 text-sm font-bold text-white hover:bg-slate-800 active:scale-[0.99] transition"
+                >
+                  Criar minha loja agora
+                  <ArrowRight size={18} weight="bold" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate("/admin")}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-slate-800 hover:bg-slate-50 active:scale-[0.99] transition"
+                >
+                  Já tenho loja: entrar no admin
+                  <ArrowUpRight size={18} weight="bold" />
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -544,6 +812,29 @@ export function PortfolioPage() {
           </div>
         </div>
       )}
+
+      <div
+        className="sm:hidden fixed inset-x-0 bottom-0 z-50 px-4 pb-4"
+        style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 16px)" }}
+      >
+        <div className="mx-auto max-w-md rounded-3xl border border-slate-200 bg-white/90 backdrop-blur-xl shadow-[0_18px_60px_-28px_rgba(15,23,42,0.6)] p-3 flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => navigate("/create")}
+            className="flex-1 inline-flex items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-4 py-3 text-sm font-black text-white"
+          >
+            <Storefront size={18} weight="duotone" />
+            Criar loja
+          </button>
+          <a
+            href="#top"
+            className="h-12 w-12 rounded-2xl border border-slate-200 bg-white text-slate-700 grid place-items-center"
+            aria-label="Voltar ao topo"
+          >
+            <ArrowUpRight size={18} weight="bold" className="-rotate-45" />
+          </a>
+        </div>
+      </div>
     </LandingPageLayout>
   );
 }
