@@ -1,11 +1,11 @@
-const STATUS_STYLES: Record<string, string> = {
-  pending: 'bg-amber-100 text-amber-800',
-  preparing: 'bg-sky-100 text-sky-700',
-  ready_for_delivery: 'bg-violet-100 text-violet-700',
-  waiting_for_motoboy: 'bg-indigo-100 text-indigo-700',
-  in_delivery: 'bg-blue-100 text-blue-700',
-  delivered: 'bg-emerald-100 text-emerald-700',
-  finished: 'bg-emerald-200 text-emerald-800',
+const STATUS_STYLES: Record<string, { pill: string; dot: string; pulse?: boolean }> = {
+  pending: { pill: 'bg-amber-50 text-amber-900 border-amber-200', dot: 'bg-amber-500', pulse: true },
+  preparing: { pill: 'bg-sky-50 text-sky-900 border-sky-200', dot: 'bg-sky-500', pulse: true },
+  ready_for_delivery: { pill: 'bg-violet-50 text-violet-900 border-violet-200', dot: 'bg-violet-500' },
+  waiting_for_motoboy: { pill: 'bg-indigo-50 text-indigo-900 border-indigo-200', dot: 'bg-indigo-500', pulse: true },
+  in_delivery: { pill: 'bg-blue-50 text-blue-900 border-blue-200', dot: 'bg-blue-500', pulse: true },
+  delivered: { pill: 'bg-emerald-50 text-emerald-900 border-emerald-200', dot: 'bg-emerald-500' },
+  finished: { pill: 'bg-emerald-100 text-emerald-900 border-emerald-200', dot: 'bg-emerald-600' },
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -20,10 +20,17 @@ const STATUS_LABELS: Record<string, string> = {
 
 export function StatusBadge({ status }: { status?: string }) {
   const label = STATUS_LABELS[status || ''] || status || 'Atualizando';
-  const classes = STATUS_STYLES[status || ''] || 'bg-slate-100 text-slate-600';
+  const tone =
+    STATUS_STYLES[status || ''] || { pill: 'bg-slate-50 text-slate-700 border-slate-200', dot: 'bg-slate-400' };
 
   return (
-    <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ${classes}`}>
+    <span
+      className={[
+        'inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-[11px] font-semibold border',
+        tone.pill,
+      ].join(' ')}
+    >
+      <span className={`h-2 w-2 rounded-full ${tone.dot} ${tone.pulse ? 'status-blink' : ''}`} />
       {label}
     </span>
   );

@@ -150,7 +150,7 @@ export function MotoboyAvailable() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 px-4 py-6 space-y-4">
+    <div className="min-h-screen motoboy-screen space-y-4">
       <MotoboyHeader
         title="Pedidos disponíveis"
         subtitle="Aceite e inicie sua rota."
@@ -265,7 +265,7 @@ export function MotoboyAvailable() {
                 <button
                   onClick={() => handleAccept(order.id)}
                   disabled={hasActive}
-                  className="w-full rounded-lg bg-brand-primary px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+                  className="w-full rounded-xl bg-[linear-gradient(120deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_60%,#f59e0b))] px-4 py-2.5 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(239,68,68,0.85)] disabled:opacity-50"
                 >
                   Aceitar entrega
                 </button>

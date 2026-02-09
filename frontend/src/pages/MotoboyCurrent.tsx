@@ -152,7 +152,7 @@ export function MotoboyCurrent() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 px-4 py-6 space-y-4">
+    <div className="min-h-screen motoboy-screen space-y-4">
       <MotoboyHeader
         title="Entrega"
         subtitle={loading ? 'Atualizando...' : activeOrder ? 'Acompanhe e finalize sua entrega.' : 'Nenhuma entrega ativa.'}
@@ -200,7 +200,7 @@ export function MotoboyCurrent() {
               {deliveryStatus === 'ACCEPTED' && (
                 <button
                   onClick={handlePickup}
-                  className="w-full rounded-lg bg-brand-primary px-4 py-2 text-sm font-semibold text-white"
+                  className="w-full rounded-xl bg-[linear-gradient(120deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_60%,#f59e0b))] px-4 py-2.5 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(239,68,68,0.85)]"
                 >
                   Retirei o pedido (iniciar rota)
                 </button>
@@ -209,7 +209,7 @@ export function MotoboyCurrent() {
               {deliveryStatus === 'PICKED_UP' && (
                 <button
                   onClick={handleStart}
-                  className="w-full rounded-lg bg-brand-primary px-4 py-2 text-sm font-semibold text-white"
+                  className="w-full rounded-xl bg-[linear-gradient(120deg,#0ea5e9,#2563eb)] px-4 py-2.5 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(37,99,235,0.6)]"
                 >
                   Iniciar rota
                 </button>
@@ -231,7 +231,7 @@ export function MotoboyCurrent() {
               {deliveryStatus === 'IN_TRANSIT' && (
                 <button
                   onClick={handleDelivered}
-                  className="w-full rounded-lg bg-brand-primary px-4 py-2 text-sm font-semibold text-white"
+                  className="w-full rounded-xl bg-[linear-gradient(120deg,#16a34a,#059669)] px-4 py-2.5 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(5,150,105,0.6)]"
                 >
                   Finalizar entrega
                 </button>
@@ -260,4 +260,3 @@ export function MotoboyCurrent() {
     </div>
   );
 }
-

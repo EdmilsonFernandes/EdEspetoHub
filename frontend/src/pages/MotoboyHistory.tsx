@@ -60,7 +60,7 @@ export function MotoboyHistory() {
   const totalMonth = orders.reduce((acc, order) => acc + Number(order.deliveryFee || 0), 0);
 
   return (
-    <div className="min-h-screen bg-slate-50 px-4 py-6 space-y-4">
+    <div className="min-h-screen motoboy-screen space-y-4">
       <MotoboyHeader title="Histórico de entregas" subtitle="Pedidos finalizados recentemente." />
       {blocked && (
         <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
@@ -128,7 +128,7 @@ export function MotoboyHistory() {
                         return next;
                       });
                     }}
-                    className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700"
+                    className="w-full rounded-xl border border-slate-200 bg-white/70 px-4 py-2.5 text-sm font-extrabold text-slate-800 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)]"
                   >
                     {isOpen ? 'Ocultar detalhes' : 'Ver detalhes'}
                   </button>
