@@ -65,7 +65,14 @@ const OrdersView = ({ orders, products, storeSlug }) => {
           if (createdAt < cutoff) return false;
         }
       }
-      if (statusFilter !== 'all' && order.status !== statusFilter) return false;
+      if (statusFilter !== 'all') {
+        const st = String(order.status || '').toLowerCase();
+        if (statusFilter === 'done') {
+          if (st !== 'done' && st !== 'delivered') return false;
+        } else if (st !== String(statusFilter).toLowerCase()) {
+          return false;
+        }
+      }
       if (dateFilter) {
         const date = order.createdAt?.seconds ? new Date(order.createdAt.seconds * 1000) : new Date(order.createdAt);
         if (!Number.isFinite(date.getTime())) return false;
@@ -101,7 +108,8 @@ const OrdersView = ({ orders, products, storeSlug }) => {
   const statusCounts = useMemo(() => {
     return (orders || []).reduce(
       (acc, order) => {
-        const key = order.status || 'pending';
+        const raw = String(order.status || 'pending').toLowerCase();
+        const key = raw === 'delivered' ? 'done' : raw;
         acc[key] = (acc[key] || 0) + 1;
         acc.all += 1;
         return acc;
@@ -111,11 +119,12 @@ const OrdersView = ({ orders, products, storeSlug }) => {
   }, [orders]);
 
   const statusStyles = (status) => {
-    if (status === 'pending') return 'bg-amber-100 text-amber-800';
-    if (status === 'preparing') return 'bg-sky-100 text-sky-700';
-    if (status === 'ready') return 'bg-violet-100 text-violet-700';
-    if (status === 'done') return 'bg-emerald-100 text-emerald-800';
-    if (status === 'cancelled') return 'bg-slate-100 text-slate-600';
+    const st = String(status || '').toLowerCase();
+    if (st === 'pending') return 'bg-amber-100 text-amber-800';
+    if (st === 'preparing') return 'bg-sky-100 text-sky-700';
+    if (st === 'ready') return 'bg-violet-100 text-violet-700';
+    if (st === 'done' || st === 'delivered') return 'bg-emerald-100 text-emerald-800';
+    if (st === 'cancelled') return 'bg-slate-100 text-slate-600';
     return 'bg-red-100 text-red-700';
   };
   const shortId = (value) => formatOrderDisplayId(value, storeSlug);
