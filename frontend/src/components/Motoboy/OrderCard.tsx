@@ -49,7 +49,7 @@ export function OrderCard({ order, compact, actions }: Props) {
         }}
         aria-hidden="true"
       />
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             {storeLogo ? (
@@ -72,7 +72,7 @@ export function OrderCard({ order, compact, actions }: Props) {
           </div>
           {createdAt && <p className="text-[11px] text-slate-400 mt-1">{formatDateTime(createdAt)}</p>}
         </div>
-        <div className="shrink-0">
+        <div className="sm:shrink-0">
           <PaymentBadge method={order?.paymentMethod || order?.payment_method} status={order?.paymentStatus} />
         </div>
       </div>

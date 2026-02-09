@@ -20,7 +20,7 @@ export function PaymentBadge({ method, status }: { method?: string; status?: str
   const tone = STATUS_STYLES[normalizedStatus] || { pill: 'bg-slate-50 text-slate-700 border-slate-200', dot: 'bg-slate-400' };
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex flex-wrap items-center gap-2 justify-start sm:justify-end">
       <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-white/70 border border-slate-200 text-slate-700">
         {methodLabel}
       </span>
