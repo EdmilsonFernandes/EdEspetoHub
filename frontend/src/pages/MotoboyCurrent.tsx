@@ -194,7 +194,11 @@ export function MotoboyCurrent() {
 
   const activeOrder = useMemo(() => {
     return (
-      orders.find((order) => ['in_delivery', 'ready_for_delivery', 'waiting_for_motoboy'].includes(order.status)) ||
+      orders.find((order) => {
+        const d = String(order?.delivery?.status || '').toUpperCase();
+        if (['ACCEPTED', 'PICKED_UP', 'IN_TRANSIT'].includes(d)) return true;
+        return ['in_delivery', 'ready_for_delivery', 'waiting_for_motoboy'].includes(order.status);
+      }) ||
       null
     );
   }, [orders]);
@@ -231,6 +235,28 @@ export function MotoboyCurrent() {
       load();
     } catch (error: any) {
       showToast(error?.message || 'Não foi possível concluir a entrega.', 'error');
+    }
+  };
+
+  const handlePickup = async () => {
+    if (!activeOrder) return;
+    try {
+      await motoboyService.pickupOrder(activeOrder.id);
+      showToast('Retirada confirmada.', 'success');
+      load();
+    } catch (error: any) {
+      showToast(error?.message || 'Não foi possível confirmar retirada.', 'error');
+    }
+  };
+
+  const handleStart = async () => {
+    if (!activeOrder) return;
+    try {
+      await motoboyService.startDelivery(activeOrder.id);
+      showToast('Rota iniciada.', 'success');
+      load();
+    } catch (error: any) {
+      showToast(error?.message || 'Não foi possível iniciar a rota.', 'error');
     }
   };
 
@@ -664,9 +690,31 @@ export function MotoboyCurrent() {
                   Abrir no GPS
                 </a>
               )}
-              {activeOrder.status === 'waiting_for_motoboy' && (
-                <p className="text-xs text-slate-500">Aceite o pedido em “Disponíveis” para iniciar a rota.</p>
-              )}
+              {(() => {
+                const d = String(activeOrder?.delivery?.status || '').toUpperCase();
+                if (!d) return null;
+                if (d === 'ACCEPTED') {
+                  return (
+                    <button
+                      onClick={handlePickup}
+                      className="w-full rounded-lg bg-brand-primary px-4 py-2 text-sm font-semibold text-white"
+                    >
+                      Retirei o pedido
+                    </button>
+                  );
+                }
+                if (d === 'PICKED_UP') {
+                  return (
+                    <button
+                      onClick={handleStart}
+                      className="w-full rounded-lg bg-brand-primary px-4 py-2 text-sm font-semibold text-white"
+                    >
+                      Iniciar rota
+                    </button>
+                  );
+                }
+                return null;
+              })()}
               {canConfirmPayment(activeOrder) && (
                 <button
                   onClick={() => {
@@ -680,9 +728,9 @@ export function MotoboyCurrent() {
               )}
               <button
                 onClick={handleDelivered}
-                className="w-full rounded-lg bg-brand-primary px-4 py-2 text-sm font-semibold text-white"
+                className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700"
               >
-                Marcar como entregue
+                Finalizar entrega
               </button>
             </div>
           }

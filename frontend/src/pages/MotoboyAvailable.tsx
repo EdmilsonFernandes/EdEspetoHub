@@ -11,6 +11,7 @@ export function MotoboyAvailable() {
   const [loading, setLoading] = useState(true);
   const [pendingCount, setPendingCount] = useState(0);
   const [blocked, setBlocked] = useState(false);
+  const [hasActive, setHasActive] = useState(false);
   const [profile, setProfile] = useState<any | null>(null);
   const [documents, setDocuments] = useState<any[]>([]);
   const [requests, setRequests] = useState<any[]>([]);
@@ -23,6 +24,13 @@ export function MotoboyAvailable() {
     try {
       const data = await motoboyService.listAvailableOrders();
       setOrders(Array.isArray(data) ? data : []);
+      try {
+        const current = await motoboyService.getCurrentOrder();
+        const d = String(current?.delivery?.status || '').toUpperCase();
+        setHasActive(Boolean(current?.id && ['ACCEPTED', 'PICKED_UP', 'IN_TRANSIT'].includes(d)));
+      } catch {
+        setHasActive(false);
+      }
       setBlocked(false);
     } catch (error: any) {
       if (error?.status === 403) {
@@ -217,6 +225,11 @@ export function MotoboyAvailable() {
         </div>
       ) : (
         <div className="grid gap-4">
+          {hasActive && (
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              Você já tem uma entrega ativa. Finalize em “Meu perfil” antes de aceitar outra.
+            </div>
+          )}
           {orders.map((order) => (
             <OrderCard
               key={order.id}
@@ -224,7 +237,8 @@ export function MotoboyAvailable() {
               actions={
                 <button
                   onClick={() => handleAccept(order.id)}
-                  className="w-full rounded-lg bg-brand-primary px-4 py-2 text-sm font-semibold text-white"
+                  disabled={hasActive}
+                  className="w-full rounded-lg bg-brand-primary px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
                 >
                   Aceitar entrega
                 </button>

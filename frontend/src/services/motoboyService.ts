@@ -13,8 +13,17 @@ export const motoboyService = {
   async getEarningsToday() {
     return apiClient.get('/motoboy/earnings/today');
   },
+  async getStats(range: 'day' | 'week' | 'month' = 'day') {
+    return apiClient.get(`/motoboy/stats?range=${range}`);
+  },
   async acceptOrder(orderId: string) {
     return apiClient.post(`/motoboy/orders/${orderId}/accept`, {});
+  },
+  async pickupOrder(orderId: string) {
+    return apiClient.post(`/motoboy/orders/${orderId}/pickup`, {});
+  },
+  async startDelivery(orderId: string) {
+    return apiClient.post(`/motoboy/orders/${orderId}/start`, {});
   },
   async confirmPayment(orderId: string, cashTendered?: number | null) {
     return apiClient.post(`/motoboy/orders/${orderId}/confirm-payment`, {

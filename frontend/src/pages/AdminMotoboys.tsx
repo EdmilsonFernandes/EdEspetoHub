@@ -208,6 +208,14 @@ export function AdminMotoboys() {
                     <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600">
                       {link.motoboyStatus || 'PENDING'}
                     </span>
+                    <span
+                      className={`px-2.5 py-1 rounded-full text-[10px] font-semibold ${
+                        link.busy ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'
+                      }`}
+                      title={link.busy ? 'Entregador com entrega ativa' : 'Entregador livre'}
+                    >
+                      {link.busy ? 'Ocupado' : 'Livre'}
+                    </span>
                     {!link.active && (
                       <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-rose-100 text-rose-700">
                         Vínculo inativo
