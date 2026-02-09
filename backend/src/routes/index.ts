@@ -22,6 +22,7 @@ import { PlatformAdminController } from '../controllers/PlatformAdminController'
 import { PlatformPublicController } from '../controllers/PlatformPublicController';
 import { PaymentController } from '../controllers/PaymentController';
 import { MotoboyController } from '../controllers/MotoboyController';
+import { DeliveryController } from '../controllers/DeliveryController';
 import { LegalController } from '../controllers/LegalController';
 import { DeliveryBillingController } from '../controllers/DeliveryBillingController';
 
@@ -102,10 +103,20 @@ routes.get('/motoboy/orders/available', requireAuth, MotoboyController.listAvail
 routes.get('/motoboy/orders/current', requireAuth, MotoboyController.getCurrentOrder);
 routes.get('/motoboy/orders/history', requireAuth, MotoboyController.listHistory);
 routes.get('/motoboy/earnings/today', requireAuth, MotoboyController.getEarningsToday);
+routes.get('/motoboy/stats', requireAuth, MotoboyController.getStats);
 routes.post('/motoboy/orders/:orderId/accept', requireAuth, MotoboyController.acceptOrder);
+routes.post('/motoboy/orders/:orderId/pickup', requireAuth, MotoboyController.pickupOrder);
+routes.post('/motoboy/orders/:orderId/start', requireAuth, MotoboyController.startDelivery);
 routes.post('/motoboy/orders/:orderId/confirm-payment', requireAuth, MotoboyController.confirmPayment);
 routes.post('/motoboy/orders/:orderId/delivered', requireAuth, MotoboyController.markDelivered);
 routes.post('/motoboy/orders/:orderId/finish', requireAuth, MotoboyController.finishOrder);
+
+// Compatibility alias (business wording).
+routes.get('/couriers/me/active-delivery', requireAuth, MotoboyController.getCurrentOrder);
+routes.get('/couriers/me/stats', requireAuth, MotoboyController.getStats);
+
+// Store operations
+routes.post('/deliveries/:deliveryId/cancel', requireAuth, requireRole('ADMIN'), DeliveryController.cancel);
 routes.post('/motoboy/documents', requireAuth, MotoboyController.uploadDocument);
 routes.get('/motoboy/documents', requireAuth, MotoboyController.listOwnDocuments);
 routes.get('/motoboy/profile', requireAuth, MotoboyController.getProfile);

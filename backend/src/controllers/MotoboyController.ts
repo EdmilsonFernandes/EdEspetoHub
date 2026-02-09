@@ -14,8 +14,10 @@
 import { Request, Response } from 'express';
 import { MotoboyService } from '../services/MotoboyService';
 import { MotoboyOrderService } from '../services/MotoboyOrderService';
+import { deliveryService } from '../services/DeliveryService';
 import { respondWithError } from '../errors/respondWithError';
 import { logger } from '../utils/logger';
+import { AppDataSource } from '../config/database';
 
 const motoboyService = new MotoboyService();
 const motoboyOrderService = new MotoboyOrderService();
@@ -91,6 +93,21 @@ export class MotoboyController {
   }
 
   /**
+   * Gets delivery stats for the current motoboy.
+   */
+  static async getStats(req: Request, res: Response) {
+    try {
+      const motoboy = await motoboyService.getActiveMotoboyByUserId(req.auth?.sub || '');
+      const range = String(req.query?.range || 'day').toLowerCase() as any;
+      const stats = await deliveryService.stats(motoboy, range);
+      return res.json(stats);
+    } catch (error: any) {
+      log.warn('Motoboy stats failed', { error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  /**
    * Lists store requests for motoboy.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
@@ -146,12 +163,27 @@ export class MotoboyController {
   static async listByStore(req: Request, res: Response) {
     try {
       const links = await motoboyService.listByStore(req.params.storeId, req.auth?.sub || '');
+      const motoboyIds = links.map((l) => l.motoboyId).filter(Boolean);
+      const busyRows: Array<{ motoboy_id: string; active_count: number }> = motoboyIds.length
+        ? await AppDataSource.query(
+            `
+            SELECT motoboy_id, COUNT(*)::int AS active_count
+            FROM order_deliveries
+            WHERE motoboy_id = ANY($1)
+              AND status IN ('ACCEPTED','PICKED_UP','IN_TRANSIT')
+            GROUP BY motoboy_id
+            `,
+            [ motoboyIds ]
+          )
+        : [];
+      const busyMap = new Map<string, number>(busyRows.map((r) => [ r.motoboy_id, Number(r.active_count || 0) ]));
       return res.json(
         links.map((link) => ({
           id: link.id,
           active: link.active,
           storeId: link.storeId,
           motoboyId: link.motoboyId,
+          busy: (busyMap.get(link.motoboyId) || 0) > 0,
           motoboyStatus: link.motoboy?.status,
           motoboyUser: link.motoboy?.user
             ? {
@@ -302,6 +334,34 @@ export class MotoboyController {
       return res.json(result);
     } catch (error: any) {
       log.warn('Motoboy accept order failed', { error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  /**
+   * Marks delivery as picked up.
+   */
+  static async pickupOrder(req: Request, res: Response) {
+    try {
+      const motoboy = await motoboyService.getActiveMotoboyByUserId(req.auth?.sub || '');
+      const delivery = await motoboyOrderService.pickupOrder(req.params.orderId, motoboy);
+      return res.json(delivery);
+    } catch (error: any) {
+      log.warn('Motoboy pickup failed', { error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  /**
+   * Marks delivery as in transit.
+   */
+  static async startDelivery(req: Request, res: Response) {
+    try {
+      const motoboy = await motoboyService.getActiveMotoboyByUserId(req.auth?.sub || '');
+      const delivery = await motoboyOrderService.startOrder(req.params.orderId, motoboy);
+      return res.json(delivery);
+    } catch (error: any) {
+      log.warn('Motoboy start delivery failed', { error });
       return respondWithError(req, res, error, 400);
     }
   }
