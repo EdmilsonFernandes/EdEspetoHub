@@ -18,6 +18,7 @@ import {
 import { formatCurrency, formatPhoneInput } from "../../utils/format";
 import { getPaymentMethodMeta } from "../../utils/paymentAssets";
 import { GoogleRouteMapView } from "../GoogleRouteMapView";
+import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
 
 export const CartView = ({
   cart,
@@ -663,6 +664,20 @@ export const CartView = ({
               <span className="bg-brand-primary-soft text-brand-primary font-bold w-6 h-6 rounded flex items-center justify-center text-xs">
                 {item.qty}
               </span>
+              <div className="w-11 h-11 rounded-xl overflow-hidden border border-gray-200 bg-gray-100 flex-shrink-0">
+                {item.imageUrl ? (
+                  <img
+                    src={resolveAssetUrl(item.imageUrl)}
+                    alt={item.name}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-[10px] text-gray-400">
+                    🍖
+                  </div>
+                )}
+              </div>
               <div className="flex flex-col">
                 <span className="text-gray-700 font-medium text-sm sm:text-base">{item.name}</span>
                 {formatItemOptions(item) && (

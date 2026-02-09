@@ -102,20 +102,6 @@ export function MotoboyCurrent() {
     return { steps, current, label };
   }, [deliveryStatus]);
 
-  const canConfirmPayment = (order: any) => {
-    const method = (order?.paymentMethod || '').toLowerCase();
-    const status = (order?.paymentStatus || '').toLowerCase();
-    return (
-      status === 'pending' &&
-      (method === 'pix' ||
-        method === 'cash' ||
-        method === 'dinheiro' ||
-        method === 'card' ||
-        method === 'credit' ||
-        method === 'debit')
-    );
-  };
-
   const handleConfirmPayment = async (cashTendered?: number | null) => {
     if (!selected) return;
     try {
@@ -384,20 +370,7 @@ export function MotoboyCurrent() {
                 onClick={handleDelivered}
                 className="btn-press w-full rounded-xl bg-[linear-gradient(120deg,#16a34a,#059669)] px-4 py-3 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(5,150,105,0.6)]"
               >
-                {paymentIsPaid ? 'Finalizar entrega' : 'Confirmar pagamento e finalizar'}
-              </button>
-            )}
-
-            {!paymentIsPaid && canConfirmPayment(activeOrder) && deliveryStatus !== 'IN_TRANSIT' && (
-              <button
-                onClick={() => {
-                  setSelected(activeOrder);
-                  setFinalizeAfterPayment(false);
-                  setShowPayment(true);
-                }}
-                className="btn-press w-full rounded-xl border border-emerald-200 bg-emerald-50/70 px-4 py-2.5 text-sm font-extrabold text-emerald-800 shadow-[0_18px_40px_-32px_rgba(5,150,105,0.4)]"
-              >
-                Confirmar pagamento
+                Finalizar entrega
               </button>
             )}
 
