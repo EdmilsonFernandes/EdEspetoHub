@@ -16,7 +16,7 @@ import { Plan, PlanName } from '../entities/Plan';
 
 const BASIC_MONTHLY = 49.9;
 const PRO_MONTHLY = 79.9;
-const YEARLY_DISCOUNT = 0.25;
+const YEARLY_DISCOUNT = 0.15;
 
 const round2 = (value: number) => Math.round(value * 100) / 100;
 
@@ -26,7 +26,7 @@ const yearlyPromo = (monthly: number) => round2(monthly * 12 * (1 - YEARLY_DISCO
 const DEFAULT_PLANS: Array<Pick<Plan, 'name' | 'displayName' | 'price' | 'promoPrice' | 'durationDays' | 'enabled'>> = [
   { name: 'basic_monthly', displayName: 'Basic Mensal', price: BASIC_MONTHLY, promoPrice: null, durationDays: 30, enabled: true },
   { name: 'pro_monthly', displayName: 'Pro Mensal', price: PRO_MONTHLY, promoPrice: null, durationDays: 30, enabled: true },
-  // No plano anual o valor cheio = mensal * 12 e o promo_price = -25%.
+// No plano anual o valor cheio = mensal * 12 e o promo_price = -15%.
   { name: 'basic_yearly', displayName: 'Basic Anual', price: yearlyFull(BASIC_MONTHLY), promoPrice: yearlyPromo(BASIC_MONTHLY), durationDays: 365, enabled: true },
   { name: 'pro_yearly', displayName: 'Pro Anual', price: yearlyFull(PRO_MONTHLY), promoPrice: yearlyPromo(PRO_MONTHLY), durationDays: 365, enabled: true },
 ];

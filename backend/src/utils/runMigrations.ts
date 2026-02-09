@@ -154,8 +154,8 @@ export async function runMigrations() {
     VALUES
       ('basic_monthly', 'Basic Mensal', 49.90, NULL, 30, true),
       ('pro_monthly', 'Pro Mensal', 79.90, NULL, 30, true),
-      ('basic_yearly', 'Basic Anual', 598.80, 449.10, 365, true),
-      ('pro_yearly', 'Pro Anual', 958.80, 719.10, 365, true)
+      ('basic_yearly', 'Basic Anual', 598.80, 509.98, 365, true),
+      ('pro_yearly', 'Pro Anual', 958.80, 815.98, 365, true)
     ON CONFLICT (name) DO UPDATE
     SET display_name = EXCLUDED.display_name,
         price = EXCLUDED.price,

@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { paymentService } from '../services/paymentService';
 import { planService } from '../services/planService';
-import { BILLING_OPTIONS, PLAN_TIERS, getPlanName } from '../constants/planCatalog';
+import { BILLING_OPTIONS, PLAN_TIERS, getPlanName, resolveAnnualPromoTotal, resolveMonthlyEquivalent } from '../constants/planCatalog';
 import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
 
 export function PaymentPage() {
@@ -318,7 +318,14 @@ export function PaymentPage() {
                         {PLAN_TIERS.map((tier) => {
                             const planKey = getPlanName(tier.key, billingKey);
                             const plan = plansByName[planKey];
-                            const price = plan ? Number(plan.price) : billing.priceByTier[tier.key];
+                            const full = plan ? Number(plan.price) : billing.priceByTier[tier.key];
+                            const promoFromApi = plan?.promoPrice != null ? Number(plan.promoPrice) : null;
+                            const promo = billingKey === 'yearly'
+                              ? (promoFromApi != null && promoFromApi > 0 && promoFromApi < full ? promoFromApi : resolveAnnualPromoTotal(full))
+                              : promoFromApi;
+                            const showPromo = billingKey === 'yearly' && promo != null && promo > 0 && promo < full;
+                            const displayPrice = billingKey === 'yearly' ? (showPromo ? promo : full) : full;
+                            const monthlyEq = billingKey === 'yearly' ? resolveMonthlyEquivalent(displayPrice) : null;
                             const isSelected = plan?.id && selectedPlanId === plan.id;
                             const isDisabled = !plan?.id;
                             return (
@@ -335,8 +342,17 @@ export function PaymentPage() {
                                   } ${isDisabled ? 'opacity-60 cursor-not-allowed' : ''}`}
                               >
                                 <p className="text-[11px] uppercase font-semibold text-gray-500">{tier.label}</p>
-                                <p className="text-lg font-bold text-gray-900">R$ {Number(price).toFixed(2)}</p>
-                                <p className="text-[11px] text-gray-500">{billing.period}</p>
+                                {showPromo ? (
+                                  <div className="mt-0.5">
+                                    <p className="text-[11px] text-gray-400 line-through">R$ {Number(full).toFixed(2)}</p>
+                                    <p className="text-lg font-bold text-gray-900">R$ {Number(displayPrice).toFixed(2)}</p>
+                                  </div>
+                                ) : (
+                                  <p className="text-lg font-bold text-gray-900">R$ {Number(displayPrice).toFixed(2)}</p>
+                                )}
+                                <p className="text-[11px] text-gray-500">
+                                  {billingKey === 'yearly' ? `${billing.period} (R$ ${Number(monthlyEq || 0).toFixed(2)}/mês)` : billing.period}
+                                </p>
                               </button>
                             );
                           })}

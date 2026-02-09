@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { storeService } from '../services/storeService';
 import { planService } from '../services/planService';
-import { BILLING_OPTIONS, PLAN_TIERS, getPlanName } from '../constants/planCatalog';
+import { BILLING_OPTIONS, PLAN_TIERS, getPlanName, resolveAnnualPromoTotal, resolveMonthlyEquivalent } from '../constants/planCatalog';
 import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
 
 export function CreateStore() {
@@ -891,7 +891,7 @@ export function CreateStore() {
                 ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
                 : 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500'
                 }`}>
-                Economize até 25%
+                Economize 15%
               </span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -918,7 +918,14 @@ export function CreateStore() {
                 {PLAN_TIERS.map((tier) => {
                   const planKey = getPlanName(tier.key, billingKey);
                   const plan = plansByName[planKey];
-                  const price = plan ? Number(plan.price) : billing.priceByTier[tier.key];
+                  const full = plan ? Number(plan.price) : billing.priceByTier[tier.key];
+                  const promoFromApi = plan?.promoPrice != null ? Number(plan.promoPrice) : null;
+                  const promo = billingKey === 'yearly'
+                    ? (promoFromApi != null && promoFromApi > 0 && promoFromApi < full ? promoFromApi : resolveAnnualPromoTotal(full))
+                    : promoFromApi;
+                  const showPromo = billingKey === 'yearly' && promo != null && promo > 0 && promo < full;
+                  const displayPrice = billingKey === 'yearly' ? (showPromo ? promo : full) : full;
+                  const monthlyEq = billingKey === 'yearly' ? resolveMonthlyEquivalent(displayPrice) : null;
                   const durationLabel = plan
                     ? `${plan.durationDays} dias de acesso`
                     : billingKey === 'yearly'
@@ -938,8 +945,17 @@ export function CreateStore() {
                       } ${isDisabled ? 'opacity-60 cursor-not-allowed' : ''}`}
                   >
                     <p className="text-sm uppercase font-semibold text-gray-500">{tier.label}</p>
-                    <p className="text-2xl font-bold text-gray-900">R$ {Number(price).toFixed(2)}</p>
-                    <p className="text-xs text-gray-500">{billing.period}</p>
+                    {showPromo ? (
+                      <div className="mt-1">
+                        <p className="text-xs text-gray-400 line-through">R$ {Number(full).toFixed(2)}</p>
+                        <p className="text-2xl font-bold text-gray-900">R$ {Number(displayPrice).toFixed(2)}</p>
+                      </div>
+                    ) : (
+                      <p className="text-2xl font-bold text-gray-900">R$ {Number(displayPrice).toFixed(2)}</p>
+                    )}
+                    <p className="text-xs text-gray-500">
+                      {billingKey === 'yearly' ? `${billing.period} (R$ ${Number(monthlyEq || 0).toFixed(2)}/mês)` : billing.period}
+                    </p>
                     <p className="text-xs text-gray-500 mt-1">{durationLabel}</p>
                     <ul className="mt-3 text-xs text-gray-600 space-y-1">
                       {tier.features.map((feature) => (

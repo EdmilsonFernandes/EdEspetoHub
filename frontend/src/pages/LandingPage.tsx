@@ -16,7 +16,7 @@ import {
 } from '@phosphor-icons/react';
 import { platformService } from '../services/platformService';
 import { planService } from '../services/planService';
-import { BILLING_OPTIONS, PLAN_TIERS, getPlanName } from '../constants/planCatalog';
+import { BILLING_OPTIONS, PLAN_TIERS, getPlanName, resolveAnnualPromoTotal, resolveMonthlyEquivalent } from '../constants/planCatalog';
 import { LandingPageLayout } from '../layouts/LandingPageLayout';
 import { useNavigate } from 'react-router-dom';
 import { formatCurrency } from '../utils/format';
@@ -46,6 +46,7 @@ export function LandingPage() {
     name: string;
     displayName?: string;
     price?: number | null;
+    promoPrice?: number | null;
   };
 
   type CurrentPlan = {
@@ -390,12 +391,24 @@ export function LandingPage() {
   const currentPlans: CurrentPlan[] = PLAN_TIERS.map(tier => {
     const planKey = getPlanName(tier.key, billingKey);
     const plan = plansByName[planKey];
-    const price = plan?.price ?? null;
+    const full = plan?.price ?? null;
+    const promoFromApi = plan?.promoPrice ?? null;
+    const isYearly = billingKey === 'yearly';
+    const tierPrices = billing.priceByTier as Record<string, number>;
+    const fullValue = full != null ? Number(full) : (tierPrices[tier.key] ?? 0);
+    const promoValue = isYearly
+      ? (promoFromApi != null && Number(promoFromApi) > 0 && Number(promoFromApi) < fullValue
+        ? Number(promoFromApi)
+        : resolveAnnualPromoTotal(fullValue))
+      : (promoFromApi != null ? Number(promoFromApi) : null);
+    const showPromo = isYearly && promoValue != null && promoValue > 0 && promoValue < fullValue;
+    const displayPrice = isYearly ? (showPromo ? promoValue : fullValue) : fullValue;
+    const monthlyEq = isYearly ? resolveMonthlyEquivalent(displayPrice) : null;
     return {
       name: plan?.displayName || tier.label,
-      price: Number(price),
-      hasPrice: price !== null && price !== undefined,
-      period: billing.period,
+      price: Number(displayPrice),
+      hasPrice: displayPrice !== null && displayPrice !== undefined,
+      period: isYearly ? `${billing.period} (R$ ${Number(monthlyEq || 0).toFixed(2)}/mês)` : billing.period,
       features: tier.features,
       popular: tier.popular,
       savings: 'savings' in billing ? billing.savings : undefined,
@@ -923,7 +936,7 @@ export function LandingPage() {
                   : 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500'
               }`}
             >
-              Economize até 25%
+              Economize 15%
             </span>
           </div>
 
