@@ -17,6 +17,7 @@ export function MotoboyCurrent() {
   const { showToast } = useToast();
   const navigate = useNavigate();
   const [showDetails, setShowDetails] = useState(false);
+  const [routeMs, setRouteMs] = useState<number>(0);
 
   const load = async () => {
     setLoading(true);
@@ -45,6 +46,21 @@ export function MotoboyCurrent() {
   const deliveryStatus = useMemo(() => {
     return String(activeOrder?.delivery?.status || '').toUpperCase();
   }, [activeOrder?.delivery?.status]);
+
+  const routeStartAt = useMemo(() => {
+    const d = activeOrder?.delivery;
+    const candidates = [d?.inTransitAt, d?.pickedUpAt, d?.acceptedAt, activeOrder?.createdAt].filter(Boolean);
+    const v = candidates.length ? new Date(candidates[0]).getTime() : 0;
+    return Number.isFinite(v) ? v : 0;
+  }, [activeOrder?.delivery?.inTransitAt, activeOrder?.delivery?.pickedUpAt, activeOrder?.delivery?.acceptedAt, activeOrder?.createdAt]);
+
+  useEffect(() => {
+    if (!activeOrder || !routeStartAt) return;
+    const update = () => setRouteMs(Math.max(0, Date.now() - routeStartAt));
+    update();
+    const t = window.setInterval(update, 1000);
+    return () => window.clearInterval(t);
+  }, [activeOrder?.id, routeStartAt]);
 
   const paymentIsPaid = useMemo(() => {
     return String(activeOrder?.paymentStatus || '').toLowerCase() === 'paid';
@@ -92,8 +108,15 @@ export function MotoboyCurrent() {
           await motoboyService.markDelivered(selected.id);
           showToast('Entrega finalizada.', 'success');
           setFinalizeAfterPayment(false);
+          const donePayload = {
+            orderId: selected.id,
+            customerName: selected?.customerName,
+            total: Number(selected?.total || 0),
+            deliveryFee: Number(selected?.deliveryFee || 0),
+            storeName: selected?.store?.name || null,
+          };
           load();
-          navigate('/motoboy/history');
+          navigate('/motoboy/done', { state: { done: donePayload } });
           return;
         } catch (error: any) {
           setFinalizeAfterPayment(false);
@@ -149,8 +172,15 @@ export function MotoboyCurrent() {
 
       await motoboyService.markDelivered(activeOrder.id);
       showToast('Entrega finalizada.', 'success');
+      const donePayload = {
+        orderId: activeOrder.id,
+        customerName: activeOrder?.customerName,
+        total: Number(activeOrder?.total || 0),
+        deliveryFee: Number(activeOrder?.deliveryFee || 0),
+        storeName: activeOrder?.store?.name || null,
+      };
       load();
-      navigate('/motoboy/history');
+      navigate('/motoboy/done', { state: { done: donePayload } });
     } catch (error: any) {
       showToast(error?.message || 'Não foi possível concluir a entrega.', 'error');
     }
@@ -171,6 +201,41 @@ export function MotoboyCurrent() {
     }
     const params = new URLSearchParams({ api: '1', query: destination });
     return `https://www.google.com/maps/search/?${params.toString()}`;
+  };
+
+  const buildWazeUrl = (order: any) => {
+    const destination = String(order?.address || '').trim();
+    if (!destination) return '';
+    const params = new URLSearchParams({ q: destination, navigate: 'yes' });
+    return `https://waze.com/ul?${params.toString()}`;
+  };
+
+  const handleCopyAddress = async () => {
+    const text = String(activeOrder?.address || '').trim();
+    if (!text) return;
+    try {
+      await navigator.clipboard.writeText(text);
+      showToast('Endereço copiado.', 'success');
+    } catch {
+      try {
+        const el = document.createElement('textarea');
+        el.value = text;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+        showToast('Endereço copiado.', 'success');
+      } catch {
+        showToast('Não foi possível copiar o endereço.', 'error');
+      }
+    }
+  };
+
+  const formatRouteTime = (ms: number) => {
+    const totalSec = Math.floor(ms / 1000);
+    const min = Math.floor(totalSec / 60);
+    const sec = totalSec % 60;
+    return `${min}m ${String(sec).padStart(2, '0')}s`;
   };
 
   return (
@@ -230,18 +295,44 @@ export function MotoboyCurrent() {
                   >
                     {paymentIsPaid ? 'Pagamento OK' : 'Pagamento pendente'}
                   </span>
+                  {routeStartAt > 0 && (
+                    <span className="px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-white/70 border border-slate-200 text-slate-800">
+                      Tempo: {formatRouteTime(routeMs)}
+                    </span>
+                  )}
                 </div>
               </div>
-              {activeOrder?.address && (
-                <a
-                  href={buildMapsUrl(activeOrder)}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="btn-press shrink-0 rounded-xl border border-slate-200 bg-white/70 px-3 py-2 text-xs font-extrabold text-slate-800 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)]"
-                >
-                  GPS
-                </a>
-              )}
+              <div className="shrink-0 flex flex-col gap-2">
+                {activeOrder?.address && (
+                  <a
+                    href={buildMapsUrl(activeOrder)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="btn-press rounded-xl border border-slate-200 bg-white/70 px-3 py-2 text-xs font-extrabold text-slate-800 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)] text-center"
+                  >
+                    Google Maps
+                  </a>
+                )}
+                {activeOrder?.address && (
+                  <a
+                    href={buildWazeUrl(activeOrder)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="btn-press rounded-xl border border-slate-200 bg-white/70 px-3 py-2 text-xs font-extrabold text-slate-800 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)] text-center"
+                  >
+                    Waze
+                  </a>
+                )}
+                {activeOrder?.address && (
+                  <button
+                    type="button"
+                    onClick={handleCopyAddress}
+                    className="btn-press rounded-xl border border-slate-200 bg-white/70 px-3 py-2 text-xs font-extrabold text-slate-800 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)]"
+                  >
+                    Copiar endereço
+                  </button>
+                )}
+              </div>
             </div>
 
             <div className="mt-4">
