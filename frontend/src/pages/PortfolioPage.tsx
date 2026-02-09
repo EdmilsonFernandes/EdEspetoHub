@@ -357,9 +357,6 @@ export function PortfolioPage() {
 
   const resolvePlanMeta = (planName = "") => {
     const normalized = planName.toString().toLowerCase();
-    if (normalized.includes("premium")) {
-      return { badge: "Mais completo", tone: "bg-slate-900 text-white", featured: true };
-    }
     if (normalized.includes("pro")) {
       return { badge: "Mais popular", tone: "bg-red-600 text-white", featured: true };
     }
@@ -371,13 +368,13 @@ export function PortfolioPage() {
     const filtered = planCycle === "yearly"
       ? list.filter((plan) => Number(plan?.durationDays) >= 360)
       : list.filter((plan) => Number(plan?.durationDays) < 360);
-    // Prefer the main three tiers if present
+    // Prefer the main tiers if present
     const order = planCycle === "yearly"
-      ? ["basic_yearly", "pro_yearly", "premium_yearly"]
-      : ["basic_monthly", "pro_monthly", "premium_monthly"];
+      ? ["basic_yearly", "pro_yearly"]
+      : ["basic_monthly", "pro_monthly"];
     const byName = new Map(filtered.map((plan) => [String(plan?.name || ""), plan]));
     const ordered = order.map((key) => byName.get(key)).filter(Boolean) as any[];
-    return ordered.length ? ordered : filtered.slice(0, 3);
+    return ordered.length ? ordered : filtered.slice(0, 2);
   }, [plans, planCycle]);
 
   useEffect(() => {
@@ -410,7 +407,7 @@ export function PortfolioPage() {
               </h1>
               <p className="text-slate-600 text-sm sm:text-base max-w-xl">
                 Veja lojas reais usando a plataforma e entenda como transformar seu cardápio em pedidos,
-                com identidade da sua marca e experiência mobile premium.
+                com identidade da sua marca e uma experiência mobile rápida.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3">
@@ -605,12 +602,19 @@ export function PortfolioPage() {
               Carregando planos...
             </div>
           ) : (
-            <div className="grid gap-6 lg:grid-cols-3">
+            <div className={`grid gap-6 ${visiblePlans.length === 2 ? "lg:grid-cols-2" : "lg:grid-cols-3"}`}>
               {visiblePlans.map((plan) => {
                 const meta = resolvePlanMeta(plan?.name);
                 const price = Number(plan?.price) || 0;
                 const promo = plan?.promoPrice != null ? Number(plan.promoPrice) : null;
-                const showPromo = promo != null && promo > 0 && promo < price;
+                const isYearly = planCycle === "yearly";
+
+                const annualFull = isYearly ? price : null;
+                const annualPromo = isYearly && promo != null && promo > 0 ? promo : null;
+                const monthlyFull = isYearly ? (annualFull! / 12) : price;
+                const monthlyPromo = isYearly && annualPromo != null ? (annualPromo / 12) : promo;
+
+                const showPromo = monthlyPromo != null && monthlyPromo > 0 && monthlyPromo < monthlyFull;
                 return (
                   <div
                     key={plan?.id || plan?.name}
@@ -640,23 +644,28 @@ export function PortfolioPage() {
                           <div>
                             <p className={`text-xs ${meta.featured ? "text-white/70" : "text-slate-500"}`}>de</p>
                             <p className={`text-sm font-bold line-through ${meta.featured ? "text-white/60" : "text-slate-400"}`}>
-                              {formatCurrency(price)}
+                              {formatCurrency(monthlyFull)}
                             </p>
                           </div>
                           <div className="text-right">
                             <p className={`text-xs ${meta.featured ? "text-white/70" : "text-slate-500"}`}>por</p>
                             <p className={`text-3xl font-black ${meta.featured ? "text-white" : "text-slate-900"}`}>
-                              {formatCurrency(promo!)}
+                              {formatCurrency(monthlyPromo!)}
                             </p>
                           </div>
                         </div>
                       ) : (
                         <p className={`text-3xl font-black ${meta.featured ? "text-white" : "text-slate-900"}`}>
-                          {formatCurrency(price)}
+                          {formatCurrency(monthlyFull)}
                         </p>
                       )}
                       <p className={`mt-2 text-xs ${meta.featured ? "text-white/70" : "text-slate-500"}`}>
-                        {planCycle === "yearly" ? "cobrado por ano" : "cobrado por mês"}
+                        {planCycle === "yearly"
+                          ? `cobrado anualmente (${formatCurrency(annualPromo ?? annualFull ?? 0)})`
+                          : "cobrado por mês"}
+                      </p>
+                      <p className={`mt-1 text-xs ${meta.featured ? "text-white/70" : "text-slate-500"}`}>
+                        7 dias grátis. Renovação pelo valor do plano.
                       </p>
                     </div>
 
@@ -876,7 +885,7 @@ export function PortfolioPage() {
               </p>
             </div>
             <div className="text-sm text-slate-500 bg-white border border-slate-200 px-4 py-2 rounded-full">
-              Equipe tecnica premium
+              Equipe técnica experiente
             </div>
           </div>
 

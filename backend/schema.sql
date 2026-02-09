@@ -188,10 +188,9 @@ INSERT INTO plans (name, display_name, price, promo_price, duration_days, enable
 VALUES
   ('basic_monthly', 'Basic Mensal', 49.90, NULL, 30, true),
   ('pro_monthly', 'Pro Mensal', 79.90, NULL, 30, true),
-  ('premium_monthly', 'Premium Mensal', 119.90, NULL, 30, true),
-  ('basic_yearly', 'Basic Anual', 39.90, NULL, 365, true),
-  ('pro_yearly', 'Pro Anual', 59.90, NULL, 365, true),
-  ('premium_yearly', 'Premium Anual', 89.90, NULL, 365, true)
+  -- No anual: valor cheio = mensal * 12, promo_price = 25% de desconto.
+  ('basic_yearly', 'Basic Anual', 598.80, 449.10, 365, true),
+  ('pro_yearly', 'Pro Anual', 958.80, 719.10, 365, true)
 ON CONFLICT (name) DO NOTHING;
 
 CREATE TABLE IF NOT EXISTS order_eta_estimates (

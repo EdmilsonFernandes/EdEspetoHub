@@ -143,16 +143,25 @@ export async function runMigrations() {
     ALTER TABLE IF EXISTS plans
     ADD COLUMN IF NOT EXISTS promo_price NUMERIC(10,2);
   `);
+  // Keep business plans consistent (Basic/Pro only) and avoid Premium showing up again.
+  await AppDataSource.query(`
+    UPDATE plans
+    SET enabled = false
+    WHERE name IN ('premium_monthly', 'premium_yearly');
+  `);
   await AppDataSource.query(`
     INSERT INTO plans (name, display_name, price, promo_price, duration_days, enabled)
     VALUES
       ('basic_monthly', 'Basic Mensal', 49.90, NULL, 30, true),
       ('pro_monthly', 'Pro Mensal', 79.90, NULL, 30, true),
-      ('premium_monthly', 'Premium Mensal', 119.90, NULL, 30, true),
-      ('basic_yearly', 'Basic Anual', 39.90, NULL, 365, true),
-      ('pro_yearly', 'Pro Anual', 59.90, NULL, 365, true),
-      ('premium_yearly', 'Premium Anual', 89.90, NULL, 365, true)
-    ON CONFLICT (name) DO NOTHING;
+      ('basic_yearly', 'Basic Anual', 598.80, 449.10, 365, true),
+      ('pro_yearly', 'Pro Anual', 958.80, 719.10, 365, true)
+    ON CONFLICT (name) DO UPDATE
+    SET display_name = EXCLUDED.display_name,
+        price = EXCLUDED.price,
+        promo_price = EXCLUDED.promo_price,
+        duration_days = EXCLUDED.duration_days,
+        enabled = EXCLUDED.enabled;
   `);
   await AppDataSource.query(`
     ALTER TABLE IF EXISTS payments

@@ -16,10 +16,8 @@ import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from 'typeor
 export type PlanName =
   | 'basic_monthly'
   | 'pro_monthly'
-  | 'premium_monthly'
   | 'basic_yearly'
   | 'pro_yearly'
-  | 'premium_yearly'
   | 'monthly'
   | 'yearly'
   | string;
