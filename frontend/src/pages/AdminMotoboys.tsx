@@ -10,6 +10,7 @@ export function AdminMotoboys() {
   const [requests, setRequests] = useState<any[]>([]);
   const [documentsByMotoboy, setDocumentsByMotoboy] = useState<Record<string, any[]>>({});
   const [docsLoadingId, setDocsLoadingId] = useState<string | null>(null);
+  const [previewDoc, setPreviewDoc] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
   const [showInactive, setShowInactive] = useState(false);
   const storeId = auth?.store?.id || '';
@@ -203,6 +204,9 @@ export function AdminMotoboys() {
                       {link.motoboyUser?.fullName || 'Entregador'}
                     </p>
                     <p className="text-xs text-slate-500">{link.motoboyUser?.email || '-'}</p>
+                    {link.motoboyUser?.phone && (
+                      <p className="text-xs text-slate-500">{link.motoboyUser.phone}</p>
+                    )}
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600">
@@ -224,7 +228,6 @@ export function AdminMotoboys() {
                   </div>
                 </div>
                 <div className="text-xs text-slate-500 flex flex-wrap gap-2">
-                  <span>ID: {link.motoboyId}</span>
                   <span>Vínculo: {link.active ? 'Ativo' : 'Inativo'}</span>
                 </div>
                 {Array.isArray(documentsByMotoboy[link.motoboyId]) && (
@@ -242,7 +245,7 @@ export function AdminMotoboys() {
                   <button
                     type="button"
                     onClick={() => loadDocuments(link.motoboyId)}
-                    className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600"
+                    className="px-2.5 py-1 rounded-lg border border-slate-200 text-[11px] font-semibold text-slate-600"
                   >
                     {docsLoadingId === link.motoboyId ? 'Carregando documentos...' : 'Ver documentos'}
                   </button>
@@ -280,8 +283,16 @@ export function AdminMotoboys() {
                           <div className="space-y-2">
                             <div className="flex items-center justify-between">
                               <span className="font-semibold text-slate-700">{doc.docType || 'DOC'}</span>
-                              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-200 text-slate-700">
-                                {doc.status || 'PENDING'}
+                              <span
+                                className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                                  doc.status === 'APPROVED'
+                                    ? 'bg-emerald-200 text-emerald-800'
+                                    : doc.status === 'REJECTED'
+                                    ? 'bg-rose-200 text-rose-800'
+                                    : 'bg-slate-200 text-slate-700'
+                                }`}
+                              >
+                                {doc.status === 'APPROVED' ? 'Aprovado' : doc.status === 'REJECTED' ? 'Rejeitado' : 'Pendente'}
                               </span>
                             </div>
                             <a
@@ -292,34 +303,41 @@ export function AdminMotoboys() {
                             >
                               Ver arquivo
                             </a>
-                            <div className="flex gap-2">
-                              <button
-                                type="button"
-                                onClick={() => handleReviewDocument(link.motoboyId, doc.id, 'approve')}
-                                className="px-3 py-1.5 rounded-lg bg-emerald-500 text-white font-semibold"
-                              >
-                                Aprovar
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleReviewDocument(link.motoboyId, doc.id, 'reject')}
-                                className="px-3 py-1.5 rounded-lg bg-rose-500 text-white font-semibold"
-                              >
-                                Rejeitar
-                              </button>
-                            </div>
+                            {doc.status !== 'APPROVED' && (
+                              <div className="flex gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => handleReviewDocument(link.motoboyId, doc.id, 'approve')}
+                                  className="px-3 py-1.5 rounded-lg bg-emerald-500 text-white font-semibold"
+                                >
+                                  Aprovar
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleReviewDocument(link.motoboyId, doc.id, 'reject')}
+                                  className="px-3 py-1.5 rounded-lg bg-rose-500 text-white font-semibold"
+                                >
+                                  Rejeitar
+                                </button>
+                              </div>
+                            )}
                           </div>
-                          <div className="rounded-xl border border-dashed border-slate-200 bg-white p-2 flex items-center justify-center">
+                          <button
+                            type="button"
+                            onClick={() => setPreviewDoc(doc)}
+                            className="rounded-xl border border-dashed border-slate-200 bg-white p-2 flex items-center justify-center"
+                            title="Clique para ampliar"
+                          >
                             {doc.fileKey ? (
                               <img
                                 src={doc.fileKey}
                                 alt={doc.docType}
-                                className="w-full h-28 object-cover rounded-lg border border-slate-200"
+                                className="w-full h-16 sm:h-20 object-cover rounded-lg border border-slate-200"
                               />
                             ) : (
                               <span className="text-[11px] text-slate-400">Sem prévia</span>
                             )}
-                          </div>
+                          </button>
                         </div>
                       </div>
                     ))}
@@ -342,6 +360,42 @@ export function AdminMotoboys() {
           </button>
         </div>
       </div>
+
+      {previewDoc && (
+        <div
+          className="fixed inset-0 z-[80] bg-black/60 flex items-center justify-center p-4"
+          onClick={() => setPreviewDoc(null)}
+          role="dialog"
+          aria-modal="true"
+        >
+          <div
+            className="w-full max-w-3xl rounded-2xl bg-white p-3"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between gap-3 px-2 pb-2">
+              <div className="text-sm font-semibold text-slate-800">
+                {previewDoc.docType || 'Documento'}
+              </div>
+              <button
+                type="button"
+                onClick={() => setPreviewDoc(null)}
+                className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700"
+              >
+                Fechar
+              </button>
+            </div>
+            {previewDoc.fileKey ? (
+              <img
+                src={previewDoc.fileKey}
+                alt={previewDoc.docType}
+                className="w-full max-h-[70vh] object-contain rounded-xl border border-slate-200"
+              />
+            ) : (
+              <div className="p-8 text-center text-sm text-slate-500">Sem imagem.</div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -715,6 +715,12 @@ export function MotoboyCurrent() {
                 }
                 return null;
               })()}
+              {String(activeOrder?.delivery?.status || '').toUpperCase() !== 'IN_TRANSIT' &&
+                String(activeOrder?.delivery?.status || '').toUpperCase() !== '' && (
+                  <p className="text-[11px] text-slate-500">
+                    Para finalizar, siga o passo a passo: Retirei o pedido -{'>'} Iniciar rota -{'>'} Finalizar entrega.
+                  </p>
+                )}
               {canConfirmPayment(activeOrder) && (
                 <button
                   onClick={() => {
@@ -726,12 +732,14 @@ export function MotoboyCurrent() {
                   Confirmar pagamento
                 </button>
               )}
-              <button
-                onClick={handleDelivered}
-                className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700"
-              >
-                Finalizar entrega
-              </button>
+              {String(activeOrder?.delivery?.status || '').toUpperCase() === 'IN_TRANSIT' && (
+                <button
+                  onClick={handleDelivered}
+                  className="w-full rounded-lg bg-brand-primary px-4 py-2 text-sm font-semibold text-white"
+                >
+                  Finalizar entrega
+                </button>
+              )}
             </div>
           }
         />
