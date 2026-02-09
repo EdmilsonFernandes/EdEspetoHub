@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { formatCurrency, formatDateTime } from '../../utils/format';
+import { resolveAssetUrl } from '../../utils/resolveAssetUrl';
 import { PaymentBadge } from './PaymentBadge';
 import { StatusBadge } from './StatusBadge';
 
@@ -23,12 +24,28 @@ export function OrderCard({ order, compact, actions }: Props) {
   const shortId = order?.shortId || (order?.id ? String(order.id).slice(0, 8) : '-');
   const customerName = order?.customerName || order?.customer_name || 'Cliente';
   const phone = order?.phone || null;
+  const storeLogo = resolveAssetUrl(order?.store?.settings?.logoUrl || order?.store?.settings?.logo_url || '');
+  const storeLabel = storeName || (storeSlug ? `/${storeSlug}` : 'Loja');
 
   return (
     <div className="premium-card p-4 sm:p-5 space-y-4">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[11px] uppercase tracking-[0.25em] text-slate-400">Pedido</p>
+          <div className="flex items-center gap-2">
+            {storeLogo ? (
+              <img
+                src={storeLogo}
+                alt={storeLabel}
+                className="h-9 w-9 rounded-xl object-cover border border-white shadow-sm"
+              />
+            ) : (
+              <div className="h-9 w-9 rounded-xl bg-slate-100 border border-white shadow-sm" />
+            )}
+            <div className="min-w-0">
+              <p className="text-[11px] uppercase tracking-[0.25em] text-slate-400 truncate">{storeLabel}</p>
+              <p className="text-[11px] text-slate-400 truncate">Pedido</p>
+            </div>
+          </div>
           <div className="mt-1 flex items-center gap-2 flex-wrap">
             <p className="text-lg font-extrabold text-slate-900 truncate">#{shortId}</p>
             <StatusBadge status={order?.status} />
@@ -80,9 +97,20 @@ export function OrderCard({ order, compact, actions }: Props) {
             {items.map((item: any) => (
               <div key={item.id || item.productId || item.name} className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-slate-900 truncate">
-                    {(item.quantity || 1)}x {item.name || 'Item'}
-                  </p>
+                  <div className="flex items-center gap-3">
+                    {item?.imageUrl ? (
+                      <img
+                        src={resolveAssetUrl(item.imageUrl)}
+                        alt={item.name || 'Item'}
+                        className="h-10 w-10 rounded-xl object-cover border border-slate-200"
+                      />
+                    ) : (
+                      <div className="h-10 w-10 rounded-xl bg-slate-100 border border-slate-200" />
+                    )}
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-slate-900 truncate">
+                        {(item.quantity || 1)}x {item.name || 'Item'}
+                      </p>
                   <div className="mt-1 flex flex-wrap gap-1">
                     {item?.cookingPoint && (
                       <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800 border border-amber-200">
@@ -94,6 +122,8 @@ export function OrderCard({ order, compact, actions }: Props) {
                         passar varinha
                       </span>
                     )}
+                  </div>
+                    </div>
                   </div>
                 </div>
                 <div className="shrink-0 text-right">
@@ -109,4 +139,3 @@ export function OrderCard({ order, compact, actions }: Props) {
     </div>
   );
 }
-

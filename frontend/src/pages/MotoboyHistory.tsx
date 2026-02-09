@@ -11,6 +11,7 @@ export function MotoboyHistory() {
   const [loading, setLoading] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
   const [blocked, setBlocked] = useState(false);
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const { showToast } = useToast();
   const navigate = useNavigate();
 
@@ -109,9 +110,32 @@ export function MotoboyHistory() {
         <div className="text-center text-sm text-slate-500">Nenhum pedido finalizado ainda.</div>
       ) : (
         <div className="grid gap-4">
-          {orders.map((order) => (
-            <OrderCard key={order.id} order={order} compact />
-          ))}
+          {orders.map((order) => {
+            const isOpen = expanded.has(order.id);
+            return (
+              <OrderCard
+                key={order.id}
+                order={order}
+                compact={!isOpen}
+                actions={
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setExpanded((prev) => {
+                        const next = new Set(prev);
+                        if (next.has(order.id)) next.delete(order.id);
+                        else next.add(order.id);
+                        return next;
+                      });
+                    }}
+                    className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700"
+                  >
+                    {isOpen ? 'Ocultar detalhes' : 'Ver detalhes'}
+                  </button>
+                }
+              />
+            );
+          })}
         </div>
       )}
     </div>

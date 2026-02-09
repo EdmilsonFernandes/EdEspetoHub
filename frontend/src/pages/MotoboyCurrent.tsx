@@ -12,6 +12,7 @@ export function MotoboyCurrent() {
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState<any | null>(null);
   const [showPayment, setShowPayment] = useState(false);
+  const [finalizeAfterPayment, setFinalizeAfterPayment] = useState(false);
   const { showToast } = useToast();
   const navigate = useNavigate();
 
@@ -20,7 +21,7 @@ export function MotoboyCurrent() {
     try {
       const current = await motoboyService.getCurrentOrder();
       setActiveOrder(current || null);
-    } catch (error: any) {
+    } catch {
       setActiveOrder(null);
     }
     try {
@@ -46,7 +47,15 @@ export function MotoboyCurrent() {
   const canConfirmPayment = (order: any) => {
     const method = (order?.paymentMethod || '').toLowerCase();
     const status = (order?.paymentStatus || '').toLowerCase();
-    return status === 'pending' && (method === 'cash' || method === 'dinheiro' || method === 'card' || method === 'credit' || method === 'debit');
+    return (
+      status === 'pending' &&
+      (method === 'pix' ||
+        method === 'cash' ||
+        method === 'dinheiro' ||
+        method === 'card' ||
+        method === 'credit' ||
+        method === 'debit')
+    );
   };
 
   const handleConfirmPayment = async (cashTendered?: number | null) => {
@@ -55,6 +64,22 @@ export function MotoboyCurrent() {
       await motoboyService.confirmPayment(selected.id, cashTendered ?? null);
       showToast('Pagamento confirmado.', 'success');
       setShowPayment(false);
+
+      if (finalizeAfterPayment) {
+        try {
+          await motoboyService.markDelivered(selected.id);
+          showToast('Entrega finalizada.', 'success');
+          setFinalizeAfterPayment(false);
+          load();
+          navigate('/motoboy/history');
+          return;
+        } catch (error: any) {
+          setFinalizeAfterPayment(false);
+          showToast(error?.message || 'Não foi possível concluir a entrega.', 'error');
+        }
+      }
+
+      setFinalizeAfterPayment(false);
       load();
     } catch (error: any) {
       showToast(error?.message || 'Não foi possível confirmar pagamento.', 'error');
@@ -65,7 +90,13 @@ export function MotoboyCurrent() {
     if (!activeOrder) return;
     try {
       await motoboyService.pickupOrder(activeOrder.id);
-      showToast('Retirada confirmada.', 'success');
+      try {
+        // Business: once the motoboy picks up the order, the route can start immediately.
+        await motoboyService.startDelivery(activeOrder.id);
+        showToast('Pedido retirado. Rota iniciada.', 'success');
+      } catch (error: any) {
+        showToast(error?.message || 'Pedido retirado. Inicie a rota para continuar.', 'warning');
+      }
       load();
     } catch (error: any) {
       showToast(error?.message || 'Não foi possível confirmar retirada.', 'error');
@@ -86,6 +117,14 @@ export function MotoboyCurrent() {
   const handleDelivered = async () => {
     if (!activeOrder) return;
     try {
+      const paymentStatus = String(activeOrder?.paymentStatus || '').toLowerCase();
+      if (paymentStatus !== 'paid') {
+        setSelected(activeOrder);
+        setFinalizeAfterPayment(true);
+        setShowPayment(true);
+        return;
+      }
+
       await motoboyService.markDelivered(activeOrder.id);
       showToast('Entrega finalizada.', 'success');
       load();
@@ -163,9 +202,10 @@ export function MotoboyCurrent() {
                   onClick={handlePickup}
                   className="w-full rounded-lg bg-brand-primary px-4 py-2 text-sm font-semibold text-white"
                 >
-                  Retirei o pedido
+                  Retirei o pedido (iniciar rota)
                 </button>
               )}
+
               {deliveryStatus === 'PICKED_UP' && (
                 <button
                   onClick={handleStart}
@@ -179,6 +219,7 @@ export function MotoboyCurrent() {
                 <button
                   onClick={() => {
                     setSelected(activeOrder);
+                    setFinalizeAfterPayment(false);
                     setShowPayment(true);
                   }}
                   className="w-full rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700"
@@ -208,7 +249,10 @@ export function MotoboyCurrent() {
 
       <ConfirmPaymentModal
         isOpen={showPayment}
-        onClose={() => setShowPayment(false)}
+        onClose={() => {
+          setShowPayment(false);
+          setFinalizeAfterPayment(false);
+        }}
         onConfirm={handleConfirmPayment}
         amount={selected?.total || 0}
         paymentMethod={selected?.paymentMethod}

@@ -83,6 +83,9 @@ export class MotoboyOrderService {
       .createQueryBuilder('o')
       .innerJoin(OrderDelivery, 'od', 'od.order_id = o.id')
       .leftJoinAndSelect('o.store', 'store')
+      .leftJoinAndSelect('store.settings', 'settings')
+      .leftJoinAndSelect('o.items', 'items')
+      .leftJoinAndSelect('items.product', 'product')
       .where('od.motoboy_id = :motoboyId', { motoboyId: motoboy.id })
       .andWhere('o.status IN (:...statuses)', { statuses: [ 'delivered', 'finished' ] })
       .andWhere('o.created_at >= :since', { since })
@@ -91,7 +94,20 @@ export class MotoboyOrderService {
 
     return orders.map((order) => ({
       id: order.id,
-      store: order.store ? { id: order.store.id, name: order.store.name } : null,
+      store: order.store
+        ? {
+            id: order.store.id,
+            name: order.store.name,
+            slug: order.store.slug,
+            settings: order.store.settings
+              ? {
+                  logoUrl: order.store.settings.logoUrl || null,
+                  primaryColor: order.store.settings.primaryColor || null,
+                  secondaryColor: order.store.settings.secondaryColor || null,
+                }
+              : null,
+          }
+        : null,
       customerName: order.customerName,
       phone: order.phone,
       address: order.address,
@@ -101,6 +117,16 @@ export class MotoboyOrderService {
       total: order.total,
       deliveryFee: order.deliveryFee,
       createdAt: order.createdAt,
+      items: (order.items || []).map((item: any) => ({
+        id: item.id,
+        name: item.product?.name || 'Produto',
+        quantity: item.quantity,
+        price: item.price,
+        productId: item.product?.id,
+        imageUrl: item.product?.imageUrl || null,
+        cookingPoint: item.cookingPoint || null,
+        passSkewer: item.passSkewer || false,
+      })),
     }));
   }
 
