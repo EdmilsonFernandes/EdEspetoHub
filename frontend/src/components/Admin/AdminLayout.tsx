@@ -71,7 +71,11 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     return Math.ceil((end - now) / (1000 * 60 * 60 * 24));
   }, [subscription?.endDate]);
 
-  const isVip = Boolean(subscription?.planExempt) || subscription?.plan?.name === 'vip';
+  // Fallback to store settings because session subscription can be stale right after VIP toggle.
+  const isVip =
+    Boolean(subscription?.planExempt) ||
+    Boolean(auth?.store?.settings?.planExempt) ||
+    subscription?.plan?.name === 'vip';
   const isTrial = !isVip && subscription?.status === 'TRIAL';
   const showRenewBanner =
     !isVip &&

@@ -68,14 +68,16 @@ export class SubscriptionController {
         return respondWithError(req, res, new AppError('SUB-001', 404), 404);
       }
       const latestPayment = await paymentRepository.findLatestByStoreId(req.params.storeId);
-      const payload = subscription || {
-        id: `vip-${req.params.storeId}`,
-        status: 'ACTIVE',
-        startDate: store?.createdAt ?? null,
-        endDate: null,
-        autoRenew: false,
-        plan: { id: 'vip', name: 'vip', displayName: planExemptLabel, price: 0, durationDays: null },
-      };
+      const payload = planExempt
+        ? {
+            id: `vip-${req.params.storeId}`,
+            status: 'ACTIVE',
+            startDate: store?.createdAt ?? null,
+            endDate: null,
+            autoRenew: false,
+            plan: { id: 'vip', name: 'vip', displayName: planExemptLabel, price: 0, durationDays: null },
+          }
+        : subscription;
       return res.json({
         ...payload,
         planExempt,

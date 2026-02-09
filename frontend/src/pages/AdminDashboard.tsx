@@ -354,13 +354,16 @@ const OrdersView = ({ orders, products, storeSlug }) => {
 
 const PaymentsView = ({ subscription, loading, error, payments }) => {
   const [showAllHistory, setShowAllHistory] = useState(false);
+  const isVip = Boolean(subscription?.planExempt) || subscription?.plan?.name === 'vip';
   const plan = subscription?.plan;
-  const planLabel = subscription?.planExempt
-    ? 'Isento de plano'
+  const planLabel = isVip
+    ? subscription?.plan?.displayName || subscription?.planExemptLabel || 'Cliente VIP'
     : plan?.displayName || plan?.name || 'Plano não identificado';
-  const priceValue = subscription?.latestPaymentAmount ?? plan?.price ?? 0;
-  const methodMeta = getPaymentMethodMeta(subscription?.paymentMethod);
-  const expiresLabel = subscription?.endDate ? formatDateTime(subscription.endDate) : '—';
+  const priceValue = isVip ? 0 : (subscription?.latestPaymentAmount ?? plan?.price ?? 0);
+  const methodMeta = isVip
+    ? { label: 'Isento de plano', icon: null }
+    : getPaymentMethodMeta(subscription?.paymentMethod);
+  const expiresLabel = isVip ? 'Sem vencimento' : (subscription?.endDate ? formatDateTime(subscription.endDate) : '—');
   const resolveDaysUntil = (value) => {
     if (!value) return null;
     const end = new Date(value).getTime();
@@ -368,9 +371,9 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
     const diffDays = Math.ceil((end - Date.now()) / (1000 * 60 * 60 * 24));
     return diffDays;
   };
-  const expiresInDays = resolveDaysUntil(subscription?.endDate);
+  const expiresInDays = isVip ? null : resolveDaysUntil(subscription?.endDate);
   const expiresHint =
-    typeof expiresInDays === 'number'
+    !isVip && typeof expiresInDays === 'number'
       ? expiresInDays > 1
         ? `em ${expiresInDays} dias`
         : expiresInDays === 1
@@ -388,9 +391,9 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
     SUSPENDED: { label: 'Assinatura suspensa', tone: 'bg-rose-100 text-rose-700', accent: 'border-l-rose-400 bg-gradient-to-r from-rose-50/70 to-white' },
     CANCELLED: { label: 'Assinatura cancelada', tone: 'bg-slate-100 text-slate-600', accent: 'border-l-slate-300 bg-gradient-to-r from-slate-50 to-white' },
   };
-  const statusLabel = statusMap[rawStatus]?.label || subscription?.status || '—';
-  const statusTone = statusMap[rawStatus]?.tone || 'bg-slate-100 text-slate-600';
-  const statusAccent = statusMap[rawStatus]?.accent || 'border-l-slate-200 bg-white';
+  const statusLabel = isVip ? 'VIP ativo' : (statusMap[rawStatus]?.label || subscription?.status || '—');
+  const statusTone = isVip ? 'bg-emerald-100 text-emerald-700' : (statusMap[rawStatus]?.tone || 'bg-slate-100 text-slate-600');
+  const statusAccent = isVip ? 'border-l-emerald-400 bg-gradient-to-r from-emerald-50/70 to-white' : (statusMap[rawStatus]?.accent || 'border-l-slate-200 bg-white');
   const paidAtLabel = subscription?.latestPaymentAt ? formatDateTime(subscription.latestPaymentAt) : '—';
   const rawPaymentStatus = (subscription?.latestPaymentStatus || '').toUpperCase();
   const paymentStatusMap: Record<string, string> = {
@@ -401,7 +404,9 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
     EXPIRED: 'Pagamento expirado',
   };
   const paymentStatus =
-    rawStatus === 'TRIAL'
+    isVip
+      ? 'Isento de cobranca (VIP)'
+      : rawStatus === 'TRIAL'
       ? 'Sem cobrança durante o trial'
       : paymentStatusMap[rawPaymentStatus] || subscription?.latestPaymentStatus || '—';
   const historyStatusMap: Record<string, string> = {
@@ -446,7 +451,7 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
             <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Plano atual</p>
             <div className="flex items-center gap-2 mt-2">
               <h3 className="text-2xl font-bold text-slate-900">{planLabel}</h3>
-              {subscription?.planExempt && (
+              {isVip && (
                 <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-[0.2em] bg-emerald-100 text-emerald-700">
                   VIP
                 </span>
@@ -462,7 +467,7 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
             <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Valor</p>
             <p className="text-lg font-semibold text-slate-900 mt-2">{formatCurrency(priceValue)}</p>
             <p className="text-xs text-slate-500 mt-1">
-              {subscription?.planExempt ? 'Plano isento' : `Plano ${plan?.billingCycle || 'mensal'}`}
+              {isVip ? 'Sem cobranca e sem vencimento' : `Plano ${plan?.billingCycle || 'mensal'}`}
             </p>
           </div>
           <div className="rounded-2xl border border-slate-200 border-l-4 border-l-sky-400 bg-slate-50 p-4">
@@ -481,15 +486,17 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
       <div className="rounded-3xl border border-slate-200 border-l-4 border-l-violet-400 bg-white p-6 shadow-[0_20px_60px_-50px_rgba(15,23,42,0.35)] space-y-4">
         <div>
           <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Ciclo</p>
-          <h3 className="text-lg font-bold text-slate-900 mt-2">Próximo vencimento</h3>
+          <h3 className="text-lg font-bold text-slate-900 mt-2">{isVip ? 'Acesso VIP' : 'Próximo vencimento'}</h3>
         </div>
         <div className="rounded-2xl border border-slate-200 border-l-4 border-l-emerald-400 bg-slate-50 p-4">
-          <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Expira em</p>
+          <p className="text-xs uppercase tracking-[0.25em] text-slate-400">{isVip ? 'Vencimento' : 'Expira em'}</p>
           <p className="text-lg font-semibold text-slate-900 mt-2">{expiresLabel}</p>
           {expiresHint && (
             <p className="text-xs font-semibold text-slate-600 mt-1">{expiresHint}</p>
           )}
-          <p className="text-xs text-slate-500 mt-1">Último pagamento: {paidAtLabel}</p>
+          <p className="text-xs text-slate-500 mt-1">
+            {isVip ? 'Acesso liberado pelo administrador.' : `Último pagamento: ${paidAtLabel}`}
+          </p>
         </div>
         {Array.isArray(payments) && payments.length > 0 && (
           <div className="pt-2 border-t border-slate-200">

@@ -20,10 +20,15 @@ import { OrderRepository } from '../repositories/OrderRepository';
 import { AppDataSource } from '../config/database';
 import { SubscriptionRepository } from '../repositories/SubscriptionRepository';
 import { AccessLogRepository } from '../repositories/AccessLogRepository';
+import { env } from '../config/env';
 import { logger } from '../utils/logger';
 import { respondWithError } from '../errors/respondWithError';
 import { AppError } from '../errors/AppError';
 import { StoreSettings } from '../entities/StoreSettings';
+import { SettingsService } from '../services/SettingsService';
+import { Plan } from '../entities/Plan';
+import { Subscription } from '../entities/Subscription';
+import { Store } from '../entities/Store';
 
 const storeRepository = new StoreRepository();
 const subscriptionService = new SubscriptionService();
@@ -32,6 +37,7 @@ const paymentEventRepository = new PaymentEventRepository();
 const orderRepository = new OrderRepository();
 const subscriptionRepository = new SubscriptionRepository();
 const accessLogRepository = new AccessLogRepository();
+const settingsService = new SettingsService();
 const log = logger.child({ scope: 'PlatformAdminController' });
 /**
  * Provides PlatformAdminController functionality.
@@ -322,36 +328,93 @@ export class PlatformAdminController {
 
     try {
       log.info('Admin plan exempt update request', { storeId, planExempt });
-      const store = await storeRepository.findById(storeId);
-      if (!store) return respondWithError(req, res, new AppError('STORE-001', 404), 404);
+      const result = await AppDataSource.transaction(async (manager) => {
+        const storeRepo = manager.getRepository(Store);
+        const storeSettingsRepo = manager.getRepository(StoreSettings);
+        const planRepo = manager.getRepository(Plan);
+        const subscriptionRepo = manager.getRepository(Subscription);
 
-      if (!store.settings) {
-        store.settings = AppDataSource.getRepository(StoreSettings).create();
-      }
+        const store = await storeRepo.findOne({ where: { id: storeId }, relations: ['settings'] });
+        if (!store) {
+          throw new AppError('STORE-001', 404);
+        }
 
-      store.settings.planExempt = planExempt;
-      store.settings.planExemptLabel = planExempt ? (label || 'Cliente VIP') : null;
-      if (planExempt) {
-        store.open = true;
-      }
+        if (!store.settings) {
+          store.settings = storeSettingsRepo.create({ store } as Partial<StoreSettings>);
+        } else if (!(store.settings as any).store) {
+          // Ensure relation is set when settings exists but wasn't hydrated with the store relation.
+          (store.settings as any).store = store;
+        }
 
-      await storeRepository.save(store);
+        store.settings.planExempt = planExempt;
+        store.settings.planExemptLabel = planExempt ? (label || 'Cliente VIP') : null;
 
-      const subscription = planExempt ? null : await subscriptionService.getCurrentByStore(store.id);
-      const hasValidPlan = subscriptionService.isActiveSubscription(subscription);
-      if (!planExempt && !subscription) {
-        store.open = false;
-        await storeRepository.save(store);
-      }
+        if (planExempt) {
+          store.open = true;
+        }
+
+        await storeSettingsRepo.save(store.settings);
+        await storeRepo.save(store);
+
+        // If VIP was removed, ensure the store gets a trial subscription (7 days default) if it has no active plan.
+        let subscription = planExempt
+          ? null
+          : await subscriptionRepo.findOne({
+              where: { store: { id: store.id } } as any,
+              order: { endDate: 'DESC' } as any,
+              relations: ['store', 'store.settings', 'plan'],
+            });
+        const now = new Date();
+        const hasValidPlan =
+          !!subscription &&
+          new Date(subscription.endDate).getTime() >= now.getTime() &&
+          subscription.status !== 'PENDING' &&
+          subscription.status !== 'EXPIRED' &&
+          subscription.status !== 'CANCELLED';
+
+        if (!planExempt && !hasValidPlan) {
+          let plan = await planRepo.findOne({ where: { name: 'basic_monthly', enabled: true } as any });
+          if (!plan) {
+            plan = await planRepo.findOne({ where: { enabled: true } as any, order: { price: 'ASC' } as any });
+          }
+          if (!plan) {
+            throw new AppError('SUB-003', 400);
+          }
+
+          const trialDays = await settingsService.getNumber('trial_days', env.trialDays);
+          const trialEnd = new Date(now);
+          trialEnd.setDate(trialEnd.getDate() + trialDays);
+
+          const created = subscriptionRepo.create({
+            store,
+            plan,
+            startDate: now,
+            endDate: trialEnd,
+            status: 'TRIAL',
+            autoRenew: false,
+            paymentMethod: 'PIX',
+          } as any);
+          await subscriptionRepo.save(created);
+          subscription = created as any;
+          store.open = true;
+          await storeRepo.save(store);
+        }
+
+        const finalSub = planExempt ? null : subscription;
+        const finalHasValidPlan = planExempt
+          ? true
+          : subscriptionService.isActiveSubscription(finalSub as any);
+        return { store, subscription: finalSub, hasValidPlan: finalHasValidPlan };
+      });
 
       return res.json({
-        storeId: store.id,
-        planExempt: store.settings.planExempt,
-        planExemptLabel: store.settings.planExemptLabel,
-        hasValidPlan,
-        shouldOpenRenewal: !planExempt && !hasValidPlan,
-        lastPlanId: subscription?.plan?.id || null,
-        lastPlanName: subscription?.plan?.name || null,
+        storeId: result.store.id,
+        planExempt: result.store.settings.planExempt,
+        planExemptLabel: result.store.settings.planExemptLabel,
+        hasValidPlan: result.hasValidPlan,
+        shouldOpenRenewal: !planExempt && !result.hasValidPlan,
+        lastPlanId: result.subscription?.plan?.id || null,
+        lastPlanName: result.subscription?.plan?.name || null,
       });
     } catch (error: any) {
       log.warn('Admin plan exempt update failed', { storeId, error });
