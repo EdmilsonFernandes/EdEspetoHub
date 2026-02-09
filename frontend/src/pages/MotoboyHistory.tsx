@@ -69,7 +69,7 @@ export function MotoboyHistory() {
       {pendingCount > 0 && (
         <button
           type="button"
-          onClick={() => navigate('/motoboy/current')}
+          onClick={() => navigate('/motoboy/profile')}
           className="w-full rounded-xl border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-semibold text-amber-700"
         >
           {pendingCount} solicitação{pendingCount === 1 ? '' : 'es'} pendente{pendingCount === 1 ? '' : 's'} de vínculo

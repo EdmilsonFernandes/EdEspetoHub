@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { LandingPage, CreateStore, AdminLogin, StorePage, OrdersQueue, AdminDashboard, AdminOrders, AdminQueue, AdminRenewal, AdminDemo, PaymentPage, SuperAdmin, ForgotPassword, ResetPassword, VerifyEmail, TermsOfUse, OrderTracking, AddressDistance, AdminMotoboys, MotoboyAvailable, MotoboyCurrent, MotoboyHistory, MotoboyLogin, MotoboyRegister } from './pages';
+import { LandingPage, CreateStore, AdminLogin, StorePage, OrdersQueue, AdminDashboard, AdminOrders, AdminQueue, AdminRenewal, AdminDemo, PaymentPage, SuperAdmin, ForgotPassword, ResetPassword, VerifyEmail, TermsOfUse, OrderTracking, AddressDistance, AdminMotoboys, MotoboyAvailable, MotoboyCurrent, MotoboyHistory, MotoboyProfile, MotoboyLogin, MotoboyRegister } from './pages';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { ToastProvider } from './contexts/ToastContext';
 import { AdminRoute } from './components/Admin/AdminRoute';
@@ -10,6 +10,7 @@ import { AdminLayout } from './components/Admin/AdminLayout';
 import { AppErrorBoundary } from './components/common/AppErrorBoundary';
 import './index.css';
 import { PortfolioPage } from './pages/PortfolioPage';
+import { MotoboyLayout } from './layouts/MotoboyLayout';
 
 function App() {
   return (
@@ -103,35 +104,22 @@ function App() {
             <Route path="/motoboy/login" element={<MotoboyLogin />} />
             <Route path="/motoboy/register" element={<MotoboyRegister />} />
             <Route
-              path="/motoboy/available"
+              path="/motoboy"
               element={
                 <AppErrorBoundary>
                   <MotoboyRoute>
-                    <MotoboyAvailable />
+                    <MotoboyLayout />
                   </MotoboyRoute>
                 </AppErrorBoundary>
               }
-            />
-            <Route
-              path="/motoboy/current"
-              element={
-                <AppErrorBoundary>
-                  <MotoboyRoute>
-                    <MotoboyCurrent />
-                  </MotoboyRoute>
-                </AppErrorBoundary>
-              }
-            />
-            <Route
-              path="/motoboy/history"
-              element={
-                <AppErrorBoundary>
-                  <MotoboyRoute>
-                    <MotoboyHistory />
-                  </MotoboyRoute>
-                </AppErrorBoundary>
-              }
-            />
+            >
+              <Route index element={<Navigate to="/motoboy/available" replace />} />
+              <Route path="available" element={<MotoboyAvailable />} />
+              <Route path="delivery" element={<MotoboyCurrent />} />
+              <Route path="history" element={<MotoboyHistory />} />
+              <Route path="profile" element={<MotoboyProfile />} />
+            </Route>
+            <Route path="/motoboy/current" element={<Navigate to="/motoboy/delivery" replace />} />
           </Routes>
         </Router>
       </ToastProvider>

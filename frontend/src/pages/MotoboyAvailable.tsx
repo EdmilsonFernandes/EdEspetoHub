@@ -113,7 +113,7 @@ export function MotoboyAvailable() {
         } catch {}
       }
       showToast('Pedido aceito. Boa entrega!', 'success');
-      navigate('/motoboy/current');
+      navigate('/motoboy/delivery');
     } catch (error: any) {
       if (error?.status === 409) {
         showToast('Pedido já foi aceito por outro motoboy.', 'warning');
@@ -131,10 +131,10 @@ export function MotoboyAvailable() {
         rightAction={
           <div className="flex items-center gap-2">
             <button
-              onClick={() => navigate('/motoboy/current')}
+              onClick={() => navigate('/motoboy/profile')}
               className="px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600"
             >
-              Meu perfil
+              Perfil
             </button>
             <button
               onClick={loadOrders}
@@ -153,7 +153,7 @@ export function MotoboyAvailable() {
       {pendingCount > 0 && (
         <button
           type="button"
-          onClick={() => navigate('/motoboy/current')}
+          onClick={() => navigate('/motoboy/profile')}
           className="w-full rounded-xl border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-semibold text-amber-700"
         >
           {pendingCount} solicitação{pendingCount === 1 ? '' : 'es'} pendente{pendingCount === 1 ? '' : 's'} de vínculo
@@ -227,7 +227,7 @@ export function MotoboyAvailable() {
         <div className="grid gap-4">
           {hasActive && (
             <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-              Você já tem uma entrega ativa. Finalize em “Meu perfil” antes de aceitar outra.
+              Você já tem uma entrega ativa. Finalize na aba “Entrega” antes de aceitar outra.
             </div>
           )}
           {orders.map((order) => (
