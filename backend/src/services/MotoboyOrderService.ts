@@ -58,7 +58,7 @@ export class MotoboyOrderService {
       .leftJoinAndSelect('items.product', 'product')
       .where('o.type = :type', { type: 'delivery' })
       .andWhere(
-        `(od.order_id IS NULL AND o.status IN (:...statuses)) OR (od.status = 'AVAILABLE' AND (od.expires_at IS NULL OR od.expires_at > NOW()))`,
+        `(od.order_id IS NULL AND o.status IN (:...statuses)) OR (od.status = 'AVAILABLE' AND od.motoboy_id IS NULL AND (od.expires_at IS NULL OR od.expires_at > NOW()))`,
         { statuses: availableOrderStatuses }
       )
       .andWhere('o.store_id IN (:...storeIds)', { storeIds })

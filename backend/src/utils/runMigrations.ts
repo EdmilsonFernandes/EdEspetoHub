@@ -390,6 +390,13 @@ export async function runMigrations() {
     ALTER TABLE IF EXISTS order_deliveries
     ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'AVAILABLE';
   `);
+  // Backfill legacy rows: if motoboy_id exists, it's not "AVAILABLE".
+  await AppDataSource.query(`
+    UPDATE order_deliveries
+    SET status = CASE WHEN delivered_at IS NOT NULL THEN 'DELIVERED' ELSE 'ACCEPTED' END
+    WHERE motoboy_id IS NOT NULL
+      AND (status IS NULL OR status = 'AVAILABLE');
+  `);
   await AppDataSource.query(`
     ALTER TABLE IF EXISTS order_deliveries
     ADD COLUMN IF NOT EXISTS freight_value NUMERIC(10,2);

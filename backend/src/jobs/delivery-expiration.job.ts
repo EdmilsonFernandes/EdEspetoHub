@@ -33,6 +33,7 @@ export function scheduleDeliveryExpirationJob() {
           UPDATE order_deliveries
           SET status = 'EXPIRED'
           WHERE status = 'AVAILABLE'
+            AND motoboy_id IS NULL
             AND expires_at IS NOT NULL
             AND expires_at < NOW()
           RETURNING order_id
@@ -51,4 +52,3 @@ export function scheduleDeliveryExpirationJob() {
   tick();
   log.info('Delivery expiration job scheduled', { intervalMs });
 }
-
