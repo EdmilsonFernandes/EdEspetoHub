@@ -5,6 +5,7 @@ import {
   ArrowUpRight,
   BookOpen,
   ChartBar,
+  ChatCircleText,
   CheckCircle,
   CreditCard,
   Lightning,
@@ -17,6 +18,7 @@ import { storeService } from "../services/storeService";
 import { productService } from "../services/productService";
 import { orderService } from "../services/orderService";
 import { platformService } from "../services/platformService";
+import { planService } from "../services/planService";
 import { resolveAssetUrl } from "../utils/resolveAssetUrl";
 import { formatCurrency } from "../utils/format";
 
@@ -154,6 +156,9 @@ export function PortfolioPage() {
     updatedAt?: string;
   } | null>(null);
   const [metricsLoading, setMetricsLoading] = useState(true);
+  const [plans, setPlans] = useState<any[]>([]);
+  const [planCycle, setPlanCycle] = useState<"monthly" | "yearly">("monthly");
+  const [plansLoading, setPlansLoading] = useState(true);
 
   useEffect(() => {
     let active = true;
@@ -179,6 +184,28 @@ export function PortfolioPage() {
 
     loadPortfolio();
 
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    const loadPlans = async () => {
+      try {
+        setPlansLoading(true);
+        const data = await planService.list();
+        if (!active) return;
+        const list = Array.isArray(data) ? data : [];
+        setPlans(list.filter((plan) => plan?.enabled !== false));
+      } catch {
+        if (!active) return;
+        setPlans([]);
+      } finally {
+        if (active) setPlansLoading(false);
+      }
+    };
+    loadPlans();
     return () => {
       active = false;
     };
@@ -320,6 +347,31 @@ export function PortfolioPage() {
       maximumFractionDigits: 1,
     }).format(numeric);
   };
+
+  const resolvePlanMeta = (planName = "") => {
+    const normalized = planName.toString().toLowerCase();
+    if (normalized.includes("premium")) {
+      return { badge: "Mais completo", tone: "bg-slate-900 text-white", featured: true };
+    }
+    if (normalized.includes("pro")) {
+      return { badge: "Mais popular", tone: "bg-red-600 text-white", featured: true };
+    }
+    return { badge: "Começar", tone: "bg-slate-100 text-slate-700", featured: false };
+  };
+
+  const visiblePlans = useMemo(() => {
+    const list = plans || [];
+    const filtered = planCycle === "yearly"
+      ? list.filter((plan) => Number(plan?.durationDays) >= 360)
+      : list.filter((plan) => Number(plan?.durationDays) < 360);
+    // Prefer the main three tiers if present
+    const order = planCycle === "yearly"
+      ? ["basic_yearly", "pro_yearly", "premium_yearly"]
+      : ["basic_monthly", "pro_monthly", "premium_monthly"];
+    const byName = new Map(filtered.map((plan) => [String(plan?.name || ""), plan]));
+    const ordered = order.map((key) => byName.get(key)).filter(Boolean) as any[];
+    return ordered.length ? ordered : filtered.slice(0, 3);
+  }, [plans, planCycle]);
 
   useEffect(() => {
     if (!profilePreview) return;
@@ -502,6 +554,135 @@ export function PortfolioPage() {
               );
             })}
           </div>
+        </div>
+      </section>
+
+      <section className="bg-white py-16">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-10">
+            <div className="space-y-3 max-w-2xl">
+              <p className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.35em] text-red-700">
+                Planos
+              </p>
+              <h2 className="text-2xl sm:text-4xl font-black text-slate-900">
+                Quanto custa vender com seu próprio site?
+              </h2>
+              <p className="text-sm text-slate-600">
+                Comece sem complicação. Se preferir, você pode testar e ajustar antes de divulgar o link.
+              </p>
+            </div>
+            <div className="flex items-center rounded-full border border-slate-200 bg-white p-1 w-fit">
+              <button
+                type="button"
+                onClick={() => setPlanCycle("monthly")}
+                className={`px-4 py-2 rounded-full text-xs font-bold transition ${
+                  planCycle === "monthly" ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-50"
+                }`}
+              >
+                Mensal
+              </button>
+              <button
+                type="button"
+                onClick={() => setPlanCycle("yearly")}
+                className={`px-4 py-2 rounded-full text-xs font-bold transition ${
+                  planCycle === "yearly" ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-50"
+                }`}
+              >
+                Anual
+              </button>
+            </div>
+          </div>
+
+          {plansLoading ? (
+            <div className="rounded-3xl border border-slate-200 bg-slate-50 p-6 text-sm text-slate-600">
+              Carregando planos...
+            </div>
+          ) : (
+            <div className="grid gap-6 lg:grid-cols-3">
+              {visiblePlans.map((plan) => {
+                const meta = resolvePlanMeta(plan?.name);
+                const price = Number(plan?.price) || 0;
+                const promo = plan?.promoPrice != null ? Number(plan.promoPrice) : null;
+                const showPromo = promo != null && promo > 0 && promo < price;
+                return (
+                  <div
+                    key={plan?.id || plan?.name}
+                    className={`rounded-3xl border p-6 shadow-sm ${
+                      meta.featured
+                        ? "border-slate-900 bg-slate-900 text-white shadow-[0_28px_80px_-52px_rgba(15,23,42,0.85)]"
+                        : "border-slate-200 bg-white"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className={`text-[11px] uppercase tracking-[0.35em] font-semibold ${meta.featured ? "text-white/70" : "text-slate-400"}`}>
+                          {planCycle === "yearly" ? "Anual" : "Mensal"}
+                        </p>
+                        <p className={`mt-2 text-xl font-black ${meta.featured ? "text-white" : "text-slate-900"}`}>
+                          {plan?.displayName || plan?.name || "Plano"}
+                        </p>
+                      </div>
+                      <span className={`px-3 py-1 rounded-full text-[11px] font-bold ${meta.tone}`}>
+                        {meta.badge}
+                      </span>
+                    </div>
+
+                    <div className="mt-6">
+                      {showPromo ? (
+                        <div className="flex items-end justify-between gap-3">
+                          <div>
+                            <p className={`text-xs ${meta.featured ? "text-white/70" : "text-slate-500"}`}>de</p>
+                            <p className={`text-sm font-bold line-through ${meta.featured ? "text-white/60" : "text-slate-400"}`}>
+                              {formatCurrency(price)}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className={`text-xs ${meta.featured ? "text-white/70" : "text-slate-500"}`}>por</p>
+                            <p className={`text-3xl font-black ${meta.featured ? "text-white" : "text-slate-900"}`}>
+                              {formatCurrency(promo!)}
+                            </p>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className={`text-3xl font-black ${meta.featured ? "text-white" : "text-slate-900"}`}>
+                          {formatCurrency(price)}
+                        </p>
+                      )}
+                      <p className={`mt-2 text-xs ${meta.featured ? "text-white/70" : "text-slate-500"}`}>
+                        {planCycle === "yearly" ? "cobrado por ano" : "cobrado por mês"}
+                      </p>
+                    </div>
+
+                    <div className={`mt-6 rounded-2xl border p-4 ${meta.featured ? "border-white/15 bg-white/10" : "border-slate-200 bg-slate-50"}`}>
+                      <p className={`text-xs font-semibold ${meta.featured ? "text-white/80" : "text-slate-700"}`}>
+                        Ideal para:
+                      </p>
+                      <p className={`mt-2 text-sm ${meta.featured ? "text-white/90" : "text-slate-600"}`}>
+                        {plan?.name?.toString().includes("basic")
+                          ? "começar no digital com cardápio e pedidos"
+                          : plan?.name?.toString().includes("pro")
+                          ? "rotina diária com fila, promoções e relatórios"
+                          : "operação completa com foco em performance e crescimento"}
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => navigate("/create")}
+                      className={`mt-6 w-full inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-black transition active:scale-[0.99] ${
+                        meta.featured
+                          ? "bg-white text-slate-900 hover:bg-white/95"
+                          : "bg-brand-gradient text-white hover:opacity-95"
+                      }`}
+                    >
+                      Começar agora
+                      <ArrowRight size={18} weight="bold" />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 
@@ -826,6 +1007,15 @@ export function PortfolioPage() {
             <Storefront size={18} weight="duotone" />
             Criar loja
           </button>
+          <a
+            href="https://wa.me/5512997822784"
+            target="_blank"
+            rel="noreferrer"
+            className="h-12 w-12 rounded-2xl bg-emerald-600 text-white grid place-items-center shadow-sm"
+            aria-label="Chamar no WhatsApp"
+          >
+            <ChatCircleText size={18} weight="duotone" />
+          </a>
           <a
             href="#top"
             className="h-12 w-12 rounded-2xl border border-slate-200 bg-white text-slate-700 grid place-items-center"
