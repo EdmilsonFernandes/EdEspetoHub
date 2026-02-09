@@ -213,7 +213,7 @@ export function MotoboyAvailable() {
         <div className="text-center text-sm text-slate-500">Carregando...</div>
       ) : orders.length === 0 ? (
         <div className="text-center text-sm text-slate-500">
-          Nenhum pedido aguardando entregador. A loja precisa marcar o pedido como “Aguardando entregador”.
+          Nenhum pedido disponível. A loja precisa marcar o pedido como “Pronto para entrega” ou “Aguardando entregador”.
         </div>
       ) : (
         <div className="grid gap-4">

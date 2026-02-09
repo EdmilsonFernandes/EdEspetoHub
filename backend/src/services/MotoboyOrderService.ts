@@ -45,6 +45,7 @@ export class MotoboyOrderService {
   async listAvailable(motoboy: Motoboy) {
     const storeIds = await this.motoboyStoreRepository.listStoreIds(motoboy.id);
     if (!storeIds.length) return [];
+    const availableStatuses = [ 'waiting_for_motoboy', 'ready_for_delivery' ];
     return AppDataSource.getRepository(Order)
       .createQueryBuilder('o')
       .leftJoinAndSelect('o.store', 'store')
@@ -52,7 +53,7 @@ export class MotoboyOrderService {
       .leftJoinAndSelect('o.items', 'items')
       .leftJoinAndSelect('items.product', 'product')
       .where('o.type = :type', { type: 'delivery' })
-      .andWhere('o.status = :status', { status: 'waiting_for_motoboy' })
+      .andWhere('o.status IN (:...statuses)', { statuses: availableStatuses })
       .andWhere('o.store_id IN (:...storeIds)', { storeIds })
       .orderBy('o.created_at', 'ASC')
       .getMany();
@@ -114,7 +115,9 @@ export class MotoboyOrderService {
 
       if (!order) throw new AppError('ORDER-001', 404);
       if (!this.isDeliveryOrder(order)) throw new AppError('MOTO-010', 400);
-      if (order.status !== 'waiting_for_motoboy') throw new AppError('MOTO-011', 400);
+      if (![ 'waiting_for_motoboy', 'ready_for_delivery' ].includes(order.status)) {
+        throw new AppError('MOTO-011', 400);
+      }
 
       const link = await this.motoboyStoreRepository.findActiveLink(motoboy.id, order.store.id);
       if (!link) throw new AppError('MOTO-012', 403);
