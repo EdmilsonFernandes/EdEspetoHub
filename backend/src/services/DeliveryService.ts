@@ -204,9 +204,6 @@ export class DeliveryService {
         throw error;
       }
 
-      order.status = 'in_delivery';
-      await orderRepo.save(order);
-
       await this.insertEvent(manager, {
         deliveryId: orderId,
         actorType: 'MOTOBOY',
@@ -226,6 +223,54 @@ export class DeliveryService {
 
   async start(orderId: string, motoboy: Motoboy) {
     return this.advance(orderId, motoboy, 'IN_TRANSIT');
+  }
+
+  async pickupAndStart(orderId: string, motoboy: Motoboy) {
+    return AppDataSource.transaction(async (manager) => {
+      const repo = manager.getRepository(OrderDelivery);
+      const orderRepo = manager.getRepository(Order);
+
+      const delivery = await repo
+        .createQueryBuilder('od')
+        .setLock('pessimistic_write')
+        .where('od.order_id = :orderId', { orderId })
+        .getOne();
+      if (!delivery) throw new AppError('DELIV-007', 404);
+      if (delivery.motoboyId !== motoboy.id) throw new AppError('AUTH-003', 403);
+
+      const from = normalizeStatus(delivery.status);
+      this.assertTransition(from, 'PICKED_UP');
+      this.assertTransition('PICKED_UP', 'IN_TRANSIT');
+
+      const now = new Date();
+      delivery.status = 'IN_TRANSIT';
+      delivery.pickedUpAt = delivery.pickedUpAt ?? now;
+      delivery.inTransitAt = now;
+      await repo.save(delivery);
+
+      await this.insertEvent(manager, {
+        deliveryId: orderId,
+        actorType: 'MOTOBOY',
+        actorId: motoboy.id,
+        fromStatus: from,
+        toStatus: 'PICKED_UP',
+      });
+      await this.insertEvent(manager, {
+        deliveryId: orderId,
+        actorType: 'MOTOBOY',
+        actorId: motoboy.id,
+        fromStatus: 'PICKED_UP',
+        toStatus: 'IN_TRANSIT',
+      });
+
+      const order = await orderRepo.findOne({ where: { id: orderId } as any });
+      if (order) {
+        order.status = 'in_delivery';
+        await orderRepo.save(order);
+      }
+
+      return delivery;
+    });
   }
 
   private async advance(orderId: string, motoboy: Motoboy, to: DeliveryStatus) {
@@ -254,6 +299,16 @@ export class DeliveryService {
         fromStatus: from,
         toStatus: to,
       });
+
+      // Once the courier starts the route, we consider the order "in delivery" for store/customer views.
+      if (to === 'IN_TRANSIT') {
+        const orderRepo = manager.getRepository(Order);
+        const order = await orderRepo.findOne({ where: { id: orderId } as any });
+        if (order) {
+          order.status = 'in_delivery';
+          await orderRepo.save(order);
+        }
+      }
       return delivery;
     });
   }

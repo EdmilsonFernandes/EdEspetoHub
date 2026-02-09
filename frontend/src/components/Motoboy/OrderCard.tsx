@@ -21,6 +21,13 @@ export function OrderCard({ order, compact, actions }: Props) {
   const deliveryFee = deliveryFeeRaw !== null && deliveryFeeRaw !== undefined ? Number(deliveryFeeRaw) : null;
 
   const items = useMemo(() => (Array.isArray(order?.items) ? order.items : []), [order?.items]);
+  const compactItemsLabel = useMemo(() => {
+    if (!items.length) return '';
+    return items
+      .slice(0, 2)
+      .map((it: any) => `${it.quantity || 1}x ${it.name || 'Item'}`)
+      .join(' • ');
+  }, [items]);
   const shortId = order?.shortId || (order?.id ? String(order.id).slice(0, 8) : '-');
   const customerName = order?.customerName || order?.customer_name || 'Cliente';
   const phone = order?.phone || null;
@@ -63,6 +70,9 @@ export function OrderCard({ order, compact, actions }: Props) {
             <p className="text-xs text-slate-500">Cliente</p>
             <p className="text-base font-bold text-slate-900 truncate">{customerName}</p>
             {phone && <p className="text-xs text-slate-600 mt-1">{phone}</p>}
+            {compact && compactItemsLabel && (
+              <p className="text-xs text-slate-600 mt-2 truncate">{compactItemsLabel}</p>
+            )}
           </div>
           <div className="text-right">
             <p className="text-xs text-slate-500">Total</p>

@@ -1195,16 +1195,18 @@ export function StorePage() {
           </div>
         ) : !showInactiveState && !showClosedState && view === 'menu' && products.length > 0 && (
           <div className="space-y-4">
-            {!user?.token && recentPublicOrders.length > 0 && (
-              <div className="mx-3 sm:mx-6 rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div className="space-y-1">
-                  <span className="font-semibold">Acompanhar pedidos recentes</span>
+              {!user?.token && recentPublicOrders.length > 0 && (
+              <div className="mx-3 sm:mx-6 rounded-3xl premium-card-glass px-4 py-4 text-sm text-emerald-900 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div className="space-y-2">
+                  <span className="text-[11px] uppercase tracking-[0.3em] text-emerald-700 font-extrabold">
+                    Acompanhar pedidos recentes
+                  </span>
                   <div className="flex flex-wrap gap-2">
                     {recentPublicOrders.map((entry) => (
                       <button
                         key={entry.id}
                         onClick={() => navigate(`/pedido/${entry.id}`)}
-                        className="px-2.5 py-1 rounded-full bg-white text-emerald-700 text-[11px] font-semibold border border-emerald-200 hover:bg-emerald-100"
+                        className="btn-press px-3 py-1.5 rounded-full bg-white/70 text-emerald-900 text-[11px] font-extrabold border border-emerald-200 hover:bg-emerald-100/70"
                       >
                         #{formatOrderDisplayId(entry.id, storeSlug)}
                       </button>
@@ -1214,14 +1216,14 @@ export function StorePage() {
                 <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() => navigate(`/pedido/${recentPublicOrders[0].id}`)}
-                    className="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:opacity-90"
+                    className="btn-press px-4 py-2 rounded-xl bg-[linear-gradient(120deg,#16a34a,#059669)] text-white text-xs font-extrabold shadow-[0_22px_48px_-32px_rgba(5,150,105,0.6)]"
                   >
                     Acompanhar agora
                   </button>
                   {lastOrderItems.length > 0 && (
                     <button
                       onClick={handleRepeatFromMenu}
-                      className="px-3 py-1.5 rounded-lg border border-emerald-300 text-emerald-700 text-xs font-semibold hover:bg-emerald-100"
+                      className="btn-press px-4 py-2 rounded-xl border border-emerald-300 bg-white/70 text-emerald-900 text-xs font-extrabold hover:bg-emerald-100/70"
                     >
                       Pedir novamente
                     </button>

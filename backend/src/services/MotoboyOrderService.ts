@@ -191,7 +191,8 @@ export class MotoboyOrderService {
   }
 
   async pickupOrder(orderId: string, motoboy: Motoboy) {
-    return deliveryService.pickup(orderId, motoboy);
+    // Business: picking up the order already means the courier is starting the route.
+    return deliveryService.pickupAndStart(orderId, motoboy);
   }
 
   async startOrder(orderId: string, motoboy: Motoboy) {

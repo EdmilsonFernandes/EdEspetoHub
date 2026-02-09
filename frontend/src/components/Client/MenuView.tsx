@@ -7,6 +7,7 @@ import {
   MapPin,
 } from "@phosphor-icons/react";
 import { formatCurrency } from "../../utils/format";
+import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
 import { ProductModal } from "../Cart/ProductModal";
 import { GoogleMapView } from "../GoogleMapView";
 
@@ -507,7 +508,7 @@ export const MenuView = ({
                 >
                   <div className="w-12 h-12 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 flex items-center justify-center text-[10px] text-slate-400">
                     {item.imageUrl ? (
-                      <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
+                      <img src={resolveAssetUrl(item.imageUrl)} alt={item.name} className="w-full h-full object-cover" />
                     ) : (
                       "🍖"
                     )}
@@ -600,7 +601,7 @@ export const MenuView = ({
                   <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-200">
                     {item.imageUrl ? (
                       <img
-                        src={item.imageUrl}
+                        src={resolveAssetUrl(item.imageUrl)}
                         alt={item.name}
                         className="w-full h-full object-cover transition duration-300 group-hover:scale-[1.03]"
                       />

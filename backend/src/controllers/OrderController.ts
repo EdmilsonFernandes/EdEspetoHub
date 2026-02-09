@@ -14,6 +14,8 @@
 import { Request, Response } from 'express';
 import { OrderService } from '../services/OrderService';
 import { OrderEtaServiceV2 } from '../services/OrderEtaServiceV2';
+import { AppDataSource } from '../config/database';
+import { OrderDelivery } from '../entities/OrderDelivery';
 import { logger } from '../utils/logger';
 import { AppError } from '../errors/AppError';
 import { respondWithError } from '../errors/respondWithError';
@@ -187,6 +189,10 @@ export class OrderController {
       const result = await orderService.getPublicById(orderId);
       if (!result) return respondWithError(req, res, new AppError('ORDER-001', 404), 404);
       const { order, queuePosition, queueSize } = result;
+      const deliveryRow =
+        order?.type === 'delivery'
+          ? await AppDataSource.getRepository(OrderDelivery).findOne({ where: { orderId: order.id } as any })
+          : null;
       const correlationId = typeof req.headers[ 'x-correlation-id' ] === 'string'
         ? req.headers[ 'x-correlation-id' ]
         : undefined;
@@ -203,6 +209,16 @@ export class OrderController {
         paymentStatus: order.paymentStatus,
         total: order.total,
         deliveryFee: order.deliveryFee ?? null,
+        delivery: deliveryRow
+          ? {
+              status: deliveryRow.status,
+              motoboyId: deliveryRow.motoboyId ?? null,
+              acceptedAt: deliveryRow.acceptedAt ?? null,
+              pickedUpAt: deliveryRow.pickedUpAt ?? null,
+              inTransitAt: deliveryRow.inTransitAt ?? null,
+              deliveredAt: deliveryRow.deliveredAt ?? null,
+            }
+          : null,
         createdAt: order.createdAt,
         queuePosition,
         queueSize,

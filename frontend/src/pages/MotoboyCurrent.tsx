@@ -155,27 +155,10 @@ export function MotoboyCurrent() {
     if (!activeOrder) return;
     try {
       await motoboyService.pickupOrder(activeOrder.id);
-      try {
-        // Business: once the motoboy picks up the order, the route can start immediately.
-        await motoboyService.startDelivery(activeOrder.id);
-        showToast('Pedido retirado. Rota iniciada.', 'success');
-      } catch (error: any) {
-        showToast(error?.message || 'Pedido retirado. Inicie a rota para continuar.', 'warning');
-      }
+      showToast('Pedido retirado. Rota iniciada.', 'success');
       load();
     } catch (error: any) {
       showToast(error?.message || 'Não foi possível confirmar retirada.', 'error');
-    }
-  };
-
-  const handleStart = async () => {
-    if (!activeOrder) return;
-    try {
-      await motoboyService.startDelivery(activeOrder.id);
-      showToast('Rota iniciada.', 'success');
-      load();
-    } catch (error: any) {
-      showToast(error?.message || 'Não foi possível iniciar a rota.', 'error');
     }
   };
 
@@ -391,12 +374,9 @@ export function MotoboyCurrent() {
               </button>
             )}
             {deliveryStatus === 'PICKED_UP' && (
-              <button
-                onClick={handleStart}
-                className="btn-press w-full rounded-xl bg-[linear-gradient(120deg,#0ea5e9,#2563eb)] px-4 py-3 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(37,99,235,0.6)]"
-              >
-                Iniciar rota agora
-              </button>
+              <div className="rounded-2xl border border-sky-200 bg-sky-50/70 px-4 py-3 text-sm text-sky-900 font-semibold">
+                Pedido retirado. Iniciando rota...
+              </div>
             )}
 
             {deliveryStatus === 'IN_TRANSIT' && (

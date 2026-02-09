@@ -423,8 +423,12 @@ export function OrderTracking() {
   }, [isDelivery, order?.type]);
   const currentStep = (() => {
     if (!isDelivery) return status;
+    const deliveryStatus = String((order as any)?.delivery?.status || '').toUpperCase();
+    if (deliveryStatus === 'DELIVERED') return 'delivered';
+    if (deliveryStatus === 'IN_TRANSIT') return 'in_delivery';
+    if (deliveryStatus === 'ACCEPTED' || deliveryStatus === 'PICKED_UP') return 'ready';
     if (status === 'ready_for_delivery' || status === 'waiting_for_motoboy' || status === 'ready') return 'ready';
-    if (status === 'in_delivery') return 'in_delivery';
+    if (status === 'in_delivery') return 'ready';
     if (status === 'delivered' || status === 'finished') return 'delivered';
     return status;
   })();
