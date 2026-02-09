@@ -19,9 +19,8 @@ export function MotoboyHeader({ title, subtitle, rightAction }: MotoboyHeaderPro
             {subtitle && <p className="text-xs sm:text-sm text-slate-600 mt-0.5">{subtitle}</p>}
           </div>
         </div>
-        <div className="shrink-0">{rightAction}</div>
+        <div className="shrink-0 flex flex-wrap justify-end gap-2">{rightAction}</div>
       </div>
     </div>
   );
 }
-

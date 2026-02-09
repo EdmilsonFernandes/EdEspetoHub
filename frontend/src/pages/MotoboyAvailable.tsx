@@ -202,7 +202,7 @@ export function MotoboyAvailable() {
           style={{ animationDelay: '40ms' }}
           role="status"
         >
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div className="min-w-0">
               <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Novo pedido</p>
               <p className="text-sm font-extrabold text-slate-900">
@@ -212,11 +212,11 @@ export function MotoboyAvailable() {
                 Atualizado agora. Toque em ver para ir direto.
               </p>
             </div>
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
               <button
                 type="button"
                 onClick={() => setNewBanner(null)}
-                className="btn-press rounded-xl border border-slate-200 bg-white/70 px-3 py-2 text-xs font-extrabold text-slate-700"
+                className="btn-press flex-1 sm:flex-none rounded-xl border border-slate-200 bg-white/70 px-3 py-2 text-xs font-extrabold text-slate-700"
               >
                 Fechar
               </button>
@@ -225,7 +225,7 @@ export function MotoboyAvailable() {
                 onClick={() => {
                   listRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }}
-                className="btn-press rounded-xl bg-[linear-gradient(120deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_60%,#f59e0b))] px-3 py-2 text-xs font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(239,68,68,0.85)]"
+                className="btn-press flex-1 sm:flex-none rounded-xl bg-[linear-gradient(120deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_60%,#f59e0b))] px-3 py-2 text-xs font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(239,68,68,0.85)]"
               >
                 Ver
               </button>
