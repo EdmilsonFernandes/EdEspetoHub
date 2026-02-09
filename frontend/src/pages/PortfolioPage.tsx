@@ -348,6 +348,13 @@ export function PortfolioPage() {
     }).format(numeric);
   };
 
+  const resolveImageSrc = (value?: string) => {
+    const raw = (value || "").trim();
+    if (!raw) return "";
+    if (raw.startsWith("http://") || raw.startsWith("https://")) return raw;
+    return resolveAssetUrl(raw) || raw;
+  };
+
   const resolvePlanMeta = (planName = "") => {
     const normalized = planName.toString().toLowerCase();
     if (normalized.includes("premium")) {
@@ -886,7 +893,7 @@ export function PortfolioPage() {
                       type="button"
                       onClick={() => {
                         if (member.profileImage) {
-                          const resolved = resolveAssetUrl(member.profileImage) || member.profileImage;
+                          const resolved = resolveImageSrc(member.profileImage);
                           setProfilePreview({
                             name: member.name,
                             image: resolved,
@@ -898,7 +905,7 @@ export function PortfolioPage() {
                     >
                       {member.profileImage ? (
                         <img
-                          src={resolveAssetUrl(member.profileImage) || member.profileImage}
+                          src={resolveImageSrc(member.profileImage)}
                           alt={member.name}
                           className="h-full w-full object-cover rounded-[20px] ring-2 ring-white brightness-105 contrast-110"
                         />
