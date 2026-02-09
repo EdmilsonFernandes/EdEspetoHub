@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
 import { useToast } from '../contexts/ToastContext';
 import { MotoboyHeader } from '../components/Motoboy/MotoboyHeader';
+import { formatPhoneInput } from '../utils/format';
 
 export function MotoboyRegister() {
   const navigate = useNavigate();
@@ -81,7 +82,7 @@ export function MotoboyRegister() {
             type="tel"
             placeholder="Telefone"
             value={form.phone}
-            onChange={(e) => setForm({ ...form, phone: e.target.value })}
+            onChange={(e) => setForm({ ...form, phone: formatPhoneInput(e.target.value) })}
             className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
           />
           <input

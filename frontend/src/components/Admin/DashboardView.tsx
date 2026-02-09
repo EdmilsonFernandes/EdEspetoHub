@@ -10,7 +10,7 @@ import {
   Tooltip as RechartsTooltip,
   ResponsiveContainer,
 } from "recharts";
-import { formatCurrency } from "../../utils/format";
+import { formatCurrency, formatPhoneInput } from "../../utils/format";
 import { exportToCsv } from "../../utils/export";
 
 const COLORS = ["var(--color-primary)", "var(--color-secondary)", "#10b981", "#3b82f6"];
@@ -967,7 +967,7 @@ export const DashboardView = ({
                         />
                         <input
                           value={editingPhone}
-                          onChange={(event) => setEditingPhone(event.target.value)}
+                          onChange={(event) => setEditingPhone(formatPhoneInput(event.target.value))}
                           placeholder="Telefone"
                           className="w-full rounded-lg border border-slate-200 px-2 py-1 text-xs focus:ring-2 focus:ring-brand-primary"
                         />

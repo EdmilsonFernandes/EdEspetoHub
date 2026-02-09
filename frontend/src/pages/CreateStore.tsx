@@ -5,6 +5,7 @@ import { storeService } from '../services/storeService';
 import { planService } from '../services/planService';
 import { BILLING_OPTIONS, PLAN_TIERS, getPlanName, resolveAnnualPromoTotal, resolveMonthlyEquivalent } from '../constants/planCatalog';
 import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
+import { formatPhoneInput } from '../utils/format';
 
 export function CreateStore() {
   const navigate = useNavigate();
@@ -494,7 +495,7 @@ export function CreateStore() {
                     <label className="text-sm font-semibold text-gray-700">Telefone</label>
                     <input
                       value={registerForm.phone}
-                      onChange={(e) => setRegisterForm((prev) => ({ ...prev, phone: e.target.value }))}
+                      onChange={(e) => setRegisterForm((prev) => ({ ...prev, phone: formatPhoneInput(e.target.value) }))}
                       className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
                       placeholder="(12) 99999-9999"
                     />
