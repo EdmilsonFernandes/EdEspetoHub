@@ -12,6 +12,9 @@ import {
   SpeakerHigh,
   SpeakerX,
   DotsThreeVertical,
+  Truck,
+  Storefront,
+  ForkKnife,
   X
 } from "@phosphor-icons/react";
 import { orderService } from "../../services/orderService";
@@ -78,6 +81,37 @@ export const GrillQueue = () => {
   });
   const previousIdsRef = useRef<string[]>([]);
   const audioContextRef = useRef<AudioContext | null>(null);
+
+  const orderTypeMeta = (order: any) => {
+    const type = String(order?.type || '').toLowerCase();
+    if (type === 'delivery') {
+      return {
+        label: 'Entrega',
+        pill: 'bg-sky-100 text-sky-800 border-sky-200',
+        icon: <Truck size={14} weight="duotone" />,
+      };
+    }
+    if (type === 'pickup') {
+      return {
+        label: 'Retirada',
+        pill: 'bg-amber-100 text-amber-800 border-amber-200',
+        icon: <Storefront size={14} weight="duotone" />,
+      };
+    }
+    if (type === 'table') {
+      const table = order?.table ? `Mesa ${order.table}` : 'Mesa';
+      return {
+        label: table,
+        pill: 'bg-fuchsia-100 text-fuchsia-800 border-fuchsia-200',
+        icon: <ForkKnife size={14} weight="duotone" />,
+      };
+    }
+    return {
+      label: formatOrderType(order?.type),
+      pill: 'bg-slate-100 text-slate-700 border-slate-200',
+      icon: <Hash size={14} weight="duotone" />,
+    };
+  };
   const itemOrderRef = useRef<Map<string, Map<string, number>>>(new Map());
   useEffect(() => {
     const sessionPixKey = auth?.store?.settings?.pixKey || '';
@@ -818,14 +852,20 @@ export const GrillQueue = () => {
                     Cliente: {order.customerName || order.name || "Cliente"}
                   </h3>
 
-                  {!(order.type === "table" && order.table) && (
-                    <p className="text-[11px] text-gray-500 uppercase break-words">
-                      {formatOrderType(order.type)}
-                      {order.table && (
-                        <span className="font-semibold text-gray-800"> · Mesa {order.table}</span>
-                      )}
-                    </p>
-                  )}
+                  <div className="mt-1 flex flex-wrap items-center gap-2">
+                    {(() => {
+                      const meta = orderTypeMeta(order);
+                      return (
+                        <span
+                          className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.18em] ${meta.pill}`}
+                          title={formatOrderType(order.type)}
+                        >
+                          {meta.icon}
+                          <span>{meta.label}</span>
+                        </span>
+                      );
+                    })()}
+                  </div>
                   {order.phone && (
                     <p className="text-[11px] text-gray-500 break-words">{order.phone}</p>
                   )}
@@ -1004,20 +1044,36 @@ export const GrillQueue = () => {
 
               {/* TOTAL + BOTÕES */}
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mt-3">
-              <div className="inline-flex items-center gap-2 text-[11px] font-semibold text-slate-600">
-                {order.type === "delivery" && order.deliveryFee ? (
-                  <span className="inline-flex items-center gap-2 text-[11px] font-semibold text-slate-500">
-                    Frete
-                    <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 text-[11px] font-bold">
-                      {formatCurrency(order.deliveryFee)}
-                    </span>
-                  </span>
-                ) : null}
-                <span>Total</span>
-                <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold">
-                  {formatCurrency(order.total || 0)}
-                </span>
-              </div>
+	              <div className="inline-flex flex-wrap items-center gap-2 text-[11px] font-semibold text-slate-600">
+	                {(() => {
+	                  const fee =
+	                    order.type === 'delivery' && order.deliveryFee !== null && order.deliveryFee !== undefined
+	                      ? Number(order.deliveryFee)
+	                      : 0;
+	                  const total = Number(order.total || 0);
+	                  const itemsTotal = Math.max(0, total - (Number.isFinite(fee) ? fee : 0));
+	                  return (
+	                    <>
+	                      <span className="text-slate-500">Itens</span>
+	                      <span className="px-2 py-0.5 rounded-full bg-white/70 text-slate-800 border border-slate-200 text-[11px] font-bold">
+	                        {formatCurrency(itemsTotal)}
+	                      </span>
+	                      {fee > 0 ? (
+	                        <>
+	                          <span className="text-slate-500">Frete</span>
+	                          <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 text-[11px] font-bold">
+	                            {formatCurrency(fee)}
+	                          </span>
+	                        </>
+	                      ) : null}
+	                      <span className="text-slate-500">Total</span>
+	                      <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold">
+	                        {formatCurrency(total)}
+	                      </span>
+	                    </>
+	                  );
+	                })()}
+	              </div>
 
               <div className="flex flex-wrap gap-2">
                 {order.status === "pending" && (
@@ -1170,7 +1226,12 @@ export const GrillQueue = () => {
               const pixQrUrl = pixPayload
                 ? `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(pixPayload)}`
                 : '';
-              const totalValue = Number(confirmModal.total || 0);
+	              const totalValue = Number(confirmModal.total || 0);
+	              const deliveryFeeValue =
+	                confirmModal.type === 'delivery' && confirmModal.deliveryFee !== null && confirmModal.deliveryFee !== undefined
+	                  ? Number(confirmModal.deliveryFee)
+	                  : 0;
+	              const itemsSubtotal = Math.max(0, totalValue - (Number.isFinite(deliveryFeeValue) ? deliveryFeeValue : 0));
               const cashValue = Number((cashConfirmValue || '').toString().replace(',', '.'));
               const cashValid = !isCashPayment || (cashConfirmValue && !Number.isNaN(cashValue) && cashValue >= totalValue);
               const changeValue = isCashPayment && cashValid ? cashValue - totalValue : 0;
@@ -1213,12 +1274,26 @@ export const GrillQueue = () => {
                   {getPaymentMethodMeta(confirmModal.payment).label}
                 </span>
               </div>
-              <div className="flex items-center justify-between">
-                <span>Total</span>
-                <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-sm font-bold">
-                  {formatCurrency(confirmModal.total || 0)}
-                </span>
-              </div>
+	              <div className="flex items-center justify-between">
+	                <span>Itens</span>
+	                <span className="px-3 py-1 rounded-full bg-white text-slate-700 border border-slate-200 text-sm font-bold">
+	                  {formatCurrency(itemsSubtotal)}
+	                </span>
+	              </div>
+	              {confirmModal.type === 'delivery' && deliveryFeeValue > 0 && (
+	                <div className="flex items-center justify-between">
+	                  <span>Frete</span>
+	                  <span className="px-3 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200 text-sm font-bold">
+	                    {formatCurrency(deliveryFeeValue)}
+	                  </span>
+	                </div>
+	              )}
+	              <div className="flex items-center justify-between">
+	                <span>Total</span>
+	                <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-sm font-bold">
+	                  {formatCurrency(totalValue)}
+	                </span>
+	              </div>
               {Array.isArray(confirmModal.items) && confirmModal.items.some((item) => resolvePromoMeta(item).promoActive) && (
                 <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
                   Promoção aplicada no pedido.
@@ -1375,30 +1450,46 @@ export const GrillQueue = () => {
                     </div>
                   ) : null}
 
-                  <div className="mt-3 flex items-center justify-between gap-3 text-xs">
-                    <div className="inline-flex items-center gap-2 text-[11px] font-semibold text-slate-600">
-                      {order.type === "delivery" && order.deliveryFee ? (
-                        <span className="inline-flex items-center gap-2 text-[11px] font-semibold text-slate-500">
-                          Frete
-                          <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 text-[11px] font-bold">
-                            {formatCurrency(order.deliveryFee)}
-                          </span>
-                        </span>
-                      ) : null}
-                      <span>Total</span>
-                      <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold">
-                        {formatCurrency(order.total || 0)}
-                      </span>
-                    </div>
-                    <a
-                      href={`/pedido/${order.id}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="px-3 py-2 rounded-lg bg-slate-900 text-white text-xs font-bold"
+	                  <div className="mt-3 flex items-center justify-between gap-3 text-xs">
+	                    <div className="inline-flex flex-wrap items-center gap-2 text-[11px] font-semibold text-slate-600">
+	                      {(() => {
+	                        const fee =
+	                          order.type === 'delivery' && order.deliveryFee !== null && order.deliveryFee !== undefined
+	                            ? Number(order.deliveryFee)
+	                            : 0;
+	                        const total = Number(order.total || 0);
+	                        const itemsTotal = Math.max(0, total - (Number.isFinite(fee) ? fee : 0));
+	                        return (
+	                          <>
+	                            <span className="text-slate-500">Itens</span>
+	                            <span className="px-2 py-0.5 rounded-full bg-white/70 text-slate-800 border border-slate-200 text-[11px] font-bold">
+	                              {formatCurrency(itemsTotal)}
+	                            </span>
+	                            {fee > 0 ? (
+	                              <>
+	                                <span className="text-slate-500">Frete</span>
+	                                <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 text-[11px] font-bold">
+	                                  {formatCurrency(fee)}
+	                                </span>
+	                              </>
+	                            ) : null}
+	                            <span className="text-slate-500">Total</span>
+	                            <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold">
+	                              {formatCurrency(total)}
+	                            </span>
+	                          </>
+	                        );
+	                      })()}
+	                    </div>
+	                    <a
+	                      href={`/pedido/${order.id}`}
+	                      target="_blank"
+	                      rel="noreferrer"
+	                      className="px-3 py-2 rounded-lg bg-slate-900 text-white text-xs font-bold"
                     >
                       Acompanhar
                     </a>
-                  </div>
+	                  </div>
                 </div>
               ))}
             </div>
@@ -1432,16 +1523,17 @@ export const GrillQueue = () => {
                   <p className="font-semibold text-slate-800">
                     {order.customerName || order.name || 'Cliente'}
                   </p>
-                  <p className="uppercase">
-                    {order.type === "table" && order.table ? (
-                      <span className="font-semibold text-slate-800">Mesa {order.table}</span>
-                    ) : (
-                      <>
-                        {formatOrderType(order.type)}
-                        {order.table && <span className="font-semibold text-slate-800"> · Mesa {order.table}</span>}
-                      </>
-                    )}
-                  </p>
+	                  {(() => {
+	                    const meta = orderTypeMeta(order);
+	                    return (
+	                      <span
+	                        className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.18em] ${meta.pill}`}
+	                      >
+	                        {meta.icon}
+	                        <span>{meta.label}</span>
+	                      </span>
+	                    );
+	                  })()}
                   {order.phone && <p>{order.phone}</p>}
                   <div className="flex items-center gap-2">
                     {(() => {
@@ -1489,17 +1581,44 @@ export const GrillQueue = () => {
                   )}
                 </div>
 
-                <div className="mt-3 flex items-center justify-between">
-                  <span className="text-sm font-bold text-emerald-700">
-                    {formatCurrency(order.total || 0)}
-                  </span>
-                  <a
-                    href={`/pedido/${order.id}`}
-                    className="text-xs font-semibold text-brand-primary hover:underline"
-                  >
-                    Ver pedido
-                  </a>
-                </div>
+	                <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+	                  <div className="inline-flex flex-wrap items-center gap-2 text-[11px] font-semibold text-slate-600">
+	                    {(() => {
+	                      const fee =
+	                        order.type === 'delivery' && order.deliveryFee !== null && order.deliveryFee !== undefined
+	                          ? Number(order.deliveryFee)
+	                          : 0;
+	                      const total = Number(order.total || 0);
+	                      const itemsTotal = Math.max(0, total - (Number.isFinite(fee) ? fee : 0));
+	                      return (
+	                        <>
+	                          <span className="text-slate-500">Itens</span>
+	                          <span className="px-2 py-0.5 rounded-full bg-white/70 text-slate-800 border border-slate-200 text-[11px] font-bold">
+	                            {formatCurrency(itemsTotal)}
+	                          </span>
+	                          {fee > 0 ? (
+	                            <>
+	                              <span className="text-slate-500">Frete</span>
+	                              <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 text-[11px] font-bold">
+	                                {formatCurrency(fee)}
+	                              </span>
+	                            </>
+	                          ) : null}
+	                          <span className="text-slate-500">Total</span>
+	                          <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold">
+	                            {formatCurrency(total)}
+	                          </span>
+	                        </>
+	                      );
+	                    })()}
+	                  </div>
+	                  <a
+	                    href={`/pedido/${order.id}`}
+	                    className="text-xs font-semibold text-brand-primary hover:underline"
+	                  >
+	                    Ver pedido
+	                  </a>
+	                </div>
               </div>
             ))}
 

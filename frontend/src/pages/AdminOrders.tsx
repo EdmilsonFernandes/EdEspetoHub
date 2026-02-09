@@ -6,6 +6,7 @@ import { orderService } from '../services/orderService';
 import { formatCurrency, formatDateTime, formatOrderDisplayId, formatOrderStatus, formatOrderType } from '../utils/format';
 import { getPaymentMethodMeta } from '../utils/paymentAssets';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
+import { ForkKnife, Storefront, Truck } from '@phosphor-icons/react';
 
 export function AdminOrders() {
   const { auth } = useAuth();
@@ -111,6 +112,20 @@ export function AdminOrders() {
     return normalized || 'Pendente';
   };
   const shortId = (value) => formatOrderDisplayId(value, storeSlug);
+  const orderTypeMeta = (order: any) => {
+    const type = String(order?.type || '').toLowerCase();
+    if (type === 'delivery') {
+      return { label: 'Entrega', pill: 'bg-sky-100 text-sky-800 border-sky-200', icon: <Truck size={14} weight="duotone" /> };
+    }
+    if (type === 'pickup') {
+      return { label: 'Retirada', pill: 'bg-amber-100 text-amber-800 border-amber-200', icon: <Storefront size={14} weight="duotone" /> };
+    }
+    if (type === 'table') {
+      const table = order?.table ? `Mesa ${order.table}` : 'Mesa';
+      return { label: table, pill: 'bg-fuchsia-100 text-fuchsia-800 border-fuchsia-200', icon: <ForkKnife size={14} weight="duotone" /> };
+    }
+    return { label: formatOrderType(order?.type), pill: 'bg-slate-100 text-slate-700 border-slate-200', icon: null };
+  };
 
   const clearFilters = () => {
     setStatusFilter('all');
@@ -241,18 +256,44 @@ export function AdminOrders() {
                           <p className="text-sm font-semibold text-slate-800">
                             {order.customerName || order.name || 'Cliente'}
                           </p>
-                          <p className="text-xs text-slate-500">
-                            {formatOrderType(order.type)}
-                            {order.table ? ` · Mesa ${order.table}` : ''}
-                          </p>
+                          <div className="mt-1">
+                            {(() => {
+                              const meta = orderTypeMeta(order);
+                              return (
+                                <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.18em] ${meta.pill}`}>
+                                  {meta.icon}
+                                  <span>{meta.label}</span>
+                                </span>
+                              );
+                            })()}
+                          </div>
                         </div>
                         <div className="flex flex-col items-end gap-2">
                           <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold ${statusStyles(order.status)}`}>
                             {formatOrderStatus(order.status, order.type)}
                           </span>
-                          <span className="text-base font-bold text-brand-primary">
-                            {formatCurrency(order.total || 0)}
-                          </span>
+                          {(() => {
+                            const fee = order.type === 'delivery' && order.deliveryFee !== null && order.deliveryFee !== undefined ? Number(order.deliveryFee) : 0;
+                            const total = Number(order.total || 0);
+                            const itemsTotal = Math.max(0, total - (Number.isFinite(fee) ? fee : 0));
+                            return (
+                              <div className="text-right">
+                                <span className="text-base font-bold text-brand-primary block">
+                                  {formatCurrency(total)}
+                                </span>
+                                <div className="mt-1 flex flex-wrap justify-end gap-1.5 text-[11px] text-slate-500 font-semibold">
+                                  <span className="px-2 py-0.5 rounded-full bg-white border border-slate-200">
+                                    Itens: {formatCurrency(itemsTotal)}
+                                  </span>
+                                  {fee > 0 && (
+                                    <span className="px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200">
+                                      Frete: {formatCurrency(fee)}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })()}
                         </div>
                       </div>
                       <div className="flex items-center gap-2 text-xs text-slate-600">
@@ -301,20 +342,42 @@ export function AdminOrders() {
                           </span>
                           <span>{formatDateTime(order.createdAt)}</span>
                         </div>
-                        <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                          <span>
-                            {formatOrderType(order.type)}
-                            {order.table ? ` · Mesa ${order.table}` : ''}
-                          </span>
+                        <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 mt-1">
+                          {(() => {
+                            const meta = orderTypeMeta(order);
+                            return (
+                              <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.18em] ${meta.pill}`}>
+                                {meta.icon}
+                                <span>{meta.label}</span>
+                              </span>
+                            );
+                          })()}
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
                         <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusStyles(order.status)}`}>
                           {formatOrderStatus(order.status, order.type)}
                         </span>
-                        <span className="text-sm font-bold text-brand-primary">
-                          {formatCurrency(order.total || 0)}
-                        </span>
+                        {(() => {
+                          const fee = order.type === 'delivery' && order.deliveryFee !== null && order.deliveryFee !== undefined ? Number(order.deliveryFee) : 0;
+                          const total = Number(order.total || 0);
+                          const itemsTotal = Math.max(0, total - (Number.isFinite(fee) ? fee : 0));
+                          return (
+                            <div className="text-right">
+                              <span className="text-sm font-bold text-brand-primary block">{formatCurrency(total)}</span>
+                              <div className="mt-1 flex flex-wrap justify-end gap-1.5 text-[11px] text-slate-500 font-semibold">
+                                <span className="px-2 py-0.5 rounded-full bg-white border border-slate-200">
+                                  Itens: {formatCurrency(itemsTotal)}
+                                </span>
+                                {fee > 0 && (
+                                  <span className="px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200">
+                                    Frete: {formatCurrency(fee)}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })()}
                       </div>
                     </div>
 
