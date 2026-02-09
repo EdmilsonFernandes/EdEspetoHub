@@ -173,7 +173,7 @@ export function CreateStore() {
     return `${digits.slice(0, 5)}-${digits.slice(5)}`;
   };
 
-  const handleCepLookup = async (cepValue?: string) => {
+  const handleCepLookup = async (cepValue?: string, forceOverwrite = false) => {
     const rawCep = (cepValue ?? registerForm.cep).replace(/\D/g, '');
     if (rawCep.length !== 8) return;
     setIsCepLoading(true);
@@ -188,11 +188,11 @@ export function CreateStore() {
       setRegisterForm((prev) => ({
         ...prev,
         cep: normalizeCep(rawCep),
-        street: prev.street || data.logradouro || '',
-        neighborhood: prev.neighborhood || data.bairro || '',
-        city: prev.city || data.localidade || '',
-        state: prev.state || data.uf || '',
-        complement: prev.complement || data.complemento || '',
+        street: forceOverwrite ? (data.logradouro || '') : (prev.street || data.logradouro || ''),
+        neighborhood: forceOverwrite ? (data.bairro || '') : (prev.neighborhood || data.bairro || ''),
+        city: forceOverwrite ? (data.localidade || '') : (prev.city || data.localidade || ''),
+        state: forceOverwrite ? (data.uf || '') : (prev.state || data.uf || ''),
+        complement: forceOverwrite ? (data.complemento || '') : (prev.complement || data.complemento || ''),
       }));
     } catch (error) {
       setCepError('Não foi possível consultar o CEP agora.');
@@ -589,14 +589,14 @@ export function CreateStore() {
                           required
                           value={registerForm.cep}
                           onChange={(e) => setRegisterForm((prev) => ({ ...prev, cep: normalizeCep(e.target.value) }))}
-                          onBlur={(e) => handleCepLookup(e.target.value)}
+                          onBlur={(e) => handleCepLookup(e.target.value, false)}
                           disabled={isCepLoading}
                           className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
                           placeholder="00000-000"
                         />
                         <button
                           type="button"
-                          onClick={() => handleCepLookup(registerForm.cep)}
+                          onClick={() => handleCepLookup(registerForm.cep, true)}
                           disabled={isCepLoading}
                           className="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         >

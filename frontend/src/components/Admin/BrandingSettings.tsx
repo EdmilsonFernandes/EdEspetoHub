@@ -17,11 +17,17 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
     colors: false,
     access: false,
   });
+  const normalizeCep = (input = "") => {
+    const digits = input.toString().replace(/\D/g, "").slice(0, 8);
+    if (digits.length <= 5) return digits;
+    return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+  };
   const parseAddress = (value = "") => {
     const raw = value.toString();
     const parts = raw.split("|").map((part) => part.trim()).filter(Boolean);
     const cepPart = parts.find((part) => /cep/i.test(part));
-    const cep = cepPart ? cepPart.replace(/cep/i, "").replace(/[:\-]/g, "").trim() : "";
+    const cepRaw = cepPart ? cepPart.replace(/cep/i, "").replace(/[:\-]/g, "").trim() : "";
+    const cep = cepRaw ? normalizeCep(cepRaw) : "";
     // Keep CEP out of the "street" slot. If CEP is the only filled part, don't leak it into street/number.
     const nonCepParts = parts.filter((part) => !/cep/i.test(part));
     const streetPart = nonCepParts[0] || "";
@@ -52,11 +58,6 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
     onChange((prev) => ({ ...prev, [field]: value }));
   };
   const handleAddressChange = (field, value) => {
-    const normalizeCep = (input = "") => {
-      const digits = input.toString().replace(/\D/g, "").slice(0, 8);
-      if (digits.length <= 5) return digits;
-      return `${digits.slice(0, 5)}-${digits.slice(5)}`;
-    };
     setAddressForm((prev) => {
       const next = { ...prev, [field]: field === "cep" ? normalizeCep(value) : value };
       const parts = [
@@ -71,7 +72,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
     });
   };
 
-  const handleStoreCepLookup = async (cepValue?: string) => {
+  const handleStoreCepLookup = async (cepValue?: string, forceOverwrite = false) => {
     const rawCep = (cepValue ?? addressForm.cep ?? "").toString().replace(/\D/g, "");
     if (rawCep.length !== 8) return;
     setStoreCepLoading(true);
@@ -86,12 +87,12 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
       setAddressForm((prev) => {
         const next = {
           ...prev,
-          cep: prev.cep || `${rawCep.slice(0, 5)}-${rawCep.slice(5)}`,
-          street: prev.street || data.logradouro || "",
-          neighborhood: prev.neighborhood || data.bairro || "",
-          city: prev.city || data.localidade || "",
-          state: prev.state || data.uf || "",
-          complement: prev.complement || data.complemento || "",
+          cep: normalizeCep(rawCep),
+          street: forceOverwrite ? (data.logradouro || "") : (prev.street || data.logradouro || ""),
+          neighborhood: forceOverwrite ? (data.bairro || "") : (prev.neighborhood || data.bairro || ""),
+          city: forceOverwrite ? (data.localidade || "") : (prev.city || data.localidade || ""),
+          state: forceOverwrite ? (data.uf || "") : (prev.state || data.uf || ""),
+          complement: forceOverwrite ? (data.complemento || "") : (prev.complement || data.complemento || ""),
         };
         const parts = [
           next.street && `${next.street}${next.number ? `, ${next.number}` : ""}`,
@@ -314,14 +315,14 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
                     type="text"
                     value={addressForm.cep || ""}
                     onChange={(e) => handleAddressChange("cep", e.target.value)}
-                    onBlur={(e) => handleStoreCepLookup(e.target.value)}
+                    onBlur={(e) => handleStoreCepLookup(e.target.value, false)}
                     disabled={storeCepLoading}
                     className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
                     placeholder="00000-000"
                   />
                   <button
                     type="button"
-                    onClick={() => handleStoreCepLookup(addressForm.cep)}
+                    onClick={() => handleStoreCepLookup(addressForm.cep, true)}
                     disabled={storeCepLoading}
                     className="mt-2 w-full px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
