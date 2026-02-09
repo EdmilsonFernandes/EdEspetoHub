@@ -470,42 +470,47 @@ export function AdminOrders() {
               </div>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full text-sm border-separate border-spacing-y-3">
-                <thead className="text-left text-xs uppercase text-slate-500">
-                  <tr>
-                    <th className="py-2 pr-4 pl-3">Data</th>
-                    <th className="py-2 pr-4">Cliente</th>
-                    <th className="py-2 pr-4 hidden md:table-cell">Tipo</th>
-                    <th className="py-2 pr-4 hidden lg:table-cell">Pagamento</th>
-                    <th className="py-2 pr-4 hidden lg:table-cell">Itens</th>
-                    <th className="py-2 pr-4">Status</th>
-                    <th className="py-2 pr-3 text-right">Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredOrders.map((order, index) => {
-                    const paymentMeta = getPaymentMethodMeta(order.payment);
-                    return (
-                      <tr
-                        key={order.id || `${order.customerName}-${index}`}
-                        className={`text-slate-700 border border-slate-200 rounded-2xl shadow-sm ${statusAccent(order.status)}`}
-                      >
-                        <td className="py-3 pr-4 pl-4 whitespace-nowrap rounded-l-2xl">
-                          {formatDateTime(order.createdAt)}
-                        </td>
-                        <td className="py-3 pr-4">
-                          <div className="font-semibold">{order.customerName || order.name || 'Cliente'}</div>
-                          <div className="text-xs text-slate-400">{order.phone || '-'}</div>
-                        </td>
-                        <td className="py-3 pr-4 whitespace-nowrap hidden md:table-cell">
-                          {formatOrderType(order.type)}
-                          {order.table ? ` · Mesa ${order.table}` : ''}
-                        </td>
-                        <td className="py-3 pr-4 whitespace-nowrap hidden lg:table-cell">
-                          <span className="inline-flex items-center gap-2">
-                            {paymentMeta.icon && (
-                              <img
+	            <div className="overflow-x-auto">
+	              <table className="min-w-full text-sm border-separate border-spacing-y-3">
+	                <thead className="text-left text-xs uppercase text-slate-500">
+	                  <tr>
+	                    <th className="py-2 pr-4 pl-3">Data</th>
+	                    <th className="py-2 pr-4">Cliente</th>
+	                    <th className="py-2 pr-4 hidden md:table-cell">Tipo</th>
+	                    <th className="py-2 pr-4 hidden lg:table-cell">Pagamento</th>
+	                    <th className="py-2 pr-4 hidden lg:table-cell">Itens</th>
+	                    <th className="py-2 pr-4">Status</th>
+	                    <th className="py-2 pr-3 text-right">Total</th>
+	                  </tr>
+	                </thead>
+	                <tbody>
+	                  {filteredOrders.map((order, index) => {
+	                    const paymentMeta = getPaymentMethodMeta(order.payment);
+	                    const typeMeta = orderTypeMeta(order);
+	                    return (
+	                      <tr
+	                        key={order.id || `${order.customerName}-${index}`}
+	                        className={`text-slate-700 border border-slate-200 rounded-2xl shadow-sm ${statusAccent(order.status)}`}
+	                      >
+	                        <td className="py-3 pr-4 pl-4 whitespace-nowrap rounded-l-2xl">
+	                          {formatDateTime(order.createdAt)}
+	                        </td>
+	                        <td className="py-3 pr-4">
+	                          <div className="font-semibold">{order.customerName || order.name || 'Cliente'}</div>
+	                          <div className="text-xs text-slate-400">{order.phone || '-'}</div>
+	                        </td>
+	                        <td className="py-3 pr-4 whitespace-nowrap hidden md:table-cell">
+	                          <span
+	                            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.18em] ${typeMeta.pill}`}
+	                          >
+	                            {typeMeta.icon}
+	                            <span>{typeMeta.label}</span>
+	                          </span>
+	                        </td>
+	                        <td className="py-3 pr-4 whitespace-nowrap hidden lg:table-cell">
+	                          <span className="inline-flex items-center gap-2">
+	                            {paymentMeta.icon && (
+	                              <img
                                 src={paymentMeta.icon}
                                 alt={paymentMeta.label}
                                 className="h-4 w-4 object-contain"
@@ -521,21 +526,43 @@ export function AdminOrders() {
                                 .map((item) => `${item.qty}x ${item.name} ${formatItemOptions(item)}`.trim())
                                 .join(', ')}
                         </td>
-                        <td className="py-3 pr-4">
-                          <span className={`px-2 py-1 rounded-full text-xs font-semibold ${statusStyles(order.status)}`}>
-                            {formatOrderStatus(order.status, order.type)}
-                          </span>
-                        </td>
-                        <td className="py-3 pr-4 text-right font-semibold text-brand-primary rounded-r-2xl">
-                          {formatCurrency(order.total || 0)}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
+	                        <td className="py-3 pr-4">
+	                          <span className={`px-2 py-1 rounded-full text-xs font-semibold ${statusStyles(order.status)}`}>
+	                            {formatOrderStatus(order.status, order.type)}
+	                          </span>
+	                        </td>
+	                        <td className="py-3 pr-4 text-right font-semibold text-brand-primary rounded-r-2xl">
+	                          {(() => {
+	                            const fee =
+	                              order.type === 'delivery' && order.deliveryFee !== null && order.deliveryFee !== undefined
+	                                ? Number(order.deliveryFee)
+	                                : 0;
+	                            const total = Number(order.total || 0);
+	                            const itemsTotal = Math.max(0, total - (Number.isFinite(fee) ? fee : 0));
+	                            return (
+	                              <div className="flex flex-col items-end gap-1">
+	                                <span className="font-bold">{formatCurrency(total)}</span>
+	                                <div className="flex flex-wrap justify-end gap-1.5 text-[10px] text-slate-500 font-semibold">
+	                                  <span className="px-2 py-0.5 rounded-full bg-white border border-slate-200">
+	                                    Itens: {formatCurrency(itemsTotal)}
+	                                  </span>
+	                                  {fee > 0 && (
+	                                    <span className="px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200">
+	                                      Frete: {formatCurrency(fee)}
+	                                    </span>
+	                                  )}
+	                                </div>
+	                              </div>
+	                            );
+	                          })()}
+	                        </td>
+	                      </tr>
+	                    );
+	                  })}
+	                </tbody>
+	              </table>
+	            </div>
+	          )}
         </div>
       </div>
     </div>
