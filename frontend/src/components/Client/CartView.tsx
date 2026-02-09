@@ -54,6 +54,8 @@ export const CartView = ({
   const [showTips, setShowTips] = useState(false);
   const [summaryCompact, setSummaryCompact] = useState(false);
   const [ctaPulse, setCtaPulse] = useState(false);
+  const [cashNeedsChange, setCashNeedsChange] = useState(false);
+  const [cashTenderedInput, setCashTenderedInput] = useState("");
   const nameInputRef = useRef<HTMLInputElement | null>(null);
 
   const visibleOrderTypes = Array.isArray(allowedOrderTypes) && allowedOrderTypes.length
@@ -68,6 +70,19 @@ export const CartView = ({
   const deliveryFeeValue = isDelivery ? normalizeNumber(deliveryFee) || 0 : 0;
   const radiusValue = normalizeNumber(deliveryRadiusKm);
   const totalWithFee = total + deliveryFeeValue;
+  const cashTenderedValue = isCash ? normalizeNumber(cashTenderedInput) : null;
+  const cashChangeDue =
+    isCash && cashTenderedValue !== null ? Number(cashTenderedValue) - Number(totalWithFee || 0) : null;
+
+  const cashValidation = useMemo(() => {
+    if (!isCash) return { blocked: false, reason: "" };
+    if (!cashNeedsChange) return { blocked: false, reason: "" };
+    if (cashTenderedValue === null) return { blocked: true, reason: "Informe com quanto vai pagar para calcular o troco." };
+    if (cashTenderedValue < totalWithFee) {
+      return { blocked: true, reason: "O valor para troco precisa ser maior ou igual ao total do pedido." };
+    }
+    return { blocked: false, reason: "" };
+  }, [isCash, cashNeedsChange, cashTenderedValue, totalWithFee]);
 
   const actionLabel = useMemo(() => {
     if (isPickup && isPix) return "Gerar Pix e enviar pedido";
@@ -774,12 +789,67 @@ export const CartView = ({
             {isPix &&
               "O QR Code do Pix aparecerá após finalizar o pedido."}
             {isCash &&
-              "Pagamento em dinheiro será confirmado no balcão."}
+              "Pagamento em dinheiro será confirmado na entrega ou no balcão."}
             {!isDelivery && !isPickup && !isPix && !isCash &&
               "Pedido será direcionado para atendimento na mesa."}
           </div>
         )}
       </div>
+
+      {isCash && (
+        <div className="bg-white rounded-2xl premium-card p-4 sm:p-6 mb-4 sm:mb-6 transition-all hover:-translate-y-0.5 active:scale-[0.99] space-y-3">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-sm sm:text-base font-extrabold text-slate-800">Troco</p>
+              <p className="text-[11px] sm:text-xs text-slate-500">
+                Se for pagar com uma nota maior, informe aqui para o entregador levar o troco certinho.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setCashNeedsChange((prev) => !prev)}
+              className={`btn-press px-3 py-1.5 rounded-full text-[11px] font-extrabold border ${
+                cashNeedsChange
+                  ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                  : "bg-white/70 text-slate-700 border-slate-200"
+              }`}
+            >
+              {cashNeedsChange ? "Precisa de troco" : "Sem troco"}
+            </button>
+          </div>
+
+          {cashNeedsChange && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-700">Vou pagar com (R$)</label>
+                <input
+                  value={cashTenderedInput}
+                  onChange={(event) => setCashTenderedInput(event.target.value)}
+                  inputMode="decimal"
+                  placeholder="Ex: 100,00"
+                  className="w-full rounded-xl border border-slate-200 bg-white/70 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-brand-primary"
+                />
+                <p className="text-[11px] text-slate-500">
+                  Total do pedido:{" "}
+                  <span className="font-bold text-slate-700">{formatCurrency(totalWithFee || 0)}</span>
+                </p>
+              </div>
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                <p className="text-[11px] uppercase tracking-[0.25em] text-slate-500 font-extrabold">Troco</p>
+                <p className="mt-2 text-lg font-black text-slate-900 tabular-nums">
+                  {cashChangeDue !== null && cashChangeDue >= 0 ? formatCurrency(cashChangeDue) : formatCurrency(0)}
+                </p>
+                {cashValidation.blocked && (
+                  <p className="mt-1 text-[11px] text-rose-600 font-semibold">{cashValidation.reason}</p>
+                )}
+                {!cashValidation.blocked && cashTenderedValue !== null && cashTenderedValue >= totalWithFee && (
+                  <p className="mt-1 text-[11px] text-emerald-700 font-semibold">Entregador leva troco certinho.</p>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Botão Finalizar */}
       <div className="fixed bottom-0 left-0 right-0 p-4 border-t border-gray-100 max-w-lg mx-auto z-40">
@@ -787,11 +857,14 @@ export const CartView = ({
           onClick={() => {
             setCtaPulse(true);
             window.setTimeout(() => setCtaPulse(false), 220);
-            onCheckout();
+            onCheckout({
+              cashTendered:
+                isCash && cashNeedsChange && cashTenderedValue !== null ? Number(cashTenderedValue) : null,
+            });
           }}
-          disabled={checkoutDisabled}
+          disabled={checkoutDisabled || cashValidation.blocked}
           className={`w-full font-bold py-4 rounded-xl shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2 ${
-            checkoutDisabled
+            checkoutDisabled || cashValidation.blocked
               ? "bg-gray-300 text-gray-600 cursor-not-allowed"
               : "bg-brand-primary text-white cursor-pointer"
           }`}
@@ -800,8 +873,10 @@ export const CartView = ({
           {isPickup ? <Wallet size={20} weight="duotone" /> : <PaperPlaneTilt size={20} weight="duotone" />}
           {actionLabel}
         </button>
-        {checkoutDisabled && checkoutDisabledReason && (
-          <p className="mt-2 text-center text-[11px] text-rose-600 font-semibold">{checkoutDisabledReason}</p>
+        {(checkoutDisabled || cashValidation.blocked) && (checkoutDisabledReason || cashValidation.reason) && (
+          <p className="mt-2 text-center text-[11px] text-rose-600 font-semibold">
+            {cashValidation.blocked ? cashValidation.reason : checkoutDisabledReason}
+          </p>
         )}
       </div>
     </div>

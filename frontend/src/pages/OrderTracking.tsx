@@ -703,10 +703,20 @@ export function OrderTracking() {
                       </p>
                     )}
                     {order.payment?.toString().toLowerCase() === 'dinheiro' && order.cashTendered ? (
-                      <p>
-                        <span className="font-semibold">Troco para:</span>{' '}
-                        {formatCurrency(Number(order.cashTendered))}
-                      </p>
+                      <>
+                        <p>
+                          <span className="font-semibold">Cliente paga com:</span>{' '}
+                          {formatCurrency(Number(order.cashTendered))}
+                        </p>
+                        {Number(order.cashTendered) > Number(order.total || 0) ? (
+                          <p>
+                            <span className="font-semibold">Troco:</span>{' '}
+                            {formatCurrency(Number(order.cashTendered) - Number(order.total || 0))}
+                          </p>
+                        ) : (
+                          <p className="text-[12px] text-slate-500 font-semibold">Sem troco</p>
+                        )}
+                      </>
                     ) : null}
                     {order.phone && (
                       <p>

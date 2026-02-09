@@ -854,9 +854,18 @@ export const GrillQueue = () => {
                     })()}
                   </p>
                   {order.payment?.toString().toLowerCase() === 'dinheiro' && order.cashTendered ? (
-                    <p className="text-[11px] text-emerald-700 font-semibold">
-                      Troco para: {formatCurrency(Number(order.cashTendered))}
-                    </p>
+                    <div className="text-[11px] space-y-0.5">
+                      <p className="text-emerald-700 font-semibold">
+                        Cliente paga com: {formatCurrency(Number(order.cashTendered))}
+                      </p>
+                      {Number(order.cashTendered) > Number(order.total || 0) ? (
+                        <p className="text-amber-700 font-semibold">
+                          Troco: {formatCurrency(Number(order.cashTendered) - Number(order.total || 0))}
+                        </p>
+                      ) : (
+                        <p className="text-slate-500 font-semibold">Sem troco</p>
+                      )}
+                    </div>
                   ) : null}
                 </div>
 

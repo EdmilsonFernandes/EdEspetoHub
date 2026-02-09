@@ -19,6 +19,10 @@ export function OrderCard({ order, compact, actions }: Props) {
   const type = order?.type || order?.orderType;
   const deliveryFeeRaw = order?.deliveryFee ?? order?.delivery_fee ?? null;
   const deliveryFee = deliveryFeeRaw !== null && deliveryFeeRaw !== undefined ? Number(deliveryFeeRaw) : null;
+  const cashTenderedRaw = order?.cashTendered ?? order?.cash_tendered ?? null;
+  const cashTendered = cashTenderedRaw !== null && cashTenderedRaw !== undefined ? Number(cashTenderedRaw) : null;
+  const totalValue = Number(order?.total || 0);
+  const cashChangeDue = cashTendered !== null ? cashTendered - totalValue : null;
 
   const items = useMemo(() => (Array.isArray(order?.items) ? order.items : []), [order?.items]);
   const compactItemsLabel = useMemo(() => {
@@ -90,6 +94,22 @@ export function OrderCard({ order, compact, actions }: Props) {
             {type === 'delivery' && deliveryFee !== null && (
               <p className="text-[11px] text-emerald-700 font-semibold">Frete: {formatCurrency(deliveryFee)}</p>
             )}
+            {(String(order?.paymentMethod || order?.payment_method || '').toLowerCase() === 'dinheiro' ||
+              String(order?.paymentMethod || order?.payment_method || '').toLowerCase() === 'cash') &&
+            cashTendered !== null ? (
+              <div className="mt-1 space-y-0.5">
+                <p className="text-[11px] text-emerald-700 font-semibold">
+                  Cliente paga com: {formatCurrency(cashTendered)}
+                </p>
+                {cashChangeDue !== null && cashChangeDue > 0 ? (
+                  <p className="text-[11px] text-amber-700 font-semibold">
+                    Troco: {formatCurrency(cashChangeDue)}
+                  </p>
+                ) : (
+                  <p className="text-[11px] text-slate-500 font-semibold">Sem troco</p>
+                )}
+              </div>
+            ) : null}
           </div>
         </div>
       </div>

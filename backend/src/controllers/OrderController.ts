@@ -207,6 +207,7 @@ export class OrderController {
         address: order.address,
         paymentMethod: order.paymentMethod,
         paymentStatus: order.paymentStatus,
+        cashTendered: order.cashTendered ?? null,
         total: order.total,
         deliveryFee: order.deliveryFee ?? null,
         delivery: deliveryRow

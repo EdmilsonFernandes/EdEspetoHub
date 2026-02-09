@@ -660,7 +660,7 @@ export function StorePage() {
     window.setTimeout(() => setTableNotice(null), 4000);
   };
 
-  const checkout = async () => {
+  const checkout = async (extra?: { cashTendered?: number | null } | null) => {
     const isSubscriptionActive =
       subscriptionStatus &&
       ![ 'PENDING', 'CANCELLED', 'SUSPENDED', 'EXPIRED' ].includes(subscriptionStatus);
@@ -705,6 +705,10 @@ export function StorePage() {
 
     const isPickup = customer.type === 'pickup';
     const payment = paymentMethod;
+    const cashTendered =
+      payment === 'dinheiro' && extra?.cashTendered !== undefined && extra?.cashTendered !== null
+        ? Number(extra.cashTendered)
+        : null;
 
     const sanitizedPhone = customer.phone.replace(/\D/g, '');
     const sanitizedPhoneKey = sanitizedPhone.length >= 10 ? `+55${sanitizedPhone}` : '';
@@ -718,6 +722,7 @@ export function StorePage() {
       type: customer.type,
       paymentMethod: payment,
       deliveryFee: customer.type === 'delivery' && deliveryFeeValue > 0 ? deliveryFeeValue : undefined,
+      cashTendered: cashTendered !== null ? cashTendered : undefined,
       items: Object.values(cart).map((item) => ({
         productId: item.id,
         quantity: item.qty,
@@ -757,6 +762,7 @@ export function StorePage() {
           table: customer.table,
           customerName: customer.name,
           paymentMethod: payment,
+          cashTendered: cashTendered !== null ? cashTendered : null,
           items: Object.values(cart).map((item) => ({
             id: item.id,
             name: item.name,
