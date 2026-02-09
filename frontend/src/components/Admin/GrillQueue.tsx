@@ -112,6 +112,48 @@ export const GrillQueue = () => {
       icon: <Hash size={14} weight="duotone" />,
     };
   };
+
+  const calcMoney = (order: any) => {
+    const fee =
+      String(order?.type || '').toLowerCase() === 'delivery' && order?.deliveryFee !== null && order?.deliveryFee !== undefined
+        ? Number(order.deliveryFee)
+        : 0;
+    const total = Number(order?.total || 0);
+    const safeFee = Number.isFinite(fee) ? fee : 0;
+    const itemsTotal = Math.max(0, total - safeFee);
+    return { fee: safeFee, total, itemsTotal };
+  };
+
+  const renderMoneyBreakdown = (order: any, alignRight = false) => {
+    const { fee, total, itemsTotal } = calcMoney(order);
+    return (
+      <div
+        className={[
+          'grid grid-cols-3 gap-2 text-[10px] sm:text-[11px] font-semibold',
+          alignRight ? 'text-right' : 'text-left',
+        ].join(' ')}
+      >
+        <div className="flex flex-col gap-1">
+          <span className="text-slate-500">Itens</span>
+          <span className="px-2 py-0.5 rounded-full bg-white/70 text-slate-800 border border-slate-200 font-bold w-fit">
+            {formatCurrency(itemsTotal)}
+          </span>
+        </div>
+        <div className="flex flex-col gap-1">
+          <span className="text-slate-500">Frete</span>
+          <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 font-bold w-fit">
+            {fee > 0 ? formatCurrency(fee) : '—'}
+          </span>
+        </div>
+        <div className="flex flex-col gap-1 items-end">
+          <span className="text-slate-500">Total</span>
+          <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] sm:text-xs font-bold w-fit">
+            {formatCurrency(total)}
+          </span>
+        </div>
+      </div>
+    );
+  };
   const itemOrderRef = useRef<Map<string, Map<string, number>>>(new Map());
   useEffect(() => {
     const sessionPixKey = auth?.store?.settings?.pixKey || '';
@@ -1044,35 +1086,8 @@ export const GrillQueue = () => {
 
               {/* TOTAL + BOTÕES */}
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mt-3">
-	              <div className="inline-flex flex-wrap items-center gap-2 text-[11px] font-semibold text-slate-600">
-	                {(() => {
-	                  const fee =
-	                    order.type === 'delivery' && order.deliveryFee !== null && order.deliveryFee !== undefined
-	                      ? Number(order.deliveryFee)
-	                      : 0;
-	                  const total = Number(order.total || 0);
-	                  const itemsTotal = Math.max(0, total - (Number.isFinite(fee) ? fee : 0));
-	                  return (
-	                    <>
-	                      <span className="text-slate-500">Itens</span>
-	                      <span className="px-2 py-0.5 rounded-full bg-white/70 text-slate-800 border border-slate-200 text-[11px] font-bold">
-	                        {formatCurrency(itemsTotal)}
-	                      </span>
-	                      {fee > 0 ? (
-	                        <>
-	                          <span className="text-slate-500">Frete</span>
-	                          <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 text-[11px] font-bold">
-	                            {formatCurrency(fee)}
-	                          </span>
-	                        </>
-	                      ) : null}
-	                      <span className="text-slate-500">Total</span>
-	                      <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold">
-	                        {formatCurrency(total)}
-	                      </span>
-	                    </>
-	                  );
-	                })()}
+	              <div className="w-full sm:w-auto">
+	                {renderMoneyBreakdown(order)}
 	              </div>
 
               <div className="flex flex-wrap gap-2">
@@ -1451,35 +1466,8 @@ export const GrillQueue = () => {
                   ) : null}
 
 	                  <div className="mt-3 flex items-center justify-between gap-3 text-xs">
-	                    <div className="inline-flex flex-wrap items-center gap-2 text-[11px] font-semibold text-slate-600">
-	                      {(() => {
-	                        const fee =
-	                          order.type === 'delivery' && order.deliveryFee !== null && order.deliveryFee !== undefined
-	                            ? Number(order.deliveryFee)
-	                            : 0;
-	                        const total = Number(order.total || 0);
-	                        const itemsTotal = Math.max(0, total - (Number.isFinite(fee) ? fee : 0));
-	                        return (
-	                          <>
-	                            <span className="text-slate-500">Itens</span>
-	                            <span className="px-2 py-0.5 rounded-full bg-white/70 text-slate-800 border border-slate-200 text-[11px] font-bold">
-	                              {formatCurrency(itemsTotal)}
-	                            </span>
-	                            {fee > 0 ? (
-	                              <>
-	                                <span className="text-slate-500">Frete</span>
-	                                <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 text-[11px] font-bold">
-	                                  {formatCurrency(fee)}
-	                                </span>
-	                              </>
-	                            ) : null}
-	                            <span className="text-slate-500">Total</span>
-	                            <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold">
-	                              {formatCurrency(total)}
-	                            </span>
-	                          </>
-	                        );
-	                      })()}
+	                    <div className="flex-1 min-w-0">
+	                      {renderMoneyBreakdown(order)}
 	                    </div>
 	                    <a
 	                      href={`/pedido/${order.id}`}
@@ -1582,35 +1570,8 @@ export const GrillQueue = () => {
                 </div>
 
 	                <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-	                  <div className="inline-flex flex-wrap items-center gap-2 text-[11px] font-semibold text-slate-600">
-	                    {(() => {
-	                      const fee =
-	                        order.type === 'delivery' && order.deliveryFee !== null && order.deliveryFee !== undefined
-	                          ? Number(order.deliveryFee)
-	                          : 0;
-	                      const total = Number(order.total || 0);
-	                      const itemsTotal = Math.max(0, total - (Number.isFinite(fee) ? fee : 0));
-	                      return (
-	                        <>
-	                          <span className="text-slate-500">Itens</span>
-	                          <span className="px-2 py-0.5 rounded-full bg-white/70 text-slate-800 border border-slate-200 text-[11px] font-bold">
-	                            {formatCurrency(itemsTotal)}
-	                          </span>
-	                          {fee > 0 ? (
-	                            <>
-	                              <span className="text-slate-500">Frete</span>
-	                              <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 text-[11px] font-bold">
-	                                {formatCurrency(fee)}
-	                              </span>
-	                            </>
-	                          ) : null}
-	                          <span className="text-slate-500">Total</span>
-	                          <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold">
-	                            {formatCurrency(total)}
-	                          </span>
-	                        </>
-	                      );
-	                    })()}
+	                  <div className="w-full">
+	                    {renderMoneyBreakdown(order)}
 	                  </div>
 	                  <a
 	                    href={`/pedido/${order.id}`}

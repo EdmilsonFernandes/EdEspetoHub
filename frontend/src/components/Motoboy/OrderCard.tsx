@@ -100,8 +100,10 @@ export function OrderCard({ order, compact, actions }: Props) {
           <div className="text-right">
             <p className="text-xs text-slate-500">Total</p>
             <p className="text-lg font-extrabold text-slate-900">{formatCurrency(order?.total || 0)}</p>
-            {type === 'delivery' && deliveryFee !== null && (
-              <p className="text-[11px] text-emerald-700 font-semibold">Frete: {formatCurrency(deliveryFee)}</p>
+            {type === 'delivery' && (
+              <p className="text-[11px] text-emerald-700 font-semibold">
+                Frete: {formatCurrency(Number.isFinite(Number(deliveryFee)) ? Number(deliveryFee) : 0)}
+              </p>
             )}
             {(String(order?.paymentMethod || order?.payment_method || '').toLowerCase() === 'dinheiro' ||
               String(order?.paymentMethod || order?.payment_method || '').toLowerCase() === 'cash') &&
