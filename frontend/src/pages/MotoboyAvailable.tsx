@@ -105,7 +105,7 @@ export function MotoboyAvailable() {
         } catch {}
       }
       showToast('Pedido aceito. Boa entrega!', 'success');
-      loadOrders();
+      navigate('/motoboy/current');
     } catch (error: any) {
       if (error?.status === 409) {
         showToast('Pedido já foi aceito por outro motoboy.', 'warning');

@@ -15,6 +15,9 @@ export function OrderCard({ order, compact, actions }: Props) {
   const storeName = order?.store?.name || order?.storeName;
   const storeSlug = order?.store?.slug || order?.storeSlug;
   const storeAddress = order?.store?.settings?.address || order?.store?.address || order?.storeAddress;
+  const type = order?.type || order?.orderType;
+  const deliveryFeeRaw = order?.deliveryFee ?? order?.delivery_fee ?? null;
+  const deliveryFee = deliveryFeeRaw !== null && deliveryFeeRaw !== undefined ? Number(deliveryFeeRaw) : null;
 
   return (
     <div className="premium-card p-4 space-y-3">
@@ -54,6 +57,9 @@ export function OrderCard({ order, compact, actions }: Props) {
         <div>
           <p className="text-xs text-slate-400">Total</p>
           <p className="text-base font-bold text-slate-800">{formatCurrency(order?.total || 0)}</p>
+          {type === 'delivery' && deliveryFee !== null && (
+            <p className="text-[11px] text-slate-500">Frete: {formatCurrency(deliveryFee)}</p>
+          )}
         </div>
         <PaymentBadge method={order?.paymentMethod || order?.payment_method} status={order?.paymentStatus} />
       </div>

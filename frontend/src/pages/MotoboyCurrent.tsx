@@ -11,6 +11,7 @@ export function MotoboyCurrent() {
   const [orders, setOrders] = useState<any[]>([]);
   const [selected, setSelected] = useState<any | null>(null);
   const [showPayment, setShowPayment] = useState(false);
+  const [earningsToday, setEarningsToday] = useState<{ total: number; count: number } | null>(null);
   const [docFiles, setDocFiles] = useState<Record<string, File | null>>({});
   const [documents, setDocuments] = useState<any[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -45,6 +46,17 @@ export function MotoboyCurrent() {
       const data = await motoboyService.listAvailableOrders();
       const parsed = Array.isArray(data) ? data : [];
       setBlocked(false);
+      try {
+        const current = await motoboyService.getCurrentOrder();
+        if (current && current.id && !parsed.find((order) => order.id === current.id)) {
+          parsed.unshift(current);
+          try {
+            localStorage.setItem('motoboy:currentOrder', JSON.stringify(current));
+          } catch {}
+        }
+      } catch {
+        // ignore
+      }
       const stored = (() => {
         try {
           const raw = localStorage.getItem('motoboy:currentOrder');
@@ -57,6 +69,14 @@ export function MotoboyCurrent() {
         parsed.unshift(stored);
       }
       setOrders(parsed);
+      try {
+        const summary = await motoboyService.getEarningsToday();
+        const total = Number(summary?.total || 0);
+        const count = Number(summary?.count || 0);
+        setEarningsToday({ total, count });
+      } catch {
+        // ignore
+      }
     } catch (error: any) {
       if (error?.status === 403) {
         setBlocked(true);
@@ -214,6 +234,23 @@ export function MotoboyCurrent() {
     }
   };
 
+  const buildMapsUrl = (order: any) => {
+    const destination = String(order?.address || '').trim();
+    const origin = String(order?.store?.settings?.address || '').trim();
+    if (!destination) return '';
+    if (origin) {
+      const params = new URLSearchParams({
+        api: '1',
+        origin,
+        destination,
+        travelmode: 'driving',
+      });
+      return `https://www.google.com/maps/dir/?${params.toString()}`;
+    }
+    const params = new URLSearchParams({ api: '1', query: destination });
+    return `https://www.google.com/maps/search/?${params.toString()}`;
+  };
+
   const handleUploadDocument = async (docType: string) => {
     const file = docFiles[docType];
     if (!file) {
@@ -348,6 +385,16 @@ export function MotoboyCurrent() {
               Pendências: {requiredDocsPending.join(', ')}.
             </span>
           )}
+        </div>
+      )}
+
+      {earningsToday && (
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+          <span className="font-semibold">Ganhos de hoje:</span>{' '}
+          {earningsToday.total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}{' '}
+          <span className="text-xs text-emerald-700">
+            ({earningsToday.count} entrega{earningsToday.count === 1 ? '' : 's'})
+          </span>
         </div>
       )}
 
@@ -607,6 +654,16 @@ export function MotoboyCurrent() {
           order={activeOrder}
           actions={
             <div className="space-y-2">
+              {activeOrder?.address && (
+                <a
+                  href={buildMapsUrl(activeOrder)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block w-full rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 text-center"
+                >
+                  Abrir no GPS
+                </a>
+              )}
               {activeOrder.status === 'waiting_for_motoboy' && (
                 <p className="text-xs text-slate-500">Aceite o pedido em “Disponíveis” para iniciar a rota.</p>
               )}

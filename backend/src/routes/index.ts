@@ -99,7 +99,9 @@ routes.get('/v2/orders/:orderId/tracking', OrderController.getTrackingV2);
 
 // Motoboy
 routes.get('/motoboy/orders/available', requireAuth, MotoboyController.listAvailableOrders);
+routes.get('/motoboy/orders/current', requireAuth, MotoboyController.getCurrentOrder);
 routes.get('/motoboy/orders/history', requireAuth, MotoboyController.listHistory);
+routes.get('/motoboy/earnings/today', requireAuth, MotoboyController.getEarningsToday);
 routes.post('/motoboy/orders/:orderId/accept', requireAuth, MotoboyController.acceptOrder);
 routes.post('/motoboy/orders/:orderId/confirm-payment', requireAuth, MotoboyController.confirmPayment);
 routes.post('/motoboy/orders/:orderId/delivered', requireAuth, MotoboyController.markDelivered);

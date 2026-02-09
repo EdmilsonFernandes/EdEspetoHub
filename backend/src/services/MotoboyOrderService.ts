@@ -31,6 +31,7 @@ export class MotoboyOrderService {
   private orderDeliveryRepository = new OrderDeliveryRepository();
   private motoboyStoreRepository = new MotoboyStoreRepository();
   private deliveryBillingService = new DeliveryBillingService();
+  private tz = process.env.APP_TZ || 'America/Sao_Paulo';
 
   private isDeliveryOrder(order: Order) {
     return order.type === 'delivery';
@@ -93,6 +94,54 @@ export class MotoboyOrderService {
       deliveryFee: order.deliveryFee,
       createdAt: order.createdAt,
     }));
+  }
+
+  /**
+   * Returns the currently assigned (active) delivery order for a motoboy.
+   */
+  async getCurrent(motoboy: Motoboy) {
+    const repo = AppDataSource.getRepository(Order);
+    const order = await repo
+      .createQueryBuilder('o')
+      .innerJoin(OrderDelivery, 'od', 'od.order_id = o.id')
+      .leftJoinAndSelect('o.store', 'store')
+      .leftJoinAndSelect('store.settings', 'settings')
+      .leftJoinAndSelect('o.items', 'items')
+      .leftJoinAndSelect('items.product', 'product')
+      .where('od.motoboy_id = :motoboyId', { motoboyId: motoboy.id })
+      .andWhere('od.delivered_at IS NULL')
+      .andWhere('o.type = :type', { type: 'delivery' })
+      .andWhere('o.status IN (:...statuses)', { statuses: [ 'in_delivery' ] })
+      .orderBy('od.assigned_at', 'DESC')
+      .getOne();
+
+    return order || null;
+  }
+
+  /**
+   * Summarizes today's earnings for a motoboy based on delivered orders.
+   * Uses a timezone-aware "today" window (default America/Sao_Paulo).
+   */
+  async getEarningsToday(motoboy: Motoboy) {
+    const tz = this.tz;
+    const repo = AppDataSource.getRepository(Order);
+    const row = await repo
+      .createQueryBuilder('o')
+      .select('COALESCE(SUM(COALESCE(o.delivery_fee, 0)), 0)', 'total')
+      .addSelect('COUNT(*)', 'count')
+      .innerJoin(OrderDelivery, 'od', 'od.order_id = o.id')
+      .where('od.motoboy_id = :motoboyId', { motoboyId: motoboy.id })
+      .andWhere("od.delivered_at >= (date_trunc('day', now() AT TIME ZONE :tz) AT TIME ZONE :tz)", { tz })
+      .andWhere("od.delivered_at < ((date_trunc('day', now() AT TIME ZONE :tz) + interval '1 day') AT TIME ZONE :tz)", {
+        tz,
+      })
+      .getRawOne<{ total: string; count: string }>();
+
+    return {
+      total: Number(row?.total || 0),
+      count: Number(row?.count || 0),
+      tz,
+    };
   }
 
   /**

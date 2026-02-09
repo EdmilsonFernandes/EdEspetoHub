@@ -63,6 +63,34 @@ export class MotoboyController {
   }
 
   /**
+   * Gets the current (active) delivery order for motoboy.
+   */
+  static async getCurrentOrder(req: Request, res: Response) {
+    try {
+      const motoboy = await motoboyService.getActiveMotoboyByUserId(req.auth?.sub || '');
+      const order = await motoboyOrderService.getCurrent(motoboy);
+      return res.json(order);
+    } catch (error: any) {
+      log.warn('Motoboy current order failed', { error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  /**
+   * Gets today's earnings summary for motoboy.
+   */
+  static async getEarningsToday(req: Request, res: Response) {
+    try {
+      const motoboy = await motoboyService.getActiveMotoboyByUserId(req.auth?.sub || '');
+      const summary = await motoboyOrderService.getEarningsToday(motoboy);
+      return res.json(summary);
+    } catch (error: any) {
+      log.warn('Motoboy earnings today failed', { error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  /**
    * Lists store requests for motoboy.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
