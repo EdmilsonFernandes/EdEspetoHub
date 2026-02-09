@@ -23,6 +23,43 @@ export function MotoboyAvailable() {
   const firstLoadRef = useRef(true);
   const listRef = useRef<HTMLDivElement | null>(null);
 
+  const notificationsEnabled = () => {
+    const raw = localStorage.getItem('motoboy:notify_orders');
+    if (raw === null) return true; // default ON
+    return raw === '1';
+  };
+
+  const notifyNewOrders = async () => {
+    if (!notificationsEnabled()) return;
+    try {
+      if ('vibrate' in navigator) navigator.vibrate?.(120);
+    } catch {}
+    // Audio can be blocked until user interacts; fail silently.
+    try {
+      const AudioCtx = (window as any).AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const playTone = (freq: number, start: number, duration: number) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        gain.gain.value = 0.06;
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(ctx.currentTime + start);
+        osc.stop(ctx.currentTime + start + duration);
+      };
+      playTone(880, 0.0, 0.08);
+      playTone(1175, 0.1, 0.09);
+      window.setTimeout(() => {
+        try {
+          ctx.close();
+        } catch {}
+      }, 400);
+    } catch {}
+  };
+
   const loadOrders = async () => {
     setLoading(true);
     try {
@@ -37,6 +74,8 @@ export function MotoboyAvailable() {
       if (!firstLoadRef.current && hasNew && nextOrders.length > 0) {
         showToast('Novo pedido na fila.', 'info');
         setNewBanner({ count: Math.max(newCount, 1), at: Date.now() });
+        localStorage.setItem('motoboy:queue_badge', '1');
+        void notifyNewOrders();
       }
       try {
         const current = await motoboyService.getCurrentOrder();

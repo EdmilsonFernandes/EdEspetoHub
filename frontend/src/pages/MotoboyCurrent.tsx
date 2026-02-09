@@ -5,6 +5,7 @@ import { OrderCard } from '../components/Motoboy/OrderCard';
 import { ConfirmPaymentModal } from '../components/Motoboy/ConfirmPaymentModal';
 import { MotoboyHeader } from '../components/Motoboy/MotoboyHeader';
 import { useToast } from '../contexts/ToastContext';
+import { formatCurrency } from '../utils/format';
 
 export function MotoboyCurrent() {
   const [activeOrder, setActiveOrder] = useState<any | null>(null);
@@ -15,6 +16,7 @@ export function MotoboyCurrent() {
   const [finalizeAfterPayment, setFinalizeAfterPayment] = useState(false);
   const { showToast } = useToast();
   const navigate = useNavigate();
+  const [showDetails, setShowDetails] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -43,6 +45,26 @@ export function MotoboyCurrent() {
   const deliveryStatus = useMemo(() => {
     return String(activeOrder?.delivery?.status || '').toUpperCase();
   }, [activeOrder?.delivery?.status]);
+
+  const paymentIsPaid = useMemo(() => {
+    return String(activeOrder?.paymentStatus || '').toLowerCase() === 'paid';
+  }, [activeOrder?.paymentStatus]);
+
+  const stepMeta = useMemo(() => {
+    const status = deliveryStatus;
+    const steps = [ 'Retirar', 'Rota', 'Entregar' ];
+    const current =
+      status === 'ACCEPTED' ? 0 : status === 'PICKED_UP' ? 1 : status === 'IN_TRANSIT' ? 2 : 0;
+    const label =
+      status === 'ACCEPTED'
+        ? 'Vá até a loja e retire o pedido.'
+        : status === 'PICKED_UP'
+          ? 'Inicie a rota no GPS.'
+          : status === 'IN_TRANSIT'
+            ? 'Chegou no cliente? Finalize e confirme o pagamento.'
+            : 'Aguardando...';
+    return { steps, current, label };
+  }, [deliveryStatus]);
 
   const canConfirmPayment = (order: any) => {
     const method = (order?.paymentMethod || '').toLowerCase();
@@ -182,69 +204,127 @@ export function MotoboyCurrent() {
           Nenhum pedido em rota. Vá para a aba <span className="font-semibold">Fila</span> para aceitar uma entrega.
         </div>
       ) : (
-        <OrderCard
-          order={activeOrder}
-          actions={
-            <div className="space-y-2">
+        <div className="space-y-4">
+          <div className="premium-card-glass p-4 motoboy-fade-up" style={{ animationDelay: '40ms' }}>
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-[11px] uppercase tracking-[0.25em] text-slate-500">Entrega ativa</p>
+                <p className="text-base font-extrabold text-slate-900 truncate">{activeOrder?.customerName}</p>
+                <p className="text-xs text-slate-600 mt-0.5 truncate">{activeOrder?.address}</p>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <span className="px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-white/70 border border-slate-200 text-slate-800">
+                    Total: {formatCurrency(activeOrder?.total || 0)}
+                  </span>
+                  {activeOrder?.deliveryFee !== null && activeOrder?.deliveryFee !== undefined && (
+                    <span className="px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-emerald-50/70 border border-emerald-200 text-emerald-900">
+                      Frete: {formatCurrency(Number(activeOrder?.deliveryFee || 0))}
+                    </span>
+                  )}
+                  <span
+                    className={[
+                      'px-2.5 py-1 rounded-full text-[11px] font-extrabold border',
+                      paymentIsPaid
+                        ? 'bg-emerald-50/70 border-emerald-200 text-emerald-900'
+                        : 'bg-amber-50/70 border-amber-200 text-amber-900',
+                    ].join(' ')}
+                  >
+                    {paymentIsPaid ? 'Pagamento OK' : 'Pagamento pendente'}
+                  </span>
+                </div>
+              </div>
               {activeOrder?.address && (
                 <a
                   href={buildMapsUrl(activeOrder)}
                   target="_blank"
                   rel="noreferrer"
-                  className="btn-press block w-full rounded-xl border border-slate-200 bg-white/70 px-4 py-2.5 text-sm font-extrabold text-slate-800 text-center shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)]"
+                  className="btn-press shrink-0 rounded-xl border border-slate-200 bg-white/70 px-3 py-2 text-xs font-extrabold text-slate-800 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)]"
                 >
-                  Abrir no GPS
+                  GPS
                 </a>
               )}
-
-              {deliveryStatus === 'ACCEPTED' && (
-                <button
-                  onClick={handlePickup}
-                  className="btn-press w-full rounded-xl bg-[linear-gradient(120deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_60%,#f59e0b))] px-4 py-2.5 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(239,68,68,0.85)]"
-                >
-                  Retirei o pedido (iniciar rota)
-                </button>
-              )}
-
-              {deliveryStatus === 'PICKED_UP' && (
-                <button
-                  onClick={handleStart}
-                  className="btn-press w-full rounded-xl bg-[linear-gradient(120deg,#0ea5e9,#2563eb)] px-4 py-2.5 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(37,99,235,0.6)]"
-                >
-                  Iniciar rota
-                </button>
-              )}
-
-              {canConfirmPayment(activeOrder) && (
-                <button
-                  onClick={() => {
-                    setSelected(activeOrder);
-                    setFinalizeAfterPayment(false);
-                    setShowPayment(true);
-                  }}
-                  className="btn-press w-full rounded-xl border border-emerald-200 bg-emerald-50/70 px-4 py-2.5 text-sm font-extrabold text-emerald-800 shadow-[0_18px_40px_-32px_rgba(5,150,105,0.4)]"
-                >
-                  Confirmar pagamento
-                </button>
-              )}
-
-              {deliveryStatus === 'IN_TRANSIT' && (
-                <button
-                  onClick={handleDelivered}
-                  className="btn-press w-full rounded-xl bg-[linear-gradient(120deg,#16a34a,#059669)] px-4 py-2.5 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(5,150,105,0.6)]"
-                >
-                  Finalizar entrega
-                </button>
-              )}
-
-              {deliveryStatus && deliveryStatus !== 'IN_TRANSIT' && (
-                <p className="text-[11px] text-slate-500">
-                  Passo a passo: Retirei o pedido -{'>'} Iniciar rota -{'>'} Finalizar entrega.
-                </p>
-              )}
             </div>
-          }
-        />
+
+            <div className="mt-4">
+              <p className="text-[11px] text-slate-600 font-semibold">{stepMeta.label}</p>
+              <div className="mt-2 flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+                {stepMeta.steps.map((s, i) => {
+                  const isCurrent = i === stepMeta.current;
+                  const isDone = i < stepMeta.current;
+                  return (
+                    <span
+                      key={s}
+                      className={[
+                        'px-3 py-1 rounded-full text-[11px] font-extrabold border whitespace-nowrap',
+                        isCurrent
+                          ? 'bg-[linear-gradient(120deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_60%,#f59e0b))] text-white border-transparent shadow-[0_18px_34px_-26px_rgba(239,68,68,0.8)]'
+                          : isDone
+                            ? 'bg-slate-50/70 text-slate-700 border-slate-200'
+                            : 'bg-white/60 text-slate-500 border-slate-200',
+                      ].join(' ')}
+                    >
+                      {s}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-2 motoboy-fade-up" style={{ animationDelay: '90ms' }}>
+            {deliveryStatus === 'ACCEPTED' && (
+              <button
+                onClick={handlePickup}
+                className="btn-press w-full rounded-xl bg-[linear-gradient(120deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_60%,#f59e0b))] px-4 py-3 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(239,68,68,0.85)]"
+              >
+                Retirei o pedido e vou sair para entrega
+              </button>
+            )}
+            {deliveryStatus === 'PICKED_UP' && (
+              <button
+                onClick={handleStart}
+                className="btn-press w-full rounded-xl bg-[linear-gradient(120deg,#0ea5e9,#2563eb)] px-4 py-3 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(37,99,235,0.6)]"
+              >
+                Iniciar rota agora
+              </button>
+            )}
+
+            {deliveryStatus === 'IN_TRANSIT' && (
+              <button
+                onClick={handleDelivered}
+                className="btn-press w-full rounded-xl bg-[linear-gradient(120deg,#16a34a,#059669)] px-4 py-3 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(5,150,105,0.6)]"
+              >
+                {paymentIsPaid ? 'Finalizar entrega' : 'Confirmar pagamento e finalizar'}
+              </button>
+            )}
+
+            {!paymentIsPaid && canConfirmPayment(activeOrder) && deliveryStatus !== 'IN_TRANSIT' && (
+              <button
+                onClick={() => {
+                  setSelected(activeOrder);
+                  setFinalizeAfterPayment(false);
+                  setShowPayment(true);
+                }}
+                className="btn-press w-full rounded-xl border border-emerald-200 bg-emerald-50/70 px-4 py-2.5 text-sm font-extrabold text-emerald-800 shadow-[0_18px_40px_-32px_rgba(5,150,105,0.4)]"
+              >
+                Confirmar pagamento
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={() => setShowDetails((v) => !v)}
+              className="btn-press w-full rounded-xl border border-slate-200 bg-white/70 px-4 py-2.5 text-sm font-extrabold text-slate-800 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)]"
+            >
+              {showDetails ? 'Ocultar detalhes do pedido' : 'Ver detalhes do pedido'}
+            </button>
+          </div>
+
+          {showDetails && (
+            <div className="motoboy-fade-up" style={{ animationDelay: '140ms' }}>
+              <OrderCard order={activeOrder} />
+            </div>
+          )}
+        </div>
       )}
 
       <ConfirmPaymentModal

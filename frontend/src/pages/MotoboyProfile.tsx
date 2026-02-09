@@ -24,6 +24,11 @@ export function MotoboyProfile() {
   const [requests, setRequests] = useState<any[]>([]);
   const [selectedStores, setSelectedStores] = useState<string[]>([]);
   const [requesting, setRequesting] = useState(false);
+  const [notifyOrders, setNotifyOrders] = useState(() => {
+    const raw = localStorage.getItem('motoboy:notify_orders');
+    if (raw === null) return true;
+    return raw === '1';
+  });
   const { showToast } = useToast();
 
   const documentTypes = [
@@ -197,6 +202,45 @@ export function MotoboyProfile() {
   return (
     <div className="min-h-screen motoboy-screen space-y-4">
       <MotoboyHeader title="Perfil" subtitle="Documentos, vínculo e dados do entregador." />
+
+      <div className="premium-card-glass p-4 space-y-3 motoboy-fade-up" style={{ animationDelay: '40ms' }}>
+        <div>
+          <p className="text-sm font-extrabold text-slate-900">Notificações</p>
+          <p className="text-xs text-slate-600">Quando entra pedido novo na fila (som e vibração).</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            setNotifyOrders((prev) => {
+              const next = !prev;
+              localStorage.setItem('motoboy:notify_orders', next ? '1' : '0');
+              return next;
+            });
+          }}
+          className={[
+            'btn-press w-full rounded-xl px-4 py-3 text-sm font-extrabold flex items-center justify-between border',
+            notifyOrders
+              ? 'bg-emerald-50/70 text-emerald-900 border-emerald-200 shadow-[0_18px_40px_-32px_rgba(5,150,105,0.35)]'
+              : 'bg-white/70 text-slate-800 border-slate-200 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.35)]',
+          ].join(' ')}
+        >
+          <span>{notifyOrders ? 'Ativadas' : 'Desativadas'}</span>
+          <span
+            className={[
+              'relative inline-flex h-7 w-12 rounded-full transition',
+              notifyOrders ? 'bg-emerald-500' : 'bg-slate-300',
+            ].join(' ')}
+            aria-hidden="true"
+          >
+            <span
+              className={[
+                'absolute top-1 h-5 w-5 rounded-full bg-white shadow transition',
+                notifyOrders ? 'left-6' : 'left-1',
+              ].join(' ')}
+            />
+          </span>
+        </button>
+      </div>
 
       {blocked && (
         <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">

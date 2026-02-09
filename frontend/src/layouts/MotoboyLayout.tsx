@@ -13,6 +13,7 @@ export function MotoboyLayout() {
   const { pathname } = useLocation();
   const [installPrompt, setInstallPrompt] = useState<any | null>(null);
   const [showInstall, setShowInstall] = useState(false);
+  const [queueBadge, setQueueBadge] = useState(false);
 
   const tabs: Tab[] = [
     {
@@ -53,6 +54,30 @@ export function MotoboyLayout() {
     window.addEventListener('beforeinstallprompt', handler);
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
+
+  useEffect(() => {
+    const readBadge = () => {
+      const flag = localStorage.getItem('motoboy:queue_badge') === '1';
+      setQueueBadge(flag);
+    };
+    readBadge();
+
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === 'motoboy:queue_badge') readBadge();
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
+
+  useEffect(() => {
+    // Visiting the queue clears the badge.
+    if (pathname.startsWith('/motoboy/available')) {
+      if (localStorage.getItem('motoboy:queue_badge') === '1') {
+        localStorage.setItem('motoboy:queue_badge', '0');
+      }
+      setQueueBadge(false);
+    }
+  }, [pathname]);
 
   return (
     <div className="min-h-screen motoboy-bg pb-28">
@@ -109,6 +134,7 @@ export function MotoboyLayout() {
           <div className="motoboy-pill grid grid-cols-4 gap-1 p-1">
             {tabs.map((tab) => {
               const active = tab.match(pathname);
+              const showDot = tab.to === '/motoboy/available' && queueBadge && !pathname.startsWith('/motoboy/available');
               return (
                 <Link
                   key={tab.to}
@@ -121,6 +147,7 @@ export function MotoboyLayout() {
                   ].join(' ')}
                   aria-current={active ? 'page' : undefined}
                 >
+                  {showDot && <span className="motoboy-dot" aria-hidden="true" />}
                   <span className={active ? 'text-white' : 'text-slate-700'}>{tab.icon}</span>
                   <span>{tab.label}</span>
                 </Link>
