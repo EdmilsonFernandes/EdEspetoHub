@@ -183,16 +183,24 @@ export function OrderTracking() {
   const storeLogo =
     resolveAssetUrl(order?.store?.settings?.logoUrl) || '/chama-no-espeto.jpeg';
   const statusLabel = useMemo(() => {
-    if (isDelivery && (status === 'done' || status === 'delivered')) return 'Saiu para entrega';
+    const deliveryStatus = String((order as any)?.delivery?.status || '').toUpperCase();
+    if (isDelivery && (deliveryStatus === 'DELIVERED' || status === 'delivered' || status === 'finished')) return 'Entregue';
+    if (isDelivery && deliveryStatus === 'IN_TRANSIT') return 'Em rota';
+    if (isDelivery && (deliveryStatus === 'ACCEPTED' || deliveryStatus === 'PICKED_UP')) return 'Entregador a caminho';
     if (isDelivery && status === 'waiting_for_motoboy') return 'Aguardando entregador';
-    if (isDelivery && status === 'in_delivery') return 'Em rota';
     if (isDelivery && status === 'ready_for_delivery') return 'Pronto para entrega';
     if (isDelivery && status === 'ready') return 'Aguardando entregador';
+    // Legacy delivery orders that still use "done".
+    if (isDelivery && status === 'done') return 'Entregue';
     if (order?.type === 'table' && status === 'done') return 'Pronto para servir';
     if (order?.type === 'pickup' && status === 'ready') return 'Pronto para retirada';
     return statusLabels[status] || status;
-  }, [isDelivery, order?.type, status]);
-  const isReady = status === 'done' || status === 'delivered' || status === 'finished';
+  }, [isDelivery, order?.type, status, (order as any)?.delivery?.status]);
+  const isReady =
+    status === 'done' ||
+    status === 'delivered' ||
+    status === 'finished' ||
+    String((order as any)?.delivery?.status || '').toUpperCase() === 'DELIVERED';
   const storePhone = order?.store?.phone;
   const customerPhone = order?.phone;
   const paymentValue = order?.paymentMethod || order?.payment;
@@ -488,7 +496,7 @@ export function OrderTracking() {
                     </p>
                     <div className="mt-2 flex items-center gap-3 flex-wrap">
                       <h1 className="text-2xl sm:text-3xl font-black text-gray-900">{statusLabel}</h1>
-                      {isDelivery && (status === 'done' || status === 'delivered') && (
+                      {isDelivery && (String((order as any)?.delivery?.status || '').toUpperCase() === 'IN_TRANSIT' || status === 'in_delivery') && (
                         <span
                           className="inline-flex items-center rounded-full bg-amber-100 text-amber-800 text-xs font-semibold px-3 py-1"
                           title="Saiu para entrega"
@@ -525,7 +533,7 @@ export function OrderTracking() {
                         Janela prevista: {etaWindowMin}–{etaWindowMax} min
                       </div>
                     )}
-                    {estimatedReadyAt && (
+                    {estimatedReadyAt && !isReady && (
                       <div className="mt-2 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold">
                         Previsão de entrega: {estimatedReadyAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                       </div>

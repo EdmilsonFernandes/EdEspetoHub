@@ -25,7 +25,7 @@ export function OrderCard({ order, compact, actions }: Props) {
     if (!items.length) return '';
     return items
       .slice(0, 2)
-      .map((it: any) => `${it.quantity || 1}x ${it.name || 'Item'}`)
+      .map((it: any) => `${it.quantity || 1}x ${it.name || it?.product?.name || 'Item'}`)
       .join(' • ');
   }, [items]);
   const shortId = order?.shortId || (order?.id ? String(order.id).slice(0, 8) : '-');
