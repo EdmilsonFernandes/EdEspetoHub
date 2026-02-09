@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { ChartBar, BookOpen, ChefHat, CreditCard, Package, Gear, ShoppingCart, CaretDown, CaretUp, Scooter } from '@phosphor-icons/react';
+import { ChartBar, BookOpen, ChefHat, CreditCard, Package, Gear, ShoppingCart, DotsThree, X, Scooter } from '@phosphor-icons/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AdminLayout } from '../layouts/AdminLayout';
@@ -608,16 +608,22 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     return stored === 'true';
   });
   const [navPulse, setNavPulse] = useState<string | null>(null);
+  const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
   const [pendingMotoboyRequests, setPendingMotoboyRequests] = useState(0);
   const prevTabRef = useRef(activeTab);
-  const mobileNavItems = [
+
+  const mobilePrimaryTabs = [
     { id: 'resumo', label: 'Resumo', icon: ChartBar },
     { id: 'pedidos', label: 'Pedidos', icon: ShoppingCart },
     { id: 'produtos', label: 'Produtos', icon: Package },
-    { id: 'pagamentos', label: 'Pag.', icon: CreditCard },
     { id: 'fila', label: 'Fila', icon: ChefHat },
-    { id: 'motoboys', label: 'Entrega', icon: Scooter },
-    { id: 'config', label: 'Config', icon: Gear },
+  ];
+
+  const mobileMoreActions = [
+    { id: 'pagamentos', label: 'Pagamentos', hint: 'Assinatura e histórico', icon: CreditCard },
+    { id: 'motoboys', label: 'Entregadores', hint: 'Motoboys e solicitações', icon: Scooter },
+    { id: 'config', label: 'Configurações', hint: 'Identidade, Pix e horários', icon: Gear },
+    { id: 'cardapio', label: 'Abrir cardápio', hint: 'Ver como o cliente vê', icon: BookOpen },
   ];
 
   const storeId = session?.store?.id;
@@ -809,6 +815,15 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     if (typeof window === 'undefined') return;
     localStorage.setItem('adminMobileNav:collapsed', String(mobileNavCollapsed));
   }, [mobileNavCollapsed]);
+
+  useEffect(() => {
+    if (!mobileMoreOpen) return;
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setMobileMoreOpen(false);
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [mobileMoreOpen]);
 
 
   useEffect(() => {
@@ -1061,7 +1076,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             </div>
             <div
               className="sm:hidden fixed left-0 right-0 px-4 z-50"
-              style={{ bottom: "calc(env(safe-area-inset-bottom) + 72px)" }}
+              style={{ bottom: "calc(env(safe-area-inset-bottom) + 96px)" }}
             >
               <button
                 type="button"
@@ -1089,80 +1104,179 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       </div>
 
       {error && <p className="text-red-600 text-sm">{error}</p>}
+
       {!mobileNavCollapsed && (
         <div
-          className="sm:hidden fixed inset-x-0 bottom-0 z-40 border-t border-slate-800 bg-slate-900 text-white backdrop-blur rounded-t-2xl shadow-2xl"
-          style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 6px)', transform: 'translateZ(0)' }}
+          className="sm:hidden fixed inset-x-0 bottom-0 z-50 px-3"
+          style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 10px)' }}
         >
-          <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-slate-950/70 via-slate-900/40 to-transparent" />
-          <div className="relative grid grid-cols-6 gap-1 px-3 pt-2 pb-2 max-w-lg mx-auto">
-            {mobileNavItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = activeTab === item.id;
-              const isMotoboy = item.id === 'motoboys';
-              return (
+          <div className="mx-auto max-w-lg">
+            <div className="relative rounded-[28px] border border-slate-200/70 bg-white/85 backdrop-blur-xl shadow-[0_18px_60px_-28px_rgba(15,23,42,0.6)] px-2 py-2 overflow-hidden">
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.9),_transparent_55%)]" />
+              <div className="pointer-events-none absolute inset-0 opacity-30" style={{
+                background: `linear-gradient(120deg, ${branding?.primaryColor || '#ef4444'} 0%, ${branding?.secondaryColor || '#0f172a'} 100%)`,
+              }} />
+              <div className="relative grid grid-cols-5 gap-1">
+                {mobilePrimaryTabs.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = activeTab === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => {
+                        setActiveTab(item.id as typeof activeTab);
+                        setNavPulse(item.id);
+                        window.setTimeout(() => setNavPulse(null), 260);
+                      }}
+                      className="relative rounded-2xl px-2 py-2 transition active:scale-95"
+                      style={isActive ? {
+                        background: `linear-gradient(120deg, ${branding?.primaryColor || '#ef4444'} 0%, ${branding?.secondaryColor || '#0f172a'} 100%)`,
+                        boxShadow: '0 14px 24px -16px rgba(15, 23, 42, 0.65)',
+                      } : undefined}
+                    >
+                      <div
+                        className={`flex flex-col items-center justify-center gap-1 ${isActive ? 'text-white' : 'text-slate-800'}`}
+                        style={isActive && navPulse === item.id ? { animation: 'navPop 220ms ease' } : undefined}
+                      >
+                        <span
+                          className={`grid place-items-center h-9 w-11 rounded-2xl ${isActive ? 'bg-white/15 ring-1 ring-white/25' : 'bg-slate-100 ring-1 ring-slate-200'}`}
+                        >
+                          <Icon size={18} weight={isActive ? 'fill' : 'duotone'} />
+                        </span>
+                        <span className={`text-[10px] leading-tight ${isActive ? 'font-bold' : 'font-semibold'} opacity-90`}>
+                          {item.label}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
+
                 <button
-                  key={item.id}
                   type="button"
-                  onClick={() => {
-                    setActiveTab(item.id as typeof activeTab);
-                    setNavPulse(item.id);
-                    window.setTimeout(() => setNavPulse(null), 260);
-                  }}
-                  className={`flex flex-col items-center justify-center gap-1 rounded-2xl px-1 py-2 text-[10px] font-semibold transition active:scale-95 ${
-                    isActive
-                      ? 'bg-brand-primary text-white shadow-[0_12px_22px_rgba(239,68,68,0.4)] scale-[1.05]'
-                      : 'text-slate-200 hover:bg-slate-800/60'
-                  }`}
-                  style={isActive && navPulse === item.id ? { animation: 'navPop 220ms ease' } : undefined}
+                  onClick={() => setMobileMoreOpen(true)}
+                  className="relative rounded-2xl px-2 py-2 transition active:scale-95"
                 >
-                <div className="relative">
-                  <Icon size={16} weight={isActive ? 'fill' : 'duotone'} />
-                  {isMotoboy && pendingMotoboyRequests > 0 && (
-                    <span className="absolute -top-2 -right-2 rounded-full bg-amber-500 text-white text-[9px] font-semibold px-1.5 py-0.5">
-                      {pendingMotoboyRequests}
+                  <div className="flex flex-col items-center justify-center gap-1 text-slate-800">
+                    <span className="relative grid place-items-center h-9 w-11 rounded-2xl bg-slate-100 ring-1 ring-slate-200">
+                      <DotsThree size={18} weight="duotone" />
+                      {pendingMotoboyRequests > 0 && (
+                        <span className="absolute -top-1 -right-1 h-4 min-w-4 px-1.5 rounded-full bg-amber-500 text-white text-[10px] font-bold grid place-items-center shadow-md">
+                          {pendingMotoboyRequests}
+                        </span>
+                      )}
                     </span>
-                  )}
-                </div>
-                <span className={`${isActive ? 'font-bold' : 'font-semibold'}`}>{item.label}</span>
-              </button>
-            );
-          })}
+                    <span className="text-[10px] leading-tight font-semibold opacity-90">Mais</span>
+                  </div>
+                </button>
+              </div>
+            </div>
           </div>
-          <button
-            type="button"
-            onClick={() => setMobileNavCollapsed(true)}
-            className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-slate-900 text-white border border-slate-700 px-3 py-1 text-[10px] font-semibold shadow-lg inline-flex items-center gap-1"
-          >
-            <CaretDown size={12} weight="bold" />
-            Ocultar menu
-          </button>
         </div>
       )}
+
       {mobileNavCollapsed && (
         <div
-          className="sm:hidden fixed inset-x-0 bottom-0 z-40 flex items-center justify-center"
-          style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 6px)' }}
+          className="sm:hidden fixed inset-x-0 bottom-0 z-50 px-3"
+          style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 10px)' }}
         >
-          <button
-            type="button"
-            onClick={() => setMobileNavCollapsed(false)}
-            className="rounded-full bg-slate-900 text-white border border-slate-700 px-4 py-2 text-xs font-semibold shadow-lg inline-flex items-center gap-2"
-          >
-            <CaretUp size={14} weight="bold" />
-            Menu
-          </button>
+          <div className="mx-auto max-w-lg flex items-center justify-center">
+            <button
+              type="button"
+              onClick={() => setMobileNavCollapsed(false)}
+              className="rounded-full bg-slate-900 text-white border border-slate-700 px-4 py-2 text-xs font-semibold shadow-lg"
+            >
+              Abrir menu
+            </button>
+          </div>
         </div>
       )}
-      {storeSlug && (
-        <button
-          type="button"
-          onClick={() => navigate(`/${storeSlug}`)}
-          className="sm:hidden fixed right-4 z-50 rounded-full bg-brand-gradient text-white px-4 py-3 text-xs font-semibold shadow-[0_12px_30px_rgba(15,23,42,0.25)] active:scale-95"
-          style={{ bottom: mobileNavCollapsed ? '64px' : '104px' }}
-        >
-          Cardápio
-        </button>
+
+      {mobileMoreOpen && (
+        <div className="sm:hidden fixed inset-0 z-[60]">
+          <div
+            className="absolute inset-0 bg-slate-900/45 backdrop-blur-sm"
+            onClick={() => setMobileMoreOpen(false)}
+          />
+          <div className="absolute inset-x-0 bottom-0 px-3" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 12px)' }}>
+            <div className="mx-auto max-w-lg rounded-3xl border border-slate-200 bg-white shadow-2xl overflow-hidden">
+              <div className="px-5 pt-5 pb-3 flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Menu</p>
+                  <p className="text-lg font-black text-slate-900 leading-tight">Ações rápidas</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setMobileMoreOpen(false)}
+                  className="h-10 w-10 rounded-full border border-slate-200 bg-slate-50 text-slate-700 grid place-items-center active:scale-95"
+                  aria-label="Fechar"
+                >
+                  <X size={18} weight="bold" />
+                </button>
+              </div>
+
+              <div className="px-3 pb-3 space-y-2">
+                {mobileMoreActions.map((action) => {
+                  const Icon = action.icon;
+                  const isMotoboy = action.id === 'motoboys';
+                  return (
+                    <button
+                      key={action.id}
+                      type="button"
+                      onClick={() => {
+                        setMobileMoreOpen(false);
+                        if (action.id === 'cardapio') {
+                          if (storeSlug) navigate(`/${storeSlug}`);
+                          return;
+                        }
+                        setActiveTab(action.id as typeof activeTab);
+                        setNavPulse(action.id);
+                        window.setTimeout(() => setNavPulse(null), 260);
+                      }}
+                      className="w-full text-left rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 transition px-4 py-3 flex items-center justify-between gap-3 active:scale-[0.99]"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <span className="relative h-10 w-10 rounded-2xl bg-slate-900 text-white grid place-items-center shadow-sm flex-shrink-0">
+                          <Icon size={18} weight="duotone" />
+                          {isMotoboy && pendingMotoboyRequests > 0 && (
+                            <span className="absolute -top-2 -right-2 h-5 min-w-5 px-1.5 rounded-full bg-amber-500 text-white text-[10px] font-bold grid place-items-center shadow-md">
+                              {pendingMotoboyRequests}
+                            </span>
+                          )}
+                        </span>
+                        <span className="min-w-0">
+                          <span className="block text-sm font-bold text-slate-900 truncate">{action.label}</span>
+                          <span className="block text-xs text-slate-500 truncate">{action.hint}</span>
+                        </span>
+                      </div>
+                      <span className="text-xs font-semibold text-slate-400">Abrir</span>
+                    </button>
+                  );
+                })}
+
+                <div className="pt-1 grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileMoreOpen(false);
+                      setMobileNavCollapsed(true);
+                    }}
+                    className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-bold text-slate-700"
+                  >
+                    Ocultar menu
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMobileMoreOpen(false)}
+                    className="rounded-2xl bg-slate-900 px-4 py-3 text-xs font-bold text-white"
+                  >
+                    Fechar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </AdminLayout>
   );
