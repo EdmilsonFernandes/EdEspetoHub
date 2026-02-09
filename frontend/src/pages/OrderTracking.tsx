@@ -25,26 +25,21 @@ const typeLabels: Record<string, string> = {
   table: 'Comer no local',
 };
 
-const stepStyles: Record<string, { done: string; idle: string }> = {
+const stepStyles: Record<string, { current: string }> = {
   pending: {
-    done: 'bg-amber-100 text-amber-800 border-amber-200',
-    idle: 'bg-white text-amber-600 border-amber-100',
+    current: 'bg-amber-100 text-amber-800 border-amber-200',
   },
   preparing: {
-    done: 'bg-sky-100 text-sky-700 border-sky-200',
-    idle: 'bg-white text-sky-600 border-sky-100',
+    current: 'bg-sky-100 text-sky-700 border-sky-200',
   },
   ready: {
-    done: 'bg-violet-100 text-violet-700 border-violet-200',
-    idle: 'bg-white text-violet-600 border-violet-100',
+    current: 'bg-violet-100 text-violet-700 border-violet-200',
   },
   done: {
-    done: 'bg-emerald-100 text-emerald-700 border-emerald-200',
-    idle: 'bg-white text-emerald-600 border-emerald-100',
+    current: 'bg-emerald-100 text-emerald-700 border-emerald-200',
   },
   delivered: {
-    done: 'bg-emerald-100 text-emerald-700 border-emerald-200',
-    idle: 'bg-white text-emerald-600 border-emerald-100',
+    current: 'bg-emerald-100 text-emerald-700 border-emerald-200',
   },
 };
 
@@ -425,6 +420,8 @@ export function OrderTracking() {
   const currentStep = isDelivery && status === 'delivered' ? 'done' : status;
   const currentIndex = Math.max(0, steps.findIndex((item) => item.id === currentStep));
   const progress = steps.length > 1 ? Math.round((currentIndex / (steps.length - 1)) * 100) : 0;
+  const completedStepClass = 'bg-slate-100 text-slate-500 border-slate-200';
+  const upcomingStepClass = 'bg-white text-slate-400 border-slate-200 opacity-70';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -557,27 +554,37 @@ export function OrderTracking() {
                 </div>
                 <div className="flex flex-nowrap gap-2 overflow-x-auto no-scrollbar pb-1 sm:grid sm:gap-3 sm:grid-cols-4 sm:overflow-visible">
                   {steps.map((step) => {
-                    const isDone =
-                      steps.findIndex((item) => item.id === step.id) <=
-                      steps.findIndex((item) => item.id === currentStep);
+                    const stepIndex = steps.findIndex((item) => item.id === step.id);
+                    const isCompleted = stepIndex >= 0 && stepIndex < currentIndex;
+                    const isCurrent = stepIndex === currentIndex;
                     const showBike = isDelivery && step.id === 'done';
                     const styleKey = step.id === 'ready' ? 'ready' : step.id;
                     const stepTone = stepStyles[styleKey] || stepStyles.pending;
                     return (
                       <div
                         key={step.id}
-                        className={`rounded-xl border px-3 py-2 flex items-center gap-2 text-xs sm:text-sm whitespace-nowrap ${
-                          isDone ? stepTone.done : stepTone.idle
-                        } ${step.id === currentStep && !isReady ? 'ring-2 ring-brand-primary animate-pulse' : ''}`}
+                        aria-current={isCurrent ? 'step' : undefined}
+                        className={[
+                          'rounded-xl border px-3 py-2 flex items-center gap-2 text-xs sm:text-sm whitespace-nowrap select-none',
+                          isCurrent
+                            ? `${stepTone.current} ring-2 ring-brand-primary/40 shadow-sm`
+                            : isCompleted
+                              ? completedStepClass
+                              : upcomingStepClass,
+                        ].join(' ')}
                       >
                         {showBike ? (
                           <Bicycle size={18} weight="duotone" />
-                        ) : isDone ? (
+                        ) : isCurrent && !isReady ? (
+                          <CircleNotch size={18} weight="duotone" className="animate-spin" />
+                        ) : isCompleted || isReady ? (
                           <CheckCircle size={18} weight="duotone" />
                         ) : (
                           <Clock size={18} weight="duotone" />
                         )}
-                        <span className="text-sm font-semibold">{step.label}</span>
+                        <span className={`text-sm ${isCurrent ? 'font-extrabold' : 'font-semibold'}`}>
+                          {step.label}
+                        </span>
                       </div>
                     );
                   })}
