@@ -15,11 +15,13 @@ export function MotoboyAvailable() {
   const [profile, setProfile] = useState<any | null>(null);
   const [documents, setDocuments] = useState<any[]>([]);
   const [requests, setRequests] = useState<any[]>([]);
+  const [newBanner, setNewBanner] = useState<{ count: number; at: number } | null>(null);
   const { showToast } = useToast();
   const navigate = useNavigate();
   const requiredDocs = ['CNH', 'SELFIE'];
   const orderIdsRef = useRef<string[]>([]);
   const firstLoadRef = useRef(true);
+  const listRef = useRef<HTMLDivElement | null>(null);
 
   const loadOrders = async () => {
     setLoading(true);
@@ -29,10 +31,12 @@ export function MotoboyAvailable() {
       const prevIds = new Set(orderIdsRef.current);
       const nextIds = nextOrders.map((o: any) => String(o?.id || '')).filter(Boolean);
       const hasNew = nextIds.some((id) => !prevIds.has(id));
+      const newCount = nextIds.filter((id) => !prevIds.has(id)).length;
       orderIdsRef.current = nextIds;
       setOrders(nextOrders);
       if (!firstLoadRef.current && hasNew && nextOrders.length > 0) {
         showToast('Novo pedido na fila.', 'info');
+        setNewBanner({ count: Math.max(newCount, 1), at: Date.now() });
       }
       try {
         const current = await motoboyService.getCurrentOrder();
@@ -151,6 +155,44 @@ export function MotoboyAvailable() {
 
   return (
     <div className="min-h-screen motoboy-screen space-y-4">
+      {newBanner && (
+        <div
+          className="premium-card-glass p-4 motoboy-fade-up"
+          style={{ animationDelay: '40ms' }}
+          role="status"
+        >
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Novo pedido</p>
+              <p className="text-sm font-extrabold text-slate-900">
+                {newBanner.count} pedido{newBanner.count === 1 ? '' : 's'} acabou{newBanner.count === 1 ? '' : 'ram'} de entrar na fila
+              </p>
+              <p className="text-[11px] text-slate-600">
+                Atualizado agora. Toque em ver para ir direto.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={() => setNewBanner(null)}
+                className="btn-press rounded-xl border border-slate-200 bg-white/70 px-3 py-2 text-xs font-extrabold text-slate-700"
+              >
+                Fechar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  listRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }}
+                className="btn-press rounded-xl bg-[linear-gradient(120deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_60%,#f59e0b))] px-3 py-2 text-xs font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(239,68,68,0.85)]"
+              >
+                Ver
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <MotoboyHeader
         title="Pedidos disponíveis"
         subtitle="Aceite e inicie sua rota."
@@ -244,33 +286,42 @@ export function MotoboyAvailable() {
       </div>
 
       {loading ? (
-        <div className="text-center text-sm text-slate-500">Carregando...</div>
+        <div className="grid gap-3" ref={listRef}>
+          <div className="motoboy-skeleton h-[92px]" />
+          <div className="motoboy-skeleton h-[92px]" />
+          <div className="motoboy-skeleton h-[92px]" />
+        </div>
       ) : orders.length === 0 ? (
         <div className="text-center text-sm text-slate-500">
           Nenhum pedido disponível. A loja precisa marcar o pedido como “Pronto para entrega” ou “Aguardando entregador”.
         </div>
       ) : (
-        <div className="grid gap-4">
+        <div className="grid gap-4" ref={listRef}>
           {hasActive && (
             <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
               Você já tem uma entrega ativa. Finalize na aba “Entrega” antes de aceitar outra.
             </div>
           )}
-          {orders.map((order) => (
-            <OrderCard
+          {orders.map((order, idx) => (
+            <div
               key={order.id}
-              order={order}
-              compact
-              actions={
-                <button
-                  onClick={() => handleAccept(order.id)}
-                  disabled={hasActive}
-                  className="w-full rounded-xl bg-[linear-gradient(120deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_60%,#f59e0b))] px-4 py-2.5 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(239,68,68,0.85)] disabled:opacity-50"
-                >
-                  Aceitar entrega
-                </button>
-              }
-            />
+              className="motoboy-fade-up"
+              style={{ animationDelay: `${Math.min(idx * 70, 420)}ms` }}
+            >
+              <OrderCard
+                order={order}
+                compact
+                actions={
+                  <button
+                    onClick={() => handleAccept(order.id)}
+                    disabled={hasActive}
+                    className="btn-press w-full rounded-xl bg-[linear-gradient(120deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_60%,#f59e0b))] px-4 py-2.5 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(239,68,68,0.85)] disabled:opacity-50"
+                  >
+                    Aceitar entrega
+                  </button>
+                }
+              />
+            </div>
           ))}
         </div>
       )}

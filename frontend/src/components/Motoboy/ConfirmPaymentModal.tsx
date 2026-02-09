@@ -23,7 +23,7 @@ export function ConfirmPaymentModal({ isOpen, onClose, onConfirm, amount, paymen
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-      <div className="w-full max-w-md rounded-2xl bg-white p-5 space-y-4 shadow-xl">
+      <div className="w-full max-w-md premium-card-glass p-5 space-y-4 shadow-xl motoboy-fade-up">
         <div>
           <h3 className="text-lg font-bold text-slate-800">Confirmar pagamento</h3>
           <p className="text-sm text-slate-500">Total do pedido: {formatCurrency(amount || 0)}</p>
@@ -45,14 +45,14 @@ export function ConfirmPaymentModal({ isOpen, onClose, onConfirm, amount, paymen
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600"
+            className="btn-press flex-1 rounded-xl border border-slate-200 bg-white/70 px-4 py-2.5 text-sm font-extrabold text-slate-700"
           >
             Cancelar
           </button>
           <button
             type="button"
             onClick={handleConfirm}
-            className="flex-1 rounded-lg bg-brand-primary px-4 py-2 text-sm font-semibold text-white"
+            className="btn-press flex-1 rounded-xl bg-[linear-gradient(120deg,#16a34a,#059669)] px-4 py-2.5 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(5,150,105,0.6)]"
           >
             Confirmar
           </button>
