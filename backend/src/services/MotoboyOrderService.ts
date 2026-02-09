@@ -20,6 +20,7 @@ import { OrderRepository } from '../repositories/OrderRepository';
 import { OrderDeliveryRepository } from '../repositories/OrderDeliveryRepository';
 import { MotoboyStoreRepository } from '../repositories/MotoboyStoreRepository';
 import { DeliveryBillingService } from './DeliveryBillingService';
+import { deliveryService } from './DeliveryService';
 /**
  * Provides MotoboyOrderService functionality.
  *
@@ -46,15 +47,20 @@ export class MotoboyOrderService {
   async listAvailable(motoboy: Motoboy) {
     const storeIds = await this.motoboyStoreRepository.listStoreIds(motoboy.id);
     if (!storeIds.length) return [];
-    const availableStatuses = [ 'waiting_for_motoboy', 'ready_for_delivery' ];
+    // Prefer the delivery queue table, but keep a fallback for legacy orders without queue rows.
+    const availableOrderStatuses = [ 'waiting_for_motoboy', 'ready_for_delivery' ];
     return AppDataSource.getRepository(Order)
       .createQueryBuilder('o')
+      .leftJoin(OrderDelivery, 'od', 'od.order_id = o.id')
       .leftJoinAndSelect('o.store', 'store')
       .leftJoinAndSelect('store.settings', 'settings')
       .leftJoinAndSelect('o.items', 'items')
       .leftJoinAndSelect('items.product', 'product')
       .where('o.type = :type', { type: 'delivery' })
-      .andWhere('o.status IN (:...statuses)', { statuses: availableStatuses })
+      .andWhere(
+        `(od.order_id IS NULL AND o.status IN (:...statuses)) OR (od.status = 'AVAILABLE' AND (od.expires_at IS NULL OR od.expires_at > NOW()))`,
+        { statuses: availableOrderStatuses }
+      )
       .andWhere('o.store_id IN (:...storeIds)', { storeIds })
       .orderBy('o.created_at', 'ASC')
       .getMany();
@@ -111,11 +117,13 @@ export class MotoboyOrderService {
       .where('od.motoboy_id = :motoboyId', { motoboyId: motoboy.id })
       .andWhere('od.delivered_at IS NULL')
       .andWhere('o.type = :type', { type: 'delivery' })
-      .andWhere('o.status IN (:...statuses)', { statuses: [ 'in_delivery' ] })
+      .andWhere('od.status IN (:...statuses)', { statuses: [ 'ACCEPTED', 'PICKED_UP', 'IN_TRANSIT' ] })
       .orderBy('od.assigned_at', 'DESC')
       .getOne();
 
-    return order || null;
+    if (!order) return null;
+    const delivery = await AppDataSource.getRepository(OrderDelivery).findOne({ where: { orderId: order.id } });
+    return { ...order, delivery };
   }
 
   /**
@@ -151,47 +159,15 @@ export class MotoboyOrderService {
    * @date 2026-01-29
    */
   async acceptOrder(orderId: string, motoboy: Motoboy) {
-    return AppDataSource.transaction(async (manager) => {
-      const orderRepo = manager.getRepository(Order);
-      const deliveryRepo = manager.getRepository(OrderDelivery);
+    return deliveryService.acceptDelivery(orderId, motoboy);
+  }
 
-      const order = await orderRepo
-        .createQueryBuilder('o')
-        .leftJoinAndSelect('o.store', 'store')
-        // Postgres does not allow FOR UPDATE on the nullable side of an outer join.
-        // Lock only the base "orders" row to avoid SQLSTATE 0A000 errors.
-        .setLock('pessimistic_write', undefined, ['o'])
-        .where('o.id = :orderId', { orderId })
-        .getOne();
+  async pickupOrder(orderId: string, motoboy: Motoboy) {
+    return deliveryService.pickup(orderId, motoboy);
+  }
 
-      if (!order) throw new AppError('ORDER-001', 404);
-      if (!this.isDeliveryOrder(order)) throw new AppError('MOTO-010', 400);
-      if (![ 'waiting_for_motoboy', 'ready_for_delivery' ].includes(order.status)) {
-        throw new AppError('MOTO-011', 400);
-      }
-
-      const link = await this.motoboyStoreRepository.findActiveLink(motoboy.id, order.store.id);
-      if (!link) throw new AppError('MOTO-012', 403);
-
-      const delivery = deliveryRepo.create({
-        orderId: order.id,
-        motoboyId: motoboy.id,
-      });
-
-      try {
-        await deliveryRepo.insert(delivery);
-      } catch (error: any) {
-        if (error?.code === '23505') {
-          throw new AppError('MOTO-013', 409);
-        }
-        throw error;
-      }
-
-      order.status = 'in_delivery';
-      await orderRepo.save(order);
-
-      return { order, delivery };
-    });
+  async startOrder(orderId: string, motoboy: Motoboy) {
+    return deliveryService.start(orderId, motoboy);
   }
 
   /**
@@ -231,24 +207,15 @@ export class MotoboyOrderService {
    * @date 2026-01-29
    */
   async markDelivered(orderId: string, motoboy: Motoboy) {
-    const delivery = await this.orderDeliveryRepository.findByOrderId(orderId);
-    if (!delivery || delivery.motoboyId !== motoboy.id) throw new AppError('MOTO-014', 403);
-
+    const result = await deliveryService.complete(orderId, motoboy);
+    if (result?.order) {
+      await this.deliveryBillingService.recordDelivery(result.order as any);
+      return result.order;
+    }
+    // fallback: keep old behavior if order not loaded
     const order = await this.orderRepository.findById(orderId);
     if (!order) throw new AppError('ORDER-001', 404);
-    if (!this.isDeliveryOrder(order)) throw new AppError('MOTO-010', 400);
-    if (![ 'in_delivery', 'ready_for_delivery', 'waiting_for_motoboy' ].includes(order.status)) {
-      throw new AppError('MOTO-015', 400);
-    }
-
-    order.status = 'delivered';
-    const saved = await this.orderRepository.save(order);
-
-    delivery.deliveredAt = new Date();
-    await this.orderDeliveryRepository.save(delivery);
-
-    await this.deliveryBillingService.recordDelivery(saved);
-    return saved;
+    return order;
   }
 
   /**

@@ -20,6 +20,7 @@ import { StoreRepository } from '../repositories/StoreRepository';
 import { AppDataSource } from '../config/database';
 import { AppError } from '../errors/AppError';
 import { DeliveryBillingService } from './DeliveryBillingService';
+import { deliveryService } from './DeliveryService';
 /**
  * Provides OrderService functionality.
  *
@@ -202,6 +203,9 @@ export class OrderService
 
     order.status = status;
     const saved = await this.orderRepository.save(order);
+    if (saved.type === 'delivery' && [ 'ready_for_delivery', 'waiting_for_motoboy' ].includes(status)) {
+      await deliveryService.ensureQueueDelivery(saved as any);
+    }
     if (order.type === 'delivery' && [ 'delivered', 'finished' ].includes(status)) {
       await this.deliveryBillingService.recordDelivery(saved);
     }
