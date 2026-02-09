@@ -406,6 +406,18 @@ Backup (recomendado):
 sh scripts/pg-backup.sh
 ```
 
+Backup com rotacao (recomendado em producao com pouco disco):
+```bash
+sh scripts/pg-backup-rotate.sh
+```
+
+Exemplo de cron (executa diariamente, mas so faz dump se ja passaram 48h e remove o anterior):
+```bash
+sudo crontab -e
+# adicionar:
+# 15 3 * * * BACKUP_DIR=/var/backups/chamanoespeto MIN_INTERVAL_HOURS=48 KEEP_LATEST=1 sh /caminho/para/repo/scripts/pg-backup-rotate.sh >> /var/log/pg-backup.log 2>&1
+```
+
 4) Verificacao rapida:
 
 ```bash
