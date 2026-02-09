@@ -277,11 +277,18 @@ export class DeliveryService {
       const now = new Date();
       delivery.status = 'DELIVERED';
       delivery.deliveredAt = now;
+      if (!delivery.paymentConfirmedAt) delivery.paymentConfirmedAt = now;
+      if (!delivery.paymentConfirmedByMotoboyId) delivery.paymentConfirmedByMotoboyId = motoboy.id;
       await deliveryRepo.save(delivery);
 
       const order = await orderRepo.findOne({ where: { id: orderId }, relations: [ 'store' ] as any });
       if (order) {
         order.status = 'delivered';
+        // Business: motoboy only marks as delivered after receiving payment.
+        // So we normalize the payment status here to avoid leaving it as PENDING.
+        if (String(order.paymentStatus || '').toUpperCase() !== 'PAID') {
+          order.paymentStatus = 'PAID';
+        }
         await orderRepo.save(order);
       }
 
@@ -439,4 +446,3 @@ export class DeliveryService {
 }
 
 export const deliveryService = new DeliveryService();
-

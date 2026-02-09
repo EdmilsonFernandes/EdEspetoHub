@@ -260,6 +260,7 @@ export function MotoboyAvailable() {
             <OrderCard
               key={order.id}
               order={order}
+              compact
               actions={
                 <button
                   onClick={() => handleAccept(order.id)}
