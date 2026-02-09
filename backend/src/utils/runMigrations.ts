@@ -390,12 +390,31 @@ export async function runMigrations() {
     ALTER TABLE IF EXISTS order_deliveries
     ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'AVAILABLE';
   `);
-  // Backfill legacy rows: if motoboy_id exists, it's not "AVAILABLE".
+  // Backfill legacy rows safely (avoid violating uq_active_delivery_per_motoboy).
+  // Old versions inserted into order_deliveries without a workflow status; use orders.status and assigned_at to infer.
+  // Guarantee: at most one active row per motoboy after backfill.
   await AppDataSource.query(`
-    UPDATE order_deliveries
-    SET status = CASE WHEN delivered_at IS NOT NULL THEN 'DELIVERED' ELSE 'ACCEPTED' END
-    WHERE motoboy_id IS NOT NULL
-      AND (status IS NULL OR status = 'AVAILABLE');
+    WITH ranked AS (
+      SELECT
+        od.order_id,
+        od.motoboy_id,
+        od.assigned_at,
+        o.status AS order_status,
+        ROW_NUMBER() OVER (PARTITION BY od.motoboy_id ORDER BY od.assigned_at DESC, od.order_id DESC) AS rn
+      FROM order_deliveries od
+      JOIN orders o ON o.id = od.order_id
+      WHERE od.motoboy_id IS NOT NULL
+        AND (od.status IS NULL OR od.status = 'AVAILABLE')
+    )
+    UPDATE order_deliveries od
+    SET status = CASE
+      WHEN ranked.order_status IN ('delivered','finished') OR od.delivered_at IS NOT NULL THEN 'DELIVERED'
+      WHEN ranked.order_status = 'in_delivery' AND ranked.rn = 1 THEN 'IN_TRANSIT'
+      WHEN ranked.rn = 1 THEN 'ACCEPTED'
+      ELSE 'DELIVERED'
+    END
+    FROM ranked
+    WHERE od.order_id = ranked.order_id;
   `);
   await AppDataSource.query(`
     ALTER TABLE IF EXISTS order_deliveries
