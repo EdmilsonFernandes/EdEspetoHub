@@ -384,6 +384,10 @@ Configurações:
 FRONTEND_PORT=8080
 ```
 
+Postgres (recomendado em producao):
+- Defina `POSTGRES_VOLUME_NAME` em `.env.prod` para fixar o volume e evitar "sumir o banco" ao mudar pasta/projeto.
+- O deploy via `scripts/compose-prod.sh` usa `docker-compose.prod.yml` e trata o volume do Postgres como **external** (nao e removido por `docker compose down -v`).
+
 2) Preparar segredos (recomendado):
 
 ```bash
@@ -395,6 +399,11 @@ cp .env.prod.secrets.example .env.prod.secrets
 
 ```bash
 sh scripts/compose-prod.sh
+```
+
+Backup (recomendado):
+```bash
+sh scripts/pg-backup.sh
 ```
 
 4) Verificacao rapida:
