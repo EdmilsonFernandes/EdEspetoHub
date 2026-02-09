@@ -7,6 +7,8 @@ const secondaryPalette = [ '#111827', '#1f2937', '#334155', '#0f172a', '#0f766e'
 
 export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving }) => {
   const fileInputRef = useRef(null);
+  const [storeCepLoading, setStoreCepLoading] = useState(false);
+  const [storeCepError, setStoreCepError] = useState("");
   const [sectionsOpen, setSectionsOpen] = useState({
     identity: true,
     promo: false,
@@ -67,6 +69,45 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
       handleChange("address", parts.join(" | "));
       return next;
     });
+  };
+
+  const handleStoreCepLookup = async (cepValue?: string) => {
+    const rawCep = (cepValue ?? addressForm.cep ?? "").toString().replace(/\D/g, "");
+    if (rawCep.length !== 8) return;
+    setStoreCepLoading(true);
+    setStoreCepError("");
+    try {
+      const response = await fetch(`https://viacep.com.br/ws/${rawCep}/json/`);
+      const data = await response.json();
+      if (data?.erro) {
+        setStoreCepError("CEP não encontrado.");
+        return;
+      }
+      setAddressForm((prev) => {
+        const next = {
+          ...prev,
+          cep: prev.cep || `${rawCep.slice(0, 5)}-${rawCep.slice(5)}`,
+          street: prev.street || data.logradouro || "",
+          neighborhood: prev.neighborhood || data.bairro || "",
+          city: prev.city || data.localidade || "",
+          state: prev.state || data.uf || "",
+          complement: prev.complement || data.complemento || "",
+        };
+        const parts = [
+          next.street && `${next.street}${next.number ? `, ${next.number}` : ""}`,
+          next.neighborhood,
+          next.city && next.state ? `${next.city} - ${next.state}` : next.city,
+          next.complement,
+          next.cep && `CEP ${next.cep}`,
+        ].filter(Boolean);
+        handleChange("address", parts.join(" | "));
+        return next;
+      });
+    } catch (error) {
+      setStoreCepError("Não foi possível consultar o CEP agora.");
+    } finally {
+      setStoreCepLoading(false);
+    }
   };
 
   const previewInitials = branding.brandName
@@ -273,9 +314,22 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
                     type="text"
                     value={addressForm.cep || ""}
                     onChange={(e) => handleAddressChange("cep", e.target.value)}
+                    onBlur={(e) => handleStoreCepLookup(e.target.value)}
+                    disabled={storeCepLoading}
                     className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
                     placeholder="00000-000"
                   />
+                  <button
+                    type="button"
+                    onClick={() => handleStoreCepLookup(addressForm.cep)}
+                    disabled={storeCepLoading}
+                    className="mt-2 w-full px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {storeCepLoading ? "Buscando..." : "Buscar CEP"}
+                  </button>
+                  {storeCepError && (
+                    <p className="mt-1 text-xs text-rose-600">{storeCepError}</p>
+                  )}
                 </div>
                 <div className="sm:col-span-2">
                   <label className="text-xs font-semibold text-gray-500">Rua / Avenida</label>
@@ -283,6 +337,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
                     type="text"
                     value={addressForm.street || ""}
                     onChange={(e) => handleAddressChange("street", e.target.value)}
+                    disabled={storeCepLoading}
                     className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
                     placeholder="Rua, avenida"
                   />

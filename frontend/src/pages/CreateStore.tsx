@@ -167,8 +167,14 @@ export function CreateStore() {
     return parts.join(' | ');
   };
 
-  const handleCepLookup = async () => {
-    const rawCep = registerForm.cep.replace(/\D/g, '');
+  const normalizeCep = (input = '') => {
+    const digits = input.toString().replace(/\D/g, '').slice(0, 8);
+    if (digits.length <= 5) return digits;
+    return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+  };
+
+  const handleCepLookup = async (cepValue?: string) => {
+    const rawCep = (cepValue ?? registerForm.cep).replace(/\D/g, '');
     if (rawCep.length !== 8) return;
     setIsCepLoading(true);
     setCepError('');
@@ -181,6 +187,7 @@ export function CreateStore() {
       }
       setRegisterForm((prev) => ({
         ...prev,
+        cep: normalizeCep(rawCep),
         street: prev.street || data.logradouro || '',
         neighborhood: prev.neighborhood || data.bairro || '',
         city: prev.city || data.localidade || '',
@@ -581,15 +588,15 @@ export function CreateStore() {
                         <input
                           required
                           value={registerForm.cep}
-                          onChange={(e) => setRegisterForm((prev) => ({ ...prev, cep: e.target.value }))}
-                          onBlur={handleCepLookup}
+                          onChange={(e) => setRegisterForm((prev) => ({ ...prev, cep: normalizeCep(e.target.value) }))}
+                          onBlur={(e) => handleCepLookup(e.target.value)}
                           disabled={isCepLoading}
                           className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
                           placeholder="00000-000"
                         />
                         <button
                           type="button"
-                          onClick={handleCepLookup}
+                          onClick={() => handleCepLookup(registerForm.cep)}
                           disabled={isCepLoading}
                           className="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         >
