@@ -71,8 +71,10 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     return Math.ceil((end - now) / (1000 * 60 * 60 * 24));
   }, [subscription?.endDate]);
 
-  const isTrial = subscription?.status === 'TRIAL';
+  const isVip = Boolean(subscription?.planExempt) || subscription?.plan?.name === 'vip';
+  const isTrial = !isVip && subscription?.status === 'TRIAL';
   const showRenewBanner =
+    !isVip &&
     !isTrial &&
     (subscription?.status === 'EXPIRING' ||
       (typeof daysLeft === 'number' && daysLeft <= 3 && daysLeft >= 0));
