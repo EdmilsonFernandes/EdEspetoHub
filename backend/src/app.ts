@@ -39,7 +39,35 @@ async function bootstrap()
   const { logger } = await import('./utils/logger');
 
   // Auto-heal: if the database was dropped, recreate it so the API can boot.
-  await ensureDatabaseExists(getEnvDbConn());
+  // Retry because on docker starts Postgres may not be ready yet.
+  {
+    const conn = getEnvDbConn();
+    const maxAttempts = process.env.DB_BOOTSTRAP_ATTEMPTS ? Number(process.env.DB_BOOTSTRAP_ATTEMPTS) : 25;
+    const baseDelayMs = process.env.DB_BOOTSTRAP_DELAY_MS ? Number(process.env.DB_BOOTSTRAP_DELAY_MS) : 1000;
+
+    let lastError: any = null;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        await ensureDatabaseExists(conn);
+        lastError = null;
+        break;
+      } catch (error) {
+        lastError = error;
+        const delay = Math.min(15000, baseDelayMs * attempt);
+        logger.warn('DB bootstrap attempt failed, retrying', {
+          attempt,
+          maxAttempts,
+          delayMs: delay,
+          error: (error as any)?.message || String(error),
+        });
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
+
+    if (lastError) {
+      throw lastError;
+    }
+  }
 
   await AppDataSource.initialize();
   // If the DB exists but is empty, apply the base schema before running migrations.

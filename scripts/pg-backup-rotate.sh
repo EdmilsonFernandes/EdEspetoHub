@@ -1,5 +1,5 @@
-#!/usr/bin/env sh
-set -e
+#!/usr/bin/env bash
+set -euo pipefail
 
 # Backup with rotation + minimum interval.
 # Default behavior:
@@ -20,7 +20,7 @@ KEEP_LATEST="${KEEP_LATEST:-1}"
 mkdir -p "$OUT_DIR"
 
 pattern="${OUT_DIR}/${DB_NAME}_*.sql.gz"
-latest="$(ls -1t $pattern 2>/dev/null | head -n 1 || true)"
+latest="$(ls -1t ${pattern} 2>/dev/null | head -n 1 || true)"
 if [ -n "$latest" ]; then
   now="$(date -u +%s)"
   last="$(stat -c %Y "$latest" 2>/dev/null || echo 0)"
@@ -41,6 +41,5 @@ echo "Backup done: $out"
 
 if [ "$KEEP_LATEST" = "1" ]; then
   # Delete every backup except the newest.
-  ls -1t $pattern 2>/dev/null | tail -n +2 | xargs -r rm -f --
+  ls -1t ${pattern} 2>/dev/null | tail -n +2 | xargs -r rm -f --
 fi
-
