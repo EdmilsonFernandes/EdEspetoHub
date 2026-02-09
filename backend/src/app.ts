@@ -18,6 +18,7 @@ import path from 'path';
 import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
 import { loadSsmEnv } from './config/ssm';
+import { ensureBaseSchema, ensureDatabaseExists, getEnvDbConn } from './utils/dbBootstrap';
 /**
  * Handles bootstrap.
  *
@@ -37,7 +38,12 @@ async function bootstrap()
   const { accessLogger } = await import('./middleware/accessLogger');
   const { logger } = await import('./utils/logger');
 
+  // Auto-heal: if the database was dropped, recreate it so the API can boot.
+  await ensureDatabaseExists(getEnvDbConn());
+
   await AppDataSource.initialize();
+  // If the DB exists but is empty, apply the base schema before running migrations.
+  await ensureBaseSchema(AppDataSource);
   await runMigrations();
   const app = express();
   app.use(requestLogger);
