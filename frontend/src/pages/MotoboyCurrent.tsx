@@ -429,6 +429,7 @@ export function MotoboyCurrent() {
         paymentMethod={selected?.paymentMethod}
         pixKey={pixInfo.pixKey}
         pixPayload={pixInfo.pixPayload}
+        defaultCashTendered={selected?.cashTendered ?? null}
       />
     </div>
   );

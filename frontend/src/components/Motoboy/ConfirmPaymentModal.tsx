@@ -9,15 +9,30 @@ type Props = {
   paymentMethod?: string;
   pixKey?: string | null;
   pixPayload?: string | null;
+  defaultCashTendered?: number | null;
 };
 
-export function ConfirmPaymentModal({ isOpen, onClose, onConfirm, amount, paymentMethod, pixKey, pixPayload }: Props) {
+export function ConfirmPaymentModal({
+  isOpen,
+  onClose,
+  onConfirm,
+  amount,
+  paymentMethod,
+  pixKey,
+  pixPayload,
+  defaultCashTendered,
+}: Props) {
   const [cashValue, setCashValue] = useState('');
   const normalizedMethod = (paymentMethod || '').toLowerCase();
   const isCash = normalizedMethod === 'cash' || normalizedMethod === 'dinheiro';
   const isPix = normalizedMethod === 'pix';
 
   if (!isOpen) return null;
+
+  const totalValue = Number(amount || 0);
+  const informedCash = defaultCashTendered !== undefined && defaultCashTendered !== null ? Number(defaultCashTendered) : null;
+  const changeDue =
+    informedCash !== null && Number.isFinite(informedCash) && informedCash > totalValue ? informedCash - totalValue : 0;
 
   const copyText = async (text: string) => {
     try {
@@ -39,8 +54,17 @@ export function ConfirmPaymentModal({ isOpen, onClose, onConfirm, amount, paymen
   };
 
   const handleConfirm = () => {
-    const parsed = isCash ? Number(cashValue.replace(',', '.')) : null;
-    onConfirm(Number.isFinite(parsed as number) ? (parsed as number) : null);
+    if (isCash) {
+      const raw = cashValue.trim();
+      if (!raw && informedCash !== null && Number.isFinite(informedCash)) {
+        onConfirm(informedCash);
+        return;
+      }
+      const parsed = Number(raw.replace(',', '.'));
+      onConfirm(Number.isFinite(parsed as number) ? (parsed as number) : null);
+      return;
+    }
+    onConfirm(null);
   };
 
   return (
@@ -97,12 +121,28 @@ export function ConfirmPaymentModal({ isOpen, onClose, onConfirm, amount, paymen
         {isCash && (
           <div className="space-y-2">
             <label className="text-xs font-semibold text-slate-600">Valor recebido em dinheiro</label>
+            {informedCash !== null && Number.isFinite(informedCash) && (
+              <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-800">
+                <p className="font-extrabold">Cliente informou no pedido</p>
+                <p className="mt-1">
+                  Paga com: <span className="font-black">{formatCurrency(informedCash)}</span>
+                </p>
+                <p className="mt-1">
+                  Troco: <span className="font-black">{formatCurrency(changeDue)}</span>
+                </p>
+              </div>
+            )}
             <input
               value={cashValue}
               onChange={(event) => setCashValue(event.target.value)}
               placeholder="Ex: 50,00"
               className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-brand-primary"
             />
+            {informedCash !== null && Number.isFinite(informedCash) && (
+              <p className="text-[11px] text-slate-500">
+                Dica: pode deixar vazio e só confirmar para usar o valor informado pelo cliente.
+              </p>
+            )}
           </div>
         )}
 

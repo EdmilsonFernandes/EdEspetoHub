@@ -104,6 +104,7 @@ export class MotoboyOrderService {
                   logoUrl: order.store.settings.logoUrl || null,
                   primaryColor: order.store.settings.primaryColor || null,
                   secondaryColor: order.store.settings.secondaryColor || null,
+                  address: order.store.settings.address || null,
                 }
               : null,
           }
