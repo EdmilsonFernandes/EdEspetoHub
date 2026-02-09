@@ -234,11 +234,18 @@ export const CartView = ({
         label: `Dentro do raio (${distanceLabel} / ${radiusValue} km).`,
       };
     }
+    const hasAddressParts = Boolean(customer.street || customer.city || customer.state || customer.cep);
+    if (hasAddressParts && normalizedStoreAddress && !storeCoords) {
+      return {
+        tone: "bg-slate-50 text-slate-600 border-slate-200",
+        label: "Calculando a localização da loja para validar a entrega...",
+      };
+    }
     return {
       tone: "bg-slate-50 text-slate-600 border-slate-200",
       label: "Preencha o endereço para validar a entrega.",
     };
-  }, [deliveryCheck?.distanceKm, deliveryCheck?.status, isDelivery, normalizedStoreAddress, radiusValue]);
+  }, [customer.city, customer.cep, customer.state, customer.street, deliveryCheck?.distanceKm, deliveryCheck?.status, isDelivery, normalizedStoreAddress, radiusValue, storeCoords]);
 
   const deliveryDebug = useMemo(() => {
     if (!isDelivery) return null;

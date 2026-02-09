@@ -20,12 +20,14 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
     const parts = raw.split("|").map((part) => part.trim()).filter(Boolean);
     const cepPart = parts.find((part) => /cep/i.test(part));
     const cep = cepPart ? cepPart.replace(/cep/i, "").replace(/[:\-]/g, "").trim() : "";
-    const streetPart = parts[0] || "";
+    // Keep CEP out of the "street" slot. If CEP is the only filled part, don't leak it into street/number.
+    const nonCepParts = parts.filter((part) => !/cep/i.test(part));
+    const streetPart = nonCepParts[0] || "";
     const streetMatch = streetPart.match(/^(.*?)(?:,\s*([^,]+))?$/);
     const street = (streetMatch?.[1] || "").trim();
     const number = (streetMatch?.[2] || "").trim();
-    const neighborhood = parts[1] || "";
-    const cityState = parts[2] || "";
+    const neighborhood = nonCepParts[1] || "";
+    const cityState = nonCepParts[2] || "";
     const cityStateMatch = cityState.match(/^(.*?)(?:\s*-\s*([A-Za-z]{2}))?$/);
     const city = (cityStateMatch?.[1] || "").trim();
     const state = (cityStateMatch?.[2] || "").trim();
@@ -34,7 +36,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
       street,
       number,
       neighborhood,
-      complement: parts[3] && !/cep/i.test(parts[3]) ? parts[3] : "",
+      complement: nonCepParts[3] || "",
       city,
       state,
     };
