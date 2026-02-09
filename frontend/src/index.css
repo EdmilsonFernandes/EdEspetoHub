@@ -72,6 +72,21 @@
   }
 }
 
+@keyframes confettiFall {
+  0% {
+    transform: translate3d(var(--confetti-x), -12px, 0) rotate(0deg);
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(calc(var(--confetti-x) + var(--confetti-drift)), 115vh, 0)
+      rotate(calc(var(--confetti-rot) * 1deg));
+    opacity: 0;
+  }
+}
+
 /* Utility classes */
 .animate-flame {
   animation: flame 3s ease-in-out infinite;
@@ -192,10 +207,33 @@
     animation: motoboyPop 220ms ease both;
   }
 
+  .confetti {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 90;
+    overflow: hidden;
+  }
+
+  .confetti-piece {
+    position: absolute;
+    top: -18px;
+    left: 0;
+    width: 10px;
+    height: 14px;
+    border-radius: 3px;
+    background: var(--confetti-color);
+    animation: confettiFall var(--confetti-duration) cubic-bezier(0.16, 0.84, 0.32, 1) both;
+    animation-delay: var(--confetti-delay);
+    opacity: 0;
+    box-shadow: 0 18px 40px -28px rgba(15, 23, 42, 0.55);
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .motoboy-fade-up,
     .motoboy-skeleton::after,
     .motoboy-pop,
+    .confetti-piece,
     .status-blink,
     .animate-flame,
     .animate-flicker,

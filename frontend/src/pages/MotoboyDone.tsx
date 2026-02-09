@@ -46,8 +46,41 @@ export function MotoboyDone() {
     return () => window.clearTimeout(t);
   }, [navigate]);
 
+  const confetti = useMemo(() => {
+    const colors = [ '#ef4444', '#f59e0b', '#22c55e', '#0ea5e9', '#a855f7' ];
+    return Array.from({ length: 18 }).map((_, i) => {
+      const color = colors[i % colors.length];
+      const left = 6 + (i * 5) % 88;
+      const drift = (i % 2 === 0 ? 1 : -1) * (20 + (i % 5) * 6);
+      const rot = 260 + i * 28;
+      const delay = `${(i % 6) * 70}ms`;
+      const duration = `${1100 + (i % 5) * 130}ms`;
+      return { i, color, left, drift, rot, delay, duration };
+    });
+  }, []);
+
   return (
     <div className="min-h-screen motoboy-screen space-y-4">
+      <div className="confetti" aria-hidden="true">
+        {confetti.map((c) => (
+          <span
+            key={c.i}
+            className="confetti-piece"
+            style={
+              {
+                left: `${c.left}%`,
+                ['--confetti-x' as any]: `${c.left}vw`,
+                ['--confetti-drift' as any]: `${c.drift}px`,
+                ['--confetti-rot' as any]: c.rot,
+                ['--confetti-delay' as any]: c.delay,
+                ['--confetti-duration' as any]: c.duration,
+                ['--confetti-color' as any]: c.color,
+              } as any
+            }
+          />
+        ))}
+      </div>
+
       <MotoboyHeader title="Entrega concluída" subtitle="Boa. Mais uma entrega finalizada." />
 
       <div className="premium-card-glass p-5 motoboy-fade-up" style={{ animationDelay: '60ms' }}>
@@ -103,4 +136,3 @@ export function MotoboyDone() {
     </div>
   );
 }
-

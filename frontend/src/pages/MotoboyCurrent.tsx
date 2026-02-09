@@ -6,6 +6,7 @@ import { ConfirmPaymentModal } from '../components/Motoboy/ConfirmPaymentModal';
 import { MotoboyHeader } from '../components/Motoboy/MotoboyHeader';
 import { useToast } from '../contexts/ToastContext';
 import { formatCurrency } from '../utils/format';
+import { buildPixPayload } from '../utils/pixPayload';
 
 export function MotoboyCurrent() {
   const [activeOrder, setActiveOrder] = useState<any | null>(null);
@@ -65,6 +66,25 @@ export function MotoboyCurrent() {
   const paymentIsPaid = useMemo(() => {
     return String(activeOrder?.paymentStatus || '').toLowerCase() === 'paid';
   }, [activeOrder?.paymentStatus]);
+
+  const pixInfo = useMemo(() => {
+    const method = String(activeOrder?.paymentMethod || '').toLowerCase();
+    if (method !== 'pix') return { pixKey: null as string | null, pixPayload: null as string | null };
+    const pixKey = String(activeOrder?.store?.settings?.pixKey || '').trim() || null;
+    if (!pixKey) return { pixKey: null, pixPayload: null };
+    const amount = Number(activeOrder?.total || 0);
+    const storeName = String(activeOrder?.store?.name || 'CHAMA NO ESPETO');
+    const city = String(activeOrder?.store?.settings?.city || activeOrder?.store?.settings?.cidade || 'BRASIL');
+    const txid = activeOrder?.id ? String(activeOrder.id).slice(0, 8) : 'PEDIDO';
+    const pixPayload = buildPixPayload({
+      key: pixKey,
+      name: storeName,
+      city,
+      amount: Number.isFinite(amount) && amount > 0 ? amount : undefined,
+      txid,
+    });
+    return { pixKey, pixPayload };
+  }, [activeOrder?.paymentMethod, activeOrder?.store?.settings?.pixKey, activeOrder?.store?.name, activeOrder?.store?.settings?.city, activeOrder?.id, activeOrder?.total]);
 
   const stepMeta = useMemo(() => {
     const status = deliveryStatus;
@@ -427,6 +447,8 @@ export function MotoboyCurrent() {
         onConfirm={handleConfirmPayment}
         amount={selected?.total || 0}
         paymentMethod={selected?.paymentMethod}
+        pixKey={pixInfo.pixKey}
+        pixPayload={pixInfo.pixPayload}
       />
     </div>
   );
