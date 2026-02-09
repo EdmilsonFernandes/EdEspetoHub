@@ -35,6 +35,9 @@ const stepStyles: Record<string, { current: string }> = {
   ready: {
     current: 'bg-violet-100 text-violet-700 border-violet-200',
   },
+  in_delivery: {
+    current: 'bg-blue-100 text-blue-700 border-blue-200',
+  },
   done: {
     current: 'bg-emerald-100 text-emerald-700 border-emerald-200',
   },
@@ -189,7 +192,7 @@ export function OrderTracking() {
     if (order?.type === 'pickup' && status === 'ready') return 'Pronto para retirada';
     return statusLabels[status] || status;
   }, [isDelivery, order?.type, status]);
-  const isReady = status === 'done' || status === 'delivered';
+  const isReady = status === 'done' || status === 'delivered' || status === 'finished';
   const storePhone = order?.store?.phone;
   const customerPhone = order?.phone;
   const paymentValue = order?.paymentMethod || order?.payment;
@@ -400,7 +403,8 @@ export function OrderTracking() {
         { id: 'pending', label: 'Recebido' },
         { id: 'preparing', label: 'Em preparo' },
         { id: 'ready', label: 'Aguardando entregador' },
-        { id: 'done', label: 'Saiu para entrega' },
+        { id: 'in_delivery', label: 'Em rota' },
+        { id: 'delivered', label: 'Entregue' },
       ];
     }
     if (order?.type === 'pickup') {
@@ -417,7 +421,13 @@ export function OrderTracking() {
       { id: 'done', label: order?.type === 'table' ? 'Pronto para servir' : 'Pronto' },
     ];
   }, [isDelivery, order?.type]);
-  const currentStep = isDelivery && status === 'delivered' ? 'done' : status;
+  const currentStep = (() => {
+    if (!isDelivery) return status;
+    if (status === 'ready_for_delivery' || status === 'waiting_for_motoboy' || status === 'ready') return 'ready';
+    if (status === 'in_delivery') return 'in_delivery';
+    if (status === 'delivered' || status === 'finished') return 'delivered';
+    return status;
+  })();
   const currentIndex = Math.max(0, steps.findIndex((item) => item.id === currentStep));
   const progress = steps.length > 1 ? Math.round((currentIndex / (steps.length - 1)) * 100) : 0;
   const completedStepClass = 'bg-slate-100 text-slate-500 border-slate-200';
@@ -557,7 +567,7 @@ export function OrderTracking() {
                     const stepIndex = steps.findIndex((item) => item.id === step.id);
                     const isCompleted = stepIndex >= 0 && stepIndex < currentIndex;
                     const isCurrent = stepIndex === currentIndex;
-                    const showBike = isDelivery && step.id === 'done';
+                    const showBike = isDelivery && step.id === 'in_delivery';
                     const styleKey = step.id === 'ready' ? 'ready' : step.id;
                     const stepTone = stepStyles[styleKey] || stepStyles.pending;
                     return (
