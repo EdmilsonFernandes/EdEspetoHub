@@ -165,9 +165,12 @@ const buildAvailabilityPayload = (value) => {
 export const ProductManager = ({ products, onProductsChange }) => {
   const { showToast } = useToast();
   const formRef = useRef<HTMLDivElement | null>(null);
+  const createNameInputRef = useRef<HTMLInputElement | null>(null);
   const [editing, setEditing] = useState(null);
   const [inlineEditId, setInlineEditId] = useState<string | null>(null);
   const [mobileEditOpen, setMobileEditOpen] = useState(false);
+  const [inlineCategorySelect, setInlineCategorySelect] = useState(initialForm.category);
+  const [inlineCustomCategory, setInlineCustomCategory] = useState('');
   const [inlineForm, setInlineForm] = useState({
     name: '',
     price: '',
@@ -283,6 +286,8 @@ export const ProductManager = ({ products, onProductsChange }) => {
       showToast('Produto adicionado com sucesso.', 'success');
       resetForm();
       await refreshProducts();
+      // Fast data entry: jump back to "Nome do Produto" after a successful save.
+      setTimeout(() => createNameInputRef.current?.focus(), 50);
     } catch (err) {
       showToast('Não foi possível salvar o produto.', 'error');
     } finally {
@@ -291,6 +296,10 @@ export const ProductManager = ({ products, onProductsChange }) => {
   };
 
   const handleEdit = (product) => {
+    const normalizedCategory = normalizeCategory(product.category || initialForm.category);
+    const isKnown = categoryOptions.some((entry) => entry.id === normalizedCategory);
+    setInlineCategorySelect(isKnown ? normalizedCategory : '__custom__');
+    setInlineCustomCategory(isKnown ? '' : normalizedCategory);
     setInlineEditId(product.id);
     setInlineImageFile('');
     setInlineForm({
@@ -298,7 +307,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
       price: product.price != null ? String(product.price) : '',
       promoPrice: product.promoPrice != null ? String(product.promoPrice) : '',
       promoActive: Boolean(product.promoActive),
-      category: product.category || initialForm.category,
+      category: normalizedCategory || initialForm.category,
       description: product.description ?? product.desc ?? '',
       imageUrl: product.imageUrl || '',
       isFeatured: Boolean(product.isFeatured),
@@ -419,6 +428,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
+                ref={createNameInputRef}
               />
             </div>
             <div className="space-y-2">
@@ -1061,11 +1071,41 @@ export const ProductManager = ({ products, onProductsChange }) => {
               </div>
               <div>
                 <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">Categoria</label>
-                <input
-                  className="w-full p-3 border border-gray-200 rounded-xl text-sm mt-2"
-                  value={inlineForm.category}
-                  onChange={(e) => setInlineForm((prev) => ({ ...prev, category: e.target.value }))}
-                />
+                <select
+                  className="w-full p-3 border border-gray-200 rounded-xl text-sm mt-2 bg-white"
+                  value={inlineCategorySelect}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setInlineCategorySelect(value);
+                    if (value === '__custom__') {
+                      const normalized = normalizeCategory(inlineCustomCategory);
+                      setInlineForm((prev) => ({ ...prev, category: normalized || prev.category }));
+                    } else {
+                      setInlineCustomCategory('');
+                      setInlineForm((prev) => ({ ...prev, category: value }));
+                    }
+                  }}
+                >
+                  {categoryOptions.map((option) => (
+                    <option key={option.id} value={option.id}>
+                      {option.label}
+                    </option>
+                  ))}
+                  <option value="__custom__">+ Nova categoria</option>
+                </select>
+                {inlineCategorySelect === '__custom__' && (
+                  <input
+                    className="w-full p-3 border border-gray-200 rounded-xl text-sm mt-2"
+                    placeholder="Digite a nova categoria"
+                    value={inlineCustomCategory}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setInlineCustomCategory(value);
+                      setInlineForm((prev) => ({ ...prev, category: normalizeCategory(value) }));
+                    }}
+                    autoFocus
+                  />
+                )}
               </div>
               <div>
                 <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">Descrição</label>
