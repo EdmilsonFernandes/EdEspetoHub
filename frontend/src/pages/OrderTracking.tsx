@@ -574,7 +574,7 @@ export function OrderTracking() {
                   </div>
                   <div className="mt-2 text-xs text-gray-500">{progress}% completo</div>
                 </div>
-                <div className="flex flex-nowrap gap-2 sm:gap-3 overflow-x-auto no-scrollbar pb-1">
+                <div className="flex flex-nowrap gap-2 sm:gap-3 overflow-x-auto overflow-y-visible no-scrollbar py-1 pb-2">
                   {steps.map((step) => {
                     const stepIndex = steps.findIndex((item) => item.id === step.id);
                     const isCompleted = stepIndex >= 0 && stepIndex < currentIndex;
