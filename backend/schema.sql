@@ -244,12 +244,39 @@ CREATE TABLE IF NOT EXISTS motoboy_stores (
 
 CREATE TABLE IF NOT EXISTS order_deliveries (
   order_id UUID PRIMARY KEY REFERENCES orders(id) ON DELETE CASCADE,
-  motoboy_id UUID NOT NULL REFERENCES motoboys(id) ON DELETE RESTRICT,
+  motoboy_id UUID REFERENCES motoboys(id) ON DELETE RESTRICT,
+  status TEXT NOT NULL DEFAULT 'AVAILABLE',
+  freight_value NUMERIC(10,2),
   assigned_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  accepted_at TIMESTAMPTZ,
+  picked_up_at TIMESTAMPTZ,
+  in_transit_at TIMESTAMPTZ,
   delivered_at TIMESTAMPTZ,
+  canceled_at TIMESTAMPTZ,
+  canceled_reason TEXT,
+  expires_at TIMESTAMPTZ,
   payment_confirmed_at TIMESTAMPTZ,
   payment_confirmed_by_motoboy_id UUID REFERENCES motoboys(id) ON DELETE RESTRICT
 );
+
+CREATE TABLE IF NOT EXISTS delivery_events (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  delivery_id UUID NOT NULL REFERENCES order_deliveries(order_id) ON DELETE CASCADE,
+  actor_type TEXT NOT NULL,
+  actor_id UUID,
+  from_status TEXT,
+  to_status TEXT NOT NULL,
+  metadata JSONB,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_delivery_events_delivery_id ON delivery_events(delivery_id);
+CREATE INDEX IF NOT EXISTS idx_delivery_events_created_at ON delivery_events(created_at DESC);
+
+-- One active delivery per motoboy at a time.
+CREATE UNIQUE INDEX IF NOT EXISTS uq_active_delivery_per_motoboy
+ON order_deliveries(motoboy_id)
+WHERE motoboy_id IS NOT NULL AND status IN ('ACCEPTED','PICKED_UP','IN_TRANSIT');
 
 CREATE TABLE IF NOT EXISTS motoboy_documents (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

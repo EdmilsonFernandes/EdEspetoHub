@@ -374,12 +374,72 @@ export async function runMigrations() {
   await AppDataSource.query(`
     CREATE TABLE IF NOT EXISTS order_deliveries (
       order_id UUID PRIMARY KEY REFERENCES orders(id) ON DELETE CASCADE,
-      motoboy_id UUID NOT NULL REFERENCES motoboys(id) ON DELETE RESTRICT,
+      motoboy_id UUID REFERENCES motoboys(id) ON DELETE RESTRICT,
       assigned_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       delivered_at TIMESTAMPTZ,
       payment_confirmed_at TIMESTAMPTZ,
       payment_confirmed_by_motoboy_id UUID REFERENCES motoboys(id) ON DELETE RESTRICT
     );
+  `);
+  // Evolve order_deliveries into a full "delivery" record (queue + workflow).
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS order_deliveries
+    ALTER COLUMN motoboy_id DROP NOT NULL;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS order_deliveries
+    ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'AVAILABLE';
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS order_deliveries
+    ADD COLUMN IF NOT EXISTS freight_value NUMERIC(10,2);
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS order_deliveries
+    ADD COLUMN IF NOT EXISTS accepted_at TIMESTAMPTZ;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS order_deliveries
+    ADD COLUMN IF NOT EXISTS picked_up_at TIMESTAMPTZ;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS order_deliveries
+    ADD COLUMN IF NOT EXISTS in_transit_at TIMESTAMPTZ;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS order_deliveries
+    ADD COLUMN IF NOT EXISTS canceled_at TIMESTAMPTZ;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS order_deliveries
+    ADD COLUMN IF NOT EXISTS canceled_reason TEXT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS order_deliveries
+    ADD COLUMN IF NOT EXISTS expires_at TIMESTAMPTZ;
+  `);
+  await AppDataSource.query(`
+    CREATE TABLE IF NOT EXISTS delivery_events (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      delivery_id UUID NOT NULL REFERENCES order_deliveries(order_id) ON DELETE CASCADE,
+      actor_type TEXT NOT NULL,
+      actor_id UUID,
+      from_status TEXT,
+      to_status TEXT NOT NULL,
+      metadata JSONB,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_delivery_events_delivery_id ON delivery_events(delivery_id);
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_delivery_events_created_at ON delivery_events(created_at DESC);
+  `);
+  await AppDataSource.query(`
+    CREATE UNIQUE INDEX IF NOT EXISTS uq_active_delivery_per_motoboy
+    ON order_deliveries(motoboy_id)
+    WHERE motoboy_id IS NOT NULL AND status IN ('ACCEPTED','PICKED_UP','IN_TRANSIT');
   `);
   await AppDataSource.query(`
     CREATE TABLE IF NOT EXISTS motoboy_documents (

@@ -46,5 +46,21 @@
   "PROD-002": "Produto inválido para esta loja.",
   "ORDER-001": "Pedido não encontrado.",
   "ORDER-002": "Tipo de pedido não permitido para esta loja.",
-  "ORDER-003": "Mesa já está ocupada. Finalize o pedido atual antes de criar outro."
+  "ORDER-003": "Mesa já está ocupada. Finalize o pedido atual antes de criar outro.",
+  "ORDER-004": "Transição de status inválida para este pedido.",
+  "DELIV-001": "Você já possui uma entrega ativa. Finalize a entrega atual antes de aceitar outra.",
+  "DELIV-002": "Transição inválida do status da entrega.",
+  "DELIV-003": "Este pedido não é de entrega.",
+  "DELIV-004": "Pedido não está disponível para entrega.",
+  "DELIV-005": "Entrega expirada. Volte para a fila e escolha outra.",
+  "DELIV-006": "Entrega já foi aceita por outro entregador.",
+  "DELIV-007": "Entrega não encontrada.",
+  "DELIV-008": "Não é possível cancelar após a retirada.",
+  "MOTO-010": "Este pedido não é de entrega.",
+  "MOTO-011": "Pedido não está disponível para entrega.",
+  "MOTO-012": "Entregador não está vinculado a esta loja.",
+  "MOTO-013": "Entrega já foi aceita por outro entregador.",
+  "MOTO-014": "Você não tem permissão para atualizar este pedido.",
+  "MOTO-015": "Status do pedido inválido para esta operação.",
+  "MOTO-016": "Não é possível finalizar este pedido."
 }

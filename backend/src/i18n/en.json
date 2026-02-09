@@ -46,5 +46,21 @@
   "PROD-002": "Invalid product for this store.",
   "ORDER-001": "Order not found.",
   "ORDER-002": "Order type not allowed for this store.",
-  "ORDER-003": "Table is already occupied. Finish the current order before creating a new one."
+  "ORDER-003": "Table is already occupied. Finish the current order before creating a new one.",
+  "ORDER-004": "Invalid order status transition.",
+  "DELIV-001": "You already have an active delivery. Finish it before accepting another one.",
+  "DELIV-002": "Invalid delivery status transition.",
+  "DELIV-003": "This order is not a delivery order.",
+  "DELIV-004": "Order is not available for delivery.",
+  "DELIV-005": "Delivery expired. Please pick another one.",
+  "DELIV-006": "Delivery was already accepted by another courier.",
+  "DELIV-007": "Delivery not found.",
+  "DELIV-008": "Cannot cancel after pickup.",
+  "MOTO-010": "This order is not a delivery order.",
+  "MOTO-011": "Order is not available for delivery.",
+  "MOTO-012": "Courier is not linked to this store.",
+  "MOTO-013": "Delivery was already accepted by another courier.",
+  "MOTO-014": "You are not allowed to update this order.",
+  "MOTO-015": "Invalid order status for this operation.",
+  "MOTO-016": "Cannot finish this order."
 }

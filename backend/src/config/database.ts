@@ -24,6 +24,7 @@ import { OrderEtaEstimate } from '../entities/OrderEtaEstimate';
 import { Motoboy } from '../entities/Motoboy';
 import { MotoboyStore } from '../entities/MotoboyStore';
 import { OrderDelivery } from '../entities/OrderDelivery';
+import { DeliveryEvent } from '../entities/DeliveryEvent';
 import { MotoboyDocument } from '../entities/MotoboyDocument';
 import { MotoboyStoreRequest } from '../entities/MotoboyStoreRequest';
 import { MotoboyAuditLog } from '../entities/MotoboyAuditLog';
@@ -48,7 +49,7 @@ export const AppDataSource = new DataSource({
   password: env.database.password,
   database: env.database.database,
   synchronize: false,
-  entities: [ User, Store, StoreSettings, Product, Order, OrderItem, OrderEtaEstimate, Motoboy, MotoboyStore, OrderDelivery, MotoboyDocument, MotoboyStoreRequest, MotoboyAuditLog, DeliveryBillingCycle, DeliveryBillingCharge, Plan, Subscription, Payment, PaymentEvent, PasswordReset, EmailVerification, SiteSetting, PlatformAdmin, AccessLog, StoreLinkHit ],
+  entities: [ User, Store, StoreSettings, Product, Order, OrderItem, OrderEtaEstimate, Motoboy, MotoboyStore, OrderDelivery, DeliveryEvent, MotoboyDocument, MotoboyStoreRequest, MotoboyAuditLog, DeliveryBillingCycle, DeliveryBillingCharge, Plan, Subscription, Payment, PaymentEvent, PasswordReset, EmailVerification, SiteSetting, PlatformAdmin, AccessLog, StoreLinkHit ],
   migrations: [],
   logging: [ 'error' ]
   //logging: [ 'error', 'query' ]

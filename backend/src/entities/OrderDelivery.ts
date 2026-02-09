@@ -38,8 +38,14 @@ export class OrderDelivery {
   @JoinColumn({ name: 'order_id' })
   order?: Order;
 
-  @Column({ name: 'motoboy_id' })
-  motoboyId!: string;
+  @Column({ name: 'motoboy_id', nullable: true })
+  motoboyId?: string | null;
+
+  @Column({ default: 'AVAILABLE' })
+  status!: string;
+
+  @Column('decimal', { name: 'freight_value', precision: 10, scale: 2, nullable: true })
+  freightValue?: number | null;
 
   @ManyToOne(() => Motoboy, { onDelete: 'RESTRICT' })
   @JoinColumn({ name: 'motoboy_id' })
@@ -48,8 +54,26 @@ export class OrderDelivery {
   @CreateDateColumn({ name: 'assigned_at' })
   assignedAt!: Date;
 
+  @Column({ name: 'accepted_at', type: 'timestamptz', nullable: true })
+  acceptedAt?: Date | null;
+
+  @Column({ name: 'picked_up_at', type: 'timestamptz', nullable: true })
+  pickedUpAt?: Date | null;
+
+  @Column({ name: 'in_transit_at', type: 'timestamptz', nullable: true })
+  inTransitAt?: Date | null;
+
   @Column({ name: 'delivered_at', type: 'timestamptz', nullable: true })
   deliveredAt?: Date | null;
+
+  @Column({ name: 'canceled_at', type: 'timestamptz', nullable: true })
+  canceledAt?: Date | null;
+
+  @Column({ name: 'canceled_reason', type: 'text', nullable: true })
+  canceledReason?: string | null;
+
+  @Column({ name: 'expires_at', type: 'timestamptz', nullable: true })
+  expiresAt?: Date | null;
 
   @Column({ name: 'payment_confirmed_at', type: 'timestamptz', nullable: true })
   paymentConfirmedAt?: Date | null;
