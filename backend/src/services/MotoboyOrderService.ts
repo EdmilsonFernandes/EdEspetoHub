@@ -109,7 +109,9 @@ export class MotoboyOrderService {
       const order = await orderRepo
         .createQueryBuilder('o')
         .leftJoinAndSelect('o.store', 'store')
-        .setLock('pessimistic_write')
+        // Postgres does not allow FOR UPDATE on the nullable side of an outer join.
+        // Lock only the base "orders" row to avoid SQLSTATE 0A000 errors.
+        .setLock('pessimistic_write', undefined, ['o'])
         .where('o.id = :orderId', { orderId })
         .getOne();
 
