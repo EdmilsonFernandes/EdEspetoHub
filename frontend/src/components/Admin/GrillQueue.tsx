@@ -55,7 +55,7 @@ export const GrillQueue = () => {
       return '';
     }
   }, []);
-  const [activeTab, setActiveTab] = useState<'queue' | 'completed'>('queue');
+  const [activeTab, setActiveTab] = useState<'queue' | 'inroute' | 'completed'>('queue');
   const [completedPage, setCompletedPage] = useState(1);
   const [completedPageSize, setCompletedPageSize] = useState(9);
   const [currentTime, setCurrentTime] = useState(Date.now());
@@ -471,13 +471,18 @@ export const GrillQueue = () => {
     [currentTime, queue]
   );
 
-  const sortedQueue = useMemo(
-    () =>
-      [...queue]
-        .filter((order) => ['pending', 'preparing', 'ready'].includes(order.status))
-        .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0)),
-    [queue]
-  );
+  const productionQueue = useMemo(() => {
+    const statuses = new Set([ 'pending', 'preparing', 'ready', 'ready_for_delivery', 'waiting_for_motoboy' ]);
+    return [...queue]
+      .filter((order) => statuses.has(order.status))
+      .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+  }, [queue]);
+
+  const inRouteQueue = useMemo(() => {
+    return [...queue]
+      .filter((order) => order.status === 'in_delivery')
+      .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+  }, [queue]);
 
   const completedToday = useMemo(() => {
     const today = new Date();
@@ -490,8 +495,9 @@ export const GrillQueue = () => {
         date.getDate() === today.getDate()
       );
     };
+    const completedStatuses = new Set([ 'done', 'delivered', 'finished' ]);
     return [...queue]
-      .filter((order) => order.status === 'done' && isSameDay(order.createdAt))
+      .filter((order) => completedStatuses.has(order.status) && isSameDay(order.createdAt))
       .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
   }, [queue]);
   const completedTotalPages = Math.max(1, Math.ceil(completedToday.length / completedPageSize));
@@ -502,21 +508,21 @@ export const GrillQueue = () => {
 
   const queueMetrics = useMemo(() => {
     const now = Date.now();
-    const withAges = sortedQueue.map((order) => {
+    const withAges = productionQueue.map((order) => {
       const createdAt = order?.createdAt ? new Date(order.createdAt).getTime() : now;
       const ageMs = Math.max(0, now - createdAt);
       return { ...order, ageMs };
     });
     const pending = withAges.filter((o) => o.status === 'pending').length;
     const preparing = withAges.filter((o) => o.status === 'preparing').length;
-    const ready = withAges.filter((o) => o.status === 'ready').length;
+    const ready = withAges.filter((o) => [ 'ready', 'ready_for_delivery', 'waiting_for_motoboy' ].includes(o.status)).length;
     const avgMs =
       withAges.length > 0
         ? withAges.reduce((acc, cur) => acc + cur.ageMs, 0) / withAges.length
         : 0;
     const oldest = withAges.reduce((acc, cur) => (cur.ageMs > acc ? cur.ageMs : acc), 0);
     return { pending, preparing, ready, avgMs, oldest };
-  }, [sortedQueue, currentTime]);
+  }, [productionQueue, currentTime]);
 
   useEffect(() => {
     if (activeTab === 'completed') {
@@ -551,6 +557,12 @@ export const GrillQueue = () => {
   };
 
   const renderTimeline = (status, orderType) => {
+    const normalizedStatus = (() => {
+      if (orderType === 'delivery' && (status === 'ready_for_delivery' || status === 'waiting_for_motoboy')) return 'ready';
+      if (orderType === 'delivery' && status === 'in_delivery') return 'done';
+      if (status === 'delivered' || status === 'finished') return 'done';
+      return status;
+    })();
     const steps =
       orderType === "pickup"
         ? [
@@ -573,9 +585,9 @@ export const GrillQueue = () => {
           ];
 
     const isActive = (key) => {
-      if (status === "pending") return key === "pending";
-      if (status === "preparing") return key !== "done" && key !== "ready";
-      if (status === "ready") return key !== "done";
+      if (normalizedStatus === "pending") return key === "pending";
+      if (normalizedStatus === "preparing") return key !== "done" && key !== "ready";
+      if (normalizedStatus === "ready") return key !== "done";
       return true;
     };
 
@@ -615,7 +627,7 @@ export const GrillQueue = () => {
           <ChefHat className={tvMode ? "text-white" : "text-brand-primary"} weight="duotone" />
           Fila de Produção
           <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${tvMode ? "bg-white/15 text-white" : "bg-brand-primary/10 text-brand-primary"}`}>
-            {sortedQueue.length} pedidos
+            {productionQueue.length} pedidos
           </span>
           {!tvMode && (
             <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold text-slate-500">
@@ -647,13 +659,14 @@ export const GrillQueue = () => {
           {!tvMode && (
             <div className="flex flex-wrap gap-2 order-2 sm:order-none">
               {[
-                { id: 'queue', label: 'Fila', count: sortedQueue.length },
+                { id: 'queue', label: 'Produção', count: productionQueue.length },
+                { id: 'inroute', label: 'Em rota', count: inRouteQueue.length },
                 { id: 'completed', label: 'Finalizados hoje', count: completedToday.length },
               ].map((tab) => (
                 <button
                   key={tab.id}
                   type="button"
-                  onClick={() => setActiveTab(tab.id as 'queue' | 'completed')}
+                  onClick={() => setActiveTab(tab.id as 'queue' | 'inroute' | 'completed')}
                   className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-all hover:-translate-y-0.5 active:scale-95 ${
                     activeTab === tab.id
                       ? 'bg-brand-primary text-white shadow-sm'
@@ -757,18 +770,22 @@ export const GrillQueue = () => {
               : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4"
           }`}
         >
-          {sortedQueue.map((order, index) => {
+          {productionQueue.map((order, index) => {
             const orderAgeMs = order?.createdAt ? Date.now() - new Date(order.createdAt).getTime() : 0;
             const isLate = orderAgeMs > 10 * 60 * 1000;
             const isNew = newOrderIds.includes(order.id);
+            const toneKey =
+              order.status === "ready_for_delivery" || order.status === "waiting_for_motoboy"
+                ? "ready"
+                : order.status;
             const statusAccent =
-              order.status === "pending"
+              toneKey === "pending"
                 ? "border-l-amber-400 bg-gradient-to-br from-amber-50/70 via-white to-amber-50/30"
-                : order.status === "preparing"
+                : toneKey === "preparing"
                 ? "border-l-sky-400 bg-gradient-to-br from-sky-50/70 via-white to-sky-50/30"
-                : order.status === "ready"
+                : toneKey === "ready"
                 ? "border-l-violet-400 bg-gradient-to-br from-violet-50/70 via-white to-violet-50/30"
-                : order.status === "done"
+                : toneKey === "done"
                 ? "border-l-emerald-400 bg-gradient-to-br from-emerald-50/70 via-white to-emerald-50/30"
                 : "border-l-slate-300 bg-gradient-to-br from-slate-50 via-white to-slate-50";
             return (
@@ -1111,7 +1128,7 @@ export const GrillQueue = () => {
           );
           })}
 
-          {sortedQueue.length === 0 && !loading && (
+          {productionQueue.length === 0 && !loading && (
             <div className="col-span-full text-center text-gray-500 py-12 bg-white rounded-xl border border-dashed">
               <div className="mx-auto max-w-sm space-y-2">
                 <div className="text-4xl">🔥</div>
@@ -1301,6 +1318,82 @@ export const GrillQueue = () => {
               );
             })()}
           </div>
+        </div>
+      )}
+
+      {activeTab === 'inroute' && (
+        <div className="space-y-3">
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600">
+            Pedidos em rota: o entregador já aceitou. Use “Acompanhar” para abrir a tela pública do cliente.
+          </div>
+          {inRouteQueue.length === 0 ? (
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center text-sm text-slate-500">
+              Nenhum pedido em rota agora.
+            </div>
+          ) : (
+            <div
+              className={`grid gap-3 xl:gap-4 ${
+                tvMode
+                  ? "grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"
+                  : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4"
+              }`}
+            >
+              {inRouteQueue.map((order) => (
+                <div
+                  key={order.id}
+                  className="relative w-full max-w-full p-3 rounded-2xl border border-l-4 border-l-blue-400 bg-gradient-to-br from-blue-50/70 via-white to-blue-50/30 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.45)]"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-[11px] font-semibold text-slate-500">
+                        Pedido #{formatOrderDisplayId(order.id, storeSlug)}
+                      </p>
+                      <p className="text-sm font-extrabold text-slate-900 truncate">
+                        {order.customerName || 'Cliente'}
+                      </p>
+                      {order.phone ? <p className="text-[11px] text-slate-500">{order.phone}</p> : null}
+                      <p className="text-[11px] text-slate-400">{formatDateTime(order.createdAt)}</p>
+                    </div>
+                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700 border border-blue-200">
+                      Em rota
+                    </span>
+                  </div>
+
+                  {order.address ? (
+                    <div className="mt-3 text-xs text-slate-600">
+                      <p className="text-[10px] uppercase tracking-[0.2em] text-slate-400">Entrega</p>
+                      <p className="font-semibold text-slate-700">{order.address}</p>
+                    </div>
+                  ) : null}
+
+                  <div className="mt-3 flex items-center justify-between gap-3 text-xs">
+                    <div className="inline-flex items-center gap-2 text-[11px] font-semibold text-slate-600">
+                      {order.type === "delivery" && order.deliveryFee ? (
+                        <span className="inline-flex items-center gap-2 text-[11px] font-semibold text-slate-500">
+                          Frete
+                          <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 text-[11px] font-bold">
+                            {formatCurrency(order.deliveryFee)}
+                          </span>
+                        </span>
+                      ) : null}
+                      <span>Total</span>
+                      <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold">
+                        {formatCurrency(order.total || 0)}
+                      </span>
+                    </div>
+                    <a
+                      href={`/pedido/${order.id}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="px-3 py-2 rounded-lg bg-slate-900 text-white text-xs font-bold"
+                    >
+                      Acompanhar
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
