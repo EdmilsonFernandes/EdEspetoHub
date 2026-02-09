@@ -43,8 +43,10 @@ services:
     container_name: chamanoespeto-postgres
     image: postgres:16
     environment:
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: espetinho
+      # Keep DB creds configurable so API+DB don't drift (common source of auth failures).
+      # IMPORTANT: Changing POSTGRES_PASSWORD does NOT change an already-initialized volume password.
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-postgres}"
+      POSTGRES_DB: "${POSTGRES_DB:-espetinho}"
     ports:
       - "5432:5432"
     volumes:
@@ -67,3 +69,6 @@ services:
 
 volumes:
   postgres-data:
+    # Pin volume name to avoid accidental "new empty DB" when compose project name/path changes.
+    # Default matches the common compose-derived name for this repo.
+    name: "${POSTGRES_VOLUME_NAME:-edespetohub_postgres-data}"

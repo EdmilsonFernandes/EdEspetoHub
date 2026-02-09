@@ -56,5 +56,13 @@ apply_env SMTP_PASS "$SMTP_PASS"
 apply_env SMTP_SECURE "$SMTP_SECURE"
 apply_env EMAIL_FROM "$EMAIL_FROM"
 
+# Database (optional, but helps keep Docker+SSM aligned and prevents auth drift)
+apply_env PGHOST "$PGHOST"
+apply_env PGPORT "$PGPORT"
+apply_env PGUSER "$PGUSER"
+apply_env PGPASSWORD "$PGPASSWORD"
+apply_env PGDATABASE "$PGDATABASE"
+apply_env JWT_SECRET "$JWT_SECRET"
+
 unset FRONTEND_PORT
 docker compose --env-file "$ENV_FILE" up --build -d
