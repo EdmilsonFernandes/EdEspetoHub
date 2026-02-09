@@ -3,6 +3,7 @@ import { motoboyService } from '../services/motoboyService';
 import { storeService } from '../services/storeService';
 import { useToast } from '../contexts/ToastContext';
 import { MotoboyHeader } from '../components/Motoboy/MotoboyHeader';
+import { formatMotoboyAccountStatus } from '../utils/motoboyStatus';
 
 export function MotoboyProfile() {
   const [docFiles, setDocFiles] = useState<Record<string, File | null>>({});
@@ -401,7 +402,19 @@ export function MotoboyProfile() {
           {savingProfile ? 'Salvando...' : 'Salvar perfil'}
         </button>
         {profile?.status && (
-          <p className="text-[11px] text-slate-500">Status do cadastro: {profile.status}</p>
+          <div className="pt-1">
+            {(() => {
+              const st = formatMotoboyAccountStatus(profile.status);
+              return (
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] text-slate-500 font-semibold">Status do cadastro:</span>
+                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border ${st.tone}`}>
+                    {st.label}
+                  </span>
+                </div>
+              );
+            })()}
+          </div>
         )}
       </div>
 

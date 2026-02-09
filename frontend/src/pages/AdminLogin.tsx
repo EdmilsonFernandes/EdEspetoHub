@@ -6,6 +6,7 @@ import { getPersistedBranding } from '../constants';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { AuthLayout } from '../layouts/AuthLayout';
+import { ArrowLeft, Eye, EyeSlash, LockKey, Storefront } from '@phosphor-icons/react';
 
 export function AdminLogin() {
   const navigate = useNavigate();
@@ -90,9 +91,12 @@ export function AdminLogin() {
     <AuthLayout>
       <form onSubmit={handleLogin} className="space-y-6">
         <div className="text-center">
-          <h2 className="text-2xl sm:text-3xl font-black text-gray-800 mb-1">Chama no Espeto</h2>
+          <div className="mx-auto h-14 w-14 rounded-2xl bg-brand-primary/10 border border-brand-primary/20 flex items-center justify-center text-brand-primary shadow-sm">
+            <LockKey size={26} weight="duotone" />
+          </div>
+          <h2 className="mt-4 text-2xl sm:text-3xl font-black text-gray-900 mb-1 tracking-tight">Painel da Loja</h2>
           <p className="text-sm text-gray-500">Acesso do administrador</p>
-          <p className="text-sm text-gray-500">Entre com suas credenciais para acessar o painel.</p>
+          <p className="text-sm text-gray-500">Use seu slug e senha para entrar.</p>
         </div>
 
         {loginError && (
@@ -122,13 +126,19 @@ export function AdminLogin() {
         <div className="space-y-4">
           <div className="space-y-2">
             <label className="text-sm font-semibold text-gray-700">Identificador da loja (slug)</label>
-            <input
-              type="text"
-              value={loginForm.slug}
-              onChange={e => setLoginForm(prev => ({ ...prev, slug: e.target.value }))}
-              className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
-              placeholder="Digite o slug da sua loja"
-            />
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                <Storefront size={18} weight="duotone" />
+              </span>
+              <input
+                type="text"
+                value={loginForm.slug}
+                onChange={e => setLoginForm(prev => ({ ...prev, slug: e.target.value }))}
+                className="w-full border border-gray-200 rounded-xl p-3 pl-10 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors bg-white/80"
+                placeholder="Ex: edsertaneja"
+                autoCapitalize="none"
+              />
+            </div>
             <p className="text-xs text-gray-500">Use o slug fácil de memorizar da sua loja.</p>
           </div>
           <div className="space-y-2">
@@ -144,19 +154,10 @@ export function AdminLogin() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                className="absolute right-2 top-1/2 -translate-y-1/2 h-9 w-9 rounded-xl border border-gray-200 bg-white/80 flex items-center justify-center text-gray-500 hover:text-gray-800"
                 aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
               >
-                {showPassword ? (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                  </svg>
-                ) : (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                )}
+                {showPassword ? <EyeSlash size={18} weight="duotone" /> : <Eye size={18} weight="duotone" />}
               </button>
             </div>
             <button
@@ -174,14 +175,17 @@ export function AdminLogin() {
             type="submit"
             className="w-full text-white py-3 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 bg-brand-gradient hover:opacity-90"
           >
-            🔑 Entrar no painel
+            Entrar no painel
           </button>
           <button
             type="button"
             onClick={() => navigate('/')}
             className="w-full border-2 border-gray-200 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-50 transition-colors"
           >
-            Voltar ao início
+            <span className="inline-flex items-center justify-center gap-2">
+              <ArrowLeft size={18} weight="duotone" />
+              Voltar ao início
+            </span>
           </button>
         </div>
       </form>

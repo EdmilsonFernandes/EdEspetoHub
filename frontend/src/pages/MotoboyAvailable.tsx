@@ -5,6 +5,7 @@ import { motoboyService } from '../services/motoboyService';
 import { OrderCard } from '../components/Motoboy/OrderCard';
 import { useToast } from '../contexts/ToastContext';
 import { MotoboyHeader } from '../components/Motoboy/MotoboyHeader';
+import { formatMotoboyAccountStatus } from '../utils/motoboyStatus';
 
 export function MotoboyAvailable() {
   const [orders, setOrders] = useState<any[]>([]);
@@ -159,8 +160,9 @@ export function MotoboyAvailable() {
     documents.map((doc: any) => [String(doc.docType || '').toUpperCase(), doc])
   );
   const hasAllRequiredDocs = requiredDocs.every((key) => documentsByType.has(key));
-  const approvedStores = requests.filter((req) => req.status === 'APPROVED');
-  const statusLabel = (() => {
+	  const approvedStores = requests.filter((req) => req.status === 'APPROVED');
+	  const accountStatus = formatMotoboyAccountStatus(profile?.status);
+	  const statusLabel = (() => {
     if (profile?.status === 'SUSPENDED') return 'Cadastro suspenso';
     if (profile?.status === 'REJECTED') return 'Cadastro recusado';
     if (profile?.status === 'PENDING_VERIFICATION') return 'Cadastro em análise';
@@ -268,15 +270,20 @@ export function MotoboyAvailable() {
       )}
 
       <div className="grid gap-3 sm:grid-cols-3">
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
-            <CheckCircle size={20} weight="duotone" />
-          </div>
-          <div>
-            <p className="text-xs text-slate-500">Status</p>
-            <p className="text-sm font-semibold text-slate-800">{profile?.status || 'Pendente'}</p>
-          </div>
-        </div>
+	        <div className="rounded-2xl border border-slate-200 bg-white p-4 flex items-center gap-3">
+	          <div className="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
+	            <CheckCircle size={20} weight="duotone" />
+	          </div>
+	          <div>
+	            <p className="text-xs text-slate-500">Status</p>
+	            <div className="mt-0.5 flex items-center gap-2">
+	              <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-extrabold border ${accountStatus.tone}`}>
+	                {accountStatus.label}
+	              </span>
+	              <span className="text-[11px] font-semibold text-slate-500">Conta</span>
+	            </div>
+	          </div>
+	        </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-4 flex items-center gap-3">
           <div className="h-10 w-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
             <Storefront size={20} weight="duotone" />

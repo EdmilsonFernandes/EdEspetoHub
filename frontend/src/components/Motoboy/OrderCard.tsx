@@ -36,10 +36,19 @@ export function OrderCard({ order, compact, actions }: Props) {
   const customerName = order?.customerName || order?.customer_name || 'Cliente';
   const phone = order?.phone || null;
   const storeLogo = resolveAssetUrl(order?.store?.settings?.logoUrl || order?.store?.settings?.logo_url || '');
+  const storeAccent = String(order?.store?.settings?.primaryColor || order?.store?.settings?.primary_color || '').trim();
+  const accentColor = storeAccent || 'var(--color-primary)';
   const storeLabel = storeName || (storeSlug ? `/${storeSlug}` : 'Loja');
 
   return (
-    <div className="premium-card p-4 sm:p-5 space-y-4">
+    <div className="premium-card p-4 sm:p-5 space-y-4 relative overflow-hidden">
+      <div
+        className="absolute left-0 top-0 bottom-0 w-1.5"
+        style={{
+          background: `linear-gradient(180deg, ${accentColor}, color-mix(in srgb, ${accentColor} 55%, #f59e0b))`,
+        }}
+        aria-hidden="true"
+      />
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
