@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { ChartBar, BookOpen, ChefHat, CreditCard, Package, Gear, ShoppingCart, DotsThree, X, Scooter } from '@phosphor-icons/react';
+import { ChartBar, BookOpen, ChefHat, CreditCard, Package, Gear, ShoppingCart, DotsThree, X, Scooter, ForkKnife, Storefront, Truck } from '@phosphor-icons/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AdminLayout } from '../layouts/AdminLayout';
@@ -119,6 +119,20 @@ const OrdersView = ({ orders, products, storeSlug }) => {
     return 'bg-red-100 text-red-700';
   };
   const shortId = (value) => formatOrderDisplayId(value, storeSlug);
+  const orderTypeMeta = (order: any) => {
+    const type = String(order?.type || '').toLowerCase();
+    if (type === 'delivery') {
+      return { label: 'Entrega', pill: 'bg-sky-100 text-sky-800 border-sky-200', icon: <Truck size={14} weight="duotone" /> };
+    }
+    if (type === 'pickup') {
+      return { label: 'Retirada', pill: 'bg-amber-100 text-amber-800 border-amber-200', icon: <Storefront size={14} weight="duotone" /> };
+    }
+    if (type === 'table') {
+      const table = order?.table ? `Mesa ${order.table}` : 'Mesa';
+      return { label: table, pill: 'bg-fuchsia-100 text-fuchsia-800 border-fuchsia-200', icon: <ForkKnife size={14} weight="duotone" /> };
+    }
+    return { label: formatOrderType(order?.type), pill: 'bg-slate-100 text-slate-700 border-slate-200', icon: null };
+  };
 
   return (
     <div className="space-y-4">
@@ -196,30 +210,59 @@ const OrdersView = ({ orders, products, storeSlug }) => {
               key={order.id || `${order.customerName}-${index}`}
               className="border border-slate-200 rounded-3xl bg-white p-5 shadow-sm space-y-4"
             >
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div>
-                  <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                    <span className="px-2.5 py-1 rounded-full border border-slate-200 bg-slate-50 font-semibold">
-                      Pedido #{shortId(order.id)}
-                    </span>
-                    <span>{formatDateTime(order.createdAt)}</span>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                    <span>
-                      {formatOrderType(order.type)}
-                      {order.table ? ` · Mesa ${order.table}` : ''}
-                    </span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusStyles(order.status)}`}>
-                    {formatOrderStatus(order.status, order.type)}
-                  </span>
-                  <span className="text-sm font-bold text-brand-primary">
-                    {formatCurrency(order.total || 0)}
-                  </span>
-                </div>
-              </div>
+	              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+	                <div>
+	                  <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+	                    <span className="px-2.5 py-1 rounded-full border border-slate-200 bg-slate-50 font-semibold">
+	                      Pedido #{shortId(order.id)}
+	                    </span>
+	                    <span>{formatDateTime(order.createdAt)}</span>
+	                  </div>
+	                  <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 mt-1">
+                      {(() => {
+                        const meta = orderTypeMeta(order);
+                        return (
+                          <span
+                            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.18em] ${meta.pill}`}
+                          >
+                            {meta.icon}
+                            <span>{meta.label}</span>
+                          </span>
+                        );
+                      })()}
+	                  </div>
+	                </div>
+	                <div className="flex items-center gap-2">
+	                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusStyles(order.status)}`}>
+	                    {formatOrderStatus(order.status, order.type)}
+	                  </span>
+                    {(() => {
+                      const fee =
+                        String(order?.type || '').toLowerCase() === 'delivery' &&
+                        order.deliveryFee !== null &&
+                        order.deliveryFee !== undefined
+                          ? Number(order.deliveryFee)
+                          : 0;
+                      const total = Number(order.total || 0);
+                      const itemsTotal = Math.max(0, total - (Number.isFinite(fee) ? fee : 0));
+                      return (
+                        <div className="text-right">
+                          <span className="text-sm font-bold text-brand-primary block">{formatCurrency(total)}</span>
+                          <div className="mt-1 flex flex-wrap justify-end gap-1.5 text-[11px] text-slate-500 font-semibold">
+                            <span className="px-2 py-0.5 rounded-full bg-white border border-slate-200">
+                              Itens: {formatCurrency(itemsTotal)}
+                            </span>
+                            {fee > 0 && (
+                              <span className="px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200">
+                                Frete: {formatCurrency(fee)}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })()}
+	                </div>
+	              </div>
 
                 <div className="grid sm:grid-cols-3 gap-3 text-sm text-slate-600">
                   <div>
@@ -245,11 +288,16 @@ const OrdersView = ({ orders, products, storeSlug }) => {
                     );
                   })()}
                 </div>
-                <div>
-                  <p className="text-xs uppercase text-slate-400">Endereço</p>
-                  <p className="font-semibold text-slate-700">{order.address || '-'}</p>
-                </div>
-              </div>
+	                <div>
+	                  <p className="text-xs uppercase text-slate-400">Endereço</p>
+	                  <p className="font-semibold text-slate-700">{order.address || '-'}</p>
+                    {String(order?.type || '').toLowerCase() === 'delivery' &&
+                      order.deliveryFee !== null &&
+                      order.deliveryFee !== undefined && (
+                        <p className="text-xs text-slate-500">Frete: {formatCurrency(Number(order.deliveryFee || 0))}</p>
+                      )}
+	                </div>
+	              </div>
 
               {(order.items || []).length > 0 && (
                 <div className="border-t border-slate-100 pt-3">

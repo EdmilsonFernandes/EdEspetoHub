@@ -30,6 +30,10 @@ export function ConfirmPaymentModal({
   if (!isOpen) return null;
 
   const totalValue = Number(amount || 0);
+  const pixQrUrl =
+    isPix && pixPayload
+      ? `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(pixPayload)}`
+      : null;
   const informedCash = defaultCashTendered !== undefined && defaultCashTendered !== null ? Number(defaultCashTendered) : null;
   const changeDue =
     informedCash !== null && Number.isFinite(informedCash) && informedCash > totalValue ? informedCash - totalValue : 0;
@@ -79,8 +83,23 @@ export function ConfirmPaymentModal({
           <div className="rounded-2xl border border-slate-200 bg-white/70 p-4 space-y-3">
             <div>
               <p className="text-sm font-extrabold text-slate-900">Pix</p>
-              <p className="text-xs text-slate-600">Copie e envie para o cliente pagar na hora.</p>
+              <p className="text-xs text-slate-600">
+                Mostre o QR Code para o cliente escanear, ou use o copia e cola.
+              </p>
             </div>
+            {pixQrUrl && (
+              <div className="rounded-2xl border border-slate-200 bg-white/70 p-3 flex flex-col items-center gap-2">
+                <img
+                  src={pixQrUrl}
+                  alt="QR Code Pix"
+                  className="h-44 w-44 rounded-xl border border-slate-200 bg-white object-contain"
+                  loading="lazy"
+                />
+                <p className="text-[11px] text-slate-500 text-center">
+                  Dica: deixe o brilho do celular alto para facilitar a leitura.
+                </p>
+              </div>
+            )}
             {pixKey && (
               <div className="space-y-2">
                 <p className="text-[11px] uppercase tracking-[0.25em] text-slate-500">Chave</p>
