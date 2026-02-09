@@ -19,6 +19,7 @@ import { Motoboy } from '../entities/Motoboy';
 import { OrderRepository } from '../repositories/OrderRepository';
 import { OrderDeliveryRepository } from '../repositories/OrderDeliveryRepository';
 import { MotoboyStoreRepository } from '../repositories/MotoboyStoreRepository';
+import { logger } from '../utils/logger';
 import { DeliveryBillingService } from './DeliveryBillingService';
 import { deliveryService } from './DeliveryService';
 /**
@@ -33,6 +34,7 @@ export class MotoboyOrderService {
   private motoboyStoreRepository = new MotoboyStoreRepository();
   private deliveryBillingService = new DeliveryBillingService();
   private tz = process.env.APP_TZ || 'America/Sao_Paulo';
+  private log = logger.child({ scope: 'MotoboyOrderService' });
 
   private isDeliveryOrder(order: Order) {
     return order.type === 'delivery';
@@ -209,7 +211,16 @@ export class MotoboyOrderService {
   async markDelivered(orderId: string, motoboy: Motoboy) {
     const result = await deliveryService.complete(orderId, motoboy);
     if (result?.order) {
-      await this.deliveryBillingService.recordDelivery(result.order as any);
+      // Delivery completion must not fail if billing fails (it can be retried later).
+      try {
+        await this.deliveryBillingService.recordDelivery(result.order as any);
+      } catch (error: any) {
+        this.log.warn('recordDelivery failed after markDelivered', {
+          orderId,
+          motoboyId: motoboy.id,
+          error,
+        });
+      }
       return result.order;
     }
     // fallback: keep old behavior if order not loaded

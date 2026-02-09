@@ -202,6 +202,7 @@ export class OrderController {
         paymentMethod: order.paymentMethod,
         paymentStatus: order.paymentStatus,
         total: order.total,
+        deliveryFee: order.deliveryFee ?? null,
         createdAt: order.createdAt,
         queuePosition,
         queueSize,

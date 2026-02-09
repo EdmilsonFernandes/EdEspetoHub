@@ -562,7 +562,7 @@ export function OrderTracking() {
                   </div>
                   <div className="mt-2 text-xs text-gray-500">{progress}% completo</div>
                 </div>
-                <div className="flex flex-nowrap gap-2 overflow-x-auto no-scrollbar pb-1 sm:grid sm:gap-3 sm:grid-cols-4 sm:overflow-visible">
+                <div className="flex flex-nowrap gap-2 sm:gap-3 overflow-x-auto no-scrollbar pb-1">
                   {steps.map((step) => {
                     const stepIndex = steps.findIndex((item) => item.id === step.id);
                     const isCompleted = stepIndex >= 0 && stepIndex < currentIndex;
@@ -575,7 +575,7 @@ export function OrderTracking() {
                         key={step.id}
                         aria-current={isCurrent ? 'step' : undefined}
                         className={[
-                          'rounded-xl border px-3 py-2 flex items-center gap-2 text-xs sm:text-sm whitespace-nowrap select-none',
+                          'rounded-xl border px-2.5 py-2 sm:px-3 flex items-center gap-2 text-xs whitespace-nowrap select-none',
                           isCurrent
                             ? `${stepTone.current} ring-2 ring-brand-primary/40 shadow-sm`
                             : isCompleted
@@ -584,15 +584,15 @@ export function OrderTracking() {
                         ].join(' ')}
                       >
                         {showBike ? (
-                          <Bicycle size={18} weight="duotone" />
+                          <Bicycle size={16} weight="duotone" />
                         ) : isCurrent && !isReady ? (
-                          <CircleNotch size={18} weight="duotone" className="animate-spin" />
+                          <CircleNotch size={16} weight="duotone" className="animate-spin" />
                         ) : isCompleted || isReady ? (
-                          <CheckCircle size={18} weight="duotone" />
+                          <CheckCircle size={16} weight="duotone" />
                         ) : (
-                          <Clock size={18} weight="duotone" />
+                          <Clock size={16} weight="duotone" />
                         )}
-                        <span className={`text-sm ${isCurrent ? 'font-extrabold' : 'font-semibold'}`}>
+                        <span className={`text-[12px] sm:text-sm ${isCurrent ? 'font-extrabold' : 'font-semibold'}`}>
                           {step.label}
                         </span>
                       </div>

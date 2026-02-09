@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { CheckCircle, Clock, Storefront } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 import { motoboyService } from '../services/motoboyService';
@@ -18,12 +18,22 @@ export function MotoboyAvailable() {
   const { showToast } = useToast();
   const navigate = useNavigate();
   const requiredDocs = ['CNH', 'SELFIE'];
+  const orderIdsRef = useRef<string[]>([]);
+  const firstLoadRef = useRef(true);
 
   const loadOrders = async () => {
     setLoading(true);
     try {
       const data = await motoboyService.listAvailableOrders();
-      setOrders(Array.isArray(data) ? data : []);
+      const nextOrders = Array.isArray(data) ? data : [];
+      const prevIds = new Set(orderIdsRef.current);
+      const nextIds = nextOrders.map((o: any) => String(o?.id || '')).filter(Boolean);
+      const hasNew = nextIds.some((id) => !prevIds.has(id));
+      orderIdsRef.current = nextIds;
+      setOrders(nextOrders);
+      if (!firstLoadRef.current && hasNew && nextOrders.length > 0) {
+        showToast('Novo pedido na fila.', 'info');
+      }
       try {
         const current = await motoboyService.getCurrentOrder();
         const d = String(current?.delivery?.status || '').toUpperCase();
@@ -46,6 +56,22 @@ export function MotoboyAvailable() {
 
   useEffect(() => {
     loadOrders();
+    firstLoadRef.current = false;
+  }, []);
+
+  useEffect(() => {
+    // Poll queue every 5s (pause when tab is hidden).
+    let timer: number | null = null;
+    const tick = async () => {
+      if (document.visibilityState !== 'visible') return;
+      await loadOrders();
+    };
+    timer = window.setInterval(() => {
+      void tick();
+    }, 5000);
+    return () => {
+      if (timer) window.clearInterval(timer);
+    };
   }, []);
 
   useEffect(() => {
