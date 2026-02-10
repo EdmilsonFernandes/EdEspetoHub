@@ -80,7 +80,7 @@ export function MotoboyLayout() {
   }, [pathname]);
 
   return (
-    <div className="min-h-screen motoboy-bg pb-28 overflow-x-hidden">
+    <div className="min-h-screen motoboy-bg pb-28">
       <Outlet />
 
       {showInstall && installPrompt && (
