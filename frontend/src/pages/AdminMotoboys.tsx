@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { Car, Camera, CheckCircle, IdentificationCard, WarningCircle, Clock } from '@phosphor-icons/react';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { motoboyAdminService } from '../services/motoboyAdminService';
@@ -63,6 +64,8 @@ export function AdminMotoboys() {
 
   const docChip = (docs: any[], type: 'CNH' | 'SELFIE' | 'CRLV') => {
     const { status } = docStatusForType(docs, type);
+    const icon =
+      type === 'CNH' ? <IdentificationCard size={14} weight="duotone" /> : type === 'SELFIE' ? <Camera size={14} weight="duotone" /> : <Car size={14} weight="duotone" />;
     const cls =
       status === 'APPROVED'
         ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
@@ -72,9 +75,16 @@ export function AdminMotoboys() {
         ? 'border-amber-200 bg-amber-50 text-amber-800'
         : 'border-slate-200 bg-slate-50 text-slate-700';
     const label = status === 'MISSING' ? 'Faltando' : status === 'PENDING' ? 'Em análise' : status === 'REJECTED' ? 'Rejeitado' : 'OK';
+    const statusIcon =
+      status === 'APPROVED' ? <CheckCircle size={14} weight="fill" /> : status === 'REJECTED' ? <WarningCircle size={14} weight="fill" /> : status === 'PENDING' ? <Clock size={14} weight="duotone" /> : null;
     return (
-      <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold border ${cls}`} title={`${type}: ${label}`}>
-        {type}: {label}
+      <span
+        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold border ${cls}`}
+        title={`${type}: ${label}`}
+      >
+        <span className="opacity-90">{icon}</span>
+        <span className="whitespace-nowrap">{type}: {label}</span>
+        {statusIcon ? <span className="ml-0.5 opacity-90">{statusIcon}</span> : null}
       </span>
     );
   };
@@ -86,6 +96,39 @@ export function AdminMotoboys() {
     setDocsModalShowHistory(false);
     setDocsModalOpen(true);
     await loadDocuments(motoboyId);
+  };
+
+  const docsModalLatest = useMemo(() => {
+    if (!docsModalMotoboyId) return [];
+    return latestDocs(documentsByMotoboy[docsModalMotoboyId] || []);
+  }, [docsModalMotoboyId, documentsByMotoboy]);
+
+  const approveAllLatestDocs = async () => {
+    if (!storeId || !docsModalMotoboyId) return;
+    const latest = docsModalLatest;
+    const targets = latest.filter((d: any) => String(d?.status || '').toUpperCase() !== 'APPROVED');
+    if (targets.length === 0) return;
+    if (reviewSubmitting) return;
+    setReviewSubmitting(true);
+    try {
+      for (const d of targets) {
+        await motoboyAdminService.approveDocument(storeId, docsModalMotoboyId, d.id);
+      }
+      showToast('Documentos aprovados.', 'success');
+      await loadDocuments(docsModalMotoboyId);
+    } catch (error: any) {
+      showToast(error?.message || 'Não foi possível aprovar os documentos.', 'error');
+    } finally {
+      setReviewSubmitting(false);
+    }
+  };
+
+  const quickRejectCRLV = async () => {
+    if (!docsModalMotoboyId) return;
+    const latest = docsModalLatest;
+    const crlv = latest.find((d: any) => normalizeDocType(d?.docType) === 'CRLV');
+    if (!crlv) return;
+    openRejectDocModal(docsModalMotoboyId, crlv.id, 'CRLV');
   };
 
   const loadMotoboys = async () => {
@@ -191,6 +234,14 @@ export function AdminMotoboys() {
       setReviewSubmitting(false);
     }
   };
+
+  const reasonChips = [
+    'Foto escura/reflexo',
+    'Documento ilegível',
+    'Documento não confere',
+    'Arquivo errado (não é este documento)',
+    'Faltou frente/verso',
+  ];
 
   const openRejectDocModal = (motoboyIdToReview: string, documentId: string, docType?: string) => {
     setRejectDocTarget({ motoboyId: motoboyIdToReview, documentId, docType });
@@ -382,13 +433,37 @@ export function AdminMotoboys() {
               <div className="text-xs text-slate-600">
                 {docsLoadingId === docsModalMotoboyId ? 'Carregando documentos...' : 'Clique para ampliar e revisar.'}
               </div>
-              <button
-                type="button"
-                onClick={() => setDocsModalShowHistory((v) => !v)}
-                className="btn-press rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-800"
-              >
-                {docsModalShowHistory ? 'Ocultar histórico' : 'Mostrar histórico'}
-              </button>
+              <div className="flex items-center gap-2">
+                {docsModalLatest.some((d: any) => String(d?.status || '').toUpperCase() !== 'APPROVED') ? (
+                  <button
+                    type="button"
+                    onClick={approveAllLatestDocs}
+                    disabled={reviewSubmitting}
+                    className="btn-press rounded-xl bg-emerald-600 px-3 py-2 text-xs font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(16,185,129,0.55)] disabled:opacity-50"
+                    title="Aprova todos os últimos documentos que não estão aprovados"
+                  >
+                    Aprovar pendências
+                  </button>
+                ) : null}
+                {docsModalLatest.some((d: any) => String(d?.docType || '').toUpperCase() === 'CRLV') ? (
+                  <button
+                    type="button"
+                    onClick={quickRejectCRLV}
+                    disabled={reviewSubmitting}
+                    className="btn-press rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-extrabold text-rose-800 disabled:opacity-50"
+                    title="Rejeitar rapidamente o CRLV (com motivo)"
+                  >
+                    Recusar CRLV
+                  </button>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={() => setDocsModalShowHistory((v) => !v)}
+                  className="btn-press rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-800"
+                >
+                  {docsModalShowHistory ? 'Ocultar histórico' : 'Mostrar histórico'}
+                </button>
+              </div>
             </div>
 
             <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -447,6 +522,19 @@ export function AdminMotoboys() {
             <div className="mt-4 space-y-3">
               <label className="block space-y-1.5">
                 <span className="text-xs font-extrabold text-slate-700">Motivo (recomendado)</span>
+                <div className="flex flex-wrap gap-2">
+                  {reasonChips.map((chip) => (
+                    <button
+                      key={chip}
+                      type="button"
+                      onClick={() => setRejectRequestReason((prev) => (prev ? `${prev}\n${chip}` : chip))}
+                      className="btn-press rounded-full border border-slate-200 bg-white px-3 py-1 text-[11px] font-extrabold text-slate-700"
+                      title="Adicionar motivo"
+                    >
+                      {chip}
+                    </button>
+                  ))}
+                </div>
                 <textarea
                   value={rejectRequestReason}
                   onChange={(e) => setRejectRequestReason(e.target.value)}
@@ -541,6 +629,19 @@ export function AdminMotoboys() {
             <div className="mt-4 space-y-3">
               <label className="block space-y-1.5">
                 <span className="text-xs font-extrabold text-slate-700">Motivo (recomendado)</span>
+                <div className="flex flex-wrap gap-2">
+                  {reasonChips.map((chip) => (
+                    <button
+                      key={chip}
+                      type="button"
+                      onClick={() => setRejectDocReason((prev) => (prev ? `${prev}\n${chip}` : chip))}
+                      className="btn-press rounded-full border border-slate-200 bg-white px-3 py-1 text-[11px] font-extrabold text-slate-700"
+                      title="Adicionar motivo"
+                    >
+                      {chip}
+                    </button>
+                  ))}
+                </div>
                 <textarea
                   value={rejectDocReason}
                   onChange={(e) => setRejectDocReason(e.target.value)}

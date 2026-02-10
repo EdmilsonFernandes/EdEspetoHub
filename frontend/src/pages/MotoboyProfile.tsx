@@ -235,15 +235,54 @@ export function MotoboyProfile() {
     return { text, reason };
   }, [documentsByType]);
 
-  const anyRejectedRequest = useMemo(() => {
-    const rejected = (requests || []).filter((r: any) => String(r?.status || '').toUpperCase() === 'REJECTED');
-    if (rejected.length === 0) return null;
-    const first = rejected[0];
-    return {
-      storeName: first?.store?.name || 'uma loja',
-      reason: first?.reason ? String(first.reason) : null,
-    };
+  const requestByStoreId = useMemo(() => {
+    // Backend is expected to return latest first; keep first request per store to avoid duplicates.
+    const map = new Map<string, any>();
+    (requests || []).forEach((r: any) => {
+      const storeId = String(r?.storeId || r?.store?.id || '');
+      if (!storeId) return;
+      if (map.has(storeId)) return;
+      map.set(storeId, r);
+    });
+    return map;
   }, [requests]);
+
+  const storeById = useMemo(() => {
+    const map = new Map<string, any>();
+    (stores || []).forEach((s: any) => {
+      if (!s?.id) return;
+      map.set(String(s.id), s);
+    });
+    return map;
+  }, [stores]);
+
+  const linkedStoreIds = useMemo(() => {
+    const ids: string[] = [];
+    requestByStoreId.forEach((req, storeId) => {
+      const st = String(req?.status || '').toUpperCase();
+      if (st === 'APPROVED' && Boolean(req?.linkActive)) ids.push(storeId);
+    });
+    return ids;
+  }, [requestByStoreId]);
+
+  const pendingStoreIds = useMemo(() => {
+    const ids: string[] = [];
+    requestByStoreId.forEach((req, storeId) => {
+      const st = String(req?.status || '').toUpperCase();
+      if (st === 'PENDING') ids.push(storeId);
+    });
+    return ids;
+  }, [requestByStoreId]);
+
+  const rejectedOrInactiveStoreIds = useMemo(() => {
+    const ids: string[] = [];
+    requestByStoreId.forEach((req, storeId) => {
+      const st = String(req?.status || '').toUpperCase();
+      const inactive = st === 'APPROVED' && !Boolean(req?.linkActive);
+      if (st === 'REJECTED' || inactive) ids.push(storeId);
+    });
+    return ids;
+  }, [requestByStoreId]);
 
   const vehicleIcon = useMemo(() => {
     const type = String(profileDraft.vehicleType || profile?.vehicleType || '').toUpperCase();
@@ -377,6 +416,28 @@ export function MotoboyProfile() {
       await motoboyService.createStoreRequests(selectedStores);
       showToast('Solicitação enviada. Aguarde aprovação.', 'success');
       setSelectedStores([]);
+      await loadRequests();
+    } catch (error: any) {
+      showToast(error?.message || 'Não foi possível enviar solicitação.', 'error');
+    } finally {
+      setRequesting(false);
+    }
+  };
+
+  const canRequestAnyStore = useMemo(() => {
+    if (!hasCompleteProfile) return false;
+    if (!hasAllRequiredDocs) return false;
+    if (hasAnyRejectedRequiredDocs) return false;
+    return true;
+  }, [hasAllRequiredDocs, hasAnyRejectedRequiredDocs, hasCompleteProfile]);
+
+  const handleRequestSingle = async (storeId: string) => {
+    if (!storeId) return;
+    if (!canRequestAnyStore) return;
+    setRequesting(true);
+    try {
+      await motoboyService.createStoreRequests([storeId]);
+      showToast('Solicitação enviada. Aguarde aprovação.', 'success');
       await loadRequests();
     } catch (error: any) {
       showToast(error?.message || 'Não foi possível enviar solicitação.', 'error');
@@ -735,16 +796,7 @@ export function MotoboyProfile() {
           <p className="text-sm font-semibold text-slate-700">Solicitar vínculo</p>
           <p className="text-xs text-slate-500">Escolha as lojas que deseja atender.</p>
         </div>
-        {anyRejectedRequest && (
-          <div className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-800">
-            <span className="font-semibold">Solicitação recusada por {anyRejectedRequest.storeName}.</span>
-            {anyRejectedRequest.reason ? (
-              <span className="block mt-1 text-rose-700">Motivo: {anyRejectedRequest.reason}</span>
-            ) : (
-              <span className="block mt-1 text-rose-700">Você pode tentar novamente ou falar com a loja.</span>
-            )}
-          </div>
-        )}
+
         {!hasCompleteProfile && (
           <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
             Complete seus dados do veículo e endereço para solicitar vínculo com lojas.
@@ -771,84 +823,194 @@ export function MotoboyProfile() {
             Seus documentos estão em análise. Você já pode solicitar vínculo; a loja fará a revisão e aprovação.
           </div>
         )}
-        {requests.length > 0 && (
-          <div className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-xs text-slate-600 space-y-1">
-            {requests.map((req) => (
-              <div key={req.id} className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <div className="font-semibold text-slate-700 truncate">{req.store?.name || 'Loja'}</div>
-                  {String(req.status || '').toUpperCase() === 'REJECTED' && req.reason ? (
-                    <div className="text-[11px] text-rose-700 truncate">Motivo: {String(req.reason)}</div>
-                  ) : null}
-                </div>
-                <span
-                  className={`shrink-0 px-2 py-0.5 rounded-full text-[10px] font-semibold ${
-                    req.status === 'APPROVED'
-                      ? req.linkActive
-                        ? 'bg-emerald-100 text-emerald-700'
-                        : 'bg-rose-100 text-rose-700'
-                      : req.status === 'REJECTED'
-                      ? 'bg-rose-100 text-rose-700'
-                      : 'bg-amber-100 text-amber-700'
-                  }`}
-                >
-                  {req.status === 'APPROVED'
-                    ? req.linkActive
-                      ? 'Aprovado'
-                      : 'Vínculo inativo'
-                    : req.status === 'REJECTED'
-                    ? 'Recusado'
-                    : 'Pendente'}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
 
-        <div className="grid gap-2">
-          {stores.length === 0 ? (
-            <p className="text-xs text-slate-500">Nenhuma loja disponível.</p>
-          ) : (
-            stores.map((store) => {
-              const isSelected = selectedStores.includes(store.id);
-              const alreadyRequested = requests.some((req) => req.storeId === store.id && req.status === 'PENDING');
-              const approved = requests.some((req) => req.storeId === store.id && req.status === 'APPROVED');
-              const openFlag = store?.open;
-              const openNow = store?.openNow;
-              const storeStatus =
-                openFlag === false
-                  ? 'Loja desativada'
-                  : openNow === false
-                  ? 'Fora do horário'
-                  : openFlag === true || openNow === true
-                  ? 'Ativa agora'
-                  : 'Ativa';
-              return (
-                <button
-                  type="button"
-                  key={store.id}
-                  onClick={() => toggleStore(store.id)}
-                  disabled={alreadyRequested || approved}
-                  className={`flex items-center justify-between rounded-xl border px-3 py-2 text-sm font-semibold ${
-                    approved
-                      ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
-                      : alreadyRequested
-                      ? 'border-amber-200 bg-amber-50 text-amber-700'
-                      : isSelected
-                      ? 'border-slate-900 bg-slate-900 text-white'
-                      : 'border-slate-200 bg-white text-slate-700'
-                  }`}
-                >
-                  <div className="flex flex-col items-start">
-                    <span>{store.name}</span>
-                    <span className="text-[10px] font-medium text-slate-500">{storeStatus}</span>
-                  </div>
-                  {approved ? 'Aprovado' : alreadyRequested ? 'Pendente' : isSelected ? 'Selecionado' : 'Selecionar'}
-                </button>
-              );
-            })
-          )}
+        <div className="grid gap-3">
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <div className="text-xs uppercase tracking-[0.22em] text-slate-500">Vínculos</div>
+                <div className="text-sm font-extrabold text-slate-900">Lojas que você já atende</div>
+              </div>
+              <span className="shrink-0 px-2.5 py-1 rounded-full text-[10px] font-extrabold border border-emerald-200 bg-emerald-50 text-emerald-800">
+                {linkedStoreIds.length} ativo{linkedStoreIds.length === 1 ? '' : 's'}
+              </span>
+            </div>
+            {linkedStoreIds.length === 0 ? (
+              <div className="mt-2 text-xs text-slate-600">Nenhum vínculo ativo ainda.</div>
+            ) : (
+              <div className="mt-3 grid gap-2">
+                {linkedStoreIds.map((storeId) => {
+                  const store = storeById.get(storeId) || requestByStoreId.get(storeId)?.store || null;
+                  const logo = store?.settings?.logoUrl || store?.logoUrl || null;
+                  const desc = store?.settings?.description || store?.description || null;
+                  const openFlag = store?.open;
+                  const openNow = store?.openNow;
+                  const storeStatus =
+                    openFlag === false ? 'Loja desativada' : openNow === false ? 'Fora do horário' : openFlag === true || openNow === true ? 'Ativa agora' : 'Ativa';
+                  return (
+                    <div key={storeId} className="rounded-2xl border border-emerald-200 bg-white p-3 flex items-center gap-3">
+                      <div className="h-12 w-12 rounded-2xl border border-slate-200 bg-slate-50 overflow-hidden shrink-0">
+                        {logo ? <img src={logo} alt={store?.name || 'Loja'} className="h-full w-full object-cover" loading="lazy" /> : null}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <div className="font-extrabold text-slate-900 truncate">{store?.name || 'Loja'}</div>
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold border border-emerald-200 bg-emerald-50 text-emerald-800">
+                            Vínculo ativo
+                          </span>
+                        </div>
+                        <div className="text-[11px] text-slate-500 truncate">{desc ? String(desc) : storeStatus}</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-white p-3">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <div className="text-xs uppercase tracking-[0.22em] text-slate-500">Solicitações</div>
+                <div className="text-sm font-extrabold text-slate-900">Pendentes ou recusadas</div>
+              </div>
+              <span className="shrink-0 px-2.5 py-1 rounded-full text-[10px] font-extrabold border border-slate-200 bg-slate-50 text-slate-700">
+                {pendingStoreIds.length} pendente{pendingStoreIds.length === 1 ? '' : 's'} | {rejectedOrInactiveStoreIds.length} recusada{rejectedOrInactiveStoreIds.length === 1 ? '' : 's'}
+              </span>
+            </div>
+            {pendingStoreIds.length === 0 && rejectedOrInactiveStoreIds.length === 0 ? (
+              <div className="mt-2 text-xs text-slate-600">Você ainda não tem solicitações.</div>
+            ) : (
+              <div className="mt-3 grid gap-2">
+                {[...pendingStoreIds, ...rejectedOrInactiveStoreIds].map((storeId) => {
+                  const req = requestByStoreId.get(storeId);
+                  const store = storeById.get(storeId) || req?.store || null;
+                  const logo = store?.settings?.logoUrl || store?.logoUrl || null;
+                  const desc = store?.settings?.description || store?.description || null;
+                  const status = String(req?.status || '').toUpperCase();
+                  const isPending = status === 'PENDING';
+                  const isRejected = status === 'REJECTED';
+                  const isInactive = status === 'APPROVED' && !Boolean(req?.linkActive);
+                  const reason = req?.reason ? String(req.reason) : null;
+
+                  const pill =
+                    isPending
+                      ? { cls: 'border-amber-200 bg-amber-50 text-amber-800', text: 'Pendente' }
+                      : isInactive
+                      ? { cls: 'border-rose-200 bg-rose-50 text-rose-800', text: 'Vínculo inativo' }
+                      : { cls: 'border-rose-200 bg-rose-50 text-rose-800', text: 'Recusado' };
+
+                  return (
+                    <div key={storeId} className="rounded-2xl border border-slate-200 bg-slate-50 p-3 flex items-start gap-3">
+                      <div className="h-12 w-12 rounded-2xl border border-slate-200 bg-white overflow-hidden shrink-0">
+                        {logo ? <img src={logo} alt={store?.name || 'Loja'} className="h-full w-full object-cover" loading="lazy" /> : null}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <div className="font-extrabold text-slate-900 truncate">{store?.name || 'Loja'}</div>
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${pill.cls}`}>{pill.text}</span>
+                        </div>
+                        <div className="text-[11px] text-slate-500 truncate">{desc ? String(desc) : null}</div>
+                        {isRejected && reason ? (
+                          <div className="mt-2 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-[11px] text-rose-800">
+                            <span className="font-extrabold">Motivo:</span> {reason}
+                          </div>
+                        ) : null}
+                      </div>
+                      {!isPending ? (
+                        <button
+                          type="button"
+                          onClick={() => handleRequestSingle(storeId)}
+                          disabled={requesting || !canRequestAnyStore}
+                          className="btn-press shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-800 disabled:opacity-50"
+                          title={!canRequestAnyStore ? 'Complete perfil e documentos para solicitar.' : 'Solicitar novamente'}
+                        >
+                          Solicitar novamente
+                        </button>
+                      ) : null}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-white p-3">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <div className="text-xs uppercase tracking-[0.22em] text-slate-500">Solicitar vínculo</div>
+                <div className="text-sm font-extrabold text-slate-900">Escolha novas lojas</div>
+                <div className="text-xs text-slate-500 mt-1">Selecione uma ou mais lojas e envie sua solicitação.</div>
+              </div>
+            </div>
+
+            <div className="mt-3 grid gap-2">
+              {stores.length === 0 ? (
+                <p className="text-xs text-slate-500">Nenhuma loja disponível.</p>
+              ) : (
+                stores
+                  .filter((s: any) => {
+                    const storeId = String(s?.id || '');
+                    if (!storeId) return false;
+                    if (linkedStoreIds.includes(storeId)) return false;
+                    if (pendingStoreIds.includes(storeId)) return false;
+                    return true;
+                  })
+                  .map((store: any) => {
+                    const storeId = String(store.id);
+                    const isSelected = selectedStores.includes(storeId);
+                    const req = requestByStoreId.get(storeId);
+                    const status = String(req?.status || '').toUpperCase();
+                    const wasRejectedOrInactive = status === 'REJECTED' || (status === 'APPROVED' && !Boolean(req?.linkActive));
+                    const logo = store?.settings?.logoUrl || null;
+                    const desc = store?.settings?.description || null;
+                    const openFlag = store?.open;
+                    const openNow = store?.openNow;
+                    const storeStatus =
+                      openFlag === false ? 'Loja desativada' : openNow === false ? 'Fora do horário' : openFlag === true || openNow === true ? 'Ativa agora' : 'Ativa';
+
+                    return (
+                      <button
+                        type="button"
+                        key={storeId}
+                        onClick={() => toggleStore(storeId)}
+                        disabled={Boolean(req) && !wasRejectedOrInactive}
+                        className={[
+                          'btn-press rounded-2xl border p-3 text-left flex items-center gap-3',
+                          isSelected ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-white text-slate-800',
+                          Boolean(req) && !wasRejectedOrInactive ? 'opacity-60 cursor-not-allowed' : '',
+                        ].join(' ')}
+                      >
+                        <div className="h-12 w-12 rounded-2xl border border-slate-200 bg-slate-50 overflow-hidden shrink-0">
+                          {logo ? <img src={logo} alt={store.name} className="h-full w-full object-cover" loading="lazy" /> : null}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <div className="font-extrabold truncate">{store.name}</div>
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${isSelected ? 'border-white/30 bg-white/15 text-white' : 'border-slate-200 bg-slate-50 text-slate-700'}`}>
+                              {storeStatus}
+                            </span>
+                            {wasRejectedOrInactive ? (
+                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${isSelected ? 'border-rose-200/40 bg-rose-500/10 text-white' : 'border-rose-200 bg-rose-50 text-rose-800'}`}>
+                                Reenvio
+                              </span>
+                            ) : null}
+                          </div>
+                          <div className={`text-[11px] truncate ${isSelected ? 'text-white/80' : 'text-slate-500'}`}>
+                            {desc ? String(desc) : null}
+                          </div>
+                        </div>
+                        <div className="shrink-0 text-xs font-extrabold">
+                          {isSelected ? 'Selecionado' : 'Selecionar'}
+                        </div>
+                      </button>
+                    );
+                  })
+              )}
+            </div>
+          </div>
         </div>
+
         <button
           type="button"
           onClick={loadRequests}
@@ -859,7 +1021,7 @@ export function MotoboyProfile() {
         <button
           type="button"
           onClick={handleRequestStores}
-          disabled={requesting || !hasAllRequiredDocs || hasAnyRejectedRequiredDocs || !hasCompleteProfile}
+          disabled={requesting || !canRequestAnyStore}
           className="w-full rounded-lg bg-brand-primary px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
         >
           {requesting ? 'Enviando...' : 'Enviar solicitação'}
