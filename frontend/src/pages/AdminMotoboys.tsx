@@ -410,10 +410,23 @@ export function AdminMotoboys() {
             >
               Abrir em nova aba
             </a>
-            {String(doc?.status || '').toUpperCase() !== 'APPROVED' ? (
-              <span className="text-[11px] text-slate-500">Revise e aprove</span>
-            ) : (
+            {src ? (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openReuploadDocModal(motoboyId, doc.id, docType);
+                }}
+                className="btn-press px-2.5 py-1 rounded-full text-[10px] font-extrabold border border-amber-200 bg-amber-50 text-amber-900"
+                title="Pedir reenvio (com motivo)"
+              >
+                Pedir reenvio
+              </button>
+            ) : null}
+            {String(doc?.status || '').toUpperCase() === 'APPROVED' ? (
               <span className="text-[11px] text-emerald-700 font-semibold">OK</span>
+            ) : (
+              <span className="text-[11px] text-slate-500">Analisar</span>
             )}
           </div>
         </div>
@@ -508,10 +521,10 @@ export function AdminMotoboys() {
           onClick={() => setDocsModalOpen(false)}
         >
           <div
-            className="w-full max-w-5xl rounded-3xl bg-white p-4 sm:p-5 border border-slate-200 shadow-2xl"
+            className="w-full max-w-5xl rounded-3xl bg-white border border-slate-200 shadow-2xl max-h-[85vh] overflow-hidden flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-start justify-between gap-3">
+            <div className="p-4 sm:p-5 flex items-start justify-between gap-3 border-b border-slate-100">
               <div className="min-w-0">
                 <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Documentos</p>
                 <h2 className="text-lg sm:text-xl font-black text-slate-900 truncate">{docsModalTitle || 'Entregador'}</h2>
@@ -521,7 +534,7 @@ export function AdminMotoboys() {
                   {docChip(documentsByMotoboy[docsModalMotoboyId] || [], 'CRLV')}
                 </div>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="hidden sm:flex items-center gap-2 shrink-0">
                 <button
                   type="button"
                   onClick={() => loadDocuments(docsModalMotoboyId)}
@@ -539,30 +552,49 @@ export function AdminMotoboys() {
               </div>
             </div>
 
-            <div className="mt-4 flex items-center justify-between gap-3">
-              <div className="text-xs text-slate-600">
+            <div className="p-4 sm:p-5 overflow-auto">
+              <div className="flex items-center justify-between gap-3">
+                <div className="text-xs text-slate-600">
                 {docsLoadingId === docsModalMotoboyId
                   ? 'Carregando documentos...'
-                  : 'Documentos validados pela equipe Chama no Espeto. Se algo estiver ruim, peça reenvio.'}
+                  : 'KYC aprovado pela plataforma. Se alguma foto estiver ruim, peça reenvio (com motivo).'}
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setDocsModalShowHistory((v) => !v)}
+                    className="btn-press rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-800"
+                  >
+                    {docsModalShowHistory ? 'Ocultar histórico' : 'Mostrar histórico'}
+                  </button>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setDocsModalShowHistory((v) => !v)}
-                  className="btn-press rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-800"
-                >
-                  {docsModalShowHistory ? 'Ocultar histórico' : 'Mostrar histórico'}
-                </button>
+
+              <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {(docsModalShowHistory
+                  ? (documentsByMotoboy[docsModalMotoboyId] || [])
+                  : latestDocs(documentsByMotoboy[docsModalMotoboyId] || [])
+                ).map((doc: any) => (
+                  <div key={doc.id}>{docThumb(doc, docsModalMotoboyId)}</div>
+                ))}
               </div>
             </div>
 
-            <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {(docsModalShowHistory
-                ? (documentsByMotoboy[docsModalMotoboyId] || [])
-                : latestDocs(documentsByMotoboy[docsModalMotoboyId] || [])
-              ).map((doc: any) => (
-                <div key={doc.id}>{docThumb(doc, docsModalMotoboyId)}</div>
-              ))}
+            <div className="sm:hidden border-t border-slate-200 bg-white/85 backdrop-blur px-4 py-3 flex items-center justify-between gap-2">
+              <button
+                type="button"
+                onClick={() => loadDocuments(docsModalMotoboyId)}
+                className="btn-press rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-700"
+              >
+                {docsLoadingId === docsModalMotoboyId ? 'Atualizando...' : 'Atualizar'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setDocsModalOpen(false)}
+                className="btn-press rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-700"
+              >
+                Fechar
+              </button>
             </div>
           </div>
         </div>
@@ -835,12 +867,16 @@ export function AdminMotoboys() {
           </div>
         ) : (
           <div className="p-4 grid gap-3 bg-[linear-gradient(180deg,rgba(248,250,252,0.85),rgba(255,255,255,1))]">
-            {pendingRequests.map((request) => (
-              <div
-                key={request.id}
-                className="rounded-2xl border border-slate-200 bg-white p-4 flex flex-col gap-3 shadow-[0_26px_60px_-48px_rgba(15,23,42,0.35)]"
-                style={{ borderLeftWidth: 6, borderLeftColor: 'rgb(245 158 11)' }}
-              >
+            {pendingRequests.map((request) => {
+              const requestDocs = request.motoboyId ? documentsByMotoboy[request.motoboyId] : null;
+              const requestKyc = requestDocs ? kycSummary(requestDocs) : null;
+              const canApprove = Boolean(requestKyc?.ok);
+              return (
+                <div
+                  key={request.id}
+                  className="rounded-2xl border border-slate-200 bg-white p-4 flex flex-col gap-3 shadow-[0_26px_60px_-48px_rgba(15,23,42,0.35)]"
+                  style={{ borderLeftWidth: 6, borderLeftColor: 'rgb(245 158 11)' }}
+                >
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-black text-slate-900">
@@ -859,7 +895,14 @@ export function AdminMotoboys() {
                   <button
                     type="button"
                     onClick={() => reviewRequest(request.id, 'approve')}
-                    className="btn-press px-3 py-2 rounded-xl bg-emerald-600 text-white text-xs font-extrabold shadow-[0_22px_48px_-34px_rgba(16,185,129,0.6)]"
+                    disabled={!canApprove}
+                    title={!canApprove ? 'Aguarde o KYC ser aprovado pela plataforma para concluir o vínculo.' : 'Aprovar vínculo'}
+                    className={[
+                      'btn-press px-3 py-2 rounded-xl text-xs font-extrabold',
+                      canApprove
+                        ? 'bg-emerald-600 text-white shadow-[0_22px_48px_-34px_rgba(16,185,129,0.6)]'
+                        : 'bg-slate-200 text-slate-600 shadow-none cursor-not-allowed',
+                    ].join(' ')}
                   >
                     Aprovar
                   </button>
@@ -880,6 +923,11 @@ export function AdminMotoboys() {
                     </button>
                   )}
                 </div>
+                {!canApprove ? (
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700">
+                    Aguardando aprovação do KYC pela plataforma (SUPER_ADMIN).
+                  </div>
+                ) : null}
 
                 {!!request.motoboyId && Array.isArray(documentsByMotoboy[request.motoboyId]) && (
                   <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-100">
@@ -889,8 +937,9 @@ export function AdminMotoboys() {
                     {docChip(documentsByMotoboy[request.motoboyId] || [], 'CRLV')}
                   </div>
                 )}
-              </div>
-            ))}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
