@@ -40,6 +40,53 @@ export function MotoboyProfile() {
   });
   const { showToast } = useToast();
 
+  const BRAZIL_UF: Array<{ uf: string; name: string }> = [
+    { uf: 'AC', name: 'Acre' },
+    { uf: 'AL', name: 'Alagoas' },
+    { uf: 'AP', name: 'Amapá' },
+    { uf: 'AM', name: 'Amazonas' },
+    { uf: 'BA', name: 'Bahia' },
+    { uf: 'CE', name: 'Ceará' },
+    { uf: 'DF', name: 'Distrito Federal' },
+    { uf: 'ES', name: 'Espírito Santo' },
+    { uf: 'GO', name: 'Goiás' },
+    { uf: 'MA', name: 'Maranhão' },
+    { uf: 'MT', name: 'Mato Grosso' },
+    { uf: 'MS', name: 'Mato Grosso do Sul' },
+    { uf: 'MG', name: 'Minas Gerais' },
+    { uf: 'PA', name: 'Pará' },
+    { uf: 'PB', name: 'Paraíba' },
+    { uf: 'PR', name: 'Paraná' },
+    { uf: 'PE', name: 'Pernambuco' },
+    { uf: 'PI', name: 'Piauí' },
+    { uf: 'RJ', name: 'Rio de Janeiro' },
+    { uf: 'RN', name: 'Rio Grande do Norte' },
+    { uf: 'RS', name: 'Rio Grande do Sul' },
+    { uf: 'RO', name: 'Rondônia' },
+    { uf: 'RR', name: 'Roraima' },
+    { uf: 'SC', name: 'Santa Catarina' },
+    { uf: 'SP', name: 'São Paulo' },
+    { uf: 'SE', name: 'Sergipe' },
+    { uf: 'TO', name: 'Tocantins' },
+  ];
+
+  const VEHICLE_COLORS = [
+    'Preta',
+    'Branca',
+    'Prata',
+    'Cinza',
+    'Vermelha',
+    'Azul',
+    'Verde',
+    'Amarela',
+    'Marrom',
+    'Outra',
+  ];
+
+  const [citiesLoading, setCitiesLoading] = useState(false);
+  const [citiesByUf, setCitiesByUf] = useState<Record<string, string[]>>({});
+  const [citiesFetchError, setCitiesFetchError] = useState<string | null>(null);
+
   const documentTypes = useMemo(() => {
     const v = String(profileDraft.vehicleType || profile?.vehicleType || '').toUpperCase();
     const crlvHelp =
@@ -148,6 +195,41 @@ export function MotoboyProfile() {
     return faceStatus === 'pending' || faceStatus === 'processing';
   }, [documents, documentsByType]);
 
+  const selectedUf = useMemo(() => String(profileDraft.state || profile?.state || '').trim().toUpperCase(), [profileDraft.state, profile?.state]);
+  const availableCities = useMemo(() => {
+    if (!selectedUf) return [];
+    return citiesByUf[selectedUf] || [];
+  }, [citiesByUf, selectedUf]);
+
+  useEffect(() => {
+    if (!selectedUf) return;
+    if (citiesByUf[selectedUf]?.length) return;
+
+    const controller = new AbortController();
+    (async () => {
+      setCitiesLoading(true);
+      setCitiesFetchError(null);
+      try {
+        const resp = await fetch(
+          `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${selectedUf}/municipios?orderBy=nome`,
+          { signal: controller.signal }
+        );
+        if (!resp.ok) throw new Error('fetch_failed');
+        const data = await resp.json();
+        const list = Array.isArray(data) ? data.map((x: any) => String(x?.nome || '').trim()).filter(Boolean) : [];
+        setCitiesByUf((prev) => ({ ...prev, [selectedUf]: list }));
+      } catch (err: any) {
+        if (err?.name === 'AbortError') return;
+        setCitiesFetchError('Não foi possível carregar a lista de cidades agora.');
+      } finally {
+        setCitiesLoading(false);
+      }
+    })();
+
+    return () => controller.abort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedUf]);
+
   useEffect(() => {
     if (!shouldPollDocs) return;
     const id = window.setInterval(() => {
@@ -196,11 +278,17 @@ export function MotoboyProfile() {
   const hasCompleteProfile = useMemo(() => {
     const v = String(profileDraft.vehicleType || profile?.vehicleType || '').toUpperCase();
     const plate = String(profileDraft.vehiclePlate || profile?.vehiclePlate || '').trim();
+    const model = String(profileDraft.vehicleModel || profile?.vehicleModel || '').trim();
+    const color = String(profileDraft.vehicleColor || profile?.vehicleColor || '').trim();
     const city = String(profileDraft.city || profile?.city || '').trim();
     const state = String(profileDraft.state || profile?.state || '').trim();
     const address = String(profileDraft.address || profile?.address || '').trim();
     if (!v) return false;
     if ((v === 'MOTO' || v === 'CARRO' || v === 'OUTRO') && plate.length < 7) return false;
+    if (v === 'MOTO' || v === 'CARRO' || v === 'OUTRO') {
+      if (!model) return false;
+      if (!color) return false;
+    }
     if (!city || !state || state.length !== 2 || !address) return false;
     return true;
   }, [profileDraft, profile]);
@@ -321,6 +409,16 @@ export function MotoboyProfile() {
     });
     return ids;
   }, [requestByStoreId]);
+
+  const requestableStores = useMemo(() => {
+    return (stores || []).filter((s: any) => {
+      const storeId = String(s?.id || '');
+      if (!storeId) return false;
+      if (linkedStoreIds.includes(storeId)) return false;
+      if (pendingStoreIds.includes(storeId)) return false;
+      return true;
+    });
+  }, [stores, linkedStoreIds, pendingStoreIds]);
 
   const vehicleIcon = useMemo(() => {
     const type = String(profileDraft.vehicleType || profile?.vehicleType || '').toUpperCase();
@@ -951,7 +1049,10 @@ export function MotoboyProfile() {
         <div className="grid gap-2 sm:grid-cols-2">
           <select
             value={profileDraft.vehicleType}
-            onChange={(event) => setProfileDraft((prev: any) => ({ ...prev, vehicleType: event.target.value }))}
+            onChange={(event) => {
+              const next = String(event.target.value || '').toUpperCase();
+              setProfileDraft((prev: any) => ({ ...prev, vehicleType: next }));
+            }}
             className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
           >
             <option value="">Tipo de veículo</option>
@@ -962,34 +1063,76 @@ export function MotoboyProfile() {
           </select>
           <input
             value={profileDraft.vehiclePlate}
-            onChange={(event) => setProfileDraft((prev: any) => ({ ...prev, vehiclePlate: event.target.value }))}
-            placeholder="Placa"
+            onChange={(event) => {
+              const next = String(event.target.value || '')
+                .toUpperCase()
+                .replace(/[^A-Z0-9]/g, '')
+                .slice(0, 7);
+              setProfileDraft((prev: any) => ({ ...prev, vehiclePlate: next }));
+            }}
+            placeholder="Placa (ABC1D23)"
             className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+            inputMode="text"
+            autoCapitalize="characters"
           />
           <input
             value={profileDraft.vehicleModel}
             onChange={(event) => setProfileDraft((prev: any) => ({ ...prev, vehicleModel: event.target.value }))}
-            placeholder="Modelo"
+            placeholder="Modelo (ex: CG 160)"
             className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
           />
-          <input
+          <select
             value={profileDraft.vehicleColor}
             onChange={(event) => setProfileDraft((prev: any) => ({ ...prev, vehicleColor: event.target.value }))}
-            placeholder="Cor"
             className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-          />
-          <input
-            value={profileDraft.city}
-            onChange={(event) => setProfileDraft((prev: any) => ({ ...prev, city: event.target.value }))}
-            placeholder="Cidade"
+          >
+            <option value="">Cor</option>
+            {VEHICLE_COLORS.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={String(profileDraft.state || '').toUpperCase()}
+            onChange={(event) => {
+              const nextUf = String(event.target.value || '').toUpperCase();
+              setProfileDraft((prev: any) => ({ ...prev, state: nextUf, city: '' }));
+            }}
             className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-          />
-          <input
-            value={profileDraft.state}
-            onChange={(event) => setProfileDraft((prev: any) => ({ ...prev, state: event.target.value }))}
-            placeholder="UF"
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-          />
+          >
+            <option value="">UF</option>
+            {BRAZIL_UF.map((s) => (
+              <option key={s.uf} value={s.uf}>
+                {s.uf} - {s.name}
+              </option>
+            ))}
+          </select>
+
+          {selectedUf && !citiesFetchError ? (
+            <select
+              value={profileDraft.city}
+              onChange={(event) => setProfileDraft((prev: any) => ({ ...prev, city: event.target.value }))}
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+              disabled={citiesLoading}
+              title={citiesLoading ? 'Carregando cidades...' : undefined}
+            >
+              <option value="">{citiesLoading ? 'Carregando cidades...' : 'Cidade'}</option>
+              {availableCities.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <input
+              value={profileDraft.city}
+              onChange={(event) => setProfileDraft((prev: any) => ({ ...prev, city: event.target.value }))}
+              placeholder="Cidade"
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+            />
+          )}
           <input
             value={profileDraft.address}
             onChange={(event) => setProfileDraft((prev: any) => ({ ...prev, address: event.target.value }))}
@@ -997,6 +1140,11 @@ export function MotoboyProfile() {
             className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm sm:col-span-2"
           />
         </div>
+        {citiesFetchError ? (
+          <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+            {citiesFetchError} Você ainda pode digitar a cidade manualmente.
+          </div>
+        ) : null}
         <button
           type="button"
           onClick={handleSaveProfile}
@@ -1095,6 +1243,23 @@ export function MotoboyProfile() {
                         </div>
                         <div className="text-[11px] text-slate-500 truncate">{desc ? String(desc) : storeStatus}</div>
                       </div>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          if (!window.confirm(`Deseja desfazer o vinculo com ${store?.name || store?.slug || 'a loja'}?`)) return;
+                          try {
+                            await motoboyService.leaveStore(storeId);
+                            showToast('Vinculo removido.', 'success');
+                            await loadRequests();
+                          } catch (error: any) {
+                            showToast(error?.message || 'Nao foi possivel desfazer o vinculo.', 'error');
+                          }
+                        }}
+                        className="btn-press shrink-0 rounded-xl border border-emerald-200 bg-white px-3 py-2 text-[11px] font-extrabold text-emerald-800"
+                        title="Sair da loja"
+                      >
+                        Sair
+                      </button>
                     </div>
                   );
                 })}
@@ -1181,18 +1346,12 @@ export function MotoboyProfile() {
             <div className="text-xs text-slate-600 -mt-1">Selecione uma ou mais lojas e envie sua solicitação.</div>
 
             <div className="mt-3 grid gap-2">
-              {stores.length === 0 ? (
-                <p className="text-xs text-slate-500">Nenhuma loja disponível.</p>
+              {requestableStores.length === 0 ? (
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-xs text-slate-700">
+                  Nenhuma loja nova disponível para solicitar agora.
+                </div>
               ) : (
-                stores
-                  .filter((s: any) => {
-                    const storeId = String(s?.id || '');
-                    if (!storeId) return false;
-                    if (linkedStoreIds.includes(storeId)) return false;
-                    if (pendingStoreIds.includes(storeId)) return false;
-                    return true;
-                  })
-                  .map((store: any) => {
+                requestableStores.map((store: any) => {
                     const storeId = String(store.id);
                     const isSelected = selectedStores.includes(storeId);
                     const req = requestByStoreId.get(storeId);
@@ -1255,14 +1414,16 @@ export function MotoboyProfile() {
           >
             Atualizar status
           </button>
-          <button
-            type="button"
-            onClick={handleRequestStores}
-            disabled={requesting || !canRequestAnyStore}
-            className="btn-press w-full rounded-xl bg-brand-primary px-4 py-3 text-sm font-extrabold text-white disabled:opacity-50 shadow-[0_22px_48px_-34px_rgba(234,88,12,0.55)]"
-          >
-            {requesting ? 'Enviando...' : 'Enviar solicitação'}
-          </button>
+          {requestableStores.length > 0 && selectedStores.length > 0 ? (
+            <button
+              type="button"
+              onClick={handleRequestStores}
+              disabled={requesting || !canRequestAnyStore}
+              className="btn-press w-full rounded-xl bg-brand-primary px-4 py-3 text-sm font-extrabold text-white disabled:opacity-50 shadow-[0_22px_48px_-34px_rgba(234,88,12,0.55)]"
+            >
+              {requesting ? 'Enviando...' : 'Enviar solicitação'}
+            </button>
+          ) : null}
         </div>
       </div>
     </div>

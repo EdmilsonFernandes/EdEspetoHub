@@ -157,6 +157,20 @@ export class MotoboyController {
   }
 
   /**
+   * Motoboy leaves a store (disable link).
+   */
+  static async leaveStore(req: Request, res: Response) {
+    try {
+      const motoboy = await motoboyService.getActiveMotoboyByUserId(req.auth?.sub || '');
+      const link = await motoboyService.leaveStore(motoboy, req.params.storeId);
+      return res.json(link);
+    } catch (error: any) {
+      log.warn('Motoboy leave store failed', { error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  /**
    * Lists motoboys linked to a store.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)

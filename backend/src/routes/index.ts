@@ -140,6 +140,7 @@ routes.get('/motoboy/profile', requireAuth, MotoboyController.getProfile);
 routes.put('/motoboy/profile', requireAuth, MotoboyController.updateProfile);
 routes.get('/motoboy/store-requests', requireAuth, MotoboyController.listStoreRequests);
 routes.post('/motoboy/store-requests', requireAuth, MotoboyController.createStoreRequest);
+routes.post('/motoboy/stores/:storeId/leave', requireAuth, MotoboyController.leaveStore);
 
 // Legal content (public)
 routes.get('/legal/terms', LegalController.getTerms);

@@ -476,6 +476,27 @@ export class MotoboyService {
   }
 
   /**
+   * Motoboy leaves a store (disables an active link).
+   * This is motoboy-initiated, does not require store owner.
+   */
+  async leaveStore(motoboy: Motoboy, storeId: string) {
+    if (!storeId) throw new AppError('STORE-001', 404);
+
+    const existing = await this.motoboyStoreRepository.findActiveLink(motoboy.id, storeId);
+    if (!existing) throw new AppError('MOTO-004', 404);
+
+    existing.active = false;
+    const saved = await this.motoboyStoreRepository.save(existing);
+    await this.logAudit({
+      storeId,
+      motoboyId: motoboy.id,
+      action: 'MOTOBOY_LEFT_STORE',
+      performedByUserId: motoboy.userId,
+    });
+    return saved;
+  }
+
+  /**
    * Approves motoboy.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)

@@ -62,4 +62,8 @@ export const motoboyService = {
   async createStoreRequests(storeIds: string[]) {
     return apiClient.post('/motoboy/store-requests', { storeIds });
   },
+
+  async leaveStore(storeId: string) {
+    return apiClient.post(`/motoboy/stores/${storeId}/leave`, {});
+  },
 };
