@@ -51,6 +51,34 @@ export class MotoboyOrderService {
     if (!storeIds.length) return [];
     // Prefer the delivery queue table, but keep a fallback for legacy orders without queue rows.
     const availableOrderStatuses = [ 'waiting_for_motoboy', 'ready_for_delivery' ];
+    const expireMinutes =
+      process.env.DELIVERY_EXPIRE_MINUTES && Number(process.env.DELIVERY_EXPIRE_MINUTES) > 0
+        ? Number(process.env.DELIVERY_EXPIRE_MINUTES)
+        : 20;
+
+    // If queue rows exist but have an old/exhausted expires_at, the order can "disappear" from the queue
+    // even though the store is still waiting for a motoboy. Refresh those rows on every queue poll.
+    try {
+      await AppDataSource.query(
+        `
+        UPDATE order_deliveries od
+           SET expires_at = NOW() + ($2 * interval '1 minute'),
+               status = COALESCE(NULLIF(UPPER(od.status), ''), 'AVAILABLE')
+          FROM orders o
+         WHERE o.id = od.order_id
+           AND o.type = 'delivery'
+           AND o.status = ANY($1)
+           AND o.store_id = ANY($3)
+           AND od.motoboy_id IS NULL
+           AND (od.expires_at IS NULL OR od.expires_at < NOW());
+        `,
+        [ availableOrderStatuses, expireMinutes, storeIds ]
+      );
+    } catch (error) {
+      // Non-fatal: listing still works without refresh, but orders may disappear until another status update.
+      this.log.warn('Failed to refresh delivery queue expirations', { error });
+    }
+
     return AppDataSource.getRepository(Order)
       .createQueryBuilder('o')
       .leftJoin(OrderDelivery, 'od', 'od.order_id = o.id')
