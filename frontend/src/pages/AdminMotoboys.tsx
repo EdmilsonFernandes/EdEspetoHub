@@ -31,6 +31,15 @@ export function AdminMotoboys() {
   const storeId = auth?.store?.id || '';
   const pendingRequests = requests.filter((request) => request.status === 'PENDING');
 
+  const formatMotoboyStatus = (raw: any) => {
+    const status = String(raw || '').toUpperCase();
+    if (status === 'ACTIVE') return 'ATIVO';
+    if (status === 'PENDING_VERIFICATION') return 'EM ANÁLISE';
+    if (status === 'SUSPENDED') return 'SUSPENSO';
+    if (status === 'REJECTED') return 'REJEITADO';
+    return status || 'PENDENTE';
+  };
+
   const normalizeDocType = (value: any) => String(value || '').trim().toUpperCase();
 
   const latestDocs = (docs: any[]) => {
@@ -50,6 +59,43 @@ export function AdminMotoboys() {
   const docsPendingCount = (docs: any[]) => {
     const latest = latestDocs(docs);
     return latest.filter((d) => String(d?.status || '').toUpperCase() !== 'APPROVED').length;
+  };
+
+  const kycSummary = (docs: any[]) => {
+    const latest = latestDocs(docs || []);
+    const byType = new Map<string, any>();
+    for (const d of latest) byType.set(normalizeDocType(d?.docType), d);
+    const cnh = byType.get('CNH');
+    const selfie = byType.get('SELFIE');
+    const crlv = byType.get('CRLV');
+    const st = (d: any) => String(d?.status || '').toUpperCase();
+    const hasAny = Boolean(cnh || selfie || crlv);
+    if (!hasAny) return { tone: 'slate' as const, label: 'KYC: sem docs', ok: false };
+    const rejected = [cnh, selfie, crlv].some((d) => st(d) === 'REJECTED');
+    if (rejected) return { tone: 'rose' as const, label: 'KYC: recusado', ok: false };
+    const pending = [cnh, selfie, crlv].some((d) => d && st(d) === 'PENDING');
+    const coreOk = st(cnh) === 'APPROVED' && st(selfie) === 'APPROVED';
+    const crlvOk = !crlv || st(crlv) === 'APPROVED';
+    if (coreOk && crlvOk) return { tone: 'emerald' as const, label: 'KYC: OK', ok: true };
+    if (pending) return { tone: 'amber' as const, label: 'KYC: em análise', ok: false };
+    return { tone: 'amber' as const, label: 'KYC: pendente', ok: false };
+  };
+
+  const kycPill = (docs: any[]) => {
+    const s = kycSummary(docs || []);
+    const cls =
+      s.tone === 'emerald'
+        ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+        : s.tone === 'rose'
+        ? 'border-rose-200 bg-rose-50 text-rose-800'
+        : s.tone === 'amber'
+        ? 'border-amber-200 bg-amber-50 text-amber-800'
+        : 'border-slate-200 bg-slate-50 text-slate-700';
+    return (
+      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-extrabold border ${cls}`}>
+        {s.label}
+      </span>
+    );
   };
 
   const filteredMotoboys = useMemo(() => {
@@ -167,7 +213,24 @@ export function AdminMotoboys() {
     if (!storeId) return;
     try {
       const data = await motoboyAdminService.listRequests(storeId);
-      setRequests(Array.isArray(data) ? data : []);
+      const list = Array.isArray(data) ? data : [];
+      setRequests(list);
+
+      const ids = Array.from(
+        new Set(
+          list
+            .filter((r: any) => String(r?.status || '').toUpperCase() === 'PENDING')
+            .map((r: any) => String(r?.motoboyId || '').trim())
+            .filter(Boolean)
+        )
+      );
+
+      // Prefetch docs for pending requests (small batch) to show KYC status + chips without extra clicks.
+      for (const id of ids.slice(0, 6)) {
+        if (documentsByMotoboy[id]) continue;
+        // eslint-disable-next-line no-await-in-loop
+        await loadDocuments(id);
+      }
     } catch (error: any) {
       showToast(error?.message || 'Não foi possível carregar solicitações.', 'error');
     }
@@ -820,6 +883,7 @@ export function AdminMotoboys() {
 
                 {!!request.motoboyId && Array.isArray(documentsByMotoboy[request.motoboyId]) && (
                   <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-100">
+                    {kycPill(documentsByMotoboy[request.motoboyId] || [])}
                     {docChip(documentsByMotoboy[request.motoboyId] || [], 'CNH')}
                     {docChip(documentsByMotoboy[request.motoboyId] || [], 'SELFIE')}
                     {docChip(documentsByMotoboy[request.motoboyId] || [], 'CRLV')}
@@ -955,7 +1019,7 @@ export function AdminMotoboys() {
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600">
-                      {link.motoboyStatus || 'PENDING'}
+                      {formatMotoboyStatus(link.motoboyStatus)}
                     </span>
                     <span
                       className={`px-2.5 py-1 rounded-full text-[10px] font-semibold ${
