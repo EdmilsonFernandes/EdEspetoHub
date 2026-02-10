@@ -63,7 +63,15 @@ export class MotoboyOrderService {
         `
         UPDATE order_deliveries od
            SET expires_at = NOW() + ($2 * interval '1 minute'),
-               status = COALESCE(NULLIF(UPPER(od.status), ''), 'AVAILABLE')
+               -- If the store is still waiting for a motoboy, keep the delivery entry AVAILABLE
+               -- even if a previous expiration job marked it as EXPIRED.
+               status = 'AVAILABLE',
+               accepted_at = NULL,
+               picked_up_at = NULL,
+               in_transit_at = NULL,
+               delivered_at = NULL,
+               canceled_at = NULL,
+               canceled_reason = NULL
           FROM orders o
          WHERE o.id = od.order_id
            AND o.type = 'delivery'
