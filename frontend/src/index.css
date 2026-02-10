@@ -130,6 +130,11 @@
   }
 
   .motoboy-screen {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 36rem; /* Tailwind max-w-xl */
+    margin-left: auto;
+    margin-right: auto;
     padding-left: 1rem;
     padding-right: 1rem;
     padding-top: 1.5rem;
