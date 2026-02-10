@@ -1162,7 +1162,7 @@ export function AdminMotoboys() {
 
       {previewDoc && (
         <div
-          className="fixed inset-0 z-[80] bg-black/60 flex items-center justify-center p-4"
+          className="fixed inset-0 z-[95] bg-black/60 flex items-center justify-center p-4"
           onClick={() => setPreviewDoc(null)}
           role="dialog"
           aria-modal="true"

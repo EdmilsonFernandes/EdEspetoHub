@@ -1,3 +1,8 @@
+import { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { SignOut, UserCircle } from '@phosphor-icons/react';
+import { useAuth } from '../../contexts/AuthContext';
+
 type MotoboyHeaderProps = {
   title: string;
   subtitle?: string;
@@ -5,6 +10,38 @@ type MotoboyHeaderProps = {
 };
 
 export function MotoboyHeader({ title, subtitle, rightAction }: MotoboyHeaderProps) {
+  const navigate = useNavigate();
+  const { setAuth } = useAuth();
+
+  const motoboySession = useMemo(() => {
+    try {
+      const raw = localStorage.getItem('motoboySession');
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  }, []);
+
+  const user = motoboySession?.user || null;
+  const userName = String(user?.fullName || user?.name || '').trim();
+  const userEmail = String(user?.email || '').trim();
+  const showSession = Boolean(motoboySession?.token && userEmail);
+
+  const handleLogout = () => {
+    try {
+      localStorage.removeItem('motoboySession');
+    } catch {
+      // ignore
+    }
+    // MotoboyLogin currently also writes to AuthContext (adminSession). Clear it to avoid leaking sessions.
+    try {
+      setAuth(null);
+    } catch {
+      // ignore
+    }
+    navigate('/motoboy/login', { replace: true });
+  };
+
   return (
     <div className="premium-card-glass p-4 sm:p-5">
       <div className="flex items-start justify-between gap-3">
@@ -19,7 +56,29 @@ export function MotoboyHeader({ title, subtitle, rightAction }: MotoboyHeaderPro
             {subtitle && <p className="text-xs sm:text-sm text-slate-600 mt-0.5">{subtitle}</p>}
           </div>
         </div>
-        <div className="shrink-0 flex flex-wrap justify-end gap-2">{rightAction}</div>
+        <div className="shrink-0 flex flex-wrap justify-end items-start gap-2">
+          {rightAction}
+          {showSession ? (
+            <>
+              <div className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 bg-white/70 text-slate-800">
+                <UserCircle size={18} weight="duotone" className="text-slate-600" />
+                <div className="leading-tight text-left">
+                  <div className="text-[11px] font-extrabold truncate max-w-[180px]">{userName || 'Entregador'}</div>
+                  <div className="text-[10px] text-slate-500 truncate max-w-[180px]">{userEmail}</div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="btn-press px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-extrabold text-slate-700 flex items-center gap-2"
+                title="Sair"
+              >
+                <SignOut size={16} weight="bold" />
+                <span className="hidden sm:inline">Sair</span>
+              </button>
+            </>
+          ) : null}
+        </div>
       </div>
     </div>
   );

@@ -32,7 +32,7 @@ export function MotoboyProfile() {
   const [cameraOpen, setCameraOpen] = useState(false);
   const [cameraDocType, setCameraDocType] = useState<string | null>(null);
   const [preview, setPreview] = useState<{ title: string; src: string | null } | null>(null);
-  const [showFaceDetails, setShowFaceDetails] = useState(false);
+  // Face verification is an internal signal; keep UI friendly (no raw status/reason for motoboys).
   const [notifyOrders, setNotifyOrders] = useState(() => {
     const raw = localStorage.getItem('motoboy:notify_orders');
     if (raw === null) return true;
@@ -218,7 +218,7 @@ export function MotoboyProfile() {
     if (!face) return null;
     const status = String(face.status || '').toLowerCase();
     const label = String(face.scoreLabel || '').toLowerCase();
-    const reason = face.reason ? String(face.reason) : '';
+    // Do not expose raw reason/status to end users.
 
     if (status === 'processing' || status === 'pending') {
       return {
@@ -226,7 +226,7 @@ export function MotoboyProfile() {
         icon: <Clock size={18} weight="duotone" />,
         title: 'Verificação automática em andamento',
         subtitle: 'Estamos conferindo sua selfie com o documento.',
-        details: { status, label, reason },
+        // details intentionally omitted
       };
     }
 
@@ -236,7 +236,7 @@ export function MotoboyProfile() {
         icon: <ShieldCheck size={18} weight="duotone" />,
         title: 'Identidade conferida',
         subtitle: 'Sua selfie bate com o documento.',
-        details: { status, label, reason },
+        // details intentionally omitted
       };
     }
 
@@ -246,7 +246,7 @@ export function MotoboyProfile() {
         icon: <Info size={18} weight="duotone" />,
         title: 'Identidade provável',
         subtitle: 'Se a foto estiver boa, a plataforma deve aprovar em breve.',
-        details: { status, label, reason },
+        // details intentionally omitted
       };
     }
 
@@ -256,7 +256,7 @@ export function MotoboyProfile() {
         icon: <ShieldWarning size={18} weight="duotone" />,
         title: 'Precisa de revisão',
         subtitle: 'A selfie pode estar ruim ou não conferir. Se for o caso, reenvie uma foto melhor.',
-        details: { status, label, reason },
+        // details intentionally omitted
       };
     }
 
@@ -264,9 +264,9 @@ export function MotoboyProfile() {
       return {
         tone: 'slate' as const,
         icon: <Info size={18} weight="duotone" />,
-        title: 'Verificação automática indisponível',
-        subtitle: 'A loja ainda pode revisar seus documentos.',
-        details: { status, label, reason },
+        title: 'Verificação automática em pausa',
+        subtitle: 'Sem problemas: a equipe da plataforma vai revisar seus documentos.',
+        // details intentionally omitted
       };
     }
 
@@ -777,7 +777,7 @@ export function MotoboyProfile() {
                 : 'border-slate-200 bg-slate-50 text-slate-900',
             ].join(' ')}
           >
-            <div className="flex items-start justify-between gap-3">
+            <div className="flex items-start gap-3">
               <div className="flex items-start gap-3 min-w-0">
                 <div className="h-10 w-10 rounded-2xl border border-slate-200 bg-white grid place-items-center shrink-0">
                   {faceBanner.icon}
@@ -787,21 +787,7 @@ export function MotoboyProfile() {
                   <div className="text-xs text-slate-700 mt-0.5">{faceBanner.subtitle}</div>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() => setShowFaceDetails((v) => !v)}
-                className="btn-press rounded-xl border border-slate-200 bg-white px-3 py-2 text-[11px] font-extrabold text-slate-800"
-              >
-                {showFaceDetails ? 'Ocultar' : 'Detalhes'}
-              </button>
             </div>
-            {showFaceDetails ? (
-              <div className="mt-3 rounded-2xl border border-slate-200 bg-white/70 px-3 py-2 text-[11px] text-slate-700">
-                <div><span className="font-extrabold">Status:</span> {String(faceBanner.details?.status || '-')}</div>
-                <div><span className="font-extrabold">Nível:</span> {String(faceBanner.details?.label || '-')}</div>
-                {faceBanner.details?.reason ? <div><span className="font-extrabold">Motivo:</span> {String(faceBanner.details.reason)}</div> : null}
-              </div>
-            ) : null}
           </div>
         )}
         <div className="grid gap-3">
