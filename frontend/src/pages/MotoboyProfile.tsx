@@ -793,8 +793,9 @@ export function MotoboyProfile() {
 
       <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-3">
         <div>
-          <p className="text-sm font-semibold text-slate-700">Solicitar vínculo</p>
-          <p className="text-xs text-slate-500">Escolha as lojas que deseja atender.</p>
+          <p className="text-xs uppercase tracking-[0.28em] text-slate-500 font-extrabold">Lojas</p>
+          <p className="text-base font-black text-slate-900">Vínculos e solicitações</p>
+          <p className="text-xs text-slate-600 mt-0.5">Aqui você vê onde já atende, o que está pendente e novas lojas para solicitar.</p>
         </div>
 
         {!hasCompleteProfile && (
@@ -1011,21 +1012,23 @@ export function MotoboyProfile() {
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={loadRequests}
-          className="w-full rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700"
-        >
-          Atualizar status
-        </button>
-        <button
-          type="button"
-          onClick={handleRequestStores}
-          disabled={requesting || !canRequestAnyStore}
-          className="w-full rounded-lg bg-brand-primary px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
-        >
-          {requesting ? 'Enviando...' : 'Enviar solicitação'}
-        </button>
+        <div className="rounded-2xl border border-slate-200 bg-gradient-to-r from-slate-50 via-white to-white p-3 flex flex-col gap-2">
+          <button
+            type="button"
+            onClick={loadRequests}
+            className="btn-press w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-extrabold text-slate-800"
+          >
+            Atualizar status
+          </button>
+          <button
+            type="button"
+            onClick={handleRequestStores}
+            disabled={requesting || !canRequestAnyStore}
+            className="btn-press w-full rounded-xl bg-brand-primary px-4 py-3 text-sm font-extrabold text-white disabled:opacity-50 shadow-[0_22px_48px_-34px_rgba(234,88,12,0.55)]"
+          >
+            {requesting ? 'Enviando...' : 'Enviar solicitação'}
+          </button>
+        </div>
       </div>
     </div>
   );

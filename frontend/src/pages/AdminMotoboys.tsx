@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Car, Camera, CheckCircle, IdentificationCard, WarningCircle, Clock } from '@phosphor-icons/react';
+import { Car, Camera, CheckCircle, IdentificationCard, WarningCircle, Clock, UsersThree, LinkSimpleHorizontal } from '@phosphor-icons/react';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { motoboyAdminService } from '../services/motoboyAdminService';
@@ -379,6 +379,43 @@ export function AdminMotoboys() {
     );
   };
 
+  const SectionHeader = ({
+    eyebrow,
+    title,
+    subtitle,
+    right,
+    tone,
+    icon,
+  }: {
+    eyebrow: string;
+    title: string;
+    subtitle: string;
+    right?: React.ReactNode;
+    tone: 'amber' | 'emerald';
+    icon: React.ReactNode;
+  }) => {
+    const bar =
+      tone === 'amber'
+        ? 'from-amber-50 via-white to-white border-amber-200/60'
+        : 'from-emerald-50 via-white to-white border-emerald-200/60';
+    const eyebrowCls = tone === 'amber' ? 'text-amber-700' : 'text-emerald-700';
+    return (
+      <div className={`px-4 py-3 border-b bg-gradient-to-r ${bar}`}>
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <div className={`text-[11px] uppercase tracking-[0.28em] font-extrabold ${eyebrowCls} flex items-center gap-2`}>
+              <span className="opacity-90">{icon}</span>
+              <span>{eyebrow}</span>
+            </div>
+            <div className="text-base sm:text-lg font-black text-slate-900">{title}</div>
+            <div className="text-xs text-slate-600 mt-0.5">{subtitle}</div>
+          </div>
+          {right ? <div className="shrink-0">{right}</div> : null}
+        </div>
+      </div>
+    );
+  };
+
   useEffect(() => {
     loadMotoboys();
     loadRequests();
@@ -685,34 +722,47 @@ export function AdminMotoboys() {
         Entregadores fazem o cadastro pelo link <span className="font-semibold">/motoboy/register</span> e solicitam vínculo com sua loja.
       </div>
 
-      <div className="premium-card p-4 space-y-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-semibold text-slate-700">Solicitações de vínculo</p>
-            <p className="text-xs text-slate-500">Motoboys que pediram para entrar na sua loja.</p>
-          </div>
-          {pendingRequests.length > 0 && (
-            <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700">
-              {pendingRequests.length} pendente{pendingRequests.length === 1 ? '' : 's'}
-            </span>
-          )}
-          <button
-            type="button"
-            onClick={loadRequests}
-            className="px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600"
-          >
-            Atualizar
-          </button>
-        </div>
+      <div className="premium-card p-0 overflow-hidden">
+        <SectionHeader
+          eyebrow="Solicitações"
+          title="Solicitações de vínculo"
+          subtitle="Motoboys que pediram para entrar na sua loja."
+          tone="amber"
+          icon={<LinkSimpleHorizontal size={16} weight="duotone" />}
+          right={
+            <div className="flex items-center gap-2">
+              {pendingRequests.length > 0 && (
+                <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800 border border-amber-200">
+                  {pendingRequests.length} pendente{pendingRequests.length === 1 ? '' : 's'}
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={loadRequests}
+                className="btn-press px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-extrabold text-slate-700"
+              >
+                Atualizar
+              </button>
+            </div>
+          }
+        />
         {pendingRequests.length === 0 ? (
-          <p className="text-sm text-slate-500">Nenhuma solicitação pendente.</p>
+          <div className="px-4 py-4">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+              Nenhuma solicitação pendente.
+            </div>
+          </div>
         ) : (
-          <div className="grid gap-3">
+          <div className="p-4 grid gap-3">
             {pendingRequests.map((request) => (
-              <div key={request.id} className="rounded-xl border border-slate-100 p-3 flex flex-col gap-2">
+              <div
+                key={request.id}
+                className="rounded-2xl border border-slate-200 bg-white p-4 flex flex-col gap-3 shadow-[0_26px_60px_-48px_rgba(15,23,42,0.35)]"
+                style={{ borderLeftWidth: 6, borderLeftColor: 'rgb(245 158 11)' }}
+              >
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-semibold text-slate-800">
+                    <p className="text-sm font-black text-slate-900">
                       {request.motoboyUser?.fullName || 'Entregador'}
                     </p>
                     <p className="text-xs text-slate-500">{request.motoboyUser?.email || '-'}</p>
@@ -728,14 +778,14 @@ export function AdminMotoboys() {
                   <button
                     type="button"
                     onClick={() => reviewRequest(request.id, 'approve')}
-                    className="px-3 py-1.5 rounded-lg bg-emerald-500 text-white font-semibold"
+                    className="btn-press px-3 py-2 rounded-xl bg-emerald-600 text-white text-xs font-extrabold shadow-[0_22px_48px_-34px_rgba(16,185,129,0.6)]"
                   >
                     Aprovar
                   </button>
                   <button
                     type="button"
                     onClick={() => reviewRequest(request.id, 'reject')}
-                    className="px-3 py-1.5 rounded-lg bg-rose-500 text-white font-semibold"
+                    className="btn-press px-3 py-2 rounded-xl bg-rose-600 text-white text-xs font-extrabold shadow-[0_22px_48px_-34px_rgba(244,63,94,0.65)]"
                   >
                     Rejeitar
                   </button>
@@ -743,7 +793,7 @@ export function AdminMotoboys() {
                     <button
                       type="button"
                       onClick={() => openDocsModal(request.motoboyId, request.motoboyUser?.fullName || 'Entregador')}
-                      className="px-2.5 py-1 rounded-lg border border-slate-200 text-[11px] font-semibold text-slate-600"
+                      className="btn-press px-3 py-2 rounded-xl border border-slate-200 bg-white text-[11px] font-extrabold text-slate-700"
                     >
                       Ver documentos
                     </button>
@@ -751,7 +801,7 @@ export function AdminMotoboys() {
                 </div>
 
                 {!!request.motoboyId && Array.isArray(documentsByMotoboy[request.motoboyId]) && (
-                  <div className="flex flex-wrap gap-2 pt-1">
+                  <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-100">
                     {docChip(documentsByMotoboy[request.motoboyId] || [], 'CNH')}
                     {docChip(documentsByMotoboy[request.motoboyId] || [], 'SELFIE')}
                     {docChip(documentsByMotoboy[request.motoboyId] || [], 'CRLV')}
@@ -763,31 +813,45 @@ export function AdminMotoboys() {
         )}
       </div>
 
-      <div className="premium-card p-4 space-y-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-semibold text-slate-700">Entregadores vinculados</p>
-            <p className="text-xs text-slate-500">Status e vínculo por loja.</p>
-          </div>
-          <button
-            type="button"
-            onClick={loadMotoboys}
-            className="px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600"
-          >
-            Atualizar
-          </button>
-        </div>
+      <div className="premium-card p-0 overflow-hidden">
+        <SectionHeader
+          eyebrow="Time"
+          title="Entregadores vinculados"
+          subtitle="Status, documentos e vínculo por loja."
+          tone="emerald"
+          icon={<UsersThree size={16} weight="duotone" />}
+          right={
+            <button
+              type="button"
+              onClick={loadMotoboys}
+              className="btn-press px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-extrabold text-slate-700"
+            >
+              Atualizar
+            </button>
+          }
+        />
         {loading ? (
-          <p className="text-sm text-slate-500">Carregando...</p>
+          <div className="px-4 py-4 text-sm text-slate-600">Carregando...</div>
         ) : filteredMotoboys.length === 0 ? (
-          <p className="text-sm text-slate-500">Nenhum entregador vinculado ainda.</p>
+          <div className="px-4 py-4">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+              Nenhum entregador vinculado ainda.
+            </div>
+          </div>
         ) : (
-          <div className="grid gap-3">
+          <div className="p-4 grid gap-3">
             {filteredMotoboys.map((link) => (
-              <div key={link.id} className="rounded-xl border border-slate-100 p-3 flex flex-col gap-2">
+              <div
+                key={link.id}
+                className="rounded-2xl border border-slate-200 bg-white p-4 flex flex-col gap-3 shadow-[0_26px_60px_-48px_rgba(15,23,42,0.35)]"
+                style={{
+                  borderLeftWidth: 6,
+                  borderLeftColor: link.active ? (link.busy ? 'rgb(245 158 11)' : 'rgb(16 185 129)') : 'rgb(244 63 94)',
+                }}
+              >
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-semibold text-slate-800">
+                    <p className="text-sm font-black text-slate-900">
                       {link.motoboyUser?.fullName || 'Entregador'}
                     </p>
                     <p className="text-xs text-slate-500">{link.motoboyUser?.email || '-'}</p>
@@ -829,17 +893,17 @@ export function AdminMotoboys() {
                   </div>
                 )}
                 {Array.isArray(documentsByMotoboy[link.motoboyId]) && (
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-100">
                     {docChip(documentsByMotoboy[link.motoboyId] || [], 'CNH')}
                     {docChip(documentsByMotoboy[link.motoboyId] || [], 'SELFIE')}
                     {docChip(documentsByMotoboy[link.motoboyId] || [], 'CRLV')}
                   </div>
                 )}
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 pt-1">
                   <button
                     type="button"
                     onClick={() => openDocsModal(link.motoboyId, link.motoboyUser?.fullName || 'Entregador')}
-                    className="px-2.5 py-1 rounded-lg border border-slate-200 text-[11px] font-semibold text-slate-600"
+                    className="btn-press px-3 py-2 rounded-xl border border-slate-200 bg-white text-[11px] font-extrabold text-slate-700"
                   >
                     Ver documentos
                   </button>
@@ -856,7 +920,7 @@ export function AdminMotoboys() {
                           showToast(error?.message || 'Não foi possível reativar vínculo.', 'error');
                         }
                       }}
-                      className="px-3 py-1.5 rounded-lg border border-emerald-200 text-xs font-semibold text-emerald-700"
+                      className="btn-press px-3 py-2 rounded-xl border border-emerald-200 bg-emerald-50 text-xs font-extrabold text-emerald-800"
                     >
                       Reativar vínculo
                     </button>
@@ -864,7 +928,7 @@ export function AdminMotoboys() {
                   <button
                     type="button"
                     onClick={() => handleUnlink(link.motoboyId)}
-                    className="px-3 py-1.5 rounded-lg border border-rose-200 text-xs font-semibold text-rose-600"
+                    className="btn-press px-3 py-2 rounded-xl border border-rose-200 bg-rose-50 text-xs font-extrabold text-rose-700"
                   >
                     Remover vínculo
                   </button>
@@ -873,17 +937,19 @@ export function AdminMotoboys() {
             ))}
           </div>
         )}
-        <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-xs text-slate-600">
-          <span>Mostrar vínculos inativos</span>
-          <button
-            type="button"
-            onClick={() => setShowInactive((prev) => !prev)}
-            className={`px-3 py-1 rounded-full text-[10px] font-semibold border ${
-              showInactive ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-slate-200'
-            }`}
-          >
-            {showInactive ? 'Visível' : 'Oculto'}
-          </button>
+        <div className="px-4 pb-4">
+          <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700">
+            <span className="font-semibold">Mostrar vínculos inativos</span>
+            <button
+              type="button"
+              onClick={() => setShowInactive((prev) => !prev)}
+              className={`btn-press px-3 py-1 rounded-full text-[10px] font-extrabold border ${
+                showInactive ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-700 border-slate-200'
+              }`}
+            >
+              {showInactive ? 'Visível' : 'Oculto'}
+            </button>
+          </div>
         </div>
       </div>
 
