@@ -34,7 +34,10 @@ export const motoboyAdminService = {
   async approveRequest(storeId: string, requestId: string) {
     return apiClient.post(`/stores/${storeId}/motoboy-requests/${requestId}/approve`, {});
   },
-  async rejectRequest(storeId: string, requestId: string, reason?: string | null) {
-    return apiClient.post(`/stores/${storeId}/motoboy-requests/${requestId}/reject`, { reason: reason || null });
+  async rejectRequest(storeId: string, requestId: string, reason?: string | null, rejectDocs?: string[] | null) {
+    return apiClient.post(`/stores/${storeId}/motoboy-requests/${requestId}/reject`, {
+      reason: reason || null,
+      rejectDocs: Array.isArray(rejectDocs) ? rejectDocs : null,
+    });
   },
 };

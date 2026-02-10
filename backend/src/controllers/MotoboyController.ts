@@ -573,12 +573,14 @@ export class MotoboyController {
   static async rejectStoreRequest(req: Request, res: Response) {
     try {
       const reason = req.body?.reason;
+      const rejectDocs = Array.isArray(req.body?.rejectDocs) ? req.body.rejectDocs : null;
       const request = await motoboyService.reviewStoreRequest(
         req.params.storeId,
         req.params.requestId,
         req.auth?.sub || '',
         'REJECTED',
-        reason
+        reason,
+        { rejectDocs }
       );
       return res.json(request);
     } catch (error: any) {

@@ -152,18 +152,33 @@ export function MotoboyProfile() {
     return () => window.clearInterval(id);
   }, [shouldPollDocs]);
 
-  const hasAllRequiredDocs = useMemo(
-    () => requiredDocs.every((key) => documentsByType.has(key)),
-    [documentsByType, requiredDocs]
-  );
+  const requiredDocStatus = useMemo(() => {
+    const missing: string[] = [];
+    const rejected: string[] = [];
+    const pending: string[] = [];
+    const approved: string[] = [];
+    for (const key of requiredDocs) {
+      const doc = documentsByType.get(key);
+      if (!doc) {
+        missing.push(key);
+        continue;
+      }
+      const st = String(doc?.status || '').toUpperCase();
+      if (st === 'REJECTED') rejected.push(key);
+      else if (st === 'PENDING') pending.push(key);
+      else if (st === 'APPROVED') approved.push(key);
+      else pending.push(key);
+    }
+    return { missing, rejected, pending, approved };
+  }, [documentsByType, requiredDocs]);
+
+  const hasAllRequiredDocs = useMemo(() => requiredDocStatus.missing.length === 0, [requiredDocStatus.missing.length]);
 
   const hasAnyPendingRequiredDocs = useMemo(() => {
-    return requiredDocs.some((key) => {
-      const doc = documentsByType.get(key);
-      const st = String(doc?.status || '').toUpperCase();
-      return doc && st === 'PENDING';
-    });
-  }, [documentsByType, requiredDocs]);
+    return requiredDocStatus.pending.length > 0;
+  }, [requiredDocStatus.pending.length]);
+
+  const hasAnyRejectedRequiredDocs = useMemo(() => requiredDocStatus.rejected.length > 0, [requiredDocStatus.rejected.length]);
 
   const hasCompleteProfile = useMemo(() => {
     const v = String(profileDraft.vehicleType || profile?.vehicleType || '').toUpperCase();
@@ -180,7 +195,7 @@ export function MotoboyProfile() {
   const requiredDocsPending = useMemo(() => {
     return requiredDocs.filter((key) => {
       const doc = documentsByType.get(key);
-      return !doc || doc.status !== 'APPROVED';
+      return !doc || String(doc.status || '').toUpperCase() !== 'APPROVED';
     });
   }, [documentsByType, requiredDocs]);
 
@@ -581,9 +596,16 @@ export function MotoboyProfile() {
             );
           })}
         </div>
-        {!hasAllRequiredDocs && (
-          <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
-            Pendências: {requiredDocsPending.join(', ')}.
+        {(requiredDocStatus.missing.length > 0 || requiredDocStatus.rejected.length > 0) && (
+          <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+            {requiredDocStatus.missing.length > 0 ? (
+              <div className="font-semibold">Faltando: {requiredDocStatus.missing.join(', ')}.</div>
+            ) : null}
+            {requiredDocStatus.rejected.length > 0 ? (
+              <div className="mt-1 font-semibold text-rose-800">
+                Recusado(s): {requiredDocStatus.rejected.join(', ')}. Reenvie o(s) documento(s) corrigido(s).
+              </div>
+            ) : null}
           </div>
         )}
       </div>
@@ -694,12 +716,20 @@ export function MotoboyProfile() {
         {!hasAllRequiredDocs && (
           <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
             Envie os documentos obrigatórios ({requiredDocs.join(', ')}) antes de solicitar vínculo.
+            {requiredDocStatus.missing.length > 0 ? (
+              <span className="block mt-1 text-amber-800 font-semibold">Faltando: {requiredDocStatus.missing.join(', ')}.</span>
+            ) : null}
+            {requiredDocStatus.rejected.length > 0 ? (
+              <span className="block mt-1 text-rose-800 font-semibold">
+                Recusado(s): {requiredDocStatus.rejected.join(', ')}. Reenvie o(s) documento(s).
+              </span>
+            ) : null}
             {requiredDocsPending.length > 0 ? (
               <span className="block mt-1 text-amber-800 font-semibold">Pendências: {requiredDocsPending.join(', ')}.</span>
             ) : null}
           </div>
         )}
-        {hasAllRequiredDocs && hasAnyPendingRequiredDocs && (
+        {hasAllRequiredDocs && !hasAnyRejectedRequiredDocs && hasAnyPendingRequiredDocs && (
           <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700">
             Seus documentos estão em análise. Você já pode solicitar vínculo; a loja fará a revisão e aprovação.
           </div>
@@ -792,7 +822,7 @@ export function MotoboyProfile() {
         <button
           type="button"
           onClick={handleRequestStores}
-          disabled={requesting || !hasAllRequiredDocs || !hasCompleteProfile}
+          disabled={requesting || !hasAllRequiredDocs || hasAnyRejectedRequiredDocs || !hasCompleteProfile}
           className="w-full rounded-lg bg-brand-primary px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
         >
           {requesting ? 'Enviando...' : 'Enviar solicitação'}

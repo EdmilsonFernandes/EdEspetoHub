@@ -47,6 +47,20 @@ export function AdminMotoboys() {
     return { cancelled: false as const, reason: reason || null };
   };
 
+  const askRejectDocs = () => {
+    const raw = window.prompt(
+      'Quais documentos deseja RECUSAR junto com a solicitação?\n\nEx: CRLV (ou CNH,SELFIE,CRLV)\nDeixe vazio para não recusar documentos agora.',
+      'CRLV'
+    );
+    if (raw === null) return { cancelled: true as const, rejectDocs: null as string[] | null };
+    const list = String(raw || '')
+      .split(',')
+      .map((x) => String(x || '').trim().toUpperCase())
+      .filter(Boolean);
+    const normalized = Array.from(new Set(list)).filter((x) => x === 'CNH' || x === 'SELFIE' || x === 'CRLV');
+    return { cancelled: false as const, rejectDocs: normalized.length > 0 ? normalized : null };
+  };
+
   const reviewRequest = async (requestId: string, status: 'approve' | 'reject') => {
     if (!storeId) return;
     try {
@@ -55,7 +69,9 @@ export function AdminMotoboys() {
       } else {
         const { cancelled, reason } = askReason('Rejeitar solicitação de vínculo?');
         if (cancelled) return;
-        await motoboyAdminService.rejectRequest(storeId, requestId, reason);
+        const { cancelled: cancelledDocs, rejectDocs } = askRejectDocs();
+        if (cancelledDocs) return;
+        await motoboyAdminService.rejectRequest(storeId, requestId, reason, rejectDocs);
       }
       showToast('Solicitação atualizada.', 'success');
       loadRequests();

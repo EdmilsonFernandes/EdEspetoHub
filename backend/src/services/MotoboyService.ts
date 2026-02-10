@@ -607,7 +607,14 @@ export class MotoboyService {
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2026-01-29
    */
-  async reviewStoreRequest(storeId: string, requestId: string, ownerId: string, status: string, reason?: string | null) {
+  async reviewStoreRequest(
+    storeId: string,
+    requestId: string,
+    ownerId: string,
+    status: string,
+    reason?: string | null,
+    options?: { rejectDocs?: string[] | null }
+  ) {
     const store = await this.storeRepository.findByIdWithOwner(storeId);
     if (!store) throw new AppError('STORE-001', 404);
     if (store.owner?.id !== ownerId) throw new AppError('AUTH-003', 403);
@@ -616,16 +623,57 @@ export class MotoboyService {
     const request = await repo.findOne({ where: { id: requestId, storeId }, relations: [ 'motoboy' ] });
     if (!request) throw new AppError('MOTO-025', 404);
 
-    request.status = status;
-    request.decidedAt = new Date();
-    request.decidedByUserId = ownerId;
-    if (status === 'REJECTED') {
-      const cleanReason = String(reason || '').trim();
-      request.reason = cleanReason || null;
-    } else {
-      request.reason = null;
-    }
-    await repo.save(request);
+    const cleanReason = String(reason || '').trim() || null;
+
+    // Keep store request + possible document rejection consistent.
+    await AppDataSource.transaction(async (manager) => {
+      const requestRepo = manager.getRepository(MotoboyStoreRequest);
+      const docRepo = manager.getRepository(MotoboyDocument);
+
+      request.status = status;
+      request.decidedAt = new Date();
+      request.decidedByUserId = ownerId;
+      request.reason = status === 'REJECTED' ? cleanReason : null;
+      await requestRepo.save(request);
+
+      if (status === 'REJECTED' && request.motoboyId && Array.isArray(options?.rejectDocs) && options!.rejectDocs!.length > 0) {
+        const normalizedTypes = Array.from(
+          new Set(
+            options!.rejectDocs!
+              .map((x) => String(x || '').trim().toUpperCase())
+              .filter(Boolean)
+              .filter((x) => x === 'CNH' || x === 'SELFIE' || x === 'CRLV')
+          )
+        );
+
+        for (const t of normalizedTypes) {
+          const doc = await docRepo.findOne({
+            where: { motoboyId: request.motoboyId, docType: t },
+            order: { uploadedAt: 'DESC' },
+          });
+          if (!doc) continue;
+          if (String(doc.status || '').toUpperCase() === 'APPROVED') continue; // don't override approved docs
+
+          doc.status = 'REJECTED';
+          doc.reviewedAt = new Date();
+          doc.reviewedByUserId = ownerId;
+          doc.metadata = {
+            ...(doc.metadata || {}),
+            review: {
+              ...(doc.metadata?.review || {}),
+              status: 'REJECTED',
+              reason: cleanReason,
+              reviewedAt: doc.reviewedAt.toISOString(),
+              reviewedByUserId: ownerId,
+              via: 'STORE_REQUEST_REJECT',
+              requestId,
+              storeId,
+            },
+          };
+          await docRepo.save(doc);
+        }
+      }
+    });
 
     await this.logAudit({
       storeId,
@@ -670,11 +718,11 @@ export class MotoboyService {
       await this.notifyMotoboyByEmail(
         request.motoboyId,
         'Solicitação rejeitada',
-        `Sua solicitação para entregar nesta loja foi rejeitada.${request.reason ? ` Motivo: ${request.reason}` : ''}`
+        `Sua solicitação para entregar nesta loja foi rejeitada.${cleanReason ? ` Motivo: ${cleanReason}` : ''}`
       );
       await this.notifyMotoboyByWhatsapp(
         request.motoboyId,
-        `Sua solicitação para entregar nesta loja foi rejeitada.${request.reason ? ` Motivo: ${request.reason}` : ''}`
+        `Sua solicitação para entregar nesta loja foi rejeitada.${cleanReason ? ` Motivo: ${cleanReason}` : ''}`
       );
     }
 
