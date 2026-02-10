@@ -44,16 +44,19 @@ export function AdminOrders() {
     return [...(orders || [])].sort((a, b) => resolveTime(b.createdAt) - resolveTime(a.createdAt));
   }, [orders]);
 
+  const canonicalStatus = (raw: any) => {
+    const st = String(raw || '').toLowerCase();
+    if (st === 'delivered') return 'done';
+    if (st === 'ready_for_delivery' || st === 'waiting_for_motoboy') return 'ready';
+    return st || 'pending';
+  };
+
   const filteredOrders = useMemo(() => {
     const normalized = query.trim().toLowerCase();
     return sortedOrders.filter((order) => {
       if (statusFilter !== 'all') {
-        const st = String(order.status || '').toLowerCase();
-        if (statusFilter === 'done') {
-          if (st !== 'done' && st !== 'delivered') return false;
-        } else if (st !== String(statusFilter).toLowerCase()) {
-          return false;
-        }
+        const st = canonicalStatus(order.status);
+        if (st !== String(statusFilter).toLowerCase()) return false;
       }
       if (dateFilter) {
         const date = order.createdAt?.seconds ? new Date(order.createdAt.seconds * 1000) : new Date(order.createdAt);
@@ -81,13 +84,12 @@ export function AdminOrders() {
   const statusCounts = useMemo(() => {
     return (orders || []).reduce(
       (acc, order) => {
-        const raw = String(order.status || 'pending').toLowerCase();
-        const key = raw === 'delivered' ? 'done' : raw;
+        const key = canonicalStatus(order.status);
         acc[key] = (acc[key] || 0) + 1;
         acc.all += 1;
         return acc;
       },
-      { all: 0, pending: 0, preparing: 0, done: 0, cancelled: 0 }
+      { all: 0, pending: 0, preparing: 0, ready: 0, done: 0, cancelled: 0 }
     );
   }, [orders]);
 
@@ -168,13 +170,14 @@ export function AdminOrders() {
 
             <div className="flex flex-col lg:flex-row lg:items-center gap-3 mb-4">
               <div className="flex flex-wrap gap-2">
-                {[
-                  { id: 'all', label: 'Todos', count: statusCounts.all },
-                  { id: 'pending', label: 'Pendentes', count: statusCounts.pending },
-                { id: 'preparing', label: 'Em preparo', count: statusCounts.preparing },
-                { id: 'done', label: 'Finalizados', count: statusCounts.done },
-                { id: 'cancelled', label: 'Cancelados', count: statusCounts.cancelled },
-              ].map((filter) => (
+	                {[
+	                  { id: 'all', label: 'Todos', count: statusCounts.all },
+	                  { id: 'pending', label: 'Pendentes', count: statusCounts.pending },
+	                { id: 'preparing', label: 'Em preparo', count: statusCounts.preparing },
+	                { id: 'ready', label: 'Aguardando', count: statusCounts.ready },
+	                { id: 'done', label: 'Finalizados', count: statusCounts.done },
+	                { id: 'cancelled', label: 'Cancelados', count: statusCounts.cancelled },
+	              ].map((filter) => (
                 <button
                   key={filter.id}
                   onClick={() => setStatusFilter(filter.id)}
