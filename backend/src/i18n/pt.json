@@ -67,5 +67,6 @@
   "MOTO-027": "Informe o tipo de veículo (moto, carro, etc.) para continuar.",
   "MOTO-028": "Placa inválida. Use o formato ABC1234 ou ABC1D23.",
   "MOTO-029": "Informe seu endereço completo (cidade, UF e endereço).",
-  "MOTO-030": "Envie e aguarde aprovação dos documentos obrigatórios para continuar."
+  "MOTO-030": "Envie os documentos obrigatórios para solicitar vínculo com lojas.",
+  "MOTO-031": "KYC do entregador ainda está em análise pela plataforma. Aguarde aprovação para concluir o vínculo."
 }

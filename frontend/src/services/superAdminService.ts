@@ -93,4 +93,36 @@ export const superAdminService = {
     });
     return handleResponse(response);
   },
+
+  async fetchMotoboyKycPending(token: string) {
+    const response = await fetch(buildUrl('/admin/motoboys/kyc/pending'), {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return handleResponse(response);
+  },
+
+  async fetchMotoboyDocuments(token: string, motoboyId: string) {
+    const response = await fetch(buildUrl(`/admin/motoboys/${motoboyId}/documents`), {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return handleResponse(response);
+  },
+
+  async approveMotoboyDocument(token: string, motoboyId: string, documentId: string) {
+    const response = await fetch(buildUrl(`/admin/motoboys/${motoboyId}/documents/${documentId}/approve`), {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({}),
+    });
+    return handleResponse(response);
+  },
+
+  async rejectMotoboyDocument(token: string, motoboyId: string, documentId: string, reason?: string | null) {
+    const response = await fetch(buildUrl(`/admin/motoboys/${motoboyId}/documents/${documentId}/reject`), {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reason: reason || null }),
+    });
+    return handleResponse(response);
+  },
 };

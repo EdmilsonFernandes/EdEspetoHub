@@ -17,6 +17,9 @@ import {
   CaretLeft,
   CaretRight,
   MagnifyingGlass,
+  IdentificationCard,
+  Camera,
+  Car,
 } from '@phosphor-icons/react';
 import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
 import { superAdminService } from '../services/superAdminService';
@@ -117,8 +120,12 @@ export function SuperAdmin() {
     payments: true,
     logs: false,
     events: false,
+    kyc: false,
   });
   const [activeSection, setActiveSection] = useState('executive');
+  const [kycQueue, setKycQueue] = useState<any[]>([]);
+  const [kycLoading, setKycLoading] = useState(false);
+  const [kycReason, setKycReason] = useState('');
 
   const loadOverview = async (authToken: string) => {
     setLoading(true);
@@ -145,7 +152,7 @@ export function SuperAdmin() {
   };
 
   useEffect(() => {
-    const sectionIds = [ 'executive', 'rankings', 'stores', 'payments', 'logs', 'events' ];
+    const sectionIds = [ 'executive', 'rankings', 'stores', 'payments', 'logs', 'events', 'kyc' ];
     const elements = sectionIds
       .map((id) => document.getElementById(id))
       .filter(Boolean) as HTMLElement[];
@@ -171,6 +178,40 @@ export function SuperAdmin() {
     if (token) {
       loadOverview(token);
     }
+  }, [token]);
+
+  const loadKycQueue = async (authToken: string) => {
+    setKycLoading(true);
+    try {
+      const data = await superAdminService.fetchMotoboyKycPending(authToken);
+      setKycQueue(Array.isArray(data) ? data : []);
+    } catch (err: any) {
+      showToast(err?.message || 'Não foi possível carregar a fila de KYC.', 'error');
+      setKycQueue([]);
+    } finally {
+      setKycLoading(false);
+    }
+  };
+
+  const reviewKycDocument = async (motoboyId: string, documentId: string, action: 'approve' | 'reject') => {
+    if (!token) return;
+    try {
+      if (action === 'approve') {
+        await superAdminService.approveMotoboyDocument(token, motoboyId, documentId);
+        showToast('Documento aprovado.', 'success');
+      } else {
+        const reason = String(kycReason || '').trim() || null;
+        await superAdminService.rejectMotoboyDocument(token, motoboyId, documentId, reason);
+        showToast('Documento rejeitado.', 'success');
+      }
+      await loadKycQueue(token);
+    } catch (err: any) {
+      showToast(err?.message || 'Não foi possível revisar o documento.', 'error');
+    }
+  };
+
+  useEffect(() => {
+    if (token) loadKycQueue(token);
   }, [token]);
 
   useEffect(() => {
@@ -851,6 +892,18 @@ export function SuperAdmin() {
             aria-current={activeSection === 'events' ? 'true' : 'false'}
           >
             Eventos
+          </a>
+          <a
+            href="#kyc"
+            onClick={() => setActiveSection('kyc')}
+            className={`px-3 py-1.5 rounded-full border border-slate-200 shadow-sm transition ${
+              activeSection === 'kyc'
+                ? 'bg-slate-900 text-white'
+                : 'bg-white text-slate-700 hover:-translate-y-0.5 hover:shadow-md'
+            }`}
+            aria-current={activeSection === 'kyc' ? 'true' : 'false'}
+          >
+            KYC
           </a>
         </div>
       </div>
@@ -1900,6 +1953,154 @@ export function SuperAdmin() {
           </>
           ) : (
             <div className="text-sm text-slate-500">Eventos ocultos.</div>
+          )}
+        </div>
+
+        <div id="kyc" className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <IdentificationCard size={20} weight="duotone" className="text-slate-700" />
+              <h2 className="text-lg font-bold text-slate-800">KYC (motoboys)</h2>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => toggleSection('kyc')}
+                className="px-3 py-2 rounded-lg text-xs font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50 flex items-center gap-1"
+              >
+                <CaretRight
+                  weight="bold"
+                  size={14}
+                  className={`transition-transform ${sectionsOpen.kyc ? 'rotate-90' : ''}`}
+                />
+                {sectionsOpen.kyc ? 'Ocultar' : 'Mostrar'}
+              </button>
+              <button
+                onClick={() => loadKycQueue(token)}
+                className="px-3 py-2 rounded-lg text-sm font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50 flex items-center gap-1"
+                disabled={!token || kycLoading}
+              >
+                <ArrowClockwise size={14} weight="duotone" />
+                {kycLoading ? 'Atualizando...' : 'Atualizar'}
+              </button>
+            </div>
+          </div>
+
+          {sectionsOpen.kyc ? (
+            <>
+              <div className="grid lg:grid-cols-[1.4fr,1fr] gap-3 mb-4">
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                  <p className="text-xs uppercase tracking-[0.2em] text-slate-500 font-semibold">Fila</p>
+                  <p className="text-2xl font-black text-slate-900 mt-1">{kycQueue.length}</p>
+                  <p className="text-xs text-slate-500 mt-1">Motoboys com documentos pendentes.</p>
+                </div>
+                <div className="rounded-2xl border border-slate-200 bg-white p-3">
+                  <p className="text-xs uppercase tracking-[0.2em] text-slate-500 font-semibold">Motivo (rejeição)</p>
+                  <input
+                    value={kycReason}
+                    onChange={(e) => setKycReason(e.target.value)}
+                    placeholder="Ex: Documento ilegível / selfie não confere"
+                    className="mt-2 w-full px-3 py-2 rounded-xl border border-slate-200 text-sm outline-none"
+                  />
+                  <p className="text-[11px] text-slate-500 mt-2">
+                    Dica: use um motivo curto e claro para o entregador reenviar.
+                  </p>
+                </div>
+              </div>
+
+              {kycQueue.length === 0 ? (
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+                  Nenhum documento pendente agora.
+                </div>
+              ) : (
+                <div className="grid gap-3">
+                  {kycQueue.map((entry: any) => {
+                    const motoboy = entry?.motoboy;
+                    const docs = Array.isArray(entry?.documents) ? entry.documents : [];
+                    const name = motoboy?.user?.fullName || 'Motoboy';
+                    const email = motoboy?.user?.email || '-';
+                    const phone = motoboy?.user?.phone || '';
+                    return (
+                      <div
+                        key={motoboy?.id || entry?.latestAt || Math.random()}
+                        className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_26px_60px_-48px_rgba(15,23,42,0.35)]"
+                        style={{ borderLeftWidth: 6, borderLeftColor: 'rgb(245 158 11)' }}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <p className="text-sm font-black text-slate-900 truncate">{name}</p>
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800">
+                                Pendente
+                              </span>
+                            </div>
+                            <p className="text-xs text-slate-500 mt-1">{email}</p>
+                            {phone ? <p className="text-xs text-slate-500">{phone}</p> : null}
+                            <p className="text-[11px] text-slate-400 mt-2">
+                              Último envio: {formatDate(entry?.latestAt)}
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => loadKycQueue(token)}
+                            className="btn-press px-3 py-2 rounded-xl border border-slate-200 bg-white text-[11px] font-extrabold text-slate-700"
+                          >
+                            Recarregar
+                          </button>
+                        </div>
+
+                        <div className="mt-3 grid md:grid-cols-3 gap-2">
+                          {docs.map((doc: any) => {
+                            const type = String(doc?.docType || '').toUpperCase();
+                            const icon =
+                              type === 'CNH' ? <IdentificationCard size={16} weight="duotone" /> : type === 'SELFIE' ? <Camera size={16} weight="duotone" /> : <Car size={16} weight="duotone" />;
+                            return (
+                              <div key={doc.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                                <div className="flex items-center justify-between gap-2">
+                                  <div className="flex items-center gap-2 min-w-0">
+                                    <span className="text-slate-700">{icon}</span>
+                                    <span className="text-xs font-extrabold text-slate-900 truncate">{type}</span>
+                                  </div>
+                                  <span className="text-[10px] font-semibold text-slate-500">
+                                    {formatDate(doc.uploadedAt)}
+                                  </span>
+                                </div>
+
+                                <div className="mt-3 flex flex-wrap gap-2">
+                                  <a
+                                    href={doc.fileKey}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-[11px] font-extrabold text-slate-700"
+                                  >
+                                    Ver
+                                  </a>
+                                  <button
+                                    type="button"
+                                    onClick={() => reviewKycDocument(motoboy.id, doc.id, 'approve')}
+                                    className="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-[11px] font-extrabold"
+                                  >
+                                    Aprovar
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => reviewKycDocument(motoboy.id, doc.id, 'reject')}
+                                    className="px-3 py-1.5 rounded-lg bg-rose-600 text-white text-[11px] font-extrabold"
+                                  >
+                                    Rejeitar
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="text-sm text-slate-500">KYC oculto.</div>
           )}
         </div>
 

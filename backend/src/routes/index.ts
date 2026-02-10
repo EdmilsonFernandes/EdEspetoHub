@@ -22,6 +22,7 @@ import { PlatformAdminController } from '../controllers/PlatformAdminController'
 import { PlatformPublicController } from '../controllers/PlatformPublicController';
 import { PaymentController } from '../controllers/PaymentController';
 import { MotoboyController } from '../controllers/MotoboyController';
+import { MotoboyKycController } from '../controllers/MotoboyKycController';
 import { DeliveryController } from '../controllers/DeliveryController';
 import { LegalController } from '../controllers/LegalController';
 import { DeliveryBillingController } from '../controllers/DeliveryBillingController';
@@ -60,10 +61,26 @@ routes.get('/admin/overview', requireAuth, requireRole('SUPER_ADMIN'), PlatformA
 routes.get('/admin/stores', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.listStores);
 routes.get('/admin/payment-events', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.listPaymentEvents);
 routes.get('/admin/access-logs', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.listAccessLogs);
-routes.post('/admin/payments/:paymentId/reprocess', requireAuth, requireRole('SUPER_ADMIN'), PaymentController.reprocess);
-routes.patch('/admin/stores/:storeId/suspend', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.suspendStore);
-routes.patch('/admin/stores/:storeId/reactivate', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.reactivateStore);
-routes.patch('/admin/stores/:storeId/plan-exempt', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.updatePlanExempt);
+ routes.post('/admin/payments/:paymentId/reprocess', requireAuth, requireRole('SUPER_ADMIN'), PaymentController.reprocess);
+ routes.patch('/admin/stores/:storeId/suspend', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.suspendStore);
+ routes.patch('/admin/stores/:storeId/reactivate', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.reactivateStore);
+ routes.patch('/admin/stores/:storeId/plan-exempt', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.updatePlanExempt);
+
+// Platform KYC (motoboy documents) - SUPER_ADMIN only
+routes.get('/admin/motoboys/kyc/pending', requireAuth, requireRole('SUPER_ADMIN'), MotoboyKycController.listPending);
+routes.get('/admin/motoboys/:motoboyId/documents', requireAuth, requireRole('SUPER_ADMIN'), MotoboyKycController.listMotoboyDocuments);
+routes.post(
+  '/admin/motoboys/:motoboyId/documents/:documentId/approve',
+  requireAuth,
+  requireRole('SUPER_ADMIN'),
+  MotoboyKycController.approveDocument
+);
+routes.post(
+  '/admin/motoboys/:motoboyId/documents/:documentId/reject',
+  requireAuth,
+  requireRole('SUPER_ADMIN'),
+  MotoboyKycController.rejectDocument
+);
 
 // Store public
 routes.get('/public/platform/metrics', PlatformPublicController.metrics);
@@ -153,23 +170,17 @@ routes.post(
 // Delivery billing (motoboy fees)
 routes.get('/stores/:storeId/delivery-billing', requireAuth, requireRole('ADMIN'), DeliveryBillingController.getCurrent);
 routes.post('/stores/:storeId/delivery-billing/pay', requireAuth, requireRole('ADMIN'), DeliveryBillingController.pay);
-routes.get(
-  '/stores/:storeId/motoboys/:motoboyId/documents',
+ routes.get(
+   '/stores/:storeId/motoboys/:motoboyId/documents',
+   requireAuth,
+   requireRole('ADMIN'),
+   MotoboyController.listDocuments
+ );
+ routes.post(
+  '/stores/:storeId/motoboys/:motoboyId/documents/:documentId/reupload',
   requireAuth,
   requireRole('ADMIN'),
-  MotoboyController.listDocuments
-);
-routes.post(
-  '/stores/:storeId/motoboys/:motoboyId/documents/:documentId/approve',
-  requireAuth,
-  requireRole('ADMIN'),
-  MotoboyController.approveDocument
-);
-routes.post(
-  '/stores/:storeId/motoboys/:motoboyId/documents/:documentId/reject',
-  requireAuth,
-  requireRole('ADMIN'),
-  MotoboyController.rejectDocument
-);
+  MotoboyController.requestDocumentReupload
+ );
 
 export default routes;

@@ -22,11 +22,8 @@ export const motoboyAdminService = {
   async listDocuments(storeId: string, motoboyId: string) {
     return apiClient.get(`/stores/${storeId}/motoboys/${motoboyId}/documents`);
   },
-  async approveDocument(storeId: string, motoboyId: string, documentId: string) {
-    return apiClient.post(`/stores/${storeId}/motoboys/${motoboyId}/documents/${documentId}/approve`, {});
-  },
-  async rejectDocument(storeId: string, motoboyId: string, documentId: string, reason?: string | null) {
-    return apiClient.post(`/stores/${storeId}/motoboys/${motoboyId}/documents/${documentId}/reject`, { reason: reason || null });
+  async requestDocumentReupload(storeId: string, motoboyId: string, documentId: string, reason?: string | null) {
+    return apiClient.post(`/stores/${storeId}/motoboys/${motoboyId}/documents/${documentId}/reupload`, { reason: reason || null });
   },
   async listRequests(storeId: string) {
     return apiClient.get(`/stores/${storeId}/motoboy-requests`);

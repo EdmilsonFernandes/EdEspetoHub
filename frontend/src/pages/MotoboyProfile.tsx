@@ -331,17 +331,22 @@ export function MotoboyProfile() {
     return '🧭';
   }, [profileDraft.vehicleType, profile?.vehicleType]);
 
-  const canStartUpload = (docType: string) => {
-    const normalized = String(docType || '').toUpperCase();
-    const currentDoc = documentsByType.get(normalized);
-    const currentStatus = String(currentDoc?.status || '').toUpperCase();
-    const cnhDoc = documentsByType.get('CNH');
-    const cnhStatus = String(cnhDoc?.status || '').toUpperCase();
+	  const canStartUpload = (docType: string) => {
+	    const normalized = String(docType || '').toUpperCase();
+	    const currentDoc = documentsByType.get(normalized);
+	    const currentStatus = String(currentDoc?.status || '').toUpperCase();
+	    const cnhDoc = documentsByType.get('CNH');
+	    const cnhStatus = String(cnhDoc?.status || '').toUpperCase();
+	    const storeReuploadRequests = currentDoc?.metadata?.review?.storeReuploadRequests || null;
+	    const reuploadRequested =
+	      Boolean(storeReuploadRequests) &&
+	      typeof storeReuploadRequests === 'object' &&
+	      Object.keys(storeReuploadRequests).length > 0;
 
-    if (normalized === 'SELFIE' && (!cnhDoc || cnhStatus === 'REJECTED')) return false;
-    if (currentDoc && (currentStatus === 'APPROVED' || currentStatus === 'PENDING')) return false;
-    return true;
-  };
+	    if (normalized === 'SELFIE' && (!cnhDoc || cnhStatus === 'REJECTED')) return false;
+	    if (currentDoc && (currentStatus === 'PENDING' || (currentStatus === 'APPROVED' && !reuploadRequested))) return false;
+	    return true;
+	  };
 
   const uploadDocumentBase64 = async (docType: string, fileBase64: string) => {
     setUploading(true);
@@ -358,22 +363,27 @@ export function MotoboyProfile() {
     }
   };
 
-  const handleUploadDocument = async (docType: string) => {
-    const normalized = String(docType || '').toUpperCase();
-    const currentDoc = documentsByType.get(normalized);
-    const currentStatus = String(currentDoc?.status || '').toUpperCase();
-    const cnhDoc = documentsByType.get('CNH');
-    const cnhStatus = String(cnhDoc?.status || '').toUpperCase();
+	  const handleUploadDocument = async (docType: string) => {
+	    const normalized = String(docType || '').toUpperCase();
+	    const currentDoc = documentsByType.get(normalized);
+	    const currentStatus = String(currentDoc?.status || '').toUpperCase();
+	    const cnhDoc = documentsByType.get('CNH');
+	    const cnhStatus = String(cnhDoc?.status || '').toUpperCase();
+	    const storeReuploadRequests = currentDoc?.metadata?.review?.storeReuploadRequests || null;
+	    const reuploadRequested =
+	      Boolean(storeReuploadRequests) &&
+	      typeof storeReuploadRequests === 'object' &&
+	      Object.keys(storeReuploadRequests).length > 0;
 
     // Enforce order: CNH first, then SELFIE. Also lock uploads once sent (pending/approved).
     if (normalized === 'SELFIE' && (!cnhDoc || cnhStatus === 'REJECTED')) {
       showToast('Envie a CNH primeiro e depois envie a selfie segurando a CNH.', 'error');
       return;
     }
-    if (currentDoc && (currentStatus === 'APPROVED' || currentStatus === 'PENDING')) {
-      showToast('Documento já enviado. Aguarde a validação.', 'info');
-      return;
-    }
+	    if (currentDoc && (currentStatus === 'PENDING' || (currentStatus === 'APPROVED' && !reuploadRequested))) {
+	      showToast('Documento já enviado. Aguarde a validação.', 'info');
+	      return;
+	    }
 
     const file = docFiles[docType];
     if (!file) {
@@ -684,20 +694,34 @@ export function MotoboyProfile() {
           </div>
         )}
         <div className="grid gap-3">
-          {documentTypes.map((doc) => {
-            const current = documentsByType.get(doc.key);
-            const currentStatus = String(current?.status || '').toUpperCase();
-            const isApproved = currentStatus === 'APPROVED';
-            const isPending = currentStatus === 'PENDING';
-            const isRejected = currentStatus === 'REJECTED';
+	          {documentTypes.map((doc) => {
+	            const current = documentsByType.get(doc.key);
+	            const currentStatus = String(current?.status || '').toUpperCase();
+	            const isApproved = currentStatus === 'APPROVED';
+	            const isPending = currentStatus === 'PENDING';
+	            const isRejected = currentStatus === 'REJECTED';
+	            const storeReuploadRequests = (current?.metadata?.review?.storeReuploadRequests || null) as any;
+	            const reuploadRequest =
+	              storeReuploadRequests && typeof storeReuploadRequests === 'object'
+	                ? (Object.values(storeReuploadRequests as any) as any[])
+	                    .filter(Boolean)
+	                    .sort((a: any, b: any) => {
+	                      const atA = a?.requestedAt ? new Date(String(a.requestedAt)).getTime() : 0;
+	                      const atB = b?.requestedAt ? new Date(String(b.requestedAt)).getTime() : 0;
+	                      return atB - atA;
+	                    })[0] || null
+	                : null;
+	            const reuploadStoreId = reuploadRequest?.storeId ? String(reuploadRequest.storeId) : null;
+	            const reuploadStoreName =
+	              (reuploadStoreId && (storeById.get(reuploadStoreId)?.name || requestByStoreId.get(reuploadStoreId)?.store?.name)) || null;
             const cnhDoc = documentsByType.get('CNH');
             const cnhStatus = String(cnhDoc?.status || '').toUpperCase();
             const blockedByOrder = doc.key === 'SELFIE' && (!cnhDoc || cnhStatus === 'REJECTED');
-            const lockUpload = Boolean(current) && (isApproved || isPending);
-            const canUpload = !blockedByOrder && (!current || isRejected) && !uploading;
+            const lockUpload = Boolean(current) && (isPending || (isApproved && !reuploadRequest));
+            const canUpload = canStartUpload(doc.key) && !uploading;
             const stepLabel = doc.key === 'CNH' ? '1/2' : doc.key === 'SELFIE' ? '2/2' : 'Opcional';
             const previewTitle = `${doc.label}`;
-            return (
+	            return (
               <div key={doc.key} className="rounded-2xl border border-slate-100 p-3 sm:p-4">
                 <div className="grid gap-3 sm:grid-cols-[1.1fr_0.9fr]">
                   <div className="space-y-2">
@@ -753,6 +777,15 @@ export function MotoboyProfile() {
                       </div>
                     ) : (
                       <>
+                        {reuploadRequest && isApproved ? (
+                          <div className="rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                            <div className="font-extrabold">Uma loja pediu reenvio deste documento.</div>
+                            <div className="text-amber-800 mt-0.5">
+                              {reuploadStoreName ? `Loja: ${reuploadStoreName}. ` : ''}
+                              {reuploadRequest?.reason ? `Motivo: ${String(reuploadRequest.reason)}` : 'Envie uma foto mais nítida.'}
+                            </div>
+                          </div>
+                        ) : null}
                         {(doc.key === 'CNH' || doc.key === 'SELFIE') && (
                           <button
                             type="button"

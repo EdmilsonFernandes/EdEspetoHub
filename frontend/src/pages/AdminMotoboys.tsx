@@ -20,9 +20,9 @@ export function AdminMotoboys() {
   const [rejectRequestTarget, setRejectRequestTarget] = useState<any | null>(null);
   const [rejectRequestReason, setRejectRequestReason] = useState('');
   const [rejectRequestDocs, setRejectRequestDocs] = useState<Record<string, boolean>>({ CRLV: true, CNH: false, SELFIE: false });
-  const [rejectDocOpen, setRejectDocOpen] = useState(false);
-  const [rejectDocTarget, setRejectDocTarget] = useState<{ motoboyId: string; documentId: string; docType?: string } | null>(null);
-  const [rejectDocReason, setRejectDocReason] = useState('');
+  const [reuploadDocOpen, setReuploadDocOpen] = useState(false);
+  const [reuploadDocTarget, setReuploadDocTarget] = useState<{ motoboyId: string; documentId: string; docType?: string } | null>(null);
+  const [reuploadDocReason, setReuploadDocReason] = useState('');
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showInactive, setShowInactive] = useState(false);
@@ -126,37 +126,28 @@ export function AdminMotoboys() {
     await loadDocuments(motoboyId);
   };
 
-  const docsModalLatest = useMemo(() => {
-    if (!docsModalMotoboyId) return [];
-    return latestDocs(documentsByMotoboy[docsModalMotoboyId] || []);
-  }, [docsModalMotoboyId, documentsByMotoboy]);
+  const openReuploadDocModal = (motoboyIdToRequest: string, documentId: string, docType?: string) => {
+    setReuploadDocTarget({ motoboyId: motoboyIdToRequest, documentId, docType });
+    setReuploadDocReason('');
+    setReuploadDocOpen(true);
+  };
 
-  const approveAllLatestDocs = async () => {
-    if (!storeId || !docsModalMotoboyId) return;
-    const latest = docsModalLatest;
-    const targets = latest.filter((d: any) => String(d?.status || '').toUpperCase() !== 'APPROVED');
-    if (targets.length === 0) return;
+  const submitReuploadDoc = async () => {
+    if (!storeId || !reuploadDocTarget?.motoboyId || !reuploadDocTarget?.documentId) return;
     if (reviewSubmitting) return;
     setReviewSubmitting(true);
     try {
-      for (const d of targets) {
-        await motoboyAdminService.approveDocument(storeId, docsModalMotoboyId, d.id);
-      }
-      showToast('Documentos aprovados.', 'success');
-      await loadDocuments(docsModalMotoboyId);
+      const reason = String(reuploadDocReason || '').trim() || null;
+      await motoboyAdminService.requestDocumentReupload(storeId, reuploadDocTarget.motoboyId, reuploadDocTarget.documentId, reason);
+      showToast('Pedido de reenvio enviado.', 'success');
+      setReuploadDocOpen(false);
+      setReuploadDocTarget(null);
+      await loadDocuments(reuploadDocTarget.motoboyId);
     } catch (error: any) {
-      showToast(error?.message || 'Não foi possível aprovar os documentos.', 'error');
+      showToast(error?.message || 'Não foi possível pedir reenvio.', 'error');
     } finally {
       setReviewSubmitting(false);
     }
-  };
-
-  const quickRejectCRLV = async () => {
-    if (!docsModalMotoboyId) return;
-    const latest = docsModalLatest;
-    const crlv = latest.find((d: any) => normalizeDocType(d?.docType) === 'CRLV');
-    if (!crlv) return;
-    openRejectDocModal(docsModalMotoboyId, crlv.id, 'CRLV');
   };
 
   const loadMotoboys = async () => {
@@ -219,26 +210,6 @@ export function AdminMotoboys() {
     }
   };
 
-  const handleReviewDocument = async (
-    motoboyIdToReview: string,
-    documentId: string,
-    status: 'approve' | 'reject',
-    reason?: string | null
-  ) => {
-    if (!storeId) return;
-    try {
-      if (status === 'approve') {
-        await motoboyAdminService.approveDocument(storeId, motoboyIdToReview, documentId);
-      } else {
-        await motoboyAdminService.rejectDocument(storeId, motoboyIdToReview, documentId, reason || null);
-      }
-      showToast('Documento atualizado.', 'success');
-      loadDocuments(motoboyIdToReview);
-    } catch (error: any) {
-      showToast(error?.message || 'Não foi possível atualizar o documento.', 'error');
-    }
-  };
-
   const submitRejectRequest = async () => {
     if (!storeId || !rejectRequestTarget?.id) return;
     if (reviewSubmitting) return;
@@ -270,26 +241,6 @@ export function AdminMotoboys() {
     'Arquivo errado (não é este documento)',
     'Faltou frente/verso',
   ];
-
-  const openRejectDocModal = (motoboyIdToReview: string, documentId: string, docType?: string) => {
-    setRejectDocTarget({ motoboyId: motoboyIdToReview, documentId, docType });
-    setRejectDocReason('');
-    setRejectDocOpen(true);
-  };
-
-  const submitRejectDoc = async () => {
-    if (!rejectDocTarget?.motoboyId || !rejectDocTarget?.documentId) return;
-    if (reviewSubmitting) return;
-    setReviewSubmitting(true);
-    try {
-      const reason = String(rejectDocReason || '').trim() || null;
-      await handleReviewDocument(rejectDocTarget.motoboyId, rejectDocTarget.documentId, 'reject', reason);
-      setRejectDocOpen(false);
-      setRejectDocTarget(null);
-    } finally {
-      setReviewSubmitting(false);
-    }
-  };
 
   const handleUnlink = async (motoboyIdToUnlink: string) => {
     if (!storeId) return;
@@ -527,31 +478,11 @@ export function AdminMotoboys() {
 
             <div className="mt-4 flex items-center justify-between gap-3">
               <div className="text-xs text-slate-600">
-                {docsLoadingId === docsModalMotoboyId ? 'Carregando documentos...' : 'Clique para ampliar e revisar.'}
+                {docsLoadingId === docsModalMotoboyId
+                  ? 'Carregando documentos...'
+                  : 'Documentos validados pela equipe Chama no Espeto. Se algo estiver ruim, peça reenvio.'}
               </div>
               <div className="flex items-center gap-2">
-                {docsModalLatest.some((d: any) => String(d?.status || '').toUpperCase() !== 'APPROVED') ? (
-                  <button
-                    type="button"
-                    onClick={approveAllLatestDocs}
-                    disabled={reviewSubmitting}
-                    className="btn-press rounded-xl bg-emerald-600 px-3 py-2 text-xs font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(16,185,129,0.55)] disabled:opacity-50"
-                    title="Aprova todos os últimos documentos que não estão aprovados"
-                  >
-                    Aprovar pendências
-                  </button>
-                ) : null}
-                {docsModalLatest.some((d: any) => String(d?.docType || '').toUpperCase() === 'CRLV') ? (
-                  <button
-                    type="button"
-                    onClick={quickRejectCRLV}
-                    disabled={reviewSubmitting}
-                    className="btn-press rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-extrabold text-rose-800 disabled:opacity-50"
-                    title="Rejeitar rapidamente o CRLV (com motivo)"
-                  >
-                    Recusar CRLV
-                  </button>
-                ) : null}
                 <button
                   type="button"
                   onClick={() => setDocsModalShowHistory((v) => !v)}
@@ -641,9 +572,9 @@ export function AdminMotoboys() {
               </label>
 
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <p className="text-xs font-extrabold text-slate-800">Recusar documentos junto?</p>
+                <p className="text-xs font-extrabold text-slate-800">Pedir reenvio de documentos</p>
                 <p className="text-[11px] text-slate-600 mt-1">
-                  Se o problema for documento, marque aqui para o entregador poder reenviar.
+                  Se o problema for documento (foto escura, ilegível, arquivo errado), marque aqui para o entregador reenviar.
                 </p>
                 <div className="mt-3 grid gap-2 sm:grid-cols-3">
                   {['CNH', 'SELFIE', 'CRLV'].map((k) => (
@@ -688,14 +619,14 @@ export function AdminMotoboys() {
         </div>
       )}
 
-      {rejectDocOpen && (
+      {reuploadDocOpen && (
         <div
           className="fixed inset-0 z-[91] bg-black/60 flex items-end sm:items-center justify-center p-4"
           role="dialog"
           aria-modal="true"
           onClick={() => {
             if (reviewSubmitting) return;
-            setRejectDocOpen(false);
+            setReuploadDocOpen(false);
           }}
         >
           <div
@@ -704,17 +635,17 @@ export function AdminMotoboys() {
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Reprovação</p>
-                <h2 className="text-lg font-black text-slate-900">Rejeitar documento</h2>
+                <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Reenvio</p>
+                <h2 className="text-lg font-black text-slate-900">Pedir reenvio do documento</h2>
                 <p className="text-sm text-slate-600 mt-1">
-                  {rejectDocTarget?.docType ? <span className="font-semibold">{rejectDocTarget.docType}</span> : 'Documento'}
+                  {reuploadDocTarget?.docType ? <span className="font-semibold">{reuploadDocTarget.docType}</span> : 'Documento'}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => {
                   if (reviewSubmitting) return;
-                  setRejectDocOpen(false);
+                  setReuploadDocOpen(false);
                 }}
                 className="btn-press rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-700"
               >
@@ -730,7 +661,7 @@ export function AdminMotoboys() {
                     <button
                       key={chip}
                       type="button"
-                      onClick={() => setRejectDocReason((prev) => (prev ? `${prev}\n${chip}` : chip))}
+                      onClick={() => setReuploadDocReason((prev) => (prev ? `${prev}\n${chip}` : chip))}
                       className="btn-press rounded-full border border-slate-200 bg-white px-3 py-1 text-[11px] font-extrabold text-slate-700"
                       title="Adicionar motivo"
                     >
@@ -739,8 +670,8 @@ export function AdminMotoboys() {
                   ))}
                 </div>
                 <textarea
-                  value={rejectDocReason}
-                  onChange={(e) => setRejectDocReason(e.target.value)}
+                  value={reuploadDocReason}
+                  onChange={(e) => setReuploadDocReason(e.target.value)}
                   placeholder="Ex: Foto escura/reflexo. Reenvie em boa iluminação."
                   rows={3}
                   className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand-primary focus:border-brand-primary"
@@ -751,7 +682,7 @@ export function AdminMotoboys() {
                   type="button"
                   onClick={() => {
                     if (reviewSubmitting) return;
-                    setRejectDocOpen(false);
+                    setReuploadDocOpen(false);
                   }}
                   className="btn-press rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-extrabold text-slate-800"
                   disabled={reviewSubmitting}
@@ -760,11 +691,11 @@ export function AdminMotoboys() {
                 </button>
                 <button
                   type="button"
-                  onClick={submitRejectDoc}
-                  className="btn-press rounded-xl bg-rose-600 px-4 py-2.5 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(244,63,94,0.8)] disabled:opacity-50"
+                  onClick={submitReuploadDoc}
+                  className="btn-press rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(245,158,11,0.8)] disabled:opacity-50"
                   disabled={reviewSubmitting}
                 >
-                  {reviewSubmitting ? 'Rejeitando...' : 'Rejeitar'}
+                  {reviewSubmitting ? 'Enviando...' : 'Pedir reenvio'}
                 </button>
               </div>
             </div>
@@ -1152,26 +1083,18 @@ export function AdminMotoboys() {
               >
                 Abrir em nova aba
               </a>
-              {String(previewDoc.status || '').toUpperCase() !== 'APPROVED' && previewDoc?._motoboyId ? (
-                <div className="flex gap-2">
+              {previewDoc?._motoboyId ? (
+                <div className="flex gap-2 items-center">
                   <button
                     type="button"
-                    onClick={() => handleReviewDocument(previewDoc._motoboyId, previewDoc.id, 'approve')}
-                    className="px-3 py-1.5 rounded-lg bg-emerald-500 text-white text-xs font-extrabold"
+                    onClick={() => openReuploadDocModal(previewDoc._motoboyId, previewDoc.id, previewDoc?.docType)}
+                    className="px-3 py-1.5 rounded-lg bg-amber-500 text-white text-xs font-extrabold"
                   >
-                    Aprovar
+                    Pedir reenvio
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => openRejectDocModal(previewDoc._motoboyId, previewDoc.id, previewDoc?.docType)}
-                    className="px-3 py-1.5 rounded-lg bg-rose-500 text-white text-xs font-extrabold"
-                  >
-                    Rejeitar
-                  </button>
+                  <span className="text-xs text-slate-500 font-semibold">Validação feita pela plataforma.</span>
                 </div>
-              ) : (
-                <span className="text-xs text-emerald-700 font-semibold">Documento aprovado.</span>
-              )}
+              ) : null}
             </div>
             {previewDoc.fileKey ? (
               <img

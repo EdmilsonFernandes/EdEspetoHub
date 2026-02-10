@@ -60,6 +60,33 @@ flowchart LR
   A --> W[Face worker (Python)]
 ```
 
+## Motoboy: KYC (plataforma) + vínculo (loja)
+
+O cadastro do motoboy tem **duas camadas**:
+
+1) **KYC global (plataforma)**: CNH/SELFIE/CRLV são validados pela equipe (SUPER_ADMIN) e/ou pela verificação assistida (face-worker).
+2) **Vínculo por loja**: cada loja decide se aceita o motoboy na operação (aprovar/rejeitar vínculo), mas **não altera** o status global do documento.
+
+Fluxo:
+
+```mermaid
+flowchart TD
+  M[Motoboy] -->|envia docs| API[API]
+  API -->|verifica selfie vs CNH| FW[face-worker]
+  API -->|fila KYC| SA[SUPER_ADMIN]
+  SA -->|aprova/rejeita docs| API
+  M -->|solicita vínculo| API
+  API -->|lista pendências+docs| LOJA[Loja (Admin)]
+  LOJA -->|aprova vínculo (se KYC aprovado)| API
+  LOJA -->|rejeita vínculo + pede reenvio| API
+  API -->|motivo do reenvio| M
+```
+
+Regras principais:
+- O motoboy pode **solicitar vínculo** assim que enviar os documentos obrigatórios (mesmo se estiverem em análise).
+- A loja só consegue **aprovar vínculo** quando o KYC global estiver **APROVADO**.
+- Se a loja precisar, ela pode **pedir reenvio** (com motivo) sem rejeitar o KYC global.
+
 ## Rodar local com Docker Compose (recomendado)
 
 ```bash

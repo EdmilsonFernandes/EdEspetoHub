@@ -67,5 +67,6 @@
   "MOTO-027": "Please select your vehicle type to continue.",
   "MOTO-028": "Invalid plate. Use ABC1234 or ABC1D23 format.",
   "MOTO-029": "Please fill your full address (city, state and address).",
-  "MOTO-030": "Please upload and wait approval for the required documents to continue."
+  "MOTO-030": "Please upload the required documents to request store links.",
+  "MOTO-031": "Courier KYC is still under platform review. Wait for approval to complete the store link."
 }

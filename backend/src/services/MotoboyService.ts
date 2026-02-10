@@ -50,7 +50,7 @@ export class MotoboyService {
     return /^(?:[A-Z]{3}[0-9]{4}|[A-Z]{3}[0-9][A-Z][0-9]{2})$/.test(plate);
   }
 
-  private async ensureMotoboyIsReadyToRequestStores(motoboy: Motoboy) {
+  private async ensureMotoboyProfileIsComplete(motoboy: Motoboy) {
     const vehicleType = String(motoboy.vehicleType || '').toUpperCase();
     const plate = this.normalizePlate(motoboy.vehiclePlate);
     const city = String(motoboy.city || '').trim();
@@ -62,18 +62,39 @@ export class MotoboyService {
       throw new AppError('MOTO-028', 400);
     }
     if (!city || !state || state.length !== 2 || !address) throw new AppError('MOTO-029', 400);
+  }
 
-    // For store link requests, documents must exist (can be pending), and must not be rejected.
-    // Approval happens by the store owner during review.
+  private getRequiredDocTypesForMotoboy(motoboy: Motoboy) {
+    const vehicleType = String(motoboy.vehicleType || '').toUpperCase();
+    const mustHave = [ 'CNH', 'SELFIE' ];
+    if (vehicleType === 'MOTO' || vehicleType === 'CARRO' || vehicleType === 'OUTRO') mustHave.push('CRLV');
+    return mustHave;
+  }
+
+  private async listLatestDocsByType(motoboyId: string) {
     const docRepo = AppDataSource.getRepository(MotoboyDocument);
-    const docs = await docRepo.find({ where: { motoboyId: motoboy.id }, order: { uploadedAt: 'DESC' } });
+    const docs = await docRepo.find({ where: { motoboyId }, order: { uploadedAt: 'DESC' } });
     const byType = new Map<string, MotoboyDocument>();
     for (const d of docs) {
       const key = String(d.docType || '').toUpperCase();
       if (!byType.has(key)) byType.set(key, d);
     }
-    const mustHave = [ 'CNH', 'SELFIE' ];
-    if (vehicleType === 'MOTO' || vehicleType === 'CARRO' || vehicleType === 'OUTRO') mustHave.push('CRLV');
+    return byType;
+  }
+
+  /**
+   * Gate for creating store link requests.
+   * - Requires profile completeness
+   * - Requires required docs to be submitted (PENDING or APPROVED)
+   * - Blocks if any required doc is missing or REJECTED
+   *
+   * Store owners need to see the request + docs while platform review is pending.
+   */
+  private async ensureMotoboyCanRequestStoreLinks(motoboy: Motoboy) {
+    await this.ensureMotoboyProfileIsComplete(motoboy);
+
+    const byType = await this.listLatestDocsByType(motoboy.id);
+    const mustHave = this.getRequiredDocTypesForMotoboy(motoboy);
 
     const missingOrRejected: Array<{ type: string; status: string }> = [];
     for (const t of mustHave) {
@@ -83,12 +104,33 @@ export class MotoboyService {
         missingOrRejected.push({ type: t, status: 'MISSING' });
         continue;
       }
-      if (status === 'REJECTED') {
-        missingOrRejected.push({ type: t, status });
-      }
+      if (status === 'REJECTED') missingOrRejected.push({ type: t, status });
     }
     if (missingOrRejected.length > 0) {
       throw new AppError('MOTO-030', 400, { pending: missingOrRejected.map((x) => x.type), documents: missingOrRejected });
+    }
+  }
+
+  /**
+   * Gate for approving store link requests:
+   * required docs must be globally APPROVED by platform (SUPER_ADMIN).
+   */
+  private async ensureMotoboyKycApproved(motoboy: Motoboy) {
+    const byType = await this.listLatestDocsByType(motoboy.id);
+    const mustHave = this.getRequiredDocTypesForMotoboy(motoboy);
+
+    const notApproved: Array<{ type: string; status: string }> = [];
+    for (const t of mustHave) {
+      const d = byType.get(t);
+      const status = String(d?.status || '').toUpperCase();
+      if (!d) {
+        notApproved.push({ type: t, status: 'MISSING' });
+        continue;
+      }
+      if (status !== 'APPROVED') notApproved.push({ type: t, status });
+    }
+    if (notApproved.length > 0) {
+      throw new AppError('MOTO-031', 409, { pending: notApproved.map((x) => x.type), documents: notApproved });
     }
   }
 
@@ -132,6 +174,118 @@ export class MotoboyService {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ to: phone, message }),
     });
+  }
+
+  private applyStoreReuploadRequestMetadata(input: {
+    metadata: any;
+    storeId: string;
+    reason?: string | null;
+    requestedByUserId?: string | null;
+    via: string;
+    requestId?: string | null;
+  }) {
+    const cleanReason = String(input.reason || '').trim() || null;
+    const nowIso = new Date().toISOString();
+    const base = input.metadata || {};
+    const review = base.review || {};
+    const storeReuploadRequests = review.storeReuploadRequests || {};
+    return {
+      ...base,
+      review: {
+        ...review,
+        storeReuploadRequests: {
+          ...storeReuploadRequests,
+          [input.storeId]: {
+            storeId: input.storeId,
+            requestId: input.requestId || null,
+            reason: cleanReason,
+            requestedAt: nowIso,
+            requestedByUserId: input.requestedByUserId || null,
+            via: input.via,
+          },
+        },
+      },
+    };
+  }
+
+  async requestDocumentReupload(storeId: string, motoboyId: string, documentId: string, ownerId: string, reason?: string | null) {
+    const store = await this.storeRepository.findByIdWithOwner(storeId);
+    if (!store) throw new AppError('STORE-001', 404);
+    if (store.owner?.id !== ownerId) throw new AppError('AUTH-003', 403);
+
+    const repo = AppDataSource.getRepository(MotoboyDocument);
+    const doc = await repo.findOne({ where: { id: documentId, motoboyId } });
+    if (!doc) throw new AppError('MOTO-023', 404);
+
+    doc.metadata = this.applyStoreReuploadRequestMetadata({
+      metadata: doc.metadata,
+      storeId,
+      reason,
+      requestedByUserId: ownerId,
+      via: 'STORE_REUPLOAD_REQUEST',
+      requestId: null,
+    });
+    await repo.save(doc);
+    return doc;
+  }
+
+  async listPendingKycQueue() {
+    const docRepo = AppDataSource.getRepository(MotoboyDocument);
+    const rows = await docRepo.find({
+      where: { status: 'PENDING' as any },
+      relations: [ 'motoboy', 'motoboy.user' ],
+      order: { uploadedAt: 'DESC' },
+    });
+
+    const byMotoboy = new Map<string, { motoboy: any; documents: any[]; latestAt: Date }>();
+    for (const d of rows) {
+      const motoboyId = String(d.motoboyId || '');
+      if (!motoboyId) continue;
+      if (!byMotoboy.has(motoboyId)) {
+        byMotoboy.set(motoboyId, { motoboy: d.motoboy, documents: [], latestAt: d.uploadedAt });
+      }
+      const entry = byMotoboy.get(motoboyId)!;
+      const t = String(d.docType || '').toUpperCase();
+      if (!entry.documents.some((x) => String(x.docType || '').toUpperCase() === t)) {
+        entry.documents.push(d);
+      }
+      if (d.uploadedAt && d.uploadedAt > entry.latestAt) entry.latestAt = d.uploadedAt;
+    }
+
+    return Array.from(byMotoboy.values())
+      .sort((a, b) => b.latestAt.getTime() - a.latestAt.getTime())
+      .map((x) => ({ ...x, latestAt: x.latestAt.toISOString() }));
+  }
+
+  async listAllDocumentsForMotoboy(motoboyId: string) {
+    if (!motoboyId) throw new AppError('MOTO-023', 404);
+    const repo = AppDataSource.getRepository(MotoboyDocument);
+    return repo.find({ where: { motoboyId }, order: { uploadedAt: 'DESC' } });
+  }
+
+  async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: string, status: string, reason?: string | null) {
+    if (!motoboyId || !documentId) throw new AppError('MOTO-023', 404);
+    const repo = AppDataSource.getRepository(MotoboyDocument);
+    const document = await repo.findOne({ where: { id: documentId, motoboyId } });
+    if (!document) throw new AppError('MOTO-023', 404);
+
+    document.status = status;
+    document.reviewedAt = new Date();
+    document.reviewedByUserId = reviewerId;
+    const cleanReason = String(reason || '').trim() || null;
+    document.metadata = {
+      ...(document.metadata || {}),
+      review: {
+        ...(document.metadata?.review || {}),
+        status,
+        reason: cleanReason,
+        reviewedAt: document.reviewedAt.toISOString(),
+        reviewedByUserId: reviewerId,
+        scope: 'PLATFORM',
+      },
+    };
+    await repo.save(document);
+    return document;
   }
 
   /**
@@ -528,7 +682,7 @@ export class MotoboyService {
   async createStoreRequests(motoboy: Motoboy, storeIds: string[]) {
     if (!Array.isArray(storeIds) || storeIds.length === 0) throw new AppError('MOTO-024', 400);
 
-    await this.ensureMotoboyIsReadyToRequestStores(motoboy);
+    await this.ensureMotoboyCanRequestStoreLinks(motoboy);
 
     const repo = AppDataSource.getRepository(MotoboyStoreRequest);
     const created: MotoboyStoreRequest[] = [];
@@ -625,6 +779,11 @@ export class MotoboyService {
 
     const cleanReason = String(reason || '').trim() || null;
 
+    // Store owners can only approve links if platform KYC is ready (docs globally APPROVED).
+    if (status === 'APPROVED' && request.motoboy) {
+      await this.ensureMotoboyKycApproved(request.motoboy);
+    }
+
     // Keep store request + possible document rejection consistent.
     await AppDataSource.transaction(async (manager) => {
       const requestRepo = manager.getRepository(MotoboyStoreRequest);
@@ -652,24 +811,17 @@ export class MotoboyService {
             order: { uploadedAt: 'DESC' },
           });
           if (!doc) continue;
-          if (String(doc.status || '').toUpperCase() === 'APPROVED') continue; // don't override approved docs
 
-          doc.status = 'REJECTED';
-          doc.reviewedAt = new Date();
-          doc.reviewedByUserId = ownerId;
-          doc.metadata = {
-            ...(doc.metadata || {}),
-            review: {
-              ...(doc.metadata?.review || {}),
-              status: 'REJECTED',
-              reason: cleanReason,
-              reviewedAt: doc.reviewedAt.toISOString(),
-              reviewedByUserId: ownerId,
-              via: 'STORE_REQUEST_REJECT',
-              requestId,
-              storeId,
-            },
-          };
+          // Store owners do not review platform KYC status.
+          // They can request a clearer file for this store only.
+          doc.metadata = this.applyStoreReuploadRequestMetadata({
+            metadata: doc.metadata,
+            storeId,
+            reason: cleanReason,
+            requestedByUserId: ownerId,
+            via: 'STORE_REQUEST_REJECT',
+            requestId,
+          });
           await docRepo.save(doc);
         }
       }

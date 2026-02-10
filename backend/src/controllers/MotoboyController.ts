@@ -326,6 +326,26 @@ export class MotoboyController {
   }
 
   /**
+   * Requests a clearer reupload for a document (store owner action).
+   * This does NOT change the platform KYC status; it only flags the doc for the store.
+   */
+  static async requestDocumentReupload(req: Request, res: Response) {
+    try {
+      const reason = req.body?.reason;
+      const doc = await motoboyService.requestDocumentReupload(
+        req.params.storeId,
+        req.params.motoboyId,
+        req.params.documentId,
+        req.auth?.sub || '',
+        reason
+      );
+      return res.json(doc);
+    } catch (error) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  /**
    * Accepts order for delivery.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
