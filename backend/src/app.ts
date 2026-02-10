@@ -81,6 +81,17 @@ async function bootstrap()
   app.use(cors());
   app.use(express.json({ limit: '10mb' }));
   app.use(accessLogger);
+  // Avoid browser/proxy caching for dynamic APIs (prevents 304 "Not Modified" hiding new queue/orders).
+  app.use((req, res, next) =>
+  {
+    if (req.path.startsWith('/api/motoboy') || req.path.startsWith('/api/stores') || req.path.startsWith('/api/orders')) {
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+      res.setHeader('Surrogate-Control', 'no-store');
+    }
+    next();
+  });
 
   const uploadsDir = path.join(process.cwd(), 'uploads');
   app.use('/uploads', express.static(uploadsDir));

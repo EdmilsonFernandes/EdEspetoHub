@@ -75,8 +75,8 @@ export class MotoboyOrderService {
           FROM orders o
          WHERE o.id = od.order_id
            AND o.type = 'delivery'
-           AND o.status = ANY($1)
-           AND o.store_id = ANY($3)
+           AND o.status = ANY($1::text[])
+           AND o.store_id = ANY($3::uuid[])
            AND od.motoboy_id IS NULL
            AND (od.expires_at IS NULL OR od.expires_at < NOW());
         `,
