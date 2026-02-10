@@ -1,0 +1,13 @@
+services:
+  frontend:
+    pull_policy: always
+
+  api:
+    pull_policy: always
+
+  face-worker:
+    pull_policy: always
+
+  maps:
+    pull_policy: always
+

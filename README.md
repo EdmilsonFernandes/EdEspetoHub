@@ -817,6 +817,31 @@ Crie um arquivo `.env.prod` com `FRONTEND_PORT=80` e suba assim:
 docker compose --env-file .env.prod up --build -d
 ```
 
+### Deploy sem build no servidor (recomendado para EC2 pequeno)
+
+Em instâncias pequenas (ex: `t3.small`) o `docker compose up --build` pode travar o SSH por falta de CPU/RAM/créditos.
+Para evitar isso, o projeto publica imagens no **GHCR** via GitHub Actions e o servidor apenas **puxa** as imagens.
+
+1) Verifique se o workflow `.github/workflows/publish-ghcr.yml` está rodando após `git push` (GitHub Actions).
+
+2) No servidor, crie/ajuste `.env.prod` com:
+
+- `IMAGE_REGISTRY=ghcr.io`
+- `IMAGE_NAMESPACE=edmilsonfernandes`
+- `IMAGE_TAG=main`
+
+3) Suba usando pull-only:
+
+```bash
+sh scripts/compose-prod-pull.sh
+```
+
+Se o repositório for privado, faça login antes:
+
+```bash
+docker login ghcr.io
+```
+
 ### Atalhos (scripts)
 
 Execução local (porta 8080):
@@ -829,6 +854,12 @@ Execução produção (porta 80):
 
 ```bash
 sh scripts/compose-prod.sh
+```
+
+Execução produção (pull-only, sem build):
+
+```bash
+sh scripts/compose-prod-pull.sh
 ```
 
 Credenciais padrão do pgAdmin (pode sobrescrever via variáveis de ambiente ao subir): `admindatony@datony.com` / `Datony20025#!`.
