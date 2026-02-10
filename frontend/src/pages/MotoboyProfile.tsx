@@ -10,6 +10,7 @@ export function MotoboyProfile() {
   const [docFiles, setDocFiles] = useState<Record<string, File | null>>({});
   const [documents, setDocuments] = useState<any[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [refreshingDocs, setRefreshingDocs] = useState(false);
   const [blocked, setBlocked] = useState(false);
   const [profile, setProfile] = useState<any | null>(null);
   const [profileDraft, setProfileDraft] = useState<any>({
@@ -74,16 +75,28 @@ export function MotoboyProfile() {
   }, []);
 
   useEffect(() => {
-    const loadDocuments = async () => {
+    // initial load
+    (async () => {
       try {
         const data = await motoboyService.listDocuments();
         setDocuments(Array.isArray(data) ? data : []);
       } catch {
         // ignore
       }
-    };
-    loadDocuments();
+    })();
   }, []);
+
+  const refreshDocuments = async () => {
+    setRefreshingDocs(true);
+    try {
+      const data = await motoboyService.listDocuments();
+      setDocuments(Array.isArray(data) ? data : []);
+    } catch {
+      // ignore
+    } finally {
+      setRefreshingDocs(false);
+    }
+  };
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -114,6 +127,23 @@ export function MotoboyProfile() {
     });
     return map;
   }, [documents]);
+
+  const shouldPollDocs = useMemo(() => {
+    if (!Array.isArray(documents) || documents.length === 0) return false;
+    const anyPending = documents.some((d) => String(d?.status || '').toUpperCase() === 'PENDING');
+    if (anyPending) return true;
+    const selfie = documentsByType.get('SELFIE');
+    const faceStatus = String(selfie?.metadata?.face?.status || '').toLowerCase();
+    return faceStatus === 'pending' || faceStatus === 'processing';
+  }, [documents, documentsByType]);
+
+  useEffect(() => {
+    if (!shouldPollDocs) return;
+    const id = window.setInterval(() => {
+      refreshDocuments().catch(() => null);
+    }, 10000);
+    return () => window.clearInterval(id);
+  }, [shouldPollDocs]);
 
   const hasAllRequiredDocs = useMemo(
     () => requiredDocs.every((key) => documentsByType.has(key)),
@@ -378,8 +408,20 @@ export function MotoboyProfile() {
 
       <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-3">
         <div>
-          <p className="text-sm font-semibold text-slate-700">Enviar documentos</p>
-          <p className="text-xs text-slate-500">CNH e Selfie são obrigatórios para entrar em lojas.</p>
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold text-slate-700">Enviar documentos</p>
+              <p className="text-xs text-slate-500">CNH e Selfie são obrigatórios para entrar em lojas.</p>
+            </div>
+            <button
+              type="button"
+              onClick={refreshDocuments}
+              disabled={refreshingDocs}
+              className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 disabled:opacity-60"
+            >
+              {refreshingDocs ? 'Atualizando...' : 'Atualizar'}
+            </button>
+          </div>
         </div>
         {faceBanner && (
           <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700">
