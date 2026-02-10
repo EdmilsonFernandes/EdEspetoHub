@@ -3,6 +3,7 @@ import { motoboyService } from '../services/motoboyService';
 import { storeService } from '../services/storeService';
 import { useToast } from '../contexts/ToastContext';
 import { MotoboyHeader } from '../components/Motoboy/MotoboyHeader';
+import { CameraCaptureModal } from '../components/Motoboy/CameraCaptureModal';
 import { formatMotoboyAccountStatus } from '../utils/motoboyStatus';
 
 export function MotoboyProfile() {
@@ -25,6 +26,8 @@ export function MotoboyProfile() {
   const [requests, setRequests] = useState<any[]>([]);
   const [selectedStores, setSelectedStores] = useState<string[]>([]);
   const [requesting, setRequesting] = useState(false);
+  const [cameraOpen, setCameraOpen] = useState(false);
+  const [cameraDocType, setCameraDocType] = useState<string | null>(null);
   const [notifyOrders, setNotifyOrders] = useState(() => {
     const raw = localStorage.getItem('motoboy:notify_orders');
     if (raw === null) return true;
@@ -153,6 +156,33 @@ export function MotoboyProfile() {
     return '🧭';
   }, [profileDraft.vehicleType, profile?.vehicleType]);
 
+  const canStartUpload = (docType: string) => {
+    const normalized = String(docType || '').toUpperCase();
+    const currentDoc = documentsByType.get(normalized);
+    const currentStatus = String(currentDoc?.status || '').toUpperCase();
+    const cnhDoc = documentsByType.get('CNH');
+    const cnhStatus = String(cnhDoc?.status || '').toUpperCase();
+
+    if (normalized === 'SELFIE' && (!cnhDoc || cnhStatus === 'REJECTED')) return false;
+    if (currentDoc && (currentStatus === 'APPROVED' || currentStatus === 'PENDING')) return false;
+    return true;
+  };
+
+  const uploadDocumentBase64 = async (docType: string, fileBase64: string) => {
+    setUploading(true);
+    try {
+      await motoboyService.uploadDocument({ docType, fileBase64 });
+      showToast(`${docType} enviado. Aguarde aprovação.`, 'success');
+      setDocFiles((prev) => ({ ...prev, [docType]: null }));
+      const data = await motoboyService.listDocuments();
+      setDocuments(Array.isArray(data) ? data : []);
+    } catch (error: any) {
+      showToast(error?.message || 'Não foi possível enviar o documento.', 'error');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleUploadDocument = async (docType: string) => {
     const normalized = String(docType || '').toUpperCase();
     const currentDoc = documentsByType.get(normalized);
@@ -187,16 +217,28 @@ export function MotoboyProfile() {
         reader.onload = () => resolve(String(reader.result || ''));
         reader.readAsDataURL(file);
       });
-      await motoboyService.uploadDocument({ docType, fileBase64 });
-      showToast(`${docType} enviado. Aguarde aprovação.`, 'success');
-      setDocFiles((prev) => ({ ...prev, [docType]: null }));
-      const data = await motoboyService.listDocuments();
-      setDocuments(Array.isArray(data) ? data : []);
+      await uploadDocumentBase64(docType, fileBase64);
     } catch (error: any) {
       showToast(error?.message || 'Não foi possível enviar o documento.', 'error');
     } finally {
       setUploading(false);
     }
+  };
+
+  const openCamera = (docType: string) => {
+    if (!canStartUpload(docType)) {
+      showToast('Documento já enviado. Aguarde a validação.', 'info');
+      return;
+    }
+    const normalized = String(docType || '').toUpperCase();
+    const cnhDoc = documentsByType.get('CNH');
+    const cnhStatus = String(cnhDoc?.status || '').toUpperCase();
+    if (normalized === 'SELFIE' && (!cnhDoc || cnhStatus === 'REJECTED')) {
+      showToast('Envie a CNH primeiro e depois envie a selfie segurando a CNH.', 'error');
+      return;
+    }
+    setCameraDocType(docType);
+    setCameraOpen(true);
   };
 
   const handleSaveProfile = async () => {
@@ -248,6 +290,29 @@ export function MotoboyProfile() {
   return (
     <div className="min-h-screen motoboy-screen space-y-4">
       <MotoboyHeader title="Perfil" subtitle="Documentos, vínculo e dados do entregador." />
+
+      <CameraCaptureModal
+        open={cameraOpen}
+        title={cameraDocType === 'SELFIE' ? 'Selfie segurando a CNH' : 'Foto da CNH'}
+        subtitle={
+          cameraDocType === 'SELFIE'
+            ? 'Enquadre bem o rosto e o documento. Evite sombra e reflexo.'
+            : 'Tire a FRENTE e o VERSO (o sistema junta em uma imagem só).'
+        }
+        mode={cameraDocType === 'CNH' ? 'cnh' : 'single'}
+        initialFacingMode={cameraDocType === 'SELFIE' ? 'user' : 'environment'}
+        onClose={() => {
+          setCameraOpen(false);
+          setCameraDocType(null);
+        }}
+        onDone={async (dataUrl) => {
+          if (!cameraDocType) return;
+          const docType = cameraDocType;
+          setCameraOpen(false);
+          setCameraDocType(null);
+          await uploadDocumentBase64(docType, dataUrl);
+        }}
+      />
 
       <div className="premium-card-glass p-4 space-y-3 motoboy-fade-up" style={{ animationDelay: '40ms' }}>
         <div>
@@ -368,6 +433,16 @@ export function MotoboyProfile() {
                       </div>
                     ) : (
                       <>
+                        {(doc.key === 'CNH' || doc.key === 'SELFIE') && (
+                          <button
+                            type="button"
+                            onClick={() => openCamera(doc.key)}
+                            disabled={!canUpload}
+                            className="w-full rounded-lg bg-brand-primary px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+                          >
+                            Tirar foto (recomendado)
+                          </button>
+                        )}
                         <input
                           type="file"
                           accept="image/*"
