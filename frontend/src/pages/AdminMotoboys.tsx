@@ -184,12 +184,15 @@ export function AdminMotoboys() {
                       {request.motoboyUser?.fullName || 'Entregador'}
                     </p>
                     <p className="text-xs text-slate-500">{request.motoboyUser?.email || '-'}</p>
+                    {request.motoboyUser?.phone && (
+                      <p className="text-xs text-slate-500">{request.motoboyUser.phone}</p>
+                    )}
                   </div>
                   <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700">
                     {request.status || 'PENDING'}
                   </span>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
                     onClick={() => reviewRequest(request.id, 'approve')}
@@ -204,7 +207,85 @@ export function AdminMotoboys() {
                   >
                     Rejeitar
                   </button>
+                  {!!request.motoboyId && (
+                    <button
+                      type="button"
+                      onClick={() => loadDocuments(request.motoboyId)}
+                      className="px-2.5 py-1 rounded-lg border border-slate-200 text-[11px] font-semibold text-slate-600"
+                    >
+                      {docsLoadingId === request.motoboyId ? 'Carregando documentos...' : 'Ver documentos'}
+                    </button>
+                  )}
                 </div>
+
+                {!!request.motoboyId &&
+                  Array.isArray(documentsByMotoboy[request.motoboyId]) &&
+                  documentsByMotoboy[request.motoboyId].length > 0 && (
+                    <div className="mt-2 space-y-2">
+                      {documentsByMotoboy[request.motoboyId].map((doc: any) => (
+                        <div key={doc.id} className="rounded-lg border border-slate-100 bg-slate-50 p-3 text-xs">
+                          <div className="grid gap-3 sm:grid-cols-[1.1fr_0.9fr]">
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between">
+                                <span className="font-semibold text-slate-700">{doc.docType || 'DOC'}</span>
+                                <div className="flex items-center gap-2">
+                                  {doc.docType === 'SELFIE' && getFaceBadge(doc)}
+                                  <span
+                                    className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                                      doc.status === 'APPROVED'
+                                        ? 'bg-emerald-200 text-emerald-800'
+                                        : doc.status === 'REJECTED'
+                                        ? 'bg-rose-200 text-rose-800'
+                                        : 'bg-slate-200 text-slate-700'
+                                    }`}
+                                  >
+                                    {doc.status === 'APPROVED' ? 'Aprovado' : doc.status === 'REJECTED' ? 'Rejeitado' : 'Pendente'}
+                                  </span>
+                                </div>
+                              </div>
+                              <a href={doc.fileKey} target="_blank" rel="noreferrer" className="text-brand-primary underline">
+                                Ver arquivo
+                              </a>
+                              {doc.status !== 'APPROVED' && (
+                                <div className="flex gap-2">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleReviewDocument(request.motoboyId, doc.id, 'approve')}
+                                    className="px-3 py-1.5 rounded-lg bg-emerald-500 text-white font-semibold"
+                                  >
+                                    Aprovar
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleReviewDocument(request.motoboyId, doc.id, 'reject')}
+                                    className="px-3 py-1.5 rounded-lg bg-rose-500 text-white font-semibold"
+                                  >
+                                    Rejeitar
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => setPreviewDoc(doc)}
+                              className="rounded-xl border border-dashed border-slate-200 bg-white p-2 flex items-center justify-center"
+                              title="Clique para ampliar"
+                            >
+                              {doc.fileKey ? (
+                                <img
+                                  src={doc.fileKey}
+                                  alt={doc.docType}
+                                  className="w-full h-16 sm:h-20 object-cover rounded-lg border border-slate-200"
+                                />
+                              ) : (
+                                <span className="text-[11px] text-slate-400">Sem prévia</span>
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
               </div>
             ))}
           </div>
