@@ -36,7 +36,11 @@ const DELIVERY_TRANSITIONS: Record<DeliveryStatus, DeliveryStatus[]> = {
   CANCELED: [ 'AVAILABLE' ],
 };
 
-const normalizeStatus = (value: any): DeliveryStatus => String(value || '').toUpperCase() as DeliveryStatus;
+// Treat NULL/empty legacy rows as AVAILABLE.
+const normalizeStatus = (value: any): DeliveryStatus => {
+  const normalized = String(value ?? '').trim().toUpperCase();
+  return (normalized || 'AVAILABLE') as DeliveryStatus;
+};
 
 export class DeliveryService {
   private deliveryExpireMinutes =
@@ -192,7 +196,7 @@ export class DeliveryService {
             acceptedAt: now,
           })
           .where('order_id = :orderId', { orderId })
-          .andWhere('status = :status', { status: 'AVAILABLE' })
+          .andWhere('(status = :status OR status IS NULL)', { status: 'AVAILABLE' })
           .andWhere('motoboy_id IS NULL')
           .andWhere('(expires_at IS NULL OR expires_at > NOW())')
           .execute();
