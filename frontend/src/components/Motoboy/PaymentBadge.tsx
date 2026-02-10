@@ -21,14 +21,14 @@ export function PaymentBadge({ method, status }: { method?: string; status?: str
 
   return (
     <div className="flex flex-wrap items-center gap-2 justify-start sm:justify-end">
-      <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-white/70 border border-slate-200 text-slate-700">
-        {methodLabel}
+      <span className="min-w-0 max-w-full px-2.5 py-1 rounded-full text-[11px] font-semibold bg-white/70 border border-slate-200 text-slate-700">
+        <span className="truncate">{methodLabel}</span>
       </span>
       <span
-        className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-[11px] font-semibold border ${tone.pill}`}
+        className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-[11px] font-semibold border ${tone.pill} min-w-0 max-w-full`}
       >
         <span className={`h-2 w-2 rounded-full ${tone.dot}`} />
-        {statusLabel}
+        <span className="truncate">{statusLabel}</span>
       </span>
     </div>
   );

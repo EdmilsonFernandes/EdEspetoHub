@@ -66,7 +66,7 @@ export function OrderCard({ order, compact, actions }: Props) {
               <p className="text-[11px] text-slate-400 truncate">Pedido</p>
             </div>
           </div>
-          <div className="mt-1 flex items-center gap-2 flex-wrap">
+          <div className="mt-1 flex flex-col sm:flex-row sm:items-center gap-2">
             <p className="text-lg font-extrabold text-slate-900 truncate">#{shortId}</p>
             <StatusBadge status={order?.status} />
           </div>

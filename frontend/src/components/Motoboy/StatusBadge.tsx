@@ -12,7 +12,7 @@ const STATUS_LABELS: Record<string, string> = {
   pending: 'Recebido',
   preparing: 'Em preparo',
   ready_for_delivery: 'Pronto para entrega',
-  waiting_for_motoboy: 'Aguardando entregador',
+  waiting_for_motoboy: 'Aguardando',
   in_delivery: 'Em rota',
   delivered: 'Entregue',
   finished: 'Finalizado',
@@ -27,11 +27,12 @@ export function StatusBadge({ status }: { status?: string }) {
     <span
       className={[
         'inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-[11px] font-semibold border',
+        'min-w-0 max-w-full overflow-hidden',
         tone.pill,
       ].join(' ')}
     >
       <span className={`h-2 w-2 rounded-full ${tone.dot} ${tone.pulse ? 'status-blink' : ''}`} />
-      {label}
+      <span className="truncate">{label}</span>
     </span>
   );
 }
