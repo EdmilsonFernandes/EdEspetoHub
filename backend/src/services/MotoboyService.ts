@@ -359,6 +359,14 @@ export class MotoboyService {
     if (!docType) throw new AppError('MOTO-020', 400);
     if (!input?.fileBase64) throw new AppError('MOTO-021', 400);
 
+    // Rate limit selfie uploads when automated verification fails too many times.
+    if (docType === 'SELFIE') {
+      const cooldown = await faceVerifyService.getSelfieCooldown(motoboy.id);
+      if (cooldown.blocked && cooldown.nextAllowedAt && cooldown.nextAllowedAt.getTime() > Date.now()) {
+        throw new AppError('MOTO-026', 429, { nextAllowedAt: cooldown.nextAllowedAt.toISOString() });
+      }
+    }
+
     const fileKey = await saveBase64Image(input.fileBase64, `motoboy-${motoboy.id}`, 'motoboys');
     if (!fileKey) throw new AppError('MOTO-022', 400);
 

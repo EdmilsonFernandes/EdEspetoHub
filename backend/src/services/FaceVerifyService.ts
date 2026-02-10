@@ -46,10 +46,51 @@ function labelFromScore(score: number | null): ScoreLabel {
 export class FaceVerifyService {
   private enabled = process.env.FACE_VERIFY_ENABLED !== 'false';
   private workerUrl = process.env.FACE_VERIFY_WORKER_URL || 'http://face-worker:8000';
+  private maxAttempts =
+    process.env.FACE_VERIFY_MAX_ATTEMPTS && Number(process.env.FACE_VERIFY_MAX_ATTEMPTS) > 0
+      ? Number(process.env.FACE_VERIFY_MAX_ATTEMPTS)
+      : 3;
+  private cooldownHours =
+    process.env.FACE_VERIFY_COOLDOWN_HOURS && Number(process.env.FACE_VERIFY_COOLDOWN_HOURS) > 0
+      ? Number(process.env.FACE_VERIFY_COOLDOWN_HOURS)
+      : 24;
+  private rejectApproved = process.env.FACE_VERIFY_REJECT_APPROVED === 'true';
+  private scoreHigh =
+    process.env.FACE_VERIFY_SCORE_HIGH && Number(process.env.FACE_VERIFY_SCORE_HIGH) > 0
+      ? Number(process.env.FACE_VERIFY_SCORE_HIGH)
+      : 0.75;
+  private scoreMedium =
+    process.env.FACE_VERIFY_SCORE_MEDIUM && Number(process.env.FACE_VERIFY_SCORE_MEDIUM) > 0
+      ? Number(process.env.FACE_VERIFY_SCORE_MEDIUM)
+      : 0.55;
   private timeoutMs =
     process.env.FACE_VERIFY_TIMEOUT_MS && Number(process.env.FACE_VERIFY_TIMEOUT_MS) > 0
       ? Number(process.env.FACE_VERIFY_TIMEOUT_MS)
       : 15_000;
+
+  async getSelfieCooldown(motoboyId: string): Promise<{ blocked: boolean; attempts: number; nextAllowedAt: Date | null }> {
+    const row = await AppDataSource.query(
+      `
+      WITH attempts AS (
+        SELECT (metadata->'face'->>'checkedAt')::timestamptz AS at
+        FROM motoboy_documents
+        WHERE motoboy_id = $1
+          AND doc_type = 'SELFIE'
+          AND (metadata->'face'->>'checkedAt') IS NOT NULL
+          AND (metadata->'face'->>'checkedAt')::timestamptz >= NOW() - ($2::int * interval '1 hour')
+      )
+      SELECT COUNT(*)::int AS count,
+             MIN(at) AS first_at
+      FROM attempts
+      `,
+      [motoboyId, this.cooldownHours]
+    );
+    const attempts = Number(row?.[0]?.count || 0);
+    const firstAt = row?.[0]?.first_at ? new Date(row[0].first_at) : null;
+    const blocked = attempts >= this.maxAttempts;
+    const nextAllowedAt = blocked && firstAt ? new Date(firstAt.getTime() + this.cooldownHours * 60 * 60 * 1000) : null;
+    return { blocked, attempts, nextAllowedAt };
+  }
 
   async markPendingIfReady(motoboyId: string) {
     if (!this.enabled) return;
@@ -107,6 +148,23 @@ export class FaceVerifyService {
     const repo = AppDataSource.getRepository(MotoboyDocument);
     const selfie = await repo.findOne({ where: { id: selfieId } });
     if (!selfie) return;
+
+    const cooldown = await this.getSelfieCooldown(selfie.motoboyId);
+    if (cooldown.blocked && cooldown.nextAllowedAt && cooldown.nextAllowedAt.getTime() > Date.now()) {
+      selfie.metadata = selfie.metadata || {};
+      selfie.metadata.face = {
+        ...(selfie.metadata.face || {}),
+        status: 'manual_required' as FaceStatus,
+        checkedAt: new Date().toISOString(),
+        scoreLabel: 'indisponivel' as ScoreLabel,
+        reason: 'rate_limited',
+        nextEligibleAt: cooldown.nextAllowedAt.toISOString(),
+        attemptWindowCount: cooldown.attempts,
+        provider: 'deepface',
+      };
+      await repo.save(selfie);
+      return;
+    }
 
     // Best-effort "claim" so we don't process the same selfie twice.
     const claimed = await AppDataSource.query(
@@ -182,6 +240,44 @@ export class FaceVerifyService {
 
       const scoreLabel = labelFromScore(faceMatchScore);
 
+      // Auto decision rules (minimum viable):
+      // - Selfie must have exactly 1 face; otherwise reject (if not approved already).
+      // - If doc face not detected => manual review.
+      // - If score is below medium => reject (if not approved already).
+      // - Medium score => manual review.
+      const isApprovedDoc = String(selfie.status || '').toUpperCase() === 'APPROVED';
+      let autoRejected = false;
+      let autoDecision: 'keep' | 'rejected' | 'manual' = 'keep';
+
+      const canAutoReject = !isApprovedDoc || this.rejectApproved;
+      if (canAutoReject) {
+        if (selfieFaceCount !== 1) {
+          autoRejected = true;
+          autoDecision = 'rejected';
+          reason = reason || 'multi_face_selfie';
+        } else if (!faceDetectedDoc || docFaceCount === 0) {
+          autoDecision = 'manual';
+        } else if (typeof faceMatchScore === 'number' && Number.isFinite(faceMatchScore) && faceMatchScore < this.scoreMedium) {
+          autoRejected = true;
+          autoDecision = 'rejected';
+          reason = reason || 'low_match';
+        } else if (typeof faceMatchScore === 'number' && Number.isFinite(faceMatchScore) && faceMatchScore < this.scoreHigh) {
+          autoDecision = 'manual';
+          status = 'manual_required';
+          reason = reason || 'medium_match';
+        }
+      } else {
+        if (
+          selfieFaceCount !== 1 ||
+          (!faceDetectedDoc || docFaceCount === 0) ||
+          (typeof faceMatchScore === 'number' && Number.isFinite(faceMatchScore) && faceMatchScore < this.scoreHigh)
+        ) {
+          status = 'manual_required';
+          autoDecision = 'manual';
+          reason = reason || 'manual_review';
+        }
+      }
+
       selfie.metadata = selfie.metadata || {};
       selfie.metadata.face = {
         ...faceMetaBase,
@@ -194,10 +290,17 @@ export class FaceVerifyService {
         faceMatchScore,
         scoreLabel,
         reason,
+        autoDecision,
+        autoRejected,
+        attemptWindowCount: cooldown.attempts + 1,
         provider: json?.provider || 'deepface',
         providerVersion: json?.providerVersion || null,
         latencyMs,
       };
+
+      if (autoRejected) {
+        selfie.status = 'REJECTED';
+      }
       await repo.save(selfie);
     } catch (error: any) {
       const latencyMs = Date.now() - startedAt;
@@ -208,6 +311,9 @@ export class FaceVerifyService {
         checkedAt: new Date().toISOString(),
         scoreLabel: 'indisponivel' as ScoreLabel,
         reason: error?.name === 'AbortError' ? 'timeout' : (error?.message || 'compare_error'),
+        autoDecision: 'manual',
+        autoRejected: false,
+        attemptWindowCount: (await this.getSelfieCooldown(selfie.motoboyId)).attempts,
         latencyMs,
       };
       await repo.save(selfie);
@@ -217,4 +323,3 @@ export class FaceVerifyService {
 }
 
 export const faceVerifyService = new FaceVerifyService();
-

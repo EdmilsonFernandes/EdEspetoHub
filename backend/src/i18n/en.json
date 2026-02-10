@@ -62,5 +62,6 @@
   "MOTO-013": "Delivery was already accepted by another courier.",
   "MOTO-014": "You are not allowed to update this order.",
   "MOTO-015": "Invalid order status for this operation.",
-  "MOTO-016": "Cannot finish this order."
+  "MOTO-016": "Cannot finish this order.",
+  "MOTO-026": "Verification attempt limit reached. Wait 24 hours to re-upload your selfie."
 }

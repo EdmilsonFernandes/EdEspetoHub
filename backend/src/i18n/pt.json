@@ -62,5 +62,6 @@
   "MOTO-013": "Entrega já foi aceita por outro entregador.",
   "MOTO-014": "Você não tem permissão para atualizar este pedido.",
   "MOTO-015": "Status do pedido inválido para esta operação.",
-  "MOTO-016": "Não é possível finalizar este pedido."
+  "MOTO-016": "Não é possível finalizar este pedido.",
+  "MOTO-026": "Limite de tentativas de validação atingido. Aguarde 24 horas para reenviar a selfie."
 }
