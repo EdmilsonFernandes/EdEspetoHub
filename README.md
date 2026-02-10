@@ -1,13 +1,16 @@
 # Chama no espeto
 
-Aplicação web para pedidos e gestão do restaurante de espetinhos Datony. O projeto traz duas experiências principais:
+Aplicação web para pedidos e gestão de lojas/restaurantes (cardápio, checkout, fila e pagamentos), com módulo de entrega via motoboy.
+
+O projeto traz quatro experiências principais:
 
 - **Loja do cliente**: montagem e edição do pedido, info da loja no mobile (sheet), WhatsApp e link de acompanhamento (publico com persistencia via `localStorage`).
-- **Painel interno**: dashboard com métricas, CRUD de produtos, fila do churrasqueiro (atualização a cada 5s), pagamentos e histórico.
+- **Painel interno (Admin/Churrasqueiro)**: dashboard com métricas, CRUD de produtos, fila do churrasqueiro (atualização a cada 5s), pagamentos e histórico.
 - **Acompanhar pedido**: pagina publica em `/pedido/:orderId` com status, fila, detalhes e branding da loja.
   - Ultimos 3 pedidos publicos ficam em `localStorage` para reabrir o acompanhamento (inclusive mesa).
   - Numero exibido usa prefixo do slug (3 letras) + 8 primeiros chars do ID.
 - **Promoções**: produto pode ter preço promocional ativo; vitrine, carrinho, fila e acompanhamento exibem valor original riscado + promocional.
+- **Entregador (Motoboy)**: fila de entregas, entrega atual, histórico, ganhos e confirmação de pagamento no final da entrega.
 
 ## Guia do usuario
 
@@ -15,9 +18,13 @@ Aplicação web para pedidos e gestão do restaurante de espetinhos Datony. O pr
 
 ## Estrutura de pastas
 
-- `frontend/`: aplicação React (Create React App) servida pelo nginx em produção.
+- `frontend/`: aplicação React + Vite (servida pelo nginx em produção).
 - `backend/`: API Node.js/Express + TypeORM em TypeScript, com documentação Swagger em `/api/docs`.
+- `server/`: microserviço de mapas (geocode/route) usado para ETA/distância.
+- `face-worker/`: worker Python (FastAPI + DeepFace) para verificação assistida de selfie vs CNH.
 - `docker-compose.yml`: sobe frontend, API, PostgreSQL e pgAdmin já apontando para as pastas certas.
+- `docker-compose.prod.yml`: override de produção (principalmente segurança do volume do Postgres).
+- `scripts/`: utilitários de deploy/backup (`compose-prod.sh`, `pg-backup-rotate.sh`).
 
 ## Padrao de documentacao (backend)
 
@@ -28,15 +35,30 @@ Aplicação web para pedidos e gestão do restaurante de espetinhos Datony. O pr
 
 ## Visão geral do stack
 
-- **Front-end**: React (Create React App) servido por nginx (`frontend/Dockerfile`).
+- **Front-end**: React + Vite servido por nginx (`frontend/Dockerfile`).
 - **API**: Node.js/Express/TypeORM (`backend/`).
-- **Banco de dados**: PostgreSQL com schema em `backend/schema.sql` e recursos opcionais de administração via pgAdmin.
+- **Banco de dados**: PostgreSQL (schema base em `backend/schema.sql` + evolução via `backend/src/utils/runMigrations.ts`).
+- **Maps**: microserviço `maps` (`server/`) para Google Routes/Geocoding.
+- **Face verify**: worker `face-worker` para verificação assistida de documentos do motoboy (selfie vs CNH).
 
 Requisitos mínimos para desenvolvimento local:
 
 - Node.js 18+ e npm/yarn
 - PostgreSQL 16+ (local) ou Docker
 - Docker + Docker Compose (opcional, recomendado)
+
+## Arquitetura (alto nível)
+
+```mermaid
+flowchart LR
+  U[Cliente / Admin / Motoboy] -->|HTTPS| N[Nginx (EC2)]
+  N -->|/| F[Frontend (nginx)]
+  N -->|/api| A[API Node (Express)]
+  N -->|/uploads| A
+  A --> P[(Postgres)]
+  A --> M[Maps service]
+  A --> W[Face worker (Python)]
+```
 
 ## Rodar local com Docker Compose (recomendado)
 
@@ -48,6 +70,25 @@ docker compose up --build
 Serviços locais:
 - Front-end: `http://localhost:8080`
 - API: `http://localhost:4000` (Swagger em `/api/docs`)
+
+## Produção: integridade do banco + backups
+
+- O volume do Postgres é **pinned** por nome em `docker-compose.yml`:
+  - `POSTGRES_VOLUME_NAME` (default: `edespetohub_postgres-data`)
+- Em produção, `docker-compose.prod.yml` marca o volume como **external**, evitando perda acidental com `docker compose down -v`.
+- A API tem bootstrap que recria o banco caso ele tenha sido dropado (e aplica `schema.sql` + migrations) para o serviço não ficar indisponível.
+
+Backup/rotação (SQL gz) via script:
+
+- `scripts/pg-backup-rotate.sh`
+  - `MIN_INTERVAL_HOURS` (default `48`)
+  - `KEEP_LATEST` (default `1`)
+
+Exemplo (cron a cada 2 dias, mantendo apenas 1 arquivo):
+
+```bash
+BACKUP_DIR=/home/ec2-user/backups/chamanoespeto MIN_INTERVAL_HOURS=48 KEEP_LATEST=1 bash /home/ec2-user/EdEspetoHub/scripts/pg-backup-rotate.sh
+```
 
 ## Rodar local sem Docker
 
@@ -198,24 +239,64 @@ Rotas:
 
 ### O que entrou (sem quebrar o que ja existe)
 - Fluxo de delivery com motoboy (atribuir, aceitar, entregar e confirmar pagamento).
-- Novos status de pedido (apenas `type='delivery'`):
+- Status de pedido (apenas `type='delivery'`, no `orders.status`):
   - `pending` → `preparing` → `ready_for_delivery` → `waiting_for_motoboy` → `in_delivery` → `delivered` → `finished`
-- Novo campo em `orders`: `payment_status` (`PENDING` | `PAID`).
+- Campos de pagamento em `orders`:
+  - `payment_method` (pix/credito/debito/dinheiro)
+  - `payment_status` (`PENDING` | `PAID`)
+  - `cash_tendered` (dinheiro: quanto o cliente informou que vai pagar)
 - Novas tabelas:
   - `motoboys`
   - `motoboy_stores`
   - `order_deliveries`
+  - `delivery_events` (auditoria de transições)
 
 ### Regras principais
 - Motoboy so ve pedidos das lojas associadas (N:N).
 - Motoboy so atua se `motoboys.status = ACTIVE`.
 - Pagamento em dinheiro/cartao fica `PENDING` ate o motoboy confirmar.
 - Aceite de pedido e feito com transacao (conflito 409 se ja aceito).
+- Exclusividade: 1 entrega ativa por motoboy (garantido por índice parcial no Postgres).
+- Concorrência: dois motoboys não aceitam o mesmo pedido (apenas 1 vence; outro recebe 409).
+- Expiração: entradas de fila expiram por `expires_at`, mas se o pedido continuar `waiting_for_motoboy`, a fila reabre automaticamente como `AVAILABLE`.
+
+### Fluxo (status do pedido vs status da entrega)
+
+```mermaid
+stateDiagram-v2
+  direction LR
+  [*] --> pending
+  pending --> preparing
+  preparing --> ready_for_delivery
+  ready_for_delivery --> waiting_for_motoboy
+  waiting_for_motoboy --> in_delivery : motoboy aceita
+  in_delivery --> delivered : motoboy entrega
+  delivered --> finished : pagamento confirmado/fechado
+```
+
+`order_deliveries.status` (workflow da entrega):
+
+```mermaid
+stateDiagram-v2
+  direction LR
+  AVAILABLE --> ACCEPTED
+  ACCEPTED --> PICKED_UP
+  PICKED_UP --> IN_TRANSIT
+  IN_TRANSIT --> DELIVERED
+  AVAILABLE --> EXPIRED
+  AVAILABLE --> CANCELED
+```
 
 ### Endpoints (novos)
 Motoboy:
 - `GET /motoboy/orders/available`
+- `GET /motoboy/orders/current`
+- `GET /motoboy/orders/history`
+- `GET /motoboy/earnings/today`
+- `GET /motoboy/stats?range=day|week|month`
 - `POST /motoboy/orders/:orderId/accept`
+- `POST /motoboy/orders/:orderId/pickup`
+- `POST /motoboy/orders/:orderId/start`
 - `POST /motoboy/orders/:orderId/confirm-payment`
 - `POST /motoboy/orders/:orderId/delivered`
 - `POST /motoboy/orders/:orderId/finish`
@@ -223,8 +304,6 @@ Motoboy:
 - `PUT /motoboy/profile`
 - `GET /motoboy/documents`
 - `POST /motoboy/documents`
-- `GET /motoboy/profile`
-- `PUT /motoboy/profile`
 
 Conteudo legal (publico):
 - `GET /legal/terms`
@@ -253,6 +332,18 @@ Responsavel (dono da loja):
 - Nenhum endpoint antigo foi removido.
 - Campos novos sao opcionais.
 - `orders.payment_status` tem default `PENDING`.
+
+## Verificação assistida de documentos (CNH + Selfie)
+
+Quando o motoboy envia CNH e Selfie, o sistema pode rodar uma verificação automática **assistida** (não é prova de identidade):
+
+- Selfie deve ter **exatamente 1 rosto**
+- Tenta detectar rosto na CNH e comparar
+- Salva resultado em `motoboy_documents.metadata.face`
+- Admin vê badge `Alta/Média/Baixa/Indisponível` e revisa manualmente
+- Política de tentativas: até 3 em 24h (depois bloqueia reenvio com 429)
+
+Detalhes completos em: `docs/FACE_VERIFY.md`
 
 ## Criar primeira loja (seed de planos)
 
