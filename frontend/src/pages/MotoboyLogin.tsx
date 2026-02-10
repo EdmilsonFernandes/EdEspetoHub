@@ -42,7 +42,7 @@ export function MotoboyLogin() {
       const sessionData = { token: session.token, user: session.user, store: session.store };
       localStorage.setItem('motoboySession', JSON.stringify(sessionData));
       setAuth(sessionData);
-      navigate('/motoboy/delivery');
+      navigate('/motoboy/home');
     } catch (err: any) {
       setError(err?.message || 'Não foi possível entrar agora.');
     } finally {
@@ -138,4 +138,3 @@ export function MotoboyLogin() {
     </div>
   );
 }
-

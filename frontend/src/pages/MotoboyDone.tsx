@@ -42,7 +42,7 @@ export function MotoboyDone() {
   }, [payload?.deliveryFee]);
 
   useEffect(() => {
-    const t = window.setTimeout(() => navigate('/motoboy/history'), 2200);
+    const t = window.setTimeout(() => navigate('/motoboy/earnings'), 2200);
     return () => window.clearTimeout(t);
   }, [navigate]);
 
@@ -127,11 +127,11 @@ export function MotoboyDone() {
 
       <button
         type="button"
-        onClick={() => navigate('/motoboy/history')}
+        onClick={() => navigate('/motoboy/earnings')}
         className="btn-press w-full rounded-xl border border-slate-200 bg-white/70 px-4 py-3 text-sm font-extrabold text-slate-800 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)] motoboy-fade-up"
         style={{ animationDelay: '140ms' }}
       >
-        Ver histórico
+        Ver ganhos
       </button>
     </div>
   );

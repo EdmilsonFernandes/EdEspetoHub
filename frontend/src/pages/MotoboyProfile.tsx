@@ -4,6 +4,7 @@ import { storeService } from '../services/storeService';
 import { useToast } from '../contexts/ToastContext';
 import { MotoboyHeader } from '../components/Motoboy/MotoboyHeader';
 import { CameraCaptureModal } from '../components/Motoboy/CameraCaptureModal';
+import { DocPreviewModal } from '../components/Motoboy/DocPreviewModal';
 import { formatMotoboyAccountStatus } from '../utils/motoboyStatus';
 
 export function MotoboyProfile() {
@@ -29,6 +30,7 @@ export function MotoboyProfile() {
   const [requesting, setRequesting] = useState(false);
   const [cameraOpen, setCameraOpen] = useState(false);
   const [cameraDocType, setCameraDocType] = useState<string | null>(null);
+  const [preview, setPreview] = useState<{ title: string; src: string | null } | null>(null);
   const [notifyOrders, setNotifyOrders] = useState(() => {
     const raw = localStorage.getItem('motoboy:notify_orders');
     if (raw === null) return true;
@@ -171,6 +173,15 @@ export function MotoboyProfile() {
     }
     return { missing, rejected, pending, approved };
   }, [documentsByType, requiredDocs]);
+
+  const docsProgress = useMemo(() => {
+    const total = requiredDocs.length;
+    const approved = requiredDocStatus.approved.length;
+    const pending = requiredDocStatus.pending.length;
+    const rejected = requiredDocStatus.rejected.length;
+    const missing = requiredDocStatus.missing.length;
+    return { total, approved, pending, rejected, missing };
+  }, [requiredDocs.length, requiredDocStatus]);
 
   const hasAllRequiredDocs = useMemo(() => requiredDocStatus.missing.length === 0, [requiredDocStatus.missing.length]);
 
@@ -378,6 +389,13 @@ export function MotoboyProfile() {
     <div className="min-h-screen motoboy-screen space-y-4">
       <MotoboyHeader title="Perfil" subtitle="Documentos, vínculo e dados do entregador." />
 
+      <DocPreviewModal
+        open={Boolean(preview)}
+        title={preview?.title || 'Documento'}
+        src={preview?.src || null}
+        onClose={() => setPreview(null)}
+      />
+
       <CameraCaptureModal
         open={cameraOpen}
         title={cameraDocType === 'SELFIE' ? 'Selfie segurando a CNH' : 'Foto da CNH'}
@@ -454,6 +472,21 @@ export function MotoboyProfile() {
               <p className="text-xs text-slate-500">
                 Para trabalhar, envie os documentos obrigatórios e aguarde aprovação.
               </p>
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border border-slate-200 bg-slate-50 text-slate-700">
+                  {docsProgress.approved}/{docsProgress.total} completos
+                </span>
+                {docsProgress.rejected > 0 ? (
+                  <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border border-rose-200 bg-rose-50 text-rose-800">
+                    {docsProgress.rejected} recusado{docsProgress.rejected === 1 ? '' : 's'}
+                  </span>
+                ) : null}
+                {docsProgress.pending > 0 ? (
+                  <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border border-amber-200 bg-amber-50 text-amber-800">
+                    {docsProgress.pending} em análise
+                  </span>
+                ) : null}
+              </div>
             </div>
             <button
               type="button"
@@ -484,8 +517,9 @@ export function MotoboyProfile() {
             const lockUpload = Boolean(current) && (isApproved || isPending);
             const canUpload = !blockedByOrder && (!current || isRejected) && !uploading;
             const stepLabel = doc.key === 'CNH' ? '1/2' : doc.key === 'SELFIE' ? '2/2' : 'Opcional';
+            const previewTitle = `${doc.label}`;
             return (
-              <div key={doc.key} className="rounded-xl border border-slate-100 p-3">
+              <div key={doc.key} className="rounded-2xl border border-slate-100 p-3 sm:p-4">
                 <div className="grid gap-3 sm:grid-cols-[1.1fr_0.9fr]">
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
@@ -570,14 +604,17 @@ export function MotoboyProfile() {
                       </div>
                     ) : null}
                   </div>
-                  <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-3 text-center text-xs text-slate-500 flex flex-col items-center justify-center">
+                  <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-3 text-center text-xs text-slate-600 flex flex-col items-center justify-center">
                     {current?.fileKey ? (
                       <>
-                        <img
-                          src={current.fileKey}
-                          alt={doc.label}
-                          className="w-full h-28 object-cover rounded-lg border border-slate-200"
-                        />
+                        <button
+                          type="button"
+                          onClick={() => setPreview({ title: previewTitle, src: String(current.fileKey || '') || null })}
+                          className="w-full rounded-xl border border-slate-200 bg-white overflow-hidden"
+                          title="Abrir prévia"
+                        >
+                          <img src={current.fileKey} alt={doc.label} className="w-full h-28 object-cover" loading="lazy" />
+                        </button>
                         <a
                           href={current.fileKey}
                           target="_blank"

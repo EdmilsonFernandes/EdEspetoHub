@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-    import { LandingPage, CreateStore, AdminLogin, StorePage, OrdersQueue, AdminDashboard, AdminOrders, AdminQueue, AdminRenewal, AdminDemo, PaymentPage, SuperAdmin, ForgotPassword, ResetPassword, VerifyEmail, TermsOfUse, OrderTracking, AddressDistance, AdminMotoboys, MotoboyAvailable, MotoboyCurrent, MotoboyHistory, MotoboyProfile, MotoboyDone, MotoboyLogin, MotoboyRegister } from './pages';
+    import { LandingPage, CreateStore, AdminLogin, StorePage, OrdersQueue, AdminDashboard, AdminOrders, AdminQueue, AdminRenewal, AdminDemo, PaymentPage, SuperAdmin, ForgotPassword, ResetPassword, VerifyEmail, TermsOfUse, OrderTracking, AddressDistance, AdminMotoboys, MotoboyAvailable, MotoboyCurrent, MotoboyHistory, MotoboyProfile, MotoboyDone, MotoboyLogin, MotoboyRegister, MotoboyHome, MotoboyEarnings } from './pages';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { ToastProvider } from './contexts/ToastContext';
 import { AdminRoute } from './components/Admin/AdminRoute';
@@ -113,11 +113,13 @@ function App() {
                 </AppErrorBoundary>
               }
             >
-              <Route index element={<Navigate to="/motoboy/available" replace />} />
+              <Route index element={<Navigate to="/motoboy/home" replace />} />
+              <Route path="home" element={<MotoboyHome />} />
               <Route path="available" element={<MotoboyAvailable />} />
               <Route path="delivery" element={<MotoboyCurrent />} />
               <Route path="done" element={<MotoboyDone />} />
-              <Route path="history" element={<MotoboyHistory />} />
+              <Route path="history" element={<Navigate to="/motoboy/earnings" replace />} />
+              <Route path="earnings" element={<MotoboyEarnings />} />
               <Route path="profile" element={<MotoboyProfile />} />
             </Route>
             <Route path="/motoboy/current" element={<Navigate to="/motoboy/delivery" replace />} />

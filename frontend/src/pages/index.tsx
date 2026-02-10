@@ -20,6 +20,8 @@ export { AdminMotoboys } from './AdminMotoboys';
 export { MotoboyAvailable } from './MotoboyAvailable';
 export { MotoboyCurrent } from './MotoboyCurrent';
 export { MotoboyHistory } from './MotoboyHistory';
+export { MotoboyHome } from './MotoboyHome';
+export { MotoboyEarnings } from './MotoboyEarnings';
 export { MotoboyDone } from './MotoboyDone';
 export { MotoboyLogin } from './MotoboyLogin';
 export { MotoboyRegister } from './MotoboyRegister';

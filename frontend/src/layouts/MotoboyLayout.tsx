@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { ClockCounterClockwise, ListChecks, UserCircle, NavigationArrow } from '@phosphor-icons/react';
+import { House, ListChecks, UserCircle, Wallet } from '@phosphor-icons/react';
 
 type Tab = {
   to: string;
@@ -17,22 +17,22 @@ export function MotoboyLayout() {
 
   const tabs: Tab[] = [
     {
+      to: '/motoboy/home',
+      label: 'Home',
+      icon: <House size={20} weight="duotone" />,
+      match: (p) => p === '/motoboy' || p.startsWith('/motoboy/home'),
+    },
+    {
       to: '/motoboy/available',
       label: 'Fila',
       icon: <ListChecks size={20} weight="duotone" />,
       match: (p) => p.startsWith('/motoboy/available'),
     },
     {
-      to: '/motoboy/delivery',
-      label: 'Entrega',
-      icon: <NavigationArrow size={20} weight="duotone" />,
-      match: (p) => p.startsWith('/motoboy/delivery') || p.startsWith('/motoboy/current'),
-    },
-    {
-      to: '/motoboy/history',
-      label: 'Histórico',
-      icon: <ClockCounterClockwise size={20} weight="duotone" />,
-      match: (p) => p.startsWith('/motoboy/history'),
+      to: '/motoboy/earnings',
+      label: 'Ganhos',
+      icon: <Wallet size={20} weight="duotone" />,
+      match: (p) => p.startsWith('/motoboy/earnings') || p.startsWith('/motoboy/history'),
     },
     {
       to: '/motoboy/profile',
@@ -134,7 +134,7 @@ export function MotoboyLayout() {
           <div className="motoboy-pill grid grid-cols-4 gap-1 p-1">
             {tabs.map((tab) => {
               const active = tab.match(pathname);
-              const showDot = tab.to === '/motoboy/available' && queueBadge && !pathname.startsWith('/motoboy/available');
+              const showDot = tab.label === 'Fila' && queueBadge && !pathname.startsWith('/motoboy/available');
               return (
                 <Link
                   key={tab.to}
