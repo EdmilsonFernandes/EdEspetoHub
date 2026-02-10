@@ -60,7 +60,8 @@ export class MotoboyOrderService {
       .leftJoinAndSelect('items.product', 'product')
       .where('o.type = :type', { type: 'delivery' })
       .andWhere(
-        `(od.order_id IS NULL AND o.status IN (:...statuses)) OR ((od.status = 'AVAILABLE' OR od.status IS NULL) AND od.motoboy_id IS NULL AND (od.expires_at IS NULL OR od.expires_at > NOW()))`,
+        // Ensure we only expose orders that are actually waiting for a motoboy, even if queue rows are stale.
+        `(od.order_id IS NULL AND o.status IN (:...statuses)) OR ((od.status = 'AVAILABLE' OR od.status IS NULL) AND o.status IN (:...statuses) AND od.motoboy_id IS NULL AND (od.expires_at IS NULL OR od.expires_at > NOW()))`,
         { statuses: availableOrderStatuses }
       )
       .andWhere('o.store_id IN (:...storeIds)', { storeIds })
