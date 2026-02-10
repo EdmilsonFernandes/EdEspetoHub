@@ -407,6 +407,37 @@ export function AdminMotoboys() {
     );
   };
 
+  const getMotoboyRegisterUrl = () => {
+    try {
+      return `${window.location.origin}/motoboy/register`;
+    } catch {
+      return '/motoboy/register';
+    }
+  };
+
+  const copyMotoboyRegisterUrl = async () => {
+    const url = getMotoboyRegisterUrl();
+    try {
+      await navigator.clipboard.writeText(url);
+      showToast('Link copiado.', 'success');
+    } catch {
+      try {
+        // fallback
+        const el = document.createElement('textarea');
+        el.value = url;
+        el.style.position = 'fixed';
+        el.style.opacity = '0';
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+        showToast('Link copiado.', 'success');
+      } catch {
+        showToast('Não foi possível copiar o link.', 'error');
+      }
+    }
+  };
+
   const SectionHeader = ({
     eyebrow,
     title,
@@ -746,8 +777,38 @@ export function AdminMotoboys() {
         <p className="text-sm text-slate-500">Acompanhe solicitações e gerencie entregadores ativos.</p>
       </div>
 
-      <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-        Entregadores fazem o cadastro pelo link <span className="font-semibold">/motoboy/register</span> e solicitam vínculo com sua loja.
+      <div className="premium-card p-4 sm:p-5 overflow-hidden">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="min-w-0">
+            <div className="text-[11px] uppercase tracking-[0.28em] font-extrabold text-emerald-700">
+              Link de cadastro
+            </div>
+            <div className="text-base sm:text-lg font-black text-slate-900">Convide entregadores para sua loja</div>
+            <div className="text-xs text-slate-600 mt-1">
+              Envie este link para o motoboy se cadastrar e solicitar vínculo.
+            </div>
+          </div>
+          <div className="shrink-0 flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={copyMotoboyRegisterUrl}
+              className="btn-press rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(16,185,129,0.55)]"
+            >
+              Copiar link
+            </button>
+            <a
+              href={getMotoboyRegisterUrl()}
+              target="_blank"
+              rel="noreferrer"
+              className="btn-press rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-extrabold text-slate-800"
+            >
+              Abrir
+            </a>
+          </div>
+        </div>
+        <div className="mt-3 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700 break-all">
+          {getMotoboyRegisterUrl()}
+        </div>
       </div>
 
       <div className="premium-card p-0 overflow-hidden">
