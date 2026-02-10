@@ -83,9 +83,24 @@ flowchart TD
 ```
 
 Regras principais:
-- O motoboy pode **solicitar vínculo** assim que enviar os documentos obrigatórios (mesmo se estiverem em análise).
-- A loja só consegue **aprovar vínculo** quando o KYC global estiver **APROVADO**.
-- Se a loja precisar, ela pode **pedir reenvio** (com motivo) sem rejeitar o KYC global.
+- O motoboy pode **solicitar vínculo** assim que enviar os documentos obrigatórios (status pode estar `PENDING`).
+- A loja só consegue **aprovar vínculo** quando o KYC global estiver **APROVADO** (SUPER_ADMIN).
+- Se a loja precisar, ela pode **pedir reenvio** (com motivo) sem rejeitar o KYC global (pedido por loja via `metadata.review.storeReuploadRequests[storeId]`).
+
+### Endpoints principais
+
+KYC (plataforma):
+- `GET /api/admin/motoboys/kyc/pending` (SUPER_ADMIN)
+- `GET /api/admin/motoboys/:motoboyId/documents` (SUPER_ADMIN)
+- `POST /api/admin/motoboys/:motoboyId/documents/:documentId/approve` (SUPER_ADMIN)
+- `POST /api/admin/motoboys/:motoboyId/documents/:documentId/reject` (SUPER_ADMIN)
+
+Vínculo (loja):
+- `POST /api/motoboy/store-requests` (motoboy)
+- `GET /api/stores/:storeId/motoboy-requests` (ADMIN da loja)
+- `POST /api/stores/:storeId/motoboy-requests/:requestId/approve` (ADMIN da loja)
+- `POST /api/stores/:storeId/motoboy-requests/:requestId/reject` (ADMIN da loja)
+- `POST /api/stores/:storeId/motoboys/:motoboyId/documents/:documentId/reupload` (ADMIN da loja)
 
 ## Rodar local com Docker Compose (recomendado)
 

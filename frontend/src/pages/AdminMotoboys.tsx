@@ -703,9 +703,9 @@ export function AdminMotoboys() {
         </div>
       )}
 
-      <div>
-        <h1 className="text-2xl font-black text-slate-800">Entregadores</h1>
-        <p className="text-sm text-slate-500">Acompanhe solicitações e gerencie entregadores ativos.</p>
+      <div className="rounded-3xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-white p-5 shadow-[0_26px_60px_-52px_rgba(15,23,42,0.35)]">
+        <h1 className="text-2xl font-black text-slate-900">Entregadores</h1>
+        <p className="text-sm text-slate-600 mt-1">Solicitações, documentos e vínculo por loja.</p>
       </div>
 
       <div className="premium-card p-4 sm:p-5 overflow-hidden">
@@ -715,9 +715,7 @@ export function AdminMotoboys() {
               Link de cadastro
             </div>
             <div className="text-base sm:text-lg font-black text-slate-900">Convide entregadores para sua loja</div>
-            <div className="text-xs text-slate-600 mt-1">
-              Envie este link para o motoboy se cadastrar e solicitar vínculo.
-            </div>
+            <div className="text-xs text-slate-600 mt-1">Copie e envie no WhatsApp. O motoboy faz o cadastro e solicita o vínculo.</div>
           </div>
           <div className="shrink-0 flex flex-wrap items-center gap-2">
             <button
@@ -773,7 +771,7 @@ export function AdminMotoboys() {
             </div>
           </div>
         ) : (
-          <div className="p-4 grid gap-3">
+          <div className="p-4 grid gap-3 bg-[linear-gradient(180deg,rgba(248,250,252,0.85),rgba(255,255,255,1))]">
             {pendingRequests.map((request) => (
               <div
                 key={request.id}
@@ -927,7 +925,7 @@ export function AdminMotoboys() {
             </div>
           </div>
         ) : (
-          <div className="p-4 grid gap-3">
+          <div className="p-4 grid gap-3 md:grid-cols-2 bg-[linear-gradient(180deg,rgba(236,253,245,0.55),rgba(255,255,255,1))]">
             {filteredMotoboys.map((link) => (
               <div
                 key={link.id}

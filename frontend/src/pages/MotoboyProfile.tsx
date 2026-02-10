@@ -245,7 +245,7 @@ export function MotoboyProfile() {
         tone: 'amber' as const,
         icon: <Info size={18} weight="duotone" />,
         title: 'Identidade provável',
-        subtitle: 'Pode pedir revisão manual na loja, se necessário.',
+        subtitle: 'Se a foto estiver boa, a plataforma deve aprovar em breve.',
         details: { status, label, reason },
       };
     }
@@ -255,7 +255,7 @@ export function MotoboyProfile() {
         tone: 'rose' as const,
         icon: <ShieldWarning size={18} weight="duotone" />,
         title: 'Precisa de revisão',
-        subtitle: 'Sua selfie pode não estar clara ou não confere.',
+        subtitle: 'A selfie pode estar ruim ou não conferir. Se for o caso, reenvie uma foto melhor.',
         details: { status, label, reason },
       };
     }
@@ -617,7 +617,7 @@ export function MotoboyProfile() {
 
       {blocked && (
         <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
-          Seu cadastro está em análise. Envie os documentos obrigatórios e aguarde aprovação das lojas.
+          Seu cadastro está em análise. Envie os documentos obrigatórios e aguarde a validação da plataforma.
         </div>
       )}
 
@@ -625,7 +625,7 @@ export function MotoboyProfile() {
         <div>
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-xs uppercase tracking-[0.28em] text-slate-500 font-extrabold">Documentos</p>
+              <p className="text-xs uppercase tracking-[0.28em] text-slate-500 font-extrabold">Documentos (KYC)</p>
               <p className="text-base font-black text-slate-900">Envie e acompanhe</p>
               <div className="mt-2 flex flex-wrap items-center gap-2">
                 <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border border-slate-200 bg-slate-50 text-slate-700">
@@ -693,7 +693,7 @@ export function MotoboyProfile() {
             ) : null}
           </div>
         )}
-        <div className="grid gap-3">
+            <div className="grid gap-3">
 	          {documentTypes.map((doc) => {
 	            const current = documentsByType.get(doc.key);
 	            const currentStatus = String(current?.status || '').toUpperCase();
@@ -721,6 +721,7 @@ export function MotoboyProfile() {
             const canUpload = canStartUpload(doc.key) && !uploading;
             const stepLabel = doc.key === 'CNH' ? '1/2' : doc.key === 'SELFIE' ? '2/2' : 'Opcional';
             const previewTitle = `${doc.label}`;
+            const prefersCamera = doc.key === 'CNH' || doc.key === 'SELFIE';
 	            return (
               <div key={doc.key} className="rounded-2xl border border-slate-100 p-3 sm:p-4">
                 <div className="grid gap-3 sm:grid-cols-[1.1fr_0.9fr]">
@@ -733,13 +734,7 @@ export function MotoboyProfile() {
                           </span>
                           <span>{doc.label}</span>
                         </p>
-                        <p className="text-xs text-slate-500">
-                          {doc.key === 'CNH'
-                            ? 'Frente + verso (bem legível).'
-                            : doc.key === 'SELFIE'
-                            ? 'Rosto + CNH aparecendo.'
-                            : 'Documento do veículo.'}
-                        </p>
+                        <p className="text-xs text-slate-500">{doc.help}</p>
                       </div>
                       {current && (
                         <span
@@ -773,7 +768,7 @@ export function MotoboyProfile() {
                             : 'border-amber-200 bg-amber-50 text-amber-800'
                         }`}
                       >
-                        {isApproved ? 'Tudo certo.' : 'Enviado. Em análise.'}
+                        {isApproved ? 'Aprovado pela plataforma.' : 'Enviado para análise da plataforma.'}
                       </div>
                     ) : (
                       <>
@@ -786,7 +781,7 @@ export function MotoboyProfile() {
                             </div>
                           </div>
                         ) : null}
-                        {(doc.key === 'CNH' || doc.key === 'SELFIE') && (
+                        {prefersCamera && (
                           <button
                             type="button"
                             onClick={() => openCamera(doc.key)}
@@ -796,23 +791,30 @@ export function MotoboyProfile() {
                             Tirar foto
                           </button>
                         )}
-                        <input
-                          type="file"
-                          accept="image/*"
-                          disabled={!canUpload}
-                          onChange={(event) =>
-                            setDocFiles((prev) => ({ ...prev, [doc.key]: event.target.files?.[0] || null }))
-                          }
-                          className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm disabled:opacity-60"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => handleUploadDocument(doc.key)}
-                          disabled={!canUpload}
-                          className="btn-press w-full rounded-xl bg-slate-900 px-4 py-3 text-sm font-extrabold text-white disabled:opacity-50 shadow-[0_22px_48px_-34px_rgba(15,23,42,0.55)]"
-                        >
-                          {uploading ? 'Enviando...' : isRejected ? 'Reenviar documento' : 'Enviar documento'}
-                        </button>
+                        <details className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
+                          <summary className="cursor-pointer select-none px-3 py-2 text-xs font-extrabold text-slate-800 bg-slate-50">
+                            {prefersCamera ? 'Ou enviar imagem da galeria' : 'Enviar imagem'}
+                          </summary>
+                          <div className="p-3 space-y-2">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              disabled={!canUpload}
+                              onChange={(event) =>
+                                setDocFiles((prev) => ({ ...prev, [doc.key]: event.target.files?.[0] || null }))
+                              }
+                              className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm disabled:opacity-60"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleUploadDocument(doc.key)}
+                              disabled={!canUpload}
+                              className="btn-press w-full rounded-xl bg-slate-900 px-4 py-3 text-sm font-extrabold text-white disabled:opacity-50 shadow-[0_22px_48px_-34px_rgba(15,23,42,0.55)]"
+                            >
+                              {uploading ? 'Enviando...' : isRejected ? 'Reenviar documento' : 'Enviar documento'}
+                            </button>
+                          </div>
+                        </details>
                       </>
                     )}
                     {isRejected && current?.metadata?.review?.reason ? (
