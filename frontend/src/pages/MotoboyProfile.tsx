@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { LinkSimpleHorizontal, Storefront, ClockClockwise, CheckCircle } from '@phosphor-icons/react';
+import { LinkSimpleHorizontal, Storefront, ClockClockwise, CheckCircle, ShieldCheck, ShieldWarning, Clock, Info } from '@phosphor-icons/react';
 import { motoboyService } from '../services/motoboyService';
 import { storeService } from '../services/storeService';
 import { useToast } from '../contexts/ToastContext';
@@ -32,6 +32,7 @@ export function MotoboyProfile() {
   const [cameraOpen, setCameraOpen] = useState(false);
   const [cameraDocType, setCameraDocType] = useState<string | null>(null);
   const [preview, setPreview] = useState<{ title: string; src: string | null } | null>(null);
+  const [showFaceDetails, setShowFaceDetails] = useState(false);
   const [notifyOrders, setNotifyOrders] = useState(() => {
     const raw = localStorage.getItem('motoboy:notify_orders');
     if (raw === null) return true;
@@ -219,21 +220,57 @@ export function MotoboyProfile() {
     const label = String(face.scoreLabel || '').toLowerCase();
     const reason = face.reason ? String(face.reason) : '';
 
-    const text =
-      status === 'processing'
-        ? 'Validacao automatica em analise'
-        : label === 'alto'
-        ? 'Validacao automatica: alta'
-        : label === 'medio'
-        ? 'Validacao automatica: media'
-        : label === 'baixo'
-        ? 'Validacao automatica: baixa (revisao manual recomendada)'
-        : status
-        ? 'Validacao automatica: indisponivel'
-        : null;
+    if (status === 'processing' || status === 'pending') {
+      return {
+        tone: 'amber' as const,
+        icon: <Clock size={18} weight="duotone" />,
+        title: 'Verificação automática em andamento',
+        subtitle: 'Estamos conferindo sua selfie com o documento.',
+        details: { status, label, reason },
+      };
+    }
 
-    if (!text) return null;
-    return { text, reason };
+    if (label === 'alto') {
+      return {
+        tone: 'emerald' as const,
+        icon: <ShieldCheck size={18} weight="duotone" />,
+        title: 'Identidade conferida',
+        subtitle: 'Sua selfie bate com o documento.',
+        details: { status, label, reason },
+      };
+    }
+
+    if (label === 'medio') {
+      return {
+        tone: 'amber' as const,
+        icon: <Info size={18} weight="duotone" />,
+        title: 'Identidade provável',
+        subtitle: 'Pode pedir revisão manual na loja, se necessário.',
+        details: { status, label, reason },
+      };
+    }
+
+    if (label === 'baixo') {
+      return {
+        tone: 'rose' as const,
+        icon: <ShieldWarning size={18} weight="duotone" />,
+        title: 'Precisa de revisão',
+        subtitle: 'Sua selfie pode não estar clara ou não confere.',
+        details: { status, label, reason },
+      };
+    }
+
+    if (status) {
+      return {
+        tone: 'slate' as const,
+        icon: <Info size={18} weight="duotone" />,
+        title: 'Verificação automática indisponível',
+        subtitle: 'A loja ainda pode revisar seus documentos.',
+        details: { status, label, reason },
+      };
+    }
+
+    return null;
   }, [documentsByType]);
 
   const requestByStoreId = useMemo(() => {
@@ -578,10 +615,8 @@ export function MotoboyProfile() {
         <div>
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-sm font-semibold text-slate-700">Enviar documentos</p>
-              <p className="text-xs text-slate-500">
-                Para trabalhar, envie os documentos obrigatórios e aguarde aprovação.
-              </p>
+              <p className="text-xs uppercase tracking-[0.28em] text-slate-500 font-extrabold">Documentos</p>
+              <p className="text-base font-black text-slate-900">Envie e acompanhe</p>
               <div className="mt-2 flex flex-wrap items-center gap-2">
                 <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border border-slate-200 bg-slate-50 text-slate-700">
                   {docsProgress.approved}/{docsProgress.total} completos
@@ -602,16 +637,50 @@ export function MotoboyProfile() {
               type="button"
               onClick={refreshDocuments}
               disabled={refreshingDocs}
-              className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 disabled:opacity-60"
+              className="btn-press rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-700 disabled:opacity-60"
             >
               {refreshingDocs ? 'Atualizando...' : 'Atualizar'}
             </button>
           </div>
         </div>
         {faceBanner && (
-          <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700">
-            <span className="font-semibold">{faceBanner.text}</span>
-            {faceBanner.reason ? <span className="text-slate-500"> ({faceBanner.reason})</span> : null}
+          <div
+            className={[
+              'rounded-2xl border px-3 py-3 text-sm',
+              faceBanner.tone === 'emerald'
+                ? 'border-emerald-200 bg-emerald-50/60 text-emerald-950'
+                : faceBanner.tone === 'amber'
+                ? 'border-amber-200 bg-amber-50/60 text-amber-950'
+                : faceBanner.tone === 'rose'
+                ? 'border-rose-200 bg-rose-50/60 text-rose-950'
+                : 'border-slate-200 bg-slate-50 text-slate-900',
+            ].join(' ')}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-3 min-w-0">
+                <div className="h-10 w-10 rounded-2xl border border-slate-200 bg-white grid place-items-center shrink-0">
+                  {faceBanner.icon}
+                </div>
+                <div className="min-w-0">
+                  <div className="font-extrabold leading-tight">{faceBanner.title}</div>
+                  <div className="text-xs text-slate-700 mt-0.5">{faceBanner.subtitle}</div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowFaceDetails((v) => !v)}
+                className="btn-press rounded-xl border border-slate-200 bg-white px-3 py-2 text-[11px] font-extrabold text-slate-800"
+              >
+                {showFaceDetails ? 'Ocultar' : 'Detalhes'}
+              </button>
+            </div>
+            {showFaceDetails ? (
+              <div className="mt-3 rounded-2xl border border-slate-200 bg-white/70 px-3 py-2 text-[11px] text-slate-700">
+                <div><span className="font-extrabold">Status:</span> {String(faceBanner.details?.status || '-')}</div>
+                <div><span className="font-extrabold">Nível:</span> {String(faceBanner.details?.label || '-')}</div>
+                {faceBanner.details?.reason ? <div><span className="font-extrabold">Motivo:</span> {String(faceBanner.details.reason)}</div> : null}
+              </div>
+            ) : null}
           </div>
         )}
         <div className="grid gap-3">
@@ -640,7 +709,13 @@ export function MotoboyProfile() {
                           </span>
                           <span>{doc.label}</span>
                         </p>
-                        <p className="text-xs text-slate-500">{doc.help}</p>
+                        <p className="text-xs text-slate-500">
+                          {doc.key === 'CNH'
+                            ? 'Frente + verso (bem legível).'
+                            : doc.key === 'SELFIE'
+                            ? 'Rosto + CNH aparecendo.'
+                            : 'Documento do veículo.'}
+                        </p>
                       </div>
                       {current && (
                         <span
@@ -674,7 +749,7 @@ export function MotoboyProfile() {
                             : 'border-amber-200 bg-amber-50 text-amber-800'
                         }`}
                       >
-                        {isApproved ? 'Documento aprovado. Nenhuma ação necessária.' : 'Documento enviado. Aguardando validação.'}
+                        {isApproved ? 'Tudo certo.' : 'Enviado. Em análise.'}
                       </div>
                     ) : (
                       <>
@@ -683,9 +758,9 @@ export function MotoboyProfile() {
                             type="button"
                             onClick={() => openCamera(doc.key)}
                             disabled={!canUpload}
-                            className="w-full rounded-lg bg-brand-primary px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+                            className="btn-press w-full rounded-xl bg-brand-primary px-4 py-3 text-sm font-extrabold text-white disabled:opacity-50 shadow-[0_22px_48px_-34px_rgba(234,88,12,0.55)]"
                           >
-                            Tirar foto (recomendado)
+                            Tirar foto
                           </button>
                         )}
                         <input
@@ -695,13 +770,13 @@ export function MotoboyProfile() {
                           onChange={(event) =>
                             setDocFiles((prev) => ({ ...prev, [doc.key]: event.target.files?.[0] || null }))
                           }
-                          className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm disabled:opacity-60"
+                          className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm disabled:opacity-60"
                         />
                         <button
                           type="button"
                           onClick={() => handleUploadDocument(doc.key)}
                           disabled={!canUpload}
-                          className="w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+                          className="btn-press w-full rounded-xl bg-slate-900 px-4 py-3 text-sm font-extrabold text-white disabled:opacity-50 shadow-[0_22px_48px_-34px_rgba(15,23,42,0.55)]"
                         >
                           {uploading ? 'Enviando...' : isRejected ? 'Reenviar documento' : 'Enviar documento'}
                         </button>
