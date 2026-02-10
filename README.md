@@ -87,6 +87,25 @@ Regras principais:
 - A loja só consegue **aprovar vínculo** quando o KYC global estiver **APROVADO** (SUPER_ADMIN).
 - Se a loja precisar, ela pode **pedir reenvio** (com motivo) sem rejeitar o KYC global (pedido por loja via `metadata.review.storeReuploadRequests[storeId]`).
 
+## Fluxo end-to-end (pedido + entrega)
+
+Este é o fluxo esperado sem quebrar os fluxos antigos (retirada/mesa continuam iguais):
+
+```mermaid
+flowchart TD
+  C[Cliente (vitrine)] -->|cria pedido| O[Order]
+  O -->|Admin prepara| Q[Fila / Produção]
+  Q -->|delivery: pronto| W[Aguardando entregador]
+  W -->|motoboy aceita| D[Em rota]
+  D -->|entregue| E[Entregue]
+  E -->|confirma pagamento / finaliza| F[Finalizado]
+```
+
+Detalhes importantes:
+- Motoboy só pode ter **1 entrega ativa** por vez.
+- Dois motoboys não conseguem aceitar a mesma entrega (concorrência).
+- Ao entrar em `Em rota`, o acompanhamento público do pedido mostra também **nome do motoboy** quando disponível.
+
 ### Endpoints principais
 
 KYC (plataforma):
