@@ -69,6 +69,12 @@ const normalizeAddressForMaps = (address?: string) => {
     .trim();
 };
 
+const firstName = (fullName?: string | null) => {
+  const n = String(fullName || '').trim();
+  if (!n) return '';
+  return n.split(/\s+/)[0] || n;
+};
+
 export function OrderTracking() {
   const { orderId } = useParams();
   const navigate = useNavigate();
@@ -158,6 +164,9 @@ export function OrderTracking() {
   const status = order?.status || 'pending';
   const typeLabel = typeLabels[order?.type] || 'Pedido';
   const isDelivery = order?.type === 'delivery';
+  const deliveryStatus = String((order as any)?.delivery?.status || '').toUpperCase();
+  const motoboyName = String((order as any)?.delivery?.motoboy?.name || '');
+  const motoboyFirst = firstName(motoboyName);
   const storeName = order?.store?.name || 'Chama no Espeto';
   const storeSlug = order?.store?.slug;
   const storeHomePath = storeSlug ? `/${storeSlug}` : '/';
@@ -183,7 +192,6 @@ export function OrderTracking() {
   const storeLogo =
     resolveAssetUrl(order?.store?.settings?.logoUrl) || '/chama-no-espeto.jpeg';
   const statusLabel = useMemo(() => {
-    const deliveryStatus = String((order as any)?.delivery?.status || '').toUpperCase();
     if (isDelivery && (deliveryStatus === 'DELIVERED' || status === 'delivered' || status === 'finished')) return 'Entregue';
     if (isDelivery && deliveryStatus === 'IN_TRANSIT') return 'Em rota';
     if (isDelivery && (deliveryStatus === 'ACCEPTED' || deliveryStatus === 'PICKED_UP')) return 'Entregador a caminho';
@@ -518,6 +526,32 @@ export function OrderTracking() {
                     <p className="text-sm text-gray-500 mt-2">
                       {storeName} • {typeLabel}
                     </p>
+
+                    {isDelivery && motoboyFirst && ['ACCEPTED', 'PICKED_UP', 'IN_TRANSIT', 'DELIVERED'].includes(deliveryStatus) ? (
+                      <div className="mt-3 rounded-2xl border border-slate-200 bg-white/70 px-4 py-3 text-sm text-slate-800">
+                        <div className="flex items-start gap-3">
+                          <div className="h-10 w-10 rounded-2xl border border-slate-200 bg-slate-50 flex items-center justify-center text-slate-700 shrink-0">
+                            <Bicycle size={18} weight="duotone" />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="text-xs uppercase tracking-[0.28em] text-slate-500 font-extrabold">
+                              Entregador
+                            </div>
+                            <div className="font-extrabold leading-tight truncate">
+                              {motoboyFirst} {deliveryStatus === 'IN_TRANSIT' ? 'está a caminho' : deliveryStatus === 'PICKED_UP' ? 'retirou seu pedido' : 'aceitou sua entrega'}
+                            </div>
+                            <div className="text-xs text-slate-600 mt-0.5">
+                              {deliveryStatus === 'IN_TRANSIT'
+                                ? 'Ele está indo até você agora.'
+                                : deliveryStatus === 'PICKED_UP'
+                                ? 'Agora é só acompanhar o trajeto.'
+                                : 'Ele está se preparando para sair da loja.'}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ) : null}
+
                     {isReady && elapsedMs > 0 && (
                       <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-brand-primary text-white text-xs font-semibold px-4 py-2 shadow-sm">
                         Tempo total: {formatDuration(elapsedMs)}

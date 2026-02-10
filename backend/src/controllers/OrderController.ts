@@ -15,6 +15,7 @@ import { Request, Response } from 'express';
 import { OrderService } from '../services/OrderService';
 import { OrderEtaServiceV2 } from '../services/OrderEtaServiceV2';
 import { AppDataSource } from '../config/database';
+import { Motoboy } from '../entities/Motoboy';
 import { OrderDelivery } from '../entities/OrderDelivery';
 import { logger } from '../utils/logger';
 import { AppError } from '../errors/AppError';
@@ -193,6 +194,13 @@ export class OrderController {
         order?.type === 'delivery'
           ? await AppDataSource.getRepository(OrderDelivery).findOne({ where: { orderId: order.id } as any })
           : null;
+      const motoboy =
+        deliveryRow?.motoboyId
+          ? await AppDataSource.getRepository(Motoboy).findOne({
+              where: { id: deliveryRow.motoboyId } as any,
+              relations: [ 'user' ],
+            })
+          : null;
       const correlationId = typeof req.headers[ 'x-correlation-id' ] === 'string'
         ? req.headers[ 'x-correlation-id' ]
         : undefined;
@@ -214,6 +222,13 @@ export class OrderController {
           ? {
               status: deliveryRow.status,
               motoboyId: deliveryRow.motoboyId ?? null,
+              motoboy: motoboy?.user
+                ? {
+                    id: motoboy.id,
+                    name: motoboy.user.fullName,
+                    firstName: String(motoboy.user.fullName || '').trim().split(' ')[0] || null,
+                  }
+                : null,
               acceptedAt: deliveryRow.acceptedAt ?? null,
               pickedUpAt: deliveryRow.pickedUpAt ?? null,
               inTransitAt: deliveryRow.inTransitAt ?? null,
