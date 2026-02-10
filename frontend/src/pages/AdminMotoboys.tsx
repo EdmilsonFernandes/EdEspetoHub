@@ -11,6 +11,10 @@ export function AdminMotoboys() {
   const [documentsByMotoboy, setDocumentsByMotoboy] = useState<Record<string, any[]>>({});
   const [docsLoadingId, setDocsLoadingId] = useState<string | null>(null);
   const [previewDoc, setPreviewDoc] = useState<any | null>(null);
+  const [docsModalOpen, setDocsModalOpen] = useState(false);
+  const [docsModalMotoboyId, setDocsModalMotoboyId] = useState<string | null>(null);
+  const [docsModalTitle, setDocsModalTitle] = useState<string>('');
+  const [docsModalShowHistory, setDocsModalShowHistory] = useState(false);
   const [rejectRequestOpen, setRejectRequestOpen] = useState(false);
   const [rejectRequestTarget, setRejectRequestTarget] = useState<any | null>(null);
   const [rejectRequestReason, setRejectRequestReason] = useState('');
@@ -44,6 +48,44 @@ export function AdminMotoboys() {
   const docsPendingCount = (docs: any[]) => {
     const latest = latestDocs(docs);
     return latest.filter((d) => String(d?.status || '').toUpperCase() !== 'APPROVED').length;
+  };
+
+  const docStatusForType = (docs: any[], type: 'CNH' | 'SELFIE' | 'CRLV') => {
+    const list = Array.isArray(docs) ? docs : [];
+    const latest = latestDocs(list);
+    const doc = latest.find((d) => normalizeDocType(d?.docType) === type) || null;
+    if (!doc) return { status: 'MISSING' as const, doc: null as any };
+    const st = String(doc?.status || '').toUpperCase();
+    if (st === 'APPROVED') return { status: 'APPROVED' as const, doc };
+    if (st === 'REJECTED') return { status: 'REJECTED' as const, doc };
+    return { status: 'PENDING' as const, doc };
+  };
+
+  const docChip = (docs: any[], type: 'CNH' | 'SELFIE' | 'CRLV') => {
+    const { status } = docStatusForType(docs, type);
+    const cls =
+      status === 'APPROVED'
+        ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+        : status === 'REJECTED'
+        ? 'border-rose-200 bg-rose-50 text-rose-800'
+        : status === 'PENDING'
+        ? 'border-amber-200 bg-amber-50 text-amber-800'
+        : 'border-slate-200 bg-slate-50 text-slate-700';
+    const label = status === 'MISSING' ? 'Faltando' : status === 'PENDING' ? 'Em análise' : status === 'REJECTED' ? 'Rejeitado' : 'OK';
+    return (
+      <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold border ${cls}`} title={`${type}: ${label}`}>
+        {type}: {label}
+      </span>
+    );
+  };
+
+  const openDocsModal = async (motoboyId: string, title: string) => {
+    if (!motoboyId) return;
+    setDocsModalMotoboyId(motoboyId);
+    setDocsModalTitle(title);
+    setDocsModalShowHistory(false);
+    setDocsModalOpen(true);
+    await loadDocuments(motoboyId);
   };
 
   const loadMotoboys = async () => {
@@ -297,6 +339,70 @@ export function AdminMotoboys() {
 
   return (
     <div className="space-y-6">
+      {docsModalOpen && docsModalMotoboyId && (
+        <div
+          className="fixed inset-0 z-[89] bg-black/60 flex items-end sm:items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setDocsModalOpen(false)}
+        >
+          <div
+            className="w-full max-w-5xl rounded-3xl bg-white p-4 sm:p-5 border border-slate-200 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Documentos</p>
+                <h2 className="text-lg sm:text-xl font-black text-slate-900 truncate">{docsModalTitle || 'Entregador'}</h2>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {docChip(documentsByMotoboy[docsModalMotoboyId] || [], 'CNH')}
+                  {docChip(documentsByMotoboy[docsModalMotoboyId] || [], 'SELFIE')}
+                  {docChip(documentsByMotoboy[docsModalMotoboyId] || [], 'CRLV')}
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => loadDocuments(docsModalMotoboyId)}
+                  className="btn-press rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-700"
+                >
+                  {docsLoadingId === docsModalMotoboyId ? 'Atualizando...' : 'Atualizar'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDocsModalOpen(false)}
+                  className="btn-press rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-700"
+                >
+                  Fechar
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-4 flex items-center justify-between gap-3">
+              <div className="text-xs text-slate-600">
+                {docsLoadingId === docsModalMotoboyId ? 'Carregando documentos...' : 'Clique para ampliar e revisar.'}
+              </div>
+              <button
+                type="button"
+                onClick={() => setDocsModalShowHistory((v) => !v)}
+                className="btn-press rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-800"
+              >
+                {docsModalShowHistory ? 'Ocultar histórico' : 'Mostrar histórico'}
+              </button>
+            </div>
+
+            <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {(docsModalShowHistory
+                ? (documentsByMotoboy[docsModalMotoboyId] || [])
+                : latestDocs(documentsByMotoboy[docsModalMotoboyId] || [])
+              ).map((doc: any) => (
+                <div key={doc.id}>{docThumb(doc, docsModalMotoboyId)}</div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {rejectRequestOpen && (
         <div
           className="fixed inset-0 z-[90] bg-black/60 flex items-end sm:items-center justify-center p-4"
@@ -535,25 +641,21 @@ export function AdminMotoboys() {
                   {!!request.motoboyId && (
                     <button
                       type="button"
-                      onClick={() => loadDocuments(request.motoboyId)}
+                      onClick={() => openDocsModal(request.motoboyId, request.motoboyUser?.fullName || 'Entregador')}
                       className="px-2.5 py-1 rounded-lg border border-slate-200 text-[11px] font-semibold text-slate-600"
                     >
-                      {docsLoadingId === request.motoboyId ? 'Carregando documentos...' : 'Ver documentos'}
+                      Ver documentos
                     </button>
                   )}
                 </div>
 
-                {!!request.motoboyId &&
-                  Array.isArray(documentsByMotoboy[request.motoboyId]) &&
-                  documentsByMotoboy[request.motoboyId].length > 0 && (
-                    <div className="mt-3">
-                      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                        {latestDocs(documentsByMotoboy[request.motoboyId]).map((doc: any) => (
-                          <div key={doc.id}>{docThumb(doc, request.motoboyId)}</div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                {!!request.motoboyId && Array.isArray(documentsByMotoboy[request.motoboyId]) && (
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {docChip(documentsByMotoboy[request.motoboyId] || [], 'CNH')}
+                    {docChip(documentsByMotoboy[request.motoboyId] || [], 'SELFIE')}
+                    {docChip(documentsByMotoboy[request.motoboyId] || [], 'CRLV')}
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -625,13 +727,20 @@ export function AdminMotoboys() {
                     )}
                   </div>
                 )}
+                {Array.isArray(documentsByMotoboy[link.motoboyId]) && (
+                  <div className="flex flex-wrap gap-2">
+                    {docChip(documentsByMotoboy[link.motoboyId] || [], 'CNH')}
+                    {docChip(documentsByMotoboy[link.motoboyId] || [], 'SELFIE')}
+                    {docChip(documentsByMotoboy[link.motoboyId] || [], 'CRLV')}
+                  </div>
+                )}
                 <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
-                    onClick={() => loadDocuments(link.motoboyId)}
+                    onClick={() => openDocsModal(link.motoboyId, link.motoboyUser?.fullName || 'Entregador')}
                     className="px-2.5 py-1 rounded-lg border border-slate-200 text-[11px] font-semibold text-slate-600"
                   >
-                    {docsLoadingId === link.motoboyId ? 'Carregando documentos...' : 'Ver documentos'}
+                    Ver documentos
                   </button>
                   {!link.active && (
                     <button
@@ -659,15 +768,6 @@ export function AdminMotoboys() {
                     Remover vínculo
                   </button>
                 </div>
-                {Array.isArray(documentsByMotoboy[link.motoboyId]) && documentsByMotoboy[link.motoboyId].length > 0 && (
-                  <div className="mt-3">
-                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                      {latestDocs(documentsByMotoboy[link.motoboyId]).map((doc: any) => (
-                        <div key={doc.id}>{docThumb(doc, link.motoboyId)}</div>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </div>
             ))}
           </div>
