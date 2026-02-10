@@ -25,7 +25,7 @@ This is not an identity proof; it is an assistive signal.
   "faceMatchScore": 0.0,
   "scoreLabel": "alto|medio|baixo|indisponivel",
   "reason": "no_face_selfie|multi_face_selfie|no_face_doc|compare_error|timeout",
-  "provider": "deepface",
+  "provider": "insightface",
   "providerVersion": "x.y.z",
   "latencyMs": 1234
 }
@@ -40,6 +40,4 @@ This is not an identity proof; it is an assistive signal.
 - `FACE_VERIFY_JOB_INTERVAL_MS` (default: 30000)
 
 Worker:
-- `FACE_DETECTOR_BACKEND` (default: `opencv`)
-- `FACE_MODEL_NAME` (default: `VGG-Face`)
-
+- `FACE_MODEL_NAME` (default: `buffalo_l`)

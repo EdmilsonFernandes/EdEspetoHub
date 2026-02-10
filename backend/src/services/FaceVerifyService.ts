@@ -101,12 +101,12 @@ export class FaceVerifyService {
     if (!selfie || !cnh) return;
 
     selfie.metadata = selfie.metadata || {};
-    selfie.metadata.face = {
-      ...(selfie.metadata.face || {}),
-      status: 'pending' as FaceStatus,
-      checkedAt: null,
-      provider: 'deepface',
-    };
+	    selfie.metadata.face = {
+	      ...(selfie.metadata.face || {}),
+	      status: 'pending' as FaceStatus,
+	      checkedAt: null,
+	      provider: 'insightface',
+	    };
     await repo.save(selfie);
   }
 
@@ -158,10 +158,10 @@ export class FaceVerifyService {
         checkedAt: new Date().toISOString(),
         scoreLabel: 'indisponivel' as ScoreLabel,
         reason: 'rate_limited',
-        nextEligibleAt: cooldown.nextAllowedAt.toISOString(),
-        attemptWindowCount: cooldown.attempts,
-        provider: 'deepface',
-      };
+	        nextEligibleAt: cooldown.nextAllowedAt.toISOString(),
+	        attemptWindowCount: cooldown.attempts,
+	        provider: 'insightface',
+	      };
       await repo.save(selfie);
       return;
     }
@@ -184,13 +184,13 @@ export class FaceVerifyService {
     if (!Array.isArray(claimed) || claimed.length === 0) return;
 
     const startedAt = Date.now();
-    const faceMetaBase: any = {
-      status: 'processing' as FaceStatus,
-      checkedAt: new Date().toISOString(),
-      provider: 'deepface',
-      providerVersion: null,
-      latencyMs: null,
-    };
+	    const faceMetaBase: any = {
+	      status: 'processing' as FaceStatus,
+	      checkedAt: new Date().toISOString(),
+	      provider: 'insightface',
+	      providerVersion: null,
+	      latencyMs: null,
+	    };
 
     try {
       const docImageBase64 = await readFileKeyAsDataUrl(cnhKey);
@@ -293,7 +293,7 @@ export class FaceVerifyService {
         autoDecision,
         autoRejected,
         attemptWindowCount: cooldown.attempts + 1,
-        provider: json?.provider || 'deepface',
+        provider: json?.provider || 'insightface',
         providerVersion: json?.providerVersion || null,
         latencyMs,
       };

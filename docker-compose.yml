@@ -35,8 +35,7 @@ services:
       context: ./face-worker
       dockerfile: Dockerfile
     environment:
-      FACE_DETECTOR_BACKEND: "${FACE_DETECTOR_BACKEND:-opencv}"
-      FACE_MODEL_NAME: "${FACE_MODEL_NAME:-VGG-Face}"
+      FACE_MODEL_NAME: "${FACE_MODEL_NAME:-buffalo_l}"
     restart: always
 
   maps:
