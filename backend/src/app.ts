@@ -75,6 +75,8 @@ async function bootstrap()
   await ensureBaseSchema(AppDataSource);
   await runMigrations();
   const app = express();
+  // API endpoints are dynamic; avoid 304/ETag cache surprises in browsers/proxies.
+  app.set('etag', false);
   app.use(requestLogger);
   app.use(cors());
   app.use(express.json({ limit: '10mb' }));

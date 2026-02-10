@@ -196,7 +196,10 @@ export class DeliveryService {
             acceptedAt: now,
           })
           .where('order_id = :orderId', { orderId })
-          .andWhere('(status = :status OR status IS NULL)', { status: 'AVAILABLE' })
+          // Legacy rows may have NULL/empty/lowercase status.
+          .andWhere("(status IS NULL OR NULLIF(TRIM(status), '') IS NULL OR UPPER(status) = :available)", {
+            available: 'AVAILABLE',
+          })
           .andWhere('motoboy_id IS NULL')
           .andWhere('(expires_at IS NULL OR expires_at > NOW())')
           .execute();

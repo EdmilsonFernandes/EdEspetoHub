@@ -32,7 +32,7 @@ export function scheduleDeliveryExpirationJob() {
         WITH expired AS (
           UPDATE order_deliveries
           SET status = 'EXPIRED'
-          WHERE status = 'AVAILABLE'
+          WHERE COALESCE(NULLIF(UPPER(status), ''), 'AVAILABLE') = 'AVAILABLE'
             AND motoboy_id IS NULL
             AND expires_at IS NOT NULL
             AND expires_at < NOW()
