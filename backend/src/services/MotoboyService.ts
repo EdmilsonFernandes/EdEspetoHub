@@ -63,7 +63,8 @@ export class MotoboyService {
     }
     if (!city || !state || state.length !== 2 || !address) throw new AppError('MOTO-029', 400);
 
-    // Documents must be approved: CNH + SELFIE, and CRLV for motor vehicles.
+    // For store link requests, documents must exist (can be pending), and must not be rejected.
+    // Approval happens by the store owner during review.
     const docRepo = AppDataSource.getRepository(MotoboyDocument);
     const docs = await docRepo.find({ where: { motoboyId: motoboy.id }, order: { uploadedAt: 'DESC' } });
     const byType = new Map<string, MotoboyDocument>();
@@ -74,12 +75,20 @@ export class MotoboyService {
     const mustHave = [ 'CNH', 'SELFIE' ];
     if (vehicleType === 'MOTO' || vehicleType === 'CARRO' || vehicleType === 'OUTRO') mustHave.push('CRLV');
 
-    const missingOrNotApproved = mustHave.filter((t) => {
+    const missingOrRejected: Array<{ type: string; status: string }> = [];
+    for (const t of mustHave) {
       const d = byType.get(t);
-      return !d || String(d.status || '').toUpperCase() !== 'APPROVED';
-    });
-    if (missingOrNotApproved.length > 0) {
-      throw new AppError('MOTO-030', 400, { pending: missingOrNotApproved });
+      const status = String(d?.status || '').toUpperCase();
+      if (!d) {
+        missingOrRejected.push({ type: t, status: 'MISSING' });
+        continue;
+      }
+      if (status === 'REJECTED') {
+        missingOrRejected.push({ type: t, status });
+      }
+    }
+    if (missingOrRejected.length > 0) {
+      throw new AppError('MOTO-030', 400, { pending: missingOrRejected.map((x) => x.type), documents: missingOrRejected });
     }
   }
 

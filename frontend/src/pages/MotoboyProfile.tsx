@@ -157,10 +157,11 @@ export function MotoboyProfile() {
     [documentsByType, requiredDocs]
   );
 
-  const hasApprovedRequiredDocs = useMemo(() => {
-    return requiredDocs.every((key) => {
+  const hasAnyPendingRequiredDocs = useMemo(() => {
+    return requiredDocs.some((key) => {
       const doc = documentsByType.get(key);
-      return doc && String(doc.status || '').toUpperCase() === 'APPROVED';
+      const st = String(doc?.status || '').toUpperCase();
+      return doc && st === 'PENDING';
     });
   }, [documentsByType, requiredDocs]);
 
@@ -664,12 +665,17 @@ export function MotoboyProfile() {
             Complete seus dados do veículo e endereço para solicitar vínculo com lojas.
           </div>
         )}
-        {!hasApprovedRequiredDocs && (
+        {!hasAllRequiredDocs && (
           <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
-            Envie e aguarde aprovação dos documentos obrigatórios ({requiredDocs.join(', ')}) antes de solicitar vínculo.
+            Envie os documentos obrigatórios ({requiredDocs.join(', ')}) antes de solicitar vínculo.
             {requiredDocsPending.length > 0 ? (
               <span className="block mt-1 text-amber-800 font-semibold">Pendências: {requiredDocsPending.join(', ')}.</span>
             ) : null}
+          </div>
+        )}
+        {hasAllRequiredDocs && hasAnyPendingRequiredDocs && (
+          <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700">
+            Seus documentos estão em análise. Você já pode solicitar vínculo; a loja fará a revisão e aprovação.
           </div>
         )}
         {requests.length > 0 && (
@@ -755,7 +761,7 @@ export function MotoboyProfile() {
         <button
           type="button"
           onClick={handleRequestStores}
-          disabled={requesting || !hasApprovedRequiredDocs || !hasCompleteProfile}
+          disabled={requesting || !hasAllRequiredDocs || !hasCompleteProfile}
           className="w-full rounded-lg bg-brand-primary px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
         >
           {requesting ? 'Enviando...' : 'Enviar solicitação'}
