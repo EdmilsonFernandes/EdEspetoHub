@@ -11,6 +11,14 @@ export function AdminMotoboys() {
   const [documentsByMotoboy, setDocumentsByMotoboy] = useState<Record<string, any[]>>({});
   const [docsLoadingId, setDocsLoadingId] = useState<string | null>(null);
   const [previewDoc, setPreviewDoc] = useState<any | null>(null);
+  const [rejectRequestOpen, setRejectRequestOpen] = useState(false);
+  const [rejectRequestTarget, setRejectRequestTarget] = useState<any | null>(null);
+  const [rejectRequestReason, setRejectRequestReason] = useState('');
+  const [rejectRequestDocs, setRejectRequestDocs] = useState<Record<string, boolean>>({ CRLV: true, CNH: false, SELFIE: false });
+  const [rejectDocOpen, setRejectDocOpen] = useState(false);
+  const [rejectDocTarget, setRejectDocTarget] = useState<{ motoboyId: string; documentId: string; docType?: string } | null>(null);
+  const [rejectDocReason, setRejectDocReason] = useState('');
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showInactive, setShowInactive] = useState(false);
   const storeId = auth?.store?.id || '';
@@ -40,38 +48,18 @@ export function AdminMotoboys() {
     }
   };
 
-  const askReason = (title: string) => {
-    const raw = window.prompt(`${title}\n\nOpcional: informe um motivo para ajudar o entregador a corrigir.`, '');
-    if (raw === null) return { cancelled: true as const, reason: null as string | null };
-    const reason = String(raw || '').trim();
-    return { cancelled: false as const, reason: reason || null };
-  };
-
-  const askRejectDocs = () => {
-    const raw = window.prompt(
-      'Quais documentos deseja RECUSAR junto com a solicitação?\n\nEx: CRLV (ou CNH,SELFIE,CRLV)\nDeixe vazio para não recusar documentos agora.',
-      'CRLV'
-    );
-    if (raw === null) return { cancelled: true as const, rejectDocs: null as string[] | null };
-    const list = String(raw || '')
-      .split(',')
-      .map((x) => String(x || '').trim().toUpperCase())
-      .filter(Boolean);
-    const normalized = Array.from(new Set(list)).filter((x) => x === 'CNH' || x === 'SELFIE' || x === 'CRLV');
-    return { cancelled: false as const, rejectDocs: normalized.length > 0 ? normalized : null };
-  };
-
   const reviewRequest = async (requestId: string, status: 'approve' | 'reject') => {
     if (!storeId) return;
     try {
       if (status === 'approve') {
         await motoboyAdminService.approveRequest(storeId, requestId);
       } else {
-        const { cancelled, reason } = askReason('Rejeitar solicitação de vínculo?');
-        if (cancelled) return;
-        const { cancelled: cancelledDocs, rejectDocs } = askRejectDocs();
-        if (cancelledDocs) return;
-        await motoboyAdminService.rejectRequest(storeId, requestId, reason, rejectDocs);
+        const target = pendingRequests.find((r) => r.id === requestId) || requests.find((r) => r.id === requestId) || null;
+        setRejectRequestTarget(target);
+        setRejectRequestReason('');
+        setRejectRequestDocs({ CRLV: true, CNH: false, SELFIE: false });
+        setRejectRequestOpen(true);
+        return;
       }
       showToast('Solicitação atualizada.', 'success');
       loadRequests();
@@ -97,20 +85,67 @@ export function AdminMotoboys() {
     }
   };
 
-  const handleReviewDocument = async (motoboyIdToReview: string, documentId: string, status: 'approve' | 'reject') => {
+  const handleReviewDocument = async (
+    motoboyIdToReview: string,
+    documentId: string,
+    status: 'approve' | 'reject',
+    reason?: string | null
+  ) => {
     if (!storeId) return;
     try {
       if (status === 'approve') {
         await motoboyAdminService.approveDocument(storeId, motoboyIdToReview, documentId);
       } else {
-        const { cancelled, reason } = askReason('Rejeitar documento?');
-        if (cancelled) return;
-        await motoboyAdminService.rejectDocument(storeId, motoboyIdToReview, documentId, reason);
+        await motoboyAdminService.rejectDocument(storeId, motoboyIdToReview, documentId, reason || null);
       }
       showToast('Documento atualizado.', 'success');
       loadDocuments(motoboyIdToReview);
     } catch (error: any) {
       showToast(error?.message || 'Não foi possível atualizar o documento.', 'error');
+    }
+  };
+
+  const submitRejectRequest = async () => {
+    if (!storeId || !rejectRequestTarget?.id) return;
+    if (reviewSubmitting) return;
+    setReviewSubmitting(true);
+    try {
+      const reason = String(rejectRequestReason || '').trim() || null;
+      const selectedDocs = Object.entries(rejectRequestDocs)
+        .filter(([_, v]) => Boolean(v))
+        .map(([k]) => String(k).toUpperCase())
+        .filter((x) => x === 'CNH' || x === 'SELFIE' || x === 'CRLV');
+      await motoboyAdminService.rejectRequest(storeId, rejectRequestTarget.id, reason, selectedDocs.length ? selectedDocs : null);
+      showToast('Solicitação atualizada.', 'success');
+      setRejectRequestOpen(false);
+      setRejectRequestTarget(null);
+      loadRequests();
+      loadMotoboys();
+      if (rejectRequestTarget?.motoboyId) loadDocuments(rejectRequestTarget.motoboyId);
+    } catch (error: any) {
+      showToast(error?.message || 'Não foi possível rejeitar a solicitação.', 'error');
+    } finally {
+      setReviewSubmitting(false);
+    }
+  };
+
+  const openRejectDocModal = (motoboyIdToReview: string, documentId: string, docType?: string) => {
+    setRejectDocTarget({ motoboyId: motoboyIdToReview, documentId, docType });
+    setRejectDocReason('');
+    setRejectDocOpen(true);
+  };
+
+  const submitRejectDoc = async () => {
+    if (!rejectDocTarget?.motoboyId || !rejectDocTarget?.documentId) return;
+    if (reviewSubmitting) return;
+    setReviewSubmitting(true);
+    try {
+      const reason = String(rejectDocReason || '').trim() || null;
+      await handleReviewDocument(rejectDocTarget.motoboyId, rejectDocTarget.documentId, 'reject', reason);
+      setRejectDocOpen(false);
+      setRejectDocTarget(null);
+    } finally {
+      setReviewSubmitting(false);
     }
   };
 
@@ -241,6 +276,178 @@ export function AdminMotoboys() {
 
   return (
     <div className="space-y-6">
+      {rejectRequestOpen && (
+        <div
+          className="fixed inset-0 z-[90] bg-black/60 flex items-end sm:items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          onClick={() => {
+            if (reviewSubmitting) return;
+            setRejectRequestOpen(false);
+          }}
+        >
+          <div
+            className="w-full max-w-xl rounded-3xl bg-white p-5 border border-slate-200 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Reprovação</p>
+                <h2 className="text-lg font-black text-slate-900">Rejeitar solicitação de vínculo</h2>
+                <p className="text-sm text-slate-600 mt-1">
+                  {rejectRequestTarget?.motoboyUser?.fullName ? (
+                    <span className="font-semibold">{rejectRequestTarget.motoboyUser.fullName}</span>
+                  ) : (
+                    'Entregador'
+                  )}{' '}
+                  {rejectRequestTarget?.motoboyUser?.email ? (
+                    <span className="text-slate-500">({rejectRequestTarget.motoboyUser.email})</span>
+                  ) : null}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  if (reviewSubmitting) return;
+                  setRejectRequestOpen(false);
+                }}
+                className="btn-press rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-700"
+              >
+                Fechar
+              </button>
+            </div>
+
+            <div className="mt-4 space-y-3">
+              <label className="block space-y-1.5">
+                <span className="text-xs font-extrabold text-slate-700">Motivo (recomendado)</span>
+                <textarea
+                  value={rejectRequestReason}
+                  onChange={(e) => setRejectRequestReason(e.target.value)}
+                  placeholder="Ex: CRLV errada. Envie o documento do veículo com foto legível."
+                  rows={3}
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand-primary focus:border-brand-primary"
+                />
+              </label>
+
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <p className="text-xs font-extrabold text-slate-800">Recusar documentos junto?</p>
+                <p className="text-[11px] text-slate-600 mt-1">
+                  Se o problema for documento, marque aqui para o entregador poder reenviar.
+                </p>
+                <div className="mt-3 grid gap-2 sm:grid-cols-3">
+                  {['CNH', 'SELFIE', 'CRLV'].map((k) => (
+                    <label
+                      key={k}
+                      className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={Boolean(rejectRequestDocs[k])}
+                        onChange={(e) => setRejectRequestDocs((prev) => ({ ...prev, [k]: e.target.checked }))}
+                      />
+                      <span className="font-semibold text-slate-800">{k}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (reviewSubmitting) return;
+                    setRejectRequestOpen(false);
+                  }}
+                  className="btn-press rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-extrabold text-slate-800"
+                  disabled={reviewSubmitting}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={submitRejectRequest}
+                  className="btn-press rounded-xl bg-rose-600 px-4 py-2.5 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(244,63,94,0.8)] disabled:opacity-50"
+                  disabled={reviewSubmitting}
+                >
+                  {reviewSubmitting ? 'Rejeitando...' : 'Rejeitar'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {rejectDocOpen && (
+        <div
+          className="fixed inset-0 z-[91] bg-black/60 flex items-end sm:items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          onClick={() => {
+            if (reviewSubmitting) return;
+            setRejectDocOpen(false);
+          }}
+        >
+          <div
+            className="w-full max-w-lg rounded-3xl bg-white p-5 border border-slate-200 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Reprovação</p>
+                <h2 className="text-lg font-black text-slate-900">Rejeitar documento</h2>
+                <p className="text-sm text-slate-600 mt-1">
+                  {rejectDocTarget?.docType ? <span className="font-semibold">{rejectDocTarget.docType}</span> : 'Documento'}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  if (reviewSubmitting) return;
+                  setRejectDocOpen(false);
+                }}
+                className="btn-press rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-700"
+              >
+                Fechar
+              </button>
+            </div>
+
+            <div className="mt-4 space-y-3">
+              <label className="block space-y-1.5">
+                <span className="text-xs font-extrabold text-slate-700">Motivo (recomendado)</span>
+                <textarea
+                  value={rejectDocReason}
+                  onChange={(e) => setRejectDocReason(e.target.value)}
+                  placeholder="Ex: Foto escura/reflexo. Reenvie em boa iluminação."
+                  rows={3}
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand-primary focus:border-brand-primary"
+                />
+              </label>
+              <div className="flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (reviewSubmitting) return;
+                    setRejectDocOpen(false);
+                  }}
+                  className="btn-press rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-extrabold text-slate-800"
+                  disabled={reviewSubmitting}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={submitRejectDoc}
+                  className="btn-press rounded-xl bg-rose-600 px-4 py-2.5 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(244,63,94,0.8)] disabled:opacity-50"
+                  disabled={reviewSubmitting}
+                >
+                  {reviewSubmitting ? 'Rejeitando...' : 'Rejeitar'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div>
         <h1 className="text-2xl font-black text-slate-800">Entregadores</h1>
         <p className="text-sm text-slate-500">Acompanhe solicitações e gerencie entregadores ativos.</p>
@@ -503,7 +710,7 @@ export function AdminMotoboys() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => handleReviewDocument(previewDoc._motoboyId, previewDoc.id, 'reject')}
+                    onClick={() => openRejectDocModal(previewDoc._motoboyId, previewDoc.id, previewDoc?.docType)}
                     className="px-3 py-1.5 rounded-lg bg-rose-500 text-white text-xs font-extrabold"
                   >
                     Rejeitar
