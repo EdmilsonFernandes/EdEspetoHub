@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { LinkSimpleHorizontal, Storefront, ClockClockwise, CheckCircle, ShieldCheck, ShieldWarning, Clock, Info } from '@phosphor-icons/react';
+import { LinkSimpleHorizontal, Storefront, ClockClockwise, CheckCircle, ShieldCheck, ShieldWarning, Clock, Info, IdentificationCard, Camera, Car } from '@phosphor-icons/react';
 import { motoboyService } from '../services/motoboyService';
 import { storeService } from '../services/storeService';
 import { useToast } from '../contexts/ToastContext';
@@ -542,6 +542,117 @@ export function MotoboyProfile() {
     );
   };
 
+  const DocCard = ({
+    step,
+    title,
+    subtitle,
+    icon,
+    status,
+    uploadedAt,
+    fileKey,
+    tone,
+    banner,
+    primaryAction,
+    secondaryAction,
+    rejectedReason,
+  }: {
+    step: string;
+    title: string;
+    subtitle: string;
+    icon: React.ReactNode;
+    status: 'APPROVED' | 'PENDING' | 'REJECTED' | 'MISSING';
+    uploadedAt?: string | null;
+    fileKey?: string | null;
+    tone: 'emerald' | 'amber' | 'rose' | 'slate';
+    banner?: React.ReactNode;
+    primaryAction?: React.ReactNode;
+    secondaryAction?: React.ReactNode;
+    rejectedReason?: string | null;
+  }) => {
+    const toneCls =
+      tone === 'emerald'
+        ? 'border-emerald-200 bg-emerald-50/40'
+        : tone === 'amber'
+        ? 'border-amber-200 bg-amber-50/40'
+        : tone === 'rose'
+        ? 'border-rose-200 bg-rose-50/40'
+        : 'border-slate-200 bg-slate-50/50';
+
+    const statusPillCls =
+      status === 'APPROVED'
+        ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+        : status === 'REJECTED'
+        ? 'border-rose-200 bg-rose-50 text-rose-800'
+        : status === 'PENDING'
+        ? 'border-amber-200 bg-amber-50 text-amber-800'
+        : 'border-slate-200 bg-slate-50 text-slate-700';
+
+    const statusLabel =
+      status === 'APPROVED' ? 'Aprovado' : status === 'REJECTED' ? 'Recusado' : status === 'PENDING' ? 'Em análise' : 'Não enviado';
+
+    return (
+      <div className={`rounded-3xl border ${toneCls} p-3 sm:p-4 overflow-hidden`}>
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0 flex items-start gap-3">
+            <div className="h-12 w-12 rounded-2xl border border-slate-200 bg-white grid place-items-center shrink-0">
+              {icon}
+            </div>
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-white/70 border border-slate-200 text-slate-700">
+                  {step}
+                </span>
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${statusPillCls}`}>
+                  {statusLabel}
+                </span>
+              </div>
+              <div className="mt-2 text-sm font-black text-slate-900">{title}</div>
+              <div className="text-xs text-slate-600 mt-0.5">{subtitle}</div>
+              {uploadedAt ? (
+                <div className="text-[11px] text-slate-500 mt-2">
+                  Enviado em {new Date(uploadedAt).toLocaleString('pt-BR')}
+                </div>
+              ) : null}
+            </div>
+          </div>
+          {fileKey ? (
+            <button
+              type="button"
+              onClick={() => setPreview({ title, src: String(fileKey || '') || null })}
+              className="btn-press rounded-2xl border border-slate-200 bg-white overflow-hidden h-14 w-14 shrink-0"
+              title="Abrir prévia"
+            >
+              <img src={fileKey} alt={title} className="h-full w-full object-cover" loading="lazy" />
+            </button>
+          ) : null}
+        </div>
+
+        {banner ? <div className="mt-3">{banner}</div> : null}
+
+        {rejectedReason ? (
+          <div className="mt-3 rounded-2xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-800">
+            <span className="font-extrabold">Motivo:</span> {rejectedReason}
+          </div>
+        ) : null}
+
+        <div className="mt-3 grid gap-2">
+          {primaryAction ? <div>{primaryAction}</div> : null}
+          {secondaryAction ? <div>{secondaryAction}</div> : null}
+          {fileKey ? (
+            <a
+              href={fileKey}
+              target="_blank"
+              rel="noreferrer"
+              className="text-xs font-extrabold text-brand-primary underline"
+            >
+              Abrir em nova aba
+            </a>
+          ) : null}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen motoboy-screen space-y-4">
       <MotoboyHeader title="Perfil" subtitle="Documentos, vínculo e dados do entregador." />
@@ -621,7 +732,7 @@ export function MotoboyProfile() {
         </div>
       )}
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-3">
+      <div className="rounded-3xl border border-slate-200 bg-white p-4 space-y-3">
         <div>
           <div className="flex items-start justify-between gap-3">
             <div>
@@ -693,7 +804,7 @@ export function MotoboyProfile() {
             ) : null}
           </div>
         )}
-            <div className="grid gap-3">
+        <div className="grid gap-3">
 	          {documentTypes.map((doc) => {
 	            const current = documentsByType.get(doc.key);
 	            const currentStatus = String(current?.status || '').toUpperCase();
@@ -717,139 +828,114 @@ export function MotoboyProfile() {
             const cnhDoc = documentsByType.get('CNH');
             const cnhStatus = String(cnhDoc?.status || '').toUpperCase();
             const blockedByOrder = doc.key === 'SELFIE' && (!cnhDoc || cnhStatus === 'REJECTED');
-            const lockUpload = Boolean(current) && (isPending || (isApproved && !reuploadRequest));
-            const canUpload = canStartUpload(doc.key) && !uploading;
             const stepLabel = doc.key === 'CNH' ? '1/2' : doc.key === 'SELFIE' ? '2/2' : 'Opcional';
-            const previewTitle = `${doc.label}`;
             const prefersCamera = doc.key === 'CNH' || doc.key === 'SELFIE';
-	            return (
-              <div key={doc.key} className="rounded-2xl border border-slate-100 p-3 sm:p-4">
-                <div className="grid gap-3 sm:grid-cols-[1.1fr_0.9fr]">
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-semibold text-slate-800 flex items-center gap-2">
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-700 border border-slate-200">
-                            {stepLabel}
-                          </span>
-                          <span>{doc.label}</span>
-                        </p>
-                        <p className="text-xs text-slate-500">{doc.help}</p>
-                      </div>
-                      {current && (
-                        <span
-                          className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
-                            current.status === 'APPROVED'
-                              ? 'bg-emerald-100 text-emerald-700'
-                              : current.status === 'REJECTED'
-                              ? 'bg-rose-100 text-rose-700'
-                              : 'bg-amber-100 text-amber-700'
-                          }`}
-                        >
-                          {current.status === 'APPROVED' ? 'Aprovado' : current.status === 'REJECTED' ? 'Recusado' : 'Pendente'}
-                        </span>
-                      )}
-                    </div>
-                    {current?.uploadedAt && (
-                      <p className="text-[11px] text-slate-500">
-                        Enviado em {new Date(current.uploadedAt).toLocaleString('pt-BR')}
-                      </p>
-                    )}
-                    {blockedByOrder && (
-                      <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
-                        Envie a CNH primeiro para liberar o envio da selfie.
-                      </div>
-                    )}
-                    {lockUpload ? (
-                      <div
-                        className={`rounded-xl border px-3 py-2 text-xs ${
-                          isApproved
-                            ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
-                            : 'border-amber-200 bg-amber-50 text-amber-800'
-                        }`}
-                      >
-                        {isApproved ? 'Aprovado pela plataforma.' : 'Enviado para análise da plataforma.'}
-                      </div>
-                    ) : (
-                      <>
-                        {reuploadRequest && isApproved ? (
-                          <div className="rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
-                            <div className="font-extrabold">Uma loja pediu reenvio deste documento.</div>
-                            <div className="text-amber-800 mt-0.5">
-                              {reuploadStoreName ? `Loja: ${reuploadStoreName}. ` : ''}
-                              {reuploadRequest?.reason ? `Motivo: ${String(reuploadRequest.reason)}` : 'Envie uma foto mais nítida.'}
-                            </div>
-                          </div>
-                        ) : null}
-                        {prefersCamera && (
-                          <button
-                            type="button"
-                            onClick={() => openCamera(doc.key)}
-                            disabled={!canUpload}
-                            className="btn-press w-full rounded-xl bg-brand-primary px-4 py-3 text-sm font-extrabold text-white disabled:opacity-50 shadow-[0_22px_48px_-34px_rgba(234,88,12,0.55)]"
-                          >
-                            Tirar foto
-                          </button>
-                        )}
-                        <details className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
-                          <summary className="cursor-pointer select-none px-3 py-2 text-xs font-extrabold text-slate-800 bg-slate-50">
-                            {prefersCamera ? 'Ou enviar imagem da galeria' : 'Enviar imagem'}
-                          </summary>
-                          <div className="p-3 space-y-2">
-                            <input
-                              type="file"
-                              accept="image/*"
-                              disabled={!canUpload}
-                              onChange={(event) =>
-                                setDocFiles((prev) => ({ ...prev, [doc.key]: event.target.files?.[0] || null }))
-                              }
-                              className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm disabled:opacity-60"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => handleUploadDocument(doc.key)}
-                              disabled={!canUpload}
-                              className="btn-press w-full rounded-xl bg-slate-900 px-4 py-3 text-sm font-extrabold text-white disabled:opacity-50 shadow-[0_22px_48px_-34px_rgba(15,23,42,0.55)]"
-                            >
-                              {uploading ? 'Enviando...' : isRejected ? 'Reenviar documento' : 'Enviar documento'}
-                            </button>
-                          </div>
-                        </details>
-                      </>
-                    )}
-                    {isRejected && current?.metadata?.review?.reason ? (
-                      <div className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-800">
-                        <span className="font-semibold">Motivo da recusa:</span>{' '}
-                        <span>{String(current.metadata.review.reason)}</span>
-                      </div>
-                    ) : null}
-                  </div>
-                  <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-3 text-center text-xs text-slate-600 flex flex-col items-center justify-center">
-                    {current?.fileKey ? (
-                      <>
-                        <button
-                          type="button"
-                          onClick={() => setPreview({ title: previewTitle, src: String(current.fileKey || '') || null })}
-                          className="w-full rounded-xl border border-slate-200 bg-white overflow-hidden"
-                          title="Abrir prévia"
-                        >
-                          <img src={current.fileKey} alt={doc.label} className="w-full h-28 object-cover" loading="lazy" />
-                        </button>
-                        <a
-                          href={current.fileKey}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="mt-2 text-xs text-brand-primary underline"
-                        >
-                          Ver arquivo
-                        </a>
-                      </>
-                    ) : (
-                      <span>Nenhum arquivo enviado</span>
-                    )}
-                  </div>
+            const status: any = current ? (currentStatus === 'APPROVED' ? 'APPROVED' : currentStatus === 'REJECTED' ? 'REJECTED' : 'PENDING') : 'MISSING';
+            const tone: any = status === 'APPROVED' ? 'emerald' : status === 'REJECTED' ? 'rose' : status === 'PENDING' ? 'amber' : 'slate';
+            const canUpload = canStartUpload(doc.key) && !uploading;
+            const lockUpload = Boolean(current) && (isPending || (isApproved && !reuploadRequest));
+
+            const blockedSelfieBanner = blockedByOrder ? (
+              <div className="rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                Envie a CNH primeiro para liberar o envio da selfie.
+              </div>
+            ) : null;
+
+            const storeReuploadBanner = reuploadRequest && isApproved ? (
+              <div className="rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                <div className="font-extrabold">Reenvio solicitado por uma loja</div>
+                <div className="text-amber-800 mt-0.5">
+                  {reuploadStoreName ? `Loja: ${reuploadStoreName}. ` : ''}
+                  {reuploadRequest?.reason ? `Motivo: ${String(reuploadRequest.reason)}` : 'Envie uma foto mais nítida.'}
                 </div>
               </div>
+            ) : null;
+
+            const lockedBanner = lockUpload ? (
+              <div
+                className={`rounded-2xl border px-3 py-2 text-xs ${
+                  isApproved ? 'border-emerald-200 bg-emerald-50 text-emerald-900' : 'border-amber-200 bg-amber-50 text-amber-900'
+                }`}
+              >
+                {isApproved ? 'Aprovado pela plataforma.' : 'Enviado para análise da plataforma.'}
+              </div>
+            ) : null;
+
+            const primaryAction = !lockUpload ? (
+              prefersCamera ? (
+                <button
+                  type="button"
+                  onClick={() => openCamera(doc.key)}
+                  disabled={!canUpload}
+                  className="btn-press w-full rounded-2xl bg-brand-primary px-4 py-3 text-sm font-extrabold text-white disabled:opacity-50 shadow-[0_22px_48px_-34px_rgba(234,88,12,0.55)]"
+                >
+                  Tirar foto
+                </button>
+              ) : (
+                <div className="text-xs text-slate-600">
+                  Envie uma foto nítida do documento do veículo.
+                </div>
+              )
+            ) : null;
+
+            const secondaryAction = !lockUpload ? (
+              <details className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
+                <summary className="cursor-pointer select-none px-3 py-2 text-xs font-extrabold text-slate-800 bg-slate-50">
+                  {prefersCamera ? 'Ou enviar imagem da galeria' : 'Enviar imagem'}
+                </summary>
+                <div className="p-3 space-y-2">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    disabled={!canUpload}
+                    onChange={(event) =>
+                      setDocFiles((prev) => ({ ...prev, [doc.key]: event.target.files?.[0] || null }))
+                    }
+                    className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm disabled:opacity-60"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleUploadDocument(doc.key)}
+                    disabled={!canUpload}
+                    className="btn-press w-full rounded-2xl bg-slate-900 px-4 py-3 text-sm font-extrabold text-white disabled:opacity-50 shadow-[0_22px_48px_-34px_rgba(15,23,42,0.55)]"
+                  >
+                    {uploading ? 'Enviando...' : isRejected ? 'Reenviar documento' : 'Enviar documento'}
+                  </button>
+                </div>
+              </details>
+            ) : null;
+
+            const rejectedReason = isRejected ? String(current?.metadata?.review?.reason || '') || null : null;
+
+	            return (
+              <DocCard
+                key={doc.key}
+                step={stepLabel}
+                title={doc.label}
+                subtitle={doc.help}
+                icon={
+                  doc.key === 'CNH' ? (
+                    <IdentificationCard size={20} weight="duotone" className="text-slate-700" />
+                  ) : doc.key === 'SELFIE' ? (
+                    <Camera size={20} weight="duotone" className="text-slate-700" />
+                  ) : (
+                    <Car size={20} weight="duotone" className="text-slate-700" />
+                  )
+                }
+                status={status}
+                uploadedAt={current?.uploadedAt || null}
+                fileKey={current?.fileKey || null}
+                tone={tone}
+                banner={
+                  blockedSelfieBanner ||
+                  storeReuploadBanner ||
+                  lockedBanner ||
+                  null
+                }
+                primaryAction={primaryAction}
+                secondaryAction={secondaryAction}
+                rejectedReason={rejectedReason}
+              />
             );
           })}
         </div>
