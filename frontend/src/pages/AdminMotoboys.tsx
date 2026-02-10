@@ -98,6 +98,41 @@ export function AdminMotoboys() {
     }
   };
 
+  const getFaceBadge = (doc: any) => {
+    const face = doc?.metadata?.face;
+    if (!face) return null;
+    const label = String(face.scoreLabel || 'indisponivel').toLowerCase();
+    const status = String(face.status || '').toLowerCase();
+
+    const text =
+      status === 'processing'
+        ? 'Verificação: em análise'
+        : label === 'alto'
+        ? 'Verificação: alta'
+        : label === 'medio'
+        ? 'Verificação: média'
+        : label === 'baixo'
+        ? 'Verificação: baixa'
+        : 'Verificação: indisponível';
+
+    const cls =
+      status === 'processing'
+        ? 'bg-slate-200 text-slate-700'
+        : label === 'alto'
+        ? 'bg-emerald-200 text-emerald-800'
+        : label === 'medio'
+        ? 'bg-amber-200 text-amber-800'
+        : label === 'baixo'
+        ? 'bg-rose-200 text-rose-800'
+        : 'bg-slate-200 text-slate-700';
+
+    return (
+      <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${cls}`} title={face.reason || ''}>
+        {text}
+      </span>
+    );
+  };
+
   useEffect(() => {
     loadMotoboys();
     loadRequests();
@@ -283,17 +318,20 @@ export function AdminMotoboys() {
                           <div className="space-y-2">
                             <div className="flex items-center justify-between">
                               <span className="font-semibold text-slate-700">{doc.docType || 'DOC'}</span>
-                              <span
-                                className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
-                                  doc.status === 'APPROVED'
-                                    ? 'bg-emerald-200 text-emerald-800'
-                                    : doc.status === 'REJECTED'
-                                    ? 'bg-rose-200 text-rose-800'
-                                    : 'bg-slate-200 text-slate-700'
-                                }`}
-                              >
-                                {doc.status === 'APPROVED' ? 'Aprovado' : doc.status === 'REJECTED' ? 'Rejeitado' : 'Pendente'}
-                              </span>
+                              <div className="flex items-center gap-2">
+                                {doc.docType === 'SELFIE' && getFaceBadge(doc)}
+                                <span
+                                  className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                                    doc.status === 'APPROVED'
+                                      ? 'bg-emerald-200 text-emerald-800'
+                                      : doc.status === 'REJECTED'
+                                      ? 'bg-rose-200 text-rose-800'
+                                      : 'bg-slate-200 text-slate-700'
+                                  }`}
+                                >
+                                  {doc.status === 'APPROVED' ? 'Aprovado' : doc.status === 'REJECTED' ? 'Rejeitado' : 'Pendente'}
+                                </span>
+                              </div>
                             </div>
                             <a
                               href={doc.fileKey}

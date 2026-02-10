@@ -119,6 +119,31 @@ export function MotoboyProfile() {
     });
   }, [documentsByType, requiredDocs]);
 
+  const faceBanner = useMemo(() => {
+    const selfie = documentsByType.get('SELFIE');
+    const face = selfie?.metadata?.face;
+    if (!face) return null;
+    const status = String(face.status || '').toLowerCase();
+    const label = String(face.scoreLabel || '').toLowerCase();
+    const reason = face.reason ? String(face.reason) : '';
+
+    const text =
+      status === 'processing'
+        ? 'Validacao automatica em analise'
+        : label === 'alto'
+        ? 'Validacao automatica: alta'
+        : label === 'medio'
+        ? 'Validacao automatica: media'
+        : label === 'baixo'
+        ? 'Validacao automatica: baixa (revisao manual recomendada)'
+        : status
+        ? 'Validacao automatica: indisponivel'
+        : null;
+
+    if (!text) return null;
+    return { text, reason };
+  }, [documentsByType]);
+
   const vehicleIcon = useMemo(() => {
     const type = String(profileDraft.vehicleType || profile?.vehicleType || '').toUpperCase();
     if (type === 'MOTO') return '🛵';
@@ -274,6 +299,12 @@ export function MotoboyProfile() {
           <p className="text-sm font-semibold text-slate-700">Enviar documentos</p>
           <p className="text-xs text-slate-500">CNH e Selfie são obrigatórios para entrar em lojas.</p>
         </div>
+        {faceBanner && (
+          <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700">
+            <span className="font-semibold">{faceBanner.text}</span>
+            {faceBanner.reason ? <span className="text-slate-500"> ({faceBanner.reason})</span> : null}
+          </div>
+        )}
         <div className="grid gap-3">
           {documentTypes.map((doc) => {
             const current = documentsByType.get(doc.key);

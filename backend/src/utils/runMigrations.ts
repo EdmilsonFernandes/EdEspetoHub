@@ -479,6 +479,24 @@ export async function runMigrations() {
       reviewed_at TIMESTAMPTZ
     );
   `);
+  // Store assisted verification results (face match, counts, flags).
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS motoboy_documents
+    ADD COLUMN IF NOT EXISTS metadata JSONB;
+  `);
+  await AppDataSource.query(`
+    UPDATE motoboy_documents
+    SET metadata = '{}'::jsonb
+    WHERE metadata IS NULL;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS motoboy_documents
+    ALTER COLUMN metadata SET DEFAULT '{}'::jsonb;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS motoboy_documents
+    ALTER COLUMN metadata SET NOT NULL;
+  `);
   await AppDataSource.query(`
     CREATE TABLE IF NOT EXISTS motoboy_store_requests (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

@@ -24,6 +24,7 @@ import { AppDataSource } from '../config/database';
 import { MotoboyAuditLog } from '../entities/MotoboyAuditLog';
 import { EmailService } from './EmailService';
 import { env } from '../config/env';
+import { faceVerifyService } from './FaceVerifyService';
 /**
  * Provides MotoboyService functionality.
  *
@@ -367,8 +368,18 @@ export class MotoboyService {
       docType,
       fileKey,
       status: 'PENDING',
+      metadata: {},
     });
     await repo.save(document);
+
+    // If CNH+SELFIE exist, queue assisted verification.
+    if (docType === 'CNH' || docType === 'SELFIE') {
+      // Fire and forget; job will also pick it up.
+      faceVerifyService
+        .markPendingIfReady(motoboy.id)
+        .catch(() => null);
+    }
+
     return document;
   }
 

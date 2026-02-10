@@ -46,6 +46,9 @@ export class MotoboyDocument {
   @Column({ name: 'reviewed_at', type: 'timestamptz', nullable: true })
   reviewedAt?: Date | null;
 
+  @Column({ type: 'jsonb', default: () => "'{}'::jsonb" })
+  metadata!: any;
+
   @ManyToOne(() => Motoboy, (motoboy) => motoboy.documents)
   @JoinColumn({ name: 'motoboy_id' })
   motoboy!: Motoboy;

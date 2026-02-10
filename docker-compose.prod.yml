@@ -1,4 +1,7 @@
 services:
+  face-worker:
+    restart: always
+
   postgres:
     volumes:
       - postgres-data:/var/lib/postgresql/data
@@ -7,4 +10,3 @@ volumes:
   postgres-data:
     external: true
     name: "${POSTGRES_VOLUME_NAME:-edespetohub_postgres-data}"
-

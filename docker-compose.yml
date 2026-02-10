@@ -26,6 +26,17 @@ services:
       - "4000:4000"
     depends_on:
       - postgres
+      - face-worker
+    restart: always
+
+  face-worker:
+    container_name: chamanoespeto-face-worker
+    build:
+      context: ./face-worker
+      dockerfile: Dockerfile
+    environment:
+      FACE_DETECTOR_BACKEND: "${FACE_DETECTOR_BACKEND:-opencv}"
+      FACE_MODEL_NAME: "${FACE_MODEL_NAME:-VGG-Face}"
     restart: always
 
   maps:

@@ -31,10 +31,11 @@ async function bootstrap()
   const { AppDataSource } = await import('./config/database');
   const routes = (await import('./routes')).default;
   const { env } = await import('./config/env');
-  const { swaggerSpec } = await import('./config/swagger');
-  const { scheduleSubscriptionExpirationJob } = await import('./jobs/subscription-expiration.job');
-  const { scheduleDeliveryExpirationJob } = await import('./jobs/delivery-expiration.job');
-  const { runMigrations } = await import('./utils/runMigrations');
+	  const { swaggerSpec } = await import('./config/swagger');
+	  const { scheduleSubscriptionExpirationJob } = await import('./jobs/subscription-expiration.job');
+	  const { scheduleDeliveryExpirationJob } = await import('./jobs/delivery-expiration.job');
+	  const { scheduleFaceVerifyJob } = await import('./jobs/face-verify.job');
+	  const { runMigrations } = await import('./utils/runMigrations');
   const { requestLogger } = await import('./middleware/requestLogger');
   const { accessLogger } = await import('./middleware/accessLogger');
   const { logger } = await import('./utils/logger');
@@ -102,8 +103,9 @@ async function bootstrap()
 
   app.use('/api', routes);
 
-  scheduleSubscriptionExpirationJob();
-  scheduleDeliveryExpirationJob();
+	  scheduleSubscriptionExpirationJob();
+	  scheduleDeliveryExpirationJob();
+	  scheduleFaceVerifyJob();
 
   app.listen(env.port, () =>
   {
