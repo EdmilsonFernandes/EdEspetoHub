@@ -63,5 +63,9 @@
   "MOTO-014": "You are not allowed to update this order.",
   "MOTO-015": "Invalid order status for this operation.",
   "MOTO-016": "Cannot finish this order.",
-  "MOTO-026": "Verification attempt limit reached. Wait 24 hours to re-upload your selfie."
+  "MOTO-026": "Verification attempt limit reached. Wait 24 hours to re-upload your selfie.",
+  "MOTO-027": "Please select your vehicle type to continue.",
+  "MOTO-028": "Invalid plate. Use ABC1234 or ABC1D23 format.",
+  "MOTO-029": "Please fill your full address (city, state and address).",
+  "MOTO-030": "Please upload and wait approval for the required documents to continue."
 }

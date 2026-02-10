@@ -38,6 +38,51 @@ export class MotoboyService {
   private userRepository = new UserRepository();
   private emailService = new EmailService();
 
+  private normalizePlate(value?: string | null) {
+    return String(value || '')
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, '');
+  }
+
+  private isValidBrazilPlate(value?: string | null) {
+    const plate = this.normalizePlate(value);
+    // Old format: ABC1234. Mercosul: ABC1D23.
+    return /^(?:[A-Z]{3}[0-9]{4}|[A-Z]{3}[0-9][A-Z][0-9]{2})$/.test(plate);
+  }
+
+  private async ensureMotoboyIsReadyToRequestStores(motoboy: Motoboy) {
+    const vehicleType = String(motoboy.vehicleType || '').toUpperCase();
+    const plate = this.normalizePlate(motoboy.vehiclePlate);
+    const city = String(motoboy.city || '').trim();
+    const state = String(motoboy.state || '').trim().toUpperCase();
+    const address = String(motoboy.address || '').trim();
+
+    if (!vehicleType) throw new AppError('MOTO-027', 400);
+    if ((vehicleType === 'MOTO' || vehicleType === 'CARRO' || vehicleType === 'OUTRO') && !this.isValidBrazilPlate(plate)) {
+      throw new AppError('MOTO-028', 400);
+    }
+    if (!city || !state || state.length !== 2 || !address) throw new AppError('MOTO-029', 400);
+
+    // Documents must be approved: CNH + SELFIE, and CRLV for motor vehicles.
+    const docRepo = AppDataSource.getRepository(MotoboyDocument);
+    const docs = await docRepo.find({ where: { motoboyId: motoboy.id }, order: { uploadedAt: 'DESC' } });
+    const byType = new Map<string, MotoboyDocument>();
+    for (const d of docs) {
+      const key = String(d.docType || '').toUpperCase();
+      if (!byType.has(key)) byType.set(key, d);
+    }
+    const mustHave = [ 'CNH', 'SELFIE' ];
+    if (vehicleType === 'MOTO' || vehicleType === 'CARRO' || vehicleType === 'OUTRO') mustHave.push('CRLV');
+
+    const missingOrNotApproved = mustHave.filter((t) => {
+      const d = byType.get(t);
+      return !d || String(d.status || '').toUpperCase() !== 'APPROVED';
+    });
+    if (missingOrNotApproved.length > 0) {
+      throw new AppError('MOTO-030', 400, { pending: missingOrNotApproved });
+    }
+  }
+
   private async logAudit(input: {
     storeId?: string | null;
     motoboyId?: string | null;
@@ -123,12 +168,20 @@ export class MotoboyService {
       address?: string | null;
     }
   ) {
-    motoboy.vehicleType = input.vehicleType ?? motoboy.vehicleType ?? null;
-    motoboy.vehiclePlate = input.vehiclePlate ?? motoboy.vehiclePlate ?? null;
+    const nextVehicleType = input.vehicleType ?? motoboy.vehicleType ?? null;
+    const nextPlateRaw = input.vehiclePlate ?? motoboy.vehiclePlate ?? null;
+    const nextPlate = nextPlateRaw ? this.normalizePlate(nextPlateRaw) : null;
+
+    if (nextPlate && !this.isValidBrazilPlate(nextPlate)) {
+      throw new AppError('MOTO-028', 400);
+    }
+
+    motoboy.vehicleType = nextVehicleType;
+    motoboy.vehiclePlate = nextPlate;
     motoboy.vehicleModel = input.vehicleModel ?? motoboy.vehicleModel ?? null;
     motoboy.vehicleColor = input.vehicleColor ?? motoboy.vehicleColor ?? null;
     motoboy.city = input.city ?? motoboy.city ?? null;
-    motoboy.state = input.state ?? motoboy.state ?? null;
+    motoboy.state = (input.state ?? motoboy.state ?? null)?.toString().toUpperCase() || null;
     motoboy.address = input.address ?? motoboy.address ?? null;
     return this.motoboyRepository.save(motoboy);
   }
@@ -447,6 +500,9 @@ export class MotoboyService {
    */
   async createStoreRequests(motoboy: Motoboy, storeIds: string[]) {
     if (!Array.isArray(storeIds) || storeIds.length === 0) throw new AppError('MOTO-024', 400);
+
+    await this.ensureMotoboyIsReadyToRequestStores(motoboy);
+
     const repo = AppDataSource.getRepository(MotoboyStoreRequest);
     const created: MotoboyStoreRequest[] = [];
 

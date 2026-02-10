@@ -5,6 +5,36 @@ import { useToast } from '../contexts/ToastContext';
 import { MotoboyHeader } from '../components/Motoboy/MotoboyHeader';
 import { formatPhoneInput } from '../utils/format';
 
+const onlyDigits = (value = '') => String(value || '').replace(/\D/g, '');
+
+const formatCpfInput = (value = '') => {
+  const digits = onlyDigits(value).slice(0, 11);
+  const p1 = digits.slice(0, 3);
+  const p2 = digits.slice(3, 6);
+  const p3 = digits.slice(6, 9);
+  const p4 = digits.slice(9, 11);
+  if (digits.length <= 3) return p1;
+  if (digits.length <= 6) return `${p1}.${p2}`;
+  if (digits.length <= 9) return `${p1}.${p2}.${p3}`;
+  return `${p1}.${p2}.${p3}-${p4}`;
+};
+
+const isValidCPF = (value = '') => {
+  const digits = onlyDigits(value);
+  if (digits.length !== 11) return false;
+  if (/^(\d)\1+$/.test(digits)) return false;
+  let sum = 0;
+  for (let i = 0; i < 9; i += 1) sum += Number(digits[i]) * (10 - i);
+  let first = (sum * 10) % 11;
+  if (first === 10) first = 0;
+  if (first !== Number(digits[9])) return false;
+  sum = 0;
+  for (let i = 0; i < 10; i += 1) sum += Number(digits[i]) * (11 - i);
+  let second = (sum * 10) % 11;
+  if (second === 10) second = 0;
+  return second === Number(digits[10]);
+};
+
 export function MotoboyRegister() {
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -12,6 +42,8 @@ export function MotoboyRegister() {
     fullName: '',
     email: '',
     phone: '',
+    cpf: '',
+    address: '',
     password: '',
     termsAccepted: false,
     lgpdAccepted: false,
@@ -28,6 +60,14 @@ export function MotoboyRegister() {
       showToast('Informe um e-mail válido.', 'error');
       return;
     }
+    if (!form.cpf || !isValidCPF(form.cpf)) {
+      showToast('Informe um CPF válido.', 'error');
+      return;
+    }
+    if (!form.address || form.address.trim().length < 8) {
+      showToast('Informe seu endereço.', 'error');
+      return;
+    }
     setLoading(true);
     try {
       await authService.registerMotoboy({
@@ -36,6 +76,9 @@ export function MotoboyRegister() {
           fullName: form.fullName,
           email: form.email,
           phone: form.phone,
+          documentType: 'CPF',
+          document: form.cpf,
+          address: form.address,
           password: form.password,
         },
         termsAccepted: form.termsAccepted,
@@ -83,6 +126,20 @@ export function MotoboyRegister() {
             placeholder="Telefone"
             value={form.phone}
             onChange={(e) => setForm({ ...form, phone: formatPhoneInput(e.target.value) })}
+            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+          />
+          <input
+            type="text"
+            placeholder="CPF"
+            value={form.cpf}
+            onChange={(e) => setForm({ ...form, cpf: formatCpfInput(e.target.value) })}
+            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+          />
+          <input
+            type="text"
+            placeholder="Endereço"
+            value={form.address}
+            onChange={(e) => setForm({ ...form, address: e.target.value })}
             className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
           />
           <input

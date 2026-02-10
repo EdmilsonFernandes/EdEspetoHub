@@ -63,5 +63,9 @@
   "MOTO-014": "Você não tem permissão para atualizar este pedido.",
   "MOTO-015": "Status do pedido inválido para esta operação.",
   "MOTO-016": "Não é possível finalizar este pedido.",
-  "MOTO-026": "Limite de tentativas de validação atingido. Aguarde 24 horas para reenviar a selfie."
+  "MOTO-026": "Limite de tentativas de validação atingido. Aguarde 24 horas para reenviar a selfie.",
+  "MOTO-027": "Informe o tipo de veículo (moto, carro, etc.) para continuar.",
+  "MOTO-028": "Placa inválida. Use o formato ABC1234 ou ABC1D23.",
+  "MOTO-029": "Informe seu endereço completo (cidade, UF e endereço).",
+  "MOTO-030": "Envie e aguarde aprovação dos documentos obrigatórios para continuar."
 }

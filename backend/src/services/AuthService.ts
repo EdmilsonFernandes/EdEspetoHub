@@ -151,6 +151,19 @@ export class AuthService
           throw new AppError('AUTH-011', 409);
         }
 
+        // Require CPF for motoboy accounts as well (business compliance).
+        const normalizedDocument = normalizeDocument(userPayload.document);
+        if (!normalizedDocument || !validateDocument(normalizedDocument, userPayload.documentType || 'CPF'))
+        {
+          throw new AppError('AUTH-009', 400);
+        }
+
+        const existingDocument = await userRepo.findOne({ where: { document: normalizedDocument } });
+        if (existingDocument)
+        {
+          throw new AppError('AUTH-010', 409);
+        }
+
         const hashed = await bcrypt.hash(userPayload.password, 10);
         const user = userRepo.create({
           fullName: userPayload.fullName,
@@ -158,6 +171,8 @@ export class AuthService
           password: hashed,
           phone: userPayload.phone,
           address: userPayload.address,
+          document: normalizedDocument,
+          documentType: (userPayload.documentType || 'CPF').toUpperCase(),
           termsAcceptedAt: new Date(),
           lgpdAcceptedAt: new Date(),
           userRole: 'MOTOBOY',
