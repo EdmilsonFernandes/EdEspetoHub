@@ -2,6 +2,9 @@ fastapi==0.115.8
 uvicorn[standard]==0.34.0
 deepface==0.0.93
 opencv-python-headless==4.11.0.86
-numpy==2.2.2
+# Tensorflow (required by deepface/retinaface) still requires numpy<2.0 on py3.11.
+numpy==1.26.4
+pandas==2.2.2
 pillow==11.1.0
+setuptools==75.8.2
 tf-keras==2.16.0
