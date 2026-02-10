@@ -129,11 +129,31 @@ export function MotoboyProfile() {
   }, [profileDraft.vehicleType, profile?.vehicleType]);
 
   const handleUploadDocument = async (docType: string) => {
+    const normalized = String(docType || '').toUpperCase();
+    const currentDoc = documentsByType.get(normalized);
+    const currentStatus = String(currentDoc?.status || '').toUpperCase();
+    const cnhDoc = documentsByType.get('CNH');
+    const cnhStatus = String(cnhDoc?.status || '').toUpperCase();
+
+    // Enforce order: CNH first, then SELFIE. Also lock uploads once sent (pending/approved).
+    if (normalized === 'SELFIE' && (!cnhDoc || cnhStatus === 'REJECTED')) {
+      showToast('Envie a CNH primeiro e depois envie a selfie segurando a CNH.', 'error');
+      return;
+    }
+    if (currentDoc && (currentStatus === 'APPROVED' || currentStatus === 'PENDING')) {
+      showToast('Documento já enviado. Aguarde a validação.', 'info');
+      return;
+    }
+
     const file = docFiles[docType];
     if (!file) {
       showToast('Selecione um arquivo para enviar.', 'error');
       return;
     }
+
+    const label = documentTypes.find((d) => d.key === normalized)?.label || normalized;
+    if (!window.confirm(`Confirma que este arquivo é: ${label}?`)) return;
+
     setUploading(true);
     try {
       const reader = new FileReader();
@@ -257,13 +277,28 @@ export function MotoboyProfile() {
         <div className="grid gap-3">
           {documentTypes.map((doc) => {
             const current = documentsByType.get(doc.key);
+            const currentStatus = String(current?.status || '').toUpperCase();
+            const isApproved = currentStatus === 'APPROVED';
+            const isPending = currentStatus === 'PENDING';
+            const isRejected = currentStatus === 'REJECTED';
+            const cnhDoc = documentsByType.get('CNH');
+            const cnhStatus = String(cnhDoc?.status || '').toUpperCase();
+            const blockedByOrder = doc.key === 'SELFIE' && (!cnhDoc || cnhStatus === 'REJECTED');
+            const lockUpload = Boolean(current) && (isApproved || isPending);
+            const canUpload = !blockedByOrder && (!current || isRejected) && !uploading;
+            const stepLabel = doc.key === 'CNH' ? '1/2' : doc.key === 'SELFIE' ? '2/2' : 'Opcional';
             return (
               <div key={doc.key} className="rounded-xl border border-slate-100 p-3">
                 <div className="grid gap-3 sm:grid-cols-[1.1fr_0.9fr]">
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-semibold text-slate-800">{doc.label}</p>
+                        <p className="text-sm font-semibold text-slate-800 flex items-center gap-2">
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-700 border border-slate-200">
+                            {stepLabel}
+                          </span>
+                          <span>{doc.label}</span>
+                        </p>
                         <p className="text-xs text-slate-500">{doc.help}</p>
                       </div>
                       {current && (
@@ -285,22 +320,42 @@ export function MotoboyProfile() {
                         Enviado em {new Date(current.uploadedAt).toLocaleString('pt-BR')}
                       </p>
                     )}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(event) =>
-                        setDocFiles((prev) => ({ ...prev, [doc.key]: event.target.files?.[0] || null }))
-                      }
-                      className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => handleUploadDocument(doc.key)}
-                      disabled={uploading}
-                      className="w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
-                    >
-                      {uploading ? 'Enviando...' : 'Enviar documento'}
-                    </button>
+                    {blockedByOrder && (
+                      <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                        Envie a CNH primeiro para liberar o envio da selfie.
+                      </div>
+                    )}
+                    {lockUpload ? (
+                      <div
+                        className={`rounded-xl border px-3 py-2 text-xs ${
+                          isApproved
+                            ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+                            : 'border-amber-200 bg-amber-50 text-amber-800'
+                        }`}
+                      >
+                        {isApproved ? 'Documento aprovado. Nenhuma ação necessária.' : 'Documento enviado. Aguardando validação.'}
+                      </div>
+                    ) : (
+                      <>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          disabled={!canUpload}
+                          onChange={(event) =>
+                            setDocFiles((prev) => ({ ...prev, [doc.key]: event.target.files?.[0] || null }))
+                          }
+                          className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm disabled:opacity-60"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleUploadDocument(doc.key)}
+                          disabled={!canUpload}
+                          className="w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+                        >
+                          {uploading ? 'Enviando...' : isRejected ? 'Reenviar documento' : 'Enviar documento'}
+                        </button>
+                      </>
+                    )}
                   </div>
                   <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-3 text-center text-xs text-slate-500 flex flex-col items-center justify-center">
                     {current?.fileKey ? (
