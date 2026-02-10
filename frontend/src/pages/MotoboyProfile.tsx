@@ -36,11 +36,18 @@ export function MotoboyProfile() {
   });
   const { showToast } = useToast();
 
-  const documentTypes = [
-    { key: 'CNH', label: 'CNH', help: 'Foto frente e verso em um único arquivo.' },
-    { key: 'SELFIE', label: 'Selfie segurando a CNH', help: 'Foto clara do rosto com o documento.' },
-    { key: 'CRLV', label: 'Documento do veículo (CRLV)', help: 'Opcional para moto ou carro.' },
-  ];
+  const documentTypes = useMemo(() => {
+    const v = String(profileDraft.vehicleType || profile?.vehicleType || '').toUpperCase();
+    const crlvHelp =
+      v === 'MOTO' || v === 'CARRO' || v === 'OUTRO'
+        ? 'Obrigatório para validar o veículo.'
+        : 'Opcional.';
+    return [
+      { key: 'CNH', label: 'CNH', help: 'Foto frente e verso em um único arquivo.' },
+      { key: 'SELFIE', label: 'Selfie segurando a CNH', help: 'Foto clara do rosto com o documento.' },
+      { key: 'CRLV', label: 'Documento do veículo (CRLV)', help: crlvHelp },
+    ];
+  }, [profileDraft.vehicleType, profile?.vehicleType]);
   const requiredDocs = useMemo(() => {
     const v = String(profileDraft.vehicleType || profile?.vehicleType || '').toUpperCase();
     const base = [ 'CNH', 'SELFIE' ];
@@ -149,6 +156,13 @@ export function MotoboyProfile() {
     () => requiredDocs.every((key) => documentsByType.has(key)),
     [documentsByType, requiredDocs]
   );
+
+  const hasApprovedRequiredDocs = useMemo(() => {
+    return requiredDocs.every((key) => {
+      const doc = documentsByType.get(key);
+      return doc && String(doc.status || '').toUpperCase() === 'APPROVED';
+    });
+  }, [documentsByType, requiredDocs]);
 
   const hasCompleteProfile = useMemo(() => {
     const v = String(profileDraft.vehicleType || profile?.vehicleType || '').toUpperCase();
@@ -411,7 +425,9 @@ export function MotoboyProfile() {
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-sm font-semibold text-slate-700">Enviar documentos</p>
-              <p className="text-xs text-slate-500">CNH e Selfie são obrigatórios para entrar em lojas.</p>
+              <p className="text-xs text-slate-500">
+                Para trabalhar, envie os documentos obrigatórios e aguarde aprovação.
+              </p>
             </div>
             <button
               type="button"
@@ -648,9 +664,12 @@ export function MotoboyProfile() {
             Complete seus dados do veículo e endereço para solicitar vínculo com lojas.
           </div>
         )}
-        {!hasAllRequiredDocs && (
+        {!hasApprovedRequiredDocs && (
           <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
             Envie e aguarde aprovação dos documentos obrigatórios ({requiredDocs.join(', ')}) antes de solicitar vínculo.
+            {requiredDocsPending.length > 0 ? (
+              <span className="block mt-1 text-amber-800 font-semibold">Pendências: {requiredDocsPending.join(', ')}.</span>
+            ) : null}
           </div>
         )}
         {requests.length > 0 && (
@@ -736,7 +755,7 @@ export function MotoboyProfile() {
         <button
           type="button"
           onClick={handleRequestStores}
-          disabled={requesting || !hasAllRequiredDocs || !hasCompleteProfile}
+          disabled={requesting || !hasApprovedRequiredDocs || !hasCompleteProfile}
           className="w-full rounded-lg bg-brand-primary px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
         >
           {requesting ? 'Enviando...' : 'Enviar solicitação'}
