@@ -25,6 +25,27 @@ export function AdminMotoboys() {
   const pendingRequests = requests.filter((request) => request.status === 'PENDING');
   const filteredMotoboys = showInactive ? motoboys : motoboys.filter((link) => link.active);
 
+  const normalizeDocType = (value: any) => String(value || '').trim().toUpperCase();
+
+  const latestDocs = (docs: any[]) => {
+    // backend already sends DESC by uploadedAt; we keep first per type.
+    const seen = new Set<string>();
+    const out: any[] = [];
+    for (const d of Array.isArray(docs) ? docs : []) {
+      const t = normalizeDocType(d?.docType);
+      if (!t) continue;
+      if (seen.has(t)) continue;
+      seen.add(t);
+      out.push(d);
+    }
+    return out;
+  };
+
+  const docsPendingCount = (docs: any[]) => {
+    const latest = latestDocs(docs);
+    return latest.filter((d) => String(d?.status || '').toUpperCase() !== 'APPROVED').length;
+  };
+
   const loadMotoboys = async () => {
     if (!storeId) return;
     setLoading(true);
@@ -527,7 +548,7 @@ export function AdminMotoboys() {
                   documentsByMotoboy[request.motoboyId].length > 0 && (
                     <div className="mt-3">
                       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                        {documentsByMotoboy[request.motoboyId].map((doc: any) => (
+                        {latestDocs(documentsByMotoboy[request.motoboyId]).map((doc: any) => (
                           <div key={doc.id}>{docThumb(doc, request.motoboyId)}</div>
                         ))}
                       </div>
@@ -595,9 +616,9 @@ export function AdminMotoboys() {
                 </div>
                 {Array.isArray(documentsByMotoboy[link.motoboyId]) && (
                   <div className="text-[11px] text-slate-500">
-                    {documentsByMotoboy[link.motoboyId].filter((doc: any) => doc.status !== 'APPROVED').length > 0 ? (
+                    {docsPendingCount(documentsByMotoboy[link.motoboyId]) > 0 ? (
                       <span className="text-amber-700">
-                        Documentos pendentes: {documentsByMotoboy[link.motoboyId].filter((doc: any) => doc.status !== 'APPROVED').length}
+                        Documentos pendentes: {docsPendingCount(documentsByMotoboy[link.motoboyId])}
                       </span>
                     ) : (
                       <span className="text-emerald-700">Documentos aprovados.</span>
@@ -641,7 +662,7 @@ export function AdminMotoboys() {
                 {Array.isArray(documentsByMotoboy[link.motoboyId]) && documentsByMotoboy[link.motoboyId].length > 0 && (
                   <div className="mt-3">
                     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                      {documentsByMotoboy[link.motoboyId].map((doc: any) => (
+                      {latestDocs(documentsByMotoboy[link.motoboyId]).map((doc: any) => (
                         <div key={doc.id}>{docThumb(doc, link.motoboyId)}</div>
                       ))}
                     </div>
