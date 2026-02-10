@@ -144,6 +144,8 @@ export class StoreController {
             id: store.id,
             name: store.name,
             slug: store.slug,
+            open: store.open,
+            openNow: StoreController.isStoreOpenNow(store),
             settings: store.settings
               ? {
                   logoUrl: store.settings.logoUrl || null,

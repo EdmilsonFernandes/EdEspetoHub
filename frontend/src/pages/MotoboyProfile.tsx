@@ -648,7 +648,16 @@ export function MotoboyProfile() {
               const isSelected = selectedStores.includes(store.id);
               const alreadyRequested = requests.some((req) => req.storeId === store.id && req.status === 'PENDING');
               const approved = requests.some((req) => req.storeId === store.id && req.status === 'APPROVED');
-              const storeStatus = store.open === true ? 'Ativa agora' : store.open === false ? 'Loja fechada' : 'Status indisponível';
+              const openFlag = store?.open;
+              const openNow = store?.openNow;
+              const storeStatus =
+                openFlag === false
+                  ? 'Loja desativada'
+                  : openNow === false
+                  ? 'Fora do horário'
+                  : openFlag === true || openNow === true
+                  ? 'Ativa agora'
+                  : 'Ativa';
               return (
                 <button
                   type="button"
