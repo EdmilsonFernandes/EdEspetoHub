@@ -241,13 +241,13 @@ export function MotoboyAvailable() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => navigate('/motoboy/profile')}
-              className="px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600"
+              className="btn-press px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-extrabold text-slate-700"
             >
               Perfil
             </button>
             <button
               onClick={loadOrders}
-              className="px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600"
+              className="btn-press px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-extrabold text-slate-700"
             >
               Atualizar
             </button>

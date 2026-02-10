@@ -209,6 +209,16 @@ export class MotoboyController {
                 phone: link.motoboy.user.phone,
               }
             : null,
+          motoboyProfile: link.motoboy
+            ? {
+                vehicleType: link.motoboy.vehicleType || null,
+                vehiclePlate: link.motoboy.vehiclePlate || null,
+                vehicleModel: link.motoboy.vehicleModel || null,
+                vehicleColor: link.motoboy.vehicleColor || null,
+                city: link.motoboy.city || null,
+                state: link.motoboy.state || null,
+              }
+            : null,
           createdAt: link.createdAt,
         }))
       );

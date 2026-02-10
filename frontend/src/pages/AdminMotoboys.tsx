@@ -172,6 +172,25 @@ export function AdminMotoboys() {
     await loadDocuments(motoboyId);
   };
 
+  const formatVehicleLine = (profile: any) => {
+    if (!profile) return '';
+    const type = String(profile?.vehicleType || '').trim();
+    const plate = String(profile?.vehiclePlate || '').trim();
+    const model = String(profile?.vehicleModel || '').trim();
+    const color = String(profile?.vehicleColor || '').trim();
+    const city = String(profile?.city || '').trim();
+    const state = String(profile?.state || '').trim();
+
+    const bits: string[] = [];
+    if (type) bits.push(type === 'MOTO' ? 'Moto' : type === 'CARRO' ? 'Carro' : type);
+    if (plate) bits.push(plate);
+    if (model) bits.push(model);
+    if (color) bits.push(color);
+    const loc = [city, state].filter(Boolean).join('/');
+    if (loc) bits.push(loc);
+    return bits.join(' • ');
+  };
+
   const openReuploadDocModal = (motoboyIdToRequest: string, documentId: string, docType?: string) => {
     setReuploadDocTarget({ motoboyId: motoboyIdToRequest, documentId, docType });
     setReuploadDocReason('');
@@ -1048,7 +1067,7 @@ export function AdminMotoboys() {
                   borderLeftColor: link.active ? (link.busy ? 'rgb(245 158 11)' : 'rgb(16 185 129)') : 'rgb(244 63 94)',
                 }}
               >
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div className="flex items-start gap-3 min-w-0">
                     <div className="h-12 w-12 rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white grid place-items-center text-slate-800 font-black shrink-0">
                       {String(link?.motoboyUser?.fullName || 'E')
@@ -1064,9 +1083,12 @@ export function AdminMotoboys() {
                     {link.motoboyUser?.phone && (
                       <p className="text-xs text-slate-500">{link.motoboyUser.phone}</p>
                     )}
+                    {formatVehicleLine(link.motoboyProfile) ? (
+                      <p className="text-[11px] text-slate-600 mt-1 truncate">{formatVehicleLine(link.motoboyProfile)}</p>
+                    ) : null}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2 sm:justify-end">
                     <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600">
                       {formatMotoboyStatus(link.motoboyStatus)}
                     </span>
@@ -1110,7 +1132,7 @@ export function AdminMotoboys() {
                   <button
                     type="button"
                     onClick={() => openDocsModal(link.motoboyId, link.motoboyUser?.fullName || 'Entregador')}
-                    className="btn-press px-3 py-2 rounded-xl border border-slate-200 bg-white text-[11px] font-extrabold text-slate-700"
+                    className="btn-press w-full sm:w-auto px-3 py-2 rounded-xl border border-slate-200 bg-white text-[11px] font-extrabold text-slate-700"
                   >
                     Ver documentos
                   </button>
@@ -1127,7 +1149,7 @@ export function AdminMotoboys() {
                           showToast(error?.message || 'Não foi possível reativar vínculo.', 'error');
                         }
                       }}
-                      className="btn-press px-3 py-2 rounded-xl border border-emerald-200 bg-emerald-50 text-xs font-extrabold text-emerald-800"
+                      className="btn-press w-full sm:w-auto px-3 py-2 rounded-xl border border-emerald-200 bg-emerald-50 text-xs font-extrabold text-emerald-800"
                     >
                       Reativar vínculo
                     </button>
@@ -1135,7 +1157,7 @@ export function AdminMotoboys() {
                   <button
                     type="button"
                     onClick={() => handleUnlink(link.motoboyId)}
-                    className="btn-press px-3 py-2 rounded-xl border border-rose-200 bg-rose-50 text-xs font-extrabold text-rose-700"
+                    className="btn-press w-full sm:w-auto px-3 py-2 rounded-xl border border-rose-200 bg-rose-50 text-xs font-extrabold text-rose-700"
                   >
                     Remover vínculo
                   </button>

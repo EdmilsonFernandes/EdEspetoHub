@@ -68,7 +68,7 @@ export function MotoboyEarnings() {
           <button
             type="button"
             onClick={load}
-            className="px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600"
+            className="btn-press px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-extrabold text-slate-700"
           >
             Atualizar
           </button>
