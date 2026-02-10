@@ -295,6 +295,7 @@ CREATE TABLE IF NOT EXISTS motoboy_store_requests (
   store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
   status TEXT NOT NULL DEFAULT 'PENDING',
   decided_by_user_id UUID REFERENCES users(id),
+  reason TEXT,
   decided_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   UNIQUE(motoboy_id, store_id)

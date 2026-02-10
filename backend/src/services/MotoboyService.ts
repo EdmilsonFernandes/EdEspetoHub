@@ -485,7 +485,14 @@ export class MotoboyService {
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2026-01-29
    */
-  async reviewDocument(storeId: string, motoboyId: string, documentId: string, ownerId: string, status: string) {
+  async reviewDocument(
+    storeId: string,
+    motoboyId: string,
+    documentId: string,
+    ownerId: string,
+    status: string,
+    reason?: string | null
+  ) {
     const store = await this.storeRepository.findByIdWithOwner(storeId);
     if (!store) throw new AppError('STORE-001', 404);
     if (store.owner?.id !== ownerId) throw new AppError('AUTH-003', 403);
@@ -497,6 +504,17 @@ export class MotoboyService {
     document.status = status;
     document.reviewedAt = new Date();
     document.reviewedByUserId = ownerId;
+    const cleanReason = String(reason || '').trim();
+    document.metadata = {
+      ...(document.metadata || {}),
+      review: {
+        ...(document.metadata?.review || {}),
+        status,
+        reason: cleanReason || null,
+        reviewedAt: document.reviewedAt.toISOString(),
+        reviewedByUserId: ownerId,
+      },
+    };
     await repo.save(document);
     return document;
   }
@@ -525,6 +543,7 @@ export class MotoboyService {
           existing.status = 'PENDING';
           existing.decidedAt = null;
           existing.decidedByUserId = null;
+          existing.reason = null;
           await repo.save(existing);
         }
         continue;
@@ -588,7 +607,7 @@ export class MotoboyService {
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2026-01-29
    */
-  async reviewStoreRequest(storeId: string, requestId: string, ownerId: string, status: string) {
+  async reviewStoreRequest(storeId: string, requestId: string, ownerId: string, status: string, reason?: string | null) {
     const store = await this.storeRepository.findByIdWithOwner(storeId);
     if (!store) throw new AppError('STORE-001', 404);
     if (store.owner?.id !== ownerId) throw new AppError('AUTH-003', 403);
@@ -600,6 +619,12 @@ export class MotoboyService {
     request.status = status;
     request.decidedAt = new Date();
     request.decidedByUserId = ownerId;
+    if (status === 'REJECTED') {
+      const cleanReason = String(reason || '').trim();
+      request.reason = cleanReason || null;
+    } else {
+      request.reason = null;
+    }
     await repo.save(request);
 
     await this.logAudit({
@@ -645,11 +670,11 @@ export class MotoboyService {
       await this.notifyMotoboyByEmail(
         request.motoboyId,
         'Solicitação rejeitada',
-        'Sua solicitação para entregar nesta loja foi rejeitada.'
+        `Sua solicitação para entregar nesta loja foi rejeitada.${request.reason ? ` Motivo: ${request.reason}` : ''}`
       );
       await this.notifyMotoboyByWhatsapp(
         request.motoboyId,
-        'Sua solicitação para entregar nesta loja foi rejeitada.'
+        `Sua solicitação para entregar nesta loja foi rejeitada.${request.reason ? ` Motivo: ${request.reason}` : ''}`
       );
     }
 

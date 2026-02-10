@@ -38,6 +38,9 @@ export class MotoboyStoreRequest {
   @Column({ name: 'decided_by_user_id', nullable: true })
   decidedByUserId?: string | null;
 
+  @Column({ name: 'reason', type: 'text', nullable: true })
+  reason?: string | null;
+
   @Column({ name: 'decided_at', type: 'timestamptz', nullable: true })
   decidedAt?: Date | null;
 

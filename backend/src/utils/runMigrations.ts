@@ -504,10 +504,15 @@ export async function runMigrations() {
       store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
       status TEXT NOT NULL DEFAULT 'PENDING',
       decided_by_user_id UUID REFERENCES users(id),
+      reason TEXT,
       decided_at TIMESTAMPTZ,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       UNIQUE(motoboy_id, store_id)
     );
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS motoboy_store_requests
+    ADD COLUMN IF NOT EXISTS reason TEXT;
   `);
   await AppDataSource.query(`
     CREATE TABLE IF NOT EXISTS motoboy_audit_logs (

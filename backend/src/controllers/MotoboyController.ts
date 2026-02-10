@@ -123,6 +123,8 @@ export class MotoboyController {
           id: request.id,
           storeId: request.storeId,
           status: request.status,
+          reason: request.reason || null,
+          decidedAt: request.decidedAt || null,
           createdAt: request.createdAt,
           linkActive: activeStoreIds.includes(request.storeId),
           store: request.store
@@ -308,12 +310,14 @@ export class MotoboyController {
    */
   static async rejectDocument(req: Request, res: Response) {
     try {
+      const reason = req.body?.reason;
       const document = await motoboyService.reviewDocument(
         req.params.storeId,
         req.params.motoboyId,
         req.params.documentId,
         req.auth?.sub || '',
-        'REJECTED'
+        'REJECTED',
+        reason
       );
       return res.json(document);
     } catch (error) {
@@ -518,6 +522,8 @@ export class MotoboyController {
           id: request.id,
           storeId: request.storeId,
           status: request.status,
+          reason: request.reason || null,
+          decidedAt: request.decidedAt || null,
           createdAt: request.createdAt,
           motoboyId: request.motoboyId,
           motoboyStatus: request.motoboy?.status,
@@ -566,11 +572,13 @@ export class MotoboyController {
    */
   static async rejectStoreRequest(req: Request, res: Response) {
     try {
+      const reason = req.body?.reason;
       const request = await motoboyService.reviewStoreRequest(
         req.params.storeId,
         req.params.requestId,
         req.auth?.sub || '',
-        'REJECTED'
+        'REJECTED',
+        reason
       );
       return res.json(request);
     } catch (error: any) {

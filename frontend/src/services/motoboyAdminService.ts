@@ -25,8 +25,8 @@ export const motoboyAdminService = {
   async approveDocument(storeId: string, motoboyId: string, documentId: string) {
     return apiClient.post(`/stores/${storeId}/motoboys/${motoboyId}/documents/${documentId}/approve`, {});
   },
-  async rejectDocument(storeId: string, motoboyId: string, documentId: string) {
-    return apiClient.post(`/stores/${storeId}/motoboys/${motoboyId}/documents/${documentId}/reject`, {});
+  async rejectDocument(storeId: string, motoboyId: string, documentId: string, reason?: string | null) {
+    return apiClient.post(`/stores/${storeId}/motoboys/${motoboyId}/documents/${documentId}/reject`, { reason: reason || null });
   },
   async listRequests(storeId: string) {
     return apiClient.get(`/stores/${storeId}/motoboy-requests`);
@@ -34,7 +34,7 @@ export const motoboyAdminService = {
   async approveRequest(storeId: string, requestId: string) {
     return apiClient.post(`/stores/${storeId}/motoboy-requests/${requestId}/approve`, {});
   },
-  async rejectRequest(storeId: string, requestId: string) {
-    return apiClient.post(`/stores/${storeId}/motoboy-requests/${requestId}/reject`, {});
+  async rejectRequest(storeId: string, requestId: string, reason?: string | null) {
+    return apiClient.post(`/stores/${storeId}/motoboy-requests/${requestId}/reject`, { reason: reason || null });
   },
 };

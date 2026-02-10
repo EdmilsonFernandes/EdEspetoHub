@@ -209,6 +209,16 @@ export function MotoboyProfile() {
     return { text, reason };
   }, [documentsByType]);
 
+  const anyRejectedRequest = useMemo(() => {
+    const rejected = (requests || []).filter((r: any) => String(r?.status || '').toUpperCase() === 'REJECTED');
+    if (rejected.length === 0) return null;
+    const first = rejected[0];
+    return {
+      storeName: first?.store?.name || 'uma loja',
+      reason: first?.reason ? String(first.reason) : null,
+    };
+  }, [requests]);
+
   const vehicleIcon = useMemo(() => {
     const type = String(profileDraft.vehicleType || profile?.vehicleType || '').toUpperCase();
     if (type === 'MOTO') return '🛵';
@@ -538,6 +548,12 @@ export function MotoboyProfile() {
                         </button>
                       </>
                     )}
+                    {isRejected && current?.metadata?.review?.reason ? (
+                      <div className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-800">
+                        <span className="font-semibold">Motivo da recusa:</span>{' '}
+                        <span>{String(current.metadata.review.reason)}</span>
+                      </div>
+                    ) : null}
                   </div>
                   <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-3 text-center text-xs text-slate-500 flex flex-col items-center justify-center">
                     {current?.fileKey ? (
@@ -660,6 +676,16 @@ export function MotoboyProfile() {
           <p className="text-sm font-semibold text-slate-700">Solicitar vínculo</p>
           <p className="text-xs text-slate-500">Escolha as lojas que deseja atender.</p>
         </div>
+        {anyRejectedRequest && (
+          <div className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-800">
+            <span className="font-semibold">Solicitação recusada por {anyRejectedRequest.storeName}.</span>
+            {anyRejectedRequest.reason ? (
+              <span className="block mt-1 text-rose-700">Motivo: {anyRejectedRequest.reason}</span>
+            ) : (
+              <span className="block mt-1 text-rose-700">Você pode tentar novamente ou falar com a loja.</span>
+            )}
+          </div>
+        )}
         {!hasCompleteProfile && (
           <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
             Complete seus dados do veículo e endereço para solicitar vínculo com lojas.
@@ -681,10 +707,15 @@ export function MotoboyProfile() {
         {requests.length > 0 && (
           <div className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-xs text-slate-600 space-y-1">
             {requests.map((req) => (
-              <div key={req.id} className="flex items-center justify-between gap-2">
-                <span>{req.store?.name || 'Loja'}</span>
+              <div key={req.id} className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <div className="font-semibold text-slate-700 truncate">{req.store?.name || 'Loja'}</div>
+                  {String(req.status || '').toUpperCase() === 'REJECTED' && req.reason ? (
+                    <div className="text-[11px] text-rose-700 truncate">Motivo: {String(req.reason)}</div>
+                  ) : null}
+                </div>
                 <span
-                  className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                  className={`shrink-0 px-2 py-0.5 rounded-full text-[10px] font-semibold ${
                     req.status === 'APPROVED'
                       ? req.linkActive
                         ? 'bg-emerald-100 text-emerald-700'

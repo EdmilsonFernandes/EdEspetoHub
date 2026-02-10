@@ -40,13 +40,22 @@ export function AdminMotoboys() {
     }
   };
 
+  const askReason = (title: string) => {
+    const raw = window.prompt(`${title}\n\nOpcional: informe um motivo para ajudar o entregador a corrigir.`, '');
+    if (raw === null) return { cancelled: true as const, reason: null as string | null };
+    const reason = String(raw || '').trim();
+    return { cancelled: false as const, reason: reason || null };
+  };
+
   const reviewRequest = async (requestId: string, status: 'approve' | 'reject') => {
     if (!storeId) return;
     try {
       if (status === 'approve') {
         await motoboyAdminService.approveRequest(storeId, requestId);
       } else {
-        await motoboyAdminService.rejectRequest(storeId, requestId);
+        const { cancelled, reason } = askReason('Rejeitar solicitação de vínculo?');
+        if (cancelled) return;
+        await motoboyAdminService.rejectRequest(storeId, requestId, reason);
       }
       showToast('Solicitação atualizada.', 'success');
       loadRequests();
@@ -78,7 +87,9 @@ export function AdminMotoboys() {
       if (status === 'approve') {
         await motoboyAdminService.approveDocument(storeId, motoboyIdToReview, documentId);
       } else {
-        await motoboyAdminService.rejectDocument(storeId, motoboyIdToReview, documentId);
+        const { cancelled, reason } = askReason('Rejeitar documento?');
+        if (cancelled) return;
+        await motoboyAdminService.rejectDocument(storeId, motoboyIdToReview, documentId, reason);
       }
       showToast('Documento atualizado.', 'success');
       loadDocuments(motoboyIdToReview);
