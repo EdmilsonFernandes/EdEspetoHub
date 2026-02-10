@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { LinkSimpleHorizontal, Storefront, ClockClockwise, CheckCircle } from '@phosphor-icons/react';
 import { motoboyService } from '../services/motoboyService';
 import { storeService } from '../services/storeService';
 import { useToast } from '../contexts/ToastContext';
@@ -446,6 +447,54 @@ export function MotoboyProfile() {
     }
   };
 
+  const StoreSectionHeader = ({
+    icon,
+    eyebrow,
+    title,
+    right,
+    tone,
+  }: {
+    icon: React.ReactNode;
+    eyebrow: string;
+    title: string;
+    right?: React.ReactNode;
+    tone: 'emerald' | 'amber' | 'slate';
+  }) => {
+    const bar =
+      tone === 'emerald'
+        ? 'from-emerald-50 via-white to-white border-emerald-200/60'
+        : tone === 'amber'
+        ? 'from-amber-50 via-white to-white border-amber-200/60'
+        : 'from-slate-50 via-white to-white border-slate-200/60';
+    const eyebrowCls = tone === 'emerald' ? 'text-emerald-700' : tone === 'amber' ? 'text-amber-700' : 'text-slate-600';
+    return (
+      <div className={`rounded-2xl border bg-gradient-to-r ${bar} px-3 py-2 flex items-start justify-between gap-3`}>
+        <div className="min-w-0">
+          <div className={`text-[10px] uppercase tracking-[0.28em] font-extrabold flex items-center gap-2 ${eyebrowCls}`}>
+            <span className="opacity-90">{icon}</span>
+            <span>{eyebrow}</span>
+          </div>
+          <div className="text-sm font-black text-slate-900">{title}</div>
+        </div>
+        {right ? <div className="shrink-0">{right}</div> : null}
+      </div>
+    );
+  };
+
+  const EmptyHint = ({ icon, title, subtitle }: { icon: React.ReactNode; title: string; subtitle: string }) => {
+    return (
+      <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 flex items-start gap-3">
+        <div className="h-10 w-10 rounded-2xl border border-slate-200 bg-white grid place-items-center text-slate-700 shrink-0">
+          {icon}
+        </div>
+        <div className="min-w-0">
+          <div className="font-extrabold text-slate-900">{title}</div>
+          <div className="text-xs text-slate-600 mt-0.5">{subtitle}</div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen motoboy-screen space-y-4">
       <MotoboyHeader title="Perfil" subtitle="Documentos, vínculo e dados do entregador." />
@@ -826,20 +875,22 @@ export function MotoboyProfile() {
         )}
 
         <div className="grid gap-3">
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
-            <div className="flex items-center justify-between gap-3">
-              <div className="min-w-0">
-                <div className="text-xs uppercase tracking-[0.22em] text-slate-500">Vínculos</div>
-                <div className="text-sm font-extrabold text-slate-900">Lojas que você já atende</div>
-              </div>
-              <span className="shrink-0 px-2.5 py-1 rounded-full text-[10px] font-extrabold border border-emerald-200 bg-emerald-50 text-emerald-800">
-                {linkedStoreIds.length} ativo{linkedStoreIds.length === 1 ? '' : 's'}
-              </span>
-            </div>
+          <div className="rounded-2xl border border-slate-200 bg-white p-3 space-y-3 motoboy-fade-up" style={{ animationDelay: '40ms' }}>
+            <StoreSectionHeader
+              icon={<CheckCircle size={18} weight="duotone" />}
+              eyebrow="Vínculos"
+              title="Lojas que você já atende"
+              tone="emerald"
+              right={
+                <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border border-emerald-200 bg-emerald-50 text-emerald-800">
+                  {linkedStoreIds.length} ativo{linkedStoreIds.length === 1 ? '' : 's'}
+                </span>
+              }
+            />
             {linkedStoreIds.length === 0 ? (
-              <div className="mt-2 text-xs text-slate-600">Nenhum vínculo ativo ainda.</div>
+              <EmptyHint icon={<Storefront size={18} weight="duotone" />} title="Nenhum vínculo ativo" subtitle="Quando uma loja aprovar seu vínculo, ela aparece aqui." />
             ) : (
-              <div className="mt-3 grid gap-2">
+              <div className="grid gap-2">
                 {linkedStoreIds.map((storeId) => {
                   const store = storeById.get(storeId) || requestByStoreId.get(storeId)?.store || null;
                   const logo = store?.settings?.logoUrl || store?.logoUrl || null;
@@ -849,13 +900,13 @@ export function MotoboyProfile() {
                   const storeStatus =
                     openFlag === false ? 'Loja desativada' : openNow === false ? 'Fora do horário' : openFlag === true || openNow === true ? 'Ativa agora' : 'Ativa';
                   return (
-                    <div key={storeId} className="rounded-2xl border border-emerald-200 bg-white p-3 flex items-center gap-3">
+                    <div key={storeId} className="rounded-2xl border border-emerald-200 bg-emerald-50/30 p-3 flex items-center gap-3 shadow-[0_22px_48px_-40px_rgba(5,150,105,0.35)]">
                       <div className="h-12 w-12 rounded-2xl border border-slate-200 bg-slate-50 overflow-hidden shrink-0">
                         {logo ? <img src={logo} alt={store?.name || 'Loja'} className="h-full w-full object-cover" loading="lazy" /> : null}
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
-                          <div className="font-extrabold text-slate-900 truncate">{store?.name || 'Loja'}</div>
+                          <div className="font-extrabold text-slate-900 truncate">{store?.name || store?.slug || 'Loja'}</div>
                           <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold border border-emerald-200 bg-emerald-50 text-emerald-800">
                             Vínculo ativo
                           </span>
@@ -869,20 +920,22 @@ export function MotoboyProfile() {
             )}
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-3">
-            <div className="flex items-center justify-between gap-3">
-              <div className="min-w-0">
-                <div className="text-xs uppercase tracking-[0.22em] text-slate-500">Solicitações</div>
-                <div className="text-sm font-extrabold text-slate-900">Pendentes ou recusadas</div>
-              </div>
-              <span className="shrink-0 px-2.5 py-1 rounded-full text-[10px] font-extrabold border border-slate-200 bg-slate-50 text-slate-700">
-                {pendingStoreIds.length} pendente{pendingStoreIds.length === 1 ? '' : 's'} | {rejectedOrInactiveStoreIds.length} recusada{rejectedOrInactiveStoreIds.length === 1 ? '' : 's'}
-              </span>
-            </div>
+          <div className="rounded-2xl border border-slate-200 bg-white p-3 space-y-3 motoboy-fade-up" style={{ animationDelay: '70ms' }}>
+            <StoreSectionHeader
+              icon={<ClockClockwise size={18} weight="duotone" />}
+              eyebrow="Solicitações"
+              title="Pendentes ou recusadas"
+              tone="amber"
+              right={
+                <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border border-slate-200 bg-slate-50 text-slate-700">
+                  {pendingStoreIds.length} pendente{pendingStoreIds.length === 1 ? '' : 's'} | {rejectedOrInactiveStoreIds.length} recusada{rejectedOrInactiveStoreIds.length === 1 ? '' : 's'}
+                </span>
+              }
+            />
             {pendingStoreIds.length === 0 && rejectedOrInactiveStoreIds.length === 0 ? (
-              <div className="mt-2 text-xs text-slate-600">Você ainda não tem solicitações.</div>
+              <EmptyHint icon={<LinkSimpleHorizontal size={18} weight="duotone" />} title="Nenhuma solicitação" subtitle="Selecione uma loja abaixo e envie sua solicitação." />
             ) : (
-              <div className="mt-3 grid gap-2">
+              <div className="grid gap-2">
                 {[...pendingStoreIds, ...rejectedOrInactiveStoreIds].map((storeId) => {
                   const req = requestByStoreId.get(storeId);
                   const store = storeById.get(storeId) || req?.store || null;
@@ -908,7 +961,7 @@ export function MotoboyProfile() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
-                          <div className="font-extrabold text-slate-900 truncate">{store?.name || 'Loja'}</div>
+                          <div className="font-extrabold text-slate-900 truncate">{store?.name || store?.slug || 'Loja'}</div>
                           <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${pill.cls}`}>{pill.text}</span>
                         </div>
                         <div className="text-[11px] text-slate-500 truncate">{desc ? String(desc) : null}</div>
@@ -936,14 +989,14 @@ export function MotoboyProfile() {
             )}
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-3">
-            <div className="flex items-center justify-between gap-3">
-              <div className="min-w-0">
-                <div className="text-xs uppercase tracking-[0.22em] text-slate-500">Solicitar vínculo</div>
-                <div className="text-sm font-extrabold text-slate-900">Escolha novas lojas</div>
-                <div className="text-xs text-slate-500 mt-1">Selecione uma ou mais lojas e envie sua solicitação.</div>
-              </div>
-            </div>
+          <div className="rounded-2xl border border-slate-200 bg-white p-3 space-y-3 motoboy-fade-up" style={{ animationDelay: '100ms' }}>
+            <StoreSectionHeader
+              icon={<Storefront size={18} weight="duotone" />}
+              eyebrow="Solicitar"
+              title="Escolha novas lojas"
+              tone="slate"
+            />
+            <div className="text-xs text-slate-600 -mt-1">Selecione uma ou mais lojas e envie sua solicitação.</div>
 
             <div className="mt-3 grid gap-2">
               {stores.length === 0 ? (

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Car, Camera, CheckCircle, IdentificationCard, WarningCircle, Clock, UsersThree, LinkSimpleHorizontal } from '@phosphor-icons/react';
+import { Car, Camera, CheckCircle, IdentificationCard, WarningCircle, Clock, UsersThree, LinkSimpleHorizontal, MagnifyingGlass, FunnelSimple } from '@phosphor-icons/react';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { motoboyAdminService } from '../services/motoboyAdminService';
@@ -26,9 +26,10 @@ export function AdminMotoboys() {
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showInactive, setShowInactive] = useState(false);
+  const [motoboyQuery, setMotoboyQuery] = useState('');
+  const [motoboyFilter, setMotoboyFilter] = useState<'all' | 'free' | 'busy' | 'docs_pending' | 'inactive'>('all');
   const storeId = auth?.store?.id || '';
   const pendingRequests = requests.filter((request) => request.status === 'PENDING');
-  const filteredMotoboys = showInactive ? motoboys : motoboys.filter((link) => link.active);
 
   const normalizeDocType = (value: any) => String(value || '').trim().toUpperCase();
 
@@ -50,6 +51,33 @@ export function AdminMotoboys() {
     const latest = latestDocs(docs);
     return latest.filter((d) => String(d?.status || '').toUpperCase() !== 'APPROVED').length;
   };
+
+  const filteredMotoboys = useMemo(() => {
+    const q = String(motoboyQuery || '').trim().toLowerCase();
+    const base = showInactive ? motoboys : motoboys.filter((link) => link.active);
+
+    const withQuery = q
+      ? base.filter((link) => {
+          const name = String(link?.motoboyUser?.fullName || '').toLowerCase();
+          const email = String(link?.motoboyUser?.email || '').toLowerCase();
+          const phone = String(link?.motoboyUser?.phone || '').toLowerCase();
+          return name.includes(q) || email.includes(q) || phone.includes(q);
+        })
+      : base;
+
+    const byFilter =
+      motoboyFilter === 'all'
+        ? withQuery
+        : motoboyFilter === 'free'
+        ? withQuery.filter((l) => !l.busy && l.active)
+        : motoboyFilter === 'busy'
+        ? withQuery.filter((l) => Boolean(l.busy) && l.active)
+        : motoboyFilter === 'inactive'
+        ? withQuery.filter((l) => !l.active)
+        : withQuery.filter((l) => docsPendingCount(documentsByMotoboy[l.motoboyId] || []) > 0);
+
+    return byFilter;
+  }, [documentsByMotoboy, motoboyFilter, motoboyQuery, motoboys, showInactive]);
 
   const docStatusForType = (docs: any[], type: 'CNH' | 'SELFIE' | 'CRLV') => {
     const list = Array.isArray(docs) ? docs : [];
@@ -830,6 +858,74 @@ export function AdminMotoboys() {
             </button>
           }
         />
+
+        <div className="px-4 pt-4">
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3 flex flex-col gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+              <div className="relative flex-1">
+                <MagnifyingGlass size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                <input
+                  value={motoboyQuery}
+                  onChange={(e) => setMotoboyQuery(e.target.value)}
+                  placeholder="Buscar por nome, email ou telefone..."
+                  className="w-full rounded-xl border border-slate-200 bg-white pl-10 pr-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand-primary focus:border-brand-primary"
+                />
+              </div>
+              <div className="shrink-0 flex items-center gap-2">
+                <span className="hidden sm:inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-extrabold text-slate-700">
+                  <FunnelSimple size={16} weight="duotone" />
+                  Filtros
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMotoboyQuery('');
+                    setMotoboyFilter('all');
+                    setShowInactive(false);
+                  }}
+                  className="btn-press px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-extrabold text-slate-700"
+                >
+                  Limpar
+                </button>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {[
+                { id: 'all', label: 'Todos' },
+                { id: 'free', label: 'Livres' },
+                { id: 'busy', label: 'Ocupados' },
+                { id: 'docs_pending', label: 'Docs pendentes' },
+                { id: 'inactive', label: 'Inativos' },
+              ].map((f) => (
+                <button
+                  key={f.id}
+                  type="button"
+                  onClick={() => setMotoboyFilter(f.id as any)}
+                  className={[
+                    'btn-press px-3 py-1.5 rounded-full text-[11px] font-extrabold border',
+                    motoboyFilter === f.id ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-700 border-slate-200',
+                  ].join(' ')}
+                >
+                  {f.label}
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={() => setShowInactive((prev) => !prev)}
+                className={[
+                  'btn-press px-3 py-1.5 rounded-full text-[11px] font-extrabold border flex items-center gap-2',
+                  showInactive ? 'bg-rose-50 text-rose-800 border-rose-200' : 'bg-white text-slate-700 border-slate-200',
+                ].join(' ')}
+                title="Alterna exibição de vínculos inativos no conjunto base"
+              >
+                <span>Inativos no base</span>
+                <span className="text-[10px] opacity-80">{showInactive ? 'ON' : 'OFF'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
         {loading ? (
           <div className="px-4 py-4 text-sm text-slate-600">Carregando...</div>
         ) : filteredMotoboys.length === 0 ? (
@@ -850,14 +946,22 @@ export function AdminMotoboys() {
                 }}
               >
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-black text-slate-900">
+                  <div className="flex items-start gap-3 min-w-0">
+                    <div className="h-12 w-12 rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white grid place-items-center text-slate-800 font-black shrink-0">
+                      {String(link?.motoboyUser?.fullName || 'E')
+                        .trim()
+                        .slice(0, 1)
+                        .toUpperCase()}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-black text-slate-900 truncate">
                       {link.motoboyUser?.fullName || 'Entregador'}
                     </p>
                     <p className="text-xs text-slate-500">{link.motoboyUser?.email || '-'}</p>
                     {link.motoboyUser?.phone && (
                       <p className="text-xs text-slate-500">{link.motoboyUser.phone}</p>
                     )}
+                    </div>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600">
