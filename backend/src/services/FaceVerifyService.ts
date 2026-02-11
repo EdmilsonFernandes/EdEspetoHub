@@ -50,7 +50,7 @@ export class FaceVerifyService {
   private maxAttempts =
     process.env.FACE_VERIFY_MAX_ATTEMPTS && Number(process.env.FACE_VERIFY_MAX_ATTEMPTS) > 0
       ? Number(process.env.FACE_VERIFY_MAX_ATTEMPTS)
-      : 3;
+      : 10;
   private cooldownHours =
     process.env.FACE_VERIFY_COOLDOWN_HOURS && Number(process.env.FACE_VERIFY_COOLDOWN_HOURS) > 0
       ? Number(process.env.FACE_VERIFY_COOLDOWN_HOURS)
