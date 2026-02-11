@@ -215,6 +215,9 @@ export class MotoboyController {
                 vehiclePlate: link.motoboy.vehiclePlate || null,
                 vehicleModel: link.motoboy.vehicleModel || null,
                 vehicleColor: link.motoboy.vehicleColor || null,
+                cnhNumber: link.motoboy.cnhNumber || null,
+                cnhCategory: link.motoboy.cnhCategory || null,
+                cnhExpiresAt: link.motoboy.cnhExpiresAt || null,
                 city: link.motoboy.city || null,
                 state: link.motoboy.state || null,
               }

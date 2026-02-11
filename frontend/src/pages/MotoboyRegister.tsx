@@ -19,7 +19,7 @@ const formatCpfInput = (value = '') => {
   return `${p1}.${p2}.${p3}-${p4}`;
 };
 
-const isValidCPF = (value = '') => {
+  const isValidCPF = (value = '') => {
   const digits = onlyDigits(value);
   if (digits.length !== 11) return false;
   if (/^(\d)\1+$/.test(digits)) return false;
@@ -33,6 +33,11 @@ const isValidCPF = (value = '') => {
   let second = (sum * 10) % 11;
   if (second === 10) second = 0;
   return second === Number(digits[10]);
+};
+
+const hasValidPhone = (value = '') => {
+  const digits = onlyDigits(value);
+  return digits.length >= 10 && digits.length <= 11;
 };
 
 export function MotoboyRegister() {
@@ -58,6 +63,10 @@ export function MotoboyRegister() {
     }
     if (!form.email || !form.email.includes('@')) {
       showToast('Informe um e-mail válido.', 'error');
+      return;
+    }
+    if (!hasValidPhone(form.phone)) {
+      showToast('Informe um telefone válido com DDD.', 'error');
       return;
     }
     if (!form.cpf || !isValidCPF(form.cpf)) {
@@ -91,6 +100,10 @@ export function MotoboyRegister() {
         showToast('Esse e-mail já é dono de loja. Use outro para o entregador.', 'error');
       } else if (error?.code === 'AUTH-011') {
         showToast('E-mail já cadastrado. Faça login ou use outro.', 'error');
+      } else if (error?.code === 'AUTH-016') {
+        showToast('Telefone já cadastrado. Use outro número.', 'error');
+      } else if (error?.code === 'AUTH-017') {
+        showToast('Telefone inválido. Informe DDD + número.', 'error');
       } else {
         showToast(error?.message || 'Não foi possível cadastrar.', 'error');
       }

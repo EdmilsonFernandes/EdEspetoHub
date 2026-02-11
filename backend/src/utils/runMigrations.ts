@@ -351,6 +351,18 @@ export async function runMigrations() {
   `);
   await AppDataSource.query(`
     ALTER TABLE IF EXISTS motoboys
+    ADD COLUMN IF NOT EXISTS cnh_number TEXT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS motoboys
+    ADD COLUMN IF NOT EXISTS cnh_category TEXT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS motoboys
+    ADD COLUMN IF NOT EXISTS cnh_expires_at DATE;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS motoboys
     ADD COLUMN IF NOT EXISTS city TEXT;
   `);
   await AppDataSource.query(`

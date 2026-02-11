@@ -50,6 +50,9 @@ export const motoboyService = {
     vehiclePlate?: string | null;
     vehicleModel?: string | null;
     vehicleColor?: string | null;
+    cnhNumber?: string | null;
+    cnhCategory?: string | null;
+    cnhExpiresAt?: string | null;
     city?: string | null;
     state?: string | null;
     address?: string | null;

@@ -74,6 +74,15 @@ export class Motoboy {
   @Column({ name: 'vehicle_color', type: 'text', nullable: true })
   vehicleColor?: string | null;
 
+  @Column({ name: 'cnh_number', type: 'text', nullable: true })
+  cnhNumber?: string | null;
+
+  @Column({ name: 'cnh_category', type: 'text', nullable: true })
+  cnhCategory?: string | null;
+
+  @Column({ name: 'cnh_expires_at', type: 'date', nullable: true })
+  cnhExpiresAt?: string | null;
+
   @Column({ name: 'city', type: 'text', nullable: true })
   city?: string | null;
 

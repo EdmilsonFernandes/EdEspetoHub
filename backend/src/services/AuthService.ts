@@ -55,6 +55,27 @@ export class AuthService
   private subscriptionService = new SubscriptionService();
   private settingsService = new SettingsService();
 
+  private normalizePhone(value?: string | null) {
+    return String(value || '').replace(/\D/g, '');
+  }
+
+  private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
+    const digits = this.normalizePhone(phone);
+    if (!digits) return;
+    const rows = await manager.query(
+      `
+      SELECT id
+      FROM users
+      WHERE regexp_replace(COALESCE(phone, ''), '\\D', '', 'g') = $1
+      LIMIT 1
+      `,
+      [digits]
+    );
+    if (Array.isArray(rows) && rows.length > 0) {
+      throw new AppError('AUTH-016', 409);
+    }
+  }
+
   /**
    * Executes super admin login logic.
    *
@@ -135,6 +156,10 @@ export class AuthService
       {
         throw new AppError('AUTH-008', 400);
       }
+      const normalizedPhone = this.normalizePhone(userPayload.phone);
+      if (normalizedPhone.length < 10) {
+        throw new AppError('AUTH-017', 400);
+      }
 
       const result = await AppDataSource.transaction(async (manager) =>
       {
@@ -163,6 +188,8 @@ export class AuthService
         {
           throw new AppError('AUTH-010', 409);
         }
+
+        await this.ensurePhoneIsAvailable(manager, userPayload.phone);
 
         const hashed = await bcrypt.hash(userPayload.password, 10);
         const user = userRepo.create({
@@ -259,6 +286,7 @@ export class AuthService
       {
         throw new AppError('AUTH-010', 409);
       }
+      await this.ensurePhoneIsAvailable(manager, userPayload.phone);
 
       const hashed = await bcrypt.hash(userPayload.password, 10);
 

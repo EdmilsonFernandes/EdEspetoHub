@@ -17,6 +17,8 @@
   "AUTH-012": "Accept the terms and privacy policy.",
   "AUTH-013": "Select a plan to continue.",
   "AUTH-014": "Invalid payment method.",
+  "AUTH-016": "Phone number already registered.",
+  "AUTH-017": "Invalid phone number.",
   "AUTH-020": "SUPER_ADMIN not found in database.",
   "AUTH-021": "Invalid credentials.",
   "AUTH-S001": "If the email exists, we will send instructions.",
@@ -68,5 +70,6 @@
   "MOTO-028": "Invalid plate. Use ABC1234 or ABC1D23 format.",
   "MOTO-029": "Please fill your full address (city, state and address).",
   "MOTO-030": "Please upload the required documents to request store links.",
-  "MOTO-031": "Courier KYC is still under platform review. Wait for approval to complete the store link."
+  "MOTO-031": "Courier KYC is still under platform review. Wait for approval to complete the store link.",
+  "MOTO-032": "For motorcycles, CNH category must include the letter A."
 }

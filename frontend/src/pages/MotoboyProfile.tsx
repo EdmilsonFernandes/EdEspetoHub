@@ -20,6 +20,9 @@ export function MotoboyProfile() {
     vehiclePlate: '',
     vehicleModel: '',
     vehicleColor: '',
+    cnhNumber: '',
+    cnhCategory: '',
+    cnhExpiresAt: '',
     city: '',
     state: '',
     address: '',
@@ -166,6 +169,9 @@ export function MotoboyProfile() {
           vehiclePlate: data?.vehiclePlate || '',
           vehicleModel: data?.vehicleModel || '',
           vehicleColor: data?.vehicleColor || '',
+          cnhNumber: data?.cnhNumber || '',
+          cnhCategory: data?.cnhCategory || '',
+          cnhExpiresAt: data?.cnhExpiresAt || '',
           city: data?.city || '',
           state: data?.state || '',
           address: data?.address || '',
@@ -280,6 +286,7 @@ export function MotoboyProfile() {
     const plate = String(profileDraft.vehiclePlate || profile?.vehiclePlate || '').trim();
     const model = String(profileDraft.vehicleModel || profile?.vehicleModel || '').trim();
     const color = String(profileDraft.vehicleColor || profile?.vehicleColor || '').trim();
+    const cnhCategory = String(profileDraft.cnhCategory || profile?.cnhCategory || '').toUpperCase().replace(/[^A-Z]/g, '');
     const city = String(profileDraft.city || profile?.city || '').trim();
     const state = String(profileDraft.state || profile?.state || '').trim();
     const address = String(profileDraft.address || profile?.address || '').trim();
@@ -289,6 +296,7 @@ export function MotoboyProfile() {
       if (!model) return false;
       if (!color) return false;
     }
+    if (v === 'MOTO' && !cnhCategory.includes('A')) return false;
     if (!city || !state || state.length !== 2 || !address) return false;
     return true;
   }, [profileDraft, profile]);
@@ -532,6 +540,9 @@ export function MotoboyProfile() {
         vehiclePlate: profileDraft.vehiclePlate || null,
         vehicleModel: profileDraft.vehicleModel || null,
         vehicleColor: profileDraft.vehicleColor || null,
+        cnhNumber: profileDraft.cnhNumber || null,
+        cnhCategory: profileDraft.cnhCategory || null,
+        cnhExpiresAt: profileDraft.cnhExpiresAt || null,
         city: profileDraft.city || null,
         state: profileDraft.state || null,
         address: profileDraft.address || null,
@@ -1093,6 +1104,48 @@ export function MotoboyProfile() {
               </option>
             ))}
           </select>
+          {(String(profileDraft.vehicleType || '').toUpperCase() === 'MOTO' ||
+            String(profileDraft.vehicleType || '').toUpperCase() === 'CARRO' ||
+            String(profileDraft.vehicleType || '').toUpperCase() === 'OUTRO') && (
+            <>
+              <input
+                value={profileDraft.cnhNumber}
+                onChange={(event) =>
+                  setProfileDraft((prev: any) => ({
+                    ...prev,
+                    cnhNumber: String(event.target.value || '').replace(/\D/g, '').slice(0, 11),
+                  }))
+                }
+                placeholder="Nº CNH"
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                inputMode="numeric"
+              />
+              <input
+                value={profileDraft.cnhCategory}
+                onChange={(event) =>
+                  setProfileDraft((prev: any) => ({
+                    ...prev,
+                    cnhCategory: String(event.target.value || '').toUpperCase().replace(/[^A-Z]/g, '').slice(0, 4),
+                  }))
+                }
+                placeholder="Categoria CNH (ex: A, AB)"
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                autoCapitalize="characters"
+              />
+              <input
+                type="date"
+                value={profileDraft.cnhExpiresAt || ''}
+                onChange={(event) => setProfileDraft((prev: any) => ({ ...prev, cnhExpiresAt: event.target.value }))}
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+              />
+              {String(profileDraft.vehicleType || '').toUpperCase() === 'MOTO' &&
+              !String(profileDraft.cnhCategory || '').toUpperCase().includes('A') ? (
+                <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800 sm:col-span-2">
+                  Para moto, a categoria da CNH precisa incluir a letra A.
+                </div>
+              ) : null}
+            </>
+          )}
 
           <select
             value={String(profileDraft.state || '').toUpperCase()}

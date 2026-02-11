@@ -50,9 +50,21 @@ export class MotoboyService {
     return /^(?:[A-Z]{3}[0-9]{4}|[A-Z]{3}[0-9][A-Z][0-9]{2})$/.test(plate);
   }
 
+  private normalizeCnhCategory(value?: string | null) {
+    return String(value || '')
+      .toUpperCase()
+      .replace(/[^A-Z]/g, '');
+  }
+
+  private hasCategoryA(value?: string | null) {
+    const normalized = this.normalizeCnhCategory(value);
+    return normalized.includes('A');
+  }
+
   private async ensureMotoboyProfileIsComplete(motoboy: Motoboy) {
     const vehicleType = String(motoboy.vehicleType || '').toUpperCase();
     const plate = this.normalizePlate(motoboy.vehiclePlate);
+    const cnhCategory = this.normalizeCnhCategory(motoboy.cnhCategory);
     const city = String(motoboy.city || '').trim();
     const state = String(motoboy.state || '').trim().toUpperCase();
     const address = String(motoboy.address || '').trim();
@@ -60,6 +72,9 @@ export class MotoboyService {
     if (!vehicleType) throw new AppError('MOTO-027', 400);
     if ((vehicleType === 'MOTO' || vehicleType === 'CARRO' || vehicleType === 'OUTRO') && !this.isValidBrazilPlate(plate)) {
       throw new AppError('MOTO-028', 400);
+    }
+    if (vehicleType === 'MOTO' && !this.hasCategoryA(cnhCategory)) {
+      throw new AppError('MOTO-032', 400);
     }
     if (!city || !state || state.length !== 2 || !address) throw new AppError('MOTO-029', 400);
   }
@@ -326,6 +341,9 @@ export class MotoboyService {
       vehiclePlate?: string | null;
       vehicleModel?: string | null;
       vehicleColor?: string | null;
+      cnhNumber?: string | null;
+      cnhCategory?: string | null;
+      cnhExpiresAt?: string | null;
       city?: string | null;
       state?: string | null;
       address?: string | null;
@@ -334,15 +352,23 @@ export class MotoboyService {
     const nextVehicleType = input.vehicleType ?? motoboy.vehicleType ?? null;
     const nextPlateRaw = input.vehiclePlate ?? motoboy.vehiclePlate ?? null;
     const nextPlate = nextPlateRaw ? this.normalizePlate(nextPlateRaw) : null;
+    const nextCnhCategoryRaw = input.cnhCategory ?? motoboy.cnhCategory ?? null;
+    const nextCnhCategory = nextCnhCategoryRaw ? this.normalizeCnhCategory(nextCnhCategoryRaw) : null;
 
     if (nextPlate && !this.isValidBrazilPlate(nextPlate)) {
       throw new AppError('MOTO-028', 400);
+    }
+    if (String(nextVehicleType || '').toUpperCase() === 'MOTO' && !this.hasCategoryA(nextCnhCategory)) {
+      throw new AppError('MOTO-032', 400);
     }
 
     motoboy.vehicleType = nextVehicleType;
     motoboy.vehiclePlate = nextPlate;
     motoboy.vehicleModel = input.vehicleModel ?? motoboy.vehicleModel ?? null;
     motoboy.vehicleColor = input.vehicleColor ?? motoboy.vehicleColor ?? null;
+    motoboy.cnhNumber = String(input.cnhNumber ?? motoboy.cnhNumber ?? '').trim() || null;
+    motoboy.cnhCategory = nextCnhCategory;
+    motoboy.cnhExpiresAt = String(input.cnhExpiresAt ?? motoboy.cnhExpiresAt ?? '').trim() || null;
     motoboy.city = input.city ?? motoboy.city ?? null;
     motoboy.state = (input.state ?? motoboy.state ?? null)?.toString().toUpperCase() || null;
     motoboy.address = input.address ?? motoboy.address ?? null;

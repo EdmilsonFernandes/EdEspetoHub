@@ -17,6 +17,8 @@
   "AUTH-012": "Aceite os termos de uso e política de privacidade.",
   "AUTH-013": "Selecione um plano para continuar.",
   "AUTH-014": "Método de pagamento inválido.",
+  "AUTH-016": "Telefone já cadastrado.",
+  "AUTH-017": "Telefone inválido.",
   "AUTH-020": "SUPER_ADMIN não configurado no banco.",
   "AUTH-021": "Credenciais inválidas.",
   "AUTH-S001": "Se o e-mail existir, enviaremos instruções.",
@@ -68,5 +70,6 @@
   "MOTO-028": "Placa inválida. Use o formato ABC1234 ou ABC1D23.",
   "MOTO-029": "Informe seu endereço completo (cidade, UF e endereço).",
   "MOTO-030": "Envie os documentos obrigatórios para solicitar vínculo com lojas.",
-  "MOTO-031": "KYC do entregador ainda está em análise pela plataforma. Aguarde aprovação para concluir o vínculo."
+  "MOTO-031": "KYC do entregador ainda está em análise pela plataforma. Aguarde aprovação para concluir o vínculo.",
+  "MOTO-032": "Para moto, a categoria da CNH deve incluir a letra A."
 }
