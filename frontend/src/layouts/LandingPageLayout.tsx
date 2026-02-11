@@ -3,7 +3,7 @@ import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
-import { BookOpen, House, Moon, SignOut, Storefront, Sun, Truck, UsersThree } from '@phosphor-icons/react';
+import { Moon, SignOut, Storefront, Sun, Truck } from '@phosphor-icons/react';
 
 interface LandingPageLayoutProps {
   children: React.ReactNode;
@@ -22,10 +22,8 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
   };
 
   const navLinks = [
-    { id: 'home', label: 'Início', icon: House, onClick: () => navigate('/') },
-    { id: 'portfolio', label: 'Portfólio', icon: Storefront, onClick: () => navigate('/portfolio') },
-    { id: 'demo', label: 'Demo', icon: UsersThree, onClick: goToDemoGuide },
-    { id: 'guide', label: 'Guia', icon: BookOpen, href: '/#guia-usuario' },
+    { id: 'home', label: 'Início', onClick: () => navigate('/') },
+    { id: 'portfolio', label: 'Portfólio', onClick: () => navigate('/portfolio') },
   ];
 
   return (
@@ -44,29 +42,15 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
               </div>
             </a>
 
-            <nav className="hidden lg:flex items-center gap-1 rounded-full border border-slate-200/70 dark:border-slate-700 bg-white/70 dark:bg-slate-900/50 px-2 py-1.5 shadow-sm">
+            <nav className="hidden lg:flex items-center gap-1.5 rounded-full border border-slate-200/80 dark:border-slate-700 bg-white/85 dark:bg-slate-900/60 px-2.5 py-1.5 shadow-sm">
               {navLinks.map((item) => {
-                const Icon = item.icon;
-                if (item.href) {
-                  return (
-                    <a
-                      key={item.id}
-                      href={item.href}
-                      className="inline-flex items-center gap-2 px-3 py-2 rounded-full text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/70 transition"
-                    >
-                      <Icon size={16} weight="duotone" />
-                      {item.label}
-                    </a>
-                  );
-                }
                 return (
                   <button
                     key={item.id}
                     type="button"
                     onClick={item.onClick}
-                    className="inline-flex items-center gap-2 px-3 py-2 rounded-full text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/70 transition"
+                    className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/70 transition"
                   >
-                    <Icon size={16} weight="duotone" />
                     {item.label}
                   </button>
                 );
@@ -131,11 +115,10 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
               )}
               <button
                 type="button"
-                onClick={goToDemoGuide}
+                onClick={() => navigate('/')}
                 className="inline-flex items-center gap-2 px-3 py-2 text-xs rounded-full border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/60 text-slate-700 dark:text-slate-200 whitespace-nowrap"
               >
-                <UsersThree size={14} weight="duotone" />
-                Demo
+                Início
               </button>
               <button
                 type="button"
@@ -145,13 +128,6 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                 <Storefront size={14} weight="duotone" />
                 Portfólio
               </button>
-              <a
-                href="/#guia-usuario"
-                className="inline-flex items-center gap-2 px-3 py-2 text-xs rounded-full border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/60 text-slate-700 dark:text-slate-200 whitespace-nowrap"
-              >
-                <BookOpen size={14} weight="duotone" />
-                Guia
-              </a>
               <button
                 type="button"
                 onClick={() => navigate('/admin')}
