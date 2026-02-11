@@ -38,6 +38,19 @@ export class MotoboyKycController {
   }
 
   /**
+   * Lists recent approved/rejected KYC reviews (platform-wide).
+   */
+  static async listRecentReviews(req: Request, res: Response) {
+    try {
+      const limit = Number(req.query?.limit || 30);
+      const data = await motoboyService.listRecentKycReviews(limit);
+      return res.json(data);
+    } catch (error) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  /**
    * Lists all documents for a motoboy (platform view).
    */
   static async listMotoboyDocuments(req: Request, res: Response) {

@@ -25,6 +25,8 @@ import { MotoboyAuditLog } from '../entities/MotoboyAuditLog';
 import { EmailService } from './EmailService';
 import { env } from '../config/env';
 import { faceVerifyService } from './FaceVerifyService';
+import { PlatformAdmin } from '../entities/PlatformAdmin';
+import { In } from 'typeorm';
 /**
  * Provides MotoboyService functionality.
  *
@@ -275,7 +277,59 @@ export class MotoboyService {
   async listAllDocumentsForMotoboy(motoboyId: string) {
     if (!motoboyId) throw new AppError('MOTO-023', 404);
     const repo = AppDataSource.getRepository(MotoboyDocument);
-    return repo.find({ where: { motoboyId }, order: { uploadedAt: 'DESC' } });
+    const docs = await repo.find({
+      where: { motoboyId },
+      relations: [ 'reviewedBy' ],
+      order: { uploadedAt: 'DESC' },
+    });
+    await this.attachPlatformReviewerInfo(docs);
+    return docs;
+  }
+
+  private async attachPlatformReviewerInfo(docs: MotoboyDocument[]) {
+    if (!Array.isArray(docs) || docs.length === 0) return;
+    const platformAdminIds = Array.from(
+      new Set(
+        docs
+          .map((doc) => String(doc?.metadata?.review?.reviewedByPlatformAdminId || '').trim())
+          .filter(Boolean)
+      )
+    );
+    if (platformAdminIds.length === 0) return;
+
+    const platformRepo = AppDataSource.getRepository(PlatformAdmin);
+    const admins = await platformRepo.find({
+      where: { id: In(platformAdminIds) },
+    });
+    const byId = new Map(admins.map((a) => [ a.id, a ]));
+
+    for (const doc of docs) {
+      const review = doc?.metadata?.review || {};
+      const platformId = String(review?.reviewedByPlatformAdminId || '').trim();
+      if (!platformId) continue;
+      const admin = byId.get(platformId);
+      doc.metadata = {
+        ...(doc.metadata || {}),
+        review: {
+          ...review,
+          reviewedByPlatformAdminUsername:
+            review?.reviewedByPlatformAdminUsername || admin?.username || null,
+        },
+      };
+    }
+  }
+
+  async listRecentKycReviews(limit = 30) {
+    const safeLimit = Number.isFinite(limit) ? Math.min(Math.max(Math.floor(limit), 1), 100) : 30;
+    const repo = AppDataSource.getRepository(MotoboyDocument);
+    const docs = await repo.find({
+      where: [ { status: 'APPROVED' as any }, { status: 'REJECTED' as any } ],
+      relations: [ 'motoboy', 'motoboy.user', 'reviewedBy' ],
+      order: { reviewedAt: 'DESC', uploadedAt: 'DESC' },
+      take: safeLimit,
+    });
+    await this.attachPlatformReviewerInfo(docs);
+    return docs;
   }
 
   async getKycAuditSummary(days = 30) {
@@ -351,6 +405,8 @@ export class MotoboyService {
     // SUPER_ADMIN token `sub` comes from platform_admins.
     // `reviewed_by_user_id` FK points to users(id), so only persist when it is a real user id.
     const reviewerUser = reviewerId ? await this.userRepository.findById(reviewerId).catch(() => null) : null;
+    const platformRepo = AppDataSource.getRepository(PlatformAdmin);
+    const platformReviewer = reviewerId ? await platformRepo.findOne({ where: { id: reviewerId } }).catch(() => null) : null;
     const reviewedByUserId = reviewerUser?.id || null;
 
     document.status = status;
@@ -367,6 +423,7 @@ export class MotoboyService {
         reviewedAt: document.reviewedAt.toISOString(),
         reviewedByUserId: reviewedByUserId,
         reviewedByPlatformAdminId: reviewerId || null,
+        reviewedByPlatformAdminUsername: platformReviewer?.username || null,
         scope: 'PLATFORM',
         awaitingReupload,
         requiredAction: awaitingReupload ? 'Reenviar documento com foto mais nitida' : null,

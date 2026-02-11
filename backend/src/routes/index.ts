@@ -71,6 +71,7 @@ routes.get('/admin/access-logs', requireAuth, requireRole('SUPER_ADMIN'), Platfo
 // Platform KYC (motoboy documents) - SUPER_ADMIN only
 routes.get('/admin/motoboys/kyc/audit', requireAuth, requireRole('SUPER_ADMIN'), MotoboyKycController.auditSummary);
 routes.get('/admin/motoboys/kyc/pending', requireAuth, requireRole('SUPER_ADMIN'), MotoboyKycController.listPending);
+routes.get('/admin/motoboys/kyc/reviews', requireAuth, requireRole('SUPER_ADMIN'), MotoboyKycController.listRecentReviews);
 routes.get('/admin/motoboys/:motoboyId/documents', requireAuth, requireRole('SUPER_ADMIN'), MotoboyKycController.listMotoboyDocuments);
 routes.post(
   '/admin/motoboys/:motoboyId/documents/:documentId/approve',

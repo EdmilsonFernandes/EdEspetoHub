@@ -215,6 +215,8 @@ export function SuperAdmin() {
   const [kycHistoryDocs, setKycHistoryDocs] = useState<any[]>([]);
   const [kycHistoryStatusFilter, setKycHistoryStatusFilter] = useState<'all' | 'PENDING' | 'APPROVED' | 'REJECTED'>('all');
   const [kycHistoryFaceFilter, setKycHistoryFaceFilter] = useState<'all' | 'alto' | 'medio' | 'baixo' | 'indisponivel'>('all');
+  const [kycRecentReviews, setKycRecentReviews] = useState<any[]>([]);
+  const [kycRecentReviewsLoading, setKycRecentReviewsLoading] = useState(false);
 
   const loadOverview = async (authToken: string) => {
     setLoading(true);
@@ -269,6 +271,19 @@ export function SuperAdmin() {
     }
   };
 
+  const loadKycRecentReviews = async (authToken: string) => {
+    setKycRecentReviewsLoading(true);
+    try {
+      const data = await superAdminService.fetchMotoboyKycReviews(authToken, 40);
+      setKycRecentReviews(Array.isArray(data) ? data : []);
+    } catch (err: any) {
+      showToast(err?.message || 'Não foi possível carregar o histórico de revisões KYC.', 'error');
+      setKycRecentReviews([]);
+    } finally {
+      setKycRecentReviewsLoading(false);
+    }
+  };
+
   const reviewKycDocument = async (motoboyId: string, documentId: string, action: 'approve' | 'reject') => {
     if (!token) return;
     try {
@@ -282,6 +297,11 @@ export function SuperAdmin() {
       }
       await loadKycQueue(token);
       await loadKycAudit(token, kycAuditDays);
+      await loadKycRecentReviews(token);
+      if (kycHistoryOpen && kycHistoryMotoboy?.id) {
+        const docs = await superAdminService.fetchMotoboyDocuments(token, kycHistoryMotoboy.id);
+        setKycHistoryDocs(Array.isArray(docs) ? docs : []);
+      }
     } catch (err: any) {
       showToast(err?.message || 'Não foi possível revisar o documento.', 'error');
     }
@@ -316,6 +336,7 @@ export function SuperAdmin() {
     if (!token) return;
     loadKycQueue(token);
     loadKycAudit(token, kycAuditDays);
+    loadKycRecentReviews(token);
   }, [token]);
 
   useEffect(() => {
@@ -2123,6 +2144,7 @@ export function SuperAdmin() {
                 onClick={() => {
                   loadKycQueue(token);
                   loadKycAudit(token, kycAuditDays);
+                  loadKycRecentReviews(token);
                 }}
                 className="px-3 py-2 rounded-lg text-sm font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50 flex items-center gap-1"
                 disabled={!token || kycLoading}
@@ -2218,6 +2240,98 @@ export function SuperAdmin() {
                     )}
                   </div>
                 </div>
+              </div>
+
+              <div className="rounded-2xl border border-slate-200 bg-white p-3 mb-4">
+                <div className="flex items-center justify-between gap-2 mb-3">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.2em] text-slate-500 font-semibold">Histórico de revisões</p>
+                    <p className="text-sm font-bold text-slate-800">Aprovados e reprovados recentes</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => loadKycRecentReviews(token)}
+                    className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-[11px] font-extrabold text-slate-700"
+                    disabled={!token || kycRecentReviewsLoading}
+                  >
+                    {kycRecentReviewsLoading ? 'Atualizando...' : 'Atualizar histórico'}
+                  </button>
+                </div>
+
+                {kycRecentReviewsLoading ? (
+                  <div className="text-sm text-slate-500">Carregando histórico...</div>
+                ) : kycRecentReviews.length === 0 ? (
+                  <div className="text-sm text-slate-500">Nenhuma revisão recente registrada.</div>
+                ) : (
+                  <div className="overflow-auto rounded-xl border border-slate-200">
+                    <table className="min-w-full text-sm">
+                      <thead className="bg-slate-50 text-slate-600">
+                        <tr>
+                          <th className="text-left px-3 py-2">Motoboy</th>
+                          <th className="text-left px-3 py-2">Doc</th>
+                          <th className="text-left px-3 py-2">Status</th>
+                          <th className="text-left px-3 py-2">Revisado por</th>
+                          <th className="text-left px-3 py-2">Quando</th>
+                          <th className="text-left px-3 py-2">Motivo</th>
+                          <th className="text-left px-3 py-2">Ação</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {kycRecentReviews.map((doc: any) => {
+                          const status = String(doc?.status || '').toUpperCase();
+                          const review = doc?.metadata?.review || {};
+                          const reviewedBy =
+                            review?.reviewedByPlatformAdminUsername ||
+                            review?.reviewedByUserId ||
+                            review?.reviewedByPlatformAdminId ||
+                            '-';
+                          const reason = String(review?.reason || '').trim() || '-';
+                          const reviewedAt = review?.reviewedAt || doc?.reviewedAt || null;
+                          return (
+                            <tr key={doc.id} className="border-t border-slate-100 align-top">
+                              <td className="px-3 py-2">
+                                <div className="font-semibold text-slate-800">{doc?.motoboy?.user?.fullName || 'Motoboy'}</div>
+                                <div className="text-[11px] text-slate-500">{doc?.motoboy?.user?.email || '-'}</div>
+                              </td>
+                              <td className="px-3 py-2 font-semibold text-slate-700">{String(doc?.docType || '-').toUpperCase()}</td>
+                              <td className="px-3 py-2">
+                                <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold border ${
+                                  status === 'APPROVED'
+                                    ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
+                                    : 'bg-rose-100 text-rose-800 border-rose-200'
+                                }`}>
+                                  {status === 'APPROVED' ? 'Aprovado' : 'Reprovado'}
+                                </span>
+                              </td>
+                              <td className="px-3 py-2 text-[12px] text-slate-700">{String(reviewedBy)}</td>
+                              <td className="px-3 py-2 text-[12px] text-slate-600">{formatDate(reviewedAt)}</td>
+                              <td className="px-3 py-2 text-[12px] text-slate-700">{reason}</td>
+                              <td className="px-3 py-2">
+                                {status === 'APPROVED' ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => reviewKycDocument(doc.motoboyId, doc.id, 'reject')}
+                                    className="px-2.5 py-1 rounded-lg bg-rose-600 text-white text-[11px] font-extrabold"
+                                  >
+                                    Reprovar
+                                  </button>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    onClick={() => reviewKycDocument(doc.motoboyId, doc.id, 'approve')}
+                                    className="px-2.5 py-1 rounded-lg bg-emerald-600 text-white text-[11px] font-extrabold"
+                                  >
+                                    Aprovar
+                                  </button>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
 
               {kycQueue.length === 0 ? (
@@ -2428,13 +2542,15 @@ export function SuperAdmin() {
                       <th className="text-left px-3 py-2">Revisão</th>
                       <th className="text-left px-3 py-2">Face Worker</th>
                       <th className="text-left px-3 py-2">Arquivo</th>
+                      <th className="text-left px-3 py-2">Ação</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredKycHistoryDocs.map((doc: any) => {
                       const review = doc?.metadata?.review || {};
                       const face = doc?.metadata?.face || {};
-                      const reviewedByPlatform = review?.reviewedByPlatformAdminId || '-';
+                      const reviewedByPlatform =
+                        review?.reviewedByPlatformAdminUsername || review?.reviewedByPlatformAdminId || '-';
                       const reviewedByUser = review?.reviewedByUserId || '-';
                       const faceLabel = String(face?.scoreLabel || 'indisponivel').toLowerCase();
                       const statusText = String(doc?.status || '-').toUpperCase();
@@ -2456,8 +2572,8 @@ export function SuperAdmin() {
                           <td className="px-3 py-2 text-[12px] text-slate-700">
                             <div>Escopo: <span className="font-semibold">{String(review?.scope || '-')}</span></div>
                             <div>Motivo: <span className="font-semibold">{String(review?.reason || '-')}</span></div>
-                            <div>By platform: <span className="font-semibold">{String(reviewedByPlatform)}</span></div>
-                            <div>By user: <span className="font-semibold">{String(reviewedByUser)}</span></div>
+                            <div>Revisor plataforma: <span className="font-semibold">{String(reviewedByPlatform)}</span></div>
+                            <div>Revisor usuário: <span className="font-semibold">{String(reviewedByUser)}</span></div>
                           </td>
                           <td className="px-3 py-2 text-[12px] text-slate-700">
                             <div>Status: <span className="font-semibold">{faceStatusLabel(String(face?.status || '-'))}</span></div>
@@ -2479,6 +2595,25 @@ export function SuperAdmin() {
                             >
                               Abrir
                             </a>
+                          </td>
+                          <td className="px-3 py-2">
+                            {statusText === 'APPROVED' ? (
+                              <button
+                                type="button"
+                                onClick={() => reviewKycDocument(kycHistoryMotoboy?.id, doc.id, 'reject')}
+                                className="px-2.5 py-1 rounded-lg bg-rose-600 text-white text-[11px] font-extrabold"
+                              >
+                                Reprovar
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => reviewKycDocument(kycHistoryMotoboy?.id, doc.id, 'approve')}
+                                className="px-2.5 py-1 rounded-lg bg-emerald-600 text-white text-[11px] font-extrabold"
+                              >
+                                Aprovar
+                              </button>
+                            )}
                           </td>
                         </tr>
                       );

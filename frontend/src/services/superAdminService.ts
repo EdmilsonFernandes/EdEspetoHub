@@ -108,6 +108,13 @@ export const superAdminService = {
     return handleResponse(response);
   },
 
+  async fetchMotoboyKycReviews(token: string, limit = 30) {
+    const response = await fetch(buildUrl(`/admin/motoboys/kyc/reviews?limit=${limit}`), {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return handleResponse(response);
+  },
+
   async fetchMotoboyDocuments(token: string, motoboyId: string) {
     const response = await fetch(buildUrl(`/admin/motoboys/${motoboyId}/documents`), {
       headers: { Authorization: `Bearer ${token}` },
