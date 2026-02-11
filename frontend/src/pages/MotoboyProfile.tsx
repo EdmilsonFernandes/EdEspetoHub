@@ -8,6 +8,20 @@ import { CameraCaptureModal } from '../components/Motoboy/CameraCaptureModal';
 import { DocPreviewModal } from '../components/Motoboy/DocPreviewModal';
 import { formatMotoboyAccountStatus } from '../utils/motoboyStatus';
 
+const faceReasonLabel = (reason?: string | null) => {
+  const code = String(reason || '').trim().toLowerCase();
+  if (!code) return null;
+  if (code === 'no_face_selfie') return 'Nao foi possivel detectar seu rosto na selfie.';
+  if (code === 'multi_face_selfie') return 'Detectamos mais de um rosto na selfie. Tire a foto sozinho.';
+  if (code === 'no_face_doc') return 'Nao foi possivel detectar o rosto na CNH. Aproxime o documento e evite reflexo.';
+  if (code === 'low_match') return 'A selfie nao conferiu com a foto da CNH.';
+  if (code === 'medium_match') return 'Conferencia parcial entre selfie e CNH. Envie uma foto mais nitida.';
+  if (code === 'timeout') return 'A validacao demorou demais. Tente reenviar.';
+  if (code === 'fetch failed' || code === 'fetch_failed') return 'Falha de conexao na validacao. Tente novamente.';
+  if (code === 'rate_limited') return 'Limite de tentativas atingido. Aguarde para tentar de novo.';
+  return 'Nao foi possivel validar automaticamente. Reenvie uma foto mais nitida.';
+};
+
 export function MotoboyProfile() {
   const [docFiles, setDocFiles] = useState<Record<string, File | null>>({});
   const [documents, setDocuments] = useState<any[]>([]);
@@ -1032,7 +1046,11 @@ export function MotoboyProfile() {
               </div>
             ) : null;
 
-            const rejectedReason = isRejected ? String(current?.metadata?.review?.reason || '') || null : null;
+            const rejectedReason = isRejected
+              ? String(current?.metadata?.review?.reason || '').trim() ||
+                faceReasonLabel(current?.metadata?.face?.reason) ||
+                'Documento recusado. Reenvie uma foto mais nítida.'
+              : null;
 
 	            return (
               <DocCard
