@@ -132,7 +132,7 @@
   .motoboy-screen {
     box-sizing: border-box;
     width: 100%;
-    max-width: 36rem; /* Tailwind max-w-xl */
+    max-width: 36rem; /* mobile-first app width */
     margin-left: auto;
     margin-right: auto;
     padding-left: 1rem;
@@ -141,6 +141,12 @@
     padding-bottom: 1.5rem;
     min-width: 0;
     overflow-x: clip;
+  }
+
+  @media (min-width: 1024px) {
+    .motoboy-screen {
+      max-width: 72rem; /* desktop browser comfort width */
+    }
   }
 
   .motoboy-nav {

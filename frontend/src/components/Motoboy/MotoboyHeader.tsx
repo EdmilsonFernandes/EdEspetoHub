@@ -44,7 +44,7 @@ export function MotoboyHeader({ title, subtitle, rightAction }: MotoboyHeaderPro
 
   return (
     <div className="premium-card-glass p-4 sm:p-5 overflow-hidden">
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+      <div className="space-y-3">
         <div className="flex items-center gap-3 min-w-0">
           <div className="relative h-11 w-11 sm:h-12 sm:w-12 rounded-2xl overflow-hidden shadow-[0_18px_34px_-26px_rgba(239,68,68,0.9)] shrink-0">
             <div className="absolute inset-0 bg-[linear-gradient(135deg,#ef4444,#f59e0b)] opacity-20" />
@@ -56,15 +56,16 @@ export function MotoboyHeader({ title, subtitle, rightAction }: MotoboyHeaderPro
             {subtitle && <p className="text-xs sm:text-sm text-slate-600 mt-0.5 break-words">{subtitle}</p>}
           </div>
         </div>
-        <div className="shrink-0 w-full sm:w-auto flex items-center justify-between sm:justify-end gap-2 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">{rightAction}</div>
+
+        <div className="flex flex-wrap items-center justify-between gap-2 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap min-w-0">{rightAction}</div>
           {showSession ? (
-            <div className="flex items-center gap-2">
-              <div className="hidden md:flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 bg-white/70 text-slate-800">
+            <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap sm:ml-auto">
+              <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 bg-white/70 text-slate-800 min-w-0 max-w-full sm:max-w-[280px]">
                 <UserCircle size={18} weight="duotone" className="text-slate-600" />
-                <div className="leading-tight text-left">
-                  <div className="text-[11px] font-extrabold truncate max-w-[180px]">{userName || 'Entregador'}</div>
-                  <div className="text-[10px] text-slate-500 truncate max-w-[180px]">{userEmail}</div>
+                <div className="leading-tight text-left min-w-0">
+                  <div className="text-[11px] font-extrabold truncate">{userName || 'Entregador'}</div>
+                  <div className="text-[10px] text-slate-500 truncate">{userEmail}</div>
                 </div>
               </div>
               <button
@@ -74,7 +75,7 @@ export function MotoboyHeader({ title, subtitle, rightAction }: MotoboyHeaderPro
                 title="Sair"
               >
                 <SignOut size={16} weight="bold" />
-                <span className="hidden md:inline">Sair</span>
+                <span>Sair</span>
               </button>
             </div>
           ) : null}

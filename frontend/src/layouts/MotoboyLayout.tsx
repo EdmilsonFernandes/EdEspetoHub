@@ -88,7 +88,8 @@ export function MotoboyLayout() {
           className="fixed left-0 right-0 z-[69] px-4"
           style={{ bottom: 'calc(env(safe-area-inset-bottom) + 98px)' }}
         >
-          <div className="max-w-xl mx-auto premium-card-glass px-4 py-3 flex items-center justify-between gap-3">
+          <div className="motoboy-screen !max-w-[72rem] !pt-0 !pb-0 !px-0">
+            <div className="premium-card-glass px-4 py-3 flex items-center justify-between gap-3">
             <div className="min-w-0">
               <p className="text-xs font-extrabold text-slate-900">Instalar o app do Entregador</p>
               <p className="text-[11px] text-slate-600 truncate">Mais rápido, sem abas, igual aplicativo.</p>
@@ -122,6 +123,7 @@ export function MotoboyLayout() {
               </button>
             </div>
           </div>
+          </div>
         </div>
       )}
 
@@ -130,7 +132,7 @@ export function MotoboyLayout() {
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
         aria-label="Navegação do entregador"
       >
-        <div className="max-w-xl mx-auto px-4 py-2">
+        <div className="motoboy-screen !max-w-[72rem] !pt-0 !pb-0">
           <div className="motoboy-pill grid grid-cols-4 gap-1 p-1">
             {tabs.map((tab) => {
               const active = tab.match(pathname);
