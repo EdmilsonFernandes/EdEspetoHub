@@ -310,7 +310,29 @@ export function MotoboyProfile() {
 
   const faceBanner = useMemo(() => {
     const selfie = documentsByType.get('SELFIE');
+    const selfieDocStatus = String(selfie?.status || '').toUpperCase();
     const face = selfie?.metadata?.face;
+
+    // Source of truth: document status approved by platform.
+    // If approved, do not keep showing "processing" from stale metadata.
+    if (selfieDocStatus === 'APPROVED') {
+      return {
+        tone: 'emerald' as const,
+        icon: <ShieldCheck size={18} weight="duotone" />,
+        title: 'Verificação concluída',
+        subtitle: 'Sua selfie foi aprovada pela plataforma.',
+      };
+    }
+
+    if (selfieDocStatus === 'REJECTED') {
+      return {
+        tone: 'rose' as const,
+        icon: <ShieldWarning size={18} weight="duotone" />,
+        title: 'Verificação recusada',
+        subtitle: 'Reenvie uma selfie nítida segurando a CNH.',
+      };
+    }
+
     if (!face) return null;
     const status = String(face.status || '').toLowerCase();
     const label = String(face.scoreLabel || '').toLowerCase();
