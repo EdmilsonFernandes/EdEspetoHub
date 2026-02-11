@@ -190,6 +190,9 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                 <button onClick={goToDemoGuide} className="block hover:text-red-400 transition-colors">
                   Ver Demo
                 </button>
+                <a href="/terms" className="block hover:text-red-400 transition-colors">
+                  Termos e Privacidade
+                </a>
                 <button onClick={() => navigate('/admin')} className="block hover:text-red-400 transition-colors">
                   Admin
                 </button>
@@ -202,7 +205,8 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
               </a>
             </div>
           </div>
-          <div className="border-t border-gray-800 pt-8 text-center text-sm text-gray-500">
+          <div className="border-t border-gray-800 pt-8 text-center text-sm text-gray-500 space-y-1">
+            <p>Edmilson Tecnologia da Informacao • CNPJ 44.771.427/0001-69</p>
             © {new Date().getFullYear()} Chama no Espeto. Todos os direitos reservados.
           </div>
         </div>

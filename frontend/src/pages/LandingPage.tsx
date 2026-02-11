@@ -442,14 +442,22 @@ export function LandingPage() {
                 className="cursor-pointer px-7 py-3.5 text-base rounded-2xl bg-gradient-to-r from-red-500 to-red-600 text-white font-extrabold hover:from-red-600 hover:to-red-700 transition-all shadow-lg"
                 aria-label="Criar minha loja agora"
               >
-                Criar minha loja
+                Quero testar grátis
               </button>
+              <a
+                href="https://wa.me/5512997822784"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl border border-emerald-200 bg-emerald-50 text-sm font-semibold text-emerald-800 hover:bg-emerald-100 transition-colors"
+              >
+                Falar no WhatsApp
+              </a>
               <button
                 type="button"
                 onClick={scrollToShowcase}
                 className="cursor-pointer inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 hover:text-red-600 hover:border-red-200 transition-colors"
               >
-                Ver produto em 30s
+                Agendar demonstração
                 <Rocket size={16} weight="duotone" />
               </button>
             </div>
@@ -1150,15 +1158,39 @@ export function LandingPage() {
                 onClick={() => navigate('/create')}
                 className="px-6 py-3 rounded-xl bg-white text-red-600 font-semibold shadow hover:shadow-lg transition"
               >
-                Criar minha loja agora
+                Quero testar grátis
               </button>
+              <a
+                href="https://wa.me/5512997822784"
+                target="_blank"
+                rel="noreferrer"
+                className="px-6 py-3 rounded-xl bg-emerald-500 text-white font-semibold shadow hover:bg-emerald-600 transition text-center"
+              >
+                Falar no WhatsApp
+              </a>
               <button
                 onClick={scrollToShowcase}
                 className="px-6 py-3 rounded-xl border border-white/80 text-white font-semibold hover:bg-white/20 transition"
               >
-                Ver o produto em ação
+                Agendar demonstração
               </button>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-10">
+        <div className="rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-5 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <p className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Credibilidade</p>
+            <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+              Edmilson Tecnologia da Informação • CNPJ 44.771.427/0001-69
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 text-xs">
+            <span className="px-2.5 py-1 rounded-full border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300">Suporte humano</span>
+            <span className="px-2.5 py-1 rounded-full border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300">Termos de uso</span>
+            <span className="px-2.5 py-1 rounded-full border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300">Política de privacidade</span>
           </div>
         </div>
       </section>
