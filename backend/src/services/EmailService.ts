@@ -137,12 +137,12 @@ export class EmailService {
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2026-01-06
    */
-  async sendEmailVerification(email: string, link: string) {
+  async sendEmailVerification(email: string, link: string, token: string) {
     const logoUrl = this.getLogoUrl();
     const subject = await this.getTemplateValue('email_templates.store_verification.subject', 'Verifique seu e-mail - Chama no Espeto');
     const textTemplate = await this.getTemplateValue(
       'email_templates.store_verification.text',
-      'Para ativar sua conta, confirme seu e-mail neste link: {{LINK}}\n\nSe não foi você, ignore este e-mail.'
+      'Para ativar sua conta, confirme seu e-mail neste link: {{LINK}}\n\nCódigo de ativação (copiar e colar): {{TOKEN}}\n\nSe não foi você, ignore este e-mail.'
     );
     const htmlTemplate = await this.getTemplateValue(
       'email_templates.store_verification.html',
@@ -157,14 +157,16 @@ export class EmailService {
           <div style="padding: 24px;">
             <p style="margin: 0 0 16px; color: #475569;">Clique no botao abaixo para ativar sua conta e continuar o pagamento.</p>
             <a href="{{LINK}}" style="display: inline-block; padding: 12px 18px; background: #dc2626; color: #ffffff; text-decoration: none; border-radius: 10px; font-weight: 700;">Confirmar e-mail</a>
+            <p style="margin: 16px 0 4px; color: #0f172a; font-size: 12px; font-weight: 700;">Código de ativação</p>
+            <div style="font-family: monospace; font-size: 12px; line-height: 1.4; color: #0f172a; word-break: break-all; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 10px; padding: 10px;">{{TOKEN}}</div>
             <p style="margin: 16px 0 0; color: #64748b; font-size: 12px;">Se não foi você, ignore este e-mail.</p>
           </div>
         </div>
       </div>
     `
     );
-    const text = this.renderTemplate(textTemplate, { LINK: link });
-    const html = this.renderTemplate(htmlTemplate, { LINK: link, LOGO_URL: logoUrl });
+    const text = this.renderTemplate(textTemplate, { LINK: link, TOKEN: token });
+    const html = this.renderTemplate(htmlTemplate, { LINK: link, TOKEN: token, LOGO_URL: logoUrl });
     await this.send({ to: email, subject, text, html });
   }
 
@@ -174,7 +176,7 @@ export class EmailService {
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2026-01-29
    */
-  async sendMotoboyVerification(email: string, link: string) {
+  async sendMotoboyVerification(email: string, link: string, token: string) {
     const logoUrl = this.getLogoUrl();
     const loginUrl = `${env.appUrl}/motoboy/login`;
     const subject = await this.getTemplateValue(
@@ -183,7 +185,7 @@ export class EmailService {
     );
     const textTemplate = await this.getTemplateValue(
       'email_templates.motoboy_verification.text',
-      'Confirme seu e-mail para ativar sua conta de entregador.\nLink de confirmação: {{LINK}}\nDepois, acesse: {{LOGIN_URL}}'
+      'Confirme seu e-mail para ativar sua conta de entregador.\nLink de confirmação: {{LINK}}\nCódigo de ativação: {{TOKEN}}\nDepois, acesse: {{LOGIN_URL}}'
     );
     const htmlTemplate = await this.getTemplateValue(
       'email_templates.motoboy_verification.html',
@@ -198,14 +200,16 @@ export class EmailService {
           <div style="padding: 24px;">
             <p style="margin: 0 0 16px; color: #475569;">Clique no botão para confirmar seu e-mail e concluir o cadastro.</p>
             <a href="{{LINK}}" style="display: inline-block; padding: 12px 18px; background: #dc2626; color: #ffffff; text-decoration: none; border-radius: 10px; font-weight: 700;">Confirmar e-mail</a>
+            <p style="margin: 16px 0 4px; color: #0f172a; font-size: 12px; font-weight: 700;">Código de ativação</p>
+            <div style="font-family: monospace; font-size: 12px; line-height: 1.4; color: #0f172a; word-break: break-all; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 10px; padding: 10px;">{{TOKEN}}</div>
             <p style="margin: 16px 0 0; color: #64748b; font-size: 12px;">Depois de confirmar, acesse: {{LOGIN_URL}}</p>
           </div>
         </div>
       </div>
     `
     );
-    const text = this.renderTemplate(textTemplate, { LINK: link, LOGIN_URL: loginUrl });
-    const html = this.renderTemplate(htmlTemplate, { LINK: link, LOGIN_URL: loginUrl, LOGO_URL: logoUrl });
+    const text = this.renderTemplate(textTemplate, { LINK: link, TOKEN: token, LOGIN_URL: loginUrl });
+    const html = this.renderTemplate(htmlTemplate, { LINK: link, TOKEN: token, LOGIN_URL: loginUrl, LOGO_URL: logoUrl });
     await this.send({ to: email, subject, text, html });
   }
 

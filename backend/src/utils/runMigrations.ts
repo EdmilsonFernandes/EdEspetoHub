@@ -235,6 +235,33 @@ export async function runMigrations() {
     CREATE INDEX IF NOT EXISTS idx_email_verifications_token ON email_verifications(token_hash);
   `);
   await AppDataSource.query(`
+    ALTER TABLE IF EXISTS email_verifications
+    ADD COLUMN IF NOT EXISTS request_ip TEXT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS email_verifications
+    ADD COLUMN IF NOT EXISTS resend_count INT NOT NULL DEFAULT 1;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS email_verifications
+    ADD COLUMN IF NOT EXISTS last_sent_at TIMESTAMPTZ;
+  `);
+  await AppDataSource.query(`
+    UPDATE email_verifications
+    SET last_sent_at = COALESCE(last_sent_at, created_at),
+        resend_count = COALESCE(resend_count, 1)
+    WHERE last_sent_at IS NULL OR resend_count IS NULL;
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_email_verifications_user_created
+    ON email_verifications(user_id, created_at DESC);
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_email_verifications_ip_created
+    ON email_verifications(request_ip, created_at DESC)
+    WHERE request_ip IS NOT NULL;
+  `);
+  await AppDataSource.query(`
     ALTER TABLE IF EXISTS subscriptions
     ADD COLUMN IF NOT EXISTS payment_method TEXT DEFAULT 'PIX';
   `);

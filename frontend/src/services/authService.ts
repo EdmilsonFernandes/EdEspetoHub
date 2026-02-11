@@ -28,10 +28,8 @@ export const authService = {
         });
         return response;
     },
-    async verifyEmail(token: string) {
-        const response = await apiClient.post("/auth/verify-email", {
-            token,
-        });
+    async verifyEmail(payload: { token: string; email?: string }) {
+        const response = await apiClient.post("/auth/verify-email", payload);
         return response;
     },
     async registerMotoboy(payload: any) {

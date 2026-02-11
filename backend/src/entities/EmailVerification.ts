@@ -38,6 +38,15 @@ export class EmailVerification {
   @Column({ name: 'used_at', type: 'timestamptz', nullable: true })
   usedAt?: Date | null;
 
+  @Column({ name: 'request_ip', type: 'text', nullable: true })
+  requestIp?: string | null;
+
+  @Column({ name: 'resend_count', type: 'int', default: 1 })
+  resendCount!: number;
+
+  @Column({ name: 'last_sent_at', type: 'timestamptz', nullable: true })
+  lastSentAt?: Date | null;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 }

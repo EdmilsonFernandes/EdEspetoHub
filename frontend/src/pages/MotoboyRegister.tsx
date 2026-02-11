@@ -94,7 +94,10 @@ export function MotoboyRegister() {
         lgpdAccepted: form.lgpdAccepted,
       });
       showToast('Cadastro criado. Verifique seu e-mail.', 'success');
-      navigate('/motoboy/login');
+      if (form.email) {
+        localStorage.setItem('signupEmail', form.email.trim().toLowerCase());
+      }
+      navigate('/verify-email', { state: { email: form.email.trim().toLowerCase() } });
     } catch (error: any) {
       if (error?.code === 'AUTH-015') {
         showToast('Esse e-mail já é dono de loja. Use outro para o entregador.', 'error');

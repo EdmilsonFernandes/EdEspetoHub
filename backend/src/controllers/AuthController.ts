@@ -43,7 +43,7 @@ export class AuthController
         storeName: req.body?.storeName || req.body?.store?.name,
         planId: req.body?.planId,
       });
-      const result = await authService.register(req.body);
+      const result = await authService.register(req.body, { ipAddress: req.ip });
       log.info('Register success', { userId: result.user?.id, storeId: result.store?.id });
       return res.status(201).json(result);
     } catch (error: any)
@@ -192,11 +192,12 @@ export class AuthController
    */
   static async verifyEmail(req: Request, res: Response)
   {
-    const { token } = req.body || {};
+    const token = String(req.body?.token || req.query?.token || '');
+    const email = String(req.body?.email || req.query?.email || '').trim();
     try
     {
       log.info('Verify email request');
-      const result = await authService.verifyEmail(token);
+      const result = await authService.verifyEmail({ token, email });
       log.info('Verify email success', { redirectUrl: result.redirectUrl });
       const { code, ...data } = result;
       return respondWithSuccess(req, res, code, data);
@@ -222,7 +223,7 @@ export class AuthController
     try
     {
       log.info('Resend verification request', { email });
-      const result = await authService.resendVerificationEmail(email);
+      const result = await authService.resendVerificationEmail(email, { ipAddress: req.ip });
       log.info('Resend verification dispatched', { email });
       const { code, ...data } = result;
       return respondWithSuccess(req, res, code, data);

@@ -10,6 +10,9 @@ export function MotoboyLogin() {
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [verifyPrompt, setVerifyPrompt] = useState<{ email?: string; emailMasked?: string } | null>(null);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
   const { setAuth } = useAuth();
   const navigate = useNavigate();
 
@@ -31,6 +34,7 @@ export function MotoboyLogin() {
     event.preventDefault();
     if (!formValid || loading) return;
     setError('');
+    setVerifyPrompt(null);
     setLoading(true);
     try {
       const session = await authService.login(form.email, form.password);
@@ -44,9 +48,41 @@ export function MotoboyLogin() {
       setAuth(sessionData);
       navigate('/motoboy/home');
     } catch (err: any) {
+      if (err?.code === 'AUTH-005') {
+        const targetEmail = err?.details?.email || form.email;
+        if (targetEmail) {
+          localStorage.setItem('signupEmail', String(targetEmail).trim().toLowerCase());
+        }
+        setVerifyPrompt({
+          email: targetEmail,
+          emailMasked: err?.details?.emailMasked,
+        });
+      }
       setError(err?.message || 'Não foi possível entrar agora.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = window.setTimeout(() => setResendCooldown((prev) => Math.max(prev - 1, 0)), 1000);
+    return () => window.clearTimeout(timer);
+  }, [resendCooldown]);
+
+  const handleResendVerification = async () => {
+    const email = String(verifyPrompt?.email || '').trim().toLowerCase();
+    if (!email || resendLoading || resendCooldown > 0) return;
+    setResendLoading(true);
+    setError('');
+    try {
+      const result = await authService.resendVerification(email);
+      setResendCooldown(Number(result?.cooldownSec || 60));
+      setError(result?.message || 'Se o e-mail existir, enviaremos instruções.');
+    } catch (err: any) {
+      setError(err?.message || 'Não foi possível reenviar agora.');
+    } finally {
+      setResendLoading(false);
     }
   };
 
@@ -72,6 +108,34 @@ export function MotoboyLogin() {
           {error && (
             <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 font-semibold">
               {error}
+            </div>
+          )}
+
+          {verifyPrompt && (
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 space-y-3">
+              <p className="font-semibold">Sua conta ainda não foi ativada.</p>
+              <p>
+                {verifyPrompt.emailMasked
+                  ? `Ative o e-mail ${verifyPrompt.emailMasked} para entrar.`
+                  : 'Ative seu e-mail para entrar.'}
+              </p>
+              <div className="flex flex-col gap-2">
+                <button
+                  type="button"
+                  onClick={handleResendVerification}
+                  disabled={resendLoading || resendCooldown > 0 || !verifyPrompt.email}
+                  className="w-full rounded-xl bg-amber-600 text-white px-4 py-2 text-xs font-bold disabled:opacity-60"
+                >
+                  {resendLoading ? 'Reenviando...' : resendCooldown > 0 ? `Reenviar em ${resendCooldown}s` : 'Reenviar código de ativação'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate('/verify-email', { state: { email: verifyPrompt.email } })}
+                  className="w-full rounded-xl border border-amber-300 bg-white px-4 py-2 text-xs font-bold text-amber-800"
+                >
+                  Já tenho o código
+                </button>
+              </div>
             </div>
           )}
 

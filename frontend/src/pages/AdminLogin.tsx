@@ -18,11 +18,15 @@ export function AdminLogin() {
   const [pendingPayment, setPendingPayment] = useState(null);
   const [branding] = useState(getPersistedBranding());
   const [showPassword, setShowPassword] = useState(false);
+  const [verifyPrompt, setVerifyPrompt] = useState<{ email?: string; emailMasked?: string } | null>(null);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
 
   const handleLogin = async event => {
     event?.preventDefault();
     setLoginError('');
     setPendingPayment(null);
+    setVerifyPrompt(null);
 
     try {
       const session = await authService.adminLogin(loginForm.slug, loginForm.password);
@@ -53,7 +57,39 @@ export function AdminLogin() {
           paymentLink: error?.details?.paymentLink,
         });
       }
+      if (error?.code === 'AUTH-005') {
+        const targetEmail = error?.details?.email;
+        if (targetEmail) {
+          localStorage.setItem('signupEmail', String(targetEmail).toLowerCase());
+        }
+        setVerifyPrompt({
+          email: targetEmail,
+          emailMasked: error?.details?.emailMasked,
+        });
+      }
       setLoginError(message);
+    }
+  };
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = window.setTimeout(() => setResendCooldown((prev) => Math.max(prev - 1, 0)), 1000);
+    return () => window.clearTimeout(timer);
+  }, [resendCooldown]);
+
+  const handleResendVerification = async () => {
+    const email = verifyPrompt?.email;
+    if (!email || resendLoading || resendCooldown > 0) return;
+    setResendLoading(true);
+    setLoginError('');
+    try {
+      const response = await authService.resendVerification(email);
+      setResendCooldown(Number(response?.cooldownSec || 60));
+      setLoginError(response?.message || 'Se o e-mail existir, enviaremos instruções.');
+    } catch (error: any) {
+      setLoginError(error?.message || 'Não foi possível reenviar agora.');
+    } finally {
+      setResendLoading(false);
     }
   };
 
@@ -120,6 +156,34 @@ export function AdminLogin() {
                 Acessar pagamento
               </a>
             )}
+          </div>
+        )}
+
+        {verifyPrompt && (
+          <div className="text-sm border border-amber-200 bg-amber-50 text-amber-800 p-4 rounded-xl space-y-3">
+            <p className="font-semibold">Sua conta ainda não foi ativada.</p>
+            <p>
+              {verifyPrompt.emailMasked
+                ? `Ative o e-mail ${verifyPrompt.emailMasked} para entrar no painel.`
+                : 'Ative seu e-mail para entrar no painel.'}
+            </p>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <button
+                type="button"
+                onClick={handleResendVerification}
+                disabled={resendLoading || resendCooldown > 0 || !verifyPrompt.email}
+                className="px-3 py-2 rounded-lg bg-amber-600 text-white font-semibold text-xs hover:bg-amber-700 disabled:opacity-60"
+              >
+                {resendLoading ? 'Reenviando...' : resendCooldown > 0 ? `Reenviar em ${resendCooldown}s` : 'Reenviar código de ativação'}
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate('/verify-email', { state: { email: verifyPrompt.email } })}
+                className="px-3 py-2 rounded-lg border border-amber-300 text-amber-800 font-semibold text-xs bg-white hover:bg-amber-100"
+              >
+                Já tenho o código
+              </button>
+            </div>
           </div>
         )}
 

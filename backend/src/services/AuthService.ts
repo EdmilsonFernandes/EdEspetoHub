@@ -59,6 +59,78 @@ export class AuthService
     return String(value || '').replace(/\D/g, '');
   }
 
+  private maskEmail(email: string) {
+    const [local = '', domain = ''] = String(email || '').split('@');
+    if (!local || !domain) return '';
+    const head = local.slice(0, 2);
+    const maskedLocal = `${head}${'*'.repeat(Math.max(local.length - head.length, 1))}`;
+    return `${maskedLocal}@${domain}`;
+  }
+
+  private getClientIp(ipAddress?: string | null) {
+    const raw = String(ipAddress || '').trim();
+    if (!raw) return null;
+    if (raw.includes(',')) return raw.split(',')[0].trim();
+    return raw;
+  }
+
+  private async isVerificationResendAllowed(userId: string, ipAddress?: string | null) {
+    const cooldownSeconds = 60;
+    const now = Date.now();
+    const oneHourAgo = new Date(now - 60 * 60 * 1000);
+    const cooldownThreshold = new Date(now - cooldownSeconds * 1000);
+    const safeIp = this.getClientIp(ipAddress);
+
+    const recentByUser = await AppDataSource.query(
+      `
+      SELECT created_at
+      FROM email_verifications
+      WHERE user_id = $1
+        AND created_at > $2
+      ORDER BY created_at DESC
+      `,
+      [userId, oneHourAgo]
+    );
+
+    if (Array.isArray(recentByUser) && recentByUser.length >= 5) {
+      return { allowed: false, cooldownSeconds };
+    }
+
+    if (safeIp) {
+      const recentByIp = await AppDataSource.query(
+        `
+        SELECT count(*)::int AS count
+        FROM email_verifications
+        WHERE request_ip = $1
+          AND created_at > $2
+        `,
+        [safeIp, oneHourAgo]
+      );
+      const totalByIp = Number(recentByIp?.[0]?.count || 0);
+      if (totalByIp >= 20) {
+        return { allowed: false, cooldownSeconds };
+      }
+    }
+
+    const cooldownRows = await AppDataSource.query(
+      `
+      SELECT created_at
+      FROM email_verifications
+      WHERE user_id = $1
+        AND created_at > $2
+      ORDER BY created_at DESC
+      LIMIT 1
+      `,
+      [userId, cooldownThreshold]
+    );
+
+    if (Array.isArray(cooldownRows) && cooldownRows.length > 0) {
+      return { allowed: false, cooldownSeconds };
+    }
+
+    return { allowed: true, cooldownSeconds };
+  }
+
   private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
     const digits = this.normalizePhone(phone);
     if (!digits) return;
@@ -122,7 +194,7 @@ export class AuthService
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
    */
-  async register(input: any)
+  async register(input: any, meta?: { ipAddress?: string | null })
   {
     this.log.info('Register start', {
       email: input?.email || input?.user?.email,
@@ -209,7 +281,7 @@ export class AuthService
         return { user };
       });
 
-      await this.sendMotoboyVerificationEmail(result.user);
+      await this.sendMotoboyVerificationEmail(result.user, meta?.ipAddress);
       this.log.info('Register motoboy success', { userId: result.user.id });
 
       const token = jwt.sign(
@@ -228,6 +300,9 @@ export class AuthService
         payment: null,
         token,
         redirectUrl: `/verify-email`,
+        next: 'VERIFY_EMAIL',
+        emailMasked: this.maskEmail(result.user.email),
+        email: result.user.email,
       };
     }
 
@@ -372,7 +447,7 @@ export class AuthService
       return { user, store, subscription };
     });
 
-    await this.sendVerificationEmail(result.user);
+    await this.sendVerificationEmail(result.user, meta?.ipAddress);
     await this.notifySignup(result.user, result.store);
     this.log.info('Register success', { userId: result.user.id, storeId: result.store.id });
 
@@ -395,6 +470,9 @@ export class AuthService
       payment: null,
       token,
       redirectUrl: `/verify-email`,
+      next: 'VERIFY_EMAIL',
+      emailMasked: this.maskEmail(result.user.email),
+      email: result.user.email,
     };
   }
 
@@ -414,7 +492,14 @@ export class AuthService
 
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) throw new AppError('AUTH-004', 401);
-    if (!user.emailVerified) throw new AppError('AUTH-005', 401);
+    if (!user.emailVerified) {
+      throw new AppError('AUTH-005', 401, {
+        next: 'VERIFY_EMAIL',
+        email: user.email,
+        emailMasked: this.maskEmail(user.email),
+        resendCooldownSec: 60,
+      });
+    }
 
     const firstStore = user.stores?.[ 0 ];
     const token = this.generateToken(user.id, firstStore?.id);
@@ -471,7 +556,14 @@ export class AuthService
     const owner = store.owner;
     const valid = await bcrypt.compare(password, owner.password);
     if (!valid) throw new AppError('AUTH-004', 401);
-    if (!owner.emailVerified) throw new AppError('AUTH-005', 401);
+    if (!owner.emailVerified) {
+      throw new AppError('AUTH-005', 401, {
+        next: 'VERIFY_EMAIL',
+        email: owner.email,
+        emailMasked: this.maskEmail(owner.email),
+        resendCooldownSec: 60,
+      });
+    }
     const currentSubscription = await this.subscriptionService.getCurrentByStore(store.id);
     const isActive = this.subscriptionService.isActiveSubscription(currentSubscription);
     if (!isActive) {
@@ -576,24 +668,34 @@ export class AuthService
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
    */
-  async resendVerificationEmail(email: string) {
+  async resendVerificationEmail(email: string, meta?: { ipAddress?: string | null }) {
     const normalizedEmail = email?.trim().toLowerCase();
     if (!normalizedEmail) throw new AppError('AUTH-006', 400);
 
     const user = await this.userRepository.findByEmail(normalizedEmail);
     if (!user) {
-      return { code: 'AUTH-S002' };
+      return { code: 'AUTH-S002', next: 'VERIFY_EMAIL', cooldownSec: 60 };
     }
     if (user.emailVerified) {
-      return { code: 'AUTH-S005' };
+      return { code: 'AUTH-S002', next: 'VERIFY_EMAIL', cooldownSec: 60 };
+    }
+
+    const rate = await this.isVerificationResendAllowed(user.id, meta?.ipAddress);
+    if (!rate.allowed) {
+      return { code: 'AUTH-S002', next: 'VERIFY_EMAIL', cooldownSec: rate.cooldownSeconds };
     }
 
     if (user.userRole === 'MOTOBOY') {
-      await this.sendMotoboyVerificationEmail(user);
+      await this.sendMotoboyVerificationEmail(user, meta?.ipAddress);
     } else {
-      await this.sendVerificationEmail(user);
+      await this.sendVerificationEmail(user, meta?.ipAddress);
     }
-    return { code: 'AUTH-S002' };
+    return {
+      code: 'AUTH-S002',
+      next: 'VERIFY_EMAIL',
+      cooldownSec: 60,
+      emailMasked: this.maskEmail(user.email),
+    };
   }
 
 
@@ -637,14 +739,26 @@ export class AuthService
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
    */
-  async verifyEmail(token: string) {
+  async verifyEmail(input: { token: string; email?: string }) {
+    const token = String(input?.token || '');
+    const normalizedEmail = input?.email?.trim().toLowerCase();
     if (!token) throw new AppError('AUTH-007', 400);
     const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
     const verificationRepo = AppDataSource.getRepository(EmailVerification);
-    let verification = await verificationRepo.findOne({
-      where: { tokenHash },
-      relations: ['user'],
-    });
+    let verification = null as EmailVerification | null;
+    if (normalizedEmail) {
+      verification = await verificationRepo
+        .createQueryBuilder('verification')
+        .leftJoinAndSelect('verification.user', 'user')
+        .where('verification.token_hash = :tokenHash', { tokenHash })
+        .andWhere('LOWER(user.email) = :email', { email: normalizedEmail })
+        .getOne();
+    } else {
+      verification = await verificationRepo.findOne({
+        where: { tokenHash },
+        relations: ['user'],
+      });
+    }
 
     let verifiedUser = verification?.user;
 
@@ -655,6 +769,9 @@ export class AuthService
         const userRepo = AppDataSource.getRepository(User);
         const user = await userRepo.findOne({ where: { id: decoded.sub } });
         if (!user) throw new AppError('AUTH-007', 400);
+        if (normalizedEmail && user.email.toLowerCase() !== normalizedEmail) {
+          throw new AppError('AUTH-007', 400);
+        }
         verifiedUser = user;
       } catch {
         throw new AppError('AUTH-007', 400);
@@ -793,7 +910,7 @@ export class AuthService
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
    */
-  private async sendVerificationEmail(user: User) {
+  private async sendVerificationEmail(user: User, ipAddress?: string | null) {
     const token = jwt.sign(
       {
         sub: user.id,
@@ -806,6 +923,11 @@ export class AuthService
     const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
     const verificationRepo = AppDataSource.getRepository(EmailVerification);
+    const maxCountRows = await AppDataSource.query(
+      `SELECT COALESCE(MAX(resend_count), 0) AS max_count FROM email_verifications WHERE user_id = $1`,
+      [user.id]
+    );
+    const nextResendCount = Number(maxCountRows?.[0]?.max_count || 0) + 1;
 
     await verificationRepo
       .createQueryBuilder()
@@ -819,11 +941,14 @@ export class AuthService
         user,
         tokenHash,
         expiresAt,
+        requestIp: this.getClientIp(ipAddress),
+        resendCount: nextResendCount,
+        lastSentAt: new Date(),
       })
     );
 
     const link = `${env.appUrl}/verify-email?token=${encodeURIComponent(token)}`;
-    await this.emailService.sendEmailVerification(user.email, link);
+    await this.emailService.sendEmailVerification(user.email, link, token);
   }
 
   /**
@@ -832,7 +957,7 @@ export class AuthService
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2026-01-29
    */
-  private async sendMotoboyVerificationEmail(user: User) {
+  private async sendMotoboyVerificationEmail(user: User, ipAddress?: string | null) {
     const token = jwt.sign(
       {
         sub: user.id,
@@ -845,6 +970,11 @@ export class AuthService
     const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
     const verificationRepo = AppDataSource.getRepository(EmailVerification);
+    const maxCountRows = await AppDataSource.query(
+      `SELECT COALESCE(MAX(resend_count), 0) AS max_count FROM email_verifications WHERE user_id = $1`,
+      [user.id]
+    );
+    const nextResendCount = Number(maxCountRows?.[0]?.max_count || 0) + 1;
 
     await verificationRepo
       .createQueryBuilder()
@@ -858,11 +988,14 @@ export class AuthService
         user,
         tokenHash,
         expiresAt,
+        requestIp: this.getClientIp(ipAddress),
+        resendCount: nextResendCount,
+        lastSentAt: new Date(),
       })
     );
 
     const link = `${env.appUrl}/verify-email?token=${encodeURIComponent(token)}`;
-    await this.emailService.sendMotoboyVerification(user.email, link);
+    await this.emailService.sendMotoboyVerification(user.email, link, token);
   }
 
 
