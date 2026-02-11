@@ -332,6 +332,34 @@ export function SuperAdmin() {
     });
   }, [kycHistoryDocs, kycHistoryStatusFilter, kycHistoryFaceFilter]);
 
+  const groupedRecentKycReviews = useMemo(() => {
+    const byMotoboy = new Map<string, any>();
+    for (const doc of kycRecentReviews || []) {
+      const motoboyId = String(doc?.motoboyId || doc?.motoboy?.id || '');
+      if (!motoboyId) continue;
+      const status = String(doc?.status || '').toUpperCase();
+      const reviewedAt = doc?.metadata?.review?.reviewedAt || doc?.reviewedAt || doc?.uploadedAt || null;
+      const reviewedAtMs = reviewedAt ? new Date(reviewedAt).getTime() : 0;
+      const current = byMotoboy.get(motoboyId) || {
+        motoboy: doc?.motoboy || null,
+        docs: [],
+        approvedCount: 0,
+        rejectedCount: 0,
+        latestReviewedAt: reviewedAt,
+        latestReviewedAtMs: reviewedAtMs,
+      };
+      current.docs.push(doc);
+      if (status === 'APPROVED') current.approvedCount += 1;
+      if (status === 'REJECTED') current.rejectedCount += 1;
+      if (reviewedAtMs > current.latestReviewedAtMs) {
+        current.latestReviewedAt = reviewedAt;
+        current.latestReviewedAtMs = reviewedAtMs;
+      }
+      byMotoboy.set(motoboyId, current);
+    }
+    return Array.from(byMotoboy.values()).sort((a, b) => b.latestReviewedAtMs - a.latestReviewedAtMs);
+  }, [kycRecentReviews]);
+
   useEffect(() => {
     if (!token) return;
     loadKycQueue(token);
@@ -2247,76 +2275,63 @@ export function SuperAdmin() {
 
                 {kycRecentReviewsLoading ? (
                   <div className="text-sm text-slate-500">Carregando histórico...</div>
-                ) : kycRecentReviews.length === 0 ? (
+                ) : groupedRecentKycReviews.length === 0 ? (
                   <div className="text-sm text-slate-500">Nenhuma revisão recente registrada.</div>
                 ) : (
-                  <div className="overflow-auto rounded-xl border border-slate-200">
-                    <table className="min-w-full text-sm">
-                      <thead className="bg-slate-50 text-slate-600">
-                        <tr>
-                          <th className="text-left px-3 py-2">Motoboy</th>
-                          <th className="text-left px-3 py-2">Doc</th>
-                          <th className="text-left px-3 py-2">Status</th>
-                          <th className="text-left px-3 py-2">Revisado por</th>
-                          <th className="text-left px-3 py-2">Quando</th>
-                          <th className="text-left px-3 py-2">Motivo</th>
-                          <th className="text-left px-3 py-2">Ação</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {kycRecentReviews.map((doc: any) => {
-                          const status = String(doc?.status || '').toUpperCase();
-                          const review = doc?.metadata?.review || {};
-                          const reviewedBy =
-                            review?.reviewedByPlatformAdminUsername ||
-                            review?.reviewedByUserId ||
-                            review?.reviewedByPlatformAdminId ||
-                            '-';
-                          const reason = String(review?.reason || '').trim() || '-';
-                          const reviewedAt = review?.reviewedAt || doc?.reviewedAt || null;
-                          return (
-                            <tr key={doc.id} className="border-t border-slate-100 align-top">
-                              <td className="px-3 py-2">
-                                <div className="font-semibold text-slate-800">{doc?.motoboy?.user?.fullName || 'Motoboy'}</div>
-                                <div className="text-[11px] text-slate-500">{doc?.motoboy?.user?.email || '-'}</div>
-                              </td>
-                              <td className="px-3 py-2 font-semibold text-slate-700">{String(doc?.docType || '-').toUpperCase()}</td>
-                              <td className="px-3 py-2">
-                                <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold border ${
-                                  status === 'APPROVED'
-                                    ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
-                                    : 'bg-rose-100 text-rose-800 border-rose-200'
-                                }`}>
-                                  {status === 'APPROVED' ? 'Aprovado' : 'Reprovado'}
-                                </span>
-                              </td>
-                              <td className="px-3 py-2 text-[12px] text-slate-700">{String(reviewedBy)}</td>
-                              <td className="px-3 py-2 text-[12px] text-slate-600">{formatDate(reviewedAt)}</td>
-                              <td className="px-3 py-2 text-[12px] text-slate-700">{reason}</td>
-                              <td className="px-3 py-2">
-                                {status === 'APPROVED' ? (
-                                  <button
-                                    type="button"
-                                    onClick={() => reviewKycDocument(doc.motoboyId, doc.id, 'reject')}
-                                    className="px-2.5 py-1 rounded-lg bg-rose-600 text-white text-[11px] font-extrabold"
-                                  >
-                                    Reprovar
-                                  </button>
-                                ) : (
-                                  <button
-                                    type="button"
-                                    onClick={() => reviewKycDocument(doc.motoboyId, doc.id, 'approve')}
-                                    className="px-2.5 py-1 rounded-lg bg-emerald-600 text-white text-[11px] font-extrabold"
-                                  >
-                                    Aprovar
-                                  </button>
-                                )}
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
+                  <div className="space-y-3">
+                    {groupedRecentKycReviews.map((entry: any) => {
+                      const motoboy = entry?.motoboy || {};
+                      const docs = Array.isArray(entry?.docs) ? entry.docs.slice(0, 3) : [];
+                      return (
+                        <div key={String(motoboy?.id || entry.latestReviewedAt || 'motoboy')} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                          <div className="flex flex-wrap items-start justify-between gap-2">
+                            <div>
+                              <div className="text-sm font-black text-slate-900">{motoboy?.user?.fullName || 'Motoboy'}</div>
+                              <div className="text-xs text-slate-500">{motoboy?.user?.email || '-'}</div>
+                              <div className="text-[11px] text-slate-500 mt-1">
+                                Revisões: {entry.docs.length} • Aprovados: {entry.approvedCount} • Reprovados: {entry.rejectedCount}
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold border border-slate-200 bg-white text-slate-700">
+                                Última revisão: {formatDate(entry.latestReviewedAt)}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => openKycHistory(motoboy)}
+                                className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-[11px] font-extrabold text-slate-700"
+                              >
+                                Ver histórico Face/KYC
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="mt-2 grid gap-2 md:grid-cols-3">
+                            {docs.map((doc: any) => {
+                              const status = String(doc?.status || '').toUpperCase();
+                              const face = doc?.metadata?.face || {};
+                              return (
+                                <div key={doc.id} className="rounded-lg border border-slate-200 bg-white p-2">
+                                  <div className="flex items-center justify-between gap-2">
+                                    <span className="text-xs font-bold text-slate-800">{String(doc?.docType || '-').toUpperCase()}</span>
+                                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
+                                      status === 'APPROVED'
+                                        ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
+                                        : 'bg-rose-100 text-rose-800 border-rose-200'
+                                    }`}>
+                                      {status === 'APPROVED' ? 'Aprovado' : 'Reprovado'}
+                                    </span>
+                                  </div>
+                                  <div className="mt-1 text-[11px] text-slate-600">
+                                    Face: {String(face?.scoreLabel || 'indisponivel')} • Score: {faceScoreLabel(face?.faceMatchScore)}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>
