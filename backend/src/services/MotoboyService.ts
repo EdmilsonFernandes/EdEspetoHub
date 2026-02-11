@@ -357,6 +357,7 @@ export class MotoboyService {
     document.reviewedAt = new Date();
     document.reviewedByUserId = reviewedByUserId;
     const cleanReason = String(reason || '').trim() || null;
+    const awaitingReupload = String(status || '').toUpperCase() === 'REJECTED';
     document.metadata = {
       ...(document.metadata || {}),
       review: {
@@ -367,6 +368,8 @@ export class MotoboyService {
         reviewedByUserId: reviewedByUserId,
         reviewedByPlatformAdminId: reviewerId || null,
         scope: 'PLATFORM',
+        awaitingReupload,
+        requiredAction: awaitingReupload ? 'Reenviar documento com foto mais nitida' : null,
       },
     };
     await repo.save(document);

@@ -1051,6 +1051,15 @@ export function MotoboyProfile() {
                 faceReasonLabel(current?.metadata?.face?.reason) ||
                 'Documento recusado. Reenvie uma foto mais nítida.'
               : null;
+            const awaitingReuploadByPlatform = isRejected && Boolean(current?.metadata?.review?.awaitingReupload);
+            const rejectedWaitBanner = awaitingReuploadByPlatform ? (
+              <div className="rounded-2xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-900">
+                <div className="font-extrabold">Aguardando novo envio</div>
+                <div className="mt-0.5 text-rose-800">
+                  Este documento foi recusado pela plataforma. Envie uma nova foto nítida para continuar.
+                </div>
+              </div>
+            ) : null;
 
 	            return (
               <DocCard
@@ -1074,6 +1083,7 @@ export function MotoboyProfile() {
                 banner={
                   blockedSelfieBanner ||
                   storeReuploadBanner ||
+                  rejectedWaitBanner ||
                   lockedBanner ||
                   null
                 }

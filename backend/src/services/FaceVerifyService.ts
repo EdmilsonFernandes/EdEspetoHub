@@ -56,6 +56,10 @@ export class FaceVerifyService {
       ? Number(process.env.FACE_VERIFY_COOLDOWN_HOURS)
       : 24;
   private rejectApproved = process.env.FACE_VERIFY_REJECT_APPROVED === 'true';
+  private rejectAfterConsecutive =
+    process.env.FACE_VERIFY_REJECT_AFTER_CONSECUTIVE && Number(process.env.FACE_VERIFY_REJECT_AFTER_CONSECUTIVE) > 0
+      ? Number(process.env.FACE_VERIFY_REJECT_AFTER_CONSECUTIVE)
+      : 2;
   private scoreHigh =
     process.env.FACE_VERIFY_SCORE_HIGH && Number(process.env.FACE_VERIFY_SCORE_HIGH) > 0
       ? Number(process.env.FACE_VERIFY_SCORE_HIGH)
@@ -253,29 +257,47 @@ export class FaceVerifyService {
       const isApprovedDoc = String(selfie.status || '').toUpperCase() === 'APPROVED';
       let autoRejected = false;
       let autoDecision: 'keep' | 'rejected' | 'manual' = 'keep';
+      const previousRejectableStreak = Number(selfie?.metadata?.face?.rejectableStreak || 0);
+      let nextRejectableStreak = 0;
+      let rejectCandidate = false;
+      let rejectCandidateReason: string | null = null;
 
       const canAutoReject = !isApprovedDoc || this.rejectApproved;
       if (canAutoReject) {
         if (selfieFaceCount !== 1) {
-          autoRejected = true;
-          autoDecision = 'rejected';
-          reason = reason || 'multi_face_selfie';
+          rejectCandidate = true;
+          rejectCandidateReason = 'multi_face_selfie';
+          reason = reason || rejectCandidateReason;
         } else if (!faceDetectedDoc || docFaceCount === 0) {
           if (this.strict) {
-            autoRejected = true;
-            autoDecision = 'rejected';
-            reason = reason || 'no_face_doc';
+            rejectCandidate = true;
+            rejectCandidateReason = 'no_face_doc';
+            reason = reason || rejectCandidateReason;
           } else {
             autoDecision = 'manual';
           }
         } else if (typeof faceMatchScore === 'number' && Number.isFinite(faceMatchScore) && faceMatchScore < this.scoreMedium) {
-          autoRejected = true;
-          autoDecision = 'rejected';
-          reason = reason || 'low_match';
+          rejectCandidate = true;
+          rejectCandidateReason = 'low_match';
+          reason = reason || rejectCandidateReason;
         } else if (typeof faceMatchScore === 'number' && Number.isFinite(faceMatchScore) && faceMatchScore < this.scoreHigh) {
           autoDecision = 'manual';
           status = 'manual_required';
           reason = reason || 'medium_match';
+        }
+
+        if (rejectCandidate) {
+          nextRejectableStreak = previousRejectableStreak + 1;
+          if (nextRejectableStreak >= this.rejectAfterConsecutive) {
+            autoRejected = true;
+            autoDecision = 'rejected';
+          } else {
+            // First suspicious attempt becomes manual review instead of hard reject.
+            autoDecision = 'manual';
+            status = 'manual_required';
+          }
+        } else {
+          nextRejectableStreak = 0;
         }
       } else {
         if (
@@ -303,6 +325,8 @@ export class FaceVerifyService {
         reason,
         autoDecision,
         autoRejected,
+        rejectableStreak: nextRejectableStreak,
+        rejectAfterConsecutive: this.rejectAfterConsecutive,
         attemptWindowCount: cooldown.attempts + 1,
         provider: json?.provider || 'insightface',
         providerVersion: json?.providerVersion || null,
