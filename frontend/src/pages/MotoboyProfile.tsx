@@ -624,7 +624,7 @@ export function MotoboyProfile() {
         : 'from-slate-50 via-white to-white border-slate-200/60';
     const eyebrowCls = tone === 'emerald' ? 'text-emerald-700' : tone === 'amber' ? 'text-amber-700' : 'text-slate-600';
     return (
-      <div className={`rounded-2xl border bg-gradient-to-r ${bar} px-3 py-2 flex items-start justify-between gap-3`}>
+      <div className={`rounded-2xl border bg-gradient-to-r ${bar} px-3 py-2 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-3 overflow-hidden`}>
         <div className="min-w-0">
           <div className={`text-[10px] uppercase tracking-[0.28em] font-extrabold flex items-center gap-2 ${eyebrowCls}`}>
             <span className="opacity-90">{icon}</span>
@@ -632,7 +632,7 @@ export function MotoboyProfile() {
           </div>
           <div className="text-sm font-black text-slate-900">{title}</div>
         </div>
-        {right ? <div className="shrink-0">{right}</div> : null}
+        {right ? <div className="w-full sm:w-auto sm:shrink-0">{right}</div> : null}
       </div>
     );
   };
@@ -763,7 +763,7 @@ export function MotoboyProfile() {
   };
 
   return (
-    <div className="min-h-screen motoboy-screen space-y-4 overflow-x-hidden">
+    <div className="min-h-screen motoboy-screen space-y-4 overflow-x-hidden no-x-scroll">
       <MotoboyHeader title="Perfil" subtitle="Documentos, vínculo e dados do entregador." />
 
       <DocPreviewModal

@@ -26,7 +26,7 @@ export function StatusBadge({ status }: { status?: string }) {
   return (
     <span
       className={[
-        'inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-[11px] font-semibold border',
+        'status-chip inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-[11px] font-semibold border',
         'min-w-0 max-w-full overflow-hidden',
         tone.pill,
       ].join(' ')}

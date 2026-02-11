@@ -39,9 +39,11 @@ export function OrderCard({ order, compact, actions }: Props) {
   const storeAccent = String(order?.store?.settings?.primaryColor || order?.store?.settings?.primary_color || '').trim();
   const accentColor = storeAccent || 'var(--color-primary)';
   const storeLabel = storeName || (storeSlug ? `/${storeSlug}` : 'Loja');
+  const paymentMethod = String(order?.paymentMethod || order?.payment_method || '').toLowerCase();
+  const isCashPayment = paymentMethod === 'dinheiro' || paymentMethod === 'cash';
 
   return (
-    <div className="premium-card p-4 sm:p-5 space-y-4 relative overflow-hidden w-full min-w-0">
+    <div className="premium-card p-4 sm:p-5 space-y-4 relative overflow-hidden w-full min-w-0 no-x-scroll">
       <div
         className="absolute left-0 top-0 bottom-0 w-1.5"
         style={{
@@ -81,13 +83,13 @@ export function OrderCard({ order, compact, actions }: Props) {
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <p className="text-xs text-slate-500">Cliente</p>
-              <p className="text-base font-bold text-slate-900 break-words">{customerName}</p>
-              {phone && <p className="text-xs text-slate-600 mt-1">{phone}</p>}
-              {compact && compactItemsLabel && (
-                <p className="text-xs text-slate-600 mt-2 break-words">{compactItemsLabel}</p>
-              )}
-              {compact && (
-                <div className="mt-2 space-y-1">
+            <p className="text-base font-bold text-slate-900 break-words">{customerName}</p>
+            {phone && <p className="text-xs text-slate-600 mt-1">{phone}</p>}
+            {compact && compactItemsLabel && (
+              <p className="text-xs text-slate-600 mt-2 break-words">{compactItemsLabel}</p>
+            )}
+            {compact && (
+              <div className="mt-2 space-y-1">
                 <p className="text-[11px] text-slate-600 break-words">
                   <span className="font-semibold text-slate-700">Loja:</span> {storeName || storeSlug || 'Loja'}
                 </p>
@@ -105,9 +107,7 @@ export function OrderCard({ order, compact, actions }: Props) {
                 Frete: {formatCurrency(Number.isFinite(Number(deliveryFee)) ? Number(deliveryFee) : 0)}
               </p>
             )}
-            {(String(order?.paymentMethod || order?.payment_method || '').toLowerCase() === 'dinheiro' ||
-              String(order?.paymentMethod || order?.payment_method || '').toLowerCase() === 'cash') &&
-            cashTendered !== null ? (
+            {isCashPayment && cashTendered !== null ? (
               <div className="mt-1 space-y-0.5">
                 <p className="text-[11px] text-emerald-700 font-semibold">
                   Cliente paga com: {formatCurrency(cashTendered)}
@@ -166,14 +166,14 @@ export function OrderCard({ order, compact, actions }: Props) {
                         {item?.cookingPoint && (
                           <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800 border border-amber-200">
                             {item.cookingPoint}
-                      </span>
-                    )}
-                    {item?.passSkewer && (
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-fuchsia-100 text-fuchsia-700 border border-fuchsia-200">
-                        passar varinha
-                      </span>
-                    )}
-                  </div>
+                          </span>
+                        )}
+                        {item?.passSkewer && (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-fuchsia-100 text-fuchsia-700 border border-fuchsia-200">
+                            passar varinha
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>

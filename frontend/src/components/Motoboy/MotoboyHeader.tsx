@@ -43,8 +43,8 @@ export function MotoboyHeader({ title, subtitle, rightAction }: MotoboyHeaderPro
   };
 
   return (
-    <div className="premium-card-glass p-4 sm:p-5 overflow-hidden">
-      <div className="space-y-3">
+    <div className="premium-card-glass p-4 sm:p-5 overflow-hidden no-x-scroll">
+      <div className="motoboy-header-grid">
         <div className="flex items-center gap-3 min-w-0">
           <div className="relative h-11 w-11 sm:h-12 sm:w-12 rounded-2xl overflow-hidden shadow-[0_18px_34px_-26px_rgba(239,68,68,0.9)] shrink-0">
             <div className="absolute inset-0 bg-[linear-gradient(135deg,#ef4444,#f59e0b)] opacity-20" />
@@ -52,13 +52,13 @@ export function MotoboyHeader({ title, subtitle, rightAction }: MotoboyHeaderPro
           </div>
           <div className="min-w-0">
             <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.22em] sm:tracking-[0.3em] text-slate-500">Área do Entregador</p>
-            <h1 className="text-lg sm:text-xl font-black text-slate-900 leading-tight break-words">{title}</h1>
+            <h1 className="premium-title text-lg sm:text-xl leading-tight break-words">{title}</h1>
             {subtitle && <p className="text-xs sm:text-sm text-slate-600 mt-0.5 break-words">{subtitle}</p>}
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-2 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap min-w-0">{rightAction}</div>
+        <div className="flex flex-wrap items-center justify-between sm:justify-end gap-2 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap min-w-0 sm:mr-1">{rightAction}</div>
           {showSession ? (
             <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap sm:ml-auto w-full sm:w-auto">
               <div className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 bg-white/70 text-slate-800 min-w-0 max-w-full sm:max-w-[280px]">
@@ -71,7 +71,7 @@ export function MotoboyHeader({ title, subtitle, rightAction }: MotoboyHeaderPro
               <button
                 type="button"
                 onClick={handleLogout}
-                className="btn-press ml-auto sm:ml-0 px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-extrabold text-slate-700 flex items-center gap-2"
+                className="btn-secondary btn-press ml-auto sm:ml-0 px-3 py-2 text-xs font-extrabold flex items-center gap-2"
                 title="Sair"
               >
                 <SignOut size={16} weight="bold" />
