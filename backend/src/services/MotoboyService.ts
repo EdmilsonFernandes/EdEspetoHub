@@ -284,9 +284,14 @@ export class MotoboyService {
     const document = await repo.findOne({ where: { id: documentId, motoboyId } });
     if (!document) throw new AppError('MOTO-023', 404);
 
+    // SUPER_ADMIN token `sub` comes from platform_admins.
+    // `reviewed_by_user_id` FK points to users(id), so only persist when it is a real user id.
+    const reviewerUser = reviewerId ? await this.userRepository.findById(reviewerId).catch(() => null) : null;
+    const reviewedByUserId = reviewerUser?.id || null;
+
     document.status = status;
     document.reviewedAt = new Date();
-    document.reviewedByUserId = reviewerId;
+    document.reviewedByUserId = reviewedByUserId;
     const cleanReason = String(reason || '').trim() || null;
     document.metadata = {
       ...(document.metadata || {}),
@@ -295,7 +300,8 @@ export class MotoboyService {
         status,
         reason: cleanReason,
         reviewedAt: document.reviewedAt.toISOString(),
-        reviewedByUserId: reviewerId,
+        reviewedByUserId: reviewedByUserId,
+        reviewedByPlatformAdminId: reviewerId || null,
         scope: 'PLATFORM',
       },
     };
