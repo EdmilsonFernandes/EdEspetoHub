@@ -126,25 +126,23 @@ export const GrillQueue = () => {
 
   const renderMoneyBreakdown = (order: any, alignRight = false) => {
     const { fee, total, itemsTotal } = calcMoney(order);
-    const chipCls =
-      'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-extrabold whitespace-nowrap';
     return (
       <div
         className={[
-          'flex flex-wrap items-center gap-2 text-[10px] sm:text-[11px] font-semibold',
-          alignRight ? 'justify-end' : 'justify-start',
+          'grid grid-cols-3 gap-2 text-[10px] sm:text-[11px] font-semibold w-full sm:w-auto',
+          alignRight ? 'sm:ml-auto' : '',
         ].join(' ')}
       >
-        <span className={`${chipCls} bg-white/70 text-slate-800 border-slate-200`}>
-          <span className="text-slate-500 font-semibold">Itens</span>
+        <span className="flex flex-col rounded-xl border border-slate-200 bg-white/70 px-2.5 py-1.5">
+          <span className="text-slate-500 font-semibold text-[10px]">Itens</span>
           <span>{formatCurrency(itemsTotal)}</span>
         </span>
-        <span className={`${chipCls} bg-slate-100 text-slate-700 border-slate-200`}>
-          <span className="text-slate-500 font-semibold">Frete</span>
+        <span className="flex flex-col rounded-xl border border-slate-200 bg-slate-100 px-2.5 py-1.5">
+          <span className="text-slate-500 font-semibold text-[10px]">Frete</span>
           <span>{fee > 0 ? formatCurrency(fee) : '—'}</span>
         </span>
-        <span className={`${chipCls} bg-emerald-50 text-emerald-700 border-emerald-200`}>
-          <span className="text-emerald-600 font-semibold">Total</span>
+        <span className="flex flex-col rounded-xl border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-emerald-700">
+          <span className="text-emerald-600 font-semibold text-[10px]">Total</span>
           <span>{formatCurrency(total)}</span>
         </span>
       </div>

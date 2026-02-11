@@ -294,14 +294,16 @@ export function AdminOrders() {
                                 <span className="text-base font-bold text-brand-primary block">
                                   {formatCurrency(total)}
                                 </span>
-                                <div className="mt-1 flex flex-wrap justify-end gap-1.5 text-[11px] text-slate-500 font-semibold">
-                                  <span className="px-2 py-0.5 rounded-full bg-white border border-slate-200">
-                                    Itens: {formatCurrency(itemsTotal)}
-                                  </span>
+                                <div className="mt-1 space-y-0.5 text-[11px] text-slate-500 font-semibold">
+                                  <div className="flex items-center justify-end gap-2">
+                                    <span>Itens</span>
+                                    <span className="text-slate-700">{formatCurrency(itemsTotal)}</span>
+                                  </div>
                                   {fee > 0 && (
-                                    <span className="px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200">
-                                      Frete: {formatCurrency(fee)}
-                                    </span>
+                                    <div className="flex items-center justify-end gap-2">
+                                      <span>Frete</span>
+                                      <span className="text-slate-700">{formatCurrency(fee)}</span>
+                                    </div>
                                   )}
                                 </div>
                               </div>
@@ -378,14 +380,16 @@ export function AdminOrders() {
                           return (
                             <div className="text-right">
                               <span className="text-sm font-bold text-brand-primary block">{formatCurrency(total)}</span>
-                              <div className="mt-1 flex flex-wrap justify-end gap-1.5 text-[11px] text-slate-500 font-semibold">
-                                <span className="px-2 py-0.5 rounded-full bg-white border border-slate-200">
-                                  Itens: {formatCurrency(itemsTotal)}
-                                </span>
+                              <div className="mt-1 space-y-0.5 text-[11px] text-slate-500 font-semibold">
+                                <div className="flex items-center justify-end gap-2">
+                                  <span>Itens</span>
+                                  <span className="text-slate-700">{formatCurrency(itemsTotal)}</span>
+                                </div>
                                 {fee > 0 && (
-                                  <span className="px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200">
-                                    Frete: {formatCurrency(fee)}
-                                  </span>
+                                  <div className="flex items-center justify-end gap-2">
+                                    <span>Frete</span>
+                                    <span className="text-slate-700">{formatCurrency(fee)}</span>
+                                  </div>
                                 )}
                               </div>
                             </div>
@@ -555,14 +559,16 @@ export function AdminOrders() {
 	                            return (
 	                              <div className="flex flex-col items-end gap-1">
 	                                <span className="font-bold">{formatCurrency(total)}</span>
-	                                <div className="flex flex-wrap justify-end gap-1.5 text-[10px] text-slate-500 font-semibold">
-	                                  <span className="px-2 py-0.5 rounded-full bg-white border border-slate-200">
-	                                    Itens: {formatCurrency(itemsTotal)}
-	                                  </span>
+	                                <div className="space-y-0.5 text-[10px] text-slate-500 font-semibold">
+	                                  <div className="flex items-center justify-end gap-2">
+	                                    <span>Itens</span>
+	                                    <span className="text-slate-700">{formatCurrency(itemsTotal)}</span>
+	                                  </div>
 	                                  {fee > 0 && (
-	                                    <span className="px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200">
-	                                      Frete: {formatCurrency(fee)}
-	                                    </span>
+	                                    <div className="flex items-center justify-end gap-2">
+	                                      <span>Frete</span>
+	                                      <span className="text-slate-700">{formatCurrency(fee)}</span>
+	                                    </div>
 	                                  )}
 	                                </div>
 	                              </div>
