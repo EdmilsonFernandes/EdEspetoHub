@@ -49,6 +49,7 @@ export function MotoboyProfile() {
   const [cameraOpen, setCameraOpen] = useState(false);
   const [cameraDocType, setCameraDocType] = useState<string | null>(null);
   const [preview, setPreview] = useState<{ title: string; src: string | null } | null>(null);
+  const [showRequestBlockedModal, setShowRequestBlockedModal] = useState(false);
   // Face verification is an internal signal; keep UI friendly (no raw status/reason for motoboys).
   const [notifyOrders, setNotifyOrders] = useState(() => {
     const raw = localStorage.getItem('motoboy:notify_orders');
@@ -593,6 +594,10 @@ export function MotoboyProfile() {
   };
 
   const toggleStore = (storeId: string) => {
+    if (!canRequestAnyStore) {
+      explainBlockedRequest();
+      return;
+    }
     setSelectedStores((prev) => {
       if (prev.includes(storeId)) return prev.filter((id) => id !== storeId);
       return [ ...prev, storeId ];
@@ -620,13 +625,31 @@ export function MotoboyProfile() {
   const canRequestAnyStore = useMemo(() => {
     if (!hasCompleteProfile) return false;
     if (!hasAllRequiredDocs) return false;
+    if (hasAnyPendingRequiredDocs) return false;
     if (hasAnyRejectedRequiredDocs) return false;
     return true;
-  }, [hasAllRequiredDocs, hasAnyRejectedRequiredDocs, hasCompleteProfile]);
+  }, [hasAllRequiredDocs, hasAnyPendingRequiredDocs, hasAnyRejectedRequiredDocs, hasCompleteProfile]);
+
+  const requestBlockReasons = useMemo(() => {
+    const reasons: string[] = [];
+    if (!hasCompleteProfile) reasons.push('Complete os dados do perfil e veículo.');
+    if (requiredDocStatus.missing.length > 0) reasons.push(`Envie os documentos faltantes: ${requiredDocStatus.missing.join(', ')}.`);
+    if (requiredDocStatus.pending.length > 0) reasons.push(`Aguarde aprovação da plataforma: ${requiredDocStatus.pending.join(', ')}.`);
+    if (requiredDocStatus.rejected.length > 0) reasons.push(`Reenvie os documentos recusados: ${requiredDocStatus.rejected.join(', ')}.`);
+    return reasons;
+  }, [hasCompleteProfile, requiredDocStatus]);
+
+  const explainBlockedRequest = () => {
+    setShowRequestBlockedModal(true);
+    if (requestBlockReasons[0]) showToast(requestBlockReasons[0], 'error');
+  };
 
   const handleRequestSingle = async (storeId: string) => {
     if (!storeId) return;
-    if (!canRequestAnyStore) return;
+    if (!canRequestAnyStore) {
+      explainBlockedRequest();
+      return;
+    }
     setRequesting(true);
     try {
       await motoboyService.createStoreRequests([storeId]);
@@ -716,7 +739,7 @@ export function MotoboyProfile() {
   }) => {
     const toneCls =
       tone === 'emerald'
-        ? 'border-emerald-200 bg-emerald-50/40'
+        ? 'border-emerald-300 bg-emerald-50/90 shadow-[0_22px_52px_-40px_rgba(16,185,129,0.5)]'
         : tone === 'amber'
         ? 'border-amber-200 bg-amber-50/40'
         : tone === 'rose'
@@ -737,6 +760,7 @@ export function MotoboyProfile() {
 
     return (
       <div className={`rounded-3xl border ${toneCls} p-3 sm:p-4 overflow-hidden`}>
+        {status === 'APPROVED' ? <div className="h-1 w-full rounded-full bg-emerald-500/90 mb-3" /> : null}
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex items-start gap-3">
             <div className="h-12 w-12 rounded-2xl border border-slate-200 bg-white grid place-items-center shrink-0">
@@ -808,6 +832,32 @@ export function MotoboyProfile() {
         src={preview?.src || null}
         onClose={() => setPreview(null)}
       />
+
+      {showRequestBlockedModal ? (
+        <div className="fixed inset-0 z-[130] bg-black/60 backdrop-blur-[1px] flex items-center justify-center p-4">
+          <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-5 shadow-2xl">
+            <p className="text-xs uppercase tracking-[0.24em] text-slate-500 font-extrabold">Solicitação bloqueada</p>
+            <h3 className="mt-1 text-lg font-black text-slate-900">Ainda não é possível solicitar vínculo</h3>
+            <p className="mt-1 text-sm text-slate-600">Para enviar solicitação para loja, finalize estes passos:</p>
+            <div className="mt-3 space-y-2">
+              {requestBlockReasons.map((reason, idx) => (
+                <div key={`${idx}-${reason}`} className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900 font-semibold">
+                  {reason}
+                </div>
+              ))}
+            </div>
+            <div className="mt-4 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setShowRequestBlockedModal(false)}
+                className="btn-press rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-extrabold text-slate-800"
+              >
+                Entendi
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       <CameraCaptureModal
         open={cameraOpen}
@@ -989,7 +1039,7 @@ export function MotoboyProfile() {
                   isApproved ? 'border-emerald-200 bg-emerald-50 text-emerald-900' : 'border-amber-200 bg-amber-50 text-amber-900'
                 }`}
               >
-                {isApproved ? 'Aprovado pela plataforma.' : 'Enviado para análise da plataforma.'}
+                {isApproved ? 'Aprovado pela plataforma. Documento pronto para solicitação de lojas.' : 'Enviado para análise da plataforma.'}
               </div>
             ) : null;
 
@@ -1312,8 +1362,8 @@ export function MotoboyProfile() {
           </div>
         )}
         {hasAllRequiredDocs && !hasAnyRejectedRequiredDocs && hasAnyPendingRequiredDocs && (
-          <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700">
-            Seus documentos estão em análise. Você já pode solicitar vínculo; a loja fará a revisão e aprovação.
+          <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+            Seus documentos estão em análise da plataforma. A solicitação de vínculo será liberada após aprovação de todos os documentos obrigatórios.
           </div>
         )}
 
