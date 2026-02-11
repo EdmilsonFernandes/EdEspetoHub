@@ -278,6 +278,70 @@ export class MotoboyService {
     return repo.find({ where: { motoboyId }, order: { uploadedAt: 'DESC' } });
   }
 
+  async getKycAuditSummary(days = 30) {
+    const safeDays = Number.isFinite(days) && days > 0 ? Math.min(Math.floor(days), 365) : 30;
+
+    const rows: Array<{ status: string; face_label: string; face_reason: string; auto_rejected: boolean }> =
+      await AppDataSource.query(
+        `
+        SELECT
+          COALESCE(status, 'PENDING') AS status,
+          COALESCE(metadata->'face'->>'scoreLabel', 'indisponivel') AS face_label,
+          COALESCE(metadata->'face'->>'reason', 'none') AS face_reason,
+          COALESCE((metadata->'face'->>'autoRejected')::boolean, false) AS auto_rejected
+        FROM motoboy_documents
+        WHERE uploaded_at >= NOW() - ($1::int * interval '1 day')
+        `,
+        [safeDays]
+      );
+
+    const totals = {
+      periodDays: safeDays,
+      totalDocs: rows.length,
+      approvedDocs: 0,
+      rejectedDocs: 0,
+      pendingDocs: 0,
+      autoRejectedDocs: 0,
+    };
+
+    const scoreLabels: Record<string, number> = { alto: 0, medio: 0, baixo: 0, indisponivel: 0 };
+    const reasons = new Map<string, number>();
+
+    for (const row of rows) {
+      const status = String(row?.status || '').toUpperCase();
+      if (status === 'APPROVED') totals.approvedDocs += 1;
+      else if (status === 'REJECTED') totals.rejectedDocs += 1;
+      else totals.pendingDocs += 1;
+
+      if (row?.auto_rejected) totals.autoRejectedDocs += 1;
+
+      const label = String(row?.face_label || 'indisponivel').toLowerCase();
+      if (scoreLabels[label] !== undefined) scoreLabels[label] += 1;
+      else scoreLabels.indisponivel += 1;
+
+      const reason = String(row?.face_reason || 'none').toLowerCase();
+      reasons.set(reason, (reasons.get(reason) || 0) + 1);
+    }
+
+    const approvalRate = totals.totalDocs > 0 ? Number(((totals.approvedDocs / totals.totalDocs) * 100).toFixed(2)) : 0;
+    const autoRejectRate = totals.totalDocs > 0 ? Number(((totals.autoRejectedDocs / totals.totalDocs) * 100).toFixed(2)) : 0;
+
+    const topReasons = Array.from(reasons.entries())
+      .map(([reason, count]) => ({ reason, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+
+    return {
+      totals: {
+        ...totals,
+        approvalRate,
+        autoRejectRate,
+      },
+      scoreLabels,
+      topReasons,
+    };
+  }
+
   async platformReviewDocument(motoboyId: string, documentId: string, reviewerId: string, status: string, reason?: string | null) {
     if (!motoboyId || !documentId) throw new AppError('MOTO-023', 404);
     const repo = AppDataSource.getRepository(MotoboyDocument);

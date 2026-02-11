@@ -101,6 +101,13 @@ export const superAdminService = {
     return handleResponse(response);
   },
 
+  async fetchMotoboyKycAudit(token: string, days = 30) {
+    const response = await fetch(buildUrl(`/admin/motoboys/kyc/audit?days=${days}`), {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return handleResponse(response);
+  },
+
   async fetchMotoboyDocuments(token: string, motoboyId: string) {
     const response = await fetch(buildUrl(`/admin/motoboys/${motoboyId}/documents`), {
       headers: { Authorization: `Bearer ${token}` },

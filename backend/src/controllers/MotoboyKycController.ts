@@ -15,6 +15,16 @@ import { MotoboyService } from '../services/MotoboyService';
 const motoboyService = new MotoboyService();
 
 export class MotoboyKycController {
+  static async auditSummary(req: Request, res: Response) {
+    try {
+      const days = Number(req.query?.days || 30);
+      const data = await motoboyService.getKycAuditSummary(days);
+      return res.json(data);
+    } catch (error) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
   /**
    * Lists motoboys that have documents pending platform (SUPER_ADMIN) review.
    */
@@ -74,4 +84,3 @@ export class MotoboyKycController {
     }
   }
 }
-

@@ -134,6 +134,8 @@ export function SuperAdmin() {
   const [kycQueue, setKycQueue] = useState<any[]>([]);
   const [kycLoading, setKycLoading] = useState(false);
   const [kycReason, setKycReason] = useState('');
+  const [kycAuditDays, setKycAuditDays] = useState(30);
+  const [kycAudit, setKycAudit] = useState<any | null>(null);
   const [kycHistoryOpen, setKycHistoryOpen] = useState(false);
   const [kycHistoryLoading, setKycHistoryLoading] = useState(false);
   const [kycHistoryMotoboy, setKycHistoryMotoboy] = useState<any | null>(null);
@@ -207,6 +209,16 @@ export function SuperAdmin() {
     }
   };
 
+  const loadKycAudit = async (authToken: string, days = kycAuditDays) => {
+    try {
+      const data = await superAdminService.fetchMotoboyKycAudit(authToken, days);
+      setKycAudit(data || null);
+    } catch (err: any) {
+      showToast(err?.message || 'Não foi possível carregar a auditoria KYC.', 'error');
+      setKycAudit(null);
+    }
+  };
+
   const reviewKycDocument = async (motoboyId: string, documentId: string, action: 'approve' | 'reject') => {
     if (!token) return;
     try {
@@ -219,6 +231,7 @@ export function SuperAdmin() {
         showToast('Documento rejeitado.', 'success');
       }
       await loadKycQueue(token);
+      await loadKycAudit(token, kycAuditDays);
     } catch (err: any) {
       showToast(err?.message || 'Não foi possível revisar o documento.', 'error');
     }
@@ -250,8 +263,15 @@ export function SuperAdmin() {
   }, [kycHistoryDocs, kycHistoryStatusFilter, kycHistoryFaceFilter]);
 
   useEffect(() => {
-    if (token) loadKycQueue(token);
+    if (!token) return;
+    loadKycQueue(token);
+    loadKycAudit(token, kycAuditDays);
   }, [token]);
+
+  useEffect(() => {
+    if (!token) return;
+    loadKycAudit(token, kycAuditDays);
+  }, [kycAuditDays]);
 
   useEffect(() => {
     if (!token || !autoRefresh) return;
@@ -2014,7 +2034,10 @@ export function SuperAdmin() {
                 {sectionsOpen.kyc ? 'Ocultar' : 'Mostrar'}
               </button>
               <button
-                onClick={() => loadKycQueue(token)}
+                onClick={() => {
+                  loadKycQueue(token);
+                  loadKycAudit(token, kycAuditDays);
+                }}
                 className="px-3 py-2 rounded-lg text-sm font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50 flex items-center gap-1"
                 disabled={!token || kycLoading}
               >
@@ -2043,6 +2066,71 @@ export function SuperAdmin() {
                   <p className="text-[11px] text-slate-500 mt-2">
                     Dica: use um motivo curto e claro para o entregador reenviar.
                   </p>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-slate-200 bg-white p-3 mb-4">
+                <div className="flex flex-wrap items-center gap-2 mb-3">
+                  <p className="text-xs uppercase tracking-[0.2em] text-slate-500 font-semibold">Auditoria KYC</p>
+                  <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                    Período
+                  </span>
+                  <select
+                    value={kycAuditDays}
+                    onChange={(e) => setKycAuditDays(Number(e.target.value || 30))}
+                    className="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-700"
+                  >
+                    <option value={7}>7 dias</option>
+                    <option value={30}>30 dias</option>
+                    <option value={90}>90 dias</option>
+                  </select>
+                </div>
+
+                <div className="grid gap-3 md:grid-cols-4">
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+                    <p className="text-[11px] text-slate-500">Documentos</p>
+                    <p className="text-xl font-black text-slate-900">{Number(kycAudit?.totals?.totalDocs || 0)}</p>
+                  </div>
+                  <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2">
+                    <p className="text-[11px] text-emerald-700">Aprovação</p>
+                    <p className="text-xl font-black text-emerald-800">{Number(kycAudit?.totals?.approvalRate || 0)}%</p>
+                  </div>
+                  <div className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2">
+                    <p className="text-[11px] text-rose-700">Auto-rejeição</p>
+                    <p className="text-xl font-black text-rose-800">{Number(kycAudit?.totals?.autoRejectRate || 0)}%</p>
+                  </div>
+                  <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2">
+                    <p className="text-[11px] text-amber-700">Pendentes</p>
+                    <p className="text-xl font-black text-amber-800">{Number(kycAudit?.totals?.pendingDocs || 0)}</p>
+                  </div>
+                </div>
+
+                <div className="grid gap-3 md:grid-cols-2 mt-3">
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                    <p className="text-[11px] uppercase tracking-[0.18em] text-slate-500 font-semibold mb-2">Distribuição score</p>
+                    <div className="flex flex-wrap gap-2">
+                      {(['alto', 'medio', 'baixo', 'indisponivel'] as const).map((label) => (
+                        <span key={label} className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border ${faceTone(label)}`}>
+                          {label}: {Number(kycAudit?.scoreLabels?.[label] || 0)}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                    <p className="text-[11px] uppercase tracking-[0.18em] text-slate-500 font-semibold mb-2">Motivos mais comuns</p>
+                    {Array.isArray(kycAudit?.topReasons) && kycAudit.topReasons.length > 0 ? (
+                      <div className="space-y-1.5">
+                        {kycAudit.topReasons.slice(0, 5).map((r: any) => (
+                          <div key={String(r.reason)} className="flex items-center justify-between text-[12px]">
+                            <span className="text-slate-700 font-medium">{String(r.reason)}</span>
+                            <span className="text-slate-900 font-extrabold">{Number(r.count || 0)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-xs text-slate-500">Sem motivos no período.</div>
+                    )}
+                  </div>
                 </div>
               </div>
 
