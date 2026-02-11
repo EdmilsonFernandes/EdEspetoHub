@@ -1236,7 +1236,7 @@ export function SuperAdmin() {
         )}
 
         {summary && (
-          <div id="rankings" className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+          <div id="rankings" className="bg-gradient-to-br from-emerald-50 via-white to-white border border-emerald-100 rounded-2xl p-4 shadow-sm">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <TrendUp size={18} weight="duotone" className="text-emerald-600" />
@@ -1255,7 +1255,7 @@ export function SuperAdmin() {
             </div>
             {sectionsOpen.rankings ? (
               <div className="grid lg:grid-cols-2 gap-4 mt-4">
-                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4">
+                <div className="bg-gradient-to-br from-emerald-50 via-white to-white border border-emerald-200 rounded-2xl p-4">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <TrendUp size={18} weight="duotone" className="text-emerald-600" />
@@ -1265,7 +1265,7 @@ export function SuperAdmin() {
                   <div className="space-y-3">
                     {rankings.byRevenue?.length ? (
                       rankings.byRevenue.map((store: any, index: number) => (
-                        <div key={store.id} className="flex items-center justify-between text-sm">
+                        <div key={store.id} className="flex items-center justify-between text-sm rounded-xl border border-emerald-100 bg-white px-3 py-2">
                           <div>
                             <p className="font-semibold text-slate-700">
                               {index + 1}. {store.name}
@@ -1288,17 +1288,17 @@ export function SuperAdmin() {
                     )}
                   </div>
                 </div>
-                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4">
+                <div className="bg-gradient-to-br from-blue-50 via-white to-white border border-blue-200 rounded-2xl p-4">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
-                      <ChartBar size={18} weight="duotone" className="text-slate-600" />
+                      <ChartBar size={18} weight="duotone" className="text-blue-600" />
                       <h3 className="text-lg font-bold text-slate-800">Top lojas por pedidos</h3>
                     </div>
                   </div>
                   <div className="space-y-3">
                     {rankings.byOrders?.length ? (
                       rankings.byOrders.map((store: any, index: number) => (
-                        <div key={store.id} className="flex items-center justify-between text-sm">
+                        <div key={store.id} className="flex items-center justify-between text-sm rounded-xl border border-blue-100 bg-white px-3 py-2">
                           <div>
                             <p className="font-semibold text-slate-700">
                               {index + 1}. {store.name}
@@ -1328,10 +1328,10 @@ export function SuperAdmin() {
           </div>
         )}
 
-        <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+        <div className="bg-gradient-to-br from-blue-50 via-white to-white border border-blue-100 rounded-2xl p-4 shadow-sm">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <ChartBar size={20} weight="duotone" className="text-slate-700" />
+              <ChartBar size={20} weight="duotone" className="text-blue-700" />
               <h2 className="text-lg font-bold text-slate-800">Receita por mês</h2>
             </div>
             <button
@@ -1365,13 +1365,13 @@ export function SuperAdmin() {
           )}
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
-          <p className="text-sm text-slate-500">
+        <div className="bg-gradient-to-r from-amber-50 via-white to-white border border-amber-100 rounded-2xl p-4 shadow-sm">
+          <p className="text-sm text-amber-900">
             Receita paga no periodo selecionado: <span className="font-semibold">{formatCurrency(periodTotal)}</span>
           </p>
         </div>
 
-        <div id="stores" className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm overflow-x-auto">
+        <div id="stores" className="bg-gradient-to-br from-slate-50 via-white to-white border border-slate-200 rounded-2xl p-4 shadow-sm overflow-x-auto">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Storefront size={18} weight="duotone" className="text-slate-700" />
@@ -1426,7 +1426,7 @@ export function SuperAdmin() {
                 </button>
               </div>
               <table className="min-w-full text-sm">
-                <thead className="text-xs uppercase text-slate-400 border-b">
+                <thead className="text-xs uppercase text-slate-500 border-b bg-slate-50">
                   <tr>
                     <th className="py-2 pr-4 text-left">Loja</th>
                     <th className="py-2 pr-4 text-left">Plano</th>
@@ -1442,7 +1442,7 @@ export function SuperAdmin() {
                     <th className="py-2 text-right">Valor</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y">
+                <tbody className="divide-y divide-slate-100">
                   {filteredStores.map((store: any) => {
                     const isVip = Boolean(store.settings?.planExempt);
                     const planName =
@@ -1459,7 +1459,7 @@ export function SuperAdmin() {
                     const topProduct = store.topProduct?.name || '-';
                     const topProductQty = store.topProduct?.quantity || 0;
                     return (
-                      <tr key={store.id}>
+                      <tr key={store.id} className="hover:bg-slate-50/70">
                         <td className="py-3 pr-4">
                           <div className="flex items-center gap-2">
                             <div className="font-semibold text-slate-700">{store.name}</div>
