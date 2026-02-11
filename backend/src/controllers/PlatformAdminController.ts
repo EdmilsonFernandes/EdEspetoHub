@@ -201,7 +201,10 @@ export class PlatformAdminController {
       const summary = enriched.reduce(
         (acc, store) => {
           const subscription = store.subscription;
-          if (subscription?.status === 'ACTIVE') acc.activeSubscriptions += 1;
+          // "Ativa" na visão operacional inclui ACTIVE e TRIAL.
+          if (subscription?.status === 'ACTIVE' || subscription?.status === 'TRIAL') {
+            acc.activeSubscriptions += 1;
+          }
           if (subscription?.status === 'EXPIRING') acc.expiringSubscriptions += 1;
           if (subscription?.status === 'EXPIRED') acc.expiredSubscriptions += 1;
           const planName = subscription?.plan?.name || '';

@@ -570,8 +570,10 @@ export function SuperAdmin() {
       if (store.settings?.planExempt) counts.vip += 1;
       const status = store.subscription?.status || 'PENDING';
       if (status === 'ACTIVE') counts.active += 1;
-      else if (status === 'TRIAL') counts.trial += 1;
-      else if (status === 'EXPIRING') counts.expiring += 1;
+      else if (status === 'TRIAL') {
+        counts.active += 1;
+        counts.trial += 1;
+      } else if (status === 'EXPIRING') counts.expiring += 1;
       else if (status === 'EXPIRED') counts.expired += 1;
       else if (status === 'SUSPENDED') counts.suspended += 1;
       else counts.pending += 1;
@@ -1487,9 +1489,6 @@ export function SuperAdmin() {
                     <th className="py-2 pr-4 text-left">Criada</th>
                     <th className="py-2 pr-4 text-left">Expira</th>
                     <th className="py-2 pr-4 text-left">Dias</th>
-                    <th className="py-2 pr-4 text-left">Pedidos</th>
-                    <th className="py-2 pr-4 text-left">Receita pedidos</th>
-                    <th className="py-2 pr-4 text-left">Mais vendido</th>
                     <th className="py-2 pr-4 text-left">Pagamento</th>
                     <th className="py-2 text-right">Valor</th>
                   </tr>
@@ -1506,10 +1505,6 @@ export function SuperAdmin() {
                     const endDate = store.subscription?.endDate;
                     const remaining = daysUntil(endDate);
                     const paymentStatus = store.latestPayment?.status || '-';
-                    const ordersCount = store.orderMetrics?.totalOrders || 0;
-                    const ordersRevenue = store.orderMetrics?.totalRevenue || 0;
-                    const topProduct = store.topProduct?.name || '-';
-                    const topProductQty = store.topProduct?.quantity || 0;
                     return (
                       <tr key={store.id} className="hover:bg-slate-50/70">
                         <td className="py-3 pr-4">
@@ -1547,14 +1542,6 @@ export function SuperAdmin() {
                         <td className="py-3 pr-4">{formatDate(store.createdAt)}</td>
                         <td className="py-3 pr-4">{formatDate(endDate)}</td>
                         <td className="py-3 pr-4">{remaining}</td>
-                        <td className="py-3 pr-4 font-semibold text-slate-700">{ordersCount}</td>
-                        <td className="py-3 pr-4 text-slate-700">{formatCurrency(ordersRevenue)}</td>
-                        <td className="py-3 pr-4">
-                          <div className="text-slate-700">{topProduct}</div>
-                          {topProductQty ? (
-                            <div className="text-xs text-slate-400">{topProductQty} vendas</div>
-                          ) : null}
-                        </td>
                         <td className="py-3 pr-4">{paymentStatus}</td>
                         <td className="py-3 text-right font-semibold text-brand-primary">
                           {formatCurrency(planPrice)}
