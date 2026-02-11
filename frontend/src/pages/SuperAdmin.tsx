@@ -70,6 +70,14 @@ const statusStyle = (status?: string) => {
   return 'bg-slate-100 text-slate-600';
 };
 
+const faceTone = (label?: string) => {
+  const normalized = String(label || '').toLowerCase();
+  if (normalized === 'alto') return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+  if (normalized === 'medio') return 'bg-amber-100 text-amber-800 border-amber-200';
+  if (normalized === 'baixo') return 'bg-rose-100 text-rose-800 border-rose-200';
+  return 'bg-slate-100 text-slate-700 border-slate-200';
+};
+
 export function SuperAdmin() {
   const { showToast } = useToast();
   const [token, setToken] = useState(() => localStorage.getItem(STORAGE_KEY) || '');
@@ -130,6 +138,8 @@ export function SuperAdmin() {
   const [kycHistoryLoading, setKycHistoryLoading] = useState(false);
   const [kycHistoryMotoboy, setKycHistoryMotoboy] = useState<any | null>(null);
   const [kycHistoryDocs, setKycHistoryDocs] = useState<any[]>([]);
+  const [kycHistoryStatusFilter, setKycHistoryStatusFilter] = useState<'all' | 'PENDING' | 'APPROVED' | 'REJECTED'>('all');
+  const [kycHistoryFaceFilter, setKycHistoryFaceFilter] = useState<'all' | 'alto' | 'medio' | 'baixo' | 'indisponivel'>('all');
 
   const loadOverview = async (authToken: string) => {
     setLoading(true);
@@ -229,6 +239,15 @@ export function SuperAdmin() {
       setKycHistoryLoading(false);
     }
   };
+
+  const filteredKycHistoryDocs = useMemo(() => {
+    return (kycHistoryDocs || []).filter((doc: any) => {
+      const statusOk = kycHistoryStatusFilter === 'all' || String(doc?.status || '').toUpperCase() === kycHistoryStatusFilter;
+      const label = String(doc?.metadata?.face?.scoreLabel || 'indisponivel').toLowerCase();
+      const faceOk = kycHistoryFaceFilter === 'all' || label === kycHistoryFaceFilter;
+      return statusOk && faceOk;
+    });
+  }, [kycHistoryDocs, kycHistoryStatusFilter, kycHistoryFaceFilter]);
 
   useEffect(() => {
     if (token) loadKycQueue(token);
@@ -2194,9 +2213,36 @@ export function SuperAdmin() {
             </div>
 
             <div className="overflow-auto max-h-[72vh] rounded-xl border border-slate-200">
+              <div className="p-3 border-b border-slate-200 bg-slate-50 flex flex-wrap items-center gap-2">
+                <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">Filtros</span>
+                <select
+                  value={kycHistoryStatusFilter}
+                  onChange={(e) => setKycHistoryStatusFilter(e.target.value as any)}
+                  className="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-700"
+                >
+                  <option value="all">Status: todos</option>
+                  <option value="PENDING">Status: pendente</option>
+                  <option value="APPROVED">Status: aprovado</option>
+                  <option value="REJECTED">Status: rejeitado</option>
+                </select>
+                <select
+                  value={kycHistoryFaceFilter}
+                  onChange={(e) => setKycHistoryFaceFilter(e.target.value as any)}
+                  className="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-700"
+                >
+                  <option value="all">Face: todos</option>
+                  <option value="alto">Face: alto</option>
+                  <option value="medio">Face: médio</option>
+                  <option value="baixo">Face: baixo</option>
+                  <option value="indisponivel">Face: indisponível</option>
+                </select>
+                <span className="ml-auto px-2.5 py-1 rounded-full text-[11px] font-semibold border border-slate-200 bg-white text-slate-700">
+                  {filteredKycHistoryDocs.length} registro{filteredKycHistoryDocs.length === 1 ? '' : 's'}
+                </span>
+              </div>
               {kycHistoryLoading ? (
                 <div className="p-4 text-sm text-slate-500">Carregando histórico...</div>
-              ) : kycHistoryDocs.length === 0 ? (
+              ) : filteredKycHistoryDocs.length === 0 ? (
                 <div className="p-4 text-sm text-slate-500">Sem histórico para este motoboy.</div>
               ) : (
                 <table className="min-w-full text-sm">
@@ -2211,17 +2257,25 @@ export function SuperAdmin() {
                     </tr>
                   </thead>
                   <tbody>
-                    {kycHistoryDocs.map((doc: any) => {
+                    {filteredKycHistoryDocs.map((doc: any) => {
                       const review = doc?.metadata?.review || {};
                       const face = doc?.metadata?.face || {};
                       const reviewedByPlatform = review?.reviewedByPlatformAdminId || '-';
                       const reviewedByUser = review?.reviewedByUserId || '-';
+                      const faceLabel = String(face?.scoreLabel || 'indisponivel').toLowerCase();
+                      const statusText = String(doc?.status || '-').toUpperCase();
                       return (
                         <tr key={doc.id} className="border-t border-slate-100 align-top">
                           <td className="px-3 py-2 font-semibold text-slate-800">{String(doc?.docType || '-')}</td>
                           <td className="px-3 py-2">
-                            <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-700">
-                              {String(doc?.status || '-')}
+                            <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold border ${
+                              statusText === 'APPROVED'
+                                ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
+                                : statusText === 'REJECTED'
+                                ? 'bg-rose-100 text-rose-800 border-rose-200'
+                                : 'bg-amber-100 text-amber-800 border-amber-200'
+                            }`}>
+                              {statusText}
                             </span>
                           </td>
                           <td className="px-3 py-2 text-slate-600">{formatDate(doc?.uploadedAt)}</td>
@@ -2233,7 +2287,12 @@ export function SuperAdmin() {
                           </td>
                           <td className="px-3 py-2 text-[12px] text-slate-700">
                             <div>Status: <span className="font-semibold">{String(face?.status || '-')}</span></div>
-                            <div>Nível: <span className="font-semibold">{String(face?.scoreLabel || '-')}</span></div>
+                            <div className="flex items-center gap-1.5">
+                              <span>Nível:</span>
+                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${faceTone(faceLabel)}`}>
+                                {faceLabel}
+                              </span>
+                            </div>
                             <div>Score: <span className="font-semibold">{String(face?.faceMatchScore ?? '-')}</span></div>
                             <div>Motivo: <span className="font-semibold">{String(face?.reason || '-')}</span></div>
                           </td>

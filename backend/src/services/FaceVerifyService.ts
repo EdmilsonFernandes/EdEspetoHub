@@ -45,6 +45,7 @@ function labelFromScore(score: number | null): ScoreLabel {
 
 export class FaceVerifyService {
   private enabled = process.env.FACE_VERIFY_ENABLED !== 'false';
+  private strict = process.env.FACE_VERIFY_STRICT !== 'false';
   private workerUrl = process.env.FACE_VERIFY_WORKER_URL || 'http://face-worker:8000';
   private maxAttempts =
     process.env.FACE_VERIFY_MAX_ATTEMPTS && Number(process.env.FACE_VERIFY_MAX_ATTEMPTS) > 0
@@ -100,6 +101,9 @@ export class FaceVerifyService {
     const cnh = await repo.findOne({ where: { motoboyId, docType: 'CNH' } as any, order: { uploadedAt: 'DESC' } });
     if (!selfie || !cnh) return;
 
+    // Do not reopen already reviewed docs.
+    if (String(selfie.status || '').toUpperCase() !== 'PENDING') return;
+
     selfie.metadata = selfie.metadata || {};
 	    selfie.metadata.face = {
 	      ...(selfie.metadata.face || {}),
@@ -131,7 +135,7 @@ export class FaceVerifyService {
           LIMIT 1
         ) c ON true
         WHERE s.doc_type = 'SELFIE'
-          AND s.status IN ('PENDING','REJECTED','APPROVED')
+          AND s.status = 'PENDING'
           AND COALESCE(s.metadata->'face'->>'status','pending') IN ('pending','failed','manual_required')
         ORDER BY s.uploaded_at ASC
         LIMIT $1
@@ -240,9 +244,9 @@ export class FaceVerifyService {
 
       const scoreLabel = labelFromScore(faceMatchScore);
 
-      // Auto decision rules (minimum viable):
+      // Auto decision rules (strict mode):
       // - Selfie must have exactly 1 face; otherwise reject (if not approved already).
-      // - If doc face not detected => manual review.
+      // - If doc face not detected => reject when strict mode is ON; otherwise manual review.
       // - If score is below medium => reject (if not approved already).
       // - Medium score => manual review.
       const isApprovedDoc = String(selfie.status || '').toUpperCase() === 'APPROVED';
@@ -256,7 +260,13 @@ export class FaceVerifyService {
           autoDecision = 'rejected';
           reason = reason || 'multi_face_selfie';
         } else if (!faceDetectedDoc || docFaceCount === 0) {
-          autoDecision = 'manual';
+          if (this.strict) {
+            autoRejected = true;
+            autoDecision = 'rejected';
+            reason = reason || 'no_face_doc';
+          } else {
+            autoDecision = 'manual';
+          }
         } else if (typeof faceMatchScore === 'number' && Number.isFinite(faceMatchScore) && faceMatchScore < this.scoreMedium) {
           autoRejected = true;
           autoDecision = 'rejected';
@@ -281,7 +291,7 @@ export class FaceVerifyService {
       selfie.metadata = selfie.metadata || {};
       selfie.metadata.face = {
         ...faceMetaBase,
-        status,
+        status: autoRejected ? ('done' as FaceStatus) : status,
         checkedAt: new Date().toISOString(),
         faceDetectedSelfie,
         faceDetectedDoc,
