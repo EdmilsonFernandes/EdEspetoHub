@@ -41,6 +41,33 @@ def _largest_face(faces):
         return float(max(0.0, x2 - x1) * max(0.0, y2 - y1))
     return sorted(faces, key=area, reverse=True)[0]
 
+def _face_area(face) -> float:
+    x1, y1, x2, y2 = face.bbox
+    return float(max(0.0, x2 - x1) * max(0.0, y2 - y1))
+
+def _filter_relevant_selfie_faces(faces, image_shape):
+    """
+    Ignore tiny faces in selfie (usually photo printed on the held document).
+    Keep only faces large enough relative to image and to the largest detected face.
+    """
+    if not faces:
+        return []
+    img_h, img_w = image_shape[:2]
+    img_area = float(max(1, img_h * img_w))
+    areas = [_face_area(f) for f in faces]
+    largest = max(areas) if areas else 0.0
+    if largest <= 0:
+        return []
+
+    min_rel_image_area = 0.006  # >=0.6% of image area
+    min_rel_largest = 0.28      # >=28% of largest face area
+    filtered = []
+    for f in faces:
+        a = _face_area(f)
+        if (a / img_area) >= min_rel_image_area and (a / largest) >= min_rel_largest:
+            filtered.append(f)
+    return filtered
+
 
 def _cosine_similarity(a: np.ndarray, b: np.ndarray) -> float:
     a = a.astype(np.float32)
@@ -77,13 +104,15 @@ def verify(req: VerifyRequest):
 
     # InsightFace expects RGB; OpenCV is BGR
     doc_faces = face_app.get(cv2.cvtColor(doc_img, cv2.COLOR_BGR2RGB))
-    selfie_faces = face_app.get(cv2.cvtColor(selfie_img, cv2.COLOR_BGR2RGB))
+    selfie_faces_raw = face_app.get(cv2.cvtColor(selfie_img, cv2.COLOR_BGR2RGB))
+    selfie_faces = _filter_relevant_selfie_faces(selfie_faces_raw, selfie_img.shape)
 
     doc_face = _largest_face(doc_faces)
     selfie_face = _largest_face(selfie_faces)
 
     doc_count = len(doc_faces) if doc_faces is not None else 0
     selfie_count = len(selfie_faces) if selfie_faces is not None else 0
+    selfie_count_raw = len(selfie_faces_raw) if selfie_faces_raw is not None else 0
 
     face_detected_doc = doc_count > 0
     face_detected_selfie = selfie_count > 0
@@ -112,6 +141,7 @@ def verify(req: VerifyRequest):
         "faceDetectedSelfie": bool(face_detected_selfie),
         "faceDetectedDoc": bool(face_detected_doc),
         "selfieFaceCount": int(selfie_count),
+        "selfieFaceCountRaw": int(selfie_count_raw),
         "docFaceCount": int(doc_count),
         "faceMatchScore": score,
         "reason": reason,
