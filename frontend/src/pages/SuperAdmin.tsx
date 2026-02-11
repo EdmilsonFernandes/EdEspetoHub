@@ -1303,7 +1303,7 @@ export function SuperAdmin() {
           </div>
         )}
 
-        {summary && (
+        {summary && activeSection === 'rankings' && (
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
               <div className="flex items-center justify-between mb-2">
