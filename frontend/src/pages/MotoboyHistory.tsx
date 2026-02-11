@@ -60,7 +60,7 @@ export function MotoboyHistory() {
   const totalMonth = orders.reduce((acc, order) => acc + Number(order.deliveryFee || 0), 0);
 
   return (
-    <div className="min-h-screen motoboy-screen space-y-4">
+    <div className="min-h-screen motoboy-screen space-y-4 overflow-x-hidden">
       <MotoboyHeader title="Histórico de entregas" subtitle="Pedidos finalizados recentemente." />
       {blocked && (
         <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">

@@ -126,31 +126,27 @@ export const GrillQueue = () => {
 
   const renderMoneyBreakdown = (order: any, alignRight = false) => {
     const { fee, total, itemsTotal } = calcMoney(order);
+    const chipCls =
+      'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-extrabold whitespace-nowrap';
     return (
       <div
         className={[
-          'grid grid-cols-3 gap-2 text-[10px] sm:text-[11px] font-semibold',
-          alignRight ? 'text-right' : 'text-left',
+          'flex flex-wrap items-center gap-2 text-[10px] sm:text-[11px] font-semibold',
+          alignRight ? 'justify-end' : 'justify-start',
         ].join(' ')}
       >
-        <div className="flex flex-col gap-1">
-          <span className="text-slate-500">Itens</span>
-          <span className="px-2 py-0.5 rounded-full bg-white/70 text-slate-800 border border-slate-200 font-bold w-fit">
-            {formatCurrency(itemsTotal)}
-          </span>
-        </div>
-        <div className="flex flex-col gap-1">
-          <span className="text-slate-500">Frete</span>
-          <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 font-bold w-fit">
-            {fee > 0 ? formatCurrency(fee) : '—'}
-          </span>
-        </div>
-        <div className="flex flex-col gap-1 items-end">
-          <span className="text-slate-500">Total</span>
-          <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] sm:text-xs font-bold w-fit">
-            {formatCurrency(total)}
-          </span>
-        </div>
+        <span className={`${chipCls} bg-white/70 text-slate-800 border-slate-200`}>
+          <span className="text-slate-500 font-semibold">Itens</span>
+          <span>{formatCurrency(itemsTotal)}</span>
+        </span>
+        <span className={`${chipCls} bg-slate-100 text-slate-700 border-slate-200`}>
+          <span className="text-slate-500 font-semibold">Frete</span>
+          <span>{fee > 0 ? formatCurrency(fee) : '—'}</span>
+        </span>
+        <span className={`${chipCls} bg-emerald-50 text-emerald-700 border-emerald-200`}>
+          <span className="text-emerald-600 font-semibold">Total</span>
+          <span>{formatCurrency(total)}</span>
+        </span>
       </div>
     );
   };

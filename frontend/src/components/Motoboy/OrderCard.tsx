@@ -41,7 +41,7 @@ export function OrderCard({ order, compact, actions }: Props) {
   const storeLabel = storeName || (storeSlug ? `/${storeSlug}` : 'Loja');
 
   return (
-    <div className="premium-card p-4 sm:p-5 space-y-4 relative overflow-hidden">
+    <div className="premium-card p-4 sm:p-5 space-y-4 relative overflow-hidden w-full min-w-0">
       <div
         className="absolute left-0 top-0 bottom-0 w-1.5"
         style={{
@@ -66,8 +66,8 @@ export function OrderCard({ order, compact, actions }: Props) {
               <p className="text-[11px] text-slate-400 truncate">Pedido</p>
             </div>
           </div>
-          <div className="mt-1 flex flex-col sm:flex-row sm:items-center gap-2">
-            <p className="text-lg font-extrabold text-slate-900 truncate">#{shortId}</p>
+          <div className="mt-1 flex flex-col sm:flex-row sm:items-center gap-2 min-w-0">
+            <p className="text-lg font-extrabold text-slate-900 break-all">#{shortId}</p>
             <StatusBadge status={order?.status} />
           </div>
           {createdAt && <p className="text-[11px] text-slate-400 mt-1">{formatDateTime(createdAt)}</p>}
@@ -81,17 +81,17 @@ export function OrderCard({ order, compact, actions }: Props) {
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <p className="text-xs text-slate-500">Cliente</p>
-            <p className="text-base font-bold text-slate-900 truncate">{customerName}</p>
-            {phone && <p className="text-xs text-slate-600 mt-1">{phone}</p>}
-            {compact && compactItemsLabel && (
-              <p className="text-xs text-slate-600 mt-2 truncate">{compactItemsLabel}</p>
-            )}
-            {compact && (
-              <div className="mt-2 space-y-1">
-                <p className="text-[11px] text-slate-600 truncate">
+              <p className="text-base font-bold text-slate-900 break-words">{customerName}</p>
+              {phone && <p className="text-xs text-slate-600 mt-1">{phone}</p>}
+              {compact && compactItemsLabel && (
+                <p className="text-xs text-slate-600 mt-2 break-words">{compactItemsLabel}</p>
+              )}
+              {compact && (
+                <div className="mt-2 space-y-1">
+                <p className="text-[11px] text-slate-600 break-words">
                   <span className="font-semibold text-slate-700">Loja:</span> {storeName || storeSlug || 'Loja'}
                 </p>
-                <p className="text-[11px] text-slate-600 truncate">
+                <p className="text-[11px] text-slate-600 break-words">
                   <span className="font-semibold text-slate-700">Entrega:</span> {address}
                 </p>
               </div>

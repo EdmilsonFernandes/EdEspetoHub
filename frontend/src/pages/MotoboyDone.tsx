@@ -60,7 +60,7 @@ export function MotoboyDone() {
   }, []);
 
   return (
-    <div className="min-h-screen motoboy-screen space-y-4">
+    <div className="min-h-screen motoboy-screen space-y-4 overflow-x-hidden">
       <div className="confetti" aria-hidden="true">
         {confetti.map((c) => (
           <span

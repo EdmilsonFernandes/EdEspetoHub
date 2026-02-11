@@ -195,7 +195,7 @@ export function MotoboyAvailable() {
   };
 
   return (
-    <div className="min-h-screen motoboy-screen space-y-4">
+    <div className="min-h-screen motoboy-screen space-y-4 overflow-x-hidden">
       {newBanner && (
         <div
           className="premium-card-glass p-4 motoboy-fade-up"

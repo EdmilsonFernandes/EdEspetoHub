@@ -752,7 +752,7 @@ export function MotoboyProfile() {
   };
 
   return (
-    <div className="min-h-screen motoboy-screen space-y-4">
+    <div className="min-h-screen motoboy-screen space-y-4 overflow-x-hidden">
       <MotoboyHeader title="Perfil" subtitle="Documentos, vínculo e dados do entregador." />
 
       <DocPreviewModal

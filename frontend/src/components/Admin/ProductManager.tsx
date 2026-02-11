@@ -1022,7 +1022,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
             className="absolute inset-0 bg-black/40"
             onClick={handleInlineCancel}
           />
-          <div className="relative w-full max-h-[90vh] overflow-y-auto rounded-t-3xl bg-white p-5 shadow-2xl sm:max-w-2xl sm:rounded-3xl sm:p-6">
+          <div className="relative w-full max-h-[92vh] overflow-y-auto rounded-t-3xl bg-white p-5 pb-24 shadow-2xl sm:max-w-2xl sm:rounded-3xl sm:p-6 sm:pb-24">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Editar produto</p>
@@ -1225,7 +1225,11 @@ export const ProductManager = ({ products, onProductsChange }) => {
                   )}
                 </div>
               </div>
-              <div className="flex gap-3 pt-2">
+              <div
+                className="fixed left-0 right-0 bottom-0 z-10 border-t border-slate-200 bg-white/95 backdrop-blur px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+12px)] sm:absolute sm:rounded-b-3xl"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="mx-auto w-full max-w-2xl flex gap-3">
                 <button
                   type="button"
                   onClick={handleInlineCancel}
@@ -1241,6 +1245,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
                 >
                   Salvar
                 </button>
+                </div>
               </div>
             </div>
           </div>

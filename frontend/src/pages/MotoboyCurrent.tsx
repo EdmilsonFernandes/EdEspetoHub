@@ -228,7 +228,7 @@ export function MotoboyCurrent() {
   };
 
   return (
-    <div className="min-h-screen motoboy-screen space-y-4">
+    <div className="min-h-screen motoboy-screen space-y-4 overflow-x-hidden">
       <MotoboyHeader
         title="Entrega"
         subtitle={loading ? 'Atualizando...' : activeOrder ? 'Acompanhe e finalize sua entrega.' : 'Nenhuma entrega ativa.'}

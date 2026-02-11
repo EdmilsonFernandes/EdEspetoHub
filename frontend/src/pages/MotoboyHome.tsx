@@ -50,7 +50,7 @@ export function MotoboyHome() {
   }, [loading, hasActive, queueCount]);
 
   return (
-    <div className="min-h-screen motoboy-screen space-y-4">
+    <div className="min-h-screen motoboy-screen space-y-4 overflow-x-hidden">
       <MotoboyHeader
         title="Home"
         subtitle={headline}

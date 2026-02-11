@@ -60,7 +60,7 @@ export function MotoboyEarnings() {
   const totalMonth = orders.reduce((acc, order) => acc + Number(order.deliveryFee || 0), 0);
 
   return (
-    <div className="min-h-screen motoboy-screen space-y-4">
+    <div className="min-h-screen motoboy-screen space-y-4 overflow-x-hidden">
       <MotoboyHeader
         title="Ganhos"
         subtitle="Resumo e histórico das suas entregas."

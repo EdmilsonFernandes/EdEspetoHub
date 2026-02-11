@@ -43,20 +43,20 @@ export function MotoboyHeader({ title, subtitle, rightAction }: MotoboyHeaderPro
   };
 
   return (
-    <div className="premium-card-glass p-4 sm:p-5">
+    <div className="premium-card-glass p-4 sm:p-5 overflow-hidden">
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="relative h-12 w-12 rounded-2xl overflow-hidden shadow-[0_18px_34px_-26px_rgba(239,68,68,0.9)]">
+          <div className="relative h-11 w-11 sm:h-12 sm:w-12 rounded-2xl overflow-hidden shadow-[0_18px_34px_-26px_rgba(239,68,68,0.9)] shrink-0">
             <div className="absolute inset-0 bg-[linear-gradient(135deg,#ef4444,#f59e0b)] opacity-20" />
             <img src="/logo.svg" alt="Chama no Espeto" className="relative h-full w-full object-cover bg-white" />
           </div>
           <div className="min-w-0">
-            <p className="text-[11px] uppercase tracking-[0.32em] text-slate-500 truncate">Área do Entregador</p>
-            <h1 className="text-lg sm:text-xl font-black text-slate-900 leading-tight truncate">{title}</h1>
-            {subtitle && <p className="text-xs sm:text-sm text-slate-600 mt-0.5">{subtitle}</p>}
+            <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.22em] sm:tracking-[0.3em] text-slate-500">Área do Entregador</p>
+            <h1 className="text-lg sm:text-xl font-black text-slate-900 leading-tight break-words">{title}</h1>
+            {subtitle && <p className="text-xs sm:text-sm text-slate-600 mt-0.5 break-words">{subtitle}</p>}
           </div>
         </div>
-        <div className="shrink-0 w-full sm:w-auto flex items-center justify-between sm:justify-end gap-2">
+        <div className="shrink-0 w-full sm:w-auto flex items-center justify-between sm:justify-end gap-2 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">{rightAction}</div>
           {showSession ? (
             <div className="flex items-center gap-2">

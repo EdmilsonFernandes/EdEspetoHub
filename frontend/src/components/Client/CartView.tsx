@@ -206,6 +206,17 @@ export const CartView = ({
 
 
   const normalizedStoreAddress = (storeAddress || "").toString().trim();
+  const normalizedCustomerAddress = (customer.address || buildDeliveryAddress(customer) || "").toString().trim();
+  const normalizeAddressForCompare = (value = "") =>
+    value
+      .toString()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]/g, "");
+  const sameAddressAsStore =
+    Boolean(normalizedStoreAddress && normalizedCustomerAddress) &&
+    normalizeAddressForCompare(normalizedStoreAddress) === normalizeAddressForCompare(normalizedCustomerAddress);
   const deliveryStatus = useMemo(() => {
     if (!isDelivery) return null;
     if (!normalizedStoreAddress) {
@@ -236,6 +247,12 @@ export const CartView = ({
       };
     }
     if (deliveryCheck?.status === "error") {
+      if (sameAddressAsStore) {
+        return {
+          tone: "bg-sky-50 text-sky-700 border-sky-200",
+          label: "O endereço informado é o mesmo da loja. Se preferir, selecione Retirada.",
+        };
+      }
       return {
         tone: "bg-amber-50 text-amber-700 border-amber-200",
         label: "Não foi possível validar o endereço de entrega.",
@@ -261,7 +278,7 @@ export const CartView = ({
       tone: "bg-slate-50 text-slate-600 border-slate-200",
       label: "Preencha o endereço para validar a entrega.",
     };
-  }, [customer.city, customer.cep, customer.state, customer.street, deliveryCheck?.distanceKm, deliveryCheck?.status, isDelivery, normalizedStoreAddress, radiusValue, storeCoords]);
+  }, [customer, deliveryCheck?.distanceKm, deliveryCheck?.status, isDelivery, normalizedStoreAddress, radiusValue, sameAddressAsStore, storeCoords]);
 
   const deliveryDebug = useMemo(() => {
     if (!isDelivery) return null;
