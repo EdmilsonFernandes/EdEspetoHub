@@ -78,6 +78,22 @@ const faceTone = (label?: string) => {
   return 'bg-slate-100 text-slate-700 border-slate-200';
 };
 
+const faceReasonLabel = (reason?: string) => {
+  const code = String(reason || '').toLowerCase();
+  if (!code || code === 'none') return 'Sem falha registrada';
+  if (code === 'rate_limited') return 'Limite de tentativas atingido';
+  if (code === 'fetch failed' || code === 'fetch_failed') return 'Falha de conexão com o validador';
+  if (code === 'timeout') return 'Validação expirou por tempo';
+  if (code === 'compare_error') return 'Erro ao comparar as imagens';
+  if (code === 'no_face_selfie') return 'Não foi detectado rosto na selfie';
+  if (code === 'multi_face_selfie') return 'Foram detectados múltiplos rostos na selfie';
+  if (code === 'no_face_doc') return 'Não foi detectado rosto no documento';
+  if (code === 'low_match') return 'Selfie não confere com o documento';
+  if (code === 'medium_match') return 'Conferência parcial (revisão manual)';
+  if (code === 'manual_review') return 'Revisão manual necessária';
+  return code;
+};
+
 export function SuperAdmin() {
   const { showToast } = useToast();
   const [token, setToken] = useState(() => localStorage.getItem(STORAGE_KEY) || '');
@@ -2122,7 +2138,7 @@ export function SuperAdmin() {
                       <div className="space-y-1.5">
                         {kycAudit.topReasons.slice(0, 5).map((r: any) => (
                           <div key={String(r.reason)} className="flex items-center justify-between text-[12px]">
-                            <span className="text-slate-700 font-medium">{String(r.reason)}</span>
+                            <span className="text-slate-700 font-medium">{faceReasonLabel(String(r.reason || ''))}</span>
                             <span className="text-slate-900 font-extrabold">{Number(r.count || 0)}</span>
                           </div>
                         ))}
@@ -2239,7 +2255,7 @@ export function SuperAdmin() {
                                         Score: <span className="font-semibold">{String(doc.metadata.face.faceMatchScore ?? '-')}</span>
                                       </div>
                                       <div>
-                                        Motivo: <span className="font-semibold">{String(doc.metadata.face.reason || '-')}</span>
+                                        Motivo: <span className="font-semibold">{faceReasonLabel(String(doc.metadata.face.reason || ''))}</span>
                                       </div>
                                     </div>
                                   </div>
@@ -2382,7 +2398,7 @@ export function SuperAdmin() {
                               </span>
                             </div>
                             <div>Score: <span className="font-semibold">{String(face?.faceMatchScore ?? '-')}</span></div>
-                            <div>Motivo: <span className="font-semibold">{String(face?.reason || '-')}</span></div>
+                            <div>Motivo: <span className="font-semibold">{faceReasonLabel(String(face?.reason || ''))}</span></div>
                           </td>
                           <td className="px-3 py-2">
                             <a
