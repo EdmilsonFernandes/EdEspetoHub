@@ -113,6 +113,44 @@ const faceScoreLabel = (score: unknown) => {
   return `${pct.toFixed(1)}%`;
 };
 
+const SECTION_META: Record<string, { title: string; description: string; tone: string }> = {
+  executive: {
+    title: 'Resumo executivo',
+    description: 'Visão rápida dos principais números da plataforma.',
+    tone: 'from-slate-900 to-slate-700 text-white border-slate-800',
+  },
+  rankings: {
+    title: 'Rankings',
+    description: 'Comparativo de lojas por receita e volume de pedidos.',
+    tone: 'from-emerald-500 to-emerald-600 text-white border-emerald-500',
+  },
+  stores: {
+    title: 'Lojas e performance',
+    description: 'Filtros, plano, VIP, métricas e saúde operacional das lojas.',
+    tone: 'from-indigo-500 to-indigo-600 text-white border-indigo-500',
+  },
+  payments: {
+    title: 'Pagamentos',
+    description: 'Acompanhamento financeiro, status e reconciliação.',
+    tone: 'from-teal-500 to-teal-600 text-white border-teal-500',
+  },
+  logs: {
+    title: 'Logs de acesso',
+    description: 'Rastreamento de acesso, segurança e auditoria de uso.',
+    tone: 'from-slate-600 to-slate-700 text-white border-slate-600',
+  },
+  events: {
+    title: 'Eventos',
+    description: 'Fila de eventos e histórico técnico da plataforma.',
+    tone: 'from-blue-500 to-blue-600 text-white border-blue-500',
+  },
+  kyc: {
+    title: 'KYC de entregadores',
+    description: 'Validação documental, score facial e decisões da plataforma.',
+    tone: 'from-violet-500 to-violet-600 text-white border-violet-500',
+  },
+};
+
 export function SuperAdmin() {
   const { showToast } = useToast();
   const [token, setToken] = useState(() => localStorage.getItem(STORAGE_KEY) || '');
@@ -201,29 +239,6 @@ export function SuperAdmin() {
   const toggleSection = (key: keyof typeof sectionsOpen) => {
     setSectionsOpen((prev) => ({ ...prev, [key]: !prev[key] }));
   };
-
-  useEffect(() => {
-    const sectionIds = [ 'executive', 'rankings', 'stores', 'payments', 'logs', 'events', 'kyc' ];
-    const elements = sectionIds
-      .map((id) => document.getElementById(id))
-      .filter(Boolean) as HTMLElement[];
-    if (!elements.length) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
-        if (visible[0]?.target?.id) {
-          setActiveSection(visible[0].target.id);
-        }
-      },
-      { rootMargin: '-30% 0px -60% 0px', threshold: [ 0.1, 0.4, 0.7 ] }
-    );
-
-    elements.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, []);
 
   useEffect(() => {
     if (token) {
@@ -915,8 +930,8 @@ export function SuperAdmin() {
 
       <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3 bg-white/90 backdrop-blur border-b border-slate-200">
         <div className="flex flex-wrap gap-2 text-xs font-semibold text-slate-700">
-          <a
-            href="#executive"
+          <button
+            type="button"
             onClick={() => setActiveSection('executive')}
             className={`px-3 py-1.5 rounded-full border border-slate-200 shadow-sm transition ${
               activeSection === 'executive'
@@ -926,9 +941,9 @@ export function SuperAdmin() {
             aria-current={activeSection === 'executive' ? 'true' : 'false'}
           >
             Resumo
-          </a>
-          <a
-            href="#rankings"
+          </button>
+          <button
+            type="button"
             onClick={() => setActiveSection('rankings')}
             className={`px-3 py-1.5 rounded-full border border-slate-200 shadow-sm transition ${
               activeSection === 'rankings'
@@ -938,9 +953,9 @@ export function SuperAdmin() {
             aria-current={activeSection === 'rankings' ? 'true' : 'false'}
           >
             Rankings
-          </a>
-          <a
-            href="#stores"
+          </button>
+          <button
+            type="button"
             onClick={() => setActiveSection('stores')}
             className={`px-3 py-1.5 rounded-full border border-slate-200 shadow-sm transition ${
               activeSection === 'stores'
@@ -950,9 +965,9 @@ export function SuperAdmin() {
             aria-current={activeSection === 'stores' ? 'true' : 'false'}
           >
             Lojas
-          </a>
-          <a
-            href="#payments"
+          </button>
+          <button
+            type="button"
             onClick={() => setActiveSection('payments')}
             className={`px-3 py-1.5 rounded-full border border-slate-200 shadow-sm transition ${
               activeSection === 'payments'
@@ -962,9 +977,9 @@ export function SuperAdmin() {
             aria-current={activeSection === 'payments' ? 'true' : 'false'}
           >
             Pagamentos
-          </a>
-          <a
-            href="#logs"
+          </button>
+          <button
+            type="button"
             onClick={() => setActiveSection('logs')}
             className={`px-3 py-1.5 rounded-full border border-slate-200 shadow-sm transition ${
               activeSection === 'logs'
@@ -974,9 +989,9 @@ export function SuperAdmin() {
             aria-current={activeSection === 'logs' ? 'true' : 'false'}
           >
             Logs
-          </a>
-          <a
-            href="#events"
+          </button>
+          <button
+            type="button"
             onClick={() => setActiveSection('events')}
             className={`px-3 py-1.5 rounded-full border border-slate-200 shadow-sm transition ${
               activeSection === 'events'
@@ -986,9 +1001,9 @@ export function SuperAdmin() {
             aria-current={activeSection === 'events' ? 'true' : 'false'}
           >
             Eventos
-          </a>
-          <a
-            href="#kyc"
+          </button>
+          <button
+            type="button"
             onClick={() => setActiveSection('kyc')}
             className={`px-3 py-1.5 rounded-full border border-slate-200 shadow-sm transition ${
               activeSection === 'kyc'
@@ -998,11 +1013,22 @@ export function SuperAdmin() {
             aria-current={activeSection === 'kyc' ? 'true' : 'false'}
           >
             KYC
-          </a>
+          </button>
         </div>
       </div>
 
-      {summary && (
+      <div
+        className={`rounded-2xl border px-4 py-3 bg-gradient-to-r ${(
+          SECTION_META[activeSection] || SECTION_META.executive
+        ).tone}`}
+      >
+        <p className="text-xs uppercase tracking-[0.16em] opacity-90">
+          {(SECTION_META[activeSection] || SECTION_META.executive).title}
+        </p>
+        <p className="text-sm opacity-95">{(SECTION_META[activeSection] || SECTION_META.executive).description}</p>
+      </div>
+
+      {summary && activeSection === 'executive' && (
         <div className="grid md:grid-cols-3 gap-3">
           <div className="rounded-2xl p-4 border border-emerald-100 bg-gradient-to-br from-emerald-50 via-white to-white">
             <p className="text-xs uppercase text-emerald-600 font-semibold">Ativação da base</p>
@@ -1024,7 +1050,7 @@ export function SuperAdmin() {
 
         {loading && <div className="text-sm text-slate-500">Carregando...</div>}
 
-        {summary && (
+        {summary && activeSection === 'executive' && (
           <div id="executive" className="grid lg:grid-cols-[2.1fr,1fr] gap-4">
             <div className="relative overflow-hidden rounded-3xl bg-slate-900 text-white p-6 shadow-lg">
               <div className="absolute -right-20 -top-20 w-64 h-64 rounded-full bg-brand-primary/20 blur-3xl" />
@@ -1235,7 +1261,7 @@ export function SuperAdmin() {
           </div>
         )}
 
-        {summary && (
+        {summary && activeSection === 'rankings' && (
           <div id="rankings" className="bg-gradient-to-br from-emerald-50 via-white to-white border border-emerald-100 rounded-2xl p-4 shadow-sm">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -1371,7 +1397,12 @@ export function SuperAdmin() {
           </p>
         </div>
 
-        <div id="stores" className="bg-gradient-to-br from-slate-50 via-white to-white border border-slate-200 rounded-2xl p-4 shadow-sm overflow-x-auto">
+        <div
+          id="stores"
+          className={`bg-gradient-to-br from-indigo-50/60 via-white to-white border border-indigo-100 rounded-2xl p-4 shadow-sm overflow-x-auto ${
+            activeSection !== 'stores' ? 'hidden' : ''
+          }`}
+        >
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Storefront size={18} weight="duotone" className="text-slate-700" />
@@ -1521,7 +1552,12 @@ export function SuperAdmin() {
           )}
         </div>
 
-        <div id="payments" className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm overflow-x-auto">
+        <div
+          id="payments"
+          className={`bg-gradient-to-br from-emerald-50/40 via-white to-white border border-emerald-100 rounded-2xl p-4 shadow-sm overflow-x-auto ${
+            activeSection !== 'payments' ? 'hidden' : ''
+          }`}
+        >
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <CreditCard size={20} className="text-slate-700" />
@@ -1762,7 +1798,12 @@ export function SuperAdmin() {
           )}
         </div>
 
-        <div id="logs" className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm overflow-x-auto">
+        <div
+          id="logs"
+          className={`bg-gradient-to-br from-slate-50 via-white to-white border border-slate-200 rounded-2xl p-4 shadow-sm overflow-x-auto ${
+            activeSection !== 'logs' ? 'hidden' : ''
+          }`}
+        >
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Funnel size={18} weight="duotone" className="text-slate-700" />
@@ -1915,7 +1956,12 @@ export function SuperAdmin() {
           )}
         </div>
 
-        <div id="events" className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm overflow-x-auto">
+        <div
+          id="events"
+          className={`bg-gradient-to-br from-blue-50/50 via-white to-white border border-blue-100 rounded-2xl p-4 shadow-sm overflow-x-auto ${
+            activeSection !== 'events' ? 'hidden' : ''
+          }`}
+        >
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <ArrowClockwise size={20} weight="duotone" className="text-slate-700" />
@@ -2050,7 +2096,12 @@ export function SuperAdmin() {
           )}
         </div>
 
-        <div id="kyc" className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+        <div
+          id="kyc"
+          className={`bg-gradient-to-br from-violet-50/40 via-white to-white border border-violet-100 rounded-2xl p-4 shadow-sm ${
+            activeSection !== 'kyc' ? 'hidden' : ''
+          }`}
+        >
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <IdentificationCard size={20} weight="duotone" className="text-slate-700" />
