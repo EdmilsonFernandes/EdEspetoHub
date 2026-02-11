@@ -419,66 +419,76 @@ export function LandingPage() {
   return (
     <LandingPageLayout>
       {/* Hero Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 lg:py-20">
-        <div className="text-center space-y-6">
-          <span className="animate-bounce inline-flex items-center px-4 py-1.5 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-bold rounded-full uppercase tracking-[0.2em] shadow-lg">
-            7 dias grátis + sem cartão
-          </span>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-[56px] font-semibold text-gray-900 dark:text-white leading-tight tracking-tight">
-            Crie seu cardápio online para
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-red-600">
-              {' '}
-              espetos e porções{' '}
+      <section className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 lg:py-20">
+        <div className="absolute inset-x-4 sm:inset-x-6 lg:inset-x-8 top-8 bottom-8 rounded-[28px] bg-[radial-gradient(circle_at_top,rgba(239,68,68,0.16),transparent_60%)] pointer-events-none" />
+        <div className="relative grid gap-8 lg:grid-cols-[1.1fr_0.9fr] items-center">
+          <div className="space-y-5">
+            <span className="inline-flex items-center px-4 py-1.5 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-bold rounded-full uppercase tracking-[0.2em] shadow-lg">
+              7 dias grátis + sem cartão
             </span>
-            em minutos
-          </h1>
-          <p className="text-base sm:text-lg text-gray-600 dark:text-gray-300 leading-relaxed max-w-3xl mx-auto">
-            Monte a identidade da sua loja, publique um link exclusivo e receba pedidos de espetos, porções e bebidas em
-            um só lugar. Teste grátis por 7 dias e ative o plano quando quiser.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-            <button
-              onClick={() => navigate('/create')}
-              className="cursor-pointer px-8 py-4 text-lg rounded-xl bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold hover:from-red-600 hover:to-red-700 transition-all shadow-lg"
-              aria-label="Criar minha loja agora"
-            >
-              🚀 Criar minha loja agora
-            </button>
-            <button
-              onClick={scrollToShowcase}
-              className="cursor-pointer px-8 py-4 text-lg rounded-xl border-2 border-slate-200 bg-white/90 text-gray-700 font-semibold hover:text-red-600 hover:border-red-200 transition-colors shadow-sm dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:border-red-400"
-              aria-label="Ver telas reais do produto"
-            >
-              ✨ Ver telas reais
-            </button>
-          </div>
-          <div className="flex flex-wrap justify-center gap-3 text-xs sm:text-sm font-semibold text-slate-600">
-            <button
-              onClick={() => navigate('/admin')}
-              className="px-3 py-2 rounded-full border border-slate-200 bg-white/90 hover:text-red-600 hover:border-red-200 transition-colors"
-            >
-              Admin da loja
-            </button>
-            <button
-              onClick={() => navigate('/motoboy/register')}
-              className="px-3 py-2 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors"
-            >
-              Sou entregador
-            </button>
-          </div>
-          {publicMetrics && (
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs sm:text-sm font-semibold text-slate-600">
-              <span className="px-4 py-2 rounded-full bg-white border border-slate-200 shadow-sm">
-                {numberFormatter.format(publicMetrics.activeStores || 0)} lojas ativas
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-[56px] font-black text-gray-900 dark:text-white leading-tight tracking-tight">
+              Seu cardápio online com
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-500">
+                {' '}cara de app e foco em venda
               </span>
-              <span className="px-4 py-2 rounded-full bg-white border border-slate-200 shadow-sm">
-                {numberFormatter.format(publicMetrics.totalOrders || 0)} pedidos processados
-              </span>
-              <span className="px-4 py-2 rounded-full bg-white border border-slate-200 shadow-sm">
-                {formatCurrency(publicMetrics.totalRevenue || 0)} em vendas geradas
-              </span>
+            </h1>
+            <p className="text-base sm:text-lg text-gray-600 dark:text-gray-300 leading-relaxed max-w-3xl">
+              Crie sua loja, personalize sua marca e receba pedidos em uma experiência limpa no celular,
+              com painel de produção e acompanhamento em tempo real.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+              <button
+                onClick={() => navigate('/create')}
+                className="cursor-pointer px-7 py-3.5 text-base rounded-2xl bg-gradient-to-r from-red-500 to-red-600 text-white font-extrabold hover:from-red-600 hover:to-red-700 transition-all shadow-lg"
+                aria-label="Criar minha loja agora"
+              >
+                Criar minha loja
+              </button>
+              <button
+                onClick={scrollToShowcase}
+                className="cursor-pointer px-7 py-3.5 text-base rounded-2xl border-2 border-slate-200 bg-white/90 text-gray-700 font-bold hover:text-red-600 hover:border-red-200 transition-colors shadow-sm dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:border-red-400"
+                aria-label="Ver telas reais do produto"
+              >
+                Ver produto em ação
+              </button>
             </div>
-          )}
+            <div className="flex flex-wrap gap-3 text-xs sm:text-sm font-semibold text-slate-600">
+              <button
+                onClick={() => navigate('/admin')}
+                className="px-3 py-2 rounded-full border border-slate-200 bg-white/90 hover:text-red-600 hover:border-red-200 transition-colors"
+              >
+                Admin da loja
+              </button>
+              <button
+                onClick={() => navigate('/motoboy/register')}
+                className="px-3 py-2 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors"
+              >
+                Sou entregador
+              </button>
+            </div>
+          </div>
+
+          <div className="rounded-3xl border border-slate-200 bg-white/95 dark:bg-slate-800/90 backdrop-blur p-5 sm:p-6 shadow-[0_22px_60px_-40px_rgba(15,23,42,0.55)]">
+            <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400 font-bold">Prova social</p>
+            <h3 className="text-xl font-black text-slate-900 dark:text-white mt-2">Plataforma em operação</h3>
+            <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">
+              Resultado real de lojas usando o sistema no dia a dia.
+            </p>
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Lojas ativas</p>
+                <p className="mt-1 text-lg font-black text-slate-900">{numberFormatter.format(publicMetrics?.activeStores || 0)}</p>
+              </div>
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Pedidos</p>
+                <p className="mt-1 text-lg font-black text-slate-900">{numberFormatter.format(publicMetrics?.totalOrders || 0)}</p>
+              </div>
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Vendas</p>
+                <p className="mt-1 text-lg font-black text-slate-900">{formatCurrency(publicMetrics?.totalRevenue || 0)}</p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

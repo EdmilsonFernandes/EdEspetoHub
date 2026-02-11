@@ -147,6 +147,7 @@ export function PortfolioPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [profilePreview, setProfilePreview] = useState<{ name: string; image: string } | null>(null);
+  const [brokenProfileImages, setBrokenProfileImages] = useState<Record<string, boolean>>({});
   const [menuBySlug, setMenuBySlug] = useState<Record<string, MenuInfo>>({});
   const [metrics, setMetrics] = useState<{
     totalStores?: number;
@@ -355,6 +356,12 @@ export function PortfolioPage() {
     return resolveAssetUrl(raw) || raw;
   };
 
+  const resolveMemberPhoto = (member: TeamMember) => {
+    if (!member.profileImage) return "";
+    if (brokenProfileImages[member.name]) return "";
+    return resolveImageSrc(member.profileImage);
+  };
+
   const resolvePlanMeta = (planName = "") => {
     const normalized = planName.toString().toLowerCase();
     if (normalized.includes("pro")) {
@@ -390,24 +397,27 @@ export function PortfolioPage() {
 
   return (
     <LandingPageLayout>
-      <section className="relative overflow-hidden bg-white">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(239,68,68,0.14),_transparent_62%)]" />
-        <div className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-orange-200/40 blur-3xl" />
-        <div className="absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-red-200/30 blur-3xl" />
+      <section className="relative overflow-hidden bg-[linear-gradient(180deg,#f8fafc_0%,#ffffff_55%,#fff7ed_100%)]">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(239,68,68,0.16),_transparent_64%)]" />
+        <div className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-orange-200/35 blur-3xl" />
+        <div className="absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-red-200/25 blur-3xl" />
 
         <div className="max-w-6xl mx-auto px-4 py-14 sm:py-20 relative">
           <div className="grid gap-10 lg:grid-cols-12 lg:items-center">
             <div className="lg:col-span-7 space-y-5">
-              <div className="inline-flex items-center gap-2 rounded-full border border-red-100 bg-red-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-red-700">
+              <div className="inline-flex items-center gap-2 rounded-full border border-red-100 bg-red-50/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-red-700">
                 <Lightning size={14} weight="duotone" />
                 Cardapio online + pedidos + produção
               </div>
-              <h1 className="text-3xl sm:text-5xl font-black text-slate-900 leading-[1.06]">
-                Um site que vende, com painel que organiza a cozinha.
+              <h1 className="text-3xl sm:text-5xl font-black text-slate-900 leading-[1.04]">
+                Portfólio real, resultado real.
+                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-500">
+                  Seu negócio com cara de app profissional.
+                </span>
               </h1>
-              <p className="text-slate-600 text-sm sm:text-base max-w-xl">
-                Veja lojas reais usando a plataforma e entenda como transformar seu cardápio em pedidos,
-                com identidade da sua marca e uma experiência mobile rápida.
+              <p className="text-slate-600 text-sm sm:text-base max-w-2xl">
+                Veja lojas reais em operação, compare estilos e entenda como transformar seu cardápio em pedidos todos os dias,
+                com um visual limpo, rápido no mobile e focado em conversão.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3">
@@ -430,16 +440,16 @@ export function PortfolioPage() {
 
               <div className="grid grid-cols-2 gap-3 pt-2">
                 {[
-                  { label: "Mobile-first", icon: CheckCircle },
+                  { label: "Experiência mobile premium", icon: CheckCircle },
                   { label: "Personalizacao por loja", icon: Storefront },
-                  { label: "Fila e operação", icon: ChartBar },
+                  { label: "Fila e operação em tempo real", icon: ChartBar },
                   { label: "Pagamentos", icon: CreditCard },
                 ].map((item) => {
                   const Icon = item.icon;
                   return (
                     <div
                       key={item.label}
-                      className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-xs font-semibold text-slate-700 flex items-center gap-2 shadow-sm"
+                      className="rounded-2xl border border-slate-200/90 bg-white/85 backdrop-blur px-4 py-3 text-xs font-semibold text-slate-700 flex items-center gap-2 shadow-sm"
                     >
                       <span className="h-8 w-8 rounded-xl bg-slate-900 text-white grid place-items-center">
                         <Icon size={16} weight="duotone" />
@@ -901,8 +911,8 @@ export function PortfolioPage() {
                     <button
                       type="button"
                       onClick={() => {
-                        if (member.profileImage) {
-                          const resolved = resolveImageSrc(member.profileImage);
+                        const resolved = resolveMemberPhoto(member);
+                        if (resolved) {
                           setProfilePreview({
                             name: member.name,
                             image: resolved,
@@ -912,14 +922,22 @@ export function PortfolioPage() {
                       className="relative h-20 w-20 rounded-[22px] bg-white border-2 border-white shadow-xl flex items-center justify-center text-lg font-bold text-slate-700 overflow-hidden transition hover:scale-[1.02]"
                       aria-label={`Ver foto de ${member.name}`}
                     >
-                      {member.profileImage ? (
+                      {resolveMemberPhoto(member) ? (
                         <img
-                          src={resolveImageSrc(member.profileImage)}
+                          src={resolveMemberPhoto(member)}
                           alt={member.name}
                           className="h-full w-full object-cover rounded-[20px] ring-2 ring-white brightness-105 contrast-110"
+                          onError={() =>
+                            setBrokenProfileImages((prev) => ({
+                              ...prev,
+                              [member.name]: true,
+                            }))
+                          }
                         />
                       ) : (
-                        member.avatar
+                        <span className={`h-full w-full rounded-[20px] bg-gradient-to-r ${member.color} text-white grid place-items-center`}>
+                          {member.avatar}
+                        </span>
                       )}
                     </button>
                     <span className="text-xs font-semibold text-slate-500 bg-white border border-slate-200 px-3 py-1 rounded-full">
