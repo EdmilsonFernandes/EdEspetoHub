@@ -126,6 +126,10 @@ export function SuperAdmin() {
   const [kycQueue, setKycQueue] = useState<any[]>([]);
   const [kycLoading, setKycLoading] = useState(false);
   const [kycReason, setKycReason] = useState('');
+  const [kycHistoryOpen, setKycHistoryOpen] = useState(false);
+  const [kycHistoryLoading, setKycHistoryLoading] = useState(false);
+  const [kycHistoryMotoboy, setKycHistoryMotoboy] = useState<any | null>(null);
+  const [kycHistoryDocs, setKycHistoryDocs] = useState<any[]>([]);
 
   const loadOverview = async (authToken: string) => {
     setLoading(true);
@@ -207,6 +211,22 @@ export function SuperAdmin() {
       await loadKycQueue(token);
     } catch (err: any) {
       showToast(err?.message || 'Não foi possível revisar o documento.', 'error');
+    }
+  };
+
+  const openKycHistory = async (motoboy: any) => {
+    if (!token || !motoboy?.id) return;
+    setKycHistoryOpen(true);
+    setKycHistoryLoading(true);
+    setKycHistoryMotoboy(motoboy);
+    try {
+      const docs = await superAdminService.fetchMotoboyDocuments(token, motoboy.id);
+      setKycHistoryDocs(Array.isArray(docs) ? docs : []);
+    } catch (err: any) {
+      showToast(err?.message || 'Não foi possível carregar o histórico de KYC.', 'error');
+      setKycHistoryDocs([]);
+    } finally {
+      setKycHistoryLoading(false);
     }
   };
 
@@ -2046,6 +2066,14 @@ export function SuperAdmin() {
                           >
                             Recarregar
                           </button>
+                          <button
+                            type="button"
+                            onClick={() => openKycHistory(motoboy)}
+                            className="btn-press px-3 py-2 rounded-xl border border-slate-200 bg-white text-[11px] font-extrabold text-slate-700"
+                            title="Ver histórico de uploads e validações KYC"
+                          >
+                            Histórico KYC
+                          </button>
                         </div>
 
                         <div className="mt-3 grid md:grid-cols-3 gap-2">
@@ -2089,6 +2117,26 @@ export function SuperAdmin() {
                                     Rejeitar
                                   </button>
                                 </div>
+
+                                {doc?.metadata?.face ? (
+                                  <div className="mt-2 rounded-xl border border-slate-200 bg-white p-2">
+                                    <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">Face worker</div>
+                                    <div className="mt-1 text-[11px] text-slate-700 space-y-0.5">
+                                      <div>
+                                        Status: <span className="font-semibold">{String(doc.metadata.face.status || '-')}</span>
+                                      </div>
+                                      <div>
+                                        Nível: <span className="font-semibold">{String(doc.metadata.face.scoreLabel || '-')}</span>
+                                      </div>
+                                      <div>
+                                        Score: <span className="font-semibold">{String(doc.metadata.face.faceMatchScore ?? '-')}</span>
+                                      </div>
+                                      <div>
+                                        Motivo: <span className="font-semibold">{String(doc.metadata.face.reason || '-')}</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ) : null}
                               </div>
                             );
                           })}
@@ -2119,6 +2167,93 @@ export function SuperAdmin() {
             <pre className="bg-slate-900 text-slate-100 text-xs p-4 rounded-xl overflow-auto max-h-[60vh]">
               {JSON.stringify(selectedEventPayload, null, 2)}
             </pre>
+          </div>
+        </div>
+      )}
+
+      {kycHistoryOpen && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-5xl p-5 space-y-4 max-h-[88vh] overflow-hidden">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <h3 className="text-lg font-bold text-slate-800">Histórico KYC</h3>
+                <p className="text-xs text-slate-500 truncate">
+                  {kycHistoryMotoboy?.user?.fullName || 'Motoboy'} • {kycHistoryMotoboy?.user?.email || '-'}
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  setKycHistoryOpen(false);
+                  setKycHistoryDocs([]);
+                  setKycHistoryMotoboy(null);
+                }}
+                className="px-3 py-1 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50"
+              >
+                Fechar
+              </button>
+            </div>
+
+            <div className="overflow-auto max-h-[72vh] rounded-xl border border-slate-200">
+              {kycHistoryLoading ? (
+                <div className="p-4 text-sm text-slate-500">Carregando histórico...</div>
+              ) : kycHistoryDocs.length === 0 ? (
+                <div className="p-4 text-sm text-slate-500">Sem histórico para este motoboy.</div>
+              ) : (
+                <table className="min-w-full text-sm">
+                  <thead className="bg-slate-50 text-slate-600">
+                    <tr>
+                      <th className="text-left px-3 py-2">Tipo</th>
+                      <th className="text-left px-3 py-2">Status</th>
+                      <th className="text-left px-3 py-2">Enviado</th>
+                      <th className="text-left px-3 py-2">Revisão</th>
+                      <th className="text-left px-3 py-2">Face Worker</th>
+                      <th className="text-left px-3 py-2">Arquivo</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {kycHistoryDocs.map((doc: any) => {
+                      const review = doc?.metadata?.review || {};
+                      const face = doc?.metadata?.face || {};
+                      const reviewedByPlatform = review?.reviewedByPlatformAdminId || '-';
+                      const reviewedByUser = review?.reviewedByUserId || '-';
+                      return (
+                        <tr key={doc.id} className="border-t border-slate-100 align-top">
+                          <td className="px-3 py-2 font-semibold text-slate-800">{String(doc?.docType || '-')}</td>
+                          <td className="px-3 py-2">
+                            <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-700">
+                              {String(doc?.status || '-')}
+                            </span>
+                          </td>
+                          <td className="px-3 py-2 text-slate-600">{formatDate(doc?.uploadedAt)}</td>
+                          <td className="px-3 py-2 text-[12px] text-slate-700">
+                            <div>Escopo: <span className="font-semibold">{String(review?.scope || '-')}</span></div>
+                            <div>Motivo: <span className="font-semibold">{String(review?.reason || '-')}</span></div>
+                            <div>By platform: <span className="font-semibold">{String(reviewedByPlatform)}</span></div>
+                            <div>By user: <span className="font-semibold">{String(reviewedByUser)}</span></div>
+                          </td>
+                          <td className="px-3 py-2 text-[12px] text-slate-700">
+                            <div>Status: <span className="font-semibold">{String(face?.status || '-')}</span></div>
+                            <div>Nível: <span className="font-semibold">{String(face?.scoreLabel || '-')}</span></div>
+                            <div>Score: <span className="font-semibold">{String(face?.faceMatchScore ?? '-')}</span></div>
+                            <div>Motivo: <span className="font-semibold">{String(face?.reason || '-')}</span></div>
+                          </td>
+                          <td className="px-3 py-2">
+                            <a
+                              href={doc?.fileKey || '#'}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-[11px] font-bold text-slate-700 inline-block"
+                            >
+                              Abrir
+                            </a>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
+            </div>
           </div>
         </div>
       )}
