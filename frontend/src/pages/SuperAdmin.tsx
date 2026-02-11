@@ -332,14 +332,53 @@ export function SuperAdmin() {
     });
   }, [kycHistoryDocs, kycHistoryStatusFilter, kycHistoryFaceFilter]);
 
+  const kycHistoryDocSummary = useMemo(() => {
+    const byType = new Map<string, any>();
+    for (const doc of filteredKycHistoryDocs || []) {
+      const type = String(doc?.docType || 'UNKNOWN').toUpperCase();
+      const status = String(doc?.status || 'PENDING').toUpperCase();
+      const reviewedAt = doc?.metadata?.review?.reviewedAt || doc?.reviewedAt || doc?.uploadedAt || null;
+      const reviewedAtMs = reviewedAt ? new Date(reviewedAt).getTime() : 0;
+      const current = byType.get(type) || {
+        docType: type,
+        total: 0,
+        approved: 0,
+        rejected: 0,
+        pending: 0,
+        latestStatus: status,
+        latestAt: reviewedAt,
+        latestAtMs: reviewedAtMs,
+      };
+      current.total += 1;
+      if (status === 'APPROVED') current.approved += 1;
+      else if (status === 'REJECTED') current.rejected += 1;
+      else current.pending += 1;
+
+      if (reviewedAtMs >= current.latestAtMs) {
+        current.latestAtMs = reviewedAtMs;
+        current.latestAt = reviewedAt;
+        current.latestStatus = status;
+      }
+      byType.set(type, current);
+    }
+    return Array.from(byType.values()).sort((a, b) => a.docType.localeCompare(b.docType));
+  }, [filteredKycHistoryDocs]);
+
   const groupedRecentKycReviews = useMemo(() => {
+    const pickMomentMs = (doc: any) => {
+      const value = doc?.metadata?.review?.reviewedAt || doc?.reviewedAt || doc?.uploadedAt || null;
+      if (!value) return 0;
+      const ms = new Date(value).getTime();
+      return Number.isFinite(ms) ? ms : 0;
+    };
+
     const byMotoboy = new Map<string, any>();
     for (const doc of kycRecentReviews || []) {
       const motoboyId = String(doc?.motoboyId || doc?.motoboy?.id || '');
       if (!motoboyId) continue;
       const status = String(doc?.status || '').toUpperCase();
       const reviewedAt = doc?.metadata?.review?.reviewedAt || doc?.reviewedAt || doc?.uploadedAt || null;
-      const reviewedAtMs = reviewedAt ? new Date(reviewedAt).getTime() : 0;
+      const reviewedAtMs = pickMomentMs(doc);
       const current = byMotoboy.get(motoboyId) || {
         motoboy: doc?.motoboy || null,
         docs: [],
@@ -357,7 +396,38 @@ export function SuperAdmin() {
       }
       byMotoboy.set(motoboyId, current);
     }
-    return Array.from(byMotoboy.values()).sort((a, b) => b.latestReviewedAtMs - a.latestReviewedAtMs);
+    return Array.from(byMotoboy.values())
+      .map((entry: any) => {
+        const docs = Array.isArray(entry.docs) ? entry.docs : [];
+        const byType = new Map<string, any>();
+        for (const doc of docs) {
+          const type = String(doc?.docType || '').toUpperCase();
+          if (!type) continue;
+          const ms = pickMomentMs(doc);
+          const current = byType.get(type);
+          if (!current || ms >= current._momentMs) {
+            byType.set(type, { ...doc, _momentMs: ms });
+          }
+        }
+        const requiredTypes = [ 'CNH', 'SELFIE', 'CRLV' ];
+        const typeSummary = requiredTypes.map((type) => {
+          const latest = byType.get(type);
+          if (latest) return latest;
+          return {
+            id: `${entry.motoboy?.id || 'motoboy'}-${type}-missing`,
+            docType: type,
+            status: 'PENDING',
+            metadata: { face: { scoreLabel: 'indisponivel', faceMatchScore: null } },
+            _momentMs: 0,
+            _missing: true,
+          };
+        });
+        return {
+          ...entry,
+          typeSummary,
+        };
+      })
+      .sort((a, b) => b.latestReviewedAtMs - a.latestReviewedAtMs);
   }, [kycRecentReviews]);
 
   useEffect(() => {
@@ -2281,7 +2351,7 @@ export function SuperAdmin() {
                   <div className="space-y-3">
                     {groupedRecentKycReviews.map((entry: any) => {
                       const motoboy = entry?.motoboy || {};
-                      const docs = Array.isArray(entry?.docs) ? entry.docs.slice(0, 3) : [];
+                      const docs = Array.isArray(entry?.typeSummary) ? entry.typeSummary : [];
                       return (
                         <div key={String(motoboy?.id || entry.latestReviewedAt || 'motoboy')} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
                           <div className="flex flex-wrap items-start justify-between gap-2">
@@ -2310,20 +2380,27 @@ export function SuperAdmin() {
                             {docs.map((doc: any) => {
                               const status = String(doc?.status || '').toUpperCase();
                               const face = doc?.metadata?.face || {};
+                              const isMissing = Boolean(doc?._missing);
                               return (
                                 <div key={doc.id} className="rounded-lg border border-slate-200 bg-white p-2">
                                   <div className="flex items-center justify-between gap-2">
                                     <span className="text-xs font-bold text-slate-800">{String(doc?.docType || '-').toUpperCase()}</span>
                                     <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
-                                      status === 'APPROVED'
+                                      isMissing
+                                        ? 'bg-amber-100 text-amber-800 border-amber-200'
+                                        : status === 'APPROVED'
                                         ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
-                                        : 'bg-rose-100 text-rose-800 border-rose-200'
+                                        : status === 'REJECTED'
+                                          ? 'bg-rose-100 text-rose-800 border-rose-200'
+                                          : 'bg-amber-100 text-amber-800 border-amber-200'
                                     }`}>
-                                      {status === 'APPROVED' ? 'Aprovado' : 'Reprovado'}
+                                      {isMissing ? 'Aguardando' : status === 'APPROVED' ? 'Aprovado' : status === 'REJECTED' ? 'Reprovado' : 'Pendente'}
                                     </span>
                                   </div>
                                   <div className="mt-1 text-[11px] text-slate-600">
-                                    Face: {String(face?.scoreLabel || 'indisponivel')} • Score: {faceScoreLabel(face?.faceMatchScore)}
+                                    {isMissing
+                                      ? 'Sem revisão recente desse documento'
+                                      : `Face: ${String(face?.scoreLabel || 'indisponivel')} • Score: ${faceScoreLabel(face?.faceMatchScore)}`}
                                   </div>
                                 </div>
                               );
@@ -2530,6 +2607,33 @@ export function SuperAdmin() {
                   {filteredKycHistoryDocs.length} registro{filteredKycHistoryDocs.length === 1 ? '' : 's'}
                 </span>
               </div>
+              {kycHistoryDocSummary.length > 0 ? (
+                <div className="p-3 border-b border-slate-200 bg-white">
+                  <p className="text-[11px] uppercase tracking-[0.16em] font-bold text-slate-500 mb-2">Resumo por documento</p>
+                  <div className="grid md:grid-cols-3 gap-2">
+                    {kycHistoryDocSummary.map((item: any) => (
+                      <div key={item.docType} className="rounded-lg border border-slate-200 bg-slate-50 p-2">
+                        <div className="text-xs font-extrabold text-slate-800">{item.docType}</div>
+                        <div className="text-[11px] text-slate-600 mt-1">
+                          Tentativas: {item.total} • Aprovado: {item.approved} • Reprovado: {item.rejected}
+                        </div>
+                        <div className="mt-1">
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
+                            item.latestStatus === 'APPROVED'
+                              ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
+                              : item.latestStatus === 'REJECTED'
+                                ? 'bg-rose-100 text-rose-800 border-rose-200'
+                                : 'bg-amber-100 text-amber-800 border-amber-200'
+                          }`}>
+                            Atual: {item.latestStatus}
+                          </span>
+                          <span className="ml-2 text-[10px] text-slate-500">{formatDate(item.latestAt)}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
               {kycHistoryLoading ? (
                 <div className="p-4 text-sm text-slate-500">Carregando histórico...</div>
               ) : filteredKycHistoryDocs.length === 0 ? (
