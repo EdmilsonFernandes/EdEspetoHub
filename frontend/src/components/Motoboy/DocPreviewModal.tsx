@@ -9,6 +9,11 @@ type DocPreviewModalProps = {
 
 export function DocPreviewModal({ open, title, src, onClose }: DocPreviewModalProps) {
   if (!open) return null;
+  const normalized = String(src || '').toLowerCase();
+  const isImage =
+    normalized.startsWith('data:image/') ||
+    /\.(png|jpe?g|webp|gif|bmp|svg)(\?.*)?$/.test(normalized);
+  const isPdf = normalized.startsWith('data:application/pdf') || /\.pdf(\?.*)?$/.test(normalized);
 
   return (
     <div className="fixed inset-0 z-[120] bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-3 overflow-hidden">
@@ -29,9 +34,17 @@ export function DocPreviewModal({ open, title, src, onClose }: DocPreviewModalPr
         </div>
 
         <div className="bg-slate-950 min-h-0 overflow-auto">
-          {src ? (
+          {src && isImage ? (
             <div className="max-h-[76vh] overflow-auto">
               <img src={src} alt={title} className="w-full h-auto max-h-[76vh] object-contain block" />
+            </div>
+          ) : src && isPdf ? (
+            <div className="h-[76vh] bg-white">
+              <iframe title={title} src={src} className="h-full w-full" />
+            </div>
+          ) : src ? (
+            <div className="p-8 text-center text-sm text-slate-200">
+              Este arquivo nao tem visualizacao embutida. Use "Abrir em nova aba".
             </div>
           ) : (
             <div className="p-8 text-center text-sm text-slate-200">Sem prévia disponível.</div>

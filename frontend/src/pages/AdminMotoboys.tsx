@@ -41,6 +41,14 @@ export function AdminMotoboys() {
   };
 
   const normalizeDocType = (value: any) => String(value || '').trim().toUpperCase();
+  const isImageFile = (value: any) => {
+    const v = String(value || '').toLowerCase();
+    return v.startsWith('data:image/') || /\.(png|jpe?g|webp|gif|bmp|svg)(\?.*)?$/.test(v);
+  };
+  const isPdfFile = (value: any) => {
+    const v = String(value || '').toLowerCase();
+    return v.startsWith('data:application/pdf') || /\.pdf(\?.*)?$/.test(v);
+  };
 
   const latestDocs = (docs: any[]) => {
     // backend already sends DESC by uploadedAt; we keep first per type.
@@ -408,13 +416,17 @@ export function AdminMotoboys() {
         </div>
         <div className="px-3 pb-3">
           <div className="rounded-xl border border-slate-200 bg-slate-50 overflow-hidden">
-            {src ? (
+            {src && isImageFile(src) ? (
               <img
                 src={src}
                 alt={docType}
                 className="w-full h-36 object-cover transition-transform duration-200 group-hover:scale-[1.02]"
                 loading="lazy"
               />
+            ) : src && isPdfFile(src) ? (
+              <div className="h-36 flex items-center justify-center bg-slate-100 text-[11px] font-bold text-slate-700">
+                CRLV em PDF
+              </div>
             ) : (
               <div className="h-36 flex items-center justify-center text-xs text-slate-400">Sem prévia</div>
             )}
@@ -1229,12 +1241,20 @@ export function AdminMotoboys() {
                 </div>
               ) : null}
             </div>
-            {previewDoc.fileKey ? (
+            {previewDoc.fileKey && isImageFile(previewDoc.fileKey) ? (
               <img
                 src={previewDoc.fileKey}
                 alt={previewDoc.docType}
                 className="w-full max-h-[70vh] object-contain rounded-xl border border-slate-200"
               />
+            ) : previewDoc.fileKey && isPdfFile(previewDoc.fileKey) ? (
+              <iframe
+                src={previewDoc.fileKey}
+                title={previewDoc.docType || 'Documento'}
+                className="w-full h-[70vh] rounded-xl border border-slate-200 bg-white"
+              />
+            ) : previewDoc.fileKey ? (
+              <div className="p-8 text-center text-sm text-slate-500">Arquivo sem prévia embutida. Use "Abrir em nova aba".</div>
             ) : (
               <div className="p-8 text-center text-sm text-slate-500">Sem imagem.</div>
             )}
