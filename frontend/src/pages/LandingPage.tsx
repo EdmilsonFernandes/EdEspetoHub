@@ -715,21 +715,9 @@ export function LandingPage() {
       </section>
 
       <section id="product-showcase" className="bg-gradient-to-br from-rose-50 via-white to-amber-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 border-y border-rose-100 dark:border-slate-700 py-16 sm:py-20">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10">
-          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
-            <div className="max-w-2xl">
-              <p className="text-xs uppercase tracking-[0.3em] text-red-600 dark:text-red-400 font-bold">Produto real</p>
-              <h2 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white mt-3">
-                Uma experiência bonita, rápida e viciante
-              </h2>
-              <p className="text-base sm:text-lg text-gray-700 dark:text-gray-200 mt-4">
-                As telas abaixo são do produto real. Tudo pensado para converter pedidos e manter a operação fluida.
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-8 rounded-[32px] border border-white/90 dark:border-slate-700 bg-white/90 dark:bg-slate-800/90 shadow-[0_22px_70px_-45px_rgba(15,23,42,0.4)] overflow-hidden">
-            <div className="grid lg:grid-cols-[1.2fr_0.8fr] gap-6 p-5 sm:p-7">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="rounded-[32px] border border-white/90 dark:border-slate-700 bg-white/90 dark:bg-slate-800/90 shadow-[0_24px_70px_-45px_rgba(15,23,42,0.4)] p-5 sm:p-7">
+            <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-6">
               <div className="rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
                 <video
                   className="w-full h-full object-cover"
@@ -749,48 +737,65 @@ export function LandingPage() {
                 <span className="inline-flex w-fit px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-200">
                   Demo guiada em 40s
                 </span>
-                <h3 className="text-2xl font-black text-gray-900 dark:text-white">Veja o fluxo completo do cliente à produção</h3>
-                <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-                  Do cardápio compacto ao pedido confirmado, fila de produção e acompanhamento em tempo real.
-                  Tudo pensado para ser rápido no celular e elegante no desktop.
+                <h3 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white leading-tight">
+                  Visual de app, operação de verdade
+                </h3>
+                <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 leading-relaxed">
+                  Do cardápio ao pedido entregue, tudo em um fluxo limpo, rápido no mobile e fácil para a equipe usar no dia a dia.
                 </p>
-                <div className="flex flex-wrap gap-2 text-xs text-slate-600 dark:text-slate-400">
-                  <span className="px-3 py-1 rounded-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">Cardápio</span>
-                  <span className="px-3 py-1 rounded-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">Checkout</span>
-                  <span className="px-3 py-1 rounded-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">Fila</span>
-                  <span className="px-3 py-1 rounded-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">Acompanhamento</span>
+                <div className="space-y-2 text-sm">
+                  <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/70 px-3 py-2">
+                    Cardápio com foco em conversão
+                  </div>
+                  <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/70 px-3 py-2">
+                    Fila de produção simples e rápida
+                  </div>
+                  <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/70 px-3 py-2">
+                    Tracking e entrega em tempo real
+                  </div>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => navigate('/create')}
+                  className="w-full sm:w-auto px-5 py-3 rounded-xl bg-gradient-to-r from-red-500 to-red-600 text-white text-sm font-extrabold shadow hover:from-red-600 hover:to-red-700 transition-all"
+                >
+                  Criar minha loja agora
+                </button>
               </div>
             </div>
-          </div>
 
-          <div className="mt-10 grid gap-6 md:grid-cols-2">
-            {showcaseShots.map((shot, index) => (
-              <button
-                key={shot.title}
-                className="rounded-3xl border border-white/80 dark:border-slate-700 bg-white/90 dark:bg-slate-800/90 shadow-[0_24px_70px_-38px_rgba(15,23,42,0.35)] overflow-hidden backdrop-blur hover:-translate-y-1 hover:shadow-[0_28px_80px_-38px_rgba(15,23,42,0.45)] transition text-left w-full"
-                onClick={() => openLightbox(showcaseShots, index, 'Produto real')}
-                aria-label={`Ampliar: ${shot.title}`}
-              >
-                <div className="relative">
-                  <img
-                    src={shot.image}
-                    alt={shot.title}
-                    className="w-full h-56 sm:h-64 lg:h-72 object-cover"
-                    loading="lazy"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
-                  <span className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-semibold bg-white/90 dark:bg-slate-800/90 text-gray-800 dark:text-gray-200">
-                    {shot.tag}
-                  </span>
-                </div>
-                <div className="p-5">
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">{shot.title}</h3>
-                  <p className="text-sm text-gray-700 dark:text-gray-300 mt-2">{shot.description}</p>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-3">Clique para ampliar</p>
-                </div>
-              </button>
-            ))}
+            <div className="mt-7">
+              <div className="flex items-center justify-between gap-3 mb-3">
+                <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400 font-bold">Telas reais</p>
+                <span className="text-[11px] text-slate-500">Toque para ampliar</span>
+              </div>
+              <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory">
+                {showcaseShots.map((shot, index) => (
+                  <button
+                    key={shot.title}
+                    className="snap-start shrink-0 w-[78%] sm:w-[46%] lg:w-[32%] rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm overflow-hidden text-left"
+                    onClick={() => openLightbox(showcaseShots, index, 'Produto real')}
+                    aria-label={`Ampliar: ${shot.title}`}
+                  >
+                    <div className="relative">
+                      <img
+                        src={shot.image}
+                        alt={shot.title}
+                        className="w-full h-44 sm:h-48 object-cover"
+                        loading="lazy"
+                      />
+                      <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-white/90 dark:bg-slate-800/90 text-gray-800 dark:text-gray-200">
+                        {shot.tag}
+                      </span>
+                    </div>
+                    <div className="p-3">
+                      <h3 className="text-sm font-bold text-gray-900 dark:text-white">{shot.title}</h3>
+                      <p className="text-xs text-gray-600 dark:text-gray-300 mt-1 line-clamp-2">{shot.description}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
