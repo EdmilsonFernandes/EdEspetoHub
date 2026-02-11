@@ -444,14 +444,15 @@ export function LandingPage() {
               >
                 Criar minha loja
               </button>
-              <button
-                onClick={scrollToShowcase}
-                className="cursor-pointer px-7 py-3.5 text-base rounded-2xl border-2 border-slate-200 bg-white/90 text-gray-700 font-bold hover:text-red-600 hover:border-red-200 transition-colors shadow-sm dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:border-red-400"
-                aria-label="Ver telas reais do produto"
-              >
-                Ver produto em ação
-              </button>
             </div>
+            <button
+              type="button"
+              onClick={scrollToShowcase}
+              className="inline-flex w-fit items-center gap-2 text-sm font-semibold text-red-600 hover:text-red-700"
+            >
+              Ver como funciona em 30 segundos
+              <Rocket size={16} weight="duotone" />
+            </button>
             <div className="flex flex-wrap gap-3 text-xs sm:text-sm font-semibold text-slate-600">
               <button
                 onClick={() => navigate('/admin')}
@@ -487,6 +488,15 @@ export function LandingPage() {
                 <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Vendas</p>
                 <p className="mt-1 text-lg font-black text-slate-900">{formatCurrency(publicMetrics?.totalRevenue || 0)}</p>
               </div>
+            </div>
+            <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50/80 px-4 py-3">
+              <p className="text-[11px] uppercase tracking-[0.2em] text-emerald-700 font-bold">Case de referência</p>
+              <p className="text-sm font-semibold text-slate-900 mt-1">
+                Loja piloto: 19 para 43 pedidos/dia em 30 dias.
+              </p>
+              <p className="text-xs text-emerald-800/90 mt-1">
+                +126% de pedidos com cardápio mobile + fila organizada.
+              </p>
             </div>
           </div>
         </div>
@@ -581,21 +591,17 @@ export function LandingPage() {
               </p>
             </div>
 
-            <div className="mt-5 grid sm:grid-cols-2 gap-3">
+            <div className="mt-5">
               <button
                 type="button"
                 onClick={() => navigate('/create')}
-                className="px-4 py-3 rounded-xl bg-slate-900 text-white text-sm font-extrabold hover:opacity-90"
+                className="w-full px-4 py-3 rounded-xl bg-slate-900 text-white text-sm font-extrabold hover:opacity-90"
               >
                 Criar minha loja
               </button>
-              <button
-                type="button"
-                onClick={() => navigate('/motoboy/register')}
-                className="px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-extrabold text-slate-800 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-700"
-              >
-                Sou entregador
-              </button>
+              <p className="mt-2 text-center text-xs text-slate-500">
+                Entregador? <button type="button" onClick={() => navigate('/motoboy/register')} className="font-semibold text-slate-700 hover:text-red-600">cadastre-se aqui</button>
+              </p>
             </div>
           </div>
         </div>
@@ -1340,6 +1346,12 @@ export function LandingPage() {
             <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">7 dias grátis + sem cartão</p>
             <p className="text-[11px] text-slate-600 dark:text-slate-400">Crie sua loja em minutos.</p>
           </div>
+          <button
+            onClick={scrollToShowcase}
+            className="px-3 py-2 rounded-xl border border-slate-200 text-slate-700 text-xs font-semibold bg-white"
+          >
+            Ver como funciona
+          </button>
           <button
             onClick={() => navigate('/create')}
             className="px-4 py-2 rounded-xl bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-semibold shadow hover:from-red-600 hover:to-red-700 transition-all"
