@@ -67,7 +67,7 @@ export class FaceVerifyService {
   private timeoutMs =
     process.env.FACE_VERIFY_TIMEOUT_MS && Number(process.env.FACE_VERIFY_TIMEOUT_MS) > 0
       ? Number(process.env.FACE_VERIFY_TIMEOUT_MS)
-      : 15_000;
+      : 90_000;
 
   async getSelfieCooldown(motoboyId: string): Promise<{ blocked: boolean; attempts: number; nextAllowedAt: Date | null }> {
     const row = await AppDataSource.query(
@@ -78,6 +78,7 @@ export class FaceVerifyService {
         WHERE motoboy_id = $1
           AND doc_type = 'SELFIE'
           AND (metadata->'face'->>'checkedAt') IS NOT NULL
+          AND COALESCE(metadata->'face'->>'status','') IN ('done','manual_required')
           AND (metadata->'face'->>'checkedAt')::timestamptz >= NOW() - ($2::int * interval '1 hour')
       )
       SELECT COUNT(*)::int AS count,
@@ -314,13 +315,15 @@ export class FaceVerifyService {
       await repo.save(selfie);
     } catch (error: any) {
       const latencyMs = Date.now() - startedAt;
+      const isTimeout = error?.name === 'AbortError';
       selfie.metadata = selfie.metadata || {};
       selfie.metadata.face = {
         ...faceMetaBase,
-        status: 'failed' as FaceStatus,
-        checkedAt: new Date().toISOString(),
+        // Timeout on low-resource instances is transient; keep pending to retry.
+        status: (isTimeout ? 'pending' : 'failed') as FaceStatus,
+        checkedAt: isTimeout ? null : new Date().toISOString(),
         scoreLabel: 'indisponivel' as ScoreLabel,
-        reason: error?.name === 'AbortError' ? 'timeout' : (error?.message || 'compare_error'),
+        reason: isTimeout ? 'timeout_retry' : (error?.message || 'compare_error'),
         autoDecision: 'manual',
         autoRejected: false,
         attemptWindowCount: (await this.getSelfieCooldown(selfie.motoboyId)).attempts,
