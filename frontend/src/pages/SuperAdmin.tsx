@@ -83,6 +83,7 @@ const faceReasonLabel = (reason?: string) => {
   if (!code || code === 'none') return 'Sem falha registrada';
   if (code === 'rate_limited') return 'Limite de tentativas atingido';
   if (code === 'fetch failed' || code === 'fetch_failed') return 'Falha de conexão com o validador';
+  if (code === 'timeout_retry') return 'Instabilidade no validador (reprocessando automaticamente)';
   if (code === 'timeout') return 'Validação expirou por tempo';
   if (code === 'compare_error') return 'Erro ao comparar as imagens';
   if (code === 'no_face_selfie') return 'Não foi detectado rosto na selfie';
@@ -92,6 +93,24 @@ const faceReasonLabel = (reason?: string) => {
   if (code === 'medium_match') return 'Conferência parcial (revisão manual)';
   if (code === 'manual_review') return 'Revisão manual necessária';
   return code;
+};
+
+const faceStatusLabel = (status?: string) => {
+  const code = String(status || '').toLowerCase();
+  if (!code) return '-';
+  if (code === 'pending') return 'Aguardando validação';
+  if (code === 'processing') return 'Validando';
+  if (code === 'done') return 'Validação concluída';
+  if (code === 'manual_required') return 'Revisão manual necessária';
+  if (code === 'failed') return 'Falha técnica na validação';
+  return code;
+};
+
+const faceScoreLabel = (score: unknown) => {
+  const n = Number(score);
+  if (!Number.isFinite(n)) return '-';
+  const pct = Math.max(0, Math.min(100, n * 100));
+  return `${pct.toFixed(1)}%`;
 };
 
 export function SuperAdmin() {
@@ -2246,13 +2265,13 @@ export function SuperAdmin() {
                                     <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">Face worker</div>
                                     <div className="mt-1 text-[11px] text-slate-700 space-y-0.5">
                                       <div>
-                                        Status: <span className="font-semibold">{String(doc.metadata.face.status || '-')}</span>
+                                        Status: <span className="font-semibold">{faceStatusLabel(String(doc.metadata.face.status || '-'))}</span>
                                       </div>
                                       <div>
                                         Nível: <span className="font-semibold">{String(doc.metadata.face.scoreLabel || '-')}</span>
                                       </div>
                                       <div>
-                                        Score: <span className="font-semibold">{String(doc.metadata.face.faceMatchScore ?? '-')}</span>
+                                        Score: <span className="font-semibold">{faceScoreLabel(doc.metadata.face.faceMatchScore)}</span>
                                       </div>
                                       <div>
                                         Motivo: <span className="font-semibold">{faceReasonLabel(String(doc.metadata.face.reason || ''))}</span>
@@ -2390,14 +2409,14 @@ export function SuperAdmin() {
                             <div>By user: <span className="font-semibold">{String(reviewedByUser)}</span></div>
                           </td>
                           <td className="px-3 py-2 text-[12px] text-slate-700">
-                            <div>Status: <span className="font-semibold">{String(face?.status || '-')}</span></div>
+                            <div>Status: <span className="font-semibold">{faceStatusLabel(String(face?.status || '-'))}</span></div>
                             <div className="flex items-center gap-1.5">
                               <span>Nível:</span>
                               <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${faceTone(faceLabel)}`}>
                                 {faceLabel}
                               </span>
                             </div>
-                            <div>Score: <span className="font-semibold">{String(face?.faceMatchScore ?? '-')}</span></div>
+                            <div>Score: <span className="font-semibold">{faceScoreLabel(face?.faceMatchScore)}</span></div>
                             <div>Motivo: <span className="font-semibold">{faceReasonLabel(String(face?.reason || ''))}</span></div>
                           </td>
                           <td className="px-3 py-2">

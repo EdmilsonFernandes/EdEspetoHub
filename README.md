@@ -402,9 +402,26 @@ Quando o motoboy envia CNH e Selfie, o sistema pode rodar uma verificação auto
 - Tenta detectar rosto na CNH e comparar
 - Salva resultado em `motoboy_documents.metadata.face`
 - Admin vê badge `Alta/Média/Baixa/Indisponível` e revisa manualmente
-- Política de tentativas: até 3 em 24h (depois bloqueia reenvio com 429)
+- Política de tentativas: configurável por ambiente (default 10 em 24h)
+- Para reduzir falso negativo, rejeição automática ocorre após falhas consecutivas (default 2)
 
 Detalhes completos em: `docs/FACE_VERIFY.md`
+
+Configuração recomendada no `.env.prod` (API):
+
+```bash
+FACE_VERIFY_ENABLED=true
+FACE_VERIFY_WORKER_URL=http://face-worker:8000
+FACE_VERIFY_TIMEOUT_MS=90000
+FACE_VERIFY_SCORE_MEDIUM=0.55
+FACE_VERIFY_SCORE_HIGH=0.75
+FACE_VERIFY_MAX_ATTEMPTS=10
+FACE_VERIFY_COOLDOWN_HOURS=24
+FACE_VERIFY_REJECT_AFTER_CONSECUTIVE=2
+FACE_VERIFY_REJECT_APPROVED=false
+FACE_VERIFY_JOB_ENABLED=true
+FACE_VERIFY_JOB_INTERVAL_MS=30000
+```
 
 ## Criar primeira loja (seed de planos)
 
