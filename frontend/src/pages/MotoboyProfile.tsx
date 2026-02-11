@@ -1283,12 +1283,12 @@ export function MotoboyProfile() {
                   const storeStatus =
                     openFlag === false ? 'Loja desativada' : openNow === false ? 'Fora do horário' : openFlag === true || openNow === true ? 'Ativa agora' : 'Ativa';
                   return (
-                    <div key={storeId} className="rounded-2xl border border-emerald-200 bg-emerald-50/30 p-3 flex items-center gap-3 shadow-[0_22px_48px_-40px_rgba(5,150,105,0.35)]">
+                    <div key={storeId} className="rounded-2xl border border-emerald-200 bg-emerald-50/30 p-3 flex flex-col sm:flex-row sm:items-center gap-3 shadow-[0_22px_48px_-40px_rgba(5,150,105,0.35)]">
                       <div className="h-12 w-12 rounded-2xl border border-slate-200 bg-slate-50 overflow-hidden shrink-0">
                         {logo ? <img src={logo} alt={store?.name || 'Loja'} className="h-full w-full object-cover" loading="lazy" /> : null}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <div className="font-extrabold text-slate-900 truncate">{store?.name || store?.slug || 'Loja'}</div>
                           <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold border border-emerald-200 bg-emerald-50 text-emerald-800">
                             Vínculo ativo
@@ -1308,7 +1308,7 @@ export function MotoboyProfile() {
                             showToast(error?.message || 'Nao foi possivel desfazer o vinculo.', 'error');
                           }
                         }}
-                        className="btn-press shrink-0 rounded-xl border border-emerald-200 bg-white px-3 py-2 text-[11px] font-extrabold text-emerald-800"
+                        className="btn-press w-full sm:w-auto rounded-xl border border-emerald-200 bg-white px-3 py-2 text-[11px] font-extrabold text-emerald-800"
                         title="Sair da loja"
                       >
                         Sair
@@ -1355,12 +1355,12 @@ export function MotoboyProfile() {
                       : { cls: 'border-rose-200 bg-rose-50 text-rose-800', text: 'Recusado' };
 
                   return (
-                    <div key={storeId} className="rounded-2xl border border-slate-200 bg-slate-50 p-3 flex items-start gap-3">
+                    <div key={storeId} className="rounded-2xl border border-slate-200 bg-slate-50 p-3 flex flex-col sm:flex-row sm:items-start gap-3">
                       <div className="h-12 w-12 rounded-2xl border border-slate-200 bg-white overflow-hidden shrink-0">
                         {logo ? <img src={logo} alt={store?.name || 'Loja'} className="h-full w-full object-cover" loading="lazy" /> : null}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <div className="font-extrabold text-slate-900 truncate">{store?.name || store?.slug || 'Loja'}</div>
                           <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${pill.cls}`}>{pill.text}</span>
                         </div>
@@ -1376,7 +1376,7 @@ export function MotoboyProfile() {
                           type="button"
                           onClick={() => handleRequestSingle(storeId)}
                           disabled={requesting || !canRequestAnyStore}
-                          className="btn-press shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-800 disabled:opacity-50"
+                          className="btn-press w-full sm:w-auto rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-800 disabled:opacity-50"
                           title={!canRequestAnyStore ? 'Complete perfil e documentos para solicitar.' : 'Solicitar novamente'}
                         >
                           Solicitar novamente

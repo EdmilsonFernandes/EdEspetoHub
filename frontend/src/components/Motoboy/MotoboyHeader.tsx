@@ -60,8 +60,8 @@ export function MotoboyHeader({ title, subtitle, rightAction }: MotoboyHeaderPro
         <div className="flex flex-wrap items-center justify-between gap-2 min-w-0">
           <div className="flex items-center gap-2 flex-wrap min-w-0">{rightAction}</div>
           {showSession ? (
-            <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap sm:ml-auto">
-              <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 bg-white/70 text-slate-800 min-w-0 max-w-full sm:max-w-[280px]">
+            <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap sm:ml-auto w-full sm:w-auto">
+              <div className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 bg-white/70 text-slate-800 min-w-0 max-w-full sm:max-w-[280px]">
                 <UserCircle size={18} weight="duotone" className="text-slate-600" />
                 <div className="leading-tight text-left min-w-0">
                   <div className="text-[11px] font-extrabold truncate">{userName || 'Entregador'}</div>
@@ -71,7 +71,7 @@ export function MotoboyHeader({ title, subtitle, rightAction }: MotoboyHeaderPro
               <button
                 type="button"
                 onClick={handleLogout}
-                className="btn-press px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-extrabold text-slate-700 flex items-center gap-2"
+                className="btn-press ml-auto sm:ml-0 px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-extrabold text-slate-700 flex items-center gap-2"
                 title="Sair"
               >
                 <SignOut size={16} weight="bold" />
