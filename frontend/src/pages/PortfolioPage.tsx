@@ -21,6 +21,7 @@ import { platformService } from "../services/platformService";
 import { planService } from "../services/planService";
 import { resolveAssetUrl } from "../utils/resolveAssetUrl";
 import { formatCurrency } from "../utils/format";
+import { resolveAnnualPromoTotal, resolveMonthlyEquivalent } from "../constants/planCatalog";
 
 /**
  * Type definition for a team member. Adding this type allows TypeScript to
@@ -620,11 +621,34 @@ export function PortfolioPage() {
                 const isYearly = planCycle === "yearly";
 
                 const annualFull = isYearly ? price : null;
-                const annualPromo = isYearly && promo != null && promo > 0 ? promo : null;
+                const annualPromoCandidate =
+                  isYearly && annualFull != null
+                    ? promo != null && promo > 0 && promo < annualFull
+                      ? promo
+                      : resolveAnnualPromoTotal(annualFull)
+                    : null;
+                const annualPromo =
+                  annualPromoCandidate != null &&
+                  annualFull != null &&
+                  annualPromoCandidate > 0 &&
+                  annualPromoCandidate < annualFull
+                    ? annualPromoCandidate
+                    : null;
                 const monthlyFull = isYearly ? (annualFull! / 12) : price;
                 const monthlyPromo = isYearly && annualPromo != null ? (annualPromo / 12) : promo;
+                const yearlyDisplay = isYearly ? annualPromo ?? annualFull ?? 0 : 0;
+                const monthlyEquivalent = isYearly ? resolveMonthlyEquivalent(yearlyDisplay) : null;
+                const normalizedName = String(plan?.name || "").toLowerCase();
+                const tierName = normalizedName.includes("pro")
+                  ? "Pro"
+                  : normalizedName.includes("basic")
+                  ? "Basic"
+                  : plan?.displayName || plan?.name || "Plano";
+                const displayTitle = `${tierName} ${planCycle === "yearly" ? "Anual" : "Mensal"}`;
 
-                const showPromo = monthlyPromo != null && monthlyPromo > 0 && monthlyPromo < monthlyFull;
+                const showPromo = isYearly
+                  ? annualPromo != null && annualFull != null && annualPromo < annualFull
+                  : monthlyPromo != null && monthlyPromo > 0 && monthlyPromo < monthlyFull;
                 return (
                   <div
                     key={plan?.id || plan?.name}
@@ -640,7 +664,7 @@ export function PortfolioPage() {
                           {planCycle === "yearly" ? "Anual" : "Mensal"}
                         </p>
                         <p className={`mt-2 text-xl font-black ${meta.featured ? "text-white" : "text-slate-900"}`}>
-                          {plan?.displayName || plan?.name || "Plano"}
+                          {displayTitle}
                         </p>
                       </div>
                       <span className={`px-3 py-1 rounded-full text-[11px] font-bold ${meta.tone}`}>
@@ -654,24 +678,24 @@ export function PortfolioPage() {
                           <div>
                             <p className={`text-xs ${meta.featured ? "text-white/70" : "text-slate-500"}`}>de</p>
                             <p className={`text-sm font-bold line-through ${meta.featured ? "text-white/60" : "text-slate-400"}`}>
-                              {formatCurrency(monthlyFull)}
+                              {formatCurrency(isYearly ? annualFull! : monthlyFull)}
                             </p>
                           </div>
                           <div className="text-right">
                             <p className={`text-xs ${meta.featured ? "text-white/70" : "text-slate-500"}`}>por</p>
                             <p className={`text-3xl font-black ${meta.featured ? "text-white" : "text-slate-900"}`}>
-                              {formatCurrency(monthlyPromo!)}
+                              {formatCurrency(isYearly ? annualPromo! : monthlyPromo!)}
                             </p>
                           </div>
                         </div>
                       ) : (
                         <p className={`text-3xl font-black ${meta.featured ? "text-white" : "text-slate-900"}`}>
-                          {formatCurrency(monthlyFull)}
+                          {formatCurrency(isYearly ? annualFull! : monthlyFull)}
                         </p>
                       )}
                       <p className={`mt-2 text-xs ${meta.featured ? "text-white/70" : "text-slate-500"}`}>
                         {planCycle === "yearly"
-                          ? `cobrado anualmente (${formatCurrency(annualPromo ?? annualFull ?? 0)})`
+                          ? `/ano (${formatCurrency(Number(monthlyEquivalent || 0))}/mês)`
                           : "cobrado por mês"}
                       </p>
                       <p className={`mt-1 text-xs ${meta.featured ? "text-white/70" : "text-slate-500"}`}>
