@@ -951,6 +951,7 @@ export function MotoboyProfile() {
             const tone: any = status === 'APPROVED' ? 'emerald' : status === 'REJECTED' ? 'rose' : status === 'PENDING' ? 'amber' : 'slate';
             const canUpload = canStartUpload(doc.key) && !uploading;
             const lockUpload = Boolean(current) && (isPending || (isApproved && !reuploadRequest));
+            const selectedFile = docFiles[doc.key] || null;
 
             const blockedSelfieBanner = blockedByOrder ? (
               <div className="rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
@@ -996,30 +997,39 @@ export function MotoboyProfile() {
             ) : null;
 
             const secondaryAction = !lockUpload ? (
-              <details className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
-                <summary className="cursor-pointer select-none px-3 py-2 text-xs font-extrabold text-slate-800 bg-slate-50">
-                  {prefersCamera ? 'Ou enviar imagem da galeria' : 'Enviar imagem'}
-                </summary>
-                <div className="p-3 space-y-2">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    disabled={!canUpload}
-                    onChange={(event) =>
-                      setDocFiles((prev) => ({ ...prev, [doc.key]: event.target.files?.[0] || null }))
-                    }
-                    className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm disabled:opacity-60"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => handleUploadDocument(doc.key)}
-                    disabled={!canUpload}
-                    className="btn-press w-full rounded-2xl bg-slate-900 px-4 py-3 text-sm font-extrabold text-white disabled:opacity-50 shadow-[0_22px_48px_-34px_rgba(15,23,42,0.55)]"
-                  >
-                    {uploading ? 'Enviando...' : isRejected ? 'Reenviar documento' : 'Enviar documento'}
-                  </button>
-                </div>
-              </details>
+              <div className="space-y-2">
+                <details className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
+                  <summary className="cursor-pointer select-none px-3 py-2 text-xs font-extrabold text-slate-800 bg-slate-50">
+                    {prefersCamera ? 'Ou enviar imagem da galeria' : 'Enviar imagem'}
+                  </summary>
+                  <div className="p-3 space-y-2">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      disabled={!canUpload}
+                      onChange={(event) =>
+                        setDocFiles((prev) => ({ ...prev, [doc.key]: event.target.files?.[0] || null }))
+                      }
+                      className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm disabled:opacity-60"
+                    />
+                  </div>
+                </details>
+
+                {selectedFile ? (
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700">
+                    Arquivo selecionado: <span className="font-semibold">{selectedFile.name}</span>
+                  </div>
+                ) : null}
+
+                <button
+                  type="button"
+                  onClick={() => handleUploadDocument(doc.key)}
+                  disabled={!canUpload || !selectedFile}
+                  className="btn-press w-full rounded-2xl bg-slate-900 px-4 py-3 text-sm font-extrabold text-white disabled:opacity-50 shadow-[0_22px_48px_-34px_rgba(15,23,42,0.55)]"
+                >
+                  {uploading ? 'Enviando...' : isRejected ? 'Reenviar documento' : 'Enviar documento'}
+                </button>
+              </div>
             ) : null;
 
             const rejectedReason = isRejected ? String(current?.metadata?.review?.reason || '') || null : null;
