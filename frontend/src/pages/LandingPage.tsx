@@ -495,58 +495,70 @@ export function LandingPage() {
       <Hero />
 
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
-        <div className="grid lg:grid-cols-[1.2fr_0.8fr] gap-8">
-          <div>
+        <div className="grid lg:grid-cols-[1.15fr_0.85fr] gap-8">
+          <div className="space-y-5">
             <p className="text-xs uppercase tracking-[0.3em] text-red-600 dark:text-red-400 font-bold">Como funciona</p>
-            <h2 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white mt-3">
-              Em 3 passos, sua operação roda sozinha
+            <h2 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white leading-tight">
+              Um fluxo simples que transforma cardápio em venda todos os dias
             </h2>
-            <p className="text-base sm:text-lg text-gray-700 dark:text-gray-200 mt-3 max-w-xl">
-              Você cria, publica e começa a receber pedidos no mesmo dia. O cliente acompanha e a produção recebe tudo organizado.
+            <p className="text-base sm:text-lg text-gray-700 dark:text-gray-200 max-w-2xl">
+              Sem gambiarra e sem planilha paralela. Você publica a loja, recebe pedidos e acompanha tudo em tempo real.
             </p>
-            <div className="mt-6 space-y-4">
+
+            <div className="grid gap-3">
               {[
                 {
-                  title: 'Crie sua loja',
-                  desc: 'Cadastre dados básicos, escolha cores e publique seu link.',
+                  step: '01',
+                  title: 'Configura em minutos',
+                  desc: 'Crie a loja, ajuste identidade visual e publique seu link.',
                   icon: Palette,
                 },
                 {
-                  title: 'Monte o cardápio',
-                  desc: 'Adicione produtos, fotos e promoções em minutos.',
+                  step: '02',
+                  title: 'Recebe pedidos organizados',
+                  desc: 'Checkout rápido para o cliente e fila clara para sua equipe.',
                   icon: ShoppingCart,
                 },
                 {
-                  title: 'Receba pedidos',
-                  desc: 'Fila de Produção atualiza sozinha e o cliente acompanha.',
-                  icon: ChefHat,
+                  step: '03',
+                  title: 'Entrega e acompanha tudo',
+                  desc: 'Produção, motoboy e rastreio em um único fluxo.',
+                  icon: Truck,
                 },
               ].map((step) => {
                 const Icon = step.icon;
                 return (
-                <div key={step.title} className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-full bg-red-500 text-white font-black flex items-center justify-center shadow-sm" aria-hidden="true">
-                    <Icon size={18} weight="duotone" />
+                  <div
+                    key={step.title}
+                    className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 flex items-start gap-4 shadow-sm"
+                  >
+                    <div className="w-11 h-11 rounded-2xl bg-gradient-to-r from-red-500 to-orange-500 text-white font-black flex items-center justify-center shadow-sm shrink-0">
+                      <Icon size={18} weight="duotone" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400 font-bold">{step.step}</p>
+                      <p className="text-base font-extrabold text-gray-900 dark:text-white mt-0.5">{step.title}</p>
+                      <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">{step.desc}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-base font-semibold text-gray-900 dark:text-white">{step.title}</p>
-                    <p className="text-sm text-gray-700 dark:text-gray-300">{step.desc}</p>
-                  </div>
-                </div>
-              )})}
+                );
+              })}
             </div>
-            <div className="mt-6 flex flex-wrap gap-3 text-xs text-slate-700 dark:text-slate-300">
-              <span className="px-3 py-1 rounded-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">Sem cartão</span>
-              <span className="px-3 py-1 rounded-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">Cancelamento fácil</span>
+
+            <div className="flex flex-wrap gap-3 text-xs text-slate-700 dark:text-slate-300">
+              <span className="px-3 py-1 rounded-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">Sem cartão no teste</span>
+              <span className="px-3 py-1 rounded-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">Sem limite de pedido no plano</span>
               <span className="px-3 py-1 rounded-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">Suporte humano</span>
             </div>
           </div>
-          <div className="rounded-[28px] border border-slate-200 dark:border-slate-700 bg-gradient-to-br from-white via-white to-rose-50 dark:from-slate-800 dark:via-slate-800 dark:to-rose-950/20 p-6 shadow-[0_20px_70px_-45px_rgba(15,23,42,0.5)]">
-            <p className="text-xs uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">Para quem é</p>
-            <h3 className="text-xl font-black text-gray-900 dark:text-white mt-3">Feito para quem vende rápido</h3>
+
+          <div className="rounded-[28px] border border-slate-200 dark:border-slate-700 bg-gradient-to-br from-white via-white to-red-50 dark:from-slate-800 dark:via-slate-800 dark:to-rose-950/20 p-6 shadow-[0_20px_70px_-45px_rgba(15,23,42,0.5)]">
+            <p className="text-xs uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">Impacto no negócio</p>
+            <h3 className="text-2xl font-black text-gray-900 dark:text-white mt-2">Pronto para escalar</h3>
             <p className="text-sm text-gray-600 dark:text-gray-300 mt-2">
-              Espetos, porções, bebidas, combos e adegas. Ideal para operações com fluxo alto.
+              Pensado para casas de espeto, porções e bebidas que querem vender mais sem perder controle da operação.
             </p>
+
             <div className="mt-5 grid grid-cols-2 gap-3 text-sm font-semibold text-slate-800 dark:text-slate-200">
               {audienceItems.map((item) => (
                 <div
@@ -560,17 +572,27 @@ export function LandingPage() {
                 </div>
               ))}
             </div>
-            <div className="mt-5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-              <div>
-                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">Área do entregador</p>
-                <p className="text-xs text-slate-600 dark:text-slate-400">
-                  Motoboys solicitam vínculo e entregam com controle total.
-                </p>
-              </div>
+
+            <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50/70 dark:border-emerald-900 dark:bg-emerald-950/20 p-4">
+              <p className="text-xs uppercase tracking-[0.22em] text-emerald-700 dark:text-emerald-300 font-bold">Potencial mensal</p>
+              <p className="text-3xl font-black text-emerald-700 dark:text-emerald-200 mt-1">{formatCurrency(monthlyEstimate)}</p>
+              <p className="text-xs text-emerald-800/80 dark:text-emerald-300/80 mt-1">
+                Simulação rápida com ticket médio e pedidos por dia.
+              </p>
+            </div>
+
+            <div className="mt-5 grid sm:grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => navigate('/create')}
+                className="px-4 py-3 rounded-xl bg-slate-900 text-white text-sm font-extrabold hover:opacity-90"
+              >
+                Criar minha loja
+              </button>
               <button
                 type="button"
                 onClick={() => navigate('/motoboy/register')}
-                className="px-4 py-2 rounded-lg bg-slate-900 text-white text-xs font-semibold hover:opacity-90"
+                className="px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-extrabold text-slate-800 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-700"
               >
                 Sou entregador
               </button>
