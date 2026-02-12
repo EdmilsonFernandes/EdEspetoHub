@@ -657,7 +657,7 @@ interface Props {
 export function AdminDashboard({ session: sessionProp }: Props) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { auth, hydrated, setAuth } = useAuth();
+  const { auth, setAuth } = useAuth();
   const { branding, setBranding } = useTheme();
   const { showToast } = useToast();
 
@@ -756,19 +756,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     });
   };
 
-
-  /* =========================
-   * PROTEÇÃO DE ROTA (ADMIN)
-   * ========================= */
-  useEffect(() => {
-    if (!hydrated) return;
-
-    if (!session?.token || session?.user?.role !== 'ADMIN' || !session?.store) {
-      navigate('/admin');
-      return;
-    }
-
-  }, [hydrated, navigate, session?.store, session?.token, session?.user?.role]);
 
   useEffect(() => {
     setBrandingDraft({

@@ -31,9 +31,7 @@ function App() {
               element={
                 <AppErrorBoundary>
                   <AdminRoute>
-                    <AdminLayout>
-                      <AdminDashboard />
-                    </AdminLayout>
+                    <AdminDashboard />
                   </AdminRoute>
                 </AppErrorBoundary>
               }
