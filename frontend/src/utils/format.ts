@@ -100,10 +100,15 @@ export const formatPlanName = (name = '') => {
 };
 
 export const formatPhoneInput = (value = '', defaultAreaCode = '') => {
+  const raw = String(value || '').trim();
   const digits = (value || '').replace(/\D/g, '').slice(0, 11);
   const fallbackDdd = (defaultAreaCode || '').replace(/\D/g, '').slice(0, 2);
+  const hasExplicitDddPrefix = /^\(\d{1,2}\)?/.test(raw);
 
   if (!digits && !fallbackDdd) return '';
+  if (hasExplicitDddPrefix && digits.length <= 2) {
+    return digits ? `(${digits})` : fallbackDdd ? `(${fallbackDdd})` : '';
+  }
 
   const hasCompleteDdd = digits.length >= 10;
   const ddd = hasCompleteDdd ? digits.slice(0, 2) : fallbackDdd;
