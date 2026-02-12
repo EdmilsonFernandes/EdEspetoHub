@@ -1404,7 +1404,7 @@ export function MotoboyProfile() {
                             Vínculo ativo
                           </span>
                         </div>
-                        <div className="text-[11px] text-slate-500 truncate">{desc ? String(desc) : storeStatus}</div>
+                        <div className="text-[11px] text-slate-500 break-words">{desc ? String(desc) : storeStatus}</div>
                       </div>
                       <button
                         type="button"
@@ -1474,7 +1474,7 @@ export function MotoboyProfile() {
                           <div className="font-extrabold text-slate-900 truncate">{store?.name || store?.slug || 'Loja'}</div>
                           <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${pill.cls}`}>{pill.text}</span>
                         </div>
-                        <div className="text-[11px] text-slate-500 truncate">{desc ? String(desc) : null}</div>
+                        <div className="text-[11px] text-slate-500 break-words">{desc ? String(desc) : null}</div>
                         {isRejected && reason ? (
                           <div className="mt-2 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-[11px] text-rose-800">
                             <span className="font-extrabold">Motivo:</span> {reason}
@@ -1534,7 +1534,7 @@ export function MotoboyProfile() {
                         onClick={() => toggleStore(storeId)}
                         disabled={Boolean(req) && !wasRejectedOrInactive}
                         className={[
-                          'btn-press rounded-2xl border p-3 text-left flex items-center gap-3',
+                          'btn-press rounded-2xl border p-3 text-left flex flex-col items-start gap-3 sm:flex-row sm:items-center',
                           isSelected ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-white text-slate-800',
                           Boolean(req) && !wasRejectedOrInactive ? 'opacity-60 cursor-not-allowed' : '',
                         ].join(' ')}
@@ -1543,7 +1543,7 @@ export function MotoboyProfile() {
                           {logo ? <img src={logo} alt={store.name} className="h-full w-full object-cover" loading="lazy" /> : null}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2">
+                          <div className="flex flex-wrap items-center gap-2">
                             <div className="font-extrabold truncate">{store.name}</div>
                             <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${isSelected ? 'border-white/30 bg-white/15 text-white' : 'border-slate-200 bg-slate-50 text-slate-700'}`}>
                               {storeStatus}
@@ -1554,7 +1554,7 @@ export function MotoboyProfile() {
                               </span>
                             ) : null}
                           </div>
-                          <div className={`text-[11px] truncate ${isSelected ? 'text-white/80' : 'text-slate-500'}`}>
+                          <div className={`text-[11px] break-words ${isSelected ? 'text-white/80' : 'text-slate-500'}`}>
                             {desc ? String(desc) : null}
                           </div>
                         </div>

@@ -1226,10 +1226,10 @@ export const ProductManager = ({ products, onProductsChange }) => {
                 </div>
               </div>
               <div
-                className="fixed left-0 right-0 bottom-0 z-10 border-t border-slate-200 bg-white/95 backdrop-blur px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+12px)] sm:absolute sm:rounded-b-3xl"
+                className="sticky bottom-0 z-20 -mx-5 mt-4 border-t border-slate-200 bg-white/95 px-5 py-3 pb-[calc(env(safe-area-inset-bottom)+12px)] backdrop-blur sm:-mx-6 sm:px-6"
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="mx-auto w-full max-w-2xl flex gap-3">
+                <div className="mx-auto flex w-full max-w-2xl gap-3">
                 <button
                   type="button"
                   onClick={handleInlineCancel}

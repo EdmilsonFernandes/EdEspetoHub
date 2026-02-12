@@ -1073,7 +1073,7 @@ export function AdminMotoboys() {
             {filteredMotoboys.map((link) => (
               <div
                 key={link.id}
-                className="rounded-2xl border border-slate-200 bg-white p-4 flex flex-col gap-3 shadow-[0_26px_60px_-48px_rgba(15,23,42,0.35)]"
+                className="rounded-2xl border border-slate-200 bg-white p-4 flex flex-col gap-3 overflow-hidden shadow-[0_26px_60px_-48px_rgba(15,23,42,0.35)]"
                 style={{
                   borderLeftWidth: 6,
                   borderLeftColor: link.active ? (link.busy ? 'rgb(245 158 11)' : 'rgb(16 185 129)') : 'rgb(244 63 94)',
@@ -1088,15 +1088,15 @@ export function AdminMotoboys() {
                         .toUpperCase()}
                     </div>
                     <div className="min-w-0">
-                      <p className="text-sm font-black text-slate-900 truncate">
+                      <p className="text-sm font-black text-slate-900 break-words">
                       {link.motoboyUser?.fullName || 'Entregador'}
                     </p>
-                    <p className="text-xs text-slate-500">{link.motoboyUser?.email || '-'}</p>
+                    <p className="text-xs text-slate-500 break-all">{link.motoboyUser?.email || '-'}</p>
                     {link.motoboyUser?.phone && (
-                      <p className="text-xs text-slate-500">{link.motoboyUser.phone}</p>
+                      <p className="text-xs text-slate-500 break-all">{link.motoboyUser.phone}</p>
                     )}
                     {formatVehicleLine(link.motoboyProfile) ? (
-                      <p className="text-[11px] text-slate-600 mt-1 truncate">{formatVehicleLine(link.motoboyProfile)}</p>
+                      <p className="text-[11px] text-slate-600 mt-1 break-words">{formatVehicleLine(link.motoboyProfile)}</p>
                     ) : null}
                     </div>
                   </div>
