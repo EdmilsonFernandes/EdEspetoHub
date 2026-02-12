@@ -761,7 +761,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
    * PROTEÇÃO DE ROTA (ADMIN)
    * ========================= */
   useEffect(() => {
-    console.count('AdminDashboard guard effect');
     if (!hydrated) return;
 
     if (!session?.token || session?.user?.role !== 'ADMIN' || !session?.store) {
@@ -868,7 +867,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     };
     window.addEventListener('adminHeader:toggle', handleToggle as EventListener);
     window.addEventListener('adminHeader:set', handleToggle as EventListener);
-    return () => window.removeEventListener('adminHeader:toggle', handleToggle as EventListener);
+    return () => {
+      window.removeEventListener('adminHeader:toggle', handleToggle as EventListener);
+      window.removeEventListener('adminHeader:set', handleToggle as EventListener);
+    };
   }, []);
 
   useEffect(() => {
