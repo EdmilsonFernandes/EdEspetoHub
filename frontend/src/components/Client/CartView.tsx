@@ -133,9 +133,11 @@ export const CartView = ({
 
   const handlePhoneLocalNumberChange = (nextValue) => {
     const digits = nextValue.replace(/\D/g, "").slice(0, 11);
-    const pastedHasDdd = digits.length >= 10 && BRAZIL_DDDS.includes(digits.slice(0, 2));
-    const resolvedDdd = pastedHasDdd ? digits.slice(0, 2) : phoneParts.ddd;
-    const localDigits = pastedHasDdd ? digits.slice(2, 11) : digits.slice(0, 9);
+    const canAutoExtractDdd = !phoneParts.ddd;
+    const extractedHasDdd =
+      canAutoExtractDdd && digits.length >= 10 && BRAZIL_DDDS.includes(digits.slice(0, 2));
+    const resolvedDdd = extractedHasDdd ? digits.slice(0, 2) : phoneParts.ddd;
+    const localDigits = extractedHasDdd ? digits.slice(2, 11) : digits.slice(0, 9);
     const formatted = localDigits
       ? resolvedDdd
         ? formatPhoneInput(localDigits, resolvedDdd)
