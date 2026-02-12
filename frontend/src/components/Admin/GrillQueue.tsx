@@ -30,7 +30,7 @@ import {
   formatOrderStatus,
   formatOrderType,
 } from "../../utils/format";
-import { formatSelectedModifiers } from "../../utils/productModifiers";
+import { formatSelectedModifiers, getModifiersSignature } from "../../utils/productModifiers";
 import { getPaymentMethodMeta } from "../../utils/paymentAssets";
 import { useAuth } from "../../contexts/AuthContext";
 import { buildPixPayload } from "../../utils/pixPayload";
@@ -215,7 +215,7 @@ export const GrillQueue = () => {
     return "bg-slate-100 text-slate-700";
   };
   const getItemBaseKey = (item) =>
-    `${item?.productId || item?.name || ''}-${item?.cookingPoint || ''}-${item?.passSkewer ? '1' : '0'}`;
+    `${item?.productId || item?.name || ''}-${item?.cookingPoint || ''}-${item?.passSkewer ? '1' : '0'}-${getModifiersSignature(item?.selectedModifiers || [])}`;
 
   const resolvePromoMeta = (item: any) => {
     const product = productsById.get(item.productId || item.id);
@@ -1546,7 +1546,10 @@ export const GrillQueue = () => {
                 <div className="mt-3 space-y-2">
                   {(order.items || []).slice(0, 3).map((item) => (
                     <div key={item.id} className="flex items-center justify-between text-xs text-slate-600">
-                      <span className="truncate">{item.qty}x {item.name}</span>
+                      <span className="truncate">
+                        {item.qty}x {item.name}
+                        {formatItemOptions(item) ? ` (${formatItemOptions(item)})` : ''}
+                      </span>
                       <span className="font-semibold text-slate-700">
                       {(() => {
                         const promoMeta = resolvePromoMeta(item);
