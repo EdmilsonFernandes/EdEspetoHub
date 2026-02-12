@@ -10,6 +10,7 @@ import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { applyBrandTheme } from '../utils/brandTheme';
 import { buildPixPayload } from '../utils/pixPayload';
 import { GoogleRouteMapView } from '../components/GoogleRouteMapView';
+import { formatSelectedModifiers } from '../utils/productModifiers';
 
 const statusLabels: Record<string, string> = {
   pending: 'Recebido',
@@ -254,6 +255,8 @@ export function OrderTracking() {
     const labels = [];
     if (item?.cookingPoint) labels.push(item.cookingPoint);
     if (item?.passSkewer) labels.push('passar varinha');
+    const selected = formatSelectedModifiers(item?.selectedModifiers || []);
+    if (selected.length) labels.push(`+ ${selected.join(', ')}`);
     return labels.length ? labels.join(' • ') : '';
   };
   const trackingLink = typeof window !== 'undefined' && order?.id
@@ -289,6 +292,7 @@ export function OrderTracking() {
         quantity: item.quantity ?? item.qty ?? 1,
         cookingPoint: item.cookingPoint || '',
         passSkewer: Boolean(item.passSkewer),
+        selectedModifiers: item.selectedModifiers || [],
       })),
     };
     localStorage.setItem(`reorder:${storeSlug}`, JSON.stringify(payload));

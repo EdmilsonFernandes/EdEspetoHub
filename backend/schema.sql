@@ -111,6 +111,7 @@ CREATE TABLE IF NOT EXISTS products (
   is_featured BOOLEAN NOT NULL DEFAULT FALSE,
   active BOOLEAN NOT NULL DEFAULT TRUE,
   availability_days JSONB,
+  modifiers JSONB,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -147,7 +148,8 @@ CREATE TABLE IF NOT EXISTS order_items (
   quantity INTEGER NOT NULL,
   price NUMERIC(10,2) NOT NULL,
   cooking_point TEXT,
-  pass_skewer BOOLEAN NOT NULL DEFAULT FALSE
+  pass_skewer BOOLEAN NOT NULL DEFAULT FALSE,
+  selected_modifiers JSONB
 );
 
 ALTER TABLE products
@@ -162,11 +164,15 @@ ALTER TABLE products
 ADD COLUMN IF NOT EXISTS promo_active BOOLEAN NOT NULL DEFAULT FALSE;
 ALTER TABLE products
 ADD COLUMN IF NOT EXISTS availability_days JSONB;
+ALTER TABLE products
+ADD COLUMN IF NOT EXISTS modifiers JSONB;
 
 ALTER TABLE order_items
 ADD COLUMN IF NOT EXISTS cooking_point TEXT;
 ALTER TABLE order_items
 ADD COLUMN IF NOT EXISTS pass_skewer BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE order_items
+ADD COLUMN IF NOT EXISTS selected_modifiers JSONB;
 
 -- Índices multi-loja
 CREATE INDEX IF NOT EXISTS idx_products_store ON products(store_id);

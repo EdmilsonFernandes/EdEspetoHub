@@ -1,4 +1,5 @@
 import { apiClient } from "../config/apiClient";
+import { normalizeProductModifiers } from "../utils/productModifiers";
 
 const isUuid = (value: string) =>
   /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(value);
@@ -48,6 +49,7 @@ const normalizeOrder = (order: any) => ({
       name: item.name ?? item.product?.name,
       cookingPoint: item.cookingPoint ?? item.cooking_point,
       passSkewer: item.passSkewer ?? item.pass_skewer ?? false,
+      selectedModifiers: normalizeProductModifiers(item.selectedModifiers ?? item.selected_modifiers ?? []),
       promoActive,
       promoPrice,
       originalPrice,
@@ -232,6 +234,7 @@ export const orderService = {
       quantity: Number(item.qty ?? item.quantity ?? 0),
       cookingPoint: item.cookingPoint,
       passSkewer: item.passSkewer,
+      selectedModifiers: item.selectedModifiers,
     }));
     await apiClient.patch(`/orders/${id}`, { items: normalizedItems, total });
   },

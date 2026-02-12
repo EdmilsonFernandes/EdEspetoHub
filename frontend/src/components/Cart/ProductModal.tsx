@@ -3,6 +3,11 @@
 import { Plus, X } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 import { formatCurrency } from "../../utils/format";
+import {
+  getModifiersTotal,
+  normalizeProductModifiers,
+  normalizeSelectedModifiers,
+} from "../../utils/productModifiers";
 
 export interface ProductModalProps {
 
@@ -16,10 +21,19 @@ export interface ProductModalProps {
 export const ProductModal = ({ product, isOpen, onClose, onAddToCart }: ProductModalProps) => {
   const [cookingPoint, setCookingPoint] = useState("ao ponto");
   const [passSkewer, setPassSkewer] = useState(false);
+  const [selectedModifierIds, setSelectedModifierIds] = useState<string[]>([]);
   const promoPrice =
     product?.promoActive && product?.promoPrice && Number(product?.promoPrice) > 0
       ? Number(product.promoPrice)
       : null;
+  const basePrice = promoPrice || Number(product?.price) || 0;
+  const availableModifiers = normalizeProductModifiers(product?.modifiers || []).filter((item) => item.active !== false);
+  const selectedModifiers = normalizeSelectedModifiers(
+    availableModifiers.filter((item) => selectedModifierIds.includes(item.id)),
+    availableModifiers
+  );
+  const modifiersTotal = getModifiersTotal(selectedModifiers);
+  const unitFinalPrice = basePrice + modifiersTotal;
 
   const isEspetoCategory = (category: any) => {
   const normalized = (category || "").toString().trim().toLowerCase();
@@ -30,6 +44,7 @@ export const ProductModal = ({ product, isOpen, onClose, onAddToCart }: ProductM
   useEffect(() => {
     setCookingPoint("ao ponto");
     setPassSkewer(false);
+    setSelectedModifierIds([]);
   }, [product?.id]);
 
   const [isAnimating, setIsAnimating] = useState(false);
@@ -45,6 +60,12 @@ export const ProductModal = ({ product, isOpen, onClose, onAddToCart }: ProductM
     setTimeout(() => {
       onClose();
     }, 200);
+  };
+
+  const toggleModifier = (modifierId: string) => {
+    setSelectedModifierIds((prev) =>
+      prev.includes(modifierId) ? prev.filter((id) => id !== modifierId) : [...prev, modifierId]
+    );
   };
 
   if (!isOpen && !isAnimating) return null;
@@ -130,10 +151,52 @@ export const ProductModal = ({ product, isOpen, onClose, onAddToCart }: ProductM
               </label>
             </div>
           )}
+          {availableModifiers.length > 0 && (
+            <div className="space-y-2">
+              <h4 className="font-semibold text-gray-700">Adicionais</h4>
+              <div className="space-y-2">
+                {availableModifiers.map((modifier) => {
+                  const checked = selectedModifierIds.includes(modifier.id);
+                  return (
+                    <label
+                      key={modifier.id}
+                      className={`flex items-center justify-between rounded-xl border px-3 py-2 text-sm transition ${
+                        checked
+                          ? "border-brand-primary bg-brand-primary-soft/50 text-brand-primary"
+                          : "border-gray-200 bg-white text-gray-700"
+                      }`}
+                    >
+                      <span className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => toggleModifier(modifier.id)}
+                        />
+                        <span>{modifier.name}</span>
+                      </span>
+                      <span className="font-semibold">+ {formatCurrency(modifier.price)}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+          {(availableModifiers.length > 0 || showEspetoOptions) && (
+            <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
+              <span className="font-semibold">Subtotal do item:</span> {formatCurrency(unitFinalPrice)}
+            </div>
+          )}
 
           <button
             onClick={() => {
-              onAddToCart(product, 1, showEspetoOptions ? { cookingPoint, passSkewer } : undefined);
+              const baseOptions = showEspetoOptions ? { cookingPoint, passSkewer } : {};
+              const options =
+                selectedModifiers.length > 0
+                  ? { ...baseOptions, selectedModifiers }
+                  : Object.keys(baseOptions).length
+                  ? baseOptions
+                  : undefined;
+              onAddToCart(product, 1, options);
               handleClose();
             }}
             className="w-full bg-brand-primary text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-brand-primary/90 transition"

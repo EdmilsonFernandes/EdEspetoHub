@@ -15,6 +15,7 @@ import {
 import { productService } from '../../services/productService';
 import { formatCurrency } from '../../utils/format';
 import { useToast } from '../../contexts/ToastContext';
+import { normalizeProductModifiers } from '../../utils/productModifiers';
 
 const WEEK_DAYS = [
   { key: 'mon', label: 'Seg' },
@@ -41,6 +42,7 @@ const initialForm = {
   isFeatured: false,
   active: true,
   availabilityDays: { ...defaultAvailability },
+  modifiers: [],
 };
 const defaultCategories = [
   { id: 'espetos', label: 'Espetos', icon: Fire },
@@ -162,6 +164,13 @@ const buildAvailabilityPayload = (value) => {
   return normalized;
 };
 
+const createEmptyModifier = (index = 0) => ({
+  id: `modifier-${Date.now()}-${index}`,
+  name: '',
+  price: '',
+  active: true,
+});
+
 export const ProductManager = ({ products, onProductsChange }) => {
   const { showToast } = useToast();
   const formRef = useRef<HTMLDivElement | null>(null);
@@ -182,6 +191,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
     isFeatured: false,
     active: true,
     availabilityDays: { ...defaultAvailability },
+    modifiers: [],
   });
   const [inlineImageFile, setInlineImageFile] = useState('');
   const [formData, setFormData] = useState(initialForm);
@@ -279,6 +289,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
       imageUrl: imageMode === 'url' ? formData.imageUrl : undefined,
       description: formData.description || undefined,
       availabilityDays: buildAvailabilityPayload(formData.availabilityDays),
+      modifiers: normalizeProductModifiers(formData.modifiers || []),
     };
 
     try {
@@ -313,6 +324,11 @@ export const ProductManager = ({ products, onProductsChange }) => {
       isFeatured: Boolean(product.isFeatured),
       active: product.active !== false,
       availabilityDays: normalizeAvailabilityState(product.availabilityDays),
+      modifiers: normalizeProductModifiers(product.modifiers || []).map((modifier, index) => ({
+        ...modifier,
+        id: modifier.id || `modifier-${product.id}-${index + 1}`,
+        price: String(modifier.price ?? ''),
+      })),
     });
   };
 
@@ -345,6 +361,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
         isFeatured: inlineForm.isFeatured,
         active: inlineForm.active,
         availabilityDays: buildAvailabilityPayload(inlineForm.availabilityDays),
+        modifiers: normalizeProductModifiers(inlineForm.modifiers || []),
       });
       showToast('Produto atualizado com sucesso.', 'success');
       setInlineEditId(null);
@@ -655,6 +672,73 @@ export const ProductManager = ({ products, onProductsChange }) => {
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             />
+          </div>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between gap-2">
+              <label className="text-sm font-medium text-gray-700">Adicionais (opcional)</label>
+              <button
+                type="button"
+                onClick={() =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    modifiers: [ ...(prev.modifiers || []), createEmptyModifier((prev.modifiers || []).length) ],
+                  }))
+                }
+                className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                + Adicional
+              </button>
+            </div>
+            {(formData.modifiers || []).length === 0 ? (
+              <p className="text-xs text-slate-500">Ex.: Ovo, Bacon, Calabresa (cada um com preço extra).</p>
+            ) : (
+              <div className="space-y-2">
+                {(formData.modifiers || []).map((modifier, index) => (
+                  <div key={modifier.id || index} className="grid grid-cols-1 md:grid-cols-[1fr_160px_auto] gap-2 items-center">
+                    <input
+                      className="p-3 border border-gray-200 rounded-lg w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+                      placeholder="Nome do adicional"
+                      value={modifier.name || ''}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          modifiers: (prev.modifiers || []).map((entry, entryIndex) =>
+                            entryIndex === index ? { ...entry, name: e.target.value } : entry
+                          ),
+                        }))
+                      }
+                    />
+                    <input
+                      type="number"
+                      step="0.01"
+                      className="p-3 border border-gray-200 rounded-lg w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+                      placeholder="Preço extra"
+                      value={modifier.price || ''}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          modifiers: (prev.modifiers || []).map((entry, entryIndex) =>
+                            entryIndex === index ? { ...entry, price: e.target.value } : entry
+                          ),
+                        }))
+                      }
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          modifiers: (prev.modifiers || []).filter((_, entryIndex) => entryIndex !== index),
+                        }))
+                      }
+                      className="px-3 py-2 rounded-lg border border-rose-200 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100"
+                    >
+                      Remover
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-700">Dias de exibição</label>
@@ -1114,6 +1198,73 @@ export const ProductManager = ({ products, onProductsChange }) => {
                   value={inlineForm.description}
                   onChange={(e) => setInlineForm((prev) => ({ ...prev, description: e.target.value }))}
                 />
+              </div>
+              <div>
+                <div className="flex items-center justify-between gap-2">
+                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">Adicionais</label>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setInlineForm((prev) => ({
+                        ...prev,
+                        modifiers: [ ...(prev.modifiers || []), createEmptyModifier((prev.modifiers || []).length) ],
+                      }))
+                    }
+                    className="px-2 py-1 rounded-lg border border-slate-200 text-[11px] font-semibold text-slate-700"
+                  >
+                    + Adicional
+                  </button>
+                </div>
+                {(inlineForm.modifiers || []).length === 0 ? (
+                  <p className="mt-2 text-[11px] text-slate-500">Sem adicionais cadastrados.</p>
+                ) : (
+                  <div className="mt-2 space-y-2">
+                    {(inlineForm.modifiers || []).map((modifier, index) => (
+                      <div key={modifier.id || index} className="grid grid-cols-[1fr_120px_auto] gap-2 items-center">
+                        <input
+                          className="w-full p-3 border border-gray-200 rounded-xl text-sm"
+                          placeholder="Nome"
+                          value={modifier.name || ''}
+                          onChange={(e) =>
+                            setInlineForm((prev) => ({
+                              ...prev,
+                              modifiers: (prev.modifiers || []).map((entry, entryIndex) =>
+                                entryIndex === index ? { ...entry, name: e.target.value } : entry
+                              ),
+                            }))
+                          }
+                        />
+                        <input
+                          type="number"
+                          step="0.01"
+                          className="w-full p-3 border border-gray-200 rounded-xl text-sm"
+                          placeholder="0.00"
+                          value={modifier.price || ''}
+                          onChange={(e) =>
+                            setInlineForm((prev) => ({
+                              ...prev,
+                              modifiers: (prev.modifiers || []).map((entry, entryIndex) =>
+                                entryIndex === index ? { ...entry, price: e.target.value } : entry
+                              ),
+                            }))
+                          }
+                        />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setInlineForm((prev) => ({
+                              ...prev,
+                              modifiers: (prev.modifiers || []).filter((_, entryIndex) => entryIndex !== index),
+                            }))
+                          }
+                          className="px-2 py-2 rounded-xl border border-rose-200 text-[11px] font-semibold text-rose-700 bg-rose-50"
+                        >
+                          X
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
               <div>
                 <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">Dias de exibição</label>

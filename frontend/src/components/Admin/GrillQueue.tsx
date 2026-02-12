@@ -30,6 +30,7 @@ import {
   formatOrderStatus,
   formatOrderType,
 } from "../../utils/format";
+import { formatSelectedModifiers } from "../../utils/productModifiers";
 import { getPaymentMethodMeta } from "../../utils/paymentAssets";
 import { useAuth } from "../../contexts/AuthContext";
 import { buildPixPayload } from "../../utils/pixPayload";
@@ -203,6 +204,8 @@ export const GrillQueue = () => {
     const labels = [];
     if (item?.cookingPoint) labels.push(item.cookingPoint);
     if (item?.passSkewer) labels.push('passar varinha');
+    const selected = formatSelectedModifiers(item?.selectedModifiers || []);
+    if (selected.length) labels.push(`+ ${selected.join(', ')}`);
     return labels.length ? labels.join(' • ') : '';
   };
   const getPriorityTone = (position) => {
@@ -1022,6 +1025,14 @@ export const GrillQueue = () => {
                                 passar varinha
                               </span>
                             )}
+                            {formatSelectedModifiers(item?.selectedModifiers || []).map((modifierName) => (
+                              <span
+                                key={`${item.id || item.productId}-${modifierName}`}
+                                className="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-slate-100 text-slate-700 border border-slate-200"
+                              >
+                                + {modifierName}
+                              </span>
+                            ))}
                           </div>
                         </div>
                       </div>

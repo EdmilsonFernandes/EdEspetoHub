@@ -120,6 +120,10 @@ export async function runMigrations() {
     ADD COLUMN IF NOT EXISTS pass_skewer BOOLEAN DEFAULT FALSE;
   `);
   await AppDataSource.query(`
+    ALTER TABLE IF EXISTS order_items
+    ADD COLUMN IF NOT EXISTS selected_modifiers JSONB;
+  `);
+  await AppDataSource.query(`
     ALTER TABLE IF EXISTS products
     ADD COLUMN IF NOT EXISTS is_featured BOOLEAN DEFAULT FALSE;
   `);
@@ -134,6 +138,10 @@ export async function runMigrations() {
   await AppDataSource.query(`
     ALTER TABLE IF EXISTS products
     ADD COLUMN IF NOT EXISTS availability_days JSONB;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS products
+    ADD COLUMN IF NOT EXISTS modifiers JSONB;
   `);
   await AppDataSource.query(`
     ALTER TABLE IF EXISTS plans

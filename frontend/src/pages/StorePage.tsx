@@ -15,6 +15,12 @@ import { formatCurrency, formatOrderDisplayId, formatPaymentMethod, formatPhoneI
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getPersistedBranding, brandingStorageKey, defaultBranding, initialCustomer, defaultPaymentMethod, DEFAULT_AREA_CODE, WHATSAPP_NUMBER, PIX_KEY } from '../constants';
 import { formatOpeningHoursSummary, isStoreOpenNow, normalizeOpeningHours } from '../utils/storeHours';
+import {
+  formatSelectedModifiers,
+  getModifiersSignature,
+  getModifiersTotal,
+  normalizeSelectedModifiers,
+} from '../utils/productModifiers';
 
 export function StorePage() {
   const { storeSlug } = useParams();
@@ -425,13 +431,19 @@ export function StorePage() {
         if (!product) return;
         const cookingPoint = item.cookingPoint || '';
         const passSkewer = Boolean(item.passSkewer);
-        const key = `${product.id}:${cookingPoint}:${passSkewer ? '1' : '0'}`;
+        const selectedModifiers = normalizeSelectedModifiers(item.selectedModifiers || [], product.modifiers || []);
+        const modifiersSignature = getModifiersSignature(selectedModifiers);
+        const key = `${product.id}:${cookingPoint}:${passSkewer ? '1' : '0'}:${modifiersSignature}`;
+        const unitPrice = resolveItemPrice(product) + getModifiersTotal(selectedModifiers);
         nextCart[key] = {
           ...product,
           key,
+          price: unitPrice,
+          originalPrice: product?.price,
           qty: Number(item.quantity || item.qty || 1),
           cookingPoint,
           passSkewer,
+          selectedModifiers,
         };
       });
       if (Object.keys(nextCart).length) {
@@ -591,7 +603,11 @@ export function StorePage() {
   const updateCart = (item, qty, options) => {
     const cookingPoint = options?.cookingPoint ?? item?.cookingPoint;
     const passSkewer = Boolean(options?.passSkewer ?? item?.passSkewer);
-    const cartKey = `${item.id}:${cookingPoint || ''}:${passSkewer ? '1' : '0'}`;
+    const selectedModifiers = normalizeSelectedModifiers(
+      options?.selectedModifiers ?? item?.selectedModifiers ?? [],
+      item?.modifiers || []
+    );
+    const cartKey = `${item.id}:${cookingPoint || ''}:${passSkewer ? '1' : '0'}:${getModifiersSignature(selectedModifiers)}`;
     setCart((previous) => {
       const currentQty = previous[cartKey]?.qty || 0;
       const nextQty = currentQty + qty;
@@ -600,7 +616,7 @@ export function StorePage() {
         delete copy[cartKey];
         return copy;
       }
-      const unitPrice = resolveItemPrice(item);
+      const unitPrice = resolveItemPrice(item) + getModifiersTotal(selectedModifiers);
       return {
         ...previous,
         [cartKey]: {
@@ -611,6 +627,7 @@ export function StorePage() {
           qty: nextQty,
           cookingPoint,
           passSkewer,
+          selectedModifiers,
         },
       };
     });
@@ -620,6 +637,8 @@ export function StorePage() {
     const labels = [];
     if (item?.cookingPoint) labels.push(item.cookingPoint);
     if (item?.passSkewer) labels.push('passar varinha');
+    const selected = formatSelectedModifiers(item?.selectedModifiers || []);
+    if (selected.length) labels.push(`+ ${selected.join(', ')}`);
     return labels.length ? `(${labels.join(' • ')})` : '';
   };
 
@@ -728,6 +747,7 @@ export function StorePage() {
         quantity: item.qty,
         cookingPoint: item.cookingPoint,
         passSkewer: item.passSkewer,
+        selectedModifiers: item.selectedModifiers || [],
       })),
     };
 
@@ -770,6 +790,7 @@ export function StorePage() {
             price: item.price * item.qty,
             cookingPoint: item.cookingPoint,
             passSkewer: item.passSkewer,
+            selectedModifiers: item.selectedModifiers || [],
           })),
           phone: customer.phone,
           deliveryFee: customer.type === 'delivery' && deliveryFeeValue > 0 ? deliveryFeeValue : null,
@@ -903,6 +924,7 @@ export function StorePage() {
           quantity: item.qty,
           cookingPoint: item.cookingPoint || '',
           passSkewer: Boolean(item.passSkewer),
+          selectedModifiers: item.selectedModifiers || [],
         })),
       };
       localStorage.setItem(`lastOrderItems:${storeSlug}`, JSON.stringify(lastItemsPayload));

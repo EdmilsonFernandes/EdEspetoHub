@@ -52,6 +52,45 @@ export class OrderService
     return Number((product as any).price) || 0;
   }
 
+  private normalizeText(value: unknown)
+  {
+    return String(value || '').trim().toLowerCase();
+  }
+
+  private resolveSelectedModifiers(
+    product: Awaited<ReturnType<ProductRepository[ 'findById' ]>>,
+    selected: any
+  )
+  {
+    const available = Array.isArray((product as any)?.modifiers) ? (product as any).modifiers : [];
+    if (!available.length || !Array.isArray(selected) || !selected.length) {
+      return { items: [] as Array<{ id: string; name: string; price: number }>, unitExtra: 0 };
+    }
+    const byId = new Map<string, any>();
+    const byName = new Map<string, any>();
+    for (const modifier of available) {
+      if (!modifier || modifier.active === false) continue;
+      const id = String(modifier.id || '').trim();
+      const name = String(modifier.name || '').trim();
+      const price = Number(modifier.price);
+      if (!id || !name || !Number.isFinite(price) || price <= 0) continue;
+      byId.set(id, { id, name, price: Number(price.toFixed(2)) });
+      byName.set(this.normalizeText(name), { id, name, price: Number(price.toFixed(2)) });
+    }
+    const seen = new Set<string>();
+    const resolved: Array<{ id: string; name: string; price: number }> = [];
+    for (const item of selected) {
+      const byIdMatch = byId.get(String(item?.id || '').trim());
+      const byNameMatch = byName.get(this.normalizeText(item?.name));
+      const match = byIdMatch || byNameMatch;
+      if (!match || seen.has(match.id)) continue;
+      seen.add(match.id);
+      resolved.push(match);
+    }
+    const unitExtra = resolved.reduce((sum, item) => sum + Number(item.price || 0), 0);
+    return { items: resolved, unitExtra: Number(unitExtra.toFixed(2)) };
+  }
+
   /**
    * Ensures store access.
    *
@@ -252,7 +291,9 @@ export class OrderService
       orderItem.order = order;
       orderItem.quantity = item.quantity;
       const unitPrice = this.resolveItemPrice(product);
-      orderItem.price = unitPrice * item.quantity;
+      const selectedModifiers = this.resolveSelectedModifiers(product, (item as any).selectedModifiers);
+      orderItem.selectedModifiers = selectedModifiers.items.length ? selectedModifiers.items : null;
+      orderItem.price = (unitPrice + selectedModifiers.unitExtra) * item.quantity;
       orderItem.cookingPoint = item.cookingPoint;
       orderItem.passSkewer = Boolean(item.passSkewer);
       nextItems.push(orderItem);
@@ -341,7 +382,9 @@ export class OrderService
       orderItem.product = product;
       orderItem.quantity = item.quantity;
       const unitPrice = this.resolveItemPrice(product);
-      orderItem.price = unitPrice * item.quantity;
+      const selectedModifiers = this.resolveSelectedModifiers(product, (item as any).selectedModifiers);
+      orderItem.selectedModifiers = selectedModifiers.items.length ? selectedModifiers.items : null;
+      orderItem.price = (unitPrice + selectedModifiers.unitExtra) * item.quantity;
       orderItem.cookingPoint = item.cookingPoint;
       orderItem.passSkewer = Boolean(item.passSkewer);
       items.push(orderItem);

@@ -56,6 +56,9 @@ export class Product {
   @Column({ name: 'availability_days', type: 'jsonb', nullable: true })
   availabilityDays?: Record<string, boolean> | null;
 
+  @Column({ type: 'jsonb', nullable: true })
+  modifiers?: Array<{ id: string; name: string; price: number; active?: boolean }> | null;
+
   @ManyToOne(() => Store, (store) => store.products, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'store_id' })
   store!: Store;

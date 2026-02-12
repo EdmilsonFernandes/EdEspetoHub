@@ -19,6 +19,7 @@ import { formatCurrency, formatPhoneInput } from "../../utils/format";
 import { getPaymentMethodMeta } from "../../utils/paymentAssets";
 import { GoogleRouteMapView } from "../GoogleRouteMapView";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
+import { formatSelectedModifiers } from "../../utils/productModifiers";
 
 const BRAZIL_DDDS = [
   "11", "12", "13", "14", "15", "16", "17", "18", "19",
@@ -196,6 +197,8 @@ export const CartView = ({
     const labels = [];
     if (item?.cookingPoint) labels.push(item.cookingPoint);
     if (item?.passSkewer) labels.push('passar varinha');
+    const modifiers = formatSelectedModifiers(item?.selectedModifiers || []);
+    if (modifiers.length) labels.push(`+ ${modifiers.join(', ')}`);
     return labels.length ? labels.join(' • ') : '';
   };
 

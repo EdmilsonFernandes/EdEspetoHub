@@ -11,11 +11,18 @@
  * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  */
 
+export interface SelectedModifierInput {
+  id?: string;
+  name?: string;
+  price?: number;
+}
+
 export interface CreateOrderItemInput {
   productId: string;
   quantity: number;
   cookingPoint?: string;
   passSkewer?: boolean;
+  selectedModifiers?: SelectedModifierInput[];
 }
 
 export interface CreateOrderDto {

@@ -11,6 +11,13 @@
  * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  */
 
+export interface ProductModifierOptionDto {
+  id?: string;
+  name: string;
+  price: number;
+  active?: boolean;
+}
+
 export interface CreateProductDto {
   name: string;
   price: number;
@@ -23,5 +30,6 @@ export interface CreateProductDto {
   isFeatured?: boolean;
   active?: boolean;
   availabilityDays?: Record<string, boolean> | null;
+  modifiers?: ProductModifierOptionDto[] | null;
   storeId: string;
 }

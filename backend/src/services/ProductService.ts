@@ -27,6 +27,37 @@ export class ProductService
 {
   private productRepository = new ProductRepository();
   private storeRepository = new StoreRepository();
+  private normalizeModifierId(value: unknown)
+  {
+    return String(value || '')
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9_-]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  }
+
+  private normalizeModifiers(input: unknown)
+  {
+    if (!Array.isArray(input)) return null;
+    const result: Array<{ id: string; name: string; price: number; active?: boolean }> = [];
+    const seen = new Set<string>();
+    input.forEach((raw: any, index: number) => {
+      const name = String(raw?.name || '').trim();
+      const price = Number(raw?.price);
+      if (!name || !Number.isFinite(price) || price <= 0) return;
+      const fallbackId = this.normalizeModifierId(`${name}-${index + 1}`);
+      const id = this.normalizeModifierId(raw?.id) || fallbackId;
+      if (!id || seen.has(id)) return;
+      seen.add(id);
+      result.push({
+        id,
+        name,
+        price: Number(price.toFixed(2)),
+        active: raw?.active !== false,
+      });
+    });
+    return result.length ? result : null;
+  }
 
   /**
    * Ensures store access.
@@ -68,6 +99,7 @@ export class ProductService
       : null;
     const promoActive = Boolean(input.promoActive) && !!promoPrice && promoPrice > 0;
     const availabilityDays = normalizeAvailabilityDays(input.availabilityDays);
+    const modifiers = this.normalizeModifiers((input as any).modifiers);
 
     const product = this.productRepository.create({
       name: input.name,
@@ -80,6 +112,7 @@ export class ProductService
       isFeatured: Boolean(input.isFeatured),
       active: input.active === false ? false : true,
       availabilityDays,
+      modifiers,
       store: safeStore,
     });
 
@@ -173,6 +206,9 @@ export class ProductService
     }
     if (data.availabilityDays !== undefined) {
       product.availabilityDays = normalizeAvailabilityDays(data.availabilityDays);
+    }
+    if ((data as any).modifiers !== undefined) {
+      product.modifiers = this.normalizeModifiers((data as any).modifiers);
     }
     if (promoPrice !== undefined) {
       product.promoPrice = promoPrice && promoPrice > 0 ? promoPrice : null;

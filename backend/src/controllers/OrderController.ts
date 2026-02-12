@@ -247,6 +247,7 @@ export class OrderController {
           imageUrl: item.product?.imageUrl || null,
           cookingPoint: item.cookingPoint || null,
           passSkewer: item.passSkewer || false,
+          selectedModifiers: item.selectedModifiers || [],
         })),
         store: order.store
           ? {

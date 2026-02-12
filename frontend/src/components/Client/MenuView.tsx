@@ -659,6 +659,13 @@ export const MenuView = ({
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
+                      const hasActiveModifiers = Array.isArray(item?.modifiers)
+                        ? item.modifiers.some((modifier: any) => modifier?.active !== false)
+                        : false;
+                      if (hasActiveModifiers) {
+                        openProductModal(item);
+                        return;
+                      }
                       if (isEspetoCategory(item.category)) {
                         onUpdateCart(item, 1, { cookingPoint: "ao ponto", passSkewer: false });
                         return;

@@ -1,5 +1,6 @@
 import { apiClient } from "../config/apiClient";
 import { resolveAssetUrl } from "../utils/resolveAssetUrl";
+import { normalizeProductModifiers } from "../utils/productModifiers";
 
 const isUuid = (value: string) =>
   /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(value);
@@ -19,6 +20,7 @@ const normalizeProduct = (product: any) => {
     promoActive: Boolean(product.promoActive ?? product.promo_active ?? false),
     active: product.active ?? product.is_active ?? true,
     availabilityDays: product.availabilityDays ?? product.availability_days ?? null,
+    modifiers: normalizeProductModifiers(product.modifiers ?? product.modifiers_json ?? []),
     description,
     desc: description,
   };
