@@ -5,6 +5,10 @@ import {
   Plus,
   MagnifyingGlass,
   MapPin,
+  ChefHat,
+  Sparkle,
+  ShoppingCart,
+  ForkKnife,
 } from "@phosphor-icons/react";
 import { formatCurrency } from "../../utils/format";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
@@ -24,6 +28,15 @@ const normalizeWhatsApp = (value) => {
 const isEspetoCategory = (category) => {
   const normalized = (category || "").toString().trim().toLowerCase();
   return normalized.includes("espeto");
+};
+
+const categoryVisualMeta = (key = "") => {
+  const normalized = String(key || "").toLowerCase();
+  if (normalized.includes("espeto")) return { icon: ChefHat, tone: "text-rose-700 bg-rose-50 border-rose-200" };
+  if (normalized.includes("bebida")) return { icon: ShoppingCart, tone: "text-sky-700 bg-sky-50 border-sky-200" };
+  if (normalized.includes("por")) return { icon: ForkKnife, tone: "text-amber-700 bg-amber-50 border-amber-200" };
+  if (normalized.includes("lanche")) return { icon: Sparkle, tone: "text-emerald-700 bg-emerald-50 border-emerald-200" };
+  return { icon: SquaresFour, tone: "text-slate-700 bg-slate-50 border-slate-200" };
 };
 
 const Header = ({
@@ -468,6 +481,15 @@ export const MenuView = ({
                     onClick={() => scrollToCategory(category.key)}
                     className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-semibold text-slate-600 hover:border-brand-primary hover:text-brand-primary transition"
                   >
+                    {(() => {
+                      const meta = categoryVisualMeta(category.key);
+                      const Icon = meta.icon;
+                      return (
+                        <span className={`inline-flex h-5 w-5 items-center justify-center rounded-full border ${meta.tone}`}>
+                          <Icon size={11} weight="duotone" />
+                        </span>
+                      );
+                    })()}
                     {category.label}
                     <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] text-slate-500">
                       {category.items.length}
@@ -581,9 +603,20 @@ export const MenuView = ({
                   className="h-9 w-1.5 rounded-full"
                   style={{ backgroundColor: accent }}
                 />
-                <h2 className="font-bold text-lg capitalize tracking-wide text-slate-800">
-                  {category.label}
-                </h2>
+                {(() => {
+                  const meta = categoryVisualMeta(category.key);
+                  const Icon = meta.icon;
+                  return (
+                    <>
+                      <span className={`inline-flex h-8 w-8 items-center justify-center rounded-xl border ${meta.tone}`}>
+                        <Icon size={16} weight="duotone" />
+                      </span>
+                      <h2 className="font-bold text-lg capitalize tracking-wide text-slate-800">
+                        {category.label}
+                      </h2>
+                    </>
+                  );
+                })()}
               </div>
               <span className="text-xs font-semibold text-slate-500 bg-slate-50 border border-slate-200 px-2 py-1 rounded-full">
                 {category.items.length === 1 ? '1 item' : `${category.items.length} itens`}
@@ -627,13 +660,21 @@ export const MenuView = ({
                       )}
                     </div>
                     {item.isFeatured && (
-                      <span className="mt-1 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700 border border-amber-200">
+                      <span className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700 border border-amber-200">
+                        <Sparkle size={10} weight="fill" />
                         Promo do dia
                       </span>
                     )}
                     {isEspetoCategory(item.category) && (
                       <div className="inline-flex items-center gap-2 text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full">
+                        <ChefHat size={12} weight="duotone" />
                         Toque para escolher o ponto da carne
+                      </div>
+                    )}
+                    {Array.isArray(item?.modifiers) && item.modifiers.some((modifier) => modifier?.active !== false) && (
+                      <div className="inline-flex items-center gap-2 text-[11px] font-semibold text-brand-primary bg-brand-primary-soft border border-brand-primary/20 px-2.5 py-1 rounded-full">
+                        <Plus size={12} weight="bold" />
+                        Tem adicionais
                       </div>
                     )}
                   </div>

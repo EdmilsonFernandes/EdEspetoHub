@@ -146,6 +146,39 @@ const OrdersView = ({ orders, products, storeSlug }) => {
     }
     return { label: formatOrderType(order?.type), pill: 'bg-slate-100 text-slate-700 border-slate-200', icon: null };
   };
+  const getOrderMoney = (order: any) => {
+    const fee =
+      String(order?.type || '').toLowerCase() === 'delivery' &&
+      order.deliveryFee !== null &&
+      order.deliveryFee !== undefined
+        ? Number(order.deliveryFee)
+        : 0;
+    const total = Number(order.total || 0);
+    const safeFee = Number.isFinite(fee) ? fee : 0;
+    const itemsTotal = Math.max(0, total - safeFee);
+    return { total, fee: safeFee, itemsTotal };
+  };
+  const renderMoneyBreakdown = (order: any) => {
+    const money = getOrderMoney(order);
+    return (
+      <div className="w-full sm:w-auto">
+        <div className="grid grid-cols-3 gap-1.5 text-[10px] sm:text-[11px] font-semibold">
+          <span className="flex flex-col rounded-xl border border-slate-200 bg-slate-50 px-2 py-1.5">
+            <span className="text-slate-500">Itens</span>
+            <span className="text-slate-800">{formatCurrency(money.itemsTotal)}</span>
+          </span>
+          <span className="flex flex-col rounded-xl border border-slate-200 bg-white px-2 py-1.5">
+            <span className="text-slate-500">Frete</span>
+            <span className="text-slate-800">{money.fee > 0 ? formatCurrency(money.fee) : '—'}</span>
+          </span>
+          <span className="flex flex-col rounded-xl border border-brand-primary/20 bg-brand-primary-soft px-2 py-1.5">
+            <span className="text-slate-500">Total</span>
+            <span className="text-brand-primary font-extrabold">{formatCurrency(money.total)}</span>
+          </span>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-4">
@@ -249,31 +282,7 @@ const OrdersView = ({ orders, products, storeSlug }) => {
 	                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusStyles(order.status)}`}>
 	                    {formatOrderStatus(order.status, order.type)}
 	                  </span>
-                    {(() => {
-                      const fee =
-                        String(order?.type || '').toLowerCase() === 'delivery' &&
-                        order.deliveryFee !== null &&
-                        order.deliveryFee !== undefined
-                          ? Number(order.deliveryFee)
-                          : 0;
-                      const total = Number(order.total || 0);
-                      const itemsTotal = Math.max(0, total - (Number.isFinite(fee) ? fee : 0));
-                      return (
-                        <div className="text-right">
-                          <span className="text-sm font-bold text-brand-primary block">{formatCurrency(total)}</span>
-                          <div className="mt-1 flex flex-wrap justify-end gap-1.5 text-[11px] text-slate-500 font-semibold">
-                            <span className="px-2 py-0.5 rounded-full bg-white border border-slate-200">
-                              Itens: {formatCurrency(itemsTotal)}
-                            </span>
-                            {fee > 0 && (
-                              <span className="px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200">
-                                Frete: {formatCurrency(fee)}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })()}
+                    {renderMoneyBreakdown(order)}
 	                </div>
 	              </div>
 

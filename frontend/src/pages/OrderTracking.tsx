@@ -47,6 +47,15 @@ const stepStyles: Record<string, { current: string }> = {
   },
 };
 
+const stepIconById: Record<string, any> = {
+  pending: Clock,
+  preparing: ChefHat,
+  ready: CheckCircle,
+  in_delivery: Bicycle,
+  done: CheckCircle,
+  delivered: CheckCircle,
+};
+
 const normalizeWhatsApp = (value?: string) => {
   if (!value) return '';
   const digits = value.toString().replace(/\D/g, '');
@@ -621,12 +630,13 @@ export function OrderTracking() {
                     const showBike = isDelivery && step.id === 'in_delivery';
                     const styleKey = step.id === 'ready' ? 'ready' : step.id;
                     const stepTone = stepStyles[styleKey] || stepStyles.pending;
+                    const StepIcon = stepIconById[step.id] || Clock;
                     return (
                       <div
                         key={step.id}
                         aria-current={isCurrent ? 'step' : undefined}
                         className={[
-                          'rounded-xl border px-2.5 py-2 sm:px-3 flex items-center gap-2 text-xs whitespace-nowrap select-none',
+                          'rounded-2xl border px-3 py-2.5 sm:px-3.5 flex items-center gap-2.5 text-xs whitespace-nowrap select-none min-w-[132px]',
                           isCurrent
                             ? `${stepTone.current} ring-2 ring-brand-primary/40 shadow-sm`
                             : isCompleted
@@ -634,17 +644,30 @@ export function OrderTracking() {
                               : upcomingStepClass,
                         ].join(' ')}
                       >
-                        {showBike ? (
-                          <Bicycle size={16} weight="duotone" />
-                        ) : isCurrent && !isReady ? (
-                          <CircleNotch size={16} weight="duotone" className="animate-spin" />
-                        ) : isCompleted || isReady ? (
-                          <CheckCircle size={16} weight="duotone" />
-                        ) : (
-                          <Clock size={16} weight="duotone" />
-                        )}
-                        <span className={`text-[12px] sm:text-sm ${isCurrent ? 'font-extrabold' : 'font-semibold'}`}>
-                          {step.label}
+                        <span
+                          className={`h-8 w-8 rounded-xl border grid place-items-center ${
+                            isCurrent
+                              ? 'bg-white/80 border-white/70'
+                              : isCompleted
+                                ? 'bg-white/70 border-slate-200'
+                                : 'bg-slate-50 border-slate-200'
+                          }`}
+                        >
+                          {showBike ? (
+                            <Bicycle size={16} weight="duotone" />
+                          ) : isCurrent && !isReady ? (
+                            <CircleNotch size={16} weight="duotone" className="animate-spin" />
+                          ) : (
+                            <StepIcon size={16} weight="duotone" />
+                          )}
+                        </span>
+                        <span className="leading-tight">
+                          <span className={`block text-[12px] sm:text-sm ${isCurrent ? 'font-extrabold' : 'font-semibold'}`}>
+                            {step.label}
+                          </span>
+                          <span className="block text-[10px] uppercase tracking-[0.14em] opacity-75">
+                            {isCurrent ? 'Agora' : isCompleted ? 'Concluido' : 'Proximo'}
+                          </span>
                         </span>
                       </div>
                     );
