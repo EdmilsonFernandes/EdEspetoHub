@@ -16,6 +16,7 @@ import { productService } from '../../services/productService';
 import { formatCurrency } from '../../utils/format';
 import { useToast } from '../../contexts/ToastContext';
 import { normalizeProductModifiers } from '../../utils/productModifiers';
+import { resolveAssetUrl } from '../../utils/resolveAssetUrl';
 
 const WEEK_DAYS = [
   { key: 'mon', label: 'Seg' },
@@ -673,9 +674,12 @@ export const ProductManager = ({ products, onProductsChange }) => {
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             />
           </div>
-          <div className="space-y-3">
+          <div className="space-y-3 rounded-2xl border border-dashed border-brand-primary/30 bg-brand-primary-soft/20 p-3 sm:p-4">
             <div className="flex items-center justify-between gap-2">
-              <label className="text-sm font-medium text-gray-700">Adicionais (opcional)</label>
+              <label className="text-sm font-semibold text-slate-800">Adicionais (opcional)</label>
+              <span className="px-2 py-0.5 rounded-full bg-white border border-slate-200 text-[11px] font-semibold text-slate-600">
+                {(formData.modifiers || []).length} item{(formData.modifiers || []).length === 1 ? '' : 's'}
+              </span>
               <button
                 type="button"
                 onClick={() =>
@@ -842,7 +846,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
             >
               <div className="flex items-start gap-3">
                 {product.imageUrl ? (
-                  <img src={product.imageUrl} className="w-12 h-12 rounded-xl object-cover" alt="" />
+                  <img src={resolveAssetUrl(product.imageUrl)} className="w-12 h-12 rounded-xl object-cover" alt="" />
                 ) : (
                   <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
                     <ImageIcon size={16} className="text-gray-400" />
@@ -961,7 +965,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
               >
                 <td className="p-4">
                   {product.imageUrl ? (
-                    <img src={product.imageUrl} className="w-10 h-10 rounded object-cover" alt="" />
+                    <img src={resolveAssetUrl(product.imageUrl)} className="w-10 h-10 rounded object-cover" alt="" />
                   ) : (
                       <div className="w-10 h-10 bg-gray-200 rounded flex items-center justify-center">
                         <ImageIcon size={16} className="text-gray-400" />
@@ -1367,7 +1371,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
                 <div className="mt-3 rounded-xl border border-gray-200 overflow-hidden bg-gray-50 h-32 flex items-center justify-center">
                   {inlineImageFile || inlineForm.imageUrl ? (
                     <img
-                      src={inlineImageFile || inlineForm.imageUrl}
+                      src={inlineImageFile || resolveAssetUrl(inlineForm.imageUrl)}
                       alt="Preview"
                       className="w-full h-full object-contain"
                     />
