@@ -50,6 +50,7 @@ export function StorePage() {
   const [reorderApplied, setReorderApplied] = useState(false);
   const autoTrackRef = useRef(false);
   const reorderTtlMs = 30 * 24 * 60 * 60 * 1000;
+  const publicOrderTtlMs = 24 * 60 * 60 * 1000;
   const [lastPublicOrderId, setLastPublicOrderId] = useState('');
   const [recentPublicOrders, setRecentPublicOrders] = useState([]);
   const [lastOrderItems, setLastOrderItems] = useState([]);
@@ -224,6 +225,22 @@ export function StorePage() {
     document.head.appendChild(favicon);
   };
 
+  const normalizeRecentPublicEntries = (entries: any[]) => {
+    const now = Date.now();
+    const unique = new Set<string>();
+    const normalized: Array<{ id: string; createdAt: number; type?: string }> = [];
+    (Array.isArray(entries) ? entries : []).forEach((entry) => {
+      const id = String(entry?.id || '').trim();
+      const createdAt = Number(entry?.createdAt || 0);
+      if (!id || !Number.isFinite(createdAt) || createdAt <= 0) return;
+      if (now - createdAt > publicOrderTtlMs) return;
+      if (unique.has(id)) return;
+      unique.add(id);
+      normalized.push({ id, createdAt, type: entry?.type });
+    });
+    return normalized.slice(0, 3);
+  };
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const media = window.matchMedia('(max-width: 640px)');
@@ -333,40 +350,70 @@ export function StorePage() {
 
     loadStore(false);
     loadProducts();
+    let cancelledRecentLoad = false;
     if (storeSlug) {
       orderService.fetchHighlightsBySlug(storeSlug)
         .then((items) => setTopProducts(items || []))
         .catch(() => setTopProducts([]));
     }
     if (storeSlug) {
-      try {
-        const raw = localStorage.getItem(`lastOrder:${storeSlug}`);
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          const shouldShow = parsed?.id;
-          setLastPublicOrderId(shouldShow ? parsed.id : '');
-        } else {
-          setLastPublicOrderId('');
+      const hydrateRecentPublicOrders = async () => {
+        let lastEntry: any = null;
+        let listEntries: any[] = [];
+        try {
+          const raw = localStorage.getItem(`lastOrder:${storeSlug}`);
+          lastEntry = raw ? JSON.parse(raw) : null;
+        } catch {
+          lastEntry = null;
         }
-      } catch {
-        setLastPublicOrderId('');
-      }
+        try {
+          const rawList = localStorage.getItem(`lastOrders:${storeSlug}`);
+          listEntries = rawList ? JSON.parse(rawList) : [];
+        } catch {
+          listEntries = [];
+        }
 
-      try {
-        const rawList = localStorage.getItem(`lastOrders:${storeSlug}`);
-        if (rawList) {
-          const parsedList = JSON.parse(rawList);
-          if (Array.isArray(parsedList)) {
-            setRecentPublicOrders(parsedList.slice(0, 3));
-          } else {
+        const candidates = normalizeRecentPublicEntries([
+          ...(lastEntry ? [lastEntry] : []),
+          ...(Array.isArray(listEntries) ? listEntries : []),
+        ]);
+
+        if (!candidates.length) {
+          if (!cancelledRecentLoad) {
+            setLastPublicOrderId('');
             setRecentPublicOrders([]);
           }
-        } else {
-          setRecentPublicOrders([]);
+          localStorage.removeItem(`lastOrder:${storeSlug}`);
+          localStorage.removeItem(`lastOrders:${storeSlug}`);
+          return;
         }
-      } catch {
-        setRecentPublicOrders([]);
-      }
+
+        const checked = await Promise.all(
+          candidates.map(async (entry) => {
+            try {
+              await orderService.getPublicById(entry.id);
+              return entry;
+            } catch {
+              return null;
+            }
+          })
+        );
+        const valid = checked.filter(Boolean);
+        if (cancelledRecentLoad) return;
+
+        setRecentPublicOrders(valid);
+        setLastPublicOrderId(valid[0]?.id || '');
+
+        if (valid.length) {
+          localStorage.setItem(`lastOrders:${storeSlug}`, JSON.stringify(valid));
+          localStorage.setItem(`lastOrder:${storeSlug}`, JSON.stringify(valid[0]));
+        } else {
+          localStorage.removeItem(`lastOrder:${storeSlug}`);
+          localStorage.removeItem(`lastOrders:${storeSlug}`);
+        }
+      };
+
+      hydrateRecentPublicOrders();
 
       try {
         const rawItems = localStorage.getItem(`lastOrderItems:${storeSlug}`);
@@ -398,6 +445,7 @@ export function StorePage() {
     document.addEventListener('visibilitychange', handleVisibility);
 
     return () => {
+      cancelledRecentLoad = true;
       document.removeEventListener('visibilitychange', handleVisibility);
     };
   }, [storeSlug]);
