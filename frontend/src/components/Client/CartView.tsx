@@ -32,15 +32,16 @@ const BRAZIL_DDDS = [
   "81", "82", "83", "84", "85", "86", "87", "88", "89",
   "91", "92", "93", "94", "95", "96", "97", "98", "99",
 ];
-const DEFAULT_DDD = "12";
 
 const extractPhoneParts = (value = "") => {
   const digits = value.replace(/\D/g, "");
-  const ddd = digits.slice(0, 2);
+  const hasCompletePhone = digits.length >= 10;
+  const ddd = hasCompletePhone ? digits.slice(0, 2) : "";
+  const hasValidDdd = BRAZIL_DDDS.includes(ddd);
   const localNumber = digits.slice(2, 11);
   return {
-    ddd: BRAZIL_DDDS.includes(ddd) ? ddd : DEFAULT_DDD,
-    localNumber,
+    ddd: hasValidDdd ? ddd : "",
+    localNumber: hasValidDdd ? localNumber : digits.slice(0, 9),
   };
 };
 
@@ -131,18 +132,25 @@ export const CartView = ({
   const phoneParts = useMemo(() => extractPhoneParts(customer.phone || ""), [customer.phone]);
 
   const handlePhoneLocalNumberChange = (nextValue) => {
-    const localDigits = nextValue.replace(/\D/g, "").slice(0, 9);
+    const digits = nextValue.replace(/\D/g, "").slice(0, 11);
+    const pastedHasDdd = digits.length >= 10 && BRAZIL_DDDS.includes(digits.slice(0, 2));
+    const resolvedDdd = pastedHasDdd ? digits.slice(0, 2) : phoneParts.ddd;
+    const localDigits = pastedHasDdd ? digits.slice(2, 11) : digits.slice(0, 9);
     const formatted = localDigits
-      ? formatPhoneInput(`${phoneParts.ddd}${localDigits}`, phoneParts.ddd)
+      ? resolvedDdd
+        ? formatPhoneInput(`${resolvedDdd}${localDigits}`, resolvedDdd)
+        : formatPhoneInput(localDigits)
       : "";
     onChangeCustomer({ ...customer, phone: formatted });
   };
 
   const handleDddChange = (nextDdd) => {
-    const safeDdd = BRAZIL_DDDS.includes(nextDdd) ? nextDdd : DEFAULT_DDD;
+    const safeDdd = BRAZIL_DDDS.includes(nextDdd) ? nextDdd : "";
     const localDigits = phoneParts.localNumber;
     const formatted = localDigits
-      ? formatPhoneInput(`${safeDdd}${localDigits}`, safeDdd)
+      ? safeDdd
+        ? formatPhoneInput(`${safeDdd}${localDigits}`, safeDdd)
+        : formatPhoneInput(localDigits)
       : "";
     onChangeCustomer({ ...customer, phone: formatted });
   };
@@ -467,10 +475,13 @@ export const CartView = ({
               <div>
                 <span className="text-[11px] font-semibold text-slate-500">DDD</span>
                 <select
-                  value={phoneParts.ddd}
+                  value={phoneParts.ddd || ""}
                   onChange={(e) => handleDddChange(e.target.value)}
                   className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm font-semibold text-slate-700 outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20"
                 >
+                  <option value="" disabled>
+                    Selecione
+                  </option>
                   {BRAZIL_DDDS.map((ddd) => (
                     <option key={ddd} value={ddd}>
                       {ddd}

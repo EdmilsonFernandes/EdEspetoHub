@@ -99,25 +99,27 @@ export const formatPlanName = (name = '') => {
   return `${tier} ${billing}`;
 };
 
-export const formatPhoneInput = (value = '', defaultAreaCode = '12') => {
-  const digits = (value || '').replace(/\D/g, '');
-  const base = digits || defaultAreaCode;
+export const formatPhoneInput = (value = '', defaultAreaCode = '') => {
+  const digits = (value || '').replace(/\D/g, '').slice(0, 11);
+  const fallbackDdd = (defaultAreaCode || '').replace(/\D/g, '').slice(0, 2);
 
-  const ddd = base.slice(0, 2).padEnd(2, defaultAreaCode[1] || '');
-  const number = base.slice(2, 11);
+  if (!digits && !fallbackDdd) return '';
 
-  const firstPart = number.slice(0, 5);
-  const secondPart = number.slice(5, 9);
+  const hasCompleteDdd = digits.length >= 10;
+  const ddd = hasCompleteDdd ? digits.slice(0, 2) : fallbackDdd;
+  const number = hasCompleteDdd ? digits.slice(2, 11) : digits.slice(0, 9);
 
-  if (number.length > 5) {
-    return `(${ddd}) ${firstPart}-${secondPart}`.trim();
+  const firstPart = number.length > 8 ? number.slice(0, 5) : number.slice(0, 4);
+  const secondPart = number.length > 8 ? number.slice(5, 9) : number.slice(4, 8);
+
+  if (ddd) {
+    if (number.length > 0 && secondPart) return `(${ddd}) ${firstPart}-${secondPart}`;
+    if (number.length > 0) return `(${ddd}) ${number}`;
+    return `(${ddd})`;
   }
 
-  if (number.length > 0) {
-    return `(${ddd}) ${number}`.trim();
-  }
-
-  return `(${ddd}) `;
+  if (secondPart) return `${firstPart}-${secondPart}`;
+  return number;
 };
 
 export const formatOrderDisplayId = (orderId?: string, storeSlug = '') => {

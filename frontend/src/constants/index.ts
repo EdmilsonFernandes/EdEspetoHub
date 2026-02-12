@@ -1,9 +1,7 @@
 // @ts-nocheck
-import { formatPhoneInput } from '../utils/format';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 
-export const DEFAULT_AREA_CODE = '12';
-export const initialCustomer = { name: '', phone: formatPhoneInput('', DEFAULT_AREA_CODE), address: '', table: '', type: 'table' };
+export const initialCustomer = { name: '', phone: '', address: '', table: '', type: 'table' };
 export const defaultPaymentMethod = 'debito';
 export const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || '5512996797210';
 export const PIX_KEY = import.meta.env.VITE_PIX_KEY || '';

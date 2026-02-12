@@ -13,7 +13,7 @@ import { SuccessView } from '../components/Client/SuccessView';
 import { useToast } from '../contexts/ToastContext';
 import { formatCurrency, formatOrderDisplayId, formatPaymentMethod, formatPhoneInput } from '../utils/format';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
-import { getPersistedBranding, brandingStorageKey, defaultBranding, initialCustomer, defaultPaymentMethod, DEFAULT_AREA_CODE, WHATSAPP_NUMBER, PIX_KEY } from '../constants';
+import { getPersistedBranding, brandingStorageKey, defaultBranding, initialCustomer, defaultPaymentMethod, WHATSAPP_NUMBER, PIX_KEY } from '../constants';
 import { formatOpeningHoursSummary, isStoreOpenNow, normalizeOpeningHours } from '../utils/storeHours';
 import {
   formatSelectedModifiers,
@@ -697,7 +697,7 @@ export function StorePage() {
     );
 
     const phoneFromMatch = !nextCustomer.phone && matchedCustomer?.phone ? matchedCustomer.phone : nextCustomer.phone;
-    const formattedPhone = formatPhoneInput(phoneFromMatch, DEFAULT_AREA_CODE);
+    const formattedPhone = formatPhoneInput(phoneFromMatch);
 
     const updatedCustomer = { ...nextCustomer, phone: formattedPhone };
     if (!user?.token && nextCustomer.type === 'table') {
