@@ -19,7 +19,7 @@ import { formatCurrency, formatPhoneInput } from "../../utils/format";
 import { getPaymentMethodMeta } from "../../utils/paymentAssets";
 import { GoogleRouteMapView } from "../GoogleRouteMapView";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
-import { formatSelectedModifiers } from "../../utils/productModifiers";
+import { formatSelectedModifiers, getModifiersTotal } from "../../utils/productModifiers";
 
 const BRAZIL_DDDS = [
   "11", "12", "13", "14", "15", "16", "17", "18", "19",
@@ -766,6 +766,11 @@ export const CartView = ({
                 <span className="text-gray-700 font-medium text-sm sm:text-base">{item.name}</span>
                 {formatItemOptions(item) && (
                   <span className="text-[11px] text-gray-500">{formatItemOptions(item)}</span>
+                )}
+                {getModifiersTotal(item?.selectedModifiers || []) > 0 && (
+                  <span className="text-[11px] text-emerald-700 font-semibold">
+                    Adicionais: + {formatCurrency(getModifiersTotal(item?.selectedModifiers || []) * item.qty)}
+                  </span>
                 )}
               </div>
             </div>

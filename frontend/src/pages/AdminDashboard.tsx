@@ -21,6 +21,7 @@ import { paymentService } from '../services/paymentService';
 import { formatCurrency, formatDateTime, formatOrderDisplayId, formatOrderStatus, formatOrderType } from '../utils/format';
 import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
+import { formatSelectedModifiers } from '../utils/productModifiers';
 
 const formatPlanCycle = (days: number) => {
   if (!Number.isFinite(days)) return '—';
@@ -349,6 +350,14 @@ const OrdersView = ({ orders, products, storeSlug }) => {
                                     passar varinha
                                   </span>
                                 )}
+                                {formatSelectedModifiers(item?.selectedModifiers || []).map((modifierName) => (
+                                  <span
+                                    key={`${item.id || item.productId}-${modifierName}`}
+                                    className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200"
+                                  >
+                                    + {modifierName}
+                                  </span>
+                                ))}
                               </div>
                             </div>
                           </div>
