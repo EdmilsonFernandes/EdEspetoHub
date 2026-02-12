@@ -138,7 +138,7 @@ export const CartView = ({
     const localDigits = pastedHasDdd ? digits.slice(2, 11) : digits.slice(0, 9);
     const formatted = localDigits
       ? resolvedDdd
-        ? formatPhoneInput(`${resolvedDdd}${localDigits}`, resolvedDdd)
+        ? formatPhoneInput(localDigits, resolvedDdd)
         : formatPhoneInput(localDigits)
       : "";
     onChangeCustomer({ ...customer, phone: formatted });
@@ -149,7 +149,7 @@ export const CartView = ({
     const localDigits = phoneParts.localNumber;
     const formatted = localDigits
       ? safeDdd
-        ? formatPhoneInput(`${safeDdd}${localDigits}`, safeDdd)
+        ? formatPhoneInput(localDigits, safeDdd)
         : formatPhoneInput(localDigits)
       : safeDdd
       ? formatPhoneInput("", safeDdd)
