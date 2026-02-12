@@ -34,14 +34,14 @@ const BRAZIL_DDDS = [
 ];
 
 const extractPhoneParts = (value = "") => {
-  const digits = value.replace(/\D/g, "");
-  const hasCompletePhone = digits.length >= 10;
-  const ddd = hasCompletePhone ? digits.slice(0, 2) : "";
+  const raw = String(value || "").trim();
+  const digits = raw.replace(/\D/g, "");
+  const hasPrefixedDdd = /^\(\d{2}\)/.test(raw);
+  const ddd = hasPrefixedDdd ? digits.slice(0, 2) : "";
   const hasValidDdd = BRAZIL_DDDS.includes(ddd);
-  const localNumber = digits.slice(2, 11);
   return {
     ddd: hasValidDdd ? ddd : "",
-    localNumber: hasValidDdd ? localNumber : digits.slice(0, 9),
+    localNumber: hasValidDdd ? digits.slice(2, 11) : digits.slice(0, 9),
   };
 };
 
@@ -151,6 +151,8 @@ export const CartView = ({
       ? safeDdd
         ? formatPhoneInput(`${safeDdd}${localDigits}`, safeDdd)
         : formatPhoneInput(localDigits)
+      : safeDdd
+      ? formatPhoneInput("", safeDdd)
       : "";
     onChangeCustomer({ ...customer, phone: formatted });
   };
