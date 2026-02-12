@@ -77,17 +77,30 @@ export class OrderService
       byId.set(id, { id, name, price: Number(price.toFixed(2)) });
       byName.set(this.normalizeText(name), { id, name, price: Number(price.toFixed(2)) });
     }
-    const seen = new Set<string>();
-    const resolved: Array<{ id: string; name: string; price: number }> = [];
+    const resolvedById = new Map<string, { id: string; name: string; price: number; quantity: number }>();
     for (const item of selected) {
       const byIdMatch = byId.get(String(item?.id || '').trim());
       const byNameMatch = byName.get(this.normalizeText(item?.name));
       const match = byIdMatch || byNameMatch;
-      if (!match || seen.has(match.id)) continue;
-      seen.add(match.id);
-      resolved.push(match);
+      if (!match) continue;
+      const quantityRaw = Number(item?.quantity ?? 1);
+      const quantity = Number.isFinite(quantityRaw) ? Math.max(1, Math.floor(quantityRaw)) : 1;
+      const current = resolvedById.get(match.id);
+      resolvedById.set(match.id, {
+        id: match.id,
+        name: match.name,
+        price: match.price,
+        quantity: (current?.quantity || 0) + quantity,
+      });
     }
-    const unitExtra = resolved.reduce((sum, item) => sum + Number(item.price || 0), 0);
+    const resolved = Array.from(resolvedById.values()).map((entry) => ({
+      ...entry,
+      quantity: Math.max(1, Math.min(20, entry.quantity)),
+    }));
+    const unitExtra = resolved.reduce(
+      (sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 1),
+      0
+    );
     return { items: resolved, unitExtra: Number(unitExtra.toFixed(2)) };
   }
 

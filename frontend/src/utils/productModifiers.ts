@@ -3,6 +3,7 @@ export interface ProductModifierOption {
   name: string;
   price: number;
   active?: boolean;
+  quantity?: number;
 }
 
 const normalizeText = (value: unknown) => String(value || '').trim();
@@ -17,6 +18,15 @@ const normalizePrice = (value: unknown) => {
   const numeric = Number(value);
   if (!Number.isFinite(numeric) || numeric <= 0) return null;
   return Number(numeric.toFixed(2));
+};
+
+const normalizeQuantity = (value: unknown) => {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return 1;
+  const rounded = Math.floor(numeric);
+  if (rounded < 1) return 1;
+  if (rounded > 20) return 20;
+  return rounded;
 };
 
 export const normalizeProductModifiers = (value: unknown): ProductModifierOption[] => {
@@ -47,37 +57,70 @@ export const normalizeSelectedModifiers = (
   available?: ProductModifierOption[] | null
 ): ProductModifierOption[] => {
   const base = normalizeProductModifiers(selected);
-  if (!available || available.length === 0) return base;
+  if (!available || available.length === 0) {
+    return (Array.isArray(selected) ? selected : base)
+      .map((raw: any, index: number) => {
+        const normalized = normalizeProductModifiers([raw])[0];
+        if (!normalized) return null;
+        return {
+          ...normalized,
+          id: normalized.id || `modifier-${index + 1}`,
+          quantity: normalizeQuantity(raw?.quantity ?? raw?.qty ?? 1),
+        };
+      })
+      .filter(Boolean) as ProductModifierOption[];
+  }
   const activeById = new Map<string, ProductModifierOption>();
   for (const option of available) {
     if (option.active === false) continue;
     activeById.set(option.id, option);
   }
-  const unique = new Set<string>();
+  const withQty = new Map<string, ProductModifierOption>();
   const result: ProductModifierOption[] = [];
-  for (const item of base) {
-    const match = activeById.get(item.id);
-    if (!match || unique.has(match.id)) continue;
-    unique.add(match.id);
-    result.push({
-      id: match.id,
-      name: match.name,
-      price: match.price,
+  for (const item of Array.isArray(selected) ? selected : base) {
+    const normalized = normalizeProductModifiers([item])[0];
+    if (!normalized) continue;
+    const qty = normalizeQuantity((item as any)?.quantity ?? (item as any)?.qty ?? 1);
+    const match = activeById.get(normalized.id);
+    const byName = !match
+      ? Array.from(activeById.values()).find(
+          (entry) => entry.name.trim().toLowerCase() === normalized.name.trim().toLowerCase()
+        )
+      : null;
+    const resolved = match || byName;
+    if (!resolved) continue;
+    const current = withQty.get(resolved.id);
+    withQty.set(resolved.id, {
+      id: resolved.id,
+      name: resolved.name,
+      price: resolved.price,
       active: true,
+      quantity: (current?.quantity || 0) + qty,
     });
   }
+  withQty.forEach((entry) =>
+    result.push({
+      ...entry,
+      quantity: normalizeQuantity(entry.quantity || 1),
+    })
+  );
   return result;
 };
 
 export const getModifiersTotal = (selected: unknown) =>
-  normalizeProductModifiers(selected).reduce((sum, item) => sum + Number(item.price || 0), 0);
+  normalizeSelectedModifiers(selected).reduce(
+    (sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 1),
+    0
+  );
 
 export const getModifiersSignature = (selected: unknown) => {
-  const list = normalizeProductModifiers(selected)
-    .map((item) => `${item.id}:${Number(item.price || 0).toFixed(2)}`)
+  const list = normalizeSelectedModifiers(selected)
+    .map((item) => `${item.id}:${Number(item.price || 0).toFixed(2)}:q${Number(item.quantity || 1)}`)
     .sort();
   return list.join('|');
 };
 
 export const formatSelectedModifiers = (selected: unknown) =>
-  normalizeProductModifiers(selected).map((item) => item.name);
+  normalizeSelectedModifiers(selected).map((item) =>
+    Number(item.quantity || 1) > 1 ? `${item.name} x${item.quantity}` : item.name
+  );

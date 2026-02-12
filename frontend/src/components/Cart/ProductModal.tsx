@@ -21,7 +21,7 @@ export interface ProductModalProps {
 export const ProductModal = ({ product, isOpen, onClose, onAddToCart }: ProductModalProps) => {
   const [cookingPoint, setCookingPoint] = useState("ao ponto");
   const [passSkewer, setPassSkewer] = useState(false);
-  const [selectedModifierIds, setSelectedModifierIds] = useState<string[]>([]);
+  const [modifierCounts, setModifierCounts] = useState<Record<string, number>>({});
   const promoPrice =
     product?.promoActive && product?.promoPrice && Number(product?.promoPrice) > 0
       ? Number(product.promoPrice)
@@ -29,8 +29,17 @@ export const ProductModal = ({ product, isOpen, onClose, onAddToCart }: ProductM
   const basePrice = promoPrice || Number(product?.price) || 0;
   const availableModifiers = normalizeProductModifiers(product?.modifiers || []).filter((item) => item.active !== false);
   const selectedModifiers = normalizeSelectedModifiers(
-    availableModifiers.filter((item) => selectedModifierIds.includes(item.id)),
     availableModifiers
+      .filter((item) => Number(modifierCounts[item.id] || 0) > 0)
+      .map((item) => ({
+        ...item,
+        quantity: Number(modifierCounts[item.id] || 1),
+      })),
+    availableModifiers
+  );
+  const selectedModifiersCount = selectedModifiers.reduce(
+    (sum, item) => sum + Number(item.quantity || 1),
+    0
   );
   const modifiersTotal = getModifiersTotal(selectedModifiers);
   const unitFinalPrice = basePrice + modifiersTotal;
@@ -44,7 +53,7 @@ export const ProductModal = ({ product, isOpen, onClose, onAddToCart }: ProductM
   useEffect(() => {
     setCookingPoint("ao ponto");
     setPassSkewer(false);
-    setSelectedModifierIds([]);
+    setModifierCounts({});
   }, [product?.id]);
 
   const [isAnimating, setIsAnimating] = useState(false);
@@ -62,10 +71,24 @@ export const ProductModal = ({ product, isOpen, onClose, onAddToCart }: ProductM
     }, 200);
   };
 
-  const toggleModifier = (modifierId: string) => {
-    setSelectedModifierIds((prev) =>
-      prev.includes(modifierId) ? prev.filter((id) => id !== modifierId) : [...prev, modifierId]
-    );
+  const incrementModifier = (modifierId: string) => {
+    setModifierCounts((prev) => {
+      const current = Number(prev[modifierId] || 0);
+      return { ...prev, [modifierId]: Math.min(20, current + 1) };
+    });
+  };
+
+  const decrementModifier = (modifierId: string) => {
+    setModifierCounts((prev) => {
+      const current = Number(prev[modifierId] || 0);
+      const next = Math.max(0, current - 1);
+      if (next === 0) {
+        const copy = { ...prev };
+        delete copy[modifierId];
+        return copy;
+      }
+      return { ...prev, [modifierId]: next };
+    });
   };
 
   if (!isOpen && !isAnimating) return null;
@@ -156,18 +179,17 @@ export const ProductModal = ({ product, isOpen, onClose, onAddToCart }: ProductM
               <div className="flex items-center justify-between">
                 <h4 className="text-sm font-bold uppercase tracking-wide text-slate-500">Adicionais</h4>
                 <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-600">
-                  {selectedModifiers.length} selecionado{selectedModifiers.length === 1 ? "" : "s"}
+                  {selectedModifiersCount} selecionado{selectedModifiersCount === 1 ? "" : "s"}
                 </span>
               </div>
               <div className="space-y-2">
                 {availableModifiers.map((modifier) => {
-                  const checked = selectedModifierIds.includes(modifier.id);
+                  const qty = Number(modifierCounts[modifier.id] || 0);
+                  const checked = qty > 0;
                   return (
-                    <button
+                    <div
                       key={modifier.id}
-                      type="button"
-                      onClick={() => toggleModifier(modifier.id)}
-                      className={`w-full rounded-2xl border px-3 py-3 text-left transition active:scale-[0.99] ${
+                      className={`w-full rounded-2xl border px-3 py-3 text-left transition ${
                         checked
                           ? "border-brand-primary bg-brand-primary-soft/40 shadow-[inset_0_0_0_1px_rgba(234,88,12,0.25)]"
                           : "border-slate-200 bg-white hover:border-slate-300"
@@ -182,16 +204,28 @@ export const ProductModal = ({ product, isOpen, onClose, onAddToCart }: ProductM
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-bold text-slate-800">+ {formatCurrency(modifier.price)}</span>
-                          <span
-                            className={`grid h-6 w-6 place-items-center rounded-full text-xs font-extrabold ${
-                              checked ? "bg-brand-primary text-white" : "bg-slate-100 text-slate-500"
-                            }`}
-                          >
-                            {checked ? "✓" : "+"}
-                          </span>
+                          <div className="flex items-center gap-1">
+                            <button
+                              type="button"
+                              onClick={() => decrementModifier(modifier.id)}
+                              className="h-7 w-7 rounded-full border border-slate-200 bg-white text-sm font-bold text-slate-700"
+                              aria-label={`Remover ${modifier.name}`}
+                            >
+                              -
+                            </button>
+                            <span className="min-w-[26px] text-center text-sm font-extrabold text-slate-800">{qty}</span>
+                            <button
+                              type="button"
+                              onClick={() => incrementModifier(modifier.id)}
+                              className="h-7 w-7 rounded-full border border-brand-primary bg-brand-primary text-sm font-bold text-white"
+                              aria-label={`Adicionar ${modifier.name}`}
+                            >
+                              +
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    </button>
+                    </div>
                   );
                 })}
               </div>

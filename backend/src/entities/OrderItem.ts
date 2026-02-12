@@ -39,7 +39,7 @@ export class OrderItem {
   passSkewer?: boolean;
 
   @Column({ name: 'selected_modifiers', type: 'jsonb', nullable: true })
-  selectedModifiers?: Array<{ id: string; name: string; price: number }> | null;
+  selectedModifiers?: Array<{ id: string; name: string; price: number; quantity?: number }> | null;
 
   @ManyToOne(() => Product, (product) => product.orderItems, { eager: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'product_id' })
