@@ -152,38 +152,57 @@ export const ProductModal = ({ product, isOpen, onClose, onAddToCart }: ProductM
             </div>
           )}
           {availableModifiers.length > 0 && (
-            <div className="space-y-2">
-              <h4 className="font-semibold text-gray-700">Adicionais</h4>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-bold uppercase tracking-wide text-slate-500">Adicionais</h4>
+                <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-600">
+                  {selectedModifiers.length} selecionado{selectedModifiers.length === 1 ? "" : "s"}
+                </span>
+              </div>
               <div className="space-y-2">
                 {availableModifiers.map((modifier) => {
                   const checked = selectedModifierIds.includes(modifier.id);
                   return (
-                    <label
+                    <button
                       key={modifier.id}
-                      className={`flex items-center justify-between rounded-xl border px-3 py-2 text-sm transition ${
+                      type="button"
+                      onClick={() => toggleModifier(modifier.id)}
+                      className={`w-full rounded-2xl border px-3 py-3 text-left transition active:scale-[0.99] ${
                         checked
-                          ? "border-brand-primary bg-brand-primary-soft/50 text-brand-primary"
-                          : "border-gray-200 bg-white text-gray-700"
+                          ? "border-brand-primary bg-brand-primary-soft/40 shadow-[inset_0_0_0_1px_rgba(234,88,12,0.25)]"
+                          : "border-slate-200 bg-white hover:border-slate-300"
                       }`}
                     >
-                      <span className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={checked}
-                          onChange={() => toggleModifier(modifier.id)}
-                        />
-                        <span>{modifier.name}</span>
-                      </span>
-                      <span className="font-semibold">+ {formatCurrency(modifier.price)}</span>
-                    </label>
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className={`font-semibold ${checked ? "text-brand-primary" : "text-slate-800"}`}>
+                            {modifier.name}
+                          </p>
+                          <p className="text-xs text-slate-500">Adicionar ao item</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-bold text-slate-800">+ {formatCurrency(modifier.price)}</span>
+                          <span
+                            className={`grid h-6 w-6 place-items-center rounded-full text-xs font-extrabold ${
+                              checked ? "bg-brand-primary text-white" : "bg-slate-100 text-slate-500"
+                            }`}
+                          >
+                            {checked ? "✓" : "+"}
+                          </span>
+                        </div>
+                      </div>
+                    </button>
                   );
                 })}
               </div>
             </div>
           )}
           {(availableModifiers.length > 0 || showEspetoOptions) && (
-            <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
-              <span className="font-semibold">Subtotal do item:</span> {formatCurrency(unitFinalPrice)}
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700">
+              <div className="flex items-center justify-between">
+                <span className="font-semibold">Subtotal do item</span>
+                <span className="text-base font-bold text-slate-900">{formatCurrency(unitFinalPrice)}</span>
+              </div>
             </div>
           )}
 
@@ -202,7 +221,7 @@ export const ProductModal = ({ product, isOpen, onClose, onAddToCart }: ProductM
             className="w-full bg-brand-primary text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-brand-primary/90 transition"
           >
             <Plus size={18} weight="bold" />
-            Adicionar ao pedido
+            Adicionar • {formatCurrency(unitFinalPrice)}
           </button>
         </div>
       </div>
