@@ -5,7 +5,7 @@ import { OrderCard } from '../components/Motoboy/OrderCard';
 import { ConfirmPaymentModal } from '../components/Motoboy/ConfirmPaymentModal';
 import { MotoboyHeader } from '../components/Motoboy/MotoboyHeader';
 import { useToast } from '../contexts/ToastContext';
-import { formatCurrency } from '../utils/format';
+import { formatAddress, formatCurrency } from '../utils/format';
 import { buildPixPayload } from '../utils/pixPayload';
 
 export function MotoboyCurrent() {
@@ -66,6 +66,10 @@ export function MotoboyCurrent() {
   const paymentIsPaid = useMemo(() => {
     return String(activeOrder?.paymentStatus || '').toLowerCase() === 'paid';
   }, [activeOrder?.paymentStatus]);
+  const activeOrderAddress = useMemo(
+    () => formatAddress(activeOrder?.address || activeOrder?.deliveryAddress),
+    [activeOrder?.address, activeOrder?.deliveryAddress]
+  );
 
   const pixInfo = useMemo(() => {
     const method = String(activeOrder?.paymentMethod || '').toLowerCase();
@@ -176,8 +180,8 @@ export function MotoboyCurrent() {
   };
 
   const buildMapsUrl = (order: any) => {
-    const destination = String(order?.address || '').trim();
-    const origin = String(order?.store?.settings?.address || '').trim();
+    const destination = formatAddress(order?.address || order?.deliveryAddress);
+    const origin = formatAddress(order?.store?.settings?.address || order?.store?.address);
     if (!destination) return '';
     if (origin) {
       const params = new URLSearchParams({
@@ -193,14 +197,14 @@ export function MotoboyCurrent() {
   };
 
   const buildWazeUrl = (order: any) => {
-    const destination = String(order?.address || '').trim();
+    const destination = formatAddress(order?.address || order?.deliveryAddress);
     if (!destination) return '';
     const params = new URLSearchParams({ q: destination, navigate: 'yes' });
     return `https://waze.com/ul?${params.toString()}`;
   };
 
   const handleCopyAddress = async () => {
-    const text = String(activeOrder?.address || '').trim();
+    const text = activeOrderAddress;
     if (!text) return;
     try {
       await navigator.clipboard.writeText(text);
@@ -264,7 +268,7 @@ export function MotoboyCurrent() {
               <div className="min-w-0">
                 <p className="text-[11px] uppercase tracking-[0.25em] text-slate-500">Entrega ativa</p>
                 <p className="text-base font-extrabold text-slate-900 truncate">{activeOrder?.customerName}</p>
-                <p className="text-xs text-slate-600 mt-0.5 truncate">{activeOrder?.address}</p>
+                <p className="text-xs text-slate-600 mt-0.5 truncate">{activeOrderAddress || '-'}</p>
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   <span className="px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-white/70 border border-slate-200 text-slate-800">
                     Total: {formatCurrency(activeOrder?.total || 0)}
@@ -292,7 +296,7 @@ export function MotoboyCurrent() {
                 </div>
               </div>
               <div className="shrink-0 flex flex-col gap-2">
-                {activeOrder?.address && (
+                {activeOrderAddress && (
                   <a
                     href={buildMapsUrl(activeOrder)}
                     target="_blank"
@@ -302,7 +306,7 @@ export function MotoboyCurrent() {
                     Google Maps
                   </a>
                 )}
-                {activeOrder?.address && (
+                {activeOrderAddress && (
                   <a
                     href={buildWazeUrl(activeOrder)}
                     target="_blank"
@@ -312,7 +316,7 @@ export function MotoboyCurrent() {
                     Waze
                   </a>
                 )}
-                {activeOrder?.address && (
+                {activeOrderAddress && (
                   <button
                     type="button"
                     onClick={handleCopyAddress}

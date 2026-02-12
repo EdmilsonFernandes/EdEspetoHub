@@ -23,6 +23,7 @@ import { productService } from "../../services/productService";
 import { motoboyAdminService } from "../../services/motoboyAdminService";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
 import {
+  formatAddress,
   formatCurrency,
   formatDateTime,
   formatDuration,
@@ -1463,10 +1464,10 @@ export const GrillQueue = () => {
                     </span>
                   </div>
 
-                  {order.address ? (
+                  {formatAddress(order.address || order.deliveryAddress) ? (
                     <div className="mt-3 text-xs text-slate-600">
                       <p className="text-[10px] uppercase tracking-[0.2em] text-slate-400">Entrega</p>
-                      <p className="font-semibold text-slate-700">{order.address}</p>
+                      <p className="font-semibold text-slate-700">{formatAddress(order.address || order.deliveryAddress)}</p>
                     </div>
                   ) : null}
 

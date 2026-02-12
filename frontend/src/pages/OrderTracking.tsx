@@ -4,7 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Bicycle, ChefHat, CheckCircle, Clock, CircleNotch, MapPin } from '@phosphor-icons/react';
 import { orderService } from '../services/orderService';
 import { mapsService } from '../services/mapsService';
-import { formatCurrency, formatDateTime, formatDuration, formatOrderDisplayId } from '../utils/format';
+import { formatAddress, formatCurrency, formatDateTime, formatDuration, formatOrderDisplayId } from '../utils/format';
 import { getPaymentMethodMeta } from '../utils/paymentAssets';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { applyBrandTheme } from '../utils/brandTheme';
@@ -61,9 +61,10 @@ const buildDemoStatus = (createdAt: number) => {
   return 'pending';
 };
 
-const normalizeAddressForMaps = (address?: string) => {
-  if (!address) return '';
-  return address
+const normalizeAddressForMaps = (address?: unknown) => {
+  const normalized = formatAddress(address);
+  if (!normalized) return '';
+  return normalized
     .replace(/\|/g, ', ')
     .replace(/\bcep\b[:\s-]*/gi, '')
     .replace(/\s{2,}/g, ' ')
@@ -774,10 +775,10 @@ export function OrderTracking() {
                         <span className="font-semibold">Mesa:</span> {order.table || '-'}
                       </p>
                     )}
-                    {order.type === 'delivery' && order.address && (
+                    {order.type === 'delivery' && formatAddress(order.address || order.deliveryAddress) && (
                       <p className="flex items-start gap-2">
                         <MapPin size={16} weight="duotone" className="text-gray-400 mt-0.5" />
-                        <span>{order.address}</span>
+                        <span>{formatAddress(order.address || order.deliveryAddress)}</span>
                       </p>
                     )}
                     {hasDeliveryFee ? (

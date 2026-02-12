@@ -19,7 +19,7 @@ import { storeService } from '../services/storeService';
 import { subscriptionService } from '../services/subscriptionService';
 import { paymentService } from '../services/paymentService';
 import { motoboyAdminService } from '../services/motoboyAdminService';
-import { formatCurrency, formatDateTime, formatOrderDisplayId, formatOrderStatus, formatOrderType } from '../utils/format';
+import { formatAddress, formatCurrency, formatDateTime, formatOrderDisplayId, formatOrderStatus, formatOrderType } from '../utils/format';
 import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { formatSelectedModifiers } from '../utils/productModifiers';
@@ -303,7 +303,7 @@ const OrdersView = ({ orders, products, storeSlug }) => {
                 </div>
 	                <div>
 	                  <p className="text-xs uppercase text-slate-400">Endereço</p>
-	                  <p className="font-semibold text-slate-700">{order.address || '-'}</p>
+	                  <p className="font-semibold text-slate-700">{formatAddress(order.address || order.deliveryAddress) || '-'}</p>
                     {String(order?.type || '').toLowerCase() === 'delivery' &&
                       order.deliveryFee !== null &&
                       order.deliveryFee !== undefined && (

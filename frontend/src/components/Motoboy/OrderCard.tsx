@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { formatCurrency, formatDateTime } from '../../utils/format';
+import { formatAddress, formatCurrency, formatDateTime } from '../../utils/format';
 import { resolveAssetUrl } from '../../utils/resolveAssetUrl';
 import { PaymentBadge } from './PaymentBadge';
 import { StatusBadge } from './StatusBadge';
@@ -13,10 +13,10 @@ type Props = {
 
 export function OrderCard({ order, compact, actions }: Props) {
   const createdAt = order?.createdAt || order?.created_at;
-  const address = order?.address || order?.deliveryAddress || '-';
+  const address = formatAddress(order?.address || order?.deliveryAddress) || '-';
   const storeName = order?.store?.name || order?.storeName;
   const storeSlug = order?.store?.slug || order?.storeSlug;
-  const storeAddress = order?.store?.settings?.address || order?.store?.address || order?.storeAddress;
+  const storeAddress = formatAddress(order?.store?.settings?.address || order?.store?.address || order?.storeAddress);
   const type = order?.type || order?.orderType;
   const deliveryFeeRaw = order?.deliveryFee ?? order?.delivery_fee ?? null;
   const deliveryFee = deliveryFeeRaw !== null && deliveryFeeRaw !== undefined ? Number(deliveryFeeRaw) : null;

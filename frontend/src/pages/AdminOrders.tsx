@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { AdminHeader } from '../components/Admin/AdminHeader';
 import { useAuth } from '../contexts/AuthContext';
 import { orderService } from '../services/orderService';
-import { formatCurrency, formatDateTime, formatOrderDisplayId, formatOrderStatus, formatOrderType } from '../utils/format';
+import { formatAddress, formatCurrency, formatDateTime, formatOrderDisplayId, formatOrderStatus, formatOrderType } from '../utils/format';
 import { getPaymentMethodMeta } from '../utils/paymentAssets';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { formatSelectedModifiers } from '../utils/productModifiers';
@@ -432,7 +432,7 @@ export function AdminOrders() {
                       </div>
                       <div>
                         <p className="text-xs uppercase text-slate-400">Endereço</p>
-                        <p className="font-semibold text-slate-700">{order.address || '-'}</p>
+                        <p className="font-semibold text-slate-700">{formatAddress(order.address || order.deliveryAddress) || '-'}</p>
                         {order.type === 'delivery' && order.deliveryFee !== null && order.deliveryFee !== undefined && (
                           <p className="text-xs text-slate-500">Frete: {formatCurrency(order.deliveryFee)}</p>
                         )}

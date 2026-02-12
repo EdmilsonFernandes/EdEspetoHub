@@ -126,3 +126,30 @@ export const formatOrderDisplayId = (orderId?: string, storeSlug = '') => {
   const prefix = storeSlug ? String(storeSlug).replace(/[^a-zA-Z0-9]/g, '').slice(0, 3).toUpperCase() : '';
   return `${prefix}${shortId}`;
 };
+
+export const formatAddress = (value: unknown) => {
+  if (value === null || value === undefined) return '';
+  if (typeof value === 'string' || typeof value === 'number') return String(value).trim();
+  if (typeof value !== 'object') return '';
+
+  const source = value as Record<string, unknown>;
+  const direct =
+    source.formatted ||
+    source.fullAddress ||
+    source.address ||
+    source.label;
+  if (typeof direct === 'string' && direct.trim()) return direct.trim();
+
+  const street = String(source.street || source.logradouro || '').trim();
+  const number = String(source.number || source.numero || '').trim();
+  const complement = String(source.complement || source.complemento || '').trim();
+  const neighborhood = String(source.neighborhood || source.bairro || '').trim();
+  const city = String(source.city || source.cidade || '').trim();
+  const state = String(source.state || source.uf || '').trim();
+  const zipCode = String(source.zipCode || source.cep || '').trim();
+
+  const line1 = [street, number].filter(Boolean).join(', ');
+  const line2 = [complement, neighborhood].filter(Boolean).join(' - ');
+  const line3 = [city, state].filter(Boolean).join(' - ');
+  return [line1, line2, line3, zipCode].filter(Boolean).join(' | ');
+};
