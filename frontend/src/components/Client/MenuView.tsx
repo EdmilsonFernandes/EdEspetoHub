@@ -595,60 +595,42 @@ export const MenuView = ({
               {category.items.map((item) => (
                 <div
                   key={item.id}
-                  className="group bg-white/95 rounded-2xl premium-card p-2.5 sm:p-3 flex gap-3 items-center hover:-translate-y-0.5 active:scale-[0.99] transition cursor-pointer"
+                  className="group bg-white/95 rounded-2xl premium-card p-3 sm:p-4 grid grid-cols-[1fr_auto] gap-3 hover:-translate-y-0.5 active:scale-[0.99] transition cursor-pointer"
                   onClick={() => openProductModal(item)}
                 >
-                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-200">
-                    {item.imageUrl ? (
-                      <img
-                        src={resolveAssetUrl(item.imageUrl)}
-                        alt={item.name}
-                        className="w-full h-full object-cover transition duration-300 group-hover:scale-[1.03]"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400 text-[10px]">
-                        sem foto
-                      </div>
-                    )}
-                  </div>
-
                   <div className="flex-1 min-w-0 space-y-1">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="font-semibold text-slate-900 text-[15px] leading-tight truncate">
-                          {item.name}
-                        </p>
-                        {item.description && (
-                          <p className="text-xs text-slate-500 line-clamp-1">{item.description}</p>
-                        )}
-                        {item.isFeatured && (
-                          <span className="mt-1 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700 border border-amber-200">
-                            Promo do dia
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {resolvePromoPrice(item) ? (
-                          <div className="flex flex-col items-end">
-                            <span className="text-[10px] font-semibold text-slate-400 line-through">
-                              {formatCurrency(item.price)}
-                            </span>
-                            <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs sm:text-sm font-extrabold bg-emerald-100 text-emerald-700 border border-emerald-200 shadow-sm">
-                              {formatCurrency(resolvePromoPrice(item))}
-                            </span>
-                          </div>
-                        ) : (
-                          <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs sm:text-sm font-extrabold bg-brand-primary/10 text-brand-primary border border-brand-primary/20 shadow-sm">
+                    <p className="font-semibold text-slate-900 text-[15px] leading-tight line-clamp-2">
+                      {item.name}
+                    </p>
+                    {item.description && (
+                      <p className="text-xs text-slate-500 line-clamp-2">{item.description}</p>
+                    )}
+                    <div className="flex items-center gap-2 pt-0.5">
+                      {resolvePromoPrice(item) ? (
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-[11px] font-semibold text-slate-400 line-through">
                             {formatCurrency(item.price)}
                           </span>
-                        )}
-                        {itemQtyMap.get(String(item.id)) > 0 && (
-                          <span className="inline-flex sm:hidden items-center px-2 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                            {itemQtyMap.get(String(item.id))}x
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-700 border border-emerald-200 shadow-sm">
+                            {formatCurrency(resolvePromoPrice(item))}
                           </span>
-                        )}
-                      </div>
+                        </div>
+                      ) : (
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-extrabold bg-brand-primary/10 text-brand-primary border border-brand-primary/20 shadow-sm">
+                          {formatCurrency(item.price)}
+                        </span>
+                      )}
+                      {itemQtyMap.get(String(item.id)) > 0 && (
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          {itemQtyMap.get(String(item.id))} no carrinho
+                        </span>
+                      )}
                     </div>
+                    {item.isFeatured && (
+                      <span className="mt-1 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700 border border-amber-200">
+                        Promo do dia
+                      </span>
+                    )}
                     {isEspetoCategory(item.category) && (
                       <div className="inline-flex items-center gap-2 text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full">
                         Toque para escolher o ponto da carne
@@ -656,32 +638,43 @@ export const MenuView = ({
                     )}
                   </div>
 
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const hasActiveModifiers = Array.isArray(item?.modifiers)
-                        ? item.modifiers.some((modifier: any) => modifier?.active !== false)
-                        : false;
-                      if (hasActiveModifiers) {
-                        openProductModal(item);
-                        return;
-                      }
-                      if (isEspetoCategory(item.category)) {
-                        onUpdateCart(item, 1, { cookingPoint: "ao ponto", passSkewer: false });
-                        return;
-                      }
-                      onUpdateCart(item, 1);
-                    }}
-                    title="Adicionar"
-                    className="relative w-10 h-10 rounded-2xl bg-brand-primary text-white flex items-center justify-center hover:opacity-90 shadow-md active:scale-95 transition"
-                  >
-                    {itemQtyMap.get(String(item.id)) > 0 && (
-                      <span className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1 rounded-full bg-amber-400 text-slate-900 text-[10px] font-extrabold border border-amber-300 flex items-center justify-center shadow-md">
-                        {itemQtyMap.get(String(item.id))}
-                      </span>
-                    )}
-                    <Plus size={18} weight="duotone" />
-                  </button>
+                  <div className="flex flex-col items-end gap-2">
+                    <div className="w-[92px] h-[92px] rounded-2xl overflow-hidden bg-gray-100 border border-gray-200 shadow-sm">
+                      {item.imageUrl ? (
+                        <img
+                          src={resolveAssetUrl(item.imageUrl)}
+                          alt={item.name}
+                          className="w-full h-full object-cover transition duration-300 group-hover:scale-[1.03]"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-400 text-[10px]">
+                          sem foto
+                        </div>
+                      )}
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const hasActiveModifiers = Array.isArray(item?.modifiers)
+                          ? item.modifiers.some((modifier: any) => modifier?.active !== false)
+                          : false;
+                        if (hasActiveModifiers) {
+                          openProductModal(item);
+                          return;
+                        }
+                        if (isEspetoCategory(item.category)) {
+                          onUpdateCart(item, 1, { cookingPoint: "ao ponto", passSkewer: false });
+                          return;
+                        }
+                        onUpdateCart(item, 1);
+                      }}
+                      title="Adicionar"
+                      className="relative h-9 min-w-[88px] px-3 rounded-xl bg-brand-primary text-white flex items-center justify-center gap-1 hover:opacity-90 shadow-md active:scale-95 transition text-xs font-extrabold"
+                    >
+                      <Plus size={14} weight="duotone" />
+                      Adicionar
+                    </button>
+                  </div>
                 </div>
               ))}
               {category.items.length === 0 && (

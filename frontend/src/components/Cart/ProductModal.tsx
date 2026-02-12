@@ -22,6 +22,7 @@ export const ProductModal = ({ product, isOpen, onClose, onAddToCart }: ProductM
   const [cookingPoint, setCookingPoint] = useState("ao ponto");
   const [passSkewer, setPassSkewer] = useState(false);
   const [modifierCounts, setModifierCounts] = useState<Record<string, number>>({});
+  const [itemQty, setItemQty] = useState(1);
   const promoPrice =
     product?.promoActive && product?.promoPrice && Number(product?.promoPrice) > 0
       ? Number(product.promoPrice)
@@ -43,6 +44,7 @@ export const ProductModal = ({ product, isOpen, onClose, onAddToCart }: ProductM
   );
   const modifiersTotal = getModifiersTotal(selectedModifiers);
   const unitFinalPrice = basePrice + modifiersTotal;
+  const totalFinalPrice = unitFinalPrice * itemQty;
 
   const isEspetoCategory = (category: any) => {
   const normalized = (category || "").toString().trim().toLowerCase();
@@ -54,6 +56,7 @@ export const ProductModal = ({ product, isOpen, onClose, onAddToCart }: ProductM
     setCookingPoint("ao ponto");
     setPassSkewer(false);
     setModifierCounts({});
+    setItemQty(1);
   }, [product?.id]);
 
   const [isAnimating, setIsAnimating] = useState(false);
@@ -249,14 +252,34 @@ export const ProductModal = ({ product, isOpen, onClose, onAddToCart }: ProductM
                   : Object.keys(baseOptions).length
                   ? baseOptions
                   : undefined;
-              onAddToCart(product, 1, options);
+              onAddToCart(product, itemQty, options);
               handleClose();
             }}
             className="w-full bg-brand-primary text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-brand-primary/90 transition"
           >
             <Plus size={18} weight="bold" />
-            Adicionar • {formatCurrency(unitFinalPrice)}
+            Adicionar • {formatCurrency(totalFinalPrice)}
           </button>
+          <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-3 py-2">
+            <span className="text-sm font-semibold text-slate-700">Quantidade</span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setItemQty((prev) => Math.max(1, prev - 1))}
+                className="h-8 w-8 rounded-full border border-slate-200 bg-white text-base font-bold text-slate-700"
+              >
+                -
+              </button>
+              <span className="min-w-[24px] text-center text-sm font-extrabold text-slate-900">{itemQty}</span>
+              <button
+                type="button"
+                onClick={() => setItemQty((prev) => Math.min(20, prev + 1))}
+                className="h-8 w-8 rounded-full border border-brand-primary bg-brand-primary text-base font-bold text-white"
+              >
+                +
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
