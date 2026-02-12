@@ -20,6 +20,36 @@ import { getPaymentMethodMeta } from "../../utils/paymentAssets";
 import { GoogleRouteMapView } from "../GoogleRouteMapView";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
 
+const BRAZIL_DDDS = [
+  "11", "12", "13", "14", "15", "16", "17", "18", "19",
+  "21", "22", "24", "27", "28",
+  "31", "32", "33", "34", "35", "37", "38",
+  "41", "42", "43", "44", "45", "46", "47", "48", "49",
+  "51", "53", "54", "55",
+  "61", "62", "63", "64", "65", "66", "67", "68", "69",
+  "71", "73", "74", "75", "77", "79",
+  "81", "82", "83", "84", "85", "86", "87", "88", "89",
+  "91", "92", "93", "94", "95", "96", "97", "98", "99",
+];
+const DEFAULT_DDD = "12";
+
+const extractPhoneParts = (value = "") => {
+  const digits = value.replace(/\D/g, "");
+  const ddd = digits.slice(0, 2);
+  const localNumber = digits.slice(2, 11);
+  return {
+    ddd: BRAZIL_DDDS.includes(ddd) ? ddd : DEFAULT_DDD,
+    localNumber,
+  };
+};
+
+const formatLocalPhoneNumber = (value = "") => {
+  const digits = value.replace(/\D/g, "").slice(0, 9);
+  if (digits.length <= 4) return digits;
+  if (digits.length <= 8) return `${digits.slice(0, 4)}-${digits.slice(4)}`;
+  return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+};
+
 export const CartView = ({
   cart,
   customer,
@@ -97,8 +127,22 @@ export const CartView = ({
     return "Finalizar pedido na mesa";
   }, [isDelivery, isPickup, isPix, isCredit, isDebit, isCash]);
 
-  const handlePhoneChange = (nextValue) => {
-    const formatted = formatPhoneInput(nextValue);
+  const phoneParts = useMemo(() => extractPhoneParts(customer.phone || ""), [customer.phone]);
+
+  const handlePhoneLocalNumberChange = (nextValue) => {
+    const localDigits = nextValue.replace(/\D/g, "").slice(0, 9);
+    const formatted = localDigits
+      ? formatPhoneInput(`${phoneParts.ddd}${localDigits}`, phoneParts.ddd)
+      : "";
+    onChangeCustomer({ ...customer, phone: formatted });
+  };
+
+  const handleDddChange = (nextDdd) => {
+    const safeDdd = BRAZIL_DDDS.includes(nextDdd) ? nextDdd : DEFAULT_DDD;
+    const localDigits = phoneParts.localNumber;
+    const formatted = localDigits
+      ? formatPhoneInput(`${safeDdd}${localDigits}`, safeDdd)
+      : "";
     onChangeCustomer({ ...customer, phone: formatted });
   };
 
@@ -416,13 +460,33 @@ export const CartView = ({
             <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">
               WhatsApp {customer.type === "table" ? "(opcional)" : ""}
             </label>
-            <input
-              type="tel"
-              value={customer.phone}
-              onChange={(e) => handlePhoneChange(e.target.value)}
-              placeholder="(12) 90000-0000"
-              className="w-full border-b-2 border-gray-100 py-2.5 sm:py-3 text-base sm:text-lg outline-none focus:border-brand-primary placeholder:text-gray-300 bg-transparent"
-            />
+            <div className="mt-2 grid grid-cols-[110px_1fr] gap-3 items-end">
+              <div>
+                <span className="text-[11px] font-semibold text-slate-500">DDD</span>
+                <select
+                  value={phoneParts.ddd}
+                  onChange={(e) => handleDddChange(e.target.value)}
+                  className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm font-semibold text-slate-700 outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20"
+                >
+                  {BRAZIL_DDDS.map((ddd) => (
+                    <option key={ddd} value={ddd}>
+                      {ddd}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <span className="text-[11px] font-semibold text-slate-500">Número</span>
+                <input
+                  type="tel"
+                  inputMode="numeric"
+                  value={formatLocalPhoneNumber(phoneParts.localNumber)}
+                  onChange={(e) => handlePhoneLocalNumberChange(e.target.value)}
+                  placeholder="90000-0000"
+                  className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-base sm:text-lg text-slate-800 outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 placeholder:text-gray-300"
+                />
+              </div>
+            </div>
             {customer.type === "table" && (
               <p className="mt-1 text-[11px] text-gray-400">
                 Para pedidos na mesa, o telefone pode ficar em branco.
