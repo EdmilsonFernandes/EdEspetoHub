@@ -693,34 +693,20 @@ export const GrillQueue = () => {
   };
 
   return (
-    <div className={tvMode ? "space-y-6 rounded-3xl bg-slate-900/95 p-4 sm:p-6 text-white" : "space-y-4"}>
+    <div className={tvMode ? "space-y-6 rounded-3xl bg-slate-900/95 p-4 sm:p-6 text-white" : "space-y-5"}>
       <style>{`@keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}`}</style>
       {/* Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className={`flex flex-wrap items-center gap-2 font-semibold ${tvMode ? "text-white" : "text-gray-700"}`}>
+      <div className={`flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between ${tvMode ? "" : "rounded-2xl border border-slate-200 bg-white px-3 py-3"}`}>
+        <div className={`flex flex-wrap items-center gap-2 font-semibold ${tvMode ? "text-white" : "text-slate-800"}`}>
           <ChefHat className={tvMode ? "text-white" : "text-brand-primary"} weight="duotone" />
           Fila de Produção
-          <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${tvMode ? "bg-white/15 text-white" : "bg-brand-primary/10 text-brand-primary"}`}>
+          <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${tvMode ? "bg-white/15 text-white" : "bg-orange-100 text-orange-700 border border-orange-200"}`}>
             {productionQueue.length} pedidos
           </span>
           {!tvMode && (
-            <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold text-slate-500">
-              <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
-                Pendentes: {queueMetrics.pending}
-              </span>
-              <span className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">
-                Em preparo: {queueMetrics.preparing}
-              </span>
-              <span className="px-2 py-0.5 rounded-full bg-sky-50 text-sky-700">
-                Aguardando: {queueMetrics.ready}
-              </span>
-              <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">
-                Média: {formatDuration(queueMetrics.avgMs)}
-              </span>
-              <span className="px-2 py-0.5 rounded-full bg-rose-50 text-rose-700">
-                Mais antigo: {formatDuration(queueMetrics.oldest)}
-              </span>
-            </div>
+            <p className="text-[12px] font-medium text-slate-500">
+              Pendentes {queueMetrics.pending} • Em preparo {queueMetrics.preparing} • Aguardando {queueMetrics.ready} • Mais antigo {formatDuration(queueMetrics.oldest)}
+            </p>
           )}
           {tvMode && (
             <span className="flex items-center gap-2 text-xs font-semibold text-white/70">
@@ -741,18 +727,16 @@ export const GrillQueue = () => {
                   key={tab.id}
                   type="button"
                   onClick={() => setActiveTab(tab.id as 'queue' | 'inroute' | 'completed')}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-all hover:-translate-y-0.5 active:scale-95 ${
+                  className={`flex items-center gap-2 px-3 py-2 rounded-full text-xs font-semibold transition-all hover:-translate-y-0.5 active:scale-95 ${
                     activeTab === tab.id
-                      ? 'bg-brand-primary text-white shadow-sm'
+                      ? 'bg-orange-500 text-white shadow-sm'
                       : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
                   }`}
                 >
                   <span>{tab.label}</span>
                   <span
                     className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                      activeTab === tab.id
-                        ? 'bg-white/20 text-white'
-                        : 'bg-slate-100 text-slate-600'
+                      activeTab === tab.id ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
                     }`}
                   >
                     {tab.count}
@@ -774,15 +758,15 @@ export const GrillQueue = () => {
               className={`flex items-center justify-between gap-2 text-sm px-3 py-2 rounded-lg w-full sm:w-auto transition-all hover:-translate-y-0.5 active:scale-95 ${
                 tvMode
                   ? "bg-white/15 text-white border border-white/20"
-                  : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
+                  : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-50"
               }`}
             >
               <span className="flex items-center gap-2">
                 {tvMode ? <Monitor size={16} weight="duotone" /> : <DotsThreeVertical size={16} weight="duotone" />}
-                {tvMode ? "Sair do modo TV" : "Ações rápidas"}
+                {tvMode ? "Sair do modo TV" : "Opções"}
               </span>
               {!tvMode && (
-                <span className="text-xs text-gray-400">{soundEnabled ? "Som on" : "Som off"}</span>
+                <span className="text-xs text-gray-400">{soundEnabled ? "Som ligado" : "Som desligado"}</span>
               )}
             </button>
             {actionsOpen && !tvMode && (
@@ -865,19 +849,17 @@ export const GrillQueue = () => {
             return (
             <div
               key={order.id}
-              className={`relative w-full max-w-full p-2.5 sm:p-3 rounded-2xl border border-l-4 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.45)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_50px_-30px_rgba(15,23,42,0.55)] overflow-hidden ${
+              className={`relative w-full max-w-full p-3 sm:p-3.5 rounded-2xl border border-slate-200 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md overflow-hidden ${
                 isNew ? 'ring-2 ring-emerald-300/80' : ''
-              } ${isLate ? 'border-rose-200 bg-rose-50/60' : statusAccent}`}
+              } ${isLate ? 'border-rose-200 bg-rose-50/60' : 'bg-white'}`}
             >
-              <div className="absolute -top-12 -right-12 w-24 h-24 rounded-full bg-brand-primary/10 blur-2xl" />
-              <div className="absolute -bottom-10 -left-10 w-24 h-24 rounded-full bg-brand-secondary/10 blur-2xl" />
               {/* HEADER DO CARD */}
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2.5">
                 <div className="relative flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1 text-[10px] text-gray-600 uppercase font-bold">
-                    <Hash size={14} weight="duotone" className="text-brand-primary" /> Fila
-                    <span className={`ml-1 px-2.5 py-1 rounded-full text-xs font-black shadow-sm ${getPriorityTone(index + 1)}`}>
-                      {String(index + 1).padStart(2, "0")}
+                  <div className="flex items-center gap-2 mb-1 text-[10px] text-slate-500 uppercase font-bold">
+                    <Hash size={14} weight="duotone" className="text-slate-400" /> Prioridade
+                    <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] font-black ${getPriorityTone(index + 1)}`}>
+                      #{String(index + 1).padStart(2, "0")}
                     </span>
                   </div>
 
@@ -888,7 +870,7 @@ export const GrillQueue = () => {
                   Pedido #{formatOrderDisplayId(order.id, storeSlug)}
                 </p>
 
-                  <h3 className="text-base font-bold text-gray-800 truncate">
+                  <h3 className="text-base font-bold text-slate-800 truncate">
                     Cliente: {order.customerName || order.name || "Cliente"}
                   </h3>
 
@@ -972,10 +954,7 @@ export const GrillQueue = () => {
               {/* LISTA DE ITENS */}
               <div className="mt-3 space-y-2">
                 {getOrderedItems(order.id, order.items || []).map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex justify-between text-xs text-gray-700 items-center gap-3 bg-white/70 border border-slate-200/60 rounded-2xl px-2.5 py-1.5"
-                  >
+                  <div key={item.id} className="flex justify-between text-xs text-gray-700 items-center gap-3 bg-slate-50 border border-slate-200 rounded-2xl px-2.5 py-1.5">
                     <div className="flex items-center gap-2.5 min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-shrink-0">
                         <button
@@ -1088,7 +1067,7 @@ export const GrillQueue = () => {
                 </button>
               </div>
 
-              {renderTimeline(order.status, order.type)}
+              {tvMode ? renderTimeline(order.status, order.type) : null}
 
               {/* TOTAL + BOTÕES */}
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mt-3">
@@ -1215,7 +1194,7 @@ export const GrillQueue = () => {
           })}
 
           {productionQueue.length === 0 && !loading && (
-            <div className="col-span-full text-center text-gray-500 py-12 bg-white rounded-xl border border-dashed">
+            <div className="col-span-full text-center text-gray-500 py-12 bg-slate-50 rounded-2xl border border-dashed border-slate-300">
               <div className="mx-auto max-w-sm space-y-2">
                 <div className="text-4xl">🔥</div>
                 <p className="text-sm font-semibold text-slate-700">Nenhum pedido aguardando.</p>
