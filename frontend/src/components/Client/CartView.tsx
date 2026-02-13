@@ -410,7 +410,7 @@ export const CartView = ({
   }, []);
 
   return (
-    <div className="animate-in slide-in-from-right pb-24 relative">
+    <div className="animate-in slide-in-from-right pb-24 relative overflow-x-hidden no-x-scroll">
       <div className="pointer-events-none absolute -top-8 -right-10 h-28 w-28 rounded-full bg-brand-primary/10 blur-2xl" />
       <div className="pointer-events-none absolute top-52 -left-8 h-24 w-24 rounded-full bg-emerald-300/10 blur-2xl" />
       <style>{`@keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}`}</style>
@@ -499,7 +499,7 @@ export const CartView = ({
             <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">
               WhatsApp {customer.type === "table" ? "(opcional)" : ""}
             </label>
-            <div className="mt-2 grid grid-cols-[110px_1fr] gap-3 items-end">
+            <div className="mt-2 grid grid-cols-1 sm:grid-cols-[110px_1fr] gap-3 items-end">
               <div>
                 <span className="text-[11px] font-semibold text-slate-500">DDD</span>
                 <select
@@ -542,12 +542,12 @@ export const CartView = ({
             <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
               Tipo de pedido
             </p>
-            <div className="flex gap-2 sm:gap-3">
+            <div className="flex gap-2 sm:gap-3 flex-wrap sm:flex-nowrap">
               {visibleOrderTypes.map((type) => (
                 <button
                   key={type}
                   onClick={() => onChangeCustomer({ ...customer, type })}
-                  className={`flex-1 py-2.5 sm:py-3 rounded-2xl border flex flex-col items-center justify-center gap-1 transition-all active:scale-[0.98] ${
+                  className={`flex-1 min-w-0 py-2.5 sm:py-3 rounded-2xl border flex flex-col items-center justify-center gap-1 transition-all active:scale-[0.98] ${
                     customer.type === type
                       ? "border-brand-primary bg-gradient-to-br from-brand-primary-soft/70 to-white text-brand-primary shadow-md"
                       : "border-gray-100 text-gray-500 hover:border-brand-primary hover:shadow-sm hover:-translate-y-0.5"
@@ -999,7 +999,7 @@ export const CartView = ({
       )}
 
       {/* Botão Finalizar */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 border-t border-slate-200 bg-white/90 backdrop-blur-md max-w-lg mx-auto z-40 shadow-[0_-18px_36px_-28px_rgba(15,23,42,0.35)]">
+      <div className="fixed bottom-0 left-0 right-0 w-full box-border p-4 border-t border-slate-200 bg-white/90 backdrop-blur-md max-w-lg mx-auto z-40 shadow-[0_-18px_36px_-28px_rgba(15,23,42,0.35)]">
         <button
           onClick={() => {
             setCtaPulse(true);

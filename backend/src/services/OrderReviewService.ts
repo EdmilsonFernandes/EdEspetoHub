@@ -162,7 +162,9 @@ export class OrderReviewService {
     const tipAmountRaw = Number(input.tipAmount ?? 0);
     const tipAmount = Number.isFinite(tipAmountRaw) ? Math.max(0, Math.min(500, tipAmountRaw)) : 0;
 
+    const normalizedOrderType = String(order.type || '').trim().toLowerCase();
     const delivery = await this.orderDeliveryRepository.findByOrderId(order.id);
+    const isDeliveryOrder = normalizedOrderType === 'delivery' || Boolean(delivery);
     const motoboyId = delivery?.motoboyId || null;
 
     const review = await this.orderReviewRepository.saveReview({
@@ -172,10 +174,10 @@ export class OrderReviewService {
       customerName: order.customerName || null,
       customerPhone: order.phone || null,
       storeRating: Number(storeRating),
-      deliveryRating: order.type === 'delivery' ? deliveryRating : null,
+      deliveryRating: isDeliveryOrder ? deliveryRating : null,
       comment: cleanComment,
       storeTags: this.sanitizeTags(input.storeTags),
-      deliveryTags: order.type === 'delivery' ? this.sanitizeTags(input.deliveryTags) : [],
+      deliveryTags: isDeliveryOrder ? this.sanitizeTags(input.deliveryTags) : [],
       tipAmount: Number(tipAmount.toFixed(2)),
     });
     return this.ensureTipPayment(order, review);
@@ -185,10 +187,12 @@ export class OrderReviewService {
     const order = await this.orderRepository.findById(orderId);
     if (!order) throw new AppError('ORDER-001', 404);
     const review = await this.orderReviewRepository.findByOrderId(order.id);
+    const normalizedOrderType = String(order.type || '').trim().toLowerCase();
+    const delivery = await this.orderDeliveryRepository.findByOrderId(order.id);
     return {
       orderId: order.id,
       canReview: [ 'done', 'delivered', 'finished' ].includes(String(order.status || '').toLowerCase()),
-      isDelivery: String(order.type || '') === 'delivery',
+      isDelivery: normalizedOrderType === 'delivery' || Boolean(delivery),
       review,
     };
   }

@@ -186,8 +186,9 @@ export function OrderTracking() {
   }, [orderId]);
 
   const status = order?.status || 'pending';
-  const typeLabel = typeLabels[order?.type] || 'Pedido';
-  const isDelivery = order?.type === 'delivery';
+  const normalizedOrderType = String(order?.type || '').toLowerCase();
+  const isDelivery = normalizedOrderType === 'delivery' || Boolean((order as any)?.delivery);
+  const typeLabel = typeLabels[normalizedOrderType] || (isDelivery ? 'Entrega' : 'Pedido');
   const deliveryStatus = String((order as any)?.delivery?.status || '').toUpperCase();
   const motoboyName = String((order as any)?.delivery?.motoboy?.name || '');
   const motoboyFirst = firstName(motoboyName);
@@ -233,7 +234,7 @@ export function OrderTracking() {
     status === 'delivered' ||
     status === 'finished' ||
     String((order as any)?.delivery?.status || '').toUpperCase() === 'DELIVERED';
-  const canRateDelivery = isDelivery;
+  const canRateDelivery = Boolean(reviewState?.isDelivery ?? isDelivery);
   const storePhone = order?.store?.phone;
   const customerPhone = order?.phone;
   const paymentValue = order?.paymentMethod || order?.payment;
@@ -244,7 +245,7 @@ export function OrderTracking() {
     '';
   const isPixPayment = (paymentValue || '').toString().trim().toLowerCase() === 'pix';
   const hasDeliveryFee =
-    order?.deliveryFee !== null && order?.deliveryFee !== undefined && order?.type === 'delivery';
+    order?.deliveryFee !== null && order?.deliveryFee !== undefined && isDelivery;
   const pixPayload = pixKey
     ? buildPixPayload({
         key: pixKey,
@@ -490,7 +491,7 @@ export function OrderTracking() {
   }, [order?.id, status]);
 
   useEffect(() => {
-    const isDeliveryOrder = order?.type === 'delivery';
+    const isDeliveryOrder = isDelivery;
     if (!isDeliveryOrder) {
       setStoreCoords(null);
       setDeliveryCoords(null);
@@ -553,7 +554,7 @@ export function OrderTracking() {
     return () => {
       active = false;
     };
-  }, [order?.address, order?.id, order?.store?.settings?.address, order?.store?.owner?.address, order?.type]);
+  }, [isDelivery, order?.address, order?.id, order?.store?.settings?.address, order?.store?.owner?.address]);
 
   const steps = useMemo(() => {
     if (isDelivery) {
@@ -926,7 +927,7 @@ export function OrderTracking() {
                         <span className="font-semibold">Mesa:</span> {order.table || '-'}
                       </p>
                     )}
-                    {order.type === 'delivery' && formatAddress(order.address || order.deliveryAddress) && (
+                    {isDelivery && formatAddress(order.address || order.deliveryAddress) && (
                       <p className="flex items-start gap-2">
                         <MapPin size={16} weight="duotone" className="text-gray-400 mt-0.5" />
                         <span>{formatAddress(order.address || order.deliveryAddress)}</span>
@@ -1000,7 +1001,7 @@ export function OrderTracking() {
                       )}
                     </div>
                   )}
-                  {order.type === 'delivery' && storeCoords?.lat && deliveryCoords?.lat && (
+                  {isDelivery && storeCoords?.lat && deliveryCoords?.lat && (
                     <div className="rounded-2xl border border-slate-200 bg-white p-3 space-y-3">
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-semibold text-slate-600">Rota da entrega</span>
