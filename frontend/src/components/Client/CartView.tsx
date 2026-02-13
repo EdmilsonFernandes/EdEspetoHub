@@ -408,7 +408,7 @@ export const CartView = ({
   }, []);
 
   return (
-    <div className="animate-in slide-in-from-right">
+    <div className="animate-in slide-in-from-right pb-24">
       <style>{`@keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}`}</style>
       {/* voltar */}
       <button
@@ -419,7 +419,7 @@ export const CartView = ({
       </button>
 
       {/* Resumo compacto (mobile) */}
-      <div className={`sm:hidden mb-4 rounded-2xl premium-card-glass px-4 ${summaryCompact ? 'py-2' : 'py-2.5'} flex items-center justify-between sticky top-2 z-40 transition-all`}>
+      <div className={`sm:hidden mb-4 rounded-2xl border border-slate-200 bg-gradient-to-r from-white via-slate-50 to-white px-4 ${summaryCompact ? 'py-2' : 'py-2.5'} flex items-center justify-between sticky top-2 z-40 transition-all shadow-[0_20px_42px_-32px_rgba(15,23,42,0.45)]`}>
         <div>
           <p className="text-[11px] uppercase tracking-[0.3em] text-slate-400">Resumo rápido</p>
           <p className="text-sm font-semibold text-slate-800">
@@ -433,13 +433,14 @@ export const CartView = ({
       </div>
 
       {/* Dados do cliente */}
-      <div className="bg-white rounded-3xl premium-card p-4 sm:p-6 mb-4 sm:mb-6">
+      <div className="relative overflow-hidden bg-gradient-to-br from-white via-slate-50 to-white rounded-3xl border border-slate-200 p-4 sm:p-6 mb-4 sm:mb-6 shadow-[0_30px_60px_-46px_rgba(15,23,42,0.45)]">
+        <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-brand-primary/80 via-red-500/70 to-orange-400/80" />
         <div className="flex items-center justify-between mb-4 sm:mb-6">
           <div>
-            <h2 className="font-bold text-gray-800 text-base sm:text-lg">Detalhes do Pedido</h2>
-            <p className="text-xs text-gray-500 hidden sm:block">Complete as infos para enviarmos seu pedido.</p>
+            <h2 className="font-black text-slate-900 text-base sm:text-lg tracking-tight">Detalhes do Pedido</h2>
+            <p className="text-xs text-slate-500 hidden sm:block">Complete as infos para enviarmos seu pedido.</p>
           </div>
-          <span className="text-xs font-semibold text-brand-primary bg-brand-primary-soft px-3 py-1 rounded-full">
+          <span className="text-[11px] font-extrabold text-brand-primary bg-brand-primary-soft px-3 py-1 rounded-full border border-brand-primary/20">
             Etapa 1/2
           </span>
         </div>
@@ -771,8 +772,9 @@ export const CartView = ({
       </div>
 
       {/* Resumo */}
-      <div className="bg-white rounded-2xl premium-card p-4 sm:p-6 mb-4 sm:mb-6 transition-all hover:-translate-y-0.5 active:scale-[0.99]">
-        <h2 className="font-bold text-gray-800 mb-3 sm:mb-4 text-base sm:text-lg">Resumo</h2>
+      <div className="relative overflow-hidden bg-gradient-to-br from-white via-emerald-50/40 to-white rounded-2xl border border-emerald-100 p-4 sm:p-6 mb-4 sm:mb-6 transition-all hover:-translate-y-0.5 active:scale-[0.99] shadow-[0_28px_56px_-44px_rgba(5,150,105,0.45)]">
+        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-400/80 via-emerald-500/60 to-white" />
+        <h2 className="font-black text-slate-900 mb-3 sm:mb-4 text-base sm:text-lg tracking-tight">Resumo</h2>
 
         {cartItems.map((item) => (
           <div
@@ -851,9 +853,10 @@ export const CartView = ({
       </div>
 
       {/* Forma de Pagamento */}
-      <div className="bg-white rounded-2xl premium-card p-4 sm:p-6 mb-4 sm:mb-6 transition-all hover:-translate-y-0.5 active:scale-[0.99]">
+      <div className="relative overflow-hidden bg-gradient-to-br from-white via-blue-50/40 to-white rounded-2xl border border-blue-100 p-4 sm:p-6 mb-4 sm:mb-6 transition-all hover:-translate-y-0.5 active:scale-[0.99] shadow-[0_28px_56px_-44px_rgba(37,99,235,0.35)]">
+        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-400/80 via-brand-primary/70 to-white" />
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-bold text-gray-800 text-base sm:text-lg flex items-center gap-2">
+          <h2 className="font-black text-slate-900 text-base sm:text-lg flex items-center gap-2 tracking-tight">
             <CreditCard size={18} className="text-brand-primary" /> Forma de Pagamento
           </h2>
           <span className="text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-full">
@@ -906,7 +909,7 @@ export const CartView = ({
         </div>
       </div>
 
-      <div className="rounded-2xl premium-card transition-all hover:-translate-y-0.5 active:scale-[0.99]">
+      <div className="rounded-2xl border border-slate-200 bg-gradient-to-r from-white via-slate-50 to-white shadow-[0_20px_42px_-34px_rgba(15,23,42,0.35)] transition-all hover:-translate-y-0.5 active:scale-[0.99]">
         <button
           type="button"
           onClick={() => setShowTips((prev) => !prev)}
@@ -936,7 +939,8 @@ export const CartView = ({
       </div>
 
       {isCash && (
-        <div className="bg-white rounded-2xl premium-card p-4 sm:p-6 mb-4 sm:mb-6 transition-all hover:-translate-y-0.5 active:scale-[0.99] space-y-3">
+        <div className="relative overflow-hidden bg-gradient-to-br from-white via-amber-50/35 to-white rounded-2xl border border-amber-100 p-4 sm:p-6 mb-4 sm:mb-6 transition-all hover:-translate-y-0.5 active:scale-[0.99] space-y-3 shadow-[0_28px_56px_-44px_rgba(245,158,11,0.4)]">
+          <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-amber-400/80 via-amber-500/60 to-white" />
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-sm sm:text-base font-extrabold text-slate-800">Troco</p>
