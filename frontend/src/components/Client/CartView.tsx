@@ -129,26 +129,22 @@ export const CartView = ({
     return "Finalizar pedido na mesa";
   }, [isDelivery, isPickup, isPix, isCredit, isDebit, isCash]);
 
-  const phoneParts = useMemo(() => extractPhoneParts(customer.phone || ""), [customer.phone]);
+  const [selectedDdd, setSelectedDdd] = useState(() => extractPhoneParts(customer.phone || "").ddd);
+  const [localPhoneDigits, setLocalPhoneDigits] = useState(() => extractPhoneParts(customer.phone || "").localNumber);
 
-  const handlePhoneLocalNumberChange = (nextValue) => {
-    const digits = nextValue.replace(/\D/g, "").slice(0, 11);
-    const canAutoExtractDdd = !phoneParts.ddd;
-    const extractedHasDdd =
-      canAutoExtractDdd && digits.length >= 10 && BRAZIL_DDDS.includes(digits.slice(0, 2));
-    const resolvedDdd = extractedHasDdd ? digits.slice(0, 2) : phoneParts.ddd;
-    const localDigits = extractedHasDdd ? digits.slice(2, 11) : digits.slice(0, 9);
-    const formatted = localDigits
-      ? resolvedDdd
-        ? formatPhoneInput(localDigits, resolvedDdd)
-        : formatPhoneInput(localDigits)
-      : "";
-    onChangeCustomer({ ...customer, phone: formatted });
-  };
+  useEffect(() => {
+    const parsed = extractPhoneParts(customer.phone || "");
+    if (parsed.ddd !== selectedDdd) {
+      setSelectedDdd(parsed.ddd);
+    }
+    if (parsed.localNumber !== localPhoneDigits) {
+      setLocalPhoneDigits(parsed.localNumber);
+    }
+  }, [customer.phone]);
 
-  const handleDddChange = (nextDdd) => {
+  const syncPhone = (nextDdd: string, nextLocal: string) => {
     const safeDdd = BRAZIL_DDDS.includes(nextDdd) ? nextDdd : "";
-    const localDigits = phoneParts.localNumber;
+    const localDigits = (nextLocal || "").replace(/\D/g, "").slice(0, 9);
     const formatted = localDigits
       ? safeDdd
         ? formatPhoneInput(localDigits, safeDdd)
@@ -157,6 +153,18 @@ export const CartView = ({
       ? formatPhoneInput("", safeDdd)
       : "";
     onChangeCustomer({ ...customer, phone: formatted });
+  };
+
+  const handlePhoneLocalNumberChange = (nextValue) => {
+    const localDigits = nextValue.replace(/\D/g, "").slice(0, 9);
+    setLocalPhoneDigits(localDigits);
+    syncPhone(selectedDdd, localDigits);
+  };
+
+  const handleDddChange = (nextDdd) => {
+    const safeDdd = BRAZIL_DDDS.includes(nextDdd) ? nextDdd : "";
+    setSelectedDdd(safeDdd);
+    syncPhone(safeDdd, localPhoneDigits);
   };
 
   const normalizeText = (value = "") =>
@@ -479,7 +487,7 @@ export const CartView = ({
               <div>
                 <span className="text-[11px] font-semibold text-slate-500">DDD</span>
                 <select
-                  value={phoneParts.ddd || ""}
+                  value={selectedDdd || ""}
                   onChange={(e) => handleDddChange(e.target.value)}
                   className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm font-semibold text-slate-700 outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20"
                 >
@@ -498,10 +506,11 @@ export const CartView = ({
                 <input
                   type="tel"
                   inputMode="numeric"
-                  value={formatLocalPhoneNumber(phoneParts.localNumber)}
+                  value={formatLocalPhoneNumber(localPhoneDigits)}
                   onChange={(e) => handlePhoneLocalNumberChange(e.target.value)}
-                  placeholder="90000-0000"
-                  className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-base sm:text-lg text-slate-800 outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 placeholder:text-gray-300"
+                  placeholder={selectedDdd ? "90000-0000" : "Selecione o DDD"}
+                  disabled={!selectedDdd}
+                  className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-base sm:text-lg text-slate-800 outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 placeholder:text-gray-300 disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
                 />
               </div>
             </div>
