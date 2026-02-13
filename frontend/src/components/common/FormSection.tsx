@@ -4,7 +4,7 @@ type FormSectionVariant = 'primary' | 'success' | 'warning' | 'neutral';
 
 interface FormSectionProps {
   title: string;
-  children: ReactNode;
+  children?: ReactNode;
   variant?: FormSectionVariant;
   subtitle?: string;
   actions?: ReactNode;

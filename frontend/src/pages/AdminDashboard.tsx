@@ -24,6 +24,7 @@ import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAs
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { formatSelectedModifiers } from '../utils/productModifiers';
 import { PremiumTabs } from '../components/common/PremiumTabs';
+import { FormSection } from '../components/common/FormSection';
 
 const formatPlanCycle = (days: number) => {
   if (!Number.isFinite(days)) return '—';
@@ -1116,9 +1117,14 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
       <div className="pb-24 sm:pb-0">
         {activeTab === 'pedidos' && (
-          <div className="bg-white rounded-2xl premium-card p-5">
+          <FormSection
+            title="Pedidos"
+            subtitle="Gestão e acompanhamento dos pedidos da loja."
+            variant="primary"
+            className="bg-white premium-card"
+          >
             <OrdersView orders={orders} products={products} storeSlug={storeSlug} />
-          </div>
+          </FormSection>
         )}
 
         {activeTab === 'produtos' && (
@@ -1126,18 +1132,29 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         )}
 
         {activeTab === 'pagamentos' && (
-          <div className="bg-white rounded-2xl premium-card p-5">
+          <FormSection
+            title="Pagamentos"
+            subtitle="Assinatura atual, ciclo e histórico financeiro."
+            variant="success"
+            className="bg-white premium-card"
+          >
             <PaymentsView
               subscription={subscriptionDetails}
               loading={subscriptionLoading}
               error={subscriptionError}
               payments={paymentsHistory}
             />
-          </div>
+          </FormSection>
         )}
 
         {activeTab === 'config' && (
-          <div className="rounded-3xl premium-card-soft p-4 sm:p-5">
+          <FormSection
+            title="Configurações"
+            subtitle="Identidade visual, tipos de pedido e horários de funcionamento."
+            variant="warning"
+            className="premium-card-soft"
+            contentClassName="space-y-4"
+          >
             <div className="space-y-4 pb-24 sm:pb-4">
               <BrandingSettings
                 branding={brandingDraft}
@@ -1162,19 +1179,29 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                 {savingBranding ? 'Salvando...' : 'Salvar alterações'}
               </button>
             </div>
-          </div>
+          </FormSection>
         )}
 
         {activeTab === 'fila' && (
-          <div className="bg-white rounded-2xl premium-card p-5">
+          <FormSection
+            title="Fila de Pedidos"
+            subtitle="Operação em tempo real dos pedidos da loja."
+            variant="neutral"
+            className="bg-white premium-card"
+          >
             <GrillQueue />
-          </div>
+          </FormSection>
         )}
 
         {activeTab === 'motoboys' && (
-          <div className="rounded-2xl premium-card p-5">
+          <FormSection
+            title="Entregadores"
+            subtitle="Vínculos, solicitações e status dos motoboys."
+            variant="primary"
+            className="premium-card"
+          >
             <AdminMotoboys />
-          </div>
+          </FormSection>
         )}
       </div>
 

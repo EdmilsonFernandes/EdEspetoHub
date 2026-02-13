@@ -6,6 +6,7 @@ import { motoboyAdminService } from '../services/motoboyAdminService';
 import { orderService } from '../services/orderService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { AdaptiveAvatar } from '../components/common/AdaptiveAvatar';
+import { FormSection } from '../components/common/FormSection';
 
 export function AdminMotoboys() {
   const { auth } = useAuth();
@@ -570,8 +571,7 @@ export function AdminMotoboys() {
   return (
     <div className="space-y-6">
       {reviewSummary && (
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.4)]">
-          <div className="text-xs uppercase tracking-[0.22em] text-slate-500 font-extrabold">Avaliações</div>
+        <FormSection title="Avaliações" variant="success" contentClassName="space-y-2">
           <div className="mt-2 grid gap-2 sm:grid-cols-3">
             <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
               <div className="text-[11px] text-slate-500">Nota da loja</div>
@@ -595,7 +595,7 @@ export function AdminMotoboys() {
               <div className="text-[11px] text-slate-500">acumulado</div>
             </div>
           </div>
-        </div>
+        </FormSection>
       )}
 
       {docsModalOpen && docsModalMotoboyId && (
@@ -883,19 +883,24 @@ export function AdminMotoboys() {
         </div>
       )}
 
-      <div className="rounded-3xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-white p-5 shadow-[0_26px_60px_-52px_rgba(15,23,42,0.35)]">
-        <h1 className="text-2xl font-black text-slate-900">Entregadores</h1>
-        <p className="text-sm text-slate-600 mt-1">Solicitações, documentos e vínculo por loja.</p>
-      </div>
+      <FormSection
+        title="Entregadores"
+        subtitle="Solicitações, documentos e vínculo por loja."
+        variant="neutral"
+        className="bg-gradient-to-br from-white via-slate-50 to-white"
+      />
 
-      <div className="premium-card p-4 sm:p-5 overflow-hidden">
+      <FormSection
+        title="Link de cadastro"
+        subtitle="Convide entregadores para sua loja. Copie e envie no WhatsApp."
+        variant="primary"
+        className="premium-card overflow-hidden"
+        contentClassName="space-y-3"
+      >
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="min-w-0">
-            <div className="text-[11px] uppercase tracking-[0.28em] font-extrabold text-emerald-700">
-              Link de cadastro
-            </div>
             <div className="text-base sm:text-lg font-black text-slate-900">Convide entregadores para sua loja</div>
-            <div className="text-xs text-slate-600 mt-1">Copie e envie no WhatsApp. O motoboy faz o cadastro e solicita o vínculo.</div>
+            <div className="text-xs text-slate-600 mt-1">O motoboy faz o cadastro e solicita o vínculo.</div>
           </div>
           <div className="shrink-0 flex flex-wrap items-center gap-2">
             <button
@@ -918,9 +923,15 @@ export function AdminMotoboys() {
         <div className="mt-3 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700 break-all">
           {getMotoboyRegisterUrl()}
         </div>
-      </div>
+      </FormSection>
 
-      <div className="premium-card p-0 overflow-hidden">
+      <FormSection
+        title="Solicitações de vínculo"
+        subtitle="Motoboys que pediram para entrar na sua loja."
+        variant="warning"
+        className="premium-card p-0 overflow-hidden"
+        contentClassName="space-y-0"
+      >
         <SectionHeader
           eyebrow="Solicitações"
           title="Solicitações de vínculo"
@@ -1037,9 +1048,15 @@ export function AdminMotoboys() {
             })}
           </div>
         )}
-      </div>
+      </FormSection>
 
-      <div className="premium-card p-0 overflow-hidden">
+      <FormSection
+        title="Entregadores vinculados"
+        subtitle="Status, documentos e vínculo por loja."
+        variant="primary"
+        className="premium-card p-0 overflow-hidden"
+        contentClassName="space-y-0"
+      >
         <SectionHeader
           eyebrow="Time"
           title="Entregadores vinculados"
@@ -1279,7 +1296,7 @@ export function AdminMotoboys() {
             </button>
           </div>
         </div>
-      </div>
+      </FormSection>
 
       {previewDoc && (
         <div
