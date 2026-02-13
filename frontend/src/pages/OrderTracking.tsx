@@ -374,18 +374,29 @@ export function OrderTracking() {
       ? 'bg-amber-50 text-amber-700 border-amber-200'
       : 'bg-slate-50 text-slate-500 border-slate-200';
 
-  const refreshReviewStatus = async () => {
+  const refreshReviewStatus = async (silent = false) => {
     if (!order?.id) return;
     try {
-      setReviewLoading(true);
+      if (!silent) setReviewLoading(true);
       const payload = await orderService.getReviewByOrder(order.id);
       setReviewState(payload || null);
     } catch (error: any) {
-      setReviewError(error?.message || 'Não foi possível atualizar status da gorjeta.');
+      if (!silent) {
+        setReviewError(error?.message || 'Não foi possível atualizar status da gorjeta.');
+      }
     } finally {
-      setReviewLoading(false);
+      if (!silent) setReviewLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (!order?.id || !isReady || !canShowTipPayment) return;
+    if (tipStatus === 'PAID' || tipStatus === 'FAILED' || tipStatus === 'NONE') return;
+    const interval = window.setInterval(() => {
+      refreshReviewStatus(true);
+    }, 5000);
+    return () => window.clearInterval(interval);
+  }, [order?.id, isReady, canShowTipPayment, tipStatus]);
 
   const toggleTag = (type: 'storeTags' | 'deliveryTags', value: string) => {
     setReviewForm((prev) => {
