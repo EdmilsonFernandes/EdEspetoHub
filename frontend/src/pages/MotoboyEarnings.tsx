@@ -8,6 +8,7 @@ import { MotoboyHeader } from '../components/Motoboy/MotoboyHeader';
 
 export function MotoboyEarnings() {
   const [orders, setOrders] = useState<any[]>([]);
+  const [tipPayouts, setTipPayouts] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
   const [blocked, setBlocked] = useState(false);
@@ -18,13 +19,18 @@ export function MotoboyEarnings() {
   const load = async () => {
     try {
       setLoading(true);
-      const data = await motoboyService.listHistory(30);
-      setOrders(Array.isArray(data) ? data : []);
+      const [historyData, tipData] = await Promise.all([
+        motoboyService.listHistory(30),
+        motoboyService.listTipPayouts(300).catch(() => []),
+      ]);
+      setOrders(Array.isArray(historyData) ? historyData : []);
+      setTipPayouts(Array.isArray(tipData) ? tipData : []);
       setBlocked(false);
     } catch (error: any) {
       if (error?.status === 403) {
         setBlocked(true);
         setOrders([]);
+        setTipPayouts([]);
       } else {
         showToast(error?.message || 'Não foi possível carregar ganhos.', 'error');
       }
@@ -58,6 +64,13 @@ export function MotoboyEarnings() {
   }, 0);
 
   const totalMonth = orders.reduce((acc, order) => acc + Number(order.deliveryFee || 0), 0);
+  const totalTipsMonth = tipPayouts.reduce((acc, row) => acc + Number(row?.tipAmount || 0), 0);
+  const totalTipsPending = tipPayouts
+    .filter((row) => String(row?.tipPayoutStatus || '').toUpperCase() !== 'PAID')
+    .reduce((acc, row) => acc + Number(row?.tipAmount || 0), 0);
+  const totalTipsPaid = tipPayouts
+    .filter((row) => String(row?.tipPayoutStatus || '').toUpperCase() === 'PAID')
+    .reduce((acc, row) => acc + Number(row?.tipAmount || 0), 0);
 
   return (
     <div className="min-h-screen motoboy-screen space-y-4 overflow-x-hidden">
@@ -89,7 +102,7 @@ export function MotoboyEarnings() {
         </button>
       )}
 
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-2xl border border-slate-200 bg-white p-4 flex items-center justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Total do dia</p>
@@ -111,6 +124,32 @@ export function MotoboyEarnings() {
             <p className="text-xs text-slate-500 mt-1">{orders.length} entregas concluídas</p>
           </div>
           <div className="h-12 w-12 rounded-2xl bg-slate-100 text-slate-700 flex items-center justify-center">
+            <ChartLineUp size={22} weight="duotone" />
+          </div>
+        </div>
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 flex items-center justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-emerald-700">Gorjetas (30 dias)</p>
+            <p className="text-2xl font-black text-emerald-700 mt-2">
+              {totalTipsMonth.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+            </p>
+            <p className="text-xs text-emerald-700/80 mt-1">{tipPayouts.length} gorjeta(s) pagas por cliente</p>
+          </div>
+          <div className="h-12 w-12 rounded-2xl bg-white/80 text-emerald-700 flex items-center justify-center">
+            <Wallet size={22} weight="duotone" />
+          </div>
+        </div>
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 flex items-center justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-amber-700">Repasse de gorjeta</p>
+            <p className="text-lg font-black text-amber-700 mt-2">
+              {totalTipsPending.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+            </p>
+            <p className="text-xs text-amber-700/80 mt-1">
+              Pendente • {totalTipsPaid.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} já repassado
+            </p>
+          </div>
+          <div className="h-12 w-12 rounded-2xl bg-white/80 text-amber-700 flex items-center justify-center">
             <ChartLineUp size={22} weight="duotone" />
           </div>
         </div>
