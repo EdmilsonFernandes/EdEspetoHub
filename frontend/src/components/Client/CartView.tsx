@@ -97,6 +97,8 @@ export const CartView = ({
   const [cashNeedsChange, setCashNeedsChange] = useState(false);
   const [cashTenderedInput, setCashTenderedInput] = useState("");
   const nameInputRef = useRef<HTMLInputElement | null>(null);
+  const premiumInputClass =
+    "w-full rounded-xl border border-slate-200 bg-white/90 px-3 py-2.5 sm:py-3 text-slate-800 outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]";
 
   const visibleOrderTypes = Array.isArray(allowedOrderTypes) && allowedOrderTypes.length
     ? allowedOrderTypes
@@ -408,7 +410,9 @@ export const CartView = ({
   }, []);
 
   return (
-    <div className="animate-in slide-in-from-right pb-24">
+    <div className="animate-in slide-in-from-right pb-24 relative">
+      <div className="pointer-events-none absolute -top-8 -right-10 h-28 w-28 rounded-full bg-brand-primary/10 blur-2xl" />
+      <div className="pointer-events-none absolute top-52 -left-8 h-24 w-24 rounded-full bg-emerald-300/10 blur-2xl" />
       <style>{`@keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}`}</style>
       {/* voltar */}
       <button
@@ -465,7 +469,7 @@ export const CartView = ({
                   allowCustomerAutocomplete && setTimeout(() => setSuggestionsOpen(false), 150)
                 }
                 placeholder="Ex: João Silva"
-                className="w-full border-b-2 border-gray-100 py-2.5 sm:py-3 pl-9 text-base sm:text-lg outline-none focus:border-brand-primary placeholder:text-gray-300 bg-transparent"
+                className="w-full border-b-2 border-gray-200 py-2.5 sm:py-3 pl-9 text-base sm:text-lg outline-none focus:border-brand-primary placeholder:text-gray-300 bg-transparent"
               />
               <MagnifyingGlass size={18} className="absolute left-0 top-1/2 -translate-y-1/2 text-gray-300" />
               {allowCustomerAutocomplete && suggestionsOpen && filteredCustomers.length > 0 && (
@@ -501,7 +505,7 @@ export const CartView = ({
                 <select
                   value={selectedDdd || ""}
                   onChange={(e) => handleDddChange(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm font-semibold text-slate-700 outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20"
+                  className={`${premiumInputClass} mt-1 text-sm font-semibold text-slate-700`}
                 >
                   <option value="" disabled>
                     Selecione
@@ -522,7 +526,7 @@ export const CartView = ({
                   onChange={(e) => handlePhoneLocalNumberChange(e.target.value)}
                   placeholder={selectedDdd ? "90000-0000" : "Selecione o DDD"}
                   disabled={!selectedDdd}
-                  className="mt-1 w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-base sm:text-lg text-slate-800 outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 placeholder:text-gray-300 disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
+                  className={`${premiumInputClass} mt-1 text-base sm:text-lg placeholder:text-gray-300 disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed`}
                 />
               </div>
             </div>
@@ -764,7 +768,7 @@ export const CartView = ({
                 }
                 inputMode="numeric"
                 placeholder="Outra mesa (ex: 18)"
-                className="w-full p-3 sm:p-4 rounded-xl bg-gray-50 border border-gray-100 text-gray-700 outline-none focus:ring-2 focus:ring-brand-primary"
+                className={`${premiumInputClass} sm:py-4`}
               />
             </div>
           )}
@@ -970,7 +974,7 @@ export const CartView = ({
                   onChange={(event) => setCashTenderedInput(event.target.value)}
                   inputMode="decimal"
                   placeholder="Ex: 100,00"
-                  className="w-full rounded-xl border border-slate-200 bg-white/70 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-brand-primary"
+                  className={`${premiumInputClass} text-sm`}
                 />
                 <p className="text-[11px] text-slate-500">
                   Total do pedido:{" "}
@@ -995,7 +999,7 @@ export const CartView = ({
       )}
 
       {/* Botão Finalizar */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 border-t border-gray-100 max-w-lg mx-auto z-40">
+      <div className="fixed bottom-0 left-0 right-0 p-4 border-t border-slate-200 bg-white/90 backdrop-blur-md max-w-lg mx-auto z-40 shadow-[0_-18px_36px_-28px_rgba(15,23,42,0.35)]">
         <button
           onClick={() => {
             setCtaPulse(true);
@@ -1009,7 +1013,7 @@ export const CartView = ({
           className={`w-full font-bold py-4 rounded-xl shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2 ${
             checkoutDisabled || cashValidation.blocked
               ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-              : "bg-brand-primary text-white cursor-pointer"
+              : "bg-gradient-to-r from-brand-primary via-red-500 to-orange-500 text-white cursor-pointer shadow-[0_24px_46px_-28px_rgba(239,68,68,0.75)]"
           }`}
           style={ctaPulse ? { animation: 'btnPop 220ms ease' } : undefined}
         >
