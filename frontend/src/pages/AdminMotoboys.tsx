@@ -34,6 +34,14 @@ export function AdminMotoboys() {
   const [motoboyFilter, setMotoboyFilter] = useState<'all' | 'free' | 'busy' | 'docs_pending' | 'inactive'>('all');
   const [reviewSummary, setReviewSummary] = useState<any | null>(null);
   const [motoboyReviewMap, setMotoboyReviewMap] = useState<Record<string, any>>({});
+  const [tipsOverview, setTipsOverview] = useState({
+    paidAmount: 0,
+    pendingAmount: 0,
+    tipOrders: 0,
+    paidTipOrders: 0,
+    pendingTipOrders: 0,
+    avgTipAmount: 0,
+  });
   const storeId = auth?.store?.id || '';
   const pendingRequests = requests.filter((request) => request.status === 'PENDING');
 
@@ -272,7 +280,10 @@ export function AdminMotoboys() {
   const loadReviewSummary = async () => {
     if (!storeId) return;
     try {
-      const data = await orderService.getReviewSummaryByStore(storeId);
+      const [data, reviews] = await Promise.all([
+        orderService.getReviewSummaryByStore(storeId),
+        orderService.listReviewsByStore(storeId, 300),
+      ]);
       setReviewSummary(data || null);
       const rows = Array.isArray(data?.motoboy) ? data.motoboy : [];
       const byId: Record<string, any> = {};
@@ -282,9 +293,35 @@ export function AdminMotoboys() {
         byId[id] = row;
       });
       setMotoboyReviewMap(byId);
+
+      const reviewRows = Array.isArray(reviews) ? reviews : [];
+      const tipRows = reviewRows.filter((r: any) => Number(r?.tipAmount ?? r?.tip_amount ?? 0) > 0);
+      const paidRows = tipRows.filter((r: any) => String(r?.tipStatus ?? r?.tip_status ?? '').toUpperCase() === 'PAID');
+      const pendingRows = tipRows.filter((r: any) => String(r?.tipStatus ?? r?.tip_status ?? '').toUpperCase() === 'PENDING');
+      const paidAmount = paidRows.reduce((acc: number, r: any) => acc + Number(r?.tipAmount ?? r?.tip_amount ?? 0), 0);
+      const pendingAmount = pendingRows.reduce((acc: number, r: any) => acc + Number(r?.tipAmount ?? r?.tip_amount ?? 0), 0);
+      const tipOrders = tipRows.length;
+      const avgTipAmount = tipOrders > 0 ? (paidAmount + pendingAmount) / tipOrders : 0;
+
+      setTipsOverview({
+        paidAmount,
+        pendingAmount,
+        tipOrders,
+        paidTipOrders: paidRows.length,
+        pendingTipOrders: pendingRows.length,
+        avgTipAmount,
+      });
     } catch {
       setReviewSummary(null);
       setMotoboyReviewMap({});
+      setTipsOverview({
+        paidAmount: 0,
+        pendingAmount: 0,
+        tipOrders: 0,
+        paidTipOrders: 0,
+        pendingTipOrders: 0,
+        avgTipAmount: 0,
+      });
     }
   };
 
@@ -572,27 +609,51 @@ export function AdminMotoboys() {
     <div className="space-y-6">
       {reviewSummary && (
         <FormSection title="Avaliações" variant="success" contentClassName="space-y-2">
-          <div className="mt-2 grid gap-2 sm:grid-cols-3">
+          <div className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
             <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
-              <div className="text-[11px] text-slate-500">Nota da loja</div>
+              <div className="text-[11px] text-slate-500">Nota da loja (média)</div>
               <div className="text-lg font-black text-slate-900">
                 {Number(reviewSummary?.summary?.store_avg_rating || 0).toFixed(1)} ★
               </div>
-              <div className="text-[11px] text-slate-500">{Number(reviewSummary?.summary?.total_reviews || 0)} avaliações</div>
+              <div className="text-[11px] text-slate-500">
+                {Number(reviewSummary?.summary?.total_reviews || 0)} avaliações
+                {Number(reviewSummary?.summary?.total_reviews || 0) < 10 ? ' · amostra baixa' : ''}
+              </div>
             </div>
             <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
               <div className="text-[11px] text-slate-500">Entrega (motoboys)</div>
               <div className="text-lg font-black text-slate-900">
                 {Number(reviewSummary?.summary?.delivery_avg_rating || 0).toFixed(1)} ★
               </div>
-              <div className="text-[11px] text-slate-500">{Number(reviewSummary?.summary?.total_delivery_reviews || 0)} avaliações</div>
+              <div className="text-[11px] text-slate-500">
+                {Number(reviewSummary?.summary?.total_delivery_reviews || 0)} avaliações
+                {Number(reviewSummary?.summary?.total_delivery_reviews || 0) < 10 ? ' · amostra baixa' : ''}
+              </div>
+            </div>
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2">
+              <div className="text-[11px] text-emerald-700">Gorjetas pagas (acumulado)</div>
+              <div className="text-lg font-black text-emerald-700">
+                R$ {Number(tipsOverview.paidAmount || 0).toFixed(2)}
+              </div>
+              <div className="text-[11px] text-emerald-700/80">{tipsOverview.paidTipOrders} pagamento(s)</div>
+            </div>
+            <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2">
+              <div className="text-[11px] text-amber-700">Gorjetas pendentes</div>
+              <div className="text-lg font-black text-amber-700">
+                R$ {Number(tipsOverview.pendingAmount || 0).toFixed(2)}
+              </div>
+              <div className="text-[11px] text-amber-700/80">{tipsOverview.pendingTipOrders} pendente(s)</div>
             </div>
             <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
-              <div className="text-[11px] text-slate-500">Gorjetas</div>
-              <div className="text-lg font-black text-emerald-700">
-                R$ {Number(reviewSummary?.summary?.total_tips || 0).toFixed(2)}
+              <div className="text-[11px] text-slate-500">Ticket médio de gorjeta</div>
+              <div className="text-lg font-black text-slate-900">
+                R$ {Number(tipsOverview.avgTipAmount || 0).toFixed(2)}
               </div>
-              <div className="text-[11px] text-slate-500">acumulado</div>
+              <div className="text-[11px] text-slate-500">
+                {Number(reviewSummary?.summary?.total_delivery_reviews || 0) > 0
+                  ? `${((tipsOverview.tipOrders / Number(reviewSummary?.summary?.total_delivery_reviews || 1)) * 100).toFixed(1)}% dos pedidos avaliados`
+                  : 'Sem base de comparação'}
+              </div>
             </div>
           </div>
         </FormSection>
