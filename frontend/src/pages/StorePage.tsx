@@ -39,6 +39,7 @@ export function StorePage() {
   const [storePhone, setStorePhone] = useState('');
   const [storeAddress, setStoreAddress] = useState('');
   const [storeDescription, setStoreDescription] = useState('');
+  const [storeName, setStoreName] = useState('');
   const [storePixKey, setStorePixKey] = useState('');
   const [deliveryRadiusKm, setDeliveryRadiusKm] = useState('');
   const [deliveryFee, setDeliveryFee] = useState('');
@@ -112,6 +113,16 @@ export function StorePage() {
     return intervals.map((interval) => `${interval.start}–${interval.end}`).join(' • ');
   }, [openingHours]);
   const weeklyHours = useMemo(() => formatOpeningHoursSummary(openingHours), [openingHours]);
+  const closedStateStoreName = useMemo(() => {
+    const exactName = String(storeName || '').trim();
+    if (exactName) return exactName;
+    const fromSlug = String(storeSlug || '')
+      .trim()
+      .replace(/[-_]+/g, ' ');
+    if (fromSlug) return fromSlug;
+    const fallbackBrand = String(branding?.brandName || '').trim();
+    return fallbackBrand || 'Loja';
+  }, [storeName, storeSlug, branding?.brandName]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
   const isDemo = storeSlug === 'demo' || storeSlug === 'test-store';
@@ -315,6 +326,7 @@ export function StorePage() {
           setStorePhone(data.owner?.phone || '');
           setStoreAddress(data.settings?.address || data.owner?.address || '');
           setStoreDescription(data.settings?.description || '');
+          setStoreName(data.name || '');
           setPromoMessage(data.settings?.promoMessage || '');
           setStorePixKey(data.settings?.pixKey || '');
           setDeliveryRadiusKm(data.settings?.deliveryRadiusKm ?? '');
@@ -1168,14 +1180,14 @@ export function StorePage() {
                       <div className="w-16 h-16 rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-white">
                         <img
                           src={branding?.logoUrl || '/chama-no-espeto.jpeg'}
-                          alt={branding?.brandName || 'Chama no Espeto'}
+                          alt={closedStateStoreName}
                           className="w-full h-full object-cover"
                         />
                       </div>
                       <div>
                         <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Atendimento</p>
                         <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">
-                          {branding?.brandName || 'Loja fechada agora'}
+                          {closedStateStoreName}
                         </h2>
                       </div>
                     </div>
