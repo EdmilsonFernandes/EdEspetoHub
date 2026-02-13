@@ -240,6 +240,7 @@ CREATE TABLE IF NOT EXISTS motoboys (
   city TEXT,
   state TEXT,
   address TEXT,
+  pix_key TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 

@@ -45,6 +45,7 @@ export function MotoboyProfile() {
     city: '',
     state: '',
     address: '',
+    pixKey: '',
   });
   const [savingProfile, setSavingProfile] = useState(false);
   const [stores, setStores] = useState<any[]>([]);
@@ -198,6 +199,7 @@ export function MotoboyProfile() {
           city: data?.city || '',
           state: data?.state || '',
           address: data?.address || '',
+          pixKey: data?.pixKey || '',
         });
       } catch {
         // ignore
@@ -600,6 +602,7 @@ export function MotoboyProfile() {
         city: profileDraft.city || null,
         state: profileDraft.state || null,
         address: profileDraft.address || null,
+        pixKey: profileDraft.pixKey || null,
         profileImageFile: profileImageFileBase64,
       });
       setProfile(updated || null);
@@ -1276,6 +1279,10 @@ export function MotoboyProfile() {
               <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Endereço operacional</p>
               <p className="text-sm font-semibold text-slate-900 break-words">{profileDraft?.address || '-'}</p>
             </div>
+            <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 sm:col-span-2">
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">PIX para repasse</p>
+              <p className="text-sm font-semibold text-slate-900 break-all">{profileDraft?.pixKey || '-'}</p>
+            </div>
           </div>
         </div>
         <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-slate-100/80 px-3 py-3 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.35)]">
@@ -1434,6 +1441,16 @@ export function MotoboyProfile() {
               className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
             />
           )}
+          <input
+            value={profileDraft.pixKey}
+            onChange={(event) => setProfileDraft((prev: any) => ({ ...prev, pixKey: event.target.value }))}
+            placeholder="Chave PIX CPF (somente números)"
+            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm sm:col-span-2"
+            inputMode="numeric"
+          />
+          <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-[11px] text-slate-600 sm:col-span-2">
+            Para repasse da gorjeta, use a chave PIX CPF do próprio entregador.
+          </div>
           <input
             value={profileDraft.address}
             onChange={(event) => setProfileDraft((prev: any) => ({ ...prev, address: event.target.value }))}

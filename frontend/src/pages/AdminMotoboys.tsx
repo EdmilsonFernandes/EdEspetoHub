@@ -1164,6 +1164,14 @@ export function AdminMotoboys() {
                     {formatVehicleLine(link.motoboyProfile) ? (
                       <p className="text-[11px] text-slate-600 mt-1 break-words">{formatVehicleLine(link.motoboyProfile)}</p>
                     ) : null}
+                    {link?.motoboyProfile?.pixKey ? (
+                      <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                        <span className="text-[10px] font-semibold text-slate-500">PIX (CPF):</span>
+                        <code className="rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-700 break-all">
+                          {String(link.motoboyProfile.pixKey)}
+                        </code>
+                      </div>
+                    ) : null}
                     </div>
                   </div>
                   <div className="flex flex-wrap items-center gap-2 sm:justify-end">

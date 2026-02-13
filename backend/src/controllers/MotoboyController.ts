@@ -221,6 +221,7 @@ export class MotoboyController {
                 cnhExpiresAt: link.motoboy.cnhExpiresAt || null,
                 city: link.motoboy.city || null,
                 state: link.motoboy.state || null,
+                pixKey: link.motoboy.pixKey || null,
               }
             : null,
           createdAt: link.createdAt,

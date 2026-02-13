@@ -413,6 +413,10 @@ export async function runMigrations() {
     ADD COLUMN IF NOT EXISTS address TEXT;
   `);
   await AppDataSource.query(`
+    ALTER TABLE IF EXISTS motoboys
+    ADD COLUMN IF NOT EXISTS pix_key TEXT;
+  `);
+  await AppDataSource.query(`
     CREATE TABLE IF NOT EXISTS order_reviews (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
       order_id UUID NOT NULL UNIQUE REFERENCES orders(id) ON DELETE CASCADE,

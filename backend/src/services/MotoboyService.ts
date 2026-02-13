@@ -27,6 +27,7 @@ import { env } from '../config/env';
 import { faceVerifyService } from './FaceVerifyService';
 import { PlatformAdmin } from '../entities/PlatformAdmin';
 import { In } from 'typeorm';
+import { normalizeDocument, validateDocument } from '../utils/documents';
 /**
  * Provides MotoboyService functionality.
  *
@@ -61,6 +62,20 @@ export class MotoboyService {
   private hasCategoryA(value?: string | null) {
     const normalized = this.normalizeCnhCategory(value);
     return normalized.includes('A');
+  }
+
+  private normalizeMotoboyPixKey(value?: string | null, cpfDocument?: string | null) {
+    const raw = String(value || '').trim();
+    if (!raw) return null;
+    const keyDigits = normalizeDocument(raw);
+    const userCpf = normalizeDocument(String(cpfDocument || ''));
+    if (!validateDocument(keyDigits, 'CPF')) {
+      throw new AppError('MOTO-033', 400);
+    }
+    if (!userCpf || !validateDocument(userCpf, 'CPF') || keyDigits !== userCpf) {
+      throw new AppError('MOTO-034', 400);
+    }
+    return keyDigits;
   }
 
   private async ensureMotoboyProfileIsComplete(motoboy: Motoboy) {
@@ -477,6 +492,7 @@ export class MotoboyService {
       city?: string | null;
       state?: string | null;
       address?: string | null;
+      pixKey?: string | null;
       profileImageFile?: string | null;
     }
   ) {
@@ -503,6 +519,9 @@ export class MotoboyService {
     motoboy.city = input.city ?? motoboy.city ?? null;
     motoboy.state = (input.state ?? motoboy.state ?? null)?.toString().toUpperCase() || null;
     motoboy.address = input.address ?? motoboy.address ?? null;
+    if (input.pixKey !== undefined) {
+      motoboy.pixKey = this.normalizeMotoboyPixKey(input.pixKey, motoboy.user?.document || null);
+    }
     const profileImageFile = String(input.profileImageFile || '').trim();
     if (profileImageFile) {
       const fileKey = await saveBase64Image(profileImageFile, `motoboy-${motoboy.id}`, 'motoboys');

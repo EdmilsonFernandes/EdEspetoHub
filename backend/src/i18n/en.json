@@ -71,5 +71,7 @@
   "MOTO-029": "Please fill your full address (city, state and address).",
   "MOTO-030": "Please upload the required documents to request store links.",
   "MOTO-031": "Courier KYC is still under platform review. Wait for approval to complete the store link.",
-  "MOTO-032": "For motorcycles, CNH category must include the letter A."
+  "MOTO-032": "For motorcycles, CNH category must include the letter A.",
+  "MOTO-033": "PIX key must be a valid CPF from the courier.",
+  "MOTO-034": "PIX key must match the courier CPF registered in the profile."
 }

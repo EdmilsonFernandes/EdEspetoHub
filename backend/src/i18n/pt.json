@@ -71,5 +71,7 @@
   "MOTO-029": "Informe seu endereço completo (cidade, UF e endereço).",
   "MOTO-030": "Envie os documentos obrigatórios para solicitar vínculo com lojas.",
   "MOTO-031": "KYC do entregador ainda está em análise pela plataforma. Aguarde aprovação para concluir o vínculo.",
-  "MOTO-032": "Para moto, a categoria da CNH deve incluir a letra A."
+  "MOTO-032": "Para moto, a categoria da CNH deve incluir a letra A.",
+  "MOTO-033": "A chave PIX deve ser um CPF válido do entregador.",
+  "MOTO-034": "A chave PIX precisa ser o mesmo CPF cadastrado no perfil do entregador."
 }

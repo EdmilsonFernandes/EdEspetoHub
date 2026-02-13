@@ -92,6 +92,9 @@ export class Motoboy {
   @Column({ name: 'address', type: 'text', nullable: true })
   address?: string | null;
 
+  @Column({ name: 'pix_key', type: 'text', nullable: true })
+  pixKey?: string | null;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 
