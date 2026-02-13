@@ -11,6 +11,9 @@
 - Mobile: header compacto + botao "Info" com sheet de endereco/WhatsApp/Instagram/horarios.
 - Mapa estatico gratuito (OpenStreetMap) no mobile com cache de coordenadas.
 - Fila do churrasqueiro usa o mesmo header do admin e mantem tema/cores.
+- Fila de Producao com visual mais clean (alinhado ao cardapio):
+  - menos ruido visual, cards mais neutros e leitura direta.
+  - banner de modo foco com toggle de atalhos.
 - Admin:
   - Header unico para todas as telas (Dashboard, Pedidos, Fila).
   - Tela de pedidos limpa (so lista).
@@ -134,6 +137,18 @@
 - Pagamento aprovado atualiza status via webhook Mercado Pago; sem HTTPS nao chega.
 - Postgres pode entrar em loop se o `pg_hba.conf` for corrompido (ex.: linha `EOF` invalida). Workaround: reescrever o arquivo no volume e resetar a senha sem apagar dados.
 - Endpoint publico de metricas: `/api/public/platform/metrics`.
+
+## Fluxo atual (como funciona hoje)
+1. Cliente fecha pedido normalmente no cardapio.
+2. Quando o pedido e finalizado, cliente pode avaliar loja/entregador.
+3. Se escolher gorjeta, o sistema gera PIX da gorjeta (Mercado Pago quando configurado).
+4. Webhook confirma a gorjeta e atualiza status (`PENDING`, `PAID`, `FAILED`).
+5. No acompanhamento do pedido, cliente ve QR/copia-e-cola e status da gorjeta.
+6. Loja recebe esse valor e faz repasse manual para o motoboy.
+7. Motoboy cadastra chave PIX no perfil (`/motoboy/profile`).
+8. Regra de seguranca: chave aceita somente CPF valido; se ja houver CPF no cadastro, precisa bater com o CPF do entregador.
+9. No Admin > Entregadores, a loja ve a chave PIX do motoboy para repassar.
+10. Fila de Producao (`/admin/queue`) ficou mais clean no estilo do cardapio e com modo foco.
 
 ## DNS / Dominio (Registro.br)
 - Ativar modo avancado em "Configurar enderecamento" -> "Modo avancado".
