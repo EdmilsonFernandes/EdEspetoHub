@@ -118,9 +118,9 @@ const KycAvatar = ({ name, profileImageUrl }: { name?: string; profileImageUrl?:
   const initials = String(name || 'M').trim().slice(0, 1).toUpperCase();
   const imageUrl = profileImageUrl ? resolveAssetUrl(profileImageUrl) : '';
   return (
-    <div className="h-10 w-10 rounded-full border border-slate-200 bg-white overflow-hidden grid place-items-center text-slate-500 font-black text-sm shrink-0">
+    <div className="h-12 w-12 rounded-full border border-slate-200 bg-white overflow-hidden grid place-items-center text-slate-500 font-black text-sm shrink-0 shadow-[0_18px_32px_-22px_rgba(15,23,42,0.45)]">
       {imageUrl ? (
-        <img src={imageUrl} alt={name || 'Motoboy'} className="h-full w-full object-cover object-center" loading="lazy" />
+        <img src={imageUrl} alt={name || 'Motoboy'} className="h-full w-full object-cover object-[center_22%]" loading="lazy" />
       ) : (
         <span>{initials}</span>
       )}

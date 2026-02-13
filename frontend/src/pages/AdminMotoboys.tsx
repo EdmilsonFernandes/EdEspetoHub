@@ -911,12 +911,12 @@ export function AdminMotoboys() {
                 >
                 <div className="flex items-center justify-between">
                   <div className="flex items-start gap-3 min-w-0">
-                    <div className="h-12 w-12 rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white overflow-hidden grid place-items-center text-slate-800 font-black shrink-0">
+                    <div className="h-14 w-14 rounded-full border border-slate-200 bg-gradient-to-br from-slate-50 to-white overflow-hidden grid place-items-center text-slate-800 font-black shrink-0 shadow-[0_18px_32px_-22px_rgba(15,23,42,0.55)]">
                       {request.motoboyUser?.profileImageUrl ? (
                         <img
                           src={resolveAssetUrl(request.motoboyUser.profileImageUrl)}
                           alt={request.motoboyUser?.fullName || 'Entregador'}
-                          className="h-full w-full object-cover object-center"
+                          className="h-full w-full object-cover object-[center_22%]"
                         />
                       ) : (
                         String(request?.motoboyUser?.fullName || 'E').trim().slice(0, 1).toUpperCase()
@@ -1095,12 +1095,12 @@ export function AdminMotoboys() {
               >
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div className="flex items-start gap-3 min-w-0">
-                    <div className="h-12 w-12 rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white grid place-items-center text-slate-800 font-black shrink-0">
+                    <div className="h-14 w-14 rounded-full border border-slate-200 bg-gradient-to-br from-slate-50 to-white grid place-items-center text-slate-800 font-black shrink-0 shadow-[0_18px_32px_-22px_rgba(15,23,42,0.55)]">
                       {link.motoboyUser?.profileImageUrl ? (
                         <img
                           src={resolveAssetUrl(link.motoboyUser.profileImageUrl)}
                           alt={link.motoboyUser?.fullName || 'Entregador'}
-                          className="h-full w-full object-cover object-center"
+                          className="h-full w-full object-cover object-[center_22%]"
                         />
                       ) : (
                         String(link?.motoboyUser?.fullName || 'E')

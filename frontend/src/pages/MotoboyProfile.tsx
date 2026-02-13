@@ -1235,7 +1235,7 @@ export function MotoboyProfile() {
           <p className="text-sm font-semibold text-slate-700">Perfil do entregador</p>
           <p className="text-xs text-slate-500">Dados do veículo e região.</p>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 space-y-2">
+        <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-slate-100/80 px-3 py-3 space-y-2 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.35)]">
           <p className="text-xs uppercase tracking-[0.22em] text-slate-500 font-extrabold">Dados da conta</p>
           <div className="grid gap-2 sm:grid-cols-2">
             <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
@@ -1263,7 +1263,7 @@ export function MotoboyProfile() {
             </div>
           </div>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 space-y-2">
+        <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-slate-100/80 px-3 py-3 space-y-2 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.35)]">
           <p className="text-xs uppercase tracking-[0.22em] text-slate-500 font-extrabold">Dados do entregador</p>
           <div className="grid gap-2 sm:grid-cols-2">
             <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
@@ -1290,16 +1290,16 @@ export function MotoboyProfile() {
             </div>
           </div>
         </div>
-        <div className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-3">
+        <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-slate-100/80 px-3 py-3 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.35)]">
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={() => profileImagePreview && setPreview({ title: 'Foto do entregador', src: profileImagePreview })}
-              className="h-16 w-16 rounded-2xl border border-slate-200 bg-white overflow-hidden grid place-items-center text-slate-500 font-black text-lg shrink-0"
+              className="h-20 w-20 rounded-full border border-slate-200 bg-white overflow-hidden grid place-items-center text-slate-500 font-black text-lg shrink-0 shadow-[0_18px_32px_-22px_rgba(15,23,42,0.55)]"
               title={profileImagePreview ? 'Ampliar foto' : 'Sem foto cadastrada'}
             >
               {profileImagePreview ? (
-                <img src={profileImagePreview} alt="Foto do entregador" className="h-full w-full object-contain object-center bg-slate-100" />
+                <img src={profileImagePreview} alt="Foto do entregador" className="h-full w-full object-cover object-[center_22%] bg-slate-100" />
               ) : (
                 <span>{String(profile?.user?.fullName || 'E').trim().slice(0, 1).toUpperCase()}</span>
               )}
@@ -1316,7 +1316,7 @@ export function MotoboyProfile() {
             </label>
           </div>
         </div>
-        <div className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-xs text-slate-600 flex items-center gap-2">
+        <div className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-600 flex items-center gap-2 shadow-[0_14px_28px_-24px_rgba(15,23,42,0.45)]">
           <span className="text-base">{vehicleIcon}</span>
           <span>Complete seus dados para ganhar confiança das lojas.</span>
         </div>
