@@ -64,15 +64,23 @@ export class MotoboyService {
     return normalized.includes('A');
   }
 
-  private normalizeMotoboyPixKey(value?: string | null, cpfDocument?: string | null) {
+  private normalizeMotoboyPixKey(
+    value?: string | null,
+    cpfDocument?: string | null,
+    documentType?: string | null
+  ) {
     const raw = String(value || '').trim();
     if (!raw) return null;
     const keyDigits = normalizeDocument(raw);
     const userCpf = normalizeDocument(String(cpfDocument || ''));
+    const userDocType = String(documentType || '').toUpperCase();
     if (!validateDocument(keyDigits, 'CPF')) {
       throw new AppError('MOTO-033', 400);
     }
-    if (!userCpf || !validateDocument(userCpf, 'CPF') || keyDigits !== userCpf) {
+    if (userCpf && userDocType && userDocType !== 'CPF') {
+      throw new AppError('MOTO-034', 400);
+    }
+    if (userCpf && validateDocument(userCpf, 'CPF') && keyDigits !== userCpf) {
       throw new AppError('MOTO-034', 400);
     }
     return keyDigits;
@@ -520,7 +528,21 @@ export class MotoboyService {
     motoboy.state = (input.state ?? motoboy.state ?? null)?.toString().toUpperCase() || null;
     motoboy.address = input.address ?? motoboy.address ?? null;
     if (input.pixKey !== undefined) {
-      motoboy.pixKey = this.normalizeMotoboyPixKey(input.pixKey, motoboy.user?.document || null);
+      const normalizedPixKey = this.normalizeMotoboyPixKey(
+        input.pixKey,
+        motoboy.user?.document || null,
+        motoboy.user?.documentType || null
+      );
+      motoboy.pixKey = normalizedPixKey;
+      if (normalizedPixKey && motoboy.user) {
+        const userDoc = normalizeDocument(String(motoboy.user.document || ''));
+        const userDocType = String(motoboy.user.documentType || '').toUpperCase();
+        if (!userDoc || !userDocType) {
+          motoboy.user.document = normalizedPixKey;
+          motoboy.user.documentType = 'CPF';
+          await this.userRepository.save(motoboy.user);
+        }
+      }
     }
     const profileImageFile = String(input.profileImageFile || '').trim();
     if (profileImageFile) {
