@@ -247,4 +247,20 @@ export const orderService = {
   async getTrackingV2(orderId: string) {
     return apiClient.get(`/v2/orders/${orderId}/tracking`);
   },
+
+  async getReviewByOrder(orderId: string) {
+    return apiClient.get(`/orders/${orderId}/review`);
+  },
+
+  async submitReviewByOrder(orderId: string, payload: any) {
+    return apiClient.post(`/orders/${orderId}/review`, payload);
+  },
+
+  async listReviewsByStore(storeId: string, limit = 100) {
+    return apiClient.get(`/stores/${storeId}/reviews?limit=${limit}`);
+  },
+
+  async getReviewSummaryByStore(storeId: string) {
+    return apiClient.get(`/stores/${storeId}/reviews/summary`);
+  },
 };

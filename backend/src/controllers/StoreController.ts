@@ -14,12 +14,14 @@
 import { Request, Response } from 'express';
 import { StoreService } from '../services/StoreService';
 import { SubscriptionService } from '../services/SubscriptionService';
+import { OrderReviewService } from '../services/OrderReviewService';
 import { logger } from '../utils/logger';
 import { AppError } from '../errors/AppError';
 import { respondWithError } from '../errors/respondWithError';
 
 const storeService = new StoreService();
 const subscriptionService = new SubscriptionService();
+const orderReviewService = new OrderReviewService();
 const DEMO_SLUGS = new Set([ 'demo', 'test-store' ]);
 const log = logger.child({ scope: 'StoreController' });
 /**
@@ -64,6 +66,12 @@ const buildDemoStore = (slug: string) => {
     subscription: {
       status: 'ACTIVE',
       endDate,
+    },
+    reviewSummary: {
+      totalReviews: 0,
+      avgStoreRating: 0,
+      totalDeliveryReviews: 0,
+      avgDeliveryRating: 0,
     },
     openNow: true,
   };
@@ -146,6 +154,7 @@ export class StoreController {
             slug: store.slug,
             open: store.open,
             openNow: StoreController.isStoreOpenNow(store),
+            reviewSummary: await orderReviewService.publicSummaryByStoreId(store.id),
             settings: store.settings
               ? {
                   logoUrl: store.settings.logoUrl || null,
@@ -187,6 +196,7 @@ export class StoreController {
         slug: store.slug,
         open: store.open,
         createdAt: store.createdAt,
+        reviewSummary: await orderReviewService.publicSummaryByStoreId(store.id),
         settings: store.settings,
         owner: store.owner
           ? {

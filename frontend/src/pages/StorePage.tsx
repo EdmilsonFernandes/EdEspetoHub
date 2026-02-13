@@ -47,6 +47,7 @@ export function StorePage() {
   const [openingHours, setOpeningHours] = useState([]);
   const [orderTypes, setOrderTypes] = useState([ 'delivery', 'pickup', 'table' ]);
   const [storeSubscription, setStoreSubscription] = useState(null);
+  const [storeReviewSummary, setStoreReviewSummary] = useState<any | null>(null);
   const [topProducts, setTopProducts] = useState([]);
   const [reorderApplied, setReorderApplied] = useState(false);
   const autoTrackRef = useRef(false);
@@ -333,6 +334,7 @@ export function StorePage() {
           setDeliveryFee(data.settings?.deliveryFee ?? '');
           setStoreOpenNow(isStoreOpenNow(normalizedHours));
           setStoreSubscription(data.subscription || null);
+          setStoreReviewSummary(data.reviewSummary || null);
           applyStoreMeta(data);
         }
       } catch (error) {
@@ -1086,6 +1088,11 @@ export function StorePage() {
           <div className="flex-1 leading-tight min-w-0">
             <h1 className="text-base sm:text-lg font-bold text-gray-900 truncate">{branding?.brandName || 'Seu Espeto'}</h1>
             <p className="text-xs text-gray-500 truncate">{branding?.tagline}</p>
+            {Number(storeReviewSummary?.totalReviews || 0) > 0 && (
+              <p className="text-[11px] text-amber-700 font-semibold mt-0.5">
+                {Number(storeReviewSummary?.avgStoreRating || 0).toFixed(1)} ★ ({Number(storeReviewSummary?.totalReviews || 0)} avaliações)
+              </p>
+            )}
           </div>
           <button
             onClick={() => setView('menu')}

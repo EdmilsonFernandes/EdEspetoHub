@@ -16,6 +16,7 @@ import { AuthController } from '../controllers/AuthController';
 import { StoreController } from '../controllers/StoreController';
 import { ProductController } from '../controllers/ProductController';
 import { OrderController } from '../controllers/OrderController';
+import { OrderReviewController } from '../controllers/OrderReviewController';
 import { PlanController } from '../controllers/PlanController';
 import { SubscriptionController } from '../controllers/SubscriptionController';
 import { PlatformAdminController } from '../controllers/PlatformAdminController';
@@ -118,6 +119,10 @@ routes.patch('/orders/:orderId/status', requireAuth, requireRole('ADMIN', 'CHURR
 routes.patch('/orders/:orderId', requireAuth, requireRole('ADMIN', 'CHURRASQUEIRO'), OrderController.updateItems);
 routes.get('/orders/:orderId/public', OrderController.getPublic);
 routes.get('/v2/orders/:orderId/tracking', OrderController.getTrackingV2);
+routes.get('/orders/:orderId/review', OrderReviewController.getByOrder);
+routes.post('/orders/:orderId/review', OrderReviewController.submitByOrder);
+routes.get('/stores/:storeId/reviews', requireAuth, requireRole('ADMIN', 'CHURRASQUEIRO'), OrderReviewController.listByStore);
+routes.get('/stores/:storeId/reviews/summary', requireAuth, requireRole('ADMIN', 'CHURRASQUEIRO'), OrderReviewController.summaryByStore);
 
 // Motoboy
 routes.get('/motoboy/orders/available', requireAuth, MotoboyController.listAvailableOrders);

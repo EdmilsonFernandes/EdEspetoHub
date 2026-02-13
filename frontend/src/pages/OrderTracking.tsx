@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Bicycle, ChefHat, CheckCircle, Clock, CircleNotch, MapPin } from '@phosphor-icons/react';
+import { Bicycle, ChefHat, CheckCircle, Clock, CircleNotch, MapPin, Star } from '@phosphor-icons/react';
 import { orderService } from '../services/orderService';
 import { mapsService } from '../services/mapsService';
 import { formatAddress, formatCurrency, formatDateTime, formatDuration, formatOrderDisplayId } from '../utils/format';
@@ -103,6 +103,18 @@ export function OrderTracking() {
   const [trackingLoading, setTrackingLoading] = useState(false);
   const [routeLoading, setRouteLoading] = useState(false);
   const [ctaPulse, setCtaPulse] = useState(false);
+  const [reviewLoading, setReviewLoading] = useState(false);
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [reviewState, setReviewState] = useState<any>(null);
+  const [reviewError, setReviewError] = useState('');
+  const [reviewForm, setReviewForm] = useState({
+    storeRating: 0,
+    deliveryRating: 0,
+    comment: '',
+    storeTags: [] as string[],
+    deliveryTags: [] as string[],
+    tipAmount: 0,
+  });
 
   useEffect(() => {
     if (!orderId) return;
@@ -220,6 +232,7 @@ export function OrderTracking() {
     status === 'delivered' ||
     status === 'finished' ||
     String((order as any)?.delivery?.status || '').toUpperCase() === 'DELIVERED';
+  const canRateDelivery = isDelivery;
   const storePhone = order?.store?.phone;
   const customerPhone = order?.phone;
   const paymentValue = order?.paymentMethod || order?.payment;
@@ -307,6 +320,80 @@ export function OrderTracking() {
     };
     localStorage.setItem(`reorder:${storeSlug}`, JSON.stringify(payload));
     navigate(storeHomePath);
+  };
+
+  useEffect(() => {
+    if (!order?.id || !isReady) return;
+    let active = true;
+    setReviewLoading(true);
+    setReviewError('');
+    orderService
+      .getReviewByOrder(order.id)
+      .then((payload) => {
+        if (!active) return;
+        setReviewState(payload || null);
+        if (payload?.review) {
+          setReviewForm({
+            storeRating: Number(payload.review.storeRating || 0),
+            deliveryRating: Number(payload.review.deliveryRating || 0),
+            comment: String(payload.review.comment || ''),
+            storeTags: Array.isArray(payload.review.storeTags) ? payload.review.storeTags : [],
+            deliveryTags: Array.isArray(payload.review.deliveryTags) ? payload.review.deliveryTags : [],
+            tipAmount: Number(payload.review.tipAmount || 0),
+          });
+        }
+      })
+      .catch((error: any) => {
+        if (!active) return;
+        setReviewError(error?.message || 'Não foi possível carregar avaliação.');
+      })
+      .finally(() => {
+        if (active) setReviewLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [order?.id, isReady]);
+
+  const storeTagOptions = ['Sabor', 'Temperatura', 'Embalagem', 'Custo-benefício'];
+  const deliveryTagOptions = ['Rápido', 'Educado', 'Pedido intacto', 'Boa comunicação'];
+  const toggleTag = (type: 'storeTags' | 'deliveryTags', value: string) => {
+    setReviewForm((prev) => {
+      const current = Array.isArray(prev[type]) ? prev[type] : [];
+      const exists = current.includes(value);
+      return {
+        ...prev,
+        [type]: exists ? current.filter((item) => item !== value) : [ ...current, value ],
+      };
+    });
+  };
+  const submitReview = async () => {
+    if (!order?.id || reviewSubmitting) return;
+    if (Number(reviewForm.storeRating || 0) < 1) {
+      setReviewError('Escolha uma nota para o pedido.');
+      return;
+    }
+    if (canRateDelivery && Number(reviewForm.deliveryRating || 0) < 1) {
+      setReviewError('Escolha uma nota para a entrega.');
+      return;
+    }
+    try {
+      setReviewSubmitting(true);
+      setReviewError('');
+      const payload = await orderService.submitReviewByOrder(order.id, {
+        storeRating: Number(reviewForm.storeRating || 0),
+        deliveryRating: canRateDelivery ? Number(reviewForm.deliveryRating || 0) : null,
+        comment: String(reviewForm.comment || ''),
+        storeTags: reviewForm.storeTags || [],
+        deliveryTags: canRateDelivery ? (reviewForm.deliveryTags || []) : [],
+        tipAmount: Number(reviewForm.tipAmount || 0),
+      });
+      setReviewState({ ...(reviewState || {}), review: payload });
+    } catch (error: any) {
+      setReviewError(error?.message || 'Não foi possível enviar sua avaliação.');
+    } finally {
+      setReviewSubmitting(false);
+    }
   };
 
   useEffect(() => {
@@ -987,6 +1074,151 @@ export function OrderTracking() {
                         : order?.type === 'table'
                         ? 'Seu pedido esta pronto. Aguarde o atendimento na sua mesa.'
                         : 'Seu pedido esta pronto! Pode ir retirar. Bom apetite!'}
+                    </div>
+                  )}
+                  {isReady && (
+                    <div className="rounded-xl border border-slate-200 bg-white p-3 space-y-3">
+                      <p className="text-sm font-semibold text-slate-900">Avaliar pedido</p>
+                      {reviewLoading ? (
+                        <p className="text-xs text-slate-500">Carregando avaliação...</p>
+                      ) : (
+                        <>
+                          <div>
+                            <p className="text-xs font-semibold text-slate-600 mb-1">Nota da loja</p>
+                            <div className="flex items-center gap-1">
+                              {[1, 2, 3, 4, 5].map((n) => (
+                                <button
+                                  key={`store-${n}`}
+                                  type="button"
+                                  onClick={() => setReviewForm((prev) => ({ ...prev, storeRating: n }))}
+                                  className={`h-8 w-8 rounded-lg border grid place-items-center ${
+                                    Number(reviewForm.storeRating || 0) >= n
+                                      ? 'bg-amber-50 border-amber-200 text-amber-600'
+                                      : 'bg-white border-slate-200 text-slate-400'
+                                  }`}
+                                  disabled={Boolean(reviewState?.review)}
+                                >
+                                  <Star size={16} weight={Number(reviewForm.storeRating || 0) >= n ? 'fill' : 'duotone'} />
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          {canRateDelivery && (
+                            <div>
+                              <p className="text-xs font-semibold text-slate-600 mb-1">Nota do entregador</p>
+                              <div className="flex items-center gap-1">
+                                {[1, 2, 3, 4, 5].map((n) => (
+                                  <button
+                                    key={`delivery-${n}`}
+                                    type="button"
+                                    onClick={() => setReviewForm((prev) => ({ ...prev, deliveryRating: n }))}
+                                    className={`h-8 w-8 rounded-lg border grid place-items-center ${
+                                      Number(reviewForm.deliveryRating || 0) >= n
+                                        ? 'bg-amber-50 border-amber-200 text-amber-600'
+                                        : 'bg-white border-slate-200 text-slate-400'
+                                    }`}
+                                    disabled={Boolean(reviewState?.review)}
+                                  >
+                                    <Star size={16} weight={Number(reviewForm.deliveryRating || 0) >= n ? 'fill' : 'duotone'} />
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          <div>
+                            <p className="text-xs font-semibold text-slate-600 mb-1">Pontos da loja</p>
+                            <div className="flex flex-wrap gap-1.5">
+                              {storeTagOptions.map((tag) => (
+                                <button
+                                  key={tag}
+                                  type="button"
+                                  onClick={() => toggleTag('storeTags', tag)}
+                                  disabled={Boolean(reviewState?.review)}
+                                  className={`px-2 py-1 rounded-full text-[10px] font-semibold border ${
+                                    reviewForm.storeTags.includes(tag)
+                                      ? 'bg-slate-900 text-white border-slate-900'
+                                      : 'bg-white text-slate-600 border-slate-200'
+                                  }`}
+                                >
+                                  {tag}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          {canRateDelivery && (
+                            <div>
+                              <p className="text-xs font-semibold text-slate-600 mb-1">Pontos da entrega</p>
+                              <div className="flex flex-wrap gap-1.5">
+                                {deliveryTagOptions.map((tag) => (
+                                  <button
+                                    key={tag}
+                                    type="button"
+                                    onClick={() => toggleTag('deliveryTags', tag)}
+                                    disabled={Boolean(reviewState?.review)}
+                                    className={`px-2 py-1 rounded-full text-[10px] font-semibold border ${
+                                      reviewForm.deliveryTags.includes(tag)
+                                        ? 'bg-slate-900 text-white border-slate-900'
+                                        : 'bg-white text-slate-600 border-slate-200'
+                                    }`}
+                                  >
+                                    {tag}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {canRateDelivery && (
+                            <div>
+                              <p className="text-xs font-semibold text-slate-600 mb-1">Gorjeta</p>
+                              <div className="flex flex-wrap gap-1.5">
+                                {[0, 2, 5, 10].map((value) => (
+                                  <button
+                                    key={`tip-${value}`}
+                                    type="button"
+                                    onClick={() => setReviewForm((prev) => ({ ...prev, tipAmount: value }))}
+                                    disabled={Boolean(reviewState?.review)}
+                                    className={`px-2 py-1 rounded-full text-[10px] font-semibold border ${
+                                      Number(reviewForm.tipAmount || 0) === value
+                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                        : 'bg-white text-slate-600 border-slate-200'
+                                    }`}
+                                  >
+                                    {value === 0 ? 'Sem gorjeta' : `R$ ${value}`}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          <textarea
+                            rows={3}
+                            maxLength={240}
+                            value={reviewForm.comment}
+                            onChange={(event) => setReviewForm((prev) => ({ ...prev, comment: event.target.value }))}
+                            placeholder="Conte como foi seu pedido (opcional)"
+                            disabled={Boolean(reviewState?.review)}
+                            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-brand-primary"
+                          />
+
+                          {reviewError ? <p className="text-xs text-rose-600 font-semibold">{reviewError}</p> : null}
+                          {reviewState?.review ? (
+                            <p className="text-xs text-emerald-700 font-semibold">Avaliação registrada. Obrigado!</p>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={submitReview}
+                              disabled={reviewSubmitting}
+                              className="w-full rounded-xl bg-slate-900 text-white text-xs font-extrabold px-3 py-2 disabled:opacity-60"
+                            >
+                              {reviewSubmitting ? 'Enviando...' : 'Enviar avaliação'}
+                            </button>
+                          )}
+                        </>
+                      )}
                     </div>
                   )}
                 </div>

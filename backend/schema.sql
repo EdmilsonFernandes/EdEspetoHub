@@ -243,6 +243,27 @@ CREATE TABLE IF NOT EXISTS motoboys (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS order_reviews (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_id UUID NOT NULL UNIQUE REFERENCES orders(id) ON DELETE CASCADE,
+  store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+  motoboy_id UUID REFERENCES motoboys(id) ON DELETE SET NULL,
+  customer_name TEXT,
+  customer_phone TEXT,
+  store_rating INT NOT NULL CHECK (store_rating BETWEEN 1 AND 5),
+  delivery_rating INT CHECK (delivery_rating BETWEEN 1 AND 5),
+  comment TEXT,
+  store_tags JSONB NOT NULL DEFAULT '[]'::jsonb,
+  delivery_tags JSONB NOT NULL DEFAULT '[]'::jsonb,
+  tip_amount NUMERIC(10,2) NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_order_reviews_store_id ON order_reviews(store_id);
+CREATE INDEX IF NOT EXISTS idx_order_reviews_motoboy_id ON order_reviews(motoboy_id);
+CREATE INDEX IF NOT EXISTS idx_order_reviews_created_at ON order_reviews(created_at DESC);
+
 CREATE TABLE IF NOT EXISTS motoboy_stores (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   motoboy_id UUID NOT NULL REFERENCES motoboys(id) ON DELETE CASCADE,

@@ -46,6 +46,10 @@ type PortfolioStore = {
   id?: string;
   name?: string;
   slug?: string;
+  reviewSummary?: {
+    totalReviews?: number;
+    avgStoreRating?: number;
+  } | null;
   settings?: {
     logoUrl?: string | null;
     description?: string | null;
@@ -800,6 +804,11 @@ export function PortfolioPage() {
                           <p className="text-[11px] uppercase tracking-[0.35em] text-white/70">Loja</p>
                           <h3 className="text-lg font-bold text-white truncate">{store.name}</h3>
                           <p className="text-xs text-white/80 truncate">/{store.slug}</p>
+                          {Number(store?.reviewSummary?.totalReviews || 0) > 0 && (
+                            <p className="mt-1 text-[11px] text-white/90 font-semibold">
+                              {Number(store?.reviewSummary?.avgStoreRating || 0).toFixed(1)} ★ ({Number(store?.reviewSummary?.totalReviews || 0)} avaliações)
+                            </p>
+                          )}
                         </div>
                       </div>
                     </div>

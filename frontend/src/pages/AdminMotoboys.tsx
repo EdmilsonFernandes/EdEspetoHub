@@ -3,6 +3,7 @@ import { Car, Camera, CheckCircle, IdentificationCard, WarningCircle, Clock, Use
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { motoboyAdminService } from '../services/motoboyAdminService';
+import { orderService } from '../services/orderService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { AdaptiveAvatar } from '../components/common/AdaptiveAvatar';
 
@@ -30,6 +31,8 @@ export function AdminMotoboys() {
   const [showInactive, setShowInactive] = useState(false);
   const [motoboyQuery, setMotoboyQuery] = useState('');
   const [motoboyFilter, setMotoboyFilter] = useState<'all' | 'free' | 'busy' | 'docs_pending' | 'inactive'>('all');
+  const [reviewSummary, setReviewSummary] = useState<any | null>(null);
+  const [motoboyReviewMap, setMotoboyReviewMap] = useState<Record<string, any>>({});
   const storeId = auth?.store?.id || '';
   const pendingRequests = requests.filter((request) => request.status === 'PENDING');
 
@@ -262,6 +265,25 @@ export function AdminMotoboys() {
       }
     } catch (error: any) {
       showToast(error?.message || 'Não foi possível carregar solicitações.', 'error');
+    }
+  };
+
+  const loadReviewSummary = async () => {
+    if (!storeId) return;
+    try {
+      const data = await orderService.getReviewSummaryByStore(storeId);
+      setReviewSummary(data || null);
+      const rows = Array.isArray(data?.motoboy) ? data.motoboy : [];
+      const byId: Record<string, any> = {};
+      rows.forEach((row: any) => {
+        const id = String(row?.motoboyId || '').trim();
+        if (!id) return;
+        byId[id] = row;
+      });
+      setMotoboyReviewMap(byId);
+    } catch {
+      setReviewSummary(null);
+      setMotoboyReviewMap({});
     }
   };
 
@@ -538,6 +560,7 @@ export function AdminMotoboys() {
   useEffect(() => {
     loadMotoboys();
     loadRequests();
+    loadReviewSummary();
   }, [storeId]);
 
   if (!storeId) {
@@ -546,6 +569,35 @@ export function AdminMotoboys() {
 
   return (
     <div className="space-y-6">
+      {reviewSummary && (
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.4)]">
+          <div className="text-xs uppercase tracking-[0.22em] text-slate-500 font-extrabold">Avaliações</div>
+          <div className="mt-2 grid gap-2 sm:grid-cols-3">
+            <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+              <div className="text-[11px] text-slate-500">Nota da loja</div>
+              <div className="text-lg font-black text-slate-900">
+                {Number(reviewSummary?.summary?.store_avg_rating || 0).toFixed(1)} ★
+              </div>
+              <div className="text-[11px] text-slate-500">{Number(reviewSummary?.summary?.total_reviews || 0)} avaliações</div>
+            </div>
+            <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+              <div className="text-[11px] text-slate-500">Entrega (motoboys)</div>
+              <div className="text-lg font-black text-slate-900">
+                {Number(reviewSummary?.summary?.delivery_avg_rating || 0).toFixed(1)} ★
+              </div>
+              <div className="text-[11px] text-slate-500">{Number(reviewSummary?.summary?.total_delivery_reviews || 0)} avaliações</div>
+            </div>
+            <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+              <div className="text-[11px] text-slate-500">Gorjetas</div>
+              <div className="text-lg font-black text-emerald-700">
+                R$ {Number(reviewSummary?.summary?.total_tips || 0).toFixed(2)}
+              </div>
+              <div className="text-[11px] text-slate-500">acumulado</div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {docsModalOpen && docsModalMotoboyId && (
         <div
           className="fixed inset-0 z-[89] bg-black/60 flex items-end sm:items-center justify-center p-4"
@@ -1136,6 +1188,19 @@ export function AdminMotoboys() {
                 <div className="text-xs text-slate-500 flex flex-wrap gap-2">
                   <span>Vínculo: {link.active ? 'Ativo' : 'Inativo'}</span>
                 </div>
+                {motoboyReviewMap[link.motoboyId] ? (
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700 flex flex-wrap items-center gap-2">
+                    <span className="font-extrabold">
+                      Nota entrega: {Number(motoboyReviewMap[link.motoboyId]?.avgDeliveryRating || 0).toFixed(1)} ★
+                    </span>
+                    <span className="text-slate-500">
+                      ({Number(motoboyReviewMap[link.motoboyId]?.totalReviews || 0)} avaliações)
+                    </span>
+                    <span className="ml-auto font-semibold text-emerald-700">
+                      Gorjetas: R$ {Number(motoboyReviewMap[link.motoboyId]?.totalTips || 0).toFixed(2)}
+                    </span>
+                  </div>
+                ) : null}
                 {Array.isArray(documentsByMotoboy[link.motoboyId]) && (
                   <div className="text-[11px] text-slate-500">
                     {docsPendingCount(documentsByMotoboy[link.motoboyId]) > 0 ? (
