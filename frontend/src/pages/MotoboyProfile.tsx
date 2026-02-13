@@ -1239,7 +1239,7 @@ export function MotoboyProfile() {
           <div className="flex items-center gap-3">
             <div className="h-16 w-16 rounded-2xl border border-slate-200 bg-white overflow-hidden grid place-items-center text-slate-500 font-black text-lg">
               {profileImagePreview ? (
-                <img src={profileImagePreview} alt="Foto do entregador" className="h-full w-full object-cover" />
+                <img src={profileImagePreview} alt="Foto do entregador" className="h-full w-full object-cover object-center" />
               ) : (
                 <span>{String(profile?.user?.fullName || 'E').trim().slice(0, 1).toUpperCase()}</span>
               )}

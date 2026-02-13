@@ -120,7 +120,7 @@ const KycAvatar = ({ name, profileImageUrl }: { name?: string; profileImageUrl?:
   return (
     <div className="h-10 w-10 rounded-full border border-slate-200 bg-white overflow-hidden grid place-items-center text-slate-500 font-black text-sm shrink-0">
       {imageUrl ? (
-        <img src={imageUrl} alt={name || 'Motoboy'} className="h-full w-full object-cover" loading="lazy" />
+        <img src={imageUrl} alt={name || 'Motoboy'} className="h-full w-full object-cover object-center" loading="lazy" />
       ) : (
         <span>{initials}</span>
       )}

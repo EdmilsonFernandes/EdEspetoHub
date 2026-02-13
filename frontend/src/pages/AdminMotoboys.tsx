@@ -916,7 +916,7 @@ export function AdminMotoboys() {
                         <img
                           src={resolveAssetUrl(request.motoboyUser.profileImageUrl)}
                           alt={request.motoboyUser?.fullName || 'Entregador'}
-                          className="h-full w-full object-cover"
+                          className="h-full w-full object-cover object-center"
                         />
                       ) : (
                         String(request?.motoboyUser?.fullName || 'E').trim().slice(0, 1).toUpperCase()
@@ -1100,7 +1100,7 @@ export function AdminMotoboys() {
                         <img
                           src={resolveAssetUrl(link.motoboyUser.profileImageUrl)}
                           alt={link.motoboyUser?.fullName || 'Entregador'}
-                          className="h-full w-full object-cover"
+                          className="h-full w-full object-cover object-center"
                         />
                       ) : (
                         String(link?.motoboyUser?.fullName || 'E')
