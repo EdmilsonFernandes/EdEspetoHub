@@ -58,6 +58,13 @@ export class OrderReviewRepository {
         'r.store_tags as "storeTags"',
         'r.delivery_tags as "deliveryTags"',
         'r.tip_amount as "tipAmount"',
+        'r.tip_status as "tipStatus"',
+        'r.tip_paid_at as "tipPaidAt"',
+        'r.tip_payout_status as "tipPayoutStatus"',
+        'r.tip_payout_at as "tipPayoutAt"',
+        'r.tip_payout_proof_url as "tipPayoutProofUrl"',
+        'r.tip_payout_notes as "tipPayoutNotes"',
+        'r.tip_payout_by_user_id as "tipPayoutByUserId"',
         'r.created_at as "createdAt"',
         'r.customer_name as "customerName"',
         'u.full_name as "motoboyName"',
@@ -117,5 +124,70 @@ export class OrderReviewRepository {
     );
 
     return { summary: summary || {}, distribution: distribution || [], motoboy: motoboy || [] };
+  }
+
+  async listTipPayoutsByStoreId(storeId: string, limit = 300) {
+    return AppDataSource.query(
+      `
+      SELECT
+        r.id AS id,
+        r.order_id AS "orderId",
+        r.store_id AS "storeId",
+        r.motoboy_id AS "motoboyId",
+        r.customer_name AS "customerName",
+        r.tip_amount AS "tipAmount",
+        r.tip_status AS "tipStatus",
+        r.tip_paid_at AS "tipPaidAt",
+        r.tip_payout_status AS "tipPayoutStatus",
+        r.tip_payout_at AS "tipPayoutAt",
+        r.tip_payout_proof_url AS "tipPayoutProofUrl",
+        r.tip_payout_notes AS "tipPayoutNotes",
+        r.tip_payout_by_user_id AS "tipPayoutByUserId",
+        r.created_at AS "createdAt",
+        u.full_name AS "motoboyName",
+        u.profile_image_url AS "motoboyProfileImageUrl"
+      FROM order_reviews r
+      LEFT JOIN motoboys m ON m.id = r.motoboy_id
+      LEFT JOIN users u ON u.id = m.user_id
+      WHERE r.store_id = $1
+        AND COALESCE(r.tip_amount, 0) > 0
+        AND UPPER(COALESCE(r.tip_status, '')) = 'PAID'
+      ORDER BY COALESCE(r.tip_payout_at, r.tip_paid_at, r.created_at) DESC
+      LIMIT $2
+      `,
+      [ storeId, Math.max(1, Math.min(500, Number(limit) || 300)) ]
+    );
+  }
+
+  async listTipPayoutsByMotoboyId(motoboyId: string, limit = 300) {
+    return AppDataSource.query(
+      `
+      SELECT
+        r.id AS id,
+        r.order_id AS "orderId",
+        r.store_id AS "storeId",
+        r.motoboy_id AS "motoboyId",
+        r.customer_name AS "customerName",
+        r.tip_amount AS "tipAmount",
+        r.tip_status AS "tipStatus",
+        r.tip_paid_at AS "tipPaidAt",
+        r.tip_payout_status AS "tipPayoutStatus",
+        r.tip_payout_at AS "tipPayoutAt",
+        r.tip_payout_proof_url AS "tipPayoutProofUrl",
+        r.tip_payout_notes AS "tipPayoutNotes",
+        r.tip_payout_by_user_id AS "tipPayoutByUserId",
+        r.created_at AS "createdAt",
+        s.name AS "storeName",
+        s.slug AS "storeSlug"
+      FROM order_reviews r
+      JOIN stores s ON s.id = r.store_id
+      WHERE r.motoboy_id = $1
+        AND COALESCE(r.tip_amount, 0) > 0
+        AND UPPER(COALESCE(r.tip_status, '')) = 'PAID'
+      ORDER BY COALESCE(r.tip_payout_at, r.tip_paid_at, r.created_at) DESC
+      LIMIT $2
+      `,
+      [ motoboyId, Math.max(1, Math.min(500, Number(limit) || 300)) ]
+    );
   }
 }

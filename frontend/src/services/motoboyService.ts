@@ -16,6 +16,9 @@ export const motoboyService = {
   async getStats(range: 'day' | 'week' | 'month' = 'day') {
     return apiClient.get(`/motoboy/stats?range=${range}`);
   },
+  async listTipPayouts(limit = 300) {
+    return apiClient.get(`/motoboy/reviews/tip-payouts?limit=${limit}`);
+  },
   async acceptOrder(orderId: string) {
     return apiClient.post(`/motoboy/orders/${orderId}/accept`, {});
   },

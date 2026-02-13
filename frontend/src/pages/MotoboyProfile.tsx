@@ -71,6 +71,8 @@ export function MotoboyProfile() {
     totalTips: 0,
     storesMeasured: 0,
   });
+  const [tipPayouts, setTipPayouts] = useState<any[]>([]);
+  const [tipPayoutsLoading, setTipPayoutsLoading] = useState(false);
   // Face verification is an internal signal; keep UI friendly (no raw status/reason for motoboys).
   const [notifyOrders, setNotifyOrders] = useState(() => {
     const raw = localStorage.getItem('motoboy:notify_orders');
@@ -566,6 +568,38 @@ export function MotoboyProfile() {
   useEffect(() => {
     loadReviewStats();
   }, [linkedStoreIds.join('|'), profile?.id, profile?.motoboyId, profile?.user?.id]);
+
+  const loadTipPayouts = async () => {
+    setTipPayoutsLoading(true);
+    try {
+      const rows = await motoboyService.listTipPayouts(300);
+      setTipPayouts(Array.isArray(rows) ? rows : []);
+    } catch {
+      setTipPayouts([]);
+    } finally {
+      setTipPayoutsLoading(false);
+    }
+  };
+
+  const formatCurrency = (value: any) =>
+    Number(value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  const formatDateTime = (value: any) => {
+    if (!value) return '-';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '-';
+    return date.toLocaleString('pt-BR');
+  };
+
+  useEffect(() => {
+    loadTipPayouts();
+  }, []);
+
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      loadTipPayouts().catch(() => null);
+    }, 15000);
+    return () => window.clearInterval(id);
+  }, []);
 
   const vehicleIcon = useMemo(() => {
     const type = String(profileDraft.vehicleType || profile?.vehicleType || '').toUpperCase();
@@ -1351,6 +1385,79 @@ export function MotoboyProfile() {
           <p className="text-[11px] text-slate-500">
             Base: {reviewStats.storesMeasured} loja{reviewStats.storesMeasured === 1 ? '' : 's'} vinculada{reviewStats.storesMeasured === 1 ? '' : 's'} com avaliações.
           </p>
+
+          <div className="rounded-2xl border border-slate-200 bg-white p-3 space-y-2">
+            <div className="flex items-center justify-between gap-2">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Histórico de repasses</p>
+                <p className="text-xs text-slate-500">Acompanhe gorjetas aguardando repasse e já pagas.</p>
+              </div>
+              <button
+                type="button"
+                onClick={loadTipPayouts}
+                className="btn-press rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-extrabold text-slate-700"
+              >
+                {tipPayoutsLoading ? 'Atualizando...' : 'Atualizar'}
+              </button>
+            </div>
+            {tipPayoutsLoading ? (
+              <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
+                Carregando histórico de repasses...
+              </div>
+            ) : tipPayouts.length === 0 ? (
+              <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
+                Sem repasses registrados ainda.
+              </div>
+            ) : (
+              <div className="grid gap-2">
+                {tipPayouts.slice(0, 30).map((row: any, idx: number) => {
+                  const payoutStatus = String(row?.tipPayoutStatus || '').toUpperCase() === 'PAID' ? 'PAID' : 'PENDING';
+                  return (
+                    <div key={String(row?.id || `tip-row-${idx}`)} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+                      <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="min-w-0">
+                          <div className="text-xs font-black text-slate-900 break-words">{row?.storeName || row?.storeSlug || 'Loja'}</div>
+                          <div className="text-[11px] text-slate-500">
+                            Pedido #{String(row?.orderId || '').slice(0, 8)} · Gorjeta paga em {formatDateTime(row?.tipPaidAt)}
+                          </div>
+                          <div className="text-[11px] text-slate-500">
+                            {payoutStatus === 'PAID' ? `Repasse confirmado em ${formatDateTime(row?.tipPayoutAt)}` : 'Aguardando repasse do lojista'}
+                          </div>
+                          {row?.tipPayoutNotes ? (
+                            <div className="text-[11px] text-slate-600 break-words">
+                              <span className="font-semibold">Obs:</span> {String(row.tipPayoutNotes)}
+                            </div>
+                          ) : null}
+                          {row?.tipPayoutProofUrl ? (
+                            <a
+                              href={resolveAssetUrl(String(row.tipPayoutProofUrl)) || String(row.tipPayoutProofUrl)}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex text-[11px] font-extrabold text-brand-primary underline"
+                            >
+                              Ver comprovante
+                            </a>
+                          ) : null}
+                        </div>
+                        <div className="flex items-center gap-2 sm:justify-end">
+                          <div className="text-sm font-black text-slate-900">{formatCurrency(row?.tipAmount || 0)}</div>
+                          <span
+                            className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold border ${
+                              payoutStatus === 'PAID'
+                                ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+                                : 'border-amber-200 bg-amber-50 text-amber-800'
+                            }`}
+                          >
+                            {payoutStatus === 'PAID' ? 'Repassado' : 'Pendente'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </FormSection>
 
         <FormSection title="Dados da conta" variant="neutral" contentClassName="space-y-2">

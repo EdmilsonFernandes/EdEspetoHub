@@ -263,4 +263,25 @@ export const orderService = {
   async getReviewSummaryByStore(storeId: string) {
     return apiClient.get(`/stores/${storeId}/reviews/summary`);
   },
+
+  async listTipPayoutsByStore(storeId: string, limit = 300) {
+    return apiClient.get(`/stores/${storeId}/reviews/tip-payouts?limit=${limit}`);
+  },
+
+  async markTipPayoutByStore(
+    storeId: string,
+    reviewId: string,
+    payload: {
+      payoutStatus?: 'PENDING' | 'PAID';
+      payoutProofFile?: string | null;
+      payoutProofUrl?: string | null;
+      payoutNotes?: string | null;
+    }
+  ) {
+    return apiClient.patch(`/stores/${storeId}/reviews/${reviewId}/tip-payout`, payload);
+  },
+
+  async listTipPayoutsForMotoboy(limit = 300) {
+    return apiClient.get(`/motoboy/reviews/tip-payouts?limit=${limit}`);
+  },
 };

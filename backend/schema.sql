@@ -265,6 +265,11 @@ CREATE TABLE IF NOT EXISTS order_reviews (
   tip_qr_code_text TEXT,
   tip_expires_at TIMESTAMPTZ,
   tip_paid_at TIMESTAMPTZ,
+  tip_payout_status TEXT NOT NULL DEFAULT 'PENDING',
+  tip_payout_at TIMESTAMPTZ,
+  tip_payout_proof_url TEXT,
+  tip_payout_notes TEXT,
+  tip_payout_by_user_id UUID REFERENCES users(id) ON DELETE SET NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

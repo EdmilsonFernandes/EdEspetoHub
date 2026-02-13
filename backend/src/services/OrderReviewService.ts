@@ -19,6 +19,7 @@ import { OrderDeliveryRepository } from '../repositories/OrderDeliveryRepository
 import { OrderRepository } from '../repositories/OrderRepository';
 import { OrderReviewRepository } from '../repositories/OrderReviewRepository';
 import { StoreRepository } from '../repositories/StoreRepository';
+import { saveBase64Image } from '../utils/imageStorage';
 
 type SubmitReviewInput = {
   storeRating: number;
@@ -27,6 +28,13 @@ type SubmitReviewInput = {
   storeTags?: string[];
   deliveryTags?: string[];
   tipAmount?: number | null;
+};
+
+type MarkTipPayoutInput = {
+  payoutStatus?: 'PENDING' | 'PAID';
+  payoutProofFile?: string | null;
+  payoutProofUrl?: string | null;
+  payoutNotes?: string | null;
 };
 
 export class OrderReviewService {
@@ -197,6 +205,61 @@ export class OrderReviewService {
     if (!store) throw new AppError('STORE-001', 404);
     this.ensureStoreAccess(store.id, authStoreId);
     return this.orderReviewRepository.getStoreSummary(store.id);
+  }
+
+  async listTipPayoutsByStoreId(storeId: string, authStoreId?: string, limit = 300) {
+    const store = await this.storeRepository.findById(storeId);
+    if (!store) throw new AppError('STORE-001', 404);
+    this.ensureStoreAccess(store.id, authStoreId);
+    return this.orderReviewRepository.listTipPayoutsByStoreId(store.id, limit);
+  }
+
+  async listTipPayoutsByMotoboyId(motoboyId: string, limit = 300) {
+    return this.orderReviewRepository.listTipPayoutsByMotoboyId(motoboyId, limit);
+  }
+
+  async markTipPayoutByStoreId(
+    storeId: string,
+    reviewId: string,
+    authStoreId: string | undefined,
+    actorUserId: string | undefined,
+    input: MarkTipPayoutInput
+  ) {
+    const store = await this.storeRepository.findById(storeId);
+    if (!store) throw new AppError('STORE-001', 404);
+    this.ensureStoreAccess(store.id, authStoreId);
+
+    const review = await this.orderReviewRepository.findById(reviewId);
+    if (!review || review.storeId !== store.id) throw new AppError('ORDER-001', 404);
+
+    const tipAmount = Number(review.tipAmount || 0);
+    if (!(tipAmount > 0)) throw new AppError('REVIEW-003', 400);
+    if (String(review.tipStatus || '').toUpperCase() !== 'PAID') throw new AppError('REVIEW-004', 400);
+
+    const nextStatus = String(input?.payoutStatus || 'PAID').toUpperCase() === 'PENDING' ? 'PENDING' : 'PAID';
+    const proofUrl = String(input?.payoutProofUrl || '').trim() || null;
+    const notes = String(input?.payoutNotes || '').trim().slice(0, 240) || null;
+
+    let uploadedProofUrl: string | null = null;
+    const proofFile = String(input?.payoutProofFile || '').trim();
+    if (proofFile) {
+      const saved = await saveBase64Image(proofFile, `tip-payout-${review.id}`, 'tips');
+      uploadedProofUrl = saved || null;
+    }
+
+    review.tipPayoutStatus = nextStatus;
+    review.tipPayoutNotes = notes;
+    review.tipPayoutByUserId = actorUserId || null;
+
+    if (nextStatus === 'PAID') {
+      review.tipPayoutAt = review.tipPayoutAt || new Date();
+      review.tipPayoutProofUrl = uploadedProofUrl || proofUrl || review.tipPayoutProofUrl || null;
+    } else {
+      review.tipPayoutAt = null;
+      review.tipPayoutProofUrl = uploadedProofUrl || proofUrl || null;
+    }
+
+    return this.orderReviewRepository.saveReview(review);
   }
 
   async publicSummaryByStoreId(storeId: string) {

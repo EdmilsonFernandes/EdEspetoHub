@@ -42,6 +42,15 @@ export function AdminMotoboys() {
     pendingTipOrders: 0,
     avgTipAmount: 0,
   });
+  const [tipPayoutRows, setTipPayoutRows] = useState<any[]>([]);
+  const [tipPayoutsLoading, setTipPayoutsLoading] = useState(false);
+  const [payoutModal, setPayoutModal] = useState<{
+    open: boolean;
+    row: any | null;
+    notes: string;
+    proofFile: File | null;
+    submitting: boolean;
+  }>({ open: false, row: null, notes: '', proofFile: null, submitting: false });
   const storeId = auth?.store?.id || '';
   const pendingRequests = requests.filter((request) => request.status === 'PENDING');
 
@@ -52,6 +61,16 @@ export function AdminMotoboys() {
     if (status === 'SUSPENDED') return 'SUSPENSO';
     if (status === 'REJECTED') return 'REJEITADO';
     return status || 'PENDENTE';
+  };
+
+  const formatCurrency = (value: any) =>
+    Number(value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+  const formatDateTime = (value: any) => {
+    if (!value) return '-';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '-';
+    return date.toLocaleString('pt-BR');
   };
 
   const normalizeDocType = (value: any) => String(value || '').trim().toUpperCase();
@@ -322,6 +341,56 @@ export function AdminMotoboys() {
         pendingTipOrders: 0,
         avgTipAmount: 0,
       });
+    }
+  };
+
+  const loadTipPayouts = async () => {
+    if (!storeId) return;
+    setTipPayoutsLoading(true);
+    try {
+      const rows = await orderService.listTipPayoutsByStore(storeId, 300);
+      setTipPayoutRows(Array.isArray(rows) ? rows : []);
+    } catch {
+      setTipPayoutRows([]);
+    } finally {
+      setTipPayoutsLoading(false);
+    }
+  };
+
+  const openPayoutModal = (row: any) => {
+    setPayoutModal({
+      open: true,
+      row,
+      notes: String(row?.tipPayoutNotes || ''),
+      proofFile: null,
+      submitting: false,
+    });
+  };
+
+  const submitPayout = async () => {
+    if (!storeId || !payoutModal?.row?.id || payoutModal.submitting) return;
+    setPayoutModal((prev) => ({ ...prev, submitting: true }));
+    try {
+      let payoutProofFile: string | null = null;
+      if (payoutModal.proofFile) {
+        payoutProofFile = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onerror = () => reject(new Error('Falha ao ler comprovante.'));
+          reader.onload = () => resolve(String(reader.result || ''));
+          reader.readAsDataURL(payoutModal.proofFile as File);
+        });
+      }
+      await orderService.markTipPayoutByStore(storeId, payoutModal.row.id, {
+        payoutStatus: 'PAID',
+        payoutNotes: payoutModal.notes || null,
+        payoutProofFile,
+      });
+      showToast('Repasse marcado como pago.', 'success');
+      setPayoutModal({ open: false, row: null, notes: '', proofFile: null, submitting: false });
+      await Promise.all([loadReviewSummary(), loadTipPayouts()]);
+    } catch (error: any) {
+      setPayoutModal((prev) => ({ ...prev, submitting: false }));
+      showToast(error?.message || 'Não foi possível concluir o repasse.', 'error');
     }
   };
 
@@ -599,6 +668,7 @@ export function AdminMotoboys() {
     loadMotoboys();
     loadRequests();
     loadReviewSummary();
+    loadTipPayouts();
   }, [storeId]);
 
   if (!storeId) {
@@ -658,6 +728,147 @@ export function AdminMotoboys() {
           </div>
         </FormSection>
       )}
+
+      <FormSection
+        title="Repasse de gorjetas"
+        subtitle="Controle de pendentes e pagos com comprovante."
+        variant="warning"
+        actions={
+          <button
+            type="button"
+            onClick={loadTipPayouts}
+            className="btn-press rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-700"
+          >
+            {tipPayoutsLoading ? 'Atualizando...' : 'Atualizar'}
+          </button>
+        }
+      >
+        {tipPayoutsLoading ? (
+          <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">Carregando repasses...</div>
+        ) : tipPayoutRows.length === 0 ? (
+          <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
+            Ainda não há gorjetas pagas para repasse.
+          </div>
+        ) : (
+          <div className="grid gap-2">
+            {tipPayoutRows.slice(0, 40).map((row: any, idx: number) => {
+              const payoutStatus = String(row?.tipPayoutStatus || '').toUpperCase() === 'PAID' ? 'PAID' : 'PENDING';
+              return (
+                <div key={String(row?.id || `tip-payout-${idx}`)} className="rounded-2xl border border-slate-200 bg-white px-3 py-2">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="min-w-0">
+                      <div className="text-sm font-black text-slate-900 break-words">{row?.motoboyName || 'Entregador'}</div>
+                      <div className="text-[11px] text-slate-500">
+                        Pedido #{String(row?.orderId || '').slice(0, 8)} · Cliente: {row?.customerName || '-'}
+                      </div>
+                      <div className="text-[11px] text-slate-500">
+                        Gorjeta paga em: {formatDateTime(row?.tipPaidAt)} · Repasse: {payoutStatus === 'PAID' ? formatDateTime(row?.tipPayoutAt) : 'pendente'}
+                      </div>
+                      {row?.tipPayoutNotes ? (
+                        <div className="mt-1 text-[11px] text-slate-600 break-words">
+                          <span className="font-semibold">Observação:</span> {String(row.tipPayoutNotes)}
+                        </div>
+                      ) : null}
+                      {row?.tipPayoutProofUrl ? (
+                        <a
+                          href={resolveAssetUrl(String(row.tipPayoutProofUrl)) || String(row.tipPayoutProofUrl)}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="mt-1 inline-flex text-[11px] font-extrabold text-brand-primary underline"
+                        >
+                          Ver comprovante
+                        </a>
+                      ) : null}
+                    </div>
+                    <div className="flex items-center gap-2 sm:justify-end">
+                      <div className="text-base font-black text-slate-900">{formatCurrency(row?.tipAmount || 0)}</div>
+                      <span
+                        className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold border ${
+                          payoutStatus === 'PAID'
+                            ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+                            : 'border-amber-200 bg-amber-50 text-amber-800'
+                        }`}
+                      >
+                        {payoutStatus === 'PAID' ? 'Repassado' : 'Aguardando repasse'}
+                      </span>
+                      {payoutStatus !== 'PAID' ? (
+                        <button
+                          type="button"
+                          onClick={() => openPayoutModal(row)}
+                          className="btn-press rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-[11px] font-extrabold text-emerald-800"
+                        >
+                          Marcar pago
+                        </button>
+                      ) : null}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </FormSection>
+
+      {payoutModal.open && payoutModal.row ? (
+        <div
+          className="fixed inset-0 z-[96] bg-black/60 flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          onClick={() => !payoutModal.submitting && setPayoutModal({ open: false, row: null, notes: '', proofFile: null, submitting: false })}
+        >
+          <div
+            className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-4 space-y-3"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div>
+              <div className="text-[11px] uppercase tracking-[0.16em] text-slate-500">Repasse da gorjeta</div>
+              <div className="text-base font-black text-slate-900">{payoutModal.row?.motoboyName || 'Entregador'}</div>
+              <div className="text-xs text-slate-500">
+                Pedido #{String(payoutModal.row?.orderId || '').slice(0, 8)} · Valor {formatCurrency(payoutModal.row?.tipAmount || 0)}
+              </div>
+            </div>
+            <textarea
+              value={payoutModal.notes}
+              onChange={(event) => setPayoutModal((prev) => ({ ...prev, notes: event.target.value }))}
+              placeholder="Observação do repasse (opcional)"
+              className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm min-h-[84px]"
+              maxLength={240}
+            />
+            <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+              <label className="text-xs font-semibold text-slate-700">
+                Comprovante (opcional)
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(event) => setPayoutModal((prev) => ({ ...prev, proofFile: event.target.files?.[0] || null }))}
+                  className="mt-1 block text-[11px] text-slate-500 file:mr-2 file:rounded-lg file:border-0 file:bg-slate-900 file:px-2.5 file:py-1.5 file:text-[11px] file:font-semibold file:text-white"
+                />
+              </label>
+              {payoutModal.proofFile ? (
+                <div className="mt-1 text-[11px] text-slate-600 break-all">{payoutModal.proofFile.name}</div>
+              ) : null}
+            </div>
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setPayoutModal({ open: false, row: null, notes: '', proofFile: null, submitting: false })}
+                disabled={payoutModal.submitting}
+                className="btn-press rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-700 disabled:opacity-60"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={submitPayout}
+                disabled={payoutModal.submitting}
+                className="btn-press rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-extrabold text-emerald-800 disabled:opacity-60"
+              >
+                {payoutModal.submitting ? 'Salvando...' : 'Confirmar repasse'}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {docsModalOpen && docsModalMotoboyId && (
         <div

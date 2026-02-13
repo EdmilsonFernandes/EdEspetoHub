@@ -476,6 +476,26 @@ export async function runMigrations() {
     ADD COLUMN IF NOT EXISTS tip_paid_at TIMESTAMPTZ;
   `);
   await AppDataSource.query(`
+    ALTER TABLE IF EXISTS order_reviews
+    ADD COLUMN IF NOT EXISTS tip_payout_status TEXT NOT NULL DEFAULT 'PENDING';
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS order_reviews
+    ADD COLUMN IF NOT EXISTS tip_payout_at TIMESTAMPTZ;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS order_reviews
+    ADD COLUMN IF NOT EXISTS tip_payout_proof_url TEXT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS order_reviews
+    ADD COLUMN IF NOT EXISTS tip_payout_notes TEXT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS order_reviews
+    ADD COLUMN IF NOT EXISTS tip_payout_by_user_id UUID REFERENCES users(id) ON DELETE SET NULL;
+  `);
+  await AppDataSource.query(`
     CREATE TABLE IF NOT EXISTS motoboy_stores (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
       motoboy_id UUID NOT NULL REFERENCES motoboys(id) ON DELETE CASCADE,

@@ -98,6 +98,21 @@ export class OrderReview {
   @Column({ name: 'tip_paid_at', type: 'timestamptz', nullable: true })
   tipPaidAt?: Date | null;
 
+  @Column({ name: 'tip_payout_status', type: 'varchar', default: 'PENDING' })
+  tipPayoutStatus!: 'PENDING' | 'PAID';
+
+  @Column({ name: 'tip_payout_at', type: 'timestamptz', nullable: true })
+  tipPayoutAt?: Date | null;
+
+  @Column({ name: 'tip_payout_proof_url', type: 'text', nullable: true })
+  tipPayoutProofUrl?: string | null;
+
+  @Column({ name: 'tip_payout_notes', type: 'text', nullable: true })
+  tipPayoutNotes?: string | null;
+
+  @Column({ name: 'tip_payout_by_user_id', type: 'uuid', nullable: true })
+  tipPayoutByUserId?: string | null;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 

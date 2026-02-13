@@ -123,6 +123,8 @@ routes.get('/orders/:orderId/review', OrderReviewController.getByOrder);
 routes.post('/orders/:orderId/review', OrderReviewController.submitByOrder);
 routes.get('/stores/:storeId/reviews', requireAuth, requireRole('ADMIN', 'CHURRASQUEIRO'), OrderReviewController.listByStore);
 routes.get('/stores/:storeId/reviews/summary', requireAuth, requireRole('ADMIN', 'CHURRASQUEIRO'), OrderReviewController.summaryByStore);
+routes.get('/stores/:storeId/reviews/tip-payouts', requireAuth, requireRole('ADMIN', 'CHURRASQUEIRO'), OrderReviewController.listTipPayoutsByStore);
+routes.patch('/stores/:storeId/reviews/:reviewId/tip-payout', requireAuth, requireRole('ADMIN', 'CHURRASQUEIRO'), OrderReviewController.markTipPayoutByStore);
 
 // Motoboy
 routes.get('/motoboy/orders/available', requireAuth, MotoboyController.listAvailableOrders);
@@ -130,6 +132,7 @@ routes.get('/motoboy/orders/current', requireAuth, MotoboyController.getCurrentO
 routes.get('/motoboy/orders/history', requireAuth, MotoboyController.listHistory);
 routes.get('/motoboy/earnings/today', requireAuth, MotoboyController.getEarningsToday);
 routes.get('/motoboy/stats', requireAuth, MotoboyController.getStats);
+routes.get('/motoboy/reviews/tip-payouts', requireAuth, OrderReviewController.listTipPayoutsForMotoboy);
 routes.post('/motoboy/orders/:orderId/accept', requireAuth, MotoboyController.acceptOrder);
 routes.post('/motoboy/orders/:orderId/pickup', requireAuth, MotoboyController.pickupOrder);
 routes.post('/motoboy/orders/:orderId/start', requireAuth, MotoboyController.startDelivery);
