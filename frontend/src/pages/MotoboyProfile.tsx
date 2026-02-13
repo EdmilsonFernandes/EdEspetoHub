@@ -1235,15 +1235,75 @@ export function MotoboyProfile() {
           <p className="text-sm font-semibold text-slate-700">Perfil do entregador</p>
           <p className="text-xs text-slate-500">Dados do veículo e região.</p>
         </div>
+        <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 space-y-2">
+          <p className="text-xs uppercase tracking-[0.22em] text-slate-500 font-extrabold">Dados da conta</p>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Nome</p>
+              <p className="text-sm font-semibold text-slate-900 break-words">{profile?.user?.fullName || '-'}</p>
+            </div>
+            <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">E-mail</p>
+              <p className="text-sm font-semibold text-slate-900 break-all">{profile?.user?.email || '-'}</p>
+            </div>
+            <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Telefone</p>
+              <p className="text-sm font-semibold text-slate-900">{profile?.user?.phone || '-'}</p>
+            </div>
+            <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Documento</p>
+              <p className="text-sm font-semibold text-slate-900">
+                {profile?.user?.documentType ? `${String(profile.user.documentType)}: ` : ''}
+                {profile?.user?.document || '-'}
+              </p>
+            </div>
+            <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 sm:col-span-2">
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Endereço da conta</p>
+              <p className="text-sm font-semibold text-slate-900 break-words">{profile?.user?.address || '-'}</p>
+            </div>
+          </div>
+        </div>
+        <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 space-y-2">
+          <p className="text-xs uppercase tracking-[0.22em] text-slate-500 font-extrabold">Dados do entregador</p>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Tipo de veículo</p>
+              <p className="text-sm font-semibold text-slate-900">{profileDraft?.vehicleType || '-'}</p>
+            </div>
+            <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Placa</p>
+              <p className="text-sm font-semibold text-slate-900">{profileDraft?.vehiclePlate || '-'}</p>
+            </div>
+            <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Cidade/UF</p>
+              <p className="text-sm font-semibold text-slate-900">
+                {profileDraft?.city || '-'}{profileDraft?.state ? ` / ${profileDraft.state}` : ''}
+              </p>
+            </div>
+            <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Categoria CNH</p>
+              <p className="text-sm font-semibold text-slate-900">{profileDraft?.cnhCategory || '-'}</p>
+            </div>
+            <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 sm:col-span-2">
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Endereço operacional</p>
+              <p className="text-sm font-semibold text-slate-900 break-words">{profileDraft?.address || '-'}</p>
+            </div>
+          </div>
+        </div>
         <div className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-3">
           <div className="flex items-center gap-3">
-            <div className="h-16 w-16 rounded-2xl border border-slate-200 bg-white overflow-hidden grid place-items-center text-slate-500 font-black text-lg">
+            <button
+              type="button"
+              onClick={() => profileImagePreview && setPreview({ title: 'Foto do entregador', src: profileImagePreview })}
+              className="h-16 w-16 rounded-2xl border border-slate-200 bg-white overflow-hidden grid place-items-center text-slate-500 font-black text-lg shrink-0"
+              title={profileImagePreview ? 'Ampliar foto' : 'Sem foto cadastrada'}
+            >
               {profileImagePreview ? (
-                <img src={profileImagePreview} alt="Foto do entregador" className="h-full w-full object-cover object-center" />
+                <img src={profileImagePreview} alt="Foto do entregador" className="h-full w-full object-contain object-center bg-slate-100" />
               ) : (
                 <span>{String(profile?.user?.fullName || 'E').trim().slice(0, 1).toUpperCase()}</span>
               )}
-            </div>
+            </button>
             <label className="text-xs text-slate-600 font-semibold">
               Foto do perfil (opcional)
               <input
@@ -1252,6 +1312,7 @@ export function MotoboyProfile() {
                 onChange={(event) => handleProfilePhotoUpload(event.target.files?.[0])}
                 className="mt-1 block text-[11px] text-slate-500 file:mr-2 file:rounded-lg file:border-0 file:bg-slate-900 file:px-2.5 file:py-1.5 file:text-[11px] file:font-semibold file:text-white"
               />
+              {profileImagePreview ? <span className="mt-1 block text-[10px] text-slate-500">Clique na foto para ampliar.</span> : null}
             </label>
           </div>
         </div>
