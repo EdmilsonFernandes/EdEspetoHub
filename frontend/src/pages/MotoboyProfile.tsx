@@ -1392,14 +1392,14 @@ export function MotoboyProfile() {
               <p className="text-lg font-black text-slate-900">{Number(reviewStats.totalReviews || 0)}</p>
             </div>
             <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2">
-              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-700">Gorjetas recebidas</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-700">Gorjetas confirmadas (cliente)</p>
               <p className="text-lg font-black text-emerald-800">
                 {Number(reviewStats.totalTips || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
               </p>
             </div>
           </div>
           <p className="text-[11px] text-slate-500">
-            Base: {reviewStats.storesMeasured} loja{reviewStats.storesMeasured === 1 ? '' : 's'} vinculada{reviewStats.storesMeasured === 1 ? '' : 's'} com avaliações.
+            Base: {reviewStats.storesMeasured} loja{reviewStats.storesMeasured === 1 ? '' : 's'} vinculada{reviewStats.storesMeasured === 1 ? '' : 's'} com avaliações e gorjetas confirmadas.
           </p>
           <div className="grid gap-2 sm:grid-cols-2">
             <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2">
