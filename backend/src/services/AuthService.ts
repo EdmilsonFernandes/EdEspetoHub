@@ -552,9 +552,21 @@ export class AuthService
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
    */
-  async adminLogin(slug: string, password: string)
+  async adminLogin(identifier: string, password: string)
   {
-    const store = await this.storeRepository.findBySlug(slug);
+    const normalizedIdentifier = String(identifier || '').trim().toLowerCase();
+    if (!normalizedIdentifier) throw new AppError('GEN-002', 400);
+
+    let store = null as any;
+    if (normalizedIdentifier.includes('@')) {
+      const owner = await this.userRepository.findByEmail(normalizedIdentifier);
+      if (owner?.id) {
+        store = await this.storeRepository.findByOwnerId(owner.id);
+      }
+    } else {
+      store = await this.storeRepository.findBySlug(normalizedIdentifier);
+    }
+
     if (!store) throw new AppError('STORE-001', 404);
 
     const owner = store.owner;

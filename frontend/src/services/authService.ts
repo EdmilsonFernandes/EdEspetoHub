@@ -8,9 +8,12 @@ export const authService = {
         });
         return response;
     },
-    async adminLogin(slug: string, password: string) {
+    async adminLogin(identifier: string, password: string) {
+        const normalizedIdentifier = String(identifier || "").trim();
         const response = await apiClient.post("/auth/admin-login", {
-            slug,
+            identifier: normalizedIdentifier,
+            slug: normalizedIdentifier.includes("@") ? undefined : normalizedIdentifier,
+            email: normalizedIdentifier.includes("@") ? normalizedIdentifier : undefined,
             password,
         });
         return response;

@@ -89,17 +89,18 @@ export class AuthController
    */
   static async adminLogin(req: Request, res: Response)
   {
-    const { slug, password } = req.body;
+    const password = req.body?.password;
+    const identifier = String(req.body?.identifier || req.body?.slug || req.body?.email || '').trim();
 
     try
     {
-      log.info('Admin login request', { slug });
-      const result = await authService.adminLogin(slug, password);
-      log.info('Admin login success', { storeId: result.store?.id, slug });
+      log.info('Admin login request', { identifier });
+      const result = await authService.adminLogin(identifier, password);
+      log.info('Admin login success', { storeId: result.store?.id, identifier });
       return res.json(result);
     } catch (error: any)
     {
-      log.warn('Admin login failed', { slug, error });
+      log.warn('Admin login failed', { identifier, error });
       return respondWithError(req, res, error, 401);
     }
   }

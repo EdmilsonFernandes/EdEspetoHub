@@ -13,7 +13,7 @@ export function AdminLogin() {
   const [searchParams] = useSearchParams();
   const { setAuth, auth, hydrated } = useAuth();
   const { setBranding } = useTheme();
-  const [loginForm, setLoginForm] = useState({ slug: '', password: '' });
+  const [loginForm, setLoginForm] = useState({ identifier: '', password: '' });
   const [loginError, setLoginError] = useState('');
   const [pendingPayment, setPendingPayment] = useState(null);
   const [branding] = useState(getPersistedBranding());
@@ -29,7 +29,7 @@ export function AdminLogin() {
     setVerifyPrompt(null);
 
     try {
-      const session = await authService.adminLogin(loginForm.slug, loginForm.password);
+      const session = await authService.adminLogin(loginForm.identifier, loginForm.password);
       const sessionData = { token: session.token, user: session.user, store: session.store };
       setAuth(sessionData);
       setBranding({
@@ -116,7 +116,7 @@ export function AdminLogin() {
     const slug = searchParams.get('slug');
     const tab = searchParams.get('tab');
     if (slug) {
-      setLoginForm(prev => ({ ...prev, slug }));
+      setLoginForm(prev => ({ ...prev, identifier: slug }));
     }
     if (tab) {
       sessionStorage.setItem('admin:redirectTab', tab);
@@ -132,7 +132,7 @@ export function AdminLogin() {
           </div>
           <h2 className="mt-4 text-2xl sm:text-3xl font-black text-gray-900 mb-1 tracking-tight">Painel da Loja</h2>
           <p className="text-sm text-gray-500">Acesso do administrador</p>
-          <p className="text-sm text-gray-500">Use seu slug e senha para entrar.</p>
+          <p className="text-sm text-gray-500">Use slug ou e-mail e sua senha para entrar.</p>
         </div>
 
         {loginError && (
@@ -189,21 +189,21 @@ export function AdminLogin() {
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-gray-700">Identificador da loja (slug)</label>
+            <label className="text-sm font-semibold text-gray-700">Slug da loja ou e-mail</label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
                 <Storefront size={18} weight="duotone" />
               </span>
               <input
                 type="text"
-                value={loginForm.slug}
-                onChange={e => setLoginForm(prev => ({ ...prev, slug: e.target.value }))}
+                value={loginForm.identifier}
+                onChange={e => setLoginForm(prev => ({ ...prev, identifier: e.target.value }))}
                 className="w-full border border-gray-200 rounded-xl p-3 pl-10 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors bg-white/80"
-                placeholder="Ex: edsertaneja"
+                placeholder="Ex: edsertaneja ou dono@loja.com"
                 autoCapitalize="none"
               />
             </div>
-            <p className="text-xs text-gray-500">Use o slug fácil de memorizar da sua loja.</p>
+            <p className="text-xs text-gray-500">Você pode entrar com o slug da loja ou o e-mail do administrador.</p>
           </div>
           <div className="space-y-2">
             <label className="text-sm font-semibold text-gray-700">Senha</label>
