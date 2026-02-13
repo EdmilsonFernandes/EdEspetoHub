@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { LinkSimpleHorizontal, Storefront, ClockClockwise, CheckCircle, ShieldCheck, ShieldWarning, Clock, Info, IdentificationCard, Camera, Car } from '@phosphor-icons/react';
 import { motoboyService } from '../services/motoboyService';
 import { storeService } from '../services/storeService';
+import { orderService } from '../services/orderService';
 import { useToast } from '../contexts/ToastContext';
 import { MotoboyHeader } from '../components/Motoboy/MotoboyHeader';
 import { CameraCaptureModal } from '../components/Motoboy/CameraCaptureModal';
@@ -58,6 +59,18 @@ export function MotoboyProfile() {
   const [preview, setPreview] = useState<{ title: string; src: string | null } | null>(null);
   const [showRequestBlockedModal, setShowRequestBlockedModal] = useState(false);
   const [activeSection, setActiveSection] = useState<'profile' | 'documents' | 'stores' | 'notifications'>('profile');
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [reviewStats, setReviewStats] = useState<{
+    avgDeliveryRating: number;
+    totalReviews: number;
+    totalTips: number;
+    storesMeasured: number;
+  }>({
+    avgDeliveryRating: 0,
+    totalReviews: 0,
+    totalTips: 0,
+    storesMeasured: 0,
+  });
   // Face verification is an internal signal; keep UI friendly (no raw status/reason for motoboys).
   const [notifyOrders, setNotifyOrders] = useState(() => {
     const raw = localStorage.getItem('motoboy:notify_orders');
@@ -475,6 +488,84 @@ export function MotoboyProfile() {
       return true;
     });
   }, [stores, linkedStoreIds, pendingStoreIds]);
+
+  const motoboyIdentity = useMemo(() => {
+    const ids = [
+      profile?.id,
+      profile?.motoboyId,
+      profile?.userId,
+      profile?.user?.id,
+    ]
+      .map((v) => String(v || '').trim())
+      .filter(Boolean);
+    return new Set(ids);
+  }, [profile?.id, profile?.motoboyId, profile?.userId, profile?.user?.id]);
+
+  const loadReviewStats = async () => {
+    if (!linkedStoreIds.length || motoboyIdentity.size === 0) {
+      setReviewStats({
+        avgDeliveryRating: 0,
+        totalReviews: 0,
+        totalTips: 0,
+        storesMeasured: 0,
+      });
+      return;
+    }
+    setReviewsLoading(true);
+    try {
+      const summaries = await Promise.all(
+        linkedStoreIds.map(async (storeId) => {
+          try {
+            const data = await orderService.getReviewSummaryByStore(storeId);
+            const rows = Array.isArray(data?.motoboy) ? data.motoboy : [];
+            const byIdentity = rows.find((row: any) => {
+              const rowIds = [
+                row?.motoboyId,
+                row?.motoboyUserId,
+                row?.userId,
+                row?.id,
+              ]
+                .map((v: any) => String(v || '').trim())
+                .filter(Boolean);
+              return rowIds.some((id: string) => motoboyIdentity.has(id));
+            });
+            return byIdentity || null;
+          } catch {
+            return null;
+          }
+        })
+      );
+
+      const validRows = summaries.filter(Boolean) as any[];
+      const totalReviews = validRows.reduce(
+        (acc, row) => acc + Number(row?.totalReviews || row?.total_reviews || 0),
+        0
+      );
+      const weightedRatingSum = validRows.reduce((acc, row) => {
+        const avg = Number(row?.avgDeliveryRating || row?.delivery_avg_rating || 0);
+        const qty = Number(row?.totalReviews || row?.total_reviews || 0);
+        return acc + avg * qty;
+      }, 0);
+      const totalTips = validRows.reduce(
+        (acc, row) => acc + Number(row?.totalTips || row?.total_tips || 0),
+        0
+      );
+      const avgDeliveryRating = totalReviews > 0 ? weightedRatingSum / totalReviews : 0;
+
+      setReviewStats({
+        avgDeliveryRating,
+        totalReviews,
+        totalTips,
+        storesMeasured: validRows.length,
+      });
+    } finally {
+      setReviewsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadReviewStats();
+  }, [linkedStoreIds.join('|'), profile?.id, profile?.motoboyId, profile?.user?.id]);
 
   const vehicleIcon = useMemo(() => {
     const type = String(profileDraft.vehicleType || profile?.vehicleType || '').toUpperCase();
@@ -1226,6 +1317,42 @@ export function MotoboyProfile() {
 
       {activeSection === 'profile' && (
       <FormSection title="Perfil do entregador" subtitle="Dados do veículo e região." variant="primary" contentClassName="space-y-3">
+        <FormSection
+          title="Desempenho"
+          subtitle="Sua reputação e gorjetas nas lojas vinculadas."
+          variant="success"
+          actions={
+            <button
+              type="button"
+              onClick={loadReviewStats}
+              disabled={reviewsLoading}
+              className="btn-press rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-700 disabled:opacity-60"
+            >
+              {reviewsLoading ? 'Atualizando...' : 'Atualizar'}
+            </button>
+          }
+        >
+          <div className="grid gap-2 sm:grid-cols-3">
+            <div className="rounded-xl border border-slate-200 bg-white px-3 py-2">
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Nota média (entrega)</p>
+              <p className="text-lg font-black text-slate-900">{Number(reviewStats.avgDeliveryRating || 0).toFixed(1)} ★</p>
+            </div>
+            <div className="rounded-xl border border-slate-200 bg-white px-3 py-2">
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Avaliações</p>
+              <p className="text-lg font-black text-slate-900">{Number(reviewStats.totalReviews || 0)}</p>
+            </div>
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2">
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-700">Gorjetas recebidas</p>
+              <p className="text-lg font-black text-emerald-800">
+                {Number(reviewStats.totalTips || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+              </p>
+            </div>
+          </div>
+          <p className="text-[11px] text-slate-500">
+            Base: {reviewStats.storesMeasured} loja{reviewStats.storesMeasured === 1 ? '' : 's'} vinculada{reviewStats.storesMeasured === 1 ? '' : 's'} com avaliações.
+          </p>
+        </FormSection>
+
         <FormSection title="Dados da conta" variant="neutral" contentClassName="space-y-2">
           <div className="grid gap-2 sm:grid-cols-2">
             <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
