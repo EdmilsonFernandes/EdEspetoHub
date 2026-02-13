@@ -720,6 +720,9 @@ export function SuperAdmin() {
           daysLeft,
           endDate,
           status: store.subscription?.status || 'PENDING',
+          logoUrl: store.settings?.logoUrl || null,
+          open: Boolean(store.open),
+          planExempt: Boolean(store.settings?.planExempt),
         };
       })
       .filter(Boolean)
@@ -1227,16 +1230,51 @@ export function SuperAdmin() {
                 {expiringSoon.length === 0 ? (
                   <p className="text-sm text-slate-500 mt-2">Nenhuma loja em risco imediato.</p>
                 ) : (
-                  <div className="mt-2 space-y-2">
+                  <div className="mt-2 grid gap-2">
                     {expiringSoon.map((store: any) => (
-                      <div key={store.id} className="flex items-center justify-between text-sm">
-                        <div>
-                          <p className="font-semibold text-slate-700">{store.name}</p>
-                          <p className="text-xs text-slate-400">{store.slug}</p>
+                      <div
+                        key={store.id}
+                        className="rounded-2xl border border-slate-200 bg-gradient-to-r from-white via-slate-50 to-white p-3 shadow-[0_20px_40px_-34px_rgba(15,23,42,0.35)]"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <AdaptiveAvatar
+                              src={store.logoUrl ? resolveAssetUrl(store.logoUrl) : ''}
+                              alt={store.name || 'Loja'}
+                              fallbackText={String(store.name || 'L').slice(0, 2)}
+                              sizeClassName="h-11 w-11"
+                              containerClassName="bg-white text-slate-800 border border-slate-200 shadow-sm"
+                              imageClassName="object-cover"
+                            />
+                            <div className="min-w-0">
+                              <p className="font-bold text-slate-800 truncate">{store.name}</p>
+                              <p className="text-xs text-slate-400 truncate">{store.slug}</p>
+                            </div>
+                          </div>
+                          <span className="px-2 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700 shrink-0">
+                            {store.daysLeft}d
+                          </span>
                         </div>
-                        <span className="px-2 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">
-                          {store.daysLeft}d
-                        </span>
+                        <div className="mt-2 flex flex-wrap items-center gap-2">
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${statusStyle(store.status)}`}>
+                            {store.status}
+                          </span>
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                              store.open ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-700'
+                            }`}
+                          >
+                            {store.open ? 'Aberta' : 'Fechada'}
+                          </span>
+                          {store.planExempt ? (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-700">
+                              VIP
+                            </span>
+                          ) : null}
+                          <span className="ml-auto text-[11px] text-slate-500">
+                            vence em {formatDate(store.endDate)}
+                          </span>
+                        </div>
                       </div>
                     ))}
                   </div>
