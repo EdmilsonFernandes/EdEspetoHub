@@ -1064,91 +1064,35 @@ export function SuperAdmin() {
       </div>
 
       <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3 bg-white/90 backdrop-blur border-b border-slate-200">
-        <div className="flex flex-wrap gap-2 text-xs font-semibold text-slate-700">
-          <button
-            type="button"
-            onClick={() => setActiveSection('executive')}
-            className={`px-3 py-1.5 rounded-full border border-slate-200 shadow-sm transition ${
-              activeSection === 'executive'
-                ? 'bg-gradient-to-r from-slate-900 to-slate-700 text-white'
-                : 'bg-white text-slate-700 hover:-translate-y-0.5 hover:shadow-md'
-            }`}
-            aria-current={activeSection === 'executive' ? 'true' : 'false'}
-          >
-            Resumo
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveSection('rankings')}
-            className={`px-3 py-1.5 rounded-full border border-slate-200 shadow-sm transition ${
-              activeSection === 'rankings'
-                ? 'bg-slate-900 text-white'
-                : 'bg-white text-slate-700 hover:-translate-y-0.5 hover:shadow-md'
-            }`}
-            aria-current={activeSection === 'rankings' ? 'true' : 'false'}
-          >
-            Rankings
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveSection('stores')}
-            className={`px-3 py-1.5 rounded-full border border-slate-200 shadow-sm transition ${
-              activeSection === 'stores'
-                ? 'bg-slate-900 text-white'
-                : 'bg-white text-slate-700 hover:-translate-y-0.5 hover:shadow-md'
-            }`}
-            aria-current={activeSection === 'stores' ? 'true' : 'false'}
-          >
-            Lojas
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveSection('payments')}
-            className={`px-3 py-1.5 rounded-full border border-slate-200 shadow-sm transition ${
-              activeSection === 'payments'
-                ? 'bg-slate-900 text-white'
-                : 'bg-white text-slate-700 hover:-translate-y-0.5 hover:shadow-md'
-            }`}
-            aria-current={activeSection === 'payments' ? 'true' : 'false'}
-          >
-            Pagamentos
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveSection('logs')}
-            className={`px-3 py-1.5 rounded-full border border-slate-200 shadow-sm transition ${
-              activeSection === 'logs'
-                ? 'bg-slate-900 text-white'
-                : 'bg-white text-slate-700 hover:-translate-y-0.5 hover:shadow-md'
-            }`}
-            aria-current={activeSection === 'logs' ? 'true' : 'false'}
-          >
-            Logs
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveSection('events')}
-            className={`px-3 py-1.5 rounded-full border border-slate-200 shadow-sm transition ${
-              activeSection === 'events'
-                ? 'bg-slate-900 text-white'
-                : 'bg-white text-slate-700 hover:-translate-y-0.5 hover:shadow-md'
-            }`}
-            aria-current={activeSection === 'events' ? 'true' : 'false'}
-          >
-            Eventos
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveSection('kyc')}
-            className={`px-3 py-1.5 rounded-full border border-slate-200 shadow-sm transition ${
-              activeSection === 'kyc'
-                ? 'bg-slate-900 text-white'
-                : 'bg-white text-slate-700 hover:-translate-y-0.5 hover:shadow-md'
-            }`}
-            aria-current={activeSection === 'kyc' ? 'true' : 'false'}
-          >
-            KYC
-          </button>
+        <div className="rounded-2xl border border-slate-200 bg-gradient-to-r from-white via-slate-50 to-white p-2 shadow-[0_20px_42px_-34px_rgba(15,23,42,0.35)]">
+          <div className="flex flex-wrap gap-2 text-xs font-semibold text-slate-700">
+            {[
+              { id: 'executive', label: 'Resumo' },
+              { id: 'rankings', label: 'Rankings' },
+              { id: 'stores', label: 'Lojas' },
+              { id: 'payments', label: 'Pagamentos' },
+              { id: 'logs', label: 'Logs' },
+              { id: 'events', label: 'Eventos' },
+              { id: 'kyc', label: 'KYC' },
+            ].map((item) => {
+              const isActive = activeSection === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setActiveSection(item.id)}
+                  className={`px-3.5 py-2 rounded-xl border transition-all ${
+                    isActive
+                      ? 'border-transparent bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 text-white shadow-[0_16px_30px_-22px_rgba(15,23,42,0.75)]'
+                      : 'border-slate-200 bg-white text-slate-700 hover:-translate-y-0.5 hover:shadow-md'
+                  }`}
+                  aria-current={isActive ? 'true' : 'false'}
+                >
+                  {item.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 

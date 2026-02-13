@@ -1050,7 +1050,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       <style>{`@keyframes navPop{0%{transform:scale(1)}50%{transform:scale(1.08)}100%{transform:scale(1)}}`}</style>
       {menuVisible ? (
         <div className="hidden sm:flex justify-center">
-          <div className="bg-white rounded-xl border border-slate-200 p-2 shadow-sm flex flex-nowrap gap-2 w-full max-w-6xl overflow-x-auto no-scrollbar">
+          <div className="bg-gradient-to-r from-white via-slate-50 to-white rounded-2xl border border-slate-200 p-2 shadow-[0_20px_42px_-34px_rgba(15,23,42,0.35)] flex flex-nowrap gap-2 w-full max-w-6xl overflow-x-auto no-scrollbar">
           {[
             { id: 'resumo', label: 'Resumo', shortLabel: 'Resumo', icon: ChartBar },
             { id: 'pedidos', label: 'Pedidos', shortLabel: 'Pedidos', icon: ShoppingCart },
@@ -1075,9 +1075,9 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                   setNavPulse(tab.id);
                   window.setTimeout(() => setNavPulse(null), 260);
                 }}
-                className={`cursor-pointer px-3 sm:px-4 py-2 rounded-lg text-[10px] sm:text-sm font-semibold transition-all active:scale-95 hover:-translate-y-0.5 flex flex-col sm:flex-row items-center gap-1 sm:gap-2 text-center min-w-[104px] border ${
+                className={`cursor-pointer px-3 sm:px-4 py-2 rounded-xl text-[10px] sm:text-sm font-semibold transition-all active:scale-95 hover:-translate-y-0.5 flex flex-col sm:flex-row items-center gap-1 sm:gap-2 text-center min-w-[104px] border ${
                   activeTab === tab.id
-                    ? 'bg-brand-primary text-white border-brand-primary ring-2 ring-brand-primary/25 shadow-[0_8px_18px_rgba(15,23,42,0.16)]'
+                    ? 'bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 text-white border-transparent ring-2 ring-slate-700/25 shadow-[0_16px_30px_-22px_rgba(15,23,42,0.75)]'
                     : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:text-slate-900 hover:shadow-sm'
                 }`}
                 style={activeTab === tab.id && navPulse === tab.id ? { animation: 'navPop 220ms ease' } : undefined}

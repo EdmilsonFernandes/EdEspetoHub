@@ -937,10 +937,10 @@ export function MotoboyProfile() {
                 type="button"
                 onClick={() => setActiveSection(tab.id as any)}
                 className={[
-                  'btn-press rounded-xl px-3 py-2.5 text-sm font-extrabold border transition',
+                  'btn-press rounded-xl px-3 py-2.5 text-sm font-extrabold border transition-all',
                   isActive
-                    ? 'bg-slate-900 text-white border-slate-900'
-                    : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50',
+                    ? 'bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 text-white border-transparent shadow-[0_16px_30px_-22px_rgba(15,23,42,0.75)]'
+                    : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:-translate-y-0.5 hover:shadow-md',
                 ].join(' ')}
               >
                 {tab.label}
