@@ -178,9 +178,11 @@ export class OrderReviewRepository {
         r.tip_payout_by_user_id AS "tipPayoutByUserId",
         r.created_at AS "createdAt",
         s.name AS "storeName",
-        s.slug AS "storeSlug"
+        s.slug AS "storeSlug",
+        ss.logo_url AS "storeLogoUrl"
       FROM order_reviews r
       JOIN stores s ON s.id = r.store_id
+      LEFT JOIN store_settings ss ON ss.store_id = s.id
       WHERE r.motoboy_id = $1
         AND COALESCE(r.tip_amount, 0) > 0
         AND UPPER(COALESCE(r.tip_status, '')) = 'PAID'

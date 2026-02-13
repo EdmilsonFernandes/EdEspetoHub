@@ -58,7 +58,7 @@ export function MotoboyProfile() {
   const [cameraDocType, setCameraDocType] = useState<string | null>(null);
   const [preview, setPreview] = useState<{ title: string; src: string | null } | null>(null);
   const [showRequestBlockedModal, setShowRequestBlockedModal] = useState(false);
-  const [activeSection, setActiveSection] = useState<'profile' | 'documents' | 'stores' | 'notifications'>('profile');
+  const [activeSection, setActiveSection] = useState<'profile' | 'documents' | 'stores' | 'notifications' | 'payouts'>('profile');
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [reviewStats, setReviewStats] = useState<{
     avgDeliveryRating: number;
@@ -590,6 +590,21 @@ export function MotoboyProfile() {
     return date.toLocaleString('pt-BR');
   };
 
+  const payoutStats = useMemo(() => {
+    const rows = Array.isArray(tipPayouts) ? tipPayouts : [];
+    const paid = rows.filter((row: any) => String(row?.tipPayoutStatus || '').toUpperCase() === 'PAID');
+    const pending = rows.filter((row: any) => String(row?.tipPayoutStatus || '').toUpperCase() !== 'PAID');
+    const paidAmount = paid.reduce((acc: number, row: any) => acc + Number(row?.tipAmount || 0), 0);
+    const pendingAmount = pending.reduce((acc: number, row: any) => acc + Number(row?.tipAmount || 0), 0);
+    return {
+      total: rows.length,
+      paidCount: paid.length,
+      pendingCount: pending.length,
+      paidAmount,
+      pendingAmount,
+    };
+  }, [tipPayouts]);
+
   useEffect(() => {
     loadTipPayouts();
   }, []);
@@ -1057,11 +1072,12 @@ export function MotoboyProfile() {
           { id: 'profile', label: 'Perfil' },
           { id: 'documents', label: 'Documentos' },
           { id: 'stores', label: 'Lojas' },
+          { id: 'payouts', label: 'Repasses' },
           { id: 'notifications', label: 'Notificações' },
         ]}
         activeId={activeSection}
         onChange={(id) => setActiveSection(id as any)}
-        listClassName="grid grid-cols-2 sm:grid-cols-4"
+        listClassName="grid grid-cols-2 sm:grid-cols-5"
         containerClassName="bg-white shadow-[0_22px_48px_-40px_rgba(15,23,42,0.45)]"
         buttonClassName="btn-press"
       />
@@ -1385,79 +1401,25 @@ export function MotoboyProfile() {
           <p className="text-[11px] text-slate-500">
             Base: {reviewStats.storesMeasured} loja{reviewStats.storesMeasured === 1 ? '' : 's'} vinculada{reviewStats.storesMeasured === 1 ? '' : 's'} com avaliações.
           </p>
-
-          <div className="rounded-2xl border border-slate-200 bg-white p-3 space-y-2">
-            <div className="flex items-center justify-between gap-2">
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Histórico de repasses</p>
-                <p className="text-xs text-slate-500">Acompanhe gorjetas aguardando repasse e já pagas.</p>
-              </div>
-              <button
-                type="button"
-                onClick={loadTipPayouts}
-                className="btn-press rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-extrabold text-slate-700"
-              >
-                {tipPayoutsLoading ? 'Atualizando...' : 'Atualizar'}
-              </button>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2">
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-amber-700">Repasses pendentes</p>
+              <p className="text-lg font-black text-amber-800">{formatCurrency(payoutStats.pendingAmount)}</p>
+              <p className="text-[11px] text-amber-800/80">{payoutStats.pendingCount} gorjeta(s) aguardando repasse</p>
             </div>
-            {tipPayoutsLoading ? (
-              <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
-                Carregando histórico de repasses...
-              </div>
-            ) : tipPayouts.length === 0 ? (
-              <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
-                Sem repasses registrados ainda.
-              </div>
-            ) : (
-              <div className="grid gap-2">
-                {tipPayouts.slice(0, 30).map((row: any, idx: number) => {
-                  const payoutStatus = String(row?.tipPayoutStatus || '').toUpperCase() === 'PAID' ? 'PAID' : 'PENDING';
-                  return (
-                    <div key={String(row?.id || `tip-row-${idx}`)} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
-                      <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                        <div className="min-w-0">
-                          <div className="text-xs font-black text-slate-900 break-words">{row?.storeName || row?.storeSlug || 'Loja'}</div>
-                          <div className="text-[11px] text-slate-500">
-                            Pedido #{String(row?.orderId || '').slice(0, 8)} · Gorjeta paga em {formatDateTime(row?.tipPaidAt)}
-                          </div>
-                          <div className="text-[11px] text-slate-500">
-                            {payoutStatus === 'PAID' ? `Repasse confirmado em ${formatDateTime(row?.tipPayoutAt)}` : 'Aguardando repasse do lojista'}
-                          </div>
-                          {row?.tipPayoutNotes ? (
-                            <div className="text-[11px] text-slate-600 break-words">
-                              <span className="font-semibold">Obs:</span> {String(row.tipPayoutNotes)}
-                            </div>
-                          ) : null}
-                          {row?.tipPayoutProofUrl ? (
-                            <a
-                              href={resolveAssetUrl(String(row.tipPayoutProofUrl)) || String(row.tipPayoutProofUrl)}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="inline-flex text-[11px] font-extrabold text-brand-primary underline"
-                            >
-                              Ver comprovante
-                            </a>
-                          ) : null}
-                        </div>
-                        <div className="flex items-center gap-2 sm:justify-end">
-                          <div className="text-sm font-black text-slate-900">{formatCurrency(row?.tipAmount || 0)}</div>
-                          <span
-                            className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold border ${
-                              payoutStatus === 'PAID'
-                                ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
-                                : 'border-amber-200 bg-amber-50 text-amber-800'
-                            }`}
-                          >
-                            {payoutStatus === 'PAID' ? 'Repassado' : 'Pendente'}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2">
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-700">Repasses concluídos</p>
+              <p className="text-lg font-black text-emerald-800">{formatCurrency(payoutStats.paidAmount)}</p>
+              <p className="text-[11px] text-emerald-800/80">{payoutStats.paidCount} gorjeta(s) repassada(s)</p>
+            </div>
           </div>
+          <button
+            type="button"
+            onClick={() => setActiveSection('payouts')}
+            className="btn-press w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-800"
+          >
+            Ver aba de repasses
+          </button>
         </FormSection>
 
         <FormSection title="Dados da conta" variant="neutral" contentClassName="space-y-2">
@@ -1716,6 +1678,100 @@ export function MotoboyProfile() {
                 </div>
               );
             })()}
+          </div>
+        )}
+      </FormSection>
+      )}
+
+      {activeSection === 'payouts' && (
+      <FormSection
+        title="Repasses de gorjeta"
+        subtitle="Acompanhe pendentes e pagos com comprovante."
+        variant="warning"
+        contentClassName="space-y-3"
+        actions={
+          <button
+            type="button"
+            onClick={loadTipPayouts}
+            className="btn-press rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-700"
+          >
+            {tipPayoutsLoading ? 'Atualizando...' : 'Atualizar'}
+          </button>
+        }
+      >
+        <div className="grid gap-2 sm:grid-cols-3">
+          <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2">
+            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-amber-700">Pendente</p>
+            <p className="text-lg font-black text-amber-800">{formatCurrency(payoutStats.pendingAmount)}</p>
+            <p className="text-[11px] text-amber-800/80">{payoutStats.pendingCount} repasse(s)</p>
+          </div>
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2">
+            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-700">Repassado</p>
+            <p className="text-lg font-black text-emerald-800">{formatCurrency(payoutStats.paidAmount)}</p>
+            <p className="text-[11px] text-emerald-800/80">{payoutStats.paidCount} repasse(s)</p>
+          </div>
+          <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Total histórico</p>
+            <p className="text-lg font-black text-slate-900">{payoutStats.total}</p>
+            <p className="text-[11px] text-slate-500">gorjeta(s) com pagamento confirmado</p>
+          </div>
+        </div>
+
+        {tipPayoutsLoading ? (
+          <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">Carregando repasses...</div>
+        ) : tipPayouts.length === 0 ? (
+          <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">Sem repasses registrados ainda.</div>
+        ) : (
+          <div className="grid gap-2">
+            {tipPayouts.slice(0, 40).map((row: any, idx: number) => {
+              const payoutStatus = String(row?.tipPayoutStatus || '').toUpperCase() === 'PAID' ? 'PAID' : 'PENDING';
+              const logo = resolveAssetUrl(String(row?.storeLogoUrl || '')) || String(row?.storeLogoUrl || '');
+              return (
+                <div key={String(row?.id || `tip-row-${idx}`)} className="rounded-2xl border border-slate-200 bg-white p-3">
+                  <div className="flex items-start gap-3">
+                    <div className="h-11 w-11 rounded-xl border border-slate-200 bg-slate-50 overflow-hidden shrink-0">
+                      {logo ? <img src={logo} alt={row?.storeName || 'Loja'} className="h-full w-full object-cover" loading="lazy" /> : null}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <div className="text-sm font-black text-slate-900 break-words">{row?.storeName || row?.storeSlug || 'Loja'}</div>
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${
+                            payoutStatus === 'PAID'
+                              ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+                              : 'border-amber-200 bg-amber-50 text-amber-800'
+                          }`}
+                        >
+                          {payoutStatus === 'PAID' ? 'Repassado' : 'Pendente'}
+                        </span>
+                      </div>
+                      <div className="text-[11px] text-slate-500">
+                        Pedido #{String(row?.orderId || '').slice(0, 8)} · Gorjeta paga em {formatDateTime(row?.tipPaidAt)}
+                      </div>
+                      <div className="text-[11px] text-slate-500">
+                        {payoutStatus === 'PAID' ? `Repasse confirmado em ${formatDateTime(row?.tipPayoutAt)}` : 'Aguardando repasse do lojista'}
+                      </div>
+                      {row?.tipPayoutNotes ? (
+                        <div className="text-[11px] text-slate-600 break-words">
+                          <span className="font-semibold">Obs:</span> {String(row.tipPayoutNotes)}
+                        </div>
+                      ) : null}
+                      {row?.tipPayoutProofUrl ? (
+                        <a
+                          href={resolveAssetUrl(String(row.tipPayoutProofUrl)) || String(row.tipPayoutProofUrl)}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex text-[11px] font-extrabold text-brand-primary underline"
+                        >
+                          Ver comprovante
+                        </a>
+                      ) : null}
+                    </div>
+                    <div className="text-sm font-black text-slate-900 shrink-0">{formatCurrency(row?.tipAmount || 0)}</div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
       </FormSection>
