@@ -150,8 +150,11 @@ export function StorePage() {
   }, [customer.type, deliveryFee]);
   const deliveryAddress = useMemo(() => {
     if (customer.type !== 'delivery') return customer.address || '';
+    const street = String(customer.street || '').trim();
+    const number = String(customer.number || '').trim();
+    const streetWithNumber = street ? (number ? `${street}, ${number}` : street) : '';
     const parts = [
-      customer.street && `${customer.street}, ${customer.number || 's/n'}`,
+      streetWithNumber,
       customer.complement,
       customer.neighborhood,
       customer.city && customer.state ? `${customer.city} - ${customer.state}` : customer.city,
@@ -174,7 +177,13 @@ export function StorePage() {
   const showClosedState = view === 'menu' && isSubscriptionActive && !storeOpenNow;
   const deliveryValidation = useMemo(() => {
     if (customer.type !== 'delivery' || !deliveryRadiusValue) {
+      if (customer.type === 'delivery' && !String(customer.number || '').trim()) {
+        return { blocked: true, reason: 'Informe o número do endereço para finalizar a entrega.' };
+      }
       return { blocked: false, reason: '' };
+    }
+    if (!String(customer.number || '').trim()) {
+      return { blocked: true, reason: 'Informe o número do endereço para finalizar a entrega.' };
     }
     if (deliveryCheck.status === 'loading') {
       return { blocked: true, reason: 'Validando distância de entrega...' };
@@ -192,7 +201,7 @@ export function StorePage() {
       return { blocked: true, reason: 'Informe o endereço para validar a entrega.' };
     }
     return { blocked: false, reason: '' };
-  }, [customer.type, deliveryCheck.status, deliveryRadiusValue, storeCoords]);
+  }, [customer.number, customer.type, deliveryCheck.status, deliveryRadiusValue, storeCoords]);
 
   const resolveItemPrice = (item) => {
     const promoPrice = item?.promoPrice != null ? Number(item.promoPrice) : null;
@@ -759,6 +768,10 @@ export function StorePage() {
 
     if (customer.type === 'delivery' && !customer.address) {
       alert('Informe o endereço completo para entrega.');
+      return;
+    }
+    if (customer.type === 'delivery' && !String(customer.number || '').trim()) {
+      alert('Informe o número do endereço para entrega.');
       return;
     }
 

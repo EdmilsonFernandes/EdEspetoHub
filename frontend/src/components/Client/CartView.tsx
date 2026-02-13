@@ -236,8 +236,11 @@ export const CartView = ({
   };
 
   const buildDeliveryAddress = (data) => {
+    const street = String(data.street || "").trim();
+    const number = String(data.number || "").trim();
+    const streetWithNumber = street ? (number ? `${street}, ${number}` : street) : "";
     const parts = [
-      data.street && `${data.street}, ${data.number || "s/n"}`,
+      streetWithNumber,
       data.complement,
       data.neighborhood,
       data.city && data.state ? `${data.city} - ${data.state}` : data.city,
