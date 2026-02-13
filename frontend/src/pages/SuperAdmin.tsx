@@ -31,6 +31,7 @@ import fireAnimation from '../assets/fire.json';
 import { useToast } from '../contexts/ToastContext';
 import { AuthLayout } from '../layouts/AuthLayout';
 import { AdminLayout } from '../layouts/AdminLayout';
+import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 
 const STORAGE_KEY = 'superAdminToken';
 const STORAGE_USER_KEY = 'superAdminUser';
@@ -111,6 +112,20 @@ const faceScoreLabel = (score: unknown) => {
   if (!Number.isFinite(n)) return '-';
   const pct = Math.max(0, Math.min(100, n * 100));
   return `${pct.toFixed(1)}%`;
+};
+
+const KycAvatar = ({ name, profileImageUrl }: { name?: string; profileImageUrl?: string }) => {
+  const initials = String(name || 'M').trim().slice(0, 1).toUpperCase();
+  const imageUrl = profileImageUrl ? resolveAssetUrl(profileImageUrl) : '';
+  return (
+    <div className="h-10 w-10 rounded-full border border-slate-200 bg-white overflow-hidden grid place-items-center text-slate-500 font-black text-sm shrink-0">
+      {imageUrl ? (
+        <img src={imageUrl} alt={name || 'Motoboy'} className="h-full w-full object-cover" loading="lazy" />
+      ) : (
+        <span>{initials}</span>
+      )}
+    </div>
+  );
 };
 
 const SECTION_META: Record<string, { title: string; description: string; tone: string }> = {
@@ -2355,11 +2370,17 @@ export function SuperAdmin() {
                       return (
                         <div key={String(motoboy?.id || entry.latestReviewedAt || 'motoboy')} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
                           <div className="flex flex-wrap items-start justify-between gap-2">
-                            <div>
-                              <div className="text-sm font-black text-slate-900">{motoboy?.user?.fullName || 'Motoboy'}</div>
-                              <div className="text-xs text-slate-500">{motoboy?.user?.email || '-'}</div>
-                              <div className="text-[11px] text-slate-500 mt-1">
-                                Revisões: {entry.docs.length} • Aprovados: {entry.approvedCount} • Reprovados: {entry.rejectedCount}
+                            <div className="flex items-start gap-2.5">
+                              <KycAvatar
+                                name={motoboy?.user?.fullName || 'Motoboy'}
+                                profileImageUrl={motoboy?.user?.profileImageUrl || ''}
+                              />
+                              <div>
+                                <div className="text-sm font-black text-slate-900">{motoboy?.user?.fullName || 'Motoboy'}</div>
+                                <div className="text-xs text-slate-500">{motoboy?.user?.email || '-'}</div>
+                                <div className="text-[11px] text-slate-500 mt-1">
+                                  Revisões: {entry.docs.length} • Aprovados: {entry.approvedCount} • Reprovados: {entry.rejectedCount}
+                                </div>
                               </div>
                             </div>
                             <div className="flex gap-2">
@@ -2432,18 +2453,21 @@ export function SuperAdmin() {
                         style={{ borderLeftWidth: 6, borderLeftColor: 'rgb(245 158 11)' }}
                       >
                         <div className="flex items-start justify-between gap-3">
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-2 min-w-0">
-                              <p className="text-sm font-black text-slate-900 truncate">{name}</p>
-                              <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800">
-                                Pendente
-                              </span>
+                          <div className="min-w-0 flex items-start gap-2.5">
+                            <KycAvatar name={name} profileImageUrl={motoboy?.user?.profileImageUrl || ''} />
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <p className="text-sm font-black text-slate-900 truncate">{name}</p>
+                                <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800">
+                                  Pendente
+                                </span>
+                              </div>
+                              <p className="text-xs text-slate-500 mt-1">{email}</p>
+                              {phone ? <p className="text-xs text-slate-500">{phone}</p> : null}
+                              <p className="text-[11px] text-slate-400 mt-2">
+                                Último envio: {formatDate(entry?.latestAt)}
+                              </p>
                             </div>
-                            <p className="text-xs text-slate-500 mt-1">{email}</p>
-                            {phone ? <p className="text-xs text-slate-500">{phone}</p> : null}
-                            <p className="text-[11px] text-slate-400 mt-2">
-                              Último envio: {formatDate(entry?.latestAt)}
-                            </p>
                           </div>
                           <button
                             type="button"
@@ -2561,11 +2585,17 @@ export function SuperAdmin() {
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-5xl p-5 space-y-4 max-h-[88vh] overflow-hidden">
             <div className="flex items-center justify-between gap-3">
-              <div className="min-w-0">
-                <h3 className="text-lg font-bold text-slate-800">Histórico KYC</h3>
-                <p className="text-xs text-slate-500 truncate">
-                  {kycHistoryMotoboy?.user?.fullName || 'Motoboy'} • {kycHistoryMotoboy?.user?.email || '-'}
-                </p>
+              <div className="min-w-0 flex items-center gap-2.5">
+                <KycAvatar
+                  name={kycHistoryMotoboy?.user?.fullName || 'Motoboy'}
+                  profileImageUrl={kycHistoryMotoboy?.user?.profileImageUrl || ''}
+                />
+                <div className="min-w-0">
+                  <h3 className="text-lg font-bold text-slate-800">Histórico KYC</h3>
+                  <p className="text-xs text-slate-500 truncate">
+                    {kycHistoryMotoboy?.user?.fullName || 'Motoboy'} • {kycHistoryMotoboy?.user?.email || '-'}
+                  </p>
+                </div>
               </div>
               <button
                 onClick={() => {

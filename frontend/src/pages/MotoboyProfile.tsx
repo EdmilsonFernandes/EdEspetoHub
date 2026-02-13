@@ -7,6 +7,7 @@ import { MotoboyHeader } from '../components/Motoboy/MotoboyHeader';
 import { CameraCaptureModal } from '../components/Motoboy/CameraCaptureModal';
 import { DocPreviewModal } from '../components/Motoboy/DocPreviewModal';
 import { formatMotoboyAccountStatus } from '../utils/motoboyStatus';
+import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 
 const faceReasonLabel = (reason?: string | null) => {
   const code = String(reason || '').trim().toLowerCase();
@@ -29,6 +30,8 @@ export function MotoboyProfile() {
   const [refreshingDocs, setRefreshingDocs] = useState(false);
   const [blocked, setBlocked] = useState(false);
   const [profile, setProfile] = useState<any | null>(null);
+  const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
+  const [profileImagePreview, setProfileImagePreview] = useState('');
   const [profileDraft, setProfileDraft] = useState<any>({
     vehicleType: '',
     vehiclePlate: '',
@@ -179,6 +182,8 @@ export function MotoboyProfile() {
       try {
         const data = await motoboyService.getProfile();
         setProfile(data || null);
+        const profileImageUrl = String(data?.user?.profileImageUrl || '').trim();
+        setProfileImagePreview(profileImageUrl ? resolveAssetUrl(profileImageUrl) || '' : '');
         setProfileDraft({
           vehicleType: data?.vehicleType || '',
           vehiclePlate: data?.vehiclePlate || '',
@@ -572,6 +577,15 @@ export function MotoboyProfile() {
   const handleSaveProfile = async () => {
     setSavingProfile(true);
     try {
+      let profileImageFileBase64: string | null = null;
+      if (profileImageFile) {
+        const reader = new FileReader();
+        profileImageFileBase64 = await new Promise((resolve, reject) => {
+          reader.onerror = () => reject(new Error('Falha ao ler a foto do perfil.'));
+          reader.onload = () => resolve(String(reader.result || ''));
+          reader.readAsDataURL(profileImageFile);
+        });
+      }
       const updated = await motoboyService.updateProfile({
         vehicleType: profileDraft.vehicleType || null,
         vehiclePlate: profileDraft.vehiclePlate || null,
@@ -583,14 +597,38 @@ export function MotoboyProfile() {
         city: profileDraft.city || null,
         state: profileDraft.state || null,
         address: profileDraft.address || null,
+        profileImageFile: profileImageFileBase64,
       });
       setProfile(updated || null);
+      const updatedProfileImageUrl = String(updated?.user?.profileImageUrl || '').trim();
+      if (updatedProfileImageUrl) {
+        setProfileImagePreview(resolveAssetUrl(updatedProfileImageUrl) || '');
+      }
+      setProfileImageFile(null);
       showToast('Perfil atualizado.', 'success');
     } catch (error: any) {
       showToast(error?.message || 'Não foi possível salvar o perfil.', 'error');
     } finally {
       setSavingProfile(false);
     }
+  };
+
+  const handleProfilePhotoUpload = (file?: File | null) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onerror = () => {
+      showToast('Nao foi possivel ler a foto do perfil.', 'error');
+    };
+    reader.onload = () => {
+      const dataUrl = String(reader.result || '');
+      if (!dataUrl.startsWith('data:image/')) {
+        showToast('Selecione uma imagem valida.', 'error');
+        return;
+      }
+      setProfileImageFile(file);
+      setProfileImagePreview(dataUrl);
+    };
+    reader.readAsDataURL(file);
   };
 
   const toggleStore = (storeId: string) => {
@@ -1162,6 +1200,26 @@ export function MotoboyProfile() {
         <div>
           <p className="text-sm font-semibold text-slate-700">Perfil do entregador</p>
           <p className="text-xs text-slate-500">Dados do veículo e região.</p>
+        </div>
+        <div className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-3">
+          <div className="flex items-center gap-3">
+            <div className="h-16 w-16 rounded-2xl border border-slate-200 bg-white overflow-hidden grid place-items-center text-slate-500 font-black text-lg">
+              {profileImagePreview ? (
+                <img src={profileImagePreview} alt="Foto do entregador" className="h-full w-full object-cover" />
+              ) : (
+                <span>{String(profile?.user?.fullName || 'E').trim().slice(0, 1).toUpperCase()}</span>
+              )}
+            </div>
+            <label className="text-xs text-slate-600 font-semibold">
+              Foto do perfil (opcional)
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(event) => handleProfilePhotoUpload(event.target.files?.[0])}
+                className="mt-1 block text-[11px] text-slate-500 file:mr-2 file:rounded-lg file:border-0 file:bg-slate-900 file:px-2.5 file:py-1.5 file:text-[11px] file:font-semibold file:text-white"
+              />
+            </label>
+          </div>
         </div>
         <div className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-xs text-slate-600 flex items-center gap-2">
           <span className="text-base">{vehicleIcon}</span>

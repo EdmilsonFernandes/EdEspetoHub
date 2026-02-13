@@ -477,6 +477,7 @@ export class MotoboyService {
       city?: string | null;
       state?: string | null;
       address?: string | null;
+      profileImageFile?: string | null;
     }
   ) {
     const nextVehicleType = input.vehicleType ?? motoboy.vehicleType ?? null;
@@ -502,6 +503,15 @@ export class MotoboyService {
     motoboy.city = input.city ?? motoboy.city ?? null;
     motoboy.state = (input.state ?? motoboy.state ?? null)?.toString().toUpperCase() || null;
     motoboy.address = input.address ?? motoboy.address ?? null;
+    const profileImageFile = String(input.profileImageFile || '').trim();
+    if (profileImageFile) {
+      const fileKey = await saveBase64Image(profileImageFile, `motoboy-${motoboy.id}`, 'motoboys');
+      if (!fileKey) throw new AppError('MOTO-022', 400);
+      if (motoboy.user) {
+        motoboy.user.profileImageUrl = fileKey;
+        await this.userRepository.save(motoboy.user);
+      }
+    }
     return this.motoboyRepository.save(motoboy);
   }
 

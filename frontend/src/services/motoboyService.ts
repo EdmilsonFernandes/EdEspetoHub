@@ -56,6 +56,7 @@ export const motoboyService = {
     city?: string | null;
     state?: string | null;
     address?: string | null;
+    profileImageFile?: string | null;
   }) {
     return apiClient.put('/motoboy/profile', payload);
   },
