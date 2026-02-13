@@ -916,7 +916,8 @@ export function AdminMotoboys() {
                       src={request.motoboyUser?.profileImageUrl ? resolveAssetUrl(request.motoboyUser.profileImageUrl) : ''}
                       alt={request.motoboyUser?.fullName || 'Entregador'}
                       fallbackText={String(request?.motoboyUser?.fullName || 'E')}
-                      sizeClassName="h-14 w-14"
+                      sizeClassName="h-16 w-16"
+                      imageClassName="object-[center_18%]"
                       containerClassName="text-slate-800 bg-gradient-to-br from-slate-50 to-white shadow-[0_18px_32px_-22px_rgba(15,23,42,0.55)]"
                     />
                     <div className="min-w-0">
@@ -1096,7 +1097,8 @@ export function AdminMotoboys() {
                       src={link.motoboyUser?.profileImageUrl ? resolveAssetUrl(link.motoboyUser.profileImageUrl) : ''}
                       alt={link.motoboyUser?.fullName || 'Entregador'}
                       fallbackText={String(link?.motoboyUser?.fullName || 'E')}
-                      sizeClassName="h-14 w-14"
+                      sizeClassName="h-16 w-16"
+                      imageClassName="object-[center_18%]"
                       containerClassName="text-slate-800 bg-gradient-to-br from-slate-50 to-white shadow-[0_18px_32px_-22px_rgba(15,23,42,0.55)]"
                     />
                     <div className="min-w-0">

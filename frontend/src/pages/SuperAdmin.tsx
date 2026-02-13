@@ -122,7 +122,8 @@ const KycAvatar = ({ name, profileImageUrl }: { name?: string; profileImageUrl?:
       src={profileImageUrl ? resolveAssetUrl(profileImageUrl) : ''}
       alt={name || 'Motoboy'}
       fallbackText={String(name || 'M')}
-      sizeClassName="h-12 w-12"
+      sizeClassName="h-14 w-14"
+      imageClassName="object-[center_18%]"
       containerClassName="shadow-[0_18px_32px_-22px_rgba(15,23,42,0.45)]"
     />
   );
@@ -216,7 +217,7 @@ export function SuperAdmin() {
     payments: true,
     logs: false,
     events: false,
-    kyc: false,
+    kyc: true,
   });
   const [activeSection, setActiveSection] = useState('executive');
   const [kycQueue, setKycQueue] = useState<any[]>([]);

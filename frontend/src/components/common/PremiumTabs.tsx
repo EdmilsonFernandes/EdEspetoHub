@@ -53,7 +53,7 @@ export function PremiumTabs({
               style={getButtonStyle ? getButtonStyle(item, isActive) : undefined}
               className={[
                 'rounded-xl border transition-all',
-                item.icon ? 'px-3 py-2 text-[10px] sm:text-sm min-w-[104px]' : 'px-3.5 py-2',
+                item.icon ? 'px-3 py-2 text-[10px] sm:text-sm min-w-[108px] sm:min-w-[124px] min-h-[56px]' : 'px-3.5 py-2',
                 item.icon ? 'flex flex-col sm:flex-row items-center gap-1 sm:gap-2 text-center active:scale-95' : '',
                 isActive
                   ? 'border-transparent bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 text-white shadow-[0_16px_30px_-22px_rgba(15,23,42,0.75)]'
@@ -68,7 +68,7 @@ export function PremiumTabs({
                   {item.badge ? item.badge : null}
                 </span>
               ) : null}
-              <span className={item.icon ? 'leading-tight text-center max-w-[90px] sm:max-w-none line-clamp-2' : ''}>{item.label}</span>
+              <span className={item.icon ? 'leading-tight text-center whitespace-normal break-words' : 'whitespace-normal break-words'}>{item.label}</span>
             </button>
           );
         })}
