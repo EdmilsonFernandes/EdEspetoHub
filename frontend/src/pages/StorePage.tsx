@@ -999,7 +999,7 @@ export function StorePage() {
       navigate(storeSlug ? `/admin?slug=${encodeURIComponent(storeSlug)}` : '/admin');
       return;
     }
-    navigate(storeSlug ? `/admin/dashboard` : '/admin', { state: { activeTab: 'fila' } });
+    navigate('/admin/queue');
   };
   const handleRepeatFromMenu = () => {
     if (!storeSlug || !lastOrderItems.length) return;

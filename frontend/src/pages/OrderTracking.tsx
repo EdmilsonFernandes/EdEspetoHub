@@ -195,7 +195,7 @@ export function OrderTracking() {
   }, [storeSlug]);
   const handleBack = () => {
     if (isAdminForStore) {
-      navigate('/admin/dashboard', { state: { activeTab: 'fila' } });
+      navigate('/admin/queue');
       return;
     }
     navigate(storeHomePath);

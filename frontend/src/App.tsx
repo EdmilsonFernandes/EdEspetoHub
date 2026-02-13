@@ -53,9 +53,7 @@ function App() {
               element={
                 <AppErrorBoundary>
                   <AdminRoute>
-                    <AdminLayout>
-                      <AdminQueue />
-                    </AdminLayout>
+                    <AdminQueue />
                   </AdminRoute>
                 </AppErrorBoundary>
               }

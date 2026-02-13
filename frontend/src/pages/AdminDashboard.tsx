@@ -749,6 +749,11 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     };
     loadRequests();
   }, [storeId]);
+  useEffect(() => {
+    if ((location.state as any)?.activeTab === 'fila') {
+      navigate('/admin/queue', { replace: true });
+    }
+  }, [location.state, navigate]);
   const [savingBranding, setSavingBranding] = useState(false);
 
   const updateAuthStore = (updates) => {
@@ -1081,6 +1086,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                 if (storeSlug) navigate(`/${storeSlug}`);
                 return;
               }
+              if (id === 'fila') {
+                navigate('/admin/queue');
+                return;
+              }
               setActiveTab(id as typeof activeTab);
               setNavPulse(id);
               window.setTimeout(() => setNavPulse(null), 260);
@@ -1191,6 +1200,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                       key={item.id}
                       type="button"
                       onClick={() => {
+                        if (item.id === 'fila') {
+                          navigate('/admin/queue');
+                          return;
+                        }
                         setActiveTab(item.id as typeof activeTab);
                         setNavPulse(item.id);
                         window.setTimeout(() => setNavPulse(null), 260);
@@ -1293,6 +1306,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                         setMobileMoreOpen(false);
                         if (action.id === 'cardapio') {
                           if (storeSlug) navigate(`/${storeSlug}`);
+                          return;
+                        }
+                        if (action.id === 'fila') {
+                          navigate('/admin/queue');
                           return;
                         }
                         setActiveTab(action.id as typeof activeTab);
