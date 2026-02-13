@@ -45,6 +45,8 @@ export function AdminMotoboys() {
   });
   const [tipPayoutRows, setTipPayoutRows] = useState<any[]>([]);
   const [tipPayoutsLoading, setTipPayoutsLoading] = useState(false);
+  const [expandedPayoutMotoboyId, setExpandedPayoutMotoboyId] = useState<string | null>(null);
+  const [openPixRows, setOpenPixRows] = useState<Record<string, boolean>>({});
   const [payoutModal, setPayoutModal] = useState<{
     open: boolean;
     row: any | null;
@@ -73,6 +75,58 @@ export function AdminMotoboys() {
     if (Number.isNaN(date.getTime())) return '-';
     return date.toLocaleString('pt-BR');
   };
+
+  const payoutGroups = useMemo(() => {
+    const groups: Array<{
+      motoboyId: string;
+      motoboyName: string;
+      pendingAmount: number;
+      paidAmount: number;
+      totalAmount: number;
+      pendingCount: number;
+      totalCount: number;
+      rows: any[];
+    }> = [];
+    const byId = new Map<string, any>();
+    (tipPayoutRows || []).forEach((row: any) => {
+      const motoboyId = String(row?.motoboyId || row?.motoboy_id || row?.motoboyName || '').trim();
+      const motoboyName = String(row?.motoboyName || 'Entregador').trim() || 'Entregador';
+      const payoutStatus = String(row?.tipPayoutStatus || '').toUpperCase() === 'PAID' ? 'PAID' : 'PENDING';
+      const tipAmount = Number(row?.tipAmount || 0);
+      if (!byId.has(motoboyId)) {
+        const group = {
+          motoboyId,
+          motoboyName,
+          pendingAmount: 0,
+          paidAmount: 0,
+          totalAmount: 0,
+          pendingCount: 0,
+          totalCount: 0,
+          rows: [] as any[],
+        };
+        byId.set(motoboyId, group);
+        groups.push(group);
+      }
+      const group = byId.get(motoboyId);
+      group.totalAmount += tipAmount;
+      group.totalCount += 1;
+      if (payoutStatus === 'PAID') group.paidAmount += tipAmount;
+      else {
+        group.pendingAmount += tipAmount;
+        group.pendingCount += 1;
+      }
+      group.rows.push(row);
+    });
+    return groups.sort((a, b) => b.pendingAmount - a.pendingAmount || b.totalAmount - a.totalAmount);
+  }, [tipPayoutRows]);
+
+  const pendingPayoutByMotoboy = useMemo(() => {
+    const map: Record<string, number> = {};
+    payoutGroups.forEach((group) => {
+      if (group.motoboyId) map[group.motoboyId] = Number(group.pendingAmount || 0);
+    });
+    return map;
+  }, [payoutGroups]);
 
   const copyText = async (value: string, okMessage: string) => {
     try {
@@ -759,115 +813,161 @@ export function AdminMotoboys() {
       >
         {tipPayoutsLoading ? (
           <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">Carregando repasses...</div>
-        ) : tipPayoutRows.length === 0 ? (
+        ) : payoutGroups.length === 0 ? (
           <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
             Ainda não há gorjetas pagas para repasse.
           </div>
         ) : (
           <div className="grid gap-2">
-            {tipPayoutRows.slice(0, 40).map((row: any, idx: number) => {
-              const payoutStatus = String(row?.tipPayoutStatus || '').toUpperCase() === 'PAID' ? 'PAID' : 'PENDING';
-              const pixKey = String(row?.motoboyPixKey || '').trim();
-              const pixPayload = pixKey
-                ? buildPixPayload({
-                    key: pixKey,
-                    name: String(row?.motoboyName || 'MOTOBOY'),
-                    city: 'BRASIL',
-                    amount: Number(row?.tipAmount || 0),
-                    txid: String(row?.orderId || '').slice(0, 25) || 'REPASSE',
-                  })
-                : '';
-              const pixQrUrl = pixPayload
-                ? `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(pixPayload)}`
-                : '';
+            {payoutGroups.map((group, gIdx) => {
+              const expanded = expandedPayoutMotoboyId === group.motoboyId;
               return (
-                <div key={String(row?.id || `tip-payout-${idx}`)} className="rounded-2xl border border-slate-200 bg-white px-3 py-2">
+                <div key={group.motoboyId || `group-${gIdx}`} className="rounded-2xl border border-slate-200 bg-white p-3 space-y-3">
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="min-w-0">
-                      <div className="text-sm font-black text-slate-900 break-words">{row?.motoboyName || 'Entregador'}</div>
+                    <div>
+                      <div className="text-sm font-black text-slate-900 break-words">{group.motoboyName}</div>
                       <div className="text-[11px] text-slate-500">
-                        Pedido #{String(row?.orderId || '').slice(0, 8)} · Cliente: {row?.customerName || '-'}
+                        {group.totalCount} repasse(s) · {formatCurrency(group.totalAmount)}
                       </div>
-                      <div className="text-[11px] text-slate-500">
-                        Gorjeta paga em: {formatDateTime(row?.tipPaidAt)} · Repasse: {payoutStatus === 'PAID' ? formatDateTime(row?.tipPayoutAt) : 'pendente'}
-                      </div>
-                      {row?.tipPayoutNotes ? (
-                        <div className="mt-1 text-[11px] text-slate-600 break-words">
-                          <span className="font-semibold">Observação:</span> {String(row.tipPayoutNotes)}
-                        </div>
-                      ) : null}
-                      {row?.tipPayoutProofUrl ? (
-                        <a
-                          href={resolveAssetUrl(String(row.tipPayoutProofUrl)) || String(row.tipPayoutProofUrl)}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="mt-1 inline-flex text-[11px] font-extrabold text-brand-primary underline"
-                        >
-                          Ver comprovante
-                        </a>
-                      ) : null}
-                      {payoutStatus !== 'PAID' ? (
-                        <div className="mt-2 rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-2 space-y-2">
-                          <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">PIX do entregador</div>
-                          {pixKey ? (
-                            <>
-                              <div className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-[11px] font-semibold text-slate-700 break-all">
-                                {pixKey}
-                              </div>
-                              <div className="flex flex-wrap gap-2">
-                                <button
-                                  type="button"
-                                  onClick={() => void copyText(pixKey, 'Chave PIX copiada.')}
-                                  className="btn-press rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-extrabold text-slate-700"
-                                >
-                                  Copiar chave PIX
-                                </button>
-                                {pixPayload ? (
-                                  <button
-                                    type="button"
-                                    onClick={() => void copyText(pixPayload, 'Código PIX copiado.')}
-                                    className="btn-press rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-extrabold text-slate-700"
-                                  >
-                                    Copiar código PIX
-                                  </button>
-                                ) : null}
-                              </div>
-                              {pixQrUrl ? (
-                                <div className="rounded-lg border border-slate-200 bg-white p-2 inline-flex">
-                                  <img src={pixQrUrl} alt="QR code Pix do repasse" className="h-24 w-24 object-contain" loading="lazy" />
-                                </div>
-                              ) : null}
-                            </>
-                          ) : (
-                            <div className="text-[11px] text-rose-700">
-                              Entregador sem chave PIX cadastrada no perfil.
-                            </div>
-                          )}
-                        </div>
-                      ) : null}
                     </div>
-                    <div className="flex items-center gap-2 sm:justify-end">
-                      <div className="text-base font-black text-slate-900">{formatCurrency(row?.tipAmount || 0)}</div>
-                      <span
-                        className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold border ${
-                          payoutStatus === 'PAID'
-                            ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
-                            : 'border-amber-200 bg-amber-50 text-amber-800'
-                        }`}
-                      >
-                        {payoutStatus === 'PAID' ? 'Repassado' : 'Aguardando repasse'}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border border-amber-200 bg-amber-50 text-amber-800">
+                        Pendente: {formatCurrency(group.pendingAmount)}
                       </span>
-                      {payoutStatus !== 'PAID' ? (
-                        <button
-                          type="button"
-                          onClick={() => openPayoutModal(row)}
-                          className="btn-press rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-[11px] font-extrabold text-emerald-800"
-                        >
-                          Marcar pago
-                        </button>
-                      ) : null}
+                      <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border border-emerald-200 bg-emerald-50 text-emerald-800">
+                        Repassado: {formatCurrency(group.paidAmount)}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setExpandedPayoutMotoboyId((prev) => (prev === group.motoboyId ? null : group.motoboyId))}
+                        className="btn-press rounded-xl border border-slate-200 bg-white px-3 py-2 text-[11px] font-extrabold text-slate-700"
+                      >
+                        {expanded ? 'Ocultar detalhes' : `Ver repasses (${group.rows.length})`}
+                      </button>
                     </div>
                   </div>
+
+                  {expanded ? (
+                    <div className="grid gap-2 border-t border-slate-100 pt-2">
+                      {group.rows.slice(0, 20).map((row: any, idx: number) => {
+                        const payoutStatus = String(row?.tipPayoutStatus || '').toUpperCase() === 'PAID' ? 'PAID' : 'PENDING';
+                        const rowKey = String(row?.id || `${group.motoboyId}-${idx}`);
+                        const pixOpen = Boolean(openPixRows[rowKey]);
+                        const pixKey = String(row?.motoboyPixKey || '').trim();
+                        const pixPayload = pixKey
+                          ? buildPixPayload({
+                              key: pixKey,
+                              name: String(row?.motoboyName || 'MOTOBOY'),
+                              city: 'BRASIL',
+                              amount: Number(row?.tipAmount || 0),
+                              txid: String(row?.orderId || '').slice(0, 25) || 'REPASSE',
+                            })
+                          : '';
+                        const pixQrUrl = pixPayload
+                          ? `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(pixPayload)}`
+                          : '';
+                        return (
+                          <div key={rowKey} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+                            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                              <div className="min-w-0">
+                                <div className="text-[11px] text-slate-700 font-semibold">
+                                  Pedido #{String(row?.orderId || '').slice(0, 8)} · Cliente: {row?.customerName || '-'}
+                                </div>
+                                <div className="text-[11px] text-slate-500">
+                                  Gorjeta paga em: {formatDateTime(row?.tipPaidAt)} · Repasse: {payoutStatus === 'PAID' ? formatDateTime(row?.tipPayoutAt) : 'pendente'}
+                                </div>
+                                {row?.tipPayoutNotes ? (
+                                  <div className="text-[11px] text-slate-600 break-words">
+                                    <span className="font-semibold">Obs:</span> {String(row.tipPayoutNotes)}
+                                  </div>
+                                ) : null}
+                                {row?.tipPayoutProofUrl ? (
+                                  <a
+                                    href={resolveAssetUrl(String(row.tipPayoutProofUrl)) || String(row.tipPayoutProofUrl)}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="inline-flex text-[11px] font-extrabold text-brand-primary underline"
+                                  >
+                                    Ver comprovante
+                                  </a>
+                                ) : null}
+                              </div>
+                              <div className="flex items-center gap-2 sm:justify-end">
+                                <div className="text-sm font-black text-slate-900">{formatCurrency(row?.tipAmount || 0)}</div>
+                                <span
+                                  className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold border ${
+                                    payoutStatus === 'PAID'
+                                      ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+                                      : 'border-amber-200 bg-amber-50 text-amber-800'
+                                  }`}
+                                >
+                                  {payoutStatus === 'PAID' ? 'Repassado' : 'Aguardando repasse'}
+                                </span>
+                                {payoutStatus !== 'PAID' ? (
+                                  <>
+                                    <button
+                                      type="button"
+                                      onClick={() => setOpenPixRows((prev) => ({ ...prev, [rowKey]: !prev[rowKey] }))}
+                                      className="btn-press rounded-xl border border-slate-200 bg-white px-3 py-2 text-[11px] font-extrabold text-slate-700"
+                                    >
+                                      {pixOpen ? 'Ocultar PIX' : 'PIX'}
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => openPayoutModal(row)}
+                                      className="btn-press rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-[11px] font-extrabold text-emerald-800"
+                                    >
+                                      Marcar pago
+                                    </button>
+                                  </>
+                                ) : null}
+                              </div>
+                            </div>
+
+                            {payoutStatus !== 'PAID' && pixOpen ? (
+                              <div className="mt-2 rounded-xl border border-slate-200 bg-white px-2.5 py-2 space-y-2">
+                                <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">PIX do entregador</div>
+                                {pixKey ? (
+                                  <>
+                                    <div className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-[11px] font-semibold text-slate-700 break-all">
+                                      {pixKey}
+                                    </div>
+                                    <div className="flex flex-wrap gap-2">
+                                      <button
+                                        type="button"
+                                        onClick={() => void copyText(pixKey, 'Chave PIX copiada.')}
+                                        className="btn-press rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-extrabold text-slate-700"
+                                      >
+                                        Copiar chave PIX
+                                      </button>
+                                      {pixPayload ? (
+                                        <button
+                                          type="button"
+                                          onClick={() => void copyText(pixPayload, 'Código PIX copiado.')}
+                                          className="btn-press rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-extrabold text-slate-700"
+                                        >
+                                          Copiar código PIX
+                                        </button>
+                                      ) : null}
+                                    </div>
+                                    {pixQrUrl ? (
+                                      <div className="rounded-lg border border-slate-200 bg-slate-50 p-2 inline-flex">
+                                        <img src={pixQrUrl} alt="QR code Pix do repasse" className="h-24 w-24 object-contain" loading="lazy" />
+                                      </div>
+                                    ) : null}
+                                  </>
+                                ) : (
+                                  <div className="text-[11px] text-rose-700">
+                                    Entregador sem chave PIX cadastrada no perfil.
+                                  </div>
+                                )}
+                              </div>
+                            ) : null}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : null}
                 </div>
               );
             })}
@@ -1550,6 +1650,11 @@ export function AdminMotoboys() {
                 </div>
                 <div className="text-xs text-slate-500 flex flex-wrap gap-2">
                   <span>Vínculo: {link.active ? 'Ativo' : 'Inativo'}</span>
+                  {Number(pendingPayoutByMotoboy[link.motoboyId] || 0) > 0 ? (
+                    <span className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-extrabold text-amber-800">
+                      Repasse pendente: {formatCurrency(pendingPayoutByMotoboy[link.motoboyId])}
+                    </span>
+                  ) : null}
                 </div>
                 {motoboyReviewMap[link.motoboyId] ? (
                   <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700 flex flex-wrap items-center gap-2">
