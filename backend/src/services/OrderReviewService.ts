@@ -12,6 +12,9 @@
  */
 
 import { AppError } from '../errors/AppError';
+import QRCode from 'qrcode';
+import { env } from '../config/env';
+import { MercadoPagoService } from './MercadoPagoService';
 import { OrderDeliveryRepository } from '../repositories/OrderDeliveryRepository';
 import { OrderRepository } from '../repositories/OrderRepository';
 import { OrderReviewRepository } from '../repositories/OrderReviewRepository';
@@ -27,6 +30,7 @@ type SubmitReviewInput = {
 };
 
 export class OrderReviewService {
+  private mercadoPagoService = new MercadoPagoService();
   private orderRepository = new OrderRepository();
   private storeRepository = new StoreRepository();
   private orderDeliveryRepository = new OrderDeliveryRepository();
@@ -45,6 +49,81 @@ export class OrderReviewService {
       .map((item) => String(item || '').trim())
       .filter(Boolean)
       .slice(0, 8);
+  }
+
+  private async ensureTipPayment(order: any, review: any) {
+    const tipAmount = Number(review?.tipAmount || 0);
+    if (!(tipAmount > 0)) {
+      review.tipStatus = 'NONE';
+      review.tipProvider = null;
+      review.tipProviderId = null;
+      review.tipPaymentLink = null;
+      review.tipQrCodeBase64 = null;
+      review.tipQrCodeText = null;
+      review.tipExpiresAt = null;
+      review.tipPaidAt = null;
+      return this.orderReviewRepository.saveReview(review);
+    }
+
+    if (
+      String(review.tipStatus || '').toUpperCase() === 'PENDING' &&
+      review.tipQrCodeText &&
+      review.tipExpiresAt &&
+      new Date(review.tipExpiresAt).getTime() > Date.now()
+    ) {
+      return review;
+    }
+
+    const description = `Gorjeta do pedido ${order.id.slice(0, 8)} - ${order.store?.name || 'Loja'}`;
+    const externalReference = `review_tip:${review.id}`;
+    const payerEmail = String(order?.store?.owner?.email || order?.customerName || 'cliente@chamanoespeto.com.br')
+      .trim()
+      .toLowerCase();
+    const payerName = String(order?.customerName || 'Cliente').trim() || 'Cliente';
+
+    let paymentLink: string | null = null;
+    let qrCodeBase64: string | null = null;
+    let qrCodeText: string | null = null;
+    let provider = 'MOCK';
+    let providerId: string | null = null;
+    let expiresAt: Date | null = new Date(Date.now() + 30 * 60 * 1000);
+
+    if (env.mercadoPago.accessToken) {
+      const mp = await this.mercadoPagoService.createPayment({
+        amount: tipAmount,
+        method: 'PIX',
+        description,
+        externalReference,
+        payer: {
+          email: payerEmail.includes('@') ? payerEmail : 'cliente@chamanoespeto.com.br',
+          name: payerName,
+        },
+      });
+      if (mp) {
+        provider = 'MERCADO_PAGO';
+        providerId = mp.providerId || null;
+        paymentLink = mp.paymentLink || null;
+        qrCodeBase64 = mp.qrCodeBase64 ? (mp.qrCodeBase64.startsWith('data:image') ? mp.qrCodeBase64 : `data:image/png;base64,${mp.qrCodeBase64}`) : null;
+        qrCodeText = mp.qrCodeText || null;
+        expiresAt = (mp as any)?.expiresAt ? new Date((mp as any).expiresAt) : expiresAt;
+      }
+    }
+
+    if (!qrCodeText) {
+      const payload = `PIX GORJETA | Store: ${order.store?.name || 'Loja'} | Amount: ${tipAmount.toFixed(2)} | Review:${review.id}`;
+      qrCodeText = payload;
+      qrCodeBase64 = await QRCode.toDataURL(payload);
+    }
+
+    review.tipStatus = 'PENDING';
+    review.tipProvider = provider;
+    review.tipProviderId = providerId;
+    review.tipPaymentLink = paymentLink;
+    review.tipQrCodeBase64 = qrCodeBase64;
+    review.tipQrCodeText = qrCodeText;
+    review.tipExpiresAt = expiresAt;
+    review.tipPaidAt = null;
+    return this.orderReviewRepository.saveReview(review);
   }
 
   private normalizeRating(value: unknown, field: string, required = false) {
@@ -78,7 +157,7 @@ export class OrderReviewService {
     const delivery = await this.orderDeliveryRepository.findByOrderId(order.id);
     const motoboyId = delivery?.motoboyId || null;
 
-    return this.orderReviewRepository.saveReview({
+    const review = await this.orderReviewRepository.saveReview({
       orderId: order.id,
       storeId: order.store.id,
       motoboyId,
@@ -91,6 +170,7 @@ export class OrderReviewService {
       deliveryTags: order.type === 'delivery' ? this.sanitizeTags(input.deliveryTags) : [],
       tipAmount: Number(tipAmount.toFixed(2)),
     });
+    return this.ensureTipPayment(order, review);
   }
 
   async getByOrderId(orderId: string) {
@@ -129,5 +209,34 @@ export class OrderReviewService {
       totalDeliveryReviews: Number(summary?.total_delivery_reviews || 0),
       avgDeliveryRating: Number(summary?.delivery_avg_rating || 0),
     };
+  }
+
+  async markTipPaidFromWebhook(reviewId: string, mpPayment: any) {
+    const review = await this.orderReviewRepository.findById(reviewId);
+    if (!review) return null;
+    review.tipStatus = 'PAID';
+    review.tipProvider = 'MERCADO_PAGO';
+    review.tipProviderId = mpPayment?.id ? String(mpPayment.id) : review.tipProviderId;
+    review.tipPaymentLink = review.tipPaymentLink || mpPayment?.transaction_details?.external_resource_url || null;
+    review.tipQrCodeText =
+      review.tipQrCodeText || mpPayment?.point_of_interaction?.transaction_data?.qr_code || null;
+    const mpQrBase64 = mpPayment?.point_of_interaction?.transaction_data?.qr_code_base64;
+    if (!review.tipQrCodeBase64 && mpQrBase64) {
+      review.tipQrCodeBase64 = String(mpQrBase64).startsWith('data:image')
+        ? String(mpQrBase64)
+        : `data:image/png;base64,${String(mpQrBase64)}`;
+    }
+    review.tipPaidAt = new Date();
+    return this.orderReviewRepository.saveReview(review);
+  }
+
+  async markTipFailedFromWebhook(reviewId: string, mpPayment: any) {
+    const review = await this.orderReviewRepository.findById(reviewId);
+    if (!review) return null;
+    review.tipStatus = 'FAILED';
+    review.tipProvider = 'MERCADO_PAGO';
+    review.tipProviderId = mpPayment?.id ? String(mpPayment.id) : review.tipProviderId;
+    review.tipPaymentLink = review.tipPaymentLink || mpPayment?.transaction_details?.external_resource_url || null;
+    return this.orderReviewRepository.saveReview(review);
   }
 }

@@ -256,6 +256,14 @@ CREATE TABLE IF NOT EXISTS order_reviews (
   store_tags JSONB NOT NULL DEFAULT '[]'::jsonb,
   delivery_tags JSONB NOT NULL DEFAULT '[]'::jsonb,
   tip_amount NUMERIC(10,2) NOT NULL DEFAULT 0,
+  tip_status TEXT NOT NULL DEFAULT 'NONE',
+  tip_provider TEXT,
+  tip_provider_id TEXT,
+  tip_payment_link TEXT,
+  tip_qr_code_base64 TEXT,
+  tip_qr_code_text TEXT,
+  tip_expires_at TIMESTAMPTZ,
+  tip_paid_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

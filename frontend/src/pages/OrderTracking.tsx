@@ -107,6 +107,7 @@ export function OrderTracking() {
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [reviewState, setReviewState] = useState<any>(null);
   const [reviewError, setReviewError] = useState('');
+  const [tipPixCopied, setTipPixCopied] = useState(false);
   const [reviewForm, setReviewForm] = useState({
     storeRating: 0,
     deliveryRating: 0,
@@ -357,6 +358,35 @@ export function OrderTracking() {
 
   const storeTagOptions = ['Sabor', 'Temperatura', 'Embalagem', 'Custo-benefício'];
   const deliveryTagOptions = ['Rápido', 'Educado', 'Pedido intacto', 'Boa comunicação'];
+  const reviewTip = reviewState?.review || null;
+  const tipStatus = String(reviewTip?.tipStatus || 'NONE').toUpperCase();
+  const tipAmount = Number(reviewTip?.tipAmount || 0);
+  const hasTip = tipAmount > 0;
+  const canShowTipPayment = hasTip && (reviewTip?.tipQrCodeText || reviewTip?.tipPaymentLink);
+  const tipStatusLabel =
+    tipStatus === 'PAID' ? 'Pago' : tipStatus === 'FAILED' ? 'Falhou' : tipStatus === 'PENDING' ? 'Pendente' : 'Sem gorjeta';
+  const tipStatusClass =
+    tipStatus === 'PAID'
+      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+      : tipStatus === 'FAILED'
+      ? 'bg-rose-50 text-rose-700 border-rose-200'
+      : tipStatus === 'PENDING'
+      ? 'bg-amber-50 text-amber-700 border-amber-200'
+      : 'bg-slate-50 text-slate-500 border-slate-200';
+
+  const refreshReviewStatus = async () => {
+    if (!order?.id) return;
+    try {
+      setReviewLoading(true);
+      const payload = await orderService.getReviewByOrder(order.id);
+      setReviewState(payload || null);
+    } catch (error: any) {
+      setReviewError(error?.message || 'Não foi possível atualizar status da gorjeta.');
+    } finally {
+      setReviewLoading(false);
+    }
+  };
+
   const toggleTag = (type: 'storeTags' | 'deliveryTags', value: string) => {
     setReviewForm((prev) => {
       const current = Array.isArray(prev[type]) ? prev[type] : [];
@@ -1206,7 +1236,66 @@ export function OrderTracking() {
 
                           {reviewError ? <p className="text-xs text-rose-600 font-semibold">{reviewError}</p> : null}
                           {reviewState?.review ? (
-                            <p className="text-xs text-emerald-700 font-semibold">Avaliação registrada. Obrigado!</p>
+                            <div className="space-y-2">
+                              <p className="text-xs text-emerald-700 font-semibold">Avaliação registrada. Obrigado!</p>
+                              {canShowTipPayment ? (
+                                <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 space-y-2">
+                                  <div className="flex items-center justify-between gap-2">
+                                    <span className="text-xs font-semibold text-slate-700">
+                                      Gorjeta: {formatCurrency(tipAmount)}
+                                    </span>
+                                    <span className={`text-[10px] font-semibold px-2 py-1 rounded-full border ${tipStatusClass}`}>
+                                      {tipStatusLabel}
+                                    </span>
+                                  </div>
+                                  {reviewTip?.tipQrCodeBase64 ? (
+                                    <div className="flex items-center justify-center">
+                                      <img
+                                        src={reviewTip.tipQrCodeBase64}
+                                        alt="QR Code da gorjeta"
+                                        className="w-40 h-40 rounded-xl bg-white border border-slate-200 object-contain"
+                                      />
+                                    </div>
+                                  ) : null}
+                                  {reviewTip?.tipQrCodeText ? (
+                                    <button
+                                      type="button"
+                                      onClick={async () => {
+                                        try {
+                                          await navigator.clipboard.writeText(String(reviewTip.tipQrCodeText || ''));
+                                          setTipPixCopied(true);
+                                          window.setTimeout(() => setTipPixCopied(false), 2000);
+                                        } catch (error) {
+                                          console.error('Falha ao copiar PIX da gorjeta', error);
+                                        }
+                                      }}
+                                      className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+                                    >
+                                      {tipPixCopied ? 'Copiado!' : 'Copiar Pix da gorjeta'}
+                                    </button>
+                                  ) : null}
+                                  {reviewTip?.tipPaymentLink ? (
+                                    <a
+                                      href={String(reviewTip.tipPaymentLink)}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-center text-xs font-semibold text-slate-700 hover:bg-slate-100"
+                                    >
+                                      Abrir link de pagamento
+                                    </a>
+                                  ) : null}
+                                  {tipStatus !== 'PAID' ? (
+                                    <button
+                                      type="button"
+                                      onClick={refreshReviewStatus}
+                                      className="w-full rounded-lg bg-slate-900 px-3 py-2 text-xs font-bold text-white"
+                                    >
+                                      Atualizar status da gorjeta
+                                    </button>
+                                  ) : null}
+                                </div>
+                              ) : null}
+                            </div>
                           ) : (
                             <button
                               type="button"

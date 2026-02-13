@@ -440,6 +440,38 @@ export async function runMigrations() {
     CREATE INDEX IF NOT EXISTS idx_order_reviews_created_at ON order_reviews(created_at DESC);
   `);
   await AppDataSource.query(`
+    ALTER TABLE IF EXISTS order_reviews
+    ADD COLUMN IF NOT EXISTS tip_status TEXT NOT NULL DEFAULT 'NONE';
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS order_reviews
+    ADD COLUMN IF NOT EXISTS tip_provider TEXT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS order_reviews
+    ADD COLUMN IF NOT EXISTS tip_provider_id TEXT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS order_reviews
+    ADD COLUMN IF NOT EXISTS tip_payment_link TEXT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS order_reviews
+    ADD COLUMN IF NOT EXISTS tip_qr_code_base64 TEXT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS order_reviews
+    ADD COLUMN IF NOT EXISTS tip_qr_code_text TEXT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS order_reviews
+    ADD COLUMN IF NOT EXISTS tip_expires_at TIMESTAMPTZ;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS order_reviews
+    ADD COLUMN IF NOT EXISTS tip_paid_at TIMESTAMPTZ;
+  `);
+  await AppDataSource.query(`
     CREATE TABLE IF NOT EXISTS motoboy_stores (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
       motoboy_id UUID NOT NULL REFERENCES motoboys(id) ON DELETE CASCADE,

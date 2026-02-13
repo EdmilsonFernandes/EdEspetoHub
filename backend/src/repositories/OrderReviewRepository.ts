@@ -29,6 +29,11 @@ export class OrderReviewRepository {
     });
   }
 
+  findById(id: string) {
+    if (!id) return Promise.resolve(null);
+    return this.repository.findOne({ where: { id } });
+  }
+
   async saveReview(input: Partial<OrderReview>) {
     const existing = input.orderId ? await this.findByOrderId(input.orderId) : null;
     if (existing) {

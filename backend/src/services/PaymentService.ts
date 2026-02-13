@@ -26,6 +26,7 @@ import { EmailService } from './EmailService';
 import { logger } from '../utils/logger';
 import { AppError } from '../errors/AppError';
 import { DeliveryBillingService } from './DeliveryBillingService';
+import { OrderReviewService } from './OrderReviewService';
 /**
  * Provides PaymentService functionality.
  *
@@ -37,6 +38,7 @@ export class PaymentService {
   private paymentEventRepository = new PaymentEventRepository();
   private emailService = new EmailService();
   private deliveryBillingService = new DeliveryBillingService();
+  private orderReviewService = new OrderReviewService();
   private log = logger.child({ scope: 'PaymentService' });
   /**
    * Handles normalize qr code.
@@ -321,6 +323,15 @@ export class PaymentService {
           await this.deliveryBillingService.markPaidFromWebhook(cycleId, mpPayment);
         } else {
           await this.deliveryBillingService.markFailedFromWebhook(cycleId, mpPayment);
+        }
+        return { status: mpPayment.status };
+      }
+      if (paymentId.startsWith('review_tip:')) {
+        const reviewId = paymentId.replace('review_tip:', '');
+        if (mpPayment.status === 'approved') {
+          await this.orderReviewService.markTipPaidFromWebhook(reviewId, mpPayment);
+        } else {
+          await this.orderReviewService.markTipFailedFromWebhook(reviewId, mpPayment);
         }
         return { status: mpPayment.status };
       }

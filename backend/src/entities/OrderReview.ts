@@ -74,6 +74,30 @@ export class OrderReview {
   @Column('decimal', { name: 'tip_amount', precision: 10, scale: 2, default: 0 })
   tipAmount!: number;
 
+  @Column({ name: 'tip_status', type: 'varchar', default: 'NONE' })
+  tipStatus!: 'NONE' | 'PENDING' | 'PAID' | 'FAILED';
+
+  @Column({ name: 'tip_provider', type: 'varchar', nullable: true })
+  tipProvider?: string | null;
+
+  @Column({ name: 'tip_provider_id', type: 'varchar', nullable: true })
+  tipProviderId?: string | null;
+
+  @Column({ name: 'tip_payment_link', type: 'text', nullable: true })
+  tipPaymentLink?: string | null;
+
+  @Column({ name: 'tip_qr_code_base64', type: 'text', nullable: true })
+  tipQrCodeBase64?: string | null;
+
+  @Column({ name: 'tip_qr_code_text', type: 'text', nullable: true })
+  tipQrCodeText?: string | null;
+
+  @Column({ name: 'tip_expires_at', type: 'timestamptz', nullable: true })
+  tipExpiresAt?: Date | null;
+
+  @Column({ name: 'tip_paid_at', type: 'timestamptz', nullable: true })
+  tipPaidAt?: Date | null;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 
