@@ -34,6 +34,7 @@ import { AdminLayout } from '../layouts/AdminLayout';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { AdaptiveAvatar } from '../components/common/AdaptiveAvatar';
 import { PremiumTabs } from '../components/common/PremiumTabs';
+import { FormSection } from '../components/common/FormSection';
 
 const STORAGE_KEY = 'superAdminToken';
 const STORAGE_USER_KEY = 'superAdminUser';
@@ -1499,11 +1500,13 @@ export function SuperAdmin() {
           </p>
         </div>
 
-        <div
-          id="stores"
-          className={`bg-gradient-to-br from-indigo-50/60 via-white to-white border border-indigo-100 rounded-2xl p-4 shadow-sm overflow-x-auto ${
+        <FormSection
+          title="Lojas e performance"
+          variant="primary"
+          className={`bg-gradient-to-br from-indigo-50/60 via-white to-white border-indigo-100 overflow-x-auto ${
             activeSection !== 'stores' ? 'hidden' : ''
           }`}
+          contentClassName="space-y-3"
         >
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
@@ -1637,13 +1640,15 @@ export function SuperAdmin() {
           ) : (
             <div className="text-sm text-slate-500">Tabela ocultada.</div>
           )}
-        </div>
+        </FormSection>
 
-        <div
-          id="payments"
-          className={`bg-gradient-to-br from-emerald-50/40 via-white to-white border border-emerald-100 rounded-2xl p-4 shadow-sm overflow-x-auto ${
+        <FormSection
+          title="Pagamentos recentes"
+          variant="success"
+          className={`bg-gradient-to-br from-emerald-50/40 via-white to-white border-emerald-100 overflow-x-auto ${
             activeSection !== 'payments' ? 'hidden' : ''
           }`}
+          contentClassName="space-y-3"
         >
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
@@ -1883,13 +1888,15 @@ export function SuperAdmin() {
           ) : (
             <div className="text-sm text-slate-500">Tabela de pagamentos oculta.</div>
           )}
-        </div>
+        </FormSection>
 
-        <div
-          id="logs"
-          className={`bg-gradient-to-br from-slate-50 via-white to-white border border-slate-200 rounded-2xl p-4 shadow-sm overflow-x-auto ${
+        <FormSection
+          title="Logs de acesso"
+          variant="neutral"
+          className={`bg-gradient-to-br from-slate-50 via-white to-white overflow-x-auto ${
             activeSection !== 'logs' ? 'hidden' : ''
           }`}
+          contentClassName="space-y-3"
         >
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
@@ -2041,13 +2048,15 @@ export function SuperAdmin() {
           ) : (
             <div className="text-sm text-slate-500">Logs ocultos.</div>
           )}
-        </div>
+        </FormSection>
 
-        <div
-          id="events"
-          className={`bg-gradient-to-br from-blue-50/50 via-white to-white border border-blue-100 rounded-2xl p-4 shadow-sm overflow-x-auto ${
+        <FormSection
+          title="Eventos de pagamento"
+          variant="primary"
+          className={`bg-gradient-to-br from-blue-50/50 via-white to-white border-blue-100 overflow-x-auto ${
             activeSection !== 'events' ? 'hidden' : ''
           }`}
+          contentClassName="space-y-3"
         >
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
@@ -2181,13 +2190,15 @@ export function SuperAdmin() {
           ) : (
             <div className="text-sm text-slate-500">Eventos ocultos.</div>
           )}
-        </div>
+        </FormSection>
 
-        <div
-          id="kyc"
-          className={`bg-gradient-to-br from-violet-50/40 via-white to-white border border-violet-100 rounded-2xl p-4 shadow-sm ${
+        <FormSection
+          title="KYC (motoboys)"
+          variant="warning"
+          className={`bg-gradient-to-br from-violet-50/40 via-white to-white border-violet-100 ${
             activeSection !== 'kyc' ? 'hidden' : ''
           }`}
+          contentClassName="space-y-3"
         >
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
@@ -2526,7 +2537,7 @@ export function SuperAdmin() {
           ) : (
             <div className="text-sm text-slate-500">KYC oculto.</div>
           )}
-        </div>
+        </FormSection>
 
       {selectedEventPayload && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
