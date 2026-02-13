@@ -53,6 +53,7 @@ export function MotoboyProfile() {
   const [cameraDocType, setCameraDocType] = useState<string | null>(null);
   const [preview, setPreview] = useState<{ title: string; src: string | null } | null>(null);
   const [showRequestBlockedModal, setShowRequestBlockedModal] = useState(false);
+  const [activeSection, setActiveSection] = useState<'profile' | 'documents' | 'stores' | 'notifications'>('profile');
   // Face verification is an internal signal; keep UI friendly (no raw status/reason for motoboys).
   const [notifyOrders, setNotifyOrders] = useState(() => {
     const raw = localStorage.getItem('motoboy:notify_orders');
@@ -920,6 +921,35 @@ export function MotoboyProfile() {
         }}
       />
 
+      <div className="rounded-2xl border border-slate-200 bg-white p-2 shadow-[0_22px_48px_-40px_rgba(15,23,42,0.45)]">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          {[
+            { id: 'profile', label: 'Perfil' },
+            { id: 'documents', label: 'Documentos' },
+            { id: 'stores', label: 'Lojas' },
+            { id: 'notifications', label: 'Notificações' },
+          ].map((tab) => {
+            const isActive = activeSection === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveSection(tab.id as any)}
+                className={[
+                  'btn-press rounded-xl px-3 py-2.5 text-sm font-extrabold border transition',
+                  isActive
+                    ? 'bg-slate-900 text-white border-slate-900'
+                    : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50',
+                ].join(' ')}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {activeSection === 'notifications' && (
       <div className="premium-card-glass p-4 space-y-3 motoboy-fade-up" style={{ animationDelay: '40ms' }}>
         <div>
           <p className="text-sm font-extrabold text-slate-900">Notificações</p>
@@ -958,6 +988,7 @@ export function MotoboyProfile() {
           </span>
         </button>
       </div>
+      )}
 
       {blocked && (
         <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
@@ -965,6 +996,7 @@ export function MotoboyProfile() {
         </div>
       )}
 
+      {activeSection === 'documents' && (
       <div className="rounded-3xl border border-slate-200 bg-white p-4 space-y-3">
         <div>
           <div className="flex items-start justify-between gap-3">
@@ -1195,7 +1227,9 @@ export function MotoboyProfile() {
           </div>
         )}
       </div>
+      )}
 
+      {activeSection === 'profile' && (
       <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-3">
         <div>
           <p className="text-sm font-semibold text-slate-700">Perfil do entregador</p>
@@ -1390,7 +1424,9 @@ export function MotoboyProfile() {
           </div>
         )}
       </div>
+      )}
 
+      {activeSection === 'stores' && (
       <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-3">
         <div>
           <p className="text-xs uppercase tracking-[0.28em] text-slate-500 font-extrabold">Lojas</p>
@@ -1647,6 +1683,7 @@ export function MotoboyProfile() {
           ) : null}
         </div>
       </div>
+      )}
     </div>
   );
 }
