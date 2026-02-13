@@ -825,7 +825,7 @@ export const GrillQueue = () => {
           className={`grid gap-3 xl:gap-4 ${
             tvMode
               ? "grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"
-              : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4"
+              : "grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3"
           }`}
         >
           {productionQueue.map((order, index) => {
@@ -1419,7 +1419,7 @@ export const GrillQueue = () => {
               className={`grid gap-3 xl:gap-4 ${
                 tvMode
                   ? "grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"
-                  : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4"
+                  : "grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3"
               }`}
             >
               {inRouteQueue.map((order) => (
