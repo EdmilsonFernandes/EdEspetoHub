@@ -32,6 +32,7 @@ import { useToast } from '../contexts/ToastContext';
 import { AuthLayout } from '../layouts/AuthLayout';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
+import { AdaptiveAvatar } from '../components/common/AdaptiveAvatar';
 
 const STORAGE_KEY = 'superAdminToken';
 const STORAGE_USER_KEY = 'superAdminUser';
@@ -115,16 +116,14 @@ const faceScoreLabel = (score: unknown) => {
 };
 
 const KycAvatar = ({ name, profileImageUrl }: { name?: string; profileImageUrl?: string }) => {
-  const initials = String(name || 'M').trim().slice(0, 1).toUpperCase();
-  const imageUrl = profileImageUrl ? resolveAssetUrl(profileImageUrl) : '';
   return (
-    <div className="h-12 w-12 rounded-full border border-slate-200 bg-white overflow-hidden grid place-items-center text-slate-500 font-black text-sm shrink-0 shadow-[0_18px_32px_-22px_rgba(15,23,42,0.45)]">
-      {imageUrl ? (
-        <img src={imageUrl} alt={name || 'Motoboy'} className="h-full w-full object-cover object-[center_22%]" loading="lazy" />
-      ) : (
-        <span>{initials}</span>
-      )}
-    </div>
+    <AdaptiveAvatar
+      src={profileImageUrl ? resolveAssetUrl(profileImageUrl) : ''}
+      alt={name || 'Motoboy'}
+      fallbackText={String(name || 'M')}
+      sizeClassName="h-12 w-12"
+      containerClassName="shadow-[0_18px_32px_-22px_rgba(15,23,42,0.45)]"
+    />
   );
 };
 

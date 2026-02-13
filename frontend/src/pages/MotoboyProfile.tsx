@@ -8,6 +8,7 @@ import { CameraCaptureModal } from '../components/Motoboy/CameraCaptureModal';
 import { DocPreviewModal } from '../components/Motoboy/DocPreviewModal';
 import { formatMotoboyAccountStatus } from '../utils/motoboyStatus';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
+import { AdaptiveAvatar } from '../components/common/AdaptiveAvatar';
 
 const faceReasonLabel = (reason?: string | null) => {
   const code = String(reason || '').trim().toLowerCase();
@@ -1292,18 +1293,15 @@ export function MotoboyProfile() {
         </div>
         <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-slate-100/80 px-3 py-3 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.35)]">
           <div className="flex items-center gap-3">
-            <button
-              type="button"
+            <AdaptiveAvatar
+              src={profileImagePreview}
+              alt="Foto do entregador"
+              fallbackText={String(profile?.user?.fullName || 'E')}
+              sizeClassName="h-20 w-20"
               onClick={() => profileImagePreview && setPreview({ title: 'Foto do entregador', src: profileImagePreview })}
-              className="h-20 w-20 rounded-full border border-slate-200 bg-white overflow-hidden grid place-items-center text-slate-500 font-black text-lg shrink-0 shadow-[0_18px_32px_-22px_rgba(15,23,42,0.55)]"
               title={profileImagePreview ? 'Ampliar foto' : 'Sem foto cadastrada'}
-            >
-              {profileImagePreview ? (
-                <img src={profileImagePreview} alt="Foto do entregador" className="h-full w-full object-cover object-[center_22%] bg-slate-100" />
-              ) : (
-                <span>{String(profile?.user?.fullName || 'E').trim().slice(0, 1).toUpperCase()}</span>
-              )}
-            </button>
+              containerClassName="text-lg shadow-[0_18px_32px_-22px_rgba(15,23,42,0.55)]"
+            />
             <label className="text-xs text-slate-600 font-semibold">
               Foto do perfil (opcional)
               <input

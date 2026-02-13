@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { motoboyAdminService } from '../services/motoboyAdminService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
+import { AdaptiveAvatar } from '../components/common/AdaptiveAvatar';
 
 export function AdminMotoboys() {
   const { auth } = useAuth();
@@ -911,17 +912,13 @@ export function AdminMotoboys() {
                 >
                 <div className="flex items-center justify-between">
                   <div className="flex items-start gap-3 min-w-0">
-                    <div className="h-14 w-14 rounded-full border border-slate-200 bg-gradient-to-br from-slate-50 to-white overflow-hidden grid place-items-center text-slate-800 font-black shrink-0 shadow-[0_18px_32px_-22px_rgba(15,23,42,0.55)]">
-                      {request.motoboyUser?.profileImageUrl ? (
-                        <img
-                          src={resolveAssetUrl(request.motoboyUser.profileImageUrl)}
-                          alt={request.motoboyUser?.fullName || 'Entregador'}
-                          className="h-full w-full object-cover object-[center_22%]"
-                        />
-                      ) : (
-                        String(request?.motoboyUser?.fullName || 'E').trim().slice(0, 1).toUpperCase()
-                      )}
-                    </div>
+                    <AdaptiveAvatar
+                      src={request.motoboyUser?.profileImageUrl ? resolveAssetUrl(request.motoboyUser.profileImageUrl) : ''}
+                      alt={request.motoboyUser?.fullName || 'Entregador'}
+                      fallbackText={String(request?.motoboyUser?.fullName || 'E')}
+                      sizeClassName="h-14 w-14"
+                      containerClassName="text-slate-800 bg-gradient-to-br from-slate-50 to-white shadow-[0_18px_32px_-22px_rgba(15,23,42,0.55)]"
+                    />
                     <div className="min-w-0">
                     <p className="text-sm font-black text-slate-900">
                       {request.motoboyUser?.fullName || 'Entregador'}
@@ -1095,20 +1092,13 @@ export function AdminMotoboys() {
               >
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div className="flex items-start gap-3 min-w-0">
-                    <div className="h-14 w-14 rounded-full border border-slate-200 bg-gradient-to-br from-slate-50 to-white grid place-items-center text-slate-800 font-black shrink-0 shadow-[0_18px_32px_-22px_rgba(15,23,42,0.55)]">
-                      {link.motoboyUser?.profileImageUrl ? (
-                        <img
-                          src={resolveAssetUrl(link.motoboyUser.profileImageUrl)}
-                          alt={link.motoboyUser?.fullName || 'Entregador'}
-                          className="h-full w-full object-cover object-[center_22%]"
-                        />
-                      ) : (
-                        String(link?.motoboyUser?.fullName || 'E')
-                          .trim()
-                          .slice(0, 1)
-                          .toUpperCase()
-                      )}
-                    </div>
+                    <AdaptiveAvatar
+                      src={link.motoboyUser?.profileImageUrl ? resolveAssetUrl(link.motoboyUser.profileImageUrl) : ''}
+                      alt={link.motoboyUser?.fullName || 'Entregador'}
+                      fallbackText={String(link?.motoboyUser?.fullName || 'E')}
+                      sizeClassName="h-14 w-14"
+                      containerClassName="text-slate-800 bg-gradient-to-br from-slate-50 to-white shadow-[0_18px_32px_-22px_rgba(15,23,42,0.55)]"
+                    />
                     <div className="min-w-0">
                       <p className="text-sm font-black text-slate-900 break-words">
                       {link.motoboyUser?.fullName || 'Entregador'}
