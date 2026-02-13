@@ -706,6 +706,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     paidTipOrders: 0,
     pendingTipOrders: 0,
     avgTipAmount: 0,
+    payoutPendingAmount: 0,
+    payoutPendingCount: 0,
+    payoutPaidAmount: 0,
+    payoutPaidCount: 0,
   });
   const prevTabRef = useRef(activeTab);
 
@@ -767,9 +771,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     const loadReviewsSummary = async () => {
       setReviewsLoading(true);
       try {
-        const [summary, reviews] = await Promise.all([
+        const [summary, reviews, payouts] = await Promise.all([
           orderService.getReviewSummaryByStore(storeId),
           orderService.listReviewsByStore(storeId, 300),
+          orderService.listTipPayoutsByStore(storeId, 300).catch(() => []),
         ]);
         if (!active) return;
         setReviewsSummary(summary || null);
@@ -781,6 +786,11 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         const pendingAmount = pendingRows.reduce((acc: number, r: any) => acc + Number(r?.tipAmount ?? r?.tip_amount ?? 0), 0);
         const tipOrders = tipRows.length;
         const avgTipAmount = tipOrders > 0 ? (paidAmount + pendingAmount) / tipOrders : 0;
+        const payoutRows = Array.isArray(payouts) ? payouts : [];
+        const payoutPendingRows = payoutRows.filter((r: any) => String(r?.tipPayoutStatus || '').toUpperCase() !== 'PAID');
+        const payoutPaidRows = payoutRows.filter((r: any) => String(r?.tipPayoutStatus || '').toUpperCase() === 'PAID');
+        const payoutPendingAmount = payoutPendingRows.reduce((acc: number, r: any) => acc + Number(r?.tipAmount || 0), 0);
+        const payoutPaidAmount = payoutPaidRows.reduce((acc: number, r: any) => acc + Number(r?.tipAmount || 0), 0);
         setTipsOverview({
           paidAmount,
           pendingAmount,
@@ -788,6 +798,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
           paidTipOrders: paidRows.length,
           pendingTipOrders: pendingRows.length,
           avgTipAmount,
+          payoutPendingAmount,
+          payoutPendingCount: payoutPendingRows.length,
+          payoutPaidAmount,
+          payoutPaidCount: payoutPaidRows.length,
         });
       } catch {
         if (!active) return;
@@ -799,6 +813,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
           paidTipOrders: 0,
           pendingTipOrders: 0,
           avgTipAmount: 0,
+          payoutPendingAmount: 0,
+          payoutPendingCount: 0,
+          payoutPaidAmount: 0,
+          payoutPaidCount: 0,
         });
       } finally {
         if (active) setReviewsLoading(false);
@@ -1174,9 +1192,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                   if (!storeId) return;
                   setReviewsLoading(true);
                   try {
-                    const [summary, reviews] = await Promise.all([
+                    const [summary, reviews, payouts] = await Promise.all([
                       orderService.getReviewSummaryByStore(storeId),
                       orderService.listReviewsByStore(storeId, 300),
+                      orderService.listTipPayoutsByStore(storeId, 300).catch(() => []),
                     ]);
                     setReviewsSummary(summary || null);
                     const reviewRows = Array.isArray(reviews) ? reviews : [];
@@ -1187,6 +1206,11 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                     const pendingAmount = pendingRows.reduce((acc: number, r: any) => acc + Number(r?.tipAmount ?? r?.tip_amount ?? 0), 0);
                     const tipOrders = tipRows.length;
                     const avgTipAmount = tipOrders > 0 ? (paidAmount + pendingAmount) / tipOrders : 0;
+                    const payoutRows = Array.isArray(payouts) ? payouts : [];
+                    const payoutPendingRows = payoutRows.filter((r: any) => String(r?.tipPayoutStatus || '').toUpperCase() !== 'PAID');
+                    const payoutPaidRows = payoutRows.filter((r: any) => String(r?.tipPayoutStatus || '').toUpperCase() === 'PAID');
+                    const payoutPendingAmount = payoutPendingRows.reduce((acc: number, r: any) => acc + Number(r?.tipAmount || 0), 0);
+                    const payoutPaidAmount = payoutPaidRows.reduce((acc: number, r: any) => acc + Number(r?.tipAmount || 0), 0);
                     setTipsOverview({
                       paidAmount,
                       pendingAmount,
@@ -1194,6 +1218,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                       paidTipOrders: paidRows.length,
                       pendingTipOrders: pendingRows.length,
                       avgTipAmount,
+                      payoutPendingAmount,
+                      payoutPendingCount: payoutPendingRows.length,
+                      payoutPaidAmount,
+                      payoutPaidCount: payoutPaidRows.length,
                     });
                   } finally {
                     setReviewsLoading(false);
@@ -1206,7 +1234,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
               </button>
             }
           >
-            <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
+            <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-6">
               <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
                 <div className="text-[11px] text-slate-500">Nota da loja</div>
                 <div className="text-lg font-black text-slate-900">
@@ -1233,9 +1261,14 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                 <div className="text-[11px] text-emerald-700/80">{tipsOverview.paidTipOrders} pagamento(s)</div>
               </div>
               <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2">
-                <div className="text-[11px] text-amber-700">Gorjetas pendentes</div>
+                <div className="text-[11px] text-amber-700">Gorjetas pendentes (cliente)</div>
                 <div className="text-lg font-black text-amber-700">{formatCurrency(tipsOverview.pendingAmount || 0)}</div>
                 <div className="text-[11px] text-amber-700/80">{tipsOverview.pendingTipOrders} pendente(s)</div>
+              </div>
+              <div className="rounded-xl border border-orange-200 bg-orange-50 px-3 py-2">
+                <div className="text-[11px] text-orange-700">Repasse pendente (motoboy)</div>
+                <div className="text-lg font-black text-orange-700">{formatCurrency(tipsOverview.payoutPendingAmount || 0)}</div>
+                <div className="text-[11px] text-orange-700/80">{tipsOverview.payoutPendingCount} aguardando repasse</div>
               </div>
               <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
                 <div className="text-[11px] text-slate-500">Ticket médio gorjeta</div>
