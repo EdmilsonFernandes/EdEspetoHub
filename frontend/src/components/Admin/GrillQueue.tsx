@@ -699,7 +699,7 @@ export const GrillQueue = () => {
       <div className={`flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between ${tvMode ? "" : "rounded-2xl border border-slate-200 bg-white px-3 py-3"}`}>
         <div className={`flex flex-wrap items-center gap-2 font-semibold ${tvMode ? "text-white" : "text-slate-800"}`}>
           <ChefHat className={tvMode ? "text-white" : "text-brand-primary"} weight="duotone" />
-          Fila de Produção
+          Fila da Cozinha
           <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${tvMode ? "bg-white/15 text-white" : "bg-orange-100 text-orange-700 border border-orange-200"}`}>
             {productionQueue.length} pedidos
           </span>
@@ -719,7 +719,7 @@ export const GrillQueue = () => {
           {!tvMode && (
             <div className="flex flex-wrap gap-2 order-2 sm:order-none">
               {[
-                { id: 'queue', label: 'Produção', count: productionQueue.length },
+                { id: 'queue', label: 'Cozinha', count: productionQueue.length },
                 { id: 'inroute', label: 'Em rota', count: inRouteQueue.length },
                 { id: 'completed', label: 'Finalizados hoje', count: completedToday.length },
               ].map((tab) => (
