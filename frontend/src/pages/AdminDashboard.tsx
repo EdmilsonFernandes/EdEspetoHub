@@ -697,6 +697,16 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   const [navPulse, setNavPulse] = useState<string | null>(null);
   const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
   const [pendingMotoboyRequests, setPendingMotoboyRequests] = useState(0);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [reviewsSummary, setReviewsSummary] = useState<any | null>(null);
+  const [tipsOverview, setTipsOverview] = useState({
+    paidAmount: 0,
+    pendingAmount: 0,
+    tipOrders: 0,
+    paidTipOrders: 0,
+    pendingTipOrders: 0,
+    avgTipAmount: 0,
+  });
   const prevTabRef = useRef(activeTab);
 
   const mobilePrimaryTabs = [
@@ -749,6 +759,55 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       }
     };
     loadRequests();
+  }, [storeId]);
+
+  useEffect(() => {
+    if (!storeId) return;
+    let active = true;
+    const loadReviewsSummary = async () => {
+      setReviewsLoading(true);
+      try {
+        const [summary, reviews] = await Promise.all([
+          orderService.getReviewSummaryByStore(storeId),
+          orderService.listReviewsByStore(storeId, 300),
+        ]);
+        if (!active) return;
+        setReviewsSummary(summary || null);
+        const reviewRows = Array.isArray(reviews) ? reviews : [];
+        const tipRows = reviewRows.filter((r: any) => Number(r?.tipAmount ?? r?.tip_amount ?? 0) > 0);
+        const paidRows = tipRows.filter((r: any) => String(r?.tipStatus ?? r?.tip_status ?? '').toUpperCase() === 'PAID');
+        const pendingRows = tipRows.filter((r: any) => String(r?.tipStatus ?? r?.tip_status ?? '').toUpperCase() === 'PENDING');
+        const paidAmount = paidRows.reduce((acc: number, r: any) => acc + Number(r?.tipAmount ?? r?.tip_amount ?? 0), 0);
+        const pendingAmount = pendingRows.reduce((acc: number, r: any) => acc + Number(r?.tipAmount ?? r?.tip_amount ?? 0), 0);
+        const tipOrders = tipRows.length;
+        const avgTipAmount = tipOrders > 0 ? (paidAmount + pendingAmount) / tipOrders : 0;
+        setTipsOverview({
+          paidAmount,
+          pendingAmount,
+          tipOrders,
+          paidTipOrders: paidRows.length,
+          pendingTipOrders: pendingRows.length,
+          avgTipAmount,
+        });
+      } catch {
+        if (!active) return;
+        setReviewsSummary(null);
+        setTipsOverview({
+          paidAmount: 0,
+          pendingAmount: 0,
+          tipOrders: 0,
+          paidTipOrders: 0,
+          pendingTipOrders: 0,
+          avgTipAmount: 0,
+        });
+      } finally {
+        if (active) setReviewsLoading(false);
+      }
+    };
+    loadReviewsSummary();
+    return () => {
+      active = false;
+    };
   }, [storeId]);
   useEffect(() => {
     if ((location.state as any)?.activeTab === 'fila') {
@@ -1103,16 +1162,104 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       ) : null}
 
       {activeTab === 'resumo' && (
-        <DashboardView
-          orders={orders}
-          customers={customers}
-          setupChecklist={setupChecklist}
-          storeUrl={storeUrl}
-          storeName={storeName}
-          storeLogo={brandingDraft.logoUrl}
-          storeDescription={brandingDraft.description}
-          linkStats={linkStats}
-        />
+        <div className="space-y-4">
+          <FormSection
+            title="Avaliações e gorjetas"
+            subtitle="Indicadores rápidos para acompanhar qualidade e repasse."
+            variant="success"
+            actions={
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!storeId) return;
+                  setReviewsLoading(true);
+                  try {
+                    const [summary, reviews] = await Promise.all([
+                      orderService.getReviewSummaryByStore(storeId),
+                      orderService.listReviewsByStore(storeId, 300),
+                    ]);
+                    setReviewsSummary(summary || null);
+                    const reviewRows = Array.isArray(reviews) ? reviews : [];
+                    const tipRows = reviewRows.filter((r: any) => Number(r?.tipAmount ?? r?.tip_amount ?? 0) > 0);
+                    const paidRows = tipRows.filter((r: any) => String(r?.tipStatus ?? r?.tip_status ?? '').toUpperCase() === 'PAID');
+                    const pendingRows = tipRows.filter((r: any) => String(r?.tipStatus ?? r?.tip_status ?? '').toUpperCase() === 'PENDING');
+                    const paidAmount = paidRows.reduce((acc: number, r: any) => acc + Number(r?.tipAmount ?? r?.tip_amount ?? 0), 0);
+                    const pendingAmount = pendingRows.reduce((acc: number, r: any) => acc + Number(r?.tipAmount ?? r?.tip_amount ?? 0), 0);
+                    const tipOrders = tipRows.length;
+                    const avgTipAmount = tipOrders > 0 ? (paidAmount + pendingAmount) / tipOrders : 0;
+                    setTipsOverview({
+                      paidAmount,
+                      pendingAmount,
+                      tipOrders,
+                      paidTipOrders: paidRows.length,
+                      pendingTipOrders: pendingRows.length,
+                      avgTipAmount,
+                    });
+                  } finally {
+                    setReviewsLoading(false);
+                  }
+                }}
+                disabled={reviewsLoading}
+                className="btn-press rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-700 disabled:opacity-60"
+              >
+                {reviewsLoading ? 'Atualizando...' : 'Atualizar'}
+              </button>
+            }
+          >
+            <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
+              <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+                <div className="text-[11px] text-slate-500">Nota da loja</div>
+                <div className="text-lg font-black text-slate-900">
+                  {Number(reviewsSummary?.summary?.store_avg_rating || 0).toFixed(1)} ★
+                </div>
+                <div className="text-[11px] text-slate-500">
+                  {Number(reviewsSummary?.summary?.total_reviews || 0)} avaliações
+                  {Number(reviewsSummary?.summary?.total_reviews || 0) < 10 ? ' · amostra baixa' : ''}
+                </div>
+              </div>
+              <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+                <div className="text-[11px] text-slate-500">Nota da entrega</div>
+                <div className="text-lg font-black text-slate-900">
+                  {Number(reviewsSummary?.summary?.delivery_avg_rating || 0).toFixed(1)} ★
+                </div>
+                <div className="text-[11px] text-slate-500">
+                  {Number(reviewsSummary?.summary?.total_delivery_reviews || 0)} avaliações
+                  {Number(reviewsSummary?.summary?.total_delivery_reviews || 0) < 10 ? ' · amostra baixa' : ''}
+                </div>
+              </div>
+              <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2">
+                <div className="text-[11px] text-emerald-700">Gorjetas pagas</div>
+                <div className="text-lg font-black text-emerald-700">{formatCurrency(tipsOverview.paidAmount || 0)}</div>
+                <div className="text-[11px] text-emerald-700/80">{tipsOverview.paidTipOrders} pagamento(s)</div>
+              </div>
+              <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2">
+                <div className="text-[11px] text-amber-700">Gorjetas pendentes</div>
+                <div className="text-lg font-black text-amber-700">{formatCurrency(tipsOverview.pendingAmount || 0)}</div>
+                <div className="text-[11px] text-amber-700/80">{tipsOverview.pendingTipOrders} pendente(s)</div>
+              </div>
+              <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+                <div className="text-[11px] text-slate-500">Ticket médio gorjeta</div>
+                <div className="text-lg font-black text-slate-900">{formatCurrency(tipsOverview.avgTipAmount || 0)}</div>
+                <div className="text-[11px] text-slate-500">
+                  {Number(reviewsSummary?.summary?.total_delivery_reviews || 0) > 0
+                    ? `${((tipsOverview.tipOrders / Number(reviewsSummary?.summary?.total_delivery_reviews || 1)) * 100).toFixed(1)}% dos pedidos avaliados`
+                    : 'Sem base de comparação'}
+                </div>
+              </div>
+            </div>
+          </FormSection>
+
+          <DashboardView
+            orders={orders}
+            customers={customers}
+            setupChecklist={setupChecklist}
+            storeUrl={storeUrl}
+            storeName={storeName}
+            storeLogo={brandingDraft.logoUrl}
+            storeDescription={brandingDraft.description}
+            linkStats={linkStats}
+          />
+        </div>
       )}
 
       <div className="pb-24 sm:pb-0">
