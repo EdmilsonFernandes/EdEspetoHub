@@ -15,7 +15,7 @@ import {
   MapPinLine,
   Clock
 } from "@phosphor-icons/react";
-import { formatCurrency, formatPhoneInput } from "../../utils/format";
+import { formatCurrency } from "../../utils/format";
 import { getPaymentMethodMeta } from "../../utils/paymentAssets";
 import { GoogleRouteMapView } from "../GoogleRouteMapView";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
@@ -50,6 +50,13 @@ const formatLocalPhoneNumber = (value = "") => {
   if (digits.length <= 4) return digits;
   if (digits.length <= 8) return `${digits.slice(0, 4)}-${digits.slice(4)}`;
   return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+};
+
+const buildPhoneFromParts = (ddd = "", local = "") => {
+  const safeDdd = String(ddd || "").replace(/\D/g, "").slice(0, 2);
+  const localDigits = String(local || "").replace(/\D/g, "").slice(0, 9);
+  if (!safeDdd || !localDigits) return "";
+  return `(${safeDdd}) ${formatLocalPhoneNumber(localDigits)}`;
 };
 
 export const CartView = ({
@@ -145,13 +152,7 @@ export const CartView = ({
   const syncPhone = (nextDdd: string, nextLocal: string) => {
     const safeDdd = BRAZIL_DDDS.includes(nextDdd) ? nextDdd : "";
     const localDigits = (nextLocal || "").replace(/\D/g, "").slice(0, 9);
-    const formatted = localDigits
-      ? safeDdd
-        ? formatPhoneInput(localDigits, safeDdd)
-        : formatPhoneInput(localDigits)
-      : safeDdd
-      ? formatPhoneInput("", safeDdd)
-      : "";
+    const formatted = buildPhoneFromParts(safeDdd, localDigits);
     onChangeCustomer({ ...customer, phone: formatted });
   };
 
@@ -193,7 +194,12 @@ export const CartView = ({
           (entry) => normalizeText(entry.name) === normalized
         );
         if (match?.phone) {
-          next.phone = formatPhoneInput(match.phone);
+          const parts = extractPhoneParts(match.phone || "");
+          const safeDdd = BRAZIL_DDDS.includes(parts.ddd) ? parts.ddd : "";
+          const safeLocal = String(parts.localNumber || "").replace(/\D/g, "").slice(0, 9);
+          setSelectedDdd(safeDdd);
+          setLocalPhoneDigits(safeLocal);
+          next.phone = buildPhoneFromParts(safeDdd, safeLocal);
         }
       }
     }
@@ -204,10 +210,15 @@ export const CartView = ({
   };
 
   const handleSelectCustomer = (entry) => {
+    const parts = extractPhoneParts(entry.phone || "");
+    const safeDdd = BRAZIL_DDDS.includes(parts.ddd) ? parts.ddd : "";
+    const safeLocal = String(parts.localNumber || "").replace(/\D/g, "").slice(0, 9);
+    setSelectedDdd(safeDdd);
+    setLocalPhoneDigits(safeLocal);
     onChangeCustomer({
       ...customer,
       name: entry.name,
-      phone: formatPhoneInput(entry.phone || ""),
+      phone: buildPhoneFromParts(safeDdd, safeLocal),
     });
     setSuggestionsOpen(false);
   };

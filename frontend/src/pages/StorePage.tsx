@@ -11,7 +11,7 @@ import { MenuView } from '../components/Client/MenuView';
 import { CartView } from '../components/Client/CartView';
 import { SuccessView } from '../components/Client/SuccessView';
 import { useToast } from '../contexts/ToastContext';
-import { formatCurrency, formatOrderDisplayId, formatPaymentMethod, formatPhoneInput } from '../utils/format';
+import { formatCurrency, formatOrderDisplayId, formatPaymentMethod } from '../utils/format';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getPersistedBranding, brandingStorageKey, defaultBranding, initialCustomer, defaultPaymentMethod, WHATSAPP_NUMBER, PIX_KEY } from '../constants';
 import { formatOpeningHoursSummary, isStoreOpenNow, normalizeOpeningHours } from '../utils/storeHours';
@@ -709,9 +709,7 @@ export function StorePage() {
     );
 
     const phoneFromMatch = !nextCustomer.phone && matchedCustomer?.phone ? matchedCustomer.phone : nextCustomer.phone;
-    const formattedPhone = formatPhoneInput(phoneFromMatch);
-
-    const updatedCustomer = { ...nextCustomer, phone: formattedPhone };
+    const updatedCustomer = { ...nextCustomer, phone: phoneFromMatch || '' };
     if (!user?.token && nextCustomer.type === 'table') {
       setLastPublicOrderId('');
       if (storeSlug) {
