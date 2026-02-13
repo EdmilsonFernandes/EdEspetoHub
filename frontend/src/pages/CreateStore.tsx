@@ -7,6 +7,37 @@ import { BILLING_OPTIONS, PLAN_TIERS, getPlanName, resolveAnnualPromoTotal, reso
 import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
 import { formatPhoneInput } from '../utils/format';
 
+const BRAZIL_DDDS = [
+  '11', '12', '13', '14', '15', '16', '17', '18', '19',
+  '21', '22', '24', '27', '28',
+  '31', '32', '33', '34', '35', '37', '38',
+  '41', '42', '43', '44', '45', '46', '47', '48', '49',
+  '51', '53', '54', '55',
+  '61', '62', '63', '64', '65', '66', '67', '68', '69',
+  '71', '73', '74', '75', '77', '79',
+  '81', '82', '83', '84', '85', '86', '87', '88', '89',
+  '91', '92', '93', '94', '95', '96', '97', '98', '99',
+];
+
+const extractPhoneParts = (value = '') => {
+  const raw = String(value || '').trim();
+  const digits = raw.replace(/\D/g, '');
+  const hasPrefix = /^\(\d{2}\)/.test(raw);
+  const ddd = hasPrefix ? digits.slice(0, 2) : '';
+  const hasValidDdd = BRAZIL_DDDS.includes(ddd);
+  return {
+    ddd: hasValidDdd ? ddd : '',
+    localNumber: hasValidDdd ? digits.slice(2, 11) : digits.slice(0, 9),
+  };
+};
+
+const formatLocalPhoneNumber = (value = '') => {
+  const digits = value.replace(/\D/g, '').slice(0, 9);
+  if (digits.length <= 4) return digits;
+  if (digits.length <= 8) return `${digits.slice(0, 4)}-${digits.slice(4)}`;
+  return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+};
+
 export function CreateStore() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -67,6 +98,7 @@ export function CreateStore() {
       },
     ],
   });
+  const storePhoneParts = extractPhoneParts(registerForm.phone || '');
 
   const convertFileToBase64 = (file: File) =>
     new Promise<string>((resolve, reject) =>
@@ -173,7 +205,7 @@ export function CreateStore() {
     return `${digits.slice(0, 5)}-${digits.slice(5)}`;
   };
 
-  const handleCepLookup = async (cepValue?: string, forceOverwrite = false) => {
+  const handleCepLookup = async (cepValue?: string) => {
     const rawCep = (cepValue ?? registerForm.cep).replace(/\D/g, '');
     if (rawCep.length !== 8) return;
     setIsCepLoading(true);
@@ -188,11 +220,11 @@ export function CreateStore() {
       setRegisterForm((prev) => ({
         ...prev,
         cep: normalizeCep(rawCep),
-        street: forceOverwrite ? (data.logradouro || '') : (prev.street || data.logradouro || ''),
-        neighborhood: forceOverwrite ? (data.bairro || '') : (prev.neighborhood || data.bairro || ''),
-        city: forceOverwrite ? (data.localidade || '') : (prev.city || data.localidade || ''),
-        state: forceOverwrite ? (data.uf || '') : (prev.state || data.uf || ''),
-        complement: forceOverwrite ? (data.complemento || '') : (prev.complement || data.complemento || ''),
+        street: data.logradouro || '',
+        neighborhood: data.bairro || '',
+        city: data.localidade || '',
+        state: data.uf || '',
+        complement: data.complemento || '',
       }));
     } catch (error) {
       setCepError('Não foi possível consultar o CEP agora.');
@@ -414,6 +446,33 @@ export function CreateStore() {
   };
 
   const storeSlugPreview = slugify(registerForm.storeName || '');
+  const handleCreateStorePhoneLocalChange = (value: string) => {
+    const digits = value.replace(/\D/g, '').slice(0, 11);
+    const canAutoExtractDdd = !storePhoneParts.ddd;
+    const extractedHasDdd =
+      canAutoExtractDdd && digits.length >= 10 && BRAZIL_DDDS.includes(digits.slice(0, 2));
+    const resolvedDdd = extractedHasDdd ? digits.slice(0, 2) : storePhoneParts.ddd;
+    const localDigits = extractedHasDdd ? digits.slice(2, 11) : digits.slice(0, 9);
+    const formatted = localDigits
+      ? resolvedDdd
+        ? formatPhoneInput(localDigits, resolvedDdd)
+        : formatPhoneInput(localDigits)
+      : '';
+    setRegisterForm((prev) => ({ ...prev, phone: formatted }));
+  };
+
+  const handleCreateStorePhoneDddChange = (ddd: string) => {
+    const safeDdd = BRAZIL_DDDS.includes(ddd) ? ddd : '';
+    const localDigits = storePhoneParts.localNumber;
+    const formatted = localDigits
+      ? safeDdd
+        ? formatPhoneInput(localDigits, safeDdd)
+        : formatPhoneInput(localDigits)
+      : safeDdd
+      ? formatPhoneInput('', safeDdd)
+      : '';
+    setRegisterForm((prev) => ({ ...prev, phone: formatted }));
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -500,12 +559,28 @@ export function CreateStore() {
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-gray-700">Telefone</label>
-                    <input
-                      value={registerForm.phone}
-                      onChange={(e) => setRegisterForm((prev) => ({ ...prev, phone: formatPhoneInput(e.target.value) }))}
-                      className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
-                      placeholder="(12) 99999-9999"
-                    />
+                    <div className="grid grid-cols-[120px_1fr] gap-2">
+                      <select
+                        value={storePhoneParts.ddd || ''}
+                        onChange={(e) => handleCreateStorePhoneDddChange(e.target.value)}
+                        className="w-full border border-gray-200 rounded-xl p-3 text-sm font-semibold focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
+                      >
+                        <option value="" disabled>
+                          DDD
+                        </option>
+                        {BRAZIL_DDDS.map((ddd) => (
+                          <option key={ddd} value={ddd}>
+                            {ddd}
+                          </option>
+                        ))}
+                      </select>
+                      <input
+                        value={formatLocalPhoneNumber(storePhoneParts.localNumber)}
+                        onChange={(e) => handleCreateStorePhoneLocalChange(e.target.value)}
+                        className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
+                        placeholder="99999-9999"
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -589,14 +664,14 @@ export function CreateStore() {
                           required
                           value={registerForm.cep}
                           onChange={(e) => setRegisterForm((prev) => ({ ...prev, cep: normalizeCep(e.target.value) }))}
-                          onBlur={(e) => handleCepLookup(e.target.value, false)}
+                          onBlur={(e) => handleCepLookup(e.target.value)}
                           disabled={isCepLoading}
                           className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
                           placeholder="00000-000"
                         />
                         <button
                           type="button"
-                          onClick={() => handleCepLookup(registerForm.cep, true)}
+                          onClick={() => handleCepLookup(registerForm.cep)}
                           disabled={isCepLoading}
                           className="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         >
