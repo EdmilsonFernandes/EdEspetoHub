@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Eye, EyeSlash, Lightning, SignIn } from '@phosphor-icons/react';
+import { ArrowSquareOut, Eye, EyeSlash, Lightning, SignIn, SignOut, UserCircle } from '@phosphor-icons/react';
 import { authService } from '../services/authService';
 import { useAuth } from '../contexts/AuthContext';
 import { MotoboyHeader } from '../components/Motoboy/MotoboyHeader';
@@ -15,6 +15,20 @@ export function MotoboyLogin() {
   const [resendCooldown, setResendCooldown] = useState(0);
   const { setAuth } = useAuth();
   const navigate = useNavigate();
+  const [persistedSession, setPersistedSession] = useState(() => {
+    try {
+      const raw = localStorage.getItem('motoboySession');
+      const parsed = raw ? JSON.parse(raw) : null;
+      const role = String(parsed?.user?.role || '').toUpperCase();
+      if (!parsed?.token || role !== 'MOTOBOY') return null;
+      return parsed;
+    } catch {
+      return null;
+    }
+  });
+  const sessionName = String(persistedSession?.user?.fullName || persistedSession?.user?.name || '').trim();
+  const sessionEmail = String(persistedSession?.user?.email || '').trim();
+  const alreadyLoggedIn = Boolean(persistedSession?.token && sessionEmail);
 
   useEffect(() => {
     const raw = localStorage.getItem('motoboy:last_email');
@@ -86,24 +100,76 @@ export function MotoboyLogin() {
     }
   };
 
+  const handleLogout = () => {
+    try {
+      localStorage.removeItem('motoboySession');
+    } catch {
+      // ignore
+    }
+    try {
+      setAuth(null);
+    } catch {
+      // ignore
+    }
+    setPersistedSession(null);
+  };
+
   return (
     <div className="min-h-screen motoboy-bg px-4 py-6 sm:py-10">
-      <div className="max-w-md mx-auto space-y-5">
+      <div className="max-w-lg mx-auto space-y-5">
         <MotoboyHeader title="Entrar" subtitle="Acesse suas entregas em segundos." />
 
-        <div className="premium-card-glass p-5 sm:p-6 space-y-4 motoboy-fade-up" style={{ animationDelay: '40ms' }}>
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Area do Entregador</p>
-              <h2 className="text-xl font-black text-slate-900">Bem-vindo de volta</h2>
-              <p className="text-sm text-slate-600 mt-1">
-                Entre para ver a fila, iniciar rota e finalizar entregas.
-              </p>
+        {alreadyLoggedIn ? (
+          <div className="premium-card-glass p-5 sm:p-6 space-y-4 motoboy-fade-up" style={{ animationDelay: '20ms' }}>
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Sessão ativa</p>
+                <h2 className="text-xl font-black text-slate-900">Você já está logado</h2>
+                <p className="text-sm text-slate-600 mt-1">Continue para a área do entregador ou troque de conta.</p>
+              </div>
+              <div className="h-11 w-11 rounded-2xl bg-white/70 border border-slate-200 flex items-center justify-center text-slate-700 shadow-sm">
+                <UserCircle size={22} weight="duotone" />
+              </div>
             </div>
-            <div className="h-11 w-11 rounded-2xl bg-white/70 border border-slate-200 flex items-center justify-center text-slate-700 shadow-sm">
-              <SignIn size={22} weight="duotone" />
+            <div className="rounded-2xl border border-slate-200 bg-white/75 px-4 py-3">
+              <div className="text-sm font-black text-slate-900 break-words">{sessionName || 'Entregador'}</div>
+              <div className="text-xs text-slate-500 break-all">{sessionEmail}</div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <button
+                type="button"
+                onClick={() => navigate('/motoboy/home')}
+                className="btn-press w-full rounded-xl bg-[linear-gradient(120deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_60%,#f59e0b))] px-4 py-3 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(239,68,68,0.85)] flex items-center justify-center gap-2"
+              >
+                <ArrowSquareOut size={18} weight="duotone" />
+                Ir para painel
+              </button>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="btn-press w-full rounded-xl border border-slate-200 bg-white/70 px-4 py-3 text-sm font-extrabold text-slate-800 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)] flex items-center justify-center gap-2"
+              >
+                <SignOut size={18} weight="duotone" />
+                Entrar com outra conta
+              </button>
             </div>
           </div>
+        ) : null}
+
+        {!alreadyLoggedIn ? (
+          <div className="premium-card-glass p-5 sm:p-6 space-y-4 motoboy-fade-up" style={{ animationDelay: '40ms' }}>
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Area do Entregador</p>
+                <h2 className="text-xl font-black text-slate-900">Bem-vindo de volta</h2>
+                <p className="text-sm text-slate-600 mt-1">
+                  Entre para ver a fila, iniciar rota e finalizar entregas.
+                </p>
+              </div>
+              <div className="h-11 w-11 rounded-2xl bg-white/70 border border-slate-200 flex items-center justify-center text-slate-700 shadow-sm">
+                <SignIn size={22} weight="duotone" />
+              </div>
+            </div>
 
           {error && (
             <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 font-semibold">
@@ -172,32 +238,33 @@ export function MotoboyLogin() {
               </div>
             </label>
 
-            <button
-              type="submit"
-              disabled={!formValid || loading}
-              className="btn-press w-full rounded-xl bg-[linear-gradient(120deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_60%,#f59e0b))] px-4 py-3 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(239,68,68,0.85)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              <Lightning size={18} weight="duotone" />
-              {loading ? 'Entrando...' : 'Entrar'}
-            </button>
+              <button
+                type="submit"
+                disabled={!formValid || loading}
+                className="btn-press w-full rounded-xl bg-[linear-gradient(120deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_60%,#f59e0b))] px-4 py-3 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(239,68,68,0.85)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                <Lightning size={18} weight="duotone" />
+                {loading ? 'Entrando...' : 'Entrar'}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => navigate('/motoboy/register')}
+                className="btn-press w-full rounded-xl border border-slate-200 bg-white/70 px-4 py-3 text-sm font-extrabold text-slate-800 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)]"
+              >
+                Criar conta de entregador
+              </button>
+            </form>
 
             <button
               type="button"
-              onClick={() => navigate('/motoboy/register')}
-              className="btn-press w-full rounded-xl border border-slate-200 bg-white/70 px-4 py-3 text-sm font-extrabold text-slate-800 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)]"
+              onClick={() => navigate('/')}
+              className="w-full text-center text-xs font-semibold text-slate-500 underline hover:no-underline"
             >
-              Criar conta de entregador
+              Voltar para o site
             </button>
-          </form>
-
-          <button
-            type="button"
-            onClick={() => navigate('/')}
-            className="w-full text-center text-xs font-semibold text-slate-500 underline hover:no-underline"
-          >
-            Voltar para o site
-          </button>
-        </div>
+          </div>
+        ) : null}
       </div>
     </div>
   );

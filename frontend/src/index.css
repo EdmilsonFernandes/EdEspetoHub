@@ -291,7 +291,7 @@
     gap: 0.65rem;
   }
 
-  @media (min-width: 640px) {
+  @media (min-width: 768px) {
     .motoboy-header-grid {
       grid-template-columns: minmax(0, 1fr) auto;
       align-items: end;
