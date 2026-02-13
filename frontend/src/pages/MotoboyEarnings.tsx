@@ -129,11 +129,11 @@ export function MotoboyEarnings() {
         </div>
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 flex items-center justify-between">
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-emerald-700">Gorjetas (30 dias)</p>
+            <p className="text-xs uppercase tracking-[0.2em] text-emerald-700">Gorjetas confirmadas (30 dias)</p>
             <p className="text-2xl font-black text-emerald-700 mt-2">
               {totalTipsMonth.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
             </p>
-            <p className="text-xs text-emerald-700/80 mt-1">{tipPayouts.length} gorjeta(s) pagas por cliente</p>
+            <p className="text-xs text-emerald-700/80 mt-1">{tipPayouts.length} gorjeta(s) confirmada(s) pelo cliente</p>
           </div>
           <div className="h-12 w-12 rounded-2xl bg-white/80 text-emerald-700 flex items-center justify-center">
             <Wallet size={22} weight="duotone" />
@@ -146,7 +146,7 @@ export function MotoboyEarnings() {
               {totalTipsPending.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
             </p>
             <p className="text-xs text-amber-700/80 mt-1">
-              Pendente • {totalTipsPaid.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} já repassado
+              Aguardando repasse • {totalTipsPaid.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} já repassado ao entregador
             </p>
           </div>
           <div className="h-12 w-12 rounded-2xl bg-white/80 text-amber-700 flex items-center justify-center">
