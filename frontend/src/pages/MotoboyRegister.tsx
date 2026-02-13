@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, UserPlus } from '@phosphor-icons/react';
 import { authService } from '../services/authService';
 import { useToast } from '../contexts/ToastContext';
@@ -72,7 +72,9 @@ const hasValidPhone = (value = '') => {
 
 export function MotoboyRegister() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { showToast } = useToast();
+  const inviteStoreSlug = new URLSearchParams(location.search).get('storeSlug') || '';
   const [form, setForm] = useState({
     fullName: '',
     email: '',
@@ -147,6 +149,9 @@ export function MotoboyRegister() {
         lgpdAccepted: form.lgpdAccepted,
       });
       showToast('Cadastro criado. Verifique seu e-mail.', 'success');
+      if (inviteStoreSlug) {
+        localStorage.setItem('motoboy:invite_store_slug', inviteStoreSlug);
+      }
       if (form.email) {
         localStorage.setItem('signupEmail', form.email.trim().toLowerCase());
       }
@@ -194,6 +199,12 @@ export function MotoboyRegister() {
               <UserPlus size={22} weight="duotone" />
             </div>
           </div>
+
+          {inviteStoreSlug ? (
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-800">
+              Convite recebido da loja <span className="font-extrabold">{inviteStoreSlug}</span>. Após validar seu cadastro, solicite o vínculo desta loja no seu perfil.
+            </div>
+          ) : null}
 
           <form onSubmit={handleSubmit} className="space-y-3">
             <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white/70 px-3 py-2.5">

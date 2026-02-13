@@ -145,7 +145,8 @@ export class OrderReviewRepository {
         r.tip_payout_by_user_id AS "tipPayoutByUserId",
         r.created_at AS "createdAt",
         u.full_name AS "motoboyName",
-        u.profile_image_url AS "motoboyProfileImageUrl"
+        u.profile_image_url AS "motoboyProfileImageUrl",
+        m.pix_key AS "motoboyPixKey"
       FROM order_reviews r
       LEFT JOIN motoboys m ON m.id = r.motoboy_id
       LEFT JOIN users u ON u.id = m.user_id

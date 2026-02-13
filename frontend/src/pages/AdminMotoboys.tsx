@@ -7,6 +7,7 @@ import { orderService } from '../services/orderService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { AdaptiveAvatar } from '../components/common/AdaptiveAvatar';
 import { FormSection } from '../components/common/FormSection';
+import { buildPixPayload } from '../utils/pixPayload';
 
 export function AdminMotoboys() {
   const { auth } = useAuth();
@@ -71,6 +72,15 @@ export function AdminMotoboys() {
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return '-';
     return date.toLocaleString('pt-BR');
+  };
+
+  const copyText = async (value: string, okMessage: string) => {
+    try {
+      await navigator.clipboard.writeText(String(value || ''));
+      showToast(okMessage, 'success');
+    } catch {
+      showToast('Não foi possível copiar.', 'error');
+    }
   };
 
   const normalizeDocType = (value: any) => String(value || '').trim().toUpperCase();
@@ -597,10 +607,14 @@ export function AdminMotoboys() {
   };
 
   const getMotoboyRegisterUrl = () => {
+    const storeSlug = String(auth?.store?.slug || '').trim();
+    const params = new URLSearchParams();
+    if (storeSlug) params.set('storeSlug', storeSlug);
+    const query = params.toString();
     try {
-      return `${window.location.origin}/motoboy/register`;
+      return `${window.location.origin}/motoboy/register${query ? `?${query}` : ''}`;
     } catch {
-      return '/motoboy/register';
+      return `/motoboy/register${query ? `?${query}` : ''}`;
     }
   };
 
@@ -753,6 +767,19 @@ export function AdminMotoboys() {
           <div className="grid gap-2">
             {tipPayoutRows.slice(0, 40).map((row: any, idx: number) => {
               const payoutStatus = String(row?.tipPayoutStatus || '').toUpperCase() === 'PAID' ? 'PAID' : 'PENDING';
+              const pixKey = String(row?.motoboyPixKey || '').trim();
+              const pixPayload = pixKey
+                ? buildPixPayload({
+                    key: pixKey,
+                    name: String(row?.motoboyName || 'MOTOBOY'),
+                    city: 'BRASIL',
+                    amount: Number(row?.tipAmount || 0),
+                    txid: String(row?.orderId || '').slice(0, 25) || 'REPASSE',
+                  })
+                : '';
+              const pixQrUrl = pixPayload
+                ? `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(pixPayload)}`
+                : '';
               return (
                 <div key={String(row?.id || `tip-payout-${idx}`)} className="rounded-2xl border border-slate-200 bg-white px-3 py-2">
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -778,6 +805,45 @@ export function AdminMotoboys() {
                         >
                           Ver comprovante
                         </a>
+                      ) : null}
+                      {payoutStatus !== 'PAID' ? (
+                        <div className="mt-2 rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-2 space-y-2">
+                          <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">PIX do entregador</div>
+                          {pixKey ? (
+                            <>
+                              <div className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-[11px] font-semibold text-slate-700 break-all">
+                                {pixKey}
+                              </div>
+                              <div className="flex flex-wrap gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => void copyText(pixKey, 'Chave PIX copiada.')}
+                                  className="btn-press rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-extrabold text-slate-700"
+                                >
+                                  Copiar chave PIX
+                                </button>
+                                {pixPayload ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => void copyText(pixPayload, 'Código PIX copiado.')}
+                                    className="btn-press rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-extrabold text-slate-700"
+                                  >
+                                    Copiar código PIX
+                                  </button>
+                                ) : null}
+                              </div>
+                              {pixQrUrl ? (
+                                <div className="rounded-lg border border-slate-200 bg-white p-2 inline-flex">
+                                  <img src={pixQrUrl} alt="QR code Pix do repasse" className="h-24 w-24 object-contain" loading="lazy" />
+                                </div>
+                              ) : null}
+                            </>
+                          ) : (
+                            <div className="text-[11px] text-rose-700">
+                              Entregador sem chave PIX cadastrada no perfil.
+                            </div>
+                          )}
+                        </div>
                       ) : null}
                     </div>
                     <div className="flex items-center gap-2 sm:justify-end">
