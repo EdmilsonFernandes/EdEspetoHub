@@ -262,6 +262,9 @@ export class AuthService
         }
 
         await this.ensurePhoneIsAvailable(manager, userPayload.phone);
+        const profileImageUrl = userPayload.profileImageFile
+          ? await saveBase64Image(userPayload.profileImageFile, `motoboy-${normalizedPhone}`, 'motoboys')
+          : null;
 
         const hashed = await bcrypt.hash(userPayload.password, 10);
         const user = userRepo.create({
@@ -275,6 +278,7 @@ export class AuthService
           termsAcceptedAt: new Date(),
           lgpdAcceptedAt: new Date(),
           userRole: 'MOTOBOY',
+          profileImageUrl: profileImageUrl || undefined,
         });
         await userRepo.save(user);
 

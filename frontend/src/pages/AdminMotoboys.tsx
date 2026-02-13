@@ -3,6 +3,7 @@ import { Car, Camera, CheckCircle, IdentificationCard, WarningCircle, Clock, Use
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { motoboyAdminService } from '../services/motoboyAdminService';
+import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 
 export function AdminMotoboys() {
   const { auth } = useAuth();
@@ -909,7 +910,19 @@ export function AdminMotoboys() {
                   style={{ borderLeftWidth: 6, borderLeftColor: 'rgb(245 158 11)' }}
                 >
                 <div className="flex items-center justify-between">
-                  <div>
+                  <div className="flex items-start gap-3 min-w-0">
+                    <div className="h-12 w-12 rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white overflow-hidden grid place-items-center text-slate-800 font-black shrink-0">
+                      {request.motoboyUser?.profileImageUrl ? (
+                        <img
+                          src={resolveAssetUrl(request.motoboyUser.profileImageUrl)}
+                          alt={request.motoboyUser?.fullName || 'Entregador'}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        String(request?.motoboyUser?.fullName || 'E').trim().slice(0, 1).toUpperCase()
+                      )}
+                    </div>
+                    <div className="min-w-0">
                     <p className="text-sm font-black text-slate-900">
                       {request.motoboyUser?.fullName || 'Entregador'}
                     </p>
@@ -917,6 +930,7 @@ export function AdminMotoboys() {
                     {request.motoboyUser?.phone && (
                       <p className="text-xs text-slate-500">{request.motoboyUser.phone}</p>
                     )}
+                    </div>
                   </div>
                   <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700">
                     {request.status || 'PENDING'}
@@ -1082,10 +1096,18 @@ export function AdminMotoboys() {
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div className="flex items-start gap-3 min-w-0">
                     <div className="h-12 w-12 rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white grid place-items-center text-slate-800 font-black shrink-0">
-                      {String(link?.motoboyUser?.fullName || 'E')
-                        .trim()
-                        .slice(0, 1)
-                        .toUpperCase()}
+                      {link.motoboyUser?.profileImageUrl ? (
+                        <img
+                          src={resolveAssetUrl(link.motoboyUser.profileImageUrl)}
+                          alt={link.motoboyUser?.fullName || 'Entregador'}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        String(link?.motoboyUser?.fullName || 'E')
+                          .trim()
+                          .slice(0, 1)
+                          .toUpperCase()
+                      )}
                     </div>
                     <div className="min-w-0">
                       <p className="text-sm font-black text-slate-900 break-words">

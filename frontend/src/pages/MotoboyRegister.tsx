@@ -83,6 +83,7 @@ export function MotoboyRegister() {
     lgpdAccepted: false,
   });
   const [loading, setLoading] = useState(false);
+  const [profilePreview, setProfilePreview] = useState('');
   const phoneParts = extractPhoneParts(form.phone || '');
   const handleDddChange = (ddd: string) => {
     const safeDdd = BRAZIL_DDDS.includes(ddd) ? ddd : '';
@@ -135,6 +136,7 @@ export function MotoboyRegister() {
           fullName: form.fullName,
           email: form.email,
           phone: form.phone,
+          profileImageFile: profilePreview || undefined,
           documentType: 'CPF',
           document: form.cpf,
           address: form.address,
@@ -164,6 +166,17 @@ export function MotoboyRegister() {
       setLoading(false);
     }
   };
+  const handleProfileUpload = (file?: File | null) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = String(reader.result || '');
+      if (dataUrl.startsWith('data:image/')) {
+        setProfilePreview(dataUrl);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 px-4 py-6 sm:py-10 space-y-6 overflow-x-hidden">
@@ -173,6 +186,24 @@ export function MotoboyRegister() {
           Use um e-mail diferente do cadastro de lojista.
         </div>
         <form onSubmit={handleSubmit} className="space-y-3">
+          <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+            <div className="h-14 w-14 rounded-2xl border border-slate-200 bg-white overflow-hidden grid place-items-center text-slate-500 font-black">
+              {profilePreview ? (
+                <img src={profilePreview} alt="Foto do perfil" className="h-full w-full object-cover" />
+              ) : (
+                <span>{String(form.fullName || 'E').trim().slice(0, 1).toUpperCase()}</span>
+              )}
+            </div>
+            <label className="text-xs text-slate-600 font-semibold">
+              Foto do perfil (opcional)
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(event) => handleProfileUpload(event.target.files?.[0])}
+                className="mt-1 block text-[11px] text-slate-500 file:mr-2 file:rounded-lg file:border-0 file:bg-slate-900 file:px-2.5 file:py-1.5 file:text-[11px] file:font-semibold file:text-white"
+              />
+            </label>
+          </div>
           <input
             type="text"
             placeholder="Nome completo"

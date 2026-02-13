@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS users (
   document TEXT,
   document_type TEXT,
   address TEXT,
+  profile_image_url TEXT,
   user_role TEXT NOT NULL DEFAULT 'STORE_OWNER',
   terms_accepted_at TIMESTAMPTZ,
   lgpd_accepted_at TIMESTAMPTZ,

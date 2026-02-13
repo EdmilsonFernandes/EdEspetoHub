@@ -207,6 +207,7 @@ export class MotoboyController {
                 fullName: link.motoboy.user.fullName,
                 email: link.motoboy.user.email,
                 phone: link.motoboy.user.phone,
+                profileImageUrl: link.motoboy.user.profileImageUrl || null,
               }
             : null,
           motoboyProfile: link.motoboy
@@ -580,6 +581,7 @@ export class MotoboyController {
                 fullName: request.motoboy.user.fullName,
                 email: request.motoboy.user.email,
                 phone: request.motoboy.user.phone,
+                profileImageUrl: request.motoboy.user.profileImageUrl || null,
               }
             : null,
         }))

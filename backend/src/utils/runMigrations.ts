@@ -200,6 +200,10 @@ export async function runMigrations() {
     ADD COLUMN IF NOT EXISTS user_role TEXT NOT NULL DEFAULT 'STORE_OWNER';
   `);
   await AppDataSource.query(`
+    ALTER TABLE IF EXISTS users
+    ADD COLUMN IF NOT EXISTS profile_image_url TEXT;
+  `);
+  await AppDataSource.query(`
     UPDATE users
     SET user_role = 'STORE_OWNER'
     WHERE user_role IS NULL

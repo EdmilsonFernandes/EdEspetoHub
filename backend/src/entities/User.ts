@@ -49,6 +49,9 @@ export class User {
   @Column({ nullable: true })
   address?: string;
 
+  @Column({ name: 'profile_image_url', nullable: true })
+  profileImageUrl?: string;
+
   @Column({ name: 'terms_accepted_at', type: 'timestamptz', nullable: true })
   termsAcceptedAt?: Date;
 
