@@ -10,6 +10,7 @@ import { formatMotoboyAccountStatus } from '../utils/motoboyStatus';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { AdaptiveAvatar } from '../components/common/AdaptiveAvatar';
 import { PremiumTabs } from '../components/common/PremiumTabs';
+import { FormSection } from '../components/common/FormSection';
 
 const faceReasonLabel = (reason?: string | null) => {
   const code = String(reason || '').trim().toLowerCase();
@@ -941,11 +942,14 @@ export function MotoboyProfile() {
       />
 
       {activeSection === 'notifications' && (
-      <div className="premium-card-glass p-4 space-y-3 motoboy-fade-up" style={{ animationDelay: '40ms' }}>
-        <div>
-          <p className="text-sm font-extrabold text-slate-900">Notificações</p>
-          <p className="text-xs text-slate-600">Quando entra pedido novo na fila (som e vibração).</p>
-        </div>
+      <div className="motoboy-fade-up" style={{ animationDelay: '40ms' }}>
+        <FormSection
+          title="Notificações"
+          subtitle="Quando entra pedido novo na fila (som e vibração)."
+          variant="neutral"
+          className="premium-card-glass"
+          contentClassName="space-y-3"
+        >
         <button
           type="button"
           onClick={() => {
@@ -978,6 +982,7 @@ export function MotoboyProfile() {
             />
           </span>
         </button>
+        </FormSection>
       </div>
       )}
 
@@ -988,37 +993,36 @@ export function MotoboyProfile() {
       )}
 
       {activeSection === 'documents' && (
-      <div className="rounded-3xl border border-slate-200 bg-white p-4 space-y-3">
-        <div>
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="text-xs uppercase tracking-[0.28em] text-slate-500 font-extrabold">Documentos (KYC)</p>
-              <p className="text-base font-black text-slate-900">Envie e acompanhe</p>
-              <div className="mt-2 flex flex-wrap items-center gap-2">
-                <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border border-slate-200 bg-slate-50 text-slate-700">
-                  {docsProgress.approved}/{docsProgress.total} completos
-                </span>
-                {docsProgress.rejected > 0 ? (
-                  <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border border-rose-200 bg-rose-50 text-rose-800">
-                    {docsProgress.rejected} recusado{docsProgress.rejected === 1 ? '' : 's'}
-                  </span>
-                ) : null}
-                {docsProgress.pending > 0 ? (
-                  <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border border-amber-200 bg-amber-50 text-amber-800">
-                    {docsProgress.pending} em análise
-                  </span>
-                ) : null}
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={refreshDocuments}
-              disabled={refreshingDocs}
-              className="btn-press rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-700 disabled:opacity-60"
-            >
-              {refreshingDocs ? 'Atualizando...' : 'Atualizar'}
-            </button>
-          </div>
+      <FormSection
+        title="Documentos (KYC)"
+        subtitle="Envie e acompanhe"
+        variant="warning"
+        contentClassName="space-y-3"
+        actions={
+          <button
+            type="button"
+            onClick={refreshDocuments}
+            disabled={refreshingDocs}
+            className="btn-press rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-700 disabled:opacity-60"
+          >
+            {refreshingDocs ? 'Atualizando...' : 'Atualizar'}
+          </button>
+        }
+      >
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border border-slate-200 bg-slate-50 text-slate-700">
+            {docsProgress.approved}/{docsProgress.total} completos
+          </span>
+          {docsProgress.rejected > 0 ? (
+            <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border border-rose-200 bg-rose-50 text-rose-800">
+              {docsProgress.rejected} recusado{docsProgress.rejected === 1 ? '' : 's'}
+            </span>
+          ) : null}
+          {docsProgress.pending > 0 ? (
+            <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border border-amber-200 bg-amber-50 text-amber-800">
+              {docsProgress.pending} em análise
+            </span>
+          ) : null}
         </div>
         {faceBanner && (
           <div
@@ -1217,17 +1221,12 @@ export function MotoboyProfile() {
             ) : null}
           </div>
         )}
-      </div>
+      </FormSection>
       )}
 
       {activeSection === 'profile' && (
-      <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-3">
-        <div>
-          <p className="text-sm font-semibold text-slate-700">Perfil do entregador</p>
-          <p className="text-xs text-slate-500">Dados do veículo e região.</p>
-        </div>
-        <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-slate-100/80 px-3 py-3 space-y-2 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.35)]">
-          <p className="text-xs uppercase tracking-[0.22em] text-slate-500 font-extrabold">Dados da conta</p>
+      <FormSection title="Perfil do entregador" subtitle="Dados do veículo e região." variant="primary" contentClassName="space-y-3">
+        <FormSection title="Dados da conta" variant="neutral" contentClassName="space-y-2">
           <div className="grid gap-2 sm:grid-cols-2">
             <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
               <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Nome</p>
@@ -1253,9 +1252,8 @@ export function MotoboyProfile() {
               <p className="text-sm font-semibold text-slate-900 break-words">{profile?.user?.address || '-'}</p>
             </div>
           </div>
-        </div>
-        <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-slate-100/80 px-3 py-3 space-y-2 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.35)]">
-          <p className="text-xs uppercase tracking-[0.22em] text-slate-500 font-extrabold">Dados do entregador</p>
+        </FormSection>
+        <FormSection title="Dados do entregador" variant="neutral" contentClassName="space-y-2">
           <div className="grid gap-2 sm:grid-cols-2">
             <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
               <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Tipo de veículo</p>
@@ -1284,7 +1282,7 @@ export function MotoboyProfile() {
               <p className="text-sm font-semibold text-slate-900 break-all">{profileDraft?.pixKey || '-'}</p>
             </div>
           </div>
-        </div>
+        </FormSection>
         <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-slate-100/80 px-3 py-3 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.35)]">
           <div className="flex items-center gap-3">
             <AdaptiveAvatar
@@ -1486,16 +1484,16 @@ export function MotoboyProfile() {
             })()}
           </div>
         )}
-      </div>
+      </FormSection>
       )}
 
       {activeSection === 'stores' && (
-      <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-3">
-        <div>
-          <p className="text-xs uppercase tracking-[0.28em] text-slate-500 font-extrabold">Lojas</p>
-          <p className="text-base font-black text-slate-900">Vínculos e solicitações</p>
-          <p className="text-xs text-slate-600 mt-0.5">Aqui você vê onde já atende, o que está pendente e novas lojas para solicitar.</p>
-        </div>
+      <FormSection
+        title="Lojas"
+        subtitle="Vínculos e solicitações. Aqui você vê onde já atende, o que está pendente e novas lojas para solicitar."
+        variant="primary"
+        contentClassName="space-y-3"
+      >
 
         {!hasCompleteProfile && (
           <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
@@ -1745,7 +1743,7 @@ export function MotoboyProfile() {
             </button>
           ) : null}
         </div>
-      </div>
+      </FormSection>
       )}
     </div>
   );

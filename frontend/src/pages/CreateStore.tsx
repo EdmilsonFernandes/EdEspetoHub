@@ -6,6 +6,7 @@ import { planService } from '../services/planService';
 import { BILLING_OPTIONS, PLAN_TIERS, getPlanName, resolveAnnualPromoTotal, resolveMonthlyEquivalent } from '../constants/planCatalog';
 import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
 import { formatPhoneInput } from '../utils/format';
+import { FormSection } from '../components/common/FormSection';
 
 const BRAZIL_DDDS = [
   '11', '12', '13', '14', '15', '16', '17', '18', '19',
@@ -513,9 +514,7 @@ export function CreateStore() {
           )}
 
           <form className="space-y-6" onSubmit={handleCreateStore}>
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Informações pessoais</h3>
-              <div className="space-y-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+            <FormSection title="Informações pessoais" variant="primary" contentClassName="space-y-4">
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-gray-700">Nome completo</label>
                   <input
@@ -750,12 +749,10 @@ export function CreateStore() {
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
+            </FormSection>
 
             <div className="pt-6 border-t border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Configurações da loja</h3>
-              <div className="space-y-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+              <FormSection title="Configurações da loja" variant="warning" contentClassName="space-y-4">
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700">Nome da loja</label>
               <input
@@ -935,20 +932,21 @@ export function CreateStore() {
                     </div>
                     <p className="text-xs text-gray-500">Informe apenas as redes que quiser destacar.</p>
                   </div>
-              </div>
+              </FormSection>
             </div>
 
             <div className="pt-6 border-t border-gray-100">
-              <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
-                <h3 className="text-lg font-semibold text-gray-900">Selecione um plano</h3>
-                <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
-                  7 dias grátis
-                </span>
-              </div>
-              <p className="text-sm text-gray-500 mb-4">
-                Comece pelo teste gratuito e escolha o plano ideal depois.
-              </p>
-              <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm space-y-6">
+              <FormSection
+                title="Selecione um plano"
+                subtitle="Comece pelo teste gratuito e escolha o plano ideal depois."
+                variant="success"
+                contentClassName="space-y-6"
+                actions={
+                  <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
+                    7 dias grátis
+                  </span>
+                }
+              >
               <div className="flex items-center justify-center gap-4 mb-6">
                 <span className={`text-sm font-semibold ${!isAnnual ? 'text-gray-900' : 'text-gray-500'}`}>
                   Mensal
@@ -1107,7 +1105,7 @@ export function CreateStore() {
                   </div>
                 </div>
               )}
-              </div>
+              </FormSection>
             </div>
 
             <div ref={termsRef} className="pt-6 border-t border-gray-100 space-y-3">
