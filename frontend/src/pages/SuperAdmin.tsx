@@ -2398,7 +2398,9 @@ export function SuperAdmin() {
                                   <div className="mt-1 text-[11px] text-slate-600">
                                     {isMissing
                                       ? 'Sem revisão recente desse documento'
-                                      : `Face: ${String(face?.scoreLabel || 'indisponivel')} • Score: ${faceScoreLabel(face?.faceMatchScore)}`}
+                                      : String(doc?.docType || '').toUpperCase() === 'SELFIE'
+                                        ? `Face: ${String(face?.scoreLabel || 'indisponivel')} • Score: ${faceScoreLabel(face?.faceMatchScore)}`
+                                        : 'Face: N/A • Score: N/A (apenas SELFIE)'}
                                   </div>
                                 </div>
                               );
@@ -2689,15 +2691,21 @@ export function SuperAdmin() {
                             <div>Revisor usuário: <span className="font-semibold">{String(reviewedByUser)}</span></div>
                           </td>
                           <td className="px-3 py-2 text-[12px] text-slate-700">
-                            <div>Status: <span className="font-semibold">{faceStatusLabel(String(face?.status || '-'))}</span></div>
-                            <div className="flex items-center gap-1.5">
-                              <span>Nível:</span>
-                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${faceTone(faceLabel)}`}>
-                                {faceLabel}
-                              </span>
-                            </div>
-                            <div>Score: <span className="font-semibold">{faceScoreLabel(face?.faceMatchScore)}</span></div>
-                            <div>Motivo: <span className="font-semibold">{faceReasonLabel(String(face?.reason || ''))}</span></div>
+                            {String(doc?.docType || '').toUpperCase() === 'SELFIE' ? (
+                              <>
+                                <div>Status: <span className="font-semibold">{faceStatusLabel(String(face?.status || '-'))}</span></div>
+                                <div className="flex items-center gap-1.5">
+                                  <span>Nível:</span>
+                                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${faceTone(faceLabel)}`}>
+                                    {faceLabel}
+                                  </span>
+                                </div>
+                                <div>Score: <span className="font-semibold">{faceScoreLabel(face?.faceMatchScore)}</span></div>
+                                <div>Motivo: <span className="font-semibold">{faceReasonLabel(String(face?.reason || ''))}</span></div>
+                              </>
+                            ) : (
+                              <div>Face/Score: <span className="font-semibold">N/A (apenas SELFIE)</span></div>
+                            )}
                           </td>
                           <td className="px-3 py-2">
                             <a
