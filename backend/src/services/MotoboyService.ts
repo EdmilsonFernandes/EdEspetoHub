@@ -538,9 +538,18 @@ export class MotoboyService {
         const userDoc = normalizeDocument(String(motoboy.user.document || ''));
         const userDocType = String(motoboy.user.documentType || '').toUpperCase();
         if (!userDoc || !userDocType) {
-          motoboy.user.document = normalizedPixKey;
-          motoboy.user.documentType = 'CPF';
-          await this.userRepository.save(motoboy.user);
+          try {
+            motoboy.user.document = normalizedPixKey;
+            motoboy.user.documentType = 'CPF';
+            await this.userRepository.save(motoboy.user);
+          } catch (error: any) {
+            const code = String(error?.code || error?.driverError?.code || '');
+            // Legacy accounts can already have this CPF on another user.
+            // Keep PIX saved on motoboy profile and avoid blocking the update.
+            if (code !== '23505') {
+              throw error;
+            }
+          }
         }
       }
     }
