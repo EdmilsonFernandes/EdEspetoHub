@@ -33,6 +33,7 @@ import { AuthLayout } from '../layouts/AuthLayout';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { AdaptiveAvatar } from '../components/common/AdaptiveAvatar';
+import { PremiumTabs } from '../components/common/PremiumTabs';
 
 const STORAGE_KEY = 'superAdminToken';
 const STORAGE_USER_KEY = 'superAdminUser';
@@ -1064,36 +1065,19 @@ export function SuperAdmin() {
       </div>
 
       <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3 bg-white/90 backdrop-blur border-b border-slate-200">
-        <div className="rounded-2xl border border-slate-200 bg-gradient-to-r from-white via-slate-50 to-white p-2 shadow-[0_20px_42px_-34px_rgba(15,23,42,0.35)]">
-          <div className="flex flex-wrap gap-2 text-xs font-semibold text-slate-700">
-            {[
-              { id: 'executive', label: 'Resumo' },
-              { id: 'rankings', label: 'Rankings' },
-              { id: 'stores', label: 'Lojas' },
-              { id: 'payments', label: 'Pagamentos' },
-              { id: 'logs', label: 'Logs' },
-              { id: 'events', label: 'Eventos' },
-              { id: 'kyc', label: 'KYC' },
-            ].map((item) => {
-              const isActive = activeSection === item.id;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => setActiveSection(item.id)}
-                  className={`px-3.5 py-2 rounded-xl border transition-all ${
-                    isActive
-                      ? 'border-transparent bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 text-white shadow-[0_16px_30px_-22px_rgba(15,23,42,0.75)]'
-                      : 'border-slate-200 bg-white text-slate-700 hover:-translate-y-0.5 hover:shadow-md'
-                  }`}
-                  aria-current={isActive ? 'true' : 'false'}
-                >
-                  {item.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+        <PremiumTabs
+          items={[
+            { id: 'executive', label: 'Resumo' },
+            { id: 'rankings', label: 'Rankings' },
+            { id: 'stores', label: 'Lojas' },
+            { id: 'payments', label: 'Pagamentos' },
+            { id: 'logs', label: 'Logs' },
+            { id: 'events', label: 'Eventos' },
+            { id: 'kyc', label: 'KYC' },
+          ]}
+          activeId={activeSection}
+          onChange={(id) => setActiveSection(id)}
+        />
       </div>
 
       <div

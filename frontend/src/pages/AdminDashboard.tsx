@@ -23,6 +23,7 @@ import { formatAddress, formatCurrency, formatDateTime, formatOrderDisplayId, fo
 import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { formatSelectedModifiers } from '../utils/productModifiers';
+import { PremiumTabs } from '../components/common/PremiumTabs';
 
 const formatPlanCycle = (days: number) => {
   if (!Number.isFinite(days)) return '—';
@@ -1050,53 +1051,44 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       <style>{`@keyframes navPop{0%{transform:scale(1)}50%{transform:scale(1.08)}100%{transform:scale(1)}}`}</style>
       {menuVisible ? (
         <div className="hidden sm:flex justify-center">
-          <div className="bg-gradient-to-r from-white via-slate-50 to-white rounded-2xl border border-slate-200 p-2 shadow-[0_20px_42px_-34px_rgba(15,23,42,0.35)] flex flex-nowrap gap-2 w-full max-w-6xl overflow-x-auto no-scrollbar">
-          {[
-            { id: 'resumo', label: 'Resumo', shortLabel: 'Resumo', icon: ChartBar },
-            { id: 'pedidos', label: 'Pedidos', shortLabel: 'Pedidos', icon: ShoppingCart },
-            { id: 'produtos', label: 'Produtos', shortLabel: 'Produtos', icon: Package },
-            { id: 'pagamentos', label: 'Pagamentos', shortLabel: 'Pag.', icon: CreditCard },
-            { id: 'cardapio', label: 'Cardápio', shortLabel: 'Cardápio', icon: BookOpen },
-            { id: 'motoboys', label: 'Entregadores', shortLabel: 'Entrega', icon: Scooter },
-            { id: 'config', label: 'Configurações', shortLabel: 'Config', icon: Gear },
-            { id: 'fila', label: 'Fila de Produção', shortLabel: 'Fila', icon: ChefHat },
-          ].map((tab) => {
-            const Icon = tab.icon;
-            const isMotoboy = tab.id === 'motoboys';
-            return (
-              <button
-                key={tab.id}
-                onClick={() => {
-                  if (tab.id === 'cardapio') {
-                    if (storeSlug) navigate(`/${storeSlug}`);
-                    return;
-                  }
-                  setActiveTab(tab.id as typeof activeTab);
-                  setNavPulse(tab.id);
-                  window.setTimeout(() => setNavPulse(null), 260);
-                }}
-                className={`cursor-pointer px-3 sm:px-4 py-2 rounded-xl text-[10px] sm:text-sm font-semibold transition-all active:scale-95 hover:-translate-y-0.5 flex flex-col sm:flex-row items-center gap-1 sm:gap-2 text-center min-w-[104px] border ${
-                  activeTab === tab.id
-                    ? 'bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 text-white border-transparent ring-2 ring-slate-700/25 shadow-[0_16px_30px_-22px_rgba(15,23,42,0.75)]'
-                    : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:text-slate-900 hover:shadow-sm'
-                }`}
-                style={activeTab === tab.id && navPulse === tab.id ? { animation: 'navPop 220ms ease' } : undefined}
-              >
-                <div className="relative">
-                  <Icon size={16} weight="duotone" />
-                  {isMotoboy && pendingMotoboyRequests > 0 && (
+          <PremiumTabs
+            containerClassName="w-full max-w-6xl overflow-x-auto no-scrollbar"
+            listClassName="flex flex-nowrap gap-2 text-xs font-semibold text-slate-700"
+            buttonClassName="cursor-pointer"
+            items={[
+              { id: 'resumo', label: 'Resumo', icon: <ChartBar size={16} weight="duotone" /> },
+              { id: 'pedidos', label: 'Pedidos', icon: <ShoppingCart size={16} weight="duotone" /> },
+              { id: 'produtos', label: 'Produtos', icon: <Package size={16} weight="duotone" /> },
+              { id: 'pagamentos', label: 'Pagamentos', icon: <CreditCard size={16} weight="duotone" /> },
+              { id: 'cardapio', label: 'Cardápio', icon: <BookOpen size={16} weight="duotone" /> },
+              {
+                id: 'motoboys',
+                label: 'Entregadores',
+                icon: <Scooter size={16} weight="duotone" />,
+                badge:
+                  pendingMotoboyRequests > 0 ? (
                     <span className="absolute -top-2 -right-2 rounded-full bg-amber-500 text-white text-[9px] font-semibold px-1.5 py-0.5">
                       {pendingMotoboyRequests}
                     </span>
-                  )}
-                </div>
-                <span className="leading-tight text-center max-w-[90px] sm:max-w-none line-clamp-2">
-                  {tab.label}
-                </span>
-              </button>
-            );
-          })}
-          </div>
+                  ) : null,
+              },
+              { id: 'config', label: 'Configurações', icon: <Gear size={16} weight="duotone" /> },
+              { id: 'fila', label: 'Fila de Produção', icon: <ChefHat size={16} weight="duotone" /> },
+            ]}
+            activeId={activeTab}
+            onChange={(id) => {
+              if (id === 'cardapio') {
+                if (storeSlug) navigate(`/${storeSlug}`);
+                return;
+              }
+              setActiveTab(id as typeof activeTab);
+              setNavPulse(id);
+              window.setTimeout(() => setNavPulse(null), 260);
+            }}
+            getButtonStyle={(item, isActive) =>
+              isActive && navPulse === item.id ? { animation: 'navPop 220ms ease' } : undefined
+            }
+          />
         </div>
       ) : null}
 

@@ -9,6 +9,7 @@ import { DocPreviewModal } from '../components/Motoboy/DocPreviewModal';
 import { formatMotoboyAccountStatus } from '../utils/motoboyStatus';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { AdaptiveAvatar } from '../components/common/AdaptiveAvatar';
+import { PremiumTabs } from '../components/common/PremiumTabs';
 
 const faceReasonLabel = (reason?: string | null) => {
   const code = String(reason || '').trim().toLowerCase();
@@ -922,33 +923,19 @@ export function MotoboyProfile() {
         }}
       />
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-2 shadow-[0_22px_48px_-40px_rgba(15,23,42,0.45)]">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          {[
-            { id: 'profile', label: 'Perfil' },
-            { id: 'documents', label: 'Documentos' },
-            { id: 'stores', label: 'Lojas' },
-            { id: 'notifications', label: 'Notificações' },
-          ].map((tab) => {
-            const isActive = activeSection === tab.id;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveSection(tab.id as any)}
-                className={[
-                  'btn-press rounded-xl px-3 py-2.5 text-sm font-extrabold border transition-all',
-                  isActive
-                    ? 'bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 text-white border-transparent shadow-[0_16px_30px_-22px_rgba(15,23,42,0.75)]'
-                    : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:-translate-y-0.5 hover:shadow-md',
-                ].join(' ')}
-              >
-                {tab.label}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+      <PremiumTabs
+        items={[
+          { id: 'profile', label: 'Perfil' },
+          { id: 'documents', label: 'Documentos' },
+          { id: 'stores', label: 'Lojas' },
+          { id: 'notifications', label: 'Notificações' },
+        ]}
+        activeId={activeSection}
+        onChange={(id) => setActiveSection(id as any)}
+        listClassName="grid grid-cols-2 sm:grid-cols-4"
+        containerClassName="bg-white shadow-[0_22px_48px_-40px_rgba(15,23,42,0.45)]"
+        buttonClassName="btn-press"
+      />
 
       {activeSection === 'notifications' && (
       <div className="premium-card-glass p-4 space-y-3 motoboy-fade-up" style={{ animationDelay: '40ms' }}>
