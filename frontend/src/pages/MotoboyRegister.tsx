@@ -5,7 +5,36 @@ import { useToast } from '../contexts/ToastContext';
 import { MotoboyHeader } from '../components/Motoboy/MotoboyHeader';
 import { formatPhoneInput } from '../utils/format';
 
+const BRAZIL_DDDS = [
+  '11', '12', '13', '14', '15', '16', '17', '18', '19',
+  '21', '22', '24', '27', '28',
+  '31', '32', '33', '34', '35', '37', '38',
+  '41', '42', '43', '44', '45', '46', '47', '48', '49',
+  '51', '53', '54', '55',
+  '61', '62', '63', '64', '65', '66', '67', '68', '69',
+  '71', '73', '74', '75', '77', '79',
+  '81', '82', '83', '84', '85', '86', '87', '88', '89',
+  '91', '92', '93', '94', '95', '96', '97', '98', '99',
+];
+
 const onlyDigits = (value = '') => String(value || '').replace(/\D/g, '');
+const extractPhoneParts = (value = '') => {
+  const raw = String(value || '').trim();
+  const digits = raw.replace(/\D/g, '');
+  const hasPrefix = /^\(\d{2}\)/.test(raw);
+  const ddd = hasPrefix ? digits.slice(0, 2) : '';
+  const hasValidDdd = BRAZIL_DDDS.includes(ddd);
+  return {
+    ddd: hasValidDdd ? ddd : '',
+    localNumber: hasValidDdd ? digits.slice(2, 11) : digits.slice(0, 9),
+  };
+};
+const formatLocalPhoneNumber = (value = '') => {
+  const digits = onlyDigits(value).slice(0, 9);
+  if (digits.length <= 4) return digits;
+  if (digits.length <= 8) return `${digits.slice(0, 4)}-${digits.slice(4)}`;
+  return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+};
 
 const formatCpfInput = (value = '') => {
   const digits = onlyDigits(value).slice(0, 11);
@@ -54,6 +83,27 @@ export function MotoboyRegister() {
     lgpdAccepted: false,
   });
   const [loading, setLoading] = useState(false);
+  const phoneParts = extractPhoneParts(form.phone || '');
+  const handleDddChange = (ddd: string) => {
+    const safeDdd = BRAZIL_DDDS.includes(ddd) ? ddd : '';
+    const formatted = phoneParts.localNumber
+      ? safeDdd
+        ? formatPhoneInput(phoneParts.localNumber, safeDdd)
+        : formatPhoneInput(phoneParts.localNumber)
+      : safeDdd
+      ? formatPhoneInput('', safeDdd)
+      : '';
+    setForm((prev) => ({ ...prev, phone: formatted }));
+  };
+  const handleLocalPhoneChange = (value: string) => {
+    const local = onlyDigits(value).slice(0, 9);
+    const formatted = local
+      ? phoneParts.ddd
+        ? formatPhoneInput(local, phoneParts.ddd)
+        : formatPhoneInput(local)
+      : '';
+    setForm((prev) => ({ ...prev, phone: formatted }));
+  };
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -137,13 +187,31 @@ export function MotoboyRegister() {
             onChange={(e) => setForm({ ...form, email: e.target.value })}
             className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
           />
-          <input
-            type="tel"
-            placeholder="Telefone"
-            value={form.phone}
-            onChange={(e) => setForm({ ...form, phone: formatPhoneInput(e.target.value) })}
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-          />
+          <div className="grid grid-cols-[110px_1fr] gap-2">
+            <select
+              value={phoneParts.ddd || ''}
+              onChange={(e) => handleDddChange(e.target.value)}
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold"
+            >
+              <option value="" disabled>
+                DDD
+              </option>
+              {BRAZIL_DDDS.map((ddd) => (
+                <option key={ddd} value={ddd}>
+                  {ddd}
+                </option>
+              ))}
+            </select>
+            <input
+              type="tel"
+              inputMode="numeric"
+              placeholder={phoneParts.ddd ? '99999-9999' : 'Selecione o DDD'}
+              value={formatLocalPhoneNumber(phoneParts.localNumber)}
+              onChange={(e) => handleLocalPhoneChange(e.target.value)}
+              disabled={!phoneParts.ddd}
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
+            />
+          </div>
           <input
             type="text"
             placeholder="CPF"

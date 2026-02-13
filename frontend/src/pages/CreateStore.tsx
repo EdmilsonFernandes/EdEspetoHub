@@ -447,12 +447,8 @@ export function CreateStore() {
 
   const storeSlugPreview = slugify(registerForm.storeName || '');
   const handleCreateStorePhoneLocalChange = (value: string) => {
-    const digits = value.replace(/\D/g, '').slice(0, 11);
-    const canAutoExtractDdd = !storePhoneParts.ddd;
-    const extractedHasDdd =
-      canAutoExtractDdd && digits.length >= 10 && BRAZIL_DDDS.includes(digits.slice(0, 2));
-    const resolvedDdd = extractedHasDdd ? digits.slice(0, 2) : storePhoneParts.ddd;
-    const localDigits = extractedHasDdd ? digits.slice(2, 11) : digits.slice(0, 9);
+    const localDigits = value.replace(/\D/g, '').slice(0, 9);
+    const resolvedDdd = storePhoneParts.ddd;
     const formatted = localDigits
       ? resolvedDdd
         ? formatPhoneInput(localDigits, resolvedDdd)
@@ -577,8 +573,9 @@ export function CreateStore() {
                       <input
                         value={formatLocalPhoneNumber(storePhoneParts.localNumber)}
                         onChange={(e) => handleCreateStorePhoneLocalChange(e.target.value)}
-                        className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
-                        placeholder="99999-9999"
+                        placeholder={storePhoneParts.ddd ? '99999-9999' : 'Selecione o DDD'}
+                        disabled={!storePhoneParts.ddd}
+                        className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
                       />
                     </div>
                   </div>
