@@ -4,7 +4,7 @@ import { apiClient } from '../config/apiClient';
 
 export function TermsOfUse() {
   const navigate = useNavigate();
-  const platformLogo = '/chama-no-espeto.jpeg';
+  const platformLogo = '/logo.svg';
   const [termsContent, setTermsContent] = useState('');
   const [lgpdContent, setLgpdContent] = useState('');
   const [loading, setLoading] = useState(true);

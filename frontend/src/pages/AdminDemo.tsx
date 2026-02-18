@@ -32,9 +32,9 @@ const formatCategoryLabel = (value = '') => {
 };
 
 const seedProducts = [
-  { id: 'demo-1', name: 'Espetinho de Alcatra', price: 12.9, category: 'espetos', imageUrl: '/chama-no-espeto.jpeg' },
-  { id: 'demo-2', name: 'Espetinho de Frango', price: 9.9, category: 'espetos', imageUrl: '/chama-no-espeto.jpeg' },
-  { id: 'demo-3', name: 'Pão de alho especial', price: 7.5, category: 'porcoes', imageUrl: '/chama-no-espeto.jpeg' },
+  { id: 'demo-1', name: 'Combo executivo', price: 12.9, category: 'espetos', imageUrl: '/marketing/menu-list.png' },
+  { id: 'demo-2', name: 'Lanche artesanal', price: 9.9, category: 'espetos', imageUrl: '/marketing/menu-list.png' },
+  { id: 'demo-3', name: 'Adicional da casa', price: 7.5, category: 'porcoes', imageUrl: '/marketing/menu-list.png' },
 ];
 
 const loadProducts = () => {
@@ -148,7 +148,7 @@ export function AdminDemo() {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between py-3 sm:py-4">
             <button onClick={() => navigate('/')} className="flex items-center gap-3">
               <div className="w-11 h-11 rounded-2xl overflow-hidden shadow-[0_14px_26px_-18px_rgba(239,68,68,0.7)] border border-white bg-white">
-                <img src="/chama-no-espeto.jpeg" alt="Chama no Espeto" className="w-full h-full object-cover" />
+                <img src="/logo.svg" alt="Jano Caminho" className="w-full h-full object-cover" />
               </div>
               <div className="hidden sm:block text-left leading-tight">
                 <p className="text-lg font-black text-gray-900">Admin Demo</p>

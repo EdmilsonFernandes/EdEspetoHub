@@ -215,7 +215,7 @@ export function OrderTracking() {
     navigate(storeHomePath);
   };
   const storeLogo =
-    resolveAssetUrl(order?.store?.settings?.logoUrl) || '/chama-no-espeto.jpeg';
+    resolveAssetUrl(order?.store?.settings?.logoUrl) || '/logo.svg';
   const statusLabel = useMemo(() => {
     if (isDelivery && (deliveryStatus === 'DELIVERED' || status === 'delivered' || status === 'finished')) return 'Entregue';
     if (isDelivery && deliveryStatus === 'IN_TRANSIT') return 'Em rota';

@@ -91,7 +91,7 @@ export function AdminRenewal() {
   };
 
   const expiresLabel = currentEndDate ? new Date(currentEndDate).toLocaleDateString('pt-BR') : '—';
-  const platformLogo = '/chama-no-espeto.jpeg';
+  const platformLogo = '/logo.svg';
   const handleGoToLogin = () => {
     logout();
     navigate('/admin');

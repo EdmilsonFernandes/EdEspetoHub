@@ -9,8 +9,8 @@ export function Hero() {
           <div className="relative p-4 sm:p-6 lg:p-8">
             <div className="overflow-hidden rounded-[24px]">
               <img
-                src="/chama-no-espeto.jpeg"
-                alt="Jano Caminho"
+                src="/marketing/menu-list.png"
+                alt="Jano Caminho - Plataforma de pedidos"
                 className="w-full h-[280px] sm:h-[420px] lg:h-[500px] object-cover object-top opacity-95"
                 style={{ maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%)', WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%)' }}
               />

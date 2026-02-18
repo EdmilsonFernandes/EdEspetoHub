@@ -9,7 +9,7 @@ export function VerifyEmail() {
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const platformLogo = '/chama-no-espeto.jpeg';
+  const platformLogo = '/logo.svg';
 
   const [status, setStatus] = useState('Enviamos um e-mail com o link e o código de ativação.');
   const [error, setError] = useState('');

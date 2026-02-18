@@ -215,7 +215,7 @@ export function StorePage() {
     if (!store) return;
     const name = store.name || store.slug || 'Jano Caminho';
     const description = `Cardápio online e pedidos da loja ${name}.`;
-    const logo = resolveAssetUrl(store.settings?.logoUrl) || '/chama-no-espeto.jpeg';
+    const logo = resolveAssetUrl(store.settings?.logoUrl) || '/logo.svg';
     const url = typeof window !== 'undefined' ? window.location.href : '';
 
     const upsertMeta = (key: string, value: string, attr: 'name' | 'property' = 'name') => {
@@ -1197,7 +1197,7 @@ export function StorePage() {
                     <div className="flex items-center gap-4">
                       <div className="w-16 h-16 rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-white">
                         <img
-                          src={branding?.logoUrl || '/chama-no-espeto.jpeg'}
+                          src={branding?.logoUrl || '/logo.svg'}
                           alt={closedStateStoreName}
                           className="w-full h-full object-cover"
                         />
