@@ -7,7 +7,7 @@ export const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || '55129967
 export const PIX_KEY = import.meta.env.VITE_PIX_KEY || '';
 
 export const defaultBranding = {
-  brandName: 'Chama no Espeto',
+  brandName: 'Jano Caminho',
   espetoId: import.meta.env.VITE_DEFAULT_STORE || 'espetinhodatony',
   logoUrl: '/logo.svg',
   primaryColor: '#b91c1c',

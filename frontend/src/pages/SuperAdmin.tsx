@@ -1015,7 +1015,7 @@ export function SuperAdmin() {
         <div className="absolute right-24 -bottom-20 w-56 h-56 rounded-full bg-emerald-400/10 blur-3xl" />
         <div className="relative flex items-center gap-4">
           <div className="w-12 h-12 rounded-2xl border border-slate-200 bg-white shadow-sm flex items-center justify-center">
-            <img src={platformLogo} alt="Chama no Espeto" className="w-7 h-7 object-contain" />
+            <img src={platformLogo} alt="Jano Caminho" className="w-7 h-7 object-contain" />
           </div>
           <div>
             <div className="flex items-center gap-2">

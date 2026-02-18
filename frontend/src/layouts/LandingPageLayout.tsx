@@ -32,12 +32,12 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
         <div className="h-1 bg-[linear-gradient(90deg,#ef4444,#f97316,#f59e0b)]" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between py-3 sm:py-4">
-            <a href="https://www.chamanoespeto.com.br" className="flex items-center gap-3">
+            <a href="https://www.janocaminho.com.br" className="flex items-center gap-3">
               <div className="h-11 w-11 rounded-2xl bg-white shadow-[0_12px_24px_-16px_rgba(239,68,68,0.8)] ring-1 ring-red-200 overflow-hidden">
-                <img src="/logo.svg" alt="Chama no Espeto" className="h-full w-full object-cover" draggable={false} />
+                <img src="/logo.svg" alt="Jano Caminho" className="h-full w-full object-cover" draggable={false} />
               </div>
               <div className="hidden sm:block leading-tight">
-                <p className="text-xl font-black text-gray-900 dark:text-white">Chama no Espeto</p>
+                <p className="text-xl font-black text-gray-900 dark:text-white">Jano Caminho</p>
                 <p className="text-xs text-slate-500 dark:text-slate-400">Pedidos, produção e vendas em um só lugar</p>
               </div>
             </a>
@@ -177,7 +177,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-3 mb-4">
-                <span className="text-xl font-black text-white">Chama no Espeto</span>
+                <span className="text-xl font-black text-white">Jano Caminho</span>
               </div>
               <p className="text-sm text-gray-400">Plataforma completa para gestão de pedidos e entregas online.</p>
             </div>
@@ -200,14 +200,14 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
             </div>
             <div>
               <h3 className="font-bold text-white mb-3">Contato</h3>
-              <a href="mailto:contato@chamanoespeto.com.br" className="text-sm text-gray-400">
-                contato@chamanoespeto.com.br
+              <a href="mailto:contato@janocaminho.com.br" className="text-sm text-gray-400">
+                contato@janocaminho.com.br
               </a>
             </div>
           </div>
           <div className="border-t border-gray-800 pt-8 text-center text-sm text-gray-500 space-y-1">
             <p>Edmilson Tecnologia da Informacao • CNPJ 44.771.427/0001-69</p>
-            © {new Date().getFullYear()} Chama no Espeto. Todos os direitos reservados.
+            © {new Date().getFullYear()} Jano Caminho. Todos os direitos reservados.
           </div>
         </div>
       </footer>

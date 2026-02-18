@@ -1,7 +1,7 @@
 {
-  "short_name": "Chama no Espeto",
-  "name": "Chama no Espeto - Sistema de Gestão para Espetinhos",
-  "description": "Plataforma completa para gestão de restaurantes de espetinhos com pedidos online e pagamento via Pix",
+  "short_name": "Jano Caminho",
+  "name": "Jano Caminho - Plataforma de Pedidos e Gestão",
+  "description": "Plataforma completa para pedidos online, operacao e entregas de restaurantes, mercados, farmacias, adegas e food trucks",
   "icons": [
     {
       "src": "favicon.svg",

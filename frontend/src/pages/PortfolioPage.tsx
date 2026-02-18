@@ -768,7 +768,7 @@ export function PortfolioPage() {
             <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
               {filteredStores.map((store) => {
                 const logo = resolveAssetUrl(store?.settings?.logoUrl || undefined);
-                const description = store?.settings?.description || "Loja ativa no Chama no Espeto.";
+                const description = store?.settings?.description || "Loja ativa no Jano Caminho.";
                 const primary = store?.settings?.primaryColor || "#dc2626";
                 const secondary = store?.settings?.secondaryColor || "#111827";
                 const slug = store?.slug || "";
@@ -921,7 +921,7 @@ export function PortfolioPage() {
                 Nosso time
               </p>
               <h2 className="text-2xl sm:text-4xl font-black text-slate-900">
-                Perfis de alto nivel por tras do Chama no Espeto
+                Perfis de alto nivel por tras do Jano Caminho
               </h2>
               <p className="text-sm text-slate-600">
                 Estrutura enxuta, stack moderna e foco em entrega rápida com qualidade de produto.

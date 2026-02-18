@@ -28,7 +28,7 @@ export function DemoTour({ open, onClose }: Props) {
         description:
           'O cliente escolhe, finaliza o pedido e envia para você. Tudo organizado e pronto para produzir.',
         ctaLabel: 'Abrir cardápio demo',
-        action: () => navigate('/chamanoespeto/demo'),
+        action: () => navigate('/janocaminho/demo'),
         icon: ShoppingCart,
         highlight: 'Fluxo do cliente',
       },
@@ -113,7 +113,7 @@ export function DemoTour({ open, onClose }: Props) {
             <div className="rounded-3xl border border-gray-100 dark:border-gray-800 bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-950 p-6">
               <div className="flex items-center justify-between">
                 <span className="text-xs uppercase tracking-[0.3em] text-red-500 font-bold">{active.highlight}</span>
-                <span className="text-xs text-gray-400">Chama no Espeto</span>
+                <span className="text-xs text-gray-400">Jano Caminho</span>
               </div>
               <div className="mt-6 grid sm:grid-cols-2 gap-4">
                 <div className="rounded-2xl border border-gray-200 dark:border-gray-800 p-4 bg-white/80 dark:bg-gray-900/60">

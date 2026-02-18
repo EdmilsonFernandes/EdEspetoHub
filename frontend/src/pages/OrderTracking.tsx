@@ -192,7 +192,7 @@ export function OrderTracking() {
   const deliveryStatus = String((order as any)?.delivery?.status || '').toUpperCase();
   const motoboyName = String((order as any)?.delivery?.motoboy?.name || '');
   const motoboyFirst = firstName(motoboyName);
-  const storeName = order?.store?.name || 'Chama no Espeto';
+  const storeName = order?.store?.name || 'Jano Caminho';
   const storeSlug = order?.store?.slug;
   const storeHomePath = storeSlug ? `/${storeSlug}` : '/';
   const isAdminForStore = useMemo(() => {

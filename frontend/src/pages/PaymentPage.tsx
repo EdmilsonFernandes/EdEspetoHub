@@ -130,7 +130,7 @@ export function PaymentPage() {
   const isMock = payment?.provider === 'MOCK';
   const storeSlug = payment?.storeSlug;
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-  const storeUrl = storeSlug ? `${baseUrl}/chamanoespeto/${storeSlug}` : '';
+  const storeUrl = storeSlug ? `${baseUrl}/${storeSlug}` : '';
   const adminUrl = storeSlug ? `${baseUrl}/admin?slug=${encodeURIComponent(storeSlug)}` : `${baseUrl}/admin`;
   const methodMeta = getPaymentMethodMeta(payment?.method);
   const providerMeta = getPaymentProviderMeta(payment?.provider);
@@ -169,10 +169,10 @@ export function PaymentPage() {
           <div className="flex items-center justify-between py-3 sm:py-4">
             <button onClick={() => navigate('/')} className="flex items-center gap-3">
               <div className="w-11 h-11 rounded-2xl overflow-hidden shadow-[0_14px_26px_-18px_rgba(239,68,68,0.7)] border border-white bg-white">
-                <img src={platformLogo} alt="Chama no Espeto" className="w-full h-full object-cover" />
+                <img src={platformLogo} alt="Jano Caminho" className="w-full h-full object-cover" />
               </div>
               <div className="hidden sm:block text-left leading-tight">
-                <p className="text-lg font-black text-gray-900">Chama no Espeto</p>
+                <p className="text-lg font-black text-gray-900">Jano Caminho</p>
                 <p className="text-xs text-gray-500 uppercase tracking-[0.25em]">Pagamento</p>
               </div>
             </button>

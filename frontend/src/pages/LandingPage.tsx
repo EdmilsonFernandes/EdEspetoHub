@@ -8,7 +8,6 @@ import {
   Rocket,
   Hamburger,
   ShoppingCart,
-  ChefHat,
   Storefront,
   Truck,
   ForkKnife,
@@ -76,8 +75,8 @@ export function LandingPage() {
   const touchStartRef = useRef({ x: 0, y: 0 });
   const touchActiveRef = useRef(false);
   const audienceItems = [
-    { label: 'Churrasqueiros', icon: ChefHat, tone: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200' },
-    { label: 'Quiosques', icon: Storefront, tone: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200' },
+    { label: 'Mercados', icon: Storefront, tone: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200' },
+    { label: 'Farmácias', icon: Storefront, tone: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200' },
     { label: 'Food trucks', icon: Truck, tone: 'bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-200' },
     { label: 'Restaurantes', icon: ForkKnife, tone: 'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-200' },
     { label: 'Adegas', icon: Wine, tone: 'bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-200' },
@@ -580,7 +579,7 @@ export function LandingPage() {
             <p className="text-xs uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">Impacto no negócio</p>
             <h3 className="text-2xl font-black text-gray-900 dark:text-white mt-2">Pronto para escalar</h3>
             <p className="text-sm text-gray-600 dark:text-gray-300 mt-2">
-              Pensado para casas de espeto, porções e bebidas que querem vender mais sem perder controle da operação.
+              Feito para restaurantes, mercados, farmácias, adegas e food trucks que querem vender mais com operação organizada.
             </p>
 
             <div className="mt-5 grid grid-cols-2 gap-3 text-sm font-semibold text-slate-800 dark:text-slate-200">
@@ -926,7 +925,7 @@ export function LandingPage() {
           </div>
           <h2 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white mb-4">Tudo que você precisa</h2>
           <p className="text-lg text-gray-700 dark:text-gray-200 mb-8 max-w-2xl mx-auto">
-            Recursos completos para gerenciar seu negócio de espetinhos online.
+            Recursos completos para gerenciar seu negocio online.
           </p>
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800 mb-6">
             7 dias grátis para testar • Sem compromisso

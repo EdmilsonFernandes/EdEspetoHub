@@ -28,7 +28,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
     storeNameOverride ||
     storeNameFromAuth ||
     branding?.brandName;
-  const storeUrl = storeSlug ? `https://www.chamanoespeto.com.br/${storeSlug}` : '';
+  const storeUrl = storeSlug ? `https://www.janocaminho.com.br/${storeSlug}` : '';
   const storeDescription = auth?.store?.settings?.description || '';
   const socialLinks = auth?.store?.settings?.socialLinks || [];
   const instagramLink = socialLinks.find((link) => link?.type === 'instagram')?.value;

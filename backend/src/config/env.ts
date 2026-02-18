@@ -8,7 +8,7 @@
  *
  * @file: env.ts
  * @Date: 2025-12-17
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author: Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  */
 
 import dotenv from 'dotenv';
@@ -48,7 +48,7 @@ export const env = {
     debug: process.env.MP_DEBUG === 'true',
   },
   email: {
-    from: process.env.EMAIL_FROM || 'Chama no Espeto <no-reply@chamanoespeto.com>',
+    from: process.env.EMAIL_FROM || 'Jano Caminho <no-reply@janocaminho.com.br>',
     smtpHost: process.env.SMTP_HOST || '',
     smtpPort: process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : 587,
     smtpUser: process.env.SMTP_USER || '',

@@ -112,7 +112,7 @@ export function VerifyEmail() {
     <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-md bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
         <div className="mx-auto mb-4 h-16 w-16 overflow-hidden rounded-2xl border border-slate-200 shadow-sm">
-          <img src={platformLogo} alt="Chama no Espeto" className="h-full w-full object-cover" />
+          <img src={platformLogo} alt="Jano Caminho" className="h-full w-full object-cover" />
         </div>
         <h1 className="text-xl font-bold text-slate-900 mb-1 text-center">Ativar conta</h1>
         <p className="text-sm text-slate-600 text-center mb-4">{error ? error : status}</p>

@@ -479,10 +479,10 @@ export function CreateStore() {
           <div className="flex items-center justify-between py-3 sm:py-4">
             <button onClick={() => navigate('/')} className="flex items-center gap-3">
               <div className="h-11 w-11 rounded-2xl bg-white shadow-[0_14px_26px_-18px_rgba(239,68,68,0.7)] ring-1 ring-red-200 overflow-hidden">
-                <img src="/logo.svg" alt="Chama no Espeto" className="h-full w-full object-cover" draggable={false} />
+                <img src="/logo.svg" alt="Jano Caminho" className="h-full w-full object-cover" draggable={false} />
               </div>
               <div className="hidden sm:block leading-tight">
-                <p className="text-lg font-black text-gray-900">Chama no Espeto</p>
+                <p className="text-lg font-black text-gray-900">Jano Caminho</p>
                 <p className="text-xs text-gray-500 uppercase tracking-[0.25em] text-left">Criar nova loja</p>
               </div>
             </button>
@@ -501,7 +501,7 @@ export function CreateStore() {
         <div className="bg-white border border-gray-100 rounded-3xl shadow-xl p-6 sm:p-8">
           <div className="mb-8 text-center">
             <div className="w-20 h-20 rounded-2xl overflow-hidden shadow-lg mx-auto mb-4 border border-white bg-white">
-              <img src={platformLogo} alt="Chama no Espeto" className="w-full h-full object-cover" />
+              <img src={platformLogo} alt="Jano Caminho" className="w-full h-full object-cover" />
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Criar minha loja</h1>
             <p className="text-gray-500">Preencha os dados para gerar seu site automaticamente.</p>
@@ -775,7 +775,7 @@ export function CreateStore() {
                 <p className="text-xs text-red-600">{fieldErrors.storeName}</p>
               )}
               <div className="text-xs text-gray-500">
-                URL da loja: <span className="font-semibold text-gray-700">/chamanoespeto/{storeSlugPreview || 'sua-loja'}</span>
+                URL da loja: <span className="font-semibold text-gray-700">www.janocaminho.com.br/{storeSlugPreview || 'sua-loja'}</span>
               </div>
               <p className="text-xs text-gray-500">
                 Se ja existir uma loja com esse nome, o sistema adiciona um sufixo (ex.: {storeSlugPreview || 'sua-loja'}-2).
@@ -1249,7 +1249,7 @@ export function CreateStore() {
             <div className="px-6 py-5 border-b border-slate-200 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
-                  <img src={platformLogo} alt="Chama no Espeto" className="w-full h-full object-cover" />
+                  <img src={platformLogo} alt="Jano Caminho" className="w-full h-full object-cover" />
                 </div>
                 <div>
                   <p className="text-lg font-bold text-slate-900">Termos de uso</p>
@@ -1268,7 +1268,7 @@ export function CreateStore() {
               <section className="space-y-2">
                 <h3 className="text-base font-semibold text-slate-900">1. Plataforma e finalidade</h3>
                 <p>
-                  A plataforma Chama no Espeto fornece ferramentas para criar, publicar e gerir lojas digitais.
+                  A plataforma Jano Caminho fornece ferramentas para criar, publicar e gerir lojas digitais.
                   O usuário é responsável pelo conteúdo, preços, ofertas e atendimento.
                 </p>
               </section>

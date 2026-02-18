@@ -1218,7 +1218,7 @@ export const GrillQueue = () => {
               const pixPayload = pixKey
                 ? buildPixPayload({
                     key: pixKey,
-                    name: auth?.store?.name || 'Chama no Espeto',
+                    name: auth?.store?.name || 'Jano Caminho',
                     amount: Number(confirmModal.total || 0),
                     txid: confirmModal.id ? `PEDIDO${confirmModal.id.slice(0, 8)}` : 'PEDIDO',
                   })

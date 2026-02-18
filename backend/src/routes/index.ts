@@ -8,7 +8,7 @@
  *
  * @file: index.ts
  * @Date: 2025-12-17
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author: Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  */
 
 import { Router } from 'express';
@@ -93,6 +93,7 @@ routes.get('/public/stores', StoreController.listPortfolio);
 routes.post('/public/stores/slug/:slug/track', StoreController.trackLink);
 routes.get('/stores/slug/:slug', StoreController.getBySlug);
 routes.get('/chamanoespeto/:slug', StoreController.getBySlug);
+routes.get('/janocaminho/:slug', StoreController.getBySlug);
 routes.get('/stores/slug/:slug/products', ProductController.listPublicBySlug);
 routes.get('/public/stores/slug/:slug/products', ProductController.listPublicBySlug);
 routes.get('/public/stores/slug/:slug/highlights', OrderController.listHighlightsBySlug);

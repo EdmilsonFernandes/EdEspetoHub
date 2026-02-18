@@ -91,6 +91,8 @@ function App() {
             <Route path="/admin/*" element={<Navigate to="/admin" replace />} />
             <Route path="/store/:storeSlug" element={<StorePage />} />
             <Route path="/:storeSlug" element={<StorePage />} />
+            <Route path="/janocaminho/:storeSlug" element={<StorePage />} />
+            <Route path="/janocaminho/:storeSlug/orders" element={<OrdersQueue />} />
             <Route path="/chamanoespeto/:storeSlug" element={<StorePage />} />
             <Route path="/chamanoespeto/:storeSlug/orders" element={<OrdersQueue />} />
             <Route path="/pedido/:orderId" element={<OrderTracking />} />

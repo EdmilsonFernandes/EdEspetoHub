@@ -176,7 +176,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
                 value={branding.instagram}
                 onChange={(e) => handleChange("instagram", e.target.value.replace("@", ""))}
                 className="w-full border border-gray-200 rounded-xl p-3 pl-8 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
-                placeholder="chamanoespeto"
+                placeholder="janocaminho"
               />
             </div>
           </div>
@@ -302,7 +302,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
                 value={branding.contactEmail || ""}
                 onChange={(e) => handleChange("contactEmail", e.target.value)}
                 className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
-                placeholder="contato@chamanoespeto.com.br"
+                placeholder="contato@janocaminho.com.br"
               />
               <p className="text-xs text-gray-500">Opcional, aparece no cardápio para contato.</p>
             </div>

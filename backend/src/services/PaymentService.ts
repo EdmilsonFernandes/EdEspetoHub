@@ -8,7 +8,7 @@
  *
  * @file: PaymentService.ts
  * @Date: 2025-12-17
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author: Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  */
 
 import { EntityManager } from 'typeorm';
@@ -30,7 +30,7 @@ import { OrderReviewService } from './OrderReviewService';
 /**
  * Provides PaymentService functionality.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2025-12-17
  */
 export class PaymentService {
@@ -43,7 +43,7 @@ export class PaymentService {
   /**
    * Handles normalize qr code.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   private normalizeQrCode(qrCode?: string | null) {
@@ -57,7 +57,7 @@ export class PaymentService {
   /**
    * Sends activation email.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   private async sendActivationEmail(email: string, slug: string) {
@@ -70,7 +70,7 @@ export class PaymentService {
   /**
    * Creates payment.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async createPayment(
@@ -87,8 +87,8 @@ export class PaymentService {
     const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
     const mockLinkBase =
       data.method === 'BOLETO'
-        ? 'https://pay.chamanoespeto.com/boleto'
-        : 'https://pay.chamanoespeto.com/checkout';
+        ? 'https://pay.janocaminho.com/boleto'
+        : 'https://pay.janocaminho.com/checkout';
     const paymentLink =
       data.method === 'CREDIT_CARD' || data.method === 'BOLETO'
         ? `${mockLinkBase}/${data.subscription.id}`
@@ -173,7 +173,7 @@ export class PaymentService {
   /**
    * Handles confirm payment.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async confirmPayment(paymentId: string) {
@@ -235,7 +235,7 @@ export class PaymentService {
   /**
    * Handles confirm mercado pago payment.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async confirmMercadoPagoPayment(mercadoPagoPaymentId: string) {
@@ -255,7 +255,7 @@ export class PaymentService {
   /**
    * Handles reprocess by payment id.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async reprocessByPaymentId(paymentId: string, providerId?: string) {
@@ -289,7 +289,7 @@ export class PaymentService {
   /**
    * Updates payment status.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   private async updatePaymentStatus(paymentId: string, providerStatus?: string) {
@@ -311,7 +311,7 @@ export class PaymentService {
   /**
    * Executes apply mercado pago status logic.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   private async applyMercadoPagoStatus(mpPayment: any) {
@@ -392,7 +392,7 @@ export class PaymentService {
   /**
    * Adds days.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   private addDays(date: Date, days: number) {
@@ -404,7 +404,7 @@ export class PaymentService {
   /**
    * Handles find by id.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async findById(paymentId: string) {

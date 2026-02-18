@@ -213,7 +213,7 @@ export function StorePage() {
 
   const applyStoreMeta = (store: any) => {
     if (!store) return;
-    const name = store.name || store.slug || 'Chama no Espeto';
+    const name = store.name || store.slug || 'Jano Caminho';
     const description = `Cardápio online e pedidos da loja ${name}.`;
     const logo = resolveAssetUrl(store.settings?.logoUrl) || '/chama-no-espeto.jpeg';
     const url = typeof window !== 'undefined' ? window.location.href : '';
@@ -229,7 +229,7 @@ export function StorePage() {
       tag.setAttribute('content', value);
     };
 
-    document.title = `${name} | Chama no Espeto`;
+    document.title = `${name} | Jano Caminho`;
     upsertMeta('description', description, 'name');
     upsertMeta('og:title', name, 'property');
     upsertMeta('og:description', description, 'property');
@@ -868,7 +868,7 @@ export function StorePage() {
           phone: customer.phone,
           deliveryFee: customer.type === 'delivery' && deliveryFeeValue > 0 ? deliveryFeeValue : null,
           total: orderTotal,
-          store: { name: 'Chama no Espeto Demo', slug: storeSlug },
+          store: { name: 'Jano Caminho Demo', slug: storeSlug },
           createdAt: Date.now(),
         })
       );
@@ -908,7 +908,7 @@ export function StorePage() {
       : `👤 *${customer.name}*`;
 
     const messageLines = [
-      `*NOVO PEDIDO - ${branding?.brandName || 'Chama no Espeto'}*`,
+      `*NOVO PEDIDO - ${branding?.brandName || 'Jano Caminho'}*`,
       storeSlug ? `🏷️ *Loja:* ${storeSlug}` : '',
       storeAddress ? `📍 *Endereço da loja:* ${storeAddress}` : '',
       '------------------',
@@ -943,7 +943,7 @@ export function StorePage() {
       .map((item) => `- ${item.qty}x ${item.name} ${formatItemOptions(item)}`.trim())
       .join('\n');
     const customerMessageLines = [
-      `Pedido #${formatOrderDisplayId(createdOrder?.id, storeSlug)} - ${branding?.brandName || 'Chama no Espeto'}`,
+      `Pedido #${formatOrderDisplayId(createdOrder?.id, storeSlug)} - ${branding?.brandName || 'Jano Caminho'}`,
       customerItemsList ? `Itens:\n${customerItemsList}` : '',
       deliveryFeeValue > 0 ? `Frete: ${formatCurrency(deliveryFeeValue)}` : '',
       `Total: ${formatCurrency(orderTotal)}`,
@@ -1265,7 +1265,7 @@ export function StorePage() {
                       </div>
                     )}
                     <div className="text-xs text-slate-400 text-center">
-                      <span className="font-semibold text-slate-500">Chama no Espeto</span> • plataforma de pedidos online
+                      <span className="font-semibold text-slate-500">Jano Caminho</span> • plataforma de pedidos online
                     </div>
                   </div>
                 </div>

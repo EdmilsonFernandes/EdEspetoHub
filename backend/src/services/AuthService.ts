@@ -8,7 +8,7 @@
  *
  * @file: AuthService.ts
  * @Date: 2025-12-17
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author: Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  */
 
 import bcrypt from 'bcryptjs';
@@ -41,7 +41,7 @@ import { PlatformAdmin } from '../entities/PlatformAdmin';
 /**
  * Provides AuthService functionality.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2025-12-17
  */
 export class AuthService
@@ -151,7 +151,7 @@ export class AuthService
   /**
    * Executes super admin login logic.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async superAdminLogin(username: string, password: string)
@@ -191,7 +191,7 @@ export class AuthService
   /**
    * Executes register logic.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async register(input: any, meta?: { ipAddress?: string | null })
@@ -344,7 +344,7 @@ export class AuthService
     /**
      * Handles result.
      *
-     * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+     * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
      * @date 2025-12-17
      */
     const result = await AppDataSource.transaction(async (manager) =>
@@ -486,7 +486,7 @@ export class AuthService
   /**
    * Executes login logic.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async login(email: string, password: string)
@@ -549,7 +549,7 @@ export class AuthService
   /**
    * Executes admin login logic.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async adminLogin(identifier: string, password: string)
@@ -640,7 +640,7 @@ export class AuthService
   /**
    * Executes request password reset logic.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async requestPasswordReset(email: string)
@@ -681,7 +681,7 @@ export class AuthService
   /**
    * Handles resend verification email.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async resendVerificationEmail(email: string, meta?: { ipAddress?: string | null }) {
@@ -720,7 +720,7 @@ export class AuthService
   /**
    * Executes reset password logic.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async resetPassword(token: string, newPassword: string)
@@ -752,7 +752,7 @@ export class AuthService
   /**
    * Handles verify email.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async verifyEmail(input: { token: string; email?: string }) {
@@ -875,7 +875,7 @@ export class AuthService
   /**
    * Generates token.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   private generateToken(userId: string, storeId?: string)
@@ -889,7 +889,7 @@ export class AuthService
   /**
    * Executes add days logic.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   private addDays(date: Date, days: number)
@@ -905,7 +905,7 @@ export class AuthService
   /**
    * Executes throw pending payment logic.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   private async throwPendingPayment(storeId: string)
@@ -923,7 +923,7 @@ export class AuthService
   /**
    * Sends verification email.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   private async sendVerificationEmail(user: User, ipAddress?: string | null) {
@@ -970,7 +970,7 @@ export class AuthService
   /**
    * Sends motoboy verification email.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-29
    */
   private async sendMotoboyVerificationEmail(user: User, ipAddress?: string | null) {
@@ -1020,7 +1020,7 @@ export class AuthService
   /**
    * Executes notify signup logic.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   private async notifySignup(user: User, store: Store) {
@@ -1046,7 +1046,7 @@ export class AuthService
   /**
    * Sends payment email.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   private sendPaymentEmail(email: string, payment: any)
@@ -1060,7 +1060,7 @@ export class AuthService
         : payment.method === 'BOLETO'
         ? 'Boleto'
         : 'Cartão de crédito';
-    const subject = 'Pagamento pendente - Chama no Espeto';
+    const subject = 'Pagamento pendente - Jano Caminho';
     const text = [
       'Recebemos seu cadastro e o pagamento esta pendente.',
       `Forma: ${methodLabel}`,
@@ -1082,7 +1082,7 @@ export class AuthService
       <div style="font-family: Arial, sans-serif; background: #f1f5f9; padding: 32px;">
         <div style="max-width: 540px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 18px; overflow: hidden;">
           <div style="padding: 24px; background: linear-gradient(135deg, #dc2626 0%, #f97316 100%);">
-            <img src="${logoUrl}" alt="Chama no Espeto" style="width: 96px; height: 96px; border-radius: 16px; border: 2px solid rgba(255,255,255,0.5);" />
+            <img src="${logoUrl}" alt="Jano Caminho" style="width: 96px; height: 96px; border-radius: 16px; border: 2px solid rgba(255,255,255,0.5);" />
             <p style="margin: 12px 0 0; color: #ffffff; font-size: 18px; font-weight: 700;">Pagamento pendente</p>
             <p style="margin: 4px 0 0; color: rgba(255,255,255,0.9); font-size: 13px;">Finalize para liberar sua loja</p>
           </div>
@@ -1109,7 +1109,7 @@ export class AuthService
   /**
    * Generates unique slug.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   private async generateUniqueSlug(name: string)

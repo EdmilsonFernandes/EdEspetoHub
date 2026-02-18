@@ -33,10 +33,10 @@ export function TermsOfUse() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <button onClick={() => navigate('/')} className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl overflow-hidden border border-slate-200 shadow-sm">
-              <img src={platformLogo} alt="Chama no Espeto" className="w-full h-full object-cover" />
+              <img src={platformLogo} alt="Jano Caminho" className="w-full h-full object-cover" />
             </div>
             <div className="text-left">
-              <p className="text-base font-bold text-slate-900">Chama no Espeto</p>
+              <p className="text-base font-bold text-slate-900">Jano Caminho</p>
               <p className="text-xs text-slate-500">Termos e Privacidade</p>
             </div>
           </button>

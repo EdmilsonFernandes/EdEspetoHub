@@ -84,7 +84,7 @@ export class OrderReviewService {
 
     const description = `Gorjeta do pedido ${order.id.slice(0, 8)} - ${order.store?.name || 'Loja'}`;
     const externalReference = `review_tip:${review.id}`;
-    const payerEmail = String(order?.store?.owner?.email || order?.customerName || 'cliente@chamanoespeto.com.br')
+    const payerEmail = String(order?.store?.owner?.email || order?.customerName || 'cliente@janocaminho.com.br')
       .trim()
       .toLowerCase();
     const payerName = String(order?.customerName || 'Cliente').trim() || 'Cliente';
@@ -103,7 +103,7 @@ export class OrderReviewService {
         description,
         externalReference,
         payer: {
-          email: payerEmail.includes('@') ? payerEmail : 'cliente@chamanoespeto.com.br',
+          email: payerEmail.includes('@') ? payerEmail : 'cliente@janocaminho.com.br',
           name: payerName,
         },
       });

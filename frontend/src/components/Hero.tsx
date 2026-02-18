@@ -10,7 +10,7 @@ export function Hero() {
             <div className="overflow-hidden rounded-[24px]">
               <img
                 src="/chama-no-espeto.jpeg"
-                alt="Chama no Espeto"
+                alt="Jano Caminho"
                 className="w-full h-[280px] sm:h-[420px] lg:h-[500px] object-cover object-top opacity-95"
                 style={{ maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%)', WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%)' }}
               />
