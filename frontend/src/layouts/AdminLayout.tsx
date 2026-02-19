@@ -59,8 +59,8 @@ export function AdminLayout({
   const shouldShowHeader = useMemo(() => showHeader && headerVisible, [showHeader, headerVisible]);
 
   return (
-    <div className="min-h-screen bg-slate-50" style={{ background: 'linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%)' }}>
-      <div className="mx-auto p-4 space-y-6">
+    <div className="ds-admin-bg">
+      <div className="mx-auto p-3 sm:p-4 space-y-4">
         {shouldShowHeader && (
           <AdminHeader contextLabel={contextLabel} onToggleHeader={handleToggleHeader} />
         )}

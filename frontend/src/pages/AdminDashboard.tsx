@@ -1182,11 +1182,11 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         </div>
       ) : null}
 
-      <div className="mx-auto w-full max-w-7xl lg:grid lg:grid-cols-[240px_1fr] lg:gap-6">
+      <div className="mx-auto w-full max-w-7xl lg:grid lg:grid-cols-[252px_1fr] lg:gap-6">
         <aside className="hidden lg:block">
-          <div className="sticky top-24 ds-sidebar p-3">
-            <p className="px-2 pb-2 text-[11px] uppercase tracking-[0.28em] text-slate-500 font-semibold">Navegação</p>
-            <div className="space-y-1">
+          <div className="sticky top-20 ds-admin-sidebar p-3">
+            <p className="px-2 pb-2 ds-admin-sidebar-title">Navegação</p>
+            <div className="space-y-1.5">
               {desktopTabItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = activeTab === item.id;
@@ -1201,10 +1201,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                       }
                       setActiveTab(item.id as typeof activeTab);
                     }}
-                    className={`w-full flex items-center justify-between gap-2 rounded-2xl px-3 py-2 text-sm font-semibold transition-all duration-150 ${
+                    className={`ds-admin-sidebar-item ds-focus-ring flex items-center justify-between gap-2 ${
                       isActive
-                        ? 'bg-brand-gradient text-white shadow-[0_16px_34px_-22px_rgba(15,23,42,0.6)]'
-                        : 'text-slate-700 hover:bg-slate-50 hover:-translate-y-0.5'
+                        ? 'ds-admin-sidebar-item-active'
+                        : ''
                     }`}
                   >
                     <span className="inline-flex items-center gap-2">
@@ -1222,7 +1222,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
               <button
                 type="button"
                 onClick={() => storeSlug && navigate(`/${storeSlug}`)}
-                className="w-full flex items-center gap-2 rounded-2xl px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:-translate-y-0.5 transition-all duration-150"
+                className="ds-admin-sidebar-item ds-focus-ring flex items-center gap-2"
               >
                 <BookOpen size={16} weight="duotone" />
                 Cardápio público

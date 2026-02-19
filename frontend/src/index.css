@@ -599,6 +599,79 @@ body {
     border-color: rgb(191 219 254);
     color: rgb(30 64 175);
   }
+
+  .ds-admin-bg {
+    min-height: 100vh;
+    background:
+      radial-gradient(1000px 500px at 0% -20%, rgba(47, 157, 247, 0.12), transparent 60%),
+      radial-gradient(900px 520px at 100% 0%, rgba(16, 185, 129, 0.08), transparent 60%),
+      linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+  }
+
+  .ds-admin-sidebar {
+    border-radius: 22px;
+    border: 1px solid rgba(30, 41, 59, 0.7);
+    background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
+    box-shadow: 0 26px 52px -34px rgba(2, 6, 23, 0.8);
+  }
+
+  .ds-admin-sidebar-title {
+    color: rgba(226, 232, 240, 0.85);
+    font-size: 11px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+
+  .ds-admin-sidebar-item {
+    width: 100%;
+    border-radius: 14px;
+    padding: 0.62rem 0.74rem;
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: #cbd5e1;
+    transition: background-color 180ms ease, color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+  }
+
+  .ds-admin-sidebar-item:hover {
+    background: rgba(148, 163, 184, 0.15);
+    color: #f8fafc;
+    transform: translateY(-1px);
+  }
+
+  .ds-admin-sidebar-item-active {
+    background: linear-gradient(120deg, var(--color-primary) 0%, color-mix(in srgb, var(--color-secondary) 72%, #111827) 100%);
+    color: #fff;
+    box-shadow: 0 18px 30px -20px rgba(15, 23, 42, 0.95);
+  }
+
+  .ds-metric-card {
+    border-radius: 1.15rem;
+    border: 1px solid rgba(226, 232, 240, 0.95);
+    background: #fff;
+    box-shadow: 0 18px 42px -30px rgba(15, 23, 42, 0.38);
+    transition: transform 180ms ease, box-shadow 180ms ease;
+  }
+
+  .ds-metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 26px 50px -30px rgba(15, 23, 42, 0.5);
+  }
+
+  .ds-metric-card-success {
+    border-color: rgb(167 243 208);
+    background: linear-gradient(180deg, rgb(236 253 245), #ffffff);
+  }
+
+  .ds-metric-card-warning {
+    border-color: rgb(253 230 138);
+    background: linear-gradient(180deg, rgb(254 252 232), #ffffff);
+  }
+
+  .ds-metric-card-neutral {
+    border-color: rgb(226 232 240);
+    background: linear-gradient(180deg, rgb(248 250 252), #ffffff);
+  }
 }
   .ds-card {
     border-radius: var(--radius-lg);

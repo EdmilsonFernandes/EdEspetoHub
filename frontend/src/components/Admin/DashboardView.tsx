@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from "react";
-import { Package, CurrencyDollar, CheckCircle, CircleDashed, LinkSimple } from "@phosphor-icons/react";
+import { Package, CurrencyDollar, CheckCircle, CircleDashed, LinkSimple, CalendarBlank, TrendUp } from "@phosphor-icons/react";
 import {
   BarChart,
   Bar,
@@ -368,6 +368,46 @@ export const DashboardView = ({
     printWindow.document.close();
   };
 
+  const metricCards = [
+    {
+      id: "total",
+      label: "Receita total",
+      value: formatCurrency(stats.totalSales),
+      helper: firstOrderLabel,
+      icon: CurrencyDollar,
+      tone: "ds-metric-card-neutral",
+      iconTone: "text-slate-700 bg-slate-100 border-slate-200",
+    },
+    {
+      id: "month",
+      label: "Receita do mês",
+      value: formatCurrency(stats.monthRevenue),
+      helper: formatMonthLabel(selectedMonth),
+      icon: CalendarBlank,
+      tone: "ds-metric-card-success",
+      iconTone: "text-emerald-700 bg-emerald-100 border-emerald-200",
+      monthSelector: true,
+    },
+    {
+      id: "period",
+      label: "Receita do período",
+      value: formatCurrency(stats.periodRevenue),
+      helper: `Período: ${periodLabel}`,
+      icon: TrendUp,
+      tone: "ds-metric-card-warning",
+      iconTone: "text-amber-700 bg-amber-100 border-amber-200",
+    },
+    {
+      id: "orders",
+      label: "Pedidos realizados",
+      value: String(stats.totalOrders),
+      helper: `Ticket médio: ${formatCurrency(stats.avgTicket)}`,
+      icon: Package,
+      tone: "ds-metric-card-neutral",
+      iconTone: "text-brand-primary bg-brand-primary-soft border-brand-primary/20",
+    },
+  ];
+
 
   return (
     <div className="space-y-6 animate-in fade-in">
@@ -495,96 +535,42 @@ export const DashboardView = ({
       )}
       {/* ---------- CARDS RESUMO ---------- */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-        {/* Faturamento total */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-gray-500 text-sm font-bold uppercase">
-                Receita total
-              </p>
-              <h3 className="text-3xl font-black text-brand-primary">
-                {formatCurrency(stats.totalSales)}
-              </h3>
-              <p className="text-xs text-gray-500 mt-1">{firstOrderLabel}</p>
-            </div>
-            <div className="p-3 bg-brand-primary-soft rounded-lg text-brand-primary">
-              <CurrencyDollar weight="duotone" />
-            </div>
-          </div>
-        </div>
-
-        {/* Faturamento do mês */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-gray-500 text-sm font-bold uppercase">
-                Receita do mês
-              </p>
-              <h3 className="text-3xl font-black text-brand-primary">
-                {formatCurrency(stats.monthRevenue)}
-              </h3>
-              <div className="mt-2">
-                <label className="text-[10px] uppercase tracking-wide text-gray-400">Mês selecionado</label>
-                <select
-                  value={selectedMonth}
-                  onChange={(e) => setSelectedMonth(e.target.value)}
-                  className="mt-1 w-full text-xs border border-gray-200 rounded-md px-2 py-1 text-gray-600 bg-white"
-                >
-                  {availableMonths.map((monthKey) => (
-                    <option key={monthKey} value={monthKey}>
-                      {formatMonthLabel(monthKey)}
-                    </option>
-                  ))}
-                </select>
+        {metricCards.map((card) => {
+          const Icon = card.icon;
+          return (
+            <div key={card.id} className={`ds-metric-card ${card.tone} p-5`}>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-[10px] uppercase tracking-[0.24em] text-slate-500 font-bold">{card.label}</p>
+                  <h3 className="text-[1.85rem] leading-tight font-black text-slate-900 mt-1">{card.value}</h3>
+                  <p className="text-xs text-slate-500 mt-1">{card.helper}</p>
+                </div>
+                <span className={`h-11 w-11 rounded-xl border flex items-center justify-center ${card.iconTone}`}>
+                  <Icon size={20} weight="duotone" />
+                </span>
               </div>
+              {card.monthSelector && (
+                <div className="mt-3">
+                  <label className="text-[10px] uppercase tracking-[0.2em] text-slate-400">Mês selecionado</label>
+                  <select
+                    value={selectedMonth}
+                    onChange={(e) => setSelectedMonth(e.target.value)}
+                    className="ds-select ds-focus-ring mt-1 w-full py-1.5 text-xs text-slate-700"
+                  >
+                    {availableMonths.map((monthKey) => (
+                      <option key={monthKey} value={monthKey}>
+                        {formatMonthLabel(monthKey)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
-            <div className="p-3 bg-brand-primary-soft rounded-lg text-brand-primary">
-              <CurrencyDollar weight="duotone" />
-            </div>
-          </div>
-        </div>
-
-        {/* Faturamento do período */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-gray-500 text-sm font-bold uppercase">
-                Receita do período
-              </p>
-              <h3 className="text-3xl font-black text-brand-primary">
-                {formatCurrency(stats.periodRevenue)}
-              </h3>
-              <p className="text-xs text-gray-500 mt-1">Período: {periodLabel}</p>
-            </div>
-            <div className="p-3 bg-brand-primary-soft rounded-lg text-brand-primary">
-              <CurrencyDollar weight="duotone" />
-            </div>
-          </div>
-        </div>
-
-        {/* Total Pedidos */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-gray-500 text-sm font-bold uppercase">
-                Pedidos realizados
-              </p>
-              <h3 className="text-3xl font-black text-brand-primary">
-                {stats.totalOrders}
-              </h3>
-              <p className="text-xs text-gray-500 mt-1">
-                Valor médio por pedido: {formatCurrency(stats.avgTicket)}
-              </p>
-            </div>
-            <div className="p-3 bg-brand-primary-soft rounded-lg text-brand-primary">
-              <Package weight="duotone" />
-            </div>
-          </div>
-        </div>
-
+          );
+        })}
       </div>
 
-      <div className="grid lg:grid-cols-[1.2fr_0.8fr] gap-6">
+      <div className="grid lg:grid-cols-[1.25fr_0.75fr] gap-6">
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
           <div className="flex items-center justify-between">
             <div>

@@ -113,7 +113,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
 
   return (
     <header
-      className="relative rounded-3xl border border-slate-200 shadow-[0_24px_50px_-32px_rgba(15,23,42,0.5)] overflow-hidden"
+      className="relative rounded-3xl border border-slate-200 shadow-[0_22px_46px_-30px_rgba(15,23,42,0.5)] overflow-hidden"
       style={{
         background: `linear-gradient(120deg, ${branding?.primaryColor || 'var(--color-primary)'} 0%, ${
           branding?.secondaryColor || 'var(--color-secondary)'
@@ -122,28 +122,28 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
       }}
     >
       <div className="pointer-events-none absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.45),_transparent_55%)]" />
-      <div className="pointer-events-none absolute top-0 left-8 right-8 h-1 rounded-full bg-white/40" />
-      <div className="px-5 pt-5 pb-4 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        <div className="flex items-start gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center overflow-hidden shadow-[0_16px_30px_-18px_rgba(0,0,0,0.35)] ring-1 ring-white/30">
+      <div className="pointer-events-none absolute top-0 left-8 right-8 h-0.5 rounded-full bg-white/40" />
+      <div className="px-4 pt-3 pb-2.5 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+        <div className="flex items-start gap-3">
+          <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center overflow-hidden shadow-[0_14px_26px_-18px_rgba(0,0,0,0.35)] ring-1 ring-white/30">
             {branding?.logoUrl ? (
               <img src={branding.logoUrl} alt={storeName} className="w-full h-full object-cover" />
             ) : (
-              <span className="text-2xl font-black">{storeName?.slice(0, 2)?.toUpperCase() || 'CE'}</span>
+              <span className="text-xl font-black">{storeName?.slice(0, 2)?.toUpperCase() || 'CE'}</span>
             )}
           </div>
-          <div className="space-y-1">
+          <div className="space-y-0.5 min-w-0">
             <div className="flex items-center gap-2">
-              <p className="text-[11px] uppercase tracking-[0.35em] font-semibold opacity-90">{contextLabel}</p>
+              <p className="text-[10px] uppercase tracking-[0.32em] font-semibold opacity-90">{contextLabel}</p>
               {planDetails?.planExempt && (
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-[0.2em] bg-emerald-100 text-emerald-700">
                   VIP
                 </span>
               )}
             </div>
-            <h1 className="text-2xl font-black leading-tight">{storeName}</h1>
+            <h1 className="text-xl sm:text-2xl font-black leading-tight truncate max-w-[42ch]">{storeName}</h1>
             {showDetails && storeDescription && (
-              <p className="text-sm text-white/85 max-w-[520px] line-clamp-2">
+              <p className="text-xs sm:text-sm text-white/85 max-w-[520px] line-clamp-1 sm:line-clamp-2">
                 {storeDescription}
               </p>
             )}
@@ -173,7 +173,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => setShowMobileDetails((prev) => !prev)}
@@ -182,7 +182,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
             {showMobileDetails ? 'Fechar' : 'Detalhes'}
           </button>
           {showDetails && (
-            <div className="hidden lg:flex items-center gap-2 bg-white/10 rounded-full px-3 py-1.5 border border-white/15">
+            <div className="hidden lg:flex items-center gap-2 bg-white/10 rounded-full px-2.5 py-1 border border-white/15">
               <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-xs font-bold">
                 {userInitials || 'AD'}
               </div>
@@ -202,9 +202,9 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
           )}
         </div>
       </div>
-      <div className="px-5 pb-5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+      <div className="px-4 pb-3.5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2.5">
         {showDetails && (
-          <div className="flex items-center gap-2 text-xs font-semibold bg-white/10 border border-white/20 rounded-full px-2 py-1.5 w-fit">
+          <div className="flex items-center gap-2 text-[11px] font-semibold bg-white/10 border border-white/20 rounded-full px-2 py-1.5 w-fit">
             <ShieldCheck size={14} weight="duotone" />
             {planDetails?.planExempt ? 'Isento de plano' : 'Assinatura ativa'}
           </div>
