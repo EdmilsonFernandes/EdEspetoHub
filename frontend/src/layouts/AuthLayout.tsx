@@ -14,6 +14,9 @@ export function AuthLayout({ children }: AuthLayoutProps) {
           <div className="absolute inset-0">
             <img src="/janocaminho.jpg" alt="Jano Caminho" className="h-full w-full object-cover object-center" />
           </div>
+          <div className="absolute inset-0 opacity-45">
+            <img src="/janocaminho.jpg" alt="" aria-hidden className="h-full w-full object-contain object-center p-8" />
+          </div>
           <div className="absolute inset-0 bg-[linear-gradient(160deg,rgba(2,6,23,0.78),rgba(2,6,23,0.68))]" />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(47,157,247,0.32),_transparent_58%),radial-gradient(circle_at_bottom,_rgba(95,211,90,0.2),_transparent_62%)]" />
 

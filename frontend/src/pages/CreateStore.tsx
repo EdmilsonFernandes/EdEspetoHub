@@ -20,6 +20,38 @@ const BRAZIL_DDDS = [
   '91', '92', '93', '94', '95', '96', '97', '98', '99',
 ];
 
+const BRAZIL_STATES = [
+  { value: 'AC', label: 'Acre' },
+  { value: 'AL', label: 'Alagoas' },
+  { value: 'AP', label: 'Amapá' },
+  { value: 'AM', label: 'Amazonas' },
+  { value: 'BA', label: 'Bahia' },
+  { value: 'CE', label: 'Ceará' },
+  { value: 'DF', label: 'Distrito Federal' },
+  { value: 'ES', label: 'Espírito Santo' },
+  { value: 'GO', label: 'Goiás' },
+  { value: 'MA', label: 'Maranhão' },
+  { value: 'MT', label: 'Mato Grosso' },
+  { value: 'MS', label: 'Mato Grosso do Sul' },
+  { value: 'MG', label: 'Minas Gerais' },
+  { value: 'PA', label: 'Pará' },
+  { value: 'PB', label: 'Paraíba' },
+  { value: 'PR', label: 'Paraná' },
+  { value: 'PE', label: 'Pernambuco' },
+  { value: 'PI', label: 'Piauí' },
+  { value: 'RJ', label: 'Rio de Janeiro' },
+  { value: 'RN', label: 'Rio Grande do Norte' },
+  { value: 'RS', label: 'Rio Grande do Sul' },
+  { value: 'RO', label: 'Rondônia' },
+  { value: 'RR', label: 'Roraima' },
+  { value: 'SC', label: 'Santa Catarina' },
+  { value: 'SP', label: 'São Paulo' },
+  { value: 'SE', label: 'Sergipe' },
+  { value: 'TO', label: 'Tocantins' },
+];
+
+const cityCacheKey = (uf: string) => `ibge:cities:${String(uf || '').toUpperCase()}`;
+
 const STORE_SEGMENTS = [
   { value: 'restaurante', label: 'Restaurante' },
   { value: 'hamburgueria', label: 'Hamburgueria' },
@@ -147,6 +179,10 @@ export function CreateStore() {
   const [validationMessage, setValidationMessage] = useState('');
   const [logoPreviewUrl, setLogoPreviewUrl] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [cityOptions, setCityOptions] = useState<string[]>([]);
+  const [isLoadingCities, setIsLoadingCities] = useState(false);
+  const [cityLookupError, setCityLookupError] = useState('');
+  const [useManualCityInput, setUseManualCityInput] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({
     email: '',
     document: '',
@@ -320,13 +356,53 @@ export function CreateStore() {
         street: data.logradouro || '',
         neighborhood: data.bairro || '',
         city: data.localidade || '',
-        state: data.uf || '',
+        state: String(data.uf || '').toUpperCase(),
         complement: data.complemento || '',
       }));
     } catch (error) {
       setCepError('Não foi possível consultar o CEP agora.');
     } finally {
       setIsCepLoading(false);
+    }
+  };
+
+  const loadCitiesByState = async (ufValue: string) => {
+    const uf = String(ufValue || '').toUpperCase();
+    if (!uf || uf.length !== 2) {
+      setCityOptions([]);
+      return;
+    }
+    setIsLoadingCities(true);
+    setCityLookupError('');
+    try {
+      const cacheKey = cityCacheKey(uf);
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length) {
+          setCityOptions(parsed);
+          setIsLoadingCities(false);
+          return;
+        }
+      }
+      const response = await fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${uf}/municipios`);
+      if (!response.ok) throw new Error('Falha ao carregar cidades.');
+      const data = await response.json();
+      const cities = Array.isArray(data)
+        ? data
+            .map((entry: any) => String(entry?.nome || '').trim())
+            .filter(Boolean)
+            .sort((a: string, b: string) => a.localeCompare(b, 'pt-BR'))
+        : [];
+      setCityOptions(cities);
+      localStorage.setItem(cacheKey, JSON.stringify(cities));
+    } catch (error) {
+      console.error('Falha ao carregar cidades por UF', error);
+      setCityOptions([]);
+      setCityLookupError('Não foi possível carregar as cidades. Você pode preencher manualmente.');
+      setUseManualCityInput(true);
+    } finally {
+      setIsLoadingCities(false);
     }
   };
 
@@ -363,6 +439,25 @@ export function CreateStore() {
 
     fetchPlans();
   }, [planIdFromUrl]);
+
+  useEffect(() => {
+    const uf = String(registerForm.state || '').toUpperCase();
+    if (!uf || uf.length !== 2) {
+      setCityOptions([]);
+      return;
+    }
+    setUseManualCityInput(false);
+    setCityLookupError('');
+    loadCitiesByState(uf);
+  }, [registerForm.state]);
+
+  useEffect(() => {
+    if (!registerForm.city || cityOptions.length === 0) return;
+    const exists = cityOptions.includes(registerForm.city);
+    if (!exists) {
+      setUseManualCityInput(true);
+    }
+  }, [registerForm.city, cityOptions]);
 
   const billingKey = isAnnual ? 'yearly' : 'monthly';
   const billing = BILLING_OPTIONS[billingKey];
@@ -620,6 +715,28 @@ export function CreateStore() {
             <p className="text-gray-500">Preencha os dados para gerar seu site automaticamente.</p>
           </div>
 
+          <div className="mb-6 ds-card p-3 sm:p-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              {[
+                { id: 1, title: 'Dados pessoais', done: Boolean(registerForm.fullName && registerForm.email && registerForm.phone) },
+                { id: 2, title: 'Endereço', done: Boolean(registerForm.cep && registerForm.city && registerForm.state && registerForm.street && registerForm.number) },
+                { id: 3, title: 'Loja', done: Boolean(registerForm.storeName && registerForm.segment) },
+              ].map((step) => (
+                <div
+                  key={step.id}
+                  className={`rounded-xl border px-3 py-2.5 ${
+                    step.done
+                      ? 'border-emerald-200 bg-emerald-50'
+                      : 'border-slate-200 bg-slate-50'
+                  }`}
+                >
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">Etapa {step.id}</p>
+                  <p className={`text-sm font-bold ${step.done ? 'text-emerald-700' : 'text-slate-800'}`}>{step.title}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
           {storeError && (
             <div className="bg-red-50 text-red-700 text-sm p-4 rounded-xl border border-red-100 mb-6">
               {storeError}
@@ -775,40 +892,81 @@ export function CreateStore() {
                           onChange={(e) => setRegisterForm((prev) => ({ ...prev, cep: normalizeCep(e.target.value) }))}
                           onBlur={(e) => handleCepLookup(e.target.value)}
                           disabled={isCepLoading}
-                          className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          className="ds-input ds-focus-ring disabled:bg-gray-100 disabled:cursor-not-allowed"
                           placeholder="00000-000"
                         />
                         <button
                           type="button"
                           onClick={() => handleCepLookup(registerForm.cep)}
                           disabled={isCepLoading}
-                          className="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                          className="w-full ds-btn ds-btn-secondary ds-focus-ring px-3 py-2 text-sm text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           {isCepLoading ? 'Buscando...' : 'Buscar CEP'}
                         </button>
                         {cepError && <p className="text-xs text-red-600">{cepError}</p>}
                       </div>
                       <div className="space-y-2">
-                        <label className="text-sm font-semibold text-gray-700">Cidade</label>
-                        <input
-                          required
-                          value={registerForm.city}
-                          onChange={(e) => setRegisterForm((prev) => ({ ...prev, city: e.target.value }))}
-                          disabled={isCepLoading}
-                          className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
-                          placeholder="Sua cidade"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-semibold text-gray-700">Estado</label>
-                        <input
+                        <label className="text-sm font-semibold text-gray-700">UF</label>
+                        <select
                           required
                           value={registerForm.state}
-                          onChange={(e) => setRegisterForm((prev) => ({ ...prev, state: e.target.value }))}
+                          onChange={(e) =>
+                            setRegisterForm((prev) => ({
+                              ...prev,
+                              state: String(e.target.value || '').toUpperCase(),
+                              city: '',
+                            }))
+                          }
                           disabled={isCepLoading}
-                          className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
-                          placeholder="UF"
-                        />
+                          className="ds-select ds-focus-ring disabled:bg-gray-100 disabled:cursor-not-allowed"
+                        >
+                          <option value="">Selecione</option>
+                          {BRAZIL_STATES.map((uf) => (
+                            <option key={uf.value} value={uf.value}>
+                              {uf.value} · {uf.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-semibold text-gray-700">Cidade</label>
+                        {useManualCityInput || !registerForm.state ? (
+                          <input
+                            required
+                            value={registerForm.city}
+                            onChange={(e) => setRegisterForm((prev) => ({ ...prev, city: e.target.value }))}
+                            disabled={isCepLoading}
+                            className="ds-input ds-focus-ring disabled:bg-gray-100 disabled:cursor-not-allowed"
+                            placeholder="Sua cidade"
+                          />
+                        ) : (
+                          <select
+                            required
+                            value={registerForm.city}
+                            onChange={(e) => setRegisterForm((prev) => ({ ...prev, city: e.target.value }))}
+                            disabled={isCepLoading || isLoadingCities}
+                            className="ds-select ds-focus-ring disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          >
+                            <option value="">
+                              {isLoadingCities ? 'Carregando cidades...' : 'Selecione a cidade'}
+                            </option>
+                            {cityOptions.map((city) => (
+                              <option key={city} value={city}>
+                                {city}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                        {cityLookupError && <p className="text-xs text-amber-700">{cityLookupError}</p>}
+                        {registerForm.state && (
+                          <button
+                            type="button"
+                            onClick={() => setUseManualCityInput((prev) => !prev)}
+                            className="text-xs font-semibold text-brand-primary hover:underline"
+                          >
+                            {useManualCityInput ? 'Usar lista de cidades' : 'Não encontrou? Digitar manualmente'}
+                          </button>
+                        )}
                       </div>
                     </div>
 
@@ -820,7 +978,7 @@ export function CreateStore() {
                           value={registerForm.street}
                           onChange={(e) => setRegisterForm((prev) => ({ ...prev, street: e.target.value }))}
                           disabled={isCepLoading}
-                          className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          className="ds-input ds-focus-ring disabled:bg-gray-100 disabled:cursor-not-allowed"
                           placeholder="Nome da rua"
                         />
                       </div>
@@ -831,7 +989,7 @@ export function CreateStore() {
                           value={registerForm.neighborhood}
                           onChange={(e) => setRegisterForm((prev) => ({ ...prev, neighborhood: e.target.value }))}
                           disabled={isCepLoading}
-                          className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          className="ds-input ds-focus-ring disabled:bg-gray-100 disabled:cursor-not-allowed"
                           placeholder="Bairro"
                         />
                       </div>
@@ -845,7 +1003,7 @@ export function CreateStore() {
                           value={registerForm.number}
                           onChange={(e) => setRegisterForm((prev) => ({ ...prev, number: e.target.value }))}
                           disabled={isCepLoading}
-                          className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          className="ds-input ds-focus-ring disabled:bg-gray-100 disabled:cursor-not-allowed"
                           placeholder="123"
                         />
                       </div>
@@ -855,7 +1013,7 @@ export function CreateStore() {
                           value={registerForm.complement}
                           onChange={(e) => setRegisterForm((prev) => ({ ...prev, complement: e.target.value }))}
                           disabled={isCepLoading}
-                          className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          className="ds-input ds-focus-ring disabled:bg-gray-100 disabled:cursor-not-allowed"
                           placeholder="Apto, sala, bloco (opcional)"
                         />
                       </div>

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowUpRight, Storefront } from '@phosphor-icons/react';
+import { ArrowUpRight, MagnifyingGlass, Storefront } from '@phosphor-icons/react';
 import { Link, useNavigate } from 'react-router-dom';
 import { LandingPageLayout } from '../layouts/LandingPageLayout';
 import { storeService } from '../services/storeService';
@@ -27,6 +27,7 @@ type PortfolioCase = {
   screenshot: string;
   segment: string;
   city: string;
+  state: string;
   cityFilterKey: string;
   searchIndex: string;
   problem: string;
@@ -84,6 +85,7 @@ export function PortfolioPage() {
   const [queryInput, setQueryInput] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [segmentFilter, setSegmentFilter] = useState('all');
+  const [stateFilter, setStateFilter] = useState('all');
   const [cityFilter, setCityFilter] = useState('all');
   const [visibleCount, setVisibleCount] = useState(9);
 
@@ -117,7 +119,9 @@ export function PortfolioPage() {
     return (stores || []).map((store, index) => {
       const logo = resolveAssetUrl(store?.settings?.logoUrl || undefined) || '/marketing/dashboard.png';
       const rawCity = (store as any)?.city || (store as any)?.addressCity || (store as any)?.settings?.city || '';
+      const rawState = (store as any)?.state || (store as any)?.addressState || (store as any)?.settings?.state || '';
       const city = String(rawCity || '').trim();
+      const state = String(rawState || '').trim().toUpperCase();
       return {
         id: String(store.id || store.slug || store.name || `store-${index}`),
         name: store.name || 'Loja ativa',
@@ -125,12 +129,14 @@ export function PortfolioPage() {
         screenshot: logo,
         segment: segmentLabel(store?.settings?.segment),
         city: city || 'Não informado',
+        state: state || '',
         cityFilterKey: city ? city.toLowerCase() : '',
         searchIndex: [
           store?.name,
           store?.slug,
           segmentLabel(store?.settings?.segment),
           city,
+          state,
           store?.settings?.description,
         ]
           .filter(Boolean)
@@ -165,18 +171,27 @@ export function PortfolioPage() {
     return options;
   }, [cases]);
 
+  const stateOptions = useMemo(() => {
+    return Array.from(
+      new Set(
+        cases.map((item) => item.state).filter((uf) => uf && uf.length === 2)
+      )
+    ).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+  }, [cases]);
+
   const filteredCases = useMemo(() => {
     return cases.filter((item) => {
       if (debouncedQuery && !item.searchIndex.includes(debouncedQuery)) return false;
       if (segmentFilter !== 'all' && item.segment !== segmentFilter) return false;
+      if (stateFilter !== 'all' && item.state !== stateFilter) return false;
       if (cityFilter !== 'all' && item.city !== cityFilter) return false;
       return true;
     });
-  }, [cases, debouncedQuery, segmentFilter, cityFilter]);
+  }, [cases, debouncedQuery, segmentFilter, stateFilter, cityFilter]);
 
   useEffect(() => {
     setVisibleCount(9);
-  }, [debouncedQuery, segmentFilter, cityFilter]);
+  }, [debouncedQuery, segmentFilter, stateFilter, cityFilter]);
 
   const visibleCases = filteredCases.slice(0, visibleCount);
   const canLoadMore = visibleCount < filteredCases.length;
@@ -201,13 +216,16 @@ export function PortfolioPage() {
         <div className="max-w-6xl mx-auto px-4 space-y-5">
           {!loading && !error && (
             <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 space-y-3">
-              <div className="grid gap-3 lg:grid-cols-[1fr_220px_220px_auto]">
-                <input
-                  value={queryInput}
-                  onChange={(event) => setQueryInput(event.target.value)}
-                  placeholder="Buscar loja (nome, segmento, cidade, slug...)"
-                  className="ds-input ds-focus-ring"
-                />
+              <div className="grid gap-3 lg:grid-cols-[1fr_170px_170px_170px_auto]">
+                <div className="relative">
+                  <MagnifyingGlass size={16} weight="duotone" className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    value={queryInput}
+                    onChange={(event) => setQueryInput(event.target.value)}
+                    placeholder="Buscar loja (nome, segmento, cidade, slug...)"
+                    className="ds-input ds-focus-ring pl-10"
+                  />
+                </div>
                 <select
                   value={segmentFilter}
                   onChange={(event) => setSegmentFilter(event.target.value)}
@@ -217,6 +235,18 @@ export function PortfolioPage() {
                   {segmentOptions.map((segment) => (
                     <option key={segment} value={segment}>
                       {segment}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={stateFilter}
+                  onChange={(event) => setStateFilter(event.target.value)}
+                  className="ds-select ds-focus-ring"
+                >
+                  <option value="all">Todas UFs</option>
+                  {stateOptions.map((uf) => (
+                    <option key={uf} value={uf}>
+                      {uf}
                     </option>
                   ))}
                 </select>
@@ -238,6 +268,7 @@ export function PortfolioPage() {
                     setQueryInput('');
                     setDebouncedQuery('');
                     setSegmentFilter('all');
+                    setStateFilter('all');
                     setCityFilter('all');
                   }}
                   className="ds-btn ds-btn-secondary ds-focus-ring px-4 py-3 text-sm font-bold"
@@ -245,6 +276,35 @@ export function PortfolioPage() {
                   Limpar
                 </button>
               </div>
+              {segmentOptions.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setSegmentFilter('all')}
+                    className={`ds-btn px-3 py-1.5 rounded-full text-xs font-bold border ${
+                      segmentFilter === 'all'
+                        ? 'bg-brand-gradient text-white border-transparent'
+                        : 'ds-btn-secondary border-slate-200 text-slate-700'
+                    }`}
+                  >
+                    Todos
+                  </button>
+                  {segmentOptions.slice(0, 8).map((segment) => (
+                    <button
+                      key={segment}
+                      type="button"
+                      onClick={() => setSegmentFilter(segment)}
+                      className={`ds-btn px-3 py-1.5 rounded-full text-xs font-bold border ${
+                        segmentFilter === segment
+                          ? 'bg-brand-gradient text-white border-transparent'
+                          : 'ds-btn-secondary border-slate-200 text-slate-700'
+                      }`}
+                    >
+                      {segment}
+                    </button>
+                  ))}
+                </div>
+              )}
               <p className="text-xs text-slate-500">
                 {filteredCases.length} resultado(s) encontrado(s)
               </p>
@@ -277,7 +337,9 @@ export function PortfolioPage() {
                       <div>
                         <p className="text-xs uppercase tracking-[0.2em] text-sky-700 font-semibold">{item.segment}</p>
                         <h2 className="text-lg font-black text-slate-900 line-clamp-1">{item.name}</h2>
-                        <p className="text-[11px] text-slate-500 mt-0.5">{item.city}</p>
+                        <p className="text-[11px] text-slate-500 mt-0.5">
+                          {item.city}{item.state ? ` • ${item.state}` : ''}
+                        </p>
                       </div>
                       {item.slug ? (
                         <Link

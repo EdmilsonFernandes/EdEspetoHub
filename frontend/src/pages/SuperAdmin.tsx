@@ -1001,7 +1001,7 @@ export function SuperAdmin() {
               disabled={loading || !loginForm.email || !loginForm.password}
               className="w-full ds-btn ds-btn-primary ds-focus-ring text-white py-3 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {loading ? '⏳ Entrando...' : '🔐 Entrar no painel'}
+              {loading ? 'Entrando...' : 'Acessar administração'}
             </button>
           </form>
       </AuthLayout>

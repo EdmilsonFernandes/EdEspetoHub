@@ -127,6 +127,9 @@ export function MotoboyLogin() {
                 <div className="absolute inset-0">
                   <img src="/janocaminho.jpg" alt="Jano Caminho" className="h-full w-full object-cover object-center" />
                 </div>
+                <div className="absolute inset-0 opacity-45">
+                  <img src="/janocaminho.jpg" alt="" aria-hidden className="h-full w-full object-contain object-center p-10" />
+                </div>
                 <div className="absolute inset-0 bg-slate-950/65" />
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(47,157,247,0.32),_transparent_56%),radial-gradient(circle_at_bottom,_rgba(95,211,90,0.2),_transparent_58%)]" />
                 <div className="relative z-10 h-full p-7 text-white flex flex-col justify-between">
@@ -284,7 +287,7 @@ export function MotoboyLogin() {
                     className="w-full ds-btn ds-btn-primary ds-focus-ring px-4 py-3 text-sm font-extrabold text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     <Lightning size={18} weight="duotone" />
-                    {loading ? 'Entrando...' : 'Entrar'}
+                    {loading ? 'Entrando...' : 'Entrar para receber entregas'}
                   </button>
 
                   <button

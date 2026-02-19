@@ -60,7 +60,7 @@ export function AdminLayout({
 
   return (
     <div className="ds-admin-bg">
-      <div className="w-full p-3 sm:p-4 space-y-4">
+      <div className="w-full max-w-[1680px] mx-auto p-3 sm:p-4 lg:px-6 space-y-4">
         {shouldShowHeader && (
           <AdminHeader contextLabel={contextLabel} onToggleHeader={handleToggleHeader} />
         )}

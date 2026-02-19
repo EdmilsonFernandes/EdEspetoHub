@@ -237,7 +237,7 @@ export function AdminLogin() {
             type="submit"
             className="w-full ds-btn ds-btn-primary ds-focus-ring text-white py-3 font-semibold"
           >
-            Entrar no painel
+            Acessar painel da loja
           </button>
           <button
             type="button"
