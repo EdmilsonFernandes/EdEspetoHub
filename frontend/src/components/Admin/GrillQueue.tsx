@@ -849,7 +849,7 @@ export const GrillQueue = () => {
             return (
             <div
               key={order.id}
-              className={`relative w-full max-w-full p-3 sm:p-3.5 rounded-2xl border border-slate-200 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md overflow-hidden ${
+              className={`relative w-full max-w-full p-3 sm:p-3.5 rounded-2xl border border-slate-200 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md overflow-visible ${
                 isNew ? 'ring-2 ring-emerald-300/80' : ''
               } ${isLate ? 'border-rose-200 bg-rose-50/60' : 'bg-white'}`}
             >
@@ -1070,12 +1070,12 @@ export const GrillQueue = () => {
               {tvMode ? renderTimeline(order.status, order.type) : null}
 
               {/* TOTAL + BOTÕES */}
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mt-3">
-	              <div className="w-full sm:w-auto">
+            <div className="mt-3 flex min-w-0 flex-col gap-3 md:flex-row md:items-end md:justify-between">
+	              <div className="w-full min-w-0 md:flex-1">
 	                {renderMoneyBreakdown(order)}
 	              </div>
 
-              <div className="flex flex-wrap gap-2">
+              <div className="w-full md:w-auto flex flex-wrap gap-2 md:justify-end">
                 {order.status === "pending" && (
                   <div className="w-full sm:w-auto">
                     <div className="mb-2 text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-2.5 py-1">

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowSquareOut, Eye, EyeSlash, Lightning, SignIn, SignOut, UserCircle } from '@phosphor-icons/react';
+import { ArrowSquareOut, Buildings, Eye, EyeSlash, Lightning, SignIn, SignOut, UserCircle } from '@phosphor-icons/react';
 import { authService } from '../services/authService';
 import { useAuth } from '../contexts/AuthContext';
 import { MotoboyHeader } from '../components/Motoboy/MotoboyHeader';
@@ -123,8 +123,12 @@ export function MotoboyLogin() {
 
         <div className="grid gap-5 lg:grid-cols-[0.95fr_1.05fr] items-stretch">
           <aside className="hidden lg:block">
-              <div className="relative overflow-hidden rounded-3xl min-h-[620px] border border-slate-800/70 bg-[linear-gradient(180deg,#020617_0%,#0b1220_60%,#0f172a_100%)] shadow-[0_30px_65px_-40px_rgba(15,23,42,0.8)] motoboy-fade-up">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.16),_transparent_50%),radial-gradient(circle_at_bottom,_rgba(34,197,94,0.14),_transparent_50%)]" />
+              <div className="relative overflow-hidden rounded-3xl min-h-[620px] border border-slate-800/70 shadow-[0_30px_65px_-40px_rgba(15,23,42,0.8)] motoboy-fade-up">
+                <div className="absolute inset-0">
+                  <img src="/janocaminho.jpg" alt="" aria-hidden className="h-full w-full object-cover object-center" />
+                </div>
+                <div className="absolute inset-0 bg-[linear-gradient(160deg,rgba(2,6,23,0.68),rgba(2,6,23,0.5))]" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(2,6,23,0.22),_transparent_46%),radial-gradient(circle_at_top,_rgba(47,157,247,0.3),_transparent_58%),radial-gradient(circle_at_bottom,_rgba(95,211,90,0.2),_transparent_62%)]" />
                 <div className="relative z-10 h-full p-7 text-white flex flex-col justify-between">
                   <div className="space-y-5">
                     <p className="text-2xl font-black tracking-tight text-white/95">Já no Caminho</p>
@@ -160,11 +164,12 @@ export function MotoboyLogin() {
           <div className="space-y-5">
             {alreadyLoggedIn ? (
               <div className="ds-card-elevated ds-login-card-enter p-5 sm:p-6 space-y-4 motoboy-fade-up ds-anim-delay-20">
-                <div className="rounded-2xl border border-slate-200/80 bg-[#050b16] p-2.5 shadow-[0_20px_40px_-24px_rgba(15,23,42,0.52)]">
-                  <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-28 sm:h-32 w-full rounded-xl object-cover object-center" />
-                  <p className="mt-2 px-1 text-center text-[11px] font-bold tracking-[0.22em] uppercase text-slate-200/95">
+                <div className="rounded-2xl border border-slate-200/80 bg-white/80 backdrop-blur p-3 shadow-[0_20px_40px_-24px_rgba(15,23,42,0.35)]">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-600">
+                    <Buildings size={12} weight="duotone" />
                     Já no Caminho
-                  </p>
+                  </div>
+                  <p className="mt-2 text-sm font-semibold text-slate-700">Área do entregador</p>
                 </div>
                 <div className="flex items-start justify-between gap-3">
                   <div>
@@ -201,11 +206,12 @@ export function MotoboyLogin() {
               </div>
             ) : (
               <div className="ds-card-elevated ds-login-card-enter p-5 sm:p-6 space-y-4 motoboy-fade-up ds-anim-delay-40">
-                <div className="rounded-2xl border border-slate-200/80 bg-[#050b16] p-2.5 shadow-[0_20px_40px_-24px_rgba(15,23,42,0.52)]">
-                  <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-28 sm:h-32 w-full rounded-xl object-cover object-center" />
-                  <p className="mt-2 px-1 text-center text-[11px] font-bold tracking-[0.22em] uppercase text-slate-200/95">
+                <div className="rounded-2xl border border-slate-200/80 bg-white/80 backdrop-blur p-3 shadow-[0_20px_40px_-24px_rgba(15,23,42,0.35)]">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-600">
+                    <Buildings size={12} weight="duotone" />
                     Já no Caminho
-                  </p>
+                  </div>
+                  <p className="mt-2 text-sm font-semibold text-slate-700">Área do entregador</p>
                 </div>
                 <div className="flex items-start justify-between gap-3">
                   <div>

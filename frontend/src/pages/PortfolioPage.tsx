@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowUpRight, MagnifyingGlass, Storefront } from '@phosphor-icons/react';
+import { ArrowUpRight, FunnelSimple, MagnifyingGlass, MapPin, Storefront } from '@phosphor-icons/react';
 import { Link, useNavigate } from 'react-router-dom';
 import { LandingPageLayout } from '../layouts/LandingPageLayout';
 import { storeService } from '../services/storeService';
@@ -87,12 +87,15 @@ const parseCityStateFromAddress = (address?: string | null) => {
     .split('|')
     .map((part) => part.trim())
     .filter(Boolean);
-  const target = byPipe.length >= 3 ? byPipe[2] : raw;
-  const matched = target.match(/(.+?)\s*[-/]\s*([A-Za-z]{2})\b/);
+  const candidates = byPipe.length ? [...byPipe].reverse() : [raw];
+  candidates.push(raw);
+  const matched = candidates
+    .map((target) => target.match(/(.+?)\s*[-/]\s*([A-Za-z]{2})\b/))
+    .find(Boolean);
   if (!matched) return { city: '', state: '' };
   return {
-    city: String(matched[1] || '').trim(),
-    state: String(matched[2] || '').trim().toUpperCase(),
+    city: String(matched?.[1] || '').trim(),
+    state: String(matched?.[2] || '').trim().toUpperCase(),
   };
 };
 
@@ -106,6 +109,7 @@ export function PortfolioPage() {
   const [segmentFilter, setSegmentFilter] = useState('all');
   const [stateFilter, setStateFilter] = useState('all');
   const [cityFilter, setCityFilter] = useState('all');
+  const [sortBy, setSortBy] = useState<'recent' | 'name_asc' | 'name_desc'>('recent');
   const [visibleCount, setVisibleCount] = useState(9);
 
   useEffect(() => {
@@ -201,18 +205,25 @@ export function PortfolioPage() {
   }, [cases]);
 
   const filteredCases = useMemo(() => {
-    return cases.filter((item) => {
+    const base = cases.filter((item) => {
       if (debouncedQuery && !item.searchIndex.includes(debouncedQuery)) return false;
       if (segmentFilter !== 'all' && item.segment !== segmentFilter) return false;
       if (stateFilter !== 'all' && item.state !== stateFilter) return false;
       if (cityFilter !== 'all' && item.city !== cityFilter) return false;
       return true;
     });
-  }, [cases, debouncedQuery, segmentFilter, stateFilter, cityFilter]);
+    if (sortBy === 'name_asc') {
+      return [...base].sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+    }
+    if (sortBy === 'name_desc') {
+      return [...base].sort((a, b) => b.name.localeCompare(a.name, 'pt-BR'));
+    }
+    return base;
+  }, [cases, debouncedQuery, segmentFilter, stateFilter, cityFilter, sortBy]);
 
   useEffect(() => {
     setVisibleCount(9);
-  }, [debouncedQuery, segmentFilter, stateFilter, cityFilter]);
+  }, [debouncedQuery, segmentFilter, stateFilter, cityFilter, sortBy]);
 
   useEffect(() => {
     if (cityFilter === 'all') return;
@@ -244,7 +255,7 @@ export function PortfolioPage() {
         <div className="max-w-6xl mx-auto px-4 space-y-5">
           {!loading && !error && (
             <div className="ds-card p-4 sm:p-5 space-y-3">
-              <div className="grid gap-3 lg:grid-cols-[1fr_170px_170px_170px_auto]">
+              <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_170px_130px_170px_150px_auto]">
                 <div className="relative">
                   <MagnifyingGlass size={16} weight="duotone" className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input
@@ -290,6 +301,20 @@ export function PortfolioPage() {
                     </option>
                   ))}
                 </select>
+                <select
+                  value={sortBy}
+                  onChange={(event) => {
+                    const value = String(event.target.value);
+                    if (value === 'recent' || value === 'name_asc' || value === 'name_desc') {
+                      setSortBy(value);
+                    }
+                  }}
+                  className="ds-select ds-focus-ring"
+                >
+                  <option value="recent">Mais recentes</option>
+                  <option value="name_asc">Nome A-Z</option>
+                  <option value="name_desc">Nome Z-A</option>
+                </select>
                 <button
                   type="button"
                   onClick={() => {
@@ -298,6 +323,7 @@ export function PortfolioPage() {
                     setSegmentFilter('all');
                     setStateFilter('all');
                     setCityFilter('all');
+                    setSortBy('recent');
                   }}
                   className="ds-btn ds-btn-secondary ds-focus-ring px-4 py-3 text-sm font-bold"
                 >
@@ -351,6 +377,21 @@ export function PortfolioPage() {
             <div className="ds-empty-state p-10 text-center">
               <Storefront size={30} weight="duotone" className="mx-auto text-slate-500" />
               <p className="text-sm font-semibold text-slate-700 mt-3">Nenhuma loja encontrada com esses filtros.</p>
+              <button
+                type="button"
+                onClick={() => {
+                  setQueryInput('');
+                  setDebouncedQuery('');
+                  setSegmentFilter('all');
+                  setStateFilter('all');
+                  setCityFilter('all');
+                  setSortBy('recent');
+                }}
+                className="mt-3 ds-btn ds-btn-secondary ds-focus-ring px-4 py-2 text-xs font-bold"
+              >
+                <FunnelSimple size={14} weight="duotone" className="inline-block mr-1" />
+                Limpar filtros
+              </button>
             </div>
           )}
 
@@ -359,15 +400,19 @@ export function PortfolioPage() {
               <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                 {visibleCases.map((item) => (
                 <article key={item.id} className="ds-card overflow-hidden h-full flex flex-col">
-                  <div className="aspect-[16/9] bg-slate-100">
+                  <div className="aspect-[16/8] bg-slate-100">
                     <img src={item.screenshot} alt={`Screenshot - ${item.name}`} className="w-full h-full object-cover" />
                   </div>
-                  <div className="p-4 space-y-3 flex-1 flex flex-col">
+                  <div className="p-3.5 space-y-2.5 flex-1 flex flex-col">
                     <div className="flex items-center justify-between gap-3">
                       <div>
-                        <p className="text-xs uppercase tracking-[0.2em] text-sky-700 font-semibold">{item.segment}</p>
+                        <p className="text-xs uppercase tracking-[0.2em] text-sky-700 font-semibold inline-flex items-center gap-1">
+                          <Storefront size={12} weight="duotone" />
+                          {item.segment}
+                        </p>
                         <h2 className="text-lg font-black text-slate-900 line-clamp-1">{item.name}</h2>
-                        <p className="text-[11px] text-slate-500 mt-0.5">
+                        <p className="text-[11px] text-slate-500 mt-0.5 inline-flex items-center gap-1">
+                          <MapPin size={11} weight="duotone" />
                           {item.city}{item.state ? ` • ${item.state}` : ''}
                         </p>
                       </div>
