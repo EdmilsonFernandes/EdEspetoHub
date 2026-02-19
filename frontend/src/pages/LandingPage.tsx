@@ -10,6 +10,7 @@ import {
   Storefront,
   Truck,
   Wine,
+  X,
 } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 import { LandingPageLayout } from '../layouts/LandingPageLayout';
@@ -35,6 +36,7 @@ export function LandingPage() {
     totalOrders?: number;
     totalRevenue?: number;
   } | null>(null);
+  const [activeProof, setActiveProof] = useState<{ title: string; image: string } | null>(null);
 
   useEffect(() => {
     document.title = 'Jano Caminho | Plataforma completa para gestão de pedidos e entregas';
@@ -71,6 +73,11 @@ export function LandingPage() {
   }, []);
 
   const ctaPrimaryHref = 'https://wa.me/5512997822784';
+  const proofVisuals = [
+    { title: 'Dashboard de gestão', image: '/marketing/dashboard-real.png' },
+    { title: 'Fila de pedidos', image: '/marketing/fila-real.png' },
+    { title: 'Painel de pedidos', image: '/marketing/pedidos-real.png' },
+  ];
 
   return (
     <LandingPageLayout>
@@ -225,19 +232,41 @@ export function LandingPage() {
           <p className="text-xs uppercase tracking-[0.3em] text-sky-700 font-semibold">Prova visual</p>
           <h2 className="text-2xl sm:text-4xl font-black text-slate-900 mt-2">Painel administrativo em operação real</h2>
           <div className="mt-6 grid gap-4 md:grid-cols-3">
-            {[
-              { title: 'Dashboard de gestão', image: '/marketing/dashboard-real.png' },
-              { title: 'Fila de pedidos', image: '/marketing/fila-real.png' },
-              { title: 'Painel de pedidos', image: '/marketing/pedidos-real.png' },
-            ].map((item) => (
-              <div key={item.title} className="rounded-3xl border border-slate-200 bg-slate-50 p-3">
+            {proofVisuals.map((item) => (
+              <button
+                key={item.title}
+                type="button"
+                onClick={() => setActiveProof(item)}
+                className="rounded-3xl border border-slate-200 bg-slate-50 p-3 text-left transition hover:-translate-y-0.5 hover:shadow-[0_20px_42px_-26px_rgba(15,23,42,0.35)]"
+              >
                 <img src={item.image} alt={item.title} className="w-full h-52 rounded-2xl object-cover" />
                 <p className="text-sm font-semibold text-slate-800 mt-3">{item.title}</p>
-              </div>
+              </button>
             ))}
           </div>
         </div>
       </section>
+
+      {activeProof && (
+        <div className="fixed inset-0 z-[120] bg-black/70 backdrop-blur-sm p-4 flex items-center justify-center">
+          <div className="w-full max-w-5xl rounded-3xl overflow-hidden bg-white shadow-2xl border border-slate-200">
+            <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
+              <p className="text-sm font-extrabold text-slate-900">{activeProof.title}</p>
+              <button
+                type="button"
+                onClick={() => setActiveProof(null)}
+                className="h-9 w-9 rounded-xl border border-slate-200 bg-white text-slate-600 hover:text-slate-900 flex items-center justify-center"
+                aria-label="Fechar zoom"
+              >
+                <X size={18} weight="bold" />
+              </button>
+            </div>
+            <div className="bg-slate-950 p-3 sm:p-5">
+              <img src={activeProof.image} alt={activeProof.title} className="w-full max-h-[78vh] object-contain rounded-2xl" />
+            </div>
+          </div>
+        </div>
+      )}
 
       <section className="bg-[linear-gradient(120deg,#0f172a,#1e293b)] py-14 sm:py-16">
         <div className="max-w-6xl mx-auto px-4">
