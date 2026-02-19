@@ -16,14 +16,36 @@ export function AdminRenewal() {
   const [isAnnual, setIsAnnual] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [currentSubscription, setCurrentSubscription] = useState<any>(null);
   const openedPaymentLinkRef = useRef('');
 
   const storeId = auth?.store?.id;
-  const currentStatus = auth?.subscription?.status;
-  const currentEndDate = auth?.subscription?.endDate;
-  const currentPlanName = String(auth?.subscription?.plan?.name || '').toLowerCase();
+  const currentStatus = currentSubscription?.status ?? auth?.subscription?.status;
+  const currentEndDate = currentSubscription?.endDate ?? auth?.subscription?.endDate;
+  const currentPlanName = String(currentSubscription?.plan?.name || auth?.subscription?.plan?.name || '').toLowerCase();
   const currentTier = currentPlanName.includes('pro') ? 'pro' : 'basic';
   const allowedTierKeys = useMemo(() => (currentTier === 'basic' ? [ 'pro' ] : [ 'basic', 'pro' ]), [currentTier]);
+
+  useEffect(() => {
+    let active = true;
+    const loadCurrentSubscription = async () => {
+      if (!storeId) return;
+      try {
+        const data = await subscriptionService.getByStore(storeId, { force: true });
+        if (active) {
+          setCurrentSubscription(data || null);
+        }
+      } catch (loadError) {
+        if (active) {
+          setCurrentSubscription(null);
+        }
+      }
+    };
+    loadCurrentSubscription();
+    return () => {
+      active = false;
+    };
+  }, [storeId]);
 
   useEffect(() => {
     const fetchPlans = async () => {
