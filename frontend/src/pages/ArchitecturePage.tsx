@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import {
   Boxes,
   Database,
+  Linkedin,
   MapPinned,
   ServerCog,
   ShieldCheck,
@@ -51,6 +52,36 @@ const stackCards = [
     title: 'Containers Docker (Deploy Cloud AWS)',
     description: 'Ambiente containerizado com deploy contínuo, isolamento de serviços e escalabilidade.',
     icon: Boxes,
+  },
+];
+
+const teamMembers = [
+  {
+    name: 'Edmilson Lopes Fernandes',
+    role: 'Arquiteto de Software e Desenvolvedor Full Stack Sênior',
+    badge: 'Principal',
+    years: 15,
+    profileUrl: 'https://www.linkedin.com/in/edmilson-santos-6805a515/',
+    profileImage: '/team/ed.png',
+    color: 'from-red-500 to-amber-500',
+  },
+  {
+    name: 'Gabriel Botega',
+    role: 'Desenvolvedor Backend',
+    badge: 'Backend',
+    years: 4,
+    profileUrl: 'https://www.linkedin.com/in/gabrielbotega/',
+    profileImage: '/team/botega.png',
+    color: 'from-sky-500 to-indigo-500',
+  },
+  {
+    name: 'Juan Felipe Rada',
+    role: 'Desenvolvedor Frontend',
+    badge: 'Frontend',
+    years: 4,
+    profileUrl: 'https://www.linkedin.com/in/radapls/',
+    profileImage: '/team/juan.png',
+    color: 'from-emerald-500 to-teal-500',
   },
 ];
 
@@ -142,7 +173,53 @@ export function ArchitecturePage() {
           </div>
         </div>
       </section>
+
+      <section className="bg-white py-14 sm:py-16">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="rounded-3xl border border-slate-200 bg-[linear-gradient(120deg,#f8fafc,#f1f5f9)] p-6 sm:p-8">
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6">
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-sky-700 font-semibold">Time de desenvolvimento</p>
+                <h3 className="text-2xl sm:text-3xl font-black text-slate-900 mt-2">Especialistas por trás da plataforma</h3>
+                <p className="text-sm text-slate-600 mt-2">Engenharia de produto focada em performance, escala e experiência premium.</p>
+              </div>
+              <span className="inline-flex w-fit rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-bold text-slate-600">
+                Equipe técnica
+              </span>
+            </div>
+            <div className="grid gap-4 md:grid-cols-3">
+              {teamMembers.map((member) => (
+                <article key={member.name} className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
+                  <div className={`h-16 bg-gradient-to-r ${member.color}`} />
+                  <div className="p-4 -mt-7">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="h-14 w-14 rounded-2xl overflow-hidden border-2 border-white shadow-sm bg-white">
+                        <img src={member.profileImage} alt={member.name} className="h-full w-full object-cover object-center" />
+                      </div>
+                      <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-600">
+                        {member.badge} • {member.years} anos
+                      </span>
+                    </div>
+                    <div className="mt-4">
+                      <h4 className="text-base font-black text-slate-900">{member.name}</h4>
+                      <p className="text-sm font-semibold text-sky-700 mt-0.5">{member.role}</p>
+                    </div>
+                    <a
+                      href={member.profileUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#0a66c2] px-3 py-2.5 text-sm font-bold text-white hover:opacity-95"
+                    >
+                      <Linkedin size={16} />
+                      Ver LinkedIn
+                    </a>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
     </LandingPageLayout>
   );
 }
-
