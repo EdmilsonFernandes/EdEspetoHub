@@ -967,7 +967,28 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       setSubscriptionError('');
       try {
         const data = await subscriptionService.getByStore(storeId);
-        if (active) setSubscriptionDetails(data);
+        if (active) {
+          setSubscriptionDetails(data);
+          if (auth?.token && auth?.store) {
+            const status = String(data?.status || '').toUpperCase();
+            const planName = String(data?.plan?.name || '').toLowerCase();
+            const isVipPlan = Boolean(data?.planExempt || auth?.store?.settings?.planExempt);
+            const isProLike = isVipPlan || status === 'TRIAL' || planName.includes('pro') || planName.includes('vip');
+            const syncedFeatures = {
+              motoboyManagement: isProLike,
+              tipPayouts: isProLike,
+              advancedDashboard: isProLike,
+              deliveryMode: isProLike,
+              pickupMode: true,
+            };
+            setAuth({
+              ...auth,
+              subscription: data,
+              planTier: isVipPlan ? 'vip' : (isProLike ? 'pro' : 'basic'),
+              features: syncedFeatures,
+            });
+          }
+        }
       } catch (err) {
         if (active) {
           setSubscriptionError(err.message || 'Não foi possível carregar a assinatura agora.');
