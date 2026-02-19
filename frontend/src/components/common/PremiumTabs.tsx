@@ -19,6 +19,7 @@ type PremiumTabsProps = {
   activeClassName?: string;
   inactiveClassName?: string;
   getButtonStyle?: (item: PremiumTabItem, isActive: boolean) => CSSProperties | undefined;
+  getButtonClassName?: (item: PremiumTabItem, isActive: boolean) => string | undefined;
 };
 
 export function PremiumTabs({
@@ -31,6 +32,7 @@ export function PremiumTabs({
   activeClassName = '',
   inactiveClassName = '',
   getButtonStyle,
+  getButtonClassName,
 }: PremiumTabsProps) {
   return (
     <div
@@ -59,6 +61,7 @@ export function PremiumTabs({
                   ? 'border-transparent bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 text-white shadow-[0_16px_30px_-22px_rgba(15,23,42,0.75)]'
                   : 'border-slate-200 bg-white text-slate-700 hover:-translate-y-0.5 hover:shadow-md',
                 isActive ? activeClassName : inactiveClassName,
+                getButtonClassName ? getButtonClassName(item, isActive) : '',
                 buttonClassName,
               ].join(' ')}
             >

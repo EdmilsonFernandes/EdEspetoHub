@@ -149,7 +149,7 @@ export function MotoboyLogin() {
 
           <div className="space-y-5">
             {alreadyLoggedIn ? (
-              <div className="ds-card-elevated p-5 sm:p-6 space-y-4 motoboy-fade-up" style={{ animationDelay: '20ms' }}>
+              <div className="ds-card-elevated p-5 sm:p-6 space-y-4 motoboy-fade-up ds-anim-delay-20">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Sessão ativa</p>
@@ -168,7 +168,7 @@ export function MotoboyLogin() {
                   <button
                     type="button"
                     onClick={() => navigate('/motoboy/home')}
-                    className="btn-press w-full rounded-xl bg-[linear-gradient(120deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_60%,#f59e0b))] px-4 py-3 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(239,68,68,0.85)] flex items-center justify-center gap-2"
+                    className="btn-press ds-btn ds-btn-primary ds-focus-ring w-full rounded-xl px-4 py-3 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(239,68,68,0.85)] flex items-center justify-center gap-2"
                   >
                     <ArrowSquareOut size={18} weight="duotone" />
                     Ir para painel
@@ -176,7 +176,7 @@ export function MotoboyLogin() {
                   <button
                     type="button"
                     onClick={handleLogout}
-                    className="btn-press w-full rounded-xl border border-slate-200 bg-white/70 px-4 py-3 text-sm font-extrabold text-slate-800 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)] flex items-center justify-center gap-2"
+                    className="btn-press ds-btn ds-btn-secondary ds-focus-ring w-full rounded-xl border border-slate-200 bg-white/70 px-4 py-3 text-sm font-extrabold text-slate-800 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)] flex items-center justify-center gap-2"
                   >
                     <SignOut size={18} weight="duotone" />
                     Entrar com outra conta
@@ -184,9 +184,9 @@ export function MotoboyLogin() {
                 </div>
               </div>
             ) : (
-              <div className="ds-card-elevated p-5 sm:p-6 space-y-4 motoboy-fade-up" style={{ animationDelay: '40ms' }}>
+              <div className="ds-card-elevated p-5 sm:p-6 space-y-4 motoboy-fade-up ds-anim-delay-40">
                 <div className="ds-card p-3 flex items-center gap-3">
-                  <div className="h-12 w-24 rounded-xl overflow-hidden bg-slate-900 border border-slate-200 shadow-sm shrink-0 p-1">
+                  <div className="h-14 w-28 rounded-xl overflow-hidden bg-slate-900 border border-slate-200 shadow-sm shrink-0 p-1">
                     <img src="/janocaminho.jpg" alt="Jano Caminho" className="h-full w-full object-contain" />
                   </div>
                   <div className="min-w-0">
@@ -228,14 +228,14 @@ export function MotoboyLogin() {
                         type="button"
                         onClick={handleResendVerification}
                         disabled={resendLoading || resendCooldown > 0 || !verifyPrompt.email}
-                        className="w-full ds-btn rounded-xl bg-amber-600 text-white px-4 py-2 text-xs font-bold disabled:opacity-60"
+                        className="w-full ds-btn ds-focus-ring rounded-xl bg-amber-600 text-white px-4 py-2 text-xs font-bold disabled:opacity-60"
                       >
                         {resendLoading ? 'Reenviando...' : resendCooldown > 0 ? `Reenviar em ${resendCooldown}s` : 'Reenviar código de ativação'}
                       </button>
                       <button
                         type="button"
                         onClick={() => navigate('/verify-email', { state: { email: verifyPrompt.email } })}
-                        className="w-full ds-btn ds-btn-secondary px-4 py-2 text-xs font-bold text-amber-800"
+                        className="w-full ds-btn ds-btn-secondary ds-focus-ring px-4 py-2 text-xs font-bold text-amber-800"
                       >
                         Já tenho o código
                       </button>
@@ -268,7 +268,7 @@ export function MotoboyLogin() {
                       <button
                         type="button"
                         onClick={() => setShowPassword((v) => !v)}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 h-9 w-9 rounded-xl border border-slate-200 bg-white/70 flex items-center justify-center text-slate-600 hover:text-slate-900 ds-btn"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 h-9 w-9 rounded-xl border border-slate-200 bg-white/70 flex items-center justify-center text-slate-600 hover:text-slate-900 ds-btn ds-focus-ring"
                         aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
                       >
                         {showPassword ? <EyeSlash size={18} weight="duotone" /> : <Eye size={18} weight="duotone" />}
@@ -279,7 +279,7 @@ export function MotoboyLogin() {
                   <button
                     type="submit"
                     disabled={!formValid || loading}
-                    className="w-full ds-btn ds-btn-primary px-4 py-3 text-sm font-extrabold text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="w-full ds-btn ds-btn-primary ds-focus-ring px-4 py-3 text-sm font-extrabold text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     <Lightning size={18} weight="duotone" />
                     {loading ? 'Entrando...' : 'Entrar'}
@@ -288,7 +288,7 @@ export function MotoboyLogin() {
                   <button
                     type="button"
                     onClick={() => navigate('/motoboy/register')}
-                    className="w-full ds-btn ds-btn-secondary px-4 py-3 text-sm font-extrabold text-slate-800"
+                    className="w-full ds-btn ds-btn-secondary ds-focus-ring px-4 py-3 text-sm font-extrabold text-slate-800"
                   >
                     Criar conta de entregador
                   </button>

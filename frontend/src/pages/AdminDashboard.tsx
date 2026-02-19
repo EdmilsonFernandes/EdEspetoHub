@@ -204,7 +204,7 @@ const OrdersView = ({ orders, products, storeSlug }) => {
             <button
               key={filter.id}
               onClick={() => setStatusFilter(filter.id)}
-              className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all hover:-translate-y-0.5 active:scale-95 ${
+              className={`ds-btn ds-focus-ring px-3 py-1.5 rounded-full text-xs font-semibold border transition-all hover:-translate-y-0.5 active:scale-95 ${
                 statusFilter === filter.id
                   ? 'bg-brand-primary text-white border-brand-primary'
                   : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
@@ -218,7 +218,7 @@ const OrdersView = ({ orders, products, storeSlug }) => {
           <select
             value={periodFilter}
             onChange={(e) => setPeriodFilter(e.target.value)}
-            className="w-full sm:w-36 rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-600 focus:ring-2 focus:ring-brand-primary"
+            className="ds-select ds-focus-ring w-full sm:w-36 py-2 text-sm text-slate-600"
           >
             <option value="all">Todo período</option>
             <option value="7">Últimos 7 dias</option>
@@ -229,21 +229,21 @@ const OrdersView = ({ orders, products, storeSlug }) => {
             type="date"
             value={dateFilter}
             onChange={(e) => setDateFilter(e.target.value)}
-            className="w-full sm:w-44 rounded-lg border border-slate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-brand-primary"
+            className="ds-input ds-focus-ring w-full sm:w-44 py-2 text-sm"
           />
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Buscar cliente, telefone ou pedido (ex: 89035f7b)"
-            className="w-full sm:w-64 rounded-lg border border-slate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-brand-primary"
+            className="ds-input ds-focus-ring w-full sm:w-64 py-2 text-sm"
           />
         </div>
       </div>
 
       {filteredOrders.length === 0 ? (
         <div className="py-12 text-center text-slate-500">
-          <div className="mx-auto max-w-md rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-6 py-8">
+          <div className="mx-auto max-w-md ds-empty-state px-6 py-8">
             <div className="text-4xl">🧾</div>
             <p className="mt-3 text-sm font-semibold text-slate-700">Nenhum pedido por aqui ainda.</p>
             <p className="text-xs text-slate-500 mt-1">
@@ -1048,7 +1048,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
    * RENDER
    * ========================= */
   if (!session?.store) {
-    return <div style={{ padding: 24 }}>Carregando painel da loja...</div>;
+    return <div className="ds-loading-page">Carregando painel da loja...</div>;
   }
 
   const openingHours = session?.store?.settings?.openingHours || [];
@@ -1140,7 +1140,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
   return (
     <AdminLayout contextLabel="Painel da Loja">
-      <style>{`@keyframes navPop{0%{transform:scale(1)}50%{transform:scale(1.08)}100%{transform:scale(1)}}`}</style>
       {menuVisible ? (
         <div className="hidden sm:flex lg:hidden justify-center">
           <PremiumTabs
@@ -1175,8 +1174,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
               setNavPulse(id);
               window.setTimeout(() => setNavPulse(null), 260);
             }}
-            getButtonStyle={(item, isActive) =>
-              isActive && navPulse === item.id ? { animation: 'navPop 220ms ease' } : undefined
+            getButtonClassName={(item, isActive) =>
+              isActive && navPulse === item.id ? 'ds-anim-pop' : ''
             }
           />
         </div>
@@ -1404,8 +1403,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
               <OpeningHoursCard />
             </div>
             <div
-              className="sm:hidden fixed left-0 right-0 px-4 z-50"
-              style={{ bottom: "calc(env(safe-area-inset-bottom) + 96px)" }}
+              className="sm:hidden fixed left-0 right-0 px-4 z-50 ds-safe-fab"
             >
               <button
                 type="button"
@@ -1448,15 +1446,12 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
       {!mobileNavCollapsed && (
         <div
-          className="sm:hidden fixed inset-x-0 bottom-0 z-50 px-3"
-          style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 10px)' }}
+          className="sm:hidden fixed inset-x-0 bottom-0 z-50 px-3 ds-safe-bottom"
         >
           <div className="mx-auto max-w-lg">
             <div className="relative rounded-[28px] border border-slate-200/70 bg-white/85 backdrop-blur-xl shadow-[0_18px_60px_-28px_rgba(15,23,42,0.6)] px-2 py-2 overflow-hidden">
               <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.9),_transparent_55%)]" />
-              <div className="pointer-events-none absolute inset-0 opacity-30" style={{
-                background: `linear-gradient(120deg, ${branding?.primaryColor || '#ef4444'} 0%, ${branding?.secondaryColor || '#0f172a'} 100%)`,
-              }} />
+              <div className="pointer-events-none absolute inset-0 opacity-30 ds-mobile-nav-overlay" />
               <div className="relative grid grid-cols-5 gap-1">
                 {mobilePrimaryTabs.map((item) => {
                   const Icon = item.icon;
@@ -1474,15 +1469,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                         setNavPulse(item.id);
                         window.setTimeout(() => setNavPulse(null), 260);
                       }}
-                      className="relative rounded-2xl px-2 py-2 transition active:scale-95"
-                      style={isActive ? {
-                        background: `linear-gradient(120deg, ${branding?.primaryColor || '#ef4444'} 0%, ${branding?.secondaryColor || '#0f172a'} 100%)`,
-                        boxShadow: '0 14px 24px -16px rgba(15, 23, 42, 0.65)',
-                      } : undefined}
+                      className={`relative rounded-2xl px-2 py-2 transition active:scale-95 ${isActive ? 'ds-mobile-nav-active' : ''}`}
                     >
                       <div
-                        className={`flex flex-col items-center justify-center gap-1 ${isActive ? 'text-white' : 'text-slate-800'}`}
-                        style={isActive && navPulse === item.id ? { animation: 'navPop 220ms ease' } : undefined}
+                        className={`flex flex-col items-center justify-center gap-1 ${isActive ? 'text-white' : 'text-slate-800'} ${isActive && navPulse === item.id ? 'ds-anim-pop' : ''}`}
                       >
                         <span
                           className={`grid place-items-center h-9 w-11 rounded-2xl ${isActive ? 'bg-white/15 ring-1 ring-white/25' : 'bg-slate-100 ring-1 ring-slate-200'}`}
@@ -1522,8 +1512,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
       {mobileNavCollapsed && (
         <div
-          className="sm:hidden fixed inset-x-0 bottom-0 z-50 px-3"
-          style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 10px)' }}
+          className="sm:hidden fixed inset-x-0 bottom-0 z-50 px-3 ds-safe-bottom"
         >
           <div className="mx-auto max-w-lg flex items-center justify-center">
             <button
@@ -1543,7 +1532,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             className="absolute inset-0 bg-slate-900/45 backdrop-blur-sm"
             onClick={() => setMobileMoreOpen(false)}
           />
-          <div className="absolute inset-x-0 bottom-0 px-3" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 12px)' }}>
+          <div className="absolute inset-x-0 bottom-0 px-3 ds-safe-bottom-lg">
             <div className="mx-auto max-w-lg rounded-3xl border border-slate-200 bg-white shadow-2xl overflow-hidden">
               <div className="px-5 pt-5 pb-3 flex items-start justify-between gap-3">
                 <div>

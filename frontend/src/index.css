@@ -43,6 +43,7 @@ body {
   font-family: "Inter", "Poppins", "Segoe UI", system-ui, -apple-system, sans-serif;
   background: var(--surface-1);
   color: var(--text-strong);
+  overflow-x: clip;
 }
 
 /* 🔥 FIRE ANIMATION */
@@ -124,6 +125,12 @@ body {
       rotate(calc(var(--confetti-rot) * 1deg));
     opacity: 0;
   }
+}
+
+@keyframes navPop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+  100% { transform: scale(1); }
 }
 
 /* Utility classes */
@@ -459,6 +466,138 @@ body {
 
   .bg-brand-secondary-soft {
     background-color: color-mix(in srgb, var(--color-secondary) 12%, white);
+  }
+
+  .ds-page-gradient {
+    min-height: 100vh;
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-primary) 12%, white) 0%,
+      #f8fafc 45%
+    );
+  }
+
+  .ds-loading-page {
+    padding: 24px;
+    color: #475569;
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+
+  .ds-empty-state {
+    border-radius: var(--radius-lg);
+    border: 1px dashed rgb(203 213 225);
+    background: #f8fafc;
+    color: #64748b;
+    padding: 1rem 1.1rem;
+    font-size: 0.86rem;
+    font-weight: 600;
+  }
+
+  .ds-focus-ring:focus-visible,
+  .ds-btn:focus-visible,
+  .ds-input:focus-visible,
+  .ds-select:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 22%, transparent);
+  }
+
+  .ds-safe-bottom {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 10px);
+  }
+
+  .ds-safe-bottom-lg {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 12px);
+  }
+
+  .ds-safe-fab {
+    bottom: calc(env(safe-area-inset-bottom) + 96px);
+  }
+
+  .ds-menu-orb-primary {
+    background: radial-gradient(circle, var(--color-primary) 0%, transparent 70%);
+  }
+
+  .ds-menu-orb-secondary {
+    background: radial-gradient(circle, var(--color-secondary) 0%, transparent 70%);
+  }
+
+  .ds-header-gradient-line {
+    background-image: linear-gradient(120deg, var(--color-primary), var(--color-secondary));
+  }
+
+  .ds-logo-frame {
+    border-color: color-mix(in srgb, var(--color-primary) 36%, #cbd5e1);
+    color: var(--color-primary);
+    background-color: #fff;
+  }
+
+  .ds-category-head {
+    border-color: color-mix(in srgb, var(--color-primary) 20%, #e2e8f0);
+  }
+
+  .ds-accent-red { background-color: #ef4444; }
+  .ds-accent-amber { background-color: #f59e0b; }
+  .ds-accent-emerald { background-color: #10b981; }
+  .ds-accent-blue { background-color: #3b82f6; }
+  .ds-accent-violet { background-color: #8b5cf6; }
+  .ds-accent-pink { background-color: #ec4899; }
+
+  .ds-mobile-nav-overlay {
+    background: linear-gradient(120deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+  }
+
+  .ds-mobile-nav-active {
+    background: linear-gradient(120deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+    box-shadow: 0 14px 24px -16px rgba(15, 23, 42, 0.65);
+  }
+
+  .ds-anim-pop {
+    animation: navPop 220ms ease;
+  }
+
+  .ds-anim-delay-20 {
+    animation-delay: 20ms;
+  }
+
+  .ds-anim-delay-40 {
+    animation-delay: 40ms;
+  }
+
+  .ds-toast {
+    border: 1px solid rgb(226 232 240);
+    border-radius: 14px;
+    padding: 0.75rem 0.95rem;
+    box-shadow: 0 18px 42px -24px rgba(15, 23, 42, 0.45);
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    min-width: 320px;
+    cursor: pointer;
+  }
+
+  .ds-toast-success {
+    background: rgb(236 253 245);
+    border-color: rgb(167 243 208);
+    color: rgb(6 95 70);
+  }
+
+  .ds-toast-error {
+    background: rgb(254 242 242);
+    border-color: rgb(254 202 202);
+    color: rgb(153 27 27);
+  }
+
+  .ds-toast-warning {
+    background: rgb(255 247 237);
+    border-color: rgb(254 215 170);
+    color: rgb(154 52 18);
+  }
+
+  .ds-toast-info {
+    background: rgb(239 246 255);
+    border-color: rgb(191 219 254);
+    color: rgb(30 64 175);
   }
 }
   .ds-card {

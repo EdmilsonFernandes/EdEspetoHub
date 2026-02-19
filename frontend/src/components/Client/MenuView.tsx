@@ -63,16 +63,12 @@ const Header = ({
     <div className={`w-full sticky top-0 z-50 ${compact ? 'pb-2' : 'pb-3'} pt-2`}>
       <div className="max-w-6xl mx-auto px-3 sm:px-4">
         <div className={`relative w-full bg-white/90 backdrop-blur-xl shadow-[0_18px_40px_-26px_rgba(15,23,42,0.45)] px-3 sm:px-4 ${compact ? 'py-2.5' : 'py-3.5 sm:py-4'} flex items-center gap-2 sm:gap-4 flex-wrap sm:flex-nowrap rounded-3xl border border-white/70`}>
-          <div
-            className="absolute top-0 left-4 right-4 h-1 rounded-full"
-            style={{ backgroundImage: "linear-gradient(120deg, var(--color-primary), var(--color-secondary))" }}
-          />
+          <div className="absolute top-0 left-4 right-4 h-1 rounded-full ds-header-gradient-line" />
 
       {/* LOGO OFICIAL */}
       {( !compact || (compact && branding?.logoUrl) ) && (
         <div
-          className={`${compact ? 'w-8 h-8' : 'w-10 h-10 sm:w-14 sm:h-14'} rounded-2xl overflow-hidden border shadow-[0_14px_30px_-20px_rgba(239,68,68,0.6)] bg-white flex-shrink-0 flex items-center justify-center`}
-          style={{ borderColor: branding?.primaryColor, color: branding?.primaryColor, backgroundColor: '#fff' }}
+          className={`${compact ? 'w-8 h-8' : 'w-10 h-10 sm:w-14 sm:h-14'} rounded-2xl overflow-hidden border shadow-[0_14px_30px_-20px_rgba(239,68,68,0.6)] ds-logo-frame flex-shrink-0 flex items-center justify-center`}
         >
           {branding?.logoUrl ? (
             <img
@@ -341,13 +337,7 @@ export const MenuView = ({
   };
 
   return (
-    <div
-      className="min-h-screen"
-      style={{
-        background:
-          "linear-gradient(180deg, color-mix(in srgb, var(--color-primary) 12%, white) 0%, #f8fafc 45%)",
-      }}
-    >
+    <div className="ds-page-gradient overflow-x-clip">
 
       {showHeader && (
         <Header
@@ -362,20 +352,10 @@ export const MenuView = ({
         />
       )}
 
-      <div className="space-y-8 p-4">
+      <div className="space-y-8 p-4 max-w-6xl mx-auto">
         <section className="relative overflow-hidden rounded-2xl premium-card-glass p-4">
-          <div
-            className="absolute -top-24 -right-20 h-56 w-56 rounded-full opacity-20"
-            style={{
-              background: "radial-gradient(circle, var(--color-primary) 0%, transparent 70%)",
-            }}
-          />
-          <div
-            className="absolute -bottom-24 -left-20 h-56 w-56 rounded-full opacity-20"
-            style={{
-              background: "radial-gradient(circle, var(--color-secondary) 0%, transparent 70%)",
-            }}
-          />
+          <div className="absolute -top-24 -right-20 h-56 w-56 rounded-full opacity-20 ds-menu-orb-primary" />
+          <div className="absolute -bottom-24 -left-20 h-56 w-56 rounded-full opacity-20 ds-menu-orb-secondary" />
           <div className="relative space-y-4">
             {!showHeader && (
               <div>
@@ -582,12 +562,12 @@ export const MenuView = ({
         )}
         {filteredGrouped.map((category, index) => {
           const accentColors = [
-            "#ef4444",
-            "#f59e0b",
-            "#10b981",
-            "#3b82f6",
-            "#8b5cf6",
-            "#ec4899",
+            "ds-accent-red",
+            "ds-accent-amber",
+            "ds-accent-emerald",
+            "ds-accent-blue",
+            "ds-accent-violet",
+            "ds-accent-pink",
           ];
           const accent = accentColors[index % accentColors.length];
           return (
@@ -595,14 +575,10 @@ export const MenuView = ({
 
             {/* Título da categoria */}
             <div
-              className="px-4 py-2 rounded-2xl premium-card-glass flex items-center justify-between"
-              style={{ borderColor: "color-mix(in srgb, var(--color-primary) 20%, #e2e8f0)" }}
+              className="px-4 py-2 rounded-2xl premium-card-glass ds-category-head flex items-center justify-between"
             >
               <div className="flex items-center gap-3">
-                <span
-                  className="h-9 w-1.5 rounded-full"
-                  style={{ backgroundColor: accent }}
-                />
+                <span className={`h-9 w-1.5 rounded-full ${accent}`} />
                 {(() => {
                   const meta = categoryVisualMeta(category.key);
                   const Icon = meta.icon;
@@ -710,7 +686,7 @@ export const MenuView = ({
                         onUpdateCart(item, 1);
                       }}
                       title="Adicionar"
-                      className="relative h-10 min-w-[102px] px-3 rounded-xl ds-btn ds-btn-primary text-white flex items-center justify-center gap-1 shadow-[0_16px_34px_-22px_rgba(15,23,42,0.6)] text-xs font-extrabold"
+                    className="relative h-10 min-w-[102px] px-3 rounded-xl ds-btn ds-btn-primary ds-focus-ring text-white flex items-center justify-center gap-1 shadow-[0_16px_34px_-22px_rgba(15,23,42,0.6)] text-xs font-extrabold"
                     >
                       <Plus size={14} weight="duotone" />
                       Adicionar
@@ -727,7 +703,7 @@ export const MenuView = ({
         );
         })}
         {filteredGrouped.length === 0 && (
-          <div className="rounded-2xl premium-card p-6 text-sm text-slate-500">
+          <div className="rounded-2xl ds-empty-state p-6 text-sm text-slate-500">
             Nenhum item encontrado.
           </div>
         )}

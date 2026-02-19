@@ -126,8 +126,8 @@ export function AdminLogin() {
   return (
     <AuthLayout>
       <form onSubmit={handleLogin} className="space-y-6">
-        <div className="ds-card p-3 flex items-center gap-3">
-          <div className="h-14 w-28 rounded-xl overflow-hidden bg-slate-900 border border-slate-200 shadow-sm shrink-0">
+        <div className="ds-card p-3 sm:p-4 flex items-center gap-3">
+          <div className="h-16 w-32 rounded-xl overflow-hidden bg-slate-900 border border-slate-200 shadow-sm shrink-0">
             <img src={platformLogo} alt="Jano Caminho" className="h-full w-full object-contain p-1" />
           </div>
           <div className="min-w-0">
@@ -209,7 +209,7 @@ export function AdminLogin() {
                 type="text"
                 value={loginForm.identifier}
                 onChange={e => setLoginForm(prev => ({ ...prev, identifier: e.target.value }))}
-                className="ds-input pl-10"
+                className="ds-input ds-focus-ring pl-10"
                 placeholder="Ex: edsertaneja ou dono@loja.com"
                 autoCapitalize="none"
               />
@@ -223,13 +223,13 @@ export function AdminLogin() {
                 type={showPassword ? 'text' : 'password'}
                 value={loginForm.password}
                 onChange={e => setLoginForm(prev => ({ ...prev, password: e.target.value }))}
-                className="ds-input pr-10"
+                className="ds-input ds-focus-ring pr-10"
                 placeholder="Sua senha de acesso"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 h-9 w-9 rounded-xl border border-gray-200 bg-white/80 flex items-center justify-center text-gray-500 hover:text-gray-800 ds-btn"
+                className="absolute right-2 top-1/2 -translate-y-1/2 h-9 w-9 rounded-xl border border-gray-200 bg-white/80 flex items-center justify-center text-gray-500 hover:text-gray-800 ds-btn ds-focus-ring"
                 aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
               >
                 {showPassword ? <EyeSlash size={18} weight="duotone" /> : <Eye size={18} weight="duotone" />}
@@ -248,14 +248,14 @@ export function AdminLogin() {
         <div className="space-y-3">
           <button
             type="submit"
-            className="w-full ds-btn ds-btn-primary text-white py-3 font-semibold"
+            className="w-full ds-btn ds-btn-primary ds-focus-ring text-white py-3 font-semibold"
           >
             Entrar no painel
           </button>
           <button
             type="button"
             onClick={() => navigate('/')}
-            className="w-full ds-btn ds-btn-secondary border-2 text-gray-700 py-3 font-semibold"
+            className="w-full ds-btn ds-btn-secondary ds-focus-ring border-2 text-gray-700 py-3 font-semibold"
           >
             <span className="inline-flex items-center justify-center gap-2">
               <ArrowLeft size={18} weight="duotone" />
