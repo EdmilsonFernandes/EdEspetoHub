@@ -539,13 +539,13 @@ export const DashboardView = ({
           const Icon = card.icon;
           return (
             <div key={card.id} className={`ds-metric-card ${card.tone} p-5`}>
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
+              <div className="relative">
+                <div className="min-w-0 pr-14">
                   <p className="text-[10px] uppercase tracking-[0.24em] text-slate-500 font-bold">{card.label}</p>
-                  <h3 className="text-[1.85rem] leading-tight font-black text-slate-900 mt-1">{card.value}</h3>
+                  <h3 className="text-[1.8rem] leading-tight font-black text-slate-900 mt-1 break-words">{card.value}</h3>
                   <p className="text-xs text-slate-500 mt-1">{card.helper}</p>
                 </div>
-                <span className={`h-11 w-11 rounded-xl border flex items-center justify-center ${card.iconTone}`}>
+                <span className={`absolute top-0 right-0 h-11 w-11 rounded-xl border flex items-center justify-center shrink-0 ${card.iconTone}`}>
                   <Icon size={20} weight="duotone" />
                 </span>
               </div>
