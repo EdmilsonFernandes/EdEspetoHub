@@ -66,7 +66,7 @@ export function CreateStore() {
     document: '',
     storeName: '',
   });
-  const platformLogo = '/logo.svg';
+  const platformLogo = '/janocaminho.jpg';
   const primaryPalette = [ '#dc2626', '#ea580c', '#f59e0b', '#16a34a', '#0ea5e9', '#2563eb', '#7c3aed' ];
   const secondaryPalette = [ '#111827', '#1f2937', '#334155', '#0f172a', '#0f766e', '#065f46', '#4b5563' ];
   const termsRef = useRef<HTMLDivElement | null>(null);
@@ -479,7 +479,7 @@ export function CreateStore() {
           <div className="flex items-center justify-between py-3 sm:py-4">
             <button onClick={() => navigate('/')} className="flex items-center gap-3">
               <div className="h-11 w-11 rounded-2xl bg-white shadow-[0_14px_26px_-18px_rgba(239,68,68,0.7)] ring-1 ring-red-200 overflow-hidden">
-                <img src="/logo.svg" alt="Jano Caminho" className="h-full w-full object-cover" draggable={false} />
+                <img src="/janocaminho.jpg" alt="Jano Caminho" className="h-full w-full object-cover" draggable={false} />
               </div>
               <div className="hidden sm:block leading-tight">
                 <p className="text-lg font-black text-gray-900">Jano Caminho</p>

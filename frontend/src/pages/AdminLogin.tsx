@@ -93,7 +93,7 @@ export function AdminLogin() {
     }
   };
 
-  const platformLogo = '/logo.svg';
+  const platformLogo = '/janocaminho.jpg';
 
   useEffect(() => {
     if (!hydrated) return;

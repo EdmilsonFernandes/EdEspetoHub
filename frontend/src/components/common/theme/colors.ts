@@ -1,21 +1,21 @@
 /**
  * Color System - Centralized color tokens for the design system
- * Based on the red theme established across the application
+ * Based on the Jano Caminho visual identity (blue + green)
  */
 
 export const colors = {
-  // Primary - Red (Main brand color)
+  // Primary - Blue (Main brand color)
   primary: {
-    50: '#fef2f2',
-    100: '#fee2e2',
-    200: '#fecaca',
-    300: '#fca5a5',
-    400: '#f87171',
-    500: '#ef4444', // Main primary
-    600: '#dc2626', // Hover/active
-    700: '#b91c1c',
-    800: '#991b1b',
-    900: '#7f1d1d',
+    50: '#eff6ff',
+    100: '#dbeafe',
+    200: '#bfdbfe',
+    300: '#93c5fd',
+    400: '#60a5fa',
+    500: '#3b82f6', // Main primary
+    600: '#2563eb', // Hover/active
+    700: '#1d4ed8',
+    800: '#1e40af',
+    900: '#1e3a8a',
   },
 
   // Secondary - Gray (Neutral/supporting)
@@ -32,18 +32,18 @@ export const colors = {
     900: '#111827',
   },
 
-  // Accent - Amber (For special offers like test plan)
+  // Accent - Green (For highlights and actions)
   accent: {
-    50: '#fffbeb',
-    100: '#fef3c7',
-    200: '#fde68a',
-    300: '#fcd34d',
-    400: '#fbbf24',
-    500: '#f59e0b', // Main accent
-    600: '#d97706', // Hover/active
-    700: '#b45309',
-    800: '#92400e',
-    900: '#78350f',
+    50: '#f0fdf4',
+    100: '#dcfce7',
+    200: '#bbf7d0',
+    300: '#86efac',
+    400: '#4ade80',
+    500: '#22c55e', // Main accent
+    600: '#16a34a', // Hover/active
+    700: '#15803d',
+    800: '#166534',
+    900: '#14532d',
   },
 
   // Success (Green)

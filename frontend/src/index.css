@@ -3,7 +3,7 @@
 @variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-primary: #dc2626;
+  --color-primary: #2f9df7;
 }
 
 :root {

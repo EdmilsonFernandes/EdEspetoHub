@@ -23,7 +23,7 @@ export function PaymentPage() {
   const [selectedPlanId, setSelectedPlanId] = useState('');
   const [isAnnual, setIsAnnual] = useState(false);
   const EVENTS_PAGE_SIZE = 25;
-  const platformLogo = '/logo.svg';
+  const platformLogo = '/janocaminho.jpg';
   const redirectRef = useRef(false);
 
   const handleCopyPix = async (value: string) => {

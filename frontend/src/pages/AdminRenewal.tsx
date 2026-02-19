@@ -91,7 +91,7 @@ export function AdminRenewal() {
   };
 
   const expiresLabel = currentEndDate ? new Date(currentEndDate).toLocaleDateString('pt-BR') : '—';
-  const platformLogo = '/logo.svg';
+  const platformLogo = '/janocaminho.jpg';
   const handleGoToLogin = () => {
     logout();
     navigate('/admin');

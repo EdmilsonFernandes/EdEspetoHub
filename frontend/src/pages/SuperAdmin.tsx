@@ -932,7 +932,7 @@ export function SuperAdmin() {
     return summary?.paidRevenue ? formatCurrency(summary.paidRevenue) : formatCurrency(0);
   }, [summary?.paidRevenue]);
 
-  const platformLogo = '/logo.svg';
+  const platformLogo = '/janocaminho.jpg';
 
   if (!token) {
     return (

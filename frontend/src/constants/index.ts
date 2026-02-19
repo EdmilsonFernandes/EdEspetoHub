@@ -9,9 +9,9 @@ export const PIX_KEY = import.meta.env.VITE_PIX_KEY || '';
 export const defaultBranding = {
   brandName: 'Jano Caminho',
   espetoId: import.meta.env.VITE_DEFAULT_STORE || 'espetinhodatony',
-  logoUrl: '/logo.svg',
-  primaryColor: '#b91c1c',
-  accentColor: '#111827',
+  logoUrl: '/janocaminho.jpg',
+  primaryColor: '#2f9df7',
+  accentColor: '#5fd35a',
   tagline: 'Crie seu site de pedidos online em minutos',
   instagram: '',
 };

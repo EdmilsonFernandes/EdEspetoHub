@@ -4,22 +4,17 @@
   "description": "Plataforma completa para pedidos online, operacao e entregas de restaurantes, mercados, farmacias, adegas e food trucks",
   "icons": [
     {
-      "src": "favicon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "logo.svg",
-      "sizes": "512x512",
-      "type": "image/svg+xml"
+      "src": "janocaminho.jpg",
+      "sizes": "1024x768",
+      "type": "image/jpeg",
+      "purpose": "any"
     }
   ],
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "theme_color": "#FF6B35",
+  "theme_color": "#2F9DF7",
   "background_color": "#ffffff",
   "categories": ["food", "business", "productivity"],
   "lang": "pt-BR"

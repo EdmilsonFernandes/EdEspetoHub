@@ -6,7 +6,7 @@ interface AuthLayoutProps {
 }
 
 export function AuthLayout({ children }: AuthLayoutProps) {
-  const platformLogo = '/logo.svg';
+  const platformLogo = '/janocaminho.jpg';
 
   return (
     <div
