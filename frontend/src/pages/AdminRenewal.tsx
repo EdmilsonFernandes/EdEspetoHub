@@ -21,13 +21,17 @@ export function AdminRenewal() {
   const storeId = auth?.store?.id;
   const currentStatus = auth?.subscription?.status;
   const currentEndDate = auth?.subscription?.endDate;
+  const currentPlanName = String(auth?.subscription?.plan?.name || '').toLowerCase();
+  const currentTier = currentPlanName.includes('pro') ? 'pro' : 'basic';
+  const allowedTierKeys = useMemo(() => (currentTier === 'basic' ? [ 'pro' ] : [ 'basic', 'pro' ]), [currentTier]);
 
   useEffect(() => {
     const fetchPlans = async () => {
       try {
         const response = await planService.list();
         setPlans(response || []);
-        const defaultPlan = response?.find((plan) => plan.name === getPlanName('basic', 'monthly'));
+        const defaultTier = allowedTierKeys.includes(currentTier) ? currentTier : allowedTierKeys[0];
+        const defaultPlan = response?.find((plan) => plan.name === getPlanName(defaultTier, 'monthly'));
         if (defaultPlan) {
           setSelectedPlanId(defaultPlan.id);
         } else if (response?.[0]) {
@@ -39,7 +43,7 @@ export function AdminRenewal() {
     };
 
     fetchPlans();
-  }, []);
+  }, [allowedTierKeys, currentTier]);
 
   const billingKey = isAnnual ? 'yearly' : 'monthly';
   const billing = BILLING_OPTIONS[billingKey];
@@ -54,10 +58,11 @@ export function AdminRenewal() {
     const isCurrentCycle = currentPlan?.name?.endsWith(`_${billingKey}`);
     if (isCurrentCycle) return;
     const fallback = PLAN_TIERS
+      .filter((tier) => allowedTierKeys.includes(tier.key))
       .map((tier) => plansByName[getPlanName(tier.key, billingKey)]?.id)
       .find(Boolean);
     if (fallback) setSelectedPlanId(fallback);
-  }, [billingKey, plans, plansByName, selectedPlanId]);
+  }, [allowedTierKeys, billingKey, plans, plansByName, selectedPlanId]);
 
   const handleRenew = async () => {
     if (!storeId) return;
@@ -146,6 +151,11 @@ export function AdminRenewal() {
 
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-gray-800">Escolha um plano</h3>
+            <p className="text-xs text-slate-500">
+              {currentTier === 'basic'
+                ? 'Seu plano atual é Basic. Nesta tela mostramos apenas upgrade para Pro.'
+                : 'Seu plano atual é Pro. Você pode manter Pro ou mudar para Basic.'}
+            </p>
             <div className="flex items-center justify-center gap-4">
               <span className={`text-sm font-semibold ${!isAnnual ? 'text-gray-900' : 'text-gray-500'}`}>Mensal</span>
               <button
@@ -159,17 +169,17 @@ export function AdminRenewal() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {PLAN_TIERS.map((tier) => {
+              {PLAN_TIERS.filter((tier) => allowedTierKeys.includes(tier.key)).map((tier) => {
                 const planKey = getPlanName(tier.key, billingKey);
                 const plan = plansByName[planKey];
-                const full = plan ? Number(plan.price) : billing.priceByTier[tier.key];
+                const full = plan ? Number(plan.price) : null;
                 const promoFromApi = plan?.promoPrice != null ? Number(plan.promoPrice) : null;
                 const promo = billingKey === 'yearly'
-                  ? (promoFromApi != null && promoFromApi > 0 && promoFromApi < full ? promoFromApi : resolveAnnualPromoTotal(full))
+                  ? (promoFromApi != null && promoFromApi > 0 && full !== null && promoFromApi < full ? promoFromApi : (full !== null ? resolveAnnualPromoTotal(full) : null))
                   : promoFromApi;
-                const showPromo = billingKey === 'yearly' && promo != null && promo > 0 && promo < full;
-                const displayPrice = billingKey === 'yearly' ? (showPromo ? promo : full) : full;
-                const monthlyEq = billingKey === 'yearly' ? resolveMonthlyEquivalent(displayPrice) : null;
+                const showPromo = billingKey === 'yearly' && promo != null && promo > 0 && full !== null && promo < full;
+                const displayPrice = full === null ? null : (billingKey === 'yearly' ? (showPromo ? promo : full) : full);
+                const monthlyEq = billingKey === 'yearly' && displayPrice !== null ? resolveMonthlyEquivalent(displayPrice) : null;
                 const durationLabel = plan
                   ? `${plan.durationDays} dias de acesso`
                   : billingKey === 'yearly'
@@ -201,7 +211,11 @@ export function AdminRenewal() {
                       </span>
                     )}
                     <p className="text-sm uppercase font-semibold text-gray-500">{tier.label}</p>
-                    {showPromo ? (
+                    {displayPrice === null ? (
+                      <div className="mt-1">
+                        <p className="text-lg font-bold text-gray-500">Indisponível</p>
+                      </div>
+                    ) : showPromo ? (
                       <div className="mt-1">
                         <p className="text-xs text-gray-400 line-through">R$ {Number(full).toFixed(2)}</p>
                         <p className="text-2xl font-bold text-gray-900">R$ {Number(displayPrice).toFixed(2)}</p>
@@ -210,7 +224,7 @@ export function AdminRenewal() {
                       <p className="text-2xl font-bold text-gray-900">R$ {Number(displayPrice).toFixed(2)}</p>
                     )}
                     <p className="text-xs text-gray-500">
-                      {billingKey === 'yearly' ? `${billing.period} (R$ ${Number(monthlyEq || 0).toFixed(2)}/mês)` : billing.period}
+                      {displayPrice === null ? 'Entre em contato com o suporte.' : (billingKey === 'yearly' ? `${billing.period} (R$ ${Number(monthlyEq || 0).toFixed(2)}/mês)` : billing.period)}
                     </p>
                     <p className="text-xs text-gray-500 mt-1">{durationLabel}</p>
                     <ul className="mt-3 text-xs text-gray-600 space-y-1">
