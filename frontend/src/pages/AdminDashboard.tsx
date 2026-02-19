@@ -1,4 +1,5 @@
 // @ts-nocheck
+import * as React from 'react';
 import { ChartBar, BookOpen, ChefHat, CreditCard, Package, Gear, ShoppingCart, DotsThree, X, Scooter, ForkKnife, Storefront, Truck } from '@phosphor-icons/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
