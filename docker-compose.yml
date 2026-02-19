@@ -72,7 +72,7 @@ services:
     container_name: chamanoespeto-pgadmin
     image: dpage/pgadmin4:8.13
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@chamanoespeto.com
+      PGADMIN_DEFAULT_EMAIL: admin@janocaminho.com.br
       PGADMIN_DEFAULT_PASSWORD: ChamaNoEspeto20025#!
       PGADMIN_CONFIG_SERVER_MODE: "False"
     ports:

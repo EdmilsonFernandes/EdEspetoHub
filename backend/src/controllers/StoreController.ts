@@ -35,7 +35,7 @@ const buildDemoStore = (slug: string) => {
   const endDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
   return {
     id: 'demo-store',
-    name: 'Chama no Espeto Demo',
+    name: 'Jano Caminho Demo',
     slug,
     open: true,
     createdAt: now,
@@ -44,7 +44,7 @@ const buildDemoStore = (slug: string) => {
       description: 'Loja demo de espetos com combos especiais e atendimento rápido.',
       primaryColor: '#dc2626',
       secondaryColor: '#111827',
-      socialLinks: [ { type: 'instagram', value: 'chamanoespeto' } ],
+      socialLinks: [ { type: 'instagram', value: 'janocaminho' } ],
       openingHours: [
         { day: 1, enabled: true, intervals: [ { start: '10:00', end: '22:00' } ] },
         { day: 2, enabled: true, intervals: [ { start: '10:00', end: '22:00' } ] },
@@ -59,7 +59,7 @@ const buildDemoStore = (slug: string) => {
     owner: {
       id: 'demo-owner',
       fullName: 'Loja Demo',
-      email: 'demo@chamanoespeto.com.br',
+      email: 'demo@janocaminho.com.br',
       phone: '(11) 99999-0000',
       address: 'Rua Demo 123, Centro - Sao Paulo/SP',
     },
