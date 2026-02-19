@@ -257,8 +257,8 @@ export class StoreService
           subscriptionStatus: subscription?.status,
         });
         const nextTypes = Array.isArray(data.orderTypes) ? data.orderTypes : [];
-        if (!features.pickupMode && nextTypes.includes('pickup')) {
-          throw new AppError('AUTH-003', 403, { requiredFeature: 'pickupMode' });
+        if (!features.deliveryMode && nextTypes.includes('delivery')) {
+          throw new AppError('AUTH-003', 403, { requiredFeature: 'deliveryMode' });
         }
         store.settings.orderTypes = nextTypes;
       } else if (!Array.isArray(store.settings.orderTypes) || !store.settings.orderTypes.length) {

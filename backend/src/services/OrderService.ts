@@ -375,10 +375,11 @@ export class OrderService
     const baseAllowedTypes = Array.isArray(store?.settings?.orderTypes) && store.settings.orderTypes.length > 0
       ? store.settings.orderTypes
       : [ 'delivery', 'pickup', 'table' ];
-    const allowedTypes = features.pickupMode
+    const allowedTypes = features.deliveryMode
       ? baseAllowedTypes
-      : baseAllowedTypes.filter((type) => String(type || '').toLowerCase() !== 'pickup');
-    if (!allowedTypes.includes(input.type)) {
+      : baseAllowedTypes.filter((type) => String(type || '').toLowerCase() !== 'delivery');
+    const safeAllowedTypes = allowedTypes.length ? allowedTypes : [ 'pickup', 'table' ];
+    if (!safeAllowedTypes.includes(input.type)) {
       throw new AppError('ORDER-002', 400);
     }
     if (input.type === 'table' && input.table) {

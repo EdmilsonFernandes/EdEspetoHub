@@ -94,9 +94,10 @@ export class StoreController {
       planExempt: params.planExempt,
       subscriptionStatus: params.subscriptionStatus,
     });
-    return features.pickupMode
+    const sanitized = features.deliveryMode
       ? incoming
-      : incoming.filter((type) => String(type || '').toLowerCase() !== 'pickup');
+      : incoming.filter((type) => String(type || '').toLowerCase() !== 'delivery');
+    return sanitized.length ? sanitized : [ 'pickup', 'table' ];
   }
   /**
    * Executes is store open now logic.

@@ -31,9 +31,9 @@ export function OrderTypeSettingsCard() {
   const [saving, setSaving] = useState(false);
   const isVip = Boolean(auth?.store?.settings?.planExempt || auth?.subscription?.planExempt);
   const planName = String(auth?.subscription?.plan?.name || '').toLowerCase();
-  const canUsePickup = Boolean(
+  const canUseDelivery = Boolean(
     isVip ||
-      auth?.features?.pickupMode ||
+      auth?.features?.deliveryMode ||
       String(auth?.subscription?.status || '').toUpperCase() === 'TRIAL' ||
       planName.includes('pro') ||
       planName.includes('vip')
@@ -43,12 +43,12 @@ export function OrderTypeSettingsCard() {
     const next = Array.isArray(auth?.store?.settings?.orderTypes) && auth.store.settings.orderTypes.length > 0
       ? auth.store.settings.orderTypes
       : DEFAULT_TYPES;
-    setSelected(canUsePickup ? next : next.filter((type) => type !== 'pickup'));
-  }, [auth?.store?.id, auth?.store?.settings?.orderTypes, canUsePickup]);
+    setSelected(canUseDelivery ? next : next.filter((type) => type !== 'delivery'));
+  }, [auth?.store?.id, auth?.store?.settings?.orderTypes, canUseDelivery]);
 
   const toggleType = (type) => {
-    if (type === 'pickup' && !canUsePickup) {
-      showToast('Retirada disponível no plano Pro.', 'info');
+    if (type === 'delivery' && !canUseDelivery) {
+      showToast('Entrega disponível no plano Pro.', 'info');
       return;
     }
     setSelected((prev) => {
@@ -65,7 +65,7 @@ export function OrderTypeSettingsCard() {
       showToast('Selecione ao menos um tipo de pedido.', 'error');
       return;
     }
-    const nextSelected = canUsePickup ? selected : selected.filter((type) => type !== 'pickup');
+    const nextSelected = canUseDelivery ? selected : selected.filter((type) => type !== 'delivery');
     setSaving(true);
     try {
       const updated = await storeService.update(storeId, { orderTypes: nextSelected });
@@ -107,7 +107,7 @@ export function OrderTypeSettingsCard() {
         {DEFAULT_TYPES.map((type) => {
           const active = selected.includes(type);
           const Icon = icons[type];
-          const disabled = type === 'pickup' && !canUsePickup;
+          const disabled = type === 'delivery' && !canUseDelivery;
           return (
             <button
               key={type}
@@ -138,9 +138,9 @@ export function OrderTypeSettingsCard() {
           );
         })}
       </div>
-      {!canUsePickup ? (
+      {!canUseDelivery ? (
         <div className="mt-3 rounded-xl border border-violet-200 bg-violet-50 px-3 py-2 text-xs text-violet-800 flex items-center justify-between gap-2">
-          <span>Retirada está disponível no plano Pro.</span>
+          <span>Entrega está disponível no plano Pro.</span>
           <button
             type="button"
             onClick={() => navigate('/admin/renewal')}

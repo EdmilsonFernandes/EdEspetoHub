@@ -4,7 +4,8 @@ export type PlanFeatureKey =
   | 'motoboyManagement'
   | 'tipPayouts'
   | 'advancedDashboard'
-  | 'pickupMode';
+  | 'pickupMode'
+  | 'deliveryMode';
 
 export type PlanFeatures = Record<PlanFeatureKey, boolean>;
 export type SubscriptionStatusLike =
@@ -24,19 +25,22 @@ const FEATURES_BY_TIER: Record<PlanTier, PlanFeatures> = {
     motoboyManagement: false,
     tipPayouts: false,
     advancedDashboard: false,
-    pickupMode: false,
+    pickupMode: true,
+    deliveryMode: false,
   },
   pro: {
     motoboyManagement: true,
     tipPayouts: true,
     advancedDashboard: true,
     pickupMode: true,
+    deliveryMode: true,
   },
   vip: {
     motoboyManagement: true,
     tipPayouts: true,
     advancedDashboard: true,
     pickupMode: true,
+    deliveryMode: true,
   },
 };
 

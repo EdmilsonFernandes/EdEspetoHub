@@ -333,11 +333,11 @@ export function StorePage() {
           const baseTypes = Array.isArray(data.settings?.orderTypes) && data.settings.orderTypes.length > 0
             ? data.settings.orderTypes
             : [ 'delivery', 'pickup', 'table' ];
-          const pickupEnabled = canUsePickupBySubscription(data.subscription, data.settings);
-          const allowedTypes = pickupEnabled
+          const deliveryEnabled = canUseDeliveryBySubscription(data.subscription, data.settings);
+          const allowedTypes = deliveryEnabled
             ? baseTypes
-            : baseTypes.filter((type: string) => String(type || '').toLowerCase() !== 'pickup');
-          setOrderTypes(allowedTypes.length ? allowedTypes : [ 'delivery', 'table' ]);
+            : baseTypes.filter((type: string) => String(type || '').toLowerCase() !== 'delivery');
+          setOrderTypes(allowedTypes.length ? allowedTypes : [ 'pickup', 'table' ]);
           setStorePhone(data.owner?.phone || '');
           setStoreAddress(data.settings?.address || data.owner?.address || '');
           setStoreDescription(data.settings?.description || '');
@@ -1454,12 +1454,12 @@ export function StorePage() {
   );
 }
 
-  const canUsePickupBySubscription = (subscription: any, settings: any) => {
+  const canUseDeliveryBySubscription = (subscription: any, settings: any) => {
     const isVip = Boolean(settings?.planExempt || subscription?.planExempt);
     if (isVip) return true;
     const status = String(subscription?.status || '').toUpperCase();
     if (status === 'TRIAL') return true;
-    if (Boolean(subscription?.features?.pickupMode)) return true;
+    if (Boolean(subscription?.features?.deliveryMode)) return true;
     const planName = String(subscription?.plan?.name || '').toLowerCase();
     return planName.includes('pro') || planName.includes('vip');
   };
