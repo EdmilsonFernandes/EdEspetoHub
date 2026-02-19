@@ -133,6 +133,7 @@ export function AdminLogin() {
           <div className="min-w-0">
             <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500 font-semibold">Jano Caminho</p>
             <p className="text-sm font-bold text-slate-900 leading-tight">Painel administrativo de operação</p>
+            <p className="text-xs text-slate-500">Cardápio, fila e pedidos em um único lugar.</p>
           </div>
         </div>
 

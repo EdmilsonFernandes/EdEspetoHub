@@ -49,9 +49,9 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                   draggable={false}
                 />
               </div>
-              <div className="leading-tight">
-                <p className="text-xl font-black text-gray-900 dark:text-white">Jano Caminho</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Pedidos e gestão em um só lugar</p>
+              <div className="leading-tight min-w-0">
+                <p className="text-base sm:text-xl font-black text-gray-900 dark:text-white truncate">Jano Caminho</p>
+                <p className="hidden sm:block text-xs text-slate-500 dark:text-slate-400">Pedidos e gestão em um só lugar</p>
               </div>
             </a>
 

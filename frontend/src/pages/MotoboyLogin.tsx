@@ -121,10 +121,10 @@ export function MotoboyLogin() {
 
         <div className="grid gap-5 lg:grid-cols-[0.95fr_1.05fr] items-start">
           <aside className="hidden lg:block">
-            <div className="premium-card-glass p-6 space-y-5 motoboy-fade-up">
-              <div className="h-40 rounded-3xl border border-slate-200 bg-slate-900 overflow-hidden p-2">
-                <img src="/janocaminho.jpg" alt="Jano Caminho" className="h-full w-full object-contain" />
-              </div>
+              <div className="premium-card-glass p-6 space-y-5 motoboy-fade-up">
+                <div className="h-40 rounded-3xl border border-slate-200 bg-slate-900 overflow-hidden p-2">
+                  <img src="/janocaminho.jpg" alt="Jano Caminho" className="h-full w-full object-contain" />
+                </div>
               <div>
                 <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500 font-semibold">Area do entregador</p>
                 <h2 className="mt-1 text-2xl font-black text-slate-900 leading-tight">
@@ -190,6 +190,7 @@ export function MotoboyLogin() {
                   <div className="min-w-0">
                     <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500 font-semibold">Jano Caminho</p>
                     <p className="text-sm font-bold text-slate-900 leading-tight">App profissional de entregas</p>
+                    <p className="text-xs text-slate-500">Rotas, status e ganhos em tempo real.</p>
                   </div>
                 </div>
 
