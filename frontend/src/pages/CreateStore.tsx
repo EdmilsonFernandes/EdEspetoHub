@@ -683,12 +683,55 @@ export function CreateStore() {
     { id: 3, title: 'Loja', done: Boolean(registerForm.storeName && registerForm.segment) },
   ];
 
+  const canAdvanceFromStep = (stepId: number) => {
+    if (stepId === 1) {
+      return Boolean(
+        registerForm.fullName &&
+          registerForm.email &&
+          registerForm.phone &&
+          registerForm.document &&
+          registerForm.password
+      );
+    }
+    if (stepId === 2) {
+      return Boolean(
+        registerForm.cep &&
+          registerForm.city &&
+          registerForm.state &&
+          registerForm.street &&
+          registerForm.number &&
+          registerForm.neighborhood
+      );
+    }
+    return true;
+  };
+
+  const getStepValidationMessage = (stepId: number) => {
+    if (stepId === 1) return 'Preencha os dados pessoais obrigatórios para continuar.';
+    if (stepId === 2) return 'Preencha o endereço completo para continuar.';
+    return 'Confira os dados obrigatórios antes de continuar.';
+  };
+
   const scrollToStep = (stepId: number) => {
+    if (stepId > currentStep && !canAdvanceFromStep(currentStep)) {
+      setValidationMessage(getStepValidationMessage(currentStep));
+      setShowValidationModal(true);
+      return;
+    }
     const target =
       stepId === 1 ? personalSectionRef.current : stepId === 2 ? addressSectionRef.current : storeSectionRef.current;
     if (!target) return;
     setCurrentStep(stepId);
     target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const handleNextStep = () => {
+    if (!canAdvanceFromStep(currentStep)) {
+      setValidationMessage(getStepValidationMessage(currentStep));
+      setShowValidationModal(true);
+      return;
+    }
+    scrollToStep(currentStep + 1);
   };
 
   return (
@@ -1494,7 +1537,7 @@ export function CreateStore() {
                   {currentStep < 3 ? (
                     <button
                       type="button"
-                      onClick={() => scrollToStep(currentStep + 1)}
+                      onClick={handleNextStep}
                       className="ds-btn ds-btn-primary ds-btn-shine ds-focus-ring px-4 py-2 text-sm font-semibold text-white"
                     >
                       Próximo
