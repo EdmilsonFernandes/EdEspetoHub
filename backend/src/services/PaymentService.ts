@@ -52,6 +52,15 @@ export class PaymentService {
     return `data:image/png;base64,${qrCode}`;
   }
 
+  private resolvePlanChargeAmount(plan: Plan) {
+    const fullPrice = Number((plan as any)?.price) || 0;
+    const promoPrice = Number((plan as any)?.promoPrice) || 0;
+    if (promoPrice > 0 && promoPrice < fullPrice) {
+      return promoPrice;
+    }
+    return fullPrice;
+  }
+
 
 
   /**
@@ -94,13 +103,15 @@ export class PaymentService {
         ? `${mockLinkBase}/${data.subscription.id}`
         : null;
 
+    const chargeAmount = this.resolvePlanChargeAmount(data.plan);
+
     let payment = paymentRepo.create({
       user: data.user,
       store: data.store,
       subscription: data.subscription,
       method: data.method,
       status: 'PENDING',
-      amount: Number(data.plan.price),
+      amount: chargeAmount,
       expiresAt,
       qrCodeBase64: null,
       qrCodeText: null,
@@ -108,7 +119,6 @@ export class PaymentService {
       provider: 'MOCK',
     } as Payment);
 
-    const chargeAmount = Number(data.plan.price);
     payment.amount = chargeAmount;
 
     payment = await paymentRepo.save(payment);
