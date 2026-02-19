@@ -27,6 +27,8 @@ export interface CreateStoreDto {
   deliveryRadiusKm?: number;
   deliveryFee?: number;
   address?: string;
+  city?: string;
+  state?: string;
   socialLinks?: { type: string; value: string }[];
   openingHours?: any[];
   orderTypes?: string[];

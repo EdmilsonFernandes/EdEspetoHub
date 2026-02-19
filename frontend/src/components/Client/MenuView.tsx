@@ -41,6 +41,7 @@ const categoryVisualMeta = (key = "") => {
 
 const Header = ({
   branding,
+  segment,
   instagramHandle,
   whatsappNumber,
   onOpenQueue,
@@ -58,6 +59,20 @@ const Header = ({
     .join("")
     .slice(0, 2)
     .toUpperCase();
+
+  const segmentLabelMap = {
+    restaurante: "Restaurante",
+    hamburgueria: "Hamburgueria",
+    lanchonete: "Lanchonete",
+    pizzaria: "Pizzaria",
+    adega: "Adega",
+    mercado: "Mercado",
+    hortifruti: "Hortifruti",
+    farmacia: "Farmácia",
+    confeitaria: "Confeitaria",
+    outros: "Comércio",
+  };
+  const segmentLabel = segmentLabelMap[String(segment || "").toLowerCase()] || "Comércio";
 
   return (
     <div className={`w-full sticky top-0 z-50 ${compact ? 'pb-2' : 'pb-3'} pt-2`}>
@@ -88,6 +103,9 @@ const Header = ({
           {branding?.brandName || "Seu Espeto"}
         </h1>
         <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
+          <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+            {segmentLabel}
+          </span>
           <span
             className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-semibold ${
               isOpenNow
@@ -189,6 +207,7 @@ export const MenuView = ({
   topProducts,
   onUpdateCart,
   branding,
+  segment,
   instagramHandle,
   whatsappNumber,
   promoMessage,
@@ -342,6 +361,7 @@ export const MenuView = ({
       {showHeader && (
         <Header
           branding={branding}
+          segment={segment}
           instagramHandle={instagramHandle}
           whatsappNumber={whatsappNumber}
           onOpenQueue={onOpenQueue}
@@ -708,9 +728,14 @@ export const MenuView = ({
           </div>
         )}
         <div className="pt-1 pb-2 text-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+          <a
+            href="https://www.janocaminho.com.br"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500 hover:text-slate-700 hover:border-slate-300 transition"
+          >
             Powered by Jano Caminho
-          </span>
+          </a>
         </div>
         </div>
       </div>

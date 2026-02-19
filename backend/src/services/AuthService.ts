@@ -316,6 +316,9 @@ export class AuthService
       logoUrl: input.logoUrl,
       logoFile: input.logoFile,
       segment: input.segment,
+      city: input.city,
+      state: input.state,
+      address: input.address,
       primaryColor: input.primaryColor,
       secondaryColor: input.secondaryColor,
       description: input.description,
@@ -397,10 +400,16 @@ export class AuthService
       const logoUrl = await saveBase64Image(storePayload.logoFile, `store-${user.id}`);
       const segment = sanitizeStoreSegment(storePayload.segment);
       const segmentPreset = getStoreSegmentPreset(segment);
+      const trimmedCity = storePayload.city?.toString().trim();
+      const trimmedState = storePayload.state?.toString().trim().toUpperCase();
+      const trimmedAddress = storePayload.address?.toString().trim() || userPayload.address?.toString().trim();
 
       const settings = manager.create(StoreSettings, {
         logoUrl: logoUrl || storePayload.logoUrl,
         description: storePayload.description || segmentPreset.description,
+        address: trimmedAddress || null,
+        city: trimmedCity || null,
+        state: trimmedState || null,
         primaryColor: storePayload.primaryColor || segmentPreset.primaryColor,
         secondaryColor: storePayload.secondaryColor || segmentPreset.secondaryColor,
         segment,

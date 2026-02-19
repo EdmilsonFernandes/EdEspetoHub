@@ -36,6 +36,12 @@ export class StoreSettings
   @Column({ name: 'address', type: 'text', nullable: true })
   address?: string | null;
 
+  @Column({ name: 'city', type: 'text', nullable: true })
+  city?: string | null;
+
+  @Column({ name: 'state', type: 'text', nullable: true })
+  state?: string | null;
+
   @Column({ name: 'primary_color', default: '#b91c1c' })
   primaryColor!: string;
 

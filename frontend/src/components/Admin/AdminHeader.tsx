@@ -30,6 +30,23 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
     branding?.brandName;
   const storeUrl = storeSlug ? `https://www.janocaminho.com.br/${storeSlug}` : '';
   const storeDescription = auth?.store?.settings?.description || '';
+  const storeSegmentRaw = String(auth?.store?.settings?.segment || '').toLowerCase();
+  const storeSegmentLabelMap: Record<string, string> = {
+    restaurante: 'Restaurante',
+    hamburgueria: 'Hamburgueria',
+    lanchonete: 'Lanchonete',
+    pizzaria: 'Pizzaria',
+    adega: 'Adega',
+    mercado: 'Mercado',
+    hortifruti: 'Hortifruti',
+    farmacia: 'Farmácia',
+    confeitaria: 'Confeitaria',
+    outros: 'Comércio',
+  };
+  const storeSegmentLabel = storeSegmentLabelMap[storeSegmentRaw] || 'Comércio';
+  const storeCity = String(auth?.store?.settings?.city || '').trim();
+  const storeState = String(auth?.store?.settings?.state || '').trim().toUpperCase();
+  const storeLocation = [storeCity, storeState].filter(Boolean).join(' • ');
   const socialLinks = auth?.store?.settings?.socialLinks || [];
   const instagramLink = socialLinks.find((link) => link?.type === 'instagram')?.value;
   const instagramHandle = instagramLink ? `@${instagramLink.replace('@', '')}` : '';
@@ -148,6 +165,16 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
               </p>
             )}
             <div className={`${showMobileDetails ? 'flex' : 'hidden'} lg:flex flex-wrap items-center gap-2 text-xs`}>
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 border border-white/20 opacity-95">
+                <Storefront size={12} weight="duotone" />
+                <span className="truncate">{storeSegmentLabel}</span>
+              </span>
+              {storeLocation && (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/15 border border-white/20 opacity-95">
+                  <Globe size={12} weight="duotone" />
+                  <span className="truncate">{storeLocation}</span>
+                </span>
+              )}
               {storeSlug && (
                 <a
                   href={storeUrl}
@@ -210,12 +237,17 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
           </div>
         )}
         <div className="flex flex-wrap items-center gap-2">
-          <div className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-full bg-white/15 border border-white/20 text-[11px] font-semibold">
+          <a
+            href="https://www.janocaminho.com.br"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-full bg-white/15 border border-white/20 text-[11px] font-semibold hover:bg-white/20 transition"
+          >
             <span className="h-5 w-9 rounded-md overflow-hidden bg-slate-900/70 p-0.5">
               <img src="/janocaminho.jpg" alt="Jano Caminho" className="h-full w-full object-contain" />
             </span>
             Feito com Jano Caminho
-          </div>
+          </a>
           {onToggleHeader && (
             <div className="flex items-center rounded-full bg-white/10 border border-white/20 p-0.5 text-[11px] sm:text-xs font-semibold">
               <button

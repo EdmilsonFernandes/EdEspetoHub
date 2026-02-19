@@ -40,6 +40,7 @@ export function StorePage() {
   const [storeAddress, setStoreAddress] = useState('');
   const [storeDescription, setStoreDescription] = useState('');
   const [storeName, setStoreName] = useState('');
+  const [storeSegment, setStoreSegment] = useState('outros');
   const [storePixKey, setStorePixKey] = useState('');
   const [deliveryRadiusKm, setDeliveryRadiusKm] = useState('');
   const [deliveryFee, setDeliveryFee] = useState('');
@@ -337,6 +338,7 @@ export function StorePage() {
           setStoreAddress(data.settings?.address || data.owner?.address || '');
           setStoreDescription(data.settings?.description || '');
           setStoreName(data.name || '');
+          setStoreSegment(String(data.settings?.segment || 'outros').toLowerCase());
           setPromoMessage(data.settings?.promoMessage || '');
           setStorePixKey(data.settings?.pixKey || '');
           setDeliveryRadiusKm(data.settings?.deliveryRadiusKm ?? '');
@@ -1265,7 +1267,14 @@ export function StorePage() {
                       </div>
                     )}
                     <div className="text-xs text-slate-400 text-center">
-                      <span className="font-semibold text-slate-500">Jano Caminho</span> • plataforma de pedidos online
+                      <a
+                        href="https://www.janocaminho.com.br"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="font-semibold text-slate-500 hover:text-slate-700 underline-offset-2 hover:underline"
+                      >
+                        Powered by Jano Caminho
+                      </a>
                     </div>
                   </div>
                 </div>
@@ -1342,6 +1351,7 @@ export function StorePage() {
               topProducts={topProducts}
               cart={cart}
               branding={branding}
+              segment={storeSegment}
               instagramHandle={instagramHandle}
               onUpdateCart={updateCart}
               onProceed={() => setView('cart')}

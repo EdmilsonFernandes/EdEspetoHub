@@ -125,12 +125,12 @@ export function MotoboyLogin() {
           <aside className="hidden lg:block">
               <div className="relative overflow-hidden rounded-3xl min-h-[620px] border border-slate-800/60 shadow-[0_30px_65px_-40px_rgba(15,23,42,0.8)] motoboy-fade-up">
                 <div className="absolute inset-0">
-                  <img src="/janocaminho.jpg" alt="Jano Caminho" className="h-full w-full object-cover object-center" />
+                  <img src="/janocaminho.jpg" alt="Jano Caminho" className="h-full w-full object-cover object-center blur-[2px] scale-[1.06]" />
                 </div>
-                <div className="absolute inset-0 opacity-45">
-                  <img src="/janocaminho.jpg" alt="" aria-hidden className="h-full w-full object-contain object-center p-10" />
+                <div className="absolute inset-0 opacity-80">
+                  <img src="/janocaminho.jpg" alt="" aria-hidden className="h-full w-full object-contain object-center p-6" />
                 </div>
-                <div className="absolute inset-0 bg-slate-950/65" />
+                <div className="absolute inset-0 bg-slate-950/75" />
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(47,157,247,0.32),_transparent_56%),radial-gradient(circle_at_bottom,_rgba(95,211,90,0.2),_transparent_58%)]" />
                 <div className="relative z-10 h-full p-7 text-white flex flex-col justify-between">
                   <div className="space-y-5">

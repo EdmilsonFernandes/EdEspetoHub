@@ -41,6 +41,38 @@ export async function runMigrations() {
   `);
   await AppDataSource.query(`
     ALTER TABLE IF EXISTS store_settings
+    ADD COLUMN IF NOT EXISTS city TEXT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS store_settings
+    ADD COLUMN IF NOT EXISTS state TEXT;
+  `);
+  await AppDataSource.query(`
+    UPDATE store_settings ss
+    SET address = u.address
+    FROM stores s
+    JOIN users u ON u.id = s.owner_id
+    WHERE ss.store_id = s.id
+      AND (ss.address IS NULL OR TRIM(ss.address) = '')
+      AND u.address IS NOT NULL
+      AND TRIM(u.address) <> '';
+  `);
+  await AppDataSource.query(`
+    UPDATE store_settings
+    SET state = UPPER((regexp_match(address, '(?i)(AC|AL|AP|AM|BA|CE|DF|ES|GO|MA|MT|MS|MG|PA|PB|PR|PE|PI|RJ|RN|RS|RO|RR|SC|SP|SE|TO)\\b'))[1])
+    WHERE (state IS NULL OR TRIM(state) = '')
+      AND address IS NOT NULL
+      AND TRIM(address) <> '';
+  `);
+  await AppDataSource.query(`
+    UPDATE store_settings
+    SET city = TRIM((regexp_match(address, '(?i)(?:\\||,|\\s)([^|,\\-/]{2,})\\s*[-/]\\s*(AC|AL|AP|AM|BA|CE|DF|ES|GO|MA|MT|MS|MG|PA|PB|PR|PE|PI|RJ|RN|RS|RO|RR|SC|SP|SE|TO)\\b'))[1])
+    WHERE (city IS NULL OR TRIM(city) = '')
+      AND address IS NOT NULL
+      AND TRIM(address) <> '';
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS store_settings
     ADD COLUMN IF NOT EXISTS pix_key TEXT;
   `);
   await AppDataSource.query(`

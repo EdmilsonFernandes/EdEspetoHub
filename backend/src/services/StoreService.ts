@@ -100,6 +100,8 @@ export class StoreService
       const deliveryRadiusKm = this.parseNumber(input.deliveryRadiusKm);
       const deliveryFee = this.parseNumber(input.deliveryFee);
       const trimmedAddress = input.address?.toString().trim();
+      const trimmedCity = input.city?.toString().trim();
+      const trimmedState = input.state?.toString().trim().toUpperCase();
       const segment = sanitizeStoreSegment(input.segment);
       const segmentPreset = getStoreSegmentPreset(segment);
 
@@ -110,6 +112,8 @@ export class StoreService
         logoUrl: logoUrl || input.logoUrl,
         description: input.description,
         address: trimmedAddress || owner.address || null,
+        city: trimmedCity || null,
+        state: trimmedState || null,
         primaryColor: input.primaryColor || segmentPreset.primaryColor,
         secondaryColor: input.secondaryColor || segmentPreset.secondaryColor,
         pixKey: normalizedPix ?? null,
@@ -257,6 +261,16 @@ export class StoreService
         store.owner.address = trimmedAddress || undefined;
         const userRepo = manager.getRepository(User);
         await userRepo.save(store.owner);
+      }
+      if (data.city !== undefined)
+      {
+        const trimmedCity = data.city?.toString().trim();
+        store.settings.city = trimmedCity || null;
+      }
+      if (data.state !== undefined)
+      {
+        const trimmedState = data.state?.toString().trim().toUpperCase();
+        store.settings.state = trimmedState || null;
       }
 
       return storeRepo.save(store);

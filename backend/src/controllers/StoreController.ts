@@ -46,6 +46,8 @@ const buildDemoStore = (slug: string) => {
       secondaryColor: '#111827',
       segment: 'restaurante',
       socialLinks: [ { type: 'instagram', value: 'janocaminho' } ],
+      city: 'São Paulo',
+      state: 'SP',
       openingHours: [
         { day: 1, enabled: true, intervals: [ { start: '10:00', end: '22:00' } ] },
         { day: 2, enabled: true, intervals: [ { start: '10:00', end: '22:00' } ] },
@@ -163,6 +165,8 @@ export class StoreController {
                   primaryColor: store.settings.primaryColor || null,
                   secondaryColor: store.settings.secondaryColor || null,
                   segment: store.settings.segment || 'outros',
+                  city: store.settings.city || null,
+                  state: store.settings.state || null,
                 }
               : null,
           };
