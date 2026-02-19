@@ -41,6 +41,7 @@ export class SubscriptionService {
   private paymentRepository = new PaymentRepository();
   private mercadoPago = new MercadoPagoService();
   private log = logger.child({ scope: 'SubscriptionService' });
+  private readonly pendingCooldownMs = 30 * 60 * 1000;
   /**
    * Creates data.
    *
@@ -189,17 +190,20 @@ export class SubscriptionService {
 
     const existingPending = await this.paymentRepository.findLatestPendingByStoreId(storeId);
     if (existingPending) {
-      const stillValid = await this.isPaymentStillValid(existingPending);
+      const createdAt = existingPending.createdAt ? new Date(existingPending.createdAt) : now;
+      const localCooldownEndsAt = new Date(createdAt.getTime() + this.pendingCooldownMs);
+      const paymentExpiresAt = existingPending.expiresAt ? new Date(existingPending.expiresAt) : null;
+      const blockUntil = paymentExpiresAt && paymentExpiresAt < localCooldownEndsAt
+        ? paymentExpiresAt
+        : localCooldownEndsAt;
+      const stillValid = await this.isPaymentStillValid(existingPending, blockUntil);
       if (stillValid) {
-        const expiresAt = existingPending.expiresAt ? new Date(existingPending.expiresAt) : null;
-        const retryAfterSeconds = expiresAt
-          ? Math.max(1, Math.ceil((expiresAt.getTime() - now.getTime()) / 1000))
-          : 1800;
+        const retryAfterSeconds = Math.max(1, Math.ceil((blockUntil.getTime() - now.getTime()) / 1000));
         throw new AppError('SUB-007', 429, {
           paymentId: existingPending.id,
           paymentUrl: `${env.appUrl}/payment/${existingPending.id}`,
           paymentLink: existingPending.paymentLink || null,
-          pendingExpiresAt: expiresAt?.toISOString() || null,
+          pendingExpiresAt: blockUntil.toISOString(),
           retryAfterSeconds,
           retryAfterMinutes: Math.ceil(retryAfterSeconds / 60),
         });
@@ -240,10 +244,14 @@ export class SubscriptionService {
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
    */
-  private async isPaymentStillValid(payment: any) {
+  private async isPaymentStillValid(payment: any, blockUntil?: Date) {
     const now = new Date();
     if (payment.status !== 'PENDING') return false;
-    if (!payment.expiresAt || payment.expiresAt <= now) return false;
+    if (blockUntil && blockUntil <= now) return false;
+    if (payment.expiresAt) {
+      const expiresAt = new Date(payment.expiresAt);
+      if (!Number.isNaN(expiresAt.getTime()) && expiresAt <= now) return false;
+    }
     if (
       payment.provider === 'MERCADO_PAGO' &&
       payment.method === 'PIX' &&

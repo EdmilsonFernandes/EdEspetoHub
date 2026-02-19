@@ -67,7 +67,7 @@ export class SubscriptionController {
       if (!subscription && !planExempt) {
         return respondWithError(req, res, new AppError('SUB-001', 404), 404);
       }
-      const latestPayment = await paymentRepository.findLatestByStoreId(req.params.storeId);
+      const latestPaidPayment = await paymentRepository.findLatestPaidByStoreId(req.params.storeId);
       const payload = planExempt
         ? {
             id: `vip-${req.params.storeId}`,
@@ -82,9 +82,9 @@ export class SubscriptionController {
         ...payload,
         planExempt,
         planExemptLabel: planExempt ? planExemptLabel : null,
-        latestPaymentAt: latestPayment?.createdAt ?? null,
-        latestPaymentStatus: latestPayment?.status ?? null,
-        latestPaymentAmount: latestPayment?.amount ?? null,
+        latestPaymentAt: latestPaidPayment?.createdAt ?? null,
+        latestPaymentStatus: latestPaidPayment?.status ?? null,
+        latestPaymentAmount: latestPaidPayment?.amount ?? null,
       });
     } catch (error: any) {
       log.warn('Subscription get failed', { storeId: req.params.storeId, error });
