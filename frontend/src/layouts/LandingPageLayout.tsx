@@ -3,7 +3,7 @@ import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
-import { Moon, SignOut, Storefront, Sun, Truck } from '@phosphor-icons/react';
+import { ChatCircleText, Moon, SignOut, Storefront, Sun, Truck } from '@phosphor-icons/react';
 
 interface LandingPageLayoutProps {
   children: React.ReactNode;
@@ -184,6 +184,16 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
       </header>
 
       <main> {children} </main>
+      <a
+        href="https://wa.me/5512997822784"
+        target="_blank"
+        rel="noreferrer"
+        className="fixed bottom-5 right-4 z-50 inline-flex items-center gap-2 rounded-full bg-emerald-600 px-4 py-3 text-white shadow-[0_18px_42px_-24px_rgba(5,150,105,0.75)] hover:bg-emerald-500 transition"
+        aria-label="Falar no WhatsApp"
+      >
+        <ChatCircleText size={18} weight="duotone" />
+        <span className="hidden sm:inline text-sm font-bold">WhatsApp</span>
+      </a>
       {/* Footer */}
       <footer className="bg-gray-900 dark:bg-black text-gray-300 dark:text-gray-400 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
