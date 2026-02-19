@@ -121,30 +121,43 @@ export function MotoboyLogin() {
           <MotoboyHeader title="Entrar" subtitle="Acesse suas entregas em segundos." />
         </div>
 
-        <div className="grid gap-5 lg:grid-cols-[0.95fr_1.05fr] items-start">
+        <div className="grid gap-5 lg:grid-cols-[0.95fr_1.05fr] items-stretch">
           <aside className="hidden lg:block">
-              <div className="premium-card-glass p-6 space-y-5 motoboy-fade-up">
-                <div className="h-40 rounded-3xl border border-slate-200 bg-slate-900 overflow-hidden p-2">
-                  <img src="/janocaminho.jpg" alt="Jano Caminho" className="h-full w-full object-contain" />
+              <div className="relative overflow-hidden rounded-3xl min-h-[620px] border border-slate-800/60 shadow-[0_30px_65px_-40px_rgba(15,23,42,0.8)] motoboy-fade-up">
+                <div className="absolute inset-0">
+                  <img src="/janocaminho.jpg" alt="Jano Caminho" className="h-full w-full object-cover object-center" />
                 </div>
-              <div>
-                <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500 font-semibold">Area do entregador</p>
-                <h2 className="mt-1 text-2xl font-black text-slate-900 leading-tight">
-                  Operação de entrega com fluxo simples e rápido.
-                </h2>
-              </div>
-              <div className="space-y-2.5">
-                {[
-                  'Receba corridas e atualize status em tempo real',
-                  'Acompanhe ganhos e repasses em um único painel',
-                  'Perfil validado com documentos e lojas vinculadas',
-                ].map((item) => (
-                  <div key={item} className="rounded-xl border border-slate-200 bg-white/75 px-3 py-2 text-sm font-semibold text-slate-700">
-                    {item}
+                <div className="absolute inset-0 bg-slate-950/65" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(47,157,247,0.32),_transparent_56%),radial-gradient(circle_at_bottom,_rgba(95,211,90,0.2),_transparent_58%)]" />
+                <div className="relative z-10 h-full p-7 text-white flex flex-col justify-between">
+                  <div className="space-y-5">
+                    <div className="h-14 w-36 rounded-2xl bg-slate-900/60 border border-white/20 p-2 shadow-[0_16px_34px_-22px_rgba(47,157,247,0.85)]">
+                      <img src="/janocaminho.jpg" alt="Jano Caminho" className="h-full w-full object-contain" />
+                    </div>
+                    <p className="text-[11px] uppercase tracking-[0.28em] text-sky-200 font-semibold">Área do entregador</p>
+                    <h2 className="text-[2rem] font-black leading-[1.1]">
+                      Operação de entregas rápida, clara e profissional
+                    </h2>
+                    <p className="text-sm text-slate-200/95 max-w-md">
+                      Receba corridas, atualize status e acompanhe ganhos com experiência mobile premium.
+                    </p>
                   </div>
-                ))}
+                  <div className="space-y-2.5 text-xs text-slate-100/95">
+                    {[
+                      'Corridas em tempo real com status da rota',
+                      'Ganhos e repasses em um único painel',
+                      'Perfil validado com documentos e lojas vinculadas',
+                    ].map((item) => (
+                      <p key={item} className="inline-flex items-center gap-2.5">
+                        <span className="h-6 w-6 rounded-full border border-white/25 bg-white/10 inline-flex items-center justify-center">
+                          <Lightning size={12} weight="duotone" />
+                        </span>
+                        {item}
+                      </p>
+                    ))}
+                  </div>
+                </div>
               </div>
-            </div>
           </aside>
 
           <div className="space-y-5">
@@ -185,17 +198,6 @@ export function MotoboyLogin() {
               </div>
             ) : (
               <div className="ds-card-elevated p-5 sm:p-6 space-y-4 motoboy-fade-up ds-anim-delay-40">
-                <div className="ds-card p-3 flex items-center gap-3">
-                  <div className="h-14 w-28 rounded-xl overflow-hidden bg-slate-900 border border-slate-200 shadow-sm shrink-0 p-1">
-                    <img src="/janocaminho.jpg" alt="Jano Caminho" className="h-full w-full object-contain" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500 font-semibold">Jano Caminho</p>
-                    <p className="text-sm font-bold text-slate-900 leading-tight">App profissional de entregas</p>
-                    <p className="text-xs text-slate-500">Rotas, status e ganhos em tempo real.</p>
-                  </div>
-                </div>
-
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Area do Entregador</p>

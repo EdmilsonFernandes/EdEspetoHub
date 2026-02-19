@@ -93,8 +93,6 @@ export function AdminLogin() {
     }
   };
 
-  const platformLogo = '/janocaminho.jpg';
-
   useEffect(() => {
     if (!hydrated) return;
     if (auth?.token && auth?.user?.role === 'ADMIN') {
@@ -126,17 +124,6 @@ export function AdminLogin() {
   return (
     <AuthLayout>
       <form onSubmit={handleLogin} className="space-y-6">
-        <div className="ds-card p-3 sm:p-4 flex items-center gap-3">
-          <div className="h-16 w-32 rounded-xl overflow-hidden bg-slate-900 border border-slate-200 shadow-sm shrink-0">
-            <img src={platformLogo} alt="Jano Caminho" className="h-full w-full object-contain p-1" />
-          </div>
-          <div className="min-w-0">
-            <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500 font-semibold">Jano Caminho</p>
-            <p className="text-sm font-bold text-slate-900 leading-tight">Plataforma de gestão para sua loja</p>
-            <p className="text-xs text-slate-500">Cardápio, fila e pedidos em um único lugar.</p>
-          </div>
-        </div>
-
         <div className="text-center">
           <div className="mx-auto h-14 w-14 rounded-2xl bg-brand-primary/10 border border-brand-primary/20 flex items-center justify-center text-brand-primary shadow-sm">
             <LockKey size={26} weight="duotone" />
