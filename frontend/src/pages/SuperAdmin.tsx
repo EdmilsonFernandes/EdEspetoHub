@@ -941,6 +941,12 @@ export function SuperAdmin() {
            className="space-y-6"
           >
             <div className="text-center">
+              <div className="mx-auto h-14 w-14 rounded-2xl bg-[linear-gradient(135deg,#ede9fe,#e0e7ff)] border border-violet-200 flex items-center justify-center text-violet-700 shadow-sm">
+                <ShieldCheck size={26} weight="duotone" />
+              </div>
+              <p className="mt-3 inline-flex rounded-full border border-violet-200 bg-violet-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-violet-700">
+                Administração da Plataforma
+              </p>
               <h2 className="text-2xl sm:text-3xl font-black text-gray-800 mb-1">Super Admin</h2>
               <p className="text-sm text-gray-500">Acesso da plataforma</p>
             </div>

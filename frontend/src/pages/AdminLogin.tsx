@@ -6,7 +6,7 @@ import { getPersistedBranding } from '../constants';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { AuthLayout } from '../layouts/AuthLayout';
-import { ArrowLeft, Eye, EyeSlash, LockKey, Storefront } from '@phosphor-icons/react';
+import { ArrowLeft, Eye, EyeSlash, Storefront } from '@phosphor-icons/react';
 
 export function AdminLogin() {
   const navigate = useNavigate();
@@ -125,9 +125,12 @@ export function AdminLogin() {
     <AuthLayout>
       <form onSubmit={handleLogin} className="space-y-6">
         <div className="text-center">
-          <div className="mx-auto h-14 w-14 rounded-2xl bg-brand-primary/10 border border-brand-primary/20 flex items-center justify-center text-brand-primary shadow-sm">
-            <LockKey size={26} weight="duotone" />
+          <div className="mx-auto h-14 w-14 rounded-2xl bg-[linear-gradient(135deg,#e0f2fe,#dbeafe)] border border-sky-200 flex items-center justify-center text-sky-700 shadow-sm">
+            <Storefront size={26} weight="duotone" />
           </div>
+          <p className="mt-3 inline-flex rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-sky-700">
+            Área da Loja
+          </p>
           <h2 className="mt-4 text-2xl sm:text-3xl font-black text-gray-900 mb-1 tracking-tight">Painel da Loja</h2>
           <p className="text-sm text-gray-500">Acesso do administrador</p>
         </div>

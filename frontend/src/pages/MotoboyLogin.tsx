@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowSquareOut, Eye, EyeSlash, Lightning, SignIn, SignOut, UserCircle } from '@phosphor-icons/react';
+import { ArrowSquareOut, Eye, EyeSlash, Lightning, SignOut, Truck, UserCircle } from '@phosphor-icons/react';
 import { authService } from '../services/authService';
 import { useAuth } from '../contexts/AuthContext';
 import { MotoboyHeader } from '../components/Motoboy/MotoboyHeader';
@@ -219,12 +219,12 @@ export function MotoboyLogin() {
                 </div>
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Area do Entregador</p>
+                    <p className="inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-700">Área do Entregador</p>
                     <h2 className="text-xl font-black text-slate-900">Bem-vindo de volta</h2>
                     <p className="text-sm text-slate-600 mt-1">Use seu e-mail e senha para entrar.</p>
                   </div>
-                  <div className="h-11 w-11 rounded-2xl bg-white/70 border border-slate-200 flex items-center justify-center text-slate-700 shadow-sm">
-                    <SignIn size={22} weight="duotone" />
+                  <div className="h-12 w-12 rounded-2xl bg-[linear-gradient(135deg,#dcfce7,#d1fae5)] border border-emerald-200 flex items-center justify-center text-emerald-700 shadow-sm">
+                    <Truck size={22} weight="duotone" />
                   </div>
                 </div>
 
