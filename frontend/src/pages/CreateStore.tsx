@@ -179,6 +179,8 @@ export function CreateStore() {
   const [validationMessage, setValidationMessage] = useState('');
   const [logoPreviewUrl, setLogoPreviewUrl] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [currentStep, setCurrentStep] = useState(1);
+  const [cepAutofilled, setCepAutofilled] = useState(false);
   const [cityOptions, setCityOptions] = useState<string[]>([]);
   const [isLoadingCities, setIsLoadingCities] = useState(false);
   const [cityLookupError, setCityLookupError] = useState('');
@@ -193,6 +195,9 @@ export function CreateStore() {
   const termsRef = useRef<HTMLDivElement | null>(null);
   const termsCheckboxRef = useRef<HTMLInputElement | null>(null);
   const logoObjectUrlRef = useRef('');
+  const personalSectionRef = useRef<HTMLDivElement | null>(null);
+  const addressSectionRef = useRef<HTMLDivElement | null>(null);
+  const storeSectionRef = useRef<HTMLDivElement | null>(null);
   const [registerForm, setRegisterForm] = useState({
     fullName: '',
     email: '',
@@ -358,6 +363,7 @@ export function CreateStore() {
         state: String(data.uf || '').toUpperCase(),
         complement: data.complemento || '',
       }));
+      setCepAutofilled(true);
     } catch (error) {
       setCepError('Não foi possível consultar o CEP agora.');
     } finally {
@@ -671,8 +677,22 @@ export function CreateStore() {
     setRegisterForm((prev) => ({ ...prev, phone: formatted }));
   };
 
+  const steps = [
+    { id: 1, title: 'Dados pessoais', done: Boolean(registerForm.fullName && registerForm.email && registerForm.phone) },
+    { id: 2, title: 'Endereço', done: Boolean(registerForm.cep && registerForm.city && registerForm.state && registerForm.street && registerForm.number) },
+    { id: 3, title: 'Loja', done: Boolean(registerForm.storeName && registerForm.segment) },
+  ];
+
+  const scrollToStep = (stepId: number) => {
+    const target =
+      stepId === 1 ? personalSectionRef.current : stepId === 2 ? addressSectionRef.current : storeSectionRef.current;
+    if (!target) return;
+    setCurrentStep(stepId);
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-[linear-gradient(165deg,#eef6ff_0%,#f8fafc_45%,#ecfeff_100%)]">
       <header className="sticky top-0 z-50 border-b border-white/60 bg-white/80 backdrop-blur-xl shadow-[0_18px_36px_-28px_rgba(15,23,42,0.5)]">
         <div className="h-1 bg-[linear-gradient(90deg,#ef4444,#f97316,#f59e0b)]" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -697,8 +717,8 @@ export function CreateStore() {
         </div>
       </header>
 
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        <div className="bg-white border border-gray-100 rounded-3xl shadow-xl p-6 sm:p-8">
+      <main className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <div className="ds-card-elevated rounded-3xl p-4 sm:p-6 lg:p-8">
           <div className="mb-8 text-center">
             <div className="w-20 h-20 rounded-2xl overflow-hidden shadow-lg mx-auto mb-4 border border-white bg-white">
               <img src={platformLogo} alt="Jano Caminho" className="w-full h-full object-cover" />
@@ -707,24 +727,30 @@ export function CreateStore() {
             <p className="text-gray-500">Preencha os dados para gerar seu site automaticamente.</p>
           </div>
 
-          <div className="mb-6 ds-card p-3 sm:p-4">
+          <div className="sticky top-[72px] sm:top-[84px] z-20 mb-6 ds-card p-3 sm:p-4 backdrop-blur bg-white/95">
+            <div className="mb-2 flex items-center justify-between">
+              <p className="text-xs uppercase tracking-[0.22em] font-semibold text-slate-500">Onboarding</p>
+              <span className="ds-badge text-[11px]">{currentStep}/3</span>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-              {[
-                { id: 1, title: 'Dados pessoais', done: Boolean(registerForm.fullName && registerForm.email && registerForm.phone) },
-                { id: 2, title: 'Endereço', done: Boolean(registerForm.cep && registerForm.city && registerForm.state && registerForm.street && registerForm.number) },
-                { id: 3, title: 'Loja', done: Boolean(registerForm.storeName && registerForm.segment) },
-              ].map((step) => (
-                <div
+              {steps.map((step) => (
+                <button
+                  type="button"
                   key={step.id}
+                  onClick={() => scrollToStep(step.id)}
                   className={`rounded-xl border px-3 py-2.5 ${
-                    step.done
-                      ? 'border-emerald-200 bg-emerald-50'
-                      : 'border-slate-200 bg-slate-50'
+                    currentStep === step.id
+                      ? 'border-brand-primary bg-brand-primary/10 ring-2 ring-brand-primary/20'
+                      : step.done
+                        ? 'border-emerald-200 bg-emerald-50'
+                        : 'border-slate-200 bg-slate-50'
                   }`}
                 >
                   <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">Etapa {step.id}</p>
-                  <p className={`text-sm font-bold ${step.done ? 'text-emerald-700' : 'text-slate-800'}`}>{step.title}</p>
-                </div>
+                  <p className={`truncate text-sm font-bold ${
+                    currentStep === step.id ? 'text-brand-primary' : step.done ? 'text-emerald-700' : 'text-slate-800'
+                  }`}>{step.title}</p>
+                </button>
               ))}
             </div>
           </div>
@@ -736,6 +762,7 @@ export function CreateStore() {
           )}
 
           <form className="space-y-6" onSubmit={handleCreateStore}>
+            <div ref={personalSectionRef} className="scroll-mt-36" onFocusCapture={() => setCurrentStep(1)}>
             <FormSection title="Informações pessoais" variant="primary" contentClassName="space-y-4">
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-gray-700">Nome completo</label>
@@ -748,7 +775,7 @@ export function CreateStore() {
                   />
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-gray-700">Email</label>
                     <input
@@ -776,11 +803,11 @@ export function CreateStore() {
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-gray-700">Telefone</label>
-                    <div className="grid grid-cols-[120px_1fr] gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-[120px_1fr] gap-2 min-w-0">
                       <select
                         value={storePhoneParts.ddd || ''}
                         onChange={(e) => handleCreateStorePhoneDddChange(e.target.value)}
-                        className="w-full border border-gray-200 rounded-xl p-3 text-sm font-semibold focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
+                        className="w-full min-w-0 border border-gray-200 rounded-xl p-3 text-sm font-semibold focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
                       >
                         <option value="" disabled>
                           DDD
@@ -796,16 +823,16 @@ export function CreateStore() {
                         onChange={(e) => handleCreateStorePhoneLocalChange(e.target.value)}
                         placeholder={storePhoneParts.ddd ? '99999-9999' : 'Selecione o DDD'}
                         disabled={!storePhoneParts.ddd}
-                        className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
+                        className="w-full min-w-0 border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
                       />
                     </div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-gray-700">Documento</label>
-                    <div className="flex gap-2">
+                    <div className="grid grid-cols-[92px_1fr] gap-2 min-w-0">
                       <select
                         value={registerForm.documentType}
                         onChange={(e) => {
@@ -815,7 +842,7 @@ export function CreateStore() {
                             updateFieldError('document', validateDocument(registerForm.document, nextType));
                           }
                         }}
-                        className="border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                        className="min-w-0 border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500"
                       >
                         <option value="CPF">CPF</option>
                         <option value="CNPJ">CNPJ</option>
@@ -831,7 +858,7 @@ export function CreateStore() {
                           }
                         }}
                         onBlur={() => updateFieldError('document', validateDocument(registerForm.document, registerForm.documentType))}
-                        className={`flex-1 border rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors ${
+                        className={`min-w-0 border rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors ${
                           fieldErrors.document ? 'border-red-400' : 'border-gray-200'
                         }`}
                         placeholder={registerForm.documentType === 'CNPJ' ? '00.000.000/0000-00' : '000.000.000-00'}
@@ -872,32 +899,42 @@ export function CreateStore() {
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-gray-200">
+                <div ref={addressSectionRef} className="pt-4 border-t border-gray-200 scroll-mt-36" onFocusCapture={() => setCurrentStep(2)}>
                   <h4 className="text-sm font-semibold text-gray-700 mb-3">Endereço</h4>
                   <div className="space-y-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                      <div className="sm:col-span-2 space-y-2">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 min-w-0">
+                      <div className="md:col-span-2 space-y-2 min-w-0">
                         <label className="text-sm font-semibold text-gray-700">CEP</label>
                         <input
                           required
                           value={registerForm.cep}
-                          onChange={(e) => setRegisterForm((prev) => ({ ...prev, cep: normalizeCep(e.target.value) }))}
+                          onChange={(e) => {
+                            setCepAutofilled(false);
+                            setRegisterForm((prev) => ({ ...prev, cep: normalizeCep(e.target.value) }));
+                          }}
                           onBlur={(e) => handleCepLookup(e.target.value)}
                           disabled={isCepLoading}
-                          className="ds-input ds-focus-ring disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          className="ds-input ds-focus-ring min-w-0 disabled:bg-gray-100 disabled:cursor-not-allowed"
                           placeholder="00000-000"
                         />
                         <button
                           type="button"
                           onClick={() => handleCepLookup(registerForm.cep)}
                           disabled={isCepLoading}
-                          className="w-full ds-btn ds-btn-secondary ds-focus-ring px-3 py-2 text-sm text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="w-full ds-btn ds-btn-secondary ds-focus-ring px-3 py-2 text-sm text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
                         >
-                          {isCepLoading ? 'Buscando...' : 'Buscar CEP'}
+                          {isCepLoading ? (
+                            <>
+                              <span className="h-4 w-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
+                              Buscando...
+                            </>
+                          ) : (
+                            'Buscar CEP'
+                          )}
                         </button>
                         {cepError && <p className="text-xs text-red-600">{cepError}</p>}
                       </div>
-                      <div className="space-y-2">
+                      <div className="space-y-2 min-w-0">
                         <label className="text-sm font-semibold text-gray-700">UF</label>
                         <select
                           required
@@ -910,7 +947,7 @@ export function CreateStore() {
                             }))
                           }
                           disabled={isCepLoading}
-                          className="ds-select ds-focus-ring disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          className="ds-select ds-focus-ring min-w-0 disabled:bg-gray-100 disabled:cursor-not-allowed"
                         >
                           <option value="">Selecione</option>
                           {BRAZIL_STATES.map((uf) => (
@@ -920,15 +957,25 @@ export function CreateStore() {
                           ))}
                         </select>
                       </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-semibold text-gray-700">Cidade</label>
+                      <div className="space-y-2 min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <label className="text-sm font-semibold text-gray-700">Cidade</label>
+                          {cepAutofilled && (
+                            <span className="text-[10px] font-semibold rounded-full px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200">
+                              Preenchido via CEP
+                            </span>
+                          )}
+                        </div>
                         <input
                           required
                           list={registerForm.state ? `cities-${registerForm.state}` : undefined}
                           value={registerForm.city}
-                          onChange={(e) => setRegisterForm((prev) => ({ ...prev, city: e.target.value }))}
+                          onChange={(e) => {
+                            setCepAutofilled(false);
+                            setRegisterForm((prev) => ({ ...prev, city: e.target.value }));
+                          }}
                           disabled={isCepLoading}
-                          className="ds-input ds-focus-ring disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          className="ds-input ds-focus-ring min-w-0 disabled:bg-gray-100 disabled:cursor-not-allowed"
                           placeholder={isLoadingCities ? 'Carregando cidades...' : 'Digite ou selecione a cidade'}
                         />
                         {registerForm.state && cityOptions.length > 0 && (
@@ -938,54 +985,66 @@ export function CreateStore() {
                             ))}
                           </datalist>
                         )}
+                        {isLoadingCities && (
+                          <p className="text-xs text-slate-500 inline-flex items-center gap-1.5">
+                            <span className="h-3.5 w-3.5 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
+                            Carregando cidades...
+                          </p>
+                        )}
                         {cityLookupError && <p className="text-xs text-amber-700">{cityLookupError}</p>}
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="space-y-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-w-0">
+                      <div className="space-y-2 min-w-0">
                         <label className="text-sm font-semibold text-gray-700">Rua / Avenida</label>
                         <input
                           required
                           value={registerForm.street}
-                          onChange={(e) => setRegisterForm((prev) => ({ ...prev, street: e.target.value }))}
+                          onChange={(e) => {
+                            setCepAutofilled(false);
+                            setRegisterForm((prev) => ({ ...prev, street: e.target.value }));
+                          }}
                           disabled={isCepLoading}
-                          className="ds-input ds-focus-ring disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          className="ds-input ds-focus-ring min-w-0 disabled:bg-gray-100 disabled:cursor-not-allowed"
                           placeholder="Nome da rua"
                         />
                       </div>
-                      <div className="space-y-2">
+                      <div className="space-y-2 min-w-0">
                         <label className="text-sm font-semibold text-gray-700">Bairro</label>
                         <input
                           required
                           value={registerForm.neighborhood}
-                          onChange={(e) => setRegisterForm((prev) => ({ ...prev, neighborhood: e.target.value }))}
+                          onChange={(e) => {
+                            setCepAutofilled(false);
+                            setRegisterForm((prev) => ({ ...prev, neighborhood: e.target.value }));
+                          }}
                           disabled={isCepLoading}
-                          className="ds-input ds-focus-ring disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          className="ds-input ds-focus-ring min-w-0 disabled:bg-gray-100 disabled:cursor-not-allowed"
                           placeholder="Bairro"
                         />
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="space-y-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-w-0">
+                      <div className="space-y-2 min-w-0">
                         <label className="text-sm font-semibold text-gray-700">Número</label>
                         <input
                           required
                           value={registerForm.number}
                           onChange={(e) => setRegisterForm((prev) => ({ ...prev, number: e.target.value }))}
                           disabled={isCepLoading}
-                          className="ds-input ds-focus-ring disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          className="ds-input ds-focus-ring min-w-0 disabled:bg-gray-100 disabled:cursor-not-allowed"
                           placeholder="123"
                         />
                       </div>
-                      <div className="space-y-2">
+                      <div className="space-y-2 min-w-0">
                         <label className="text-sm font-semibold text-gray-700">Complemento</label>
                         <input
                           value={registerForm.complement}
                           onChange={(e) => setRegisterForm((prev) => ({ ...prev, complement: e.target.value }))}
                           disabled={isCepLoading}
-                          className="ds-input ds-focus-ring disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          className="ds-input ds-focus-ring min-w-0 disabled:bg-gray-100 disabled:cursor-not-allowed"
                           placeholder="Apto, sala, bloco (opcional)"
                         />
                       </div>
@@ -993,8 +1052,9 @@ export function CreateStore() {
                   </div>
                 </div>
             </FormSection>
+            </div>
 
-            <div className="pt-6 border-t border-gray-100">
+            <div ref={storeSectionRef} className="pt-6 border-t border-gray-100 scroll-mt-36" onFocusCapture={() => setCurrentStep(3)}>
               <FormSection title="Configurações da loja" variant="warning" contentClassName="space-y-4">
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700">Nome da loja</label>
@@ -1417,20 +1477,47 @@ export function CreateStore() {
               </label>
             </div>
 
-            <button
-              type="submit"
-              disabled={isRegistering}
-              className="w-full bg-gradient-to-r from-red-500 to-red-600 text-white py-4 rounded-xl font-semibold hover:from-red-600 hover:to-red-700 disabled:opacity-60 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-            >
-              {isRegistering ? (
-                <span className="flex items-center justify-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Criando sua loja...
-                </span>
-              ) : (
-                '🚀 Criar minha loja agora'
-              )}
-            </button>
+            <div className="sticky bottom-3 z-20 rounded-2xl border border-slate-200 bg-white/95 backdrop-blur p-3 shadow-[0_18px_40px_-28px_rgba(15,23,42,0.5)]">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
+                <div className="text-xs text-slate-500">
+                  Etapa atual <span className="font-semibold text-slate-700">{currentStep} de 3</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => scrollToStep(Math.max(1, currentStep - 1))}
+                    disabled={currentStep === 1}
+                    className="ds-btn ds-btn-secondary ds-focus-ring px-4 py-2 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Voltar
+                  </button>
+                  {currentStep < 3 ? (
+                    <button
+                      type="button"
+                      onClick={() => scrollToStep(currentStep + 1)}
+                      className="ds-btn ds-btn-primary ds-btn-shine ds-focus-ring px-4 py-2 text-sm font-semibold text-white"
+                    >
+                      Próximo
+                    </button>
+                  ) : (
+                    <button
+                      type="submit"
+                      disabled={isRegistering}
+                      className="ds-btn ds-btn-primary ds-btn-shine ds-focus-ring px-4 py-2 text-sm font-semibold text-white disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                      {isRegistering ? (
+                        <span className="inline-flex items-center justify-center gap-2">
+                          <span className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          Criando loja...
+                        </span>
+                      ) : (
+                        'Criar minha loja'
+                      )}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
 
             {paymentResult && (
               <div className="mt-6 bg-green-50 border border-green-100 rounded-2xl p-4 space-y-2">
