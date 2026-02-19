@@ -39,6 +39,7 @@ import { logger } from '../utils/logger';
 import { AppError } from '../errors/AppError';
 import { PlatformAdmin } from '../entities/PlatformAdmin';
 import { getStoreSegmentPreset, sanitizeStoreSegment } from '../utils/storeSegment';
+import { resolvePlanFeatures, resolvePlanTier } from '../config/planFeatures';
 /**
  * Provides AuthService functionality.
  *
@@ -543,8 +544,9 @@ export class AuthService
       }
       : undefined;
 
+    let currentSubscription: any = null;
     if (sanitizedStore) {
-      const currentSubscription = await this.subscriptionService.getCurrentByStore(firstStore.id);
+      currentSubscription = await this.subscriptionService.getCurrentByStore(firstStore.id);
       const isActive = this.subscriptionService.isActiveSubscription(currentSubscription);
       if (!isActive) {
         await this.throwPendingPayment(firstStore.id);
@@ -554,8 +556,29 @@ export class AuthService
         await this.storeRepository.save(firstStore);
       }
     }
+    const planExempt = Boolean(firstStore?.settings?.planExempt);
+    const planTier = resolvePlanTier(currentSubscription?.plan?.name, planExempt);
+    const features = resolvePlanFeatures({
+      planName: currentSubscription?.plan?.name,
+      planExempt,
+    });
 
-    return { user: sanitizedUser, store: sanitizedStore, token };
+    return {
+      user: sanitizedUser,
+      store: sanitizedStore,
+      token,
+      subscription: currentSubscription
+        ? {
+            id: currentSubscription.id,
+            status: currentSubscription.status,
+            plan: currentSubscription.plan,
+            endDate: currentSubscription.endDate,
+            planExempt,
+          }
+        : null,
+      planTier,
+      features,
+    };
   }
 
 
@@ -633,6 +656,12 @@ export class AuthService
         phone: owner.phone,
       },
     };
+    const planExempt = Boolean(store?.settings?.planExempt);
+    const planTier = resolvePlanTier(currentSubscription?.plan?.name, planExempt);
+    const features = resolvePlanFeatures({
+      planName: currentSubscription?.plan?.name,
+      planExempt,
+    });
 
     return {
       token,
@@ -644,8 +673,11 @@ export class AuthService
             status: currentSubscription.status,
             plan: currentSubscription.plan,
             endDate: currentSubscription.endDate,
+            planExempt,
           }
         : null,
+      planTier,
+      features,
     };
   }
 

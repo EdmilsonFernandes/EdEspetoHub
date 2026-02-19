@@ -30,6 +30,7 @@ import { DeliveryBillingController } from '../controllers/DeliveryBillingControl
 
 import { requireAuth, requireRole } from '../middleware/authGuard';
 import { requireActiveSubscription } from '../middleware/subscriptionGuard';
+import { requirePlanFeature } from '../middleware/planFeatureGuard';
 
 const routes = Router();
 
@@ -124,8 +125,8 @@ routes.get('/orders/:orderId/review', OrderReviewController.getByOrder);
 routes.post('/orders/:orderId/review', OrderReviewController.submitByOrder);
 routes.get('/stores/:storeId/reviews', requireAuth, requireRole('ADMIN', 'CHURRASQUEIRO'), OrderReviewController.listByStore);
 routes.get('/stores/:storeId/reviews/summary', requireAuth, requireRole('ADMIN', 'CHURRASQUEIRO'), OrderReviewController.summaryByStore);
-routes.get('/stores/:storeId/reviews/tip-payouts', requireAuth, requireRole('ADMIN', 'CHURRASQUEIRO'), OrderReviewController.listTipPayoutsByStore);
-routes.patch('/stores/:storeId/reviews/:reviewId/tip-payout', requireAuth, requireRole('ADMIN', 'CHURRASQUEIRO'), OrderReviewController.markTipPayoutByStore);
+routes.get('/stores/:storeId/reviews/tip-payouts', requireAuth, requireRole('ADMIN', 'CHURRASQUEIRO'), requirePlanFeature('tipPayouts'), OrderReviewController.listTipPayoutsByStore);
+routes.patch('/stores/:storeId/reviews/:reviewId/tip-payout', requireAuth, requireRole('ADMIN', 'CHURRASQUEIRO'), requirePlanFeature('tipPayouts'), OrderReviewController.markTipPayoutByStore);
 
 // Motoboy
 routes.get('/motoboy/orders/available', requireAuth, MotoboyController.listAvailableOrders);
@@ -161,23 +162,25 @@ routes.get('/legal/lgpd', LegalController.getLgpd);
 routes.post('/admin/site-settings', requireAuth, requireRole('SUPER_ADMIN'), LegalController.setSetting);
 
 // Store owner motoboy management
-routes.get('/stores/:storeId/motoboys', requireAuth, requireRole('ADMIN'), MotoboyController.listByStore);
-routes.post('/stores/:storeId/motoboys', requireAuth, requireRole('ADMIN'), MotoboyController.createForStore);
-routes.post('/stores/:storeId/motoboys/:motoboyId/link', requireAuth, requireRole('ADMIN'), MotoboyController.linkStore);
-routes.post('/stores/:storeId/motoboys/:motoboyId/unlink', requireAuth, requireRole('ADMIN'), MotoboyController.unlinkStore);
-routes.post('/stores/:storeId/motoboys/:motoboyId/approve', requireAuth, requireRole('ADMIN'), MotoboyController.approve);
-routes.post('/stores/:storeId/motoboys/:motoboyId/suspend', requireAuth, requireRole('ADMIN'), MotoboyController.suspend);
-routes.get('/stores/:storeId/motoboy-requests', requireAuth, requireRole('ADMIN'), MotoboyController.listStoreRequestsForStore);
+routes.get('/stores/:storeId/motoboys', requireAuth, requireRole('ADMIN'), requirePlanFeature('motoboyManagement'), MotoboyController.listByStore);
+routes.post('/stores/:storeId/motoboys', requireAuth, requireRole('ADMIN'), requirePlanFeature('motoboyManagement'), MotoboyController.createForStore);
+routes.post('/stores/:storeId/motoboys/:motoboyId/link', requireAuth, requireRole('ADMIN'), requirePlanFeature('motoboyManagement'), MotoboyController.linkStore);
+routes.post('/stores/:storeId/motoboys/:motoboyId/unlink', requireAuth, requireRole('ADMIN'), requirePlanFeature('motoboyManagement'), MotoboyController.unlinkStore);
+routes.post('/stores/:storeId/motoboys/:motoboyId/approve', requireAuth, requireRole('ADMIN'), requirePlanFeature('motoboyManagement'), MotoboyController.approve);
+routes.post('/stores/:storeId/motoboys/:motoboyId/suspend', requireAuth, requireRole('ADMIN'), requirePlanFeature('motoboyManagement'), MotoboyController.suspend);
+routes.get('/stores/:storeId/motoboy-requests', requireAuth, requireRole('ADMIN'), requirePlanFeature('motoboyManagement'), MotoboyController.listStoreRequestsForStore);
 routes.post(
   '/stores/:storeId/motoboy-requests/:requestId/approve',
   requireAuth,
   requireRole('ADMIN'),
+  requirePlanFeature('motoboyManagement'),
   MotoboyController.approveStoreRequest
 );
 routes.post(
   '/stores/:storeId/motoboy-requests/:requestId/reject',
   requireAuth,
   requireRole('ADMIN'),
+  requirePlanFeature('motoboyManagement'),
   MotoboyController.rejectStoreRequest
 );
 
@@ -188,12 +191,14 @@ routes.post('/stores/:storeId/delivery-billing/pay', requireAuth, requireRole('A
    '/stores/:storeId/motoboys/:motoboyId/documents',
    requireAuth,
    requireRole('ADMIN'),
+   requirePlanFeature('motoboyManagement'),
    MotoboyController.listDocuments
  );
  routes.post(
   '/stores/:storeId/motoboys/:motoboyId/documents/:documentId/reupload',
   requireAuth,
   requireRole('ADMIN'),
+  requirePlanFeature('motoboyManagement'),
   MotoboyController.requestDocumentReupload
  );
 

@@ -713,6 +713,14 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     payoutPaidCount: 0,
   });
   const prevTabRef = useRef(activeTab);
+  const isVip = Boolean(session?.store?.settings?.planExempt || session?.subscription?.planExempt);
+  const planName = String(session?.subscription?.plan?.name || '').toLowerCase();
+  const canUseMotoboys = Boolean(
+    isVip ||
+      session?.features?.motoboyManagement ||
+      planName.includes('pro') ||
+      planName.includes('vip')
+  );
 
   const mobilePrimaryTabs = [
     { id: 'resumo', label: 'Resumo', icon: ChartBar },
@@ -726,7 +734,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     { id: 'motoboys', label: 'Entregadores', hint: 'Motoboys e solicitações', icon: Scooter },
     { id: 'config', label: 'Configurações', hint: 'Identidade, Pix e horários', icon: Gear },
     { id: 'cardapio', label: 'Abrir cardápio', hint: 'Ver como o cliente vê', icon: BookOpen },
-  ];
+  ].filter((item) => (item.id === 'motoboys' ? canUseMotoboys : true));
   const desktopTabItems = [
     { id: 'resumo', label: 'Resumo', icon: ChartBar },
     { id: 'pedidos', label: 'Pedidos', icon: ShoppingCart },
@@ -735,7 +743,13 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     { id: 'motoboys', label: 'Entregadores', icon: Scooter },
     { id: 'config', label: 'Configurações', icon: Gear },
     { id: 'fila', label: 'Fila', icon: ChefHat },
-  ];
+  ].filter((item) => (item.id === 'motoboys' ? canUseMotoboys : true));
+
+  useEffect(() => {
+    if (!canUseMotoboys && activeTab === 'motoboys') {
+      setActiveTab('resumo');
+    }
+  }, [canUseMotoboys, activeTab]);
 
   const storeId = session?.store?.id;
   const storeSlug = session?.store?.slug;
