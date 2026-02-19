@@ -40,7 +40,7 @@ export class EmailService {
    */
   private getLogoUrl() {
     const base = env.appUrl?.replace(/\/$/, '') || 'http://localhost:3000';
-    return `${base}/chama-no-espeto.jpeg`;
+    return `${base}/janocaminho.jpg`;
   }
 
   /**
@@ -89,10 +89,20 @@ export class EmailService {
   private async getTemplateValue(key: string, fallback: string) {
     try {
       const value = await this.settingsService.getValue(key);
-      return value || fallback;
+      return this.normalizeBrandingContent(value || fallback);
     } catch {
-      return fallback;
+      return this.normalizeBrandingContent(fallback);
     }
+  }
+
+  private normalizeBrandingContent(content: string) {
+    return String(content || '')
+      .replace(/Chama no Espeto/g, 'Já no Caminho')
+      .replace(/chama no espeto/g, 'já no caminho')
+      .replace(/www\.chamanoespeto\.com\.br/g, 'www.janocaminho.com.br')
+      .replace(/chamanoespeto\.com\.br/g, 'janocaminho.com.br')
+      .replace(/\/chama-no-espeto\.jpeg/g, '/janocaminho.jpg')
+      .replace(/chama-no-espeto\.jpeg/g, 'janocaminho.jpg');
   }
 
   private renderTemplate(template: string, vars: Record<string, string>) {
