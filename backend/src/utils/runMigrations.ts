@@ -225,8 +225,6 @@ export async function runMigrations() {
       ('pro_yearly', 'Pro Anual', 958.80, 815.98, 365, true)
     ON CONFLICT (name) DO UPDATE
     SET display_name = EXCLUDED.display_name,
-        price = EXCLUDED.price,
-        promo_price = EXCLUDED.promo_price,
         duration_days = EXCLUDED.duration_days,
         enabled = EXCLUDED.enabled;
   `);
