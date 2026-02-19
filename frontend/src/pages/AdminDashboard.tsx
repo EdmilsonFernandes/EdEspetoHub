@@ -434,9 +434,12 @@ const OrdersView = ({ orders, products, storeSlug }) => {
 };
 
 const PaymentsView = ({ subscription, loading, error, payments }) => {
+  const navigate = useNavigate();
   const [showAllHistory, setShowAllHistory] = useState(false);
   const isVip = Boolean(subscription?.planExempt) || subscription?.plan?.name === 'vip';
   const plan = subscription?.plan;
+  const planName = String(plan?.name || '').toLowerCase();
+  const isBasicPlan = !isVip && planName.includes('basic');
   const planLabel = isVip
     ? subscription?.plan?.displayName || subscription?.planExemptLabel || 'Cliente VIP'
     : plan?.displayName || plan?.name || 'Plano não identificado';
@@ -579,6 +582,22 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
             {isVip ? 'Acesso liberado pelo administrador.' : `Último pagamento: ${paidAtLabel}`}
           </p>
         </div>
+        {isBasicPlan && (
+          <div className="rounded-2xl border border-violet-200 border-l-4 border-l-violet-400 bg-violet-50 p-4">
+            <p className="text-xs uppercase tracking-[0.25em] text-violet-700">Upgrade</p>
+            <p className="text-sm font-bold text-violet-900 mt-2">Desbloqueie recursos Pro</p>
+            <p className="text-xs text-violet-700/90 mt-1">
+              Ative retirada, entregadores e fluxo de gorjetas.
+            </p>
+            <button
+              type="button"
+              onClick={() => navigate('/admin/renewal')}
+              className="mt-3 rounded-lg border border-violet-300 bg-white px-3 py-1.5 text-xs font-bold text-violet-700 hover:bg-violet-100"
+            >
+              Trocar para Pro
+            </button>
+          </div>
+        )}
         {Array.isArray(payments) && payments.length > 0 && (
           <div className="pt-2 border-t border-slate-200">
             <div className="flex items-center justify-between gap-3">
