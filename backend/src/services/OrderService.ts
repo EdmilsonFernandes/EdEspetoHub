@@ -21,6 +21,8 @@ import { AppDataSource } from '../config/database';
 import { AppError } from '../errors/AppError';
 import { DeliveryBillingService } from './DeliveryBillingService';
 import { deliveryService } from './DeliveryService';
+import { SubscriptionService } from './SubscriptionService';
+import { resolvePlanFeatures } from '../config/planFeatures';
 /**
  * Provides OrderService functionality.
  *
@@ -33,6 +35,7 @@ export class OrderService
   private storeRepository = new StoreRepository();
   private productRepository = new ProductRepository();
   private deliveryBillingService = new DeliveryBillingService();
+  private subscriptionService = new SubscriptionService();
 
   /**
    * Resolves the price used for an item.
@@ -363,9 +366,18 @@ export class OrderService
    */
   private async buildOrder(input: Omit<CreateOrderDto, 'storeId'>, store: Awaited<ReturnType<StoreRepository[ 'findById' ]>>)
   {
-    const allowedTypes = Array.isArray(store?.settings?.orderTypes) && store.settings.orderTypes.length > 0
+    const subscription = store?.id ? await this.subscriptionService.getCurrentByStore(store.id) : null;
+    const features = resolvePlanFeatures({
+      planName: subscription?.plan?.name,
+      planExempt: Boolean(store?.settings?.planExempt),
+      subscriptionStatus: subscription?.status,
+    });
+    const baseAllowedTypes = Array.isArray(store?.settings?.orderTypes) && store.settings.orderTypes.length > 0
       ? store.settings.orderTypes
       : [ 'delivery', 'pickup', 'table' ];
+    const allowedTypes = features.pickupMode
+      ? baseAllowedTypes
+      : baseAllowedTypes.filter((type) => String(type || '').toLowerCase() !== 'pickup');
     if (!allowedTypes.includes(input.type)) {
       throw new AppError('ORDER-002', 400);
     }

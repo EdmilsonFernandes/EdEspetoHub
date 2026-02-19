@@ -330,10 +330,14 @@ export function StorePage() {
           }));
           const normalizedHours = normalizeOpeningHours(data.settings?.openingHours || []);
           setOpeningHours(normalizedHours);
-          const allowedTypes = Array.isArray(data.settings?.orderTypes) && data.settings.orderTypes.length > 0
+          const baseTypes = Array.isArray(data.settings?.orderTypes) && data.settings.orderTypes.length > 0
             ? data.settings.orderTypes
             : [ 'delivery', 'pickup', 'table' ];
-          setOrderTypes(allowedTypes);
+          const pickupEnabled = canUsePickupBySubscription(data.subscription, data.settings);
+          const allowedTypes = pickupEnabled
+            ? baseTypes
+            : baseTypes.filter((type: string) => String(type || '').toLowerCase() !== 'pickup');
+          setOrderTypes(allowedTypes.length ? allowedTypes : [ 'delivery', 'table' ]);
           setStorePhone(data.owner?.phone || '');
           setStoreAddress(data.settings?.address || data.owner?.address || '');
           setStoreDescription(data.settings?.description || '');
@@ -474,6 +478,13 @@ export function StorePage() {
       document.removeEventListener('visibilitychange', handleVisibility);
     };
   }, [storeSlug]);
+
+  useEffect(() => {
+    if (!Array.isArray(orderTypes) || !orderTypes.length) return;
+    if (orderTypes.includes(customer.type)) return;
+    const fallbackType = orderTypes.includes('delivery') ? 'delivery' : orderTypes[0];
+    setCustomer((prev) => ({ ...prev, type: fallbackType }));
+  }, [orderTypes, customer.type]);
 
   useEffect(() => {
     if (!storeSlug || typeof window === 'undefined') return;
@@ -1443,3 +1454,12 @@ export function StorePage() {
   );
 }
 
+  const canUsePickupBySubscription = (subscription: any, settings: any) => {
+    const isVip = Boolean(settings?.planExempt || subscription?.planExempt);
+    if (isVip) return true;
+    const status = String(subscription?.status || '').toUpperCase();
+    if (status === 'TRIAL') return true;
+    if (Boolean(subscription?.features?.pickupMode)) return true;
+    const planName = String(subscription?.plan?.name || '').toLowerCase();
+    return planName.includes('pro') || planName.includes('vip');
+  };

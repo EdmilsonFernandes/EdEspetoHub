@@ -235,7 +235,8 @@ export function OrderTracking() {
     status === 'delivered' ||
     status === 'finished' ||
     String((order as any)?.delivery?.status || '').toUpperCase() === 'DELIVERED';
-  const canRateDelivery = Boolean(reviewState?.isDelivery ?? isDelivery);
+  const canRateDelivery = Boolean(reviewState?.features?.deliveryFeedbackEnabled ?? reviewState?.isDelivery ?? isDelivery);
+  const canUseTipFlow = Boolean(reviewState?.features?.tipEnabled ?? canRateDelivery);
   const storePhone = order?.store?.phone;
   const customerPhone = order?.phone;
   const paymentValue = order?.paymentMethod || order?.payment;
@@ -342,7 +343,7 @@ export function OrderTracking() {
             comment: String(payload.review.comment || ''),
             storeTags: Array.isArray(payload.review.storeTags) ? payload.review.storeTags : [],
             deliveryTags: Array.isArray(payload.review.deliveryTags) ? payload.review.deliveryTags : [],
-            tipAmount: Number(payload.review.tipAmount || 0),
+            tipAmount: Number(payload?.features?.tipEnabled ? payload.review.tipAmount || 0 : 0),
           });
         }
       })
@@ -372,7 +373,7 @@ export function OrderTracking() {
   );
   const tipUiStatus = isTipExpired && tipStatus === 'PENDING' ? 'EXPIRED' : tipStatus;
   const tipAmount = Number(reviewTip?.tipAmount || 0);
-  const hasTip = tipAmount > 0;
+  const hasTip = canUseTipFlow && tipAmount > 0;
   const canShowTipPayment = hasTip && (reviewTip?.tipQrCodeText || reviewTip?.tipPaymentLink);
   const tipStatusLabel =
     tipUiStatus === 'PAID'
@@ -448,7 +449,7 @@ export function OrderTracking() {
         comment: String(reviewForm.comment || ''),
         storeTags: reviewForm.storeTags || [],
         deliveryTags: canRateDelivery ? (reviewForm.deliveryTags || []) : [],
-        tipAmount: Number(reviewForm.tipAmount || 0),
+        tipAmount: canUseTipFlow ? Number(reviewForm.tipAmount || 0) : 0,
       });
       setReviewState({ ...(reviewState || {}), review: payload });
     } catch (error: any) {
@@ -1233,7 +1234,7 @@ export function OrderTracking() {
                             </div>
                           )}
 
-                          {canRateDelivery && (
+                          {canUseTipFlow && (
                             <div>
                               <p className="text-xs font-semibold text-slate-600 mb-1">Gorjeta</p>
                               <div className="flex flex-wrap gap-1.5">

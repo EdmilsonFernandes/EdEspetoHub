@@ -18,6 +18,7 @@ import { OrderReviewService } from '../services/OrderReviewService';
 import { logger } from '../utils/logger';
 import { AppError } from '../errors/AppError';
 import { respondWithError } from '../errors/respondWithError';
+import { resolvePlanFeatures } from '../config/planFeatures';
 
 const storeService = new StoreService();
 const subscriptionService = new SubscriptionService();
@@ -86,6 +87,17 @@ const buildDemoStore = (slug: string) => {
  * @date 2025-12-17
  */
 export class StoreController {
+  private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?: string | null; planExempt?: boolean; subscriptionStatus?: string | null }) {
+    const incoming = Array.isArray(orderTypes) ? orderTypes : [ 'delivery', 'pickup', 'table' ];
+    const features = resolvePlanFeatures({
+      planName: params.planName,
+      planExempt: params.planExempt,
+      subscriptionStatus: params.subscriptionStatus,
+    });
+    return features.pickupMode
+      ? incoming
+      : incoming.filter((type) => String(type || '').toLowerCase() !== 'pickup');
+  }
   /**
    * Executes is store open now logic.
    *
@@ -197,6 +209,11 @@ export class StoreController {
       const store = await storeService.getBySlug(req.params.slug);
       if (!store) return respondWithError(req, res, new AppError('STORE-001', 404), 404);
       const subscription = await subscriptionService.getCurrentByStore(store.id);
+      const orderTypes = StoreController.sanitizeOrderTypesByPlan(store.settings?.orderTypes, {
+        planName: subscription?.plan?.name,
+        planExempt: Boolean(store.settings?.planExempt),
+        subscriptionStatus: subscription?.status || null,
+      });
       const sanitizedStore = {
         id: store.id,
         name: store.name,
@@ -204,7 +221,10 @@ export class StoreController {
         open: store.open,
         createdAt: store.createdAt,
         reviewSummary: await orderReviewService.publicSummaryByStoreId(store.id),
-        settings: store.settings,
+        settings: {
+          ...(store.settings || {}),
+          orderTypes,
+        },
         owner: store.owner
           ? {
             id: store.owner.id,

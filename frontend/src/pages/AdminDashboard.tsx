@@ -723,6 +723,13 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       planName.includes('pro') ||
       planName.includes('vip')
   );
+  const canUseDeliveryReviewsAndTips = Boolean(
+    isVip ||
+      session?.features?.tipPayouts ||
+      subscriptionStatus === 'TRIAL' ||
+      planName.includes('pro') ||
+      planName.includes('vip')
+  );
 
   const mobilePrimaryTabs = [
     { id: 'resumo', label: 'Resumo', icon: ChartBar },
@@ -797,11 +804,13 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     const loadReviewsSummary = async () => {
       setReviewsLoading(true);
       try {
-        const [summary, reviews, payouts] = await Promise.all([
-          orderService.getReviewSummaryByStore(storeId),
-          orderService.listReviewsByStore(storeId, 300),
-          orderService.listTipPayoutsByStore(storeId, 300).catch(() => []),
-        ]);
+        const summary = await orderService.getReviewSummaryByStore(storeId);
+        const [reviews, payouts] = canUseDeliveryReviewsAndTips
+          ? await Promise.all([
+              orderService.listReviewsByStore(storeId, 300),
+              orderService.listTipPayoutsByStore(storeId, 300).catch(() => []),
+            ])
+          : [[], []];
         if (!active) return;
         setReviewsSummary(summary || null);
         const reviewRows = Array.isArray(reviews) ? reviews : [];
@@ -852,7 +861,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     return () => {
       active = false;
     };
-  }, [storeId]);
+  }, [storeId, canUseDeliveryReviewsAndTips]);
   useEffect(() => {
     if ((location.state as any)?.activeTab === 'fila') {
       navigate('/admin/queue', { replace: true });
@@ -1281,11 +1290,13 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                   if (!storeId) return;
                   setReviewsLoading(true);
                   try {
-                    const [summary, reviews, payouts] = await Promise.all([
-                      orderService.getReviewSummaryByStore(storeId),
-                      orderService.listReviewsByStore(storeId, 300),
-                      orderService.listTipPayoutsByStore(storeId, 300).catch(() => []),
-                    ]);
+                    const summary = await orderService.getReviewSummaryByStore(storeId);
+                    const [reviews, payouts] = canUseDeliveryReviewsAndTips
+                      ? await Promise.all([
+                          orderService.listReviewsByStore(storeId, 300),
+                          orderService.listTipPayoutsByStore(storeId, 300).catch(() => []),
+                        ])
+                      : [[], []];
                     setReviewsSummary(summary || null);
                     const reviewRows = Array.isArray(reviews) ? reviews : [];
                     const tipRows = reviewRows.filter((r: any) => Number(r?.tipAmount ?? r?.tip_amount ?? 0) > 0);
@@ -1323,7 +1334,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
               </button>
             }
           >
-            <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-6">
+            <div className={`grid gap-2 ${canUseDeliveryReviewsAndTips ? 'sm:grid-cols-2 xl:grid-cols-6' : 'sm:grid-cols-2 xl:grid-cols-3'}`}>
               <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
                 <div className="text-[11px] text-slate-500">Nota da loja</div>
                 <div className="text-lg font-black text-slate-900">
@@ -1334,40 +1345,56 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                   {Number(reviewsSummary?.summary?.total_reviews || 0) < 10 ? ' · amostra baixa' : ''}
                 </div>
               </div>
-              <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
-                <div className="text-[11px] text-slate-500">Nota da entrega</div>
-                <div className="text-lg font-black text-slate-900">
-                  {Number(reviewsSummary?.summary?.delivery_avg_rating || 0).toFixed(1)} ★
+              {canUseDeliveryReviewsAndTips ? (
+                <>
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+                    <div className="text-[11px] text-slate-500">Nota da entrega</div>
+                    <div className="text-lg font-black text-slate-900">
+                      {Number(reviewsSummary?.summary?.delivery_avg_rating || 0).toFixed(1)} ★
+                    </div>
+                    <div className="text-[11px] text-slate-500">
+                      {Number(reviewsSummary?.summary?.total_delivery_reviews || 0)} avaliações
+                      {Number(reviewsSummary?.summary?.total_delivery_reviews || 0) < 10 ? ' · amostra baixa' : ''}
+                    </div>
+                  </div>
+                  <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2">
+                    <div className="text-[11px] text-emerald-700">Gorjetas pagas</div>
+                    <div className="text-lg font-black text-emerald-700">{formatCurrency(tipsOverview.paidAmount || 0)}</div>
+                    <div className="text-[11px] text-emerald-700/80">{tipsOverview.paidTipOrders} pagamento(s)</div>
+                  </div>
+                  <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2">
+                    <div className="text-[11px] text-amber-700">Gorjetas pendentes (cliente)</div>
+                    <div className="text-lg font-black text-amber-700">{formatCurrency(tipsOverview.pendingAmount || 0)}</div>
+                    <div className="text-[11px] text-amber-700/80">{tipsOverview.pendingTipOrders} pendente(s)</div>
+                  </div>
+                  <div className="rounded-xl border border-orange-200 bg-orange-50 px-3 py-2">
+                    <div className="text-[11px] text-orange-700">Repasse pendente (motoboy)</div>
+                    <div className="text-lg font-black text-orange-700">{formatCurrency(tipsOverview.payoutPendingAmount || 0)}</div>
+                    <div className="text-[11px] text-orange-700/80">{tipsOverview.payoutPendingCount} aguardando repasse</div>
+                  </div>
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+                    <div className="text-[11px] text-slate-500">Ticket médio gorjeta</div>
+                    <div className="text-lg font-black text-slate-900">{formatCurrency(tipsOverview.avgTipAmount || 0)}</div>
+                    <div className="text-[11px] text-slate-500">
+                      {Number(reviewsSummary?.summary?.total_delivery_reviews || 0) > 0
+                        ? `${((tipsOverview.tipOrders / Number(reviewsSummary?.summary?.total_delivery_reviews || 1)) * 100).toFixed(1)}% dos pedidos avaliados`
+                        : 'Sem base de comparação'}
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="rounded-xl border border-violet-200 bg-violet-50 px-3 py-2 sm:col-span-1 xl:col-span-2">
+                  <div className="text-[11px] text-violet-700">Avaliações de entrega e gorjetas</div>
+                  <div className="text-sm font-bold text-violet-900">Disponível no plano Pro</div>
+                  <button
+                    type="button"
+                    onClick={() => navigate('/admin/renewal')}
+                    className="mt-2 rounded-lg border border-violet-300 bg-white px-2.5 py-1 text-xs font-bold text-violet-700 hover:bg-violet-100"
+                  >
+                    Trocar assinatura
+                  </button>
                 </div>
-                <div className="text-[11px] text-slate-500">
-                  {Number(reviewsSummary?.summary?.total_delivery_reviews || 0)} avaliações
-                  {Number(reviewsSummary?.summary?.total_delivery_reviews || 0) < 10 ? ' · amostra baixa' : ''}
-                </div>
-              </div>
-              <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2">
-                <div className="text-[11px] text-emerald-700">Gorjetas pagas</div>
-                <div className="text-lg font-black text-emerald-700">{formatCurrency(tipsOverview.paidAmount || 0)}</div>
-                <div className="text-[11px] text-emerald-700/80">{tipsOverview.paidTipOrders} pagamento(s)</div>
-              </div>
-              <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2">
-                <div className="text-[11px] text-amber-700">Gorjetas pendentes (cliente)</div>
-                <div className="text-lg font-black text-amber-700">{formatCurrency(tipsOverview.pendingAmount || 0)}</div>
-                <div className="text-[11px] text-amber-700/80">{tipsOverview.pendingTipOrders} pendente(s)</div>
-              </div>
-              <div className="rounded-xl border border-orange-200 bg-orange-50 px-3 py-2">
-                <div className="text-[11px] text-orange-700">Repasse pendente (motoboy)</div>
-                <div className="text-lg font-black text-orange-700">{formatCurrency(tipsOverview.payoutPendingAmount || 0)}</div>
-                <div className="text-[11px] text-orange-700/80">{tipsOverview.payoutPendingCount} aguardando repasse</div>
-              </div>
-              <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
-                <div className="text-[11px] text-slate-500">Ticket médio gorjeta</div>
-                <div className="text-lg font-black text-slate-900">{formatCurrency(tipsOverview.avgTipAmount || 0)}</div>
-                <div className="text-[11px] text-slate-500">
-                  {Number(reviewsSummary?.summary?.total_delivery_reviews || 0) > 0
-                    ? `${((tipsOverview.tipOrders / Number(reviewsSummary?.summary?.total_delivery_reviews || 1)) * 100).toFixed(1)}% dos pedidos avaliados`
-                    : 'Sem base de comparação'}
-                </div>
-              </div>
+              )}
             </div>
           </FormSection>
 

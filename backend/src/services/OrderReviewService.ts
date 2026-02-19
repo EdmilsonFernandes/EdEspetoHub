@@ -20,6 +20,8 @@ import { OrderRepository } from '../repositories/OrderRepository';
 import { OrderReviewRepository } from '../repositories/OrderReviewRepository';
 import { StoreRepository } from '../repositories/StoreRepository';
 import { saveBase64Image } from '../utils/imageStorage';
+import { SubscriptionService } from './SubscriptionService';
+import { resolvePlanFeatures } from '../config/planFeatures';
 
 type SubmitReviewInput = {
   storeRating: number;
@@ -43,6 +45,20 @@ export class OrderReviewService {
   private storeRepository = new StoreRepository();
   private orderDeliveryRepository = new OrderDeliveryRepository();
   private orderReviewRepository = new OrderReviewRepository();
+  private subscriptionService = new SubscriptionService();
+
+  private async resolveStoreReviewFeatures(storeId: string) {
+    const store = await this.storeRepository.findById(storeId);
+    const subscription = await this.subscriptionService.getCurrentByStore(storeId);
+    const features = resolvePlanFeatures({
+      planName: subscription?.plan?.name,
+      planExempt: Boolean(store?.settings?.planExempt),
+      subscriptionStatus: subscription?.status,
+    });
+    const deliveryFeedbackEnabled = Boolean(features.motoboyManagement);
+    const tipEnabled = Boolean(features.tipPayouts && deliveryFeedbackEnabled);
+    return { deliveryFeedbackEnabled, tipEnabled };
+  }
 
   private ensureStoreAccess(storeId: string, authStoreId?: string) {
     if (!authStoreId) return;
@@ -165,7 +181,11 @@ export class OrderReviewService {
     const normalizedOrderType = String(order.type || '').trim().toLowerCase();
     const delivery = await this.orderDeliveryRepository.findByOrderId(order.id);
     const isDeliveryOrder = normalizedOrderType === 'delivery' || Boolean(delivery);
-    const motoboyId = delivery?.motoboyId || null;
+    const storeFeatures = await this.resolveStoreReviewFeatures(order.store.id);
+    const canUseDeliveryFeedback = isDeliveryOrder && storeFeatures.deliveryFeedbackEnabled;
+    const canUseTip = canUseDeliveryFeedback && storeFeatures.tipEnabled;
+    const motoboyId = canUseDeliveryFeedback ? (delivery?.motoboyId || null) : null;
+    const normalizedTipAmount = canUseTip ? Number(tipAmount.toFixed(2)) : 0;
 
     const review = await this.orderReviewRepository.saveReview({
       orderId: order.id,
@@ -174,11 +194,11 @@ export class OrderReviewService {
       customerName: order.customerName || null,
       customerPhone: order.phone || null,
       storeRating: Number(storeRating),
-      deliveryRating: isDeliveryOrder ? deliveryRating : null,
+      deliveryRating: canUseDeliveryFeedback ? deliveryRating : null,
       comment: cleanComment,
       storeTags: this.sanitizeTags(input.storeTags),
-      deliveryTags: isDeliveryOrder ? this.sanitizeTags(input.deliveryTags) : [],
-      tipAmount: Number(tipAmount.toFixed(2)),
+      deliveryTags: canUseDeliveryFeedback ? this.sanitizeTags(input.deliveryTags) : [],
+      tipAmount: normalizedTipAmount,
     });
     return this.ensureTipPayment(order, review);
   }
@@ -189,11 +209,36 @@ export class OrderReviewService {
     const review = await this.orderReviewRepository.findByOrderId(order.id);
     const normalizedOrderType = String(order.type || '').trim().toLowerCase();
     const delivery = await this.orderDeliveryRepository.findByOrderId(order.id);
+    const storeFeatures = await this.resolveStoreReviewFeatures(order.store.id);
+    const canUseDeliveryFeedback = (normalizedOrderType === 'delivery' || Boolean(delivery)) && storeFeatures.deliveryFeedbackEnabled;
+    const canUseTip = canUseDeliveryFeedback && storeFeatures.tipEnabled;
+    const sanitizedReview = review
+      ? {
+          ...review,
+          deliveryRating: canUseDeliveryFeedback ? review.deliveryRating : null,
+          deliveryTags: canUseDeliveryFeedback ? review.deliveryTags : [],
+          tipAmount: canUseTip ? review.tipAmount : 0,
+          tipStatus: canUseTip ? review.tipStatus : 'NONE',
+          tipProvider: canUseTip ? review.tipProvider : null,
+          tipProviderId: canUseTip ? review.tipProviderId : null,
+          tipPaymentLink: canUseTip ? review.tipPaymentLink : null,
+          tipQrCodeBase64: canUseTip ? review.tipQrCodeBase64 : null,
+          tipQrCodeText: canUseTip ? review.tipQrCodeText : null,
+          tipExpiresAt: canUseTip ? review.tipExpiresAt : null,
+          tipPaidAt: canUseTip ? review.tipPaidAt : null,
+          tipPayoutStatus: canUseTip ? review.tipPayoutStatus : null,
+          tipPayoutAt: canUseTip ? review.tipPayoutAt : null,
+        }
+      : null;
     return {
       orderId: order.id,
       canReview: [ 'done', 'delivered', 'finished' ].includes(String(order.status || '').toLowerCase()),
-      isDelivery: normalizedOrderType === 'delivery' || Boolean(delivery),
-      review,
+      isDelivery: canUseDeliveryFeedback,
+      features: {
+        deliveryFeedbackEnabled: canUseDeliveryFeedback,
+        tipEnabled: canUseTip,
+      },
+      review: sanitizedReview,
     };
   }
 
@@ -232,6 +277,8 @@ export class OrderReviewService {
     const store = await this.storeRepository.findById(storeId);
     if (!store) throw new AppError('STORE-001', 404);
     this.ensureStoreAccess(store.id, authStoreId);
+    const storeFeatures = await this.resolveStoreReviewFeatures(store.id);
+    if (!storeFeatures.tipEnabled) throw new AppError('AUTH-003', 403, { requiredFeature: 'tipPayouts' });
 
     const review = await this.orderReviewRepository.findById(reviewId);
     if (!review || review.storeId !== store.id) throw new AppError('ORDER-001', 404);
