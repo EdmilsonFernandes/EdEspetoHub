@@ -467,24 +467,23 @@ export function PortfolioPage() {
             </div>
 
             <div className="lg:col-span-5 space-y-4">
-              <div className="rounded-3xl border border-slate-200 bg-slate-950 shadow-[0_24px_60px_-36px_rgba(15,23,42,0.6)] overflow-hidden">
+              <div className="rounded-3xl border border-slate-200 bg-white shadow-[0_24px_60px_-36px_rgba(15,23,42,0.35)] overflow-hidden">
                 <img
                   src="/janocaminho.jpg"
                   alt="Banner Jano Caminho"
-                  className="w-full h-52 sm:h-56 object-cover object-center"
+                  className="w-full h-48 sm:h-52 object-contain object-center bg-white"
                   loading="eager"
                 />
-                <div className="p-4 bg-[linear-gradient(120deg,rgba(47,157,247,0.14),rgba(95,211,90,0.16))]">
-                  <p className="text-[11px] uppercase tracking-[0.3em] text-slate-700 font-bold">Identidade da plataforma</p>
-                  <p className="text-sm font-extrabold text-slate-900 mt-1">
-                    Jano Caminho para mercado, farmacia, adega, food truck e restaurante
+                <div className="px-4 py-3 bg-[linear-gradient(120deg,rgba(47,157,247,0.08),rgba(95,211,90,0.1))]">
+                  <p className="text-sm font-bold text-slate-800">
+                    Jano Caminho para mercado, farmácia, adega, food truck e restaurante
                   </p>
                 </div>
               </div>
               <div className="rounded-3xl border border-slate-200 bg-white shadow-[0_24px_60px_-36px_rgba(15,23,42,0.6)] overflow-hidden">
                 <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/60">
                   <p className="text-[11px] uppercase tracking-[0.35em] text-slate-500 font-semibold">
-                    Resultados (publico)
+                    Resultados
                   </p>
                   <p className="text-lg font-black text-slate-900">Indicadores da plataforma</p>
                   <p className="text-xs text-slate-500 mt-1">

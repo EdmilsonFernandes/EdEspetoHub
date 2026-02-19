@@ -33,12 +33,17 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between py-3 sm:py-4">
             <a href="https://www.janocaminho.com.br" className="flex items-center gap-3">
-              <div className="h-11 w-11 rounded-2xl bg-white shadow-[0_12px_24px_-16px_rgba(47,157,247,0.8)] ring-1 ring-sky-200 overflow-hidden">
-                <img src="/janocaminho.jpg" alt="Jano Caminho" className="h-full w-full object-cover" draggable={false} />
+              <div className="h-12 w-12 rounded-2xl bg-white shadow-[0_12px_24px_-16px_rgba(47,157,247,0.8)] ring-1 ring-sky-200 overflow-hidden">
+                <img
+                  src="/janocaminho.jpg"
+                  alt="Jano Caminho"
+                  className="h-full w-full object-cover object-[15%_center]"
+                  draggable={false}
+                />
               </div>
               <div className="hidden sm:block leading-tight">
                 <p className="text-xl font-black text-gray-900 dark:text-white">Jano Caminho</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Pedidos, produção e vendas em um só lugar</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Pedidos e gestão em um só lugar</p>
               </div>
             </a>
 

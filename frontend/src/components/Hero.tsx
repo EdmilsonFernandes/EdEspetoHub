@@ -7,26 +7,12 @@ export function Hero() {
           <div className="absolute -bottom-32 -left-16 h-72 w-72 rounded-full bg-emerald-200/45 dark:bg-emerald-900/30 blur-3xl" />
 
           <div className="relative p-4 sm:p-6 lg:p-8">
-            <div className="overflow-hidden rounded-[24px] border border-slate-200/70 bg-slate-950/95 p-2 sm:p-3">
+            <div className="overflow-hidden rounded-[24px] border border-slate-200/70 bg-slate-900/90 p-2">
               <img
                 src="/janocaminho.jpg"
                 alt="Jano Caminho - Plataforma de pedidos"
-                className="w-full h-[280px] sm:h-[420px] lg:h-[500px] object-contain object-center rounded-2xl"
+                className="w-full h-[180px] sm:h-[240px] lg:h-[300px] object-contain object-center rounded-2xl"
               />
-            </div>
-            <div className="mt-5 grid gap-3 md:grid-cols-3">
-              <div className="rounded-2xl border border-slate-200/70 dark:border-slate-700/70 bg-white dark:bg-gray-800 p-4 shadow-[0_14px_32px_-24px_rgba(15,23,42,0.6)] dark:shadow-[0_14px_32px_-24px_rgba(0,0,0,0.8)]">
-                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Site pronto em minutos</p>
-                <p className="mt-1 text-sm font-semibold text-slate-900 dark:text-white">Sua vitrine publicada e organizada</p>
-              </div>
-              <div className="rounded-2xl border border-slate-200/70 dark:border-slate-700/70 bg-white dark:bg-gray-800 p-4 shadow-[0_14px_32px_-24px_rgba(15,23,42,0.6)] dark:shadow-[0_14px_32px_-24px_rgba(0,0,0,0.8)]">
-                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Fila de Produção</p>
-                <p className="mt-1 text-sm font-semibold text-slate-900 dark:text-white">Controle total do preparo</p>
-              </div>
-              <div className="rounded-2xl border border-slate-200/70 dark:border-slate-700/70 bg-white dark:bg-gray-800 p-4 shadow-[0_14px_32px_-24px_rgba(15,23,42,0.6)] dark:shadow-[0_14px_32px_-24px_rgba(0,0,0,0.8)]">
-                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Pagamentos organizados</p>
-                <p className="mt-1 text-sm font-semibold text-slate-900 dark:text-white">Pix e checkout prontos</p>
-              </div>
             </div>
           </div>
         </div>

@@ -432,7 +432,7 @@ export function LandingPage() {
               </span>
             </h1>
             <p className="text-base sm:text-lg text-gray-600 dark:text-gray-300 leading-relaxed max-w-2xl">
-              Link da loja pronto para divulgar, pedidos organizados em tempo real e operação sem confusão no balcão.
+              Crie sua loja, publique o link e comece a vender com operação organizada.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3">
@@ -451,42 +451,15 @@ export function LandingPage() {
               >
                 Falar no WhatsApp
               </a>
-              <button
-                type="button"
-                onClick={scrollToShowcase}
-                className="cursor-pointer inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 hover:text-sky-600 hover:border-sky-200 transition-colors"
-              >
-                Agendar demonstração
-                <Rocket size={16} weight="duotone" />
-              </button>
             </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-              <div className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600">
-                Setup em minutos
-              </div>
-              <div className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600">
-                Sem cartão no trial
-              </div>
-              <div className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600">
-                Mobile first
-              </div>
-            </div>
-
-            <div className="flex flex-wrap gap-2.5 text-xs sm:text-sm font-semibold text-slate-600">
-              <button
-                onClick={() => navigate('/admin')}
-                className="px-3 py-2 rounded-full border border-slate-200 bg-white/90 hover:text-sky-600 hover:border-sky-200 transition-colors"
-              >
-                Entrar como loja
-              </button>
-              <button
-                onClick={() => navigate('/motoboy/register')}
-                className="px-3 py-2 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors"
-              >
-                Cadastro entregador
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={scrollToShowcase}
+              className="cursor-pointer inline-flex items-center justify-center gap-2 w-fit px-4 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-700 hover:text-sky-600 hover:border-sky-200 transition-colors"
+            >
+              Ver demonstração
+              <Rocket size={14} weight="duotone" />
+            </button>
           </div>
 
           <div className="rounded-3xl border border-slate-200 bg-white/95 dark:bg-slate-800/90 backdrop-blur p-5 sm:p-6 shadow-[0_22px_60px_-40px_rgba(15,23,42,0.55)]">
