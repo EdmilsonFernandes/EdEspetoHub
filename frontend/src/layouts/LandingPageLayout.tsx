@@ -27,13 +27,13 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(47,157,247,0.14),_transparent_48%),radial-gradient(circle_at_bottom_right,_rgba(95,211,90,0.16),_transparent_45%)] bg-gray-50 dark:bg-slate-950">
       <header className="sticky top-0 z-50 border-b border-white/60 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl shadow-[0_20px_40px_-30px_rgba(15,23,42,0.45)]">
-        <div className="h-1 bg-[linear-gradient(90deg,#ef4444,#f97316,#f59e0b)]" />
+        <div className="h-1 bg-[linear-gradient(90deg,#2f9df7,#18b3f9,#5fd35a)]" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between py-3 sm:py-4">
             <a href="https://www.janocaminho.com.br" className="flex items-center gap-3">
-              <div className="h-11 w-11 rounded-2xl bg-white shadow-[0_12px_24px_-16px_rgba(239,68,68,0.8)] ring-1 ring-red-200 overflow-hidden">
+              <div className="h-11 w-11 rounded-2xl bg-white shadow-[0_12px_24px_-16px_rgba(47,157,247,0.8)] ring-1 ring-sky-200 overflow-hidden">
                 <img src="/janocaminho.jpg" alt="Jano Caminho" className="h-full w-full object-cover" draggable={false} />
               </div>
               <div className="hidden sm:block leading-tight">
@@ -184,16 +184,16 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
             <div>
               <h3 className="font-bold text-white mb-3">Links Rápidos</h3>
               <div className="space-y-2 text-sm">
-                <button onClick={() => navigate('/create')} className="block hover:text-red-400 transition-colors">
+                <button onClick={() => navigate('/create')} className="block hover:text-sky-400 transition-colors">
                   Criar Loja
                 </button>
-                <button onClick={goToDemoGuide} className="block hover:text-red-400 transition-colors">
+                <button onClick={goToDemoGuide} className="block hover:text-sky-400 transition-colors">
                   Ver Demo
                 </button>
-                <a href="/terms" className="block hover:text-red-400 transition-colors">
+                <a href="/terms" className="block hover:text-sky-400 transition-colors">
                   Termos e Privacidade
                 </a>
-                <button onClick={() => navigate('/admin')} className="block hover:text-red-400 transition-colors">
+                <button onClick={() => navigate('/admin')} className="block hover:text-sky-400 transition-colors">
                   Admin
                 </button>
               </div>
@@ -214,3 +214,4 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
     </div>
   );
 }
+

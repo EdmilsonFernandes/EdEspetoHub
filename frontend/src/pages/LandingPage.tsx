@@ -422,12 +422,12 @@ export function LandingPage() {
         <div className="absolute inset-x-4 sm:inset-x-6 lg:inset-x-8 top-8 bottom-8 rounded-[28px] bg-[radial-gradient(circle_at_top,rgba(239,68,68,0.14),transparent_62%)] pointer-events-none" />
         <div className="relative grid gap-8 lg:gap-10 lg:grid-cols-[1.08fr_0.92fr] items-center">
           <div className="space-y-6">
-            <span className="inline-flex items-center px-4 py-1.5 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-bold rounded-full uppercase tracking-[0.2em] shadow-lg">
+            <span className="inline-flex items-center px-4 py-1.5 bg-gradient-to-r from-sky-500 to-emerald-500 text-white text-xs font-bold rounded-full uppercase tracking-[0.2em] shadow-lg">
               7 dias grátis
             </span>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-[56px] font-black text-gray-900 dark:text-white leading-tight tracking-tight max-w-3xl">
               Venda mais com um
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-500">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-orange-500">
                 {' '}cardápio digital com cara de app
               </span>
             </h1>
@@ -438,7 +438,7 @@ export function LandingPage() {
             <div className="flex flex-col sm:flex-row gap-3">
               <button
                 onClick={() => navigate('/create')}
-                className="cursor-pointer px-7 py-3.5 text-base rounded-2xl bg-gradient-to-r from-red-500 to-red-600 text-white font-extrabold hover:from-red-600 hover:to-red-700 transition-all shadow-lg"
+                className="cursor-pointer px-7 py-3.5 text-base rounded-2xl bg-gradient-to-r from-sky-500 to-emerald-500 text-white font-extrabold hover:from-sky-600 hover:to-emerald-600 transition-all shadow-lg"
                 aria-label="Criar minha loja agora"
               >
                 Quero testar grátis
@@ -454,7 +454,7 @@ export function LandingPage() {
               <button
                 type="button"
                 onClick={scrollToShowcase}
-                className="cursor-pointer inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 hover:text-red-600 hover:border-red-200 transition-colors"
+                className="cursor-pointer inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 hover:text-sky-600 hover:border-sky-200 transition-colors"
               >
                 Agendar demonstração
                 <Rocket size={16} weight="duotone" />
@@ -476,7 +476,7 @@ export function LandingPage() {
             <div className="flex flex-wrap gap-2.5 text-xs sm:text-sm font-semibold text-slate-600">
               <button
                 onClick={() => navigate('/admin')}
-                className="px-3 py-2 rounded-full border border-slate-200 bg-white/90 hover:text-red-600 hover:border-red-200 transition-colors"
+                className="px-3 py-2 rounded-full border border-slate-200 bg-white/90 hover:text-sky-600 hover:border-sky-200 transition-colors"
               >
                 Entrar como loja
               </button>
@@ -520,7 +520,7 @@ export function LandingPage() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
         <div className="grid lg:grid-cols-[1.15fr_0.85fr] gap-8">
           <div className="space-y-5">
-            <p className="text-xs uppercase tracking-[0.3em] text-red-600 dark:text-red-400 font-bold">Como funciona</p>
+            <p className="text-xs uppercase tracking-[0.3em] text-sky-600 dark:text-sky-400 font-bold">Como funciona</p>
             <h2 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white leading-tight">
               Um fluxo simples que transforma cardápio em venda todos os dias
             </h2>
@@ -555,7 +555,7 @@ export function LandingPage() {
                     key={step.title}
                     className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 flex items-start gap-4 shadow-sm"
                   >
-                    <div className="w-11 h-11 rounded-2xl bg-gradient-to-r from-red-500 to-orange-500 text-white font-black flex items-center justify-center shadow-sm shrink-0">
+                    <div className="w-11 h-11 rounded-2xl bg-gradient-to-r from-sky-500 to-orange-500 text-white font-black flex items-center justify-center shadow-sm shrink-0">
                       <Icon size={18} weight="duotone" />
                     </div>
                     <div className="min-w-0">
@@ -575,7 +575,7 @@ export function LandingPage() {
             </div>
           </div>
 
-          <div className="rounded-[28px] border border-slate-200 dark:border-slate-700 bg-gradient-to-br from-white via-white to-red-50 dark:from-slate-800 dark:via-slate-800 dark:to-rose-950/20 p-6 shadow-[0_20px_70px_-45px_rgba(15,23,42,0.5)]">
+          <div className="rounded-[28px] border border-slate-200 dark:border-slate-700 bg-gradient-to-br from-white via-white to-cyan-50 dark:from-slate-800 dark:via-slate-800 dark:to-sky-950/20 p-6 shadow-[0_20px_70px_-45px_rgba(15,23,42,0.5)]">
             <p className="text-xs uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">Impacto no negócio</p>
             <h3 className="text-2xl font-black text-gray-900 dark:text-white mt-2">Pronto para escalar</h3>
             <p className="text-sm text-gray-600 dark:text-gray-300 mt-2">
@@ -613,7 +613,7 @@ export function LandingPage() {
                 Criar minha loja
               </button>
               <p className="mt-2 text-center text-xs text-slate-500">
-                Entregador? <button type="button" onClick={() => navigate('/motoboy/register')} className="font-semibold text-slate-700 hover:text-red-600">cadastre-se aqui</button>
+                Entregador? <button type="button" onClick={() => navigate('/motoboy/register')} className="font-semibold text-slate-700 hover:text-sky-600">cadastre-se aqui</button>
               </p>
             </div>
           </div>
@@ -635,7 +635,7 @@ export function LandingPage() {
             </div>
             <button
               onClick={() => navigate('/create')}
-              className="px-6 py-3 rounded-xl bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold hover:from-red-600 hover:to-red-700 transition"
+              className="px-6 py-3 rounded-xl bg-gradient-to-r from-sky-500 to-emerald-500 text-white font-semibold hover:from-sky-600 hover:to-emerald-600 transition"
             >
               Quero começar agora
             </button>
@@ -650,8 +650,8 @@ export function LandingPage() {
                   onClick={() => setGuideStep(index)}
                   className={`w-full text-left px-4 py-4 rounded-2xl border transition ${
                     guideStep === index
-                      ? 'bg-gradient-to-r from-red-500 to-red-600 text-white border-red-500 shadow-lg'
-                      : 'bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 border-slate-200 dark:border-slate-700 hover:border-red-300 dark:hover:border-red-500'
+                      ? 'bg-gradient-to-r from-sky-500 to-emerald-500 text-white border-sky-500 shadow-lg'
+                      : 'bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 border-slate-200 dark:border-slate-700 hover:border-sky-300 dark:hover:border-sky-500'
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2">
@@ -714,7 +714,7 @@ export function LandingPage() {
               <div className="mt-6 space-y-3">
                 {guideSteps[guideStep].bullets.map((item) => (
                   <div key={item} className="flex items-start gap-3">
-                    <span className="mt-1 w-2.5 h-2.5 rounded-full bg-red-500 dark:bg-red-400" />
+                    <span className="mt-1 w-2.5 h-2.5 rounded-full bg-sky-500 dark:bg-red-400" />
                     <p className="text-sm text-slate-700 dark:text-slate-300">{item}</p>
                   </div>
                 ))}
@@ -727,7 +727,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section id="product-showcase" className="bg-gradient-to-br from-rose-50 via-white to-amber-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 border-y border-rose-100 dark:border-slate-700 py-16 sm:py-20">
+      <section id="product-showcase" className="bg-gradient-to-br from-sky-50 via-white to-amber-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 border-y border-sky-100 dark:border-slate-700 py-16 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="rounded-[32px] border border-white/90 dark:border-slate-700 bg-white/90 dark:bg-slate-800/90 shadow-[0_24px_70px_-45px_rgba(15,23,42,0.4)] p-5 sm:p-7">
             <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-6">
@@ -770,7 +770,7 @@ export function LandingPage() {
                 <button
                   type="button"
                   onClick={() => navigate('/create')}
-                  className="w-full sm:w-auto px-5 py-3 rounded-xl bg-gradient-to-r from-red-500 to-red-600 text-white text-sm font-extrabold shadow hover:from-red-600 hover:to-red-700 transition-all"
+                  className="w-full sm:w-auto px-5 py-3 rounded-xl bg-gradient-to-r from-sky-500 to-emerald-500 text-white text-sm font-extrabold shadow hover:from-sky-600 hover:to-emerald-600 transition-all"
                 >
                   Criar minha loja agora
                 </button>
@@ -817,7 +817,7 @@ export function LandingPage() {
         <div className="rounded-[32px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-[0_24px_70px_-50px_rgba(15,23,42,0.5)] overflow-hidden">
           <div className="grid lg:grid-cols-2 gap-8 p-6 sm:p-10">
             <div className="space-y-4">
-              <p className="text-xs uppercase tracking-[0.3em] text-red-600 dark:text-red-400 font-bold">Simulador</p>
+              <p className="text-xs uppercase tracking-[0.3em] text-sky-600 dark:text-sky-400 font-bold">Simulador</p>
               <h2 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white">
                 Descubra quanto sua loja pode gerar por mês
               </h2>
@@ -830,7 +830,7 @@ export function LandingPage() {
                 <span className="px-3 py-1 rounded-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">Ajuste em segundos</span>
               </div>
             </div>
-            <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-gradient-to-br from-white via-white to-rose-50 dark:from-slate-800 dark:via-slate-800 dark:to-rose-950/20 p-6 space-y-6">
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-gradient-to-br from-white via-white to-rose-50 dark:from-slate-800 dark:via-slate-800 dark:to-sky-950/20 p-6 space-y-6">
               <div className="grid gap-5">
                 <div>
                   <label htmlFor="ticket-average" className="text-sm font-semibold text-slate-800 dark:text-slate-200">Valor médio por pedido (R$)</label>
@@ -864,7 +864,7 @@ export function LandingPage() {
               </div>
               <button
                 onClick={() => navigate('/create')}
-                className="w-full px-4 py-3 rounded-xl bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold shadow hover:from-red-600 hover:to-red-700 transition-all"
+                className="w-full px-4 py-3 rounded-xl bg-gradient-to-r from-sky-500 to-emerald-500 text-white font-semibold shadow hover:from-sky-600 hover:to-emerald-600 transition-all"
               >
                 Quero esse resultado
               </button>
@@ -886,28 +886,28 @@ export function LandingPage() {
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="p-6 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl shadow-sm hover:shadow-md transition-all">
-              <div className="w-12 h-12 bg-red-500 dark:bg-red-600 rounded-xl flex items-center justify-center mb-4" aria-hidden="true">
+              <div className="w-12 h-12 bg-sky-500 dark:bg-sky-600 rounded-xl flex items-center justify-center mb-4" aria-hidden="true">
                 <Palette className="text-white text-2xl" weight="duotone" />
               </div>
               <p className="font-bold text-gray-900 dark:text-white mb-2 text-lg">Identidade visual flexível</p>
               <p className="text-sm text-gray-700 dark:text-gray-300">Logo, cores e slug exclusivo por loja.</p>
             </div>
             <div className="p-6 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl shadow-sm hover:shadow-md transition-all">
-              <div className="w-12 h-12 bg-red-500 dark:bg-red-600 rounded-xl flex items-center justify-center mb-4" aria-hidden="true">
+              <div className="w-12 h-12 bg-sky-500 dark:bg-sky-600 rounded-xl flex items-center justify-center mb-4" aria-hidden="true">
                 <Monitor className="text-white text-2xl" weight="duotone" />
               </div>
               <p className="font-bold text-gray-900 dark:text-white mb-2 text-lg">Gestão completa</p>
               <p className="text-sm text-gray-700 dark:text-gray-300">Produtos, status e fila de produção.</p>
             </div>
             <div className="p-6 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl shadow-sm hover:shadow-md transition-all">
-              <div className="w-12 h-12 bg-red-500 dark:bg-red-600 rounded-xl flex items-center justify-center mb-4" aria-hidden="true">
+              <div className="w-12 h-12 bg-sky-500 dark:bg-sky-600 rounded-xl flex items-center justify-center mb-4" aria-hidden="true">
                 <DeviceMobile className="text-white text-2xl" weight="duotone" />
               </div>
               <p className="font-bold text-gray-900 dark:text-white mb-2 text-lg">Mobile-first</p>
               <p className="text-sm text-gray-700 dark:text-gray-300">Otimizado para celular e tablet.</p>
             </div>
             <div className="p-6 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl shadow-sm hover:shadow-md transition-all">
-              <div className="w-12 h-12 bg-red-500 dark:bg-red-600 rounded-xl flex items-center justify-center mb-4" aria-hidden="true">
+              <div className="w-12 h-12 bg-sky-500 dark:bg-sky-600 rounded-xl flex items-center justify-center mb-4" aria-hidden="true">
                 <Rocket className="text-white text-2xl" weight="duotone" />
               </div>
               <p className="font-bold text-gray-900 dark:text-white mb-2 text-lg">Setup rápido</p>
@@ -920,31 +920,31 @@ export function LandingPage() {
       {/* Benefits Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
         <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-3xl shadow-xl p-8 sm:p-12 text-center">
-          <div className="w-20 h-20 bg-red-500 dark:bg-red-600 rounded-2xl flex items-center justify-center mx-auto shadow-lg mb-6" aria-hidden="true">
+          <div className="w-20 h-20 bg-sky-500 dark:bg-sky-600 rounded-2xl flex items-center justify-center mx-auto shadow-lg mb-6" aria-hidden="true">
             <Hamburger className="text-white text-9xl" weight="duotone" />
           </div>
           <h2 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white mb-4">Tudo que você precisa</h2>
           <p className="text-lg text-gray-700 dark:text-gray-200 mb-8 max-w-2xl mx-auto">
             Recursos completos para gerenciar seu negocio online.
           </p>
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800 mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold bg-sky-50 dark:bg-sky-950/30 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-red-800 mb-6">
             7 dias grátis para testar • Sem compromisso
           </div>
           <div className="grid sm:grid-cols-2 gap-4 max-w-2xl mx-auto text-left">
             <div className="flex items-center gap-3 text-gray-800 dark:text-gray-200">
-              <span className="text-red-600 dark:text-red-400 text-xl font-bold">✓</span>
+              <span className="text-sky-600 dark:text-sky-400 text-xl font-bold">✓</span>
               <span>Cardápio personalizado</span>
             </div>
             <div className="flex items-center gap-3 text-gray-800 dark:text-gray-200">
-              <span className="text-red-600 dark:text-red-400 text-xl font-bold">✓</span>
+              <span className="text-sky-600 dark:text-sky-400 text-xl font-bold">✓</span>
               <span>Integração com WhatsApp</span>
             </div>
             <div className="flex items-center gap-3 text-gray-800 dark:text-gray-200">
-              <span className="text-red-600 dark:text-red-400 text-xl font-bold">✓</span>
+              <span className="text-sky-600 dark:text-sky-400 text-xl font-bold">✓</span>
               <span>Painel administrativo</span>
             </div>
             <div className="flex items-center gap-3 text-gray-800 dark:text-gray-200">
-              <span className="text-red-600 dark:text-red-400 text-xl font-bold">✓</span>
+              <span className="text-sky-600 dark:text-sky-400 text-xl font-bold">✓</span>
               <span>Fila de Produção</span>
             </div>
           </div>
@@ -968,7 +968,7 @@ export function LandingPage() {
             <button
               onClick={() => setIsAnnual(!isAnnual)}
               className={`relative inline-flex h-8 w-16 items-center rounded-full transition-colors ${
-                isAnnual ? 'bg-red-500' : 'bg-gray-300 dark:bg-gray-600'
+                isAnnual ? 'bg-sky-500' : 'bg-gray-300 dark:bg-gray-600'
               }`}
               role="switch"
               aria-checked={isAnnual}
@@ -1030,7 +1030,7 @@ export function LandingPage() {
                     plan.isTest
                       ? 'bg-white dark:bg-gray-800 border-2 border-amber-400 ring-2 ring-amber-200/60'
                       : plan.popular
-                      ? 'md:z-10 bg-white dark:bg-gray-800 border-2 border-red-500 shadow-2xl'
+                      ? 'md:z-10 bg-white dark:bg-gray-800 border-2 border-sky-500 shadow-2xl'
                       : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
                   }`}
                 >
@@ -1041,7 +1041,7 @@ export function LandingPage() {
                   )}
                   {plan.popular && !plan.isTest && (
                     <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                      <span className="bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-1 rounded-full text-xs font-bold">
+                      <span className="bg-gradient-to-r from-sky-500 to-emerald-500 text-white px-4 py-1 rounded-full text-xs font-bold">
                         MAIS POPULAR
                       </span>
                     </div>
@@ -1060,7 +1060,7 @@ export function LandingPage() {
                       </>
                     ) : plan.hasPrice ? (
                       <>
-                        <div className="text-4xl font-black text-red-600 dark:text-red-400 mb-2">
+                        <div className="text-4xl font-black text-sky-600 dark:text-sky-400 mb-2">
                           R$ {plan.price.toFixed(2)}
                         </div>
                         <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
@@ -1075,7 +1075,7 @@ export function LandingPage() {
                   <ul className="space-y-3 mb-8 flex-grow">
                     {plan.features.map((feature, featureIndex) => (
                       <li key={featureIndex} className="flex items-center gap-3 text-gray-800 dark:text-gray-200">
-                        <span className={`text-lg ${plan.isTest ? 'text-amber-500 dark:text-amber-400' : 'text-red-500 dark:text-red-400'}`}>✓</span>
+                        <span className={`text-lg ${plan.isTest ? 'text-amber-500 dark:text-amber-400' : 'text-red-500 dark:text-sky-400'}`}>✓</span>
                         <span>{feature}</span>
                       </li>
                     ))}
@@ -1088,8 +1088,8 @@ export function LandingPage() {
                       plan.isTest
                         ? 'bg-amber-500 hover:bg-amber-600 text-white shadow'
                         : plan.popular
-                        ? 'bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700 shadow-lg'
-                        : 'border-2 border-red-500 text-red-600 dark:text-red-500 hover:bg-red-50 dark:hover:bg-red-950'
+                        ? 'bg-gradient-to-r from-sky-500 to-emerald-500 text-white hover:from-sky-600 hover:to-emerald-600 shadow-lg'
+                        : 'border-2 border-sky-500 text-sky-600 dark:text-red-500 hover:bg-sky-50 dark:hover:bg-red-950'
                     }`}
                   >
                     {plan.isTest ? 'Começar grátis' : 'Começar Agora'}
@@ -1120,7 +1120,7 @@ export function LandingPage() {
                   key={index}
                   onClick={() => setCarouselIndex(index)}
                   className={`w-3 h-3 rounded-full transition-colors ${
-                    index === carouselIndex ? 'bg-red-500' : 'bg-gray-300 dark:bg-gray-600'
+                    index === carouselIndex ? 'bg-sky-500' : 'bg-gray-300 dark:bg-gray-600'
                   }`}
                   aria-label={`Go to plan ${index + 1}`}
                 />
@@ -1155,7 +1155,7 @@ export function LandingPage() {
             <div className="flex flex-col sm:flex-row gap-3">
               <button
                 onClick={() => navigate('/create')}
-                className="px-6 py-3 rounded-xl bg-white text-red-600 font-semibold shadow hover:shadow-lg transition"
+                className="px-6 py-3 rounded-xl bg-white text-sky-600 font-semibold shadow hover:shadow-lg transition"
               >
                 Quero testar grátis
               </button>
@@ -1319,7 +1319,7 @@ export function LandingPage() {
       <div className="fixed bottom-4 right-4 z-40 flex flex-col items-end gap-3 sm:bottom-6 sm:right-6">
         {faqOpen && (
           <div className="w-[320px] sm:w-[360px] rounded-3xl border border-slate-200 bg-white shadow-[0_24px_70px_-40px_rgba(15,23,42,0.45)] overflow-hidden">
-            <div className="px-5 py-4 bg-gradient-to-r from-red-600 to-red-500 text-white dark:from-red-700 dark:to-red-600">
+            <div className="px-5 py-4 bg-gradient-to-r from-red-600 to-cyan-500 text-white dark:from-red-700 dark:to-emerald-500">
               <p className="text-xs uppercase tracking-[0.3em] text-white/80">Ajuda rápida</p>
               <h3 className="text-lg font-bold">Tire dúvidas em segundos</h3>
             </div>
@@ -1332,7 +1332,7 @@ export function LandingPage() {
                     onClick={() => setFaqCategory(category)}
                     className={`px-3 py-1.5 rounded-full text-[11px] font-semibold border transition ${
                       faqCategory === category
-                        ? 'bg-red-500 text-white border-red-500 dark:bg-red-600 dark:border-red-600'
+                        ? 'bg-sky-500 text-white border-sky-500 dark:bg-sky-600 dark:border-red-600'
                         : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600'
                     }`}
                   >
@@ -1383,7 +1383,7 @@ export function LandingPage() {
 
       <div className="h-20 sm:hidden" />
       <div className="sm:hidden fixed bottom-0 inset-x-0 z-50 px-4 pb-4">
-        <div className="rounded-2xl border border-red-200 dark:border-red-800 bg-white/95 dark:bg-slate-800/95 backdrop-blur shadow-[0_12px_30px_rgba(15,23,42,0.18)] px-3 py-3 flex items-center gap-3">
+        <div className="rounded-2xl border border-sky-200 dark:border-red-800 bg-white/95 dark:bg-slate-800/95 backdrop-blur shadow-[0_12px_30px_rgba(15,23,42,0.18)] px-3 py-3 flex items-center gap-3">
           <div className="flex-1">
             <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">7 dias grátis + sem cartão</p>
             <p className="text-[11px] text-slate-600 dark:text-slate-400">Crie sua loja em minutos.</p>
@@ -1396,7 +1396,7 @@ export function LandingPage() {
           </button>
           <button
             onClick={() => navigate('/create')}
-            className="px-4 py-2 rounded-xl bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-semibold shadow hover:from-red-600 hover:to-red-700 transition-all"
+            className="px-4 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-emerald-500 text-white text-xs font-semibold shadow hover:from-sky-600 hover:to-emerald-600 transition-all"
           >
             Criar minha loja agora
           </button>
@@ -1405,3 +1405,5 @@ export function LandingPage() {
     </LandingPageLayout>
   );
 }
+
+

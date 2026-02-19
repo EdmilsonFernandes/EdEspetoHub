@@ -102,7 +102,7 @@ export function PortfolioPage() {
       ],
       previousWork: "Liderou desenvolvimento backend para multiplas plataformas SaaS e e-commerce",
       avatar: "E",
-      color: "from-red-500 to-amber-500",
+      color: "from-sky-500 to-amber-500",
       profileUrl: "https://www.linkedin.com/in/edmilson-santos-6805a515/",
       profileImage: "/uploads/perfil/edmilson.jpeg",
     },
@@ -370,7 +370,7 @@ export function PortfolioPage() {
   const resolvePlanMeta = (planName = "") => {
     const normalized = planName.toString().toLowerCase();
     if (normalized.includes("pro")) {
-      return { badge: "Mais popular", tone: "bg-red-600 text-white", featured: true };
+      return { badge: "Mais popular", tone: "bg-sky-600 text-white", featured: true };
     }
     return { badge: "Começar", tone: "bg-slate-100 text-slate-700", featured: false };
   };
@@ -410,7 +410,7 @@ export function PortfolioPage() {
         <div className="max-w-6xl mx-auto px-4 py-14 sm:py-20 relative">
           <div className="grid gap-10 lg:grid-cols-12 lg:items-center">
             <div className="lg:col-span-7 space-y-5">
-              <div className="inline-flex items-center gap-2 rounded-full border border-red-100 bg-red-50/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-red-700">
+              <div className="inline-flex items-center gap-2 rounded-full border border-red-100 bg-red-50/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-sky-700">
                 <Lightning size={14} weight="duotone" />
                 Cardapio online + pedidos + produção
               </div>
@@ -528,7 +528,7 @@ export function PortfolioPage() {
                   <input
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-9 pr-4 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                    className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-9 pr-4 text-sm focus:ring-2 focus:ring-red-500 focus:border-sky-500"
                     placeholder="Digite o nome ou slug"
                   />
                 </div>
@@ -580,7 +580,7 @@ export function PortfolioPage() {
         <div className="max-w-6xl mx-auto px-4">
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-10">
             <div className="space-y-3 max-w-2xl">
-              <p className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.35em] text-red-700">
+              <p className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.35em] text-sky-700">
                 Planos
               </p>
               <h2 className="text-2xl sm:text-4xl font-black text-slate-900">
@@ -749,7 +749,7 @@ export function PortfolioPage() {
           )}
 
           {error && !loading && (
-            <div className="rounded-2xl border border-red-100 bg-red-50 p-6 text-sm text-red-600">
+            <div className="rounded-2xl border border-red-100 bg-red-50 p-6 text-sm text-sky-600">
               {error}
             </div>
           )}
@@ -844,7 +844,7 @@ export function PortfolioPage() {
                           ))}
                         </div>
                       </div>
-                      <div className="inline-flex items-center gap-2 text-sm font-semibold text-red-600">
+                      <div className="inline-flex items-center gap-2 text-sm font-semibold text-sky-600">
                         Visitar loja
                         <ArrowUpRight size={16} weight="bold" className="transition-transform group-hover:translate-x-1" />
                       </div>
@@ -863,7 +863,7 @@ export function PortfolioPage() {
             <div className="absolute inset-0 opacity-25 bg-[radial-gradient(circle_at_top,_rgba(239,68,68,0.25),_transparent_60%)]" />
             <div className="relative grid gap-8 lg:grid-cols-12 lg:items-center">
               <div className="lg:col-span-7 space-y-3">
-                <p className="text-[11px] uppercase tracking-[0.35em] text-red-700 font-semibold">
+                <p className="text-[11px] uppercase tracking-[0.35em] text-sky-700 font-semibold">
                   Pronto para colocar no ar
                 </p>
                 <h2 className="text-2xl sm:text-4xl font-black text-slate-900 leading-tight">
@@ -1095,3 +1095,4 @@ export function PortfolioPage() {
     </LandingPageLayout>
   );
 }
+
