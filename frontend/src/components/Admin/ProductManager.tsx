@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Image as ImageIcon,
   PencilSimple,
@@ -51,6 +51,19 @@ const defaultCategories = [
   { id: 'porcoes', label: 'Porções', icon: Package },
   { id: 'outros', label: 'Outros', icon: DotsThree },
 ];
+
+const SEGMENT_CATEGORY_SUGGESTIONS: Record<string, string[]> = {
+  restaurante: ['entradas', 'pratos', 'bebidas', 'sobremesas'],
+  hamburgueria: ['hamburgueres', 'combos', 'porcoes', 'bebidas'],
+  lanchonete: ['lanches', 'salgados', 'sucos', 'bebidas'],
+  pizzaria: ['pizzas', 'broto', 'bordas', 'bebidas'],
+  adega: ['cervejas', 'destilados', 'vinhos', 'gelo'],
+  mercado: ['mercearia', 'higiene', 'bebidas', 'limpeza'],
+  hortifruti: ['frutas', 'verduras', 'legumes', 'promocoes'],
+  farmacia: ['medicamentos', 'higiene', 'beleza', 'infantil'],
+  confeitaria: ['bolos', 'doces', 'tortas', 'bebidas'],
+  outros: ['destaques', 'mais vendidos', 'promocoes', 'novidades'],
+};
 
 const categoryAccentClasses: Record<string, string> = {
   espetos: 'border-l-rose-400',
@@ -172,7 +185,7 @@ const createEmptyModifier = (index = 0) => ({
   active: true,
 });
 
-export const ProductManager = ({ products, onProductsChange }) => {
+export const ProductManager = ({ products, onProductsChange, storeSegment = 'outros' }) => {
   const { showToast } = useToast();
   const formRef = useRef<HTMLDivElement | null>(null);
   const createNameInputRef = useRef<HTMLInputElement | null>(null);
@@ -207,22 +220,43 @@ export const ProductManager = ({ products, onProductsChange }) => {
   const pageSize = 15;
 
   const categoryOptions = useMemo(() => {
-    const unique = new Set(defaultCategories.map((entry) => entry.id));
+    const segmentKey = normalizeCategory(storeSegment) || 'outros';
+    const suggested = (SEGMENT_CATEGORY_SUGGESTIONS[segmentKey] || SEGMENT_CATEGORY_SUGGESTIONS.outros || [])
+      .map((entry) => normalizeCategory(entry))
+      .filter(Boolean);
+    const baseDefaults = suggested.length
+      ? suggested.map((entry) => ({
+          id: entry,
+          label: formatCategoryLabel(entry),
+          icon: DotsThree,
+        }))
+      : defaultCategories.map((entry) => ({ id: entry.id, label: entry.label, icon: entry.icon }));
+    const unique = new Set(baseDefaults.map((entry) => entry.id));
     (products || []).forEach((product) => {
       const key = normalizeCategory(product.category);
       if (key) unique.add(key);
     });
-    const known = defaultCategories.map((entry) => ({
-      id: entry.id,
-      label: entry.label,
-      icon: entry.icon,
-    }));
     const extras = Array.from(unique)
-      .filter((entry) => !defaultCategories.find((item) => item.id === entry))
+      .filter((entry) => !baseDefaults.find((item) => item.id === entry))
       .sort()
       .map((entry) => ({ id: entry, label: formatCategoryLabel(entry), icon: DotsThree }));
-    return [ ...known, ...extras ];
-  }, [products]);
+    return [ ...baseDefaults, ...extras ];
+  }, [products, storeSegment]);
+
+  const defaultCategoryId = useMemo(
+    () => categoryOptions[0]?.id || initialForm.category,
+    [categoryOptions]
+  );
+
+  useEffect(() => {
+    if (!defaultCategoryId) return;
+    setCategorySelect((prev) => (prev && prev !== initialForm.category ? prev : defaultCategoryId));
+    setFormData((prev) => {
+      const shouldReplace = !prev?.category || prev.category === initialForm.category;
+      if (!shouldReplace) return prev;
+      return { ...prev, category: defaultCategoryId };
+    });
+  }, [defaultCategoryId]);
 
   const categoryTabs = useMemo(() => {
     const counts = new Map();
@@ -257,10 +291,10 @@ export const ProductManager = ({ products, onProductsChange }) => {
 
   const resetForm = () => {
     setEditing(null);
-    setFormData(initialForm);
+    setFormData({ ...initialForm, category: defaultCategoryId });
     setImageMode('url');
     setImagePreview('');
-    setCategorySelect(initialForm.category);
+    setCategorySelect(defaultCategoryId);
     setCustomCategory('');
     setShowCustomInput(false);
   };
@@ -308,7 +342,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
   };
 
   const handleEdit = (product) => {
-    const normalizedCategory = normalizeCategory(product.category || initialForm.category);
+    const normalizedCategory = normalizeCategory(product.category || defaultCategoryId);
     const isKnown = categoryOptions.some((entry) => entry.id === normalizedCategory);
     setInlineCategorySelect(isKnown ? normalizedCategory : '__custom__');
     setInlineCustomCategory(isKnown ? '' : normalizedCategory);
@@ -319,7 +353,7 @@ export const ProductManager = ({ products, onProductsChange }) => {
       price: product.price != null ? String(product.price) : '',
       promoPrice: product.promoPrice != null ? String(product.promoPrice) : '',
       promoActive: Boolean(product.promoActive),
-      category: normalizedCategory || initialForm.category,
+      category: normalizedCategory || defaultCategoryId,
       description: product.description ?? product.desc ?? '',
       imageUrl: product.imageUrl || '',
       isFeatured: Boolean(product.isFeatured),
@@ -531,8 +565,8 @@ export const ProductManager = ({ products, onProductsChange }) => {
                   setShowCustomInput(!showCustomInput);
                   if (showCustomInput) {
                     setCustomCategory('');
-                    setCategorySelect(initialForm.category);
-                    setFormData({ ...formData, category: initialForm.category });
+                    setCategorySelect(defaultCategoryId);
+                    setFormData({ ...formData, category: defaultCategoryId });
                   }
                 }}
                 className={`flex items-center gap-2 px-3 py-2 rounded-lg font-medium text-sm transition-all hover:-translate-y-0.5 active:scale-95 border-2 ${

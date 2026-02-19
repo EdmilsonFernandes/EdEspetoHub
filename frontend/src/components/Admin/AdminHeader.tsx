@@ -210,6 +210,12 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
           </div>
         )}
         <div className="flex flex-wrap items-center gap-2">
+          <div className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-full bg-white/15 border border-white/20 text-[11px] font-semibold">
+            <span className="h-5 w-9 rounded-md overflow-hidden bg-slate-900/70 p-0.5">
+              <img src="/janocaminho.jpg" alt="Jano Caminho" className="h-full w-full object-contain" />
+            </span>
+            Feito com Jano Caminho
+          </div>
           {onToggleHeader && (
             <div className="flex items-center rounded-full bg-white/10 border border-white/20 p-0.5 text-[11px] sm:text-xs font-semibold">
               <button

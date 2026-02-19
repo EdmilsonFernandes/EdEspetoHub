@@ -122,8 +122,8 @@ export function MotoboyLogin() {
         <div className="grid gap-5 lg:grid-cols-[0.95fr_1.05fr] items-start">
           <aside className="hidden lg:block">
             <div className="premium-card-glass p-6 space-y-5 motoboy-fade-up">
-              <div className="h-40 rounded-3xl border border-slate-200 bg-slate-900 overflow-hidden">
-                <img src="/janocaminho.jpg" alt="Jano Caminho" className="h-full w-full object-cover object-center" />
+              <div className="h-40 rounded-3xl border border-slate-200 bg-slate-900 overflow-hidden p-2">
+                <img src="/janocaminho.jpg" alt="Jano Caminho" className="h-full w-full object-contain" />
               </div>
               <div>
                 <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500 font-semibold">Area do entregador</p>
@@ -183,6 +183,16 @@ export function MotoboyLogin() {
               </div>
             ) : (
               <div className="premium-card-glass p-5 sm:p-6 space-y-4 motoboy-fade-up" style={{ animationDelay: '40ms' }}>
+                <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-3 flex items-center gap-3">
+                  <div className="h-12 w-24 rounded-xl overflow-hidden bg-slate-900 border border-slate-200 shadow-sm shrink-0 p-1">
+                    <img src="/janocaminho.jpg" alt="Jano Caminho" className="h-full w-full object-contain" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500 font-semibold">Jano Caminho</p>
+                    <p className="text-sm font-bold text-slate-900 leading-tight">App profissional de entregas</p>
+                  </div>
+                </div>
+
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Area do Entregador</p>

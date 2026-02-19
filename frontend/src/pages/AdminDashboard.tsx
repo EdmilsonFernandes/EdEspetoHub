@@ -1308,7 +1308,11 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         )}
 
         {activeTab === 'produtos' && (
-          <ProductManager products={products} onProductsChange={setProducts} />
+          <ProductManager
+            products={products}
+            onProductsChange={setProducts}
+            storeSegment={auth?.store?.settings?.segment || 'outros'}
+          />
         )}
 
         {activeTab === 'pagamentos' && (

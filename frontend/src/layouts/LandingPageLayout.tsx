@@ -33,15 +33,23 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between py-3 sm:py-4">
             <a href="https://www.janocaminho.com.br" className="flex items-center gap-3 min-w-0">
-              <div className="h-12 sm:h-14 w-24 sm:w-28 rounded-2xl bg-slate-900 shadow-[0_14px_28px_-18px_rgba(47,157,247,0.7)] ring-1 ring-sky-200/70 overflow-hidden shrink-0">
+              <div className="h-11 w-11 sm:hidden rounded-2xl bg-slate-900 shadow-[0_14px_28px_-18px_rgba(47,157,247,0.7)] ring-1 ring-sky-200/70 overflow-hidden shrink-0">
                 <img
                   src="/janocaminho.jpg"
                   alt="Jano Caminho"
-                  className="h-full w-full object-cover object-[18%_center]"
+                  className="h-full w-full object-cover object-[12%_center]"
                   draggable={false}
                 />
               </div>
-              <div className="hidden sm:block leading-tight">
+              <div className="hidden sm:block h-12 w-36 rounded-2xl bg-slate-900 shadow-[0_14px_28px_-18px_rgba(47,157,247,0.7)] ring-1 ring-sky-200/70 overflow-hidden shrink-0">
+                <img
+                  src="/janocaminho.jpg"
+                  alt="Jano Caminho"
+                  className="h-full w-full object-cover object-center"
+                  draggable={false}
+                />
+              </div>
+              <div className="leading-tight">
                 <p className="text-xl font-black text-gray-900 dark:text-white">Jano Caminho</p>
                 <p className="text-xs text-slate-500 dark:text-slate-400">Pedidos e gestão em um só lugar</p>
               </div>

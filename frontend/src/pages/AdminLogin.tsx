@@ -127,8 +127,8 @@ export function AdminLogin() {
     <AuthLayout>
       <form onSubmit={handleLogin} className="space-y-6">
         <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-3 flex items-center gap-3">
-          <div className="h-12 w-20 rounded-xl overflow-hidden bg-slate-900 border border-slate-200 shadow-sm shrink-0">
-            <img src={platformLogo} alt="Jano Caminho" className="h-full w-full object-cover object-center" />
+          <div className="h-14 w-28 rounded-xl overflow-hidden bg-slate-900 border border-slate-200 shadow-sm shrink-0">
+            <img src={platformLogo} alt="Jano Caminho" className="h-full w-full object-contain p-1" />
           </div>
           <div className="min-w-0">
             <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500 font-semibold">Jano Caminho</p>
