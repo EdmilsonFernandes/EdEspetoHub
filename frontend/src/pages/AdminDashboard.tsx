@@ -1182,7 +1182,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         </div>
       ) : null}
 
-      <div className="mx-auto w-full max-w-7xl lg:grid lg:grid-cols-[252px_1fr] lg:gap-6">
+      <div className="w-full lg:grid lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-6">
         <aside className="hidden lg:block">
           <div className="sticky top-20 ds-admin-sidebar p-3">
             <p className="px-2 pb-2 ds-admin-sidebar-title">Navegação</p>

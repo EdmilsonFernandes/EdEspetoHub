@@ -20,6 +20,21 @@ type PortfolioStore = {
   } | null;
 };
 
+type PortfolioCase = {
+  id: string;
+  name: string;
+  slug: string;
+  screenshot: string;
+  segment: string;
+  city: string;
+  cityFilterKey: string;
+  searchIndex: string;
+  problem: string;
+  solution: string;
+  result: string;
+  technologies: string[];
+};
+
 const segmentLabel = (segment?: string | null) => {
   const value = String(segment || '').toLowerCase();
   const map: Record<string, string> = {
@@ -66,6 +81,11 @@ export function PortfolioPage() {
   const [stores, setStores] = useState<PortfolioStore[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [queryInput, setQueryInput] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+  const [segmentFilter, setSegmentFilter] = useState('all');
+  const [cityFilter, setCityFilter] = useState('all');
+  const [visibleCount, setVisibleCount] = useState(9);
 
   useEffect(() => {
     document.title = 'Portfólio | Jano Caminho';
@@ -93,15 +113,29 @@ export function PortfolioPage() {
     };
   }, []);
 
-  const cases = useMemo(() => {
-    return (stores || []).map((store) => {
+  const cases = useMemo<PortfolioCase[]>(() => {
+    return (stores || []).map((store, index) => {
       const logo = resolveAssetUrl(store?.settings?.logoUrl || undefined) || '/marketing/dashboard.png';
+      const rawCity = (store as any)?.city || (store as any)?.addressCity || (store as any)?.settings?.city || '';
+      const city = String(rawCity || '').trim();
       return {
-        id: store.id || store.slug,
+        id: String(store.id || store.slug || store.name || `store-${index}`),
         name: store.name || 'Loja ativa',
         slug: store.slug || '',
         screenshot: logo,
         segment: segmentLabel(store?.settings?.segment),
+        city: city || 'Não informado',
+        cityFilterKey: city ? city.toLowerCase() : '',
+        searchIndex: [
+          store?.name,
+          store?.slug,
+          segmentLabel(store?.settings?.segment),
+          city,
+          store?.settings?.description,
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase(),
         problem: caseProblem(store?.settings?.segment),
         solution: caseSolution(store?.name),
         result: caseResult(store),
@@ -109,6 +143,43 @@ export function PortfolioPage() {
       };
     });
   }, [stores]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDebouncedQuery(queryInput.trim().toLowerCase()), 180);
+    return () => window.clearTimeout(timer);
+  }, [queryInput]);
+
+  const segmentOptions = useMemo(() => {
+    const options = Array.from(new Set(cases.map((item) => item.segment))).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+    return options;
+  }, [cases]);
+
+  const cityOptions = useMemo(() => {
+    const options = Array.from(
+      new Set(
+        cases
+          .map((item) => item.city)
+          .filter((city: string) => city && city !== 'Não informado')
+      )
+    ).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+    return options;
+  }, [cases]);
+
+  const filteredCases = useMemo(() => {
+    return cases.filter((item) => {
+      if (debouncedQuery && !item.searchIndex.includes(debouncedQuery)) return false;
+      if (segmentFilter !== 'all' && item.segment !== segmentFilter) return false;
+      if (cityFilter !== 'all' && item.city !== cityFilter) return false;
+      return true;
+    });
+  }, [cases, debouncedQuery, segmentFilter, cityFilter]);
+
+  useEffect(() => {
+    setVisibleCount(9);
+  }, [debouncedQuery, segmentFilter, cityFilter]);
+
+  const visibleCases = filteredCases.slice(0, visibleCount);
+  const canLoadMore = visibleCount < filteredCases.length;
 
   return (
     <LandingPageLayout>
@@ -128,6 +199,58 @@ export function PortfolioPage() {
 
       <section className="bg-slate-50 py-12 sm:py-14">
         <div className="max-w-6xl mx-auto px-4 space-y-5">
+          {!loading && !error && (
+            <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 space-y-3">
+              <div className="grid gap-3 lg:grid-cols-[1fr_220px_220px_auto]">
+                <input
+                  value={queryInput}
+                  onChange={(event) => setQueryInput(event.target.value)}
+                  placeholder="Buscar loja (nome, segmento, cidade, slug...)"
+                  className="ds-input ds-focus-ring"
+                />
+                <select
+                  value={segmentFilter}
+                  onChange={(event) => setSegmentFilter(event.target.value)}
+                  className="ds-select ds-focus-ring"
+                >
+                  <option value="all">Todos segmentos</option>
+                  {segmentOptions.map((segment) => (
+                    <option key={segment} value={segment}>
+                      {segment}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={cityFilter}
+                  onChange={(event) => setCityFilter(event.target.value)}
+                  className="ds-select ds-focus-ring"
+                >
+                  <option value="all">Todas cidades</option>
+                  {cityOptions.map((city) => (
+                    <option key={city} value={city}>
+                      {city}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setQueryInput('');
+                    setDebouncedQuery('');
+                    setSegmentFilter('all');
+                    setCityFilter('all');
+                  }}
+                  className="ds-btn ds-btn-secondary ds-focus-ring px-4 py-3 text-sm font-bold"
+                >
+                  Limpar
+                </button>
+              </div>
+              <p className="text-xs text-slate-500">
+                {filteredCases.length} resultado(s) encontrado(s)
+              </p>
+            </div>
+          )}
+
           {loading && (
             <div className="rounded-2xl border border-slate-200 bg-white p-5 text-sm text-slate-500">Carregando cases...</div>
           )}
@@ -136,23 +259,25 @@ export function PortfolioPage() {
             <div className="rounded-2xl border border-rose-200 bg-rose-50 p-5 text-sm text-rose-700">{error}</div>
           )}
 
-          {!loading && !error && cases.length === 0 && (
+          {!loading && !error && filteredCases.length === 0 && (
             <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center">
               <Storefront size={30} weight="duotone" className="mx-auto text-slate-500" />
               <p className="text-sm font-semibold text-slate-700 mt-3">Nenhum case disponível por enquanto.</p>
             </div>
           )}
 
-          {!loading && !error && cases.length > 0 && (
-            <div className="grid gap-5 lg:grid-cols-2">
-              {cases.map((item) => (
-                <article key={item.id} className="rounded-3xl border border-slate-200 bg-white overflow-hidden shadow-sm">
-                  <img src={item.screenshot} alt={`Screenshot - ${item.name}`} className="w-full h-56 object-cover bg-slate-100" />
-                  <div className="p-5 sm:p-6 space-y-4">
+          {!loading && !error && filteredCases.length > 0 && (
+            <div className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {visibleCases.map((item) => (
+                <article key={item.id} className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+                  <img src={item.screenshot} alt={`Screenshot - ${item.name}`} className="w-full h-40 object-cover bg-slate-100" />
+                  <div className="p-4 space-y-3">
                     <div className="flex items-center justify-between gap-3">
                       <div>
                         <p className="text-xs uppercase tracking-[0.2em] text-sky-700 font-semibold">{item.segment}</p>
-                        <h2 className="text-xl font-black text-slate-900">{item.name}</h2>
+                        <h2 className="text-lg font-black text-slate-900 line-clamp-1">{item.name}</h2>
+                        <p className="text-[11px] text-slate-500 mt-0.5">{item.city}</p>
                       </div>
                       {item.slug ? (
                         <Link
@@ -165,18 +290,18 @@ export function PortfolioPage() {
                       ) : null}
                     </div>
 
-                    <div className="grid gap-3">
-                      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                    <div className="grid gap-2.5">
+                      <div className="rounded-xl border border-slate-200 bg-slate-50 p-2.5">
                         <p className="text-[11px] uppercase tracking-[0.25em] text-slate-500">Problema resolvido</p>
-                        <p className="text-sm text-slate-700 mt-1">{item.problem}</p>
+                        <p className="text-xs text-slate-700 mt-1 line-clamp-2">{item.problem}</p>
                       </div>
-                      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                      <div className="rounded-xl border border-slate-200 bg-slate-50 p-2.5">
                         <p className="text-[11px] uppercase tracking-[0.25em] text-slate-500">Solução aplicada</p>
-                        <p className="text-sm text-slate-700 mt-1">{item.solution}</p>
+                        <p className="text-xs text-slate-700 mt-1 line-clamp-2">{item.solution}</p>
                       </div>
-                      <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-3">
+                      <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-2.5">
                         <p className="text-[11px] uppercase tracking-[0.25em] text-emerald-700">Resultado obtido</p>
-                        <p className="text-sm text-emerald-800 mt-1">{item.result}</p>
+                        <p className="text-xs text-emerald-800 mt-1 line-clamp-2">{item.result}</p>
                       </div>
                     </div>
 
@@ -184,7 +309,7 @@ export function PortfolioPage() {
                       <p className="text-[11px] uppercase tracking-[0.25em] text-slate-500 mb-2">Tecnologias utilizadas</p>
                       <div className="flex flex-wrap gap-2">
                         {item.technologies.map((tech) => (
-                          <span key={tech} className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700">
+                          <span key={tech} className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700">
                             {tech}
                           </span>
                         ))}
@@ -193,6 +318,18 @@ export function PortfolioPage() {
                   </div>
                 </article>
               ))}
+            </div>
+              {canLoadMore && (
+                <div className="flex justify-center pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setVisibleCount((prev) => prev + 9)}
+                    className="ds-btn ds-btn-secondary ds-focus-ring px-5 py-2.5 text-sm font-bold"
+                  >
+                    Carregar mais
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
