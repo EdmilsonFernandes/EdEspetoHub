@@ -164,12 +164,13 @@ export function PortfolioPage() {
     const options = Array.from(
       new Set(
         cases
+          .filter((item) => (stateFilter === 'all' ? true : item.state === stateFilter))
           .map((item) => item.city)
           .filter((city: string) => city && city !== 'Não informado')
       )
     ).sort((a, b) => a.localeCompare(b, 'pt-BR'));
     return options;
-  }, [cases]);
+  }, [cases, stateFilter]);
 
   const stateOptions = useMemo(() => {
     return Array.from(
@@ -193,6 +194,13 @@ export function PortfolioPage() {
     setVisibleCount(9);
   }, [debouncedQuery, segmentFilter, stateFilter, cityFilter]);
 
+  useEffect(() => {
+    if (cityFilter === 'all') return;
+    if (!cityOptions.includes(cityFilter)) {
+      setCityFilter('all');
+    }
+  }, [stateFilter, cityOptions, cityFilter]);
+
   const visibleCases = filteredCases.slice(0, visibleCount);
   const canLoadMore = visibleCount < filteredCases.length;
 
@@ -215,7 +223,7 @@ export function PortfolioPage() {
       <section className="bg-slate-50 py-12 sm:py-14">
         <div className="max-w-6xl mx-auto px-4 space-y-5">
           {!loading && !error && (
-            <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 space-y-3">
+            <div className="ds-card p-4 sm:p-5 space-y-3">
               <div className="grid gap-3 lg:grid-cols-[1fr_170px_170px_170px_auto]">
                 <div className="relative">
                   <MagnifyingGlass size={16} weight="duotone" className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -273,7 +281,7 @@ export function PortfolioPage() {
                   }}
                   className="ds-btn ds-btn-secondary ds-focus-ring px-4 py-3 text-sm font-bold"
                 >
-                  Limpar
+                  Limpar filtros
                 </button>
               </div>
               {segmentOptions.length > 0 && (
@@ -312,17 +320,17 @@ export function PortfolioPage() {
           )}
 
           {loading && (
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 text-sm text-slate-500">Carregando cases...</div>
+            <div className="ds-card p-5 text-sm text-slate-500">Carregando cases...</div>
           )}
 
           {error && !loading && (
-            <div className="rounded-2xl border border-rose-200 bg-rose-50 p-5 text-sm text-rose-700">{error}</div>
+            <div className="ds-alert ds-alert-error">{error}</div>
           )}
 
           {!loading && !error && filteredCases.length === 0 && (
-            <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center">
+            <div className="ds-empty-state p-10 text-center">
               <Storefront size={30} weight="duotone" className="mx-auto text-slate-500" />
-              <p className="text-sm font-semibold text-slate-700 mt-3">Nenhum case disponível por enquanto.</p>
+              <p className="text-sm font-semibold text-slate-700 mt-3">Nenhuma loja encontrada com esses filtros.</p>
             </div>
           )}
 
@@ -330,9 +338,11 @@ export function PortfolioPage() {
             <div className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                 {visibleCases.map((item) => (
-                <article key={item.id} className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm">
-                  <img src={item.screenshot} alt={`Screenshot - ${item.name}`} className="w-full h-40 object-cover bg-slate-100" />
-                  <div className="p-4 space-y-3">
+                <article key={item.id} className="ds-card overflow-hidden h-full flex flex-col">
+                  <div className="aspect-[16/9] bg-slate-100">
+                    <img src={item.screenshot} alt={`Screenshot - ${item.name}`} className="w-full h-full object-cover" />
+                  </div>
+                  <div className="p-4 space-y-3 flex-1 flex flex-col">
                     <div className="flex items-center justify-between gap-3">
                       <div>
                         <p className="text-xs uppercase tracking-[0.2em] text-sky-700 font-semibold">{item.segment}</p>
@@ -352,7 +362,7 @@ export function PortfolioPage() {
                       ) : null}
                     </div>
 
-                    <div className="grid gap-2.5">
+                    <div className="grid gap-2.5 flex-1">
                       <div className="rounded-xl border border-slate-200 bg-slate-50 p-2.5">
                         <p className="text-[11px] uppercase tracking-[0.25em] text-slate-500">Problema resolvido</p>
                         <p className="text-xs text-slate-700 mt-1 line-clamp-2">{item.problem}</p>
@@ -367,7 +377,7 @@ export function PortfolioPage() {
                       </div>
                     </div>
 
-                    <div>
+                    <div className="pt-0.5">
                       <p className="text-[11px] uppercase tracking-[0.25em] text-slate-500 mb-2">Tecnologias utilizadas</p>
                       <div className="flex flex-wrap gap-2">
                         {item.technologies.map((tech) => (

@@ -849,3 +849,43 @@ body {
     background: rgb(254 252 232);
     color: rgb(133 77 14);
   }
+
+  .ds-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: rgba(2, 6, 23, 0.52);
+    backdrop-filter: blur(4px);
+  }
+
+  .ds-table-wrap {
+    border: 1px solid rgb(226 232 240);
+    border-radius: 14px;
+    background: #fff;
+    overflow: auto;
+  }
+
+  .ds-table {
+    width: 100%;
+    min-width: 640px;
+    font-size: 0.875rem;
+  }
+
+  .ds-table thead {
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border-bottom: 1px solid rgb(226 232 240);
+  }
+
+  .ds-table th,
+  .ds-table td {
+    padding: 0.65rem 0.8rem;
+    vertical-align: top;
+  }
+
+  .ds-table tbody tr + tr {
+    border-top: 1px solid rgb(241 245 249);
+  }

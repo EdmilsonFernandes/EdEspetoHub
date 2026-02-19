@@ -115,7 +115,7 @@ export function MotoboyLogin() {
   };
 
   return (
-    <div className="min-h-screen motoboy-bg px-4 py-6 sm:py-10">
+    <div className="min-h-screen motoboy-bg overflow-x-clip px-4 py-6 sm:py-10">
       <div className="max-w-5xl mx-auto space-y-5">
         <div className="lg:hidden">
           <MotoboyHeader title="Entrar" subtitle="Acesse suas entregas em segundos." />
@@ -205,9 +205,7 @@ export function MotoboyLogin() {
                   <div>
                     <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Area do Entregador</p>
                     <h2 className="text-xl font-black text-slate-900">Bem-vindo de volta</h2>
-                    <p className="text-sm text-slate-600 mt-1">
-                      Entre para ver a fila, iniciar rota e finalizar entregas.
-                    </p>
+                    <p className="text-sm text-slate-600 mt-1">Use seu e-mail e senha para entrar.</p>
                   </div>
                   <div className="h-11 w-11 rounded-2xl bg-white/70 border border-slate-200 flex items-center justify-center text-slate-700 shadow-sm">
                     <SignIn size={22} weight="duotone" />
@@ -233,7 +231,7 @@ export function MotoboyLogin() {
                         type="button"
                         onClick={handleResendVerification}
                         disabled={resendLoading || resendCooldown > 0 || !verifyPrompt.email}
-                        className="w-full ds-btn ds-focus-ring rounded-xl bg-amber-600 text-white px-4 py-2 text-xs font-bold disabled:opacity-60"
+                        className="w-full ds-btn ds-btn-primary ds-focus-ring rounded-xl text-white px-4 py-2 text-xs font-bold disabled:opacity-60"
                       >
                         {resendLoading ? 'Reenviando...' : resendCooldown > 0 ? `Reenviar em ${resendCooldown}s` : 'Reenviar código de ativação'}
                       </button>
@@ -253,7 +251,7 @@ export function MotoboyLogin() {
                     <span className="text-xs font-extrabold text-slate-700">Email</span>
                     <input
                       type="email"
-                      placeholder="voce@exemplo.com"
+                      placeholder="seuemail@dominio.com"
                       value={form.email}
                       onChange={(e) => setForm({ ...form, email: e.target.value })}
                       className="ds-input"
@@ -265,7 +263,7 @@ export function MotoboyLogin() {
                     <div className="relative">
                       <input
                         type={showPassword ? 'text' : 'password'}
-                        placeholder="Sua senha"
+                        placeholder="Digite sua senha"
                         value={form.password}
                         onChange={(e) => setForm({ ...form, password: e.target.value })}
                         className="ds-input pr-11"

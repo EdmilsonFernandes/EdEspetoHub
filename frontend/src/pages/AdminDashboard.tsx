@@ -1182,9 +1182,9 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         </div>
       ) : null}
 
-      <div className="w-full lg:grid lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-6 lg:items-start">
+      <div className="w-full lg:grid lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-5 xl:gap-6 lg:items-start">
         <aside className="hidden lg:block">
-          <div className="sticky top-20 ds-admin-sidebar p-3">
+          <div className="sticky top-18 ds-admin-sidebar p-3 max-h-[calc(100vh-5.5rem)] overflow-y-auto">
             <p className="px-2 pb-2 ds-admin-sidebar-title">Navegação</p>
             <div className="space-y-1.5">
               {desktopTabItems.map((item) => {

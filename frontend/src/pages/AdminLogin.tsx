@@ -130,7 +130,7 @@ export function AdminLogin() {
           </div>
           <h2 className="mt-4 text-2xl sm:text-3xl font-black text-gray-900 mb-1 tracking-tight">Painel da Loja</h2>
           <p className="text-sm text-gray-500">Acesso do administrador</p>
-          <p className="text-sm text-gray-500">Use slug ou e-mail e sua senha para entrar.</p>
+          <p className="text-sm text-gray-500">Entre com slug ou e-mail.</p>
         </div>
 
         {loginError && (
@@ -139,7 +139,7 @@ export function AdminLogin() {
             {pendingPayment?.paymentUrl && (
               <a
                 href={pendingPayment.paymentUrl}
-                className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-brand-primary text-white text-xs font-semibold hover:opacity-90"
+                className="inline-flex items-center justify-center ds-btn ds-btn-primary ds-focus-ring px-4 py-2 text-xs font-semibold"
               >
                 Acessar pagamento
               </a>
@@ -149,7 +149,7 @@ export function AdminLogin() {
                 href={pendingPayment.paymentLink}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-brand-primary text-white text-xs font-semibold hover:opacity-90"
+                className="inline-flex items-center justify-center ds-btn ds-btn-primary ds-focus-ring px-4 py-2 text-xs font-semibold"
               >
                 Acessar pagamento
               </a>
@@ -170,7 +170,7 @@ export function AdminLogin() {
                 type="button"
                 onClick={handleResendVerification}
                 disabled={resendLoading || resendCooldown > 0 || !verifyPrompt.email}
-                className="ds-btn rounded-lg bg-amber-600 text-white font-semibold text-xs px-3 py-2 hover:bg-amber-700 disabled:opacity-60"
+                className="ds-btn ds-btn-primary ds-focus-ring text-white font-semibold text-xs px-3 py-2 disabled:opacity-60"
               >
                 {resendLoading ? 'Reenviando...' : resendCooldown > 0 ? `Reenviar em ${resendCooldown}s` : 'Reenviar código de ativação'}
               </button>
@@ -187,7 +187,7 @@ export function AdminLogin() {
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-gray-700">Slug da loja ou e-mail</label>
+            <label className="text-sm font-semibold text-gray-700">Slug ou e-mail</label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
                 <Storefront size={18} weight="duotone" />
@@ -201,7 +201,7 @@ export function AdminLogin() {
                 autoCapitalize="none"
               />
             </div>
-            <p className="text-xs text-gray-500">Você pode entrar com o slug da loja ou o e-mail do administrador.</p>
+            <p className="text-xs text-gray-500">Use o mesmo login do cadastro.</p>
           </div>
           <div className="space-y-2">
             <label className="text-sm font-semibold text-gray-700">Senha</label>
@@ -211,7 +211,7 @@ export function AdminLogin() {
                 value={loginForm.password}
                 onChange={e => setLoginForm(prev => ({ ...prev, password: e.target.value }))}
                 className="ds-input ds-focus-ring pr-10"
-                placeholder="Sua senha de acesso"
+                placeholder="Digite sua senha"
               />
               <button
                 type="button"

@@ -1561,7 +1561,7 @@ export function SuperAdmin() {
                   Sem VIP
                 </button>
               </div>
-              <table className="min-w-full text-sm">
+              <table className="ds-table">
                 <thead className="text-xs uppercase text-slate-500 border-b bg-slate-50">
                   <tr>
                     <th className="py-2 pr-4 text-left">Loja</th>
@@ -1692,13 +1692,13 @@ export function SuperAdmin() {
                 value={paymentQuery}
                 onChange={(event) => setPaymentQuery(event.target.value)}
                 placeholder="Buscar por loja, email, providerId..."
-                className="ml-2 bg-transparent outline-none text-sm w-48"
+                className="ml-2 bg-transparent ds-focus-ring text-sm w-48"
               />
             </div>
             <select
               value={dateRange}
               onChange={(event) => setDateRange(event.target.value)}
-              className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none flex items-center gap-2"
+              className="px-3 py-2 rounded-lg border border-slate-200 text-sm ds-focus-ring flex items-center gap-2"
             >
               <option value="7">Últimos 7 dias</option>
               <option value="30">Últimos 30 dias</option>
@@ -1710,19 +1710,19 @@ export function SuperAdmin() {
               value={minAmount}
               onChange={(event) => setMinAmount(event.target.value)}
               placeholder="Min R$"
-              className="w-24 px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none"
+              className="w-24 px-3 py-2 rounded-lg border border-slate-200 text-sm ds-focus-ring"
             />
             <input
               type="number"
               value={maxAmount}
               onChange={(event) => setMaxAmount(event.target.value)}
               placeholder="Max R$"
-              className="w-24 px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none"
+              className="w-24 px-3 py-2 rounded-lg border border-slate-200 text-sm ds-focus-ring"
             />
             <select
               value={paymentStatusFilter}
               onChange={(event) => setPaymentStatusFilter(event.target.value)}
-              className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none"
+              className="px-3 py-2 rounded-lg border border-slate-200 text-sm ds-focus-ring"
             >
               <option value="all">Status: Todos</option>
               <option value="PAID">Pago</option>
@@ -1732,7 +1732,7 @@ export function SuperAdmin() {
             <select
               value={paymentMethodFilter}
               onChange={(event) => setPaymentMethodFilter(event.target.value)}
-              className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none"
+              className="px-3 py-2 rounded-lg border border-slate-200 text-sm ds-focus-ring"
             >
               <option value="all">Metodo: Todos</option>
               <option value="PIX">Pix</option>
@@ -1742,14 +1742,14 @@ export function SuperAdmin() {
             <select
               value={paymentProviderFilter}
               onChange={(event) => setPaymentProviderFilter(event.target.value)}
-              className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none"
+              className="px-3 py-2 rounded-lg border border-slate-200 text-sm ds-focus-ring"
             >
               <option value="all">Provider: Todos</option>
               <option value="MERCADO_PAGO">Mercado Pago</option>
               <option value="MOCK">Mock</option>
             </select>
           </div>
-          <table className="min-w-full text-sm">
+          <table className="ds-table">
             <thead className="text-xs uppercase text-slate-400 border-b">
               <tr>
                 <th className="py-2 pr-4 text-left">Data</th>
@@ -1933,13 +1933,13 @@ export function SuperAdmin() {
                 value={accessLogQuery}
                 onChange={(event) => setAccessLogQuery(event.target.value)}
                 placeholder="Buscar rota ou user-agent..."
-                className="ml-2 bg-transparent outline-none text-sm w-48"
+                className="ml-2 bg-transparent ds-focus-ring text-sm w-48"
               />
             </div>
             <select
               value={accessLogRole}
               onChange={(event) => setAccessLogRole(event.target.value)}
-              className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none"
+              className="px-3 py-2 rounded-lg border border-slate-200 text-sm ds-focus-ring"
             >
               <option value="all">Role: Todas</option>
               <option value="SUPER_ADMIN">Super admin</option>
@@ -1949,7 +1949,7 @@ export function SuperAdmin() {
             <select
               value={accessLogMethod}
               onChange={(event) => setAccessLogMethod(event.target.value)}
-              className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none"
+              className="px-3 py-2 rounded-lg border border-slate-200 text-sm ds-focus-ring"
             >
               <option value="all">Metodo: Todos</option>
               <option value="GET">GET</option>
@@ -1961,7 +1961,7 @@ export function SuperAdmin() {
             <select
               value={accessLogStatus}
               onChange={(event) => setAccessLogStatus(event.target.value)}
-              className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none"
+              className="px-3 py-2 rounded-lg border border-slate-200 text-sm ds-focus-ring"
             >
               <option value="all">Status: Todos</option>
               <option value="200">200</option>
@@ -1976,7 +1976,7 @@ export function SuperAdmin() {
             <select
               value={accessLogStore}
               onChange={(event) => setAccessLogStore(event.target.value)}
-              className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none"
+              className="px-3 py-2 rounded-lg border border-slate-200 text-sm ds-focus-ring"
             >
               <option value="all">Loja: Todas</option>
               {stores.map((store: any) => (
@@ -1986,7 +1986,7 @@ export function SuperAdmin() {
               ))}
             </select>
           </div>
-          <table className="min-w-full text-sm">
+          <table className="ds-table">
             <thead className="text-xs uppercase text-slate-400 border-b">
               <tr>
                 <th className="py-2 pr-4 text-left">Data</th>
@@ -2089,7 +2089,7 @@ export function SuperAdmin() {
             <select
               value={eventStoreFilter}
               onChange={(event) => setEventStoreFilter(event.target.value)}
-              className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none"
+              className="px-3 py-2 rounded-lg border border-slate-200 text-sm ds-focus-ring"
             >
               <option value="all">Todas as lojas</option>
               {stores.map((store: any) => (
@@ -2101,7 +2101,7 @@ export function SuperAdmin() {
             <select
               value={eventStatusFilter}
               onChange={(event) => setEventStatusFilter(event.target.value)}
-              className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none"
+              className="px-3 py-2 rounded-lg border border-slate-200 text-sm ds-focus-ring"
             >
               <option value="all">Status: Todos</option>
               <option value="approved">Aprovado</option>
@@ -2113,7 +2113,7 @@ export function SuperAdmin() {
               <option value="failed">Falhou</option>
             </select>
           </div>
-          <table className="min-w-full text-sm">
+          <table className="ds-table">
             <thead className="text-xs uppercase text-slate-400 border-b">
               <tr>
                 <th className="py-2 pr-4 text-left">Data</th>
@@ -2246,7 +2246,7 @@ export function SuperAdmin() {
                     value={kycReason}
                     onChange={(e) => setKycReason(e.target.value)}
                     placeholder="Ex: Documento ilegível / selfie não confere"
-                    className="mt-2 w-full px-3 py-2 rounded-xl border border-slate-200 text-sm outline-none"
+                    className="mt-2 w-full px-3 py-2 rounded-xl border border-slate-200 text-sm ds-focus-ring"
                   />
                   <p className="text-[11px] text-slate-500 mt-2">
                     Dica: use um motivo curto e claro para o entregador reenviar.
@@ -2542,8 +2542,8 @@ export function SuperAdmin() {
         </FormSection>
 
       {selectedEventPayload && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-3xl p-6 space-y-4">
+        <div className="ds-modal-backdrop flex items-center justify-center p-4">
+          <div className="ds-modal w-full max-w-3xl p-6 space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-bold text-slate-800">Payload do webhook</h3>
               <button
@@ -2561,8 +2561,8 @@ export function SuperAdmin() {
       )}
 
       {kycHistoryOpen && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-5xl p-5 space-y-4 max-h-[88vh] overflow-hidden">
+        <div className="ds-modal-backdrop flex items-center justify-center p-4">
+          <div className="ds-modal w-full max-w-5xl p-5 space-y-4 max-h-[88vh] overflow-hidden">
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0 flex items-center gap-2.5">
                 <KycAvatar
@@ -2648,7 +2648,7 @@ export function SuperAdmin() {
               ) : filteredKycHistoryDocs.length === 0 ? (
                 <div className="p-4 text-sm text-slate-500">Sem histórico para este motoboy.</div>
               ) : (
-                <table className="min-w-full text-sm">
+                <table className="ds-table">
                   <thead className="bg-slate-50 text-slate-600">
                     <tr>
                       <th className="text-left px-3 py-2">Tipo</th>

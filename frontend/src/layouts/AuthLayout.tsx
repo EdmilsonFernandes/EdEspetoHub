@@ -8,16 +8,16 @@ interface AuthLayoutProps {
 
 export function AuthLayout({ children }: AuthLayoutProps) {
   return (
-    <div className="min-h-screen p-4 sm:p-6 bg-[linear-gradient(135deg,#050b16_0%,#0f172a_45%,#111827_100%)]">
+    <div className="min-h-screen overflow-x-clip p-4 sm:p-6 bg-[linear-gradient(135deg,#050b16_0%,#0f172a_45%,#111827_100%)]">
       <div className="mx-auto max-w-6xl min-h-[calc(100vh-2rem)] sm:min-h-[calc(100vh-3rem)] grid lg:grid-cols-2 rounded-[28px] overflow-hidden border border-white/10 shadow-[0_40px_90px_-45px_rgba(0,0,0,0.75)]">
         <div className="relative flex p-6 sm:p-8 lg:p-10 text-white bg-slate-900 min-h-[240px] lg:min-h-0">
           <div className="absolute inset-0">
             <img src="/janocaminho.jpg" alt="Jano Caminho" className="h-full w-full object-cover object-center blur-[2px] scale-[1.06]" />
           </div>
-          <div className="absolute inset-0 opacity-80">
-            <img src="/janocaminho.jpg" alt="" aria-hidden className="h-full w-full object-contain object-center p-4 sm:p-6" />
+          <div className="absolute inset-0 opacity-85">
+            <img src="/janocaminho.jpg" alt="" aria-hidden className="h-full w-full object-contain object-center p-5 sm:p-8" />
           </div>
-          <div className="absolute inset-0 bg-[linear-gradient(160deg,rgba(2,6,23,0.84),rgba(2,6,23,0.72))]" />
+          <div className="absolute inset-0 bg-[linear-gradient(160deg,rgba(2,6,23,0.88),rgba(2,6,23,0.78))]" />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(47,157,247,0.32),_transparent_58%),radial-gradient(circle_at_bottom,_rgba(95,211,90,0.2),_transparent_62%)]" />
 
           <div className="relative z-10 flex flex-col justify-between h-full w-full">
