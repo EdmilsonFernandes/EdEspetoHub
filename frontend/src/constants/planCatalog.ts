@@ -5,7 +5,8 @@ export const PLAN_TIERS = [
     features: [
       'Site e cardápio online',
       'Pedidos ilimitados',
-      'Mesa e retirada',
+      'Retirada no balcão',
+      'Sem entregas e gorjetas',
       'Suporte padrão',
     ],
   },

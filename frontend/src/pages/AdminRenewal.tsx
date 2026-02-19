@@ -24,7 +24,7 @@ export function AdminRenewal() {
   const currentEndDate = currentSubscription?.endDate ?? auth?.subscription?.endDate;
   const currentPlanName = String(currentSubscription?.plan?.name || auth?.subscription?.plan?.name || '').toLowerCase();
   const currentTier = currentPlanName.includes('pro') ? 'pro' : 'basic';
-  const allowedTierKeys = useMemo(() => [currentTier], [currentTier]);
+  const allowedTierKeys = useMemo(() => PLAN_TIERS.map((tier) => tier.key), []);
 
   useEffect(() => {
     let active = true;
@@ -175,8 +175,8 @@ export function AdminRenewal() {
             <h3 className="text-lg font-semibold text-gray-800">Escolha um plano</h3>
             <p className="text-xs text-slate-500">
               {currentTier === 'basic'
-                ? 'Seu plano atual é Basic. Você pode alternar entre Basic mensal e Basic anual.'
-                : 'Seu plano atual é Pro. Você pode alternar entre Pro mensal e Pro anual.'}
+                ? 'Seu plano atual é Basic. Você pode manter o Basic (mensal/anual) ou fazer upgrade para Pro.'
+                : 'Seu plano atual é Pro. Você pode alternar entre mensal e anual ou mudar de plano.'}
             </p>
             <div className="flex items-center justify-center gap-4">
               <span className={`text-sm font-semibold ${!isAnnual ? 'text-gray-900' : 'text-gray-500'}`}>Mensal</span>
