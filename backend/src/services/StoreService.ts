@@ -24,6 +24,7 @@ import { saveBase64Image } from '../utils/imageStorage';
 import { sanitizeSocialLinks } from '../utils/socialLinks';
 import { AppError } from '../errors/AppError';
 import { getStoreSegmentPreset, sanitizeStoreSegment } from '../utils/storeSegment';
+import { resolvePlanFeatures } from '../config/planFeatures';
 /**
  * Provides StoreService functionality.
  *
@@ -249,7 +250,17 @@ export class StoreService
 
       if (data.orderTypes)
       {
-        store.settings.orderTypes = data.orderTypes;
+        const subscription = await this.subscriptionService.getCurrentByStore(store.id);
+        const features = resolvePlanFeatures({
+          planName: subscription?.plan?.name,
+          planExempt: Boolean(store.settings?.planExempt),
+          subscriptionStatus: subscription?.status,
+        });
+        const nextTypes = Array.isArray(data.orderTypes) ? data.orderTypes : [];
+        if (!features.pickupMode && nextTypes.includes('pickup')) {
+          throw new AppError('AUTH-003', 403, { requiredFeature: 'pickupMode' });
+        }
+        store.settings.orderTypes = nextTypes;
       } else if (!Array.isArray(store.settings.orderTypes) || !store.settings.orderTypes.length) {
         store.settings.orderTypes = segmentPreset.orderTypes;
       }

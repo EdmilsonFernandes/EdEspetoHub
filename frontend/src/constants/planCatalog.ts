@@ -2,12 +2,23 @@ export const PLAN_TIERS = [
   {
     key: 'basic',
     label: '🥩 Plano Basic',
-    features: ['Site ativo', 'Pedidos ilimitados', 'Suporte básico'],
+    features: [
+      'Site e cardápio online',
+      'Pedidos ilimitados',
+      'Entrega e mesa',
+      'Suporte padrão',
+    ],
   },
   {
     key: 'pro',
     label: '🔥 Plano Pro',
-    features: ['Tudo do plano basic', 'Prioridade no suporte', 'Selo "Plano Pro" no admin'],
+    features: [
+      'Tudo do Basic',
+      'Retirada no balcão',
+      'Gestão de entregadores',
+      'Repasse de gorjetas',
+      'Suporte prioritário',
+    ],
     popular: true,
   },
 ];

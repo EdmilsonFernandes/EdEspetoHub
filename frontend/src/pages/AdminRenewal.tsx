@@ -128,8 +128,13 @@ export function AdminRenewal() {
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Renovar assinatura</h1>
               <p className="text-gray-500 mt-1">
-                Sua assinatura esta {currentStatus === 'EXPIRED' ? 'expirada' : 'quase expirando'}.
+                Sua assinatura está {currentStatus === 'EXPIRED' ? 'expirada' : 'quase expirando'}.
               </p>
+              {String(currentStatus || '').toUpperCase() === 'TRIAL' ? (
+                <p className="mt-2 text-xs text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-lg px-3 py-2 inline-flex">
+                  Trial ativo com recursos Pro liberados.
+                </p>
+              ) : null}
             </div>
             <div className="bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3">
               <p className="text-xs text-slate-500">Expiração</p>
@@ -208,6 +213,11 @@ export function AdminRenewal() {
                       {billingKey === 'yearly' ? `${billing.period} (R$ ${Number(monthlyEq || 0).toFixed(2)}/mês)` : billing.period}
                     </p>
                     <p className="text-xs text-gray-500 mt-1">{durationLabel}</p>
+                    <ul className="mt-3 text-xs text-gray-600 space-y-1">
+                      {tier.features.map((feature) => (
+                        <li key={feature}>✓ {feature}</li>
+                      ))}
+                    </ul>
                   </button>
                 );
               })}

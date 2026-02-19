@@ -40,6 +40,7 @@ export const requirePlanFeature = (feature: PlanFeatureKey) => {
       const features = resolvePlanFeatures({
         planName: subscription?.plan?.name,
         planExempt,
+        subscriptionStatus: subscription?.status,
       });
 
       if (features[feature]) return next();
@@ -59,4 +60,3 @@ export const requirePlanFeature = (feature: PlanFeatureKey) => {
     }
   };
 };
-

@@ -715,9 +715,11 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   const prevTabRef = useRef(activeTab);
   const isVip = Boolean(session?.store?.settings?.planExempt || session?.subscription?.planExempt);
   const planName = String(session?.subscription?.plan?.name || '').toLowerCase();
+  const subscriptionStatus = String(session?.subscription?.status || '').toUpperCase();
   const canUseMotoboys = Boolean(
     isVip ||
       session?.features?.motoboyManagement ||
+      subscriptionStatus === 'TRIAL' ||
       planName.includes('pro') ||
       planName.includes('vip')
   );

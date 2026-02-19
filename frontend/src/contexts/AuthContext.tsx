@@ -4,6 +4,9 @@ type AuthSession = {
   token: string;
   user: any;
   store: any;
+  subscription?: any;
+  planTier?: string;
+  features?: Record<string, boolean>;
 };
 
 type AuthContextType = {

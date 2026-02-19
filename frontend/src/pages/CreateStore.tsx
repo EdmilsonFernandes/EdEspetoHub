@@ -1552,13 +1552,13 @@ export function CreateStore() {
                   <span className="absolute -top-3 left-4 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-full">
                     7 DIAS GRATIS
                   </span>
-                  <p className="text-sm uppercase font-semibold text-amber-700">Teste completo</p>
+                  <p className="text-sm uppercase font-semibold text-amber-700">Trial completo</p>
                   <p className="text-2xl font-bold text-gray-900">Sem cartão</p>
-                  <p className="text-xs text-gray-500">Escolha o plano ao final do periodo gratuito.</p>
+                  <p className="text-xs text-gray-500">No trial você usa todos os recursos do plano Pro por 7 dias.</p>
                   <ul className="mt-3 text-xs text-gray-600 space-y-1">
                     <li>✓ Loja ativa por 7 dias</li>
-                    <li>✓ Acesso ao painel completo</li>
-                    <li>✓ Pode renovar quando quiser</li>
+                    <li>✓ Recursos Pro liberados</li>
+                    <li>✓ Escolha o plano depois</li>
                   </ul>
                 </button>
                 {PLAN_TIERS.map((tier) => {
@@ -1618,6 +1618,9 @@ export function CreateStore() {
                 })}
                 {!plans.length && <p className="text-sm text-gray-500">Carregando planos disponíveis...</p>}
               </div>
+              <p className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-xl px-3 py-2">
+                Durante o trial, sua loja fica com recursos Pro liberados. Após o período, você pode manter no Basic ou trocar para Pro.
+              </p>
 
               {selectedPlanId !== 'test-plan-7days' && (
                 <div className="mt-6">

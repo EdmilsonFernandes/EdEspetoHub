@@ -3,25 +3,40 @@ export type PlanTier = 'basic' | 'pro' | 'vip';
 export type PlanFeatureKey =
   | 'motoboyManagement'
   | 'tipPayouts'
-  | 'advancedDashboard';
+  | 'advancedDashboard'
+  | 'pickupMode';
 
 export type PlanFeatures = Record<PlanFeatureKey, boolean>;
+export type SubscriptionStatusLike =
+  | 'TRIAL'
+  | 'PENDING'
+  | 'ACTIVE'
+  | 'EXPIRING'
+  | 'EXPIRED'
+  | 'SUSPENDED'
+  | 'CANCELLED'
+  | string
+  | null
+  | undefined;
 
 const FEATURES_BY_TIER: Record<PlanTier, PlanFeatures> = {
   basic: {
     motoboyManagement: false,
     tipPayouts: false,
     advancedDashboard: false,
+    pickupMode: false,
   },
   pro: {
     motoboyManagement: true,
     tipPayouts: true,
     advancedDashboard: true,
+    pickupMode: true,
   },
   vip: {
     motoboyManagement: true,
     tipPayouts: true,
     advancedDashboard: true,
+    pickupMode: true,
   },
 };
 
@@ -39,8 +54,12 @@ export const resolvePlanTier = (planName?: string | null, planExempt?: boolean):
 export const resolvePlanFeatures = (params: {
   planName?: string | null;
   planExempt?: boolean;
+  subscriptionStatus?: SubscriptionStatusLike;
 }): PlanFeatures => {
+  const status = normalize(params.subscriptionStatus).toUpperCase();
+  if (status === 'TRIAL') {
+    return FEATURES_BY_TIER.pro;
+  }
   const tier = resolvePlanTier(params.planName, params.planExempt);
   return FEATURES_BY_TIER[tier];
 };
-

@@ -561,6 +561,7 @@ export class AuthService
     const features = resolvePlanFeatures({
       planName: currentSubscription?.plan?.name,
       planExempt,
+      subscriptionStatus: currentSubscription?.status,
     });
 
     return {
@@ -661,6 +662,7 @@ export class AuthService
     const features = resolvePlanFeatures({
       planName: currentSubscription?.plan?.name,
       planExempt,
+      subscriptionStatus: currentSubscription?.status,
     });
 
     return {
