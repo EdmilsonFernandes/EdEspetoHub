@@ -37,7 +37,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                 <img
                   src="/janocaminho.jpg"
                   alt="Jano Caminho"
-                  className="h-full w-full object-cover object-center"
+                  className="h-full w-full object-cover object-[18%_center]"
                   draggable={false}
                 />
               </div>

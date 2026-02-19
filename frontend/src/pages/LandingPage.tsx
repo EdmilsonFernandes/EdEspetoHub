@@ -452,14 +452,6 @@ export function LandingPage() {
                 Falar no WhatsApp
               </a>
             </div>
-            <button
-              type="button"
-              onClick={scrollToShowcase}
-              className="cursor-pointer inline-flex items-center justify-center gap-2 w-fit px-4 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-700 hover:text-sky-600 hover:border-sky-200 transition-colors"
-            >
-              Ver demonstração
-              <Rocket size={14} weight="duotone" />
-            </button>
           </div>
 
           <div className="rounded-3xl border border-slate-200 bg-white/95 dark:bg-slate-800/90 backdrop-blur p-5 sm:p-6 shadow-[0_22px_60px_-40px_rgba(15,23,42,0.55)]">
@@ -1140,12 +1132,6 @@ export function LandingPage() {
               >
                 Falar no WhatsApp
               </a>
-              <button
-                onClick={scrollToShowcase}
-                className="px-6 py-3 rounded-xl border border-white/80 text-white font-semibold hover:bg-white/20 transition"
-              >
-                Agendar demonstração
-              </button>
             </div>
           </div>
         </div>
