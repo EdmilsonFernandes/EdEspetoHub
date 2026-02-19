@@ -89,7 +89,7 @@ const caseProblem = (segment?: string | null) => {
 
 const caseSolution = (name?: string) => {
   const storeName = String(name || 'a loja');
-  return `Implantação do Jano Caminho para ${storeName}, com cardápio digital, painel operacional e fluxo de entrega/retirada com status ao vivo.`;
+  return `Implantação do Já no Caminho para ${storeName}, com cardápio digital, painel operacional e fluxo de entrega/retirada com status ao vivo.`;
 };
 
 const caseResult = (store: PortfolioStore) => {
@@ -165,7 +165,7 @@ export function PortfolioPage() {
   ];
 
   useEffect(() => {
-    document.title = 'Portfólio | Jano Caminho';
+    document.title = 'Portfólio | Já no Caminho';
   }, []);
 
   useEffect(() => {
@@ -294,7 +294,7 @@ export function PortfolioPage() {
           <div className="max-w-3xl">
             <p className="text-xs uppercase tracking-[0.3em] text-sky-700 font-semibold">Portfólio</p>
             <h1 className="text-3xl sm:text-5xl font-black text-slate-900 leading-[1.05] mt-2">
-              Cases reais de operação digital com o Jano Caminho
+              Cases reais de operação digital com o Já no Caminho
             </h1>
             <p className="text-sm sm:text-lg text-slate-600 mt-4">
               Cada projeto mostra problema, solução aplicada e resultado. Estrutura pensada para negócios que precisam vender mais e operar melhor.

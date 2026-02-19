@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 
 export const initialCustomer = { name: '', phone: '', address: '', table: '', type: 'table' };
@@ -7,7 +7,7 @@ export const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || '55129967
 export const PIX_KEY = import.meta.env.VITE_PIX_KEY || '';
 
 export const defaultBranding = {
-  brandName: 'Jano Caminho',
+  brandName: 'Já no Caminho',
   espetoId: import.meta.env.VITE_DEFAULT_STORE || 'espetinhodatony',
   logoUrl: '/janocaminho.jpg',
   primaryColor: '#2f9df7',
@@ -34,3 +34,4 @@ export const getPersistedBranding = (ownerId: string = defaultBranding.espetoId)
     return { ...defaultBranding, espetoId: ownerId };
   }
 };
+

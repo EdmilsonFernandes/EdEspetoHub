@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   CheckSquare,
@@ -1218,7 +1218,7 @@ export const GrillQueue = () => {
               const pixPayload = pixKey
                 ? buildPixPayload({
                     key: pixKey,
-                    name: auth?.store?.name || 'Jano Caminho',
+                    name: auth?.store?.name || 'Já no Caminho',
                     amount: Number(confirmModal.total || 0),
                     txid: confirmModal.id ? `PEDIDO${confirmModal.id.slice(0, 8)}` : 'PEDIDO',
                   })
@@ -1631,3 +1631,4 @@ export const GrillQueue = () => {
     </div>
   );
 };
+

@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Bicycle, ChefHat, CheckCircle, Clock, CircleNotch, MapPin, Star } from '@phosphor-icons/react';
@@ -192,7 +192,7 @@ export function OrderTracking() {
   const deliveryStatus = String((order as any)?.delivery?.status || '').toUpperCase();
   const motoboyName = String((order as any)?.delivery?.motoboy?.name || '');
   const motoboyFirst = firstName(motoboyName);
-  const storeName = order?.store?.name || 'Jano Caminho';
+  const storeName = order?.store?.name || 'Já no Caminho';
   const storeSlug = order?.store?.slug;
   const storeHomePath = storeSlug ? `/${storeSlug}` : '/';
   const isAdminForStore = useMemo(() => {
@@ -1331,3 +1331,4 @@ export function OrderTracking() {
     </div>
   );
 }
+

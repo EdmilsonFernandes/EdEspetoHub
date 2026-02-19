@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+﻿import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SignOut, UserCircle } from '@phosphor-icons/react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -48,7 +48,7 @@ export function MotoboyHeader({ title, subtitle, rightAction }: MotoboyHeaderPro
         <div className="flex items-center gap-3 min-w-0">
           <div className="relative h-11 w-16 sm:h-12 sm:w-20 rounded-2xl overflow-hidden shadow-[0_18px_34px_-26px_rgba(239,68,68,0.9)] shrink-0 bg-slate-900 p-1">
             <div className="absolute inset-0 bg-[linear-gradient(135deg,#ef4444,#f59e0b)] opacity-20" />
-            <img src="/janocaminho.jpg" alt="Jano Caminho" className="relative h-full w-full object-contain" />
+            <img src="/janocaminho.jpg" alt="Já no Caminho" className="relative h-full w-full object-contain" />
           </div>
           <div className="min-w-0">
             <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.22em] sm:tracking-[0.3em] text-slate-500">Área do Entregador</p>
@@ -84,3 +84,4 @@ export function MotoboyHeader({ title, subtitle, rightAction }: MotoboyHeaderPro
     </div>
   );
 }
+

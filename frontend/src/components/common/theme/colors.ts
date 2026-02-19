@@ -1,6 +1,6 @@
-/**
+﻿/**
  * Color System - Centralized color tokens for the design system
- * Based on the Jano Caminho visual identity (blue + green)
+ * Based on the Já no Caminho visual identity (blue + green)
  */
 
 export const colors = {
@@ -97,3 +97,4 @@ export const colors = {
 
 export type ColorKey = keyof typeof colors;
 export type ColorShade = keyof typeof colors.primary;
+

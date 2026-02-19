@@ -241,12 +241,14 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
             href="https://www.janocaminho.com.br"
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-full bg-white/15 border border-white/20 text-[11px] font-semibold hover:bg-white/20 transition"
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/25 text-[11px] font-semibold text-white/90 hover:bg-white/18 hover:text-white transition"
+            title="Ir para janocaminho.com.br"
           >
-            <span className="h-5 w-9 rounded-md overflow-hidden bg-slate-900/70 p-0.5">
-              <img src="/janocaminho.jpg" alt="Jano Caminho" className="h-full w-full object-contain" />
+            <span className="h-5 w-5 rounded-full overflow-hidden bg-slate-900/70 ring-1 ring-white/35">
+              <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full object-cover object-center" />
             </span>
-            Feito com Jano Caminho
+            <span className="hidden sm:inline">Powered by</span>
+            <span className="font-bold">Já no Caminho</span>
           </a>
           {onToggleHeader && (
             <div className="flex items-center rounded-full bg-white/10 border border-white/20 p-0.5 text-[11px] sm:text-xs font-semibold">

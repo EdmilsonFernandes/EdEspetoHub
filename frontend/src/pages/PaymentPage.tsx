@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { paymentService } from '../services/paymentService';
@@ -169,10 +169,10 @@ export function PaymentPage() {
           <div className="flex items-center justify-between py-3 sm:py-4">
             <button onClick={() => navigate('/')} className="flex items-center gap-3">
               <div className="w-11 h-11 rounded-2xl overflow-hidden shadow-[0_14px_26px_-18px_rgba(239,68,68,0.7)] border border-white bg-white">
-                <img src={platformLogo} alt="Jano Caminho" className="w-full h-full object-cover" />
+                <img src={platformLogo} alt="Já no Caminho" className="w-full h-full object-cover" />
               </div>
               <div className="hidden sm:block text-left leading-tight">
-                <p className="text-lg font-black text-gray-900">Jano Caminho</p>
+                <p className="text-lg font-black text-gray-900">Já no Caminho</p>
                 <p className="text-xs text-gray-500 uppercase tracking-[0.25em]">Pagamento</p>
               </div>
             </button>
@@ -555,3 +555,4 @@ export function PaymentPage() {
     </div>
   );
 }
+

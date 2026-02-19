@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 import React, { useEffect, useMemo, useState } from "react";
 import { Package, CurrencyDollar, CheckCircle, CircleDashed, LinkSimple, CalendarBlank, TrendUp } from "@phosphor-icons/react";
 import {
@@ -20,7 +20,7 @@ export const DashboardView = ({
   customers = [],
   setupChecklist = [],
   storeUrl = "",
-  storeName = "Jano Caminho",
+  storeName = "Já no Caminho",
   storeLogo = "",
   storeDescription = "",
   linkStats = null,
@@ -1049,3 +1049,4 @@ export default DashboardView;
     setQrCopied(true);
     setTimeout(() => setQrCopied(false), 1500);
   };
+

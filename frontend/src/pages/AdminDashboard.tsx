@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 import * as React from 'react';
 import { ChartBar, BookOpen, ChefHat, CreditCard, Package, Gear, ShoppingCart, DotsThree, X, Scooter, ForkKnife, Storefront, Truck } from '@phosphor-icons/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -740,7 +740,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   const storeId = session?.store?.id;
   const storeSlug = session?.store?.slug;
   const storeUrl = storeSlug ? `https://www.janocaminho.com.br/${storeSlug}` : '';
-  const storeName = session?.store?.name || 'Jano Caminho';
+  const storeName = session?.store?.name || 'Já no Caminho';
   const socialLinks = session?.store?.settings?.socialLinks || [];
   const whatsappNumber = session?.store?.owner?.phone || '';
   const instagramLink = socialLinks.find((link) => link?.type === 'instagram')?.value;
@@ -1620,3 +1620,4 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     </AdminLayout>
   );
 }
+

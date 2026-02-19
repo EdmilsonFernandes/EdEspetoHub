@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ShoppingCart, PaperPlaneTilt } from '@phosphor-icons/react';
@@ -214,7 +214,7 @@ export function StorePage() {
 
   const applyStoreMeta = (store: any) => {
     if (!store) return;
-    const name = store.name || store.slug || 'Jano Caminho';
+    const name = store.name || store.slug || 'Já no Caminho';
     const description = `Cardápio online e pedidos da loja ${name}.`;
     const logo = resolveAssetUrl(store.settings?.logoUrl) || '/janocaminho.jpg';
     const url = typeof window !== 'undefined' ? window.location.href : '';
@@ -230,7 +230,7 @@ export function StorePage() {
       tag.setAttribute('content', value);
     };
 
-    document.title = `${name} | Jano Caminho`;
+    document.title = `${name} | Já no Caminho`;
     upsertMeta('description', description, 'name');
     upsertMeta('og:title', name, 'property');
     upsertMeta('og:description', description, 'property');
@@ -870,7 +870,7 @@ export function StorePage() {
           phone: customer.phone,
           deliveryFee: customer.type === 'delivery' && deliveryFeeValue > 0 ? deliveryFeeValue : null,
           total: orderTotal,
-          store: { name: 'Jano Caminho Demo', slug: storeSlug },
+          store: { name: 'Já no Caminho Demo', slug: storeSlug },
           createdAt: Date.now(),
         })
       );
@@ -910,7 +910,7 @@ export function StorePage() {
       : `👤 *${customer.name}*`;
 
     const messageLines = [
-      `*NOVO PEDIDO - ${branding?.brandName || 'Jano Caminho'}*`,
+      `*NOVO PEDIDO - ${branding?.brandName || 'Já no Caminho'}*`,
       storeSlug ? `🏷️ *Loja:* ${storeSlug}` : '',
       storeAddress ? `📍 *Endereço da loja:* ${storeAddress}` : '',
       '------------------',
@@ -945,7 +945,7 @@ export function StorePage() {
       .map((item) => `- ${item.qty}x ${item.name} ${formatItemOptions(item)}`.trim())
       .join('\n');
     const customerMessageLines = [
-      `Pedido #${formatOrderDisplayId(createdOrder?.id, storeSlug)} - ${branding?.brandName || 'Jano Caminho'}`,
+      `Pedido #${formatOrderDisplayId(createdOrder?.id, storeSlug)} - ${branding?.brandName || 'Já no Caminho'}`,
       customerItemsList ? `Itens:\n${customerItemsList}` : '',
       deliveryFeeValue > 0 ? `Frete: ${formatCurrency(deliveryFeeValue)}` : '',
       `Total: ${formatCurrency(orderTotal)}`,
@@ -1273,7 +1273,7 @@ export function StorePage() {
                         rel="noreferrer"
                         className="font-semibold text-slate-500 hover:text-slate-700 underline-offset-2 hover:underline"
                       >
-                        Powered by Jano Caminho
+                        Powered by Já no Caminho
                       </a>
                     </div>
                   </div>
@@ -1442,3 +1442,4 @@ export function StorePage() {
     </div>
   );
 }
+

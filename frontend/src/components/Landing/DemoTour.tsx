@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChefHat, ClipboardText, ShoppingCart } from '@phosphor-icons/react';
@@ -113,7 +113,7 @@ export function DemoTour({ open, onClose }: Props) {
             <div className="rounded-3xl border border-gray-100 dark:border-gray-800 bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-950 p-6">
               <div className="flex items-center justify-between">
                 <span className="text-xs uppercase tracking-[0.3em] text-red-500 font-bold">{active.highlight}</span>
-                <span className="text-xs text-gray-400">Jano Caminho</span>
+                <span className="text-xs text-gray-400">Já no Caminho</span>
               </div>
               <div className="mt-6 grid sm:grid-cols-2 gap-4">
                 <div className="rounded-2xl border border-gray-200 dark:border-gray-800 p-4 bg-white/80 dark:bg-gray-900/60">
@@ -176,3 +176,4 @@ export function DemoTour({ open, onClose }: Props) {
     </div>
   );
 }
+

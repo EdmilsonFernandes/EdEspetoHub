@@ -36,7 +36,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
               <div className="h-11 w-11 sm:hidden rounded-2xl bg-slate-900 shadow-[0_14px_28px_-18px_rgba(47,157,247,0.7)] ring-1 ring-sky-200/70 overflow-hidden shrink-0">
                 <img
                   src="/janocaminho.jpg"
-                  alt="Jano Caminho"
+                  alt="Já no Caminho"
                   className="h-full w-full object-cover object-[12%_center]"
                   draggable={false}
                 />
@@ -44,13 +44,13 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
               <div className="hidden sm:block h-12 w-36 rounded-2xl bg-slate-900 shadow-[0_14px_28px_-18px_rgba(47,157,247,0.7)] ring-1 ring-sky-200/70 overflow-hidden shrink-0">
                 <img
                   src="/janocaminho.jpg"
-                  alt="Jano Caminho"
+                  alt="Já no Caminho"
                   className="h-full w-full object-cover object-center"
                   draggable={false}
                 />
               </div>
               <div className="leading-tight min-w-0">
-                <p className="text-base sm:text-xl font-black text-white truncate">Jano Caminho</p>
+                <p className="text-base sm:text-xl font-black text-white truncate">Já no Caminho</p>
                 <p className="hidden sm:block text-xs text-slate-300">Pedidos e gestão em um só lugar</p>
               </div>
             </a>
@@ -200,7 +200,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-3 mb-4">
-                <span className="text-xl font-black text-white">Jano Caminho</span>
+                <span className="text-xl font-black text-white">Já no Caminho</span>
               </div>
               <p className="text-sm text-gray-400">Plataforma completa para gestão de pedidos e entregas online.</p>
             </div>
@@ -236,7 +236,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                   Arquiteto principal e liderança técnica
                 </p>
                 <p>
-                  Equipe Jano Caminho
+                  Equipe Já no Caminho
                   <br />
                   Frontend, backend, produto e operação
                 </p>
@@ -245,7 +245,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
           </div>
           <div className="border-t border-gray-800 pt-8 text-center text-sm text-gray-500 space-y-1">
             <p>Edmilson Tecnologia da Informação • CNPJ 44.771.427/0001-69</p>
-            © {new Date().getFullYear()} Jano Caminho. Todos os direitos reservados.
+            © {new Date().getFullYear()} Já no Caminho. Todos os direitos reservados.
           </div>
         </div>
       </footer>

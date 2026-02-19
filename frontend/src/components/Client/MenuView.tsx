@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 import React, { useEffect, useMemo, useState } from "react";
 import {
   SquaresFour,
@@ -734,7 +734,7 @@ export const MenuView = ({
             rel="noreferrer"
             className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500 hover:text-slate-700 hover:border-slate-300 transition"
           >
-            Powered by Jano Caminho
+            Powered by Já no Caminho
           </a>
         </div>
         </div>
@@ -749,3 +749,4 @@ export const MenuView = ({
     </div>
   );
 };
+

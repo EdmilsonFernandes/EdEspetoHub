@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { storeService } from '../services/storeService';
@@ -878,7 +878,7 @@ export function CreateStore() {
                 <Buildings size={21} weight="duotone" />
               </div>
               <div className="hidden sm:block leading-tight">
-                <p className="text-lg font-black text-gray-900">Jano Caminho</p>
+                <p className="text-lg font-black text-gray-900">Já no Caminho</p>
                 <p className="text-xs text-gray-500 uppercase tracking-[0.25em] text-left">Criar nova loja</p>
               </div>
             </button>
@@ -1846,7 +1846,7 @@ export function CreateStore() {
             <div className="px-6 py-5 border-b border-slate-200 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
-                  <img src={platformLogo} alt="Jano Caminho" className="w-full h-full object-cover" />
+                  <img src={platformLogo} alt="Já no Caminho" className="w-full h-full object-cover" />
                 </div>
                 <div>
                   <p className="text-lg font-bold text-slate-900">Termos de uso</p>
@@ -1865,7 +1865,7 @@ export function CreateStore() {
               <section className="space-y-2">
                 <h3 className="text-base font-semibold text-slate-900">1. Plataforma e finalidade</h3>
                 <p>
-                  A plataforma Jano Caminho fornece ferramentas para criar, publicar e gerir lojas digitais.
+                  A plataforma Já no Caminho fornece ferramentas para criar, publicar e gerir lojas digitais.
                   O usuário é responsável pelo conteúdo, preços, ofertas e atendimento.
                 </p>
               </section>
@@ -1940,3 +1940,4 @@ export function CreateStore() {
     </div>
   );
 }
+

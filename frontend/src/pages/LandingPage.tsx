@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import {
   CheckCircle,
   Cube,
@@ -39,12 +39,12 @@ export function LandingPage() {
   const [activeProof, setActiveProof] = useState<{ title: string; image: string } | null>(null);
 
   useEffect(() => {
-    document.title = 'Jano Caminho | Plataforma completa para gestão de pedidos e entregas';
+    document.title = 'Já no Caminho | Plataforma completa para gestão de pedidos e entregas';
     const description =
       'Plataforma de gestão de pedidos, entregas e retirada para qualquer comércio. Sistema moderno com painel administrativo completo.';
 
     upsertMeta('description', description, 'name');
-    upsertMeta('og:title', 'Jano Caminho | Plataforma completa para gestão de pedidos e entregas', 'property');
+    upsertMeta('og:title', 'Já no Caminho | Plataforma completa para gestão de pedidos e entregas', 'property');
     upsertMeta('og:description', description, 'property');
     upsertMeta('og:image', 'https://www.janocaminho.com.br/janocaminho.jpg', 'property');
     upsertMeta('og:type', 'website', 'property');
@@ -91,7 +91,7 @@ export function LandingPage() {
                 SaaS para operação comercial
               </span>
               <h1 className="text-3xl sm:text-5xl font-black text-white leading-[1.05]">
-                Jano Caminho - Plataforma completa para gestão de pedidos e entregas
+                Já no Caminho - Plataforma completa para gestão de pedidos e entregas
               </h1>
               <p className="text-sm sm:text-lg text-slate-200 max-w-2xl mx-auto lg:mx-0">
                 Centralize pedidos online, organize sua operação e aumente suas vendas com um sistema moderno e inteligente.
@@ -118,7 +118,7 @@ export function LandingPage() {
             <div className="rounded-3xl border border-white/15 bg-white/5 backdrop-blur p-5 shadow-[0_26px_64px_-36px_rgba(0,0,0,0.6)]">
               <img
                 src="/janocaminho.jpg"
-                alt="Jano Caminho"
+                alt="Já no Caminho"
                 className="w-full h-52 sm:h-60 rounded-2xl bg-slate-950 object-contain p-2"
               />
               <div className="grid grid-cols-3 gap-2 mt-4">
@@ -301,3 +301,4 @@ export function LandingPage() {
     </LandingPageLayout>
   );
 }
+
