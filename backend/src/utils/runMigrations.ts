@@ -715,4 +715,25 @@ export async function runMigrations() {
   await AppDataSource.query(`
     CREATE INDEX IF NOT EXISTS idx_delivery_billing_charges_cycle ON delivery_billing_charges(cycle_id);
   `);
+  // Rebrand migration (idempotent): update legacy brand/domain mentions in persisted text settings.
+  await AppDataSource.query(`
+    UPDATE site_settings
+    SET value = REPLACE(value, 'www.chamanoespeto.com.br', 'www.janocaminho.com.br')
+    WHERE value ILIKE '%www.chamanoespeto.com.br%';
+  `);
+  await AppDataSource.query(`
+    UPDATE site_settings
+    SET value = REPLACE(value, 'chamanoespeto.com.br', 'janocaminho.com.br')
+    WHERE value ILIKE '%chamanoespeto.com.br%';
+  `);
+  await AppDataSource.query(`
+    UPDATE site_settings
+    SET value = REPLACE(value, 'Chama no Espeto', 'Jano Caminho')
+    WHERE value ILIKE '%Chama no Espeto%';
+  `);
+  await AppDataSource.query(`
+    UPDATE site_settings
+    SET value = REPLACE(value, 'chamanoespeto', 'janocaminho')
+    WHERE value ILIKE '%chamanoespeto%';
+  `);
 }

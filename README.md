@@ -192,7 +192,7 @@ Verificacao rapida:
 - Ao subir a API, procure o log `SSM env loaded` (mostra o nome do parametro e a quantidade de chaves).
 {
   "JWT_SECRET": "secret",
-  "APP_BASE_URL": "https://chamanoespeto.com.br",
+  "APP_BASE_URL": "https://www.janocaminho.com.br",
   "PGHOST": "db.prod",
   "PGPORT": "5432",
   "PGUSER": "postgres",
@@ -206,7 +206,7 @@ Verificacao rapida:
   "SMTP_USER": "usuario",
   "SMTP_PASS": "senha",
   "SMTP_SECURE": "false",
-  "EMAIL_FROM": "Chama no Espeto <contato@chamanoespeto.com.br>"
+  "EMAIL_FROM": "Jano Caminho <contato@janocaminho.com.br>"
 }
 ```
 
@@ -646,10 +646,10 @@ sudo certbot --nginx -d chamanoespeto.com.br -d www.chamanoespeto.com.br
 ```
 SMTP_HOST=smtp.zoho.com
 SMTP_PORT=587
-SMTP_USER=contato@chamanoespeto.com.br
+SMTP_USER=contato@janocaminho.com.br
 SMTP_PASS=<senha-ou-app-password>
 SMTP_SECURE=false
-EMAIL_FROM=Chama no Espeto <contato@chamanoespeto.com.br>
+EMAIL_FROM=Jano Caminho <contato@janocaminho.com.br>
 ```
 
 Se configurar assinatura secreta no painel, defina `MP_WEBHOOK_SECRET` na API.
