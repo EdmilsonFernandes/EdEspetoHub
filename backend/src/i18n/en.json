@@ -34,6 +34,7 @@
   "SUB-004": "Plan unavailable for subscription.",
   "SUB-005": "Subscription suspended. Contact support.",
   "SUB-006": "Payment attempts limit reached. Try again later.",
+  "SUB-007": "There is already a pending payment for this store. Wait for it to expire before trying again.",
   "PAY-001": "Payment not found.",
   "PAY-002": "Payment failed.",
   "PAY-003": "Mercado Pago not configured.",

@@ -189,20 +189,23 @@ export class SubscriptionService {
 
     const existingPending = await this.paymentRepository.findLatestPendingByStoreId(storeId);
     if (existingPending) {
-      const sameMethod = existingPending.method === paymentMethod;
-      const samePlan = existingPending.subscription?.plan?.id === resolvedPlan.id;
       const stillValid = await this.isPaymentStillValid(existingPending);
-      if (sameMethod && samePlan && stillValid) {
-        return existingPending;
+      if (stillValid) {
+        const expiresAt = existingPending.expiresAt ? new Date(existingPending.expiresAt) : null;
+        const retryAfterSeconds = expiresAt
+          ? Math.max(1, Math.ceil((expiresAt.getTime() - now.getTime()) / 1000))
+          : 1800;
+        throw new AppError('SUB-007', 429, {
+          paymentId: existingPending.id,
+          paymentUrl: `${env.appUrl}/payment/${existingPending.id}`,
+          paymentLink: existingPending.paymentLink || null,
+          pendingExpiresAt: expiresAt?.toISOString() || null,
+          retryAfterSeconds,
+          retryAfterMinutes: Math.ceil(retryAfterSeconds / 60),
+        });
       }
       existingPending.status = 'FAILED';
       await this.paymentRepository.save(existingPending);
-    }
-
-    const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const recentCount = await this.paymentRepository.countRecentByStoreId(storeId, since);
-    if (recentCount >= 3) {
-      throw new AppError('SUB-006', 429);
     }
 
     return AppDataSource.transaction(async (manager) => {

@@ -106,7 +106,20 @@ export function AdminRenewal() {
         navigate(`/payment/${payment.id}`);
       }
     } catch (err) {
-      setError(err.message || 'Não foi possível gerar a renovação agora.');
+      const waitMinutes = Number(err?.details?.retryAfterMinutes || 0);
+      const pendingUrl = err?.details?.paymentUrl;
+      if (err?.code === 'SUB-007') {
+        setError(
+          waitMinutes > 0
+            ? `Já existe um pagamento pendente. Aguarde cerca de ${waitMinutes} minuto(s) para tentar novamente.`
+            : 'Já existe um pagamento pendente para esta loja. Aguarde expirar para tentar novamente.'
+        );
+        if (pendingUrl) {
+          openedPaymentLinkRef.current = pendingUrl;
+        }
+      } else {
+        setError(err.message || 'Não foi possível gerar a renovação agora.');
+      }
     } finally {
       setIsSubmitting(false);
     }

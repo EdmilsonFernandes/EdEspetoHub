@@ -34,6 +34,7 @@
   "SUB-004": "Plano indisponível para assinatura.",
   "SUB-005": "Assinatura suspensa. Entre em contato com o suporte.",
   "SUB-006": "Limite de tentativas de pagamento atingido. Tente novamente mais tarde.",
+  "SUB-007": "Já existe um pagamento pendente para esta loja. Aguarde expirar para tentar novamente.",
   "PAY-001": "Pagamento não encontrado.",
   "PAY-002": "Pagamento falhou.",
   "PAY-003": "Mercado Pago não configurado.",
