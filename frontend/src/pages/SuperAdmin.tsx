@@ -20,6 +20,7 @@ import {
   IdentificationCard,
   Camera,
   Car,
+  ShieldCheck,
 } from '@phosphor-icons/react';
 import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
 import { superAdminService } from '../services/superAdminService';
