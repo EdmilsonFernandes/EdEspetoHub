@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { SignOut, Globe, Sparkle, ShieldCheck } from '@phosphor-icons/react';
+import { SignOut, Globe, Sparkle, ShieldCheck, Storefront } from '@phosphor-icons/react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
