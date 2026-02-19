@@ -182,7 +182,6 @@ export function CreateStore() {
   const [cityOptions, setCityOptions] = useState<string[]>([]);
   const [isLoadingCities, setIsLoadingCities] = useState(false);
   const [cityLookupError, setCityLookupError] = useState('');
-  const [useManualCityInput, setUseManualCityInput] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({
     email: '',
     document: '',
@@ -400,7 +399,6 @@ export function CreateStore() {
       console.error('Falha ao carregar cidades por UF', error);
       setCityOptions([]);
       setCityLookupError('Não foi possível carregar as cidades. Você pode preencher manualmente.');
-      setUseManualCityInput(true);
     } finally {
       setIsLoadingCities(false);
     }
@@ -446,18 +444,9 @@ export function CreateStore() {
       setCityOptions([]);
       return;
     }
-    setUseManualCityInput(false);
     setCityLookupError('');
     loadCitiesByState(uf);
   }, [registerForm.state]);
-
-  useEffect(() => {
-    if (!registerForm.city || cityOptions.length === 0) return;
-    const exists = cityOptions.includes(registerForm.city);
-    if (!exists) {
-      setUseManualCityInput(true);
-    }
-  }, [registerForm.city, cityOptions]);
 
   const billingKey = isAnnual ? 'yearly' : 'monthly';
   const billing = BILLING_OPTIONS[billingKey];
@@ -933,43 +922,23 @@ export function CreateStore() {
                       </div>
                       <div className="space-y-2">
                         <label className="text-sm font-semibold text-gray-700">Cidade</label>
-                        {useManualCityInput || !registerForm.state ? (
-                          <input
-                            required
-                            value={registerForm.city}
-                            onChange={(e) => setRegisterForm((prev) => ({ ...prev, city: e.target.value }))}
-                            disabled={isCepLoading}
-                            className="ds-input ds-focus-ring disabled:bg-gray-100 disabled:cursor-not-allowed"
-                            placeholder="Sua cidade"
-                          />
-                        ) : (
-                          <select
-                            required
-                            value={registerForm.city}
-                            onChange={(e) => setRegisterForm((prev) => ({ ...prev, city: e.target.value }))}
-                            disabled={isCepLoading || isLoadingCities}
-                            className="ds-select ds-focus-ring disabled:bg-gray-100 disabled:cursor-not-allowed"
-                          >
-                            <option value="">
-                              {isLoadingCities ? 'Carregando cidades...' : 'Selecione a cidade'}
-                            </option>
+                        <input
+                          required
+                          list={registerForm.state ? `cities-${registerForm.state}` : undefined}
+                          value={registerForm.city}
+                          onChange={(e) => setRegisterForm((prev) => ({ ...prev, city: e.target.value }))}
+                          disabled={isCepLoading}
+                          className="ds-input ds-focus-ring disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          placeholder={isLoadingCities ? 'Carregando cidades...' : 'Digite ou selecione a cidade'}
+                        />
+                        {registerForm.state && cityOptions.length > 0 && (
+                          <datalist id={`cities-${registerForm.state}`}>
                             {cityOptions.map((city) => (
-                              <option key={city} value={city}>
-                                {city}
-                              </option>
+                              <option key={city} value={city} />
                             ))}
-                          </select>
+                          </datalist>
                         )}
                         {cityLookupError && <p className="text-xs text-amber-700">{cityLookupError}</p>}
-                        {registerForm.state && (
-                          <button
-                            type="button"
-                            onClick={() => setUseManualCityInput((prev) => !prev)}
-                            className="text-xs font-semibold text-brand-primary hover:underline"
-                          >
-                            {useManualCityInput ? 'Usar lista de cidades' : 'Não encontrou? Digitar manualmente'}
-                          </button>
-                        )}
                       </div>
                     </div>
 

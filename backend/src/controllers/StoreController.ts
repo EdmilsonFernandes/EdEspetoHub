@@ -162,6 +162,7 @@ export class StoreController {
               ? {
                   logoUrl: store.settings.logoUrl || null,
                   description: store.settings.description || null,
+                  address: store.settings.address || null,
                   primaryColor: store.settings.primaryColor || null,
                   secondaryColor: store.settings.secondaryColor || null,
                   segment: store.settings.segment || 'outros',

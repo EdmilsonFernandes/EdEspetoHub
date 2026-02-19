@@ -17,6 +17,9 @@ type PortfolioStore = {
     logoUrl?: string | null;
     description?: string | null;
     segment?: string | null;
+    address?: string | null;
+    city?: string | null;
+    state?: string | null;
   } | null;
 };
 
@@ -77,6 +80,22 @@ const caseResult = (store: PortfolioStore) => {
   return 'Operação digital publicada com experiência mobile profissional e base pronta para escalar vendas.';
 };
 
+const parseCityStateFromAddress = (address?: string | null) => {
+  const raw = String(address || '').trim();
+  if (!raw) return { city: '', state: '' };
+  const byPipe = raw
+    .split('|')
+    .map((part) => part.trim())
+    .filter(Boolean);
+  const target = byPipe.length >= 3 ? byPipe[2] : raw;
+  const matched = target.match(/(.+?)\s*[-/]\s*([A-Za-z]{2})\b/);
+  if (!matched) return { city: '', state: '' };
+  return {
+    city: String(matched[1] || '').trim(),
+    state: String(matched[2] || '').trim().toUpperCase(),
+  };
+};
+
 export function PortfolioPage() {
   const navigate = useNavigate();
   const [stores, setStores] = useState<PortfolioStore[]>([]);
@@ -120,8 +139,9 @@ export function PortfolioPage() {
       const logo = resolveAssetUrl(store?.settings?.logoUrl || undefined) || '/marketing/dashboard.png';
       const rawCity = (store as any)?.city || (store as any)?.addressCity || (store as any)?.settings?.city || '';
       const rawState = (store as any)?.state || (store as any)?.addressState || (store as any)?.settings?.state || '';
-      const city = String(rawCity || '').trim();
-      const state = String(rawState || '').trim().toUpperCase();
+      const fallbackLocation = parseCityStateFromAddress((store as any)?.settings?.address || '');
+      const city = String(rawCity || fallbackLocation.city || '').trim();
+      const state = String(rawState || fallbackLocation.state || '').trim().toUpperCase();
       return {
         id: String(store.id || store.slug || store.name || `store-${index}`),
         name: store.name || 'Loja ativa',

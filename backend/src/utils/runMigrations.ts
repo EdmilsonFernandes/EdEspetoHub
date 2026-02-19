@@ -72,6 +72,20 @@ export async function runMigrations() {
       AND TRIM(address) <> '';
   `);
   await AppDataSource.query(`
+    UPDATE store_settings
+    SET state = UPPER(TRIM(split_part(split_part(address, '|', 3), '-', 2)))
+    WHERE (state IS NULL OR TRIM(state) = '')
+      AND address LIKE '%|%'
+      AND split_part(address, '|', 3) LIKE '%-%';
+  `);
+  await AppDataSource.query(`
+    UPDATE store_settings
+    SET city = TRIM(split_part(split_part(address, '|', 3), '-', 1))
+    WHERE (city IS NULL OR TRIM(city) = '')
+      AND address LIKE '%|%'
+      AND split_part(address, '|', 3) LIKE '%-%';
+  `);
+  await AppDataSource.query(`
     ALTER TABLE IF EXISTS store_settings
     ADD COLUMN IF NOT EXISTS pix_key TEXT;
   `);

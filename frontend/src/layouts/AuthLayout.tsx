@@ -22,9 +22,6 @@ export function AuthLayout({ children }: AuthLayoutProps) {
 
           <div className="relative z-10 flex flex-col justify-between h-full w-full">
             <div className="space-y-5">
-              <div className="h-14 w-32 sm:h-16 sm:w-40 rounded-2xl bg-slate-900/55 border border-white/15 p-2 shadow-[0_18px_34px_-20px_rgba(47,157,247,0.85)]">
-                <img src="/janocaminho.jpg" alt="Jano Caminho" className="h-full w-full object-contain" />
-              </div>
               <p className="text-[11px] uppercase tracking-[0.35em] text-sky-200 font-semibold">Plataforma SaaS</p>
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black leading-tight">Gestão de pedidos e entregas para operações reais</h1>
               <p className="text-xs sm:text-sm text-slate-200/95 max-w-md">

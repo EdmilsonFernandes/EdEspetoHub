@@ -944,7 +944,6 @@ export function SuperAdmin() {
             <div className="text-center">
               <h2 className="text-2xl sm:text-3xl font-black text-gray-800 mb-1">Super Admin</h2>
               <p className="text-sm text-gray-500">Acesso da plataforma</p>
-              <p className="text-sm text-gray-500">Entre com suas credenciais de super administrador.</p>
             </div>
 
             {sessionExpired && (
@@ -962,7 +961,7 @@ export function SuperAdmin() {
                   value={loginForm.email}
                   onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
                   className="ds-input ds-focus-ring"
-                  placeholder="Digite seu usuário"
+                  placeholder="Usuário"
                 />
               </div>
               <div className="space-y-2">
@@ -973,7 +972,7 @@ export function SuperAdmin() {
                     value={loginForm.password}
                     onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
                     className="ds-input ds-focus-ring pr-10"
-                    placeholder="Sua senha de acesso"
+                    placeholder="Senha"
                   />
                   <button
                     type="button"

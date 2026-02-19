@@ -134,9 +134,6 @@ export function MotoboyLogin() {
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(47,157,247,0.32),_transparent_56%),radial-gradient(circle_at_bottom,_rgba(95,211,90,0.2),_transparent_58%)]" />
                 <div className="relative z-10 h-full p-7 text-white flex flex-col justify-between">
                   <div className="space-y-5">
-                    <div className="h-14 w-36 rounded-2xl bg-slate-900/60 border border-white/20 p-2 shadow-[0_16px_34px_-22px_rgba(47,157,247,0.85)]">
-                      <img src="/janocaminho.jpg" alt="Jano Caminho" className="h-full w-full object-contain" />
-                    </div>
                     <p className="text-[11px] uppercase tracking-[0.28em] text-sky-200 font-semibold">Área do entregador</p>
                     <h2 className="text-[2rem] font-black leading-[1.1]">
                       Operação de entregas rápida, clara e profissional
@@ -251,7 +248,7 @@ export function MotoboyLogin() {
                     <span className="text-xs font-extrabold text-slate-700">Email</span>
                     <input
                       type="email"
-                      placeholder="seuemail@dominio.com"
+                      placeholder="E-mail"
                       value={form.email}
                       onChange={(e) => setForm({ ...form, email: e.target.value })}
                       className="ds-input"
@@ -263,7 +260,7 @@ export function MotoboyLogin() {
                     <div className="relative">
                       <input
                         type={showPassword ? 'text' : 'password'}
-                        placeholder="Digite sua senha"
+                        placeholder="Senha"
                         value={form.password}
                         onChange={(e) => setForm({ ...form, password: e.target.value })}
                         className="ds-input pr-11"

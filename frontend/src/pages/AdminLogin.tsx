@@ -130,7 +130,6 @@ export function AdminLogin() {
           </div>
           <h2 className="mt-4 text-2xl sm:text-3xl font-black text-gray-900 mb-1 tracking-tight">Painel da Loja</h2>
           <p className="text-sm text-gray-500">Acesso do administrador</p>
-          <p className="text-sm text-gray-500">Entre com slug ou e-mail.</p>
         </div>
 
         {loginError && (
@@ -197,11 +196,10 @@ export function AdminLogin() {
                 value={loginForm.identifier}
                 onChange={e => setLoginForm(prev => ({ ...prev, identifier: e.target.value }))}
                 className="ds-input ds-focus-ring pl-10"
-                placeholder="Ex: edsertaneja ou dono@loja.com"
+                placeholder="Slug ou e-mail"
                 autoCapitalize="none"
               />
             </div>
-            <p className="text-xs text-gray-500">Use o mesmo login do cadastro.</p>
           </div>
           <div className="space-y-2">
             <label className="text-sm font-semibold text-gray-700">Senha</label>
