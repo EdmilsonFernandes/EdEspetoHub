@@ -462,7 +462,7 @@ export const MenuView = ({
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                className="w-full rounded-full border border-slate-200 bg-white py-2 pl-9 pr-4 text-sm focus:ring-2 focus:ring-brand-primary focus:border-brand-primary"
+                className="ds-input rounded-full py-2 pl-9 pr-4 text-sm"
                 placeholder="Buscar no cardápio (ex: costela)"
               />
             </div>
@@ -472,7 +472,7 @@ export const MenuView = ({
           <div
             className={`sticky ${showHeader ? "top-16 sm:top-[88px]" : "top-3"} z-40 -mx-4 px-4 pb-2`}
           >
-            <div className="rounded-2xl premium-card-glass px-3 py-2">
+            <div className="rounded-2xl premium-card-glass px-3 py-2 ds-tabs">
               <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
                 {filteredGrouped.map((category) => (
                   <button
@@ -710,7 +710,7 @@ export const MenuView = ({
                         onUpdateCart(item, 1);
                       }}
                       title="Adicionar"
-                      className="relative h-10 min-w-[102px] px-3 rounded-xl bg-[linear-gradient(120deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_58%,#10b981))] text-white flex items-center justify-center gap-1 hover:opacity-95 shadow-[0_16px_34px_-22px_rgba(15,23,42,0.6)] active:scale-95 transition text-xs font-extrabold"
+                      className="relative h-10 min-w-[102px] px-3 rounded-xl ds-btn ds-btn-primary text-white flex items-center justify-center gap-1 shadow-[0_16px_34px_-22px_rgba(15,23,42,0.6)] text-xs font-extrabold"
                     >
                       <Plus size={14} weight="duotone" />
                       Adicionar

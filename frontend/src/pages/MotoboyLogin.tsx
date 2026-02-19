@@ -149,7 +149,7 @@ export function MotoboyLogin() {
 
           <div className="space-y-5">
             {alreadyLoggedIn ? (
-              <div className="premium-card-glass p-5 sm:p-6 space-y-4 motoboy-fade-up" style={{ animationDelay: '20ms' }}>
+              <div className="ds-card-elevated p-5 sm:p-6 space-y-4 motoboy-fade-up" style={{ animationDelay: '20ms' }}>
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Sessão ativa</p>
@@ -184,8 +184,8 @@ export function MotoboyLogin() {
                 </div>
               </div>
             ) : (
-              <div className="premium-card-glass p-5 sm:p-6 space-y-4 motoboy-fade-up" style={{ animationDelay: '40ms' }}>
-                <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-3 flex items-center gap-3">
+              <div className="ds-card-elevated p-5 sm:p-6 space-y-4 motoboy-fade-up" style={{ animationDelay: '40ms' }}>
+                <div className="ds-card p-3 flex items-center gap-3">
                   <div className="h-12 w-24 rounded-xl overflow-hidden bg-slate-900 border border-slate-200 shadow-sm shrink-0 p-1">
                     <img src="/janocaminho.jpg" alt="Jano Caminho" className="h-full w-full object-contain" />
                   </div>
@@ -210,13 +210,13 @@ export function MotoboyLogin() {
                 </div>
 
                 {error && (
-                  <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 font-semibold">
+                  <div className="ds-alert ds-alert-error">
                     {error}
                   </div>
                 )}
 
                 {verifyPrompt && (
-                  <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 space-y-3">
+                  <div className="ds-alert ds-alert-warning space-y-3">
                     <p className="font-semibold">Sua conta ainda não foi ativada.</p>
                     <p>
                       {verifyPrompt.emailMasked
@@ -228,14 +228,14 @@ export function MotoboyLogin() {
                         type="button"
                         onClick={handleResendVerification}
                         disabled={resendLoading || resendCooldown > 0 || !verifyPrompt.email}
-                        className="w-full rounded-xl bg-amber-600 text-white px-4 py-2 text-xs font-bold disabled:opacity-60"
+                        className="w-full ds-btn rounded-xl bg-amber-600 text-white px-4 py-2 text-xs font-bold disabled:opacity-60"
                       >
                         {resendLoading ? 'Reenviando...' : resendCooldown > 0 ? `Reenviar em ${resendCooldown}s` : 'Reenviar código de ativação'}
                       </button>
                       <button
                         type="button"
                         onClick={() => navigate('/verify-email', { state: { email: verifyPrompt.email } })}
-                        className="w-full rounded-xl border border-amber-300 bg-white px-4 py-2 text-xs font-bold text-amber-800"
+                        className="w-full ds-btn ds-btn-secondary px-4 py-2 text-xs font-bold text-amber-800"
                       >
                         Já tenho o código
                       </button>
@@ -251,7 +251,7 @@ export function MotoboyLogin() {
                       placeholder="voce@exemplo.com"
                       value={form.email}
                       onChange={(e) => setForm({ ...form, email: e.target.value })}
-                      className="w-full rounded-xl border border-slate-200 bg-white/70 px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand-primary focus:border-brand-primary"
+                      className="ds-input"
                     />
                   </label>
 
@@ -263,12 +263,12 @@ export function MotoboyLogin() {
                         placeholder="Sua senha"
                         value={form.password}
                         onChange={(e) => setForm({ ...form, password: e.target.value })}
-                        className="w-full rounded-xl border border-slate-200 bg-white/70 px-3 py-2.5 pr-11 text-sm outline-none focus:ring-2 focus:ring-brand-primary focus:border-brand-primary"
+                        className="ds-input pr-11"
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword((v) => !v)}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 h-9 w-9 rounded-xl border border-slate-200 bg-white/70 flex items-center justify-center text-slate-600 hover:text-slate-900"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 h-9 w-9 rounded-xl border border-slate-200 bg-white/70 flex items-center justify-center text-slate-600 hover:text-slate-900 ds-btn"
                         aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
                       >
                         {showPassword ? <EyeSlash size={18} weight="duotone" /> : <Eye size={18} weight="duotone" />}
@@ -279,7 +279,7 @@ export function MotoboyLogin() {
                   <button
                     type="submit"
                     disabled={!formValid || loading}
-                    className="btn-press w-full rounded-xl bg-[linear-gradient(120deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_60%,#f59e0b))] px-4 py-3 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(239,68,68,0.85)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="w-full ds-btn ds-btn-primary px-4 py-3 text-sm font-extrabold text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     <Lightning size={18} weight="duotone" />
                     {loading ? 'Entrando...' : 'Entrar'}
@@ -288,7 +288,7 @@ export function MotoboyLogin() {
                   <button
                     type="button"
                     onClick={() => navigate('/motoboy/register')}
-                    className="btn-press w-full rounded-xl border border-slate-200 bg-white/70 px-4 py-3 text-sm font-extrabold text-slate-800 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)]"
+                    className="w-full ds-btn ds-btn-secondary px-4 py-3 text-sm font-extrabold text-slate-800"
                   >
                     Criar conta de entregador
                   </button>
