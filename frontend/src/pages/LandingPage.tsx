@@ -226,9 +226,9 @@ export function LandingPage() {
           <h2 className="text-2xl sm:text-4xl font-black text-slate-900 mt-2">Painel administrativo em operação real</h2>
           <div className="mt-6 grid gap-4 md:grid-cols-3">
             {[
-              { title: 'Dashboard de gestão', image: '/marketing/dashboard.png' },
-              { title: 'Fila de produção', image: '/marketing/grill-queue.png' },
-              { title: 'Checkout e pedido', image: '/marketing/checkout.png' },
+              { title: 'Dashboard de gestão', image: '/marketing/dashboard-real.png' },
+              { title: 'Fila de pedidos', image: '/marketing/fila-real.png' },
+              { title: 'Painel de pedidos', image: '/marketing/pedidos-real.png' },
             ].map((item) => (
               <div key={item.title} className="rounded-3xl border border-slate-200 bg-slate-50 p-3">
                 <img src={item.image} alt={item.title} className="w-full h-52 rounded-2xl object-cover" />
