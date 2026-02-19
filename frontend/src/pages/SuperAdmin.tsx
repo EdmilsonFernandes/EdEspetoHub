@@ -170,6 +170,7 @@ const SECTION_META: Record<string, { title: string; description: string; tone: s
 
 export function SuperAdmin() {
   const { showToast } = useToast();
+  const platformLogo = '/janocaminho.jpg';
   const [token, setToken] = useState(() => localStorage.getItem(STORAGE_KEY) || '');
   const [superAdminUser, setSuperAdminUser] = useState(() => localStorage.getItem(STORAGE_USER_KEY) || '');
   const [overview, setOverview] = useState(null);
