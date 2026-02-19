@@ -39,18 +39,39 @@ type PortfolioCase = {
   technologies: string[];
 };
 
+const normalizeSegment = (segment?: string | null) =>
+  String(segment || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toLowerCase();
+
 const segmentLabel = (segment?: string | null) => {
-  const value = String(segment || '').toLowerCase();
+  const value = normalizeSegment(segment);
   const map: Record<string, string> = {
     restaurante: 'Restaurante',
+    restaurantes: 'Restaurante',
+    restaurant: 'Restaurante',
     hamburgueria: 'Hamburgueria',
+    hamburguerias: 'Hamburgueria',
+    hamburgeria: 'Hamburgueria',
     lanchonete: 'Lanchonete',
+    lanchonetes: 'Lanchonete',
     pizzaria: 'Pizzaria',
+    pizzarias: 'Pizzaria',
     adega: 'Adega',
+    adegas: 'Adega',
     mercado: 'Mercado',
+    mercados: 'Mercado',
     hortifruti: 'Hortifruti',
+    hortifrutis: 'Hortifruti',
     farmacia: 'Farmácia',
+    farmacias: 'Farmácia',
+    drogaria: 'Farmácia',
+    drogarias: 'Farmácia',
     confeitaria: 'Confeitaria',
+    confeitarias: 'Confeitaria',
+    outros: 'Comércio local',
   };
   return map[value] || 'Comércio local';
 };
