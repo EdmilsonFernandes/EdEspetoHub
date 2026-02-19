@@ -26,7 +26,7 @@
   --text-soft: #64748b;
   --radius-sm: 12px;
   --radius-md: 16px;
-  --radius-lg: 20px;
+  --radius-lg: 16px;
   --radius-xl: 1.5rem;
   --shadow-soft: 0 12px 30px -22px rgba(15, 23, 42, 0.4);
   --shadow-card: 0 24px 50px -34px rgba(15, 23, 42, 0.45);
@@ -518,7 +518,7 @@ body {
   }
 
   .ds-empty-state {
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-md);
     border: 1px dashed rgb(203 213 225);
     background: #f8fafc;
     color: #64748b;
@@ -707,14 +707,14 @@ body {
   }
 }
   .ds-card {
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-md);
     border: 1px solid rgb(226 232 240);
     background: #fff;
     box-shadow: var(--shadow-soft);
   }
 
   .ds-card-elevated {
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-md);
     border: 1px solid rgba(226, 232, 240, 0.9);
     background: #fff;
     box-shadow: var(--shadow-elevated);
@@ -753,7 +753,7 @@ body {
   .ds-input {
     width: 100%;
     border: 1px solid rgb(226 232 240);
-    border-radius: 14px;
+    border-radius: var(--radius-sm);
     background: rgba(255, 255, 255, 0.96);
     padding: 12px 14px;
     color: #0f172a;
@@ -769,14 +769,14 @@ body {
   .ds-select {
     width: 100%;
     border: 1px solid rgb(226 232 240);
-    border-radius: 14px;
+    border-radius: var(--radius-sm);
     background: rgba(255, 255, 255, 0.96);
     padding: 12px 14px;
     color: #0f172a;
   }
 
   .ds-btn {
-    border-radius: 14px;
+    border-radius: var(--radius-sm);
     font-weight: 800;
     transition: transform 150ms ease, filter 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
   }
@@ -864,7 +864,7 @@ body {
   }
 
   .ds-alert {
-    border-radius: 14px;
+    border-radius: var(--radius-sm);
     border: 1px solid rgb(226 232 240);
     padding: 12px 14px;
     font-size: 13px;
@@ -938,7 +938,7 @@ body {
 
   .ds-table-wrap {
     border: 1px solid rgb(226 232 240);
-    border-radius: 14px;
+    border-radius: var(--radius-sm);
     background: #fff;
     overflow: auto;
   }

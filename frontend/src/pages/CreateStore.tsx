@@ -525,7 +525,7 @@ export function CreateStore() {
     try {
       if (!termsAccepted || !lgpdAccepted) {
         setStoreError('');
-        setValidationMessage('Para continuar, aceite os termos de uso e a politica de privacidade.');
+        setValidationMessage('Para continuar, aceite os termos de uso e a política de privacidade.');
         setShowValidationModal(true);
         if (termsRef.current) {
           termsRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -917,7 +917,7 @@ export function CreateStore() {
                     required
                     value={registerForm.fullName}
                     onChange={(e) => setRegisterForm((prev) => ({ ...prev, fullName: e.target.value }))}
-                    className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
+                    className="ds-input ds-focus-ring"
                     placeholder="Seu nome completo"
                   />
                 </div>
@@ -937,7 +937,7 @@ export function CreateStore() {
                         }
                       }}
                       onBlur={() => updateFieldError('email', validateEmail(registerForm.email))}
-                      className={`w-full border rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors ${
+                      className={`ds-input ds-focus-ring ${
                         fieldErrors.email ? 'border-red-400' : 'border-gray-200'
                       }`}
                       placeholder="seu@email.com"
@@ -954,7 +954,7 @@ export function CreateStore() {
                       <select
                         value={storePhoneParts.ddd || ''}
                         onChange={(e) => handleCreateStorePhoneDddChange(e.target.value)}
-                        className="w-full min-w-0 border border-gray-200 rounded-xl p-3 text-sm font-semibold focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
+                        className="ds-select ds-focus-ring w-full min-w-0 text-sm font-semibold"
                       >
                         <option value="" disabled>
                           DDD
@@ -970,7 +970,7 @@ export function CreateStore() {
                         onChange={(e) => handleCreateStorePhoneLocalChange(e.target.value)}
                         placeholder={storePhoneParts.ddd ? '99999-9999' : 'Selecione o DDD'}
                         disabled={!storePhoneParts.ddd}
-                        className="w-full min-w-0 border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
+                        className="ds-input ds-focus-ring w-full min-w-0 disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
                       />
                     </div>
                   </div>
@@ -989,7 +989,7 @@ export function CreateStore() {
                             updateFieldError('document', validateDocument(registerForm.document, nextType));
                           }
                         }}
-                        className="min-w-0 border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                        className="ds-select ds-focus-ring min-w-0 text-sm"
                       >
                         <option value="CPF">CPF</option>
                         <option value="CNPJ">CNPJ</option>
@@ -1005,7 +1005,7 @@ export function CreateStore() {
                           }
                         }}
                         onBlur={() => updateFieldError('document', validateDocument(registerForm.document, registerForm.documentType))}
-                        className={`min-w-0 border rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors ${
+                        className={`ds-input ds-focus-ring min-w-0 ${
                           fieldErrors.document ? 'border-red-400' : 'border-gray-200'
                         }`}
                         placeholder={registerForm.documentType === 'CNPJ' ? '00.000.000/0000-00' : '000.000.000-00'}
@@ -1023,7 +1023,7 @@ export function CreateStore() {
                         type={showPassword ? 'text' : 'password'}
                         value={registerForm.password}
                         onChange={(e) => setRegisterForm((prev) => ({ ...prev, password: e.target.value }))}
-                        className="w-full border border-gray-200 rounded-xl p-3 pr-10 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
+                        className="ds-input ds-focus-ring w-full pr-10"
                         placeholder="Mínimo 6 caracteres"
                       />
                       <button
@@ -1222,7 +1222,7 @@ export function CreateStore() {
                   }
                 }}
                 onBlur={() => updateFieldError('storeName', validateStoreName(registerForm.storeName))}
-                className={`w-full border rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors ${
+                className={`ds-input ds-focus-ring ${
                   fieldErrors.storeName ? 'border-red-400' : 'border-gray-200'
                 }`}
                 placeholder="Ex.: Espetinho do João"
@@ -1254,7 +1254,7 @@ export function CreateStore() {
               <textarea
                 value={registerForm.storeDescription}
                 onChange={(e) => setRegisterForm((prev) => ({ ...prev, storeDescription: e.target.value }))}
-                className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors min-h-[110px]"
+                className="ds-input ds-focus-ring min-h-[110px]"
                 placeholder="Conte em poucas palavras o que torna sua loja especial."
                 maxLength={220}
               />
@@ -1269,7 +1269,7 @@ export function CreateStore() {
               <select
                 value={registerForm.segment}
                 onChange={(e) => handleStoreSegmentChange(e.target.value)}
-                className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
+                className="ds-select ds-focus-ring"
               >
                 {STORE_SEGMENTS.map((segment) => (
                   <option key={segment.value} value={segment.value}>
@@ -1298,7 +1298,7 @@ export function CreateStore() {
               <input
                 value={registerForm.pixKey}
                 onChange={(e) => setRegisterForm((prev) => ({ ...prev, pixKey: e.target.value }))}
-                className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
+                className="ds-input ds-focus-ring"
                 placeholder="Ex: 012999999999 ou email@pix.com"
               />
               <p className="text-xs text-gray-500">Telefone com DDD pode começar com 0 que ajustamos para +55.</p>
@@ -1390,7 +1390,7 @@ export function CreateStore() {
                           <select
                             value={link.type}
                             onChange={(e) => updateSocialLink(index, 'type', e.target.value)}
-                            className="border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                            className="ds-select ds-focus-ring min-w-[132px] text-sm"
                           >
                             <option value="instagram">Instagram</option>
                             <option value="facebook">Facebook</option>
@@ -1399,7 +1399,7 @@ export function CreateStore() {
                           <input
                             value={link.value}
                             onChange={(e) => updateSocialLink(index, 'value', e.target.value)}
-                            className="flex-1 border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
+                            className="ds-input ds-focus-ring min-w-0 flex-1"
                             placeholder="@usuário ou URL"
                           />
                           {registerForm.socialLinks.length > 1 && (
@@ -1632,9 +1632,9 @@ export function CreateStore() {
                   <button
                     type="button"
                     onClick={() => setShowTerms(true)}
-                    className="text-red-500 font-semibold hover:underline"
-                  >
-                    politica de privacidade
+                  className="text-red-500 font-semibold hover:underline"
+                >
+                    política de privacidade
                   </button>
                   .
                 </span>
@@ -1728,7 +1728,7 @@ export function CreateStore() {
                           onClick={() => handleCopyPix(paymentResult.payment.qrCodeText)}
                           className="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:opacity-90"
                         >
-                          {pixCopied ? 'Copiado!' : 'Copiar codigo'}
+                          {pixCopied ? 'Copiado!' : 'Copiar código'}
                         </button>
                       </div>
                     )}
@@ -1773,7 +1773,7 @@ export function CreateStore() {
                 </div>
                 <div>
                   <p className="text-lg font-bold text-slate-900">Termos de uso</p>
-                  <p className="text-xs text-slate-500">LGPD e politica de privacidade</p>
+                  <p className="text-xs text-slate-500">LGPD e política de privacidade</p>
                 </div>
               </div>
               <button
@@ -1803,20 +1803,20 @@ export function CreateStore() {
                 <h3 className="text-base font-semibold text-slate-900">3. Pagamentos e acesso</h3>
                 <p>
                   A ativação completa depende da confirmação do pagamento do plano escolhido. Boletos podem
-                  levar ate 3 dias uteis para compensar.
+                  levar até 3 dias úteis para compensar.
                 </p>
               </section>
               <section className="space-y-2">
                 <h3 className="text-base font-semibold text-slate-900">4. LGPD e privacidade</h3>
                 <p>
                   Os dados pessoais são tratados para cadastro, autenticação, cobrança e suporte, conforme a
-                  LGPD. O usuário pode solicitar atualização ou exclusão quando aplicavel.
+                  LGPD. O usuário pode solicitar atualização ou exclusão quando aplicável.
                 </p>
               </section>
               <section className="space-y-2">
                 <h3 className="text-base font-semibold text-slate-900">5. Uso adequado</h3>
                 <p>
-                  E proibido utilizar a plataforma para fins ilegais ou fraudulentos. Contas em desacordo
+                  É proibido utilizar a plataforma para fins ilegais ou fraudulentos. Contas em desacordo
                   podem ser suspensas.
                 </p>
               </section>
@@ -1846,7 +1846,7 @@ export function CreateStore() {
               </div>
             </div>
             <div className="px-5 py-4 text-sm text-slate-600">
-              {validationMessage || 'Confira os campos obrigatorios antes de continuar.'}
+              {validationMessage || 'Confira os campos obrigatórios antes de continuar.'}
             </div>
             <div className="px-5 py-4 border-t border-slate-200 bg-slate-50 flex justify-end">
               <button

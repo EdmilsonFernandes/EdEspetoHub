@@ -131,21 +131,21 @@ export const GrillQueue = () => {
     return (
       <div
         className={[
-          'grid grid-cols-3 gap-2 text-[10px] sm:text-[11px] font-semibold w-full sm:w-auto',
+          'grid w-full min-w-0 grid-cols-1 gap-2 text-[10px] sm:grid-cols-3 sm:text-[11px] font-semibold',
           alignRight ? 'sm:ml-auto' : '',
         ].join(' ')}
       >
-        <span className="flex flex-col rounded-xl border border-slate-200 bg-white/70 px-2.5 py-1.5">
+        <span className="flex min-w-0 flex-col rounded-xl border border-slate-200 bg-white/70 px-2.5 py-1.5">
           <span className="text-slate-500 font-semibold text-[10px]">Itens</span>
-          <span>{formatCurrency(itemsTotal)}</span>
+          <span className="truncate">{formatCurrency(itemsTotal)}</span>
         </span>
-        <span className="flex flex-col rounded-xl border border-slate-200 bg-slate-100 px-2.5 py-1.5">
+        <span className="flex min-w-0 flex-col rounded-xl border border-slate-200 bg-slate-100 px-2.5 py-1.5">
           <span className="text-slate-500 font-semibold text-[10px]">Frete</span>
-          <span>{fee > 0 ? formatCurrency(fee) : '—'}</span>
+          <span className="truncate">{fee > 0 ? formatCurrency(fee) : '—'}</span>
         </span>
-        <span className="flex flex-col rounded-xl border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-emerald-700">
+        <span className="flex min-w-0 flex-col rounded-xl border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-emerald-700">
           <span className="text-emerald-600 font-semibold text-[10px]">Total</span>
-          <span>{formatCurrency(total)}</span>
+          <span className="truncate">{formatCurrency(total)}</span>
         </span>
       </div>
     );
@@ -1476,7 +1476,7 @@ export const GrillQueue = () => {
             {pagedCompleted.map((order) => (
               <div
                 key={order.id}
-                className="relative w-full max-w-full rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-slate-100/70 p-4 shadow-sm overflow-hidden"
+                className="relative w-full max-w-full rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-slate-100/70 p-4 shadow-sm overflow-visible"
               >
                 <div className="absolute -top-10 -right-10 w-20 h-20 rounded-full bg-emerald-400/10 blur-2xl" />
                 <div className="absolute -bottom-10 -left-10 w-20 h-20 rounded-full bg-brand-primary/10 blur-2xl" />

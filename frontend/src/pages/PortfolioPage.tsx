@@ -399,7 +399,7 @@ export function PortfolioPage() {
             <div className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                 {visibleCases.map((item) => (
-                <article key={item.id} className="ds-card overflow-hidden h-full flex flex-col">
+                <article key={item.id} className="ds-card overflow-hidden h-full flex flex-col transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_24px_48px_-30px_rgba(15,23,42,0.45)]">
                   <div className="aspect-[16/8] bg-slate-100">
                     <img src={item.screenshot} alt={`Screenshot - ${item.name}`} className="w-full h-full object-cover" />
                   </div>

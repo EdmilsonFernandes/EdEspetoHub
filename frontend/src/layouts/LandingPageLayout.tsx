@@ -197,7 +197,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
       {/* Footer */}
       <footer className="bg-gray-900 dark:bg-black text-gray-300 dark:text-gray-400 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-3 mb-4">
                 <span className="text-xl font-black text-white">Jano Caminho</span>
@@ -227,9 +227,24 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                 contato@janocaminho.com.br
               </a>
             </div>
+            <div>
+              <h3 className="font-bold text-white mb-3">Desenvolvimento</h3>
+              <div className="space-y-2 text-sm text-gray-400">
+                <p>
+                  <span className="text-white font-semibold">Edmilson Lopes</span>
+                  <br />
+                  Arquiteto principal e liderança técnica
+                </p>
+                <p>
+                  Equipe Jano Caminho
+                  <br />
+                  Frontend, backend, produto e operação
+                </p>
+              </div>
+            </div>
           </div>
           <div className="border-t border-gray-800 pt-8 text-center text-sm text-gray-500 space-y-1">
-            <p>Edmilson Tecnologia da Informacao • CNPJ 44.771.427/0001-69</p>
+            <p>Edmilson Tecnologia da Informação • CNPJ 44.771.427/0001-69</p>
             © {new Date().getFullYear()} Jano Caminho. Todos os direitos reservados.
           </div>
         </div>
