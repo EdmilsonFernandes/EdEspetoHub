@@ -120,7 +120,7 @@ export function PortfolioPage() {
       badge: 'Principal',
       years: 15,
       profileUrl: 'https://www.linkedin.com/in/edmilson-santos-6805a515/',
-      profileImage: '/uploads/perfil/edmilson.jpeg',
+      profileImage: '/team/edmilson.png',
       color: 'from-red-500 to-amber-500',
     },
     {
