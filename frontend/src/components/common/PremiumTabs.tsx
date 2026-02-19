@@ -60,6 +60,7 @@ export function PremiumTabs({
                 isActive
                   ? 'border-transparent bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 text-white shadow-[0_16px_30px_-22px_rgba(15,23,42,0.75)]'
                   : 'border-slate-200 bg-white text-slate-700 hover:-translate-y-0.5 hover:shadow-md',
+                item.disabled ? 'opacity-55 cursor-not-allowed hover:translate-y-0 hover:shadow-none' : '',
                 isActive ? activeClassName : inactiveClassName,
                 getButtonClassName ? getButtonClassName(item, isActive) : '',
                 buttonClassName,

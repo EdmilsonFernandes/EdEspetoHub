@@ -731,19 +731,19 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
   const mobileMoreActions = [
     { id: 'pagamentos', label: 'Pagamentos', hint: 'Assinatura e histórico', icon: CreditCard },
-    { id: 'motoboys', label: 'Entregadores', hint: 'Motoboys e solicitações', icon: Scooter },
+    { id: 'motoboys', label: 'Entregadores', hint: canUseMotoboys ? 'Motoboys e solicitações' : 'Disponível no plano Pro', icon: Scooter, disabled: !canUseMotoboys },
     { id: 'config', label: 'Configurações', hint: 'Identidade, Pix e horários', icon: Gear },
     { id: 'cardapio', label: 'Abrir cardápio', hint: 'Ver como o cliente vê', icon: BookOpen },
-  ].filter((item) => (item.id === 'motoboys' ? canUseMotoboys : true));
+  ];
   const desktopTabItems = [
     { id: 'resumo', label: 'Resumo', icon: ChartBar },
     { id: 'pedidos', label: 'Pedidos', icon: ShoppingCart },
     { id: 'produtos', label: 'Produtos', icon: Package },
     { id: 'pagamentos', label: 'Pagamentos', icon: CreditCard },
-    { id: 'motoboys', label: 'Entregadores', icon: Scooter },
+    { id: 'motoboys', label: 'Entregadores', icon: Scooter, disabled: !canUseMotoboys },
     { id: 'config', label: 'Configurações', icon: Gear },
     { id: 'fila', label: 'Fila', icon: ChefHat },
-  ].filter((item) => (item.id === 'motoboys' ? canUseMotoboys : true));
+  ];
 
   useEffect(() => {
     if (!canUseMotoboys && activeTab === 'motoboys') {
@@ -1165,9 +1165,15 @@ export function AdminDashboard({ session: sessionProp }: Props) {
               ...desktopTabItems.map((item) => ({
                 id: item.id,
                 label: item.label,
+                title: item.disabled ? 'Disponível no plano Pro' : undefined,
+                disabled: item.disabled,
                 icon: React.createElement(item.icon, { size: 16, weight: 'duotone' }),
                 badge:
-                  item.id === 'motoboys' && pendingMotoboyRequests > 0 ? (
+                  item.id === 'motoboys' && item.disabled ? (
+                    <span className="absolute -top-2 -right-2 rounded-full bg-violet-600 text-white text-[9px] font-semibold px-1.5 py-0.5">
+                      Pro
+                    </span>
+                  ) : item.id === 'motoboys' && pendingMotoboyRequests > 0 ? (
                     <span className="absolute -top-2 -right-2 rounded-full bg-amber-500 text-white text-[9px] font-semibold px-1.5 py-0.5">
                       {pendingMotoboyRequests}
                     </span>
@@ -1183,6 +1189,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
               }
               if (id === 'fila') {
                 navigate('/admin/queue');
+                return;
+              }
+              if (id === 'motoboys' && !canUseMotoboys) {
+                showToast('Recurso disponível no plano Pro.', 'info');
                 return;
               }
               setActiveTab(id as typeof activeTab);
@@ -1209,23 +1219,33 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                     key={item.id}
                     type="button"
                     onClick={() => {
+                      if (item.id === 'motoboys' && item.disabled) {
+                        showToast('Recurso disponível no plano Pro.', 'info');
+                        return;
+                      }
                       if (item.id === 'fila') {
                         navigate('/admin/queue');
                         return;
                       }
                       setActiveTab(item.id as typeof activeTab);
                     }}
+                    title={item.disabled ? 'Disponível no plano Pro' : undefined}
                     className={`ds-admin-sidebar-item ds-focus-ring flex items-center justify-between gap-2 ${
                       isActive
                         ? 'ds-admin-sidebar-item-active'
                         : ''
-                    }`}
+                    } ${item.disabled ? 'opacity-55 cursor-not-allowed hover:translate-y-0 hover:shadow-none' : ''}`}
                   >
                     <span className="inline-flex items-center gap-2">
                       <Icon size={16} weight={isActive ? 'fill' : 'duotone'} />
                       {item.label}
                     </span>
-                    {item.id === 'motoboys' && pendingMotoboyRequests > 0 && (
+                    {item.id === 'motoboys' && item.disabled && (
+                      <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${isActive ? 'bg-white/20' : 'bg-violet-100 text-violet-700'}`}>
+                        Pro
+                      </span>
+                    )}
+                    {item.id === 'motoboys' && !item.disabled && pendingMotoboyRequests > 0 && (
                       <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${isActive ? 'bg-white/20' : 'bg-amber-100 text-amber-700'}`}>
                         {pendingMotoboyRequests}
                       </span>
@@ -1573,6 +1593,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                       key={action.id}
                       type="button"
                       onClick={() => {
+                        if (action.id === 'motoboys' && action.disabled) {
+                          showToast('Recurso disponível no plano Pro.', 'info');
+                          return;
+                        }
                         setMobileMoreOpen(false);
                         if (action.id === 'cardapio') {
                           if (storeSlug) navigate(`/${storeSlug}`);
@@ -1586,12 +1610,20 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                         setNavPulse(action.id);
                         window.setTimeout(() => setNavPulse(null), 260);
                       }}
-                      className="w-full text-left rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 transition px-4 py-3 flex items-center justify-between gap-3 active:scale-[0.99]"
+                      title={action.disabled ? 'Disponível no plano Pro' : undefined}
+                      className={`w-full text-left rounded-2xl border border-slate-200 bg-white transition px-4 py-3 flex items-center justify-between gap-3 active:scale-[0.99] ${
+                        action.disabled ? 'opacity-60 cursor-not-allowed' : 'hover:bg-slate-50'
+                      }`}
                     >
                       <div className="flex items-center gap-3 min-w-0">
                         <span className="relative h-10 w-10 rounded-2xl bg-slate-900 text-white grid place-items-center shadow-sm flex-shrink-0">
                           <Icon size={18} weight="duotone" />
-                          {isMotoboy && pendingMotoboyRequests > 0 && (
+                          {isMotoboy && action.disabled && (
+                            <span className="absolute -top-2 -right-2 h-5 min-w-5 px-1.5 rounded-full bg-violet-600 text-white text-[10px] font-bold grid place-items-center shadow-md">
+                              Pro
+                            </span>
+                          )}
+                          {isMotoboy && !action.disabled && pendingMotoboyRequests > 0 && (
                             <span className="absolute -top-2 -right-2 h-5 min-w-5 px-1.5 rounded-full bg-amber-500 text-white text-[10px] font-bold grid place-items-center shadow-md">
                               {pendingMotoboyRequests}
                             </span>
@@ -1602,7 +1634,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                           <span className="block text-xs text-slate-500 truncate">{action.hint}</span>
                         </span>
                       </div>
-                      <span className="text-xs font-semibold text-slate-400">Abrir</span>
+                      <span className="text-xs font-semibold text-slate-400">{action.disabled ? 'Pro' : 'Abrir'}</span>
                     </button>
                   );
                 })}
