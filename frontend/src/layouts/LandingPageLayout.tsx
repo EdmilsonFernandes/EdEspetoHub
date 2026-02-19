@@ -24,6 +24,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
   const navLinks = [
     { id: 'home', label: 'Início', onClick: () => navigate('/') },
     { id: 'portfolio', label: 'Portfólio', onClick: () => navigate('/portfolio') },
+    { id: 'architecture', label: 'Arquitetura', onClick: () => navigate('/arquitetura') },
   ];
 
   return (
@@ -143,6 +144,13 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
               </button>
               <button
                 type="button"
+                onClick={() => navigate('/arquitetura')}
+                className="inline-flex items-center gap-2 px-3 py-2 text-xs rounded-full border border-white/20 bg-white/10 text-slate-100 whitespace-nowrap"
+              >
+                Arquitetura
+              </button>
+              <button
+                type="button"
                 onClick={() => navigate('/admin')}
                 className="inline-flex items-center gap-2 px-3 py-2 text-xs rounded-full border border-white/20 bg-white/10 text-slate-100 whitespace-nowrap"
               >
@@ -212,6 +220,9 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                 </button>
                 <button onClick={goToDemoGuide} className="block hover:text-sky-400 transition-colors">
                   Ver Demo
+                </button>
+                <button onClick={() => navigate('/arquitetura')} className="block hover:text-sky-400 transition-colors">
+                  Arquitetura
                 </button>
                 <a href="/terms" className="block hover:text-sky-400 transition-colors">
                   Termos e Privacidade

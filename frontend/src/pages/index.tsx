@@ -26,3 +26,4 @@ export { MotoboyDone } from './MotoboyDone';
 export { MotoboyLogin } from './MotoboyLogin';
 export { MotoboyRegister } from './MotoboyRegister';
 export { MotoboyProfile } from './MotoboyProfile';
+export { ArchitecturePage } from './ArchitecturePage';
