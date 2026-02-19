@@ -44,7 +44,7 @@ export function DocPreviewModal({ open, title, src, onClose }: DocPreviewModalPr
             </div>
           ) : src ? (
             <div className="p-8 text-center text-sm text-slate-200">
-              Este arquivo nao tem visualizacao embutida. Use "Abrir em nova aba".
+              Este arquivo não tem visualização embutida. Use "Abrir em nova aba".
             </div>
           ) : (
             <div className="p-8 text-center text-sm text-slate-200">Sem prévia disponível.</div>

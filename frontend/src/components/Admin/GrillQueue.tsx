@@ -1328,7 +1328,7 @@ export const GrillQueue = () => {
                       }}
                       className="w-full px-4 py-2 rounded-lg border border-slate-200 text-slate-700 text-sm font-semibold hover:bg-slate-100 transition-all hover:-translate-y-0.5 active:scale-95"
                     >
-                      {pixCopied ? 'Copiado!' : 'Copiar codigo Pix'}
+                      {pixCopied ? 'Copiado!' : 'Copiar código Pix'}
                     </button>
                   </div>
                 ) : (

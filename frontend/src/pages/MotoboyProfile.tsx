@@ -16,15 +16,15 @@ import { FormSection } from '../components/common/FormSection';
 const faceReasonLabel = (reason?: string | null) => {
   const code = String(reason || '').trim().toLowerCase();
   if (!code) return null;
-  if (code === 'no_face_selfie') return 'Nao foi possivel detectar seu rosto na selfie.';
+  if (code === 'no_face_selfie') return 'Não foi possível detectar seu rosto na selfie.';
   if (code === 'multi_face_selfie') return 'Detectamos mais de um rosto na selfie. Tire a foto sozinho.';
-  if (code === 'no_face_doc') return 'Nao foi possivel detectar o rosto na CNH. Aproxime o documento e evite reflexo.';
-  if (code === 'low_match') return 'A selfie nao conferiu com a foto da CNH.';
-  if (code === 'medium_match') return 'Conferencia parcial entre selfie e CNH. Envie uma foto mais nitida.';
-  if (code === 'timeout') return 'A validacao demorou demais. Tente reenviar.';
-  if (code === 'fetch failed' || code === 'fetch_failed') return 'Falha de conexao na validacao. Tente novamente.';
+  if (code === 'no_face_doc') return 'Não foi possível detectar o rosto na CNH. Aproxime o documento e evite reflexo.';
+  if (code === 'low_match') return 'A selfie não conferiu com a foto da CNH.';
+  if (code === 'medium_match') return 'Conferência parcial entre selfie e CNH. Envie uma foto mais nítida.';
+  if (code === 'timeout') return 'A validação demorou demais. Tente reenviar.';
+  if (code === 'fetch failed' || code === 'fetch_failed') return 'Falha de conexão na validação. Tente novamente.';
   if (code === 'rate_limited') return 'Limite de tentativas atingido. Aguarde para tentar de novo.';
-  return 'Nao foi possivel validar automaticamente. Reenvie uma foto mais nitida.';
+  return 'Não foi possível validar automaticamente. Reenvie uma foto mais nítida.';
 };
 
 export function MotoboyProfile() {
@@ -764,7 +764,7 @@ export function MotoboyProfile() {
     if (!file) return;
     const reader = new FileReader();
     reader.onerror = () => {
-      showToast('Nao foi possivel ler a foto do perfil.', 'error');
+      showToast('Não foi possível ler a foto do perfil.', 'error');
     };
     reader.onload = () => {
       const dataUrl = String(reader.result || '');
@@ -1854,13 +1854,13 @@ export function MotoboyProfile() {
                       <button
                         type="button"
                         onClick={async () => {
-                          if (!window.confirm(`Deseja desfazer o vinculo com ${store?.name || store?.slug || 'a loja'}?`)) return;
+                          if (!window.confirm(`Deseja desfazer o vínculo com ${store?.name || store?.slug || 'a loja'}?`)) return;
                           try {
                             await motoboyService.leaveStore(storeId);
                             showToast('Vinculo removido.', 'success');
                             await loadRequests();
                           } catch (error: any) {
-                            showToast(error?.message || 'Nao foi possivel desfazer o vinculo.', 'error');
+                            showToast(error?.message || 'Não foi possível desfazer o vínculo.', 'error');
                           }
                         }}
                         className="btn-press w-full sm:w-auto rounded-xl border border-emerald-200 bg-white px-3 py-2 text-[11px] font-extrabold text-emerald-800"

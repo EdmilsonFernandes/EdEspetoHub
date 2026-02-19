@@ -462,7 +462,7 @@ export function PaymentPage() {
                             onClick={() => handleCopyPix(payment.qrCodeText)}
                             className="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:opacity-90"
                           >
-                            {pixCopied ? 'Copiado!' : 'Copiar codigo'}
+                            {pixCopied ? 'Copiado!' : 'Copiar código'}
                           </button>
                         </div>
                       )}

@@ -180,6 +180,7 @@ export function CreateStore() {
   const [showValidationModal, setShowValidationModal] = useState(false);
   const [validationMessage, setValidationMessage] = useState('');
   const [logoPreviewUrl, setLogoPreviewUrl] = useState('');
+  const [bannerPreviewUrl, setBannerPreviewUrl] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [cepAutofilled, setCepAutofilled] = useState(false);
@@ -197,6 +198,7 @@ export function CreateStore() {
   const termsRef = useRef<HTMLDivElement | null>(null);
   const termsCheckboxRef = useRef<HTMLInputElement | null>(null);
   const logoObjectUrlRef = useRef('');
+  const bannerObjectUrlRef = useRef('');
   const personalSectionRef = useRef<HTMLDivElement | null>(null);
   const addressSectionRef = useRef<HTMLDivElement | null>(null);
   const storeSectionRef = useRef<HTMLDivElement | null>(null);
@@ -286,6 +288,23 @@ export function CreateStore() {
     }
   };
 
+  const handleBannerUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    try {
+      if (bannerObjectUrlRef.current) {
+        URL.revokeObjectURL(bannerObjectUrlRef.current);
+      }
+      const nextPreview = URL.createObjectURL(file);
+      bannerObjectUrlRef.current = nextPreview;
+      setBannerPreviewUrl(nextPreview);
+    } catch (error) {
+      console.error('Falha ao processar banner', error);
+      setBannerPreviewUrl('');
+      setStoreError('Não foi possível carregar o banner enviado agora.');
+    }
+  };
+
   const handleCopyStoreUrl = async () => {
     const value = `https://www.janocaminho.com.br/${storeSlugPreview || 'sua-loja'}`;
     try {
@@ -313,6 +332,9 @@ export function CreateStore() {
     return () => {
       if (logoObjectUrlRef.current) {
         URL.revokeObjectURL(logoObjectUrlRef.current);
+      }
+      if (bannerObjectUrlRef.current) {
+        URL.revokeObjectURL(bannerObjectUrlRef.current);
       }
     };
   }, []);
@@ -759,6 +781,20 @@ export function CreateStore() {
     scrollToStep(currentStep + 1);
   };
 
+  const previewDisplayName = registerForm.storeName.trim() || 'Sua Loja';
+  const previewSlug = storeSlugPreview || 'sua-loja';
+  const previewLogoSrc = logoPreviewUrl || registerForm.logoFile || '';
+  const previewLocation = [registerForm.city, registerForm.state].filter(Boolean).join(' • ') || 'Cidade • UF';
+  const previewBannerStyle = bannerPreviewUrl
+    ? {
+        backgroundImage: `url(${bannerPreviewUrl})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }
+    : {
+        backgroundImage: `linear-gradient(120deg, ${registerForm.primaryColor || '#2f9df7'}, ${registerForm.secondaryColor || '#5fd35a'})`,
+      };
+
   const previewPanel = (
     <div className="ds-card-elevated rounded-2xl p-4 space-y-4">
       <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-600">
@@ -796,13 +832,36 @@ export function CreateStore() {
       </div>
       <div className="rounded-xl border border-slate-200 bg-white p-3">
         <p className="text-[11px] font-semibold text-slate-500 mb-2">Como ficará sua loja</p>
-        <div className="rounded-lg border border-slate-100 bg-slate-50 p-2.5">
-          <div className="h-16 rounded-md bg-[linear-gradient(120deg,#0f172a,#1e293b)] mb-2" />
-          <p className="text-[11px] font-bold text-slate-800 truncate">{registerForm.storeName || 'Sua loja'}</p>
-          <p className="text-[10px] text-slate-500 truncate">janocaminho.com.br/{storeSlugPreview || 'sua-loja'}</p>
-          <button type="button" className="mt-2 h-7 w-full rounded-md bg-brand-primary text-white text-[11px] font-semibold">
+        <div className="overflow-hidden rounded-xl border border-slate-100 bg-slate-50 shadow-[0_12px_28px_-20px_rgba(15,23,42,0.45)]">
+          <div className="relative h-20" style={previewBannerStyle}>
+            <div className="absolute inset-0 bg-black/18" />
+          </div>
+          <div className="relative px-3 pb-3 pt-8">
+            <div className="absolute -top-7 left-3 h-14 w-14 rounded-full border-2 border-white bg-white shadow-md overflow-hidden">
+              {previewLogoSrc ? (
+                <img src={previewLogoSrc} alt={previewDisplayName} className="h-full w-full object-cover" />
+              ) : (
+                <div
+                  className="h-full w-full"
+                  style={{
+                    backgroundImage: `linear-gradient(120deg, ${registerForm.primaryColor || '#2f9df7'}, ${registerForm.secondaryColor || '#5fd35a'})`,
+                  }}
+                />
+              )}
+            </div>
+            <p className="text-[12px] font-black text-slate-800 truncate">{previewDisplayName}</p>
+            <p className="text-[10px] text-slate-500 truncate">{previewLocation}</p>
+            <p className="text-[10px] text-slate-500 truncate">janocaminho.com.br/{previewSlug}</p>
+          </div>
+          <div className="px-3 pb-3">
+            <button
+              type="button"
+              className="mt-1 h-7 w-full rounded-md text-white text-[11px] font-semibold"
+              style={{ backgroundColor: registerForm.primaryColor || '#2f9df7' }}
+            >
             Ver cardápio
-          </button>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -1329,6 +1388,24 @@ export function CreateStore() {
                       alt="Pré-visualização do logo"
                       className="w-full h-full object-cover"
                     />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700 block">Banner da loja (opcional)</label>
+              <div className="flex items-start gap-4">
+                <label className="flex-1 cursor-pointer">
+                  <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 hover:border-red-400 transition-colors text-center">
+                    <p className="text-sm text-gray-600 mb-1">Clique para enviar</p>
+                    <p className="text-xs text-gray-500">Imagem horizontal para destaque da vitrine</p>
+                  </div>
+                  <input type="file" accept="image/*" onChange={handleBannerUpload} className="hidden" />
+                </label>
+                {bannerPreviewUrl && (
+                  <div className="w-28 h-20 rounded-xl overflow-hidden border-2 border-gray-200 flex-shrink-0">
+                    <img src={bannerPreviewUrl} alt="Pré-visualização do banner" className="w-full h-full object-cover" />
                   </div>
                 )}
               </div>

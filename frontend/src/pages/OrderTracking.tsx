@@ -967,7 +967,7 @@ export function OrderTracking() {
                               }}
                               className="w-full px-3 py-2 rounded-lg border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-100"
                             >
-                              {pixCopied ? 'Copiado!' : 'Copiar codigo Pix'}
+                              {pixCopied ? 'Copiado!' : 'Copiar código Pix'}
                             </button>
                           </>
                         ) : (
