@@ -260,7 +260,7 @@ export function PaymentPage() {
                     )}
                   </div>
                   <p className="text-xs text-emerald-800">
-                    Use o login e senha cadastrados para entrar no painel. Seu slug ja vai preenchido no login.
+                    Use o login e senha cadastrados para entrar no painel. Seu slug já vai preenchido no login.
                   </p>
                   <p className="text-xs text-emerald-700">Redirecionando em alguns segundos...</p>
                 </div>

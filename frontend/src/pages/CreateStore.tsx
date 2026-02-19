@@ -794,6 +794,17 @@ export function CreateStore() {
           Experiência mobile-first para loja e cliente final.
         </p>
       </div>
+      <div className="rounded-xl border border-slate-200 bg-white p-3">
+        <p className="text-[11px] font-semibold text-slate-500 mb-2">Como ficará sua loja</p>
+        <div className="rounded-lg border border-slate-100 bg-slate-50 p-2.5">
+          <div className="h-16 rounded-md bg-[linear-gradient(120deg,#0f172a,#1e293b)] mb-2" />
+          <p className="text-[11px] font-bold text-slate-800 truncate">{registerForm.storeName || 'Sua loja'}</p>
+          <p className="text-[10px] text-slate-500 truncate">janocaminho.com.br/{storeSlugPreview || 'sua-loja'}</p>
+          <button type="button" className="mt-2 h-7 w-full rounded-md bg-brand-primary text-white text-[11px] font-semibold">
+            Ver cardápio
+          </button>
+        </div>
+      </div>
     </div>
   );
 
@@ -804,8 +815,8 @@ export function CreateStore() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between py-3 sm:py-4">
             <button onClick={() => navigate('/')} className="flex items-center gap-3">
-              <div className="h-11 w-11 rounded-2xl bg-white shadow-[0_14px_26px_-18px_rgba(239,68,68,0.7)] ring-1 ring-red-200 overflow-hidden">
-                <img src="/janocaminho.jpg" alt="Jano Caminho" className="h-full w-full object-cover" draggable={false} />
+              <div className="h-11 w-11 rounded-2xl bg-white shadow-[0_14px_26px_-18px_rgba(239,68,68,0.7)] ring-1 ring-red-200 flex items-center justify-center text-slate-700">
+                <Buildings size={21} weight="duotone" />
               </div>
               <div className="hidden sm:block leading-tight">
                 <p className="text-lg font-black text-gray-900">Jano Caminho</p>
@@ -824,7 +835,7 @@ export function CreateStore() {
       </header>
 
       <main className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        <div className="grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)] items-start">
+        <div className="grid gap-6 lg:grid-cols-[35%_65%] items-start">
         <aside className="order-2 lg:order-1 lg:sticky lg:top-[96px] hidden lg:block">
           {previewPanel}
         </aside>
@@ -842,7 +853,7 @@ export function CreateStore() {
           <div className="sticky top-[72px] sm:top-[84px] z-20 mb-6 ds-card p-3 sm:p-4 backdrop-blur bg-white/95 border border-slate-200">
             <div className="mb-2 flex items-center justify-between gap-2">
               <p className="text-xs uppercase tracking-[0.22em] font-semibold text-slate-500">Onboarding</p>
-              <span className="text-[11px] text-slate-500 font-semibold">{currentStep}/3</span>
+              <span className="text-[11px] text-slate-500 font-semibold">Etapa {currentStep} de 3</span>
             </div>
             <div className="flex gap-2 overflow-x-auto pb-1">
               {steps.map((step) => (
@@ -932,7 +943,7 @@ export function CreateStore() {
                       placeholder="seu@email.com"
                     />
                     {fieldErrors.email ? (
-                      <p className="text-xs text-red-600">{fieldErrors.email}</p>
+                      <p className="ds-field-error">{fieldErrors.email}</p>
                     ) : (
                     <p className="text-xs text-gray-500">Cada e-mail pode ter apenas uma conta.</p>
                     )}
@@ -1001,7 +1012,7 @@ export function CreateStore() {
                       />
                     </div>
                     {fieldErrors.document && (
-                      <p className="text-xs text-red-600">{fieldErrors.document}</p>
+                      <p className="ds-field-error">{fieldErrors.document}</p>
                     )}
                   </div>
                   <div className="space-y-2">
@@ -1069,7 +1080,7 @@ export function CreateStore() {
                             'Buscar CEP'
                           )}
                         </button>
-                        {cepError && <p className="text-xs text-red-600">{cepError}</p>}
+                        {cepError && <p className="ds-field-error">{cepError}</p>}
                       </div>
                       <div className="space-y-2 min-w-0">
                         <label className="text-sm font-semibold text-gray-700">UF</label>
@@ -1217,7 +1228,7 @@ export function CreateStore() {
                 placeholder="Ex.: Espetinho do João"
               />
               {fieldErrors.storeName && (
-                <p className="text-xs text-red-600">{fieldErrors.storeName}</p>
+                <p className="ds-field-error">{fieldErrors.storeName}</p>
               )}
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-xs text-gray-500">URL da loja:</span>
@@ -1234,7 +1245,7 @@ export function CreateStore() {
                 </button>
               </div>
               <p className="text-xs text-gray-500">
-                Se ja existir uma loja com esse nome, o sistema adiciona um sufixo (ex.: {storeSlugPreview || 'sua-loja'}-2).
+                Se já existir uma loja com esse nome, o sistema adiciona um sufixo (ex.: {storeSlugPreview || 'sua-loja'}-2).
               </p>
             </div>
 
