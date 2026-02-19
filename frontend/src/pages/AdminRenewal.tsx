@@ -22,6 +22,8 @@ export function AdminRenewal() {
   const storeId = auth?.store?.id;
   const currentStatus = currentSubscription?.status ?? auth?.subscription?.status;
   const currentEndDate = currentSubscription?.endDate ?? auth?.subscription?.endDate;
+  const latestPaymentStatus = String(currentSubscription?.latestPaymentStatus || '').toUpperCase();
+  const showTrialBadge = String(currentStatus || '').toUpperCase() === 'TRIAL' && latestPaymentStatus !== 'PAID';
   const currentPlanName = String(currentSubscription?.plan?.name || auth?.subscription?.plan?.name || '').toLowerCase();
   const currentTier: 'basic' | 'pro' = currentPlanName.includes('pro') ? 'pro' : 'basic';
   const allowedTierKeys = useMemo(() => PLAN_TIERS.map((tier) => tier.key), []);
@@ -159,7 +161,7 @@ export function AdminRenewal() {
               <p className="text-gray-500 mt-1">
                 Sua assinatura está {currentStatus === 'EXPIRED' ? 'expirada' : 'quase expirando'}.
               </p>
-              {String(currentStatus || '').toUpperCase() === 'TRIAL' ? (
+              {showTrialBadge ? (
                 <p className="mt-2 text-xs text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-lg px-3 py-2 inline-flex">
                   Trial ativo com recursos Pro liberados.
                 </p>
