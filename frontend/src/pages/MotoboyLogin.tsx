@@ -165,7 +165,10 @@ export function MotoboyLogin() {
             {alreadyLoggedIn ? (
               <div className="ds-card-elevated ds-login-card-enter p-5 sm:p-6 space-y-4 motoboy-fade-up ds-anim-delay-20">
                 <div className="rounded-2xl border border-slate-200/80 bg-white/80 backdrop-blur p-2.5 shadow-[0_20px_40px_-24px_rgba(15,23,42,0.35)]">
-                  <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-24 sm:h-28 w-full rounded-xl object-cover object-center" />
+                  <div className="relative h-24 sm:h-28 w-full rounded-xl overflow-hidden bg-[linear-gradient(120deg,#0f172a,#1e293b)]">
+                    <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full object-contain object-center" />
+                    <div className="pointer-events-none absolute inset-0 bg-black/10" />
+                  </div>
                   <p className="mt-2 px-1 text-center text-[11px] font-bold tracking-[0.22em] uppercase text-slate-700">
                     Área do entregador
                   </p>
@@ -206,7 +209,10 @@ export function MotoboyLogin() {
             ) : (
               <div className="ds-card-elevated ds-login-card-enter p-5 sm:p-6 space-y-4 motoboy-fade-up ds-anim-delay-40">
                 <div className="rounded-2xl border border-slate-200/80 bg-white/80 backdrop-blur p-2.5 shadow-[0_20px_40px_-24px_rgba(15,23,42,0.35)]">
-                  <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-24 sm:h-28 w-full rounded-xl object-cover object-center" />
+                  <div className="relative h-24 sm:h-28 w-full rounded-xl overflow-hidden bg-[linear-gradient(120deg,#0f172a,#1e293b)]">
+                    <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full object-contain object-center" />
+                    <div className="pointer-events-none absolute inset-0 bg-black/10" />
+                  </div>
                   <p className="mt-2 px-1 text-center text-[11px] font-bold tracking-[0.22em] uppercase text-slate-700">
                     Área do entregador
                   </p>
