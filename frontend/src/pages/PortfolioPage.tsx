@@ -402,21 +402,21 @@ export function PortfolioPage() {
 
   return (
     <LandingPageLayout>
-      <section className="relative overflow-hidden bg-[linear-gradient(180deg,#f8fafc_0%,#ffffff_55%,#fff7ed_100%)]">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(239,68,68,0.16),_transparent_64%)]" />
-        <div className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-orange-200/35 blur-3xl" />
-        <div className="absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-red-200/25 blur-3xl" />
+      <section className="relative overflow-hidden bg-[linear-gradient(180deg,#f0f9ff_0%,#ffffff_55%,#ecfeff_100%)]">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(47,157,247,0.2),_transparent_64%)]" />
+        <div className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-sky-200/40 blur-3xl" />
+        <div className="absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-emerald-200/25 blur-3xl" />
 
         <div className="max-w-6xl mx-auto px-4 py-14 sm:py-20 relative">
           <div className="grid gap-10 lg:grid-cols-12 lg:items-center">
             <div className="lg:col-span-7 space-y-5">
-              <div className="inline-flex items-center gap-2 rounded-full border border-red-100 bg-red-50/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-sky-700">
+              <div className="inline-flex items-center gap-2 rounded-full border border-sky-100 bg-sky-50/90 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-sky-700">
                 <Lightning size={14} weight="duotone" />
                 Cardapio online + pedidos + produção
               </div>
               <h1 className="text-3xl sm:text-5xl font-black text-slate-900 leading-[1.04]">
                 Portfólio real, resultado real.
-                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-500">
+                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-sky-600 to-emerald-500">
                   Seu negócio com cara de app profissional.
                 </span>
               </h1>
@@ -429,7 +429,7 @@ export function PortfolioPage() {
                 <button
                   type="button"
                   onClick={() => navigate("/create")}
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-5 py-3 text-sm font-bold text-white shadow-[0_18px_40px_-28px_rgba(239,68,68,0.9)] hover:opacity-95 active:scale-[0.99] transition"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-brand-gradient px-5 py-3 text-sm font-bold text-white shadow-[0_18px_40px_-28px_rgba(47,157,247,0.9)] hover:opacity-95 active:scale-[0.99] transition"
                 >
                   Criar minha loja
                   <ArrowRight size={18} weight="bold" />
@@ -466,7 +466,21 @@ export function PortfolioPage() {
               </div>
             </div>
 
-            <div className="lg:col-span-5">
+            <div className="lg:col-span-5 space-y-4">
+              <div className="rounded-3xl border border-slate-200 bg-slate-950 shadow-[0_24px_60px_-36px_rgba(15,23,42,0.6)] overflow-hidden">
+                <img
+                  src="/janocaminho.jpg"
+                  alt="Banner Jano Caminho"
+                  className="w-full h-52 sm:h-56 object-cover object-center"
+                  loading="eager"
+                />
+                <div className="p-4 bg-[linear-gradient(120deg,rgba(47,157,247,0.14),rgba(95,211,90,0.16))]">
+                  <p className="text-[11px] uppercase tracking-[0.3em] text-slate-700 font-bold">Identidade da plataforma</p>
+                  <p className="text-sm font-extrabold text-slate-900 mt-1">
+                    Jano Caminho para mercado, farmacia, adega, food truck e restaurante
+                  </p>
+                </div>
+              </div>
               <div className="rounded-3xl border border-slate-200 bg-white shadow-[0_24px_60px_-36px_rgba(15,23,42,0.6)] overflow-hidden">
                 <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/60">
                   <p className="text-[11px] uppercase tracking-[0.35em] text-slate-500 font-semibold">
@@ -528,7 +542,7 @@ export function PortfolioPage() {
                   <input
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-9 pr-4 text-sm focus:ring-2 focus:ring-red-500 focus:border-sky-500"
+                    className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-9 pr-4 text-sm focus:ring-2 focus:ring-brand-primary focus:border-brand-primary"
                     placeholder="Digite o nome ou slug"
                   />
                 </div>

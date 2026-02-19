@@ -7,12 +7,11 @@ export function Hero() {
           <div className="absolute -bottom-32 -left-16 h-72 w-72 rounded-full bg-emerald-200/45 dark:bg-emerald-900/30 blur-3xl" />
 
           <div className="relative p-4 sm:p-6 lg:p-8">
-            <div className="overflow-hidden rounded-[24px]">
+            <div className="overflow-hidden rounded-[24px] border border-slate-200/70 bg-slate-950/95 p-2 sm:p-3">
               <img
                 src="/janocaminho.jpg"
                 alt="Jano Caminho - Plataforma de pedidos"
-                className="w-full h-[280px] sm:h-[420px] lg:h-[500px] object-cover object-center opacity-95"
-                style={{ maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%)', WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%)' }}
+                className="w-full h-[280px] sm:h-[420px] lg:h-[500px] object-contain object-center rounded-2xl"
               />
             </div>
             <div className="mt-5 grid gap-3 md:grid-cols-3">

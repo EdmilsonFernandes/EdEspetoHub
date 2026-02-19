@@ -7,6 +7,9 @@
 }
 
 :root {
+  --brand-blue: #2f9df7;
+  --brand-cyan: #18b3f9;
+  --brand-green: #5fd35a;
   --surface-0: #ffffff;
   --surface-1: #f8fafc;
   --surface-2: #f1f5f9;
@@ -18,6 +21,10 @@
   --radius-xl: 1.5rem;
   --shadow-soft: 0 12px 30px -22px rgba(15, 23, 42, 0.4);
   --shadow-card: 0 24px 50px -34px rgba(15, 23, 42, 0.45);
+}
+
+body {
+  font-family: 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
 
 /* 🔥 FIRE ANIMATION */
