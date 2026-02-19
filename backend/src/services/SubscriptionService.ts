@@ -180,11 +180,19 @@ export class SubscriptionService {
 
     const now = new Date();
     const paymentMethod = (input.paymentMethod || 'PIX') as PaymentMethod;
+    const plan = input.planId
+      ? await this.planRepository.findById(input.planId)
+      : null;
+    const resolvedPlan =
+      plan || (await this.planRepository.findAll()).find((p) => p.id === input.planId);
+    if (!resolvedPlan || !resolvedPlan.enabled) throw new AppError('SUB-003', 400);
+
     const existingPending = await this.paymentRepository.findLatestPendingByStoreId(storeId);
     if (existingPending) {
       const sameMethod = existingPending.method === paymentMethod;
+      const samePlan = existingPending.subscription?.plan?.id === resolvedPlan.id;
       const stillValid = await this.isPaymentStillValid(existingPending);
-      if (sameMethod && stillValid) {
+      if (sameMethod && samePlan && stillValid) {
         return existingPending;
       }
       existingPending.status = 'FAILED';
@@ -196,13 +204,6 @@ export class SubscriptionService {
     if (recentCount >= 3) {
       throw new AppError('SUB-006', 429);
     }
-
-    const plan = input.planId
-      ? await this.planRepository.findById(input.planId)
-      : null;
-    const resolvedPlan =
-      plan || (await this.planRepository.findAll()).find((p) => p.id === input.planId);
-    if (!resolvedPlan || !resolvedPlan.enabled) throw new AppError('SUB-003', 400);
 
     return AppDataSource.transaction(async (manager) => {
       const subscriptionRepo = manager.getRepository(Subscription);
