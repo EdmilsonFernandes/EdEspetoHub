@@ -761,7 +761,32 @@ export function CreateStore() {
       </header>
 
       <main className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        <div className="ds-card-elevated rounded-3xl p-4 sm:p-6 lg:p-8">
+        <div className="grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)] items-start">
+        <aside className="hidden lg:block sticky top-[96px]">
+          <div className="ds-card rounded-2xl p-4 space-y-4">
+            <p className="text-xs uppercase tracking-[0.24em] font-semibold text-slate-500">Pré-visualização</p>
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+              <p className="text-xs text-slate-500 mb-1">Seu site ficará em</p>
+              <p className="text-xs font-semibold text-slate-900 break-all">janocaminho.com.br/{storeSlugPreview || 'sua-loja'}</p>
+            </div>
+            <div className="space-y-2 text-xs text-slate-600">
+              <p className="inline-flex items-start gap-2">
+                <span className="mt-1 h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                Link público pronto para divulgar no WhatsApp e Instagram.
+              </p>
+              <p className="inline-flex items-start gap-2">
+                <span className="mt-1 h-1.5 w-1.5 rounded-full bg-sky-500" />
+                Cardápio, pedidos e produção integrados em um único painel.
+              </p>
+              <p className="inline-flex items-start gap-2">
+                <span className="mt-1 h-1.5 w-1.5 rounded-full bg-amber-500" />
+                Configuração guiada em 3 etapas com publicação rápida.
+              </p>
+            </div>
+          </div>
+        </aside>
+
+        <div className="min-w-0 ds-card-elevated rounded-3xl p-4 sm:p-6 lg:p-8">
           <div className="mb-8 text-center">
             <div className="w-20 h-20 rounded-2xl overflow-hidden shadow-lg mx-auto mb-4 border border-white bg-white">
               <img src={platformLogo} alt="Jano Caminho" className="w-full h-full object-cover" />
@@ -1120,8 +1145,11 @@ export function CreateStore() {
               {fieldErrors.storeName && (
                 <p className="text-xs text-red-600">{fieldErrors.storeName}</p>
               )}
-              <div className="text-xs text-gray-500">
-                URL da loja: <span className="font-semibold text-gray-700">www.janocaminho.com.br/{storeSlugPreview || 'sua-loja'}</span>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs text-gray-500">URL da loja:</span>
+                <span className="inline-flex max-w-full items-center rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700">
+                  www.janocaminho.com.br/{storeSlugPreview || 'sua-loja'}
+                </span>
               </div>
               <p className="text-xs text-gray-500">
                 Se ja existir uma loja com esse nome, o sistema adiciona um sufixo (ex.: {storeSlugPreview || 'sua-loja'}-2).
@@ -1638,6 +1666,7 @@ export function CreateStore() {
               Ao criar sua conta, você confirma a veracidade dos dados fornecidos.
             </p>
           </form>
+        </div>
         </div>
       </main>
       {showTerms && (
