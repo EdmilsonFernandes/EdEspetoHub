@@ -932,8 +932,6 @@ export function SuperAdmin() {
     return summary?.paidRevenue ? formatCurrency(summary.paidRevenue) : formatCurrency(0);
   }, [summary?.paidRevenue]);
 
-  const platformLogo = '/janocaminho.jpg';
-
   if (!token) {
     return (
       <AuthLayout>
@@ -998,7 +996,7 @@ export function SuperAdmin() {
             <button
               type="submit"
               disabled={loading || !loginForm.email || !loginForm.password}
-              className="w-full ds-btn ds-btn-primary ds-focus-ring text-white py-3 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full ds-btn ds-btn-primary ds-btn-shine ds-focus-ring text-white py-3 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {loading ? 'Entrando...' : 'Acessar administração'}
             </button>

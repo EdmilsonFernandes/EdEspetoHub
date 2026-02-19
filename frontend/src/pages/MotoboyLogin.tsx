@@ -1,11 +1,20 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowSquareOut, Eye, EyeSlash, Lightning, SignIn, SignOut, UserCircle } from '@phosphor-icons/react';
+import Lottie from 'lottie-react';
 import { authService } from '../services/authService';
 import { useAuth } from '../contexts/AuthContext';
 import { MotoboyHeader } from '../components/Motoboy/MotoboyHeader';
+import fireAnimation from '../assets/fire.json';
 
 export function MotoboyLogin() {
+  const heroParticles = [
+    { x: '10%', y: '22%', size: '10px', dur: '8s', delay: '0.2s', dx: '10px' },
+    { x: '24%', y: '64%', size: '9px', dur: '7.2s', delay: '0.8s', dx: '8px' },
+    { x: '38%', y: '36%', size: '12px', dur: '8.6s', delay: '0.4s', dx: '12px' },
+    { x: '62%', y: '76%', size: '10px', dur: '7.8s', delay: '1.1s', dx: '9px' },
+    { x: '78%', y: '28%', size: '9px', dur: '8.3s', delay: '0.6s', dx: '11px' },
+  ];
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -125,15 +134,40 @@ export function MotoboyLogin() {
           <aside className="hidden lg:block">
               <div className="relative overflow-hidden rounded-3xl min-h-[620px] border border-slate-800/60 shadow-[0_30px_65px_-40px_rgba(15,23,42,0.8)] motoboy-fade-up">
                 <div className="absolute inset-0">
-                  <img src="/janocaminho.jpg" alt="Jano Caminho" className="h-full w-full object-cover object-center blur-[2px] scale-[1.06]" />
+                  <img src="/janocaminho.jpg" alt="Jano Caminho" className="h-full w-full object-cover object-center scale-[1.04]" />
                 </div>
-                <div className="absolute inset-0 opacity-80">
+                <div className="absolute inset-0 opacity-68">
                   <img src="/janocaminho.jpg" alt="" aria-hidden className="h-full w-full object-contain object-center p-6" />
                 </div>
-                <div className="absolute inset-0 bg-slate-950/75" />
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(47,157,247,0.32),_transparent_56%),radial-gradient(circle_at_bottom,_rgba(95,211,90,0.2),_transparent_58%)]" />
+                <div className="absolute inset-0 bg-[linear-gradient(160deg,rgba(2,6,23,0.82),rgba(2,6,23,0.7))]" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(2,6,23,0.38),_transparent_50%),radial-gradient(circle_at_top,_rgba(47,157,247,0.3),_transparent_58%),radial-gradient(circle_at_bottom,_rgba(95,211,90,0.2),_transparent_62%)]" />
+                <div className="absolute inset-0 opacity-95" aria-hidden>
+                  {heroParticles.map((particle, index) => (
+                    <span
+                      key={`motoboy-hero-particle-${index}`}
+                      className="ds-hero-particle"
+                      style={
+                        {
+                          '--x': particle.x,
+                          '--y': particle.y,
+                          '--size': particle.size,
+                          '--dur': particle.dur,
+                          '--delay': particle.delay,
+                          '--dx': particle.dx,
+                        } as React.CSSProperties
+                      }
+                    />
+                  ))}
+                </div>
+                <div className="absolute right-4 top-3 w-24 opacity-35 pointer-events-none">
+                  <Lottie animationData={fireAnimation} loop autoplay />
+                </div>
                 <div className="relative z-10 h-full p-7 text-white flex flex-col justify-between">
                   <div className="space-y-5">
+                    <p className="text-2xl font-black tracking-tight text-white/95">Jano Caminho</p>
+                    <p className="pointer-events-none select-none text-[92px] font-black leading-none tracking-tight text-white/[0.07] -mb-2">
+                      JANO
+                    </p>
                     <p className="text-[11px] uppercase tracking-[0.28em] text-sky-200 font-semibold">Área do entregador</p>
                     <h2 className="text-[2rem] font-black leading-[1.1]">
                       Operação de entregas rápida, clara e profissional
@@ -162,7 +196,7 @@ export function MotoboyLogin() {
 
           <div className="space-y-5">
             {alreadyLoggedIn ? (
-              <div className="ds-card-elevated p-5 sm:p-6 space-y-4 motoboy-fade-up ds-anim-delay-20">
+              <div className="ds-card-elevated ds-login-card-enter p-5 sm:p-6 space-y-4 motoboy-fade-up ds-anim-delay-20">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Sessão ativa</p>
@@ -181,7 +215,7 @@ export function MotoboyLogin() {
                   <button
                     type="button"
                     onClick={() => navigate('/motoboy/home')}
-                    className="btn-press ds-btn ds-btn-primary ds-focus-ring w-full rounded-xl px-4 py-3 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(239,68,68,0.85)] flex items-center justify-center gap-2"
+                    className="btn-press ds-btn ds-btn-primary ds-btn-shine ds-focus-ring w-full rounded-xl px-4 py-3 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(239,68,68,0.85)] flex items-center justify-center gap-2"
                   >
                     <ArrowSquareOut size={18} weight="duotone" />
                     Ir para painel
@@ -197,7 +231,7 @@ export function MotoboyLogin() {
                 </div>
               </div>
             ) : (
-              <div className="ds-card-elevated p-5 sm:p-6 space-y-4 motoboy-fade-up ds-anim-delay-40">
+              <div className="ds-card-elevated ds-login-card-enter p-5 sm:p-6 space-y-4 motoboy-fade-up ds-anim-delay-40">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Area do Entregador</p>
@@ -279,7 +313,7 @@ export function MotoboyLogin() {
                   <button
                     type="submit"
                     disabled={!formValid || loading}
-                    className="w-full ds-btn ds-btn-primary ds-focus-ring px-4 py-3 text-sm font-extrabold text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="w-full ds-btn ds-btn-primary ds-btn-shine ds-focus-ring px-4 py-3 text-sm font-extrabold text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     <Lightning size={18} weight="duotone" />
                     {loading ? 'Entrando...' : 'Entrar para receber entregas'}

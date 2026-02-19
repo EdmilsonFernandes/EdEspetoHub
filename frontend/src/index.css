@@ -133,6 +133,39 @@ body {
   100% { transform: scale(1); }
 }
 
+@keyframes heroParticleFloat {
+  0% {
+    transform: translate3d(var(--x, 0), var(--y, 0), 0) scale(0.9);
+    opacity: 0.12;
+  }
+  50% {
+    transform: translate3d(calc(var(--x, 0) + var(--dx, 10px)), calc(var(--y, 0) - 12px), 0) scale(1);
+    opacity: 0.28;
+  }
+  100% {
+    transform: translate3d(var(--x, 0), var(--y, 0), 0) scale(0.9);
+    opacity: 0.12;
+  }
+}
+
+@keyframes loginCardEnter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes buttonShine {
+  0% { transform: translateX(-120%) skewX(-18deg); opacity: 0; }
+  35% { opacity: 0.5; }
+  60% { opacity: 0.25; }
+  100% { transform: translateX(240%) skewX(-18deg); opacity: 0; }
+}
+
 /* Utility classes */
 .animate-flame {
   animation: flame 3s ease-in-out infinite;
@@ -848,6 +881,45 @@ body {
     border-color: rgb(253 230 138);
     background: rgb(254 252 232);
     color: rgb(133 77 14);
+  }
+
+  .ds-login-card-enter {
+    animation: loginCardEnter 420ms cubic-bezier(0.2, 0.9, 0.2, 1) both;
+  }
+
+  .ds-hero-particle {
+    position: absolute;
+    width: var(--size, 10px);
+    height: var(--size, 10px);
+    left: 0;
+    top: 0;
+    border-radius: 999px;
+    background: radial-gradient(circle, rgba(255,255,255,0.65) 0%, rgba(255,255,255,0) 72%);
+    animation: heroParticleFloat var(--dur, 7s) ease-in-out infinite;
+    animation-delay: var(--delay, 0s);
+    pointer-events: none;
+    mix-blend-mode: screen;
+  }
+
+  .ds-btn-shine {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ds-btn-shine::after {
+    content: "";
+    position: absolute;
+    top: -24%;
+    bottom: -24%;
+    width: 40%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.45), transparent);
+    animation: buttonShine 3.2s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  .ds-btn-shine:hover {
+    transform: translateY(-1px) scale(1.01);
+    box-shadow: 0 24px 48px -28px rgba(15, 23, 42, 0.65);
   }
 
   .ds-modal-backdrop {

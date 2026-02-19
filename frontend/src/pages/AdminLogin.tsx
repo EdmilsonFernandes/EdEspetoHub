@@ -233,7 +233,7 @@ export function AdminLogin() {
         <div className="space-y-3">
           <button
             type="submit"
-            className="w-full ds-btn ds-btn-primary ds-focus-ring text-white py-3 font-semibold"
+            className="w-full ds-btn ds-btn-primary ds-btn-shine ds-focus-ring text-white py-3 font-semibold"
           >
             Acessar painel da loja
           </button>
