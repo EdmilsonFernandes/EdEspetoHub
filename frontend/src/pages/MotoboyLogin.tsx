@@ -117,7 +117,9 @@ export function MotoboyLogin() {
   return (
     <div className="min-h-screen motoboy-bg px-4 py-6 sm:py-10">
       <div className="max-w-5xl mx-auto space-y-5">
-        <MotoboyHeader title="Entrar" subtitle="Acesse suas entregas em segundos." />
+        <div className="lg:hidden">
+          <MotoboyHeader title="Entrar" subtitle="Acesse suas entregas em segundos." />
+        </div>
 
         <div className="grid gap-5 lg:grid-cols-[0.95fr_1.05fr] items-start">
           <aside className="hidden lg:block">

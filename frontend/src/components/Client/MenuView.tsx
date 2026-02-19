@@ -680,7 +680,7 @@ export const MenuView = ({
                   </div>
 
                   <div className="flex flex-col items-end gap-2">
-                    <div className="w-[92px] h-[92px] rounded-2xl overflow-hidden bg-gray-100 border border-gray-200 shadow-sm">
+                    <div className="w-[108px] h-[108px] rounded-2xl overflow-hidden bg-gray-100 border border-gray-200 shadow-sm">
                       {item.imageUrl ? (
                         <img
                           src={resolveAssetUrl(item.imageUrl)}
@@ -710,7 +710,7 @@ export const MenuView = ({
                         onUpdateCart(item, 1);
                       }}
                       title="Adicionar"
-                      className="relative h-9 min-w-[88px] px-3 rounded-xl bg-brand-primary text-white flex items-center justify-center gap-1 hover:opacity-90 shadow-md active:scale-95 transition text-xs font-extrabold"
+                      className="relative h-10 min-w-[102px] px-3 rounded-xl bg-[linear-gradient(120deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_58%,#10b981))] text-white flex items-center justify-center gap-1 hover:opacity-95 shadow-[0_16px_34px_-22px_rgba(15,23,42,0.6)] active:scale-95 transition text-xs font-extrabold"
                     >
                       <Plus size={14} weight="duotone" />
                       Adicionar
@@ -731,6 +731,11 @@ export const MenuView = ({
             Nenhum item encontrado.
           </div>
         )}
+        <div className="pt-1 pb-2 text-center">
+          <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+            Powered by Jano Caminho
+          </span>
+        </div>
         </div>
       </div>
 

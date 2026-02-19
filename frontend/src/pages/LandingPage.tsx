@@ -74,19 +74,19 @@ export function LandingPage() {
 
   return (
     <LandingPageLayout>
-      <section className="relative overflow-hidden bg-[linear-gradient(180deg,#eef7ff_0%,#f8fafc_45%,#ecfeff_100%)]">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(37,99,235,0.14),_transparent_55%)]" />
+      <section className="relative overflow-hidden bg-[linear-gradient(145deg,#050b16_0%,#0f172a_50%,#111827_100%)]">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(47,157,247,0.24),_transparent_55%)]" />
         <div className="max-w-6xl mx-auto px-4 py-14 sm:py-20 relative">
           <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] items-center">
-            <div className="space-y-5">
-              <span className="inline-flex items-center gap-2 rounded-full border border-sky-100 bg-sky-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-sky-700">
+            <div className="space-y-5 text-center lg:text-left">
+              <span className="inline-flex items-center gap-2 rounded-full border border-sky-300/40 bg-sky-400/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-sky-200">
                 <Rocket size={14} weight="duotone" />
                 SaaS para operação comercial
               </span>
-              <h1 className="text-3xl sm:text-5xl font-black text-slate-900 leading-[1.05]">
+              <h1 className="text-3xl sm:text-5xl font-black text-white leading-[1.05]">
                 Jano Caminho - Plataforma completa para gestão de pedidos e entregas
               </h1>
-              <p className="text-sm sm:text-lg text-slate-600 max-w-2xl">
+              <p className="text-sm sm:text-lg text-slate-200 max-w-2xl mx-auto lg:mx-0">
                 Centralize pedidos online, organize sua operação e aumente suas vendas com um sistema moderno e inteligente.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 pt-1">
@@ -101,31 +101,31 @@ export function LandingPage() {
                 <button
                   type="button"
                   onClick={() => navigate('/create')}
-                  className="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-800 hover:bg-slate-50"
+                  className="inline-flex items-center justify-center rounded-2xl border border-white/30 bg-white/10 backdrop-blur px-5 py-3 text-sm font-black text-white hover:bg-white/15"
                 >
                   Criar minha loja
                 </button>
               </div>
             </div>
 
-            <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_26px_64px_-36px_rgba(15,23,42,0.45)]">
+            <div className="rounded-3xl border border-white/15 bg-white/5 backdrop-blur p-5 shadow-[0_26px_64px_-36px_rgba(0,0,0,0.6)]">
               <img
                 src="/janocaminho.jpg"
                 alt="Jano Caminho"
                 className="w-full h-52 sm:h-60 rounded-2xl bg-slate-950 object-contain p-2"
               />
               <div className="grid grid-cols-3 gap-2 mt-4">
-                <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                  <p className="text-[11px] text-slate-500 uppercase tracking-[0.2em]">Lojas</p>
-                  <p className="text-lg font-black text-slate-900">{metrics?.activeStores ?? '-'}</p>
+                <div className="rounded-xl border border-white/15 bg-white/10 p-3">
+                  <p className="text-[11px] text-slate-300 uppercase tracking-[0.2em]">Lojas</p>
+                  <p className="text-lg font-black text-white">{metrics?.activeStores ?? '-'}</p>
                 </div>
-                <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                  <p className="text-[11px] text-slate-500 uppercase tracking-[0.2em]">Pedidos</p>
-                  <p className="text-lg font-black text-slate-900">{metrics?.totalOrders ?? '-'}</p>
+                <div className="rounded-xl border border-white/15 bg-white/10 p-3">
+                  <p className="text-[11px] text-slate-300 uppercase tracking-[0.2em]">Pedidos</p>
+                  <p className="text-lg font-black text-white">{metrics?.totalOrders ?? '-'}</p>
                 </div>
-                <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3">
-                  <p className="text-[11px] text-emerald-700 uppercase tracking-[0.2em]">Vendas</p>
-                  <p className="text-lg font-black text-emerald-700">
+                <div className="rounded-xl border border-emerald-300/30 bg-emerald-400/10 p-3">
+                  <p className="text-[11px] text-emerald-200 uppercase tracking-[0.2em]">Vendas</p>
+                  <p className="text-lg font-black text-emerald-100">
                     {metrics ? formatCurrency(metrics.totalRevenue || 0) : '-'}
                   </p>
                 </div>

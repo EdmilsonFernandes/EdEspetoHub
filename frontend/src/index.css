@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800;900&display=swap");
 @import "tailwindcss";
 
 @variant dark (&:where(.dark, .dark *));
@@ -10,21 +11,25 @@
   --brand-blue: #2f9df7;
   --brand-cyan: #18b3f9;
   --brand-green: #5fd35a;
+  --brand-navy: #0b1220;
+  --brand-ink: #111827;
   --surface-0: #ffffff;
   --surface-1: #f8fafc;
   --surface-2: #f1f5f9;
   --text-strong: #0f172a;
   --text-soft: #64748b;
-  --radius-sm: 0.75rem;
-  --radius-md: 1rem;
-  --radius-lg: 1.25rem;
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 20px;
   --radius-xl: 1.5rem;
   --shadow-soft: 0 12px 30px -22px rgba(15, 23, 42, 0.4);
   --shadow-card: 0 24px 50px -34px rgba(15, 23, 42, 0.45);
 }
 
 body {
-  font-family: 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-family: "Inter", "Poppins", "Segoe UI", system-ui, -apple-system, sans-serif;
+  background: var(--surface-1);
+  color: var(--text-strong);
 }
 
 /* 🔥 FIRE ANIMATION */

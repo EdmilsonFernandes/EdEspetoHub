@@ -726,6 +726,15 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     { id: 'config', label: 'Configurações', hint: 'Identidade, Pix e horários', icon: Gear },
     { id: 'cardapio', label: 'Abrir cardápio', hint: 'Ver como o cliente vê', icon: BookOpen },
   ];
+  const desktopTabItems = [
+    { id: 'resumo', label: 'Resumo', icon: ChartBar },
+    { id: 'pedidos', label: 'Pedidos', icon: ShoppingCart },
+    { id: 'produtos', label: 'Produtos', icon: Package },
+    { id: 'pagamentos', label: 'Pagamentos', icon: CreditCard },
+    { id: 'motoboys', label: 'Entregadores', icon: Scooter },
+    { id: 'config', label: 'Configurações', icon: Gear },
+    { id: 'fila', label: 'Fila', icon: ChefHat },
+  ];
 
   const storeId = session?.store?.id;
   const storeSlug = session?.store?.slug;
@@ -1133,30 +1142,24 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     <AdminLayout contextLabel="Painel da Loja">
       <style>{`@keyframes navPop{0%{transform:scale(1)}50%{transform:scale(1.08)}100%{transform:scale(1)}}`}</style>
       {menuVisible ? (
-        <div className="hidden sm:flex justify-center">
+        <div className="hidden sm:flex lg:hidden justify-center">
           <PremiumTabs
             containerClassName="w-full max-w-6xl overflow-x-auto no-scrollbar"
             listClassName="flex flex-nowrap gap-2 text-xs font-semibold text-slate-700"
             buttonClassName="cursor-pointer"
             items={[
-              { id: 'resumo', label: 'Resumo', icon: <ChartBar size={16} weight="duotone" /> },
-              { id: 'pedidos', label: 'Pedidos', icon: <ShoppingCart size={16} weight="duotone" /> },
-              { id: 'produtos', label: 'Produtos', icon: <Package size={16} weight="duotone" /> },
-              { id: 'pagamentos', label: 'Pagamentos', icon: <CreditCard size={16} weight="duotone" /> },
-              { id: 'cardapio', label: 'Cardápio', icon: <BookOpen size={16} weight="duotone" /> },
-              {
-                id: 'motoboys',
-                label: 'Entregadores',
-                icon: <Scooter size={16} weight="duotone" />,
+              ...desktopTabItems.map((item) => ({
+                id: item.id,
+                label: item.label,
+                icon: React.createElement(item.icon, { size: 16, weight: 'duotone' }),
                 badge:
-                  pendingMotoboyRequests > 0 ? (
+                  item.id === 'motoboys' && pendingMotoboyRequests > 0 ? (
                     <span className="absolute -top-2 -right-2 rounded-full bg-amber-500 text-white text-[9px] font-semibold px-1.5 py-0.5">
                       {pendingMotoboyRequests}
                     </span>
                   ) : null,
-              },
-              { id: 'config', label: 'Configurações', icon: <Gear size={16} weight="duotone" /> },
-              { id: 'fila', label: 'Fila de Produção', icon: <ChefHat size={16} weight="duotone" /> },
+              })),
+              { id: 'cardapio', label: 'Cardápio', icon: <BookOpen size={16} weight="duotone" /> },
             ]}
             activeId={activeTab}
             onChange={(id) => {
@@ -1179,6 +1182,56 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         </div>
       ) : null}
 
+      <div className="mx-auto w-full max-w-7xl lg:grid lg:grid-cols-[240px_1fr] lg:gap-6">
+        <aside className="hidden lg:block">
+          <div className="sticky top-24 rounded-3xl border border-slate-200 bg-white p-3 shadow-[0_24px_60px_-38px_rgba(15,23,42,0.5)]">
+            <p className="px-2 pb-2 text-[11px] uppercase tracking-[0.28em] text-slate-500 font-semibold">Navegação</p>
+            <div className="space-y-1">
+              {desktopTabItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = activeTab === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => {
+                      if (item.id === 'fila') {
+                        navigate('/admin/queue');
+                        return;
+                      }
+                      setActiveTab(item.id as typeof activeTab);
+                    }}
+                    className={`w-full flex items-center justify-between gap-2 rounded-2xl px-3 py-2 text-sm font-semibold transition ${
+                      isActive
+                        ? 'bg-brand-gradient text-white shadow-[0_16px_34px_-22px_rgba(15,23,42,0.6)]'
+                        : 'text-slate-700 hover:bg-slate-50'
+                    }`}
+                  >
+                    <span className="inline-flex items-center gap-2">
+                      <Icon size={16} weight={isActive ? 'fill' : 'duotone'} />
+                      {item.label}
+                    </span>
+                    {item.id === 'motoboys' && pendingMotoboyRequests > 0 && (
+                      <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${isActive ? 'bg-white/20' : 'bg-amber-100 text-amber-700'}`}>
+                        {pendingMotoboyRequests}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+              <button
+                type="button"
+                onClick={() => storeSlug && navigate(`/${storeSlug}`)}
+                className="w-full flex items-center gap-2 rounded-2xl px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                <BookOpen size={16} weight="duotone" />
+                Cardápio público
+              </button>
+            </div>
+          </div>
+        </aside>
+
+        <div className="min-w-0">
       {activeTab === 'resumo' && (
         <div className="space-y-4">
           <FormSection
@@ -1390,6 +1443,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       </div>
 
       {error && <p className="text-red-600 text-sm">{error}</p>}
+        </div>
+      </div>
 
       {!mobileNavCollapsed && (
         <div

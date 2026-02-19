@@ -28,7 +28,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(47,157,247,0.14),_transparent_48%),radial-gradient(circle_at_bottom_right,_rgba(95,211,90,0.16),_transparent_45%)] bg-gray-50 dark:bg-slate-950">
-      <header className="sticky top-0 z-50 border-b border-white/60 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl shadow-[0_20px_40px_-30px_rgba(15,23,42,0.45)]">
+      <header className="sticky top-0 z-50 border-b border-white/10 bg-[linear-gradient(120deg,rgba(5,11,22,0.9),rgba(17,24,39,0.9))] backdrop-blur-xl shadow-[0_20px_40px_-30px_rgba(0,0,0,0.75)]">
         <div className="h-1 bg-[linear-gradient(90deg,#2f9df7,#18b3f9,#5fd35a)]" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between py-3 sm:py-4">
@@ -50,19 +50,19 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                 />
               </div>
               <div className="leading-tight min-w-0">
-                <p className="text-base sm:text-xl font-black text-gray-900 dark:text-white truncate">Jano Caminho</p>
-                <p className="hidden sm:block text-xs text-slate-500 dark:text-slate-400">Pedidos e gestão em um só lugar</p>
+                <p className="text-base sm:text-xl font-black text-white truncate">Jano Caminho</p>
+                <p className="hidden sm:block text-xs text-slate-300">Pedidos e gestão em um só lugar</p>
               </div>
             </a>
 
-            <nav className="hidden lg:flex items-center gap-1.5 rounded-full border border-slate-200/80 dark:border-slate-700 bg-white/85 dark:bg-slate-900/60 px-2.5 py-1.5 shadow-sm">
+            <nav className="hidden lg:flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-2.5 py-1.5 shadow-sm">
               {navLinks.map((item) => {
                 return (
                   <button
                     key={item.id}
                     type="button"
                     onClick={item.onClick}
-                    className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/70 transition"
+                    className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold text-slate-100 hover:bg-white/10 transition"
                   >
                     {item.label}
                   </button>
@@ -81,7 +81,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
               )}
               <button
                 onClick={() => navigate('/admin')}
-                className="inline-flex px-3 py-2 sm:px-4 text-sm rounded-full border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
+                className="inline-flex px-3 py-2 sm:px-4 text-sm rounded-full border border-white/20 text-slate-100 hover:bg-white/10 transition-all"
               >
                 Admin loja
               </button>
@@ -106,7 +106,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
               )}
               <button
                 onClick={toggleTheme}
-                className="cursor-pointer p-2 rounded-full border border-slate-200/60 dark:border-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                className="cursor-pointer p-2 rounded-full border border-white/20 text-slate-100 hover:bg-white/10 transition-colors"
                 aria-label="Toggle theme"
               >
                 {theme === 'light' ? <Moon size={18} weight="duotone" /> : <Sun size={18} weight="duotone" />}
@@ -129,14 +129,14 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
               <button
                 type="button"
                 onClick={() => navigate('/')}
-                className="inline-flex items-center gap-2 px-3 py-2 text-xs rounded-full border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/60 text-slate-700 dark:text-slate-200 whitespace-nowrap"
+                className="inline-flex items-center gap-2 px-3 py-2 text-xs rounded-full border border-white/20 bg-white/10 text-slate-100 whitespace-nowrap"
               >
                 Início
               </button>
               <button
                 type="button"
                 onClick={() => navigate('/portfolio')}
-                className="inline-flex items-center gap-2 px-3 py-2 text-xs rounded-full border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/60 text-slate-700 dark:text-slate-200 whitespace-nowrap"
+                className="inline-flex items-center gap-2 px-3 py-2 text-xs rounded-full border border-white/20 bg-white/10 text-slate-100 whitespace-nowrap"
               >
                 <Storefront size={14} weight="duotone" />
                 Portfólio
@@ -144,7 +144,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
               <button
                 type="button"
                 onClick={() => navigate('/admin')}
-                className="inline-flex items-center gap-2 px-3 py-2 text-xs rounded-full border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/60 text-slate-700 dark:text-slate-200 whitespace-nowrap"
+                className="inline-flex items-center gap-2 px-3 py-2 text-xs rounded-full border border-white/20 bg-white/10 text-slate-100 whitespace-nowrap"
               >
                 Admin
               </button>
@@ -159,7 +159,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
               <button
                 type="button"
                 onClick={toggleTheme}
-                className="inline-flex items-center gap-2 px-3 py-2 text-xs rounded-full border border-slate-200/60 dark:border-slate-700 bg-white/80 dark:bg-slate-900/60 text-slate-700 dark:text-slate-200 whitespace-nowrap"
+                className="inline-flex items-center gap-2 px-3 py-2 text-xs rounded-full border border-white/20 bg-white/10 text-slate-100 whitespace-nowrap"
                 aria-label="Toggle theme"
               >
                 {theme === 'light' ? <Moon size={14} weight="duotone" /> : <Sun size={14} weight="duotone" />}
