@@ -7,6 +7,7 @@ import { BILLING_OPTIONS, PLAN_TIERS, getPlanName, resolveAnnualPromoTotal, reso
 import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
 import { formatPhoneInput } from '../utils/format';
 import { FormSection } from '../components/common/FormSection';
+import { Buildings, CopySimple, GlobeHemisphereWest, RocketLaunch } from '@phosphor-icons/react';
 
 const BRAZIL_DDDS = [
   '11', '12', '13', '14', '15', '16', '17', '18', '19',
@@ -174,6 +175,7 @@ export function CreateStore() {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [lgpdAccepted, setLgpdAccepted] = useState(false);
   const [pixCopied, setPixCopied] = useState(false);
+  const [slugCopied, setSlugCopied] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
   const [showValidationModal, setShowValidationModal] = useState(false);
   const [validationMessage, setValidationMessage] = useState('');
@@ -281,6 +283,29 @@ export function CreateStore() {
       window.setTimeout(() => setPixCopied(false), 2000);
     } catch (error) {
       console.error('Falha ao copiar PIX', error);
+    }
+  };
+
+  const handleCopyStoreUrl = async () => {
+    const value = `https://www.janocaminho.com.br/${storeSlugPreview || 'sua-loja'}`;
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(value);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = value;
+        textarea.setAttribute('readonly', '');
+        textarea.style.position = 'absolute';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
+      setSlugCopied(true);
+      window.setTimeout(() => setSlugCopied(false), 1800);
+    } catch (error) {
+      console.error('Falha ao copiar URL da loja', error);
     }
   };
 
@@ -734,6 +759,44 @@ export function CreateStore() {
     scrollToStep(currentStep + 1);
   };
 
+  const previewPanel = (
+    <div className="ds-card-elevated rounded-2xl p-4 space-y-4">
+      <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-600">
+        <GlobeHemisphereWest size={12} weight="duotone" />
+        Pré-visualização
+      </div>
+      <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+        <p className="text-xs text-slate-500 mb-1">Seu site ficará em</p>
+        <div className="flex items-center gap-2">
+          <p className="text-xs font-semibold text-slate-900 break-all flex-1">janocaminho.com.br/{storeSlugPreview || 'sua-loja'}</p>
+          <button
+            type="button"
+            onClick={handleCopyStoreUrl}
+            className="h-7 w-7 rounded-lg border border-slate-200 bg-white text-slate-600 hover:text-slate-900 flex items-center justify-center"
+            aria-label="Copiar URL da loja"
+          >
+            <CopySimple size={14} weight="bold" />
+          </button>
+        </div>
+        {slugCopied && <p className="mt-1 text-[11px] font-semibold text-emerald-600">URL copiada</p>}
+      </div>
+      <div className="space-y-2 text-xs text-slate-600">
+        <p className="inline-flex items-start gap-2">
+          <RocketLaunch className="mt-0.5" size={13} weight="duotone" />
+          Publique sua loja em minutos com link pronto para divulgar.
+        </p>
+        <p className="inline-flex items-start gap-2">
+          <Buildings className="mt-0.5" size={13} weight="duotone" />
+          Painel com cardápio, pedidos e produção no mesmo fluxo.
+        </p>
+        <p className="inline-flex items-start gap-2">
+          <GlobeHemisphereWest className="mt-0.5" size={13} weight="duotone" />
+          Experiência mobile-first para loja e cliente final.
+        </p>
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-[linear-gradient(165deg,#eef6ff_0%,#f8fafc_45%,#ecfeff_100%)]">
       <header className="sticky top-0 z-50 border-b border-white/60 bg-white/80 backdrop-blur-xl shadow-[0_18px_36px_-28px_rgba(15,23,42,0.5)]">
@@ -762,65 +825,65 @@ export function CreateStore() {
 
       <main className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         <div className="grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)] items-start">
-        <aside className="hidden lg:block sticky top-[96px]">
-          <div className="ds-card rounded-2xl p-4 space-y-4">
-            <p className="text-xs uppercase tracking-[0.24em] font-semibold text-slate-500">Pré-visualização</p>
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-              <p className="text-xs text-slate-500 mb-1">Seu site ficará em</p>
-              <p className="text-xs font-semibold text-slate-900 break-all">janocaminho.com.br/{storeSlugPreview || 'sua-loja'}</p>
-            </div>
-            <div className="space-y-2 text-xs text-slate-600">
-              <p className="inline-flex items-start gap-2">
-                <span className="mt-1 h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                Link público pronto para divulgar no WhatsApp e Instagram.
-              </p>
-              <p className="inline-flex items-start gap-2">
-                <span className="mt-1 h-1.5 w-1.5 rounded-full bg-sky-500" />
-                Cardápio, pedidos e produção integrados em um único painel.
-              </p>
-              <p className="inline-flex items-start gap-2">
-                <span className="mt-1 h-1.5 w-1.5 rounded-full bg-amber-500" />
-                Configuração guiada em 3 etapas com publicação rápida.
-              </p>
-            </div>
-          </div>
+        <aside className="order-2 lg:order-1 lg:sticky lg:top-[96px] hidden lg:block">
+          {previewPanel}
         </aside>
 
-        <div className="min-w-0 ds-card-elevated rounded-3xl p-4 sm:p-6 lg:p-8">
-          <div className="mb-8 text-center">
-            <div className="w-20 h-20 rounded-2xl overflow-hidden shadow-lg mx-auto mb-4 border border-white bg-white">
-              <img src={platformLogo} alt="Jano Caminho" className="w-full h-full object-cover" />
+        <div className="order-1 lg:order-2 min-w-0 ds-card-elevated rounded-3xl p-4 sm:p-6 lg:p-8">
+          <div className="mb-5 flex flex-col gap-3 sm:gap-2">
+            <div className="inline-flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.24em] text-slate-600">
+              <Buildings size={12} weight="duotone" />
+              Criar nova loja
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Criar minha loja</h1>
-            <p className="text-gray-500">Preencha os dados para gerar seu site automaticamente.</p>
+            <h1 className="text-2xl sm:text-3xl font-black text-gray-900 leading-tight">Criar minha loja</h1>
+            <p className="text-sm sm:text-base text-slate-600">Em 3 etapas você publica seu link e começa a vender.</p>
           </div>
 
-          <div className="sticky top-[72px] sm:top-[84px] z-20 mb-6 ds-card p-3 sm:p-4 backdrop-blur bg-white/95">
-            <div className="mb-2 flex items-center justify-between">
+          <div className="sticky top-[72px] sm:top-[84px] z-20 mb-6 ds-card p-3 sm:p-4 backdrop-blur bg-white/95 border border-slate-200">
+            <div className="mb-2 flex items-center justify-between gap-2">
               <p className="text-xs uppercase tracking-[0.22em] font-semibold text-slate-500">Onboarding</p>
-              <span className="ds-badge text-[11px]">{currentStep}/3</span>
+              <span className="text-[11px] text-slate-500 font-semibold">{currentStep}/3</span>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            <div className="flex gap-2 overflow-x-auto pb-1">
               {steps.map((step) => (
                 <button
                   type="button"
                   key={step.id}
                   onClick={() => scrollToStep(step.id)}
-                  className={`rounded-xl border px-3 py-2.5 ${
+                  className={`min-w-[170px] sm:min-w-0 sm:flex-1 rounded-xl border px-3 py-2 ${
                     currentStep === step.id
                       ? 'border-brand-primary bg-brand-primary/10 ring-2 ring-brand-primary/20'
                       : step.done
                         ? 'border-emerald-200 bg-emerald-50'
                         : 'border-slate-200 bg-slate-50'
-                  }`}
+                  } text-left`}
                 >
-                  <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">Etapa {step.id}</p>
-                  <p className={`truncate text-sm font-bold ${
-                    currentStep === step.id ? 'text-brand-primary' : step.done ? 'text-emerald-700' : 'text-slate-800'
-                  }`}>{step.title}</p>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`h-6 w-6 rounded-full text-[11px] font-bold flex items-center justify-center ${
+                        currentStep === step.id
+                          ? 'bg-brand-primary text-white'
+                          : step.done
+                            ? 'bg-emerald-500 text-white'
+                            : 'bg-white text-slate-600 border border-slate-300'
+                      }`}
+                    >
+                      {step.id}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Etapa</p>
+                      <p className={`truncate text-sm font-bold ${
+                        currentStep === step.id ? 'text-brand-primary' : step.done ? 'text-emerald-700' : 'text-slate-800'
+                      }`}>{step.title}</p>
+                    </div>
+                  </div>
                 </button>
               ))}
             </div>
+          </div>
+
+          <div className="lg:hidden mb-6">
+            {previewPanel}
           </div>
 
           {storeError && (
@@ -831,7 +894,12 @@ export function CreateStore() {
 
           <form className="space-y-6" onSubmit={handleCreateStore}>
             <div ref={personalSectionRef} className="scroll-mt-36" onFocusCapture={() => setCurrentStep(1)}>
-            <FormSection title="Informações pessoais" variant="primary" contentClassName="space-y-4">
+            <FormSection
+              title="Informações pessoais"
+              subtitle="Dados do responsável pela operação da loja."
+              variant="primary"
+              contentClassName="space-y-4"
+            >
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-gray-700">Nome completo</label>
                   <input
@@ -968,7 +1036,8 @@ export function CreateStore() {
                 </div>
 
                 <div ref={addressSectionRef} className="pt-4 border-t border-gray-200 scroll-mt-36" onFocusCapture={() => setCurrentStep(2)}>
-                  <h4 className="text-sm font-semibold text-gray-700 mb-3">Endereço</h4>
+                  <h4 className="text-sm font-semibold text-gray-700">Endereço</h4>
+                  <p className="text-xs text-slate-500 mb-3">Onde sua loja opera e recebe pedidos.</p>
                   <div className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 min-w-0">
                       <div className="md:col-span-2 space-y-2 min-w-0">
@@ -1123,7 +1192,12 @@ export function CreateStore() {
             </div>
 
             <div ref={storeSectionRef} className="pt-6 border-t border-gray-100 scroll-mt-36" onFocusCapture={() => setCurrentStep(3)}>
-              <FormSection title="Configurações da loja" variant="warning" contentClassName="space-y-4">
+              <FormSection
+                title="Configurações da loja"
+                subtitle="Defina identidade, segmento e canais de contato."
+                variant="warning"
+                contentClassName="space-y-4"
+              >
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700">Nome da loja</label>
               <input
@@ -1150,6 +1224,14 @@ export function CreateStore() {
                 <span className="inline-flex max-w-full items-center rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700">
                   www.janocaminho.com.br/{storeSlugPreview || 'sua-loja'}
                 </span>
+                <button
+                  type="button"
+                  onClick={handleCopyStoreUrl}
+                  className="h-7 w-7 rounded-lg border border-slate-200 bg-white text-slate-600 hover:text-slate-900 flex items-center justify-center"
+                  aria-label="Copiar URL da loja"
+                >
+                  <CopySimple size={14} weight="bold" />
+                </button>
               </div>
               <p className="text-xs text-gray-500">
                 Se ja existir uma loja com esse nome, o sistema adiciona um sufixo (ex.: {storeSlugPreview || 'sua-loja'}-2).
@@ -1548,9 +1630,9 @@ export function CreateStore() {
               </label>
             </div>
 
-            <div className="sticky bottom-3 z-20 rounded-2xl border border-slate-200 bg-white/95 backdrop-blur p-3 shadow-[0_18px_40px_-28px_rgba(15,23,42,0.5)]">
+            <div className="sticky bottom-3 z-20 rounded-2xl border border-slate-200/90 bg-white/90 backdrop-blur-xl p-3 shadow-[0_24px_46px_-30px_rgba(15,23,42,0.55)]">
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
-                <div className="text-xs text-slate-500">
+                <div className="text-[11px] text-slate-500">
                   Etapa atual <span className="font-semibold text-slate-700">{currentStep} de 3</span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -1566,7 +1648,8 @@ export function CreateStore() {
                     <button
                       type="button"
                       onClick={handleNextStep}
-                      className="ds-btn ds-btn-primary ds-btn-shine ds-focus-ring px-4 py-2 text-sm font-semibold text-white"
+                      disabled={!canAdvanceFromStep(currentStep)}
+                      className="ds-btn ds-btn-primary ds-btn-shine ds-focus-ring px-4 py-2 text-sm font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Próximo
                     </button>
