@@ -6,28 +6,15 @@ interface AuthLayoutProps {
 }
 
 export function AuthLayout({ children }: AuthLayoutProps) {
-  const platformLogo = '/janocaminho.jpg';
-
   return (
-    <div
-      className="min-h-screen bg-brand-secondary-soft flex items-center justify-center p-4 relative"
-      style={{
-        backgroundImage: `url(${platformLogo})`,
-        backgroundSize: '200px',
-        backgroundRepeat: 'repeat',
-        backgroundPosition: 'center',
-        opacity: 0.95,
-      }}
-    >
-      <div
-        className="absolute inset-0 bg-gradient-to-br from-white/90 to-gray-50/90"
-        style={{ backdropFilter: 'blur(2px)' }}
-      />
-      <div className="absolute bottom-0 left-0 right-0 pointer-events-none z-0 h-48 bg-gradient-to-t from-red-100/70 via-orange-100/40 to-transparent" />
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-[linear-gradient(135deg,#eff6ff_0%,#f8fafc_50%,#ecfeff_100%)]">
+      <div className="absolute -top-20 -right-20 h-80 w-80 rounded-full bg-sky-200/40 blur-3xl" />
+      <div className="absolute -bottom-24 -left-16 h-96 w-96 rounded-full bg-emerald-200/30 blur-3xl" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(37,99,235,0.12),_transparent_55%)]" />
       <div className="max-w-md w-full relative z-10">
-        <div className="absolute -top-24 -right-20 w-56 h-56 bg-brand-primary-soft rounded-full blur-3xl" />
-        <div className="absolute -bottom-24 -left-16 w-56 h-56 bg-brand-secondary-soft rounded-full blur-3xl" />
-        <div className="bg-white/95 backdrop-blur rounded-3xl shadow-2xl border border-white/70 p-6 sm:p-8 space-y-6 relative">
+        <div className="bg-white/95 backdrop-blur rounded-3xl shadow-2xl border border-white/70 p-6 sm:p-8 space-y-6 relative overflow-hidden">
+          <div className="absolute inset-x-0 top-0 h-1 bg-[linear-gradient(90deg,#2f9df7,#18b3f9,#5fd35a)]" />
+          <div className="absolute -top-14 -right-14 h-36 w-36 rounded-full bg-sky-100/70 blur-2xl" />
           {children}
         </div>
       </div>

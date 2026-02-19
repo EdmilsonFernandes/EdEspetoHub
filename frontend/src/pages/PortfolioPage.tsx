@@ -468,16 +468,19 @@ export function PortfolioPage() {
 
             <div className="lg:col-span-5 space-y-4">
               <div className="rounded-3xl border border-slate-200 bg-white shadow-[0_24px_60px_-36px_rgba(15,23,42,0.35)] overflow-hidden">
-                <img
-                  src="/janocaminho.jpg"
-                  alt="Banner Jano Caminho"
-                  className="w-full h-48 sm:h-52 object-contain object-center bg-white"
-                  loading="eager"
-                />
-                <div className="px-4 py-3 bg-[linear-gradient(120deg,rgba(47,157,247,0.08),rgba(95,211,90,0.1))]">
-                  <p className="text-sm font-bold text-slate-800">
-                    Jano Caminho para mercado, farmácia, adega, food truck e restaurante
-                  </p>
+                <div className="relative">
+                  <img
+                    src="/janocaminho.jpg"
+                    alt="Jano Caminho para mercado, farmácia, adega, food truck e restaurante"
+                    className="w-full h-56 sm:h-64 object-cover object-center"
+                    loading="eager"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-900/25 to-transparent" />
+                  <div className="absolute inset-x-4 bottom-4 rounded-2xl border border-white/20 bg-white/10 px-3 py-2 backdrop-blur-md">
+                    <p className="text-xs sm:text-sm font-bold text-white">
+                      Plataforma para mercado, farmácia, adega, food truck e restaurante
+                    </p>
+                  </div>
                 </div>
               </div>
               <div className="rounded-3xl border border-slate-200 bg-white shadow-[0_24px_60px_-36px_rgba(15,23,42,0.6)] overflow-hidden">

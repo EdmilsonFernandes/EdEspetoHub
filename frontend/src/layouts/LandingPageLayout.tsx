@@ -32,12 +32,12 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
         <div className="h-1 bg-[linear-gradient(90deg,#2f9df7,#18b3f9,#5fd35a)]" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between py-3 sm:py-4">
-            <a href="https://www.janocaminho.com.br" className="flex items-center gap-3">
-              <div className="h-12 w-12 rounded-2xl bg-white shadow-[0_12px_24px_-16px_rgba(47,157,247,0.8)] ring-1 ring-sky-200 overflow-hidden">
+            <a href="https://www.janocaminho.com.br" className="flex items-center gap-3 min-w-0">
+              <div className="h-12 sm:h-14 w-24 sm:w-28 rounded-2xl bg-slate-900 shadow-[0_14px_28px_-18px_rgba(47,157,247,0.7)] ring-1 ring-sky-200/70 overflow-hidden shrink-0">
                 <img
                   src="/janocaminho.jpg"
                   alt="Jano Caminho"
-                  className="h-full w-full object-cover object-[15%_center]"
+                  className="h-full w-full object-cover object-center"
                   draggable={false}
                 />
               </div>
