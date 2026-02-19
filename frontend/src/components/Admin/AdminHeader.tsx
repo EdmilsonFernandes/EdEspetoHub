@@ -88,6 +88,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
       try {
         const subscription = await subscriptionService.getByStore(storeId);
         setPlanDetails({
+          status: subscription?.status || null,
           planName: subscription?.planExempt ? 'vip' : subscription?.plan?.name || '',
           displayName: subscription?.planExempt
             ? 'Isento de plano'

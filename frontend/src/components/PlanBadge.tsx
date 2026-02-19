@@ -58,6 +58,9 @@ export const PlanBadge = ({ planName, displayName, variant = 'light', details })
       ? 'bg-white/15 text-white ring-white/25 shadow-black/20'
       : `bg-gradient-to-r ${style.badge}`;
   const titleLabel = displayName || planDetails?.tier?.label || 'Plano não definido';
+  const subscriptionStatus = String(details?.status || '').toUpperCase();
+  const latestPaymentStatus = String(details?.latestPaymentStatus || '').toUpperCase();
+  const canShowPaidInfo = !details?.planExempt && subscriptionStatus !== 'TRIAL' && latestPaymentStatus === 'PAID';
 
   // Handle click outside to close dropdown
   useEffect(() => {
@@ -113,7 +116,7 @@ export const PlanBadge = ({ planName, displayName, variant = 'light', details })
               </li>
             ))}
           </ul>
-          {details?.startDate || (!details?.planExempt && (details?.endDate || details?.latestPaymentAt)) ? (
+          {details?.startDate || (!details?.planExempt && details?.endDate) || canShowPaidInfo ? (
             <div className="mt-3 border-t border-gray-100 pt-3 text-[11px] text-gray-500 space-y-1">
               {details?.startDate && (
                 <div className="flex items-center justify-between">
@@ -121,7 +124,7 @@ export const PlanBadge = ({ planName, displayName, variant = 'light', details })
                   <span className="font-semibold text-gray-700">{formatDate(details.startDate)}</span>
                 </div>
               )}
-              {!details?.planExempt && details?.latestPaymentAt && (
+              {canShowPaidInfo && details?.latestPaymentAt && (
                 <div className="flex items-center justify-between">
                   <span>Ultimo pagamento</span>
                   <span className="font-semibold text-gray-700">
@@ -129,7 +132,7 @@ export const PlanBadge = ({ planName, displayName, variant = 'light', details })
                   </span>
                 </div>
               )}
-              {!details?.planExempt && details?.latestPaymentAmount && (
+              {canShowPaidInfo && details?.latestPaymentAmount && (
                 <div className="flex items-center justify-between">
                   <span>Valor pago</span>
                   <span className="font-semibold text-gray-700">
