@@ -42,6 +42,7 @@ const buildDemoStore = (slug: string) => {
     createdAt: now,
     settings: {
       logoUrl: '/chama-no-espeto.jpeg',
+      bannerUrl: null,
       description: 'Loja demo de espetos com combos especiais e atendimento rápido.',
       primaryColor: '#dc2626',
       secondaryColor: '#111827',
@@ -174,6 +175,7 @@ export class StoreController {
             settings: store.settings
               ? {
                   logoUrl: store.settings.logoUrl || null,
+                  bannerUrl: store.settings.bannerUrl || null,
                   description: store.settings.description || null,
                   address: store.settings.address || null,
                   primaryColor: store.settings.primaryColor || null,

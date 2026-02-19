@@ -30,6 +30,9 @@ export class StoreSettings
   @Column({ name: 'logo_url', type: 'text', nullable: true })
   logoUrl?: string | null;
 
+  @Column({ name: 'banner_url', type: 'text', nullable: true })
+  bannerUrl?: string | null;
+
   @Column({ name: 'description', type: 'text', nullable: true })
   description?: string | null;
 

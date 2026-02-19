@@ -316,6 +316,8 @@ export class AuthService
       name: input.storeName,
       logoUrl: input.logoUrl,
       logoFile: input.logoFile,
+      bannerUrl: (input as any).bannerUrl,
+      bannerFile: (input as any).bannerFile,
       segment: input.segment,
       city: input.city,
       state: input.state,
@@ -399,6 +401,7 @@ export class AuthService
       }
 
       const logoUrl = await saveBase64Image(storePayload.logoFile, `store-${user.id}`);
+      const bannerUrl = await saveBase64Image(storePayload.bannerFile, `store-banner-${user.id}`);
       const segment = sanitizeStoreSegment(storePayload.segment);
       const segmentPreset = getStoreSegmentPreset(segment);
       const trimmedCity = storePayload.city?.toString().trim();
@@ -407,6 +410,7 @@ export class AuthService
 
       const settings = manager.create(StoreSettings, {
         logoUrl: logoUrl || storePayload.logoUrl,
+        bannerUrl: bannerUrl || storePayload.bannerUrl || null,
         description: storePayload.description || segmentPreset.description,
         address: trimmedAddress || null,
         city: trimmedCity || null,

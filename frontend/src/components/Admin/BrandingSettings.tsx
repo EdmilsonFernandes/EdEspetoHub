@@ -7,6 +7,7 @@ const secondaryPalette = [ '#111827', '#1f2937', '#334155', '#0f172a', '#0f766e'
 
 export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving }) => {
   const fileInputRef = useRef(null);
+  const bannerInputRef = useRef(null);
   const [storeCepLoading, setStoreCepLoading] = useState(false);
   const [storeCepError, setStoreCepError] = useState("");
   const [sectionsOpen, setSectionsOpen] = useState({
@@ -119,6 +120,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
     .toUpperCase();
 
   const logoPreview = resolveAssetUrl(branding.logoUrl) || branding.logoFile || "";
+  const bannerPreview = resolveAssetUrl(branding.bannerUrl) || branding.bannerFile || "";
 
   return (
 
@@ -245,6 +247,55 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
                 </button>
               </div>
             )}
+          </div>
+        </div>
+        <div className="space-y-3">
+          <label className="text-sm font-semibold text-gray-700">Banner da loja</label>
+          <div className="flex flex-col gap-3">
+            <label className="w-full cursor-pointer">
+              <div className="border-2 border-dashed border-gray-300 rounded-2xl p-4 hover:border-brand-primary transition-colors text-center bg-white/70">
+                <p className="text-sm text-gray-600 mb-1">Envie o banner da loja</p>
+                <p className="text-xs text-gray-500">PNG ou JPG até 5MB</p>
+              </div>
+              <input
+                ref={bannerInputRef}
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  const reader = new FileReader();
+                  reader.onload = () => {
+                    handleChange("bannerFile", reader.result);
+                    handleChange("bannerUrl", reader.result);
+                  };
+                  reader.readAsDataURL(file);
+                }}
+                className="hidden"
+              />
+            </label>
+            <div className="w-full rounded-2xl overflow-hidden border border-gray-200 bg-gray-100 min-h-[140px] relative group">
+              {bannerPreview ? (
+                <img src={bannerPreview} alt="Banner da loja" className="w-full h-[180px] object-cover" />
+              ) : (
+                <div className="h-[180px] flex items-center justify-center text-xs text-gray-500">
+                  Sem banner configurado
+                </div>
+              )}
+              {bannerPreview ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleChange("bannerFile", "");
+                    handleChange("bannerUrl", "");
+                    if (bannerInputRef.current) bannerInputRef.current.value = "";
+                  }}
+                  className="absolute inset-0 bg-black/45 text-white text-xs opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center hover:-translate-y-0.5 active:scale-95"
+                >
+                  Remover banner
+                </button>
+              ) : null}
+            </div>
           </div>
         </div>
           </div>

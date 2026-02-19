@@ -96,6 +96,8 @@ export class StoreService
       );
 
       const logoUrl = await saveBase64Image(input.logoFile, `store-${input.ownerId}`);
+      const bannerUrl = await saveBase64Image(input.bannerFile, `store-banner-${input.ownerId}`);
+      const trimmedBannerUrl = input.bannerUrl?.toString().trim();
 
       const socialLinks = sanitizeSocialLinks(input.socialLinks);
       const deliveryRadiusKm = this.parseNumber(input.deliveryRadiusKm);
@@ -111,6 +113,7 @@ export class StoreService
       const trimmedEmail = input.contactEmail?.toString().trim();
       const settings = manager.create(StoreSettings, {
         logoUrl: logoUrl || input.logoUrl,
+        bannerUrl: bannerUrl || trimmedBannerUrl || null,
         description: input.description,
         address: trimmedAddress || owner.address || null,
         city: trimmedCity || null,
@@ -199,9 +202,15 @@ export class StoreService
       const segmentPreset = getStoreSegmentPreset(nextSegment);
 
       const uploadedLogo = await saveBase64Image(data.logoFile, `store-${store.id}`);
+      const uploadedBanner = await saveBase64Image(data.bannerFile, `store-banner-${store.id}`);
 
       store.settings.logoUrl =
         uploadedLogo ?? data.logoUrl ?? store.settings.logoUrl;
+
+      if (data.bannerFile !== undefined || data.bannerUrl !== undefined) {
+        const trimmedBannerUrl = data.bannerUrl?.toString().trim();
+        store.settings.bannerUrl = uploadedBanner ?? trimmedBannerUrl ?? null;
+      }
 
       store.settings.description =
         data.description ?? store.settings.description;

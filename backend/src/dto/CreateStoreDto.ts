@@ -17,6 +17,8 @@ export interface CreateStoreDto {
   slug?: string;
   logoUrl?: string;
   logoFile?: string | null;
+  bannerUrl?: string;
+  bannerFile?: string | null;
   description?: string;
   primaryColor: string;
   secondaryColor?: string;

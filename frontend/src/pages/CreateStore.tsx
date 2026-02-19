@@ -221,6 +221,7 @@ export function CreateStore() {
     storeDescription: '',
     pixKey: '',
     logoFile: '',
+    bannerFile: '',
     primaryColor: '#2f9df7',
     secondaryColor: '#5fd35a',
     socialLinks: [
@@ -288,7 +289,7 @@ export function CreateStore() {
     }
   };
 
-  const handleBannerUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleBannerUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
     try {
@@ -298,6 +299,8 @@ export function CreateStore() {
       const nextPreview = URL.createObjectURL(file);
       bannerObjectUrlRef.current = nextPreview;
       setBannerPreviewUrl(nextPreview);
+      const base64 = await convertFileToBase64(file);
+      setRegisterForm((prev) => ({ ...prev, bannerFile: base64 }));
     } catch (error) {
       console.error('Falha ao processar banner', error);
       setBannerPreviewUrl('');
@@ -583,6 +586,7 @@ export function CreateStore() {
           state: registerForm.state,
           pixKey: registerForm.pixKey,
           logoFile: registerForm.logoFile,
+          bannerFile: registerForm.bannerFile,
           primaryColor: registerForm.primaryColor,
           secondaryColor: registerForm.secondaryColor,
           socialLinks: registerForm.socialLinks.filter((link) => link.value),
