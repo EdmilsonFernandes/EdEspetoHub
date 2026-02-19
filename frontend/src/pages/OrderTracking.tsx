@@ -11,6 +11,7 @@ import { applyBrandTheme } from '../utils/brandTheme';
 import { buildPixPayload } from '../utils/pixPayload';
 import { GoogleRouteMapView } from '../components/GoogleRouteMapView';
 import { formatSelectedModifiers } from '../utils/productModifiers';
+import { usePollingPaymentStatus } from '../hooks/usePollingPaymentStatus';
 
 const statusLabels: Record<string, string> = {
   pending: 'Recebido',
@@ -361,43 +362,62 @@ export function OrderTracking() {
   const deliveryTagOptions = ['Rápido', 'Educado', 'Pedido intacto', 'Boa comunicação'];
   const reviewTip = reviewState?.review || null;
   const tipStatus = String(reviewTip?.tipStatus || 'NONE').toUpperCase();
+  const tipExpiresAtMs = reviewTip?.tipExpiresAt ? new Date(reviewTip.tipExpiresAt).getTime() : null;
+  const isTipExpired = Boolean(
+    tipExpiresAtMs &&
+      Number.isFinite(tipExpiresAtMs) &&
+      tipExpiresAtMs <= Date.now() &&
+      tipStatus !== 'PAID' &&
+      tipStatus !== 'NONE'
+  );
+  const tipUiStatus = isTipExpired && tipStatus === 'PENDING' ? 'EXPIRED' : tipStatus;
   const tipAmount = Number(reviewTip?.tipAmount || 0);
   const hasTip = tipAmount > 0;
   const canShowTipPayment = hasTip && (reviewTip?.tipQrCodeText || reviewTip?.tipPaymentLink);
   const tipStatusLabel =
-    tipStatus === 'PAID' ? 'Pago' : tipStatus === 'FAILED' ? 'Falhou' : tipStatus === 'PENDING' ? 'Pendente' : 'Sem gorjeta';
+    tipUiStatus === 'PAID'
+      ? 'Pago'
+      : tipUiStatus === 'FAILED'
+      ? 'Não confirmado'
+      : tipUiStatus === 'EXPIRED'
+      ? 'Expirado'
+      : tipUiStatus === 'PENDING'
+      ? 'Pendente'
+      : 'Sem gorjeta';
   const tipStatusClass =
-    tipStatus === 'PAID'
+    tipUiStatus === 'PAID'
       ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-      : tipStatus === 'FAILED'
-      ? 'bg-rose-50 text-rose-700 border-rose-200'
-      : tipStatus === 'PENDING'
+      : tipUiStatus === 'FAILED' || tipUiStatus === 'EXPIRED'
+      ? 'bg-slate-100 text-slate-700 border-slate-200'
+      : tipUiStatus === 'PENDING'
       ? 'bg-amber-50 text-amber-700 border-amber-200'
       : 'bg-slate-50 text-slate-500 border-slate-200';
 
-  const refreshReviewStatus = async (silent = false) => {
+  const refreshReviewStatus = async ({ silent = true }: { silent?: boolean } = {}) => {
     if (!order?.id) return;
     try {
       if (!silent) setReviewLoading(true);
       const payload = await orderService.getReviewByOrder(order.id);
       setReviewState(payload || null);
+      return String(payload?.review?.tipStatus || '').toUpperCase();
     } catch (error: any) {
-      if (!silent) {
-        setReviewError(error?.message || 'Não foi possível atualizar status da gorjeta.');
-      }
+      return null;
     } finally {
       if (!silent) setReviewLoading(false);
     }
   };
 
-  useEffect(() => {
-    if (!order?.id || !isReady || !canShowTipPayment) return;
-    if (tipStatus === 'PAID' || tipStatus === 'FAILED' || tipStatus === 'NONE') return;
-    const interval = window.setInterval(() => {
-      refreshReviewStatus(true);
-    }, 5000);
-    return () => window.clearInterval(interval);
-  }, [order?.id, isReady, canShowTipPayment, tipStatus]);
+  const tipPolling = usePollingPaymentStatus({
+    id: reviewTip?.id || order?.id,
+    enabled: Boolean(order?.id && isReady && canShowTipPayment),
+    status: tipUiStatus,
+    intervalMs: 5000,
+    timeoutMs: 4 * 60 * 1000,
+    checkStatus: async () => {
+      const nextStatus = await refreshReviewStatus({ silent: true });
+      return nextStatus || tipUiStatus;
+    },
+  });
 
   const toggleTag = (type: 'storeTags' | 'deliveryTags', value: string) => {
     setReviewForm((prev) => {
@@ -1296,15 +1316,46 @@ export function OrderTracking() {
                                       Abrir link de pagamento
                                     </a>
                                   ) : null}
-                                  {tipStatus !== 'PAID' ? (
-                                    <button
-                                      type="button"
-                                      onClick={refreshReviewStatus}
-                                      className="w-full rounded-lg bg-slate-900 px-3 py-2 text-xs font-bold text-white"
-                                    >
-                                      Atualizar status da gorjeta
-                                    </button>
-                                  ) : null}
+                                  {tipUiStatus === 'PAID' ? (
+                                    <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-800">
+                                      <p className="font-semibold">Pagamento confirmado. Obrigado!</p>
+                                    </div>
+                                  ) : (
+                                    <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 space-y-2">
+                                      <div className="flex items-center gap-2 text-xs text-slate-700">
+                                        <CircleNotch
+                                          size={14}
+                                          weight="bold"
+                                          className={tipPolling.isChecking || tipPolling.isPolling ? 'animate-spin text-sky-600' : 'text-slate-400'}
+                                        />
+                                        <span className="font-semibold">
+                                          {tipUiStatus === 'PENDING'
+                                            ? 'Aguardando confirmação do pagamento via Pix. Isso pode levar alguns segundos.'
+                                            : 'Não conseguimos confirmar ainda. Você pode tentar novamente.'}
+                                        </span>
+                                      </div>
+                                      <div className="text-[11px] text-slate-500 space-y-1">
+                                        <p>{tipPolling.isChecking ? 'Verificando...' : 'Monitoramento automático ativo.'}</p>
+                                        {tipPolling.connectionUnstable ? (
+                                          <p className="text-amber-700">Conexão instável, tentando novamente.</p>
+                                        ) : null}
+                                        {tipPolling.lastCheckedAgoSec !== null ? (
+                                          <p>Última verificação há {tipPolling.lastCheckedAgoSec}s</p>
+                                        ) : null}
+                                        {tipPolling.timedOut ? (
+                                          <p>Tempo de verificação automática finalizado. Você pode verificar novamente agora.</p>
+                                        ) : null}
+                                      </div>
+                                      <button
+                                        type="button"
+                                        onClick={tipPolling.verifyNow}
+                                        disabled={tipPolling.isChecking}
+                                        className="w-full rounded-lg bg-slate-900 px-3 py-2 text-xs font-bold text-white disabled:opacity-60"
+                                      >
+                                        {tipPolling.isChecking ? 'Verificando...' : 'Já paguei, verificar agora'}
+                                      </button>
+                                    </div>
+                                  )}
                                 </div>
                               ) : null}
                             </div>
