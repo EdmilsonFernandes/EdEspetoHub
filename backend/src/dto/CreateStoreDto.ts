@@ -23,6 +23,7 @@ export interface CreateStoreDto {
   pixKey?: string;
   contactEmail?: string;
   promoMessage?: string;
+  segment?: string;
   deliveryRadiusKm?: number;
   deliveryFee?: number;
   address?: string;

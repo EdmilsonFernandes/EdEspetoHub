@@ -51,6 +51,9 @@ export class StoreSettings
   @Column({ name: 'promo_message', type: 'text', nullable: true })
   promoMessage?: string | null;
 
+  @Column({ name: 'segment', type: 'varchar', nullable: true, default: 'outros' })
+  segment?: string | null;
+
   @Column({ name: 'prep_base_minutes', type: 'int', nullable: true })
   prepBaseMinutes?: number | null;
 

@@ -53,6 +53,15 @@ export async function runMigrations() {
   `);
   await AppDataSource.query(`
     ALTER TABLE IF EXISTS store_settings
+    ADD COLUMN IF NOT EXISTS segment VARCHAR DEFAULT 'outros';
+  `);
+  await AppDataSource.query(`
+    UPDATE store_settings
+    SET segment = COALESCE(NULLIF(TRIM(segment), ''), 'outros')
+    WHERE segment IS NULL OR TRIM(segment) = '';
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS store_settings
     ADD COLUMN IF NOT EXISTS plan_exempt BOOLEAN DEFAULT FALSE;
   `);
   await AppDataSource.query(`

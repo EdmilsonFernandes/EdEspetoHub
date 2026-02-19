@@ -44,6 +44,7 @@ const buildDemoStore = (slug: string) => {
       description: 'Loja demo de espetos com combos especiais e atendimento rápido.',
       primaryColor: '#dc2626',
       secondaryColor: '#111827',
+      segment: 'restaurante',
       socialLinks: [ { type: 'instagram', value: 'janocaminho' } ],
       openingHours: [
         { day: 1, enabled: true, intervals: [ { start: '10:00', end: '22:00' } ] },
@@ -161,6 +162,7 @@ export class StoreController {
                   description: store.settings.description || null,
                   primaryColor: store.settings.primaryColor || null,
                   secondaryColor: store.settings.secondaryColor || null,
+                  segment: store.settings.segment || 'outros',
                 }
               : null,
           };

@@ -38,6 +38,7 @@ import { normalizeDocument, validateDocument } from '../utils/documents';
 import { logger } from '../utils/logger';
 import { AppError } from '../errors/AppError';
 import { PlatformAdmin } from '../entities/PlatformAdmin';
+import { getStoreSegmentPreset, sanitizeStoreSegment } from '../utils/storeSegment';
 /**
  * Provides AuthService functionality.
  *
@@ -314,8 +315,10 @@ export class AuthService
       name: input.storeName,
       logoUrl: input.logoUrl,
       logoFile: input.logoFile,
+      segment: input.segment,
       primaryColor: input.primaryColor,
       secondaryColor: input.secondaryColor,
+      description: input.description,
       socialLinks: input.socialLinks,
     };
 
@@ -392,15 +395,18 @@ export class AuthService
       }
 
       const logoUrl = await saveBase64Image(storePayload.logoFile, `store-${user.id}`);
+      const segment = sanitizeStoreSegment(storePayload.segment);
+      const segmentPreset = getStoreSegmentPreset(segment);
 
       const settings = manager.create(StoreSettings, {
         logoUrl: logoUrl || storePayload.logoUrl,
-        description: storePayload.description,
-        primaryColor: storePayload.primaryColor,
-        secondaryColor: storePayload.secondaryColor,
+        description: storePayload.description || segmentPreset.description,
+        primaryColor: storePayload.primaryColor || segmentPreset.primaryColor,
+        secondaryColor: storePayload.secondaryColor || segmentPreset.secondaryColor,
+        segment,
         socialLinks: sanitizeSocialLinks(storePayload.socialLinks),
         openingHours: storePayload.openingHours ?? [],
-        orderTypes: storePayload.orderTypes ?? [ 'delivery', 'pickup', 'table' ],
+        orderTypes: storePayload.orderTypes ?? segmentPreset.orderTypes,
       });
 
       const store = storeRepo.create({

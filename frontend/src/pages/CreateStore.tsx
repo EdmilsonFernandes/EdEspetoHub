@@ -20,6 +20,92 @@ const BRAZIL_DDDS = [
   '91', '92', '93', '94', '95', '96', '97', '98', '99',
 ];
 
+const STORE_SEGMENTS = [
+  { value: 'restaurante', label: 'Restaurante' },
+  { value: 'hamburgueria', label: 'Hamburgueria' },
+  { value: 'lanchonete', label: 'Lanchonete' },
+  { value: 'pizzaria', label: 'Pizzaria' },
+  { value: 'adega', label: 'Adega' },
+  { value: 'mercado', label: 'Mercado' },
+  { value: 'hortifruti', label: 'Hortifruti' },
+  { value: 'farmacia', label: 'Farmácia / Drogaria' },
+  { value: 'confeitaria', label: 'Confeitaria' },
+  { value: 'outros', label: 'Outros' },
+];
+
+const STORE_SEGMENT_PRESETS: Record<string, { primaryColor: string; secondaryColor: string; description: string; orderTypes: string[]; categories: string[] }> = {
+  restaurante: {
+    primaryColor: '#f97316',
+    secondaryColor: '#0f172a',
+    description: 'Pratos frescos e atendimento rápido com pedido online.',
+    orderTypes: ['delivery', 'pickup', 'table'],
+    categories: ['Entradas', 'Pratos', 'Bebidas', 'Sobremesas'],
+  },
+  hamburgueria: {
+    primaryColor: '#ef4444',
+    secondaryColor: '#111827',
+    description: 'Hambúrgueres artesanais e combos para delivery, retirada e mesa.',
+    orderTypes: ['delivery', 'pickup', 'table'],
+    categories: ['Hambúrgueres', 'Combos', 'Porções', 'Bebidas'],
+  },
+  lanchonete: {
+    primaryColor: '#f59e0b',
+    secondaryColor: '#1f2937',
+    description: 'Lanches, salgados e bebidas com operação simples no dia a dia.',
+    orderTypes: ['delivery', 'pickup', 'table'],
+    categories: ['Lanches', 'Salgados', 'Sucos', 'Bebidas'],
+  },
+  pizzaria: {
+    primaryColor: '#dc2626',
+    secondaryColor: '#111827',
+    description: 'Pizzas e porções com cardápio online e fila organizada.',
+    orderTypes: ['delivery', 'pickup', 'table'],
+    categories: ['Pizzas', 'Broto', 'Bordas', 'Bebidas'],
+  },
+  adega: {
+    primaryColor: '#7c3aed',
+    secondaryColor: '#0f172a',
+    description: 'Bebidas geladas e conveniência com pedidos rápidos.',
+    orderTypes: ['delivery', 'pickup'],
+    categories: ['Cervejas', 'Destilados', 'Vinhos', 'Gelo'],
+  },
+  mercado: {
+    primaryColor: '#2563eb',
+    secondaryColor: '#0f172a',
+    description: 'Mercado digital com produtos por categoria e checkout rápido.',
+    orderTypes: ['delivery', 'pickup'],
+    categories: ['Mercearia', 'Higiene', 'Bebidas', 'Limpeza'],
+  },
+  hortifruti: {
+    primaryColor: '#16a34a',
+    secondaryColor: '#14532d',
+    description: 'Frutas, verduras e legumes frescos com pedido online.',
+    orderTypes: ['delivery', 'pickup'],
+    categories: ['Frutas', 'Verduras', 'Legumes', 'Promoções'],
+  },
+  farmacia: {
+    primaryColor: '#0ea5e9',
+    secondaryColor: '#0f172a',
+    description: 'Medicamentos e conveniência com atendimento rápido e seguro.',
+    orderTypes: ['delivery', 'pickup'],
+    categories: ['Medicamentos', 'Higiene', 'Beleza', 'Infantil'],
+  },
+  confeitaria: {
+    primaryColor: '#ec4899',
+    secondaryColor: '#1f2937',
+    description: 'Doces e sobremesas com vitrine digital encantadora.',
+    orderTypes: ['delivery', 'pickup', 'table'],
+    categories: ['Bolos', 'Doces', 'Tortas', 'Bebidas'],
+  },
+  outros: {
+    primaryColor: '#2f9df7',
+    secondaryColor: '#5fd35a',
+    description: 'Loja online com pedidos organizados e experiência moderna.',
+    orderTypes: ['delivery', 'pickup', 'table'],
+    categories: ['Destaques', 'Mais vendidos', 'Promoções', 'Novidades'],
+  },
+};
+
 const extractPhoneParts = (value = '') => {
   const raw = String(value || '').trim();
   const digits = raw.replace(/\D/g, '');
@@ -87,11 +173,12 @@ export function CreateStore() {
     city: '',
     state: '',
     storeName: '',
+    segment: 'outros',
     storeDescription: '',
     pixKey: '',
     logoFile: '',
-    primaryColor: '#b91c1c',
-    secondaryColor: '#111827',
+    primaryColor: '#2f9df7',
+    secondaryColor: '#5fd35a',
     socialLinks: [
       {
         type: 'instagram',
@@ -100,6 +187,7 @@ export function CreateStore() {
     ],
   });
   const storePhoneParts = extractPhoneParts(registerForm.phone || '');
+  const selectedSegmentPreset = STORE_SEGMENT_PRESETS[registerForm.segment] || STORE_SEGMENT_PRESETS.outros;
 
   const convertFileToBase64 = (file: File) =>
     new Promise<string>((resolve, reject) =>
@@ -163,6 +251,14 @@ export function CreateStore() {
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (registerForm.storeDescription) return;
+    setRegisterForm((prev) => ({
+      ...prev,
+      storeDescription: STORE_SEGMENT_PRESETS[prev.segment || 'outros']?.description || '',
+    }));
+  }, [registerForm.storeDescription, registerForm.segment]);
 
   const updateSocialLink = (index: number, key: 'type' | 'value', value: string) =>
   {
@@ -343,12 +439,14 @@ export function CreateStore() {
         },
         store: {
           name: registerForm.storeName,
+          segment: registerForm.segment,
           description: registerForm.storeDescription,
           pixKey: registerForm.pixKey,
           logoFile: registerForm.logoFile,
           primaryColor: registerForm.primaryColor,
           secondaryColor: registerForm.secondaryColor,
           socialLinks: registerForm.socialLinks.filter((link) => link.value),
+          orderTypes: selectedSegmentPreset.orderTypes,
         },
         planId: effectivePlanId,
         paymentMethod,
@@ -447,6 +545,21 @@ export function CreateStore() {
   };
 
   const storeSlugPreview = slugify(registerForm.storeName || '');
+  const handleStoreSegmentChange = (segment: string) => {
+    const safeSegment = STORE_SEGMENT_PRESETS[segment] ? segment : 'outros';
+    const preset = STORE_SEGMENT_PRESETS[safeSegment];
+    setRegisterForm((prev) => ({
+      ...prev,
+      segment: safeSegment,
+      primaryColor: preset.primaryColor,
+      secondaryColor: preset.secondaryColor,
+      storeDescription:
+        !prev.storeDescription || prev.storeDescription.length < 12
+          ? preset.description
+          : prev.storeDescription,
+    }));
+  };
+
   const handleCreateStorePhoneLocalChange = (value: string) => {
     const localDigits = value.replace(/\D/g, '').slice(0, 9);
     const resolvedDdd = storePhoneParts.ddd;
@@ -794,6 +907,30 @@ export function CreateStore() {
               <div className="flex items-center justify-between text-xs text-gray-500">
                 <span>Isso aparece no portfólio de lojas.</span>
                 <span>{registerForm.storeDescription.length}/220</span>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700">Ramo da loja</label>
+              <select
+                value={registerForm.segment}
+                onChange={(e) => handleStoreSegmentChange(e.target.value)}
+                className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
+              >
+                {STORE_SEGMENTS.map((segment) => (
+                  <option key={segment.value} value={segment.value}>
+                    {segment.label}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-gray-500">
+                Aplicamos presets de cores, descrição e tipo de pedido para acelerar o setup.
+              </p>
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Sugestões de categorias</p>
+                <p className="mt-1 text-xs text-slate-700">
+                  {selectedSegmentPreset.categories.join(' • ')}
+                </p>
               </div>
             </div>
 

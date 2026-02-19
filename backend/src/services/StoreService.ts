@@ -23,6 +23,7 @@ import { EntityManager } from 'typeorm';
 import { saveBase64Image } from '../utils/imageStorage';
 import { sanitizeSocialLinks } from '../utils/socialLinks';
 import { AppError } from '../errors/AppError';
+import { getStoreSegmentPreset, sanitizeStoreSegment } from '../utils/storeSegment';
 /**
  * Provides StoreService functionality.
  *
@@ -99,6 +100,8 @@ export class StoreService
       const deliveryRadiusKm = this.parseNumber(input.deliveryRadiusKm);
       const deliveryFee = this.parseNumber(input.deliveryFee);
       const trimmedAddress = input.address?.toString().trim();
+      const segment = sanitizeStoreSegment(input.segment);
+      const segmentPreset = getStoreSegmentPreset(segment);
 
       // 3️⃣ Settings
       const normalizedPix = this.normalizePixKey(input.pixKey);
@@ -107,16 +110,17 @@ export class StoreService
         logoUrl: logoUrl || input.logoUrl,
         description: input.description,
         address: trimmedAddress || owner.address || null,
-        primaryColor: input.primaryColor,
-        secondaryColor: input.secondaryColor,
+        primaryColor: input.primaryColor || segmentPreset.primaryColor,
+        secondaryColor: input.secondaryColor || segmentPreset.secondaryColor,
         pixKey: normalizedPix ?? null,
         contactEmail: trimmedEmail || null,
         promoMessage: input.promoMessage?.toString().trim() || null,
+        segment,
         deliveryRadiusKm: deliveryRadiusKm ?? null,
         deliveryFee: deliveryFee ?? null,
         socialLinks,
         openingHours: input.openingHours ?? [],
-        orderTypes: input.orderTypes ?? [ 'delivery', 'pickup', 'table' ],
+        orderTypes: input.orderTypes ?? segmentPreset.orderTypes,
       });
 
       // 4️⃣ Store
@@ -184,6 +188,11 @@ export class StoreService
         store.settings = manager.create(StoreSettings);
       }
 
+      const nextSegment = data.segment !== undefined
+        ? sanitizeStoreSegment(data.segment)
+        : sanitizeStoreSegment(store.settings.segment);
+      const segmentPreset = getStoreSegmentPreset(nextSegment);
+
       const uploadedLogo = await saveBase64Image(data.logoFile, `store-${store.id}`);
 
       store.settings.logoUrl =
@@ -193,10 +202,12 @@ export class StoreService
         data.description ?? store.settings.description;
 
       store.settings.primaryColor =
-        data.primaryColor ?? store.settings.primaryColor;
+        data.primaryColor ?? store.settings.primaryColor ?? segmentPreset.primaryColor;
 
       store.settings.secondaryColor =
-        data.secondaryColor ?? store.settings.secondaryColor;
+        data.secondaryColor ?? store.settings.secondaryColor ?? segmentPreset.secondaryColor;
+
+      store.settings.segment = nextSegment;
 
       if (data.pixKey !== undefined)
       {
@@ -235,6 +246,8 @@ export class StoreService
       if (data.orderTypes)
       {
         store.settings.orderTypes = data.orderTypes;
+      } else if (!Array.isArray(store.settings.orderTypes) || !store.settings.orderTypes.length) {
+        store.settings.orderTypes = segmentPreset.orderTypes;
       }
 
       if (data.address !== undefined && store.owner)
