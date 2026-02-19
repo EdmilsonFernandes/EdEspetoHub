@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowUpRight, FunnelSimple, MagnifyingGlass, MapPin, Storefront } from '@phosphor-icons/react';
+import { ArrowUpRight, FunnelSimple, LinkedinLogo, MagnifyingGlass, MapPin, Storefront } from '@phosphor-icons/react';
 import { Link, useNavigate } from 'react-router-dom';
 import { LandingPageLayout } from '../layouts/LandingPageLayout';
 import { storeService } from '../services/storeService';
@@ -111,6 +111,37 @@ export function PortfolioPage() {
   const [cityFilter, setCityFilter] = useState('all');
   const [sortBy, setSortBy] = useState<'recent' | 'name_asc' | 'name_desc'>('recent');
   const [visibleCount, setVisibleCount] = useState(9);
+  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
+
+  const teamMembers = [
+    {
+      name: 'Edmilson Lopes Fernandes',
+      role: 'Arquiteto de Software e Desenvolvedor Full Stack Sênior',
+      badge: 'Principal',
+      years: 15,
+      profileUrl: 'https://www.linkedin.com/in/edmilson-santos-6805a515/',
+      profileImage: '/uploads/perfil/edmilson.jpeg',
+      color: 'from-red-500 to-amber-500',
+    },
+    {
+      name: 'Gabriel Botega',
+      role: 'Desenvolvedor Backend',
+      badge: 'Backend',
+      years: 4,
+      profileUrl: 'https://www.linkedin.com/in/gabrielbotega/',
+      profileImage: '/uploads/perfil/gabriel.jpeg',
+      color: 'from-sky-500 to-indigo-500',
+    },
+    {
+      name: 'Juan Felipe Rada',
+      role: 'Desenvolvedor Frontend',
+      badge: 'Frontend',
+      years: 4,
+      profileUrl: 'https://www.linkedin.com/in/radapls/',
+      profileImage: '/uploads/perfil/juan.jpeg',
+      color: 'from-emerald-500 to-teal-500',
+    },
+  ];
 
   useEffect(() => {
     document.title = 'Portfólio | Jano Caminho';
@@ -473,6 +504,73 @@ export function PortfolioPage() {
       </section>
 
       <section className="bg-white py-14 sm:py-16">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="mb-10 rounded-3xl border border-slate-200 bg-[linear-gradient(120deg,#f8fafc,#f1f5f9)] p-6 sm:p-8">
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6">
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-sky-700 font-semibold">Time de desenvolvimento</p>
+                <h2 className="text-2xl sm:text-3xl font-black text-slate-900 mt-2">Especialistas por trás da plataforma</h2>
+                <p className="text-sm text-slate-600 mt-2">Engenharia de produto focada em performance, escala e experiência premium.</p>
+              </div>
+              <span className="inline-flex w-fit rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-bold text-slate-600">
+                Equipe técnica
+              </span>
+            </div>
+            <div className="grid gap-4 md:grid-cols-3">
+              {teamMembers.map((member) => {
+                const initials = member.name
+                  .split(' ')
+                  .map((part) => part[0])
+                  .join('')
+                  .slice(0, 2)
+                  .toUpperCase();
+                const canShowImage = Boolean(member.profileImage) && !imageErrors[member.name];
+                return (
+                  <article key={member.name} className="ds-card overflow-hidden">
+                    <div className={`h-16 bg-gradient-to-r ${member.color}`} />
+                    <div className="p-4 -mt-7">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="h-14 w-14 rounded-2xl overflow-hidden border-2 border-white shadow-sm bg-white">
+                          {canShowImage ? (
+                            <img
+                              src={resolveAssetUrl(member.profileImage)}
+                              alt={member.name}
+                              className="h-full w-full object-cover"
+                              onError={() => setImageErrors((prev) => ({ ...prev, [member.name]: true }))}
+                            />
+                          ) : (
+                            <div className="h-full w-full flex items-center justify-center text-sm font-black text-slate-600 bg-slate-100">
+                              {initials}
+                            </div>
+                          )}
+                        </div>
+                        <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-600">
+                          {member.badge} • {member.years} anos
+                        </span>
+                      </div>
+                      <div className="mt-4">
+                        <h3 className="text-base font-black text-slate-900">{member.name}</h3>
+                        <p className="text-sm font-semibold text-sky-700 mt-0.5">{member.role}</p>
+                      </div>
+                      <a
+                        href={member.profileUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#0a66c2] px-3 py-2.5 text-sm font-bold text-white hover:opacity-95"
+                      >
+                        <LinkedinLogo size={16} weight="fill" />
+                        Ver LinkedIn
+                      </a>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-white py-2 sm:py-4">
         <div className="max-w-6xl mx-auto px-4">
           <div className="rounded-3xl border border-slate-200 bg-[linear-gradient(120deg,#f8fafc,#eef2ff)] p-7 sm:p-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div>
