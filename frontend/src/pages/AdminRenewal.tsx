@@ -11,7 +11,7 @@ export function AdminRenewal() {
   const navigate = useNavigate();
   const { auth, logout } = useAuth();
   const [plans, setPlans] = useState([]);
-  const [selectedPlanId, setSelectedPlanId] = useState('');
+  const [selectedTierKey, setSelectedTierKey] = useState<'basic' | 'pro'>('basic');
   const [paymentMethod, setPaymentMethod] = useState('PIX');
   const [isAnnual, setIsAnnual] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -23,7 +23,7 @@ export function AdminRenewal() {
   const currentStatus = currentSubscription?.status ?? auth?.subscription?.status;
   const currentEndDate = currentSubscription?.endDate ?? auth?.subscription?.endDate;
   const currentPlanName = String(currentSubscription?.plan?.name || auth?.subscription?.plan?.name || '').toLowerCase();
-  const currentTier = currentPlanName.includes('pro') ? 'pro' : 'basic';
+  const currentTier: 'basic' | 'pro' = currentPlanName.includes('pro') ? 'pro' : 'basic';
   const allowedTierKeys = useMemo(() => PLAN_TIERS.map((tier) => tier.key), []);
 
   useEffect(() => {
@@ -52,13 +52,8 @@ export function AdminRenewal() {
       try {
         const response = await planService.list();
         setPlans(response || []);
-        const defaultTier = allowedTierKeys.includes(currentTier) ? currentTier : allowedTierKeys[0];
-        const defaultPlan = response?.find((plan) => plan.name === getPlanName(defaultTier, 'monthly'));
-        if (defaultPlan) {
-          setSelectedPlanId(defaultPlan.id);
-        } else if (response?.[0]) {
-          setSelectedPlanId(response[0].id);
-        }
+        const defaultTier = allowedTierKeys.includes(currentTier) ? currentTier : 'basic';
+        setSelectedTierKey(defaultTier as 'basic' | 'pro');
       } catch (error) {
         console.error('Não foi possível carregar os planos', error);
       }
@@ -73,18 +68,16 @@ export function AdminRenewal() {
     acc[plan.name] = plan;
     return acc;
   }, {});
+  const selectedPlan = plansByName[getPlanName(selectedTierKey, billingKey)];
+  const selectedPlanId = selectedPlan?.id || '';
 
   useEffect(() => {
     if (!plans.length) return;
-    const currentPlan = plans.find((plan) => plan.id === selectedPlanId);
-    const isCurrentCycle = currentPlan?.name?.endsWith(`_${billingKey}`);
-    if (isCurrentCycle) return;
-    const fallback = PLAN_TIERS
-      .filter((tier) => allowedTierKeys.includes(tier.key))
-      .map((tier) => plansByName[getPlanName(tier.key, billingKey)]?.id)
-      .find(Boolean);
-    if (fallback) setSelectedPlanId(fallback);
-  }, [allowedTierKeys, billingKey, plans, plansByName, selectedPlanId]);
+    if (!plansByName[getPlanName(selectedTierKey, billingKey)]?.id) {
+      const fallbackTier = (PLAN_TIERS.find((tier) => plansByName[getPlanName(tier.key, billingKey)]?.id)?.key || 'basic') as 'basic' | 'pro';
+      setSelectedTierKey(fallbackTier);
+    }
+  }, [billingKey, plans, plansByName, selectedTierKey]);
 
   const handleRenew = async () => {
     if (!storeId) return;
@@ -213,7 +206,7 @@ export function AdminRenewal() {
                   <button
                     type="button"
                     key={planKey}
-                    onClick={() => plan?.id && setSelectedPlanId(plan.id)}
+                    onClick={() => plan?.id && setSelectedTierKey(tier.key as 'basic' | 'pro')}
                     disabled={isDisabled}
                     className={`border rounded-2xl p-4 text-left transition-all relative ${
                       !selectedPlanId && !isSelected ? 'border-red-200 bg-red-50/40' : ''
