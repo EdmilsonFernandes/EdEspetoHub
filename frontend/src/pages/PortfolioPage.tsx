@@ -102,7 +102,7 @@ export function PortfolioPage() {
       ],
       previousWork: "Liderou desenvolvimento backend para multiplas plataformas SaaS e e-commerce",
       avatar: "E",
-      color: "from-sky-500 to-amber-500",
+      color: "from-sky-500 to-emerald-500",
       profileUrl: "https://www.linkedin.com/in/edmilson-santos-6805a515/",
       profileImage: "/uploads/perfil/edmilson.jpeg",
     },
@@ -763,7 +763,7 @@ export function PortfolioPage() {
           )}
 
           {error && !loading && (
-            <div className="rounded-2xl border border-red-100 bg-red-50 p-6 text-sm text-sky-600">
+            <div className="rounded-2xl border border-sky-100 bg-sky-50 p-6 text-sm text-sky-600">
               {error}
             </div>
           )}
@@ -874,7 +874,7 @@ export function PortfolioPage() {
       <section className="bg-white py-16">
         <div className="max-w-6xl mx-auto px-4">
           <div className="rounded-3xl border border-slate-200 bg-slate-50/60 p-7 sm:p-10 overflow-hidden relative">
-            <div className="absolute inset-0 opacity-25 bg-[radial-gradient(circle_at_top,_rgba(239,68,68,0.25),_transparent_60%)]" />
+            <div className="absolute inset-0 opacity-25 bg-[radial-gradient(circle_at_top,_rgba(47,157,247,0.22),_transparent_60%)]" />
             <div className="relative grid gap-8 lg:grid-cols-12 lg:items-center">
               <div className="lg:col-span-7 space-y-3">
                 <p className="text-[11px] uppercase tracking-[0.35em] text-sky-700 font-semibold">
@@ -1109,4 +1109,5 @@ export function PortfolioPage() {
     </LandingPageLayout>
   );
 }
+
 

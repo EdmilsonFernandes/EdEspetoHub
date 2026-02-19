@@ -75,10 +75,10 @@ export function LandingPage() {
   const touchStartRef = useRef({ x: 0, y: 0 });
   const touchActiveRef = useRef(false);
   const audienceItems = [
-    { label: 'Mercados', icon: Storefront, tone: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200' },
+    { label: 'Mercados', icon: Storefront, tone: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200' },
     { label: 'Farmácias', icon: Storefront, tone: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200' },
     { label: 'Food trucks', icon: Truck, tone: 'bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-200' },
-    { label: 'Restaurantes', icon: ForkKnife, tone: 'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-200' },
+    { label: 'Restaurantes', icon: ForkKnife, tone: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-200' },
     { label: 'Adegas', icon: Wine, tone: 'bg-violet-100 text-violet-800 dark:bg-violet-900/30 dark:text-violet-200' },
   ];
   const guideSteps = [
@@ -427,7 +427,7 @@ export function LandingPage() {
             </span>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-[56px] font-black text-gray-900 dark:text-white leading-tight tracking-tight max-w-3xl">
               Venda mais com um
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-orange-500">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-emerald-500">
                 {' '}cardápio digital com cara de app
               </span>
             </h1>
@@ -555,7 +555,7 @@ export function LandingPage() {
                     key={step.title}
                     className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 flex items-start gap-4 shadow-sm"
                   >
-                    <div className="w-11 h-11 rounded-2xl bg-gradient-to-r from-sky-500 to-orange-500 text-white font-black flex items-center justify-center shadow-sm shrink-0">
+                    <div className="w-11 h-11 rounded-2xl bg-gradient-to-r from-sky-500 to-emerald-500 text-white font-black flex items-center justify-center shadow-sm shrink-0">
                       <Icon size={18} weight="duotone" />
                     </div>
                     <div className="min-w-0">
@@ -624,7 +624,7 @@ export function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
             <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-amber-600 dark:text-amber-400 font-bold">Guia do usuario</p>
+              <p className="text-xs uppercase tracking-[0.3em] text-emerald-600 dark:text-emerald-400 font-bold">Guia do usuario</p>
               <h2 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white mt-3">
                 Entenda o fluxo completo antes de criar sua loja
               </h2>
@@ -656,7 +656,7 @@ export function LandingPage() {
                 >
                   <div className="flex items-center justify-between gap-2">
                     <div>
-                      <p className={`text-xs uppercase tracking-[0.25em] font-semibold ${guideStep === index ? 'text-white/90' : 'text-amber-600 dark:text-amber-400'}`}>
+                      <p className={`text-xs uppercase tracking-[0.25em] font-semibold ${guideStep === index ? 'text-white/90' : 'text-emerald-600 dark:text-emerald-400'}`}>
                         {step.role}
                       </p>
                       <div className="flex flex-wrap items-center gap-2 mt-2">
@@ -714,7 +714,7 @@ export function LandingPage() {
               <div className="mt-6 space-y-3">
                 {guideSteps[guideStep].bullets.map((item) => (
                   <div key={item} className="flex items-start gap-3">
-                    <span className="mt-1 w-2.5 h-2.5 rounded-full bg-sky-500 dark:bg-red-400" />
+                    <span className="mt-1 w-2.5 h-2.5 rounded-full bg-sky-500 dark:bg-sky-400" />
                     <p className="text-sm text-slate-700 dark:text-slate-300">{item}</p>
                   </div>
                 ))}
@@ -727,7 +727,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section id="product-showcase" className="bg-gradient-to-br from-sky-50 via-white to-amber-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 border-y border-sky-100 dark:border-slate-700 py-16 sm:py-20">
+      <section id="product-showcase" className="bg-gradient-to-br from-sky-50 via-white to-cyan-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 border-y border-sky-100 dark:border-slate-700 py-16 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="rounded-[32px] border border-white/90 dark:border-slate-700 bg-white/90 dark:bg-slate-800/90 shadow-[0_24px_70px_-45px_rgba(15,23,42,0.4)] p-5 sm:p-7">
             <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-6">
@@ -747,7 +747,7 @@ export function LandingPage() {
                 </video>
               </div>
               <div className="space-y-4">
-                <span className="inline-flex w-fit px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-200">
+                <span className="inline-flex w-fit px-3 py-1 rounded-full text-xs font-semibold bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-200">
                   Demo guiada em 40s
                 </span>
                 <h3 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white leading-tight">
@@ -830,7 +830,7 @@ export function LandingPage() {
                 <span className="px-3 py-1 rounded-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">Ajuste em segundos</span>
               </div>
             </div>
-            <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-gradient-to-br from-white via-white to-rose-50 dark:from-slate-800 dark:via-slate-800 dark:to-sky-950/20 p-6 space-y-6">
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-gradient-to-br from-white via-white to-cyan-50 dark:from-slate-800 dark:via-slate-800 dark:to-sky-950/20 p-6 space-y-6">
               <div className="grid gap-5">
                 <div>
                   <label htmlFor="ticket-average" className="text-sm font-semibold text-slate-800 dark:text-slate-200">Valor médio por pedido (R$)</label>
@@ -927,7 +927,7 @@ export function LandingPage() {
           <p className="text-lg text-gray-700 dark:text-gray-200 mb-8 max-w-2xl mx-auto">
             Recursos completos para gerenciar seu negocio online.
           </p>
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold bg-sky-50 dark:bg-sky-950/30 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-red-800 mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold bg-sky-50 dark:bg-sky-950/30 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800 mb-6">
             7 dias grátis para testar • Sem compromisso
           </div>
           <div className="grid sm:grid-cols-2 gap-4 max-w-2xl mx-auto text-left">
@@ -1050,7 +1050,7 @@ export function LandingPage() {
                     <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{plan.name}</h3>
                     {plan.isTest ? (
                       <>
-                        <div className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-600 mb-2">
+                        <div className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-emerald-600 mb-2">
                           Grátis
                         </div>
                         <p className="text-xs font-semibold text-slate-600 mb-2">
@@ -1075,7 +1075,7 @@ export function LandingPage() {
                   <ul className="space-y-3 mb-8 flex-grow">
                     {plan.features.map((feature, featureIndex) => (
                       <li key={featureIndex} className="flex items-center gap-3 text-gray-800 dark:text-gray-200">
-                        <span className={`text-lg ${plan.isTest ? 'text-amber-500 dark:text-amber-400' : 'text-red-500 dark:text-sky-400'}`}>✓</span>
+                        <span className={`text-lg ${plan.isTest ? 'text-amber-500 dark:text-emerald-400' : 'text-sky-500 dark:text-sky-400'}`}>✓</span>
                         <span>{feature}</span>
                       </li>
                     ))}
@@ -1089,7 +1089,7 @@ export function LandingPage() {
                         ? 'bg-amber-500 hover:bg-amber-600 text-white shadow'
                         : plan.popular
                         ? 'bg-gradient-to-r from-sky-500 to-emerald-500 text-white hover:from-sky-600 hover:to-emerald-600 shadow-lg'
-                        : 'border-2 border-sky-500 text-sky-600 dark:text-red-500 hover:bg-sky-50 dark:hover:bg-red-950'
+                        : 'border-2 border-sky-500 text-sky-600 dark:text-sky-400 hover:bg-sky-50 dark:hover:bg-sky-950'
                     }`}
                   >
                     {plan.isTest ? 'Começar grátis' : 'Começar Agora'}
@@ -1141,7 +1141,7 @@ export function LandingPage() {
       </section>
 
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 sm:pb-20">
-        <div className="rounded-[32px] bg-gradient-to-r from-red-600 via-red-500 to-orange-500 dark:from-red-700 dark:via-red-600 dark:to-orange-600 text-white p-8 sm:p-12 shadow-[0_26px_80px_-50px_rgba(239,68,68,0.7)]">
+        <div className="rounded-[32px] bg-gradient-to-r from-sky-600 via-cyan-500 to-emerald-500 dark:from-sky-700 dark:via-cyan-600 dark:to-emerald-600 text-white p-8 sm:p-12 shadow-[0_26px_80px_-50px_rgba(47,157,247,0.7)]">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
             <div className="max-w-2xl">
               <p className="text-xs uppercase tracking-[0.3em] text-white/90 font-semibold">Pronto para vender mais?</p>
@@ -1319,7 +1319,7 @@ export function LandingPage() {
       <div className="fixed bottom-4 right-4 z-40 flex flex-col items-end gap-3 sm:bottom-6 sm:right-6">
         {faqOpen && (
           <div className="w-[320px] sm:w-[360px] rounded-3xl border border-slate-200 bg-white shadow-[0_24px_70px_-40px_rgba(15,23,42,0.45)] overflow-hidden">
-            <div className="px-5 py-4 bg-gradient-to-r from-red-600 to-cyan-500 text-white dark:from-red-700 dark:to-emerald-500">
+            <div className="px-5 py-4 bg-gradient-to-r from-sky-600 to-cyan-500 text-white dark:from-sky-700 dark:to-emerald-500">
               <p className="text-xs uppercase tracking-[0.3em] text-white/80">Ajuda rápida</p>
               <h3 className="text-lg font-bold">Tire dúvidas em segundos</h3>
             </div>
@@ -1332,7 +1332,7 @@ export function LandingPage() {
                     onClick={() => setFaqCategory(category)}
                     className={`px-3 py-1.5 rounded-full text-[11px] font-semibold border transition ${
                       faqCategory === category
-                        ? 'bg-sky-500 text-white border-sky-500 dark:bg-sky-600 dark:border-red-600'
+                        ? 'bg-sky-500 text-white border-sky-500 dark:bg-sky-600 dark:border-sky-600'
                         : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600'
                     }`}
                   >
@@ -1383,7 +1383,7 @@ export function LandingPage() {
 
       <div className="h-20 sm:hidden" />
       <div className="sm:hidden fixed bottom-0 inset-x-0 z-50 px-4 pb-4">
-        <div className="rounded-2xl border border-sky-200 dark:border-red-800 bg-white/95 dark:bg-slate-800/95 backdrop-blur shadow-[0_12px_30px_rgba(15,23,42,0.18)] px-3 py-3 flex items-center gap-3">
+        <div className="rounded-2xl border border-sky-200 dark:border-sky-800 bg-white/95 dark:bg-slate-800/95 backdrop-blur shadow-[0_12px_30px_rgba(15,23,42,0.18)] px-3 py-3 flex items-center gap-3">
           <div className="flex-1">
             <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">7 dias grátis + sem cartão</p>
             <p className="text-[11px] text-slate-600 dark:text-slate-400">Crie sua loja em minutos.</p>
@@ -1405,5 +1405,7 @@ export function LandingPage() {
     </LandingPageLayout>
   );
 }
+
+
 
 
