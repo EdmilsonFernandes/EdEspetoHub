@@ -19,8 +19,8 @@ import { OrderDeliveryRepository } from '../repositories/OrderDeliveryRepository
 import { OrderRepository } from '../repositories/OrderRepository';
 import { OrderReviewRepository } from '../repositories/OrderReviewRepository';
 import { StoreRepository } from '../repositories/StoreRepository';
+import { SubscriptionRepository } from '../repositories/SubscriptionRepository';
 import { saveBase64Image } from '../utils/imageStorage';
-import { SubscriptionService } from './SubscriptionService';
 import { resolvePlanFeatures } from '../config/planFeatures';
 
 type SubmitReviewInput = {
@@ -43,13 +43,13 @@ export class OrderReviewService {
   private mercadoPagoService = new MercadoPagoService();
   private orderRepository = new OrderRepository();
   private storeRepository = new StoreRepository();
+  private subscriptionRepository = new SubscriptionRepository();
   private orderDeliveryRepository = new OrderDeliveryRepository();
   private orderReviewRepository = new OrderReviewRepository();
-  private subscriptionService = new SubscriptionService();
 
   private async resolveStoreReviewFeatures(storeId: string) {
     const store = await this.storeRepository.findById(storeId);
-    const subscription = await this.subscriptionService.getCurrentByStore(storeId);
+    const subscription = await this.subscriptionRepository.findLatestByStoreId(storeId);
     const features = resolvePlanFeatures({
       planName: subscription?.plan?.name,
       planExempt: Boolean(store?.settings?.planExempt),
