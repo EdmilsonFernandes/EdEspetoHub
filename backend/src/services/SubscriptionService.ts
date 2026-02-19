@@ -88,7 +88,7 @@ export class SubscriptionService {
    * @date 2025-12-17
    */
   async getCurrentByStore(storeId: string) {
-    const subscription = await this.subscriptionRepository.findLatestByStoreId(storeId);
+    const subscription = await this.subscriptionRepository.findCurrentByStoreId(storeId);
     if (!subscription) return null;
 
     const status = this.resolveStatus(subscription);

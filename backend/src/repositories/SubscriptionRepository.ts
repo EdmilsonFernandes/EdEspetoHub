@@ -66,6 +66,28 @@ export class SubscriptionRepository {
     });
   }
 
+  findCurrentByStoreId(storeId: string) {
+    return this.repository
+      .createQueryBuilder('subscription')
+      .leftJoinAndSelect('subscription.store', 'store')
+      .leftJoinAndSelect('store.settings', 'settings')
+      .leftJoinAndSelect('subscription.plan', 'plan')
+      .where('store.id = :storeId', { storeId })
+      .orderBy(
+        `CASE
+          WHEN subscription.status IN ('ACTIVE','EXPIRING','TRIAL') THEN 0
+          WHEN subscription.status = 'SUSPENDED' THEN 1
+          WHEN subscription.status = 'PENDING' THEN 2
+          WHEN subscription.status IN ('EXPIRED','CANCELLED') THEN 3
+          ELSE 4
+        END`,
+        'ASC'
+      )
+      .addOrderBy('subscription.endDate', 'DESC')
+      .addOrderBy('subscription.createdAt', 'DESC')
+      .getOne();
+  }
+
   /**
    * Handles find by id.
    *
