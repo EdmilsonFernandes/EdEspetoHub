@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React from 'react';
-import { Buildings, CheckCircle, Lightning, ShieldCheck } from '@phosphor-icons/react';
+import { CheckCircle, Lightning, ShieldCheck } from '@phosphor-icons/react';
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -55,12 +55,11 @@ export function AuthLayout({ children }: AuthLayoutProps) {
           <div className="w-full max-w-md bg-white/85 backdrop-blur-[12px] rounded-[22px] shadow-[0_34px_72px_-34px_rgba(15,23,42,0.5)] border border-white/80 p-6 sm:p-8 space-y-6 relative overflow-hidden ds-login-card-enter">
             <div className="absolute inset-x-0 top-0 h-1 bg-[linear-gradient(90deg,#2f9df7,#18b3f9,#5fd35a)]" />
             <div className="absolute -top-14 -right-14 h-36 w-36 rounded-full bg-sky-100/70 blur-2xl" />
-            <div className="rounded-2xl border border-slate-200/80 bg-white/70 backdrop-blur-xl p-3 shadow-[0_20px_40px_-24px_rgba(15,23,42,0.38)]">
-              <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-600">
-                <Buildings size={12} weight="duotone" />
+            <div className="rounded-2xl border border-slate-200/80 bg-white/70 backdrop-blur-xl p-2.5 shadow-[0_20px_40px_-24px_rgba(15,23,42,0.38)]">
+              <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-24 sm:h-28 w-full rounded-xl object-cover object-center" />
+              <p className="mt-2 px-1 text-center text-[11px] font-bold tracking-[0.22em] uppercase text-slate-700">
                 Já no Caminho
-              </div>
-              <p className="mt-2 text-sm font-semibold text-slate-700">Plataforma de pedidos e entregas</p>
+              </p>
             </div>
             {children}
           </div>

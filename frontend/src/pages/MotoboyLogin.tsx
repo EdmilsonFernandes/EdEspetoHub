@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowSquareOut, Buildings, Eye, EyeSlash, Lightning, SignIn, SignOut, UserCircle } from '@phosphor-icons/react';
+import { ArrowSquareOut, Eye, EyeSlash, Lightning, SignIn, SignOut, UserCircle } from '@phosphor-icons/react';
 import { authService } from '../services/authService';
 import { useAuth } from '../contexts/AuthContext';
 import { MotoboyHeader } from '../components/Motoboy/MotoboyHeader';
@@ -164,12 +164,11 @@ export function MotoboyLogin() {
           <div className="space-y-5">
             {alreadyLoggedIn ? (
               <div className="ds-card-elevated ds-login-card-enter p-5 sm:p-6 space-y-4 motoboy-fade-up ds-anim-delay-20">
-                <div className="rounded-2xl border border-slate-200/80 bg-white/80 backdrop-blur p-3 shadow-[0_20px_40px_-24px_rgba(15,23,42,0.35)]">
-                  <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-600">
-                    <Buildings size={12} weight="duotone" />
-                    Já no Caminho
-                  </div>
-                  <p className="mt-2 text-sm font-semibold text-slate-700">Área do entregador</p>
+                <div className="rounded-2xl border border-slate-200/80 bg-white/80 backdrop-blur p-2.5 shadow-[0_20px_40px_-24px_rgba(15,23,42,0.35)]">
+                  <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-24 sm:h-28 w-full rounded-xl object-cover object-center" />
+                  <p className="mt-2 px-1 text-center text-[11px] font-bold tracking-[0.22em] uppercase text-slate-700">
+                    Área do entregador
+                  </p>
                 </div>
                 <div className="flex items-start justify-between gap-3">
                   <div>
@@ -206,12 +205,11 @@ export function MotoboyLogin() {
               </div>
             ) : (
               <div className="ds-card-elevated ds-login-card-enter p-5 sm:p-6 space-y-4 motoboy-fade-up ds-anim-delay-40">
-                <div className="rounded-2xl border border-slate-200/80 bg-white/80 backdrop-blur p-3 shadow-[0_20px_40px_-24px_rgba(15,23,42,0.35)]">
-                  <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-600">
-                    <Buildings size={12} weight="duotone" />
-                    Já no Caminho
-                  </div>
-                  <p className="mt-2 text-sm font-semibold text-slate-700">Área do entregador</p>
+                <div className="rounded-2xl border border-slate-200/80 bg-white/80 backdrop-blur p-2.5 shadow-[0_20px_40px_-24px_rgba(15,23,42,0.35)]">
+                  <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-24 sm:h-28 w-full rounded-xl object-cover object-center" />
+                  <p className="mt-2 px-1 text-center text-[11px] font-bold tracking-[0.22em] uppercase text-slate-700">
+                    Área do entregador
+                  </p>
                 </div>
                 <div className="flex items-start justify-between gap-3">
                   <div>
