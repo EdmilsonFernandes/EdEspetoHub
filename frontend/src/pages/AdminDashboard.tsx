@@ -1178,6 +1178,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         primaryColor: updated?.settings?.primaryColor,
         secondaryColor: updated?.settings?.secondaryColor,
         logoUrl: updated?.settings?.logoUrl,
+        bannerUrl: updated?.settings?.bannerUrl,
         brandName: updated?.name,
       });
       showToast('Identidade atualizada com sucesso.', 'success');

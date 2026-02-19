@@ -10,6 +10,7 @@ export const defaultBranding = {
   brandName: 'Já no Caminho',
   espetoId: import.meta.env.VITE_DEFAULT_STORE || 'espetinhodatony',
   logoUrl: '/janocaminho.jpg',
+  bannerUrl: '',
   primaryColor: '#2f9df7',
   accentColor: '#5fd35a',
   tagline: 'Crie seu site de pedidos online em minutos',
@@ -28,6 +29,7 @@ export const getPersistedBranding = (ownerId: string = defaultBranding.espetoId)
     espetoId: ownerId,
     ...parsed,
     logoUrl: resolveAssetUrl(parsed.logoUrl || defaultBranding.logoUrl),
+    bannerUrl: resolveAssetUrl(parsed.bannerUrl || defaultBranding.bannerUrl),
   };
   } catch (error) {
     console.error('Erro ao carregar branding salvo', error);

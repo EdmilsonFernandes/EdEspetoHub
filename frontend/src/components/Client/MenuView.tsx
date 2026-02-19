@@ -73,11 +73,25 @@ const Header = ({
     outros: "Comércio",
   };
   const segmentLabel = segmentLabelMap[String(segment || "").toLowerCase()] || "Comércio";
+  const bannerUrl = resolveAssetUrl(branding?.bannerUrl || "");
 
   return (
     <div className={`w-full sticky top-0 z-50 ${compact ? 'pb-2' : 'pb-3'} pt-2`}>
       <div className="max-w-6xl mx-auto px-3 sm:px-4">
-        <div className={`relative w-full bg-white/90 backdrop-blur-xl shadow-[0_18px_40px_-26px_rgba(15,23,42,0.45)] px-3 sm:px-4 ${compact ? 'py-2.5' : 'py-3.5 sm:py-4'} flex items-center gap-2 sm:gap-4 flex-wrap sm:flex-nowrap rounded-3xl border border-white/70`}>
+        <div
+          className={`relative w-full backdrop-blur-xl shadow-[0_18px_40px_-26px_rgba(15,23,42,0.45)] px-3 sm:px-4 ${compact ? 'py-2.5' : 'py-3.5 sm:py-4'} flex items-center gap-2 sm:gap-4 flex-wrap sm:flex-nowrap rounded-3xl border border-white/70`}
+          style={
+            bannerUrl
+              ? {
+                  backgroundImage: `linear-gradient(120deg, color-mix(in srgb, ${branding?.primaryColor || '#2f9df7'} 58%, #0f172a 42%), color-mix(in srgb, ${branding?.accentColor || '#5fd35a'} 52%, #0f172a 48%)), url(${bannerUrl})`,
+                  backgroundSize: 'cover, cover',
+                  backgroundPosition: 'center, center',
+                }
+              : undefined
+          }
+        >
+          {!bannerUrl && <div className="absolute inset-0 rounded-3xl bg-white/90" />}
+          <div className="absolute inset-0 rounded-3xl bg-black/10" />
           <div className="absolute top-0 left-4 right-4 h-1 rounded-full ds-header-gradient-line" />
 
       {/* LOGO OFICIAL */}
@@ -98,7 +112,7 @@ const Header = ({
       )}
 
       {/* Nome + infos */}
-      <div className="flex-1 leading-tight min-w-0">
+      <div className="relative flex-1 leading-tight min-w-0">
         <h1 className={`${compact ? 'text-sm' : 'text-base sm:text-xl'} font-black text-gray-900 truncate`}>
           {branding?.brandName || "Seu Espeto"}
         </h1>

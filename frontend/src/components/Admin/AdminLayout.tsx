@@ -18,9 +18,10 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
 
     const settings = auth?.store?.settings || {};
     const logoUrl = resolveAssetUrl(settings.logoUrl);
+    const bannerUrl = resolveAssetUrl(settings.bannerUrl);
     const name = auth?.store?.name;
 
-    const key = `${auth?.store?.id ?? ''}|${settings.primaryColor ?? ''}|${settings.secondaryColor ?? ''}|${logoUrl ?? ''}|${name ?? ''}`;
+    const key = `${auth?.store?.id ?? ''}|${settings.primaryColor ?? ''}|${settings.secondaryColor ?? ''}|${logoUrl ?? ''}|${bannerUrl ?? ''}|${name ?? ''}`;
     if (!auth?.store?.id) return;
     if (brandingKeyRef.current === key) return;
     brandingKeyRef.current = key;
@@ -29,6 +30,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       primaryColor: settings.primaryColor,
       secondaryColor: settings.secondaryColor,
       logoUrl,
+      bannerUrl,
       brandName: name,
     });
   }, [
@@ -36,6 +38,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     auth?.store?.id,
     auth?.store?.name,
     auth?.store?.settings?.logoUrl,
+    auth?.store?.settings?.bannerUrl,
     auth?.store?.settings?.primaryColor,
     auth?.store?.settings?.secondaryColor,
     setBranding,

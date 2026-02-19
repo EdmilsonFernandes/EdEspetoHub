@@ -324,6 +324,7 @@ export function StorePage() {
             espetoId: data.slug || prev.espetoId,
             brandName: data.name || prev.brandName,
             logoUrl: resolveAssetUrl(data.settings?.logoUrl) || prev.logoUrl,
+            bannerUrl: resolveAssetUrl(data.settings?.bannerUrl) || prev.bannerUrl,
             primaryColor: data.settings?.primaryColor || prev.primaryColor,
             accentColor: data.settings?.secondaryColor || prev.accentColor,
             instagram: instagramLink || prev.instagram,
