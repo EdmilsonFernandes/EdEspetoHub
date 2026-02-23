@@ -62,6 +62,22 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
     .map((part) => part[0]?.toUpperCase())
     .join('');
   const showDetails = !isMobile || showMobileDetails;
+  const headerBackgroundStyle = hasBanner
+    ? {
+        backgroundColor: '#0f172a',
+        backgroundImage: `linear-gradient(120deg, rgba(15,23,42,0.42) 0%, rgba(15,23,42,0.52) 100%), radial-gradient(circle at 12% 8%, rgba(255,255,255,0.22), transparent 48%), url(${bannerUrl})`,
+        backgroundSize: '100% 100%, 100% 100%, contain',
+        backgroundPosition: 'center, center, center',
+        backgroundRepeat: 'no-repeat, no-repeat, no-repeat',
+        color: '#fff',
+      }
+    : {
+        backgroundImage: `linear-gradient(120deg, ${branding?.primaryColor || 'var(--color-primary)'} 0%, ${branding?.secondaryColor || 'var(--color-secondary)'} 100%)`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        color: '#fff',
+      };
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -135,23 +151,15 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
   return (
     <header
       className="relative rounded-3xl border border-slate-200 shadow-[0_22px_46px_-30px_rgba(15,23,42,0.5)] overflow-visible"
-      style={{
-        backgroundImage: hasBanner
-          ? `linear-gradient(120deg, rgba(15,23,42,0.28) 0%, rgba(15,23,42,0.42) 100%), url(${bannerUrl})`
-          : `linear-gradient(120deg, ${branding?.primaryColor || 'var(--color-primary)'} 0%, ${branding?.secondaryColor || 'var(--color-secondary)'} 100%)`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        color: '#fff',
-      }}
+      style={headerBackgroundStyle}
     >
       <div className="pointer-events-none absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.45),_transparent_55%)]" />
       <div className="pointer-events-none absolute top-0 left-8 right-8 h-0.5 rounded-full bg-white/40" />
       <div className="px-4 pt-3 pb-2.5 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-        <div className="flex items-start gap-3">
+        <div className="flex items-start gap-3 rounded-2xl border border-white/18 bg-slate-950/24 backdrop-blur-[2px] px-3 py-2">
           <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center overflow-hidden shadow-[0_14px_26px_-18px_rgba(0,0,0,0.35)] ring-1 ring-white/30">
             {branding?.logoUrl ? (
-              <img src={branding.logoUrl} alt={storeName} className="w-full h-full object-cover" />
+              <img src={branding.logoUrl} alt={storeName} className="w-full h-full object-contain p-0.5" />
             ) : (
               <span className="text-xl font-black">{storeName?.slice(0, 2)?.toUpperCase() || 'CE'}</span>
             )}
@@ -216,7 +224,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
             {showMobileDetails ? 'Fechar' : 'Detalhes'}
           </button>
           {showDetails && (
-            <div className="hidden lg:flex items-center gap-2 bg-white/10 rounded-full px-2.5 py-1 border border-white/15">
+            <div className="hidden lg:flex items-center gap-2 bg-slate-950/28 rounded-full px-2.5 py-1 border border-white/18 backdrop-blur-[1.5px]">
               <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-xs font-bold">
                 {userInitials || 'AD'}
               </div>
@@ -236,9 +244,9 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
           )}
         </div>
       </div>
-      <div className="px-4 pb-3.5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2.5">
+      <div className="px-4 pb-3.5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2.5 rounded-b-3xl">
         {showDetails && (
-          <div className="flex items-center gap-2 text-[11px] font-semibold bg-white/10 border border-white/20 rounded-full px-2 py-1.5 w-fit">
+          <div className="flex items-center gap-2 text-[11px] font-semibold bg-slate-950/30 border border-white/22 rounded-full px-2 py-1.5 w-fit backdrop-blur-[1.5px]">
             <ShieldCheck size={14} weight="duotone" />
             {planDetails?.planExempt ? 'Isento de plano' : 'Assinatura ativa'}
           </div>
