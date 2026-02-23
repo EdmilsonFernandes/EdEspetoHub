@@ -491,6 +491,27 @@ export function MotoboyProfile() {
     });
   }, [stores, linkedStoreIds, pendingStoreIds]);
 
+  const resolveStoreLogo = (store: any, fallbackStore?: any) => {
+    const raw =
+      String(store?.settings?.logoUrl || '') ||
+      String(store?.logoUrl || '') ||
+      String(fallbackStore?.settings?.logoUrl || '') ||
+      String(fallbackStore?.logoUrl || '');
+    if (!raw) return '';
+    return resolveAssetUrl(raw) || raw;
+  };
+
+  const getStoreInitials = (store: any, fallbackStore?: any) => {
+    const baseName = String(store?.name || store?.slug || fallbackStore?.name || fallbackStore?.slug || 'Loja');
+    const initials = baseName
+      .split(' ')
+      .map((part) => part.trim()[0] || '')
+      .join('')
+      .slice(0, 2)
+      .toUpperCase();
+    return initials || 'LJ';
+  };
+
   const motoboyIdentity = useMemo(() => {
     const ids = [
       profile?.id,
@@ -1831,7 +1852,7 @@ export function MotoboyProfile() {
               <div className="grid gap-2">
                 {linkedStoreIds.map((storeId) => {
                   const store = storeById.get(storeId) || requestByStoreId.get(storeId)?.store || null;
-                  const logo = store?.settings?.logoUrl || store?.logoUrl || null;
+                  const logo = resolveStoreLogo(store, requestByStoreId.get(storeId)?.store);
                   const desc = store?.settings?.description || store?.description || null;
                   const openFlag = store?.open;
                   const openNow = store?.openNow;
@@ -1840,7 +1861,13 @@ export function MotoboyProfile() {
                   return (
                     <div key={storeId} className="rounded-2xl border border-emerald-200 bg-emerald-50/30 p-3 flex flex-col sm:flex-row sm:items-center gap-3 shadow-[0_22px_48px_-40px_rgba(5,150,105,0.35)]">
                       <div className="h-12 w-12 rounded-2xl border border-slate-200 bg-slate-50 overflow-hidden shrink-0">
-                        {logo ? <img src={logo} alt={store?.name || 'Loja'} className="h-full w-full object-cover" loading="lazy" /> : null}
+                        {logo ? (
+                          <img src={logo} alt={store?.name || 'Loja'} className="h-full w-full object-cover" loading="lazy" />
+                        ) : (
+                          <div className="h-full w-full grid place-items-center text-[10px] font-black text-slate-500">
+                            {getStoreInitials(store, requestByStoreId.get(storeId)?.store)}
+                          </div>
+                        )}
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
@@ -1894,7 +1921,7 @@ export function MotoboyProfile() {
                 {[...pendingStoreIds, ...rejectedOrInactiveStoreIds].map((storeId) => {
                   const req = requestByStoreId.get(storeId);
                   const store = storeById.get(storeId) || req?.store || null;
-                  const logo = store?.settings?.logoUrl || store?.logoUrl || null;
+                  const logo = resolveStoreLogo(store, req?.store);
                   const desc = store?.settings?.description || store?.description || null;
                   const status = String(req?.status || '').toUpperCase();
                   const isPending = status === 'PENDING';
@@ -1912,7 +1939,13 @@ export function MotoboyProfile() {
                   return (
                     <div key={storeId} className="rounded-2xl border border-slate-200 bg-slate-50 p-3 flex flex-col sm:flex-row sm:items-start gap-3">
                       <div className="h-12 w-12 rounded-2xl border border-slate-200 bg-white overflow-hidden shrink-0">
-                        {logo ? <img src={logo} alt={store?.name || 'Loja'} className="h-full w-full object-cover" loading="lazy" /> : null}
+                        {logo ? (
+                          <img src={logo} alt={store?.name || 'Loja'} className="h-full w-full object-cover" loading="lazy" />
+                        ) : (
+                          <div className="h-full w-full grid place-items-center text-[10px] font-black text-slate-500">
+                            {getStoreInitials(store, req?.store)}
+                          </div>
+                        )}
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
@@ -1965,7 +1998,7 @@ export function MotoboyProfile() {
                     const req = requestByStoreId.get(storeId);
                     const status = String(req?.status || '').toUpperCase();
                     const wasRejectedOrInactive = status === 'REJECTED' || (status === 'APPROVED' && !Boolean(req?.linkActive));
-                    const logo = store?.settings?.logoUrl || null;
+                    const logo = resolveStoreLogo(store);
                     const desc = store?.settings?.description || null;
                     const openFlag = store?.open;
                     const openNow = store?.openNow;
@@ -1985,7 +2018,13 @@ export function MotoboyProfile() {
                         ].join(' ')}
                       >
                         <div className="h-12 w-12 rounded-2xl border border-slate-200 bg-slate-50 overflow-hidden shrink-0">
-                          {logo ? <img src={logo} alt={store.name} className="h-full w-full object-cover" loading="lazy" /> : null}
+                          {logo ? (
+                            <img src={logo} alt={store.name} className="h-full w-full object-cover" loading="lazy" />
+                          ) : (
+                            <div className="h-full w-full grid place-items-center text-[10px] font-black text-slate-500">
+                              {getStoreInitials(store)}
+                            </div>
+                          )}
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-2">
