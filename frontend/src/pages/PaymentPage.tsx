@@ -152,6 +152,7 @@ export function PaymentPage() {
       return String(next?.status || payment?.status || '');
     },
   });
+  const pixProgressPct = Math.max(0, Math.min(100, (pixPolling.remainingMs / (5 * 60 * 1000)) * 100));
 
   useEffect(() => {
     if (!plans.length || !needsRenew) return;
@@ -483,15 +484,21 @@ export function PaymentPage() {
                           </button>
                         </div>
                       )}
-                      <div className="w-full rounded-xl border border-slate-200 bg-white p-3 text-left space-y-2">
+                      <div className="w-full rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50 via-orange-50 to-white p-3 text-left space-y-2 shadow-[0_12px_28px_-24px_rgba(234,88,12,0.8)]">
                         <div className="flex items-center justify-between gap-2">
-                          <p className="text-xs font-semibold text-slate-700">Aguardando confirmação do pagamento via Pix</p>
-                          <span className="rounded-full bg-slate-900 px-2 py-1 text-[10px] font-bold text-white">
+                          <p className="text-xs font-semibold text-amber-900">Aguardando confirmação do pagamento via Pix</p>
+                          <span className="rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-2 py-1 text-[10px] font-black text-white animate-pulse">
                             {pixPolling.remainingLabel}
                           </span>
                         </div>
+                        <div className="h-1.5 rounded-full bg-amber-100 overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-gradient-to-r from-amber-400 via-orange-500 to-rose-500 transition-all duration-700"
+                            style={{ width: `${pixProgressPct}%` }}
+                          />
+                        </div>
                         <p className="text-[11px] text-slate-500">
-                          {pixPolling.isChecking ? 'Verificando...' : 'Atualização automática a cada 5 segundos.'}
+                          {pixPolling.isChecking ? 'Verificando...' : 'Atualização automática a cada 5 segundos. Não feche esta tela.'}
                         </p>
                         {pixPolling.connectionUnstable ? (
                           <p className="text-[11px] text-amber-700">Conexão instável, tentando novamente.</p>

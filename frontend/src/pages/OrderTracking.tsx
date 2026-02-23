@@ -419,6 +419,7 @@ export function OrderTracking() {
       return nextStatus || tipUiStatus;
     },
   });
+  const tipProgressPct = Math.max(0, Math.min(100, (tipPolling.remainingMs / (5 * 60 * 1000)) * 100));
 
   const toggleTag = (type: 'storeTags' | 'deliveryTags', value: string) => {
     setReviewForm((prev) => {
@@ -1322,12 +1323,18 @@ export function OrderTracking() {
                                       <p className="font-semibold">Pagamento confirmado. Obrigado!</p>
                                     </div>
                                   ) : (
-                                    <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 space-y-2">
-                                      <div className="flex items-center justify-between gap-2 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2">
-                                        <span className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.2em]">Tempo restante</span>
-                                        <span className="rounded-full bg-slate-900 px-2.5 py-1 text-xs font-black text-white">
+                                    <div className="rounded-lg border border-amber-200 bg-gradient-to-br from-amber-50 via-orange-50 to-white px-3 py-2 space-y-2 shadow-[0_10px_24px_-22px_rgba(234,88,12,0.85)]">
+                                      <div className="flex items-center justify-between gap-2 rounded-lg border border-amber-200 bg-white/80 px-2.5 py-2">
+                                        <span className="text-[11px] font-semibold text-amber-900 uppercase tracking-[0.2em]">Tempo restante</span>
+                                        <span className="rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-2.5 py-1 text-xs font-black text-white animate-pulse">
                                           {tipPolling.remainingLabel}
                                         </span>
+                                      </div>
+                                      <div className="h-1.5 rounded-full bg-amber-100 overflow-hidden">
+                                        <div
+                                          className="h-full rounded-full bg-gradient-to-r from-amber-400 via-orange-500 to-rose-500 transition-all duration-700"
+                                          style={{ width: `${tipProgressPct}%` }}
+                                        />
                                       </div>
                                       <div className="flex items-center gap-2 text-xs text-slate-700">
                                         <CircleNotch
