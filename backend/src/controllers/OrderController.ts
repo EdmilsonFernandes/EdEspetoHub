@@ -227,6 +227,7 @@ export class OrderController {
                     id: motoboy.id,
                     name: motoboy.user.fullName,
                     firstName: String(motoboy.user.fullName || '').trim().split(' ')[0] || null,
+                    profileImageUrl: motoboy.user.profileImageUrl || null,
                   }
                 : null,
               acceptedAt: deliveryRow.acceptedAt ?? null,

@@ -201,6 +201,11 @@ export function OrderTracking() {
   const deliveryStatus = String((order as any)?.delivery?.status || '').toUpperCase();
   const motoboyName = String((order as any)?.delivery?.motoboy?.name || '');
   const motoboyFirst = firstName(motoboyName);
+  const motoboyProfileImageUrl = resolveAssetUrl(
+    (order as any)?.delivery?.motoboy?.profileImageUrl ||
+    (order as any)?.delivery?.motoboy?.imageUrl ||
+    ''
+  );
   const storeName = order?.store?.name || 'Já no Caminho';
   const storeSlug = order?.store?.slug;
   const storeHomePath = storeSlug ? `/${storeSlug}` : '/';
@@ -432,6 +437,7 @@ export function OrderTracking() {
     },
   });
   const tipProgressPct = Math.max(0, Math.min(100, (tipPolling.remainingMs / (5 * 60 * 1000)) * 100));
+  const showTipPendingUi = tipUiStatus !== 'PAID';
 
   const toggleTag = (type: 'storeTags' | 'deliveryTags', value: string) => {
     setReviewForm((prev) => {
@@ -740,9 +746,17 @@ export function OrderTracking() {
                     {isDelivery && motoboyFirst && ['ACCEPTED', 'PICKED_UP', 'IN_TRANSIT', 'DELIVERED'].includes(deliveryStatus) ? (
                       <div className="mt-3 rounded-2xl border border-slate-200 bg-white/70 px-4 py-3 text-sm text-slate-800">
                         <div className="flex items-start gap-3">
-                          <div className="h-10 w-10 rounded-2xl border border-slate-200 bg-slate-50 flex items-center justify-center text-slate-700 shrink-0">
-                            <Bicycle size={18} weight="duotone" />
-                          </div>
+                          {motoboyProfileImageUrl ? (
+                            <img
+                              src={motoboyProfileImageUrl}
+                              alt={motoboyFirst}
+                              className="h-10 w-10 rounded-2xl border border-slate-200 object-cover shrink-0 bg-white"
+                            />
+                          ) : (
+                            <div className="h-10 w-10 rounded-2xl border border-slate-200 bg-slate-50 flex items-center justify-center text-slate-700 shrink-0">
+                              <Bicycle size={18} weight="duotone" />
+                            </div>
+                          )}
                           <div className="min-w-0">
                             <div className="text-xs uppercase tracking-[0.28em] text-slate-500 font-extrabold">
                               Entregador
@@ -1327,7 +1341,7 @@ export function OrderTracking() {
                                       {tipStatusLabel}
                                     </span>
                                   </div>
-                                  {reviewTip?.tipQrCodeBase64 ? (
+                                  {showTipPendingUi && reviewTip?.tipQrCodeBase64 ? (
                                     <div className="rounded-2xl border border-amber-200 bg-[linear-gradient(135deg,#fff7ed,#ffedd5)] px-3 py-2.5 shadow-[0_12px_26px_-22px_rgba(234,88,12,0.9)]">
                                       <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-amber-700">Tempo limite para pagar a gorjeta</p>
                                       <div className="mt-1.5 flex items-center justify-between gap-2">
@@ -1378,7 +1392,7 @@ export function OrderTracking() {
                                     <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-800">
                                       <p className="font-semibold">Pagamento confirmado. Obrigado!</p>
                                     </div>
-                                  ) : (
+                                  ) : showTipPendingUi ? (
                                     <div className="rounded-lg border border-amber-200 bg-gradient-to-br from-amber-50 via-orange-50 to-white px-3 py-2 space-y-2 shadow-[0_10px_24px_-22px_rgba(234,88,12,0.85)]">
                                       <div className="flex items-center justify-between gap-2 rounded-lg border border-amber-200 bg-white/80 px-2.5 py-2">
                                         <span className="text-[11px] font-semibold text-amber-900 uppercase tracking-[0.2em]">Tempo restante</span>
@@ -1425,7 +1439,12 @@ export function OrderTracking() {
                                         {tipPolling.isChecking ? 'Verificando...' : 'Já paguei, verificar agora'}
                                       </button>
                                     </div>
-                                  )}
+                                  ) : null}
+                                  {tipUiStatus === 'PAID' && reviewTip?.tipPaidAt ? (
+                                    <p className="text-[11px] text-emerald-700 font-semibold">
+                                      Confirmado em {new Date(reviewTip.tipPaidAt).toLocaleString('pt-BR')}
+                                    </p>
+                                  ) : null}
                                 </div>
                               ) : null}
                             </div>
