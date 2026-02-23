@@ -1,8 +1,9 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SignOut, UserCircle } from '@phosphor-icons/react';
 import { useAuth } from '../../contexts/AuthContext';
 import { resolveAssetUrl } from '../../utils/resolveAssetUrl';
+import { motoboyService } from '../../services/motoboyService';
 
 type MotoboyHeaderProps = {
   title: string;
@@ -26,9 +27,51 @@ export function MotoboyHeader({ title, subtitle, rightAction }: MotoboyHeaderPro
   const user = motoboySession?.user || null;
   const userName = String(user?.fullName || user?.name || '').trim();
   const userEmail = String(user?.email || '').trim();
-  const userImage = resolveAssetUrl(String(user?.profileImageUrl || ''));
+  const [resolvedUserImage, setResolvedUserImage] = useState<string>(
+    resolveAssetUrl(String(user?.profileImageUrl || '')) || ''
+  );
+  const userImage = resolvedUserImage;
   const userInitial = String((userName || 'E').trim().charAt(0) || 'E').toUpperCase();
   const showSession = Boolean(motoboySession?.token && userEmail);
+
+  useEffect(() => {
+    let active = true;
+    const fallbackImage = resolveAssetUrl(String(user?.profileImageUrl || '')) || '';
+    if (fallbackImage) {
+      setResolvedUserImage(fallbackImage);
+      return () => {
+        active = false;
+      };
+    }
+    if (!showSession) return () => {
+      active = false;
+    };
+    (async () => {
+      try {
+        const profile = await motoboyService.getProfile();
+        const profileImageUrl = resolveAssetUrl(String(profile?.user?.profileImageUrl || '')) || '';
+        if (!active) return;
+        if (profileImageUrl) {
+          setResolvedUserImage(profileImageUrl);
+          try {
+            const raw = localStorage.getItem('motoboySession');
+            const parsed = raw ? JSON.parse(raw) : null;
+            if (parsed?.user && !parsed.user.profileImageUrl) {
+              parsed.user.profileImageUrl = String(profile?.user?.profileImageUrl || '');
+              localStorage.setItem('motoboySession', JSON.stringify(parsed));
+            }
+          } catch {
+            // ignore
+          }
+        }
+      } catch {
+        // ignore
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [showSession, user?.profileImageUrl]);
 
   const handleLogout = () => {
     try {
