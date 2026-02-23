@@ -35,6 +35,7 @@ export function usePollingPaymentStatus({
   timeoutMs = 4 * 60 * 1000,
   checkStatus,
 }: UsePollingPaymentStatusParams) {
+  const checkStatusRef = useRef(checkStatus);
   const timerRef = useRef<number | null>(null);
   const activeRef = useRef(false);
   const checkingRef = useRef(false);
@@ -50,6 +51,10 @@ export function usePollingPaymentStatus({
 
   const normalizedStatus = String(status || '').toUpperCase();
   const isTerminalStatus = TERMINAL_STATUSES.has(normalizedStatus);
+
+  useEffect(() => {
+    checkStatusRef.current = checkStatus;
+  }, [checkStatus]);
 
   const clearTimer = useCallback(() => {
     if (timerRef.current) {
@@ -81,7 +86,7 @@ export function usePollingPaymentStatus({
       setIsChecking(true);
 
       try {
-        const nextStatus = normalizeStatus(await checkStatus());
+        const nextStatus = normalizeStatus(await checkStatusRef.current());
         const now = Date.now();
         setLastCheckedAt(now);
         setConnectionUnstable(false);
@@ -118,7 +123,7 @@ export function usePollingPaymentStatus({
         setIsChecking(false);
       }
     },
-    [checkStatus, intervalMs, scheduleNext, stopPolling, timeoutMs]
+    [intervalMs, scheduleNext, stopPolling, timeoutMs]
   );
 
   const startPolling = useCallback(() => {
