@@ -80,6 +80,7 @@ export function AdminMotoboys() {
     const groups: Array<{
       motoboyId: string;
       motoboyName: string;
+      motoboyProfileImageUrl: string;
       pendingAmount: number;
       paidAmount: number;
       totalAmount: number;
@@ -91,12 +92,14 @@ export function AdminMotoboys() {
     (tipPayoutRows || []).forEach((row: any) => {
       const motoboyId = String(row?.motoboyId || row?.motoboy_id || row?.motoboyName || '').trim();
       const motoboyName = String(row?.motoboyName || 'Entregador').trim() || 'Entregador';
+      const motoboyProfileImageUrl = String(row?.motoboyProfileImageUrl || '').trim();
       const payoutStatus = String(row?.tipPayoutStatus || '').toUpperCase() === 'PAID' ? 'PAID' : 'PENDING';
       const tipAmount = Number(row?.tipAmount || 0);
       if (!byId.has(motoboyId)) {
         const group = {
           motoboyId,
           motoboyName,
+          motoboyProfileImageUrl,
           pendingAmount: 0,
           paidAmount: 0,
           totalAmount: 0,
@@ -114,6 +117,9 @@ export function AdminMotoboys() {
       else {
         group.pendingAmount += tipAmount;
         group.pendingCount += 1;
+      }
+      if (!group.motoboyProfileImageUrl && motoboyProfileImageUrl) {
+        group.motoboyProfileImageUrl = motoboyProfileImageUrl;
       }
       group.rows.push(row);
     });
@@ -824,11 +830,21 @@ export function AdminMotoboys() {
               return (
                 <div key={group.motoboyId || `group-${gIdx}`} className="rounded-2xl border border-slate-200 bg-white p-3 space-y-3">
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <AdaptiveAvatar
+                        src={group.motoboyProfileImageUrl ? resolveAssetUrl(group.motoboyProfileImageUrl) : ''}
+                        alt={group.motoboyName || 'Entregador'}
+                        fallbackText={String(group.motoboyName || 'E')}
+                        sizeClassName="h-11 w-11"
+                        imageClassName="object-[center_18%]"
+                        containerClassName="text-slate-800 bg-gradient-to-br from-slate-50 to-white shadow-[0_14px_28px_-20px_rgba(15,23,42,0.5)]"
+                      />
+                      <div className="min-w-0">
                       <div className="text-sm font-black text-slate-900 break-words">{group.motoboyName}</div>
                       <div className="text-[11px] text-slate-500">
                         {group.totalCount} repasse(s) · {formatCurrency(group.totalAmount)}
                       </div>
+                    </div>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border border-amber-200 bg-amber-50 text-amber-800">
