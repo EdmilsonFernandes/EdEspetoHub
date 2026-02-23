@@ -310,7 +310,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
             <div className="flex items-center gap-2">
               <span className="h-2.5 w-2.5 rounded-full bg-amber-500" />
               <p className="text-sm font-semibold text-gray-800">Destaque do Dia</p>
-              <p className="text-xs text-gray-500">Uma frase que vende no topo do cardápio.</p>
+              <p className="text-xs text-gray-500">Uma frase que vende no topo da vitrine.</p>
             </div>
             <span className="text-xs text-gray-500 sm:hidden">{sectionsOpen.promo ? 'Fechar' : 'Abrir'}</span>
           </button>
@@ -325,7 +325,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
                 maxLength={120}
               />
               <div className="flex items-center justify-between text-xs text-gray-500">
-                <span>Aparece no topo do cardápio.</span>
+                <span>Aparece no topo da vitrine.</span>
                 <span>{(branding.promoMessage || "").length}/120</span>
               </div>
             </div>
@@ -355,7 +355,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
                 className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
                 placeholder="contato@janocaminho.com.br"
               />
-              <p className="text-xs text-gray-500">Opcional, aparece no cardápio para contato.</p>
+              <p className="text-xs text-gray-500">Opcional, aparece na vitrine para contato.</p>
             </div>
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700">Endereço da loja</label>
@@ -548,7 +548,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
                 />
               ))}
             </div>
-            <p className="text-xs text-gray-500">A cor principal define os destaques do cardápio.</p>
+            <p className="text-xs text-gray-500">A cor principal define os destaques da vitrine.</p>
           </div>
 
           <div className="space-y-3">
@@ -587,7 +587,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
             <div className="flex items-center gap-2">
               <span className="h-2.5 w-2.5 rounded-full bg-slate-500" />
               <p className="text-sm font-semibold text-gray-800">URL da Loja</p>
-              <p className="text-xs text-gray-500">Link público e definitivo do cardápio.</p>
+              <p className="text-xs text-gray-500">Link público e definitivo da vitrine.</p>
             </div>
             <span className="text-xs text-gray-500 sm:hidden">{sectionsOpen.access ? 'Fechar' : 'Abrir'}</span>
           </button>

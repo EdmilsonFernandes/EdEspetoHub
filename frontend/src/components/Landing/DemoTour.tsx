@@ -16,7 +16,7 @@ export function DemoTour({ open, onClose }: Props) {
         id: 'setup',
         title: 'Cadastro em 3 minutos',
         description:
-          'Defina o nome da loja, cores e cadastre seus produtos. O cardápio já fica pronto para receber pedidos.',
+          'Defina o nome da loja, cores e cadastre seus produtos. A vitrine já fica pronta para receber pedidos.',
         ctaLabel: 'Abrir cadastro',
         action: () => navigate('/create'),
         icon: ClipboardText,
@@ -24,10 +24,10 @@ export function DemoTour({ open, onClose }: Props) {
       },
       {
         id: 'orders',
-        title: 'Pedido no cardápio',
+        title: 'Pedido na vitrine',
         description:
           'O cliente escolhe, finaliza o pedido e envia para você. Tudo organizado e pronto para produzir.',
-        ctaLabel: 'Abrir cardápio demo',
+        ctaLabel: 'Abrir vitrine demo',
         action: () => navigate('/janocaminho/demo'),
         icon: ShoppingCart,
         highlight: 'Fluxo do cliente',

@@ -91,7 +91,7 @@ const STORE_SEGMENT_PRESETS: Record<string, { primaryColor: string; secondaryCol
   pizzaria: {
     primaryColor: '#dc2626',
     secondaryColor: '#111827',
-    description: 'Pizzas e porções com cardápio online e fila organizada.',
+    description: 'Pizzas e porções com vitrine online e fila organizada.',
     orderTypes: ['delivery', 'pickup', 'table'],
     categories: ['Pizzas', 'Broto', 'Bordas', 'Bebidas'],
   },
@@ -827,7 +827,7 @@ export function CreateStore() {
         </p>
         <p className="inline-flex items-start gap-2">
           <Buildings className="mt-0.5" size={13} weight="duotone" />
-          Painel com cardápio, pedidos e produção no mesmo fluxo.
+          Painel com vitrine, pedidos e operação no mesmo fluxo.
         </p>
         <p className="inline-flex items-start gap-2">
           <GlobeHemisphereWest className="mt-0.5" size={13} weight="duotone" />
@@ -863,7 +863,7 @@ export function CreateStore() {
               className="mt-1 h-7 w-full rounded-md text-white text-[11px] font-semibold"
               style={{ backgroundColor: registerForm.primaryColor || '#2f9df7' }}
             >
-            Ver cardápio
+            Ver vitrine
             </button>
           </div>
         </div>

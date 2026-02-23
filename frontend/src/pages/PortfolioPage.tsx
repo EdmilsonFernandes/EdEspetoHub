@@ -89,7 +89,7 @@ const caseProblem = (segment?: string | null) => {
 
 const caseSolution = (name?: string) => {
   const storeName = String(name || 'a loja');
-  return `Implantação do Já no Caminho para ${storeName}, com cardápio digital, painel operacional e fluxo de entrega/retirada com status ao vivo.`;
+  return `Implantação do Já no Caminho para ${storeName}, com vitrine digital, painel operacional e fluxo de entrega/retirada com status ao vivo.`;
 };
 
 const caseResult = (store: PortfolioStore) => {

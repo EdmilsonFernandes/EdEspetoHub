@@ -462,7 +462,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
               <Plus size={20} weight="duotone" className="text-brand-primary" />
               Cadastro de produto
             </h3>
-            <p className="text-xs text-slate-500 mt-1">Cadastre itens do cardápio com foto, preço e categoria.</p>
+            <p className="text-xs text-slate-500 mt-1">Cadastre itens da vitrine com foto, preço e categoria.</p>
           </div>
           <span className="px-3 py-1 rounded-full text-xs font-semibold bg-brand-primary-soft text-brand-primary">
             Novo item
@@ -815,7 +815,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
           <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
             <div>
               <p className="text-sm font-semibold text-slate-800">Promoção do dia</p>
-              <p className="text-xs text-slate-500">Destaque este produto no topo do cardápio.</p>
+              <p className="text-xs text-slate-500">Destaque este produto no topo da vitrine.</p>
             </div>
             <button
               type="button"

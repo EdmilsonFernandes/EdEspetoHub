@@ -25,7 +25,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
               <p className="text-[11px] uppercase tracking-[0.35em] text-sky-200 font-semibold">Plataforma SaaS</p>
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black leading-tight">Gestão de pedidos e entregas para operações reais</h1>
               <p className="text-xs sm:text-sm text-slate-200/95 max-w-md">
-                Estruture cardápio, pedidos, produção e atendimento em uma experiência moderna, rápida e escalável.
+                Estruture vitrine, pedidos, operação e atendimento em uma experiência moderna, rápida e escalável.
               </p>
             </div>
             <div className="hidden sm:block space-y-2.5 text-xs text-slate-100/95">

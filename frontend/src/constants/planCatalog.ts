@@ -3,7 +3,7 @@ export const PLAN_TIERS = [
     key: 'basic',
     label: '🥩 Plano Basic',
     features: [
-      'Site e cardápio online',
+      'Site e vitrine online',
       'Pedidos ilimitados',
       'Retirada no balcão',
       'Sem entregas e gorjetas',
