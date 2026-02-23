@@ -21,6 +21,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
   const [planDetails, setPlanDetails] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
   const [showMobileDetails, setShowMobileDetails] = useState(false);
+  const [compactDesktop, setCompactDesktop] = useState(false);
 
   const storeSlug = auth?.store?.slug;
   const storeNameFromAuth = auth?.store?.name;
@@ -100,6 +101,21 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
   }, []);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handleScroll = () => {
+      const isDesktop = window.innerWidth >= 1024;
+      setCompactDesktop(isDesktop && window.scrollY > 64);
+    };
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+    };
+  }, []);
+
+  useEffect(() => {
     const storeId = auth?.store?.id;
     if (!storeId) return;
     const loadPlan = async () => {
@@ -159,9 +175,9 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
       <div className="pointer-events-none absolute inset-y-0 right-0 w-[40%] bg-gradient-to-l from-slate-950/40 via-slate-900/20 to-transparent" />
       <div className="pointer-events-none absolute top-0 left-8 right-8 h-0.5 rounded-full bg-white/40" />
       <div className="pointer-events-none absolute inset-0 rounded-3xl ring-1 ring-inset ring-white/12" />
-      <div className="px-4 pt-3 pb-2.5 min-h-[156px] flex flex-col lg:flex-row lg:items-start justify-between gap-3">
-        <div className="flex items-start gap-3 rounded-2xl border border-white/22 bg-slate-950/30 backdrop-blur-[4px] px-3.5 py-2.5 max-w-[920px] shadow-[0_16px_36px_-26px_rgba(0,0,0,0.7)]">
-          <div className="w-16 h-16 rounded-2xl bg-white/90 backdrop-blur flex items-center justify-center overflow-hidden shadow-[0_18px_32px_-18px_rgba(0,0,0,0.56)] ring-1 ring-white/80">
+      <div className={`px-4 pb-2.5 flex flex-col lg:flex-row justify-between gap-3 transition-all duration-200 ${compactDesktop ? 'pt-2 min-h-[112px] lg:items-center' : 'pt-3 min-h-[156px] lg:items-start'}`}>
+        <div className={`flex items-start gap-3 rounded-2xl border border-white/22 bg-slate-950/30 backdrop-blur-[4px] max-w-[920px] shadow-[0_16px_36px_-26px_rgba(0,0,0,0.7)] transition-all duration-200 ${compactDesktop ? 'px-3 py-2' : 'px-3.5 py-2.5'}`}>
+          <div className={`rounded-2xl bg-white/90 backdrop-blur flex items-center justify-center overflow-hidden shadow-[0_18px_32px_-18px_rgba(0,0,0,0.56)] ring-1 ring-white/80 transition-all duration-200 ${compactDesktop ? 'w-12 h-12' : 'w-16 h-16'}`}>
             {branding?.logoUrl ? (
               <img src={branding.logoUrl} alt={storeName} className="w-full h-full object-contain p-1" />
             ) : (
@@ -177,13 +193,13 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
                 </span>
               )}
             </div>
-            <h1 className="text-[22px] sm:text-[28px] font-black leading-tight truncate max-w-[42ch] drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]">{storeName}</h1>
-            {showDetails && storeDescription && (
+            <h1 className={`font-black leading-tight truncate max-w-[42ch] drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)] transition-all duration-200 ${compactDesktop ? 'text-[18px] sm:text-[22px]' : 'text-[22px] sm:text-[28px]'}`}>{storeName}</h1>
+            {showDetails && storeDescription && !compactDesktop && (
               <p className="text-xs sm:text-sm text-white/85 max-w-[520px] line-clamp-1 sm:line-clamp-2">
                 {storeDescription}
               </p>
             )}
-            <div className={`${showMobileDetails ? 'flex' : 'hidden'} lg:flex flex-wrap items-center gap-2 text-xs`}>
+            <div className={`${showMobileDetails ? 'flex' : 'hidden'} lg:flex flex-wrap items-center gap-2 text-xs ${compactDesktop ? 'lg:mt-0.5' : ''}`}>
               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/14 border border-white/28 opacity-95 shadow-sm">
                 <Storefront size={12} weight="duotone" />
                 <span className="truncate">{storeSegmentLabel}</span>
@@ -219,7 +235,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-2 rounded-2xl border border-white/20 bg-slate-950/34 backdrop-blur-[4px] px-2.5 py-2 shadow-[0_16px_34px_-24px_rgba(0,0,0,0.72)]">
+        <div className={`flex items-center gap-2 rounded-2xl border border-white/20 bg-slate-950/34 backdrop-blur-[4px] px-2.5 shadow-[0_16px_34px_-24px_rgba(0,0,0,0.72)] transition-all duration-200 ${compactDesktop ? 'py-1.5' : 'py-2'}`}>
           <button
             type="button"
             onClick={() => setShowMobileDetails((prev) => !prev)}
@@ -248,7 +264,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
           )}
         </div>
       </div>
-      <div className="px-4 pb-3.5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2.5 rounded-b-3xl border-t border-white/12">
+      <div className={`px-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2.5 rounded-b-3xl border-t border-white/12 transition-all duration-200 ${compactDesktop ? 'pb-2.5' : 'pb-3.5'}`}>
         {showDetails && (
           <div className="flex items-center gap-2 text-[11px] font-semibold bg-slate-950/34 border border-white/25 rounded-full px-2 py-1.5 w-fit backdrop-blur-[2px]">
             <ShieldCheck size={14} weight="duotone" />
