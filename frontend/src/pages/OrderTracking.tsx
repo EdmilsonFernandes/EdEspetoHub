@@ -382,7 +382,7 @@ export function OrderTracking() {
   const tipUiStatus = isTipExpired && tipStatus === 'PENDING' ? 'EXPIRED' : tipStatus;
   const tipAmount = Number(reviewTip?.tipAmount || 0);
   const hasTip = canUseTipFlow && tipAmount > 0;
-  const canShowTipPayment = hasTip && (reviewTip?.tipQrCodeText || reviewTip?.tipPaymentLink);
+  const canShowTipPayment = hasTip && (reviewTip?.tipQrCodeBase64 || reviewTip?.tipQrCodeText || reviewTip?.tipPaymentLink);
   const tipPollingStatus =
     canShowTipPayment && tipUiStatus !== 'PAID' && tipUiStatus !== 'NONE'
       ? 'PENDING'

@@ -107,8 +107,9 @@ export function PaymentPage() {
     loadPlans();
   }, [paymentId, payment?.subscription?.plan?.id]);
 
-  const isPaid = payment?.status === 'PAID';
-  const isFailed = payment?.status === 'FAILED';
+  const normalizedPaymentStatus = String(payment?.status || '').toUpperCase();
+  const isPaid = normalizedPaymentStatus === 'PAID';
+  const isFailed = normalizedPaymentStatus === 'FAILED';
   const isExpired = payment?.expiresAt ? new Date(payment.expiresAt) <= new Date() : false;
   const createdAt = payment?.createdAt ? new Date(payment.createdAt) : null;
   const isRecentPayment =
@@ -117,7 +118,7 @@ export function PaymentPage() {
       : false;
   const needsRenew = isFailed || isExpired;
   const isVerified = payment?.emailVerified;
-  const isPixPending = payment?.method === 'PIX' && payment?.status === 'PENDING';
+  const isPixPending = payment?.method === 'PIX' && normalizedPaymentStatus === 'PENDING';
   const statusLabel = isPaid
     ? 'Pagamento aprovado'
     : isFailed
