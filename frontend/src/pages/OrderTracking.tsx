@@ -383,6 +383,10 @@ export function OrderTracking() {
   const tipAmount = Number(reviewTip?.tipAmount || 0);
   const hasTip = canUseTipFlow && tipAmount > 0;
   const canShowTipPayment = hasTip && (reviewTip?.tipQrCodeText || reviewTip?.tipPaymentLink);
+  const tipPollingStatus =
+    canShowTipPayment && tipUiStatus !== 'PAID' && tipUiStatus !== 'NONE'
+      ? 'PENDING'
+      : tipUiStatus;
   const tipStatusLabel =
     tipUiStatus === 'PAID'
       ? 'Pago'
@@ -419,7 +423,7 @@ export function OrderTracking() {
   const tipPolling = usePollingPaymentStatus({
     id: reviewTip?.id || order?.id,
     enabled: Boolean(order?.id && isReady && canShowTipPayment),
-    status: tipUiStatus,
+    status: tipPollingStatus,
     intervalMs: 5000,
     timeoutMs: 5 * 60 * 1000,
     checkStatus: async () => {
