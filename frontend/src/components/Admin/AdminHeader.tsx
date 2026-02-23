@@ -137,7 +137,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
       className="relative rounded-3xl border border-slate-200 shadow-[0_22px_46px_-30px_rgba(15,23,42,0.5)] overflow-visible"
       style={{
         backgroundImage: hasBanner
-          ? `linear-gradient(120deg, rgba(15,23,42,0.42) 0%, rgba(15,23,42,0.58) 100%), url(${bannerUrl})`
+          ? `linear-gradient(120deg, rgba(15,23,42,0.28) 0%, rgba(15,23,42,0.42) 100%), url(${bannerUrl})`
           : `linear-gradient(120deg, ${branding?.primaryColor || 'var(--color-primary)'} 0%, ${branding?.secondaryColor || 'var(--color-secondary)'} 100%)`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
