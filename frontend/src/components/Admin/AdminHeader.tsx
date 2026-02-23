@@ -65,10 +65,10 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
   const headerBackgroundStyle = hasBanner
     ? {
         backgroundColor: '#0f172a',
-        backgroundImage: `linear-gradient(120deg, rgba(15,23,42,0.42) 0%, rgba(15,23,42,0.52) 100%), radial-gradient(circle at 12% 8%, rgba(255,255,255,0.22), transparent 48%), url(${bannerUrl})`,
-        backgroundSize: '100% 100%, 100% 100%, contain',
-        backgroundPosition: 'center, center, center',
-        backgroundRepeat: 'no-repeat, no-repeat, no-repeat',
+        backgroundImage: `linear-gradient(120deg, rgba(15,23,42,0.34) 0%, rgba(15,23,42,0.5) 100%), url(${bannerUrl})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
         color: '#fff',
       }
     : {
@@ -153,15 +153,16 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
       className="relative rounded-3xl border border-slate-200 shadow-[0_22px_46px_-30px_rgba(15,23,42,0.5)] overflow-visible"
       style={headerBackgroundStyle}
     >
-      <div className="pointer-events-none absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.45),_transparent_55%)]" />
+      <div className="pointer-events-none absolute inset-0 opacity-35 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.34),_transparent_55%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-slate-900/12 via-transparent to-slate-900/22" />
       <div className="pointer-events-none absolute top-0 left-8 right-8 h-0.5 rounded-full bg-white/40" />
       <div className="px-4 pt-3 pb-2.5 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
         <div className="flex items-start gap-3 rounded-2xl border border-white/18 bg-slate-950/24 backdrop-blur-[2px] px-3 py-2">
-          <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center overflow-hidden shadow-[0_14px_26px_-18px_rgba(0,0,0,0.35)] ring-1 ring-white/30">
+          <div className="w-14 h-14 rounded-2xl bg-white/88 backdrop-blur flex items-center justify-center overflow-hidden shadow-[0_16px_28px_-18px_rgba(0,0,0,0.5)] ring-1 ring-white/80">
             {branding?.logoUrl ? (
-              <img src={branding.logoUrl} alt={storeName} className="w-full h-full object-contain p-0.5" />
+              <img src={branding.logoUrl} alt={storeName} className="w-full h-full object-contain p-1" />
             ) : (
-              <span className="text-xl font-black">{storeName?.slice(0, 2)?.toUpperCase() || 'CE'}</span>
+              <span className="text-xl font-black text-slate-800">{storeName?.slice(0, 2)?.toUpperCase() || 'CE'}</span>
             )}
           </div>
           <div className="space-y-0.5 min-w-0">
