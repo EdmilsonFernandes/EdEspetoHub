@@ -51,7 +51,8 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
   const socialLinks = auth?.store?.settings?.socialLinks || [];
   const instagramLink = socialLinks.find((link) => link?.type === 'instagram')?.value;
   const instagramHandle = instagramLink ? `@${instagramLink.replace('@', '')}` : '';
-  const bannerUrl = resolveAssetUrl(auth?.store?.settings?.bannerUrl || branding?.bannerUrl || '');
+  const bannerUrl = resolveAssetUrl(auth?.store?.settings?.bannerUrl || '') || '';
+  const hasBanner = Boolean(bannerUrl);
   const userName = auth?.user?.fullName || auth?.user?.name || auth?.user?.email || 'Admin';
   const userRole = auth?.user?.role || 'ADMIN';
   const userInitials = userName
@@ -135,11 +136,11 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
     <header
       className="relative rounded-3xl border border-slate-200 shadow-[0_22px_46px_-30px_rgba(15,23,42,0.5)] overflow-visible"
       style={{
-        backgroundImage: bannerUrl
-          ? `linear-gradient(120deg, color-mix(in srgb, ${branding?.primaryColor || 'var(--color-primary)'} 62%, #0f172a 38%) 0%, color-mix(in srgb, ${branding?.secondaryColor || 'var(--color-secondary)'} 58%, #0f172a 42%) 100%), url(${bannerUrl})`
+        backgroundImage: hasBanner
+          ? `linear-gradient(120deg, rgba(15,23,42,0.42) 0%, rgba(15,23,42,0.58) 100%), url(${bannerUrl})`
           : `linear-gradient(120deg, ${branding?.primaryColor || 'var(--color-primary)'} 0%, ${branding?.secondaryColor || 'var(--color-secondary)'} 100%)`,
-        backgroundSize: bannerUrl ? 'cover, cover' : 'cover',
-        backgroundPosition: bannerUrl ? 'center, center' : 'center',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
         color: '#fff',
       }}
