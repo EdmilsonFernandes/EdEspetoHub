@@ -1198,9 +1198,17 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       const payload = {
         name: brandingDraft.brandName,
         logoFile: brandingDraft.logoFile || undefined,
-        logoUrl: brandingDraft.logoFile ? undefined : brandingDraft.logoUrl || undefined,
+        logoUrl: brandingDraft.logoFile
+          ? undefined
+          : brandingDraft.logoUrl === ''
+          ? null
+          : brandingDraft.logoUrl || undefined,
         bannerFile: brandingDraft.bannerFile || undefined,
-        bannerUrl: brandingDraft.bannerFile ? undefined : brandingDraft.bannerUrl || undefined,
+        bannerUrl: brandingDraft.bannerFile
+          ? undefined
+          : brandingDraft.bannerUrl === ''
+          ? null
+          : brandingDraft.bannerUrl || undefined,
         description: brandingDraft.description || undefined,
         primaryColor: brandingDraft.primaryColor,
         secondaryColor: brandingDraft.secondaryColor,
