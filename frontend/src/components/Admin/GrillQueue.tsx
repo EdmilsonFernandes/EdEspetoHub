@@ -615,7 +615,7 @@ export const GrillQueue = () => {
 
   const getStatusStyles = (status, orderType) => {
     if (status === "preparing") {
-      return { label: "Em preparo", className: "bg-amber-100 text-amber-700" };
+      return { label: "Em atendimento", className: "bg-amber-100 text-amber-700" };
     }
     if (status === "ready") {
       const label = orderType === "delivery" ? "Aguardando entregador" : "Aguardando retirada";
@@ -641,20 +641,20 @@ export const GrillQueue = () => {
       orderType === "pickup"
         ? [
             { key: "pending", label: "Recebido" },
-            { key: "preparing", label: "Em preparo" },
+            { key: "preparing", label: "Em atendimento" },
             { key: "ready", label: "Pronto p/ retirada" },
             { key: "done", label: "Pago" },
           ]
         : orderType === "delivery"
         ? [
             { key: "pending", label: "Recebido" },
-            { key: "preparing", label: "Em preparo" },
+            { key: "preparing", label: "Em atendimento" },
             { key: "ready", label: "Aguardando entregador" },
             { key: "done", label: "Saiu para entrega" },
           ]
         : [
             { key: "pending", label: "Recebido" },
-            { key: "preparing", label: "Em preparo" },
+            { key: "preparing", label: "Em atendimento" },
             { key: "done", label: "Pronto" },
           ];
 
@@ -705,7 +705,7 @@ export const GrillQueue = () => {
           </span>
           {!tvMode && (
             <p className="text-[12px] font-medium text-slate-500">
-              Pendentes {queueMetrics.pending} • Em preparo {queueMetrics.preparing} • Aguardando {queueMetrics.ready} • Mais antigo {formatDuration(queueMetrics.oldest)}
+              Pendentes {queueMetrics.pending} • Em atendimento {queueMetrics.preparing} • Aguardando {queueMetrics.ready} • Mais antigo {formatDuration(queueMetrics.oldest)}
             </p>
           )}
           {tvMode && (
@@ -1079,7 +1079,7 @@ export const GrillQueue = () => {
                 {order.status === "pending" && (
                   <div className="w-full sm:w-auto">
                     <div className="mb-2 text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-2.5 py-1">
-                      Clique em iniciar preparo para começar.
+                      Clique em iniciar atendimento para começar.
                     </div>
                     <button
                       onClick={() => { pulseCta(order.id + '-prep'); handleAdvance(order.id, "preparing"); }}
@@ -1087,7 +1087,7 @@ export const GrillQueue = () => {
                       style={ctaPulseId === order.id + '-prep' ? { animation: 'btnPop 220ms ease' } : undefined}
                       className="w-full sm:w-auto px-3 py-2 rounded-lg bg-amber-500 text-white text-xs font-bold flex items-center justify-center gap-1 disabled:opacity-60 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95"
                     >
-                      <Clock size={16} weight="duotone" /> Iniciar preparo
+                      <Clock size={16} weight="duotone" /> Iniciar atendimento
                     </button>
                   </div>
                 )}
@@ -1631,4 +1631,5 @@ export const GrillQueue = () => {
     </div>
   );
 };
+
 

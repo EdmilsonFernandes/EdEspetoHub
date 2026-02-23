@@ -15,7 +15,7 @@ import { usePollingPaymentStatus } from '../hooks/usePollingPaymentStatus';
 
 const statusLabels: Record<string, string> = {
   pending: 'Recebido',
-  preparing: 'Em preparo',
+  preparing: 'Em atendimento',
   ready: 'Pronto para retirada',
   done: 'Pronto',
   delivered: 'Entregue',
@@ -627,7 +627,7 @@ export function OrderTracking() {
     if (isDelivery) {
       return [
         { id: 'pending', label: 'Recebido' },
-        { id: 'preparing', label: 'Em preparo' },
+        { id: 'preparing', label: 'Em atendimento' },
         { id: 'ready', label: 'Aguardando entregador' },
         { id: 'in_delivery', label: 'Em rota' },
         { id: 'delivered', label: 'Entregue' },
@@ -636,14 +636,14 @@ export function OrderTracking() {
     if (order?.type === 'pickup') {
       return [
         { id: 'pending', label: 'Recebido' },
-        { id: 'preparing', label: 'Em preparo' },
+        { id: 'preparing', label: 'Em atendimento' },
         { id: 'ready', label: 'Pronto para retirada' },
         { id: 'done', label: 'Pago' },
       ];
     }
     return [
       { id: 'pending', label: 'Recebido' },
-      { id: 'preparing', label: 'Em preparo' },
+      { id: 'preparing', label: 'Em atendimento' },
       { id: 'done', label: order?.type === 'table' ? 'Pronto para servir' : 'Pronto' },
     ];
   }, [isDelivery, order?.type]);
@@ -799,7 +799,7 @@ export function OrderTracking() {
                 <div className="flex items-center gap-3 mb-4">
                   <ChefHat className="text-red-500" weight="duotone" />
                   <div>
-                    <p className="text-sm font-semibold text-gray-800">Andamento do preparo</p>
+                    <p className="text-sm font-semibold text-gray-800">Andamento do pedido</p>
                     <p className="text-xs text-gray-500">
                       {polling ? 'Atualizando automaticamente' : 'Status finalizado'}
                     </p>
@@ -1452,4 +1452,5 @@ export function OrderTracking() {
     </div>
   );
 }
+
 

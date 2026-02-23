@@ -1,4 +1,4 @@
-const STATUS_STYLES: Record<string, { pill: string; dot: string; pulse?: boolean }> = {
+﻿const STATUS_STYLES: Record<string, { pill: string; dot: string; pulse?: boolean }> = {
   pending: { pill: 'bg-amber-50 text-amber-900 border-amber-200', dot: 'bg-amber-500', pulse: true },
   preparing: { pill: 'bg-sky-50 text-sky-900 border-sky-200', dot: 'bg-sky-500', pulse: true },
   ready_for_delivery: { pill: 'bg-violet-50 text-violet-900 border-violet-200', dot: 'bg-violet-500' },
@@ -10,7 +10,7 @@ const STATUS_STYLES: Record<string, { pill: string; dot: string; pulse?: boolean
 
 const STATUS_LABELS: Record<string, string> = {
   pending: 'Recebido',
-  preparing: 'Em preparo',
+  preparing: 'Em atendimento',
   ready_for_delivery: 'Pronto para entrega',
   waiting_for_motoboy: 'Aguardando',
   in_delivery: 'Em rota',
@@ -36,3 +36,4 @@ export function StatusBadge({ status }: { status?: string }) {
     </span>
   );
 }
+

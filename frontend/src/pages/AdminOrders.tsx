@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 import { useEffect, useMemo, useState } from 'react';
 import { AdminHeader } from '../components/Admin/AdminHeader';
 import { useAuth } from '../contexts/AuthContext';
@@ -207,7 +207,7 @@ export function AdminOrders() {
 	                {[
 	                  { id: 'all', label: 'Todos', count: statusCounts.all },
 	                  { id: 'pending', label: 'Pendentes', count: statusCounts.pending },
-	                { id: 'preparing', label: 'Em preparo', count: statusCounts.preparing },
+	                { id: 'preparing', label: 'Em atendimento', count: statusCounts.preparing },
 	                { id: 'ready', label: 'Aguardando', count: statusCounts.ready },
 	                { id: 'done', label: 'Finalizados', count: statusCounts.done },
 	                { id: 'cancelled', label: 'Cancelados', count: statusCounts.cancelled },
@@ -561,3 +561,4 @@ export function AdminOrders() {
     </div>
   );
 }
+

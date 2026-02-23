@@ -1,4 +1,4 @@
-export const formatCurrency = (value: number | string | null | undefined) => {
+﻿export const formatCurrency = (value: number | string | null | undefined) => {
   const numeric = Number(value);
   const safeValue = Number.isFinite(numeric) ? numeric : 0;
   return safeValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -46,7 +46,7 @@ export const formatOrderStatus = (status?: string, type?: string) => {
   const normalizedType = (type || '').toString().toLowerCase();
   const map: Record<string, string> = {
     pending: 'Pendente',
-    preparing: 'Preparando',
+    preparing: 'Em atendimento',
     ready: normalizedType === 'delivery' ? 'Aguardando entregador' : 'Aguardando retirada',
     waiting_for_motoboy: 'Aguardando entregador',
     in_delivery: 'Em rota',
@@ -160,3 +160,4 @@ export const formatAddress = (value: unknown) => {
   const line3 = [city, state].filter(Boolean).join(' - ');
   return [line1, line2, line3, zipCode].filter(Boolean).join(' | ');
 };
+
