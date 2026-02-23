@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { SignOut, Globe, Sparkle, ShieldCheck, Storefront } from '@phosphor-icons/react';
+import { SignOut, Globe, Sparkle, ShieldCheck, Storefront, PushPin } from '@phosphor-icons/react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -22,6 +22,10 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
   const [isMobile, setIsMobile] = useState(false);
   const [showMobileDetails, setShowMobileDetails] = useState(false);
   const [compactDesktop, setCompactDesktop] = useState(false);
+  const [pinExpanded, setPinExpanded] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return localStorage.getItem('adminHeader:pinExpanded') === 'true';
+  });
 
   const storeSlug = auth?.store?.slug;
   const storeNameFromAuth = auth?.store?.name;
@@ -104,7 +108,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
     if (typeof window === 'undefined') return;
     const handleScroll = () => {
       const isDesktop = window.innerWidth >= 1024;
-      setCompactDesktop(isDesktop && window.scrollY > 64);
+      setCompactDesktop(isDesktop && window.scrollY > 64 && !pinExpanded);
     };
     handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -113,7 +117,15 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', handleScroll);
     };
-  }, []);
+  }, [pinExpanded]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem('adminHeader:pinExpanded', String(pinExpanded));
+    if (pinExpanded) {
+      setCompactDesktop(false);
+    }
+  }, [pinExpanded]);
 
   useEffect(() => {
     const storeId = auth?.store?.id;
@@ -236,6 +248,20 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
           </div>
         </div>
         <div className={`flex items-center gap-2 rounded-2xl border border-white/20 bg-slate-950/34 backdrop-blur-[4px] px-2.5 shadow-[0_16px_34px_-24px_rgba(0,0,0,0.72)] transition-all duration-200 ${compactDesktop ? 'py-1.5' : 'py-2'}`}>
+          <button
+            type="button"
+            onClick={() => setPinExpanded((prev) => !prev)}
+            className={`hidden lg:inline-flex items-center gap-1.5 px-3 py-2 rounded-full border text-xs font-semibold transition ${
+              pinExpanded
+                ? 'bg-white/22 border-white/35 text-white'
+                : 'bg-white/10 border-white/22 text-white/85 hover:bg-white/18 hover:text-white'
+            }`}
+            title={pinExpanded ? 'Desafixar cabeçalho expandido' : 'Fixar cabeçalho expandido'}
+            aria-label={pinExpanded ? 'Desafixar cabeçalho expandido' : 'Fixar cabeçalho expandido'}
+          >
+            <PushPin size={13} weight={pinExpanded ? 'fill' : 'duotone'} />
+            {pinExpanded ? 'Expandido fixo' : 'Fixar expandido'}
+          </button>
           <button
             type="button"
             onClick={() => setShowMobileDetails((prev) => !prev)}
