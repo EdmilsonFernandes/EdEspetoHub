@@ -57,13 +57,6 @@ const stepIconById: Record<string, any> = {
   delivered: CheckCircle,
 };
 
-const normalizeWhatsApp = (value?: string) => {
-  if (!value) return '';
-  const digits = value.toString().replace(/\D/g, '');
-  if (!digits) return '';
-  return digits.startsWith('55') ? digits : `55${digits}`;
-};
-
 const buildDemoStatus = (createdAt: number) => {
   const diff = Date.now() - createdAt;
   if (diff > 8 * 60 * 1000) return 'done';
@@ -251,7 +244,6 @@ export function OrderTracking() {
   const canRateDelivery = Boolean(reviewState?.features?.deliveryFeedbackEnabled ?? reviewState?.isDelivery ?? isDelivery);
   const canUseTipFlow = Boolean(reviewState?.features?.tipEnabled ?? canRateDelivery);
   const storePhone = order?.store?.phone;
-  const customerPhone = order?.phone;
   const paymentValue = order?.paymentMethod || order?.payment;
   const paymentMeta = paymentValue ? getPaymentMethodMeta(paymentValue) : null;
   const pixKey =
@@ -291,37 +283,8 @@ export function OrderTracking() {
     const base = order?.updatedAt ? new Date(order.updatedAt).getTime() : Date.now();
     return new Date(base + Number(deliveryRoute.durationMin) * 60 * 1000);
   }, [deliveryRoute?.durationMin, order?.updatedAt]);
-  const formatItemOptions = (item: any) => {
-    const labels = [];
-    if (item?.cookingPoint) labels.push(item.cookingPoint);
-    if (item?.passSkewer) labels.push('passar varinha');
-    const selected = formatSelectedModifiers(item?.selectedModifiers || []);
-    if (selected.length) labels.push(`+ ${selected.join(', ')}`);
-    return labels.length ? labels.join(' • ') : '';
-  };
-  const trackingLink = typeof window !== 'undefined' && order?.id
-    ? `${window.location.origin}/pedido/${order.id}`
-    : '';
-  const orderItemsText = (order?.items || [])
-    .map((item: any) => {
-      const options = formatItemOptions(item);
-      return `- ${item.quantity}x ${item.name}${options ? ` (${options})` : ''}`;
-    })
-    .join('\n');
-  const whatsappMessage = [
-    `Pedido #${formatOrderDisplayId(order?.id, storeSlug)} - ${storeName}`,
-    orderItemsText ? `Itens:\n${orderItemsText}` : '',
-    `Total: ${formatCurrency(order?.total || 0)}`,
-    isPixPayment && pixKey ? `Pix: ${pixKey}` : '',
-    trackingLink ? `Acompanhar: ${trackingLink}` : '',
-  ]
-    .filter(Boolean)
-    .join('\n');
-  const customerWhatsappLink = customerPhone
-    ? `https://wa.me/${normalizeWhatsApp(customerPhone)}?text=${encodeURIComponent(whatsappMessage)}`
-    : '';
   const storeWhatsappLink = storePhone
-    ? `https://wa.me/${normalizeWhatsApp(storePhone)}`
+    ? `https://wa.me/55${String(storePhone || '').replace(/\D/g, '').replace(/^55/, '')}`
     : '';
   const handleRepeatOrder = () => {
     if (!storeSlug || !order?.items?.length) return;
@@ -1058,18 +1021,8 @@ export function OrderTracking() {
                         )}
                       </div>
                     )}
-                  {(customerWhatsappLink || storeWhatsappLink) && (
+                  {storeWhatsappLink && (
                     <div className="flex flex-col gap-2">
-                      {customerWhatsappLink && (
-                        <a
-                          href={customerWhatsappLink}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex items-center justify-center px-3 py-2 rounded-lg bg-green-600 text-white text-xs font-semibold hover:opacity-90"
-                        >
-                          Enviar detalhes para meu WhatsApp
-                        </a>
-                      )}
                       {storeWhatsappLink && (
                         <a
                           href={storeWhatsappLink}
@@ -1190,11 +1143,9 @@ export function OrderTracking() {
                     </p>
                   )}
                   </div>
-                  {isReady && (
+                  {isReady && !isDelivery && (
                     <div className="rounded-xl border border-green-200 bg-green-50 p-3 text-sm text-green-700">
-                      {isDelivery
-                        ? 'Seu pedido saiu para entrega. Se precisar, mande uma referencia do endereco. Bom apetite!'
-                        : order?.type === 'table'
+                      {order?.type === 'table'
                         ? 'Seu pedido esta pronto. Aguarde o atendimento na sua mesa.'
                         : 'Seu pedido esta pronto! Pode ir retirar. Bom apetite!'}
                     </div>
