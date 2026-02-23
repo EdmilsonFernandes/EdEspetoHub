@@ -1,6 +1,6 @@
 ﻿// @ts-nocheck
 import * as React from 'react';
-import { ChartBar, BookOpen, ChefHat, CreditCard, Package, Gear, ShoppingCart, DotsThree, X, Scooter, ForkKnife, Storefront, Truck } from '@phosphor-icons/react';
+import { ChartBar, BookOpen, ChefHat, CreditCard, Package, Gear, ShoppingCart, X, Scooter, ForkKnife, Storefront, Truck, List, CaretLeft, CaretRight } from '@phosphor-icons/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AdminLayout } from '../layouts/AdminLayout';
@@ -24,7 +24,6 @@ import { formatAddress, formatCurrency, formatDateTime, formatOrderDisplayId, fo
 import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { formatSelectedModifiers } from '../utils/productModifiers';
-import { PremiumTabs } from '../components/common/PremiumTabs';
 import { FormSection } from '../components/common/FormSection';
 
 const formatPlanCycle = (days: number) => {
@@ -708,14 +707,15 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     if (typeof window === 'undefined') return true;
     return localStorage.getItem('adminHeader:visible') !== 'false';
   });
-  const [mobileNavCollapsed, setMobileNavCollapsed] = useState(() => {
+  const [isDesktopLayout, setIsDesktopLayout] = useState(() => {
     if (typeof window === 'undefined') return true;
-    const stored = localStorage.getItem('adminMobileNav:collapsed');
-    if (stored === null) return true;
-    return stored === 'true';
+    return window.matchMedia('(min-width: 1024px)').matches;
   });
-  const [navPulse, setNavPulse] = useState<string | null>(null);
-  const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
+  const [sidebarCompact, setSidebarCompact] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return localStorage.getItem('adminSidebar:compact') === 'true';
+  });
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [pendingMotoboyRequests, setPendingMotoboyRequests] = useState(0);
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [reviewsSummary, setReviewsSummary] = useState<any | null>(null);
@@ -750,19 +750,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       planName.includes('vip')
   );
 
-  const mobilePrimaryTabs = [
-    { id: 'resumo', label: 'Resumo', icon: ChartBar },
-    { id: 'pedidos', label: 'Pedidos', icon: ShoppingCart },
-    { id: 'produtos', label: 'Produtos', icon: Package },
-    { id: 'fila', label: 'Fila', icon: ChefHat },
-  ];
-
-  const mobileMoreActions = [
-    { id: 'pagamentos', label: 'Pagamentos', hint: 'Assinatura e histórico', icon: CreditCard },
-    { id: 'motoboys', label: 'Entregadores', hint: canUseMotoboys ? 'Motoboys e solicitações' : 'Disponível no plano Pro', icon: Scooter, disabled: !canUseMotoboys },
-    { id: 'config', label: 'Configurações', hint: 'Identidade, Pix e horários', icon: Gear },
-    { id: 'cardapio', label: 'Abrir vitrine', hint: 'Ver como o cliente vê', icon: BookOpen },
-  ];
   const desktopTabItems = [
     { id: 'resumo', label: 'Resumo', icon: ChartBar },
     { id: 'pedidos', label: 'Pedidos', icon: ShoppingCart },
@@ -772,6 +759,13 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     { id: 'config', label: 'Configurações', icon: Gear },
     { id: 'fila', label: 'Fila', icon: ChefHat },
   ];
+  const navItems = useMemo(
+    () => [
+      ...desktopTabItems,
+      { id: 'cardapio', label: 'Vitrine pública', icon: BookOpen, disabled: false, standalone: true },
+    ],
+    [desktopTabItems]
+  );
 
   useEffect(() => {
     if (!canUseMotoboys && activeTab === 'motoboys') {
@@ -1051,17 +1045,42 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    localStorage.setItem('adminMobileNav:collapsed', String(mobileNavCollapsed));
-  }, [mobileNavCollapsed]);
+    const media = window.matchMedia('(min-width: 1024px)');
+    const onChange = () => setIsDesktopLayout(media.matches);
+    onChange();
+    if (media.addEventListener) {
+      media.addEventListener('change', onChange);
+    } else {
+      media.addListener(onChange);
+    }
+    return () => {
+      if (media.removeEventListener) {
+        media.removeEventListener('change', onChange);
+      } else {
+        media.removeListener(onChange);
+      }
+    };
+  }, []);
 
   useEffect(() => {
-    if (!mobileMoreOpen) return;
+    if (typeof window === 'undefined') return;
+    localStorage.setItem('adminSidebar:compact', String(sidebarCompact));
+  }, [sidebarCompact]);
+
+  useEffect(() => {
+    if (!mobileDrawerOpen) return;
     const handleKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setMobileMoreOpen(false);
+      if (event.key === 'Escape') setMobileDrawerOpen(false);
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [mobileMoreOpen]);
+  }, [mobileDrawerOpen]);
+
+  useEffect(() => {
+    if (isDesktopLayout && mobileDrawerOpen) {
+      setMobileDrawerOpen(false);
+    }
+  }, [isDesktopLayout, mobileDrawerOpen]);
 
 
   useEffect(() => {
@@ -1212,114 +1231,112 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     }
   };
 
+  const handleNavSelect = (id: string) => {
+    if (id === 'cardapio') {
+      if (storeSlug) navigate(`/${storeSlug}`);
+      return;
+    }
+    if (id === 'fila') {
+      navigate('/admin/queue');
+      return;
+    }
+    if (id === 'motoboys' && !canUseMotoboys) {
+      showToast('Recurso disponível no plano Pro.', 'info');
+      return;
+    }
+    setActiveTab(id as typeof activeTab);
+    setMobileDrawerOpen(false);
+  };
+
+  const sidebarGridClass = sidebarCompact
+    ? 'w-full lg:grid lg:grid-cols-[72px_minmax(0,1fr)] lg:gap-5 xl:gap-6 lg:items-start'
+    : 'w-full lg:grid lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-5 xl:gap-6 lg:items-start';
+
   return (
     <AdminLayout contextLabel="Painel da Loja">
-      {menuVisible ? (
-        <div className="hidden sm:flex lg:hidden justify-center">
-          <PremiumTabs
-            containerClassName="w-full max-w-6xl overflow-x-auto no-scrollbar"
-            listClassName="flex flex-nowrap gap-2 text-xs font-semibold text-slate-700"
-            buttonClassName="cursor-pointer"
-            items={[
-              ...desktopTabItems.map((item) => ({
-                id: item.id,
-                label: item.label,
-                title: item.disabled ? 'Disponível no plano Pro' : undefined,
-                disabled: item.disabled,
-                icon: React.createElement(item.icon, { size: 16, weight: 'duotone' }),
-                badge:
-                  item.id === 'motoboys' && item.disabled ? (
-                    <span className="absolute -top-2 -right-2 rounded-full bg-violet-600 text-white text-[9px] font-semibold px-1.5 py-0.5">
-                      Pro
-                    </span>
-                  ) : item.id === 'motoboys' && pendingMotoboyRequests > 0 ? (
-                    <span className="absolute -top-2 -right-2 rounded-full bg-amber-500 text-white text-[9px] font-semibold px-1.5 py-0.5">
-                      {pendingMotoboyRequests}
-                    </span>
-                  ) : null,
-              })),
-              { id: 'cardapio', label: 'Vitrine', icon: <BookOpen size={16} weight="duotone" /> },
-            ]}
-            activeId={activeTab}
-            onChange={(id) => {
-              if (id === 'cardapio') {
-                if (storeSlug) navigate(`/${storeSlug}`);
-                return;
-              }
-              if (id === 'fila') {
-                navigate('/admin/queue');
-                return;
-              }
-              if (id === 'motoboys' && !canUseMotoboys) {
-                showToast('Recurso disponível no plano Pro.', 'info');
-                return;
-              }
-              setActiveTab(id as typeof activeTab);
-              setNavPulse(id);
-              window.setTimeout(() => setNavPulse(null), 260);
-            }}
-            getButtonClassName={(item, isActive) =>
-              isActive && navPulse === item.id ? 'ds-anim-pop' : ''
-            }
-          />
+      <div className="lg:hidden sticky top-3 z-30">
+        <div className="rounded-2xl border border-slate-200 bg-white/90 backdrop-blur px-3 py-2 flex items-center justify-between shadow-sm">
+          <p className="text-xs font-semibold text-slate-600">Menu do painel</p>
+          <button
+            type="button"
+            onClick={() => setMobileDrawerOpen(true)}
+            className="ds-focus-ring inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+            aria-label="Abrir menu"
+          >
+            <List size={16} weight="duotone" />
+            Navegação
+          </button>
         </div>
-      ) : null}
+      </div>
 
-      <div className="w-full lg:grid lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-5 xl:gap-6 lg:items-start">
+      <div className={sidebarGridClass}>
         <aside className="hidden lg:block">
-          <div className="sticky top-18 ds-admin-sidebar p-3 max-h-[calc(100vh-5.5rem)] overflow-y-auto">
-            <p className="px-2 pb-2 ds-admin-sidebar-title">Navegação</p>
+          <div className={`sticky top-18 ds-admin-sidebar p-2.5 max-h-[calc(100vh-5.5rem)] overflow-y-auto overflow-x-visible ${sidebarCompact ? 'w-[72px]' : 'w-[280px]'}`}>
+            <div className={`px-1 pb-2 flex items-center ${sidebarCompact ? 'justify-center' : 'justify-between'}`}>
+              {!sidebarCompact && <p className="px-2 ds-admin-sidebar-title">Navegação</p>}
+              <button
+                type="button"
+                onClick={() => setSidebarCompact((prev) => !prev)}
+                className="ds-focus-ring inline-flex h-9 w-9 items-center justify-center rounded-xl border border-white/15 bg-white/10 text-slate-100 hover:bg-white/20 transition"
+                aria-label={sidebarCompact ? 'Expandir menu' : 'Minimizar menu'}
+                title={sidebarCompact ? 'Expandir menu' : 'Minimizar menu'}
+              >
+                {sidebarCompact ? <CaretRight size={16} weight="bold" /> : <CaretLeft size={16} weight="bold" />}
+              </button>
+            </div>
             <div className="space-y-1.5">
-              {desktopTabItems.map((item) => {
+              {navItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = activeTab === item.id;
                 return (
                   <button
                     key={item.id}
                     type="button"
-                    onClick={() => {
-                      if (item.id === 'motoboys' && item.disabled) {
-                        showToast('Recurso disponível no plano Pro.', 'info');
-                        return;
-                      }
-                      if (item.id === 'fila') {
-                        navigate('/admin/queue');
-                        return;
-                      }
-                      setActiveTab(item.id as typeof activeTab);
-                    }}
+                    onClick={() => handleNavSelect(item.id)}
                     title={item.disabled ? 'Disponível no plano Pro' : undefined}
-                    className={`ds-admin-sidebar-item ds-focus-ring flex items-center justify-between gap-2 ${
+                    aria-label={item.label}
+                    className={`group relative ds-admin-sidebar-item ds-focus-ring flex items-center ${
+                      sidebarCompact ? 'justify-center px-2.5' : 'justify-between gap-2'
+                    } ${
                       isActive
                         ? 'ds-admin-sidebar-item-active'
                         : ''
                     } ${item.disabled ? 'opacity-55 cursor-not-allowed hover:translate-y-0 hover:shadow-none' : ''}`}
                   >
-                    <span className="inline-flex items-center gap-2">
+                    <span className={`inline-flex items-center ${sidebarCompact ? '' : 'gap-2'}`}>
                       <Icon size={16} weight={isActive ? 'fill' : 'duotone'} />
-                      {item.label}
+                      {!sidebarCompact && item.label}
                     </span>
-                    {item.id === 'motoboys' && item.disabled && (
+                    {!sidebarCompact && item.id === 'motoboys' && item.disabled && (
                       <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${isActive ? 'bg-white/20' : 'bg-violet-100 text-violet-700'}`}>
                         Pro
                       </span>
                     )}
-                    {item.id === 'motoboys' && !item.disabled && pendingMotoboyRequests > 0 && (
+                    {!sidebarCompact && item.id === 'motoboys' && !item.disabled && pendingMotoboyRequests > 0 && (
                       <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${isActive ? 'bg-white/20' : 'bg-amber-100 text-amber-700'}`}>
                         {pendingMotoboyRequests}
                       </span>
                     )}
+                    {sidebarCompact && (
+                      <>
+                        {item.id === 'motoboys' && item.disabled && (
+                          <span className="absolute -top-1 -right-1 rounded-full bg-violet-600 text-white text-[9px] font-semibold px-1.5 py-0.5">
+                            Pro
+                          </span>
+                        )}
+                        {item.id === 'motoboys' && !item.disabled && pendingMotoboyRequests > 0 && (
+                          <span className="absolute -top-1 -right-1 rounded-full bg-amber-500 text-white text-[9px] font-semibold px-1.5 py-0.5">
+                            {pendingMotoboyRequests}
+                          </span>
+                        )}
+                        <span className="pointer-events-none absolute left-[calc(100%+10px)] top-1/2 -translate-y-1/2 whitespace-nowrap rounded-lg border border-slate-700 bg-slate-900 px-2 py-1 text-[11px] font-semibold text-white opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100">
+                          {item.label}
+                        </span>
+                      </>
+                    )}
                   </button>
                 );
               })}
-              <button
-                type="button"
-                onClick={() => storeSlug && navigate(`/${storeSlug}`)}
-                className="ds-admin-sidebar-item ds-focus-ring flex items-center gap-2"
-              >
-                <BookOpen size={16} weight="duotone" />
-                Vitrine pública
-              </button>
             </div>
           </div>
         </aside>
@@ -1556,188 +1573,54 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         </div>
       </div>
 
-      {!mobileNavCollapsed && (
-        <div
-          className="sm:hidden fixed inset-x-0 bottom-0 z-50 px-3 ds-safe-bottom"
-        >
-          <div className="mx-auto max-w-lg">
-            <div className="relative rounded-[28px] border border-slate-200/70 bg-white/85 backdrop-blur-xl shadow-[0_18px_60px_-28px_rgba(15,23,42,0.6)] px-2 py-2 overflow-hidden">
-              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.9),_transparent_55%)]" />
-              <div className="pointer-events-none absolute inset-0 opacity-30 ds-mobile-nav-overlay" />
-              <div className="relative grid grid-cols-5 gap-1">
-                {mobilePrimaryTabs.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = activeTab === item.id;
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => {
-                        if (item.id === 'fila') {
-                          navigate('/admin/queue');
-                          return;
-                        }
-                        setActiveTab(item.id as typeof activeTab);
-                        setNavPulse(item.id);
-                        window.setTimeout(() => setNavPulse(null), 260);
-                      }}
-                      className={`relative rounded-2xl px-2 py-2 transition active:scale-95 ${isActive ? 'ds-mobile-nav-active' : ''}`}
-                    >
-                      <div
-                        className={`flex flex-col items-center justify-center gap-1 ${isActive ? 'text-white' : 'text-slate-800'} ${isActive && navPulse === item.id ? 'ds-anim-pop' : ''}`}
-                      >
-                        <span
-                          className={`grid place-items-center h-9 w-11 rounded-2xl ${isActive ? 'bg-white/15 ring-1 ring-white/25' : 'bg-slate-100 ring-1 ring-slate-200'}`}
-                        >
-                          <Icon size={18} weight={isActive ? 'fill' : 'duotone'} />
-                        </span>
-                        <span className={`text-[10px] leading-tight ${isActive ? 'font-bold' : 'font-semibold'} opacity-90`}>
-                          {item.label}
-                        </span>
-                      </div>
-                    </button>
-                  );
-                })}
-
-                <button
-                  type="button"
-                  onClick={() => setMobileMoreOpen(true)}
-                  className="relative rounded-2xl px-2 py-2 transition active:scale-95"
-                >
-                  <div className="flex flex-col items-center justify-center gap-1 text-slate-800">
-                    <span className="relative grid place-items-center h-9 w-11 rounded-2xl bg-slate-100 ring-1 ring-slate-200">
-                      <DotsThree size={18} weight="duotone" />
-                      {pendingMotoboyRequests > 0 && (
-                        <span className="absolute -top-1 -right-1 h-4 min-w-4 px-1.5 rounded-full bg-amber-500 text-white text-[10px] font-bold grid place-items-center shadow-md">
-                          {pendingMotoboyRequests}
-                        </span>
-                      )}
+      {!isDesktopLayout && mobileDrawerOpen && (
+        <div className="lg:hidden fixed inset-0 z-[60]">
+          <div className="absolute inset-0 bg-slate-900/45 backdrop-blur-sm" onClick={() => setMobileDrawerOpen(false)} />
+          <aside className="absolute left-0 top-0 bottom-0 w-[280px] max-w-[86vw] ds-admin-sidebar p-3 overflow-y-auto">
+            <div className="px-1 pb-3 flex items-center justify-between">
+              <p className="px-2 ds-admin-sidebar-title">Navegação</p>
+              <button
+                type="button"
+                onClick={() => setMobileDrawerOpen(false)}
+                className="ds-focus-ring inline-flex h-9 w-9 items-center justify-center rounded-xl border border-white/15 bg-white/10 text-slate-100 hover:bg-white/20 transition"
+                aria-label="Fechar menu"
+              >
+                <X size={16} weight="bold" />
+              </button>
+            </div>
+            <div className="space-y-1.5">
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = activeTab === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => handleNavSelect(item.id)}
+                    title={item.disabled ? 'Disponível no plano Pro' : undefined}
+                    className={`ds-admin-sidebar-item ds-focus-ring flex items-center justify-between gap-2 ${
+                      isActive ? 'ds-admin-sidebar-item-active' : ''
+                    } ${item.disabled ? 'opacity-55 cursor-not-allowed hover:translate-y-0 hover:shadow-none' : ''}`}
+                  >
+                    <span className="inline-flex items-center gap-2">
+                      <Icon size={16} weight={isActive ? 'fill' : 'duotone'} />
+                      {item.label}
                     </span>
-                    <span className="text-[10px] leading-tight font-semibold opacity-90">Mais</span>
-                  </div>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {mobileNavCollapsed && (
-        <div
-          className="sm:hidden fixed inset-x-0 bottom-0 z-50 px-3 ds-safe-bottom"
-        >
-          <div className="mx-auto max-w-lg flex items-center justify-center">
-            <button
-              type="button"
-              onClick={() => setMobileNavCollapsed(false)}
-              className="rounded-full bg-slate-900 text-white border border-slate-700 px-4 py-2 text-xs font-semibold shadow-lg"
-            >
-              Abrir menu
-            </button>
-          </div>
-        </div>
-      )}
-
-      {mobileMoreOpen && (
-        <div className="sm:hidden fixed inset-0 z-[60]">
-          <div
-            className="absolute inset-0 bg-slate-900/45 backdrop-blur-sm"
-            onClick={() => setMobileMoreOpen(false)}
-          />
-          <div className="absolute inset-x-0 bottom-0 px-3 ds-safe-bottom-lg">
-            <div className="mx-auto max-w-lg rounded-3xl border border-slate-200 bg-white shadow-2xl overflow-hidden">
-              <div className="px-5 pt-5 pb-3 flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Menu</p>
-                  <p className="text-lg font-black text-slate-900 leading-tight">Ações rápidas</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setMobileMoreOpen(false)}
-                  className="h-10 w-10 rounded-full border border-slate-200 bg-slate-50 text-slate-700 grid place-items-center active:scale-95"
-                  aria-label="Fechar"
-                >
-                  <X size={18} weight="bold" />
-                </button>
-              </div>
-
-              <div className="px-3 pb-3 space-y-2">
-                {mobileMoreActions.map((action) => {
-                  const Icon = action.icon;
-                  const isMotoboy = action.id === 'motoboys';
-                  return (
-                    <button
-                      key={action.id}
-                      type="button"
-                      onClick={() => {
-                        if (action.id === 'motoboys' && action.disabled) {
-                          showToast('Recurso disponível no plano Pro.', 'info');
-                          return;
-                        }
-                        setMobileMoreOpen(false);
-                        if (action.id === 'cardapio') {
-                          if (storeSlug) navigate(`/${storeSlug}`);
-                          return;
-                        }
-                        if (action.id === 'fila') {
-                          navigate('/admin/queue');
-                          return;
-                        }
-                        setActiveTab(action.id as typeof activeTab);
-                        setNavPulse(action.id);
-                        window.setTimeout(() => setNavPulse(null), 260);
-                      }}
-                      title={action.disabled ? 'Disponível no plano Pro' : undefined}
-                      className={`w-full text-left rounded-2xl border border-slate-200 bg-white transition px-4 py-3 flex items-center justify-between gap-3 active:scale-[0.99] ${
-                        action.disabled ? 'opacity-60 cursor-not-allowed' : 'hover:bg-slate-50'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <span className="relative h-10 w-10 rounded-2xl bg-slate-900 text-white grid place-items-center shadow-sm flex-shrink-0">
-                          <Icon size={18} weight="duotone" />
-                          {isMotoboy && action.disabled && (
-                            <span className="absolute -top-2 -right-2 h-5 min-w-5 px-1.5 rounded-full bg-violet-600 text-white text-[10px] font-bold grid place-items-center shadow-md">
-                              Pro
-                            </span>
-                          )}
-                          {isMotoboy && !action.disabled && pendingMotoboyRequests > 0 && (
-                            <span className="absolute -top-2 -right-2 h-5 min-w-5 px-1.5 rounded-full bg-amber-500 text-white text-[10px] font-bold grid place-items-center shadow-md">
-                              {pendingMotoboyRequests}
-                            </span>
-                          )}
-                        </span>
-                        <span className="min-w-0">
-                          <span className="block text-sm font-bold text-slate-900 truncate">{action.label}</span>
-                          <span className="block text-xs text-slate-500 truncate">{action.hint}</span>
-                        </span>
-                      </div>
-                      <span className="text-xs font-semibold text-slate-400">{action.disabled ? 'Pro' : 'Abrir'}</span>
-                    </button>
-                  );
-                })}
-
-                <div className="pt-1 grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMobileMoreOpen(false);
-                      setMobileNavCollapsed(true);
-                    }}
-                    className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-bold text-slate-700"
-                  >
-                    Ocultar menu
+                    {item.id === 'motoboys' && item.disabled && (
+                      <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${isActive ? 'bg-white/20' : 'bg-violet-100 text-violet-700'}`}>
+                        Pro
+                      </span>
+                    )}
+                    {item.id === 'motoboys' && !item.disabled && pendingMotoboyRequests > 0 && (
+                      <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${isActive ? 'bg-white/20' : 'bg-amber-100 text-amber-700'}`}>
+                        {pendingMotoboyRequests}
+                      </span>
+                    )}
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => setMobileMoreOpen(false)}
-                    className="rounded-2xl bg-slate-900 px-4 py-3 text-xs font-bold text-white"
-                  >
-                    Fechar
-                  </button>
-                </div>
-              </div>
+                );
+              })}
             </div>
-          </div>
+          </aside>
         </div>
       )}
     </AdminLayout>
