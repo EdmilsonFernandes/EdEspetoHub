@@ -151,15 +151,16 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
 
   return (
     <header
-      className="relative rounded-3xl border border-slate-200 shadow-[0_24px_54px_-32px_rgba(15,23,42,0.55)] overflow-visible"
+      className="relative rounded-3xl border border-slate-200/80 shadow-[0_26px_64px_-34px_rgba(15,23,42,0.58)] overflow-visible"
       style={headerBackgroundStyle}
     >
       <div className="pointer-events-none absolute inset-0 opacity-35 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.34),_transparent_55%)]" />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-slate-900/12 via-transparent to-slate-900/22" />
       <div className="pointer-events-none absolute inset-y-0 right-0 w-[40%] bg-gradient-to-l from-slate-950/40 via-slate-900/20 to-transparent" />
       <div className="pointer-events-none absolute top-0 left-8 right-8 h-0.5 rounded-full bg-white/40" />
+      <div className="pointer-events-none absolute inset-0 rounded-3xl ring-1 ring-inset ring-white/12" />
       <div className="px-4 pt-3 pb-2.5 min-h-[156px] flex flex-col lg:flex-row lg:items-start justify-between gap-3">
-        <div className="flex items-start gap-3 rounded-2xl border border-white/18 bg-slate-950/24 backdrop-blur-[3px] px-3.5 py-2.5 max-w-[920px]">
+        <div className="flex items-start gap-3 rounded-2xl border border-white/22 bg-slate-950/30 backdrop-blur-[4px] px-3.5 py-2.5 max-w-[920px] shadow-[0_16px_36px_-26px_rgba(0,0,0,0.7)]">
           <div className="w-16 h-16 rounded-2xl bg-white/90 backdrop-blur flex items-center justify-center overflow-hidden shadow-[0_18px_32px_-18px_rgba(0,0,0,0.56)] ring-1 ring-white/80">
             {branding?.logoUrl ? (
               <img src={branding.logoUrl} alt={storeName} className="w-full h-full object-contain p-1" />
@@ -169,26 +170,26 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
           </div>
           <div className="space-y-0.5 min-w-0">
             <div className="flex items-center gap-2">
-              <p className="text-[10px] uppercase tracking-[0.32em] font-semibold opacity-90">{contextLabel}</p>
+              <p className="text-[10px] uppercase tracking-[0.32em] font-semibold text-white/90">{contextLabel}</p>
               {planDetails?.planExempt && (
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-[0.2em] bg-emerald-100 text-emerald-700">
                   VIP
                 </span>
               )}
             </div>
-            <h1 className="text-[22px] sm:text-[28px] font-black leading-tight truncate max-w-[42ch]">{storeName}</h1>
+            <h1 className="text-[22px] sm:text-[28px] font-black leading-tight truncate max-w-[42ch] drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]">{storeName}</h1>
             {showDetails && storeDescription && (
               <p className="text-xs sm:text-sm text-white/85 max-w-[520px] line-clamp-1 sm:line-clamp-2">
                 {storeDescription}
               </p>
             )}
             <div className={`${showMobileDetails ? 'flex' : 'hidden'} lg:flex flex-wrap items-center gap-2 text-xs`}>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/12 border border-white/25 opacity-95">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/14 border border-white/28 opacity-95 shadow-sm">
                 <Storefront size={12} weight="duotone" />
                 <span className="truncate">{storeSegmentLabel}</span>
               </span>
               {storeLocation && (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/12 border border-white/25 opacity-95">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/14 border border-white/28 opacity-95 shadow-sm">
                   <Globe size={12} weight="duotone" />
                   <span className="truncate">{storeLocation}</span>
                 </span>
@@ -198,7 +199,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
                   href={storeUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/12 border border-white/25 opacity-95 hover:opacity-100 hover:bg-white/20 transition"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/14 border border-white/28 opacity-95 hover:opacity-100 hover:bg-white/22 transition"
                 >
                   <Globe size={12} weight="duotone" />
                   <span className="truncate">{storeUrl.replace('https://', '')}</span>
@@ -209,7 +210,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
                   href={`https://instagram.com/${instagramHandle.replace('@', '')}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/12 border border-white/25 opacity-95 hover:opacity-100 hover:bg-white/20 transition"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/14 border border-white/28 opacity-95 hover:opacity-100 hover:bg-white/22 transition"
                 >
                   <img src="/insta.avif" alt="Instagram" className="h-4 w-4 rounded-full" />
                   <span className="truncate">{instagramHandle}</span>
@@ -218,7 +219,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-2 rounded-2xl border border-white/16 bg-slate-950/28 backdrop-blur-[3px] px-2.5 py-2">
+        <div className="flex items-center gap-2 rounded-2xl border border-white/20 bg-slate-950/34 backdrop-blur-[4px] px-2.5 py-2 shadow-[0_16px_34px_-24px_rgba(0,0,0,0.72)]">
           <button
             type="button"
             onClick={() => setShowMobileDetails((prev) => !prev)}
@@ -227,7 +228,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
             {showMobileDetails ? 'Fechar' : 'Detalhes'}
           </button>
           {showDetails && (
-            <div className="hidden lg:flex items-center gap-2 bg-slate-950/28 rounded-full px-2.5 py-1 border border-white/18 backdrop-blur-[1.5px]">
+            <div className="hidden lg:flex items-center gap-2 bg-slate-950/32 rounded-full px-2.5 py-1 border border-white/20 backdrop-blur-[2px]">
               <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-xs font-bold">
                 {userInitials || 'AD'}
               </div>
@@ -247,7 +248,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
           )}
         </div>
       </div>
-      <div className="px-4 pb-3.5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2.5 rounded-b-3xl">
+      <div className="px-4 pb-3.5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2.5 rounded-b-3xl border-t border-white/12">
         {showDetails && (
           <div className="flex items-center gap-2 text-[11px] font-semibold bg-slate-950/34 border border-white/25 rounded-full px-2 py-1.5 w-fit backdrop-blur-[2px]">
             <ShieldCheck size={14} weight="duotone" />
@@ -259,7 +260,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
             href="https://www.janocaminho.com.br"
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/25 text-[11px] font-semibold text-white/90 hover:bg-white/18 hover:text-white transition"
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/12 border border-white/30 text-[11px] font-semibold text-white/95 hover:bg-white/20 hover:text-white transition"
             title="Ir para janocaminho.com.br"
           >
             <span className="h-5 w-5 rounded-full overflow-hidden bg-slate-900/70 ring-1 ring-white/35">
@@ -269,7 +270,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
             <span className="font-bold">Já no Caminho</span>
           </a>
           {onToggleHeader && (
-            <div className="flex items-center rounded-full bg-white/10 border border-white/20 p-0.5 text-[11px] sm:text-xs font-semibold">
+            <div className="flex items-center rounded-full bg-white/12 border border-white/25 p-0.5 text-[11px] sm:text-xs font-semibold">
               <button
                 type="button"
                 className="px-3 py-1.5 rounded-full bg-white/20 text-white shadow-sm"
