@@ -95,6 +95,7 @@ export function OrderTracking() {
   const [loading, setLoading] = useState(true);
   const [polling, setPolling] = useState(true);
   const [elapsedMs, setElapsedMs] = useState(0);
+  const [frozenElapsedMs, setFrozenElapsedMs] = useState<number | null>(null);
   const [prepStart, setPrepStart] = useState<number | null>(null);
   const [pixCopied, setPixCopied] = useState(false);
   const [storeCoords, setStoreCoords] = useState(null);
@@ -148,7 +149,14 @@ export function OrderTracking() {
       try {
         const data = await orderService.getPublicById(orderId);
         setOrder(data);
-        if (data?.status === 'done' || data?.status === 'delivered') {
+        const orderStatus = String(data?.status || '').toLowerCase();
+        const deliveryStatus = String((data as any)?.delivery?.status || '').toUpperCase();
+        const isTerminal =
+          orderStatus === 'done' ||
+          orderStatus === 'delivered' ||
+          orderStatus === 'finished' ||
+          deliveryStatus === 'DELIVERED';
+        if (isTerminal) {
           setPolling(false);
         }
       } catch (err: any) {
@@ -485,15 +493,48 @@ export function OrderTracking() {
   }, [order?.id]);
 
   useEffect(() => {
+    setFrozenElapsedMs(null);
+  }, [order?.id]);
+
+  useEffect(() => {
     if (!order?.createdAt) return;
     const start = new Date(order.createdAt).getTime();
     if (!Number.isFinite(start)) return;
-    const update = () => setElapsedMs(Date.now() - start);
+
+    const resolveFinishedAtMs = () => {
+      if (!isReady) return null;
+      const candidates = [
+        (order as any)?.delivery?.deliveredAt,
+        (order as any)?.deliveredAt,
+        (order as any)?.finishedAt,
+        (order as any)?.completedAt,
+        (order as any)?.doneAt,
+        (order as any)?.delivery?.updatedAt,
+        (order as any)?.updatedAt,
+      ];
+      for (const candidate of candidates) {
+        if (!candidate) continue;
+        const parsed = new Date(candidate).getTime();
+        if (Number.isFinite(parsed) && parsed >= start) return parsed;
+      }
+      return Date.now();
+    };
+
+    const update = () => {
+      const finishedAt = resolveFinishedAtMs();
+      const end = finishedAt ?? Date.now();
+      const total = Math.max(0, end - start);
+      setElapsedMs(total);
+      if (finishedAt !== null) {
+        setFrozenElapsedMs(total);
+      }
+    };
+
     update();
-    if (isReady) return;
+    if (isReady || frozenElapsedMs !== null) return;
     const timer = window.setInterval(update, 1000);
     return () => window.clearInterval(timer);
-  }, [order?.createdAt, isReady]);
+  }, [order?.createdAt, order?.updatedAt, (order as any)?.delivery?.updatedAt, (order as any)?.delivery?.deliveredAt, isReady, frozenElapsedMs]);
 
   useEffect(() => {
     if (!order?.id) return;
