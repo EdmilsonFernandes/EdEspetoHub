@@ -1,10 +1,13 @@
-import { useEffect, useState } from 'react';
-import { ChartLineUp, Wallet } from '@phosphor-icons/react';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowRight, ChartLineUp, Clock, CurrencyCircleDollar, Wallet } from '@phosphor-icons/react';
 import { motoboyService } from '../services/motoboyService';
 import { OrderCard } from '../components/Motoboy/OrderCard';
 import { useToast } from '../contexts/ToastContext';
-import { useNavigate } from 'react-router-dom';
 import { MotoboyHeader } from '../components/Motoboy/MotoboyHeader';
+
+const toCurrency = (value: number) =>
+  Number(value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
 export function MotoboyEarnings() {
   const [orders, setOrders] = useState<any[]>([]);
@@ -13,6 +16,7 @@ export function MotoboyEarnings() {
   const [pendingCount, setPendingCount] = useState(0);
   const [blocked, setBlocked] = useState(false);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [lastUpdatedAt, setLastUpdatedAt] = useState<number | null>(null);
   const { showToast } = useToast();
   const navigate = useNavigate();
 
@@ -26,6 +30,7 @@ export function MotoboyEarnings() {
       setOrders(Array.isArray(historyData) ? historyData : []);
       setTipPayouts(Array.isArray(tipData) ? tipData : []);
       setBlocked(false);
+      setLastUpdatedAt(Date.now());
     } catch (error: any) {
       if (error?.status === 403) {
         setBlocked(true);
@@ -40,7 +45,7 @@ export function MotoboyEarnings() {
   };
 
   useEffect(() => {
-    load();
+    void load();
   }, [showToast]);
 
   useEffect(() => {
@@ -53,45 +58,58 @@ export function MotoboyEarnings() {
         setPendingCount(0);
       }
     };
-    loadRequests();
+    void loadRequests();
   }, []);
 
   const todayKey = new Date().toDateString();
-  const totalToday = orders.reduce((acc, order) => {
-    const createdAt = order.createdAt ? new Date(order.createdAt).toDateString() : '';
-    if (createdAt !== todayKey) return acc;
-    return acc + Number(order.deliveryFee || 0);
-  }, 0);
+  const deliveriesToday = useMemo(
+    () =>
+      orders.filter((order) => {
+        const createdAt = order.createdAt ? new Date(order.createdAt).toDateString() : '';
+        return createdAt === todayKey;
+      }),
+    [orders, todayKey]
+  );
 
+  const totalToday = deliveriesToday.reduce((acc, order) => acc + Number(order.deliveryFee || 0), 0);
   const totalMonth = orders.reduce((acc, order) => acc + Number(order.deliveryFee || 0), 0);
+  const avgDeliveryFee = orders.length > 0 ? totalMonth / orders.length : 0;
+
+  const tipRowsPaid = tipPayouts.filter((row) => String(row?.tipPayoutStatus || '').toUpperCase() === 'PAID');
+  const tipRowsPending = tipPayouts.filter((row) => String(row?.tipPayoutStatus || '').toUpperCase() !== 'PAID');
   const totalTipsMonth = tipPayouts.reduce((acc, row) => acc + Number(row?.tipAmount || 0), 0);
-  const totalTipsPending = tipPayouts
-    .filter((row) => String(row?.tipPayoutStatus || '').toUpperCase() !== 'PAID')
-    .reduce((acc, row) => acc + Number(row?.tipAmount || 0), 0);
-  const totalTipsPaid = tipPayouts
-    .filter((row) => String(row?.tipPayoutStatus || '').toUpperCase() === 'PAID')
-    .reduce((acc, row) => acc + Number(row?.tipAmount || 0), 0);
+  const totalTipsPending = tipRowsPending.reduce((acc, row) => acc + Number(row?.tipAmount || 0), 0);
+  const totalTipsPaid = tipRowsPaid.reduce((acc, row) => acc + Number(row?.tipAmount || 0), 0);
+
+  const totalGross30d = totalMonth + totalTipsMonth;
+  const lastUpdatedLabel = lastUpdatedAt
+    ? new Date(lastUpdatedAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+    : '—';
+
+  const recentTipPayouts = useMemo(() => tipPayouts.slice(0, 5), [tipPayouts]);
 
   return (
     <div className="min-h-screen motoboy-screen space-y-4 overflow-x-hidden">
       <MotoboyHeader
         title="Ganhos"
-        subtitle="Resumo e histórico das suas entregas."
+        subtitle="Visão financeira da sua operação nos últimos 30 dias."
         rightAction={
           <button
             type="button"
             onClick={load}
             className="btn-press px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-extrabold text-slate-700"
           >
-            Atualizar
+            {loading ? 'Atualizando...' : 'Atualizar'}
           </button>
         }
       />
+
       {blocked && (
         <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
           Seu cadastro está em análise. Aguarde aprovação para visualizar ganhos.
         </div>
       )}
+
       {pendingCount > 0 && (
         <button
           type="button"
@@ -102,93 +120,185 @@ export function MotoboyEarnings() {
         </button>
       )}
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 flex items-center justify-between">
+      <section className="premium-card-glass p-4 sm:p-5 motoboy-fade-up">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Resumo financeiro</p>
+            <p className="text-sm text-slate-700 mt-1">Atualizado às <span className="font-semibold">{lastUpdatedLabel}</span></p>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => navigate('/motoboy/history')}
+              className="btn-press rounded-xl border border-slate-200 bg-white/70 px-3 py-2 text-xs font-extrabold text-slate-700"
+            >
+              Histórico completo
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/motoboy/profile')}
+              className="btn-press rounded-xl border border-slate-200 bg-white/70 px-3 py-2 text-xs font-extrabold text-slate-700"
+            >
+              Perfil
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+        <article className="rounded-2xl border border-slate-200 bg-white p-4 flex items-center justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Total do dia</p>
-            <p className="text-2xl font-black text-emerald-600 mt-2">
-              {totalToday.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-            </p>
-            <p className="text-xs text-slate-500 mt-1">Somatório do frete entregue hoje</p>
+            <p className="text-2xl font-black text-emerald-600 mt-2">{toCurrency(totalToday)}</p>
+            <p className="text-xs text-slate-500 mt-1">{deliveriesToday.length} entrega(s) hoje</p>
           </div>
-          <div className="h-12 w-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+          <div className="h-12 w-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-200">
             <Wallet size={22} weight="duotone" />
           </div>
-        </div>
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 flex items-center justify-between">
-          <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Últimos 30 dias</p>
-            <p className="text-2xl font-black text-slate-800 mt-2">
-              {totalMonth.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-            </p>
-            <p className="text-xs text-slate-500 mt-1">{orders.length} entregas concluídas</p>
-          </div>
-          <div className="h-12 w-12 rounded-2xl bg-slate-100 text-slate-700 flex items-center justify-center">
-            <ChartLineUp size={22} weight="duotone" />
-          </div>
-        </div>
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 flex items-center justify-between">
-          <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-emerald-700">Gorjetas confirmadas (30 dias)</p>
-            <p className="text-2xl font-black text-emerald-700 mt-2">
-              {totalTipsMonth.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-            </p>
-            <p className="text-xs text-emerald-700/80 mt-1">{tipPayouts.length} gorjeta(s) confirmada(s) pelo cliente</p>
-          </div>
-          <div className="h-12 w-12 rounded-2xl bg-white/80 text-emerald-700 flex items-center justify-center">
-            <Wallet size={22} weight="duotone" />
-          </div>
-        </div>
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 flex items-center justify-between">
-          <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-amber-700">Repasse de gorjeta</p>
-            <p className="text-lg font-black text-amber-700 mt-2">
-              {totalTipsPending.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-            </p>
-            <p className="text-xs text-amber-700/80 mt-1">
-              Aguardando repasse • {totalTipsPaid.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} já repassado ao entregador
-            </p>
-          </div>
-          <div className="h-12 w-12 rounded-2xl bg-white/80 text-amber-700 flex items-center justify-center">
-            <ChartLineUp size={22} weight="duotone" />
-          </div>
-        </div>
-      </div>
+        </article>
 
-      {loading ? (
-        <div className="text-center text-sm text-slate-500">Carregando...</div>
-      ) : orders.length === 0 ? (
-        <div className="text-center text-sm text-slate-500">Nenhuma entrega finalizada ainda.</div>
-      ) : (
-        <div className="grid gap-4">
-          {orders.map((order) => {
-            const isOpen = expanded.has(order.id);
-            return (
-              <OrderCard
-                key={order.id}
-                order={order}
-                compact={!isOpen}
-                actions={
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setExpanded((prev) => {
-                        const next = new Set(prev);
-                        if (next.has(order.id)) next.delete(order.id);
-                        else next.add(order.id);
-                        return next;
-                      });
-                    }}
-                    className="w-full rounded-xl border border-slate-200 bg-white/70 px-4 py-2.5 text-sm font-extrabold text-slate-800 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)]"
-                  >
-                    {isOpen ? 'Ocultar detalhes' : 'Ver detalhes'}
-                  </button>
-                }
-              />
-            );
-          })}
+        <article className="rounded-2xl border border-slate-200 bg-white p-4 flex items-center justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Frete 30 dias</p>
+            <p className="text-2xl font-black text-slate-800 mt-2">{toCurrency(totalMonth)}</p>
+            <p className="text-xs text-slate-500 mt-1">{orders.length} entrega(s) concluída(s)</p>
+          </div>
+          <div className="h-12 w-12 rounded-2xl bg-slate-100 text-slate-700 flex items-center justify-center border border-slate-200">
+            <ChartLineUp size={22} weight="duotone" />
+          </div>
+        </article>
+
+        <article className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 flex items-center justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-emerald-700">Gorjetas (30 dias)</p>
+            <p className="text-2xl font-black text-emerald-700 mt-2">{toCurrency(totalTipsMonth)}</p>
+            <p className="text-xs text-emerald-700/80 mt-1">{tipPayouts.length} gorjeta(s) confirmada(s)</p>
+          </div>
+          <div className="h-12 w-12 rounded-2xl bg-white/80 text-emerald-700 flex items-center justify-center border border-emerald-200">
+            <CurrencyCircleDollar size={22} weight="duotone" />
+          </div>
+        </article>
+
+        <article className="rounded-2xl border border-amber-200 bg-amber-50 p-4 flex items-center justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-amber-700">Repasse pendente</p>
+            <p className="text-2xl font-black text-amber-700 mt-2">{toCurrency(totalTipsPending)}</p>
+            <p className="text-xs text-amber-700/80 mt-1">{tipRowsPending.length} item(ns) aguardando repasse</p>
+          </div>
+          <div className="h-12 w-12 rounded-2xl bg-white/80 text-amber-700 flex items-center justify-center border border-amber-200">
+            <Clock size={22} weight="duotone" />
+          </div>
+        </article>
+
+        <article className="rounded-2xl border border-blue-200 bg-blue-50 p-4 flex items-center justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-blue-700">Total bruto 30 dias</p>
+            <p className="text-2xl font-black text-blue-700 mt-2">{toCurrency(totalGross30d)}</p>
+            <p className="text-xs text-blue-700/80 mt-1">Ticket frete médio: {toCurrency(avgDeliveryFee)}</p>
+          </div>
+          <div className="h-12 w-12 rounded-2xl bg-white/85 text-blue-700 flex items-center justify-center border border-blue-200">
+            <Wallet size={22} weight="duotone" />
+          </div>
+        </article>
+      </section>
+
+      <section className="grid gap-3 lg:grid-cols-[1.1fr_0.9fr]">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4">
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-xs uppercase tracking-[0.2em] text-slate-500 font-bold">Últimas entregas (30 dias)</p>
+            <button
+              type="button"
+              onClick={() => navigate('/motoboy/history')}
+              className="text-xs font-extrabold text-slate-700 inline-flex items-center gap-1"
+            >
+              Ver tudo <ArrowRight size={14} weight="bold" />
+            </button>
+          </div>
+          <div className="mt-3">
+            {loading ? (
+              <div className="grid gap-3">
+                <div className="motoboy-skeleton h-[92px]" />
+                <div className="motoboy-skeleton h-[92px]" />
+              </div>
+            ) : orders.length === 0 ? (
+              <div className="text-center text-sm text-slate-500 py-6">Nenhuma entrega finalizada ainda.</div>
+            ) : (
+              <div className="grid gap-4">
+                {orders.slice(0, 8).map((order) => {
+                  const isOpen = expanded.has(order.id);
+                  return (
+                    <OrderCard
+                      key={order.id}
+                      order={order}
+                      compact={!isOpen}
+                      actions={
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setExpanded((prev) => {
+                              const next = new Set(prev);
+                              if (next.has(order.id)) next.delete(order.id);
+                              else next.add(order.id);
+                              return next;
+                            });
+                          }}
+                          className="w-full rounded-xl border border-slate-200 bg-white/70 px-4 py-2.5 text-sm font-extrabold text-slate-800 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)]"
+                        >
+                          {isOpen ? 'Ocultar detalhes' : 'Ver detalhes'}
+                        </button>
+                      }
+                    />
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
-      )}
+
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-3">
+          <p className="text-xs uppercase tracking-[0.2em] text-slate-500 font-bold">Histórico de repasses</p>
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+            Repassado: <span className="font-extrabold">{toCurrency(totalTipsPaid)}</span>
+          </div>
+          <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+            Aguardando repasse: <span className="font-extrabold">{toCurrency(totalTipsPending)}</span>
+          </div>
+
+          {recentTipPayouts.length === 0 ? (
+            <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-4 text-xs text-slate-500 text-center">
+              Ainda não há gorjetas registradas.
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {recentTipPayouts.map((row: any) => {
+                const payoutStatus = String(row?.tipPayoutStatus || '').toUpperCase() === 'PAID' ? 'PAID' : 'PENDING';
+                return (
+                  <div key={row?.id || `${row?.orderId}-${row?.tipPaidAt}`} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-xs font-semibold text-slate-700 truncate">
+                        {row?.storeName || 'Loja'} • Pedido #{String(row?.orderId || '').slice(0, 8)}
+                      </p>
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${
+                          payoutStatus === 'PAID'
+                            ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                            : 'border-amber-200 bg-amber-50 text-amber-700'
+                        }`}
+                      >
+                        {payoutStatus === 'PAID' ? 'Repassado' : 'Pendente'}
+                      </span>
+                    </div>
+                    <div className="mt-1 text-xs text-slate-600 flex items-center justify-between gap-2">
+                      <span>{toCurrency(Number(row?.tipAmount || 0))}</span>
+                      <span>{row?.tipPaidAt ? new Date(row.tipPaidAt).toLocaleDateString('pt-BR') : '-'}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </section>
     </div>
   );
 }
