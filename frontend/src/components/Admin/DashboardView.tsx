@@ -336,7 +336,7 @@ export const DashboardView = ({
       <html lang="pt-BR">
         <head>
           <meta charset="utf-8" />
-          <title>QR do Cardápio - ${safeStoreName}</title>
+          <title>QR da Vitrine - ${safeStoreName}</title>
           <style>
             body { margin: 0; font-family: Arial, sans-serif; background: #f8fafc; color: #0f172a; }
             .page { padding: 40px 24px; display: flex; flex-direction: column; align-items: center; gap: 16px; }
@@ -350,9 +350,9 @@ export const DashboardView = ({
         <body>
           <div class="page">
             <div class="card">
-              <div class="title">Cardápio ${safeStoreName}</div>
+              <div class="title">Vitrine ${safeStoreName}</div>
               <div class="subtitle">Aponte a câmera para fazer seu pedido</div>
-              <img class="qr" src="${qrUrl}" alt="QR Code do cardápio" />
+              <img class="qr" src="${qrUrl}" alt="QR Code da vitrine" />
               <div class="link">${storeUrl}</div>
             </div>
           </div>
@@ -492,20 +492,20 @@ export const DashboardView = ({
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
           <div className="flex flex-col lg:flex-row lg:items-center gap-5">
             <div className="flex-1 space-y-2">
-              <p className="text-xs uppercase tracking-[0.35em] text-slate-400">QR do cardápio</p>
+              <p className="text-xs uppercase tracking-[0.35em] text-slate-400">QR da vitrine</p>
               <h3 className="text-xl font-black text-slate-900">Imprima e coloque nas mesas</h3>
               <p className="text-sm text-slate-500">
-                O cliente aponta a câmera, abre o cardápio e faz o pedido em segundos.
+                O cliente aponta a câmera, abre a vitrine e faz o pedido em segundos.
               </p>
               <div className="mt-4 text-xs text-slate-500">
-                Imprima e coloque nas mesas ou copie o link do cardápio.
+                Imprima e coloque nas mesas ou copie o link da vitrine.
               </div>
             </div>
             <div className="flex items-center gap-4">
               <div className="w-24 h-24 rounded-2xl border border-slate-200 bg-slate-50 flex items-center justify-center overflow-hidden">
                 <img
                   src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(storeUrl)}`}
-                  alt="QR do cardápio"
+                  alt="QR da vitrine"
                   className="w-full h-full object-contain"
                 />
               </div>

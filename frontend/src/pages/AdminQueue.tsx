@@ -51,7 +51,7 @@ export function AdminQueue() {
                 className="btn-press inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-700 whitespace-nowrap"
               >
                 <Browsers size={15} weight="duotone" />
-                Painel admin
+                Painel
               </button>
               <button
                 type="button"
@@ -62,7 +62,7 @@ export function AdminQueue() {
                 className="btn-press inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-700 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <BookOpen size={15} weight="duotone" />
-                Cardápio
+                Vitrine
               </button>
             </div>
           </div>

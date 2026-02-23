@@ -215,7 +215,7 @@ export function StorePage() {
   const applyStoreMeta = (store: any) => {
     if (!store) return;
     const name = store.name || store.slug || 'Já no Caminho';
-    const description = `Cardápio online e pedidos da loja ${name}.`;
+    const description = `Vitrine online e pedidos da loja ${name}.`;
     const logo = resolveAssetUrl(store.settings?.logoUrl) || '/janocaminho.jpg';
     const url = typeof window !== 'undefined' ? window.location.href : '';
 
@@ -1081,7 +1081,7 @@ export function StorePage() {
         <div className="bg-amber-50 border-b border-amber-200">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm text-amber-900">
             <span>
-              Demo do cardápio ativa. Veja o fluxo completo para entender como funciona.
+              Demo da vitrine ativa. Veja o fluxo completo para entender como funciona.
             </span>
             <div className="flex items-center gap-2">
               <button
@@ -1302,7 +1302,7 @@ export function StorePage() {
               </div>
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Loja ainda não configurada</h2>
               <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md">
-                Falta cadastrar os produtos para o cardápio aparecer. Se você é o responsável pela loja, clique abaixo para configurar.
+                Falta cadastrar os produtos para a vitrine aparecer. Se você é o responsável pela loja, clique abaixo para configurar.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <button

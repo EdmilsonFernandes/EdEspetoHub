@@ -761,7 +761,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     { id: 'pagamentos', label: 'Pagamentos', hint: 'Assinatura e histórico', icon: CreditCard },
     { id: 'motoboys', label: 'Entregadores', hint: canUseMotoboys ? 'Motoboys e solicitações' : 'Disponível no plano Pro', icon: Scooter, disabled: !canUseMotoboys },
     { id: 'config', label: 'Configurações', hint: 'Identidade, Pix e horários', icon: Gear },
-    { id: 'cardapio', label: 'Abrir cardápio', hint: 'Ver como o cliente vê', icon: BookOpen },
+    { id: 'cardapio', label: 'Abrir vitrine', hint: 'Ver como o cliente vê', icon: BookOpen },
   ];
   const desktopTabItems = [
     { id: 'resumo', label: 'Resumo', icon: ChartBar },
@@ -1141,7 +1141,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     },
     {
       id: 'products',
-      label: 'Produtos no cardápio',
+      label: 'Produtos na vitrine',
       done: products.length > 0,
       action: 'Cadastrar produtos',
       onClick: () => setActiveTab('produtos'),
@@ -1238,7 +1238,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                     </span>
                   ) : null,
               })),
-              { id: 'cardapio', label: 'Cardápio', icon: <BookOpen size={16} weight="duotone" /> },
+              { id: 'cardapio', label: 'Vitrine', icon: <BookOpen size={16} weight="duotone" /> },
             ]}
             activeId={activeTab}
             onChange={(id) => {
@@ -1318,7 +1318,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                 className="ds-admin-sidebar-item ds-focus-ring flex items-center gap-2"
               >
                 <BookOpen size={16} weight="duotone" />
-                Cardápio público
+                Vitrine pública
               </button>
             </div>
           </div>

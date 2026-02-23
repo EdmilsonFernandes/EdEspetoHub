@@ -91,8 +91,8 @@ const Header = ({
           }
         >
           {!bannerUrl && <div className="absolute inset-0 rounded-3xl bg-white/90" />}
-          <div className="absolute inset-0 rounded-3xl bg-black/10" />
-          <div className="absolute top-0 left-4 right-4 h-1 rounded-full ds-header-gradient-line" />
+          <div className="pointer-events-none absolute inset-0 rounded-3xl bg-black/10" />
+          <div className="pointer-events-none absolute top-0 left-4 right-4 h-1 rounded-full ds-header-gradient-line" />
 
       {/* LOGO OFICIAL */}
       {( !compact || (compact && branding?.logoUrl) ) && (
@@ -185,14 +185,14 @@ const Header = ({
               type="button"
               className="px-3 py-1.5 rounded-full text-xs font-semibold bg-brand-primary text-white shadow-sm"
             >
-              Cardápio
+              Vitrine
             </button>
             <button
               type="button"
               onClick={onOpenQueue}
               className="px-3 py-1.5 rounded-full text-xs font-semibold text-slate-600 hover:text-slate-900"
             >
-              Produção
+              Pedidos
             </button>
           </div>
         )}
@@ -202,7 +202,7 @@ const Header = ({
             className="px-2 sm:px-3 py-1.5 sm:py-2 rounded-full text-xs font-semibold border border-brand-secondary text-brand-secondary hover:bg-brand-secondary-soft transition flex items-center gap-1 whitespace-nowrap"
           >
             <SquaresFour size={12} weight="duotone" />
-            {!compact && <span className="hidden sm:inline">Admin</span>}
+            {!compact && <span className="hidden sm:inline">Painel</span>}
           </button>
         )}
       </div>
@@ -394,7 +394,7 @@ export const MenuView = ({
             {!showHeader && (
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-500">
-                  Bem-vindo ao nosso cardápio
+                  Bem-vindo à sua vitrine
                 </p>
                 <h2 className="text-lg sm:text-xl font-black text-slate-900 mt-1">
                   {branding?.brandName || "Seu Espeto"}
@@ -477,7 +477,7 @@ export const MenuView = ({
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 className="ds-input rounded-full py-2 pl-9 pr-4 text-sm"
-                placeholder="Buscar no cardápio (ex: costela)"
+                placeholder="Buscar produtos (ex: costela)"
               />
             </div>
           </div>
