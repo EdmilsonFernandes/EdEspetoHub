@@ -542,7 +542,9 @@ export const DashboardView = ({
               <div className="relative">
                 <div className="min-w-0 pr-14">
                   <p className="text-[10px] uppercase tracking-[0.24em] text-slate-500 font-bold">{card.label}</p>
-                  <h3 className="text-[1.8rem] leading-tight font-black text-slate-900 mt-1 break-words">{card.value}</h3>
+                  <h3 className="mt-1 whitespace-nowrap leading-tight font-black tracking-tight text-slate-900 text-[clamp(1.35rem,2.05vw,1.8rem)]">
+                    {card.value}
+                  </h3>
                   <p className="text-xs text-slate-500 mt-1">{card.helper}</p>
                 </div>
                 <span className={`absolute top-0 right-0 h-11 w-11 rounded-xl border flex items-center justify-center shrink-0 ${card.iconTone}`}>
