@@ -1,10 +1,11 @@
 ﻿// @ts-nocheck
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { paymentService } from '../services/paymentService';
 import { planService } from '../services/planService';
 import { BILLING_OPTIONS, PLAN_TIERS, getPlanName, resolveAnnualPromoTotal, resolveMonthlyEquivalent } from '../constants/planCatalog';
 import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
+import { usePollingPaymentStatus } from '../hooks/usePollingPaymentStatus';
 
 export function PaymentPage() {
   const { paymentId } = useParams();
@@ -13,7 +14,6 @@ export function PaymentPage() {
   const [events, setEvents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-  const [polling, setPolling] = useState(false);
   const [eventsPage, setEventsPage] = useState(0);
   const [eventsHasMore, setEventsHasMore] = useState(true);
   const [pixCopied, setPixCopied] = useState(false);
@@ -25,6 +25,32 @@ export function PaymentPage() {
   const EVENTS_PAGE_SIZE = 25;
   const platformLogo = '/janocaminho.jpg';
   const redirectRef = useRef(false);
+
+  const loadPayment = useCallback(
+    async ({ silent = false, withEvents = false }: { silent?: boolean; withEvents?: boolean } = {}) => {
+      if (!paymentId) return null;
+      if (!silent) setIsLoading(true);
+      try {
+        const data = await paymentService.getById(paymentId);
+        setPayment(data);
+        if (withEvents) {
+          const eventData = await paymentService.getEvents(paymentId, EVENTS_PAGE_SIZE, 0);
+          setEvents(eventData || []);
+          setEventsPage(0);
+          setEventsHasMore((eventData || []).length === EVENTS_PAGE_SIZE);
+        }
+        return data;
+      } catch (err: any) {
+        if (!silent) {
+          setError(err.message || 'Não foi possível carregar o pagamento no momento.');
+        }
+        return null;
+      } finally {
+        if (!silent) setIsLoading(false);
+      }
+    },
+    [EVENTS_PAGE_SIZE, paymentId]
+  );
 
   const handleCopyPix = async (value: string) => {
     if (!value) return;
@@ -50,37 +76,10 @@ export function PaymentPage() {
   };
 
   useEffect(() => {
-    let interval: number | undefined;
-
-    const loadPayment = async (silent = false) => {
-      if (!silent) setIsLoading(true);
-      try {
-        const data = await paymentService.getById(paymentId);
-        setPayment(data);
-        const eventData = await paymentService.getEvents(paymentId, EVENTS_PAGE_SIZE, 0);
-        setEvents(eventData || []);
-        setEventsPage(0);
-        setEventsHasMore((eventData || []).length === EVENTS_PAGE_SIZE);
-        if (data?.status === 'PAID' || data?.status === 'FAILED') {
-          setPolling(false);
-        }
-      } catch (err: any) {
-        setError(err.message || 'Não foi possível carregar o pagamento no momento.');
-      } finally {
-        if (!silent) setIsLoading(false);
-      }
-    };
-
-    if (paymentId) {
-      loadPayment();
-      setPolling(true);
-      interval = window.setInterval(() => loadPayment(true), 8000);
-    }
-
-    return () => {
-      if (interval) window.clearInterval(interval);
-    };
-  }, [paymentId]);
+    setError('');
+    if (!paymentId) return;
+    void loadPayment({ silent: false, withEvents: true });
+  }, [loadPayment, paymentId]);
 
   useEffect(() => {
     if (!paymentId) return;
@@ -118,6 +117,7 @@ export function PaymentPage() {
       : false;
   const needsRenew = isFailed || isExpired;
   const isVerified = payment?.emailVerified;
+  const isPixPending = payment?.method === 'PIX' && payment?.status === 'PENDING';
   const statusLabel = isPaid
     ? 'Pagamento aprovado'
     : isFailed
@@ -140,6 +140,18 @@ export function PaymentPage() {
     acc[plan.name] = plan;
     return acc;
   }, {});
+
+  const pixPolling = usePollingPaymentStatus({
+    id: isPixPending ? paymentId : null,
+    enabled: Boolean(paymentId && isPixPending),
+    status: payment?.status,
+    intervalMs: 5000,
+    timeoutMs: 5 * 60 * 1000,
+    checkStatus: async () => {
+      const next = await loadPayment({ silent: true, withEvents: false });
+      return String(next?.status || payment?.status || '');
+    },
+  });
 
   useEffect(() => {
     if (!plans.length || !needsRenew) return;
@@ -271,7 +283,7 @@ export function PaymentPage() {
                   <p className="text-sm font-semibold text-gray-700 mb-2">Status</p>
                   <p className={`text-lg font-bold ${statusTone}`}>
                     {payment.status}
-                    {polling && <span className="ml-2 text-xs text-gray-500">(atualizando)</span>}
+                    {isPixPending && pixPolling.isPolling ? <span className="ml-2 text-xs text-gray-500">(atualizando)</span> : null}
                   </p>
 
                   <div className="mt-4 space-y-2 text-sm text-gray-700">
@@ -289,6 +301,11 @@ export function PaymentPage() {
                         {new Date(payment.expiresAt).toLocaleString('pt-BR')}
                       </p>
                     )}
+                    {isPixPending ? (
+                      <p>
+                        <span className="font-semibold">Tempo para confirmação:</span> {pixPolling.remainingLabel}
+                      </p>
+                    ) : null}
                   </div>
                 </div>
 
@@ -466,6 +483,36 @@ export function PaymentPage() {
                           </button>
                         </div>
                       )}
+                      <div className="w-full rounded-xl border border-slate-200 bg-white p-3 text-left space-y-2">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="text-xs font-semibold text-slate-700">Aguardando confirmação do pagamento via Pix</p>
+                          <span className="rounded-full bg-slate-900 px-2 py-1 text-[10px] font-bold text-white">
+                            {pixPolling.remainingLabel}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-500">
+                          {pixPolling.isChecking ? 'Verificando...' : 'Atualização automática a cada 5 segundos.'}
+                        </p>
+                        {pixPolling.connectionUnstable ? (
+                          <p className="text-[11px] text-amber-700">Conexão instável, tentando novamente.</p>
+                        ) : null}
+                        {pixPolling.lastCheckedAgoSec !== null ? (
+                          <p className="text-[11px] text-slate-500">Última verificação há {pixPolling.lastCheckedAgoSec}s</p>
+                        ) : null}
+                        {pixPolling.timedOut ? (
+                          <p className="text-[11px] text-slate-600">
+                            Tempo automático encerrado. Clique em verificar para tentar novamente.
+                          </p>
+                        ) : null}
+                        <button
+                          type="button"
+                          onClick={pixPolling.verifyNow}
+                          disabled={pixPolling.isChecking}
+                          className="w-full rounded-lg bg-slate-900 px-3 py-2 text-xs font-bold text-white disabled:opacity-60"
+                        >
+                          {pixPolling.isChecking ? 'Verificando...' : 'Já paguei, verificar agora'}
+                        </button>
+                      </div>
                       {isMock && (
                         <p className="text-xs text-gray-500 text-center">Pagamento mock para testes - nenhum valor será cobrado.</p>
                       )}

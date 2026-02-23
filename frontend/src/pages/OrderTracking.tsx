@@ -413,7 +413,7 @@ export function OrderTracking() {
     enabled: Boolean(order?.id && isReady && canShowTipPayment),
     status: tipUiStatus,
     intervalMs: 5000,
-    timeoutMs: 4 * 60 * 1000,
+    timeoutMs: 5 * 60 * 1000,
     checkStatus: async () => {
       const nextStatus = await refreshReviewStatus({ silent: true });
       return nextStatus || tipUiStatus;
@@ -1323,6 +1323,12 @@ export function OrderTracking() {
                                     </div>
                                   ) : (
                                     <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 space-y-2">
+                                      <div className="flex items-center justify-between gap-2 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2">
+                                        <span className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.2em]">Tempo restante</span>
+                                        <span className="rounded-full bg-slate-900 px-2.5 py-1 text-xs font-black text-white">
+                                          {tipPolling.remainingLabel}
+                                        </span>
+                                      </div>
                                       <div className="flex items-center gap-2 text-xs text-slate-700">
                                         <CircleNotch
                                           size={14}

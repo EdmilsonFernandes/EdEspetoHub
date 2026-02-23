@@ -163,15 +163,26 @@ export function usePollingPaymentStatus({
   }, [startPolling, stopPolling]);
 
   useEffect(() => {
-    if (!isPolling || !lastCheckedAt) return;
+    if (!isPolling) return;
     const interval = window.setInterval(() => setClockNow(Date.now()), 1000);
     return () => window.clearInterval(interval);
-  }, [isPolling, lastCheckedAt]);
+  }, [isPolling]);
 
   const lastCheckedAgoSec = useMemo(() => {
     if (!lastCheckedAt) return null;
     return Math.max(0, Math.floor((clockNow - lastCheckedAt) / 1000));
   }, [clockNow, lastCheckedAt]);
+
+  const remainingMs = useMemo(() => {
+    if (!startedAtRef.current) return timeoutMs;
+    const elapsed = Math.max(0, clockNow - startedAtRef.current);
+    return Math.max(0, timeoutMs - elapsed);
+  }, [clockNow, timeoutMs]);
+
+  const remainingSec = useMemo(() => Math.ceil(remainingMs / 1000), [remainingMs]);
+  const remainingMin = Math.floor(remainingSec / 60);
+  const remainingSecPart = remainingSec % 60;
+  const remainingLabel = `${String(remainingMin).padStart(2, '0')}:${String(remainingSecPart).padStart(2, '0')}`;
 
   return {
     isPolling,
@@ -180,7 +191,9 @@ export function usePollingPaymentStatus({
     timedOut,
     lastCheckedAt,
     lastCheckedAgoSec,
+    remainingMs,
+    remainingSec,
+    remainingLabel,
     verifyNow,
   };
 }
-
