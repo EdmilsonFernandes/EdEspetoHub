@@ -1,7 +1,8 @@
-﻿import { useMemo } from 'react';
+import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SignOut, UserCircle } from '@phosphor-icons/react';
 import { useAuth } from '../../contexts/AuthContext';
+import { resolveAssetUrl } from '../../utils/resolveAssetUrl';
 
 type MotoboyHeaderProps = {
   title: string;
@@ -25,6 +26,8 @@ export function MotoboyHeader({ title, subtitle, rightAction }: MotoboyHeaderPro
   const user = motoboySession?.user || null;
   const userName = String(user?.fullName || user?.name || '').trim();
   const userEmail = String(user?.email || '').trim();
+  const userImage = resolveAssetUrl(String(user?.profileImageUrl || ''));
+  const userInitial = String((userName || 'E').trim().charAt(0) || 'E').toUpperCase();
   const showSession = Boolean(motoboySession?.token && userEmail);
 
   const handleLogout = () => {
@@ -33,7 +36,6 @@ export function MotoboyHeader({ title, subtitle, rightAction }: MotoboyHeaderPro
     } catch {
       // ignore
     }
-    // MotoboyLogin currently also writes to AuthContext (adminSession). Clear it to avoid leaking sessions.
     try {
       setAuth(null);
     } catch {
@@ -61,9 +63,34 @@ export function MotoboyHeader({ title, subtitle, rightAction }: MotoboyHeaderPro
           <div className="flex items-center gap-2 flex-wrap min-w-0 sm:mr-1">{rightAction}</div>
           {showSession ? (
             <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap sm:ml-auto w-full sm:w-auto">
-              <div className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 bg-white/70 text-slate-800 min-w-0 max-w-full sm:max-w-[280px]">
-                <UserCircle size={18} weight="duotone" className="text-slate-600" />
+              <div className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 bg-white/70 text-slate-800 min-w-0 max-w-full sm:max-w-[320px]">
+                {userImage ? (
+                  <img
+                    src={userImage}
+                    alt={userName || 'Entregador'}
+                    className="h-9 w-9 rounded-xl object-cover border border-slate-200 bg-white shrink-0"
+                  />
+                ) : (
+                  <div className="h-9 w-9 rounded-xl border border-slate-200 bg-slate-100 text-slate-700 grid place-items-center text-xs font-extrabold shrink-0">
+                    {userInitial}
+                  </div>
+                )}
                 <div className="leading-tight text-left min-w-0">
+                  <div className="text-[11px] font-extrabold truncate">{userName || 'Entregador'}</div>
+                  <div className="text-[10px] text-slate-500 truncate">{userEmail}</div>
+                </div>
+              </div>
+              <div className="sm:hidden flex items-center gap-2 px-2.5 py-2 rounded-xl border border-slate-200 bg-white/70 text-slate-800 min-w-0">
+                {userImage ? (
+                  <img
+                    src={userImage}
+                    alt={userName || 'Entregador'}
+                    className="h-8 w-8 rounded-lg object-cover border border-slate-200 bg-white shrink-0"
+                  />
+                ) : (
+                  <UserCircle size={18} weight="duotone" className="text-slate-600 shrink-0" />
+                )}
+                <div className="leading-tight text-left min-w-0 max-w-[140px]">
                   <div className="text-[11px] font-extrabold truncate">{userName || 'Entregador'}</div>
                   <div className="text-[10px] text-slate-500 truncate">{userEmail}</div>
                 </div>
@@ -84,4 +111,3 @@ export function MotoboyHeader({ title, subtitle, rightAction }: MotoboyHeaderPro
     </div>
   );
 }
-

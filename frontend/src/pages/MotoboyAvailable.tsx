@@ -160,16 +160,9 @@ export function MotoboyAvailable() {
     documents.map((doc: any) => [String(doc.docType || '').toUpperCase(), doc])
   );
   const hasAllRequiredDocs = requiredDocs.every((key) => documentsByType.has(key));
-	  const approvedStores = requests.filter((req) => req.status === 'APPROVED');
-	  const accountStatus = formatMotoboyAccountStatus(profile?.status);
-	  const statusLabel = (() => {
-    if (profile?.status === 'SUSPENDED') return 'Cadastro suspenso';
-    if (profile?.status === 'REJECTED') return 'Cadastro recusado';
-    if (profile?.status === 'PENDING_VERIFICATION') return 'Cadastro em análise';
-    if (profile?.status === 'ACTIVE' && approvedStores.length === 0) return 'Sem vínculo aprovado';
-    if (profile?.status === 'ACTIVE') return 'Cadastro ativo';
-    return 'Cadastro pendente';
-  })();
+  const missingRequiredDocs = requiredDocs.filter((key) => !documentsByType.has(key)).length;
+  const approvedStores = requests.filter((req) => req.status === 'APPROVED');
+  const accountStatus = formatMotoboyAccountStatus(profile?.status);
 
   const handleAccept = async (orderId: string) => {
     try {
@@ -269,27 +262,35 @@ export function MotoboyAvailable() {
         </button>
       )}
 
-      <div className="grid gap-3 sm:grid-cols-3">
-	        <div className="rounded-2xl border border-slate-200 bg-white p-4 flex items-center gap-3">
-	          <div className="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
-	            <CheckCircle size={20} weight="duotone" />
-	          </div>
-	          <div>
-	            <p className="text-xs text-slate-500">Status</p>
-	            <div className="mt-0.5 flex items-center gap-2">
-	              <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-extrabold border ${accountStatus.tone}`}>
-	                {accountStatus.label}
-	              </span>
-	              <span className="text-[11px] font-semibold text-slate-500">Conta</span>
-	            </div>
-	          </div>
-	        </div>
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 flex items-center gap-3">
+          <div className="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
+            <CheckCircle size={20} weight="duotone" />
+          </div>
+          <div>
+            <p className="text-xs text-slate-500">Conta</p>
+            <span className={`mt-0.5 inline-flex px-2.5 py-0.5 rounded-full text-[11px] font-extrabold border ${accountStatus.tone}`}>
+              {accountStatus.label}
+            </span>
+          </div>
+        </div>
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 flex items-center gap-3">
+          <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${hasAllRequiredDocs ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>
+            <CheckCircle size={20} weight="duotone" />
+          </div>
+          <div>
+            <p className="text-xs text-slate-500">Documentos</p>
+            <p className={`text-sm font-semibold ${hasAllRequiredDocs ? 'text-emerald-700' : 'text-amber-700'}`}>
+              {hasAllRequiredDocs ? 'Tudo certo' : `${missingRequiredDocs} pendente(s)`}
+            </p>
+          </div>
+        </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-4 flex items-center gap-3">
           <div className="h-10 w-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
             <Storefront size={20} weight="duotone" />
           </div>
           <div>
-            <p className="text-xs text-slate-500">Lojas aprovadas</p>
+            <p className="text-xs text-slate-500">Lojas vinculadas</p>
             <p className="text-sm font-semibold text-slate-800">{approvedStores.length}</p>
           </div>
         </div>
@@ -304,32 +305,20 @@ export function MotoboyAvailable() {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-2">
-        <p className="text-sm font-semibold text-slate-700">Status do entregador</p>
-        <p className="text-xs text-slate-500">{statusLabel}</p>
-        <div className="flex flex-wrap gap-2 text-xs">
-          <span
-            className={`px-2.5 py-1 rounded-full font-semibold ${
-              hasAllRequiredDocs ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
-            }`}
-          >
-            Documentos {hasAllRequiredDocs ? 'OK' : 'pendentes'}
-          </span>
-          <span className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 font-semibold">
-            Lojas aprovadas: {approvedStores.length}
-          </span>
+      {!hasAllRequiredDocs || approvedStores.length === 0 ? (
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-2">
+          {!hasAllRequiredDocs ? (
+            <p className="text-[12px] text-amber-700 font-semibold">
+              Complete CNH e Selfie para liberar todos os pedidos da fila.
+            </p>
+          ) : null}
+          {approvedStores.length === 0 ? (
+            <p className="text-[12px] text-slate-600">
+              Você ainda não tem vínculo aprovado com loja. Acesse o perfil para solicitar.
+            </p>
+          ) : null}
         </div>
-        {!hasAllRequiredDocs && (
-          <p className="text-[11px] text-amber-600">
-            Complete CNH e Selfie para solicitar vínculo e receber pedidos.
-          </p>
-        )}
-        {approvedStores.length === 0 && (
-          <p className="text-[11px] text-slate-500">
-            Pedidos só aparecem após a loja aprovar seu vínculo.
-          </p>
-        )}
-      </div>
+      ) : null}
 
       {loading ? (
         <div className="grid gap-3" ref={listRef}>
