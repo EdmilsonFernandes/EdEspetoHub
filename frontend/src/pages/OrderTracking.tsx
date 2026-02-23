@@ -1283,6 +1283,17 @@ export function OrderTracking() {
                                     </span>
                                   </div>
                                   {reviewTip?.tipQrCodeBase64 ? (
+                                    <div className="rounded-2xl border border-amber-200 bg-[linear-gradient(135deg,#fff7ed,#ffedd5)] px-3 py-2.5 shadow-[0_12px_26px_-22px_rgba(234,88,12,0.9)]">
+                                      <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-amber-700">Tempo limite para pagar a gorjeta</p>
+                                      <div className="mt-1.5 flex items-center justify-between gap-2">
+                                        <p className="text-[11px] font-semibold text-amber-900">Você tem até o fim do contador</p>
+                                        <span className="rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 px-2.5 py-1 text-xs font-black text-white animate-pulse">
+                                          {tipPolling.remainingLabel}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  ) : null}
+                                  {reviewTip?.tipQrCodeBase64 ? (
                                     <div className="flex items-center justify-center">
                                       <img
                                         src={reviewTip.tipQrCodeBase64}

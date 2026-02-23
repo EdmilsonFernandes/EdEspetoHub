@@ -465,6 +465,15 @@ export function PaymentPage() {
                     </>
                   ) : payment.method === 'PIX' && payment.qrCodeBase64 ? (
                     <>
+                      <div className="w-full rounded-2xl border border-amber-200 bg-[linear-gradient(135deg,#fff7ed,#ffedd5)] px-4 py-3 shadow-[0_16px_32px_-28px_rgba(234,88,12,0.9)]">
+                        <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-amber-700">Tempo limite para pagamento Pix</p>
+                        <div className="mt-2 flex items-center justify-between gap-3">
+                          <p className="text-sm font-semibold text-amber-900">Finalize o pagamento antes de expirar</p>
+                          <span className="rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 px-3 py-1.5 text-base font-black text-white shadow-sm animate-pulse">
+                            {pixPolling.remainingLabel}
+                          </span>
+                        </div>
+                      </div>
                       <div className="flex items-center gap-2 text-sm text-gray-700">
                         {providerMeta.icon && (
                           <img src={providerMeta.icon} alt={providerMeta.label} className="h-5" />
