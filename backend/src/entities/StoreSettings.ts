@@ -33,6 +33,9 @@ export class StoreSettings
   @Column({ name: 'banner_url', type: 'text', nullable: true })
   bannerUrl?: string | null;
 
+  @Column({ name: 'banner_position', type: 'varchar', nullable: true, default: 'center' })
+  bannerPosition?: string | null;
+
   @Column({ name: 'description', type: 'text', nullable: true })
   description?: string | null;
 

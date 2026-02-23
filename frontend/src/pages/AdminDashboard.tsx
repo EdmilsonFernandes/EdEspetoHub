@@ -787,6 +787,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     logoFile: '',
     bannerUrl: resolveAssetUrl(session?.store?.settings?.bannerUrl) || '',
     bannerFile: '',
+    bannerPosition: session?.store?.settings?.bannerPosition === 'top' ? 'top' : 'center',
     description: session?.store?.settings?.description || '',
     primaryColor: session?.store?.settings?.primaryColor || '#b91c1c',
     secondaryColor: session?.store?.settings?.secondaryColor || '#111827',
@@ -907,6 +908,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       logoFile: '',
       bannerUrl: resolveAssetUrl(session?.store?.settings?.bannerUrl) || '',
       bannerFile: '',
+      bannerPosition: session?.store?.settings?.bannerPosition === 'top' ? 'top' : 'center',
       description: session?.store?.settings?.description || '',
       primaryColor: session?.store?.settings?.primaryColor || '#b91c1c',
       secondaryColor: session?.store?.settings?.secondaryColor || '#111827',
@@ -922,6 +924,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     session?.store?.name,
     session?.store?.settings?.logoUrl,
     session?.store?.settings?.bannerUrl,
+    session?.store?.settings?.bannerPosition,
     session?.store?.settings?.description,
     session?.store?.settings?.primaryColor,
     session?.store?.settings?.secondaryColor,
@@ -1209,6 +1212,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
           : brandingDraft.bannerUrl === ''
           ? null
           : brandingDraft.bannerUrl || undefined,
+        bannerPosition: brandingDraft.bannerPosition === 'top' ? 'top' : 'center',
         description: brandingDraft.description || undefined,
         primaryColor: brandingDraft.primaryColor,
         secondaryColor: brandingDraft.secondaryColor,

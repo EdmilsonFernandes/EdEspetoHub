@@ -251,6 +251,19 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
         </div>
         <div className="space-y-3">
           <label className="text-sm font-semibold text-gray-700">Banner da loja</label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-gray-500">Posição do banner no painel</label>
+              <select
+                value={branding.bannerPosition || "center"}
+                onChange={(e) => handleChange("bannerPosition", e.target.value)}
+                className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
+              >
+                <option value="center">Centro (recomendado)</option>
+                <option value="top">Topo</option>
+              </select>
+            </div>
+          </div>
           <div className="flex flex-col gap-3">
             <label className="w-full cursor-pointer">
               <div className="border-2 border-dashed border-gray-300 rounded-2xl p-4 hover:border-brand-primary transition-colors text-center bg-white/70">

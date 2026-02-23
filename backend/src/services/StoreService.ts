@@ -65,6 +65,9 @@ export class StoreService
     if (digits.length > 11) return `+${digits}`;
     return trimmed;
   }
+  private normalizeBannerPosition(value?: string | null): 'center' | 'top' {
+    return String(value || '').toLowerCase() === 'top' ? 'top' : 'center';
+  }
 
   /* =========================
    * CREATE STORE
@@ -107,6 +110,7 @@ export class StoreService
       const trimmedState = input.state?.toString().trim().toUpperCase();
       const segment = sanitizeStoreSegment(input.segment);
       const segmentPreset = getStoreSegmentPreset(segment);
+      const bannerPosition = this.normalizeBannerPosition(input.bannerPosition);
 
       // 3️⃣ Settings
       const normalizedPix = this.normalizePixKey(input.pixKey);
@@ -114,6 +118,7 @@ export class StoreService
       const settings = manager.create(StoreSettings, {
         logoUrl: logoUrl || input.logoUrl,
         bannerUrl: bannerUrl || trimmedBannerUrl || null,
+        bannerPosition,
         description: input.description,
         address: trimmedAddress || owner.address || null,
         city: trimmedCity || null,
@@ -210,6 +215,10 @@ export class StoreService
       if (data.bannerFile !== undefined || data.bannerUrl !== undefined) {
         const trimmedBannerUrl = data.bannerUrl?.toString().trim();
         store.settings.bannerUrl = uploadedBanner ?? trimmedBannerUrl ?? null;
+      }
+      if (data.bannerPosition !== undefined)
+      {
+        store.settings.bannerPosition = this.normalizeBannerPosition(data.bannerPosition);
       }
 
       store.settings.description =

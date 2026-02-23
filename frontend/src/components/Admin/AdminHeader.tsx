@@ -52,6 +52,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
   const instagramLink = socialLinks.find((link) => link?.type === 'instagram')?.value;
   const instagramHandle = instagramLink ? `@${instagramLink.replace('@', '')}` : '';
   const bannerUrl = resolveAssetUrl(auth?.store?.settings?.bannerUrl || '') || '';
+  const bannerPosition = auth?.store?.settings?.bannerPosition === 'top' ? 'top center' : 'center';
   const hasBanner = Boolean(bannerUrl);
   const userName = auth?.user?.fullName || auth?.user?.name || auth?.user?.email || 'Admin';
   const userRole = auth?.user?.role || 'ADMIN';
@@ -67,7 +68,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
         backgroundColor: '#0f172a',
         backgroundImage: `linear-gradient(120deg, rgba(15,23,42,0.34) 0%, rgba(15,23,42,0.5) 100%), url(${bannerUrl})`,
         backgroundSize: 'cover',
-        backgroundPosition: 'center',
+        backgroundPosition: `center, ${bannerPosition}`,
         backgroundRepeat: 'no-repeat',
         color: '#fff',
       }

@@ -41,6 +41,18 @@ export async function runMigrations() {
   `);
   await AppDataSource.query(`
     ALTER TABLE IF EXISTS store_settings
+    ADD COLUMN IF NOT EXISTS banner_position VARCHAR DEFAULT 'center';
+  `);
+  await AppDataSource.query(`
+    UPDATE store_settings
+    SET banner_position = CASE
+      WHEN LOWER(COALESCE(banner_position, '')) = 'top' THEN 'top'
+      ELSE 'center'
+    END
+    WHERE banner_position IS NULL OR LOWER(COALESCE(banner_position, '')) NOT IN ('center','top');
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS store_settings
     ADD COLUMN IF NOT EXISTS address TEXT;
   `);
   await AppDataSource.query(`
