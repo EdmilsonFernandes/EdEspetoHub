@@ -1028,6 +1028,45 @@ export function MotoboyProfile() {
     );
   };
 
+  const profileAccountStatus = formatMotoboyAccountStatus(profile?.status);
+  const tabItems = [
+    { id: 'profile', label: 'Perfil', icon: <ShieldCheck size={16} weight="duotone" /> },
+    {
+      id: 'documents',
+      label: 'Documentos',
+      icon: <IdentificationCard size={16} weight="duotone" />,
+      badge:
+        docsProgress.pending + docsProgress.rejected + docsProgress.missing > 0 ? (
+          <span className="absolute -top-1.5 -right-1 h-4 min-w-4 px-1 rounded-full bg-amber-500 text-white text-[9px] font-black grid place-items-center">
+            {docsProgress.pending + docsProgress.rejected + docsProgress.missing}
+          </span>
+        ) : null,
+    },
+    {
+      id: 'stores',
+      label: 'Lojas',
+      icon: <Storefront size={16} weight="duotone" />,
+      badge:
+        pendingStoreIds.length > 0 ? (
+          <span className="absolute -top-1.5 -right-1 h-4 min-w-4 px-1 rounded-full bg-sky-500 text-white text-[9px] font-black grid place-items-center">
+            {pendingStoreIds.length}
+          </span>
+        ) : null,
+    },
+    {
+      id: 'payouts',
+      label: 'Repasses',
+      icon: <ClockClockwise size={16} weight="duotone" />,
+      badge:
+        payoutStats.pendingCount > 0 ? (
+          <span className="absolute -top-1.5 -right-1 h-4 min-w-4 px-1 rounded-full bg-amber-500 text-white text-[9px] font-black grid place-items-center">
+            {payoutStats.pendingCount}
+          </span>
+        ) : null,
+    },
+    { id: 'notifications', label: 'Notificações', icon: <Info size={16} weight="duotone" /> },
+  ];
+
   return (
     <div className="min-h-screen motoboy-screen space-y-4 overflow-x-hidden no-x-scroll">
       <MotoboyHeader title="Perfil" subtitle="Documentos, vínculo e dados do entregador." />
@@ -1088,18 +1127,39 @@ export function MotoboyProfile() {
         }}
       />
 
+      <div className="rounded-2xl border border-slate-200 bg-white p-3 sm:p-4 shadow-[0_22px_48px_-40px_rgba(15,23,42,0.45)] motoboy-fade-up">
+        <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Conta</p>
+            <div className="mt-1">
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${profileAccountStatus.tone}`}>
+                {profileAccountStatus.label}
+              </span>
+            </div>
+          </div>
+          <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Documentos</p>
+            <p className="text-sm font-black text-slate-900 mt-1">
+              {docsProgress.approved}/{docsProgress.total} aprovados
+            </p>
+          </div>
+          <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Lojas vinculadas</p>
+            <p className="text-sm font-black text-slate-900 mt-1">{linkedStoreIds.length} ativa(s)</p>
+          </div>
+          <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Repasses</p>
+            <p className="text-sm font-black text-slate-900 mt-1">{payoutStats.pendingCount} pendente(s)</p>
+          </div>
+        </div>
+      </div>
+
       <PremiumTabs
-        items={[
-          { id: 'profile', label: 'Perfil' },
-          { id: 'documents', label: 'Documentos' },
-          { id: 'stores', label: 'Lojas' },
-          { id: 'payouts', label: 'Repasses' },
-          { id: 'notifications', label: 'Notificações' },
-        ]}
+        items={tabItems}
         activeId={activeSection}
         onChange={(id) => setActiveSection(id as any)}
-        listClassName="grid grid-cols-2 sm:grid-cols-5"
-        containerClassName="bg-white shadow-[0_22px_48px_-40px_rgba(15,23,42,0.45)]"
+        listClassName="grid grid-cols-2 sm:grid-cols-5 gap-2"
+        containerClassName="bg-white/90 backdrop-blur-sm shadow-[0_22px_48px_-40px_rgba(15,23,42,0.45)] border-slate-200 sticky top-[10px] z-20"
         buttonClassName="btn-press"
       />
 

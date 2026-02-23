@@ -16,6 +16,7 @@ export function MotoboyEarnings() {
   const [pendingCount, setPendingCount] = useState(0);
   const [blocked, setBlocked] = useState(false);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [ordersPage, setOrdersPage] = useState(1);
   const [lastUpdatedAt, setLastUpdatedAt] = useState<number | null>(null);
   const { showToast } = useToast();
   const navigate = useNavigate();
@@ -87,6 +88,16 @@ export function MotoboyEarnings() {
     : '—';
 
   const recentTipPayouts = useMemo(() => tipPayouts.slice(0, 5), [tipPayouts]);
+  const ordersPerPage = 10;
+  const totalOrdersPages = Math.max(1, Math.ceil(orders.length / ordersPerPage));
+  const paginatedOrders = useMemo(() => {
+    const start = (ordersPage - 1) * ordersPerPage;
+    return orders.slice(start, start + ordersPerPage);
+  }, [orders, ordersPage]);
+
+  useEffect(() => {
+    if (ordersPage > totalOrdersPages) setOrdersPage(totalOrdersPages);
+  }, [ordersPage, totalOrdersPages]);
 
   return (
     <div className="min-h-screen motoboy-screen space-y-4 overflow-x-hidden">
@@ -224,7 +235,7 @@ export function MotoboyEarnings() {
               <div className="text-center text-sm text-slate-500 py-6">Nenhuma entrega finalizada ainda.</div>
             ) : (
               <div className="grid gap-4">
-                {orders.slice(0, 8).map((order) => {
+                {paginatedOrders.map((order) => {
                   const isOpen = expanded.has(order.id);
                   return (
                     <OrderCard
@@ -250,6 +261,35 @@ export function MotoboyEarnings() {
                     />
                   );
                 })}
+                {orders.length > ordersPerPage ? (
+                  <div className="pt-1 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <p className="text-xs text-slate-500">
+                      Mostrando {Math.min((ordersPage - 1) * ordersPerPage + 1, orders.length)}–
+                      {Math.min(ordersPage * ordersPerPage, orders.length)} de {orders.length} entregas
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setOrdersPage((p) => Math.max(1, p - 1))}
+                        disabled={ordersPage <= 1}
+                        className="btn-press rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-extrabold text-slate-700 disabled:opacity-45"
+                      >
+                        Anterior
+                      </button>
+                      <span className="px-2.5 py-1 rounded-lg bg-slate-100 text-[11px] font-bold text-slate-700">
+                        {ordersPage}/{totalOrdersPages}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setOrdersPage((p) => Math.min(totalOrdersPages, p + 1))}
+                        disabled={ordersPage >= totalOrdersPages}
+                        className="btn-press rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-extrabold text-slate-700 disabled:opacity-45"
+                      >
+                        Próxima
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
               </div>
             )}
           </div>
