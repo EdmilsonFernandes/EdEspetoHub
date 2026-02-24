@@ -23,6 +23,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
   const [showMobileDetails, setShowMobileDetails] = useState(false);
   const [showDesktopDetails, setShowDesktopDetails] = useState(false);
   const [compactDesktop, setCompactDesktop] = useState(false);
+  const [mobileCompact, setMobileCompact] = useState(false);
   const [pinExpanded, setPinExpanded] = useState(() => {
     if (typeof window === 'undefined') return false;
     return localStorage.getItem('adminHeader:pinExpanded') === 'true';
@@ -178,6 +179,21 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    const handleMobileCompact = () => {
+      const mobile = window.innerWidth < 768;
+      setMobileCompact(mobile && window.scrollY > 56);
+    };
+    handleMobileCompact();
+    window.addEventListener('scroll', handleMobileCompact, { passive: true });
+    window.addEventListener('resize', handleMobileCompact);
+    return () => {
+      window.removeEventListener('scroll', handleMobileCompact);
+      window.removeEventListener('resize', handleMobileCompact);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
     localStorage.setItem('adminHeader:pinExpanded', String(pinExpanded));
     if (pinExpanded) {
       setCompactDesktop(false);
@@ -250,9 +266,9 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
       <div className="pointer-events-none absolute inset-y-0 right-0 w-[40%] bg-gradient-to-l from-slate-950/40 via-slate-900/20 to-transparent" />
       <div className="pointer-events-none absolute top-0 left-8 right-8 h-0.5 rounded-full bg-white/40" />
       <div className="pointer-events-none absolute inset-0 rounded-3xl ring-1 ring-inset ring-white/12" />
-      <div className="md:hidden px-3 py-3 space-y-2.5">
-        <div className="flex items-center gap-2.5 rounded-2xl border border-white/20 bg-slate-950/34 px-2.5 py-2 backdrop-blur-[4px]">
-          <div className="w-11 h-11 rounded-xl bg-white/90 ring-1 ring-white/80 overflow-hidden flex items-center justify-center shadow-[0_14px_28px_-18px_rgba(0,0,0,0.55)]">
+      <div className={`md:hidden px-3 transition-all duration-200 ${mobileCompact ? 'py-2 space-y-2' : 'py-3 space-y-2.5'}`}>
+        <div className={`flex items-center gap-2.5 rounded-2xl border border-white/20 bg-slate-950/34 px-2.5 backdrop-blur-[4px] transition-all duration-200 ${mobileCompact ? 'py-1.5' : 'py-2'}`}>
+          <div className={`${mobileCompact ? 'w-9 h-9 rounded-lg' : 'w-11 h-11 rounded-xl'} bg-white/90 ring-1 ring-white/80 overflow-hidden flex items-center justify-center shadow-[0_14px_28px_-18px_rgba(0,0,0,0.55)] transition-all duration-200`}>
             {branding?.logoUrl ? (
               <img src={branding.logoUrl} alt={storeName} className="w-full h-full object-contain p-1" />
             ) : (
@@ -261,8 +277,8 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-[10px] uppercase tracking-[0.22em] font-semibold text-white/80">{contextLabel}</p>
-            <h1 className="text-base font-black text-white truncate">{storeName}</h1>
-            <p className="text-[11px] text-white/80 truncate">
+            <h1 className={`${mobileCompact ? 'text-sm' : 'text-base'} font-black text-white truncate transition-all duration-200`}>{storeName}</h1>
+            <p className={`text-[11px] text-white/80 truncate ${mobileCompact ? 'hidden' : ''}`}>
               {storeSegmentLabel}{storeLocation ? ` • ${storeLocation}` : ''}
             </p>
           </div>
@@ -275,7 +291,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
           </button>
         </div>
 
-        <div className="flex items-center justify-between gap-2 rounded-2xl border border-white/20 bg-slate-950/34 px-2.5 py-2 backdrop-blur-[4px]">
+        <div className={`flex items-center justify-between gap-2 rounded-2xl border border-white/20 bg-slate-950/34 px-2.5 py-2 backdrop-blur-[4px] transition-all duration-200 ${mobileCompact ? 'py-1.5' : ''}`}>
           <div className="min-w-0">
             <p className="text-[10px] uppercase tracking-[0.2em] text-white/70">Assinatura</p>
             <p className="text-xs font-semibold text-white truncate">{planStatusLabel}</p>
@@ -288,7 +304,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
           />
         </div>
 
-        <div className="flex items-center justify-between gap-2 rounded-2xl border border-white/20 bg-slate-950/30 px-2.5 py-2">
+        <div className={`flex items-center justify-between gap-2 rounded-2xl border border-white/20 bg-slate-950/30 px-2.5 transition-all duration-200 ${mobileCompact ? 'py-1.5' : 'py-2'}`}>
           {onToggleHeader && (
             <div className="flex items-center rounded-full bg-white/12 border border-white/25 p-0.5 text-[11px] font-semibold">
               <button
