@@ -21,7 +21,6 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
   const [planDetails, setPlanDetails] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
   const [showMobileDetails, setShowMobileDetails] = useState(false);
-  const [showDesktopDetails, setShowDesktopDetails] = useState(false);
   const [compactDesktop, setCompactDesktop] = useState(false);
   const [mobileCompact, setMobileCompact] = useState(false);
   const [pinExpanded, setPinExpanded] = useState(() => {
@@ -107,20 +106,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
       : []),
   ];
   const visibleDesktopChips = infoChips.slice(0, 2);
-  const hiddenDesktopChips = infoChips.slice(2);
-  const planStatusRaw = String(planDetails?.status || '').toUpperCase();
-  const planStatusLabel =
-    planDetails?.planExempt
-      ? 'VIP ativo'
-      : planStatusRaw === 'ACTIVE'
-      ? 'Plano ativo'
-      : planStatusRaw === 'TRIAL'
-      ? 'Trial ativo'
-      : planStatusRaw === 'EXPIRING'
-      ? 'Expirando'
-      : planStatusRaw === 'PENDING'
-      ? 'Pendente'
-      : 'Sem status';
+  const headerLabel = (contextLabel || 'Painel admin').trim() || 'Painel admin';
   const opsCards = [
     { id: 'segment', label: 'Segmento', value: storeSegmentLabel },
     { id: 'location', label: 'Local', value: storeLocation || 'Não definido' },
@@ -249,12 +235,6 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
     return () => window.removeEventListener('adminHeader:toggle', handler);
   }, []);
 
-  useEffect(() => {
-    if (isMobile && showDesktopDetails) {
-      setShowDesktopDetails(false);
-    }
-  }, [isMobile, showDesktopDetails]);
-
   return (
     <header
       className="relative z-[90] isolate rounded-3xl border border-slate-200/80 shadow-[0_26px_64px_-34px_rgba(15,23,42,0.58)] overflow-visible"
@@ -275,7 +255,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
             )}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-[10px] uppercase tracking-[0.22em] font-semibold text-white/80">{contextLabel}</p>
+            <p className="text-[10px] uppercase tracking-[0.22em] font-semibold text-white/80">{headerLabel}</p>
             <h1 className={`${mobileCompact ? 'text-sm' : 'text-base'} font-black text-white truncate transition-all duration-200`}>{storeName}</h1>
             <p className={`text-[11px] text-white/80 truncate ${mobileCompact ? 'hidden' : ''}`}>
               {storeSegmentLabel}{storeLocation ? ` • ${storeLocation}` : ''}
@@ -292,8 +272,8 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
 
         <div className={`flex items-center justify-between gap-2 rounded-2xl border border-white/20 bg-slate-950/34 px-2.5 py-2 backdrop-blur-[4px] transition-all duration-200 ${mobileCompact ? 'py-1.5' : ''}`}>
           <div className="min-w-0">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-white/70">Assinatura</p>
-            <p className="text-xs font-semibold text-white truncate">{planStatusLabel}</p>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-white/70">Plano</p>
+            <p className="text-xs font-semibold text-white truncate">Gestão de assinatura</p>
           </div>
           <PlanBadge
             planName={planDetails?.planName}
@@ -349,7 +329,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
           </div>
           <div className="space-y-0.5 min-w-0">
             <div className="flex items-center gap-2">
-              <p className="text-[10px] uppercase tracking-[0.32em] font-semibold text-white/90">{contextLabel}</p>
+              <p className="text-[10px] uppercase tracking-[0.32em] font-semibold text-white/90">{headerLabel}</p>
               {planDetails?.planExempt && (
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-[0.2em] bg-emerald-100 text-emerald-700">
                   VIP
@@ -357,11 +337,6 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
               )}
             </div>
             <h1 className={`font-black leading-tight truncate max-w-[42ch] drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)] transition-all duration-200 ${compactDesktop ? 'text-[18px] sm:text-[22px]' : 'text-[22px] sm:text-[28px]'}`}>{storeName}</h1>
-            {showDetails && storeDescription && !compactDesktop && (
-              <p className="text-xs sm:text-sm text-white/85 max-w-[520px] line-clamp-1 sm:line-clamp-2">
-                {storeDescription}
-              </p>
-            )}
             <div className={`${showMobileDetails ? 'flex' : 'hidden'} lg:flex flex-wrap items-center gap-2 text-xs ${compactDesktop ? 'lg:mt-0.5' : ''}`}>
               {visibleDesktopChips.map((chip) =>
                 chip.href ? (
@@ -388,15 +363,6 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
                     <span className="truncate">{chip.label}</span>
                   </span>
                 )
-              )}
-              {hiddenDesktopChips.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => setShowDesktopDetails((prev) => !prev)}
-                  className="hidden lg:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 border border-white/25 text-white/90 hover:bg-white/20 transition"
-                >
-                  {showDesktopDetails ? 'Ocultar detalhes' : `+${hiddenDesktopChips.length} detalhes`}
-                </button>
               )}
             </div>
           </div>
@@ -454,40 +420,6 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
           )}
         </div>
       </div>
-      {showDesktopDetails && (
-        <div className="hidden lg:block px-4 pb-2">
-          <div className="rounded-2xl border border-white/20 bg-slate-950/35 backdrop-blur-[4px] p-3">
-            <div className="flex flex-wrap items-center gap-2 text-xs">
-              {infoChips.map((chip) =>
-                chip.href ? (
-                  <a
-                    key={chip.id}
-                    href={chip.href}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/14 border border-white/28 text-white hover:bg-white/22 transition"
-                  >
-                    {chip.image ? (
-                      <img src={chip.image} alt="" className="h-4 w-4 rounded-full" />
-                    ) : (
-                      chip.icon
-                    )}
-                    <span className="truncate">{chip.label}</span>
-                  </a>
-                ) : (
-                  <span
-                    key={chip.id}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/14 border border-white/28 text-white"
-                  >
-                    {chip.icon}
-                    <span className="truncate">{chip.label}</span>
-                  </span>
-                )
-              )}
-            </div>
-          </div>
-        </div>
-      )}
       <div className={`px-4 flex flex-col lg:flex-row lg:items-center lg:justify-end gap-2.5 rounded-b-3xl border-t border-white/12 transition-all duration-200 ${compactDesktop ? 'pb-2.5' : 'pb-3.5'}`}>
         <div className="flex flex-wrap items-center gap-2">
           <a
