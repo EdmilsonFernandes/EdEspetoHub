@@ -79,133 +79,124 @@ const Header = ({
     <div className={`w-full sticky top-0 z-50 ${compact ? 'pb-2' : 'pb-3'} pt-2`}>
       <div className="max-w-6xl mx-auto px-3 sm:px-4">
         <div
-          className={`relative w-full backdrop-blur-xl shadow-[0_18px_40px_-26px_rgba(15,23,42,0.45)] px-3 sm:px-4 ${compact ? 'py-2.5' : 'py-3.5 sm:py-4'} flex items-center gap-2 sm:gap-4 flex-wrap sm:flex-nowrap rounded-3xl border border-white/70`}
-          style={
-            bannerUrl
-              ? {
-                  backgroundImage: `linear-gradient(120deg, color-mix(in srgb, ${branding?.primaryColor || '#2f9df7'} 58%, #0f172a 42%), color-mix(in srgb, ${branding?.accentColor || '#5fd35a'} 52%, #0f172a 48%)), url(${bannerUrl})`,
-                  backgroundSize: 'cover, cover',
-                  backgroundPosition: 'center, center',
-                }
-              : undefined
-          }
+          className={`relative overflow-hidden rounded-3xl border border-white/70 px-3 sm:px-5 ${compact ? 'py-2.5' : 'py-3.5 sm:py-4'} shadow-[0_18px_40px_-24px_rgba(15,23,42,0.45)]`}
+          style={{
+            backgroundImage: bannerUrl
+              ? `linear-gradient(110deg, rgba(8,15,30,0.62), rgba(8,15,30,0.44)), url(${bannerUrl})`
+              : `linear-gradient(115deg, color-mix(in srgb, ${branding?.primaryColor || '#0ea5e9'} 66%, #0f172a 34%), color-mix(in srgb, ${branding?.accentColor || '#22c55e'} 54%, #0f172a 46%))`,
+            backgroundSize: bannerUrl ? 'cover' : '100% 100%',
+            backgroundPosition: 'center',
+          }}
         >
-          {!bannerUrl && <div className="absolute inset-0 rounded-3xl bg-white/90" />}
-          <div className="pointer-events-none absolute inset-0 rounded-3xl bg-black/10" />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-slate-950/55 via-slate-900/25 to-slate-950/65" />
           <div className="pointer-events-none absolute top-0 left-4 right-4 h-1 rounded-full ds-header-gradient-line" />
 
-      {/* LOGO OFICIAL */}
-      {( !compact || (compact && branding?.logoUrl) ) && (
-        <div
-          className={`${compact ? 'w-8 h-8' : 'w-10 h-10 sm:w-14 sm:h-14'} rounded-2xl overflow-hidden border shadow-[0_14px_30px_-20px_rgba(239,68,68,0.6)] ds-logo-frame flex-shrink-0 flex items-center justify-center`}
-        >
-          {branding?.logoUrl ? (
-            <img
-              src={branding.logoUrl}
-              alt={branding.brandName}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <span className="font-bold text-sm sm:text-lg">{previewInitials || "ES"}</span>
-          )}
-        </div>
-      )}
+          <div className="relative flex flex-wrap items-start gap-3 sm:gap-4 sm:flex-nowrap">
+            {(!compact || (compact && branding?.logoUrl)) && (
+              <div className="w-11 h-11 sm:w-16 sm:h-16 rounded-2xl overflow-hidden border border-white/40 bg-white/10 backdrop-blur-sm shadow-[0_14px_30px_-20px_rgba(14,165,233,0.8)] flex-shrink-0 flex items-center justify-center">
+                {branding?.logoUrl ? (
+                  <img
+                    src={branding.logoUrl}
+                    alt={branding.brandName}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="font-black text-base sm:text-lg text-white">{previewInitials || "JC"}</span>
+                )}
+              </div>
+            )}
 
-      {/* Nome + infos */}
-      <div className="relative flex-1 leading-tight min-w-0">
-        <h1 className={`${compact ? 'text-sm' : 'text-base sm:text-xl'} font-black text-gray-900 truncate`}>
-          {branding?.brandName || "Seu Espeto"}
-        </h1>
-        <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
-          <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
-            {segmentLabel}
-          </span>
-          <span
-            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-semibold ${
-              isOpenNow
-                ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
-                : 'bg-amber-100 text-amber-800 border border-amber-200'
-            }`}
-          >
-            <span className={`h-1.5 w-1.5 rounded-full ${isOpenNow ? 'bg-emerald-500' : 'bg-amber-500'}`} />
-            {isOpenNow ? 'Aberto agora' : 'Fechado no momento'}
-          </span>
-          {todayHoursLabel && (
-            <span className="inline-flex items-center rounded-full bg-slate-100 text-slate-600 border border-slate-200 px-2.5 py-1 text-[10px] font-semibold">
-              Hoje {todayHoursLabel}
-            </span>
-          )}
-        </div>
-        {!compact && (
-          <div className="mt-1 flex flex-wrap items-center gap-1 sm:gap-2 text-xs text-slate-500">
-          {storeSlug && (
-            <a
-              href={storeUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="hidden sm:inline-flex items-center gap-2 px-2.5 py-1 rounded-full border border-slate-200 bg-white text-slate-600 text-[11px] uppercase tracking-wide hover:border-slate-300 hover:text-slate-800 transition"
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
-              Site: <span className="font-semibold normal-case">{storeUrl.replace(/^https?:\/\//, '')}</span>
-            </a>
-          )}
-          {instagramHandle && (
-            <a
-              href={`https://instagram.com/${instagramHandle.replace("@", "")}`}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1 px-2 py-1 rounded-full border border-brand-primary text-brand-primary bg-brand-primary-soft font-semibold hover:underline text-[10px] sm:text-xs"
-            >
-              <img src="/insta.avif" alt="Instagram" className="h-3 w-3 sm:h-3.5 sm:w-3.5 rounded-full" />
-              <span className="hidden sm:inline">Instagram {instagramHandle}</span>
-              <span className="sm:hidden">{instagramHandle}</span>
-            </a>
-          )}
-          {normalizeWhatsApp(whatsappNumber) && (
-            <a
-              href={`https://wa.me/${normalizeWhatsApp(whatsappNumber)}`}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1 px-2 py-1 rounded-full border border-emerald-200 text-emerald-700 bg-emerald-50 font-semibold hover:underline text-[10px] sm:text-xs"
-            >
-              <img src="/whatspp.jpg" alt="WhatsApp" className="h-3 w-3 sm:h-3.5 sm:w-3.5 rounded-full" />
-              <span className="hidden sm:inline">WhatsApp</span>
-              <span className="sm:hidden">Whats</span>
-            </a>
-          )}
-        </div>
-        )}
-      </div>
+            <div className="min-w-0 flex-1">
+              <h1 className={`${compact ? 'text-sm' : 'text-lg sm:text-2xl'} font-black text-white truncate`}>
+                {branding?.brandName || "Sua Loja"}
+              </h1>
+              <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center gap-1 rounded-full border border-white/30 bg-white/20 px-2.5 py-1 text-[10px] font-semibold text-white">
+                  {segmentLabel}
+                </span>
+                <span
+                  className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[10px] font-semibold ${
+                    isOpenNow
+                      ? 'border-emerald-200/80 bg-emerald-500/25 text-emerald-50'
+                      : 'border-amber-200/80 bg-amber-500/25 text-amber-50'
+                  }`}
+                >
+                  <span className={`h-1.5 w-1.5 rounded-full ${isOpenNow ? 'bg-emerald-200' : 'bg-amber-200'}`} />
+                  {isOpenNow ? 'Aberto agora' : 'Fechado no momento'}
+                </span>
+                {todayHoursLabel && (
+                  <span className="inline-flex items-center rounded-full border border-white/30 bg-white/15 px-2.5 py-1 text-[10px] font-semibold text-slate-100">
+                    Hoje {todayHoursLabel}
+                  </span>
+                )}
+              </div>
+              {!compact && (
+                <div className="mt-2 flex flex-wrap items-center gap-1.5 sm:gap-2">
+                  {storeSlug && (
+                    <a
+                      href={storeUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/15 px-2.5 py-1 text-[11px] font-semibold text-slate-100 hover:bg-white/25 transition"
+                    >
+                      Site: <span className="normal-case">{storeUrl.replace(/^https?:\/\//, '')}</span>
+                    </a>
+                  )}
+                  {instagramHandle && (
+                    <a
+                      href={`https://instagram.com/${instagramHandle.replace("@", "")}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1 rounded-full border border-pink-200/60 bg-pink-500/20 px-2.5 py-1 text-[11px] font-semibold text-pink-50 hover:bg-pink-500/30 transition"
+                    >
+                      <img src="/insta.avif" alt="Instagram" className="h-3.5 w-3.5 rounded-full" />
+                      {instagramHandle}
+                    </a>
+                  )}
+                  {normalizeWhatsApp(whatsappNumber) && (
+                    <a
+                      href={`https://wa.me/${normalizeWhatsApp(whatsappNumber)}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1 rounded-full border border-emerald-200/70 bg-emerald-500/20 px-2.5 py-1 text-[11px] font-semibold text-emerald-50 hover:bg-emerald-500/30 transition"
+                    >
+                      <img src="/whatspp.jpg" alt="WhatsApp" className="h-3.5 w-3.5 rounded-full" />
+                      WhatsApp
+                    </a>
+                  )}
+                </div>
+              )}
+            </div>
 
-      {/* Buttons - Responsive */}
-      <div className="w-full sm:w-auto flex flex-row items-center justify-end gap-2 order-last sm:order-none sm:flex-shrink-0">
-        {onOpenQueue && (
-          <div className="flex items-center rounded-full border border-slate-200 bg-white p-0.5 shadow-[0_12px_24px_-20px_rgba(15,23,42,0.35)]">
-            <button
-              type="button"
-              className="px-3 py-1.5 rounded-full text-xs font-semibold bg-brand-primary text-white shadow-sm"
-            >
-              Vitrine
-            </button>
-            <button
-              type="button"
-              onClick={onOpenQueue}
-              className="px-3 py-1.5 rounded-full text-xs font-semibold text-slate-600 hover:text-slate-900"
-            >
-              Pedidos
-            </button>
+            <div className="w-full sm:w-auto flex flex-row items-center justify-end gap-2 order-last sm:order-none sm:flex-shrink-0">
+              {onOpenQueue && (
+                <div className="flex items-center rounded-full border border-white/40 bg-white/20 p-0.5 backdrop-blur-sm">
+                  <button
+                    type="button"
+                    className="px-3 py-1.5 rounded-full text-xs font-bold bg-white text-slate-900 shadow-sm"
+                  >
+                    Vitrine
+                  </button>
+                  <button
+                    type="button"
+                    onClick={onOpenQueue}
+                    className="px-3 py-1.5 rounded-full text-xs font-semibold text-white hover:text-slate-100"
+                  >
+                    Operação
+                  </button>
+                </div>
+              )}
+              {onOpenAdmin && (
+                <button
+                  onClick={onOpenAdmin}
+                  className="px-3 py-2 rounded-full text-xs font-semibold border border-white/40 bg-white/10 text-white hover:bg-white/20 transition flex items-center gap-1 whitespace-nowrap"
+                >
+                  <SquaresFour size={12} weight="duotone" />
+                  {!compact && <span className="hidden sm:inline">Painel</span>}
+                </button>
+              )}
+            </div>
           </div>
-        )}
-        {onOpenAdmin && (
-          <button
-            onClick={onOpenAdmin}
-            className="px-2 sm:px-3 py-1.5 sm:py-2 rounded-full text-xs font-semibold border border-brand-secondary text-brand-secondary hover:bg-brand-secondary-soft transition flex items-center gap-1 whitespace-nowrap"
-          >
-            <SquaresFour size={12} weight="duotone" />
-            {!compact && <span className="hidden sm:inline">Painel</span>}
-          </button>
-        )}
-      </div>
         </div>
       </div>
     </div>
