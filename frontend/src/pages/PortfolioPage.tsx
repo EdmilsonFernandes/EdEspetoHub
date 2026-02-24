@@ -131,7 +131,7 @@ export function PortfolioPage() {
   const [stateFilter, setStateFilter] = useState('all');
   const [cityFilter, setCityFilter] = useState('all');
   const [sortBy, setSortBy] = useState<'recent' | 'name_asc' | 'name_desc'>('recent');
-  const [visibleCount, setVisibleCount] = useState(9);
+  const [visibleCount, setVisibleCount] = useState(12);
   useEffect(() => {
     document.title = 'Portfólio | Já no Caminho';
   }, []);
@@ -242,7 +242,7 @@ export function PortfolioPage() {
   }, [cases, debouncedQuery, segmentFilter, stateFilter, cityFilter, sortBy]);
 
   useEffect(() => {
-    setVisibleCount(9);
+    setVisibleCount(12);
   }, [debouncedQuery, segmentFilter, stateFilter, cityFilter, sortBy]);
 
   useEffect(() => {
@@ -417,20 +417,20 @@ export function PortfolioPage() {
 
           {!loading && !error && filteredCases.length > 0 && (
             <div className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {visibleCases.map((item) => (
-                <article key={item.id} className="ds-card overflow-hidden h-full flex flex-col transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_24px_48px_-30px_rgba(15,23,42,0.45)]">
-                  <div className="aspect-[16/8] bg-slate-100">
+                <article key={item.id} className="ds-card overflow-hidden h-full flex flex-col transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_20px_40px_-28px_rgba(15,23,42,0.4)]">
+                  <div className="aspect-[16/7] bg-slate-100">
                     <img src={item.screenshot} alt={`Screenshot - ${item.name}`} className="w-full h-full object-cover" />
                   </div>
-                  <div className="p-3.5 space-y-2.5 flex-1 flex flex-col">
+                  <div className="p-3 space-y-2 flex-1 flex flex-col">
                     <div className="flex items-center justify-between gap-3">
-                      <div>
-                        <p className="text-xs uppercase tracking-[0.2em] text-sky-700 font-semibold inline-flex items-center gap-1">
+                      <div className="min-w-0">
+                        <p className="text-[10px] uppercase tracking-[0.17em] text-sky-700 font-semibold inline-flex items-center gap-1">
                           <Storefront size={12} weight="duotone" />
                           {item.segment}
                         </p>
-                        <h2 className="text-lg font-black text-slate-900 line-clamp-1">{item.name}</h2>
+                        <h2 className="text-base font-black text-slate-900 line-clamp-1">{item.name}</h2>
                         <p className="text-[11px] text-slate-500 mt-0.5 inline-flex items-center gap-1">
                           <MapPin size={11} weight="duotone" />
                           {item.city}{item.state ? ` • ${item.state}` : ''}
@@ -447,29 +447,19 @@ export function PortfolioPage() {
                       ) : null}
                     </div>
 
-                    <div className="grid gap-2.5 flex-1">
-                      <div className="rounded-xl border border-slate-200 bg-slate-50 p-2.5">
-                        <p className="text-[11px] uppercase tracking-[0.25em] text-slate-500">Problema resolvido</p>
-                        <p className="text-xs text-slate-700 mt-1 line-clamp-2">{item.problem}</p>
-                      </div>
-                      <div className="rounded-xl border border-slate-200 bg-slate-50 p-2.5">
-                        <p className="text-[11px] uppercase tracking-[0.25em] text-slate-500">Solução aplicada</p>
-                        <p className="text-xs text-slate-700 mt-1 line-clamp-2">{item.solution}</p>
-                      </div>
-                      <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-2.5">
-                        <p className="text-[11px] uppercase tracking-[0.25em] text-emerald-700">Resultado obtido</p>
-                        <p className="text-xs text-emerald-800 mt-1 line-clamp-2">{item.result}</p>
-                      </div>
-                    </div>
-
-                    <div className="pt-0.5">
-                      <p className="text-[11px] uppercase tracking-[0.25em] text-slate-500 mb-2">Tecnologias utilizadas</p>
-                      <div className="flex flex-wrap gap-2">
-                        {item.technologies.map((tech) => (
-                          <span key={tech} className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700">
+                    <div className="flex-1 space-y-2">
+                      <p className="text-xs text-slate-600 line-clamp-2">{item.result}</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {item.technologies.slice(0, 3).map((tech) => (
+                          <span key={tech} className="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-700">
                             {tech}
                           </span>
                         ))}
+                        {item.technologies.length > 3 && (
+                          <span className="rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
+                            +{item.technologies.length - 3}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -480,7 +470,7 @@ export function PortfolioPage() {
                 <div className="flex justify-center pt-2">
                   <button
                     type="button"
-                    onClick={() => setVisibleCount((prev) => prev + 9)}
+                    onClick={() => setVisibleCount((prev) => prev + 12)}
                     className="ds-btn ds-btn-secondary ds-focus-ring px-5 py-2.5 text-sm font-bold"
                   >
                     Carregar mais
