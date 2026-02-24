@@ -19,7 +19,7 @@ export function AdminQueue() {
   }
 
   return (
-    <AdminLayout contextLabel="Fila de Pedidos" showHeader={false}>
+    <AdminLayout contextLabel="Central de Pedidos" showHeader={false}>
       <div className="mx-auto w-full max-w-[1320px] space-y-4">
         <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white/95 backdrop-blur px-4 py-4 shadow-[0_22px_52px_-38px_rgba(15,23,42,0.45)]">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(47,157,247,0.16),transparent_42%),radial-gradient(circle_at_bottom_right,rgba(95,211,90,0.14),transparent_46%)]" />
@@ -35,7 +35,7 @@ export function AdminQueue() {
                 )}
               </span>
               <div className="min-w-0">
-                <h1 className="text-lg sm:text-xl font-black text-slate-900 leading-tight">Fila de Pedidos</h1>
+                <h1 className="text-lg sm:text-xl font-black text-slate-900 leading-tight">Central de Pedidos</h1>
                 <div className="flex flex-wrap items-center gap-2 mt-1">
                   <p className="text-xs text-slate-500 truncate">{storeName}</p>
                   <span className="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-sky-700">

@@ -771,7 +771,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     { id: 'pagamentos', label: 'Pagamentos', icon: CreditCard },
     { id: 'motoboys', label: 'Entregadores', icon: Scooter, disabled: !canUseMotoboys },
     { id: 'config', label: 'Configurações', icon: Gear },
-    { id: 'fila', label: 'Fila', icon: ChefHat },
+    { id: 'fila', label: 'Operação', icon: ChefHat },
   ];
   const navItems = useMemo(
     () => [
@@ -787,7 +787,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       produtos: { title: 'Produtos', subtitle: 'Gerencie catálogo, preço, disponibilidade e destaque da vitrine.' },
       pagamentos: { title: 'Pagamentos', subtitle: 'Controle assinatura, ciclo e eventos de cobrança da loja.' },
       config: { title: 'Configurações', subtitle: 'Ajuste identidade, canais, tipos de pedido e horários da operação.' },
-      fila: { title: 'Fila', subtitle: 'Operação em andamento e fluxo de atendimento da loja.' },
+      fila: { title: 'Operação', subtitle: 'Acompanhe pedidos em andamento e o fluxo de atendimento da loja.' },
       motoboys: { title: 'Entregadores', subtitle: 'Vínculos, documentos, solicitações e status de entrega.' },
     }),
     []
@@ -1613,7 +1613,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
         {activeTab === 'fila' && (
           <FormSection
-            title="Fila de Pedidos"
+            title="Central de Pedidos"
             subtitle="Operação em tempo real dos pedidos da loja."
             variant="neutral"
             className="bg-white premium-card"
