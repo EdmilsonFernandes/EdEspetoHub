@@ -242,7 +242,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
 
   return (
     <header
-      className="relative rounded-3xl border border-slate-200/80 shadow-[0_26px_64px_-34px_rgba(15,23,42,0.58)] overflow-visible"
+      className="relative z-[90] isolate rounded-3xl border border-slate-200/80 shadow-[0_26px_64px_-34px_rgba(15,23,42,0.58)] overflow-visible"
       style={headerBackgroundStyle}
     >
       <div className="pointer-events-none absolute inset-0 opacity-35 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.34),_transparent_55%)]" />
