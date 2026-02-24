@@ -1148,37 +1148,37 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
       {mobileEditOpen && (
         <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
           <div
-            className="absolute inset-0 bg-black/40"
+            className="absolute inset-0 bg-slate-950/55 backdrop-blur-[2px]"
             onClick={handleInlineCancel}
           />
-          <div className="relative w-full max-h-[92vh] overflow-y-auto rounded-t-3xl bg-white p-5 pb-24 shadow-2xl sm:max-w-2xl sm:rounded-3xl sm:p-6 sm:pb-24">
-            <div className="flex items-center justify-between mb-4">
+          <div className="relative w-full max-h-[92vh] overflow-y-auto rounded-t-3xl border border-slate-200/80 bg-gradient-to-b from-white via-white to-slate-50/70 p-5 pb-24 shadow-[0_30px_70px_-34px_rgba(15,23,42,0.65)] sm:max-w-2xl sm:rounded-3xl sm:p-6 sm:pb-24">
+            <div className="mb-4 flex items-center justify-between border-b border-slate-100 pb-3">
               <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Editar produto</p>
-                <p className="text-lg font-semibold text-gray-900">{inlineForm.name || 'Produto'}</p>
+                <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Editar produto</p>
+                <p className="text-lg font-black text-slate-900">{inlineForm.name || 'Produto'}</p>
               </div>
               <button
                 type="button"
                 onClick={handleInlineCancel}
-                className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center"
+                className="w-9 h-9 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-600 hover:bg-slate-50"
               >
                 <X size={18} />
               </button>
             </div>
             <div className="space-y-4">
-              <div>
+              <div className="rounded-2xl border border-slate-200 bg-white p-3.5">
                 <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">Nome</label>
                 <input
-                  className="w-full p-3 border border-gray-200 rounded-xl text-sm mt-2"
+                  className="w-full p-3 border border-gray-200 rounded-xl text-sm mt-2 bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
                   value={inlineForm.name}
                   onChange={(e) => setInlineForm((prev) => ({ ...prev, name: e.target.value }))}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
+              <div className="grid grid-cols-2 gap-3 rounded-2xl border border-slate-200 bg-white p-3.5">
+                <div className="min-w-0">
                   <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">Preço</label>
                 <input
-                  className="w-full p-3 border border-gray-200 rounded-xl text-sm mt-2"
+                  className="w-full p-3 border border-gray-200 rounded-xl text-sm mt-2 bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
                   type="number"
                   step="0.01"
                   value={inlineForm.price}
@@ -1186,10 +1186,10 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                   onChange={(e) => setInlineForm((prev) => ({ ...prev, price: e.target.value }))}
                 />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">Promo</label>
                 <input
-                  className="w-full p-3 border border-gray-200 rounded-xl text-sm mt-2"
+                  className="w-full p-3 border border-gray-200 rounded-xl text-sm mt-2 bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
                   type="number"
                   step="0.01"
                   value={inlineForm.promoPrice}
@@ -1198,10 +1198,10 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                 />
                 </div>
               </div>
-              <div>
+              <div className="rounded-2xl border border-slate-200 bg-white p-3.5">
                 <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">Categoria</label>
                 <select
-                  className="w-full p-3 border border-gray-200 rounded-xl text-sm mt-2 bg-white"
+                  className="w-full p-3 border border-gray-200 rounded-xl text-sm mt-2 bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
                   value={inlineCategorySelect}
                   onChange={(e) => {
                     const value = e.target.value;
@@ -1224,7 +1224,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                 </select>
                 {inlineCategorySelect === '__custom__' && (
                   <input
-                    className="w-full p-3 border border-gray-200 rounded-xl text-sm mt-2"
+                    className="w-full p-3 border border-gray-200 rounded-xl text-sm mt-2 bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
                     placeholder="Digite a nova categoria"
                     value={inlineCustomCategory}
                     onChange={(e) => {
@@ -1236,15 +1236,15 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                   />
                 )}
               </div>
-              <div>
+              <div className="rounded-2xl border border-slate-200 bg-white p-3.5">
                 <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">Descrição</label>
                 <textarea
-                  className="w-full p-3 border border-gray-200 rounded-xl text-sm mt-2 min-h-[100px]"
+                  className="w-full p-3 border border-gray-200 rounded-xl text-sm mt-2 min-h-[100px] bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
                   value={inlineForm.description}
                   onChange={(e) => setInlineForm((prev) => ({ ...prev, description: e.target.value }))}
                 />
               </div>
-              <div>
+              <div className="rounded-2xl border border-dashed border-brand-primary/30 bg-brand-primary-soft/20 p-3.5">
                 <div className="flex items-center justify-between gap-2">
                   <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">Adicionais</label>
                   <button
@@ -1267,7 +1267,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                     {(inlineForm.modifiers || []).map((modifier, index) => (
                       <div key={modifier.id || index} className="grid grid-cols-[1fr_120px_auto] gap-2 items-center">
                         <input
-                          className="w-full p-3 border border-gray-200 rounded-xl text-sm"
+                          className="w-full p-3 border border-gray-200 rounded-xl text-sm bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
                           placeholder="Nome"
                           value={modifier.name || ''}
                           onChange={(e) =>
@@ -1282,7 +1282,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                         <input
                           type="number"
                           step="0.01"
-                          className="w-full p-3 border border-gray-200 rounded-xl text-sm"
+                          className="w-full p-3 border border-gray-200 rounded-xl text-sm bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
                           placeholder="0.00"
                           value={modifier.price || ''}
                           onChange={(e) =>
@@ -1311,7 +1311,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                   </div>
                 )}
               </div>
-              <div>
+              <div className="rounded-2xl border border-slate-200 bg-white p-3.5">
                 <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">Dias de exibição</label>
                 <div className="mt-3 grid grid-cols-7 gap-2">
                   {WEEK_DAYS.map((day) => (
@@ -1345,7 +1345,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                   Se nenhum dia for marcado, o produto aparece todos os dias.
                 </p>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-3 rounded-2xl border border-slate-200 bg-white p-3.5">
                 <button
                   type="button"
                   onClick={() => setInlineForm((prev) => ({ ...prev, promoActive: !prev.promoActive }))}
@@ -1369,10 +1369,10 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                   {inlineForm.isFeatured ? 'Destaque ativo' : 'Ativar destaque'}
                 </button>
               </div>
-              <div>
+              <div className="rounded-2xl border border-slate-200 bg-white p-3.5">
                 <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">Imagem (URL)</label>
                 <input
-                  className="w-full p-3 border border-gray-200 rounded-xl text-sm mt-2"
+                  className="w-full p-3 border border-gray-200 rounded-xl text-sm mt-2 bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
                   placeholder="https://..."
                   value={inlineForm.imageUrl}
                   onChange={(e) => setInlineForm((prev) => ({ ...prev, imageUrl: e.target.value }))}
@@ -1422,14 +1422,14 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                 </div>
               </div>
               <div
-                className="sticky bottom-0 z-20 -mx-5 mt-4 border-t border-slate-200 bg-white/95 px-5 py-3 pb-[calc(env(safe-area-inset-bottom)+12px)] backdrop-blur sm:-mx-6 sm:px-6"
+                className="sticky bottom-0 z-20 -mx-5 mt-4 border-t border-slate-200 bg-white/90 px-5 py-3 pb-[calc(env(safe-area-inset-bottom)+12px)] backdrop-blur-xl sm:-mx-6 sm:px-6"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="mx-auto flex w-full max-w-2xl gap-3">
                 <button
                   type="button"
                   onClick={handleInlineCancel}
-                  className="flex-1 py-3 rounded-xl border border-gray-200 text-sm font-semibold text-slate-600"
+                  className="flex-1 py-3 rounded-xl border border-gray-200 bg-white text-sm font-semibold text-slate-600 hover:bg-slate-50"
                 >
                   Cancelar
                 </button>
@@ -1437,7 +1437,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                   type="button"
                   onClick={handleInlineSave}
                   disabled={saving}
-                  className="flex-1 py-3 rounded-xl bg-brand-primary text-white text-sm font-semibold"
+                  className="flex-1 py-3 rounded-xl bg-brand-gradient text-white text-sm font-semibold shadow-[0_12px_24px_-16px_rgba(59,130,246,0.85)] hover:opacity-95 disabled:opacity-60"
                 >
                   Salvar
                 </button>
