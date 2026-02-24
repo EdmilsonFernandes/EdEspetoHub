@@ -131,7 +131,7 @@ export function AdminRenewal() {
   return (
     <AdminLayout contextLabel="Renovar assinatura">
       <main className="w-full max-w-5xl mx-auto py-2 sm:py-4">
-        <div className="rounded-3xl border border-slate-200/80 bg-white p-5 sm:p-8 shadow-[0_26px_58px_-40px_rgba(15,23,42,0.6)] space-y-6">
+        <div className="rounded-3xl border border-slate-200/80 bg-gradient-to-b from-white via-white to-slate-50/65 p-5 sm:p-8 shadow-[0_26px_58px_-40px_rgba(15,23,42,0.6)] space-y-6">
           <div className="flex justify-start">
             <button
               type="button"
@@ -143,8 +143,8 @@ export function AdminRenewal() {
           </div>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Renovar assinatura</h1>
-              <p className="text-gray-500 mt-1">
+              <h1 className="text-2xl sm:text-3xl font-black text-slate-900">Renovar assinatura</h1>
+              <p className="text-slate-500 mt-1">
                 Sua assinatura está {currentStatus === 'EXPIRED' ? 'expirada' : 'quase expirando'}.
               </p>
               {showTrialBadge ? (
@@ -153,31 +153,40 @@ export function AdminRenewal() {
                 </p>
               ) : null}
             </div>
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3">
+            <div className="bg-white border border-slate-200 rounded-2xl px-4 py-3 shadow-[0_14px_26px_-22px_rgba(15,23,42,0.45)]">
               <p className="text-xs text-slate-500">Expiração</p>
-              <p className="text-sm font-semibold text-slate-800">{expiresLabel}</p>
+              <p className="text-sm font-bold text-slate-800">{expiresLabel}</p>
             </div>
           </div>
 
           {error && <div className="text-sm text-red-600 bg-red-50 border border-red-100 p-3 rounded-xl">{error}</div>}
 
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-800">Escolha um plano</h3>
+          <div className="space-y-4 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
+            <h3 className="text-lg font-black text-slate-800">Escolha um plano</h3>
             <p className="text-xs text-slate-500">
               {currentTier === 'basic'
                 ? 'Seu plano atual é Basic. Você pode manter o Basic (mensal/anual) ou fazer upgrade para Pro.'
                 : 'Seu plano atual é Pro. Você pode alternar entre mensal e anual ou mudar de plano.'}
             </p>
-            <div className="flex items-center justify-center gap-4">
-              <span className={`text-sm font-semibold ${!isAnnual ? 'text-gray-900' : 'text-gray-500'}`}>Mensal</span>
+            <div className="mx-auto w-full max-w-sm rounded-full border border-slate-200 bg-slate-100 p-1 grid grid-cols-2 gap-1">
               <button
                 type="button"
-                onClick={() => setIsAnnual(!isAnnual)}
-                className={`relative inline-flex h-8 w-16 items-center rounded-full transition-colors ${isAnnual ? 'bg-red-500' : 'bg-gray-300'}`}
+                onClick={() => setIsAnnual(false)}
+                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                  !isAnnual ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                }`}
               >
-                <span className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${isAnnual ? 'translate-x-9' : 'translate-x-1'}`} />
+                Mensal
               </button>
-              <span className={`text-sm font-semibold ${isAnnual ? 'text-gray-900' : 'text-gray-500'}`}>Anual</span>
+              <button
+                type="button"
+                onClick={() => setIsAnnual(true)}
+                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                  isAnnual ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                }`}
+              >
+                Anual {billing.savings ? `· ${billing.savings}` : ''}
+              </button>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -208,12 +217,12 @@ export function AdminRenewal() {
                   className={`border rounded-2xl p-4 text-left transition-all relative ${
                       !selectedPlanId && !isSelected ? 'border-red-200 bg-red-50/40' : ''
                     } ${isSelected
-                      ? 'border-red-500 shadow-[0_22px_36px_-28px_rgba(239,68,68,0.75)] bg-red-50'
-                      : 'border-gray-200 hover:border-red-200 hover:-translate-y-0.5'
+                      ? 'border-brand-primary shadow-[0_22px_36px_-28px_rgba(14,165,233,0.72)] bg-brand-primary-soft/45'
+                      : 'border-gray-200 hover:border-brand-primary/35 hover:-translate-y-0.5'
                       } ${isDisabled ? 'opacity-60 cursor-not-allowed' : ''}`}
                   >
                     {tier.popular && (
-                      <span className="absolute -top-3 right-4 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                      <span className="absolute -top-3 right-4 bg-brand-gradient text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm">
                         MAIS POPULAR
                       </span>
                     )}
@@ -222,24 +231,24 @@ export function AdminRenewal() {
                         {billing.savings}
                       </span>
                     )}
-                    <p className="text-sm uppercase font-semibold text-gray-500">{tier.label}</p>
+                    <p className="text-sm uppercase font-semibold text-slate-500">{tier.label}</p>
                     {displayPrice === null ? (
                       <div className="mt-1">
-                        <p className="text-lg font-bold text-gray-500">Indisponível</p>
+                        <p className="text-lg font-bold text-slate-500">Indisponível</p>
                       </div>
                     ) : showPromo ? (
                       <div className="mt-1">
-                        <p className="text-xs text-gray-400 line-through">R$ {Number(full).toFixed(2)}</p>
-                        <p className="text-2xl font-bold text-gray-900">R$ {Number(displayPrice).toFixed(2)}</p>
+                        <p className="text-xs text-slate-400 line-through">R$ {Number(full).toFixed(2)}</p>
+                        <p className="text-2xl font-black text-slate-900">R$ {Number(displayPrice).toFixed(2)}</p>
                       </div>
                     ) : (
-                      <p className="text-2xl font-bold text-gray-900">R$ {Number(displayPrice).toFixed(2)}</p>
+                      <p className="text-2xl font-black text-slate-900">R$ {Number(displayPrice).toFixed(2)}</p>
                     )}
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-slate-500">
                       {displayPrice === null ? 'Entre em contato com o suporte.' : (billingKey === 'yearly' ? `${billing.period} (R$ ${Number(monthlyEq || 0).toFixed(2)}/mês)` : billing.period)}
                     </p>
-                    <p className="text-xs text-gray-500 mt-1">{durationLabel}</p>
-                    <ul className="mt-3 text-xs text-gray-600 space-y-1">
+                    <p className="text-xs text-slate-500 mt-1">{durationLabel}</p>
+                    <ul className="mt-3 text-xs text-slate-600 space-y-1">
                       {tier.features.map((feature) => (
                         <li key={feature}>✓ {feature}</li>
                       ))}
@@ -255,8 +264,8 @@ export function AdminRenewal() {
             )}
           </div>
 
-          <div className="space-y-3">
-            <h4 className="text-sm font-semibold text-gray-700">Forma de pagamento</h4>
+          <div className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
+            <h4 className="text-sm font-semibold text-slate-700">Forma de pagamento</h4>
             <div className="flex flex-wrap gap-3">
               <button
                 type="button"
@@ -309,7 +318,7 @@ export function AdminRenewal() {
               type="button"
               onClick={handleRenew}
               disabled={!selectedPlanId || isSubmitting}
-              className="w-full bg-gradient-to-r from-red-500 to-red-600 text-white py-4 rounded-xl font-semibold hover:from-red-600 hover:to-red-700 disabled:opacity-60 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl"
+              className="w-full bg-brand-gradient text-white py-4 rounded-xl font-semibold hover:opacity-95 disabled:opacity-60 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl"
             >
               {isSubmitting ? 'Gerando pagamento...' : 'Gerar renovação'}
             </button>
