@@ -15,13 +15,13 @@ interface FormSectionProps {
 
 const containerToneByVariant: Record<FormSectionVariant, string> = {
   primary:
-    'border-slate-200 bg-white shadow-[0_20px_44px_-34px_rgba(15,23,42,0.32)]',
+    'border-slate-200/90 bg-white shadow-[0_24px_50px_-34px_rgba(15,23,42,0.34)]',
   success:
-    'border-emerald-200/80 bg-[linear-gradient(165deg,rgba(240,253,244,0.92),rgba(255,255,255,0.98))] shadow-[0_20px_44px_-34px_rgba(5,150,105,0.28)]',
+    'border-emerald-200/80 bg-[linear-gradient(165deg,rgba(240,253,244,0.94),rgba(255,255,255,0.98))] shadow-[0_24px_50px_-34px_rgba(5,150,105,0.3)]',
   warning:
-    'border-amber-200/80 bg-[linear-gradient(165deg,rgba(255,251,235,0.95),rgba(255,255,255,0.98))] shadow-[0_20px_44px_-34px_rgba(217,119,6,0.28)]',
+    'border-amber-200/80 bg-[linear-gradient(165deg,rgba(255,251,235,0.96),rgba(255,255,255,0.98))] shadow-[0_24px_50px_-34px_rgba(217,119,6,0.3)]',
   neutral:
-    'border-slate-200/90 bg-slate-50/80 shadow-[0_18px_38px_-30px_rgba(15,23,42,0.24)]',
+    'border-slate-200/90 bg-slate-50/85 shadow-[0_22px_44px_-32px_rgba(15,23,42,0.26)]',
 };
 
 const titleToneByVariant: Record<FormSectionVariant, string> = {
@@ -68,14 +68,14 @@ export function FormSection({
       />
       <div className="relative mb-4 flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <h2 id={resolvedHeadingId} className={joinClasses('text-base sm:text-lg font-black leading-tight', titleToneByVariant[variant])}>
+          <h2 id={resolvedHeadingId} className={joinClasses('text-base sm:text-lg font-black leading-tight tracking-[-0.01em]', titleToneByVariant[variant])}>
             {title}
           </h2>
           {subtitle ? <p className="mt-1 text-xs sm:text-sm text-slate-600">{subtitle}</p> : null}
         </div>
         {actions ? <div className="w-full sm:w-auto shrink-0">{actions}</div> : null}
       </div>
-      {children ? <div className="relative mb-4 h-px bg-slate-200/80" /> : null}
+      {children ? <div className="relative mb-4 h-px bg-gradient-to-r from-slate-200/70 via-slate-300/70 to-slate-200/70" /> : null}
       <div className={joinClasses('relative space-y-4', contentClassName)}>{children}</div>
     </section>
   );

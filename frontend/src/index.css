@@ -636,16 +636,18 @@ body {
   .ds-admin-bg {
     min-height: 100vh;
     background:
-      radial-gradient(1000px 500px at 0% -20%, rgba(47, 157, 247, 0.12), transparent 60%),
-      radial-gradient(900px 520px at 100% 0%, rgba(16, 185, 129, 0.08), transparent 60%),
-      linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+      radial-gradient(1000px 500px at 0% -20%, rgba(47, 157, 247, 0.16), transparent 58%),
+      radial-gradient(900px 520px at 100% 0%, rgba(16, 185, 129, 0.12), transparent 58%),
+      linear-gradient(180deg, #f8fafc 0%, #edf2f9 50%, #e8eef7 100%);
   }
 
   .ds-admin-sidebar {
     border-radius: 22px;
-    border: 1px solid rgba(30, 41, 59, 0.7);
-    background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
-    box-shadow: 0 26px 52px -34px rgba(2, 6, 23, 0.8);
+    border: 1px solid rgba(51, 65, 85, 0.78);
+    background:
+      radial-gradient(120% 100% at 100% 0%, rgba(47,157,247,0.22), transparent 52%),
+      linear-gradient(180deg, #0b1324 0%, #0f172a 56%, #111827 100%);
+    box-shadow: 0 32px 60px -36px rgba(2, 6, 23, 0.86);
   }
 
   .ds-admin-sidebar-title {
@@ -663,32 +665,35 @@ body {
     font-size: 0.86rem;
     font-weight: 700;
     color: #cbd5e1;
-    transition: background-color 180ms ease, color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+    border: 1px solid transparent;
+    transition: background-color 180ms ease, color 180ms ease, transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
   }
 
   .ds-admin-sidebar-item:hover {
-    background: rgba(148, 163, 184, 0.15);
+    background: rgba(148, 163, 184, 0.16);
+    border-color: rgba(148, 163, 184, 0.22);
     color: #f8fafc;
     transform: translateY(-1px);
   }
 
   .ds-admin-sidebar-item-active {
-    background: linear-gradient(120deg, var(--color-primary) 0%, color-mix(in srgb, var(--color-secondary) 72%, #111827) 100%);
+    background: linear-gradient(120deg, var(--color-primary) 0%, color-mix(in srgb, var(--color-secondary) 76%, #111827) 100%);
+    border-color: rgba(255, 255, 255, 0.22);
     color: #fff;
-    box-shadow: 0 18px 30px -20px rgba(15, 23, 42, 0.95);
+    box-shadow: 0 20px 36px -22px rgba(15, 23, 42, 0.95);
   }
 
   .ds-metric-card {
     border-radius: 1.15rem;
     border: 1px solid rgba(226, 232, 240, 0.95);
     background: #fff;
-    box-shadow: 0 18px 42px -30px rgba(15, 23, 42, 0.38);
+    box-shadow: 0 20px 46px -30px rgba(15, 23, 42, 0.42);
     transition: transform 180ms ease, box-shadow 180ms ease;
   }
 
   .ds-metric-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 26px 50px -30px rgba(15, 23, 42, 0.5);
+    box-shadow: 0 28px 54px -30px rgba(15, 23, 42, 0.56);
   }
 
   .ds-metric-card-success {
