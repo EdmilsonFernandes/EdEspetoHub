@@ -36,6 +36,7 @@ export function AdminRenewal() {
     return null;
   }, [location.search]);
   const allowedTierKeys = useMemo(() => PLAN_TIERS.map((tier) => tier.key), []);
+  const showOnlyProUpgrade = preferredTier === 'pro' && currentTier === 'basic';
 
   useEffect(() => {
     let active = true;
@@ -175,7 +176,9 @@ export function AdminRenewal() {
           <div className="space-y-4 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
             <h3 className="text-lg font-black text-slate-800">Escolha um plano</h3>
             <p className="text-xs text-slate-500">
-              {currentTier === 'basic'
+              {showOnlyProUpgrade
+                ? 'Seu plano atual é Basic. Para liberar entregadores, faça upgrade para o plano Pro.'
+                : currentTier === 'basic'
                 ? 'Seu plano atual é Basic. Você pode manter o Basic (mensal/anual) ou fazer upgrade para Pro.'
                 : 'Seu plano atual é Pro. Você pode alternar entre mensal e anual ou mudar de plano.'}
             </p>
@@ -200,8 +203,11 @@ export function AdminRenewal() {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {PLAN_TIERS.filter((tier) => allowedTierKeys.includes(tier.key)).map((tier) => {
+            <div className={`grid grid-cols-1 ${showOnlyProUpgrade ? 'sm:grid-cols-1 max-w-md mx-auto' : 'sm:grid-cols-3'} gap-4`}>
+              {PLAN_TIERS
+                .filter((tier) => allowedTierKeys.includes(tier.key))
+                .filter((tier) => (showOnlyProUpgrade ? tier.key === 'pro' : true))
+                .map((tier) => {
                 const planKey = getPlanName(tier.key, billingKey);
                 const plan = plansByName[planKey];
                 const full = plan ? Number(plan.price) : null;
