@@ -88,6 +88,31 @@ export function MotoboyEarnings() {
     : '—';
 
   const recentTipPayouts = useMemo(() => tipPayouts.slice(0, 5), [tipPayouts]);
+  const tipsByOrderId = useMemo(() => {
+    const map = new Map<string, { tipAmount: number; tipPayoutStatus: string }>();
+    (tipPayouts || []).forEach((row: any) => {
+      const orderId = String(row?.orderId || '').trim();
+      if (!orderId) return;
+      const prev = map.get(orderId);
+      const currentAmount = Number(row?.tipAmount || 0);
+      if (!prev) {
+        map.set(orderId, {
+          tipAmount: currentAmount,
+          tipPayoutStatus: String(row?.tipPayoutStatus || 'PENDING'),
+        });
+        return;
+      }
+      map.set(orderId, {
+        tipAmount: prev.tipAmount + currentAmount,
+        tipPayoutStatus:
+          String(prev.tipPayoutStatus || '').toUpperCase() === 'PAID' &&
+          String(row?.tipPayoutStatus || '').toUpperCase() === 'PAID'
+            ? 'PAID'
+            : 'PENDING',
+      });
+    });
+    return map;
+  }, [tipPayouts]);
   const ordersPerPage = 10;
   const totalOrdersPages = Math.max(1, Math.ceil(orders.length / ordersPerPage));
   const paginatedOrders = useMemo(() => {
@@ -183,7 +208,7 @@ export function MotoboyEarnings() {
           <div>
             <p className="text-xs uppercase tracking-[0.2em] text-emerald-700">Gorjetas (30 dias)</p>
             <p className="text-2xl font-black text-emerald-700 mt-2">{toCurrency(totalTipsMonth)}</p>
-            <p className="text-xs text-emerald-700/80 mt-1">{tipPayouts.length} gorjeta(s) confirmada(s)</p>
+            <p className="text-xs text-emerald-700/80 mt-1">{tipPayouts.length} gorjeta(s) paga(s) por cliente</p>
           </div>
           <div className="h-12 w-12 rounded-2xl bg-white/80 text-emerald-700 flex items-center justify-center border border-emerald-200">
             <CurrencyCircleDollar size={22} weight="duotone" />
@@ -205,7 +230,7 @@ export function MotoboyEarnings() {
           <div>
             <p className="text-xs uppercase tracking-[0.2em] text-blue-700">Total bruto 30 dias</p>
             <p className="text-2xl font-black text-blue-700 mt-2">{toCurrency(totalGross30d)}</p>
-            <p className="text-xs text-blue-700/80 mt-1">Ticket frete médio: {toCurrency(avgDeliveryFee)}</p>
+            <p className="text-xs text-blue-700/80 mt-1">Frete + gorjetas pagas por cliente • ticket frete: {toCurrency(avgDeliveryFee)}</p>
           </div>
           <div className="h-12 w-12 rounded-2xl bg-white/85 text-blue-700 flex items-center justify-center border border-blue-200">
             <Wallet size={22} weight="duotone" />
@@ -225,6 +250,9 @@ export function MotoboyEarnings() {
               Ver tudo <ArrowRight size={14} weight="bold" />
             </button>
           </div>
+          <p className="mt-1 text-[11px] text-slate-500">
+            Mostra o total do pedido e o seu ganho real por entrega (frete + gorjeta).
+          </p>
           <div className="mt-3">
             {loading ? (
               <div className="grid gap-3">
@@ -237,11 +265,15 @@ export function MotoboyEarnings() {
               <div className="grid gap-4">
                 {paginatedOrders.map((order) => {
                   const isOpen = expanded.has(order.id);
+                  const tipInfo = tipsByOrderId.get(String(order?.id || '')) || { tipAmount: 0, tipPayoutStatus: 'PENDING' };
                   return (
                     <OrderCard
                       key={order.id}
                       order={order}
                       compact={!isOpen}
+                      showCourierEarnings
+                      tipAmount={tipInfo.tipAmount}
+                      tipPayoutStatus={tipInfo.tipPayoutStatus}
                       actions={
                         <button
                           type="button"

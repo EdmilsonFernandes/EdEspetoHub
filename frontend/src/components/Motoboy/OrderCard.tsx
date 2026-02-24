@@ -9,9 +9,12 @@ type Props = {
   order: any;
   compact?: boolean;
   actions?: React.ReactNode;
+  showCourierEarnings?: boolean;
+  tipAmount?: number;
+  tipPayoutStatus?: string;
 };
 
-export function OrderCard({ order, compact, actions }: Props) {
+export function OrderCard({ order, compact, actions, showCourierEarnings = false, tipAmount = 0, tipPayoutStatus }: Props) {
   const createdAt = order?.createdAt || order?.created_at;
   const address = formatAddress(order?.address || order?.deliveryAddress) || '-';
   const storeName = order?.store?.name || order?.storeName;
@@ -24,6 +27,9 @@ export function OrderCard({ order, compact, actions }: Props) {
   const cashTendered = cashTenderedRaw !== null && cashTenderedRaw !== undefined ? Number(cashTenderedRaw) : null;
   const totalValue = Number(order?.total || 0);
   const cashChangeDue = cashTendered !== null ? cashTendered - totalValue : null;
+  const safeTipAmount = Number(tipAmount || 0);
+  const deliveryGain = Math.max(0, Number(deliveryFee || 0)) + safeTipAmount;
+  const tipRepasseStatus = String(tipPayoutStatus || '').toUpperCase() === 'PAID' ? 'PAID' : 'PENDING';
 
   const items = useMemo(() => (Array.isArray(order?.items) ? order.items : []), [order?.items]);
   const compactItemsLabel = useMemo(() => {
@@ -101,12 +107,26 @@ export function OrderCard({ order, compact, actions }: Props) {
             )}
           </div>
           <div className="text-right">
-            <p className="text-xs text-slate-500">Total</p>
+            <p className="text-xs text-slate-500">Total do pedido</p>
             <p className="text-lg font-extrabold text-slate-900">{formatCurrency(order?.total || 0)}</p>
             {type === 'delivery' && (
               <p className="text-[11px] text-emerald-700 font-semibold">
                 Frete: {formatCurrency(Number.isFinite(Number(deliveryFee)) ? Number(deliveryFee) : 0)}
               </p>
+            )}
+            {showCourierEarnings && type === 'delivery' && (
+              <div className="mt-1.5 space-y-0.5">
+                <p className="text-[11px] text-blue-700 font-semibold">
+                  Seu ganho: {formatCurrency(deliveryGain)}
+                </p>
+                {safeTipAmount > 0 ? (
+                  <p className="text-[10px] text-slate-500">
+                    Frete + gorjeta ({tipRepasseStatus === 'PAID' ? 'repassada' : 'repasse pendente'})
+                  </p>
+                ) : (
+                  <p className="text-[10px] text-slate-500">Somente frete</p>
+                )}
+              </div>
             )}
             {isCashPayment && cashTendered !== null ? (
               <div className="mt-1 space-y-0.5">
