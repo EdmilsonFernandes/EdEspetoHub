@@ -106,13 +106,18 @@ export function OrderCard({ order, compact, actions, showCourierEarnings = false
               </div>
             )}
           </div>
-          <div className="text-right">
-            <p className="text-xs text-slate-500">Total do pedido</p>
-            <p className="text-lg font-extrabold text-slate-900">{formatCurrency(order?.total || 0)}</p>
+          <div className="text-right space-y-2">
+            <div className="rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-1.5">
+              <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500">Total do pedido</p>
+              <p className="text-lg font-extrabold text-slate-900">{formatCurrency(order?.total || 0)}</p>
+            </div>
             {type === 'delivery' && (
-              <p className="text-[11px] text-emerald-700 font-semibold">
-                Frete: {formatCurrency(Number.isFinite(Number(deliveryFee)) ? Number(deliveryFee) : 0)}
-              </p>
+              <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-2.5 py-1.5">
+                <p className="text-[10px] uppercase tracking-[0.14em] text-emerald-700">Frete da entrega</p>
+                <p className="text-base font-extrabold text-emerald-700">
+                  {formatCurrency(Number.isFinite(Number(deliveryFee)) ? Number(deliveryFee) : 0)}
+                </p>
+              </div>
             )}
             {showCourierEarnings && type === 'delivery' && (
               <div className="mt-1.5 space-y-0.5">
