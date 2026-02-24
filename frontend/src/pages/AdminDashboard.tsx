@@ -336,8 +336,9 @@ const OrdersView = ({ orders, products, storeSlug }) => {
                       return (
                         <div
                           key={item.id || item.name}
-                          className="rounded-xl border border-slate-200/80 bg-slate-50/70 p-2.5 sm:p-3 shadow-[0_8px_18px_-16px_rgba(15,23,42,0.45)]"
+                          className="relative overflow-hidden rounded-xl border border-brand-primary/20 bg-gradient-to-br from-brand-primary-soft/50 via-white to-emerald-50/40 p-2.5 sm:p-3 shadow-[0_10px_22px_-16px_rgba(14,165,233,0.45)]"
                         >
+                          <div className="pointer-events-none absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-brand-primary to-emerald-400" />
                           <div className="flex items-center justify-between gap-3">
                             <div className="flex items-center gap-3 min-w-0">
                               <div className="w-11 h-11 rounded-lg overflow-hidden border border-slate-200 bg-slate-100 flex-shrink-0">
