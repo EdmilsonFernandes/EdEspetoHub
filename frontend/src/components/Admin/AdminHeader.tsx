@@ -21,6 +21,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
   const [planDetails, setPlanDetails] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
   const [showMobileDetails, setShowMobileDetails] = useState(false);
+  const [showDesktopDetails, setShowDesktopDetails] = useState(false);
   const [compactDesktop, setCompactDesktop] = useState(false);
   const [pinExpanded, setPinExpanded] = useState(() => {
     if (typeof window === 'undefined') return false;
@@ -68,6 +69,44 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
     .map((part) => part[0]?.toUpperCase())
     .join('');
   const showDetails = !isMobile || showMobileDetails;
+  const infoChips = [
+    {
+      id: 'segment',
+      label: storeSegmentLabel,
+      icon: <Storefront size={12} weight="duotone" />,
+    },
+    ...(storeLocation
+      ? [
+          {
+            id: 'location',
+            label: storeLocation,
+            icon: <Globe size={12} weight="duotone" />,
+          },
+        ]
+      : []),
+    ...(storeSlug
+      ? [
+          {
+            id: 'storeUrl',
+            label: storeUrl.replace('https://', ''),
+            icon: <Globe size={12} weight="duotone" />,
+            href: storeUrl,
+          },
+        ]
+      : []),
+    ...(instagramHandle
+      ? [
+          {
+            id: 'instagram',
+            label: instagramHandle,
+            image: '/insta.avif',
+            href: `https://instagram.com/${instagramHandle.replace('@', '')}`,
+          },
+        ]
+      : []),
+  ];
+  const visibleDesktopChips = infoChips.slice(0, 3);
+  const hiddenDesktopChips = infoChips.slice(3);
   const headerBackgroundStyle = hasBanner
     ? {
         backgroundColor: '#0f172a',
@@ -177,6 +216,12 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
     return () => window.removeEventListener('adminHeader:toggle', handler);
   }, []);
 
+  useEffect(() => {
+    if (isMobile && showDesktopDetails) {
+      setShowDesktopDetails(false);
+    }
+  }, [isMobile, showDesktopDetails]);
+
   return (
     <header
       className="relative rounded-3xl border border-slate-200/80 shadow-[0_26px_64px_-34px_rgba(15,23,42,0.58)] overflow-visible"
@@ -212,37 +257,40 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
               </p>
             )}
             <div className={`${showMobileDetails ? 'flex' : 'hidden'} lg:flex flex-wrap items-center gap-2 text-xs ${compactDesktop ? 'lg:mt-0.5' : ''}`}>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/14 border border-white/28 opacity-95 shadow-sm">
-                <Storefront size={12} weight="duotone" />
-                <span className="truncate">{storeSegmentLabel}</span>
-              </span>
-              {storeLocation && (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/14 border border-white/28 opacity-95 shadow-sm">
-                  <Globe size={12} weight="duotone" />
-                  <span className="truncate">{storeLocation}</span>
-                </span>
+              {visibleDesktopChips.map((chip) =>
+                chip.href ? (
+                  <a
+                    key={chip.id}
+                    href={chip.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/14 border border-white/28 opacity-95 shadow-sm hover:opacity-100 hover:bg-white/22 transition"
+                  >
+                    {chip.image ? (
+                      <img src={chip.image} alt="" className="h-4 w-4 rounded-full" />
+                    ) : (
+                      chip.icon
+                    )}
+                    <span className="truncate">{chip.label}</span>
+                  </a>
+                ) : (
+                  <span
+                    key={chip.id}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/14 border border-white/28 opacity-95 shadow-sm"
+                  >
+                    {chip.icon}
+                    <span className="truncate">{chip.label}</span>
+                  </span>
+                )
               )}
-              {storeSlug && (
-                <a
-                  href={storeUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/14 border border-white/28 opacity-95 hover:opacity-100 hover:bg-white/22 transition"
+              {hiddenDesktopChips.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setShowDesktopDetails((prev) => !prev)}
+                  className="hidden lg:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 border border-white/25 text-white/90 hover:bg-white/20 transition"
                 >
-                  <Globe size={12} weight="duotone" />
-                  <span className="truncate">{storeUrl.replace('https://', '')}</span>
-                </a>
-              )}
-              {instagramHandle && (
-                <a
-                  href={`https://instagram.com/${instagramHandle.replace('@', '')}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/14 border border-white/28 opacity-95 hover:opacity-100 hover:bg-white/22 transition"
-                >
-                  <img src="/insta.avif" alt="Instagram" className="h-4 w-4 rounded-full" />
-                  <span className="truncate">{instagramHandle}</span>
-                </a>
+                  {showDesktopDetails ? 'Ocultar detalhes' : `+${hiddenDesktopChips.length} detalhes`}
+                </button>
               )}
             </div>
           </div>
@@ -290,6 +338,40 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
           )}
         </div>
       </div>
+      {showDesktopDetails && (
+        <div className="hidden lg:block px-4 pb-2">
+          <div className="rounded-2xl border border-white/20 bg-slate-950/35 backdrop-blur-[4px] p-3">
+            <div className="flex flex-wrap items-center gap-2 text-xs">
+              {infoChips.map((chip) =>
+                chip.href ? (
+                  <a
+                    key={chip.id}
+                    href={chip.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/14 border border-white/28 text-white hover:bg-white/22 transition"
+                  >
+                    {chip.image ? (
+                      <img src={chip.image} alt="" className="h-4 w-4 rounded-full" />
+                    ) : (
+                      chip.icon
+                    )}
+                    <span className="truncate">{chip.label}</span>
+                  </a>
+                ) : (
+                  <span
+                    key={chip.id}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/14 border border-white/28 text-white"
+                  >
+                    {chip.icon}
+                    <span className="truncate">{chip.label}</span>
+                  </span>
+                )
+              )}
+            </div>
+          </div>
+        </div>
+      )}
       <div className={`px-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2.5 rounded-b-3xl border-t border-white/12 transition-all duration-200 ${compactDesktop ? 'pb-2.5' : 'pb-3.5'}`}>
         {showDetails && (
           <div className="flex items-center gap-2 text-[11px] font-semibold bg-slate-950/34 border border-white/25 rounded-full px-2 py-1.5 w-fit backdrop-blur-[2px]">
