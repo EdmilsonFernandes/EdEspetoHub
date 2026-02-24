@@ -89,7 +89,7 @@ export function LandingPage() {
     <LandingPageLayout>
       <section className="relative overflow-hidden bg-[linear-gradient(145deg,#050b16_0%,#0f172a_50%,#111827_100%)]">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(47,157,247,0.24),_transparent_55%)]" />
-        <div className="max-w-6xl mx-auto px-4 py-14 sm:py-20 relative">
+        <div className="max-w-7xl mx-auto px-4 py-14 sm:py-20 lg:py-24 relative">
           <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] items-center">
             <div className="space-y-5 text-center lg:text-left">
               <span className="inline-flex items-center gap-2 rounded-full border border-sky-300/40 bg-sky-400/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-sky-200">
@@ -97,10 +97,10 @@ export function LandingPage() {
                 Plataforma SaaS profissional
               </span>
               <h1 className="text-3xl sm:text-5xl font-black text-white leading-[1.05]">
-                Já no Caminho - Plataforma completa para gestão de pedidos e entregas
+                Já no Caminho, a plataforma empresarial para pedidos e entregas
               </h1>
               <p className="text-sm sm:text-lg text-slate-200 max-w-2xl mx-auto lg:mx-0">
-                Centralize pedidos online, organize sua operação e aumente suas vendas com um sistema moderno e inteligente.
+                Centralize canais de venda, organize operação em tempo real e escale com governança, previsibilidade e foco em resultado.
               </p>
               <div className="flex flex-wrap gap-2 justify-center lg:justify-start">
                 {trustBadges.map((badge) => (
@@ -159,7 +159,7 @@ export function LandingPage() {
       </section>
 
       <section className="bg-white py-14 sm:py-16">
-        <div className="max-w-6xl mx-auto px-4">
+        <div className="max-w-7xl mx-auto px-4">
           <div className="mb-8 rounded-2xl border border-slate-200 bg-[linear-gradient(120deg,#f8fafc,#f1f5f9)] p-4 sm:p-5">
             <p className="text-xs uppercase tracking-[0.3em] text-slate-500 font-semibold">Padrão empresarial</p>
             <div className="mt-3 grid gap-3 sm:grid-cols-3">
@@ -180,6 +180,9 @@ export function LandingPage() {
           <div className="text-center mb-8 sm:mb-10">
             <p className="text-xs uppercase tracking-[0.3em] text-sky-700 font-semibold">Como funciona</p>
             <h2 className="text-2xl sm:text-4xl font-black text-slate-900 mt-2">Fluxo simples para vender todos os dias</h2>
+            <p className="mt-2 text-sm text-slate-500 max-w-2xl mx-auto">
+              Um processo claro, auditável e padronizado para qualquer operação comercial.
+            </p>
           </div>
           <div className="grid gap-4 sm:gap-5 md:grid-cols-3">
             {[
@@ -215,7 +218,7 @@ export function LandingPage() {
       </section>
 
       <section className="bg-slate-50 py-14 sm:py-16">
-        <div className="max-w-6xl mx-auto px-4 space-y-10">
+        <div className="max-w-7xl mx-auto px-4 space-y-10">
           <div>
             <p className="text-xs uppercase tracking-[0.3em] text-sky-700 font-semibold">Benefícios</p>
             <h2 className="text-2xl sm:text-4xl font-black text-slate-900 mt-2">Valor direto para o seu negócio</h2>
@@ -237,6 +240,9 @@ export function LandingPage() {
           <div>
             <p className="text-xs uppercase tracking-[0.3em] text-sky-700 font-semibold">Segmentos atendidos</p>
             <h2 className="text-2xl sm:text-4xl font-black text-slate-900 mt-2">Pronto para diferentes operações</h2>
+            <p className="mt-2 text-sm text-slate-500 max-w-2xl">
+              Arquitetura flexível para restaurantes, varejo local, conveniência, farmácia, adega e novos formatos.
+            </p>
             <div className="mt-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
               {[
                 { label: 'Restaurantes', icon: Storefront },
@@ -261,9 +267,12 @@ export function LandingPage() {
       </section>
 
       <section className="bg-white py-14 sm:py-16">
-        <div className="max-w-6xl mx-auto px-4">
+        <div className="max-w-7xl mx-auto px-4">
           <p className="text-xs uppercase tracking-[0.3em] text-sky-700 font-semibold">Prova visual</p>
           <h2 className="text-2xl sm:text-4xl font-black text-slate-900 mt-2">Painel administrativo em operação real</h2>
+          <p className="mt-2 text-sm text-slate-500 max-w-2xl">
+            Interface projetada para decisão rápida, execução diária e escala operacional.
+          </p>
           <div className="mt-6 grid gap-4 md:grid-cols-3">
             {proofVisuals.map((item) => (
               <button
@@ -302,13 +311,13 @@ export function LandingPage() {
       )}
 
       <section className="bg-[linear-gradient(120deg,#0f172a,#1e293b)] py-14 sm:py-16">
-        <div className="max-w-6xl mx-auto px-4">
+        <div className="max-w-7xl mx-auto px-4">
           <div className="rounded-3xl border border-white/15 bg-white/5 p-7 sm:p-10 text-white flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div>
               <p className="text-xs uppercase tracking-[0.3em] text-sky-200 font-semibold">Próximo passo</p>
-              <h2 className="text-2xl sm:text-4xl font-black mt-2">Leve sua operação para padrão de empresa vencedora</h2>
+              <h2 className="text-2xl sm:text-4xl font-black mt-2">Transforme sua operação em um padrão de alta performance</h2>
               <p className="text-sm text-slate-200 mt-2 max-w-2xl">
-                Estruture pedidos, produção e entrega em um único fluxo profissional, com desempenho mobile e gestão em tempo real.
+                Estruture pedidos, produção e entrega em um único fluxo profissional, com experiência mobile, dados confiáveis e gestão em tempo real.
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3">
