@@ -106,19 +106,18 @@ export function OrderCard({ order, compact, actions, showCourierEarnings = false
               </div>
             )}
           </div>
-          <div className="text-right space-y-2">
-            <div className="rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-1.5">
-              <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500">Total do pedido</p>
-              <p className="text-lg font-extrabold text-slate-900">{formatCurrency(order?.total || 0)}</p>
+          <div className="text-right min-w-0 max-w-[220px]">
+            <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500 mb-1">Valores</p>
+            <div className="flex flex-wrap justify-end gap-1.5">
+              <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
+                Pedido: <strong className="ml-1 text-slate-900">{formatCurrency(order?.total || 0)}</strong>
+              </span>
+              {type === 'delivery' && (
+                <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">
+                  Frete: <strong className="ml-1">{formatCurrency(Number.isFinite(Number(deliveryFee)) ? Number(deliveryFee) : 0)}</strong>
+                </span>
+              )}
             </div>
-            {type === 'delivery' && (
-              <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-2.5 py-1.5">
-                <p className="text-[10px] uppercase tracking-[0.14em] text-emerald-700">Frete da entrega</p>
-                <p className="text-base font-extrabold text-emerald-700">
-                  {formatCurrency(Number.isFinite(Number(deliveryFee)) ? Number(deliveryFee) : 0)}
-                </p>
-              </div>
-            )}
             {showCourierEarnings && type === 'delivery' && (
               <div className="mt-1.5 space-y-0.5">
                 <p className="text-[11px] text-blue-700 font-semibold">
