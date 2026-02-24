@@ -246,7 +246,11 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
       <div className="pointer-events-none absolute top-0 left-8 right-8 h-0.5 rounded-full bg-white/40" />
       <div className="pointer-events-none absolute inset-0 rounded-3xl ring-1 ring-inset ring-white/12" />
       <div className={`md:hidden px-3 transition-all duration-200 ${mobileCompact ? 'py-2 space-y-2' : 'py-3 space-y-2.5'}`}>
-        <div className={`flex items-center gap-2.5 rounded-2xl border border-white/20 bg-slate-950/34 px-2.5 backdrop-blur-[4px] transition-all duration-200 ${mobileCompact ? 'py-1.5' : 'py-2'}`}>
+        <button
+          type="button"
+          onClick={() => setShowMobileDetails(true)}
+          className={`w-full flex items-center gap-2.5 rounded-2xl border border-white/20 bg-slate-950/34 px-2.5 backdrop-blur-[4px] transition-all duration-200 text-left ${mobileCompact ? 'py-1.5' : 'py-2'}`}
+        >
           <div className={`${mobileCompact ? 'w-9 h-9 rounded-lg' : 'w-11 h-11 rounded-xl'} bg-white/90 ring-1 ring-white/80 overflow-hidden flex items-center justify-center shadow-[0_14px_28px_-18px_rgba(0,0,0,0.55)] transition-all duration-200`}>
             {branding?.logoUrl ? (
               <img src={branding.logoUrl} alt={storeName} className="w-full h-full object-contain p-1" />
@@ -261,50 +265,27 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
               {storeSegmentLabel}{storeLocation ? ` • ${storeLocation}` : ''}
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => setShowMobileDetails(true)}
-            className="px-2.5 py-1.5 rounded-full text-[11px] font-semibold bg-white/15 border border-white/25 text-white hover:bg-white/25 transition"
-          >
-            Detalhes
-          </button>
-        </div>
-
-        <div className={`flex items-center justify-between gap-2 rounded-2xl border border-white/20 bg-slate-950/34 px-2.5 py-2 backdrop-blur-[4px] transition-all duration-200 ${mobileCompact ? 'py-1.5' : ''}`}>
-          <div className="min-w-0">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-white/70">Plano</p>
-            <p className="text-xs font-semibold text-white truncate">Gestão de assinatura</p>
+          <div className="shrink-0">
+            <PlanBadge
+              planName={planDetails?.planName}
+              displayName={planDetails?.displayName}
+              variant="dark"
+              details={planDetails}
+            />
           </div>
-          <PlanBadge
-            planName={planDetails?.planName}
-            displayName={planDetails?.displayName}
-            variant="dark"
-            details={planDetails}
-          />
-        </div>
+        </button>
 
         <div className={`flex items-center justify-between gap-2 rounded-2xl border border-white/20 bg-slate-950/30 px-2.5 transition-all duration-200 ${mobileCompact ? 'py-1.5' : 'py-2'}`}>
           {onToggleHeader && (
-            <div className="flex items-center rounded-full bg-white/12 border border-white/25 p-0.5 text-[11px] font-semibold">
-              <button
-                type="button"
-                className="px-2.5 py-1.5 rounded-full bg-white/20 text-white shadow-sm"
-                onClick={() => {
-                  window.dispatchEvent(new CustomEvent('adminHeader:set', { detail: { visible: true } }));
-                }}
-              >
-                Painel
-              </button>
-              <button
-                type="button"
-                className="px-2.5 py-1.5 rounded-full text-white/85 hover:text-white hover:bg-white/15 transition"
-                onClick={() => {
-                  window.dispatchEvent(new CustomEvent('adminHeader:set', { detail: { visible: false } }));
-                }}
-              >
-                Foco
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => {
+                window.dispatchEvent(new CustomEvent('adminHeader:set', { detail: { visible: false } }));
+              }}
+              className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-full bg-white/15 hover:bg-white/25 border border-white/20 text-[11px] font-semibold text-white"
+            >
+              Modo foco
+            </button>
           )}
           <button
             onClick={() => {
