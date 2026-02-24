@@ -163,7 +163,8 @@ export class StoreController {
       const entries = await Promise.all(
         stores.map(async (store) => {
           const subscription = await subscriptionService.getCurrentByStore(store.id);
-          const isActive = subscriptionService.isActiveSubscription(subscription);
+          const isVip = Boolean(store?.settings?.planExempt);
+          const isActive = isVip || subscriptionService.isActiveSubscription(subscription);
           if (!isActive) return null;
           return {
             id: store.id,
