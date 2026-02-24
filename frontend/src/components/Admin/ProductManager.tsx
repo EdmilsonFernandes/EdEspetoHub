@@ -455,27 +455,31 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
 
   return (
     <div className="space-y-6">
-      <div ref={formRef} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-        <div className="flex flex-wrap items-start justify-between gap-3 mb-6">
+      <div
+        ref={formRef}
+        className="overflow-hidden rounded-3xl border border-slate-200/90 bg-gradient-to-b from-white via-white to-slate-50/70 p-5 sm:p-6 shadow-[0_18px_40px_-28px_rgba(15,23,42,0.45)]"
+      >
+        <div className="mb-6 flex flex-wrap items-start justify-between gap-3 border-b border-slate-100 pb-4">
           <div>
-            <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+            <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">
               <Plus size={20} weight="duotone" className="text-brand-primary" />
               Cadastro de produto
             </h3>
-            <p className="text-xs text-slate-500 mt-1">Cadastre itens da vitrine com foto, preço e categoria.</p>
+            <p className="mt-1 text-xs text-slate-500">Cadastre itens da vitrine com foto, preço e categoria.</p>
           </div>
-          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-brand-primary-soft text-brand-primary">
+          <span className="px-3 py-1 rounded-full text-xs font-semibold border border-brand-primary/25 bg-brand-primary-soft text-brand-primary">
             Novo item
           </span>
         </div>
 
         <div className="grid gap-6">
           <form onSubmit={handleSubmit} className="space-y-4 w-full">
+          <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 sm:p-5">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">Nome do Produto</label>
               <input
-                className="p-3 border border-gray-200 rounded-lg w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+                className="p-3 border border-gray-200 rounded-xl w-full bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
                 placeholder="Ex: Espeto de Carne"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -486,7 +490,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">Preço</label>
               <input
-                className="p-3 border border-gray-200 rounded-lg w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+                className="p-3 border border-gray-200 rounded-xl w-full bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
                 placeholder="Ex: 10.50"
                 type="number"
                 step="0.01"
@@ -496,12 +500,14 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
               />
             </div>
           </div>
+          </div>
 
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">Preço promocional (opcional)</label>
               <input
-                className="p-3 border border-gray-200 rounded-lg w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+                className="p-3 border border-gray-200 rounded-xl w-full bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
                 placeholder="Ex: 8.90"
                 type="number"
                 step="0.01"
@@ -531,8 +537,9 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
               </div>
             </div>
           </div>
+          </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2 rounded-2xl border border-slate-200 bg-slate-50/60 p-4 sm:p-5">
             <label className="text-sm font-medium text-gray-700">Categoria</label>
             <div className="flex flex-wrap gap-2">
               {categoryOptions.map((option) => {
@@ -548,7 +555,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                       setShowCustomInput(false);
                       setFormData({ ...formData, category: option.id });
                     }}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-lg font-medium text-sm transition-all hover:-translate-y-0.5 active:scale-95 ${
+                  className={`flex items-center gap-2 px-3 py-2 rounded-xl font-medium text-sm transition-all hover:-translate-y-0.5 active:scale-95 ${
                       isSelected
                         ? 'bg-brand-primary text-white shadow-md'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -569,7 +576,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                     setFormData({ ...formData, category: defaultCategoryId });
                   }
                 }}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg font-medium text-sm transition-all hover:-translate-y-0.5 active:scale-95 border-2 ${
+                className={`flex items-center gap-2 px-3 py-2 rounded-xl font-medium text-sm transition-all hover:-translate-y-0.5 active:scale-95 border-2 ${
                   showCustomInput
                     ? 'border-brand-primary bg-brand-primary-soft text-brand-primary'
                     : 'border-gray-300 border-dashed text-gray-600 hover:border-brand-primary hover:text-brand-primary'
@@ -581,7 +588,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
             </div>
             {showCustomInput && (
               <input
-                className="p-3 border border-gray-200 rounded-lg w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent mt-3"
+                className="mt-3 p-3 border border-gray-200 rounded-xl w-full bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
                 placeholder="Digite o nome da nova categoria"
                 value={customCategory}
                 onChange={(e) => {
@@ -594,7 +601,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
             )}
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
             <label className="text-sm font-medium text-gray-700">Imagem do Produto</label>
 
             {/* Toggle buttons */}
@@ -698,7 +705,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
             )}
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
             <label className="text-sm font-medium text-gray-700">Descrição (opcional)</label>
             <textarea
               className="p-3 border border-gray-200 rounded-lg w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent"
@@ -708,7 +715,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             />
           </div>
-          <div className="space-y-3 rounded-2xl border border-dashed border-brand-primary/30 bg-brand-primary-soft/20 p-3 sm:p-4">
+          <div className="space-y-3 rounded-2xl border border-dashed border-brand-primary/30 bg-brand-primary-soft/20 p-4 sm:p-5">
             <div className="flex items-center justify-between gap-2">
               <label className="text-sm font-semibold text-slate-800">Adicionais (opcional)</label>
               <span className="px-2 py-0.5 rounded-full bg-white border border-slate-200 text-[11px] font-semibold text-slate-600">
@@ -778,7 +785,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
               </div>
             )}
           </div>
-          <div className="space-y-2">
+          <div className="space-y-2 rounded-2xl border border-slate-200 bg-slate-50/70 p-4 sm:p-5">
             <label className="text-sm font-medium text-gray-700">Dias de exibição</label>
             <div className="grid grid-cols-7 gap-2">
               {WEEK_DAYS.map((day) => (
@@ -812,7 +819,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
               Se nenhum dia for marcado, o produto aparece todos os dias.
             </p>
           </div>
-          <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+          <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 sm:px-5">
             <div>
               <p className="text-sm font-semibold text-slate-800">Promoção do dia</p>
               <p className="text-xs text-slate-500">Destaque este produto no topo da vitrine.</p>
@@ -833,7 +840,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
           <div className="flex gap-3 pt-2">
             <button
               type="submit"
-              className="bg-brand-primary text-white px-6 py-3 rounded-lg font-semibold flex-1 flex justify-center items-center gap-2 hover:bg-brand-primary/90 transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-60"
+              className="bg-brand-gradient text-white px-6 py-3 rounded-xl font-semibold flex-1 flex justify-center items-center gap-2 hover:opacity-95 transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-60 shadow-[0_14px_28px_-18px_rgba(59,130,246,0.8)]"
               disabled={saving}
             >
               <FloppyDisk size={18} weight="duotone" />
@@ -842,7 +849,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
             <button
               type="button"
               onClick={resetForm}
-              className="bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-all hover:-translate-y-0.5 active:scale-95"
+              className="bg-white border border-slate-200 text-gray-700 px-6 py-3 rounded-xl font-semibold hover:bg-slate-50 transition-all hover:-translate-y-0.5 active:scale-95"
             >
               Limpar
             </button>
@@ -852,8 +859,8 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="flex flex-wrap items-center gap-2 px-4 py-3 border-b border-slate-100 bg-slate-50">
+      <div className="overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-[0_16px_34px_-26px_rgba(15,23,42,0.45)]">
+        <div className="flex flex-wrap items-center gap-2 px-4 py-3 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white">
           {categoryTabs.map((tab) => (
             <button
               key={tab.id}
@@ -864,7 +871,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
               }}
               className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all hover:-translate-y-0.5 active:scale-95 ${
                 categoryFilter === tab.id
-                  ? 'bg-brand-primary text-white border-brand-primary'
+                  ? 'bg-brand-gradient text-white border-transparent shadow-[0_12px_24px_-18px_rgba(59,130,246,0.9)]'
                   : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
               }`}
             >
@@ -876,7 +883,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
           {pagedProducts.map((product) => (
             <div
               key={product.id}
-              className={`rounded-2xl border border-slate-200 ${resolveCategoryAccent(product.category)} border-l-4 bg-white p-4 shadow-sm`}
+              className={`rounded-2xl border border-slate-200 ${resolveCategoryAccent(product.category)} border-l-4 bg-gradient-to-br from-white via-white to-slate-50/60 p-4 shadow-[0_12px_24px_-18px_rgba(15,23,42,0.38)]`}
             >
               <div className="flex items-start gap-3">
                 {product.imageUrl ? (
@@ -978,22 +985,22 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
 
         <div className="hidden sm:block overflow-x-auto">
         <table className="w-full text-left min-w-[680px]">
-          <thead className="bg-gray-50 border-b">
+          <thead className="bg-slate-50/90 border-b border-slate-200">
             <tr>
-              <th className="p-4 font-bold text-gray-600">Foto</th>
-              <th className="p-4 font-bold text-gray-600">Nome</th>
-              <th className="p-4 font-bold text-gray-600">Categoria</th>
-              <th className="p-4 font-bold text-gray-600">Preço</th>
-              <th className="p-4 font-bold text-gray-600">Status</th>
-              <th className="p-4 font-bold text-gray-600">Dias</th>
-              <th className="p-4 font-bold text-gray-600 text-right">Ações</th>
+              <th className="p-4 text-[11px] uppercase tracking-[0.18em] font-bold text-slate-500">Foto</th>
+              <th className="p-4 text-[11px] uppercase tracking-[0.18em] font-bold text-slate-500">Nome</th>
+              <th className="p-4 text-[11px] uppercase tracking-[0.18em] font-bold text-slate-500">Categoria</th>
+              <th className="p-4 text-[11px] uppercase tracking-[0.18em] font-bold text-slate-500">Preço</th>
+              <th className="p-4 text-[11px] uppercase tracking-[0.18em] font-bold text-slate-500">Status</th>
+              <th className="p-4 text-[11px] uppercase tracking-[0.18em] font-bold text-slate-500">Dias</th>
+              <th className="p-4 text-[11px] uppercase tracking-[0.18em] font-bold text-slate-500 text-right">Ações</th>
             </tr>
           </thead>
-          <tbody className="divide-y">
+          <tbody className="divide-y divide-slate-100">
             {pagedProducts.map((product) => (
               <React.Fragment key={product.id}>
               <tr
-                className={`hover:bg-gray-50 ${
+                className={`hover:bg-slate-50/75 transition-colors ${
                   inlineEditId === product.id ? 'bg-amber-50/60' : ''
                 } ${product.active === false ? 'opacity-70' : ''}`}
               >
