@@ -12,6 +12,7 @@ const toCurrency = (value: number) =>
 export function MotoboyEarnings() {
   const [orders, setOrders] = useState<any[]>([]);
   const [tipPayouts, setTipPayouts] = useState<any[]>([]);
+  const [earningsToday, setEarningsToday] = useState<{ total: number; count: number }>({ total: 0, count: 0 });
   const [loading, setLoading] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
   const [blocked, setBlocked] = useState(false);
@@ -24,12 +25,17 @@ export function MotoboyEarnings() {
   const load = async () => {
     try {
       setLoading(true);
-      const [historyData, tipData] = await Promise.all([
+      const [historyData, tipData, todayData] = await Promise.all([
         motoboyService.listHistory(30),
         motoboyService.listTipPayouts(300).catch(() => []),
+        motoboyService.getEarningsToday().catch(() => ({ total: 0, count: 0 })),
       ]);
       setOrders(Array.isArray(historyData) ? historyData : []);
       setTipPayouts(Array.isArray(tipData) ? tipData : []);
+      setEarningsToday({
+        total: Number(todayData?.total || 0),
+        count: Number(todayData?.count || 0),
+      });
       setBlocked(false);
       setLastUpdatedAt(Date.now());
     } catch (error: any) {
@@ -37,6 +43,7 @@ export function MotoboyEarnings() {
         setBlocked(true);
         setOrders([]);
         setTipPayouts([]);
+        setEarningsToday({ total: 0, count: 0 });
       } else {
         showToast(error?.message || 'Não foi possível carregar ganhos.', 'error');
       }
@@ -62,23 +69,21 @@ export function MotoboyEarnings() {
     void loadRequests();
   }, []);
 
-  const todayKey = new Date().toDateString();
-  const deliveriesToday = useMemo(
-    () =>
-      orders.filter((order) => {
-        const createdAt = order.createdAt ? new Date(order.createdAt).toDateString() : '';
-        return createdAt === todayKey;
-      }),
-    [orders, todayKey]
-  );
-
-  const totalToday = deliveriesToday.reduce((acc, order) => acc + Number(order.deliveryFee || 0), 0);
+  const totalToday = Number(earningsToday?.total || 0);
+  const deliveriesTodayCount = Number(earningsToday?.count || 0);
   const totalMonth = orders.reduce((acc, order) => acc + Number(order.deliveryFee || 0), 0);
+  const deliveredOrdersValue30d = orders.reduce((acc, order) => acc + Number(order.total || 0), 0);
   const avgDeliveryFee = orders.length > 0 ? totalMonth / orders.length : 0;
 
-  const tipRowsPaid = tipPayouts.filter((row) => String(row?.tipPayoutStatus || '').toUpperCase() === 'PAID');
-  const tipRowsPending = tipPayouts.filter((row) => String(row?.tipPayoutStatus || '').toUpperCase() !== 'PAID');
-  const totalTipsMonth = tipPayouts.reduce((acc, row) => acc + Number(row?.tipAmount || 0), 0);
+  const tipsCutoffMs = Date.now() - 30 * 24 * 60 * 60 * 1000;
+  const tipRows30d = tipPayouts.filter((row) => {
+    const dt = row?.tipPaidAt || row?.createdAt;
+    if (!dt) return false;
+    return new Date(dt).getTime() >= tipsCutoffMs;
+  });
+  const tipRowsPaid = tipRows30d.filter((row) => String(row?.tipPayoutStatus || '').toUpperCase() === 'PAID');
+  const tipRowsPending = tipRows30d.filter((row) => String(row?.tipPayoutStatus || '').toUpperCase() !== 'PAID');
+  const totalTipsMonth = tipRows30d.reduce((acc, row) => acc + Number(row?.tipAmount || 0), 0);
   const totalTipsPending = tipRowsPending.reduce((acc, row) => acc + Number(row?.tipAmount || 0), 0);
   const totalTipsPaid = tipRowsPaid.reduce((acc, row) => acc + Number(row?.tipAmount || 0), 0);
 
@@ -181,12 +186,12 @@ export function MotoboyEarnings() {
         </div>
       </section>
 
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
         <article className="rounded-2xl border border-slate-200 bg-white p-4 flex items-center justify-between">
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Total do dia</p>
+            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Seu ganho hoje</p>
             <p className="text-2xl font-black text-emerald-600 mt-2">{toCurrency(totalToday)}</p>
-            <p className="text-xs text-slate-500 mt-1">{deliveriesToday.length} entrega(s) hoje</p>
+            <p className="text-xs text-slate-500 mt-1">{deliveriesTodayCount} entrega(s) concluída(s) hoje</p>
           </div>
           <div className="h-12 w-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-200">
             <Wallet size={22} weight="duotone" />
@@ -195,9 +200,9 @@ export function MotoboyEarnings() {
 
         <article className="rounded-2xl border border-slate-200 bg-white p-4 flex items-center justify-between">
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Frete 30 dias</p>
+            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Frete (30 dias)</p>
             <p className="text-2xl font-black text-slate-800 mt-2">{toCurrency(totalMonth)}</p>
-            <p className="text-xs text-slate-500 mt-1">{orders.length} entrega(s) concluída(s)</p>
+            <p className="text-xs text-slate-500 mt-1">{orders.length} entrega(s) concluída(s) no período</p>
           </div>
           <div className="h-12 w-12 rounded-2xl bg-slate-100 text-slate-700 flex items-center justify-center border border-slate-200">
             <ChartLineUp size={22} weight="duotone" />
@@ -208,7 +213,7 @@ export function MotoboyEarnings() {
           <div>
             <p className="text-xs uppercase tracking-[0.2em] text-emerald-700">Gorjetas (30 dias)</p>
             <p className="text-2xl font-black text-emerald-700 mt-2">{toCurrency(totalTipsMonth)}</p>
-            <p className="text-xs text-emerald-700/80 mt-1">{tipPayouts.length} gorjeta(s) paga(s) por cliente</p>
+            <p className="text-xs text-emerald-700/80 mt-1">{tipRows30d.length} gorjeta(s) paga(s) por cliente</p>
           </div>
           <div className="h-12 w-12 rounded-2xl bg-white/80 text-emerald-700 flex items-center justify-center border border-emerald-200">
             <CurrencyCircleDollar size={22} weight="duotone" />
@@ -228,12 +233,23 @@ export function MotoboyEarnings() {
 
         <article className="rounded-2xl border border-blue-200 bg-blue-50 p-4 flex items-center justify-between">
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-blue-700">Total bruto 30 dias</p>
+            <p className="text-xs uppercase tracking-[0.2em] text-blue-700">Seu ganho total (30 dias)</p>
             <p className="text-2xl font-black text-blue-700 mt-2">{toCurrency(totalGross30d)}</p>
-            <p className="text-xs text-blue-700/80 mt-1">Frete + gorjetas pagas por cliente • ticket frete: {toCurrency(avgDeliveryFee)}</p>
+            <p className="text-xs text-blue-700/80 mt-1">Frete + gorjetas pagas pelo cliente • ticket frete: {toCurrency(avgDeliveryFee)}</p>
           </div>
           <div className="h-12 w-12 rounded-2xl bg-white/85 text-blue-700 flex items-center justify-center border border-blue-200">
             <Wallet size={22} weight="duotone" />
+          </div>
+        </article>
+
+        <article className="rounded-2xl border border-violet-200 bg-violet-50 p-4 flex items-center justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-violet-700">Valor dos pedidos (30 dias)</p>
+            <p className="text-2xl font-black text-violet-700 mt-2">{toCurrency(deliveredOrdersValue30d)}</p>
+            <p className="text-xs text-violet-700/80 mt-1">Informativo da loja • não é seu ganho</p>
+          </div>
+          <div className="h-12 w-12 rounded-2xl bg-white/85 text-violet-700 flex items-center justify-center border border-violet-200">
+            <ChartLineUp size={22} weight="duotone" />
           </div>
         </article>
       </section>
