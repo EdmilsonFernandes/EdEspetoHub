@@ -540,15 +540,15 @@ export const DashboardView = ({
           return (
             <div key={card.id} className={`ds-metric-card ${card.tone} p-5`}>
               <div className="relative">
-                <div className="min-w-0 pr-14">
+                <div className="min-w-0 pr-16 lg:pr-14">
                   <p className="text-[10px] uppercase tracking-[0.24em] text-slate-500 font-bold">{card.label}</p>
-                  <h3 className="mt-1 whitespace-nowrap leading-tight font-black tracking-tight text-slate-900 text-[clamp(1.35rem,2.05vw,1.8rem)]">
+                  <h3 className="mt-1 whitespace-nowrap leading-tight font-black tracking-tight text-slate-900 text-[clamp(1.22rem,1.65vw,1.7rem)] lg:text-[clamp(1.15rem,1.25vw,1.52rem)]">
                     {card.value}
                   </h3>
                   <p className="text-xs text-slate-500 mt-1">{card.helper}</p>
                 </div>
-                <span className={`absolute top-0 right-0 h-11 w-11 rounded-xl border flex items-center justify-center shrink-0 ${card.iconTone}`}>
-                  <Icon size={20} weight="duotone" />
+                <span className={`absolute top-0.5 right-0.5 h-9 w-9 lg:h-8 lg:w-8 rounded-xl border flex items-center justify-center shrink-0 ${card.iconTone}`}>
+                  <Icon size={16} weight="duotone" />
                 </span>
               </div>
               {card.monthSelector && (
