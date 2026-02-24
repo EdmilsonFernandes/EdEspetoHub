@@ -34,11 +34,17 @@ export function OrderCard({ order, compact, actions, showCourierEarnings = false
   const items = useMemo(() => (Array.isArray(order?.items) ? order.items : []), [order?.items]);
   const compactItemsLabel = useMemo(() => {
     if (!items.length) return '';
-    return items
-      .slice(0, 2)
-      .map((it: any) => `${it.quantity || 1}x ${it.name || it?.product?.name || 'Item'}`)
-      .join(' • ');
+    const first = items[0];
+    const firstLabel = `${first?.quantity || 1}x ${first?.name || first?.product?.name || 'Item'}`;
+    const remaining = items.length - 1;
+    return remaining > 0 ? `${firstLabel} +${remaining} item(ns)` : firstLabel;
   }, [items]);
+  const compactAddress = useMemo(() => {
+    const raw = String(address || '').trim();
+    if (!raw) return '-';
+    if (raw.length <= 64) return raw;
+    return `${raw.slice(0, 64)}...`;
+  }, [address]);
   const shortId = order?.shortId || (order?.id ? String(order.id).slice(0, 8) : '-');
   const customerName = order?.customerName || order?.customer_name || 'Cliente';
   const phone = order?.phone || null;
@@ -97,11 +103,11 @@ export function OrderCard({ order, compact, actions, showCourierEarnings = false
             )}
             {compact && (
               <div className="mt-2 space-y-1">
-                <p className="text-[11px] text-slate-600 break-words">
+                <p className="text-[11px] text-slate-600 truncate">
                   <span className="font-semibold text-slate-700">Loja:</span> {storeName || storeSlug || 'Loja'}
                 </p>
-                <p className="text-[11px] text-slate-600 break-words">
-                  <span className="font-semibold text-slate-700">Entrega:</span> {address}
+                <p className="text-[11px] text-slate-600 truncate">
+                  <span className="font-semibold text-slate-700">Entrega:</span> {compactAddress}
                 </p>
               </div>
             )}
