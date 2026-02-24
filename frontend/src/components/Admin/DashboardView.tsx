@@ -1,6 +1,6 @@
 ﻿// @ts-nocheck
 import React, { useEffect, useMemo, useState } from "react";
-import { Package, CurrencyDollar, CheckCircle, CircleDashed, LinkSimple, CalendarBlank, TrendUp } from "@phosphor-icons/react";
+import { Package, CurrencyDollar, CheckCircle, CircleDashed, LinkSimple, CalendarBlank, TrendUp, CaretDown } from "@phosphor-icons/react";
 import {
   BarChart,
   Bar,
@@ -27,6 +27,7 @@ export const DashboardView = ({
 }) => {
   const [qrCopied, setQrCopied] = useState(false);
   const [showUtm, setShowUtm] = useState(false);
+  const [showChecklistDetails, setShowChecklistDetails] = useState(false);
   const utmStorageKey = useMemo(() => (storeUrl ? `utm:store:${storeUrl}` : "utm:store"), [storeUrl]);
   const [utmSource, setUtmSource] = useState("instagram");
   const [utmMedium, setUtmMedium] = useState("bio");
@@ -55,6 +56,9 @@ export const DashboardView = ({
     }
   });
   const periodLabel = periodDays === "all" ? "Todo período" : `${periodDays} dias`;
+  const checklistDoneCount = setupChecklist.filter((item) => item.done).length;
+  const checklistPendingCount = Math.max(0, setupChecklist.length - checklistDoneCount);
+  const checklistProgress = setupChecklist.length === 0 ? 0 : Math.round((checklistDoneCount / setupChecklist.length) * 100);
   const linkStatsLabel = linkStats?.days ? `${linkStats.days} dias` : "7 dias";
   const linkStatsTotal = linkStats?.total ?? 0;
   const linkStatsSource = linkStats?.topSource || "direto";
@@ -82,6 +86,11 @@ export const DashboardView = ({
     const query = params.toString();
     return query ? `${storeUrl}?${query}` : storeUrl;
   }, [storeUrl, utmSource, utmMedium, utmCampaign]);
+
+  useEffect(() => {
+    if (!setupChecklist.length) return;
+    setShowChecklistDetails(checklistPendingCount > 0);
+  }, [setupChecklist.length, checklistPendingCount]);
 
   useEffect(() => {
     if (!storeUrl) return;
@@ -431,8 +440,13 @@ export const DashboardView = ({
               </div>
             </div>
             <div className="flex flex-col items-start lg:items-end gap-3">
-              <div className="text-xs text-slate-500">
-                {setupChecklist.filter((item) => item.done).length} de {setupChecklist.length} completos
+              <div className="flex flex-wrap items-center gap-2 text-xs">
+                <span className="px-2.5 py-1 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700 font-semibold">
+                  {checklistDoneCount} concluído(s)
+                </span>
+                <span className={`px-2.5 py-1 rounded-full border font-semibold ${checklistPendingCount > 0 ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-slate-200 bg-slate-50 text-slate-600'}`}>
+                  {checklistPendingCount} pendente(s)
+                </span>
               </div>
               {storeUrl && (
                 <a
@@ -449,42 +463,53 @@ export const DashboardView = ({
           <div className="mt-5 h-2.5 rounded-full bg-slate-100 overflow-hidden">
             <div
               className="h-full bg-brand-primary"
-              style={{
-                width: `${
-                  setupChecklist.length === 0
-                    ? 0
-                    : Math.round((setupChecklist.filter((item) => item.done).length / setupChecklist.length) * 100)
-                }%`,
-              }}
+              style={{ width: `${checklistProgress}%` }}
             />
           </div>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            {setupChecklist.map((item) => (
-              <div
-                key={item.id}
-                className={`flex items-center justify-between gap-3 rounded-xl border px-3 py-2 ${
-                  item.done ? "border-emerald-200 bg-emerald-50/50" : "border-slate-200 bg-white"
-                }`}
-              >
-                <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-                  {item.done ? (
-                    <CheckCircle size={16} weight="duotone" className="text-emerald-600" />
-                  ) : (
-                    <CircleDashed size={16} weight="duotone" className="text-slate-400" />
-                  )}
-                  <span>{item.label}</span>
-                </div>
-                {!item.done && item.onClick && (
-                  <button
-                    type="button"
-                    onClick={item.onClick}
-                    className="px-2.5 py-1 rounded-full text-[11px] font-semibold text-brand-primary border border-brand-primary/40 hover:bg-brand-primary/10"
+          <div className="mt-4">
+            <button
+              type="button"
+              onClick={() => setShowChecklistDetails((prev) => !prev)}
+              className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+            >
+              {showChecklistDetails ? 'Ocultar checklist' : 'Ver checklist'}
+              <CaretDown size={14} className={`transition-transform ${showChecklistDetails ? 'rotate-180' : ''}`} />
+            </button>
+            {showChecklistDetails && (
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                {setupChecklist.map((item) => (
+                  <div
+                    key={item.id}
+                    className={`flex items-center justify-between gap-3 rounded-xl border px-3 py-2 ${
+                      item.done ? "border-emerald-200 bg-emerald-50/50" : "border-amber-200 bg-amber-50/40"
+                    }`}
                   >
-                    {item.action || "Completar"}
-                  </button>
-                )}
+                    <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                      {item.done ? (
+                        <CheckCircle size={16} weight="duotone" className="text-emerald-600" />
+                      ) : (
+                        <CircleDashed size={16} weight="duotone" className="text-amber-600" />
+                      )}
+                      <span>{item.label}</span>
+                    </div>
+                    {!item.done && item.onClick && (
+                      <button
+                        type="button"
+                        onClick={item.onClick}
+                        className="px-2.5 py-1 rounded-full text-[11px] font-semibold text-brand-primary border border-brand-primary/40 hover:bg-brand-primary/10"
+                      >
+                        {item.action || "Configurar"}
+                      </button>
+                    )}
+                    {item.done && (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold border border-emerald-200 bg-emerald-100 text-emerald-700">
+                        OK
+                      </span>
+                    )}
+                  </div>
+                ))}
               </div>
-            ))}
+            )}
           </div>
         </div>
       )}
