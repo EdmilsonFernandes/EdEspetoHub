@@ -105,8 +105,8 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
         ]
       : []),
   ];
-  const visibleDesktopChips = infoChips.slice(0, 3);
-  const hiddenDesktopChips = infoChips.slice(3);
+  const visibleDesktopChips = infoChips.slice(0, 2);
+  const hiddenDesktopChips = infoChips.slice(2);
   const headerBackgroundStyle = hasBanner
     ? {
         backgroundColor: '#0f172a',
@@ -318,7 +318,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
             {showMobileDetails ? 'Fechar' : 'Detalhes'}
           </button>
           {showDetails && (
-            <div className="hidden lg:flex items-center gap-2 bg-slate-950/32 rounded-full px-2.5 py-1 border border-white/20 backdrop-blur-[2px]">
+            <div className="hidden lg:flex items-center gap-2 bg-slate-950/32 rounded-full px-2.5 py-1 border border-white/20 backdrop-blur-[2px]" title="Conta logada">
               <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-xs font-bold">
                 {userInitials || 'AD'}
               </div>
@@ -374,7 +374,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
       )}
       <div className={`px-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2.5 rounded-b-3xl border-t border-white/12 transition-all duration-200 ${compactDesktop ? 'pb-2.5' : 'pb-3.5'}`}>
         {showDetails && (
-          <div className="flex items-center gap-2 text-[11px] font-semibold bg-slate-950/34 border border-white/25 rounded-full px-2 py-1.5 w-fit backdrop-blur-[2px]">
+          <div className="flex items-center gap-2 text-[11px] font-semibold bg-slate-950/34 border border-white/25 rounded-full px-2 py-1.5 w-fit backdrop-blur-[2px]" title="Status da assinatura">
             <ShieldCheck size={14} weight="duotone" />
             {planDetails?.planExempt ? 'Isento de plano' : 'Assinatura ativa'}
           </div>
@@ -384,7 +384,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
             href="https://www.janocaminho.com.br"
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/12 border border-white/30 text-[11px] font-semibold text-white/95 hover:bg-white/20 hover:text-white transition"
+            className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/12 border border-white/30 text-[11px] font-semibold text-white/95 hover:bg-white/20 hover:text-white transition ${compactDesktop ? 'lg:hidden' : ''}`}
             title="Ir para janocaminho.com.br"
           >
             <span className="h-5 w-5 rounded-full overflow-hidden bg-slate-900/70 ring-1 ring-white/35">
@@ -444,6 +444,16 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
               </button>
             </div>
             <div className="mt-4 space-y-2 text-sm text-slate-700">
+              {storeSegmentLabel && (
+                <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
+                  Segmento: <span className="font-semibold text-slate-700">{storeSegmentLabel}</span>
+                </div>
+              )}
+              {storeLocation && (
+                <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
+                  Localização: <span className="font-semibold text-slate-700">{storeLocation}</span>
+                </div>
+              )}
               {storeDescription && (
                 <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
                   {storeDescription}
