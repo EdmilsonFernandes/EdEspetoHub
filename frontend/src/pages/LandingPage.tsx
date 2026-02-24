@@ -73,6 +73,12 @@ export function LandingPage() {
   }, []);
 
   const ctaPrimaryHref = 'https://wa.me/5512997822784';
+  const trustBadges = [
+    'Cloud-native na AWS',
+    'Operação em tempo real',
+    'Segurança e rastreabilidade',
+    'Mobile-first para equipes',
+  ];
   const proofVisuals = [
     { title: 'Dashboard de gestão', image: '/marketing/dashboard-real.png' },
     { title: 'Fila de pedidos', image: '/marketing/fila-real.png' },
@@ -88,7 +94,7 @@ export function LandingPage() {
             <div className="space-y-5 text-center lg:text-left">
               <span className="inline-flex items-center gap-2 rounded-full border border-sky-300/40 bg-sky-400/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-sky-200">
                 <Rocket size={14} weight="duotone" />
-                SaaS para operação comercial
+                Plataforma SaaS profissional
               </span>
               <h1 className="text-3xl sm:text-5xl font-black text-white leading-[1.05]">
                 Já no Caminho - Plataforma completa para gestão de pedidos e entregas
@@ -96,6 +102,16 @@ export function LandingPage() {
               <p className="text-sm sm:text-lg text-slate-200 max-w-2xl mx-auto lg:mx-0">
                 Centralize pedidos online, organize sua operação e aumente suas vendas com um sistema moderno e inteligente.
               </p>
+              <div className="flex flex-wrap gap-2 justify-center lg:justify-start">
+                {trustBadges.map((badge) => (
+                  <span
+                    key={badge}
+                    className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-[11px] font-semibold text-slate-100"
+                  >
+                    {badge}
+                  </span>
+                ))}
+              </div>
               <div className="flex flex-col sm:flex-row gap-3 pt-1">
                 <a
                   href={ctaPrimaryHref}
@@ -123,15 +139,15 @@ export function LandingPage() {
               />
               <div className="grid grid-cols-3 gap-2 mt-4">
                 <div className="rounded-xl border border-white/15 bg-white/10 p-3">
-                  <p className="text-[11px] text-slate-300 uppercase tracking-[0.2em]">Lojas</p>
+                  <p className="text-[11px] text-slate-300 uppercase tracking-[0.2em]">Lojas ativas</p>
                   <p className="text-lg font-black text-white">{metrics?.activeStores ?? '-'}</p>
                 </div>
                 <div className="rounded-xl border border-white/15 bg-white/10 p-3">
-                  <p className="text-[11px] text-slate-300 uppercase tracking-[0.2em]">Pedidos</p>
+                  <p className="text-[11px] text-slate-300 uppercase tracking-[0.2em]">Pedidos processados</p>
                   <p className="text-lg font-black text-white">{metrics?.totalOrders ?? '-'}</p>
                 </div>
                 <div className="rounded-xl border border-emerald-300/30 bg-emerald-400/10 p-3">
-                  <p className="text-[11px] text-emerald-200 uppercase tracking-[0.2em]">Vendas</p>
+                  <p className="text-[11px] text-emerald-200 uppercase tracking-[0.2em]">Receita pública</p>
                   <p className="text-lg font-black text-emerald-100">
                     {metrics ? formatCurrency(metrics.totalRevenue || 0) : '-'}
                   </p>
@@ -144,6 +160,23 @@ export function LandingPage() {
 
       <section className="bg-white py-14 sm:py-16">
         <div className="max-w-6xl mx-auto px-4">
+          <div className="mb-8 rounded-2xl border border-slate-200 bg-[linear-gradient(120deg,#f8fafc,#f1f5f9)] p-4 sm:p-5">
+            <p className="text-xs uppercase tracking-[0.3em] text-slate-500 font-semibold">Padrão empresarial</p>
+            <div className="mt-3 grid gap-3 sm:grid-cols-3">
+              <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
+                <p className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Disponibilidade</p>
+                <p className="text-sm font-black text-slate-900">Infraestrutura escalável</p>
+              </div>
+              <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
+                <p className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Confiabilidade</p>
+                <p className="text-sm font-black text-slate-900">Fluxo estável de operação</p>
+              </div>
+              <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
+                <p className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Crescimento</p>
+                <p className="text-sm font-black text-slate-900">Pronto para expansão</p>
+              </div>
+            </div>
+          </div>
           <div className="text-center mb-8 sm:mb-10">
             <p className="text-xs uppercase tracking-[0.3em] text-sky-700 font-semibold">Como funciona</p>
             <h2 className="text-2xl sm:text-4xl font-black text-slate-900 mt-2">Fluxo simples para vender todos os dias</h2>
@@ -273,7 +306,7 @@ export function LandingPage() {
           <div className="rounded-3xl border border-white/15 bg-white/5 p-7 sm:p-10 text-white flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div>
               <p className="text-xs uppercase tracking-[0.3em] text-sky-200 font-semibold">Próximo passo</p>
-              <h2 className="text-2xl sm:text-4xl font-black mt-2">Leve sua operação para o nível SaaS</h2>
+              <h2 className="text-2xl sm:text-4xl font-black mt-2">Leve sua operação para padrão de empresa vencedora</h2>
               <p className="text-sm text-slate-200 mt-2 max-w-2xl">
                 Estruture pedidos, produção e entrega em um único fluxo profissional, com desempenho mobile e gestão em tempo real.
               </p>
