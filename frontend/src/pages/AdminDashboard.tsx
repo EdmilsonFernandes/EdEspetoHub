@@ -1279,7 +1279,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       return;
     }
     if (id === 'motoboys' && !canUseMotoboys) {
-      showToast('Recurso disponível no plano Pro.', 'info');
+      showToast('Disponível no plano Pro. Faça o upgrade para liberar entregadores.', 'info');
+      navigate('/admin/renewal');
       return;
     }
     setActiveTab(id as typeof activeTab);
@@ -1331,7 +1332,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                     key={item.id}
                     type="button"
                     onClick={() => handleNavSelect(item.id)}
-                    title={item.disabled ? 'Disponível no plano Pro' : undefined}
+                    title={item.disabled ? 'Disponível no plano Pro · clique para upgrade' : undefined}
                     aria-label={item.label}
                     className={`group relative ds-admin-sidebar-item ds-focus-ring flex items-center ${
                       sidebarCompact ? 'justify-center px-2.5' : 'justify-between gap-2'
@@ -1339,7 +1340,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                       isActive
                         ? 'ds-admin-sidebar-item-active'
                         : ''
-                    } ${item.disabled ? 'opacity-55 cursor-not-allowed hover:translate-y-0 hover:shadow-none' : ''}`}
+                    } ${item.disabled ? 'opacity-80 cursor-pointer border border-violet-300/50 bg-violet-500/10 hover:bg-violet-500/20' : ''}`}
                   >
                     <span className={`inline-flex items-center ${sidebarCompact ? '' : 'gap-2'}`}>
                       <Icon size={16} weight={isActive ? 'fill' : 'duotone'} />
@@ -1662,10 +1663,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                     key={item.id}
                     type="button"
                     onClick={() => handleNavSelect(item.id)}
-                    title={item.disabled ? 'Disponível no plano Pro' : undefined}
+                    title={item.disabled ? 'Disponível no plano Pro · clique para upgrade' : undefined}
                     className={`ds-admin-sidebar-item ds-focus-ring flex items-center justify-between gap-2 ${
                       isActive ? 'ds-admin-sidebar-item-active' : ''
-                    } ${item.disabled ? 'opacity-55 cursor-not-allowed hover:translate-y-0 hover:shadow-none' : ''}`}
+                    } ${item.disabled ? 'opacity-80 cursor-pointer border border-violet-300/50 bg-violet-500/10 hover:bg-violet-500/20' : ''}`}
                   >
                     <span className="inline-flex items-center gap-2">
                       <Icon size={16} weight={isActive ? 'fill' : 'duotone'} />
