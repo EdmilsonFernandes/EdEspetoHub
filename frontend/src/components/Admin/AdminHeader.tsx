@@ -107,6 +107,24 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
   ];
   const visibleDesktopChips = infoChips.slice(0, 2);
   const hiddenDesktopChips = infoChips.slice(2);
+  const planStatusRaw = String(planDetails?.status || '').toUpperCase();
+  const planStatusLabel =
+    planDetails?.planExempt
+      ? 'VIP ativo'
+      : planStatusRaw === 'ACTIVE'
+      ? 'Plano ativo'
+      : planStatusRaw === 'TRIAL'
+      ? 'Trial ativo'
+      : planStatusRaw === 'EXPIRING'
+      ? 'Expirando'
+      : planStatusRaw === 'PENDING'
+      ? 'Pendente'
+      : 'Sem status';
+  const opsCards = [
+    { id: 'segment', label: 'Segmento', value: storeSegmentLabel },
+    { id: 'location', label: 'Local', value: storeLocation || 'Não definido' },
+    { id: 'plan', label: 'Assinatura', value: planStatusLabel },
+  ];
   const headerBackgroundStyle = hasBanner
     ? {
         backgroundColor: '#0f172a',
@@ -232,7 +250,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
       <div className="pointer-events-none absolute inset-y-0 right-0 w-[40%] bg-gradient-to-l from-slate-950/40 via-slate-900/20 to-transparent" />
       <div className="pointer-events-none absolute top-0 left-8 right-8 h-0.5 rounded-full bg-white/40" />
       <div className="pointer-events-none absolute inset-0 rounded-3xl ring-1 ring-inset ring-white/12" />
-      <div className={`px-4 pb-2.5 flex flex-col lg:flex-row justify-between gap-3 transition-all duration-200 ${compactDesktop ? 'pt-2 min-h-[112px] lg:items-center' : 'pt-3 min-h-[156px] lg:items-start'}`}>
+      <div className={`px-4 pb-2.5 flex flex-col lg:grid lg:grid-cols-[minmax(0,1.5fr)_minmax(280px,0.8fr)_auto] gap-3 transition-all duration-200 ${compactDesktop ? 'pt-2 min-h-[112px] lg:items-center' : 'pt-3 min-h-[156px] lg:items-start'}`}>
         <div className={`flex items-start gap-3 rounded-2xl border border-white/22 bg-slate-950/30 backdrop-blur-[4px] max-w-[920px] shadow-[0_16px_36px_-26px_rgba(0,0,0,0.7)] transition-all duration-200 ${compactDesktop ? 'px-3 py-2' : 'px-3.5 py-2.5'}`}>
           <div className={`rounded-2xl bg-white/90 backdrop-blur flex items-center justify-center overflow-hidden shadow-[0_18px_32px_-18px_rgba(0,0,0,0.56)] ring-1 ring-white/80 transition-all duration-200 ${compactDesktop ? 'w-12 h-12' : 'w-16 h-16'}`}>
             {branding?.logoUrl ? (
@@ -295,6 +313,16 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
             </div>
           </div>
         </div>
+        {!compactDesktop && (
+          <div className="hidden lg:grid grid-cols-1 gap-2 rounded-2xl border border-white/20 bg-slate-950/34 backdrop-blur-[4px] p-2.5 shadow-[0_16px_34px_-24px_rgba(0,0,0,0.72)]">
+            {opsCards.map((card) => (
+              <div key={card.id} className="rounded-xl border border-white/15 bg-white/10 px-2.5 py-2">
+                <p className="text-[10px] uppercase tracking-[0.18em] text-white/70">{card.label}</p>
+                <p className="text-[13px] font-semibold text-white truncate">{card.value}</p>
+              </div>
+            ))}
+          </div>
+        )}
         <div className={`flex items-center gap-2 rounded-2xl border border-white/20 bg-slate-950/34 backdrop-blur-[4px] px-2.5 shadow-[0_16px_34px_-24px_rgba(0,0,0,0.72)] transition-all duration-200 ${compactDesktop ? 'py-1.5' : 'py-2'}`}>
           <button
             type="button"
