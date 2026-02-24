@@ -471,7 +471,7 @@ export const CartView = ({
                 onBlur={() =>
                   allowCustomerAutocomplete && setTimeout(() => setSuggestionsOpen(false), 150)
                 }
-                placeholder="Ex: João Silva"
+                placeholder="Nome completo"
                 className="w-full border-b-2 border-gray-200 py-2.5 sm:py-3 pl-9 text-base sm:text-lg outline-none focus:border-brand-primary placeholder:text-gray-300 bg-transparent"
               />
               <MagnifyingGlass size={18} className="absolute left-0 top-1/2 -translate-y-1/2 text-gray-300" />
@@ -770,7 +770,7 @@ export const CartView = ({
                   onChangeCustomer({ ...customer, table: e.target.value })
                 }
                 inputMode="numeric"
-                placeholder="Outra mesa (ex: 18)"
+                placeholder="Número da mesa"
                 className={`${premiumInputClass} sm:py-4`}
               />
             </div>
@@ -976,7 +976,7 @@ export const CartView = ({
                   value={cashTenderedInput}
                   onChange={(event) => setCashTenderedInput(event.target.value)}
                   inputMode="decimal"
-                  placeholder="Ex: 100,00"
+                  placeholder="0,00"
                   className={`${premiumInputClass} text-sm`}
                 />
                 <p className="text-[11px] text-slate-500">

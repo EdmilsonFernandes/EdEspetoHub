@@ -204,7 +204,7 @@ export function AdminDemo() {
             />
             <input
               className="p-3 border rounded-lg"
-              placeholder="Preço (Ex: 10.50)"
+              placeholder="Preço"
               type="number"
               step="0.01"
               value={formData.price}

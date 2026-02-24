@@ -165,7 +165,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
             value={branding.brandName}
             onChange={(e) => handleChange("brandName", e.target.value)}
             className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
-              placeholder="Ex: Chama do Sertao"
+              placeholder="Nome da loja"
             />
           </div>
 
@@ -190,7 +190,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
               value={branding.description || ""}
               onChange={(e) => handleChange("description", e.target.value)}
               className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors min-h-[110px]"
-            placeholder="Ex: Espetos artesanais, cerveja gelada e atendimento rápido."
+            placeholder="Descreva brevemente sua loja e seus diferenciais."
               maxLength={220}
             />
             <div className="flex items-center justify-between text-xs text-gray-500">
@@ -334,7 +334,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
                 value={branding.promoMessage || ""}
                 onChange={(e) => handleChange("promoMessage", e.target.value)}
                 className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors min-h-[90px]"
-                placeholder="Ex: Combo do dia: 2 espetos + refri por R$ 29,90"
+                placeholder="Oferta do dia: item + bebida por R$ 29,90"
                 maxLength={120}
               />
               <div className="flex items-center justify-between text-xs text-gray-500">
@@ -473,7 +473,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
                 value={branding.pixKey || ''}
                 onChange={(e) => handleChange("pixKey", e.target.value)}
                 className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
-                placeholder="Ex: +5511999999999 ou contato@pix.com"
+                placeholder="+5511999999999 ou contato@pix.com"
               />
               <p className="text-xs text-gray-500">Usada para gerar o QR Code na confirmação de pagamento. Telefone com DDD pode começar com 0 que ajustamos para +55.</p>
             </div>
@@ -504,7 +504,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
                   value={branding.deliveryRadiusKm ?? ''}
                   onChange={(e) => handleChange("deliveryRadiusKm", e.target.value)}
                   className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
-                  placeholder="Ex: 20"
+                  placeholder="20"
                 />
                 <p className="text-xs text-gray-500">Deixe vazio para aceitar entregas sem limite.</p>
               </div>
@@ -517,7 +517,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
                   value={branding.deliveryFee ?? ''}
                   onChange={(e) => handleChange("deliveryFee", e.target.value)}
                   className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
-                  placeholder="Ex: 5,00"
+                  placeholder="5,00"
                 />
                 <p className="text-xs text-gray-500">Mostrado no checkout quando o cliente escolhe entrega.</p>
               </div>

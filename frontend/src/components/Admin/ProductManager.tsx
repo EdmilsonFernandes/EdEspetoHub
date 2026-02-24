@@ -480,7 +480,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
               <label className="text-sm font-medium text-gray-700">Nome do Produto</label>
               <input
                 className="p-3 border border-gray-200 rounded-xl w-full bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
-                placeholder="Ex: Espeto de Carne"
+                placeholder="Nome do produto"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
@@ -491,7 +491,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
               <label className="text-sm font-medium text-gray-700">Preço</label>
               <input
                 className="p-3 border border-gray-200 rounded-xl w-full bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
-                placeholder="Ex: 10.50"
+                placeholder="0.00"
                 type="number"
                 step="0.01"
                 value={formData.price}
@@ -508,7 +508,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
               <label className="text-sm font-medium text-gray-700">Preço promocional (opcional)</label>
               <input
                 className="p-3 border border-gray-200 rounded-xl w-full bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
-                placeholder="Ex: 8.90"
+                placeholder="0.00"
                 type="number"
                 step="0.01"
                 value={formData.promoPrice}

@@ -1199,7 +1199,7 @@ export function AdminMotoboys() {
                 <textarea
                   value={rejectRequestReason}
                   onChange={(e) => setRejectRequestReason(e.target.value)}
-                  placeholder="Ex: CRLV errada. Envie o documento do veículo com foto legível."
+                  placeholder="Documento incorreto. Envie o documento do veículo com foto legível."
                   rows={3}
                   className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand-primary focus:border-brand-primary"
                 />
@@ -1306,7 +1306,7 @@ export function AdminMotoboys() {
                 <textarea
                   value={reuploadDocReason}
                   onChange={(e) => setReuploadDocReason(e.target.value)}
-                  placeholder="Ex: Foto escura/reflexo. Reenvie em boa iluminação."
+                  placeholder="Foto escura/reflexo. Reenvie em boa iluminação."
                   rows={3}
                   className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand-primary focus:border-brand-primary"
                 />

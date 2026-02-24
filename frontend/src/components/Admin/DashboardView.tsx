@@ -622,7 +622,7 @@ export const DashboardView = ({
                       type="text"
                       value={utmCampaign}
                       onChange={(event) => setUtmCampaign(event.target.value)}
-                      placeholder="ex: janocaminho"
+                      placeholder="janocaminho"
                       className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:ring-2 focus:ring-brand-primary"
                     />
                   </div>

@@ -1619,7 +1619,7 @@ export function MotoboyProfile() {
           <input
             value={profileDraft.vehicleModel}
             onChange={(event) => setProfileDraft((prev: any) => ({ ...prev, vehicleModel: event.target.value }))}
-            placeholder="Modelo (ex: CG 160)"
+            placeholder="Modelo do veículo"
             className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
           />
           <select
@@ -1658,7 +1658,7 @@ export function MotoboyProfile() {
                     cnhCategory: String(event.target.value || '').toUpperCase().replace(/[^A-Z]/g, '').slice(0, 4),
                   }))
                 }
-                placeholder="Categoria CNH (ex: A, AB)"
+                placeholder="Categoria CNH (A, AB...)"
                 className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
                 autoCapitalize="characters"
               />

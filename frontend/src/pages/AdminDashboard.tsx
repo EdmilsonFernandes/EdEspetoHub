@@ -235,7 +235,7 @@ const OrdersView = ({ orders, products, storeSlug }) => {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Buscar cliente, telefone ou pedido (ex: 89035f7b)"
+            placeholder="Buscar cliente, telefone ou ID do pedido"
             className="ds-input ds-focus-ring w-full sm:w-64 py-2 text-sm"
           />
         </div>

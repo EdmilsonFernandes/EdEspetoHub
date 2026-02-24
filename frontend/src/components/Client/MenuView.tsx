@@ -468,7 +468,7 @@ export const MenuView = ({
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 className="ds-input rounded-full py-2 pl-9 pr-4 text-sm"
-                placeholder="Buscar produtos (ex: costela)"
+                placeholder="Buscar produtos por nome ou categoria"
               />
             </div>
           </div>

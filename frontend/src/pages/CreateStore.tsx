@@ -1288,7 +1288,7 @@ export function CreateStore() {
                 className={`ds-input ds-focus-ring ${
                   fieldErrors.storeName ? 'border-red-400' : 'border-gray-200'
                 }`}
-                placeholder="Ex.: Espetinho do João"
+                placeholder="Nome da sua loja"
               />
               {fieldErrors.storeName && (
                 <p className="ds-field-error">{fieldErrors.storeName}</p>
@@ -1362,7 +1362,7 @@ export function CreateStore() {
                 value={registerForm.pixKey}
                 onChange={(e) => setRegisterForm((prev) => ({ ...prev, pixKey: e.target.value }))}
                 className="ds-input ds-focus-ring"
-                placeholder="Ex: 012999999999 ou email@pix.com"
+                placeholder="012999999999 ou email@pix.com"
               />
               <p className="text-xs text-gray-500">Telefone com DDD pode começar com 0 que ajustamos para +55.</p>
             </div>
