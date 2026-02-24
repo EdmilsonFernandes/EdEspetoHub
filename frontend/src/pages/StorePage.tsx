@@ -1,4 +1,4 @@
-﻿// @ts-nocheck
+// @ts-nocheck
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ShoppingCart, PaperPlaneTilt } from '@phosphor-icons/react';
@@ -721,7 +721,7 @@ export function StorePage() {
   const formatItemOptions = (item) => {
     const labels = [];
     if (item?.cookingPoint) labels.push(item.cookingPoint);
-    if (item?.passSkewer) labels.push('passar varinha');
+    if (item?.passSkewer) labels.push('passar farinha');
     const selected = formatSelectedModifiers(item?.selectedModifiers || []);
     if (selected.length) labels.push(`+ ${selected.join(', ')}`);
     return labels.length ? `(${labels.join(' • ')})` : '';
@@ -1464,3 +1464,4 @@ export function StorePage() {
     const planName = String(subscription?.plan?.name || '').toLowerCase();
     return planName.includes('pro') || planName.includes('vip');
   };
+

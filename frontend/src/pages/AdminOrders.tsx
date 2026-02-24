@@ -1,4 +1,4 @@
-﻿// @ts-nocheck
+// @ts-nocheck
 import { useEffect, useMemo, useState } from 'react';
 import { AdminHeader } from '../components/Admin/AdminHeader';
 import { useAuth } from '../contexts/AuthContext';
@@ -115,7 +115,7 @@ export function AdminOrders() {
   const formatItemOptions = (item) => {
     const labels = [];
     if (item?.cookingPoint) labels.push(item.cookingPoint);
-    if (item?.passSkewer) labels.push('passar varinha');
+    if (item?.passSkewer) labels.push('passar farinha');
     const selected = formatSelectedModifiers(item?.selectedModifiers || []);
     if (selected.length) labels.push(`+ ${selected.join(', ')}`);
     return labels.length ? `(${labels.join(' • ')})` : '';
@@ -458,7 +458,7 @@ export function AdminOrders() {
                                     )}
                                     {item?.passSkewer && (
                                       <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-fuchsia-100 text-fuchsia-700 border border-fuchsia-200">
-                                        passar varinha
+                                        passar farinha
                                       </span>
                                     )}
                                     {formatSelectedModifiers(item?.selectedModifiers || []).map((modifierName) => (
@@ -561,4 +561,5 @@ export function AdminOrders() {
     </div>
   );
 }
+
 

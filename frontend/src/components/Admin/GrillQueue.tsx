@@ -1,4 +1,4 @@
-﻿// @ts-nocheck
+// @ts-nocheck
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   CheckSquare,
@@ -204,7 +204,7 @@ export const GrillQueue = () => {
   const formatItemOptions = (item) => {
     const labels = [];
     if (item?.cookingPoint) labels.push(item.cookingPoint);
-    if (item?.passSkewer) labels.push('passar varinha');
+    if (item?.passSkewer) labels.push('passar farinha');
     const selected = formatSelectedModifiers(item?.selectedModifiers || []);
     if (selected.length) labels.push(`+ ${selected.join(', ')}`);
     return labels.length ? labels.join(' • ') : '';
@@ -1002,7 +1002,7 @@ export const GrillQueue = () => {
                             )}
                             {item?.passSkewer && (
                               <span className="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-fuchsia-100 text-fuchsia-700 border border-fuchsia-200">
-                                passar varinha
+                                passar farinha
                               </span>
                             )}
                             {formatSelectedModifiers(item?.selectedModifiers || []).map((modifierName) => (
@@ -1631,5 +1631,6 @@ export const GrillQueue = () => {
     </div>
   );
 };
+
 
 

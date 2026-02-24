@@ -229,7 +229,7 @@ export const CartView = ({
   const formatItemOptions = (item) => {
     const labels = [];
     if (item?.cookingPoint) labels.push(item.cookingPoint);
-    if (item?.passSkewer) labels.push('passar varinha');
+    if (item?.passSkewer) labels.push('passar farinha');
     const modifiers = formatSelectedModifiers(item?.selectedModifiers || []);
     if (modifiers.length) labels.push(`+ ${modifiers.join(', ')}`);
     return labels.length ? labels.join(' • ') : '';
@@ -1032,3 +1032,4 @@ export const CartView = ({
     </div>
   );
 };
+

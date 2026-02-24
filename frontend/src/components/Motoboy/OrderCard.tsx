@@ -191,7 +191,7 @@ export function OrderCard({ order, compact, actions, showCourierEarnings = false
                         )}
                         {item?.passSkewer && (
                           <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-fuchsia-100 text-fuchsia-700 border border-fuchsia-200">
-                            passar varinha
+                            passar farinha
                           </span>
                         )}
                         {formatSelectedModifiers(item?.selectedModifiers || []).map((modifierName) => (
@@ -219,3 +219,4 @@ export function OrderCard({ order, compact, actions, showCourierEarnings = false
     </div>
   );
 }
+

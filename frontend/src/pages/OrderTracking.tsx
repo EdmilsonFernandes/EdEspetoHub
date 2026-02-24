@@ -1,4 +1,4 @@
-﻿// @ts-nocheck
+// @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Bicycle, ChefHat, CheckCircle, Clock, CircleNotch, MapPin, Star } from '@phosphor-icons/react';
@@ -886,7 +886,7 @@ export function OrderTracking() {
                               )}
                               {item?.passSkewer && (
                                 <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-fuchsia-100 text-fuchsia-700 border border-fuchsia-200">
-                                  passar varinha
+                                  passar farinha
                                 </span>
                               )}
                               {formatSelectedModifiers(item?.selectedModifiers || []).map((modifierName) => (
@@ -1422,5 +1422,6 @@ export function OrderTracking() {
     </div>
   );
 }
+
 
 

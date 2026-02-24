@@ -1,4 +1,4 @@
-﻿// @ts-nocheck
+// @ts-nocheck
 import * as React from 'react';
 import { ChartBar, BookOpen, ChefHat, CreditCard, Package, Gear, ShoppingCart, X, Scooter, ForkKnife, Storefront, Truck, List, CaretLeft, CaretRight } from '@phosphor-icons/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -377,7 +377,7 @@ const OrdersView = ({ orders, products, storeSlug }) => {
                             )}
                             {item?.passSkewer && (
                               <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-fuchsia-100 text-fuchsia-700 border border-fuchsia-200">
-                                passar varinha
+                                passar farinha
                               </span>
                             )}
                             {formatSelectedModifiers(item?.selectedModifiers || []).map((modifierName) => (
@@ -1690,5 +1690,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     </AdminLayout>
   );
 }
+
 
 

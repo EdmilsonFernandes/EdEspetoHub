@@ -173,7 +173,7 @@ export const ProductModal = ({ product, isOpen, onClose, onAddToCart }: ProductM
                   checked={passSkewer}
                   onChange={(event) => setPassSkewer(event.target.checked)}
                 />
-                Passar varinha
+                Passar farinha
               </label>
             </div>
           )}
@@ -294,3 +294,4 @@ export const ProductModal = ({ product, isOpen, onClose, onAddToCart }: ProductM
     </div>
   );
 };
+
