@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { SignOut, Globe, Sparkle, ShieldCheck, Storefront, PushPin } from '@phosphor-icons/react';
+import { SignOut, Globe, Sparkle, Storefront, PushPin } from '@phosphor-icons/react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -124,7 +124,6 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
   const opsCards = [
     { id: 'segment', label: 'Segmento', value: storeSegmentLabel },
     { id: 'location', label: 'Local', value: storeLocation || 'Não definido' },
-    { id: 'plan', label: 'Assinatura', value: planStatusLabel },
   ];
   const headerBackgroundStyle = hasBanner
     ? {
@@ -489,13 +488,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
           </div>
         </div>
       )}
-      <div className={`px-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2.5 rounded-b-3xl border-t border-white/12 transition-all duration-200 ${compactDesktop ? 'pb-2.5' : 'pb-3.5'}`}>
-        {showDetails && (
-          <div className="flex items-center gap-2 text-[11px] font-semibold bg-slate-950/34 border border-white/25 rounded-full px-2 py-1.5 w-fit backdrop-blur-[2px]" title="Status da assinatura">
-            <ShieldCheck size={14} weight="duotone" />
-            {planDetails?.planExempt ? 'Isento de plano' : 'Assinatura ativa'}
-          </div>
-        )}
+      <div className={`px-4 flex flex-col lg:flex-row lg:items-center lg:justify-end gap-2.5 rounded-b-3xl border-t border-white/12 transition-all duration-200 ${compactDesktop ? 'pb-2.5' : 'pb-3.5'}`}>
         <div className="flex flex-wrap items-center gap-2">
           <a
             href="https://www.janocaminho.com.br"

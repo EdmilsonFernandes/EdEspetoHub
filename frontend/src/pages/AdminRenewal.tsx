@@ -2,6 +2,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { AdminLayout } from '../layouts/AdminLayout';
 import { planService } from '../services/planService';
 import { subscriptionService } from '../services/subscriptionService';
 import { BILLING_OPTIONS, PLAN_TIERS, getPlanName, resolveAnnualPromoTotal, resolveMonthlyEquivalent } from '../constants/planCatalog';
@@ -9,7 +10,7 @@ import { getPaymentMethodMeta } from '../utils/paymentAssets';
 
 export function AdminRenewal() {
   const navigate = useNavigate();
-  const { auth, logout } = useAuth();
+  const { auth } = useAuth();
   const [plans, setPlans] = useState([]);
   const [selectedTierKey, setSelectedTierKey] = useState<'basic' | 'pro'>('basic');
   const [paymentMethod, setPaymentMethod] = useState('PIX');
@@ -126,39 +127,11 @@ export function AdminRenewal() {
   };
 
   const expiresLabel = currentEndDate ? new Date(currentEndDate).toLocaleDateString('pt-BR') : '—';
-  const platformLogo = '/janocaminho.jpg';
-  const handleGoToLogin = () => {
-    logout();
-    navigate('/admin');
-  };
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="sticky top-0 z-50 border-b border-white/60 bg-white/80 backdrop-blur-xl shadow-[0_18px_36px_-28px_rgba(15,23,42,0.5)]">
-        <div className="h-1 bg-[linear-gradient(90deg,#ef4444,#f97316,#f59e0b)]" />
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-3 sm:py-4">
-            <button onClick={() => navigate('/')} className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-2xl overflow-hidden shadow-[0_14px_26px_-18px_rgba(239,68,68,0.7)] border border-white bg-white">
-                <img src={platformLogo} alt="Já no Caminho" className="w-full h-full object-cover" />
-              </div>
-              <div className="hidden sm:block text-left leading-tight">
-                <p className="text-lg font-black text-gray-900">Já no Caminho</p>
-                <p className="text-xs text-gray-500 uppercase tracking-[0.25em]">Renovação</p>
-              </div>
-            </button>
-            <button
-              onClick={handleGoToLogin}
-              className="px-3 py-2 sm:px-4 text-sm rounded-full border border-slate-200 text-gray-700 hover:bg-gray-50 transition-colors"
-            >
-              Ir para login
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        <div className="bg-white border border-gray-100 rounded-3xl shadow-xl p-6 sm:p-8 space-y-6">
+    <AdminLayout contextLabel="Renovar assinatura">
+      <main className="w-full max-w-5xl mx-auto py-2 sm:py-4">
+        <div className="rounded-3xl border border-slate-200/80 bg-white p-5 sm:p-8 shadow-[0_26px_58px_-40px_rgba(15,23,42,0.6)] space-y-6">
           <div className="flex justify-start">
             <button
               type="button"
@@ -232,11 +205,11 @@ export function AdminRenewal() {
                     key={planKey}
                     onClick={() => plan?.id && setSelectedTierKey(tier.key as 'basic' | 'pro')}
                     disabled={isDisabled}
-                    className={`border rounded-2xl p-4 text-left transition-all relative ${
+                  className={`border rounded-2xl p-4 text-left transition-all relative ${
                       !selectedPlanId && !isSelected ? 'border-red-200 bg-red-50/40' : ''
                     } ${isSelected
-                      ? 'border-red-500 shadow-lg bg-red-50'
-                      : 'border-gray-200 hover:border-red-200'
+                      ? 'border-red-500 shadow-[0_22px_36px_-28px_rgba(239,68,68,0.75)] bg-red-50'
+                      : 'border-gray-200 hover:border-red-200 hover:-translate-y-0.5'
                       } ${isDisabled ? 'opacity-60 cursor-not-allowed' : ''}`}
                   >
                     {tier.popular && (
@@ -343,7 +316,7 @@ export function AdminRenewal() {
           </div>
         </div>
       </main>
-    </div>
+    </AdminLayout>
   );
 }
 
