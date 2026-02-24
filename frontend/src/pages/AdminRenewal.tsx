@@ -1,6 +1,6 @@
 ﻿// @ts-nocheck
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { planService } from '../services/planService';
@@ -10,6 +10,7 @@ import { getPaymentMethodMeta } from '../utils/paymentAssets';
 
 export function AdminRenewal() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { auth } = useAuth();
   const [plans, setPlans] = useState([]);
   const [selectedTierKey, setSelectedTierKey] = useState<'basic' | 'pro'>('basic');
@@ -27,6 +28,13 @@ export function AdminRenewal() {
   const showTrialBadge = String(currentStatus || '').toUpperCase() === 'TRIAL' && latestPaymentStatus !== 'PAID';
   const currentPlanName = String(currentSubscription?.plan?.name || auth?.subscription?.plan?.name || '').toLowerCase();
   const currentTier: 'basic' | 'pro' = currentPlanName.includes('pro') ? 'pro' : 'basic';
+  const preferredTier: 'basic' | 'pro' | null = useMemo(() => {
+    const params = new URLSearchParams(location.search || '');
+    const focus = String(params.get('focus') || '').toLowerCase();
+    if (focus === 'pro') return 'pro';
+    if (focus === 'basic') return 'basic';
+    return null;
+  }, [location.search]);
   const allowedTierKeys = useMemo(() => PLAN_TIERS.map((tier) => tier.key), []);
 
   useEffect(() => {
@@ -55,7 +63,10 @@ export function AdminRenewal() {
       try {
         const response = await planService.list();
         setPlans(response || []);
-        const defaultTier = allowedTierKeys.includes(currentTier) ? currentTier : 'basic';
+        const defaultTier =
+          preferredTier && allowedTierKeys.includes(preferredTier)
+            ? preferredTier
+            : (allowedTierKeys.includes(currentTier) ? currentTier : 'basic');
         setSelectedTierKey(defaultTier as 'basic' | 'pro');
       } catch (error) {
         console.error('Não foi possível carregar os planos', error);
@@ -63,7 +74,7 @@ export function AdminRenewal() {
     };
 
     fetchPlans();
-  }, [allowedTierKeys, currentTier]);
+  }, [allowedTierKeys, currentTier, preferredTier]);
 
   const billingKey = isAnnual ? 'yearly' : 'monthly';
   const billing = BILLING_OPTIONS[billingKey];

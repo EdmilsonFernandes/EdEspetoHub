@@ -1280,7 +1280,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     }
     if (id === 'motoboys' && !canUseMotoboys) {
       showToast('Disponível no plano Pro. Faça o upgrade para liberar entregadores.', 'info');
-      navigate('/admin/renewal');
+      navigate('/admin/renewal?focus=pro');
       return;
     }
     setActiveTab(id as typeof activeTab);

@@ -147,7 +147,15 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
     if (typeof window === 'undefined') return;
     const handleScroll = () => {
       const isDesktop = window.innerWidth >= 1024;
-      setCompactDesktop(isDesktop && window.scrollY > 64);
+      if (!isDesktop) {
+        setCompactDesktop(false);
+        return;
+      }
+      const y = window.scrollY;
+      setCompactDesktop((prev) => {
+        if (prev) return y > 44;
+        return y > 96;
+      });
     };
     handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -162,7 +170,15 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
     if (typeof window === 'undefined') return;
     const handleMobileCompact = () => {
       const mobile = window.innerWidth < 768;
-      setMobileCompact(mobile && window.scrollY > 56);
+      if (!mobile) {
+        setMobileCompact(false);
+        return;
+      }
+      const y = window.scrollY;
+      setMobileCompact((prev) => {
+        if (prev) return y > 28;
+        return y > 72;
+      });
     };
     handleMobileCompact();
     window.addEventListener('scroll', handleMobileCompact, { passive: true });
