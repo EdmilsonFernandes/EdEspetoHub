@@ -149,6 +149,7 @@ export class MotoboyOrderService {
       customerName: order.customerName,
       phone: order.phone,
       address: order.address,
+      type: order.type,
       status: order.status,
       paymentMethod: order.paymentMethod,
       paymentStatus: order.paymentStatus,

@@ -23,6 +23,7 @@ export function OrderCard({ order, compact, actions, showCourierEarnings = false
   const type = order?.type || order?.orderType;
   const deliveryFeeRaw = order?.deliveryFee ?? order?.delivery_fee ?? null;
   const deliveryFee = deliveryFeeRaw !== null && deliveryFeeRaw !== undefined ? Number(deliveryFeeRaw) : null;
+  const isDelivery = String(type || '').toLowerCase() === 'delivery' || deliveryFee !== null;
   const cashTenderedRaw = order?.cashTendered ?? order?.cash_tendered ?? null;
   const cashTendered = cashTenderedRaw !== null && cashTenderedRaw !== undefined ? Number(cashTenderedRaw) : null;
   const totalValue = Number(order?.total || 0);
@@ -118,13 +119,13 @@ export function OrderCard({ order, compact, actions, showCourierEarnings = false
               <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
                 Pedido: <strong className="ml-1 text-slate-900">{formatCurrency(order?.total || 0)}</strong>
               </span>
-              {type === 'delivery' && (
+              {isDelivery && (
                 <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">
                   Frete: <strong className="ml-1">{formatCurrency(Number.isFinite(Number(deliveryFee)) ? Number(deliveryFee) : 0)}</strong>
                 </span>
               )}
             </div>
-            {showCourierEarnings && type === 'delivery' && (
+            {showCourierEarnings && isDelivery && (
               <div className="mt-1.5 space-y-0.5">
                 <p className="text-[11px] text-blue-700 font-semibold">
                   Seu ganho: {formatCurrency(deliveryGain)}
