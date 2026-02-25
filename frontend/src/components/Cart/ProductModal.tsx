@@ -287,22 +287,34 @@ export const ProductModal = ({ product, cart = {}, isOpen, onClose, onAddToCart 
             </div>
             <div className="flex-1 space-y-2">
               {currentSelectionQty > 0 && (
-                <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs">
-                  <span className="text-slate-600">
-                    No pedido: <strong className="text-slate-900">{currentSelectionQty}</strong>
+                <div
+                  className={`flex items-center justify-between rounded-xl border px-3 py-2 text-xs shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] ${
+                    currentSelectionQty >= 3
+                      ? "border-amber-200 bg-amber-50/90"
+                      : "border-emerald-200 bg-emerald-50/80"
+                  }`}
+                >
+                  <span className="inline-flex items-center gap-1.5 text-slate-700">
+                    <span
+                      className={`h-2 w-2 rounded-full ${
+                        currentSelectionQty >= 3 ? "bg-amber-500" : "bg-emerald-500"
+                      }`}
+                    />
+                    No pedido:
+                    <strong className="text-slate-900">{currentSelectionQty}</strong>
                   </span>
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
                       onClick={() => onAddToCart(product, -1, selectedOptions)}
-                      className="rounded-lg border border-slate-300 bg-white px-2 py-1 font-semibold text-slate-700"
+                      className="rounded-lg border border-slate-300 bg-white px-2 py-1 font-semibold text-slate-700 hover:bg-slate-100 transition"
                     >
                       -1
                     </button>
                     <button
                       type="button"
                       onClick={() => onAddToCart(product, -currentSelectionQty, selectedOptions)}
-                      className="rounded-lg border border-rose-200 bg-rose-50 px-2 py-1 font-semibold text-rose-700"
+                      className="rounded-lg border border-rose-200 bg-rose-50 px-2 py-1 font-semibold text-rose-700 hover:bg-rose-100 transition"
                     >
                       Remover tudo
                     </button>
