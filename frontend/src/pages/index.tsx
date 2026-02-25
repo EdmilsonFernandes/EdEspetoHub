@@ -4,7 +4,7 @@ export { TermsOfUse } from './TermsOfUse';
 export { AdminLogin } from './AdminLogin';
 export { StorePage } from './StorePage';
 export { OrdersQueue } from './OrdersQueue';
-export { AdminDashboard } from './AdminDashboard';
+export { AdminOrders as AdminDashboard } from './AdminOrders';
 export { AdminOrders } from './AdminOrders';
 export { AdminQueue } from './AdminQueue';
 export { AdminRenewal } from './AdminRenewal';
