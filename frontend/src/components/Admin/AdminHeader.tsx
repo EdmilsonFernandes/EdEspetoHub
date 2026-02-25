@@ -118,7 +118,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
       }
     : {
         backgroundColor: '#111827',
-        backgroundImage: `linear-gradient(120deg, color-mix(in srgb, ${branding?.primaryColor || 'var(--color-primary)'} 38%, #0f172a 62%) 0%, color-mix(in srgb, ${branding?.secondaryColor || 'var(--color-secondary)'} 28%, #111827 72%) 100%)`,
+        backgroundImage: `linear-gradient(120deg, color-mix(in srgb, ${branding?.primaryColor || 'var(--color-primary)'} 28%, #0f172a 72%) 0%, color-mix(in srgb, ${branding?.secondaryColor || 'var(--color-secondary)'} 18%, #111827 82%) 100%)`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
@@ -250,7 +250,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
       <div className="pointer-events-none absolute inset-y-0 right-0 w-[32%] bg-gradient-to-l from-slate-950/20 via-slate-900/8 to-transparent" />
       <div className="pointer-events-none absolute top-0 left-8 right-8 h-0.5 rounded-full bg-white/24" />
       <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/10" />
-      <div className={`md:hidden px-3 transition-all duration-200 ${mobileCompact ? 'py-1.5 space-y-2' : 'py-2 space-y-2'}`}>
+      <div className={`md:hidden px-3 transition-all duration-200 ${mobileCompact ? 'py-1 space-y-2' : 'py-1.5 space-y-2'}`}>
         <button
           type="button"
           onClick={() => setShowMobileDetails(true)}
@@ -304,7 +304,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
         </div>
       </div>
 
-      <div className={`hidden md:flex md:flex-col px-4 pb-1.5 lg:grid lg:grid-cols-[minmax(0,1.5fr)_minmax(280px,0.8fr)_auto] gap-2 transition-all duration-200 ${compactDesktop ? 'pt-1.5 min-h-[92px] lg:items-center' : 'pt-2 min-h-[118px] lg:items-start'}`}>
+      <div className={`hidden md:flex md:flex-col px-4 pb-1 lg:grid lg:grid-cols-[minmax(0,1.5fr)_minmax(280px,0.8fr)_auto] gap-2 transition-all duration-200 ${compactDesktop ? 'pt-1 min-h-[88px] lg:items-center' : 'pt-1.5 min-h-[110px] lg:items-start'}`}>
         <div className={`flex items-start gap-3 rounded-xl border border-white/18 bg-slate-950/18 backdrop-blur-[4px] max-w-[920px] shadow-[0_10px_24px_-18px_rgba(0,0,0,0.52)] transition-all duration-200 ${compactDesktop ? 'px-3 py-1.5' : 'px-3 py-1.5'}`}>
           <div className={`rounded-xl bg-white/90 backdrop-blur flex items-center justify-center overflow-hidden shadow-[0_14px_24px_-16px_rgba(0,0,0,0.5)] ring-1 ring-white/80 transition-all duration-200 ${compactDesktop ? 'w-11 h-11' : 'w-14 h-14'}`}>
             {branding?.logoUrl ? (
@@ -392,7 +392,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
           )}
         </div>
       </div>
-      <div className={`px-4 flex flex-col lg:flex-row lg:items-center lg:justify-end gap-2 rounded-b-2xl border-t border-white/10 transition-all duration-200 ${compactDesktop ? 'pb-1.5' : 'pb-2.5'}`}>
+      <div className={`px-4 flex flex-col lg:flex-row lg:items-center lg:justify-end gap-2 rounded-b-2xl border-t border-white/10 transition-all duration-200 ${compactDesktop ? 'pb-1' : 'pb-2'}`}>
         <div className="flex flex-wrap items-center gap-2">
           <a
             href="https://www.janocaminho.com.br"
