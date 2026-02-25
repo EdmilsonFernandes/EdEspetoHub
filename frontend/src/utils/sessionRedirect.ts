@@ -16,9 +16,9 @@ const getLoginPath = (scope: SessionScope) => {
 };
 
 export const isSessionAuthError = (status?: number, message?: string, code?: string) => {
-  if (status === 401 || status === 403) return true;
+  if (status === 401) return true;
   const normalizedCode = String(code || '').toUpperCase();
-  if (normalizedCode.startsWith('AUTH-')) return true;
+  if ([ 'AUTH-001', 'AUTH-002', 'AUTH-007' ].includes(normalizedCode)) return true;
   const normalizedMessage = String(message || '')
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')

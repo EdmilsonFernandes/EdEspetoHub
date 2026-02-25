@@ -11,7 +11,7 @@ const buildUrl = (path: string) => {
   return `${API_BASE_URL}${normalized}`;
 };
 
-const handleResponse = async (response: Response) => {
+const handleResponse = async (response: Response, canAutoLogout = true) => {
   if (!response.ok) {
     const contentType = response.headers.get('content-type') || '';
     let payload: any = null;
@@ -27,7 +27,7 @@ const handleResponse = async (response: Response) => {
     if (payload?.code) error.code = payload.code;
     if (payload?.details) error.details = payload.details;
 
-    if (isSessionAuthError(response.status, message, payload?.code || '')) {
+    if (canAutoLogout && isSessionAuthError(response.status, message, payload?.code || '')) {
       forceLogoutAndRedirect('superadmin');
     }
 
@@ -110,7 +110,7 @@ export const superAdminService = {
       },
       body: JSON.stringify(payload),
     });
-    return handleResponse(response);
+    return handleResponse(response, false);
   },
 
   async fetchMotoboyKycPending(token: string) {

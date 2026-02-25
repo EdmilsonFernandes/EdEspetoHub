@@ -49,7 +49,11 @@ const buildUrl = (path: string) =>
   return `${API_BASE_URL}${normalizedPath}`;
 };
 
-const handleResponse = async (response: Response, routeScope: 'admin' | 'motoboy' = 'admin') =>
+const handleResponse = async (
+  response: Response,
+  routeScope: 'admin' | 'motoboy' = 'admin',
+  canAutoLogout = false
+) =>
 {
   if (!response.ok)
   {
@@ -68,7 +72,7 @@ const handleResponse = async (response: Response, routeScope: 'admin' | 'motoboy
     if (payload?.details) error.details = payload.details;
 
     const messageToCheck = payload?.message || message || '';
-    if (isSessionAuthError(response.status, messageToCheck, payload?.code || '')) {
+    if (canAutoLogout && isSessionAuthError(response.status, messageToCheck, payload?.code || '')) {
       const inferredScope =
         typeof window !== 'undefined'
           ? inferScopeFromPathname(window.location.pathname)
@@ -104,7 +108,7 @@ const request = async (path: string, options: any = {}) =>
   }
 
   const response = await fetch(url, finalOptions);
-  return handleResponse(response, isMotoboyRoute ? 'motoboy' : 'admin'); // ⬅️ NÃO mascarar erro
+  return handleResponse(response, isMotoboyRoute ? 'motoboy' : 'admin', Boolean(token)); // ⬅️ NÃO mascarar erro
 };
 
 // RAW (para download/export etc)
