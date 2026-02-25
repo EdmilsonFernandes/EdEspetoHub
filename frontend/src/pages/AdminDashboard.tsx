@@ -1111,6 +1111,16 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     }
   }, [isDesktopLayout, mobileDrawerOpen]);
 
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    if (!mobileDrawerOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [mobileDrawerOpen]);
+
 
   useEffect(() => {
     if (!storeId) return;
@@ -1293,17 +1303,20 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
   return (
     <AdminLayout contextLabel="Painel da Loja">
-      <div className="lg:hidden sticky top-3 z-30">
-        <div className="rounded-2xl border border-slate-200 bg-white/90 backdrop-blur px-3 py-2 flex items-center justify-between shadow-sm">
-          <p className="text-xs font-semibold text-slate-600">Menu do painel</p>
+      <div className="lg:hidden sticky top-2 z-[95]">
+        <div className="rounded-2xl border border-slate-200 bg-white/95 backdrop-blur px-3 py-2.5 flex items-center justify-between shadow-[0_16px_34px_-24px_rgba(15,23,42,0.45)]">
+          <div className="min-w-0">
+            <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-[0.2em]">Navegação</p>
+            <p className="text-xs font-semibold text-slate-700 truncate">Acesso rápido do painel</p>
+          </div>
           <button
             type="button"
             onClick={() => setMobileDrawerOpen(true)}
-            className="ds-focus-ring inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+            className="ds-focus-ring inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-900 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-800"
             aria-label="Abrir menu"
           >
             <List size={16} weight="duotone" />
-            Navegação
+            Abrir
           </button>
         </div>
       </div>
@@ -1640,11 +1653,14 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       </div>
 
       {!isDesktopLayout && mobileDrawerOpen && (
-        <div className="lg:hidden fixed inset-0 z-[60]">
-          <div className="absolute inset-0 bg-slate-900/45 backdrop-blur-sm" onClick={() => setMobileDrawerOpen(false)} />
-          <aside className="absolute left-0 top-0 bottom-0 w-[280px] max-w-[86vw] ds-admin-sidebar p-3 overflow-y-auto">
+        <div className="lg:hidden fixed inset-0 z-[120]">
+          <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onClick={() => setMobileDrawerOpen(false)} />
+          <aside className="absolute left-0 top-0 bottom-0 w-[300px] max-w-[88vw] ds-admin-sidebar p-3 overflow-y-auto border-r border-white/15 shadow-[28px_0_64px_-32px_rgba(15,23,42,0.72)]">
             <div className="px-1 pb-3 flex items-center justify-between">
-              <p className="px-2 ds-admin-sidebar-title">Navegação</p>
+              <div className="px-2">
+                <p className="ds-admin-sidebar-title">Navegação</p>
+                <p className="text-[11px] text-slate-300">Escolha uma seção</p>
+              </div>
               <button
                 type="button"
                 onClick={() => setMobileDrawerOpen(false)}
