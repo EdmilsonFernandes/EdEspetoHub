@@ -1,11 +1,25 @@
 // @ts-nocheck
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, Browsers, ChefHat } from '@phosphor-icons/react';
+import { BookOpen, Browsers } from '@phosphor-icons/react';
 import { GrillQueue } from '../components/Admin/GrillQueue';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { useAuth } from '../contexts/AuthContext';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
+import { AppHeader } from '../components/common/AppHeader';
+
+const segmentLabelMap: Record<string, string> = {
+  restaurante: 'Restaurante',
+  hamburgueria: 'Hamburgueria',
+  lanchonete: 'Lanchonete',
+  pizzaria: 'Pizzaria',
+  adega: 'Adega',
+  mercado: 'Mercado',
+  hortifruti: 'Hortifruti',
+  farmacia: 'Farmácia',
+  confeitaria: 'Confeitaria',
+  outros: 'Comércio',
+};
 
 export function AdminQueue() {
   const navigate = useNavigate();
@@ -13,6 +27,9 @@ export function AdminQueue() {
   const storeSlug = auth?.store?.slug;
   const storeLogo = resolveAssetUrl(auth?.store?.settings?.logoUrl || auth?.store?.logoUrl || '');
   const storeName = String(auth?.store?.name || 'Minha loja');
+  const segment =
+    segmentLabelMap[String(auth?.store?.settings?.segment || 'outros').toLowerCase()] || 'Comércio';
+  const city = [auth?.store?.settings?.city, String(auth?.store?.settings?.state || '').toUpperCase()].filter(Boolean).join(' • ');
 
   if (!auth?.store) {
     return <div style={{ padding: 24 }}>Carregando fila da loja...</div>;
@@ -21,52 +38,40 @@ export function AdminQueue() {
   return (
     <AdminLayout contextLabel="Central de Pedidos" showHeader={false}>
       <div className="mx-auto w-full max-w-[1320px] space-y-4">
-        <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white/95 backdrop-blur px-4 py-4 shadow-[0_22px_52px_-38px_rgba(15,23,42,0.45)]">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(47,157,247,0.16),transparent_42%),radial-gradient(circle_at_bottom_right,rgba(95,211,90,0.14),transparent_46%)]" />
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex items-center gap-3 min-w-0">
-              <span className="h-12 w-12 rounded-2xl bg-white text-white grid place-items-center shadow-sm overflow-hidden border border-slate-200">
-                {storeLogo ? (
-                  <img src={storeLogo} alt={storeName} className="h-full w-full object-cover" />
-                ) : (
-                  <span className="h-full w-full grid place-items-center rounded-2xl bg-[linear-gradient(120deg,#2f9df7,#5fd35a)]">
-                    <ChefHat size={20} weight="duotone" />
-                  </span>
-                )}
-              </span>
-              <div className="min-w-0">
-                <h1 className="text-lg sm:text-xl font-black text-slate-900 leading-tight">Central de Pedidos</h1>
-                <div className="flex flex-wrap items-center gap-2 mt-1">
-                  <p className="text-xs text-slate-500 truncate">{storeName}</p>
-                  <span className="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-sky-700">
-                    Operação ao vivo
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div className="flex flex-wrap items-center gap-2 lg:justify-end">
-              <button
-                type="button"
-                onClick={() => navigate('/admin/dashboard')}
-                className="btn-press inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-700 whitespace-nowrap"
-              >
-                <Browsers size={15} weight="duotone" />
-                Painel
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  if (storeSlug) navigate(`/${storeSlug}`);
-                }}
-                disabled={!storeSlug}
-                className="btn-press inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-700 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <BookOpen size={15} weight="duotone" />
-                Vitrine
-              </button>
-            </div>
-          </div>
-        </div>
+        <AppHeader
+          variant="operations"
+          storeName={storeName}
+          storeLogo={storeLogo}
+          bannerUrl={auth?.store?.settings?.bannerUrl || ''}
+          subtitle="Central de Pedidos"
+          status="Operação ao vivo"
+          segment={segment}
+          city={city}
+          actions={[
+            {
+              id: 'dashboard',
+              label: 'Painel',
+              icon: <Browsers size={14} weight="duotone" />,
+              tone: 'ghost',
+              onClick: () => navigate('/admin/dashboard'),
+            },
+            {
+              id: 'store',
+              label: 'Vitrine',
+              icon: <BookOpen size={14} weight="duotone" />,
+              tone: 'ghost',
+              onClick: () => {
+                if (storeSlug) navigate(`/${storeSlug}`);
+              },
+            },
+            {
+              id: 'focus',
+              label: 'Modo foco',
+              tone: 'primary',
+              onClick: () => window.dispatchEvent(new CustomEvent('adminHeader:set', { detail: { visible: false } })),
+            },
+          ]}
+        />
 
         <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm overflow-x-hidden">
           <GrillQueue />

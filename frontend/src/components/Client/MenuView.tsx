@@ -14,10 +14,8 @@ import { formatCurrency } from "../../utils/format";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
 import { ProductModal } from "../Cart/ProductModal";
 import { GoogleMapView } from "../GoogleMapView";
+import { AppHeader } from "../common/AppHeader";
 
-// =======================================
-// HEADER PREMIUM COM LOGO OFICIAL
-// =======================================
 const normalizeWhatsApp = (value) => {
   if (!value) return "";
   const digits = value.toString().replace(/\D/g, "");
@@ -38,174 +36,6 @@ const categoryVisualMeta = (key = "") => {
   if (normalized.includes("lanche")) return { icon: Sparkle, tone: "text-emerald-700 bg-emerald-50 border-emerald-200" };
   return { icon: SquaresFour, tone: "text-slate-700 bg-slate-50 border-slate-200" };
 };
-
-const Header = ({
-  branding,
-  segment,
-  instagramHandle,
-  whatsappNumber,
-  onOpenQueue,
-  onOpenAdmin,
-  compact,
-  isOpenNow,
-  todayHoursLabel
-}) => {
-  const storeSlug = branding?.espetoId || "";
-  const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
-  const storeUrl = storeSlug ? `${baseUrl}/${storeSlug}` : "";
-  const previewInitials = branding?.brandName
-    ?.split(" ")
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-
-  const segmentLabelMap = {
-    restaurante: "Restaurante",
-    hamburgueria: "Hamburgueria",
-    lanchonete: "Lanchonete",
-    pizzaria: "Pizzaria",
-    adega: "Adega",
-    mercado: "Mercado",
-    hortifruti: "Hortifruti",
-    farmacia: "Farmácia",
-    confeitaria: "Confeitaria",
-    outros: "Comércio",
-  };
-  const segmentLabel = segmentLabelMap[String(segment || "").toLowerCase()] || "Comércio";
-  const bannerUrl = resolveAssetUrl(branding?.bannerUrl || "");
-
-  return (
-    <div className={`w-full sticky top-0 z-50 ${compact ? 'pb-2' : 'pb-3'} pt-2`}>
-      <div className="max-w-6xl mx-auto px-3 sm:px-4">
-        <div
-          className={`relative overflow-hidden rounded-3xl border border-white/70 px-3 sm:px-5 ${compact ? 'py-2.5' : 'py-3.5 sm:py-4'} shadow-[0_18px_40px_-24px_rgba(15,23,42,0.45)]`}
-          style={{
-            backgroundImage: bannerUrl
-              ? `linear-gradient(110deg, rgba(8,15,30,0.62), rgba(8,15,30,0.44)), url(${bannerUrl})`
-              : `linear-gradient(115deg, color-mix(in srgb, ${branding?.primaryColor || '#0ea5e9'} 66%, #0f172a 34%), color-mix(in srgb, ${branding?.accentColor || '#22c55e'} 54%, #0f172a 46%))`,
-            backgroundSize: bannerUrl ? 'cover' : '100% 100%',
-            backgroundPosition: 'center',
-          }}
-        >
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-slate-950/55 via-slate-900/25 to-slate-950/65" />
-          <div className="pointer-events-none absolute top-0 left-4 right-4 h-1 rounded-full ds-header-gradient-line" />
-
-          <div className="relative flex flex-wrap items-start gap-3 sm:gap-4 sm:flex-nowrap">
-            {(!compact || (compact && branding?.logoUrl)) && (
-              <div className="w-11 h-11 sm:w-16 sm:h-16 rounded-2xl overflow-hidden border border-white/40 bg-white/10 backdrop-blur-sm shadow-[0_14px_30px_-20px_rgba(14,165,233,0.8)] flex-shrink-0 flex items-center justify-center">
-                {branding?.logoUrl ? (
-                  <img
-                    src={branding.logoUrl}
-                    alt={branding.brandName}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <span className="font-black text-base sm:text-lg text-white">{previewInitials || "JC"}</span>
-                )}
-              </div>
-            )}
-
-            <div className="min-w-0 flex-1">
-              <h1 className={`${compact ? 'text-sm' : 'text-lg sm:text-2xl'} font-black text-white truncate`}>
-                {branding?.brandName || "Sua Loja"}
-              </h1>
-              <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-1 rounded-full border border-white/30 bg-white/20 px-2.5 py-1 text-[10px] font-semibold text-white">
-                  {segmentLabel}
-                </span>
-                <span
-                  className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[10px] font-semibold ${
-                    isOpenNow
-                      ? 'border-emerald-200/80 bg-emerald-500/25 text-emerald-50'
-                      : 'border-amber-200/80 bg-amber-500/25 text-amber-50'
-                  }`}
-                >
-                  <span className={`h-1.5 w-1.5 rounded-full ${isOpenNow ? 'bg-emerald-200' : 'bg-amber-200'}`} />
-                  {isOpenNow ? 'Aberto agora' : 'Fechado no momento'}
-                </span>
-                {todayHoursLabel && (
-                  <span className="inline-flex items-center rounded-full border border-white/30 bg-white/15 px-2.5 py-1 text-[10px] font-semibold text-slate-100">
-                    Hoje {todayHoursLabel}
-                  </span>
-                )}
-              </div>
-              {!compact && (
-                <div className="mt-2 flex flex-wrap items-center gap-1.5 sm:gap-2">
-                  {storeSlug && (
-                    <a
-                      href={storeUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/15 px-2.5 py-1 text-[11px] font-semibold text-slate-100 hover:bg-white/25 transition"
-                    >
-                      Site: <span className="normal-case">{storeUrl.replace(/^https?:\/\//, '')}</span>
-                    </a>
-                  )}
-                  {instagramHandle && (
-                    <a
-                      href={`https://instagram.com/${instagramHandle.replace("@", "")}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-1 rounded-full border border-pink-200/60 bg-pink-500/20 px-2.5 py-1 text-[11px] font-semibold text-pink-50 hover:bg-pink-500/30 transition"
-                    >
-                      <img src="/insta.avif" alt="Instagram" className="h-3.5 w-3.5 rounded-full" />
-                      {instagramHandle}
-                    </a>
-                  )}
-                  {normalizeWhatsApp(whatsappNumber) && (
-                    <a
-                      href={`https://wa.me/${normalizeWhatsApp(whatsappNumber)}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-1 rounded-full border border-emerald-200/70 bg-emerald-500/20 px-2.5 py-1 text-[11px] font-semibold text-emerald-50 hover:bg-emerald-500/30 transition"
-                    >
-                      <img src="/whatspp.jpg" alt="WhatsApp" className="h-3.5 w-3.5 rounded-full" />
-                      WhatsApp
-                    </a>
-                  )}
-                </div>
-              )}
-            </div>
-
-            <div className="w-full sm:w-auto flex flex-row items-center justify-end gap-2 order-last sm:order-none sm:flex-shrink-0">
-              {onOpenQueue && (
-                <div className="flex items-center rounded-full border border-white/40 bg-white/20 p-0.5 backdrop-blur-sm">
-                  <button
-                    type="button"
-                    className="px-3 py-1.5 rounded-full text-xs font-bold bg-white text-slate-900 shadow-sm"
-                  >
-                    Vitrine
-                  </button>
-                  <button
-                    type="button"
-                    onClick={onOpenQueue}
-                    className="px-3 py-1.5 rounded-full text-xs font-semibold text-white hover:text-slate-100"
-                  >
-                    Operação
-                  </button>
-                </div>
-              )}
-              {onOpenAdmin && (
-                <button
-                  onClick={onOpenAdmin}
-                  className="px-3 py-2 rounded-full text-xs font-semibold border border-white/40 bg-white/10 text-white hover:bg-white/20 transition flex items-center gap-1 whitespace-nowrap"
-                >
-                  <SquaresFour size={12} weight="duotone" />
-                  {!compact && <span className="hidden sm:inline">Painel</span>}
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// =======================================
-// MENU ORGANIZADO POR CATEGORIA (COM FOTOS)
-// =======================================
 export const MenuView = ({
   products,
   cart,
@@ -381,6 +211,63 @@ export const MenuView = ({
       })
       .filter((category) => category.items.length > 0);
   }, [grouped, query]);
+  const segmentLabelMap = {
+    restaurante: "Restaurante",
+    hamburgueria: "Hamburgueria",
+    lanchonete: "Lanchonete",
+    pizzaria: "Pizzaria",
+    adega: "Adega",
+    mercado: "Mercado",
+    hortifruti: "Hortifruti",
+    farmacia: "Farmácia",
+    confeitaria: "Confeitaria",
+    outros: "Comércio",
+  };
+  const segmentLabel = segmentLabelMap[String(segment || "").toLowerCase()] || "Comércio";
+  const headerActions = useMemo(() => {
+    const actions = [];
+    if (branding?.espetoId && typeof window !== "undefined") {
+      actions.push({
+        id: "site",
+        label: "Abrir site",
+        href: `${window.location.origin}/${branding.espetoId}`,
+        tone: "ghost",
+      });
+    }
+    if (normalizeWhatsApp(whatsappNumber)) {
+      actions.push({
+        id: "wa",
+        label: "WhatsApp",
+        href: `https://wa.me/${normalizeWhatsApp(whatsappNumber)}`,
+        tone: "ghost",
+      });
+    }
+    if (instagramHandle) {
+      actions.push({
+        id: "ig",
+        label: instagramHandle,
+        href: `https://instagram.com/${instagramHandle.replace("@", "")}`,
+        tone: "ghost",
+      });
+    }
+    if (onOpenQueue) {
+      actions.push({
+        id: "queue",
+        label: "Operação",
+        onClick: onOpenQueue,
+        tone: "ghost",
+      });
+    }
+    if (onOpenAdmin) {
+      actions.push({
+        id: "admin",
+        label: "Painel",
+        onClick: onOpenAdmin,
+        tone: "primary",
+      });
+    }
+    return actions;
+  }, [whatsappNumber, instagramHandle, onOpenQueue, onOpenAdmin]);
 
   const registerCategoryRef = (key) => (node) => {
     if (node) {
@@ -399,17 +286,21 @@ export const MenuView = ({
     <div className="ds-page-gradient overflow-x-clip">
 
       {showHeader && (
-        <Header
-          branding={branding}
-          segment={segment}
-          instagramHandle={instagramHandle}
-          whatsappNumber={whatsappNumber}
-          onOpenQueue={onOpenQueue}
-          onOpenAdmin={onOpenAdmin}
-          compact={compactHeader}
-          isOpenNow={isOpenNow}
-          todayHoursLabel={todayHoursLabel}
-        />
+        <div className={`w-full sticky top-0 z-50 ${compactHeader ? 'pb-2' : 'pb-3'} pt-2`}>
+          <div className="max-w-6xl mx-auto px-3 sm:px-4">
+            <AppHeader
+              variant="store"
+              storeName={branding?.brandName || "Sua Loja"}
+              storeLogo={branding?.logoUrl || ""}
+              bannerUrl={branding?.bannerUrl || ""}
+              subtitle="Vitrine pública"
+              status={isOpenNow ? "Aberto agora" : "Fechado no momento"}
+              city={todayHoursLabel ? `Hoje: ${todayHoursLabel}` : ""}
+              segment={segmentLabel}
+              actions={headerActions}
+            />
+          </div>
+        </div>
       )}
 
       <div className="space-y-8 p-4 max-w-6xl mx-auto">
