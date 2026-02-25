@@ -204,6 +204,19 @@ const getBundleEconomyPreview = ({
   };
 };
 
+const getBundleEconomyLabel = (product: any) => {
+  const preview = getBundleEconomyPreview({
+    unitPrice: product?.price,
+    promoActive: product?.promoActive,
+    promoPrice: product?.promoPrice,
+    bundlePromoActive: product?.bundlePromoActive,
+    bundlePromoQty: product?.bundlePromoQty,
+    bundlePromoPrice: product?.bundlePromoPrice,
+  });
+  if (!preview) return '';
+  return `Economia por combo: ${formatCurrency(preview.economy)}`;
+};
+
 const createEmptyModifier = (index = 0) => ({
   id: `modifier-${Date.now()}-${index}`,
   name: '',
@@ -1149,7 +1162,10 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                           {formatCurrency(product.promoPrice)}
                         </span>
                         {product.bundlePromoActive && Number(product.bundlePromoQty) >= 2 && Number(product.bundlePromoPrice) > 0 && (
-                          <span className="text-[10px] font-semibold text-emerald-700">
+                          <span
+                            className="text-[10px] font-semibold text-emerald-700 cursor-help"
+                            title={getBundleEconomyLabel(product)}
+                          >
                             {product.bundlePromoQty} por {formatCurrency(product.bundlePromoPrice)}
                           </span>
                         )}
@@ -1158,7 +1174,10 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                       <div className="flex flex-col items-end">
                         <span className="text-brand-primary font-bold">{formatCurrency(product.price)}</span>
                         {product.bundlePromoActive && Number(product.bundlePromoQty) >= 2 && Number(product.bundlePromoPrice) > 0 && (
-                          <span className="text-[10px] font-semibold text-emerald-700">
+                          <span
+                            className="text-[10px] font-semibold text-emerald-700 cursor-help"
+                            title={getBundleEconomyLabel(product)}
+                          >
                             {product.bundlePromoQty} por {formatCurrency(product.bundlePromoPrice)}
                           </span>
                         )}
