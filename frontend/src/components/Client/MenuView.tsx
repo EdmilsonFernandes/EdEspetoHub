@@ -824,6 +824,7 @@ export const MenuView = ({
 
       <ProductModal
         product={selectedProduct}
+        cart={cart}
         isOpen={isModalOpen}
         onClose={closeProductModal}
         onAddToCart={onUpdateCart}

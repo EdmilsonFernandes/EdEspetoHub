@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { formatCurrency } from "../../utils/format";
 import {
   getModifiersTotal,
+  getModifiersSignature,
   normalizeProductModifiers,
   normalizeSelectedModifiers,
 } from "../../utils/productModifiers";
@@ -12,13 +13,14 @@ import {
 export interface ProductModalProps {
 
     product: any | null;
+    cart?: Record<string, any>;
     isOpen: boolean;
     onClose: () => void;
     onAddToCart: (product: any, quantity: number, options?: Record<string, any>) => void;
 
  }
 
-export const ProductModal = ({ product, isOpen, onClose, onAddToCart }: ProductModalProps) => {
+export const ProductModal = ({ product, cart = {}, isOpen, onClose, onAddToCart }: ProductModalProps) => {
   const [cookingPoint, setCookingPoint] = useState("ao ponto");
   const [passSkewer, setPassSkewer] = useState(false);
   const [modifierCounts, setModifierCounts] = useState<Record<string, number>>({});
@@ -45,12 +47,27 @@ export const ProductModal = ({ product, isOpen, onClose, onAddToCart }: ProductM
   const modifiersTotal = getModifiersTotal(selectedModifiers);
   const unitFinalPrice = basePrice + modifiersTotal;
   const totalFinalPrice = unitFinalPrice * itemQty;
-
   const isEspetoCategory = (category: any) => {
   const normalized = (category || "").toString().trim().toLowerCase();
   return normalized.includes("espeto");
 };
   const showEspetoOptions = product ? isEspetoCategory(product.category) : false;
+  const selectedOptions = selectedModifiers.length > 0
+    ? { ...(showEspetoOptions ? { cookingPoint, passSkewer } : {}), selectedModifiers }
+    : showEspetoOptions
+    ? { cookingPoint, passSkewer }
+    : undefined;
+  const selectedSignature = getModifiersSignature(selectedModifiers);
+  const currentSelectionQty = Object.values(cart || {}).reduce((acc: number, entry: any) => {
+    if (!entry || String(entry?.id) !== String(product?.id)) return acc;
+    const samePoint = (entry?.cookingPoint || "") === (showEspetoOptions ? cookingPoint : "");
+    const sameSkewer = Boolean(entry?.passSkewer) === (showEspetoOptions ? Boolean(passSkewer) : false);
+    const entrySignature = getModifiersSignature(entry?.selectedModifiers || []);
+    if (samePoint && sameSkewer && entrySignature === selectedSignature) {
+      return acc + Number(entry?.qty || 0);
+    }
+    return acc;
+  }, 0);
 
   useEffect(() => {
     setCookingPoint("ao ponto");
@@ -268,26 +285,44 @@ export const ProductModal = ({ product, isOpen, onClose, onAddToCart }: ProductM
                 <Plus size={14} weight="bold" />
               </button>
             </div>
-            <button
-              onClick={() => {
-                const baseOptions = showEspetoOptions ? { cookingPoint, passSkewer } : {};
-                const options =
-                  selectedModifiers.length > 0
-                    ? { ...baseOptions, selectedModifiers }
-                    : Object.keys(baseOptions).length
-                    ? baseOptions
-                    : undefined;
-                onAddToCart(product, itemQty, options);
-                handleClose();
-              }}
-              className="flex-1 bg-brand-primary text-white py-3 rounded-2xl font-semibold flex items-center justify-between px-4 hover:bg-brand-primary/90 transition"
-            >
-              <span className="inline-flex items-center gap-1.5">
-                <Plus size={16} weight="bold" />
-                Adicionar
-              </span>
-              <span className="font-extrabold">{formatCurrency(totalFinalPrice)}</span>
-            </button>
+            <div className="flex-1 space-y-2">
+              {currentSelectionQty > 0 && (
+                <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs">
+                  <span className="text-slate-600">
+                    No pedido: <strong className="text-slate-900">{currentSelectionQty}</strong>
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => onAddToCart(product, -1, selectedOptions)}
+                      className="rounded-lg border border-slate-300 bg-white px-2 py-1 font-semibold text-slate-700"
+                    >
+                      -1
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onAddToCart(product, -currentSelectionQty, selectedOptions)}
+                      className="rounded-lg border border-rose-200 bg-rose-50 px-2 py-1 font-semibold text-rose-700"
+                    >
+                      Remover tudo
+                    </button>
+                  </div>
+                </div>
+              )}
+              <button
+                onClick={() => {
+                  onAddToCart(product, itemQty, selectedOptions);
+                  handleClose();
+                }}
+                className="w-full bg-brand-primary text-white py-3 rounded-2xl font-semibold flex items-center justify-between px-4 hover:bg-brand-primary/90 transition"
+              >
+                <span className="inline-flex items-center gap-1.5">
+                  <Plus size={16} weight="bold" />
+                  Adicionar
+                </span>
+                <span className="font-extrabold">{formatCurrency(totalFinalPrice)}</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
