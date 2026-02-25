@@ -1,6 +1,6 @@
 // @ts-nocheck
 import * as React from 'react';
-import { ChartBar, BookOpen, ChefHat, CreditCard, Package, Gear, ShoppingCart, X, Scooter, ForkKnife, Storefront, Truck, List, CaretLeft, CaretRight, Star } from '@phosphor-icons/react';
+import { ChartBar, BookOpen, ChefHat, CreditCard, Package, Gear, ShoppingCart, X, Scooter, ForkKnife, Storefront, Truck, List, CaretLeft, CaretRight, Star, Bell, WarningCircle } from '@phosphor-icons/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AdminLayout } from '../layouts/AdminLayout';
@@ -1193,6 +1193,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     payoutPaidCount: 0,
   });
   const prevTabRef = useRef(activeTab);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const notificationsRef = useRef<HTMLDivElement | null>(null);
   const isVip = Boolean(session?.store?.settings?.planExempt || session?.subscription?.planExempt);
   const planName = String(session?.subscription?.plan?.name || '').toLowerCase();
   const subscriptionStatus = String(session?.subscription?.status || '').toUpperCase();
@@ -1455,6 +1457,143 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     const fieldsChanged = Object.keys(current).some((key) => current[key] !== draft[key]);
     return fieldsChanged || Boolean(brandingDraft.logoFile || brandingDraft.bannerFile);
   }, [brandingDraft, session?.store, instagramHandle]);
+  const headerNotifications = useMemo(() => {
+    const normalizeTime = (value: any) => {
+      if (!value) return 0;
+      if (value?.seconds) return Number(value.seconds) * 1000;
+      const parsed = new Date(value).getTime();
+      return Number.isFinite(parsed) ? parsed : 0;
+    };
+    const normalizeStatus = (raw: any) => {
+      const st = String(raw || '').toLowerCase();
+      if (st === 'delivered') return 'done';
+      if (st === 'ready_for_delivery' || st === 'waiting_for_motoboy') return 'ready';
+      return st || 'pending';
+    };
+    const result: Array<{
+      id: string;
+      title: string;
+      description: string;
+      tone: 'danger' | 'warning' | 'info' | 'success';
+      actionLabel: string;
+      action: () => void;
+    }> = [];
+
+    const pendingOrders = (orders || []).filter((order: any) => normalizeStatus(order?.status) === 'pending').length;
+    const readyOrders = (orders || []).filter((order: any) => normalizeStatus(order?.status) === 'ready').length;
+    if (pendingOrders > 0) {
+      result.push({
+        id: 'pending-orders',
+        title: `${pendingOrders} pedido(s) pendente(s)`,
+        description: 'Pedidos novos aguardando início da operação.',
+        tone: 'warning',
+        actionLabel: 'Ver pedidos',
+        action: () => setActiveTab('pedidos'),
+      });
+    }
+    if (readyOrders > 0) {
+      result.push({
+        id: 'ready-orders',
+        title: `${readyOrders} pedido(s) pronto(s)`,
+        description: 'Pedidos prontos aguardando retirada/expedição.',
+        tone: 'info',
+        actionLabel: 'Abrir operação',
+        action: () => navigate('/admin/queue'),
+      });
+    }
+    if (pendingMotoboyRequests > 0) {
+      result.push({
+        id: 'motoboy-requests',
+        title: `${pendingMotoboyRequests} solicitação(ões) de entregador`,
+        description: canUseMotoboys
+          ? 'Há solicitações aguardando aprovação da loja.'
+          : 'Recurso disponível no plano Pro.',
+        tone: canUseMotoboys ? 'warning' : 'info',
+        actionLabel: canUseMotoboys ? 'Revisar solicitações' : 'Trocar assinatura',
+        action: () => {
+          if (canUseMotoboys) {
+            setActiveTab('motoboys');
+          } else {
+            navigate('/admin/renewal?focus=pro');
+          }
+        },
+      });
+    }
+    if (canUseDeliveryReviewsAndTips && Number(tipsOverview?.payoutPendingCount || 0) > 0) {
+      result.push({
+        id: 'tip-payout',
+        title: `${tipsOverview.payoutPendingCount} repasse(s) pendente(s)`,
+        description: `Total aguardando repasse: ${formatCurrency(Number(tipsOverview?.payoutPendingAmount || 0))}.`,
+        tone: 'warning',
+        actionLabel: 'Ver repasses',
+        action: () => setActiveTab('motoboys'),
+      });
+    }
+    const expiresAt = new Date(subscriptionDetails?.endDate || '').getTime();
+    const daysUntilExpiry = Number.isFinite(expiresAt)
+      ? Math.ceil((expiresAt - Date.now()) / (1000 * 60 * 60 * 24))
+      : null;
+    if (!isVip && daysUntilExpiry !== null && daysUntilExpiry <= 7) {
+      result.push({
+        id: 'subscription-expiring',
+        title: daysUntilExpiry <= 0 ? 'Assinatura expirada' : 'Assinatura perto do vencimento',
+        description:
+          daysUntilExpiry <= 0
+            ? 'Renove para manter a operação sem interrupções.'
+            : `Vence em ${daysUntilExpiry} dia(s).`,
+        tone: 'danger',
+        actionLabel: 'Renovar agora',
+        action: () => navigate('/admin/renewal'),
+      });
+    }
+    const failedRecent = (paymentsHistory || []).filter((payment: any) => {
+      const status = String(payment?.status || '').toUpperCase();
+      if (status !== 'FAILED') return false;
+      const ts = normalizeTime(payment?.createdAt);
+      return ts > 0 && Date.now() - ts <= 24 * 60 * 60 * 1000;
+    }).length;
+    if (failedRecent > 0) {
+      result.push({
+        id: 'failed-payments',
+        title: `${failedRecent} falha(s) de pagamento recente(s)`,
+        description: 'Revise tentativas para evitar bloqueio de assinatura.',
+        tone: 'danger',
+        actionLabel: 'Ver pagamentos',
+        action: () => setActiveTab('pagamentos'),
+      });
+    }
+    return result.slice(0, 8);
+  }, [
+    orders,
+    pendingMotoboyRequests,
+    canUseMotoboys,
+    canUseDeliveryReviewsAndTips,
+    tipsOverview,
+    subscriptionDetails?.endDate,
+    isVip,
+    paymentsHistory,
+    navigate,
+  ]);
+  const unreadNotifications = headerNotifications.length;
+
+  useEffect(() => {
+    if (!notificationsOpen) return;
+    const onPointerDown = (event: MouseEvent) => {
+      if (!notificationsRef.current) return;
+      if (!notificationsRef.current.contains(event.target as Node)) {
+        setNotificationsOpen(false);
+      }
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setNotificationsOpen(false);
+    };
+    document.addEventListener('mousedown', onPointerDown);
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', onPointerDown);
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [notificationsOpen]);
 
   /* =========================
    * CARREGA PRODUTOS + PEDIDOS
@@ -1892,7 +2031,72 @@ export function AdminDashboard({ session: sessionProp }: Props) {
           <h2 className="text-lg font-black text-slate-900 leading-tight">{tabMeta[activeTab]?.title || 'Painel da loja'}</h2>
           <p className="text-xs text-slate-500 mt-0.5 truncate">{tabMeta[activeTab]?.subtitle || 'Operação centralizada da loja.'}</p>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="relative flex items-center gap-2 shrink-0" ref={notificationsRef}>
+          <button
+            type="button"
+            onClick={() => setNotificationsOpen((prev) => !prev)}
+            className={`ds-focus-ring relative inline-flex h-10 w-10 items-center justify-center rounded-xl border transition ${
+              notificationsOpen
+                ? 'border-slate-900 bg-slate-900 text-white'
+                : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+            }`}
+            aria-label="Abrir notificações"
+          >
+            <Bell size={18} weight={notificationsOpen ? 'fill' : 'duotone'} />
+            {unreadNotifications > 0 && (
+              <span className="absolute -right-1 -top-1 min-w-[18px] h-[18px] rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white flex items-center justify-center">
+                {unreadNotifications > 9 ? '9+' : unreadNotifications}
+              </span>
+            )}
+          </button>
+          {notificationsOpen && (
+            <div className="absolute right-0 top-[calc(100%+10px)] z-[120] w-[min(92vw,360px)] rounded-2xl border border-slate-200 bg-white shadow-[0_22px_48px_-26px_rgba(15,23,42,0.48)] overflow-hidden">
+              <div className="px-3 py-2.5 border-b border-slate-100 bg-slate-50/80">
+                <p className="text-[11px] uppercase tracking-[0.2em] font-bold text-slate-500">Notificações</p>
+                <p className="text-xs text-slate-600 mt-0.5">Prioridades da operação em tempo real</p>
+              </div>
+              <div className="max-h-[58vh] overflow-y-auto p-2 space-y-1.5">
+                {headerNotifications.length === 0 ? (
+                  <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2">
+                    <p className="text-sm font-semibold text-emerald-700">Operação estável</p>
+                    <p className="text-xs text-emerald-700/80 mt-1">Sem pendências críticas no momento.</p>
+                  </div>
+                ) : (
+                  headerNotifications.map((note) => {
+                    const toneClass =
+                      note.tone === 'danger'
+                        ? 'border-rose-200 bg-rose-50'
+                        : note.tone === 'warning'
+                        ? 'border-amber-200 bg-amber-50'
+                        : note.tone === 'success'
+                        ? 'border-emerald-200 bg-emerald-50'
+                        : 'border-sky-200 bg-sky-50';
+                    return (
+                      <div key={note.id} className={`rounded-xl border px-3 py-2 ${toneClass}`}>
+                        <div className="flex items-start gap-2">
+                          <WarningCircle size={16} weight="duotone" className="mt-0.5 text-slate-600" />
+                          <div className="min-w-0">
+                            <p className="text-xs font-bold text-slate-800">{note.title}</p>
+                            <p className="text-[11px] text-slate-600 mt-0.5">{note.description}</p>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                note.action();
+                                setNotificationsOpen(false);
+                              }}
+                              className="mt-1.5 rounded-lg border border-slate-300 bg-white px-2 py-1 text-[11px] font-semibold text-slate-700 hover:bg-slate-100"
+                            >
+                              {note.actionLabel}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          )}
           {storeSlug && (
             <a
               href={`/${storeSlug}`}
