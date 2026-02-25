@@ -1397,6 +1397,7 @@ export function StorePage() {
             checkoutDisabledReason={deliveryValidation.reason}
             onChangeCustomer={handleCustomerChange}
             onChangePayment={setPaymentMethod}
+            onUpdateCart={updateCart}
             onCheckout={checkout}
             onBack={() => setView('menu')}
           />

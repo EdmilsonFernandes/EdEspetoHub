@@ -326,6 +326,41 @@ export const MenuView = ({
     return map;
   }, [cart]);
 
+  const buildCartOptions = (entry: any) => ({
+    cookingPoint: entry?.cookingPoint || "",
+    passSkewer: Boolean(entry?.passSkewer),
+    selectedModifiers: Array.isArray(entry?.selectedModifiers) ? entry.selectedModifiers : [],
+  });
+
+  const resolveQuickAdjustEntry = (item: any) => {
+    const entries = Object.values(cart || {}).filter((entry: any) => entry?.id === item?.id);
+    if (!entries.length) return null;
+
+    const hasActiveModifiers = Array.isArray(item?.modifiers)
+      ? item.modifiers.some((modifier: any) => modifier?.active !== false)
+      : false;
+
+    if (hasActiveModifiers) {
+      return entries[0] as any;
+    }
+
+    if (isEspetoCategory(item?.category)) {
+      const preferred = entries.find(
+        (entry: any) =>
+          (entry?.cookingPoint || "") === "ao ponto" && !entry?.passSkewer
+      );
+      return (preferred || entries[0]) as any;
+    }
+
+    const plain = entries.find(
+      (entry: any) =>
+        !entry?.cookingPoint &&
+        !entry?.passSkewer &&
+        (!Array.isArray(entry?.selectedModifiers) || entry.selectedModifiers.length === 0)
+    );
+    return (plain || entries[0]) as any;
+  };
+
   const filteredGrouped = useMemo(() => {
     const normalized = query.trim().toLowerCase();
     if (!normalized) return grouped;
@@ -694,12 +729,14 @@ export const MenuView = ({
                         </div>
                       )}
                     </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const hasActiveModifiers = Array.isArray(item?.modifiers)
-                          ? item.modifiers.some((modifier: any) => modifier?.active !== false)
-                          : false;
+                    {(() => {
+                      const itemQty = itemQtyMap.get(String(item.id)) || 0;
+                      const hasActiveModifiers = Array.isArray(item?.modifiers)
+                        ? item.modifiers.some((modifier: any) => modifier?.active !== false)
+                        : false;
+
+                      const handleIncrement = (event: React.MouseEvent) => {
+                        event.stopPropagation();
                         if (hasActiveModifiers) {
                           openProductModal(item);
                           return;
@@ -709,13 +746,53 @@ export const MenuView = ({
                           return;
                         }
                         onUpdateCart(item, 1);
-                      }}
-                      title="Adicionar"
-                    className="relative h-10 min-w-[102px] px-3 rounded-xl ds-btn ds-btn-primary ds-focus-ring text-white flex items-center justify-center gap-1 shadow-[0_16px_34px_-22px_rgba(15,23,42,0.6)] text-xs font-extrabold"
-                    >
-                      <Plus size={14} weight="duotone" />
-                      Adicionar
-                    </button>
+                      };
+
+                      const handleDecrement = (event: React.MouseEvent) => {
+                        event.stopPropagation();
+                        const entry = resolveQuickAdjustEntry(item);
+                        if (!entry) return;
+                        onUpdateCart(item, -1, buildCartOptions(entry));
+                      };
+
+                      if (itemQty <= 0) {
+                        return (
+                          <button
+                            onClick={handleIncrement}
+                            title="Adicionar"
+                            className="relative h-10 min-w-[102px] px-3 rounded-xl ds-btn ds-btn-primary ds-focus-ring text-white flex items-center justify-center gap-1 shadow-[0_16px_34px_-22px_rgba(15,23,42,0.6)] text-xs font-extrabold"
+                          >
+                            <Plus size={14} weight="duotone" />
+                            Adicionar
+                          </button>
+                        );
+                      }
+
+                      return (
+                        <div
+                          className="h-10 min-w-[112px] rounded-xl border border-brand-primary/35 bg-white/95 shadow-[0_14px_26px_-20px_rgba(14,165,233,0.7)] px-1.5 flex items-center justify-between gap-1"
+                          onClick={(event) => event.stopPropagation()}
+                        >
+                          <button
+                            type="button"
+                            onClick={handleDecrement}
+                            className="h-7 w-7 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-100 transition flex items-center justify-center"
+                            aria-label={`Remover uma unidade de ${item.name}`}
+                          >
+                            -
+                          </button>
+                          <span className="min-w-[26px] text-center text-xs font-black text-slate-900">{itemQty}</span>
+                          <button
+                            type="button"
+                            onClick={handleIncrement}
+                            className="h-7 w-7 rounded-lg bg-brand-primary text-white hover:brightness-110 transition flex items-center justify-center"
+                            aria-label={`Adicionar uma unidade de ${item.name}`}
+                          >
+                            +
+                          </button>
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
               ))}

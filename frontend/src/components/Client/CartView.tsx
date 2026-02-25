@@ -76,11 +76,17 @@ export const CartView = ({
   checkoutDisabledReason = "",
   onChangeCustomer,
   onChangePayment,
+  onUpdateCart,
   onCheckout,
   onBack
 }) => {
   const cartItems = Object.values(cart);
   const total = cartItems.reduce((acc, item) => acc + item.price * item.qty, 0);
+  const buildCartOptions = (entry: any) => ({
+    cookingPoint: entry?.cookingPoint || "",
+    passSkewer: Boolean(entry?.passSkewer),
+    selectedModifiers: Array.isArray(entry?.selectedModifiers) ? entry.selectedModifiers : [],
+  });
   const normalizeNumber = (value) => {
     if (value === null || value === undefined) return null;
     const raw = value.toString().trim();
@@ -786,12 +792,28 @@ export const CartView = ({
         {cartItems.map((item) => (
           <div
             key={item.key || item.id}
-            className="flex justify-between items-center py-2 sm:py-3 border-b border-gray-50 last:border-0"
+            className="flex justify-between items-center gap-2 py-2 sm:py-3 border-b border-gray-50 last:border-0"
           >
-            <div className="flex items-center gap-3">
-              <span className="bg-brand-primary-soft text-brand-primary font-bold w-6 h-6 rounded flex items-center justify-center text-xs">
-                {item.qty}
-              </span>
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-1 py-1">
+                <button
+                  type="button"
+                  onClick={() => onUpdateCart?.(item, -1, buildCartOptions(item))}
+                  className="h-6 w-6 rounded-md text-slate-700 hover:bg-slate-100 transition"
+                  aria-label={`Diminuir quantidade de ${item.name}`}
+                >
+                  -
+                </button>
+                <span className="min-w-[24px] text-center text-xs font-bold text-slate-800">{item.qty}</span>
+                <button
+                  type="button"
+                  onClick={() => onUpdateCart?.(item, 1, buildCartOptions(item))}
+                  className="h-6 w-6 rounded-md bg-brand-primary text-white hover:brightness-110 transition"
+                  aria-label={`Aumentar quantidade de ${item.name}`}
+                >
+                  +
+                </button>
+              </div>
               <div className="w-11 h-11 rounded-xl overflow-hidden border border-gray-200 bg-gray-100 flex-shrink-0">
                 {item.imageUrl ? (
                   <img
@@ -806,7 +828,7 @@ export const CartView = ({
                   </div>
                 )}
               </div>
-              <div className="flex flex-col">
+              <div className="flex flex-col min-w-0">
                 <span className="text-gray-700 font-medium text-sm sm:text-base">{item.name}</span>
                 {formatItemOptions(item) && (
                   <span className="text-[11px] text-gray-500">{formatItemOptions(item)}</span>
@@ -818,20 +840,29 @@ export const CartView = ({
                 )}
               </div>
             </div>
-            {item.originalPrice && Number(item.originalPrice) > Number(item.price) ? (
-              <span className="flex flex-col items-end gap-0.5">
-                <span className="text-[11px] line-through text-gray-400">
-                  {formatCurrency(Number(item.originalPrice) * item.qty)}
+            <div className="flex items-center gap-2 flex-shrink-0">
+              {item.originalPrice && Number(item.originalPrice) > Number(item.price) ? (
+                <span className="flex flex-col items-end gap-0.5">
+                  <span className="text-[11px] line-through text-gray-400">
+                    {formatCurrency(Number(item.originalPrice) * item.qty)}
+                  </span>
+                  <span className="font-bold text-emerald-600">
+                    {formatCurrency(item.price * item.qty)}
+                  </span>
                 </span>
-                <span className="font-bold text-emerald-600">
+              ) : (
+                <span className="font-bold text-gray-900">
                   {formatCurrency(item.price * item.qty)}
                 </span>
-              </span>
-            ) : (
-              <span className="font-bold text-gray-900">
-                {formatCurrency(item.price * item.qty)}
-              </span>
-            )}
+              )}
+              <button
+                type="button"
+                onClick={() => onUpdateCart?.(item, -item.qty, buildCartOptions(item))}
+                className="text-[11px] font-semibold text-rose-600 hover:text-rose-700 hover:underline"
+              >
+                Remover
+              </button>
+            </div>
           </div>
         ))}
 
