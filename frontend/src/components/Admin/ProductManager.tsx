@@ -181,6 +181,29 @@ const buildAvailabilityPayload = (value) => {
   return normalized;
 };
 
+const getBundleEconomyPreview = ({
+  unitPrice,
+  promoActive,
+  promoPrice,
+  bundlePromoActive,
+  bundlePromoQty,
+  bundlePromoPrice,
+}: any) => {
+  if (!bundlePromoActive) return null;
+  const qty = Math.floor(Number(bundlePromoQty || 0));
+  const groupPrice = Number(bundlePromoPrice || 0);
+  if (!(qty >= 2) || !(groupPrice > 0)) return null;
+  const saleBase = promoActive && Number(promoPrice || 0) > 0 ? Number(promoPrice) : Number(unitPrice || 0);
+  if (!(saleBase > 0)) return null;
+  const regular = saleBase * qty;
+  const economy = regular - groupPrice;
+  if (!(economy > 0)) return null;
+  return {
+    regular,
+    economy,
+  };
+};
+
 const createEmptyModifier = (index = 0) => ({
   id: `modifier-${Date.now()}-${index}`,
   name: '',
@@ -598,6 +621,22 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                 />
               </div>
             </div>
+            {(() => {
+              const preview = getBundleEconomyPreview({
+                unitPrice: formData.price,
+                promoActive: formData.promoActive,
+                promoPrice: formData.promoPrice,
+                bundlePromoActive: formData.bundlePromoActive,
+                bundlePromoQty: formData.bundlePromoQty,
+                bundlePromoPrice: formData.bundlePromoPrice,
+              });
+              if (!preview) return null;
+              return (
+                <p className="mt-2 text-[11px] font-semibold text-emerald-700">
+                  Economia por combo: {formatCurrency(preview.economy)} (de {formatCurrency(preview.regular)} por {formatCurrency(Number(formData.bundlePromoPrice || 0))})
+                </p>
+              );
+            })()}
           </div>
           </div>
 
@@ -1563,6 +1602,22 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                     />
                   </div>
                 </div>
+                {(() => {
+                  const preview = getBundleEconomyPreview({
+                    unitPrice: inlineForm.price,
+                    promoActive: inlineForm.promoActive,
+                    promoPrice: inlineForm.promoPrice,
+                    bundlePromoActive: inlineForm.bundlePromoActive,
+                    bundlePromoQty: inlineForm.bundlePromoQty,
+                    bundlePromoPrice: inlineForm.bundlePromoPrice,
+                  });
+                  if (!preview) return null;
+                  return (
+                    <p className="mt-2 text-[11px] font-semibold text-emerald-700">
+                      Economia por combo: {formatCurrency(preview.economy)}
+                    </p>
+                  );
+                })()}
               </div>
             </div>
           </div>

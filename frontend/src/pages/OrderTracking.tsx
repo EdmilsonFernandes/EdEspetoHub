@@ -102,7 +102,6 @@ export function OrderTracking() {
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [reviewState, setReviewState] = useState<any>(null);
   const [reviewError, setReviewError] = useState('');
-  const [showAllItemsMobile, setShowAllItemsMobile] = useState(false);
   const [showTimelineMobile, setShowTimelineMobile] = useState(false);
   const [showItemsSheetMobile, setShowItemsSheetMobile] = useState(false);
   const [tipPixCopied, setTipPixCopied] = useState(false);
@@ -651,13 +650,7 @@ export function OrderTracking() {
   const totalItems = Array.isArray(order?.items)
     ? order.items.reduce((acc: number, item: any) => acc + Number(item?.quantity || 1), 0)
     : 0;
-  const mobileItemsLimit = 2;
-  const itemsToRender =
-    Array.isArray(order?.items) && !showAllItemsMobile
-      ? order.items.slice(0, mobileItemsLimit)
-      : Array.isArray(order?.items)
-      ? order.items
-      : [];
+  const itemsToRender = Array.isArray(order?.items) ? order.items : [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -980,7 +973,7 @@ export function OrderTracking() {
                   <div className="space-y-3 text-sm text-gray-600">
                     {itemsToRender.map((item) => (
                       <div key={item.id || item.productId} className="flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
                           {item.imageUrl || item.image || item.product?.imageUrl ? (
                             <img
                               src={resolveAssetUrl(item.imageUrl || item.image || item.product?.imageUrl)}
@@ -992,8 +985,13 @@ export function OrderTracking() {
                               🍖
                             </div>
                           )}
-                          <div className="flex flex-col">
-                            <span className="font-semibold text-gray-800">{item.quantity}x {item.name}</span>
+                          <div className="flex flex-col min-w-0">
+                            <span className="font-semibold text-gray-800 break-words">
+                              <span className="inline-flex items-center justify-center min-w-[28px] px-1.5 mr-1 rounded-md bg-slate-100 text-slate-700 text-xs font-bold">
+                                {item.quantity}x
+                              </span>
+                              {item.name}
+                            </span>
                             <div className="flex flex-wrap gap-1 mt-1">
                               {item?.cookingPoint && (
                                 <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800 border border-amber-200">
@@ -1017,7 +1015,7 @@ export function OrderTracking() {
                           </div>
                         </div>
                         {item.originalPrice && Number(item.originalPrice) > Number(item.price) ? (
-                          <span className="flex flex-col items-end gap-0.5">
+                          <span className="flex flex-col items-end gap-0.5 flex-shrink-0">
                             <span className="text-[11px] line-through text-gray-400">
                               {formatCurrency(Number(item.originalPrice) * (item.quantity || 1))}
                             </span>
@@ -1026,21 +1024,10 @@ export function OrderTracking() {
                             </span>
                           </span>
                         ) : (
-                          <span className="font-semibold text-gray-800">R$ {Number(item.price).toFixed(2)}</span>
+                          <span className="font-semibold text-gray-800 flex-shrink-0">R$ {Number(item.price).toFixed(2)}</span>
                         )}
                       </div>
                     ))}
-                    {Array.isArray(order?.items) && order.items.length > mobileItemsLimit && (
-                      <button
-                        type="button"
-                        onClick={() => setShowAllItemsMobile((prev) => !prev)}
-                        className="sm:hidden mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700"
-                      >
-                        {showAllItemsMobile
-                          ? 'Mostrar menos itens'
-                          : `Ver todos os itens (${order.items.length})`}
-                      </button>
-                    )}
                   </div>
                   {hasDeliveryFee ? (
                     <div className="mt-5 flex items-center justify-between text-xs font-semibold text-slate-600 border-t border-gray-100 pt-4">
