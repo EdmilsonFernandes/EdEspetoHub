@@ -2185,13 +2185,13 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         </aside>
 
         <div className="min-w-0 space-y-4">
-      <section className="hidden md:flex items-start justify-between gap-4 rounded-2xl border border-slate-200 bg-white/90 backdrop-blur-sm px-4 py-3 shadow-[0_20px_45px_-36px_rgba(15,23,42,0.5)] overflow-visible">
+      <section className="hidden md:flex relative z-[220] items-start justify-between gap-4 rounded-2xl border border-slate-200 bg-white/90 backdrop-blur-sm px-4 py-3 shadow-[0_20px_45px_-36px_rgba(15,23,42,0.5)] overflow-visible">
         <div className="min-w-0">
           <p className="text-[10px] uppercase tracking-[0.24em] font-bold text-slate-400">Workspace</p>
           <h2 className="text-lg font-black text-slate-900 leading-tight">{tabMeta[activeTab]?.title || 'Painel da loja'}</h2>
           <p className="text-xs text-slate-500 mt-0.5 truncate">{tabMeta[activeTab]?.subtitle || 'Operação centralizada da loja.'}</p>
         </div>
-        <div className="relative z-[180] flex items-center gap-2 shrink-0" ref={notificationsRef}>
+        <div className="relative z-[260] flex items-center gap-2 shrink-0" ref={notificationsRef}>
           <button
             type="button"
             onClick={() => setNotificationsOpen((prev) => !prev)}
@@ -2210,7 +2210,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             )}
           </button>
           {notificationsOpen && (
-            <div className="absolute right-0 top-[calc(100%+10px)] z-[260] w-[min(92vw,360px)] rounded-2xl border border-slate-200 bg-white shadow-[0_22px_48px_-26px_rgba(15,23,42,0.48)] overflow-hidden">
+            <div className="absolute right-0 top-[calc(100%+10px)] z-[9999] w-[min(92vw,360px)] rounded-2xl border border-slate-200 bg-white shadow-[0_22px_48px_-26px_rgba(15,23,42,0.48)] overflow-hidden">
               <div className="px-3 py-2.5 border-b border-slate-100 bg-slate-50/80">
                 <p className="text-[11px] uppercase tracking-[0.2em] font-bold text-slate-500">Notificações</p>
                 <div className="mt-0.5 flex items-center justify-between gap-2">
