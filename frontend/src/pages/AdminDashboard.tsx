@@ -1655,22 +1655,22 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       {!isDesktopLayout && mobileDrawerOpen && (
         <div className="lg:hidden fixed inset-0 z-[120]">
           <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onClick={() => setMobileDrawerOpen(false)} />
-          <aside className="absolute left-0 top-0 bottom-0 w-[300px] max-w-[88vw] ds-admin-sidebar p-3 overflow-y-auto border-r border-white/15 shadow-[28px_0_64px_-32px_rgba(15,23,42,0.72)]">
-            <div className="px-1 pb-3 flex items-center justify-between">
-              <div className="px-2">
-                <p className="ds-admin-sidebar-title">Navegação</p>
-                <p className="text-[11px] text-slate-300">Escolha uma seção</p>
+          <aside className="absolute inset-x-0 bottom-0 rounded-t-3xl border border-slate-200 bg-white shadow-[0_-24px_56px_-30px_rgba(15,23,42,0.55)] max-h-[78vh] overflow-y-auto">
+            <div className="sticky top-0 z-10 bg-white/95 backdrop-blur border-b border-slate-100 px-4 py-3 flex items-center justify-between">
+              <div>
+                <p className="text-[11px] uppercase tracking-[0.2em] font-bold text-slate-500">Navegação</p>
+                <p className="text-sm font-semibold text-slate-800">Escolha uma seção</p>
               </div>
               <button
                 type="button"
                 onClick={() => setMobileDrawerOpen(false)}
-                className="ds-focus-ring inline-flex h-9 w-9 items-center justify-center rounded-xl border border-white/15 bg-white/10 text-slate-100 hover:bg-white/20 transition"
+                className="ds-focus-ring inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition"
                 aria-label="Fechar menu"
               >
                 <X size={16} weight="bold" />
               </button>
             </div>
-            <div className="space-y-1.5">
+            <div className="p-4 grid grid-cols-1 gap-2.5">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = activeTab === item.id;
@@ -1680,12 +1680,14 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                     type="button"
                     onClick={() => handleNavSelect(item.id)}
                     title={item.disabled ? 'Disponível no plano Pro · clique para upgrade' : undefined}
-                    className={`ds-admin-sidebar-item ds-focus-ring flex items-center justify-between gap-2 ${
-                      isActive ? 'ds-admin-sidebar-item-active' : ''
-                    } ${item.disabled ? 'opacity-80 cursor-pointer border border-violet-300/50 bg-violet-500/10 hover:bg-violet-500/20' : ''}`}
+                    className={`ds-focus-ring flex items-center justify-between gap-2 rounded-2xl border px-3 py-3 text-sm font-semibold transition ${
+                      isActive
+                        ? 'border-slate-900 bg-slate-900 text-white'
+                        : 'border-slate-200 bg-white text-slate-700'
+                    } ${item.disabled ? 'opacity-85 cursor-pointer border-violet-300 bg-violet-50 text-violet-700 hover:bg-violet-100' : 'hover:bg-slate-50'}`}
                   >
                     <span className="inline-flex items-center gap-2">
-                      <Icon size={16} weight={isActive ? 'fill' : 'duotone'} />
+                      <Icon size={17} weight={isActive ? 'fill' : 'duotone'} />
                       {item.label}
                     </span>
                     {item.id === 'motoboys' && item.disabled && (
