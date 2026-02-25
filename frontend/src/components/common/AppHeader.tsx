@@ -27,7 +27,10 @@ type AppHeaderProps = {
   actions?: HeaderAction[];
 };
 
-const getActionToneClass = (variant: 'admin' | 'store' | 'operations', tone: 'primary' | 'ghost' | 'danger') => {
+function getActionToneClass(
+  variant: 'admin' | 'store' | 'operations',
+  tone: 'primary' | 'ghost' | 'danger'
+) {
   if (variant === 'operations') {
     if (tone === 'primary') return 'border-sky-400/50 bg-sky-500/20 text-sky-100 hover:bg-sky-500/30';
     if (tone === 'danger') return 'border-rose-400/40 bg-rose-500/15 text-rose-100 hover:bg-rose-500/25';
@@ -36,7 +39,7 @@ const getActionToneClass = (variant: 'admin' | 'store' | 'operations', tone: 'pr
   if (tone === 'primary') return 'border-slate-900 bg-slate-900 text-white hover:bg-slate-800';
   if (tone === 'danger') return 'border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100';
   return 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50';
-};
+}
 
 const variantShell = {
   admin: 'border-slate-200 bg-white shadow-[0_20px_48px_-34px_rgba(15,23,42,0.36)]',
