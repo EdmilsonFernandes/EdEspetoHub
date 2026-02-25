@@ -79,21 +79,21 @@ const Header = ({
     <div className={`w-full sticky top-0 z-50 ${compact ? 'pb-2' : 'pb-3'} pt-2`}>
       <div className="max-w-6xl mx-auto px-3 sm:px-4">
         <div
-          className={`relative overflow-hidden rounded-3xl border border-white/70 px-3 sm:px-5 ${compact ? 'py-2.5' : 'py-3.5 sm:py-4'} shadow-[0_18px_40px_-24px_rgba(15,23,42,0.45)]`}
+          className={`relative overflow-hidden rounded-2xl border border-white/70 px-3 sm:px-5 ${compact ? 'py-2' : 'py-3 sm:py-3.5'} shadow-[0_14px_32px_-22px_rgba(15,23,42,0.36)]`}
           style={{
             backgroundImage: bannerUrl
-              ? `linear-gradient(110deg, rgba(8,15,30,0.62), rgba(8,15,30,0.44)), url(${bannerUrl})`
-              : `linear-gradient(115deg, color-mix(in srgb, ${branding?.primaryColor || '#0ea5e9'} 66%, #0f172a 34%), color-mix(in srgb, ${branding?.accentColor || '#22c55e'} 54%, #0f172a 46%))`,
+              ? `linear-gradient(110deg, rgba(8,15,30,0.5), rgba(8,15,30,0.32)), url(${bannerUrl})`
+              : `linear-gradient(115deg, color-mix(in srgb, ${branding?.primaryColor || '#0ea5e9'} 56%, #0f172a 44%), color-mix(in srgb, ${branding?.accentColor || '#22c55e'} 44%, #0f172a 56%))`,
             backgroundSize: bannerUrl ? 'cover' : '100% 100%',
             backgroundPosition: 'center',
           }}
         >
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-slate-950/55 via-slate-900/25 to-slate-950/65" />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-slate-950/45 via-slate-900/16 to-slate-950/52" />
           <div className="pointer-events-none absolute top-0 left-4 right-4 h-1 rounded-full ds-header-gradient-line" />
 
           <div className="relative flex flex-wrap items-start gap-3 sm:gap-4 sm:flex-nowrap">
             {(!compact || (compact && branding?.logoUrl)) && (
-              <div className="w-11 h-11 sm:w-16 sm:h-16 rounded-2xl overflow-hidden border border-white/40 bg-white/10 backdrop-blur-sm shadow-[0_14px_30px_-20px_rgba(14,165,233,0.8)] flex-shrink-0 flex items-center justify-center">
+              <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-xl overflow-hidden border border-white/40 bg-white/10 backdrop-blur-sm shadow-[0_10px_22px_-16px_rgba(14,165,233,0.6)] flex-shrink-0 flex items-center justify-center">
                 {branding?.logoUrl ? (
                   <img
                     src={branding.logoUrl}
@@ -107,7 +107,7 @@ const Header = ({
             )}
 
             <div className="min-w-0 flex-1">
-              <h1 className={`${compact ? 'text-sm' : 'text-lg sm:text-2xl'} font-black text-white truncate`}>
+              <h1 className={`${compact ? 'text-sm' : 'text-lg sm:text-xl'} font-black text-white truncate`}>
                 {branding?.brandName || "Sua Loja"}
               </h1>
               <div className="mt-1.5 flex flex-wrap items-center gap-2">
@@ -125,7 +125,7 @@ const Header = ({
                   {isOpenNow ? 'Aberto agora' : 'Fechado no momento'}
                 </span>
                 {todayHoursLabel && (
-                  <span className="inline-flex items-center rounded-full border border-white/30 bg-white/15 px-2.5 py-1 text-[10px] font-semibold text-slate-100">
+                  <span className="inline-flex items-center rounded-full border border-white/30 bg-white/15 px-2.5 py-1 text-[10px] font-semibold text-slate-100 max-w-[20ch] truncate">
                     Hoje {todayHoursLabel}
                   </span>
                 )}
@@ -137,9 +137,9 @@ const Header = ({
                       href={storeUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/15 px-2.5 py-1 text-[11px] font-semibold text-slate-100 hover:bg-white/25 transition"
+                      className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/15 px-2.5 py-1 text-[11px] font-semibold text-slate-100 hover:bg-white/25 transition max-w-full"
                     >
-                      Site: <span className="normal-case">{storeUrl.replace(/^https?:\/\//, '')}</span>
+                      Site: <span className="normal-case truncate max-w-[24ch]">{storeUrl.replace(/^https?:\/\//, '')}</span>
                     </a>
                   )}
                   {instagramHandle && (
@@ -173,7 +173,7 @@ const Header = ({
                 <div className="flex items-center rounded-full border border-white/40 bg-white/20 p-0.5 backdrop-blur-sm">
                   <button
                     type="button"
-                    className="px-3 py-1.5 rounded-full text-xs font-bold bg-white text-slate-900 shadow-sm"
+                    className="px-3 py-1.5 rounded-full text-xs font-semibold bg-white text-slate-900 shadow-sm"
                   >
                     Vitrine
                   </button>
