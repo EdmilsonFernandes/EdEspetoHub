@@ -487,6 +487,33 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
     }
   };
 
+  const handleDeleteProduct = async (productId: string) => {
+    setSaving(true);
+    try {
+      await productService.delete(productId);
+      showToast('Produto removido com sucesso.', 'success');
+      try {
+        await refreshProducts();
+      } catch (refreshError) {
+        console.warn('Produto removido, mas a lista não atualizou imediatamente.', refreshError);
+      }
+    } catch (error: any) {
+      const message = (error?.message || '').toString();
+      if (error?.code === 'PROD-001' || error?.status === 404 || message.includes('Produto')) {
+        showToast('Produto removido com sucesso.', 'success');
+        try {
+          await refreshProducts();
+        } catch (refreshError) {
+          console.warn('Produto removido, mas a lista não atualizou imediatamente.', refreshError);
+        }
+        return;
+      }
+      showToast('Não foi possível remover o produto.', 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleUpload = (file) => {
     if (!file) {
       setFormData((prev) => ({ ...prev, imageFile: '' }));
@@ -1074,23 +1101,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                     type="button"
                     onClick={() => {
                       if (!window.confirm('Excluir produto?')) return;
-                      setSaving(true);
-                      productService
-                        .delete(product.id)
-                        .then(async () => {
-                          showToast('Produto removido com sucesso.', 'success');
-                          await refreshProducts();
-                        })
-                        .catch(async (error) => {
-                          const message = (error?.message || '').toString();
-                          if (error?.code === 'PROD-001' || error?.status === 404 || message.includes('Produto')) {
-                            showToast('Produto removido com sucesso.', 'success');
-                            await refreshProducts();
-                            return;
-                          }
-                          showToast('Não foi possível remover o produto.', 'error');
-                        })
-                        .finally(() => setSaving(false));
+                      handleDeleteProduct(product.id);
                     }}
                     className="px-3 py-1.5 rounded-lg border border-red-200 text-red-600 text-xs font-semibold"
                   >
@@ -1226,23 +1237,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                     <button
                       onClick={() => {
                         if (!window.confirm('Excluir produto?')) return;
-                        setSaving(true);
-                        productService
-                          .delete(product.id)
-                          .then(async () => {
-                            showToast('Produto removido com sucesso.', 'success');
-                            await refreshProducts();
-                          })
-                          .catch(async (error) => {
-                            const message = (error?.message || '').toString();
-                            if (error?.code === 'PROD-001' || error?.status === 404 || message.includes('Produto')) {
-                              showToast('Produto removido com sucesso.', 'success');
-                              await refreshProducts();
-                              return;
-                            }
-                            showToast('Não foi possível remover o produto.', 'error');
-                          })
-                          .finally(() => setSaving(false));
+                        handleDeleteProduct(product.id);
                       }}
                       className="text-red-600 hover:bg-red-50 p-2 rounded transition-all hover:-translate-y-0.5 active:scale-95"
                     >
