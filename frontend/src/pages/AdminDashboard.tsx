@@ -1216,6 +1216,14 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       planName.includes('pro') ||
       planName.includes('vip')
   );
+  const storeId = session?.store?.id;
+  const storeSlug = session?.store?.slug;
+  const storeUrl = storeSlug ? `https://www.janocaminho.com.br/${storeSlug}` : '';
+  const storeName = session?.store?.name || 'Já no Caminho';
+  const socialLinks = session?.store?.settings?.socialLinks || [];
+  const whatsappNumber = session?.store?.owner?.phone || '';
+  const instagramLink = socialLinks.find((link) => link?.type === 'instagram')?.value;
+  const instagramHandle = instagramLink ? `@${instagramLink.replace('@', '')}` : '';
 
   const desktopTabItems = [
     { id: 'resumo', label: 'Resumo', icon: ChartBar },
@@ -1298,15 +1306,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       setActiveTab('resumo');
     }
   }, [canUseMotoboys, activeTab]);
-
-  const storeId = session?.store?.id;
-  const storeSlug = session?.store?.slug;
-  const storeUrl = storeSlug ? `https://www.janocaminho.com.br/${storeSlug}` : '';
-  const storeName = session?.store?.name || 'Já no Caminho';
-  const socialLinks = session?.store?.settings?.socialLinks || [];
-  const whatsappNumber = session?.store?.owner?.phone || '';
-  const instagramLink = socialLinks.find((link) => link?.type === 'instagram')?.value;
-  const instagramHandle = instagramLink ? `@${instagramLink.replace('@', '')}` : '';
   const [brandingDraft, setBrandingDraft] = useState(() => ({
     brandName: session?.store?.name || '',
     logoUrl: resolveAssetUrl(session?.store?.settings?.logoUrl) || '',
