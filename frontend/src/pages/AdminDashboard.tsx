@@ -39,7 +39,7 @@ const OrdersView = ({ orders, products, storeSlug }) => {
   const [dateFilter, setDateFilter] = useState('');
   const [periodFilter, setPeriodFilter] = useState('all');
   const [ordersPage, setOrdersPage] = useState(1);
-  const [ordersPageSize, setOrdersPageSize] = useState(9);
+  const [ordersPageSize, setOrdersPageSize] = useState(10);
   const productsById = useMemo(() => {
     const map = new Map();
     (products || []).forEach((product) => map.set(product.id, product));
@@ -101,6 +101,31 @@ const OrdersView = ({ orders, products, storeSlug }) => {
   }, [filteredOrders, ordersPage, ordersPageSize]);
   const ordersStart = filteredOrders.length === 0 ? 0 : (ordersPage - 1) * ordersPageSize + 1;
   const ordersEnd = Math.min(filteredOrders.length, ordersPage * ordersPageSize);
+  const groupedPagedOrders = useMemo(() => {
+    const byLabel = new Map<string, any[]>();
+    const now = new Date();
+    const todayKey = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`;
+    const yesterday = new Date(now);
+    yesterday.setDate(now.getDate() - 1);
+    const yesterdayKey = `${yesterday.getFullYear()}-${yesterday.getMonth()}-${yesterday.getDate()}`;
+    for (const order of pagedOrders) {
+      const date = order?.createdAt?.seconds ? new Date(order.createdAt.seconds * 1000) : new Date(order?.createdAt);
+      const key = Number.isFinite(date.getTime())
+        ? `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`
+        : 'unknown';
+      const label =
+        key === todayKey
+          ? 'Hoje'
+          : key === yesterdayKey
+          ? 'Ontem'
+          : Number.isFinite(date.getTime())
+          ? date.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit' })
+          : 'Sem data';
+      if (!byLabel.has(label)) byLabel.set(label, []);
+      byLabel.get(label)!.push(order);
+    }
+    return Array.from(byLabel.entries()).map(([label, list]) => ({ label, list }));
+  }, [pagedOrders]);
 
   useEffect(() => {
     setOrdersPage(1);
@@ -191,8 +216,9 @@ const OrdersView = ({ orders, products, storeSlug }) => {
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row lg:items-center gap-3">
-        <div className="flex flex-wrap gap-2">
+      <div className="sticky top-2 z-10 rounded-2xl border border-slate-200 bg-white/95 px-3 py-3 shadow-sm backdrop-blur-sm">
+        <div className="flex flex-col lg:flex-row lg:items-center gap-3">
+          <div className="flex flex-wrap gap-2">
           {[
             { id: 'all', label: 'Todos', count: statusCounts.all },
             { id: 'pending', label: 'Pendentes', count: statusCounts.pending },
@@ -213,8 +239,8 @@ const OrdersView = ({ orders, products, storeSlug }) => {
               {filter.label} ({filter.count})
             </button>
           ))}
-        </div>
-        <div className="flex flex-col sm:flex-row gap-2 lg:ml-auto w-full lg:w-auto">
+          </div>
+          <div className="flex flex-col sm:flex-row gap-2 lg:ml-auto w-full lg:w-auto">
           <select
             value={periodFilter}
             onChange={(e) => setPeriodFilter(e.target.value)}
@@ -238,6 +264,7 @@ const OrdersView = ({ orders, products, storeSlug }) => {
             placeholder="Buscar cliente, telefone ou ID do pedido"
             className="ds-input ds-focus-ring w-full sm:w-64 py-2 text-sm"
           />
+          </div>
         </div>
       </div>
 
@@ -253,11 +280,18 @@ const OrdersView = ({ orders, products, storeSlug }) => {
         </div>
       ) : (
         <div className="space-y-4">
-          {pagedOrders.map((order, index) => (
-            <div
-              key={order.id || `${order.customerName}-${index}`}
-              className="border border-slate-200 rounded-3xl bg-white p-5 shadow-sm space-y-4"
-            >
+          {groupedPagedOrders.map((group) => (
+            <div key={group.label} className="space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-brand-primary" />
+                <h3 className="text-sm font-bold text-slate-700 capitalize">{group.label}</h3>
+                <span className="text-xs text-slate-500">{group.list.length} pedido(s)</span>
+              </div>
+              {group.list.map((order, index) => (
+                <div
+                  key={order.id || `${order.customerName}-${index}`}
+                  className="border border-slate-200 rounded-3xl bg-white p-5 shadow-sm space-y-4"
+                >
 	              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
 	                <div>
 	                  <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
@@ -396,6 +430,8 @@ const OrdersView = ({ orders, products, storeSlug }) => {
                   </div>
                 </div>
               )}
+                </div>
+              ))}
             </div>
           ))}
           {filteredOrders.length > 0 && (
@@ -404,15 +440,15 @@ const OrdersView = ({ orders, products, storeSlug }) => {
                 <span>
                   Exibindo {ordersStart}-{ordersEnd} de {filteredOrders.length}
                 </span>
-                <span>Pagina {ordersPage} de {ordersTotalPages}</span>
+                <span>Página {ordersPage} de {ordersTotalPages}</span>
                 <label className="flex items-center gap-2">
-                  <span>Por pagina</span>
+                  <span>Por página</span>
                   <select
                     value={ordersPageSize}
                     onChange={(event) => setOrdersPageSize(Number(event.target.value))}
                     className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-600 focus:ring-2 focus:ring-brand-primary"
                   >
-                    {[5, 9, 12, 15].map((size) => (
+                    {[10, 20, 30].map((size) => (
                       <option key={size} value={size}>
                         {size}
                       </option>
@@ -889,6 +925,32 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
     CANCELLED: 'border-l-slate-300 bg-gradient-to-r from-slate-50 to-white',
     EXPIRED: 'border-l-slate-300 bg-gradient-to-r from-slate-50 to-white',
   };
+  const paymentInsights = useMemo(() => {
+    const rows = Array.isArray(payments) ? payments : [];
+    const totals = {
+      paidCount: 0,
+      paidAmount: 0,
+      pendingCount: 0,
+      pendingAmount: 0,
+      failedCount: 0,
+      failedAmount: 0,
+    };
+    rows.forEach((payment) => {
+      const status = String(payment?.status || '').toUpperCase();
+      const amount = Number(payment?.amount || 0);
+      if (status === 'PAID') {
+        totals.paidCount += 1;
+        totals.paidAmount += amount;
+      } else if (status === 'PENDING') {
+        totals.pendingCount += 1;
+        totals.pendingAmount += amount;
+      } else if (status === 'FAILED' || status === 'CANCELLED' || status === 'EXPIRED') {
+        totals.failedCount += 1;
+        totals.failedAmount += amount;
+      }
+    });
+    return totals;
+  }, [payments]);
 
   if (loading) {
     return <div className="py-8 text-sm text-slate-500">Carregando dados de pagamento...</div>;
@@ -971,6 +1033,28 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
             >
               Trocar para Pro
             </button>
+          </div>
+        )}
+        {Array.isArray(payments) && payments.length > 0 && (
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+            <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500 font-bold">Resumo financeiro</p>
+            <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
+              <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2">
+                <p className="text-[11px] text-emerald-700">Recebido</p>
+                <p className="text-sm font-black text-emerald-800">{formatCurrency(paymentInsights.paidAmount)}</p>
+                <p className="text-[11px] text-emerald-700/80">{paymentInsights.paidCount} pagamento(s)</p>
+              </div>
+              <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2">
+                <p className="text-[11px] text-amber-700">Em análise</p>
+                <p className="text-sm font-black text-amber-800">{formatCurrency(paymentInsights.pendingAmount)}</p>
+                <p className="text-[11px] text-amber-700/80">{paymentInsights.pendingCount} pendente(s)</p>
+              </div>
+              <div className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2">
+                <p className="text-[11px] text-rose-700">Não concluído</p>
+                <p className="text-sm font-black text-rose-800">{formatCurrency(paymentInsights.failedAmount)}</p>
+                <p className="text-[11px] text-rose-700/80">{paymentInsights.failedCount} tentativa(s)</p>
+              </div>
+            </div>
           </div>
         )}
         {Array.isArray(payments) && payments.length > 0 && (
@@ -1276,6 +1360,11 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     }
   }, [location.state, navigate]);
   const [savingBranding, setSavingBranding] = useState(false);
+  const [configPanels, setConfigPanels] = useState({
+    branding: true,
+    orderTypes: false,
+    hours: false,
+  });
 
   const updateAuthStore = (updates) => {
     if (!auth?.store) return;
@@ -1329,6 +1418,43 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     session?.store?.settings?.deliveryFee,
     instagramHandle,
   ]);
+  const hasBrandingChanges = useMemo(() => {
+    const normalize = (value: any) => String(value ?? '').trim();
+    const current = {
+      brandName: normalize(session?.store?.name),
+      logoUrl: normalize(resolveAssetUrl(session?.store?.settings?.logoUrl) || ''),
+      bannerUrl: normalize(resolveAssetUrl(session?.store?.settings?.bannerUrl) || ''),
+      bannerPosition: session?.store?.settings?.bannerPosition === 'top' ? 'top' : 'center',
+      description: normalize(session?.store?.settings?.description),
+      primaryColor: normalize(session?.store?.settings?.primaryColor || '#b91c1c'),
+      secondaryColor: normalize(session?.store?.settings?.secondaryColor || '#111827'),
+      pixKey: normalize(session?.store?.settings?.pixKey),
+      contactEmail: normalize(session?.store?.settings?.contactEmail),
+      promoMessage: normalize(session?.store?.settings?.promoMessage),
+      address: normalize(session?.store?.settings?.address || session?.store?.owner?.address || ''),
+      instagram: normalize(instagramHandle?.replace('@', '') || ''),
+      deliveryRadiusKm: normalize(session?.store?.settings?.deliveryRadiusKm),
+      deliveryFee: normalize(session?.store?.settings?.deliveryFee),
+    };
+    const draft = {
+      brandName: normalize(brandingDraft.brandName),
+      logoUrl: normalize(brandingDraft.logoUrl),
+      bannerUrl: normalize(brandingDraft.bannerUrl),
+      bannerPosition: brandingDraft.bannerPosition === 'top' ? 'top' : 'center',
+      description: normalize(brandingDraft.description),
+      primaryColor: normalize(brandingDraft.primaryColor),
+      secondaryColor: normalize(brandingDraft.secondaryColor),
+      pixKey: normalize(brandingDraft.pixKey),
+      contactEmail: normalize(brandingDraft.contactEmail),
+      promoMessage: normalize(brandingDraft.promoMessage),
+      address: normalize(brandingDraft.address),
+      instagram: normalize(brandingDraft.instagram),
+      deliveryRadiusKm: normalize(brandingDraft.deliveryRadiusKm),
+      deliveryFee: normalize(brandingDraft.deliveryFee),
+    };
+    const fieldsChanged = Object.keys(current).some((key) => current[key] !== draft[key]);
+    return fieldsChanged || Boolean(brandingDraft.logoFile || brandingDraft.bannerFile);
+  }, [brandingDraft, session?.store, instagramHandle]);
 
   /* =========================
    * CARREGA PRODUTOS + PEDIDOS
@@ -1981,16 +2107,101 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             className="premium-card-soft"
             contentClassName="space-y-4"
           >
-            <div className="space-y-4 pb-24 sm:pb-4">
-              <BrandingSettings
-                branding={brandingDraft}
-                onChange={setBrandingDraft}
-                storeSlug={storeSlug}
-                onSave={handleSaveBranding}
-                saving={savingBranding}
-              />
-              <OrderTypeSettingsCard />
-              <OpeningHoursCard />
+            <div className="space-y-3 pb-24 sm:pb-4">
+              <section className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setConfigPanels((prev) => ({ ...prev, branding: !prev.branding }))}
+                  className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-slate-50 transition"
+                >
+                  <div>
+                    <p className="text-sm font-bold text-slate-800">Perfil da loja</p>
+                    <p className="text-xs text-slate-500">Nome, logo, banner, cores e dados públicos.</p>
+                  </div>
+                  <span
+                    className={`inline-flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition-transform ${
+                      configPanels.branding ? 'rotate-180' : ''
+                    }`}
+                  >
+                    <CaretRight size={14} weight="bold" />
+                  </span>
+                </button>
+                {configPanels.branding && (
+                  <div className="border-t border-slate-100 p-4">
+                    <BrandingSettings
+                      branding={brandingDraft}
+                      onChange={setBrandingDraft}
+                      storeSlug={storeSlug}
+                      onSave={handleSaveBranding}
+                      saving={savingBranding}
+                    />
+                  </div>
+                )}
+              </section>
+              <section className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setConfigPanels((prev) => ({ ...prev, orderTypes: !prev.orderTypes }))}
+                  className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-slate-50 transition"
+                >
+                  <div>
+                    <p className="text-sm font-bold text-slate-800">Tipos de pedido</p>
+                    <p className="text-xs text-slate-500">Entrega, retirada e mesa por plano e operação.</p>
+                  </div>
+                  <span
+                    className={`inline-flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition-transform ${
+                      configPanels.orderTypes ? 'rotate-180' : ''
+                    }`}
+                  >
+                    <CaretRight size={14} weight="bold" />
+                  </span>
+                </button>
+                {configPanels.orderTypes && (
+                  <div className="border-t border-slate-100 p-4">
+                    <OrderTypeSettingsCard />
+                  </div>
+                )}
+              </section>
+              <section className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setConfigPanels((prev) => ({ ...prev, hours: !prev.hours }))}
+                  className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-slate-50 transition"
+                >
+                  <div>
+                    <p className="text-sm font-bold text-slate-800">Horários da operação</p>
+                    <p className="text-xs text-slate-500">Controle dias e horários de abertura da loja.</p>
+                  </div>
+                  <span
+                    className={`inline-flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition-transform ${
+                      configPanels.hours ? 'rotate-180' : ''
+                    }`}
+                  >
+                    <CaretRight size={14} weight="bold" />
+                  </span>
+                </button>
+                {configPanels.hours && (
+                  <div className="border-t border-slate-100 p-4">
+                    <OpeningHoursCard />
+                  </div>
+                )}
+              </section>
+            </div>
+            <div className="hidden sm:flex sticky bottom-3 z-40 items-center justify-between rounded-2xl border border-slate-200 bg-white/90 backdrop-blur px-4 py-3 shadow-[0_16px_30px_-22px_rgba(15,23,42,0.45)]">
+              <div>
+                <p className="text-xs font-semibold text-slate-700">
+                  {hasBrandingChanges ? 'Alterações prontas para salvar' : 'Tudo sincronizado'}
+                </p>
+                <p className="text-[11px] text-slate-500">A ação abaixo salva os dados de identidade da loja.</p>
+              </div>
+              <button
+                type="button"
+                onClick={handleSaveBranding}
+                disabled={savingBranding || !hasBrandingChanges}
+                className="rounded-xl bg-brand-gradient px-4 py-2 text-xs font-bold text-white shadow-[0_12px_26px_-18px_rgba(15,23,42,0.7)] hover:opacity-95 disabled:opacity-60"
+              >
+                {savingBranding ? 'Salvando...' : 'Salvar identidade'}
+              </button>
             </div>
             <div
               className="sm:hidden fixed left-0 right-0 px-4 z-50 ds-safe-fab"
@@ -1998,10 +2209,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
               <button
                 type="button"
                 onClick={handleSaveBranding}
-                disabled={savingBranding}
+                disabled={savingBranding || !hasBrandingChanges}
                 className="w-full rounded-2xl bg-brand-gradient text-white py-4 text-sm font-semibold shadow-lg hover:opacity-90 disabled:opacity-60"
               >
-                {savingBranding ? 'Salvando...' : 'Salvar alterações'}
+                {savingBranding ? 'Salvando...' : hasBrandingChanges ? 'Salvar alterações' : 'Sem alterações pendentes'}
               </button>
             </div>
           </FormSection>
