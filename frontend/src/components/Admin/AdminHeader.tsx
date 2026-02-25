@@ -354,9 +354,9 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
           </div>
         </div>
         {!compactDesktop && (
-          <div className="hidden lg:grid grid-cols-1 gap-1.5 rounded-xl border border-white/18 bg-slate-950/18 backdrop-blur-[4px] p-2 shadow-[0_10px_22px_-18px_rgba(0,0,0,0.46)]">
+          <div className="hidden lg:grid grid-cols-1 gap-1.5 rounded-xl border border-white/14 bg-slate-950/14 backdrop-blur-[4px] p-2 shadow-[0_8px_18px_-16px_rgba(0,0,0,0.36)]">
             {opsCards.map((card) => (
-              <div key={card.id} className="rounded-lg border border-white/14 bg-white/8 px-2.5 py-1.5">
+              <div key={card.id} className="rounded-lg border border-white/10 bg-white/6 px-2.5 py-1.5">
                 <p className="text-[10px] uppercase tracking-[0.18em] text-white/70">{card.label}</p>
                 <p className="text-[13px] font-semibold text-white truncate">{card.value}</p>
               </div>
@@ -398,7 +398,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
             href="https://www.janocaminho.com.br"
             target="_blank"
             rel="noreferrer"
-            className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/24 text-[11px] font-semibold text-white/92 hover:bg-white/16 hover:text-white transition ${compactDesktop ? 'lg:hidden' : ''}`}
+            className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/8 border border-white/20 text-[11px] font-semibold text-white/90 hover:bg-white/12 hover:text-white transition ${compactDesktop ? 'lg:hidden' : ''}`}
             title="Ir para janocaminho.com.br"
           >
             <span className="h-5 w-5 rounded-full overflow-hidden bg-slate-900/70 ring-1 ring-white/35">
@@ -408,10 +408,10 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
             <span className="font-bold">Já no Caminho</span>
           </a>
           {onToggleHeader && (
-            <div className="flex items-center rounded-full bg-white/10 border border-white/22 p-0.5 text-[11px] sm:text-xs font-semibold">
+            <div className="flex items-center rounded-full bg-white/8 border border-white/18 p-0.5 text-[11px] sm:text-xs font-semibold shadow-[0_6px_14px_-12px_rgba(0,0,0,0.35)]">
               <button
                 type="button"
-                className="px-3 py-1.5 rounded-full bg-white/16 text-white shadow-sm"
+                className="px-3 py-1.5 rounded-full bg-white/12 text-white shadow-[0_4px_10px_-8px_rgba(0,0,0,0.3)]"
                 onClick={() => {
                   window.dispatchEvent(new CustomEvent('adminHeader:set', { detail: { visible: true } }));
                 }}
@@ -420,7 +420,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
               </button>
               <button
                 type="button"
-                className="px-3 py-1.5 rounded-full text-white/80 hover:text-white hover:bg-white/12 transition flex items-center gap-1.5"
+                className="px-3 py-1.5 rounded-full text-white/80 hover:text-white hover:bg-white/10 transition flex items-center gap-1.5"
                 onClick={() => {
                   window.dispatchEvent(new CustomEvent('adminHeader:set', { detail: { visible: false } }));
                 }}
@@ -435,7 +435,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
               logout();
               navigate('/admin');
             }}
-            className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-full bg-white/10 hover:bg-white/16 border border-white/20 text-xs font-semibold"
+            className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-full bg-white/8 hover:bg-white/12 border border-white/18 text-xs font-semibold"
           >
             <SignOut size={14} weight="duotone" /> Sair
           </button>
