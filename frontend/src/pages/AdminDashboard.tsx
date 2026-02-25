@@ -451,6 +451,8 @@ const ReviewsView = ({ reviews = [], canUseDeliveryReviewsAndTips = false, onUpg
   const [ratingFilter, setRatingFilter] = useState<'all' | '1' | '2' | '3' | '4' | '5'>('all');
   const [commentFilter, setCommentFilter] = useState<'all' | 'with_comment'>('all');
   const [tipFilter, setTipFilter] = useState<'all' | 'with_tip'>('all');
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const normalized = query.trim().toLowerCase();
   const normalizedRows = useMemo(() => (Array.isArray(reviews) ? reviews : []), [reviews]);
   const getInitials = (value: string) => {
@@ -515,6 +517,21 @@ const ReviewsView = ({ reviews = [], canUseDeliveryReviewsAndTips = false, onUpg
       return haystack.includes(normalized);
     });
   }, [normalizedRows, ratingFilter, commentFilter, tipFilter, normalized, storeSlug]);
+  const totalPages = Math.max(1, Math.ceil(rows.length / pageSize));
+  const pagedRows = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return rows.slice(start, start + pageSize);
+  }, [rows, page, pageSize]);
+  const rangeStart = rows.length === 0 ? 0 : (page - 1) * pageSize + 1;
+  const rangeEnd = Math.min(rows.length, page * pageSize);
+
+  useEffect(() => {
+    setPage(1);
+  }, [query, ratingFilter, commentFilter, tipFilter, pageSize]);
+
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+  }, [page, totalPages]);
 
   return (
     <div className="space-y-4">
@@ -569,61 +586,96 @@ const ReviewsView = ({ reviews = [], canUseDeliveryReviewsAndTips = false, onUpg
           Nenhuma avaliação encontrada.
         </div>
       ) : (
-        <div className="grid gap-3 lg:grid-cols-2">
-          {rows.map((row: any) => (
-            <article
-              key={row.id}
-              className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_18px_36px_-28px_rgba(15,23,42,0.55)] transition hover:-translate-y-0.5 hover:shadow-[0_24px_42px_-30px_rgba(15,23,42,0.6)]"
-            >
-              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-brand-primary/70 via-emerald-500/60 to-sky-500/70" />
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0 flex items-start gap-3">
-                  <div className="h-10 w-10 flex-shrink-0 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 font-black text-xs flex items-center justify-center">
-                    {getInitials(row.customerName || 'Cliente')}
+        <div className="space-y-3">
+          <div className="grid gap-3 lg:grid-cols-2">
+            {pagedRows.map((row: any) => (
+              <article
+                key={row.id}
+                className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_18px_36px_-28px_rgba(15,23,42,0.55)] transition hover:-translate-y-0.5 hover:shadow-[0_24px_42px_-30px_rgba(15,23,42,0.6)]"
+              >
+                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-brand-primary/70 via-emerald-500/60 to-sky-500/70" />
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex items-start gap-3">
+                    <div className="h-10 w-10 flex-shrink-0 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 font-black text-xs flex items-center justify-center">
+                      {getInitials(row.customerName || 'Cliente')}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-black text-slate-900 truncate">{row.customerName || 'Cliente'}</p>
+                      <p className="text-[11px] text-slate-500">Pedido #{formatOrderDisplayId(row.orderId, storeSlug)}</p>
+                      <p className="text-[11px] text-slate-500 mt-0.5">{formatDateTime(row.createdAt)}</p>
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-black text-slate-900 truncate">{row.customerName || 'Cliente'}</p>
-                    <p className="text-[11px] text-slate-500">Pedido #{formatOrderDisplayId(row.orderId, storeSlug)}</p>
-                    <p className="text-[11px] text-slate-500 mt-0.5">{formatDateTime(row.createdAt)}</p>
+                  <div className="flex flex-wrap items-center justify-end gap-1.5 text-xs">
+                    <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 font-semibold text-slate-700">
+                      {renderStars(row.storeRating)}
+                      Loja {Number(row.storeRating || 0).toFixed(1)}
+                    </span>
+                    {canUseDeliveryReviewsAndTips && row.deliveryRating ? (
+                      <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 font-semibold text-emerald-700">
+                        {renderStars(row.deliveryRating)}
+                        Entrega {Number(row.deliveryRating || 0).toFixed(1)}
+                      </span>
+                    ) : null}
+                    {canUseDeliveryReviewsAndTips && Number(row.tipAmount || 0) > 0 ? (
+                      <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 font-semibold text-emerald-700">
+                        Gorjeta {formatCurrency(Number(row.tipAmount || 0))}
+                      </span>
+                    ) : null}
                   </div>
                 </div>
-                <div className="flex flex-wrap items-center justify-end gap-1.5 text-xs">
-                  <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 font-semibold text-slate-700">
-                    {renderStars(row.storeRating)}
-                    Loja {Number(row.storeRating || 0).toFixed(1)}
-                  </span>
-                  {canUseDeliveryReviewsAndTips && row.deliveryRating ? (
-                    <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 font-semibold text-emerald-700">
-                      {renderStars(row.deliveryRating)}
-                      Entrega {Number(row.deliveryRating || 0).toFixed(1)}
-                    </span>
-                  ) : null}
-                  {canUseDeliveryReviewsAndTips && Number(row.tipAmount || 0) > 0 ? (
-                    <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 font-semibold text-emerald-700">
-                      Gorjeta {formatCurrency(Number(row.tipAmount || 0))}
-                    </span>
-                  ) : null}
-                </div>
-              </div>
-              {row.comment ? (
-                <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50/70 px-3 py-2.5">
-                  <p className="text-sm text-slate-700 leading-relaxed">{row.comment}</p>
-                </div>
-              ) : (
-                <p className="mt-3 text-xs text-slate-400">Sem comentário.</p>
-              )}
-              <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
-                <span className="rounded-full border border-slate-200 bg-white px-2 py-1 font-semibold">
-                  ID: {String(row.orderId || '').slice(0, 8)}
-                </span>
-                {canUseDeliveryReviewsAndTips && row.motoboyName ? (
+                {row.comment ? (
+                  <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50/70 px-3 py-2.5">
+                    <p className="text-sm text-slate-700 leading-relaxed">{row.comment}</p>
+                  </div>
+                ) : (
+                  <p className="mt-3 text-xs text-slate-400">Sem comentário.</p>
+                )}
+                <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
                   <span className="rounded-full border border-slate-200 bg-white px-2 py-1 font-semibold">
-                    Entregador: {row.motoboyName}
+                    ID: {String(row.orderId || '').slice(0, 8)}
                   </span>
-                ) : null}
-              </div>
-            </article>
-          ))}
+                  {canUseDeliveryReviewsAndTips && row.motoboyName ? (
+                    <span className="rounded-full border border-slate-200 bg-white px-2 py-1 font-semibold">
+                      Entregador: {row.motoboyName}
+                    </span>
+                  ) : null}
+                </div>
+              </article>
+            ))}
+          </div>
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2">
+            <p className="text-xs text-slate-500">
+              Exibindo {rangeStart}-{rangeEnd} de {rows.length} avaliações
+            </p>
+            <div className="flex items-center gap-2">
+              <select
+                value={pageSize}
+                onChange={(event) => setPageSize(Number(event.target.value))}
+                className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-600"
+              >
+                {[10, 20, 30].map((size) => (
+                  <option key={size} value={size}>{size}/página</option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+                disabled={page <= 1}
+                className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+              >
+                Anterior
+              </button>
+              <span className="text-xs text-slate-500">Página {page} de {totalPages}</span>
+              <button
+                type="button"
+                onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+                disabled={page >= totalPages}
+                className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+              >
+                Próxima
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
