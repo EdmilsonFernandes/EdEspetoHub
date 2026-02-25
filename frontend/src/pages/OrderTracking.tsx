@@ -104,6 +104,7 @@ export function OrderTracking() {
   const [reviewError, setReviewError] = useState('');
   const [showAllItemsMobile, setShowAllItemsMobile] = useState(false);
   const [showTimelineMobile, setShowTimelineMobile] = useState(false);
+  const [showItemsSheetMobile, setShowItemsSheetMobile] = useState(false);
   const [tipPixCopied, setTipPixCopied] = useState(false);
   const [reviewForm, setReviewForm] = useState({
     storeRating: 0,
@@ -474,6 +475,9 @@ export function OrderTracking() {
   useEffect(() => {
     setShowTimelineMobile(false);
   }, [order?.id, status, deliveryStatus]);
+  useEffect(() => {
+    setShowItemsSheetMobile(false);
+  }, [order?.id]);
 
   useEffect(() => {
     setFrozenElapsedMs(null);
@@ -681,7 +685,7 @@ export function OrderTracking() {
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24 sm:pb-12 sm:py-12">
         <div className="bg-white border border-gray-100 rounded-3xl shadow-xl p-6 sm:p-8">
           {loading && (
             <div className="flex flex-col items-center justify-center py-12 gap-3 text-gray-500">
@@ -1542,6 +1546,109 @@ export function OrderTracking() {
           )}
         </div>
       </main>
+
+      {!loading && !error && order ? (
+        <div className="sm:hidden fixed bottom-0 inset-x-0 z-40 border-t border-slate-200 bg-white/95 backdrop-blur px-4 py-3 shadow-[0_-16px_36px_-28px_rgba(15,23,42,0.65)]">
+          <button
+            type="button"
+            onClick={() => setShowItemsSheetMobile(true)}
+            className="w-full rounded-2xl bg-slate-900 text-white px-4 py-3 flex items-center justify-between"
+          >
+            <span className="text-sm font-bold">
+              Ver itens do pedido ({Array.isArray(order?.items) ? order.items.length : 0})
+            </span>
+            <span className="text-sm font-black">{formatCurrency(order?.total || 0)}</span>
+          </button>
+        </div>
+      ) : null}
+
+      {showItemsSheetMobile && order ? (
+        <div className="sm:hidden fixed inset-0 z-50">
+          <button
+            type="button"
+            aria-label="Fechar itens do pedido"
+            onClick={() => setShowItemsSheetMobile(false)}
+            className="absolute inset-0 bg-black/45"
+          />
+          <div className="absolute inset-x-0 bottom-0 rounded-t-3xl border border-slate-200 bg-white max-h-[78vh] overflow-y-auto">
+            <div className="sticky top-0 z-10 bg-white/95 backdrop-blur border-b border-slate-100 px-4 py-3 flex items-center justify-between">
+              <p className="text-sm font-black text-slate-900">Itens do pedido</p>
+              <button
+                type="button"
+                onClick={() => setShowItemsSheetMobile(false)}
+                className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 bg-slate-50"
+              >
+                Fechar
+              </button>
+            </div>
+
+            <div className="px-4 py-3 space-y-3">
+              {(order.items || []).map((item) => (
+                <div key={`sheet-${item.id || item.productId}`} className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start gap-2 min-w-0">
+                      {item.imageUrl || item.image || item.product?.imageUrl ? (
+                        <img
+                          src={resolveAssetUrl(item.imageUrl || item.image || item.product?.imageUrl)}
+                          alt={item.name}
+                          className="w-10 h-10 rounded-xl object-cover border border-gray-200"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-xl bg-gray-100 border border-gray-200 flex items-center justify-center text-xs text-gray-400">
+                          🍽️
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-slate-900 break-words">
+                          {item.quantity}x {item.name}
+                        </p>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {item?.cookingPoint && (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800 border border-amber-200">
+                              {item.cookingPoint}
+                            </span>
+                          )}
+                          {item?.passSkewer && (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-fuchsia-100 text-fuchsia-700 border border-fuchsia-200">
+                              passar farinha
+                            </span>
+                          )}
+                          {formatSelectedModifiers(item?.selectedModifiers || []).map((modifierName) => (
+                            <span
+                              key={`sheet-${item.id || item.productId}-${modifierName}`}
+                              className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200"
+                            >
+                              + {modifierName}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    <span className="text-sm font-bold text-slate-900">
+                      {item.originalPrice && Number(item.originalPrice) > Number(item.price)
+                        ? formatCurrency(Number(item.price))
+                        : formatCurrency(Number(item.price || 0))}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="border-t border-slate-100 px-4 py-3 space-y-2 bg-white">
+              {hasDeliveryFee ? (
+                <div className="flex items-center justify-between text-xs font-semibold text-slate-600">
+                  <span>Frete</span>
+                  <span>{formatCurrency(order?.deliveryFee || 0)}</span>
+                </div>
+              ) : null}
+              <div className="flex items-center justify-between text-sm font-black text-slate-900">
+                <span>Total do pedido</span>
+                <span>{formatCurrency(order?.total || 0)}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
