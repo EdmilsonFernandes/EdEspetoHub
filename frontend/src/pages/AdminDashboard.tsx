@@ -448,23 +448,49 @@ const OrdersView = ({ orders, products, storeSlug }) => {
 
 const ReviewsView = ({ reviews = [], canUseDeliveryReviewsAndTips = false, onUpgrade, storeSlug }) => {
   const [query, setQuery] = useState('');
-  const [ratingFilter, setRatingFilter] = useState<'all' | '5'>('all');
+  const [ratingFilter, setRatingFilter] = useState<'all' | '1' | '2' | '3' | '4' | '5'>('all');
   const [commentFilter, setCommentFilter] = useState<'all' | 'with_comment'>('all');
   const [tipFilter, setTipFilter] = useState<'all' | 'with_tip'>('all');
   const normalized = query.trim().toLowerCase();
   const normalizedRows = useMemo(() => (Array.isArray(reviews) ? reviews : []), [reviews]);
+  const normalizeRating = (value: unknown) => {
+    const parsed = Number(value || 0);
+    if (!Number.isFinite(parsed)) return 0;
+    return Math.max(1, Math.min(5, Math.round(parsed)));
+  };
+  const renderStars = (value: unknown) => {
+    const score = normalizeRating(value);
+    return (
+      <span className="inline-flex items-center gap-0.5" aria-label={`${score} estrelas`}>
+        {[1, 2, 3, 4, 5].map((star) => (
+          <Star
+            key={star}
+            size={11}
+            weight={star <= score ? 'fill' : 'regular'}
+            className={star <= score ? 'text-amber-400' : 'text-slate-300'}
+          />
+        ))}
+      </span>
+    );
+  };
   const filterCounts = useMemo(() => {
     const all = normalizedRows.length;
-    const five = normalizedRows.filter((row: any) => Number(row?.storeRating || 0) >= 5).length;
+    const ratings = {
+      1: normalizedRows.filter((row: any) => normalizeRating(row?.storeRating) === 1).length,
+      2: normalizedRows.filter((row: any) => normalizeRating(row?.storeRating) === 2).length,
+      3: normalizedRows.filter((row: any) => normalizeRating(row?.storeRating) === 3).length,
+      4: normalizedRows.filter((row: any) => normalizeRating(row?.storeRating) === 4).length,
+      5: normalizedRows.filter((row: any) => normalizeRating(row?.storeRating) === 5).length,
+    };
     const withComment = normalizedRows.filter((row: any) => String(row?.comment || '').trim().length > 0).length;
     const withTip = normalizedRows.filter((row: any) => Number(row?.tipAmount || 0) > 0).length;
-    return { all, five, withComment, withTip };
+    return { all, ratings, withComment, withTip };
   }, [normalizedRows]);
 
   const rows = useMemo(() => {
     return normalizedRows
       .filter((row: any) => {
-        if (ratingFilter === '5' && Number(row?.storeRating || 0) < 5) return false;
+        if (ratingFilter !== 'all' && normalizeRating(row?.storeRating) !== Number(ratingFilter)) return false;
         if (commentFilter === 'with_comment' && String(row?.comment || '').trim().length === 0) return false;
         if (tipFilter === 'with_tip' && Number(row?.tipAmount || 0) <= 0) return false;
         return true;
@@ -511,7 +537,11 @@ const ReviewsView = ({ reviews = [], canUseDeliveryReviewsAndTips = false, onUpg
       <div className="flex flex-wrap items-center gap-2">
         {[
           { id: 'all', label: `Todas (${filterCounts.all})`, active: ratingFilter === 'all' && commentFilter === 'all' && tipFilter === 'all', onClick: () => { setRatingFilter('all'); setCommentFilter('all'); setTipFilter('all'); } },
-          { id: 'five', label: `Só 5 estrelas (${filterCounts.five})`, active: ratingFilter === '5', onClick: () => setRatingFilter((prev) => (prev === '5' ? 'all' : '5')) },
+          { id: 'r5', label: `5★ (${filterCounts.ratings[5]})`, active: ratingFilter === '5', onClick: () => setRatingFilter((prev) => (prev === '5' ? 'all' : '5')) },
+          { id: 'r4', label: `4★ (${filterCounts.ratings[4]})`, active: ratingFilter === '4', onClick: () => setRatingFilter((prev) => (prev === '4' ? 'all' : '4')) },
+          { id: 'r3', label: `3★ (${filterCounts.ratings[3]})`, active: ratingFilter === '3', onClick: () => setRatingFilter((prev) => (prev === '3' ? 'all' : '3')) },
+          { id: 'r2', label: `2★ (${filterCounts.ratings[2]})`, active: ratingFilter === '2', onClick: () => setRatingFilter((prev) => (prev === '2' ? 'all' : '2')) },
+          { id: 'r1', label: `1★ (${filterCounts.ratings[1]})`, active: ratingFilter === '1', onClick: () => setRatingFilter((prev) => (prev === '1' ? 'all' : '1')) },
           { id: 'comment', label: `Com comentário (${filterCounts.withComment})`, active: commentFilter === 'with_comment', onClick: () => setCommentFilter((prev) => (prev === 'with_comment' ? 'all' : 'with_comment')) },
           { id: 'tip', label: `Com gorjeta (${filterCounts.withTip})`, active: tipFilter === 'with_tip', onClick: () => setTipFilter((prev) => (prev === 'with_tip' ? 'all' : 'with_tip')) },
         ].map((chip) => (
@@ -544,11 +574,12 @@ const ReviewsView = ({ reviews = [], canUseDeliveryReviewsAndTips = false, onUpg
                 </div>
                 <div className="flex items-center gap-2 text-xs">
                   <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2 py-1 font-semibold text-slate-700">
-                    <Star size={12} weight="fill" className="text-amber-400" />
+                    {renderStars(row.storeRating)}
                     Loja {Number(row.storeRating || 0).toFixed(1)}
                   </span>
                   {canUseDeliveryReviewsAndTips && row.deliveryRating ? (
                     <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-1 font-semibold text-emerald-700">
+                      {renderStars(row.deliveryRating)}
                       Entrega {Number(row.deliveryRating || 0).toFixed(1)}
                     </span>
                   ) : null}
