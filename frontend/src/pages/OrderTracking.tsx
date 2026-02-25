@@ -102,6 +102,7 @@ export function OrderTracking() {
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [reviewState, setReviewState] = useState<any>(null);
   const [reviewError, setReviewError] = useState('');
+  const [showAllItemsMobile, setShowAllItemsMobile] = useState(false);
   const [tipPixCopied, setTipPixCopied] = useState(false);
   const [reviewForm, setReviewForm] = useState({
     storeRating: 0,
@@ -466,6 +467,10 @@ export function OrderTracking() {
   }, [order?.id]);
 
   useEffect(() => {
+    setShowAllItemsMobile(false);
+  }, [order?.id]);
+
+  useEffect(() => {
     setFrozenElapsedMs(null);
   }, [order?.id]);
 
@@ -631,6 +636,16 @@ export function OrderTracking() {
   const progress = steps.length > 1 ? Math.round((currentIndex / (steps.length - 1)) * 100) : 0;
   const completedStepClass = 'bg-slate-100 text-slate-500 border-slate-200';
   const upcomingStepClass = 'bg-white text-slate-400 border-slate-200 opacity-70';
+  const totalItems = Array.isArray(order?.items)
+    ? order.items.reduce((acc: number, item: any) => acc + Number(item?.quantity || 1), 0)
+    : 0;
+  const mobileItemsLimit = 2;
+  const itemsToRender =
+    Array.isArray(order?.items) && !showAllItemsMobile
+      ? order.items.slice(0, mobileItemsLimit)
+      : Array.isArray(order?.items)
+      ? order.items
+      : [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -772,6 +787,23 @@ export function OrderTracking() {
                 </div>
               </div>
 
+              <div className="sm:hidden rounded-2xl border border-slate-200 bg-white p-3">
+                <div className="flex items-center justify-between gap-2">
+                  <div>
+                    <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500 font-bold">Resumo rápido</p>
+                    <p className="text-sm font-semibold text-slate-800 mt-1">
+                      {totalItems} item(ns) • {formatCurrency(order.total || 0)}
+                    </p>
+                  </div>
+                  <a
+                    href="#order-summary"
+                    className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700"
+                  >
+                    Ver itens
+                  </a>
+                </div>
+              </div>
+
               <div className="rounded-2xl border border-gray-100 p-4 bg-gray-50">
                 <div className="flex items-center gap-3 mb-4">
                   <ChefHat className="text-red-500" weight="duotone" />
@@ -795,7 +827,59 @@ export function OrderTracking() {
                   </div>
                   <div className="mt-2 text-xs text-gray-500">{progress}% completo</div>
                 </div>
-                <div className="flex flex-nowrap gap-2 sm:gap-3 overflow-x-auto overflow-y-visible no-scrollbar py-1 pb-2">
+                <div className="sm:hidden grid gap-2 py-1 pb-2">
+                  {steps.map((step) => {
+                    const stepIndex = steps.findIndex((item) => item.id === step.id);
+                    const isCompleted = stepIndex >= 0 && stepIndex < currentIndex;
+                    const isCurrent = stepIndex === currentIndex;
+                    const showBike = isDelivery && step.id === 'in_delivery';
+                    const styleKey = step.id === 'ready' ? 'ready' : step.id;
+                    const stepTone = stepStyles[styleKey] || stepStyles.pending;
+                    const StepIcon = stepIconById[step.id] || Clock;
+                    return (
+                      <div
+                        key={`mobile-${step.id}`}
+                        aria-current={isCurrent ? 'step' : undefined}
+                        className={[
+                          'rounded-2xl border px-3 py-2.5 flex items-center gap-2.5 text-xs select-none',
+                          isCurrent
+                            ? `${stepTone.current} ring-2 ring-brand-primary/35 shadow-sm`
+                            : isCompleted
+                              ? completedStepClass
+                              : upcomingStepClass,
+                        ].join(' ')}
+                      >
+                        <span
+                          className={`h-8 w-8 rounded-xl border grid place-items-center ${
+                            isCurrent
+                              ? 'bg-white/80 border-white/70'
+                              : isCompleted
+                                ? 'bg-white/70 border-slate-200'
+                                : 'bg-slate-50 border-slate-200'
+                          }`}
+                        >
+                          {showBike ? (
+                            <Bicycle size={16} weight="duotone" />
+                          ) : isCurrent && !isReady ? (
+                            <CircleNotch size={16} weight="duotone" className="animate-spin" />
+                          ) : (
+                            <StepIcon size={16} weight="duotone" />
+                          )}
+                        </span>
+                        <span className="leading-tight">
+                          <span className={`block text-[12px] ${isCurrent ? 'font-extrabold' : 'font-semibold'}`}>
+                            {step.label}
+                          </span>
+                          <span className="block text-[10px] uppercase tracking-[0.14em] opacity-75">
+                            {isCurrent ? 'Agora' : isCompleted ? 'Concluído' : 'Próximo'}
+                          </span>
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="hidden sm:flex flex-nowrap gap-2 sm:gap-3 overflow-x-auto overflow-y-visible no-scrollbar py-1 pb-2">
                   {steps.map((step) => {
                     const stepIndex = steps.findIndex((item) => item.id === step.id);
                     const isCompleted = stepIndex >= 0 && stepIndex < currentIndex;
@@ -839,7 +923,7 @@ export function OrderTracking() {
                             {step.label}
                           </span>
                           <span className="block text-[10px] uppercase tracking-[0.14em] opacity-75">
-                            {isCurrent ? 'Agora' : isCompleted ? 'Concluido' : 'Proximo'}
+                            {isCurrent ? 'Agora' : isCompleted ? 'Concluído' : 'Próximo'}
                           </span>
                         </span>
                       </div>
@@ -849,7 +933,7 @@ export function OrderTracking() {
               </div>
 
               <div className="grid sm:grid-cols-2 gap-4">
-                <div className="rounded-3xl premium-card p-5">
+                <div id="order-summary" className="rounded-3xl premium-card p-5">
                   <div className="flex items-center justify-between gap-3 mb-4">
                     <p className="text-sm font-semibold text-gray-900">Resumo do pedido</p>
                     {paymentMeta?.label && (
@@ -862,7 +946,7 @@ export function OrderTracking() {
                     )}
                   </div>
                   <div className="space-y-3 text-sm text-gray-600">
-                    {(order.items || []).map((item) => (
+                    {itemsToRender.map((item) => (
                       <div key={item.id || item.productId} className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-3">
                           {item.imageUrl || item.image || item.product?.imageUrl ? (
@@ -914,6 +998,17 @@ export function OrderTracking() {
                         )}
                       </div>
                     ))}
+                    {Array.isArray(order?.items) && order.items.length > mobileItemsLimit && (
+                      <button
+                        type="button"
+                        onClick={() => setShowAllItemsMobile((prev) => !prev)}
+                        className="sm:hidden mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700"
+                      >
+                        {showAllItemsMobile
+                          ? 'Mostrar menos itens'
+                          : `Ver todos os itens (${order.items.length})`}
+                      </button>
+                    )}
                   </div>
                   {hasDeliveryFee ? (
                     <div className="mt-5 flex items-center justify-between text-xs font-semibold text-slate-600 border-t border-gray-100 pt-4">
