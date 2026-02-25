@@ -636,6 +636,9 @@ export function OrderTracking() {
   const progress = steps.length > 1 ? Math.round((currentIndex / (steps.length - 1)) * 100) : 0;
   const completedStepClass = 'bg-slate-100 text-slate-500 border-slate-200';
   const upcomingStepClass = 'bg-white text-slate-400 border-slate-200 opacity-70';
+  const currentStepItem = steps[currentIndex] || steps[0];
+  const nextStepItem = currentIndex >= 0 && currentIndex < steps.length - 1 ? steps[currentIndex + 1] : null;
+  const CurrentStepIcon = stepIconById[currentStepItem?.id] || CheckCircle;
   const totalItems = Array.isArray(order?.items)
     ? order.items.reduce((acc: number, item: any) => acc + Number(item?.quantity || 1), 0)
     : 0;
@@ -827,56 +830,61 @@ export function OrderTracking() {
                   </div>
                   <div className="mt-2 text-xs text-gray-500">{progress}% completo</div>
                 </div>
-                <div className="sm:hidden grid gap-2 py-1 pb-2">
-                  {steps.map((step) => {
-                    const stepIndex = steps.findIndex((item) => item.id === step.id);
-                    const isCompleted = stepIndex >= 0 && stepIndex < currentIndex;
-                    const isCurrent = stepIndex === currentIndex;
-                    const showBike = isDelivery && step.id === 'in_delivery';
-                    const styleKey = step.id === 'ready' ? 'ready' : step.id;
-                    const stepTone = stepStyles[styleKey] || stepStyles.pending;
-                    const StepIcon = stepIconById[step.id] || Clock;
-                    return (
-                      <div
-                        key={`mobile-${step.id}`}
-                        aria-current={isCurrent ? 'step' : undefined}
-                        className={[
-                          'rounded-2xl border px-3 py-2.5 flex items-center gap-2.5 text-xs select-none',
-                          isCurrent
-                            ? `${stepTone.current} ring-2 ring-brand-primary/35 shadow-sm`
-                            : isCompleted
-                              ? completedStepClass
-                              : upcomingStepClass,
-                        ].join(' ')}
-                      >
-                        <span
-                          className={`h-8 w-8 rounded-xl border grid place-items-center ${
-                            isCurrent
-                              ? 'bg-white/80 border-white/70'
-                              : isCompleted
-                                ? 'bg-white/70 border-slate-200'
-                                : 'bg-slate-50 border-slate-200'
-                          }`}
-                        >
-                          {showBike ? (
-                            <Bicycle size={16} weight="duotone" />
-                          ) : isCurrent && !isReady ? (
-                            <CircleNotch size={16} weight="duotone" className="animate-spin" />
-                          ) : (
-                            <StepIcon size={16} weight="duotone" />
-                          )}
-                        </span>
-                        <span className="leading-tight">
-                          <span className={`block text-[12px] ${isCurrent ? 'font-extrabold' : 'font-semibold'}`}>
-                            {step.label}
-                          </span>
-                          <span className="block text-[10px] uppercase tracking-[0.14em] opacity-75">
-                            {isCurrent ? 'Agora' : isCompleted ? 'Concluído' : 'Próximo'}
-                          </span>
-                        </span>
+                <div className="sm:hidden space-y-2 py-1 pb-2">
+                  <div className="rounded-2xl border border-brand-primary/25 bg-brand-primary-soft px-3 py-2.5">
+                    <p className="text-[10px] uppercase tracking-[0.18em] text-brand-primary/80 font-bold">Etapa atual</p>
+                    <div className="mt-1.5 flex items-center gap-2.5">
+                      <span className="h-8 w-8 rounded-xl border border-brand-primary/20 bg-white grid place-items-center text-brand-primary">
+                        {isDelivery && currentStepItem?.id === 'in_delivery' ? (
+                          <Bicycle size={16} weight="duotone" />
+                        ) : !isReady ? (
+                          <CircleNotch size={16} weight="duotone" className="animate-spin" />
+                        ) : (
+                          <CurrentStepIcon size={16} weight="duotone" />
+                        )}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="text-sm font-extrabold text-slate-900">{currentStepItem?.label || statusLabel}</p>
+                        <p className="text-[11px] text-slate-600">Atualizando automaticamente</p>
                       </div>
-                    );
-                  })}
+                    </div>
+                  </div>
+
+                  {nextStepItem ? (
+                    <div className="rounded-2xl border border-slate-200 bg-white px-3 py-2">
+                      <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500 font-bold">Próximo passo</p>
+                      <p className="text-xs font-semibold text-slate-700 mt-1">{nextStepItem.label}</p>
+                    </div>
+                  ) : null}
+
+                  <div className="rounded-2xl border border-slate-200 bg-white px-3 py-2.5">
+                    <p className="text-[10px] uppercase tracking-[0.16em] text-slate-500 font-bold mb-2">Linha do pedido</p>
+                    <div className="space-y-1.5">
+                      {steps.map((step) => {
+                        const stepIndex = steps.findIndex((item) => item.id === step.id);
+                        const isCompleted = stepIndex >= 0 && stepIndex < currentIndex;
+                        const isCurrent = stepIndex === currentIndex;
+                        return (
+                          <div key={`mobile-line-${step.id}`} className="flex items-center gap-2">
+                            <span
+                              className={`h-5 w-5 rounded-full border grid place-items-center ${
+                                isCurrent
+                                  ? 'border-brand-primary bg-brand-primary text-white'
+                                  : isCompleted
+                                    ? 'border-emerald-300 bg-emerald-50 text-emerald-700'
+                                    : 'border-slate-200 bg-slate-50 text-slate-400'
+                              }`}
+                            >
+                              {isCompleted ? <CheckCircle size={12} weight="fill" /> : <span className="text-[9px] font-bold">{stepIndex + 1}</span>}
+                            </span>
+                            <span className={`text-[12px] ${isCurrent ? 'font-extrabold text-slate-900' : isCompleted ? 'font-semibold text-slate-700' : 'text-slate-500'}`}>
+                              {step.label}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
 
                 <div className="hidden sm:flex flex-nowrap gap-2 sm:gap-3 overflow-x-auto overflow-y-visible no-scrollbar py-1 pb-2">
