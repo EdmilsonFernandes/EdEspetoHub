@@ -103,6 +103,7 @@ export function OrderTracking() {
   const [reviewState, setReviewState] = useState<any>(null);
   const [reviewError, setReviewError] = useState('');
   const [showAllItemsMobile, setShowAllItemsMobile] = useState(false);
+  const [showTimelineMobile, setShowTimelineMobile] = useState(false);
   const [tipPixCopied, setTipPixCopied] = useState(false);
   const [reviewForm, setReviewForm] = useState({
     storeRating: 0,
@@ -469,6 +470,10 @@ export function OrderTracking() {
   useEffect(() => {
     setShowAllItemsMobile(false);
   }, [order?.id]);
+
+  useEffect(() => {
+    setShowTimelineMobile(false);
+  }, [order?.id, status, deliveryStatus]);
 
   useEffect(() => {
     setFrozenElapsedMs(null);
@@ -858,32 +863,47 @@ export function OrderTracking() {
                   ) : null}
 
                   <div className="rounded-2xl border border-slate-200 bg-white px-3 py-2.5">
-                    <p className="text-[10px] uppercase tracking-[0.16em] text-slate-500 font-bold mb-2">Linha do pedido</p>
-                    <div className="space-y-1.5">
-                      {steps.map((step) => {
-                        const stepIndex = steps.findIndex((item) => item.id === step.id);
-                        const isCompleted = stepIndex >= 0 && stepIndex < currentIndex;
-                        const isCurrent = stepIndex === currentIndex;
-                        return (
-                          <div key={`mobile-line-${step.id}`} className="flex items-center gap-2">
-                            <span
-                              className={`h-5 w-5 rounded-full border grid place-items-center ${
-                                isCurrent
-                                  ? 'border-brand-primary bg-brand-primary text-white'
-                                  : isCompleted
-                                    ? 'border-emerald-300 bg-emerald-50 text-emerald-700'
-                                    : 'border-slate-200 bg-slate-50 text-slate-400'
-                              }`}
-                            >
-                              {isCompleted ? <CheckCircle size={12} weight="fill" /> : <span className="text-[9px] font-bold">{stepIndex + 1}</span>}
-                            </span>
-                            <span className={`text-[12px] ${isCurrent ? 'font-extrabold text-slate-900' : isCompleted ? 'font-semibold text-slate-700' : 'text-slate-500'}`}>
-                              {step.label}
-                            </span>
-                          </div>
-                        );
-                      })}
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-[10px] uppercase tracking-[0.16em] text-slate-500 font-bold">Linha do pedido</p>
+                      <button
+                        type="button"
+                        onClick={() => setShowTimelineMobile((prev) => !prev)}
+                        className="text-[11px] font-semibold text-slate-700 rounded-full border border-slate-200 px-2.5 py-1 bg-slate-50"
+                      >
+                        {showTimelineMobile ? 'Ocultar' : 'Ver completa'}
+                      </button>
                     </div>
+                    {showTimelineMobile ? (
+                      <div className="space-y-1.5 mt-2">
+                        {steps.map((step) => {
+                          const stepIndex = steps.findIndex((item) => item.id === step.id);
+                          const isCompleted = stepIndex >= 0 && stepIndex < currentIndex;
+                          const isCurrent = stepIndex === currentIndex;
+                          return (
+                            <div key={`mobile-line-${step.id}`} className="flex items-center gap-2">
+                              <span
+                                className={`h-5 w-5 rounded-full border grid place-items-center ${
+                                  isCurrent
+                                    ? 'border-brand-primary bg-brand-primary text-white'
+                                    : isCompleted
+                                      ? 'border-emerald-300 bg-emerald-50 text-emerald-700'
+                                      : 'border-slate-200 bg-slate-50 text-slate-400'
+                                }`}
+                              >
+                                {isCompleted ? <CheckCircle size={12} weight="fill" /> : <span className="text-[9px] font-bold">{stepIndex + 1}</span>}
+                              </span>
+                              <span className={`text-[12px] ${isCurrent ? 'font-extrabold text-slate-900' : isCompleted ? 'font-semibold text-slate-700' : 'text-slate-500'}`}>
+                                {step.label}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <p className="mt-2 text-xs text-slate-500">
+                        Toque em <span className="font-semibold">Ver completa</span> para abrir todas as etapas.
+                      </p>
+                    )}
                   </div>
                 </div>
 
