@@ -480,6 +480,10 @@ const ReviewsView = ({ reviews = [], canUseDeliveryReviewsAndTips = false, onUpg
       </span>
     );
   };
+  const parseTime = (value: unknown) => {
+    const parsed = new Date(value as any).getTime();
+    return Number.isFinite(parsed) ? parsed : 0;
+  };
   const filterCounts = useMemo(() => {
     const all = normalizedRows.length;
     const ratings = {
@@ -517,6 +521,81 @@ const ReviewsView = ({ reviews = [], canUseDeliveryReviewsAndTips = false, onUpg
       return haystack.includes(normalized);
     });
   }, [normalizedRows, ratingFilter, commentFilter, tipFilter, normalized, storeSlug]);
+  const insights = useMemo(() => {
+    const base = normalizedRows;
+    const total = base.length;
+    const avgStore =
+      total > 0
+        ? base.reduce((acc: number, row: any) => acc + Number(row?.storeRating || 0), 0) / total
+        : 0;
+    const withComment = base.filter((row: any) => String(row?.comment || '').trim().length > 0).length;
+    const withTip = base.filter((row: any) => Number(row?.tipAmount || 0) > 0).length;
+    const now = Date.now();
+    const last7 = base.filter((row: any) => {
+      const ts = parseTime(row?.createdAt);
+      return ts > 0 && now - ts <= 7 * 24 * 60 * 60 * 1000;
+    });
+    const avg7 =
+      last7.length > 0
+        ? last7.reduce((acc: number, row: any) => acc + Number(row?.storeRating || 0), 0) / last7.length
+        : 0;
+    return {
+      total,
+      avgStore,
+      avg7,
+      withCommentRate: total > 0 ? (withComment / total) * 100 : 0,
+      withTipRate: total > 0 ? (withTip / total) * 100 : 0,
+    };
+  }, [normalizedRows]);
+  const ratingDistribution = useMemo(() => {
+    const total = normalizedRows.length || 1;
+    const buckets = [5, 4, 3, 2, 1].map((score) => {
+      const count = normalizedRows.filter((row: any) => normalizeRating(row?.storeRating) === score).length;
+      const percent = (count / total) * 100;
+      return { score, count, percent };
+    });
+    return buckets;
+  }, [normalizedRows]);
+
+  const handleExportCsv = () => {
+    const source = rows || [];
+    if (!source.length) return;
+    const escapeCell = (value: unknown) => {
+      const text = String(value ?? '');
+      const escaped = text.replace(/"/g, '""');
+      return `"${escaped}"`;
+    };
+    const header = [
+      'data_hora',
+      'pedido',
+      'cliente',
+      'nota_loja',
+      'nota_entrega',
+      'gorjeta',
+      'comentario',
+      'entregador',
+    ];
+    const lines = source.map((row: any) => [
+      formatDateTime(row?.createdAt),
+      formatOrderDisplayId(row?.orderId, storeSlug),
+      row?.customerName || 'Cliente',
+      Number(row?.storeRating || 0).toFixed(1),
+      row?.deliveryRating != null ? Number(row?.deliveryRating || 0).toFixed(1) : '',
+      Number(row?.tipAmount || 0).toFixed(2),
+      row?.comment || '',
+      row?.motoboyName || '',
+    ]);
+    const csv = [header, ...lines].map((line) => line.map(escapeCell).join(';')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `avaliacoes-${storeSlug || 'loja'}-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
+    URL.revokeObjectURL(url);
+  };
   const totalPages = Math.max(1, Math.ceil(rows.length / pageSize));
   const pagedRows = useMemo(() => {
     const start = (page - 1) * pageSize;
@@ -549,12 +628,59 @@ const ReviewsView = ({ reviews = [], canUseDeliveryReviewsAndTips = false, onUpg
         </div>
       )}
       <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Buscar por cliente, pedido ou comentário..."
-          className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-brand-primary"
-        />
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Buscar por cliente, pedido ou comentário..."
+            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-brand-primary"
+          />
+          <button
+            type="button"
+            onClick={handleExportCsv}
+            disabled={!rows.length}
+            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-50"
+          >
+            Exportar CSV
+          </button>
+        </div>
+      </div>
+      <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="rounded-xl border border-slate-200 bg-white px-3 py-2">
+          <p className="text-[11px] text-slate-500">Nota média da loja</p>
+          <p className="text-lg font-black text-slate-900">{insights.avgStore.toFixed(2)}</p>
+          <div className="mt-1">{renderStars(insights.avgStore)}</div>
+        </div>
+        <div className="rounded-xl border border-slate-200 bg-white px-3 py-2">
+          <p className="text-[11px] text-slate-500">Média últimos 7 dias</p>
+          <p className="text-lg font-black text-slate-900">{insights.avg7.toFixed(2)}</p>
+          <p className="text-[11px] text-slate-500 mt-1">Base: {insights.total} avaliação(ões)</p>
+        </div>
+        <div className="rounded-xl border border-slate-200 bg-white px-3 py-2">
+          <p className="text-[11px] text-slate-500">Com comentário</p>
+          <p className="text-lg font-black text-slate-900">{insights.withCommentRate.toFixed(1)}%</p>
+          <p className="text-[11px] text-slate-500 mt-1">qualidade de feedback</p>
+        </div>
+        <div className="rounded-xl border border-slate-200 bg-white px-3 py-2">
+          <p className="text-[11px] text-slate-500">Com gorjeta</p>
+          <p className="text-lg font-black text-slate-900">{insights.withTipRate.toFixed(1)}%</p>
+          <p className="text-[11px] text-slate-500 mt-1">engajamento do cliente</p>
+        </div>
+      </div>
+      <div className="rounded-xl border border-slate-200 bg-white p-3 space-y-2">
+        <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Distribuição de notas</p>
+        {ratingDistribution.map((bucket) => (
+          <div key={bucket.score} className="grid grid-cols-[42px_minmax(0,1fr)_64px] items-center gap-2">
+            <span className="text-xs font-semibold text-slate-600">{bucket.score}★</span>
+            <div className="h-2.5 rounded-full bg-slate-100 overflow-hidden">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-amber-400 to-orange-500"
+                style={{ width: `${Math.max(3, bucket.percent)}%` }}
+              />
+            </div>
+            <span className="text-[11px] text-slate-500 text-right">{bucket.count} ({bucket.percent.toFixed(0)}%)</span>
+          </div>
+        ))}
       </div>
       <div className="flex flex-wrap items-center gap-2">
         {[
