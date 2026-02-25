@@ -453,6 +453,11 @@ const ReviewsView = ({ reviews = [], canUseDeliveryReviewsAndTips = false, onUpg
   const [tipFilter, setTipFilter] = useState<'all' | 'with_tip'>('all');
   const normalized = query.trim().toLowerCase();
   const normalizedRows = useMemo(() => (Array.isArray(reviews) ? reviews : []), [reviews]);
+  const getInitials = (value: string) => {
+    const parts = String(value || '').trim().split(' ').filter(Boolean);
+    if (!parts.length) return 'CL';
+    return parts.slice(0, 2).map((part) => part[0]?.toUpperCase() || '').join('');
+  };
   const normalizeRating = (value: unknown) => {
     const parsed = Number(value || 0);
     if (!Number.isFinite(parsed)) return 0;
@@ -564,43 +569,60 @@ const ReviewsView = ({ reviews = [], canUseDeliveryReviewsAndTips = false, onUpg
           Nenhuma avaliação encontrada.
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="grid gap-3 lg:grid-cols-2">
           {rows.map((row: any) => (
-            <div key={row.id} className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div>
-                  <p className="text-sm font-bold text-slate-900">{row.customerName || 'Cliente'}</p>
-                  <p className="text-[11px] text-slate-500">Pedido #{formatOrderDisplayId(row.orderId, storeSlug)}</p>
+            <article
+              key={row.id}
+              className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_18px_36px_-28px_rgba(15,23,42,0.55)] transition hover:-translate-y-0.5 hover:shadow-[0_24px_42px_-30px_rgba(15,23,42,0.6)]"
+            >
+              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-brand-primary/70 via-emerald-500/60 to-sky-500/70" />
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 flex items-start gap-3">
+                  <div className="h-10 w-10 flex-shrink-0 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 font-black text-xs flex items-center justify-center">
+                    {getInitials(row.customerName || 'Cliente')}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-black text-slate-900 truncate">{row.customerName || 'Cliente'}</p>
+                    <p className="text-[11px] text-slate-500">Pedido #{formatOrderDisplayId(row.orderId, storeSlug)}</p>
+                    <p className="text-[11px] text-slate-500 mt-0.5">{formatDateTime(row.createdAt)}</p>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 text-xs">
-                  <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2 py-1 font-semibold text-slate-700">
+                <div className="flex flex-wrap items-center justify-end gap-1.5 text-xs">
+                  <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 font-semibold text-slate-700">
                     {renderStars(row.storeRating)}
                     Loja {Number(row.storeRating || 0).toFixed(1)}
                   </span>
                   {canUseDeliveryReviewsAndTips && row.deliveryRating ? (
-                    <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-1 font-semibold text-emerald-700">
+                    <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 font-semibold text-emerald-700">
                       {renderStars(row.deliveryRating)}
                       Entrega {Number(row.deliveryRating || 0).toFixed(1)}
                     </span>
                   ) : null}
                   {canUseDeliveryReviewsAndTips && Number(row.tipAmount || 0) > 0 ? (
-                    <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2 py-1 font-semibold text-emerald-700">
+                    <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 font-semibold text-emerald-700">
                       Gorjeta {formatCurrency(Number(row.tipAmount || 0))}
                     </span>
                   ) : null}
                 </div>
               </div>
               {row.comment ? (
-                <p className="mt-2 text-sm text-slate-700">{row.comment}</p>
+                <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50/70 px-3 py-2.5">
+                  <p className="text-sm text-slate-700 leading-relaxed">{row.comment}</p>
+                </div>
               ) : (
-                <p className="mt-2 text-xs text-slate-400">Sem comentário.</p>
+                <p className="mt-3 text-xs text-slate-400">Sem comentário.</p>
               )}
-              <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
-                {canUseDeliveryReviewsAndTips && row.motoboyName ? <span>Entregador: {row.motoboyName}</span> : null}
-                {canUseDeliveryReviewsAndTips && row.motoboyName ? <span>•</span> : null}
-                <span>{formatDateTime(row.createdAt)}</span>
+              <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
+                <span className="rounded-full border border-slate-200 bg-white px-2 py-1 font-semibold">
+                  ID: {String(row.orderId || '').slice(0, 8)}
+                </span>
+                {canUseDeliveryReviewsAndTips && row.motoboyName ? (
+                  <span className="rounded-full border border-slate-200 bg-white px-2 py-1 font-semibold">
+                    Entregador: {row.motoboyName}
+                  </span>
+                ) : null}
               </div>
-            </div>
+            </article>
           ))}
         </div>
       )}
