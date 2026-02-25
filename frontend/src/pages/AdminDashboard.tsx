@@ -1195,6 +1195,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   const prevTabRef = useRef(activeTab);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const notificationsRef = useRef<HTMLDivElement | null>(null);
+  const [dismissedNotificationKeys, setDismissedNotificationKeys] = useState<string[]>([]);
   const isVip = Boolean(session?.store?.settings?.planExempt || session?.subscription?.planExempt);
   const planName = String(session?.subscription?.plan?.name || '').toLowerCase();
   const subscriptionStatus = String(session?.subscription?.status || '').toUpperCase();
@@ -1471,6 +1472,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       return st || 'pending';
     };
     const result: Array<{
+      key: string;
       id: string;
       title: string;
       description: string;
@@ -1483,6 +1485,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     const readyOrders = (orders || []).filter((order: any) => normalizeStatus(order?.status) === 'ready').length;
     if (pendingOrders > 0) {
       result.push({
+        key: `pending-orders:${pendingOrders}`,
         id: 'pending-orders',
         title: `${pendingOrders} pedido(s) pendente(s)`,
         description: 'Pedidos novos aguardando início da operação.',
@@ -1493,6 +1496,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     }
     if (readyOrders > 0) {
       result.push({
+        key: `ready-orders:${readyOrders}`,
         id: 'ready-orders',
         title: `${readyOrders} pedido(s) pronto(s)`,
         description: 'Pedidos prontos aguardando retirada/expedição.',
@@ -1503,6 +1507,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     }
     if (pendingMotoboyRequests > 0) {
       result.push({
+        key: `motoboy-requests:${pendingMotoboyRequests}:${canUseMotoboys ? 'enabled' : 'pro-only'}`,
         id: 'motoboy-requests',
         title: `${pendingMotoboyRequests} solicitação(ões) de entregador`,
         description: canUseMotoboys
@@ -1521,6 +1526,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     }
     if (canUseDeliveryReviewsAndTips && Number(tipsOverview?.payoutPendingCount || 0) > 0) {
       result.push({
+        key: `tip-payout:${tipsOverview.payoutPendingCount}:${Number(tipsOverview?.payoutPendingAmount || 0).toFixed(2)}`,
         id: 'tip-payout',
         title: `${tipsOverview.payoutPendingCount} repasse(s) pendente(s)`,
         description: `Total aguardando repasse: ${formatCurrency(Number(tipsOverview?.payoutPendingAmount || 0))}.`,
@@ -1535,6 +1541,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       : null;
     if (!isVip && daysUntilExpiry !== null && daysUntilExpiry <= 7) {
       result.push({
+        key: `subscription-expiring:${daysUntilExpiry}`,
         id: 'subscription-expiring',
         title: daysUntilExpiry <= 0 ? 'Assinatura expirada' : 'Assinatura perto do vencimento',
         description:
@@ -1554,6 +1561,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     }).length;
     if (failedRecent > 0) {
       result.push({
+        key: `failed-payments:${failedRecent}`,
         id: 'failed-payments',
         title: `${failedRecent} falha(s) de pagamento recente(s)`,
         description: 'Revise tentativas para evitar bloqueio de assinatura.',
@@ -1574,7 +1582,11 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     paymentsHistory,
     navigate,
   ]);
-  const unreadNotifications = headerNotifications.length;
+  const activeNotifications = useMemo(
+    () => headerNotifications.filter((note) => !dismissedNotificationKeys.includes(note.key)),
+    [headerNotifications, dismissedNotificationKeys]
+  );
+  const unreadNotifications = activeNotifications.length;
   const notificationToneClass = (tone: 'danger' | 'warning' | 'info' | 'success') => {
     if (tone === 'danger') return 'border-rose-200 bg-rose-50';
     if (tone === 'warning') return 'border-amber-200 bg-amber-50';
@@ -1600,6 +1612,36 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       document.removeEventListener('keydown', onKeyDown);
     };
   }, [notificationsOpen]);
+  useEffect(() => {
+    if (!storeId) return;
+    const key = `adminNotifications:dismissed:${storeId}`;
+    try {
+      const raw = localStorage.getItem(key);
+      const parsed = raw ? JSON.parse(raw) : [];
+      if (Array.isArray(parsed)) {
+        setDismissedNotificationKeys(parsed.filter((item) => typeof item === 'string'));
+      } else {
+        setDismissedNotificationKeys([]);
+      }
+    } catch {
+      setDismissedNotificationKeys([]);
+    }
+  }, [storeId]);
+  useEffect(() => {
+    if (!storeId) return;
+    const key = `adminNotifications:dismissed:${storeId}`;
+    localStorage.setItem(key, JSON.stringify(dismissedNotificationKeys));
+  }, [storeId, dismissedNotificationKeys]);
+  const markNotificationRead = (noteKey: string) => {
+    setDismissedNotificationKeys((prev) => (prev.includes(noteKey) ? prev : [...prev, noteKey]));
+  };
+  const clearAllNotifications = () => {
+    setDismissedNotificationKeys((prev) => {
+      const keys = activeNotifications.map((note) => note.key);
+      const merged = new Set([...prev, ...keys]);
+      return Array.from(merged);
+    });
+  };
 
   /* =========================
    * CARREGA PRODUTOS + PEDIDOS
@@ -2078,33 +2120,53 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             <div className="absolute right-0 top-[calc(100%+10px)] z-[120] w-[min(92vw,360px)] rounded-2xl border border-slate-200 bg-white shadow-[0_22px_48px_-26px_rgba(15,23,42,0.48)] overflow-hidden">
               <div className="px-3 py-2.5 border-b border-slate-100 bg-slate-50/80">
                 <p className="text-[11px] uppercase tracking-[0.2em] font-bold text-slate-500">Notificações</p>
-                <p className="text-xs text-slate-600 mt-0.5">Prioridades da operação em tempo real</p>
+                <div className="mt-0.5 flex items-center justify-between gap-2">
+                  <p className="text-xs text-slate-600">Prioridades da operação em tempo real</p>
+                  {activeNotifications.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={clearAllNotifications}
+                      className="text-[11px] font-semibold text-slate-600 hover:text-slate-900"
+                    >
+                      Marcar todas como lidas
+                    </button>
+                  )}
+                </div>
               </div>
               <div className="max-h-[58vh] overflow-y-auto p-2 space-y-1.5">
-                {headerNotifications.length === 0 ? (
+                {activeNotifications.length === 0 ? (
                   <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2">
                     <p className="text-sm font-semibold text-emerald-700">Operação estável</p>
                     <p className="text-xs text-emerald-700/80 mt-1">Sem pendências críticas no momento.</p>
                   </div>
                 ) : (
-                  headerNotifications.map((note) => {
+                  activeNotifications.map((note) => {
                     return (
-                      <div key={note.id} className={`rounded-xl border px-3 py-2 ${notificationToneClass(note.tone)}`}>
+                      <div key={note.key} className={`rounded-xl border px-3 py-2 ${notificationToneClass(note.tone)}`}>
                         <div className="flex items-start gap-2">
                           <WarningCircle size={16} weight="duotone" className="mt-0.5 text-slate-600" />
                           <div className="min-w-0">
                             <p className="text-xs font-bold text-slate-800">{note.title}</p>
                             <p className="text-[11px] text-slate-600 mt-0.5">{note.description}</p>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                note.action();
-                                setNotificationsOpen(false);
-                              }}
-                              className="mt-1.5 rounded-lg border border-slate-300 bg-white px-2 py-1 text-[11px] font-semibold text-slate-700 hover:bg-slate-100"
-                            >
-                              {note.actionLabel}
-                            </button>
+                            <div className="mt-1.5 flex items-center gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  note.action();
+                                  setNotificationsOpen(false);
+                                }}
+                                className="rounded-lg border border-slate-300 bg-white px-2 py-1 text-[11px] font-semibold text-slate-700 hover:bg-slate-100"
+                              >
+                                {note.actionLabel}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => markNotificationRead(note.key)}
+                                className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-[11px] font-semibold text-slate-500 hover:bg-slate-100"
+                              >
+                                Marcar lida
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -2485,33 +2547,53 @@ export function AdminDashboard({ session: sessionProp }: Props) {
               </button>
             </div>
             <div className="p-4 space-y-2.5">
-              {headerNotifications.length === 0 ? (
+              {activeNotifications.length === 0 ? (
                 <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2">
                   <p className="text-sm font-semibold text-emerald-700">Operação estável</p>
                   <p className="text-xs text-emerald-700/80 mt-1">Sem pendências críticas no momento.</p>
                 </div>
               ) : (
-                headerNotifications.map((note) => (
-                  <div key={`mobile-${note.id}`} className={`rounded-xl border px-3 py-2.5 ${notificationToneClass(note.tone)}`}>
+                <>
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      onClick={clearAllNotifications}
+                      className="text-[11px] font-semibold text-slate-600 hover:text-slate-900"
+                    >
+                      Marcar todas como lidas
+                    </button>
+                  </div>
+                  {activeNotifications.map((note) => (
+                  <div key={`mobile-${note.key}`} className={`rounded-xl border px-3 py-2.5 ${notificationToneClass(note.tone)}`}>
                     <div className="flex items-start gap-2">
                       <WarningCircle size={16} weight="duotone" className="mt-0.5 text-slate-600" />
                       <div className="min-w-0">
                         <p className="text-sm font-bold text-slate-800">{note.title}</p>
                         <p className="text-xs text-slate-600 mt-0.5">{note.description}</p>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            note.action();
-                            setNotificationsOpen(false);
-                          }}
-                          className="mt-2 rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100"
-                        >
-                          {note.actionLabel}
-                        </button>
+                        <div className="mt-2 flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              note.action();
+                              setNotificationsOpen(false);
+                            }}
+                            className="rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+                          >
+                            {note.actionLabel}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => markNotificationRead(note.key)}
+                            className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-500 hover:bg-slate-100"
+                          >
+                            Marcar lida
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
-                ))
+                  ))}
+                </>
               )}
             </div>
           </aside>
