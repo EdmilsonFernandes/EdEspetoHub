@@ -1575,6 +1575,12 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     navigate,
   ]);
   const unreadNotifications = headerNotifications.length;
+  const notificationToneClass = (tone: 'danger' | 'warning' | 'info' | 'success') => {
+    if (tone === 'danger') return 'border-rose-200 bg-rose-50';
+    if (tone === 'warning') return 'border-amber-200 bg-amber-50';
+    if (tone === 'success') return 'border-emerald-200 bg-emerald-50';
+    return 'border-sky-200 bg-sky-50';
+  };
 
   useEffect(() => {
     if (!notificationsOpen) return;
@@ -1940,15 +1946,34 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-[0.2em]">Navegação</p>
             <p className="text-xs font-semibold text-slate-700 truncate">Acesso rápido do painel</p>
           </div>
-          <button
-            type="button"
-            onClick={() => setMobileDrawerOpen(true)}
-            className="ds-focus-ring inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-900 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-800"
-            aria-label="Abrir menu"
-          >
-            <List size={16} weight="duotone" />
-            Abrir
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setNotificationsOpen((prev) => !prev)}
+              className={`ds-focus-ring relative inline-flex h-10 w-10 items-center justify-center rounded-xl border transition ${
+                notificationsOpen
+                  ? 'border-slate-900 bg-slate-900 text-white'
+                  : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+              }`}
+              aria-label="Abrir notificações"
+            >
+              <Bell size={18} weight={notificationsOpen ? 'fill' : 'duotone'} />
+              {unreadNotifications > 0 && (
+                <span className="absolute -right-1 -top-1 min-w-[18px] h-[18px] rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white flex items-center justify-center">
+                  {unreadNotifications > 9 ? '9+' : unreadNotifications}
+                </span>
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={() => setMobileDrawerOpen(true)}
+              className="ds-focus-ring inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-900 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-800"
+              aria-label="Abrir menu"
+            >
+              <List size={16} weight="duotone" />
+              Abrir
+            </button>
+          </div>
         </div>
       </div>
 
@@ -2063,16 +2088,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                   </div>
                 ) : (
                   headerNotifications.map((note) => {
-                    const toneClass =
-                      note.tone === 'danger'
-                        ? 'border-rose-200 bg-rose-50'
-                        : note.tone === 'warning'
-                        ? 'border-amber-200 bg-amber-50'
-                        : note.tone === 'success'
-                        ? 'border-emerald-200 bg-emerald-50'
-                        : 'border-sky-200 bg-sky-50';
                     return (
-                      <div key={note.id} className={`rounded-xl border px-3 py-2 ${toneClass}`}>
+                      <div key={note.id} className={`rounded-xl border px-3 py-2 ${notificationToneClass(note.tone)}`}>
                         <div className="flex items-start gap-2">
                           <WarningCircle size={16} weight="duotone" className="mt-0.5 text-slate-600" />
                           <div className="min-w-0">
@@ -2448,6 +2465,58 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       {error && <p className="text-red-600 text-sm">{error}</p>}
         </div>
       </div>
+
+      {!isDesktopLayout && notificationsOpen && (
+        <div className="lg:hidden fixed inset-0 z-[130]">
+          <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onClick={() => setNotificationsOpen(false)} />
+          <aside className="absolute inset-x-0 bottom-0 rounded-t-3xl border border-slate-200 bg-white shadow-[0_-24px_56px_-30px_rgba(15,23,42,0.55)] max-h-[78vh] overflow-y-auto">
+            <div className="sticky top-0 z-10 bg-white/95 backdrop-blur border-b border-slate-100 px-4 py-3 flex items-center justify-between">
+              <div>
+                <p className="text-[11px] uppercase tracking-[0.2em] font-bold text-slate-500">Notificações</p>
+                <p className="text-sm font-semibold text-slate-800">Prioridades da operação</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setNotificationsOpen(false)}
+                className="ds-focus-ring inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition"
+                aria-label="Fechar notificações"
+              >
+                <X size={16} weight="bold" />
+              </button>
+            </div>
+            <div className="p-4 space-y-2.5">
+              {headerNotifications.length === 0 ? (
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2">
+                  <p className="text-sm font-semibold text-emerald-700">Operação estável</p>
+                  <p className="text-xs text-emerald-700/80 mt-1">Sem pendências críticas no momento.</p>
+                </div>
+              ) : (
+                headerNotifications.map((note) => (
+                  <div key={`mobile-${note.id}`} className={`rounded-xl border px-3 py-2.5 ${notificationToneClass(note.tone)}`}>
+                    <div className="flex items-start gap-2">
+                      <WarningCircle size={16} weight="duotone" className="mt-0.5 text-slate-600" />
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-slate-800">{note.title}</p>
+                        <p className="text-xs text-slate-600 mt-0.5">{note.description}</p>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            note.action();
+                            setNotificationsOpen(false);
+                          }}
+                          className="mt-2 rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+                        >
+                          {note.actionLabel}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </aside>
+        </div>
+      )}
 
       {!isDesktopLayout && mobileDrawerOpen && (
         <div className="lg:hidden fixed inset-0 z-[120]">
