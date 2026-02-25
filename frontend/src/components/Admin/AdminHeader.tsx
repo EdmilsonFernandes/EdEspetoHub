@@ -110,14 +110,15 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
   const headerBackgroundStyle = hasBanner
     ? {
         backgroundColor: '#0f172a',
-        backgroundImage: `linear-gradient(120deg, rgba(15,23,42,0.34) 0%, rgba(15,23,42,0.5) 100%), url(${bannerUrl})`,
+        backgroundImage: `linear-gradient(120deg, rgba(15,23,42,0.26) 0%, rgba(15,23,42,0.38) 100%), url(${bannerUrl})`,
         backgroundSize: 'cover',
         backgroundPosition: `center, ${bannerPosition}`,
         backgroundRepeat: 'no-repeat',
         color: '#fff',
       }
     : {
-        backgroundImage: `linear-gradient(120deg, ${branding?.primaryColor || 'var(--color-primary)'} 0%, ${branding?.secondaryColor || 'var(--color-secondary)'} 100%)`,
+        backgroundColor: '#111827',
+        backgroundImage: `linear-gradient(120deg, color-mix(in srgb, ${branding?.primaryColor || 'var(--color-primary)'} 38%, #0f172a 62%) 0%, color-mix(in srgb, ${branding?.secondaryColor || 'var(--color-secondary)'} 28%, #111827 72%) 100%)`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
@@ -244,16 +245,16 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
       className="relative z-[90] isolate rounded-2xl border border-slate-200/80 shadow-[0_14px_32px_-22px_rgba(15,23,42,0.38)] overflow-visible"
       style={headerBackgroundStyle}
     >
-      <div className="pointer-events-none absolute inset-0 opacity-25 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.24),_transparent_58%)]" />
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-slate-900/8 via-transparent to-slate-900/16" />
-      <div className="pointer-events-none absolute inset-y-0 right-0 w-[36%] bg-gradient-to-l from-slate-950/26 via-slate-900/10 to-transparent" />
-      <div className="pointer-events-none absolute top-0 left-8 right-8 h-0.5 rounded-full bg-white/30" />
+      <div className="pointer-events-none absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.18),_transparent_58%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-slate-900/6 via-transparent to-slate-900/12" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-[32%] bg-gradient-to-l from-slate-950/20 via-slate-900/8 to-transparent" />
+      <div className="pointer-events-none absolute top-0 left-8 right-8 h-0.5 rounded-full bg-white/24" />
       <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/10" />
-      <div className={`md:hidden px-3 transition-all duration-200 ${mobileCompact ? 'py-2 space-y-2' : 'py-2.5 space-y-2.5'}`}>
+      <div className={`md:hidden px-3 transition-all duration-200 ${mobileCompact ? 'py-1.5 space-y-2' : 'py-2 space-y-2'}`}>
         <button
           type="button"
           onClick={() => setShowMobileDetails(true)}
-          className={`w-full flex items-center gap-2.5 rounded-xl border border-white/20 bg-slate-950/28 px-2.5 backdrop-blur-[4px] transition-all duration-200 text-left ${mobileCompact ? 'py-1.5' : 'py-2'}`}
+          className={`w-full flex items-center gap-2.5 rounded-xl border border-white/18 bg-slate-950/22 px-2.5 backdrop-blur-[4px] transition-all duration-200 text-left ${mobileCompact ? 'py-1.5' : 'py-2'}`}
         >
           <div className={`${mobileCompact ? 'w-9 h-9 rounded-lg' : 'w-11 h-11 rounded-xl'} bg-white/90 ring-1 ring-white/80 overflow-hidden flex items-center justify-center shadow-[0_14px_28px_-18px_rgba(0,0,0,0.55)] transition-all duration-200`}>
             {branding?.logoUrl ? (
@@ -279,7 +280,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
           </div>
         </button>
 
-        <div className={`flex items-center justify-between gap-2 rounded-xl border border-white/20 bg-slate-950/24 px-2.5 transition-all duration-200 ${mobileCompact ? 'py-1.5' : 'py-2'}`}>
+        <div className={`flex items-center justify-between gap-2 rounded-xl border border-white/18 bg-slate-950/20 px-2.5 transition-all duration-200 ${mobileCompact ? 'py-1.5' : 'py-2'}`}>
           {onToggleHeader && (
             <button
               type="button"
@@ -303,8 +304,8 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
         </div>
       </div>
 
-      <div className={`hidden md:flex md:flex-col px-4 pb-2 lg:grid lg:grid-cols-[minmax(0,1.5fr)_minmax(280px,0.8fr)_auto] gap-2.5 transition-all duration-200 ${compactDesktop ? 'pt-2 min-h-[98px] lg:items-center' : 'pt-2.5 min-h-[132px] lg:items-start'}`}>
-        <div className={`flex items-start gap-3 rounded-xl border border-white/22 bg-slate-950/24 backdrop-blur-[4px] max-w-[920px] shadow-[0_12px_28px_-20px_rgba(0,0,0,0.6)] transition-all duration-200 ${compactDesktop ? 'px-3 py-1.5' : 'px-3 py-2'}`}>
+      <div className={`hidden md:flex md:flex-col px-4 pb-1.5 lg:grid lg:grid-cols-[minmax(0,1.5fr)_minmax(280px,0.8fr)_auto] gap-2 transition-all duration-200 ${compactDesktop ? 'pt-1.5 min-h-[92px] lg:items-center' : 'pt-2 min-h-[118px] lg:items-start'}`}>
+        <div className={`flex items-start gap-3 rounded-xl border border-white/18 bg-slate-950/18 backdrop-blur-[4px] max-w-[920px] shadow-[0_10px_24px_-18px_rgba(0,0,0,0.52)] transition-all duration-200 ${compactDesktop ? 'px-3 py-1.5' : 'px-3 py-1.5'}`}>
           <div className={`rounded-xl bg-white/90 backdrop-blur flex items-center justify-center overflow-hidden shadow-[0_14px_24px_-16px_rgba(0,0,0,0.5)] ring-1 ring-white/80 transition-all duration-200 ${compactDesktop ? 'w-11 h-11' : 'w-14 h-14'}`}>
             {branding?.logoUrl ? (
               <img src={branding.logoUrl} alt={storeName} className="w-full h-full object-contain p-1" />
@@ -321,7 +322,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
                 </span>
               )}
             </div>
-            <h1 className={`font-black leading-tight truncate max-w-[42ch] drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)] transition-all duration-200 ${compactDesktop ? 'text-[18px] sm:text-[22px]' : 'text-[22px] sm:text-[28px]'}`}>{storeName}</h1>
+            <h1 className={`font-black leading-tight truncate max-w-[42ch] drop-shadow-[0_2px_8px_rgba(0,0,0,0.28)] transition-all duration-200 ${compactDesktop ? 'text-[18px] sm:text-[21px]' : 'text-[20px] sm:text-[25px]'}`}>{storeName}</h1>
             <div className={`${showMobileDetails ? 'flex' : 'hidden'} lg:flex flex-wrap items-center gap-2 text-xs ${compactDesktop ? 'lg:mt-0.5' : ''}`}>
               {visibleDesktopChips.map((chip) =>
                 chip.href ? (
@@ -330,7 +331,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
                     href={chip.href}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/14 border border-white/28 opacity-95 shadow-sm hover:opacity-100 hover:bg-white/22 transition"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/12 border border-white/24 opacity-90 shadow-sm hover:opacity-100 hover:bg-white/18 transition"
                   >
                     {chip.image ? (
                       <img src={chip.image} alt="" className="h-4 w-4 rounded-full" />
@@ -342,7 +343,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
                 ) : (
                   <span
                     key={chip.id}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/14 border border-white/28 opacity-95 shadow-sm"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/12 border border-white/24 opacity-90 shadow-sm"
                   >
                     {chip.icon}
                     <span className="truncate">{chip.label}</span>
@@ -353,16 +354,16 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
           </div>
         </div>
         {!compactDesktop && (
-          <div className="hidden lg:grid grid-cols-1 gap-2 rounded-xl border border-white/20 bg-slate-950/24 backdrop-blur-[4px] p-2 shadow-[0_12px_26px_-20px_rgba(0,0,0,0.55)]">
+          <div className="hidden lg:grid grid-cols-1 gap-1.5 rounded-xl border border-white/18 bg-slate-950/18 backdrop-blur-[4px] p-2 shadow-[0_10px_22px_-18px_rgba(0,0,0,0.46)]">
             {opsCards.map((card) => (
-              <div key={card.id} className="rounded-lg border border-white/15 bg-white/10 px-2.5 py-2">
+              <div key={card.id} className="rounded-lg border border-white/14 bg-white/8 px-2.5 py-1.5">
                 <p className="text-[10px] uppercase tracking-[0.18em] text-white/70">{card.label}</p>
                 <p className="text-[13px] font-semibold text-white truncate">{card.value}</p>
               </div>
             ))}
           </div>
         )}
-        <div className={`flex items-center gap-2 rounded-xl border border-white/20 bg-slate-950/24 backdrop-blur-[4px] px-2.5 shadow-[0_12px_24px_-18px_rgba(0,0,0,0.52)] transition-all duration-200 ${compactDesktop ? 'py-1.5' : 'py-2'}`}>
+        <div className={`flex items-center gap-2 rounded-xl border border-white/18 bg-slate-950/18 backdrop-blur-[4px] px-2.5 shadow-[0_10px_20px_-16px_rgba(0,0,0,0.44)] transition-all duration-200 ${compactDesktop ? 'py-1.5' : 'py-1.5'}`}>
           <button
             type="button"
             onClick={() => setShowMobileDetails((prev) => !prev)}
@@ -391,13 +392,13 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
           )}
         </div>
       </div>
-      <div className={`px-4 flex flex-col lg:flex-row lg:items-center lg:justify-end gap-2 rounded-b-2xl border-t border-white/12 transition-all duration-200 ${compactDesktop ? 'pb-2' : 'pb-3'}`}>
+      <div className={`px-4 flex flex-col lg:flex-row lg:items-center lg:justify-end gap-2 rounded-b-2xl border-t border-white/10 transition-all duration-200 ${compactDesktop ? 'pb-1.5' : 'pb-2.5'}`}>
         <div className="flex flex-wrap items-center gap-2">
           <a
             href="https://www.janocaminho.com.br"
             target="_blank"
             rel="noreferrer"
-            className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/12 border border-white/30 text-[11px] font-semibold text-white/95 hover:bg-white/20 hover:text-white transition ${compactDesktop ? 'lg:hidden' : ''}`}
+            className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/24 text-[11px] font-semibold text-white/92 hover:bg-white/16 hover:text-white transition ${compactDesktop ? 'lg:hidden' : ''}`}
             title="Ir para janocaminho.com.br"
           >
             <span className="h-5 w-5 rounded-full overflow-hidden bg-slate-900/70 ring-1 ring-white/35">
@@ -407,10 +408,10 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
             <span className="font-bold">Já no Caminho</span>
           </a>
           {onToggleHeader && (
-            <div className="flex items-center rounded-full bg-white/12 border border-white/25 p-0.5 text-[11px] sm:text-xs font-semibold">
+            <div className="flex items-center rounded-full bg-white/10 border border-white/22 p-0.5 text-[11px] sm:text-xs font-semibold">
               <button
                 type="button"
-                className="px-3 py-1.5 rounded-full bg-white/20 text-white shadow-sm"
+                className="px-3 py-1.5 rounded-full bg-white/16 text-white shadow-sm"
                 onClick={() => {
                   window.dispatchEvent(new CustomEvent('adminHeader:set', { detail: { visible: true } }));
                 }}
@@ -419,7 +420,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
               </button>
               <button
                 type="button"
-                className="px-3 py-1.5 rounded-full text-white/80 hover:text-white hover:bg-white/15 transition flex items-center gap-1.5"
+                className="px-3 py-1.5 rounded-full text-white/80 hover:text-white hover:bg-white/12 transition flex items-center gap-1.5"
                 onClick={() => {
                   window.dispatchEvent(new CustomEvent('adminHeader:set', { detail: { visible: false } }));
                 }}
@@ -434,7 +435,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
               logout();
               navigate('/admin');
             }}
-            className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-full bg-white/15 hover:bg-white/25 border border-white/20 text-xs font-semibold"
+            className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-full bg-white/10 hover:bg-white/16 border border-white/20 text-xs font-semibold"
           >
             <SignOut size={14} weight="duotone" /> Sair
           </button>
