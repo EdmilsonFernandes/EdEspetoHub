@@ -467,10 +467,6 @@ export function OrderTracking() {
   }, [order?.id]);
 
   useEffect(() => {
-    setShowAllItemsMobile(false);
-  }, [order?.id]);
-
-  useEffect(() => {
     setShowItemsSheetMobile(false);
   }, [order?.id]);
 
