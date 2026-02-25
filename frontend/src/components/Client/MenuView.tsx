@@ -14,7 +14,6 @@ import { formatCurrency } from "../../utils/format";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
 import { ProductModal } from "../Cart/ProductModal";
 import { GoogleMapView } from "../GoogleMapView";
-import { AppHeader } from "../common/AppHeader";
 
 const normalizeWhatsApp = (value) => {
   if (!value) return "";
@@ -288,17 +287,72 @@ export const MenuView = ({
       {showHeader && (
         <div className={`w-full sticky top-0 z-50 ${compactHeader ? 'pb-2' : 'pb-3'} pt-2`}>
           <div className="max-w-6xl mx-auto px-3 sm:px-4">
-            <AppHeader
-              variant="store"
-              storeName={branding?.brandName || "Sua Loja"}
-              storeLogo={branding?.logoUrl || ""}
-              bannerUrl={branding?.bannerUrl || ""}
-              subtitle="Vitrine pública"
-              status={isOpenNow ? "Aberto agora" : "Fechado no momento"}
-              city={todayHoursLabel ? `Hoje: ${todayHoursLabel}` : ""}
-              segment={segmentLabel}
-              actions={headerActions}
-            />
+            <header className="rounded-2xl border border-slate-200 bg-white shadow-[0_18px_40px_-32px_rgba(15,23,42,0.3)] overflow-hidden">
+              <div className="px-3 sm:px-4 py-3 sm:py-4">
+                <div className="flex items-center gap-3 min-h-[44px]">
+                  <div className="h-11 w-11 shrink-0 rounded-xl border border-slate-200/70 bg-white/90 overflow-hidden flex items-center justify-center">
+                    {branding?.logoUrl ? (
+                      <img src={resolveAssetUrl(branding.logoUrl)} alt={branding?.brandName || "Sua Loja"} className="h-full w-full object-cover" />
+                    ) : (
+                      <span className="text-sm font-black text-slate-800">JC</span>
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1 overflow-hidden">
+                    <h1 className="text-base sm:text-lg font-black leading-tight truncate text-slate-900">
+                      {branding?.brandName || "Sua Loja"}
+                    </h1>
+                    <p className="text-xs truncate mt-0.5 text-slate-500">Vitrine pública</p>
+                  </div>
+                </div>
+                <div className="mt-2.5 flex items-center gap-2 overflow-x-auto no-scrollbar pb-0.5">
+                  <span className="inline-flex whitespace-nowrap rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-semibold text-slate-700">
+                    {isOpenNow ? "Aberto agora" : "Fechado no momento"}
+                  </span>
+                  {!!todayHoursLabel && (
+                    <span className="inline-flex whitespace-nowrap rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-semibold text-slate-700">
+                      Hoje: {todayHoursLabel}
+                    </span>
+                  )}
+                  <span className="inline-flex whitespace-nowrap rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-semibold text-slate-700">
+                    {segmentLabel}
+                  </span>
+                </div>
+                {headerActions.length > 0 && (
+                  <div className="mt-2.5 flex items-center gap-2 overflow-x-auto no-scrollbar pb-0.5">
+                    {headerActions.map((action: any) =>
+                      action.href ? (
+                        <a
+                          key={action.id}
+                          href={action.href}
+                          target="_blank"
+                          rel="noreferrer"
+                          className={`inline-flex min-h-[44px] items-center gap-1.5 rounded-xl border px-3 text-xs font-semibold transition ${
+                            action.tone === "primary"
+                              ? "border-slate-900 bg-slate-900 text-white hover:bg-slate-800"
+                              : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                          }`}
+                        >
+                          {action.label}
+                        </a>
+                      ) : (
+                        <button
+                          key={action.id}
+                          type="button"
+                          onClick={action.onClick}
+                          className={`inline-flex min-h-[44px] items-center gap-1.5 rounded-xl border px-3 text-xs font-semibold transition ${
+                            action.tone === "primary"
+                              ? "border-slate-900 bg-slate-900 text-white hover:bg-slate-800"
+                              : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                          }`}
+                        >
+                          {action.label}
+                        </button>
+                      )
+                    )}
+                  </div>
+                )}
+              </div>
+            </header>
           </div>
         </div>
       )}
