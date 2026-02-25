@@ -208,6 +208,18 @@ export async function runMigrations() {
   `);
   await AppDataSource.query(`
     ALTER TABLE IF EXISTS products
+    ADD COLUMN IF NOT EXISTS bundle_promo_qty INT;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS products
+    ADD COLUMN IF NOT EXISTS bundle_promo_price NUMERIC(10,2);
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS products
+    ADD COLUMN IF NOT EXISTS bundle_promo_active BOOLEAN NOT NULL DEFAULT FALSE;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS products
     ADD COLUMN IF NOT EXISTS availability_days JSONB;
   `);
   await AppDataSource.query(`

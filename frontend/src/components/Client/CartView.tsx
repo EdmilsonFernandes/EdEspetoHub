@@ -20,6 +20,7 @@ import { getPaymentMethodMeta } from "../../utils/paymentAssets";
 import { GoogleRouteMapView } from "../GoogleRouteMapView";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
 import { formatSelectedModifiers, getModifiersTotal } from "../../utils/productModifiers";
+import { getBundleDiscountForCartItem, getCartPricing } from "../../utils/orderPricing";
 
 const BRAZIL_DDDS = [
   "11", "12", "13", "14", "15", "16", "17", "18", "19",
@@ -74,6 +75,7 @@ export const CartView = ({
   deliveryCoords = null,
   checkoutDisabled = false,
   checkoutDisabledReason = "",
+  pricingSummary,
   onChangeCustomer,
   onChangePayment,
   onUpdateCart,
@@ -81,7 +83,10 @@ export const CartView = ({
   onBack
 }) => {
   const cartItems = Object.values(cart);
-  const total = cartItems.reduce((acc, item) => acc + item.price * item.qty, 0);
+  const fallbackPricing = getCartPricing(cart);
+  const subtotal = pricingSummary?.subtotal ?? fallbackPricing.subtotal;
+  const discountTotal = pricingSummary?.discountTotal ?? fallbackPricing.discountTotal;
+  const total = pricingSummary?.total ?? fallbackPricing.discountedSubtotal;
   const buildCartOptions = (entry: any) => ({
     cookingPoint: entry?.cookingPoint || "",
     passSkewer: Boolean(entry?.passSkewer),
@@ -838,6 +843,11 @@ export const CartView = ({
                     Adicionais: + {formatCurrency(getModifiersTotal(item?.selectedModifiers || []) * item.qty)}
                   </span>
                 )}
+                {getBundleDiscountForCartItem(item) > 0 && (
+                  <span className="text-[11px] text-emerald-700 font-semibold">
+                    Promoção aplicada: - {formatCurrency(getBundleDiscountForCartItem(item))}
+                  </span>
+                )}
               </div>
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
@@ -873,6 +883,20 @@ export const CartView = ({
               Frete
             </span>
             <span className="font-semibold text-slate-800">{formatCurrency(deliveryFeeValue)}</span>
+          </div>
+        )}
+        {discountTotal > 0 && (
+          <div className="flex justify-between items-center pt-3 text-sm text-slate-600">
+            <span>Subtotal sem desconto</span>
+            <span className="font-semibold text-slate-800">{formatCurrency(subtotal)}</span>
+          </div>
+        )}
+        {discountTotal > 0 && (
+          <div className="flex justify-between items-center pt-3 text-sm">
+            <span className="inline-flex items-center gap-2 text-emerald-700 font-semibold">
+              Promoção por quantidade
+            </span>
+            <span className="font-bold text-emerald-700">- {formatCurrency(discountTotal)}</span>
           </div>
         )}
 

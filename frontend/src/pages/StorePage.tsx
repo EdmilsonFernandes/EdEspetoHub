@@ -21,6 +21,7 @@ import {
   getModifiersTotal,
   normalizeSelectedModifiers,
 } from '../utils/productModifiers';
+import { getCartPricing } from '../utils/orderPricing';
 
 export function StorePage() {
   const { storeSlug } = useParams();
@@ -134,10 +135,9 @@ export function StorePage() {
     Boolean(storeSlug) &&
     user.store.slug === storeSlug;
 
-  const cartItemsTotal = useMemo(
-    () => Object.values(cart).reduce((acc, item) => acc + item.price * item.qty, 0),
-    [cart]
-  );
+  const cartPricing = useMemo(() => getCartPricing(cart), [cart]);
+  const cartItemsTotal = cartPricing.discountedSubtotal;
+  const cartDiscountTotal = cartPricing.discountTotal;
   const deliveryRadiusValue = useMemo(() => {
     const value = getNumeric(deliveryRadiusKm);
     if (!value || value <= 0) return null;
@@ -713,6 +713,9 @@ export function StorePage() {
           cookingPoint,
           passSkewer,
           selectedModifiers,
+          bundlePromoActive: Boolean(item?.bundlePromoActive),
+          bundlePromoQty: item?.bundlePromoQty ?? null,
+          bundlePromoPrice: item?.bundlePromoPrice ?? null,
         },
       };
     });
@@ -1395,6 +1398,11 @@ export function StorePage() {
             deliveryCoords={deliveryCoords}
             checkoutDisabled={deliveryValidation.blocked}
             checkoutDisabledReason={deliveryValidation.reason}
+            pricingSummary={{
+              subtotal: cartPricing.subtotal,
+              discountTotal: cartDiscountTotal,
+              total: cartItemsTotal,
+            }}
             onChangeCustomer={handleCustomerChange}
             onChangePayment={setPaymentMethod}
             onUpdateCart={updateCart}

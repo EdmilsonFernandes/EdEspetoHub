@@ -38,6 +38,15 @@ export class Product {
   @Column({ name: 'promo_active', default: false })
   promoActive!: boolean;
 
+  @Column({ name: 'bundle_promo_qty', type: 'int', nullable: true })
+  bundlePromoQty?: number | null;
+
+  @Column('decimal', { precision: 10, scale: 2, name: 'bundle_promo_price', nullable: true })
+  bundlePromoPrice?: number | null;
+
+  @Column({ name: 'bundle_promo_active', default: false })
+  bundlePromoActive!: boolean;
+
   @Column({ nullable: true })
   category?: string;
 

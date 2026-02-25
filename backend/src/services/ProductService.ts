@@ -59,6 +59,40 @@ export class ProductService
     return result.length ? result : null;
   }
 
+  private resolveBundlePromo(input: Partial<CreateProductDto>, baseUnitPrice: number, current?: { qty?: number | null; price?: number | null; active?: boolean })
+  {
+    const parseOptionalNumber = (value: unknown) => {
+      if (value === undefined || value === null || String(value).trim() === '') return null;
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : null;
+    };
+
+    const nextQtyRaw = input.bundlePromoQty !== undefined
+      ? parseOptionalNumber(input.bundlePromoQty)
+      : parseOptionalNumber(current?.qty);
+    const nextPriceRaw = input.bundlePromoPrice !== undefined
+      ? parseOptionalNumber(input.bundlePromoPrice)
+      : parseOptionalNumber(current?.price);
+    const requestedActive = input.bundlePromoActive !== undefined ? Boolean(input.bundlePromoActive) : Boolean(current?.active);
+
+    const qty = nextQtyRaw !== null ? Math.max(2, Math.floor(Number(nextQtyRaw))) : null;
+    const price = nextPriceRaw !== null && Number(nextPriceRaw) > 0
+      ? Number(Number(nextPriceRaw).toFixed(2))
+      : null;
+
+    const canActivate = Boolean(requestedActive) && Boolean(qty && qty >= 2) && Boolean(price && price > 0);
+    if (!canActivate) {
+      return { qty, price, active: false };
+    }
+
+    const regularGroupPrice = Number(baseUnitPrice || 0) * Number(qty);
+    if (!(regularGroupPrice > 0) || Number(price) >= regularGroupPrice) {
+      return { qty, price, active: false };
+    }
+
+    return { qty, price, active: true };
+  }
+
   /**
    * Ensures store access.
    *
@@ -98,6 +132,8 @@ export class ProductService
       ? Number(input.promoPrice)
       : null;
     const promoActive = Boolean(input.promoActive) && !!promoPrice && promoPrice > 0;
+    const saleBasePrice = promoActive ? Number(promoPrice) : Number(input.price);
+    const bundlePromo = this.resolveBundlePromo(input, saleBasePrice);
     const availabilityDays = normalizeAvailabilityDays(input.availabilityDays);
     const modifiers = this.normalizeModifiers((input as any).modifiers);
 
@@ -106,6 +142,9 @@ export class ProductService
       price: input.price,
       promoPrice,
       promoActive,
+      bundlePromoQty: bundlePromo.qty,
+      bundlePromoPrice: bundlePromo.price,
+      bundlePromoActive: bundlePromo.active,
       category: input.category,
       description: (input as any).description ?? (input as any).desc,
       imageUrl: uploadedImage || input.imageUrl,
@@ -216,6 +255,17 @@ export class ProductService
     if (typeof data.promoActive === 'boolean') {
       product.promoActive = data.promoActive && !!product.promoPrice;
     }
+    const saleBasePrice = product.promoActive && product.promoPrice
+      ? Number(product.promoPrice)
+      : Number(product.price);
+    const bundlePromo = this.resolveBundlePromo(data, saleBasePrice, {
+      qty: product.bundlePromoQty ?? null,
+      price: product.bundlePromoPrice ?? null,
+      active: product.bundlePromoActive,
+    });
+    product.bundlePromoQty = bundlePromo.qty;
+    product.bundlePromoPrice = bundlePromo.price;
+    product.bundlePromoActive = bundlePromo.active;
 
     return this.productRepository.save(product);
   }

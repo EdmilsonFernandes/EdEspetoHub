@@ -36,6 +36,9 @@ const initialForm = {
   price: '',
   promoPrice: '',
   promoActive: false,
+  bundlePromoActive: false,
+  bundlePromoQty: '',
+  bundlePromoPrice: '',
   category: 'espetos',
   imageUrl: '',
   imageFile: '',
@@ -199,6 +202,9 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
     price: '',
     promoPrice: '',
     promoActive: false,
+    bundlePromoActive: false,
+    bundlePromoQty: '',
+    bundlePromoPrice: '',
     category: initialForm.category,
     description: '',
     imageUrl: '',
@@ -320,6 +326,9 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
       price: parseFloat(formData.price),
       promoPrice: formData.promoPrice ? parseFloat(formData.promoPrice) : undefined,
       promoActive: Boolean(formData.promoActive),
+      bundlePromoQty: formData.bundlePromoQty ? Number(formData.bundlePromoQty) : undefined,
+      bundlePromoPrice: formData.bundlePromoPrice ? parseFloat(formData.bundlePromoPrice) : undefined,
+      bundlePromoActive: Boolean(formData.bundlePromoActive),
       imageFile: imageMode === 'upload' ? formData.imageFile : undefined,
       imageUrl: imageMode === 'url' ? formData.imageUrl : undefined,
       description: formData.description || undefined,
@@ -353,6 +362,9 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
       price: product.price != null ? String(product.price) : '',
       promoPrice: product.promoPrice != null ? String(product.promoPrice) : '',
       promoActive: Boolean(product.promoActive),
+      bundlePromoActive: Boolean(product.bundlePromoActive),
+      bundlePromoQty: product.bundlePromoQty != null ? String(product.bundlePromoQty) : '',
+      bundlePromoPrice: product.bundlePromoPrice != null ? String(product.bundlePromoPrice) : '',
       category: normalizedCategory || defaultCategoryId,
       description: product.description ?? product.desc ?? '',
       imageUrl: product.imageUrl || '',
@@ -389,6 +401,9 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
         price: parseFloat(inlineForm.price),
         promoPrice: inlineForm.promoPrice ? parseFloat(inlineForm.promoPrice) : undefined,
         promoActive: Boolean(inlineForm.promoActive),
+        bundlePromoQty: inlineForm.bundlePromoQty ? Number(inlineForm.bundlePromoQty) : undefined,
+        bundlePromoPrice: inlineForm.bundlePromoPrice ? parseFloat(inlineForm.bundlePromoPrice) : undefined,
+        bundlePromoActive: Boolean(inlineForm.bundlePromoActive),
         category: inlineForm.category,
         description: inlineForm.description || undefined,
         imageUrl: inlineImageFile ? undefined : inlineForm.imageUrl || undefined,
@@ -534,6 +549,53 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                 >
                   {formData.promoActive ? 'Ativo' : 'Inativo'}
                 </button>
+              </div>
+            </div>
+          </div>
+          <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50/60 p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold text-emerald-800">Promoção por quantidade</p>
+                <p className="text-[11px] text-emerald-700">Ex.: 2 unidades por R$ 16,00</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setFormData((prev) => ({ ...prev, bundlePromoActive: !prev.bundlePromoActive }))}
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition ${
+                  formData.bundlePromoActive
+                    ? 'bg-emerald-600 text-white border-emerald-600'
+                    : 'bg-white text-slate-600 border-slate-200'
+                }`}
+              >
+                {formData.bundlePromoActive ? 'Ativo' : 'Inativo'}
+              </button>
+            </div>
+            <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.15em]">Leve</label>
+                <input
+                  className="p-3 border border-gray-200 rounded-xl w-full bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+                  placeholder="2"
+                  type="number"
+                  min="2"
+                  step="1"
+                  value={formData.bundlePromoQty}
+                  onChange={(e) => setFormData({ ...formData, bundlePromoQty: e.target.value })}
+                  disabled={!formData.bundlePromoActive}
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.15em]">Pague</label>
+                <input
+                  className="p-3 border border-gray-200 rounded-xl w-full bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+                  placeholder="16.00"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={formData.bundlePromoPrice}
+                  onChange={(e) => setFormData({ ...formData, bundlePromoPrice: e.target.value })}
+                  disabled={!formData.bundlePromoActive}
+                />
               </div>
             </div>
           </div>
@@ -923,6 +985,11 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                     ) : (
                       <span className="text-brand-primary font-bold">{formatCurrency(product.price)}</span>
                     )}
+                    {product.bundlePromoActive && Number(product.bundlePromoQty) >= 2 && Number(product.bundlePromoPrice) > 0 && (
+                      <p className="mt-1 text-[11px] font-semibold text-emerald-700">
+                        {product.bundlePromoQty} por {formatCurrency(product.bundlePromoPrice)}
+                      </p>
+                    )}
                   </div>
                 </div>
                 <div className="flex flex-col gap-2">
@@ -1042,9 +1109,21 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                         <span className="text-emerald-600 font-bold">
                           {formatCurrency(product.promoPrice)}
                         </span>
+                        {product.bundlePromoActive && Number(product.bundlePromoQty) >= 2 && Number(product.bundlePromoPrice) > 0 && (
+                          <span className="text-[10px] font-semibold text-emerald-700">
+                            {product.bundlePromoQty} por {formatCurrency(product.bundlePromoPrice)}
+                          </span>
+                        )}
                       </div>
                     ) : (
-                      <span className="text-brand-primary font-bold">{formatCurrency(product.price)}</span>
+                      <div className="flex flex-col items-end">
+                        <span className="text-brand-primary font-bold">{formatCurrency(product.price)}</span>
+                        {product.bundlePromoActive && Number(product.bundlePromoQty) >= 2 && Number(product.bundlePromoPrice) > 0 && (
+                          <span className="text-[10px] font-semibold text-emerald-700">
+                            {product.bundlePromoQty} por {formatCurrency(product.bundlePromoPrice)}
+                          </span>
+                        )}
+                      </div>
                     )}
                   </td>
                   <td className="p-4">
@@ -1441,6 +1520,48 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                 >
                   Salvar
                 </button>
+                </div>
+              </div>
+              <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-3.5">
+                <div className="flex items-center justify-between gap-2">
+                  <label className="text-xs font-semibold text-emerald-700 uppercase tracking-[0.2em]">Combo promocional</label>
+                  <button
+                    type="button"
+                    onClick={() => setInlineForm((prev) => ({ ...prev, bundlePromoActive: !prev.bundlePromoActive }))}
+                    className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border ${
+                      inlineForm.bundlePromoActive
+                        ? 'bg-emerald-600 text-white border-emerald-600'
+                        : 'bg-white text-slate-600 border-slate-200'
+                    }`}
+                  >
+                    {inlineForm.bundlePromoActive ? 'Ativo' : 'Inativo'}
+                  </button>
+                </div>
+                <div className="mt-2 grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[11px] font-semibold text-slate-500">Leve</label>
+                    <input
+                      className="w-full p-3 border border-gray-200 rounded-xl text-sm mt-1 bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+                      type="number"
+                      step="1"
+                      min="2"
+                      value={inlineForm.bundlePromoQty}
+                      onChange={(e) => setInlineForm((prev) => ({ ...prev, bundlePromoQty: e.target.value }))}
+                      disabled={!inlineForm.bundlePromoActive}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-semibold text-slate-500">Pague</label>
+                    <input
+                      className="w-full p-3 border border-gray-200 rounded-xl text-sm mt-1 bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={inlineForm.bundlePromoPrice}
+                      onChange={(e) => setInlineForm((prev) => ({ ...prev, bundlePromoPrice: e.target.value }))}
+                      disabled={!inlineForm.bundlePromoActive}
+                    />
+                  </div>
                 </div>
               </div>
             </div>

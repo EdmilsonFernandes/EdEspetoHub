@@ -713,6 +713,12 @@ export const MenuView = ({
                         Tem adicionais
                       </div>
                     )}
+                    {item?.bundlePromoActive && Number(item?.bundlePromoQty) >= 2 && Number(item?.bundlePromoPrice) > 0 && (
+                      <div className="inline-flex items-center gap-2 text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
+                        <Sparkle size={12} weight="duotone" />
+                        {item.bundlePromoQty} por {formatCurrency(Number(item.bundlePromoPrice))}
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex flex-col items-end gap-2">

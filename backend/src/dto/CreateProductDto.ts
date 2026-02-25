@@ -23,6 +23,9 @@ export interface CreateProductDto {
   price: number;
   promoPrice?: number;
   promoActive?: boolean;
+  bundlePromoQty?: number;
+  bundlePromoPrice?: number;
+  bundlePromoActive?: boolean;
   category?: string;
   description?: string;
   imageUrl?: string;

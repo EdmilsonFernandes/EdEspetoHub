@@ -55,6 +55,31 @@ export class OrderService
     return Number((product as any).price) || 0;
   }
 
+  private resolveBundleDiscount(
+    product: Awaited<ReturnType<ProductRepository[ 'findById' ]>>,
+    quantity: number
+  )
+  {
+    if (!product) return 0;
+    const bundleActive = Boolean((product as any).bundlePromoActive);
+    const bundleQty = Math.max(0, Math.floor(Number((product as any).bundlePromoQty || 0)));
+    const bundlePrice = Number((product as any).bundlePromoPrice || 0);
+    const qty = Math.max(0, Math.floor(Number(quantity || 0)));
+    if (!bundleActive || bundleQty < 2 || bundlePrice <= 0 || qty < bundleQty) return 0;
+
+    const baseUnitPrice = this.resolveItemPrice(product);
+    if (!(baseUnitPrice > 0)) return 0;
+
+    const groups = Math.floor(qty / bundleQty);
+    if (groups <= 0) return 0;
+
+    const regularGroup = baseUnitPrice * bundleQty;
+    const discountPerGroup = Math.max(0, regularGroup - bundlePrice);
+    if (discountPerGroup <= 0) return 0;
+
+    return Number((discountPerGroup * groups).toFixed(2));
+  }
+
   private normalizeText(value: unknown)
   {
     return String(value || '').trim().toLowerCase();
@@ -309,7 +334,9 @@ export class OrderService
       const unitPrice = this.resolveItemPrice(product);
       const selectedModifiers = this.resolveSelectedModifiers(product, (item as any).selectedModifiers);
       orderItem.selectedModifiers = selectedModifiers.items.length ? selectedModifiers.items : null;
-      orderItem.price = (unitPrice + selectedModifiers.unitExtra) * item.quantity;
+      const grossLine = (unitPrice + selectedModifiers.unitExtra) * item.quantity;
+      const bundleDiscount = this.resolveBundleDiscount(product, item.quantity);
+      orderItem.price = Math.max(0, grossLine - bundleDiscount);
       orderItem.cookingPoint = item.cookingPoint;
       orderItem.passSkewer = Boolean(item.passSkewer);
       nextItems.push(orderItem);
@@ -410,7 +437,9 @@ export class OrderService
       const unitPrice = this.resolveItemPrice(product);
       const selectedModifiers = this.resolveSelectedModifiers(product, (item as any).selectedModifiers);
       orderItem.selectedModifiers = selectedModifiers.items.length ? selectedModifiers.items : null;
-      orderItem.price = (unitPrice + selectedModifiers.unitExtra) * item.quantity;
+      const grossLine = (unitPrice + selectedModifiers.unitExtra) * item.quantity;
+      const bundleDiscount = this.resolveBundleDiscount(product, item.quantity);
+      orderItem.price = Math.max(0, grossLine - bundleDiscount);
       orderItem.cookingPoint = item.cookingPoint;
       orderItem.passSkewer = Boolean(item.passSkewer);
       items.push(orderItem);
