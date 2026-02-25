@@ -981,12 +981,11 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       setReviewsLoading(true);
       try {
         const summary = await orderService.getReviewSummaryByStore(storeId);
-        const [reviews, payouts] = canUseDeliveryReviewsAndTips
-          ? await Promise.all([
-              orderService.listReviewsByStore(storeId, 300),
-              orderService.listTipPayoutsByStore(storeId, 300).catch(() => []),
-            ])
-          : [[], []];
+        const reviewsPromise = orderService.listReviewsByStore(storeId, 300).catch(() => []);
+        const payoutsPromise = canUseDeliveryReviewsAndTips
+          ? orderService.listTipPayoutsByStore(storeId, 300).catch(() => [])
+          : Promise.resolve([]);
+        const [reviews, payouts] = await Promise.all([reviewsPromise, payoutsPromise]);
         if (!active) return;
         setReviewsSummary(summary || null);
         const reviewRows = Array.isArray(reviews) ? reviews : [];
@@ -1571,12 +1570,11 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                   setReviewsLoading(true);
                   try {
                     const summary = await orderService.getReviewSummaryByStore(storeId);
-                    const [reviews, payouts] = canUseDeliveryReviewsAndTips
-                      ? await Promise.all([
-                          orderService.listReviewsByStore(storeId, 300),
-                          orderService.listTipPayoutsByStore(storeId, 300).catch(() => []),
-                        ])
-                      : [[], []];
+                    const reviewsPromise = orderService.listReviewsByStore(storeId, 300).catch(() => []);
+                    const payoutsPromise = canUseDeliveryReviewsAndTips
+                      ? orderService.listTipPayoutsByStore(storeId, 300).catch(() => [])
+                      : Promise.resolve([]);
+                    const [reviews, payouts] = await Promise.all([reviewsPromise, payoutsPromise]);
                     setReviewsSummary(summary || null);
                     const reviewRows = Array.isArray(reviews) ? reviews : [];
                     setReviewsList(reviewRows);
