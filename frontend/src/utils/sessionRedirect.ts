@@ -1,6 +1,6 @@
 type SessionScope = 'admin' | 'motoboy' | 'superadmin';
 
-const TOKEN_ERROR_REGEX = /token inv[aá]lido|token ausente|token expirado|jwt|unauthorized|n[aã]o autorizado|sess[aã]o expirada/i;
+const TOKEN_ERROR_REGEX = /token|jwt|unauthorized|n[aã]o autorizado|sess[aã]o expirada/i;
 
 export const inferScopeFromPathname = (pathname: string): SessionScope => {
   const current = String(pathname || '').toLowerCase();
@@ -16,10 +16,13 @@ const getLoginPath = (scope: SessionScope) => {
 };
 
 export const isSessionAuthError = (status?: number, message?: string, code?: string) => {
-  if (status === 401) return true;
+  if (status === 401 || status === 403) return true;
   const normalizedCode = String(code || '').toUpperCase();
   if (normalizedCode.startsWith('AUTH-')) return true;
-  const normalizedMessage = String(message || '');
+  const normalizedMessage = String(message || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
   if (!normalizedMessage) return false;
   return TOKEN_ERROR_REGEX.test(normalizedMessage);
 };
@@ -42,4 +45,3 @@ export const forceLogoutAndRedirect = (scope: SessionScope) => {
     window.location.replace(loginPath);
   }
 };
-

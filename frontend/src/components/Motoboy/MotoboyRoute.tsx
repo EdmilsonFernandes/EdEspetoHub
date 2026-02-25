@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { motoboyService } from '../../services/motoboyService';
+import { forceLogoutAndRedirect, isSessionAuthError } from '../../utils/sessionRedirect';
 
 export function MotoboyRoute({ children }: { children: React.ReactNode }) {
   const { auth, hydrated } = useAuth();
@@ -35,6 +36,11 @@ export function MotoboyRoute({ children }: { children: React.ReactNode }) {
         await motoboyService.listStoreRequests();
         setAllowed(true);
       } catch (error: any) {
+        if (isSessionAuthError(error?.status, error?.message, error?.code)) {
+          forceLogoutAndRedirect('motoboy');
+          setAllowed(false);
+          return;
+        }
         if (error?.status === 403) {
           setAllowed(false);
         } else {
