@@ -211,9 +211,9 @@ export function MotoboyEarnings() {
 
         <article className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 flex items-center justify-between">
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-emerald-700">Gorjetas (30 dias)</p>
+            <p className="text-xs uppercase tracking-[0.2em] text-emerald-700">Gorjetas pagas pelo cliente (30 dias)</p>
             <p className="text-2xl font-black text-emerald-700 mt-2">{toCurrency(totalTipsMonth)}</p>
-            <p className="text-xs text-emerald-700/80 mt-1">{tipRows30d.length} gorjeta(s) paga(s) por cliente</p>
+            <p className="text-xs text-emerald-700/80 mt-1">{tipRows30d.length} gorjeta(s) registrada(s)</p>
           </div>
           <div className="h-12 w-12 rounded-2xl bg-white/80 text-emerald-700 flex items-center justify-center border border-emerald-200">
             <CurrencyCircleDollar size={22} weight="duotone" />
@@ -235,7 +235,8 @@ export function MotoboyEarnings() {
           <div>
             <p className="text-xs uppercase tracking-[0.2em] text-blue-700">Seu ganho total (30 dias)</p>
             <p className="text-2xl font-black text-blue-700 mt-2">{toCurrency(totalGross30d)}</p>
-            <p className="text-xs text-blue-700/80 mt-1">Frete + gorjetas pagas pelo cliente • ticket frete: {toCurrency(avgDeliveryFee)}</p>
+            <p className="text-xs text-blue-700/80 mt-1">Frete ({toCurrency(totalMonth)}) + gorjetas ({toCurrency(totalTipsMonth)})</p>
+            <p className="text-[11px] text-blue-700/80 mt-1">Ticket médio de frete: {toCurrency(avgDeliveryFee)}</p>
           </div>
           <div className="h-12 w-12 rounded-2xl bg-white/85 text-blue-700 flex items-center justify-center border border-blue-200">
             <Wallet size={22} weight="duotone" />

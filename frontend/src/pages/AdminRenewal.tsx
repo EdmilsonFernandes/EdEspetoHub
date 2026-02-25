@@ -85,6 +85,16 @@ export function AdminRenewal() {
   }, {});
   const selectedPlan = plansByName[getPlanName(selectedTierKey, billingKey)];
   const selectedPlanId = selectedPlan?.id || '';
+  const selectedPlanDisplayValue = useMemo(() => {
+    if (!selectedPlan) return null;
+    const full = Number(selectedPlan.price || 0);
+    const promoFromApi = selectedPlan?.promoPrice != null ? Number(selectedPlan.promoPrice) : null;
+    if (billingKey === 'yearly') {
+      if (promoFromApi != null && promoFromApi > 0 && promoFromApi < full) return promoFromApi;
+      return resolveAnnualPromoTotal(full);
+    }
+    return full;
+  }, [selectedPlan, billingKey]);
 
   useEffect(() => {
     if (!plans.length) return;
@@ -282,6 +292,20 @@ export function AdminRenewal() {
           </div>
 
           <div className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
+            <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
+              <p className="text-[11px] uppercase tracking-[0.18em] text-slate-500 font-bold">Resumo da cobrança</p>
+              <div className="mt-1 grid gap-1.5 sm:grid-cols-3 text-sm">
+                <p className="text-slate-700">
+                  Plano: <span className="font-bold">{selectedPlan?.displayName || '—'}</span>
+                </p>
+                <p className="text-slate-700">
+                  Ciclo: <span className="font-bold">{billing.period}</span>
+                </p>
+                <p className="text-slate-700">
+                  Total: <span className="font-black text-slate-900">{selectedPlanDisplayValue != null ? `R$ ${Number(selectedPlanDisplayValue).toFixed(2)}` : '—'}</span>
+                </p>
+              </div>
+            </div>
             <h4 className="text-sm font-semibold text-slate-700">Forma de pagamento</h4>
             <div className="flex flex-wrap gap-3">
               <button

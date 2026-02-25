@@ -226,6 +226,7 @@ const createEmptyModifier = (index = 0) => ({
 
 export const ProductManager = ({ products, onProductsChange, storeSegment = 'outros' }) => {
   const { showToast } = useToast();
+  const pendingDeleteTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
   const formRef = useRef<HTMLDivElement | null>(null);
   const createNameInputRef = useRef<HTMLInputElement | null>(null);
   const [editing, setEditing] = useState(null);
@@ -260,6 +261,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [page, setPage] = useState(1);
   const pageSize = 15;
+  const [pendingDeleteIds, setPendingDeleteIds] = useState<string[]>([]);
 
   const categoryOptions = useMemo(() => {
     const segmentKey = normalizeCategory(storeSegment) || 'outros';
@@ -299,6 +301,13 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
       return { ...prev, category: defaultCategoryId };
     });
   }, [defaultCategoryId]);
+
+  useEffect(() => {
+    return () => {
+      pendingDeleteTimersRef.current.forEach((timer) => clearTimeout(timer));
+      pendingDeleteTimersRef.current.clear();
+    };
+  }, []);
 
   const categoryTabs = useMemo(() => {
     const counts = new Map();
@@ -487,7 +496,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
     }
   };
 
-  const handleDeleteProduct = async (productId: string) => {
+  const finalizeDeleteProduct = async (productId: string) => {
     setSaving(true);
     try {
       await productService.delete(productId);
@@ -511,7 +520,38 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
       showToast('Não foi possível remover o produto.', 'error');
     } finally {
       setSaving(false);
+      setPendingDeleteIds((prev) => prev.filter((id) => id !== productId));
+      const timer = pendingDeleteTimersRef.current.get(productId);
+      if (timer) {
+        clearTimeout(timer);
+        pendingDeleteTimersRef.current.delete(productId);
+      }
     }
+  };
+
+  const handleDeleteProduct = (product: any) => {
+    const productId = String(product?.id || '').trim();
+    if (!productId) return;
+    if (pendingDeleteTimersRef.current.has(productId)) return;
+    setPendingDeleteIds((prev) => (prev.includes(productId) ? prev : [...prev, productId]));
+    const timer = setTimeout(() => {
+      pendingDeleteTimersRef.current.delete(productId);
+      void finalizeDeleteProduct(productId);
+    }, 6000);
+    pendingDeleteTimersRef.current.set(productId, timer);
+    showToast(`"${product?.name || 'Produto'}" será removido em 6s.`, 'warning', {
+      actionLabel: 'Desfazer',
+      durationMs: 6500,
+      onAction: () => {
+        const runningTimer = pendingDeleteTimersRef.current.get(productId);
+        if (runningTimer) {
+          clearTimeout(runningTimer);
+          pendingDeleteTimersRef.current.delete(productId);
+        }
+        setPendingDeleteIds((prev) => prev.filter((id) => id !== productId));
+        showToast('Remoção cancelada.', 'info');
+      },
+    });
   };
 
   const handleUpload = (file) => {
@@ -1101,11 +1141,12 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                     type="button"
                     onClick={() => {
                       if (!window.confirm('Excluir produto?')) return;
-                      handleDeleteProduct(product.id);
+                      handleDeleteProduct(product);
                     }}
-                    className="px-3 py-1.5 rounded-lg border border-red-200 text-red-600 text-xs font-semibold"
+                    disabled={pendingDeleteIds.includes(product.id)}
+                    className="px-3 py-1.5 rounded-lg border border-red-200 text-red-600 text-xs font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Excluir
+                    {pendingDeleteIds.includes(product.id) ? 'Agendado...' : 'Excluir'}
                   </button>
                 </div>
               </div>
@@ -1237,9 +1278,10 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                     <button
                       onClick={() => {
                         if (!window.confirm('Excluir produto?')) return;
-                        handleDeleteProduct(product.id);
+                        handleDeleteProduct(product);
                       }}
-                      className="text-red-600 hover:bg-red-50 p-2 rounded transition-all hover:-translate-y-0.5 active:scale-95"
+                      disabled={pendingDeleteIds.includes(product.id)}
+                      className="text-red-600 hover:bg-red-50 p-2 rounded transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:translate-y-0 disabled:active:scale-100"
                     >
                   <Trash size={18} weight="duotone" />
                     </button>

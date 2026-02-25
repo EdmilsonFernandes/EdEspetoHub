@@ -1,6 +1,6 @@
 // @ts-nocheck
 import * as React from 'react';
-import { ChartBar, BookOpen, ChefHat, CreditCard, Package, Gear, ShoppingCart, X, Scooter, ForkKnife, Storefront, Truck, List, CaretLeft, CaretRight, Star, Bell, WarningCircle } from '@phosphor-icons/react';
+import { ChartBar, BookOpen, ChefHat, CreditCard, Package, Gear, ShoppingCart, X, Scooter, ForkKnife, Storefront, Truck, List, CaretLeft, CaretRight, Star, Bell, WarningCircle, MagnifyingGlass } from '@phosphor-icons/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AdminLayout } from '../layouts/AdminLayout';
@@ -1176,6 +1176,9 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     return localStorage.getItem('adminSidebar:compact') === 'true';
   });
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+  const [commandOpen, setCommandOpen] = useState(false);
+  const [commandQuery, setCommandQuery] = useState('');
+  const [notificationCriticalOnly, setNotificationCriticalOnly] = useState(false);
   const [pendingMotoboyRequests, setPendingMotoboyRequests] = useState(0);
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [reviewsSummary, setReviewsSummary] = useState<any | null>(null);
@@ -1244,6 +1247,51 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     }),
     []
   );
+  const commandActions = useMemo(() => {
+    const items = [
+      ...desktopTabItems
+        .filter((item) => !item.disabled)
+        .map((item) => ({
+          id: `tab-${item.id}`,
+          label: item.label,
+          description: tabMeta[item.id]?.subtitle || 'Abrir seção',
+          run: () => {
+            if (item.id === 'fila') {
+              navigate('/admin/queue');
+              return;
+            }
+            setActiveTab(item.id as typeof activeTab);
+            setMobileDrawerOpen(false);
+          },
+        })),
+      {
+        id: 'go-menu',
+        label: 'Abrir vitrine pública',
+        description: 'Abre a página pública da loja em nova aba.',
+        run: () => {
+          if (storeSlug) window.open(`/${storeSlug}`, '_blank', 'noopener,noreferrer');
+        },
+      },
+      {
+        id: 'go-queue',
+        label: 'Abrir operação',
+        description: 'Acessa a central de operação dos pedidos.',
+        run: () => navigate('/admin/queue'),
+      },
+      {
+        id: 'go-renewal',
+        label: 'Trocar assinatura',
+        description: 'Abre a tela de renovação/upgrade da assinatura.',
+        run: () => navigate('/admin/renewal'),
+      },
+    ];
+    return items;
+  }, [desktopTabItems, tabMeta, storeSlug, navigate]);
+  const filteredCommandActions = useMemo(() => {
+    const q = commandQuery.trim().toLowerCase();
+    if (!q) return commandActions;
+    return commandActions.filter((item) => `${item.label} ${item.description}`.toLowerCase().includes(q));
+  }, [commandActions, commandQuery]);
 
   useEffect(() => {
     if (!canUseMotoboys && activeTab === 'motoboys') {
@@ -1476,6 +1524,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       id: string;
       title: string;
       description: string;
+      generatedAt: number;
       tone: 'danger' | 'warning' | 'info' | 'success';
       actionLabel: string;
       action: () => void;
@@ -1484,22 +1533,34 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     const pendingOrders = (orders || []).filter((order: any) => normalizeStatus(order?.status) === 'pending').length;
     const readyOrders = (orders || []).filter((order: any) => normalizeStatus(order?.status) === 'ready').length;
     if (pendingOrders > 0) {
+      const oldestPendingTs = (orders || [])
+        .filter((order: any) => normalizeStatus(order?.status) === 'pending')
+        .map((order: any) => normalizeTime(order?.createdAt))
+        .filter((ts: number) => ts > 0)
+        .sort((a: number, b: number) => a - b)[0] || Date.now();
       result.push({
         key: `pending-orders:${pendingOrders}`,
         id: 'pending-orders',
         title: `${pendingOrders} pedido(s) pendente(s)`,
         description: 'Pedidos novos aguardando início da operação.',
+        generatedAt: oldestPendingTs,
         tone: 'warning',
         actionLabel: 'Ver pedidos',
         action: () => setActiveTab('pedidos'),
       });
     }
     if (readyOrders > 0) {
+      const oldestReadyTs = (orders || [])
+        .filter((order: any) => normalizeStatus(order?.status) === 'ready')
+        .map((order: any) => normalizeTime(order?.createdAt))
+        .filter((ts: number) => ts > 0)
+        .sort((a: number, b: number) => a - b)[0] || Date.now();
       result.push({
         key: `ready-orders:${readyOrders}`,
         id: 'ready-orders',
         title: `${readyOrders} pedido(s) pronto(s)`,
         description: 'Pedidos prontos aguardando retirada/expedição.',
+        generatedAt: oldestReadyTs,
         tone: 'info',
         actionLabel: 'Abrir operação',
         action: () => navigate('/admin/queue'),
@@ -1513,6 +1574,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         description: canUseMotoboys
           ? 'Há solicitações aguardando aprovação da loja.'
           : 'Recurso disponível no plano Pro.',
+        generatedAt: Date.now(),
         tone: canUseMotoboys ? 'warning' : 'info',
         actionLabel: canUseMotoboys ? 'Revisar solicitações' : 'Trocar assinatura',
         action: () => {
@@ -1530,6 +1592,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         id: 'tip-payout',
         title: `${tipsOverview.payoutPendingCount} repasse(s) pendente(s)`,
         description: `Total aguardando repasse: ${formatCurrency(Number(tipsOverview?.payoutPendingAmount || 0))}.`,
+        generatedAt: Date.now(),
         tone: 'warning',
         actionLabel: 'Ver repasses',
         action: () => setActiveTab('motoboys'),
@@ -1548,6 +1611,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
           daysUntilExpiry <= 0
             ? 'Renove para manter a operação sem interrupções.'
             : `Vence em ${daysUntilExpiry} dia(s).`,
+        generatedAt: Date.now(),
         tone: 'danger',
         actionLabel: 'Renovar agora',
         action: () => navigate('/admin/renewal'),
@@ -1565,6 +1629,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         id: 'failed-payments',
         title: `${failedRecent} falha(s) de pagamento recente(s)`,
         description: 'Revise tentativas para evitar bloqueio de assinatura.',
+        generatedAt: Date.now(),
         tone: 'danger',
         actionLabel: 'Ver pagamentos',
         action: () => setActiveTab('pagamentos'),
@@ -1582,16 +1647,30 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     paymentsHistory,
     navigate,
   ]);
-  const activeNotifications = useMemo(
-    () => headerNotifications.filter((note) => !dismissedNotificationKeys.includes(note.key)),
-    [headerNotifications, dismissedNotificationKeys]
-  );
+  const activeNotifications = useMemo(() => {
+    const filtered = headerNotifications.filter((note) => !dismissedNotificationKeys.includes(note.key));
+    return notificationCriticalOnly
+      ? filtered.filter((note) => note.tone === 'danger' || note.tone === 'warning')
+      : filtered;
+  }, [headerNotifications, dismissedNotificationKeys, notificationCriticalOnly]);
   const unreadNotifications = activeNotifications.length;
   const notificationToneClass = (tone: 'danger' | 'warning' | 'info' | 'success') => {
     if (tone === 'danger') return 'border-rose-200 bg-rose-50';
     if (tone === 'warning') return 'border-amber-200 bg-amber-50';
     if (tone === 'success') return 'border-emerald-200 bg-emerald-50';
     return 'border-sky-200 bg-sky-50';
+  };
+  const notificationRelativeTime = (value: number) => {
+    const ts = Number(value || 0);
+    if (!Number.isFinite(ts) || ts <= 0) return 'agora';
+    const diffSec = Math.max(0, Math.floor((Date.now() - ts) / 1000));
+    if (diffSec < 60) return `há ${diffSec}s`;
+    const diffMin = Math.floor(diffSec / 60);
+    if (diffMin < 60) return `há ${diffMin}min`;
+    const diffHour = Math.floor(diffMin / 60);
+    if (diffHour < 24) return `há ${diffHour}h`;
+    const diffDay = Math.floor(diffHour / 24);
+    return `há ${diffDay}d`;
   };
 
   useEffect(() => {
@@ -1776,13 +1855,28 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   }, [sidebarCompact]);
 
   useEffect(() => {
-    if (!mobileDrawerOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      const isShortcut = (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k';
+      if (!isShortcut) return;
+      event.preventDefault();
+      setCommandOpen(true);
+      setCommandQuery('');
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
+
+  useEffect(() => {
+    if (!mobileDrawerOpen && !commandOpen) return;
     const handleKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setMobileDrawerOpen(false);
+      if (event.key === 'Escape') {
+        setMobileDrawerOpen(false);
+        setCommandOpen(false);
+      }
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [mobileDrawerOpen]);
+  }, [mobileDrawerOpen, commandOpen]);
 
   useEffect(() => {
     if (isDesktopLayout && mobileDrawerOpen) {
@@ -2122,7 +2216,19 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                 <p className="text-[11px] uppercase tracking-[0.2em] font-bold text-slate-500">Notificações</p>
                 <div className="mt-0.5 flex items-center justify-between gap-2">
                   <p className="text-xs text-slate-600">Prioridades da operação em tempo real</p>
-                  {activeNotifications.length > 0 && (
+                  <div className="inline-flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setNotificationCriticalOnly((prev) => !prev)}
+                      className={`text-[11px] font-semibold rounded-full border px-2 py-0.5 ${
+                        notificationCriticalOnly
+                          ? 'border-amber-300 bg-amber-50 text-amber-700'
+                          : 'border-slate-200 bg-white text-slate-600'
+                      }`}
+                    >
+                      {notificationCriticalOnly ? 'Só críticas' : 'Todas'}
+                    </button>
+                    {activeNotifications.length > 0 && (
                     <button
                       type="button"
                       onClick={clearAllNotifications}
@@ -2130,7 +2236,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                     >
                       Marcar todas como lidas
                     </button>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
               <div className="max-h-[58vh] overflow-y-auto p-2 space-y-1.5">
@@ -2146,7 +2253,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                         <div className="flex items-start gap-2">
                           <WarningCircle size={16} weight="duotone" className="mt-0.5 text-slate-600" />
                           <div className="min-w-0">
-                            <p className="text-xs font-bold text-slate-800">{note.title}</p>
+                            <div className="flex items-center justify-between gap-2">
+                              <p className="text-xs font-bold text-slate-800">{note.title}</p>
+                              <span className="text-[10px] text-slate-500 whitespace-nowrap">{notificationRelativeTime(note.generatedAt)}</span>
+                            </div>
                             <p className="text-[11px] text-slate-600 mt-0.5">{note.description}</p>
                             <div className="mt-1.5 flex items-center gap-1.5">
                               <button
@@ -2186,6 +2296,18 @@ export function AdminDashboard({ session: sessionProp }: Props) {
               Abrir vitrine
             </a>
           )}
+          <button
+            type="button"
+            onClick={() => {
+              setCommandOpen(true);
+              setCommandQuery('');
+            }}
+            className="hidden xl:inline-flex ds-focus-ring items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+          >
+            <MagnifyingGlass size={15} weight="duotone" />
+            Buscar
+            <span className="rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[10px] font-bold text-slate-500">Ctrl K</span>
+          </button>
           <button
             type="button"
             onClick={() => setActiveTab('config')}
@@ -2554,7 +2676,18 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                 </div>
               ) : (
                 <>
-                  <div className="flex justify-end">
+                  <div className="flex items-center justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setNotificationCriticalOnly((prev) => !prev)}
+                      className={`text-[11px] font-semibold rounded-full border px-2 py-0.5 ${
+                        notificationCriticalOnly
+                          ? 'border-amber-300 bg-amber-50 text-amber-700'
+                          : 'border-slate-200 bg-white text-slate-600'
+                      }`}
+                    >
+                      {notificationCriticalOnly ? 'Só críticas' : 'Todas'}
+                    </button>
                     <button
                       type="button"
                       onClick={clearAllNotifications}
@@ -2568,7 +2701,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                     <div className="flex items-start gap-2">
                       <WarningCircle size={16} weight="duotone" className="mt-0.5 text-slate-600" />
                       <div className="min-w-0">
-                        <p className="text-sm font-bold text-slate-800">{note.title}</p>
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="text-sm font-bold text-slate-800">{note.title}</p>
+                          <span className="text-[10px] text-slate-500 whitespace-nowrap">{notificationRelativeTime(note.generatedAt)}</span>
+                        </div>
                         <p className="text-xs text-slate-600 mt-0.5">{note.description}</p>
                         <div className="mt-2 flex items-center gap-1.5">
                           <button
@@ -2597,6 +2733,60 @@ export function AdminDashboard({ session: sessionProp }: Props) {
               )}
             </div>
           </aside>
+        </div>
+      )}
+
+      {commandOpen && (
+        <div
+          className="fixed inset-0 z-[140] bg-slate-900/45 backdrop-blur-sm flex items-start justify-center px-4 pt-20"
+          onClick={() => setCommandOpen(false)}
+        >
+          <div
+            className="w-full max-w-2xl rounded-2xl border border-slate-200 bg-white shadow-[0_28px_60px_-35px_rgba(15,23,42,0.6)] overflow-hidden"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="px-4 py-3 border-b border-slate-100">
+              <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+                <MagnifyingGlass size={16} className="text-slate-500" />
+                <input
+                  autoFocus
+                  value={commandQuery}
+                  onChange={(event) => setCommandQuery(event.target.value)}
+                  placeholder="Buscar ação no painel..."
+                  className="w-full bg-transparent text-sm text-slate-700 outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => setCommandOpen(false)}
+                  className="text-xs font-semibold text-slate-500 hover:text-slate-900"
+                >
+                  Esc
+                </button>
+              </div>
+            </div>
+            <div className="max-h-[60vh] overflow-y-auto p-2">
+              {filteredCommandActions.length === 0 ? (
+                <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-4 text-center text-sm text-slate-500">
+                  Nenhuma ação encontrada.
+                </div>
+              ) : (
+                filteredCommandActions.map((action) => (
+                  <button
+                    key={action.id}
+                    type="button"
+                    onClick={() => {
+                      action.run();
+                      setCommandOpen(false);
+                    }}
+                    className="w-full text-left rounded-xl border border-transparent hover:border-slate-200 hover:bg-slate-50 px-3 py-2.5 transition"
+                  >
+                    <p className="text-sm font-semibold text-slate-800">{action.label}</p>
+                    <p className="text-xs text-slate-500 mt-0.5">{action.description}</p>
+                  </button>
+                ))
+              )}
+            </div>
+          </div>
         </div>
       )}
 

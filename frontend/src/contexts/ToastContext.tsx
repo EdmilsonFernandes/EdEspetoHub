@@ -7,10 +7,20 @@ interface Toast {
   id: string;
   message: string;
   type: ToastType;
+  actionLabel?: string;
+  onAction?: () => void;
 }
 
 interface ToastContextType {
-  showToast: (message: string, type?: ToastType) => void;
+  showToast: (
+    message: string,
+    type?: ToastType,
+    options?: {
+      actionLabel?: string;
+      onAction?: () => void;
+      durationMs?: number;
+    }
+  ) => void;
 }
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
@@ -28,12 +38,20 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setToasts((prev) => prev.filter((toast) => toast.id !== id));
   }, []);
 
-  const showToast = useCallback((message: string, type: ToastType = 'info') => {
+  const showToast = useCallback((
+    message: string,
+    type: ToastType = 'info',
+    options?: {
+      actionLabel?: string;
+      onAction?: () => void;
+      durationMs?: number;
+    }
+  ) => {
     const id = Math.random().toString(36).substring(7);
-    setToasts((prev) => [...prev, { id, message, type }]);
+    setToasts((prev) => [...prev, { id, message, type, actionLabel: options?.actionLabel, onAction: options?.onAction }]);
     setTimeout(() => {
       removeToast(id);
-    }, 4000);
+    }, Math.max(1500, Number(options?.durationMs || 4000)));
   }, [removeToast]);
 
   const getToastClass = (type: ToastType) => {
@@ -75,8 +93,26 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           >
             <span className="text-lg font-bold">{getIcon(toast.type)}</span>
             <span className="text-sm font-medium flex-1">{toast.message}</span>
+            {toast.actionLabel && toast.onAction && (
+              <button
+                onClick={(event) => {
+                  event.stopPropagation();
+                  try {
+                    toast.onAction?.();
+                  } finally {
+                    removeToast(toast.id);
+                  }
+                }}
+                className="rounded-lg border border-white/30 bg-white/20 px-2 py-1 text-[11px] font-bold uppercase tracking-[0.08em] hover:bg-white/30 transition"
+              >
+                {toast.actionLabel}
+              </button>
+            )}
             <button
-              onClick={() => removeToast(toast.id)}
+              onClick={(event) => {
+                event.stopPropagation();
+                removeToast(toast.id);
+              }}
               className="text-lg font-bold hover:opacity-70 transition-opacity"
               aria-label="Fechar"
             >
