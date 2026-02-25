@@ -1,6 +1,6 @@
 // @ts-nocheck
 import * as React from 'react';
-import { ChartBar, BookOpen, ChefHat, CreditCard, Package, Gear, ShoppingCart, X, Scooter, ForkKnife, Storefront, Truck, List, CaretLeft, CaretRight } from '@phosphor-icons/react';
+import { ChartBar, BookOpen, ChefHat, CreditCard, Package, Gear, ShoppingCart, X, Scooter, ForkKnife, Storefront, Truck, List, CaretLeft, CaretRight, Star } from '@phosphor-icons/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AdminLayout } from '../layouts/AdminLayout';
@@ -446,6 +446,97 @@ const OrdersView = ({ orders, products, storeSlug }) => {
   );
 };
 
+const ReviewsView = ({ reviews = [], canUseDeliveryReviewsAndTips = false, onUpgrade, storeSlug }) => {
+  const [query, setQuery] = useState('');
+  const normalized = query.trim().toLowerCase();
+  const rows = useMemo(() => {
+    if (!normalized) return reviews;
+    return (reviews || []).filter((row: any) => {
+      const haystack = [
+        row?.customerName,
+        row?.comment,
+        row?.orderId,
+        row?.motoboyName,
+        formatOrderDisplayId(row?.orderId, storeSlug),
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+      return haystack.includes(normalized);
+    });
+  }, [reviews, normalized, storeSlug]);
+
+  return (
+    <div className="space-y-4">
+      {!canUseDeliveryReviewsAndTips && (
+        <div className="rounded-xl border border-violet-200 bg-violet-50 p-4">
+          <p className="text-sm font-bold text-violet-900">Detalhes de entrega e gorjetas no plano Pro</p>
+          <p className="mt-1 text-xs text-violet-700">Você já vê as avaliações da loja. Para dados de entrega e gorjetas, faça upgrade.</p>
+          <button
+            type="button"
+            onClick={onUpgrade}
+            className="mt-3 rounded-lg border border-violet-300 bg-white px-3 py-1.5 text-xs font-bold text-violet-700 hover:bg-violet-100"
+          >
+            Trocar assinatura
+          </button>
+        </div>
+      )}
+      <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Buscar por cliente, pedido ou comentário..."
+          className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-brand-primary"
+        />
+      </div>
+      {!rows.length ? (
+        <div className="rounded-xl border border-slate-200 bg-white p-5 text-sm text-slate-500">
+          Nenhuma avaliação encontrada.
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {rows.map((row: any) => (
+            <div key={row.id} className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <p className="text-sm font-bold text-slate-900">{row.customerName || 'Cliente'}</p>
+                  <p className="text-[11px] text-slate-500">Pedido #{formatOrderDisplayId(row.orderId, storeSlug)}</p>
+                </div>
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2 py-1 font-semibold text-slate-700">
+                    <Star size={12} weight="fill" className="text-amber-400" />
+                    Loja {Number(row.storeRating || 0).toFixed(1)}
+                  </span>
+                  {canUseDeliveryReviewsAndTips && row.deliveryRating ? (
+                    <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-1 font-semibold text-emerald-700">
+                      Entrega {Number(row.deliveryRating || 0).toFixed(1)}
+                    </span>
+                  ) : null}
+                  {canUseDeliveryReviewsAndTips && Number(row.tipAmount || 0) > 0 ? (
+                    <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2 py-1 font-semibold text-emerald-700">
+                      Gorjeta {formatCurrency(Number(row.tipAmount || 0))}
+                    </span>
+                  ) : null}
+                </div>
+              </div>
+              {row.comment ? (
+                <p className="mt-2 text-sm text-slate-700">{row.comment}</p>
+              ) : (
+                <p className="mt-2 text-xs text-slate-400">Sem comentário.</p>
+              )}
+              <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
+                {canUseDeliveryReviewsAndTips && row.motoboyName ? <span>Entregador: {row.motoboyName}</span> : null}
+                {canUseDeliveryReviewsAndTips && row.motoboyName ? <span>•</span> : null}
+                <span>{formatDateTime(row.createdAt)}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const PaymentsView = ({ subscription, loading, error, payments }) => {
   const navigate = useNavigate();
   const [showAllHistory, setShowAllHistory] = useState(false);
@@ -714,7 +805,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   const [linkStats, setLinkStats] = useState<any>(null);
   const [subscriptionError, setSubscriptionError] = useState('');
   const [subscriptionLoading, setSubscriptionLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'resumo' | 'pedidos' | 'produtos' | 'config' | 'fila' | 'pagamentos' | 'motoboys'>(() => {
+  const [activeTab, setActiveTab] = useState<'resumo' | 'pedidos' | 'avaliacoes' | 'produtos' | 'config' | 'fila' | 'pagamentos' | 'motoboys'>(() => {
     return (location.state as any)?.activeTab || 'resumo';
   });
   const [menuVisible, setMenuVisible] = useState(() => {
@@ -733,6 +824,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   const [pendingMotoboyRequests, setPendingMotoboyRequests] = useState(0);
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [reviewsSummary, setReviewsSummary] = useState<any | null>(null);
+  const [reviewsList, setReviewsList] = useState<any[]>([]);
   const [tipsOverview, setTipsOverview] = useState({
     paidAmount: 0,
     pendingAmount: 0,
@@ -767,6 +859,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   const desktopTabItems = [
     { id: 'resumo', label: 'Resumo', icon: ChartBar },
     { id: 'pedidos', label: 'Pedidos', icon: ShoppingCart },
+    { id: 'avaliacoes', label: 'Avaliações', icon: Star },
     { id: 'produtos', label: 'Produtos', icon: Package },
     { id: 'pagamentos', label: 'Pagamentos', icon: CreditCard },
     { id: 'motoboys', label: 'Entregadores', icon: Scooter, disabled: !canUseMotoboys },
@@ -784,6 +877,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     () => ({
       resumo: { title: 'Resumo executivo', subtitle: 'Visão consolidada da operação, receita e qualidade da loja.' },
       pedidos: { title: 'Pedidos', subtitle: 'Acompanhe status, filtros e histórico dos pedidos em tempo real.' },
+      avaliacoes: { title: 'Avaliações', subtitle: 'Notas e comentários dos clientes por pedido.' },
       produtos: { title: 'Produtos', subtitle: 'Gerencie catálogo, preço, disponibilidade e destaque da vitrine.' },
       pagamentos: { title: 'Pagamentos', subtitle: 'Controle assinatura, ciclo e eventos de cobrança da loja.' },
       config: { title: 'Configurações', subtitle: 'Ajuste identidade, canais, tipos de pedido e horários da operação.' },
@@ -856,6 +950,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         if (!active) return;
         setReviewsSummary(summary || null);
         const reviewRows = Array.isArray(reviews) ? reviews : [];
+        setReviewsList(reviewRows);
         const tipRows = reviewRows.filter((r: any) => Number(r?.tipAmount ?? r?.tip_amount ?? 0) > 0);
         const paidRows = tipRows.filter((r: any) => String(r?.tipStatus ?? r?.tip_status ?? '').toUpperCase() === 'PAID');
         const pendingRows = tipRows.filter((r: any) => String(r?.tipStatus ?? r?.tip_status ?? '').toUpperCase() === 'PENDING');
@@ -883,6 +978,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       } catch {
         if (!active) return;
         setReviewsSummary(null);
+        setReviewsList([]);
         setTipsOverview({
           paidAmount: 0,
           pendingAmount: 0,
@@ -1443,6 +1539,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                       : [[], []];
                     setReviewsSummary(summary || null);
                     const reviewRows = Array.isArray(reviews) ? reviews : [];
+                    setReviewsList(reviewRows);
                     const tipRows = reviewRows.filter((r: any) => Number(r?.tipAmount ?? r?.tip_amount ?? 0) > 0);
                     const paidRows = tipRows.filter((r: any) => String(r?.tipStatus ?? r?.tip_status ?? '').toUpperCase() === 'PAID');
                     const pendingRows = tipRows.filter((r: any) => String(r?.tipStatus ?? r?.tip_status ?? '').toUpperCase() === 'PENDING');
@@ -1564,6 +1661,22 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             className="bg-white premium-card"
           >
             <OrdersView orders={orders} products={products} storeSlug={storeSlug} />
+          </FormSection>
+        )}
+
+        {activeTab === 'avaliacoes' && (
+          <FormSection
+            title="Avaliações"
+            subtitle="Veja nota, comentário e gorjeta por cliente."
+            variant="success"
+            className="bg-white premium-card"
+          >
+            <ReviewsView
+              reviews={reviewsList}
+              canUseDeliveryReviewsAndTips={canUseDeliveryReviewsAndTips}
+              onUpgrade={() => navigate('/admin/renewal')}
+              storeSlug={storeSlug}
+            />
           </FormSection>
         )}
 
