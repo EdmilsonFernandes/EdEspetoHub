@@ -1,3 +1,5 @@
+import { forceLogoutAndRedirect, isSessionAuthError } from '../utils/sessionRedirect';
+
 const resolveBaseUrl = () => {
   return import.meta.env.VITE_API_BASE_URL || '/api';
 };
@@ -11,8 +13,25 @@ const buildUrl = (path: string) => {
 
 const handleResponse = async (response: Response) => {
   if (!response.ok) {
-    const text = await response.text();
-    throw new Error(text || response.statusText);
+    const contentType = response.headers.get('content-type') || '';
+    let payload: any = null;
+    if (contentType.includes('application/json')) {
+      payload = await response.json().catch(() => null);
+    } else {
+      const text = await response.text().catch(() => '');
+      payload = text ? { message: text } : null;
+    }
+    const message = payload?.message || response.statusText || 'Falha na requisição';
+    const error: any = new Error(message);
+    error.status = response.status;
+    if (payload?.code) error.code = payload.code;
+    if (payload?.details) error.details = payload.details;
+
+    if (isSessionAuthError(response.status, message, payload?.code || '')) {
+      forceLogoutAndRedirect('superadmin');
+    }
+
+    throw error;
   }
   return response.json();
 };

@@ -1,3 +1,5 @@
+import { forceLogoutAndRedirect, inferScopeFromPathname, isSessionAuthError } from '../utils/sessionRedirect';
+
 const resolveBaseUrl = () =>
 {
   return import.meta.env.VITE_API_BASE_URL || '/api';
@@ -47,7 +49,7 @@ const buildUrl = (path: string) =>
   return `${API_BASE_URL}${normalizedPath}`;
 };
 
-const handleResponse = async (response: Response) =>
+const handleResponse = async (response: Response, routeScope: 'admin' | 'motoboy' = 'admin') =>
 {
   if (!response.ok)
   {
@@ -64,6 +66,17 @@ const handleResponse = async (response: Response) =>
     error.status = response.status;
     if (payload?.code) error.code = payload.code;
     if (payload?.details) error.details = payload.details;
+
+    const messageToCheck = payload?.message || message || '';
+    if (isSessionAuthError(response.status, messageToCheck, payload?.code || '')) {
+      const inferredScope =
+        typeof window !== 'undefined'
+          ? inferScopeFromPathname(window.location.pathname)
+          : routeScope;
+      const targetScope = inferredScope === 'superadmin' ? routeScope : inferredScope;
+      forceLogoutAndRedirect(targetScope);
+    }
+
     throw error;
   }
   return response.json();
@@ -91,7 +104,7 @@ const request = async (path: string, options: any = {}) =>
   }
 
   const response = await fetch(url, finalOptions);
-  return handleResponse(response); // ⬅️ NÃO mascarar erro
+  return handleResponse(response, isMotoboyRoute ? 'motoboy' : 'admin'); // ⬅️ NÃO mascarar erro
 };
 
 // RAW (para download/export etc)
