@@ -448,10 +448,29 @@ const OrdersView = ({ orders, products, storeSlug }) => {
 
 const ReviewsView = ({ reviews = [], canUseDeliveryReviewsAndTips = false, onUpgrade, storeSlug }) => {
   const [query, setQuery] = useState('');
+  const [ratingFilter, setRatingFilter] = useState<'all' | '5'>('all');
+  const [commentFilter, setCommentFilter] = useState<'all' | 'with_comment'>('all');
+  const [tipFilter, setTipFilter] = useState<'all' | 'with_tip'>('all');
   const normalized = query.trim().toLowerCase();
+  const normalizedRows = useMemo(() => (Array.isArray(reviews) ? reviews : []), [reviews]);
+  const filterCounts = useMemo(() => {
+    const all = normalizedRows.length;
+    const five = normalizedRows.filter((row: any) => Number(row?.storeRating || 0) >= 5).length;
+    const withComment = normalizedRows.filter((row: any) => String(row?.comment || '').trim().length > 0).length;
+    const withTip = normalizedRows.filter((row: any) => Number(row?.tipAmount || 0) > 0).length;
+    return { all, five, withComment, withTip };
+  }, [normalizedRows]);
+
   const rows = useMemo(() => {
-    if (!normalized) return reviews;
-    return (reviews || []).filter((row: any) => {
+    return normalizedRows
+      .filter((row: any) => {
+        if (ratingFilter === '5' && Number(row?.storeRating || 0) < 5) return false;
+        if (commentFilter === 'with_comment' && String(row?.comment || '').trim().length === 0) return false;
+        if (tipFilter === 'with_tip' && Number(row?.tipAmount || 0) <= 0) return false;
+        return true;
+      })
+      .filter((row: any) => {
+        if (!normalized) return true;
       const haystack = [
         row?.customerName,
         row?.comment,
@@ -464,7 +483,7 @@ const ReviewsView = ({ reviews = [], canUseDeliveryReviewsAndTips = false, onUpg
         .toLowerCase();
       return haystack.includes(normalized);
     });
-  }, [reviews, normalized, storeSlug]);
+  }, [normalizedRows, ratingFilter, commentFilter, tipFilter, normalized, storeSlug]);
 
   return (
     <div className="space-y-4">
@@ -488,6 +507,27 @@ const ReviewsView = ({ reviews = [], canUseDeliveryReviewsAndTips = false, onUpg
           placeholder="Buscar por cliente, pedido ou comentário..."
           className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-brand-primary"
         />
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        {[
+          { id: 'all', label: `Todas (${filterCounts.all})`, active: ratingFilter === 'all' && commentFilter === 'all' && tipFilter === 'all', onClick: () => { setRatingFilter('all'); setCommentFilter('all'); setTipFilter('all'); } },
+          { id: 'five', label: `Só 5 estrelas (${filterCounts.five})`, active: ratingFilter === '5', onClick: () => setRatingFilter((prev) => (prev === '5' ? 'all' : '5')) },
+          { id: 'comment', label: `Com comentário (${filterCounts.withComment})`, active: commentFilter === 'with_comment', onClick: () => setCommentFilter((prev) => (prev === 'with_comment' ? 'all' : 'with_comment')) },
+          { id: 'tip', label: `Com gorjeta (${filterCounts.withTip})`, active: tipFilter === 'with_tip', onClick: () => setTipFilter((prev) => (prev === 'with_tip' ? 'all' : 'with_tip')) },
+        ].map((chip) => (
+          <button
+            key={chip.id}
+            type="button"
+            onClick={chip.onClick}
+            className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+              chip.active
+                ? 'bg-brand-primary text-white border-brand-primary'
+                : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+            }`}
+          >
+            {chip.label}
+          </button>
+        ))}
       </div>
       {!rows.length ? (
         <div className="rounded-xl border border-slate-200 bg-white p-5 text-sm text-slate-500">
