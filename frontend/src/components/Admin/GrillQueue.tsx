@@ -81,6 +81,7 @@ export const GrillQueue = () => {
     if (typeof window === "undefined") return false;
     return localStorage.getItem("queueTvMode") === "true";
   });
+  const [queueFilter, setQueueFilter] = useState<'all' | 'pending' | 'preparing' | 'ready' | 'late'>('all');
   const previousIdsRef = useRef<string[]>([]);
   const audioContextRef = useRef<AudioContext | null>(null);
 
@@ -590,13 +591,59 @@ export const GrillQueue = () => {
     const pending = withAges.filter((o) => o.status === 'pending').length;
     const preparing = withAges.filter((o) => o.status === 'preparing').length;
     const ready = withAges.filter((o) => [ 'ready', 'ready_for_delivery', 'waiting_for_motoboy' ].includes(o.status)).length;
+    const late = withAges.filter((o) => o.ageMs > 10 * 60 * 1000).length;
     const avgMs =
       withAges.length > 0
         ? withAges.reduce((acc, cur) => acc + cur.ageMs, 0) / withAges.length
         : 0;
     const oldest = withAges.reduce((acc, cur) => (cur.ageMs > acc ? cur.ageMs : acc), 0);
-    return { pending, preparing, ready, avgMs, oldest };
+    return { pending, preparing, ready, late, avgMs, oldest };
   }, [productionQueue, currentTime]);
+
+  const filteredProductionQueue = useMemo(() => {
+    if (queueFilter === 'all') return productionQueue;
+    if (queueFilter === 'pending') return productionQueue.filter((order) => order.status === 'pending');
+    if (queueFilter === 'preparing') return productionQueue.filter((order) => order.status === 'preparing');
+    if (queueFilter === 'ready') {
+      return productionQueue.filter((order) => [ 'ready', 'ready_for_delivery', 'waiting_for_motoboy' ].includes(order.status));
+    }
+    if (queueFilter === 'late') {
+      const now = Date.now();
+      return productionQueue.filter((order) => {
+        const createdAt = order?.createdAt ? new Date(order.createdAt).getTime() : now;
+        const ageMs = Math.max(0, now - createdAt);
+        return ageMs > 10 * 60 * 1000;
+      });
+    }
+    return productionQueue;
+  }, [productionQueue, queueFilter, currentTime]);
+
+  const focusAndRunQuickAction = async (kind: 'start' | 'ready' | 'finish') => {
+    if (kind === 'start') {
+      const target = productionQueue.find((order) => order.status === 'pending');
+      if (!target) return;
+      pulseCta(target.id + '-prep');
+      await handleAdvance(target.id, 'preparing');
+      return;
+    }
+    if (kind === 'ready') {
+      const target = productionQueue.find((order) => order.status === 'preparing');
+      if (!target) return;
+      const nextStatus =
+        target.type === 'delivery'
+          ? 'ready_for_delivery'
+          : target.type === 'pickup'
+          ? 'ready'
+          : 'done';
+      pulseCta(target.id + '-ready');
+      await handleAdvance(target.id, nextStatus);
+      return;
+    }
+    const target = productionQueue.find((order) => [ 'ready', 'waiting_for_motoboy' ].includes(order.status) && order.type !== 'delivery');
+    if (!target) return;
+    pulseCta(target.id + '-done');
+    await handleAdvance(target.id, 'done');
+  };
 
   useEffect(() => {
     if (activeTab === 'completed') {
@@ -705,7 +752,7 @@ export const GrillQueue = () => {
           </span>
           {!tvMode && (
             <p className="text-[12px] font-medium text-slate-500">
-              Pendentes {queueMetrics.pending} • Em atendimento {queueMetrics.preparing} • Aguardando {queueMetrics.ready} • Mais antigo {formatDuration(queueMetrics.oldest)}
+              Pendentes {queueMetrics.pending} • Em atendimento {queueMetrics.preparing} • Aguardando {queueMetrics.ready} • Atrasados {queueMetrics.late} • Mais antigo {formatDuration(queueMetrics.oldest)}
             </p>
           )}
           {tvMode && (
@@ -820,6 +867,62 @@ export const GrillQueue = () => {
         </div>
       </div>
 
+      {!tvMode && activeTab === 'queue' && (
+        <div className="grid grid-cols-2 xl:grid-cols-5 gap-2">
+          {[
+            { id: 'all', label: 'Todos', value: productionQueue.length, tone: 'border-slate-200 bg-white text-slate-700' },
+            { id: 'pending', label: 'Pendentes', value: queueMetrics.pending, tone: 'border-amber-200 bg-amber-50 text-amber-700' },
+            { id: 'preparing', label: 'Em atendimento', value: queueMetrics.preparing, tone: 'border-sky-200 bg-sky-50 text-sky-700' },
+            { id: 'ready', label: 'Prontos', value: queueMetrics.ready, tone: 'border-violet-200 bg-violet-50 text-violet-700' },
+            { id: 'late', label: 'Atrasados', value: queueMetrics.late, tone: 'border-rose-200 bg-rose-50 text-rose-700' },
+          ].map((kpi) => (
+            <button
+              key={kpi.id}
+              type="button"
+              onClick={() => setQueueFilter(kpi.id as any)}
+              className={`rounded-xl border px-3 py-2 text-left transition hover:-translate-y-0.5 ${
+                queueFilter === kpi.id ? 'ring-2 ring-brand-primary/25' : ''
+              } ${kpi.tone}`}
+            >
+              <p className="text-[10px] uppercase tracking-[0.14em] font-bold opacity-80">{kpi.label}</p>
+              <p className="text-lg font-black leading-tight">{kpi.value}</p>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {!tvMode && activeTab === 'queue' && (
+        <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-xs font-bold text-slate-700 uppercase tracking-[0.18em]">Ações rápidas</p>
+            <p className="text-[11px] text-slate-500">Atalho para o próximo pedido da fila</p>
+          </div>
+          <div className="mt-2.5 grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <button
+              type="button"
+              onClick={() => focusAndRunQuickAction('start')}
+              className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-700 hover:bg-amber-100 transition"
+            >
+              Iniciar atendimento
+            </button>
+            <button
+              type="button"
+              onClick={() => focusAndRunQuickAction('ready')}
+              className="rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-xs font-bold text-sky-700 hover:bg-sky-100 transition"
+            >
+              Marcar pronto
+            </button>
+            <button
+              type="button"
+              onClick={() => focusAndRunQuickAction('finish')}
+              className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700 hover:bg-emerald-100 transition"
+            >
+              Finalizar próximo
+            </button>
+          </div>
+        </div>
+      )}
+
       {activeTab === 'queue' && (
         <div
           className={`grid gap-3 xl:gap-4 ${
@@ -828,10 +931,16 @@ export const GrillQueue = () => {
               : "grid-cols-1"
           }`}
         >
-          {productionQueue.map((order, index) => {
+          {filteredProductionQueue.map((order, index) => {
             const orderAgeMs = order?.createdAt ? Date.now() - new Date(order.createdAt).getTime() : 0;
             const isLate = orderAgeMs > 10 * 60 * 1000;
             const isNew = newOrderIds.includes(order.id);
+            const slaTone = isLate
+              ? 'bg-rose-100 text-rose-700 border-rose-200'
+              : orderAgeMs > 6 * 60 * 1000
+              ? 'bg-amber-100 text-amber-700 border-amber-200'
+              : 'bg-emerald-100 text-emerald-700 border-emerald-200';
+            const slaLabel = isLate ? 'Crítico' : orderAgeMs > 6 * 60 * 1000 ? 'Atenção' : 'No prazo';
             const toneKey =
               order.status === "ready_for_delivery" || order.status === "waiting_for_motoboy"
                 ? "ready"
@@ -948,6 +1057,9 @@ export const GrillQueue = () => {
                       {elapsedTime[order.id] || "0s"}
                     </span>
                   </div>
+                  <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full border ${slaTone}`}>
+                    SLA {slaLabel}
+                  </span>
                 </div>
               </div>
 
