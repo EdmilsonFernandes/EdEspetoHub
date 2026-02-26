@@ -682,9 +682,7 @@ export const GrillQueue = () => {
       const nextStatus =
         target.type === 'delivery'
           ? 'ready_for_delivery'
-          : target.type === 'pickup'
-          ? 'ready'
-          : 'done';
+          : 'ready';
       pulseCta(target.id + '-ready');
       await handleAdvance(target.id, nextStatus);
       return;
@@ -715,7 +713,12 @@ export const GrillQueue = () => {
       return { label: "Em atendimento", className: "bg-amber-100 text-amber-700" };
     }
     if (status === "ready") {
-      const label = orderType === "delivery" ? "Aguardando entregador" : "Aguardando retirada";
+      const label =
+        orderType === "delivery"
+          ? "Aguardando entregador"
+          : orderType === "pickup"
+          ? "Aguardando retirada"
+          : "Pronto para servir";
       return { label, className: "bg-sky-100 text-sky-700" };
     }
     return { label: "Aguardando", className: "bg-red-100 text-red-700" };
@@ -752,7 +755,8 @@ export const GrillQueue = () => {
         : [
             { key: "pending", label: "Recebido" },
             { key: "preparing", label: "Em atendimento" },
-            { key: "done", label: "Pronto" },
+            { key: "ready", label: "Pronto para servir" },
+            { key: "done", label: "Finalizado" },
           ];
 
     const isActive = (key) => {
@@ -801,9 +805,7 @@ export const GrillQueue = () => {
             {productionQueue.length} pedidos
           </span>
           {!tvMode && (
-            <p className="text-[12px] font-medium text-slate-500">
-              Pendentes {queueMetrics.pending} • Em atendimento {queueMetrics.preparing} • Aguardando {queueMetrics.ready} • Atrasados {queueMetrics.late} • Mais antigo {formatDuration(queueMetrics.oldest)}
-            </p>
+            <p className="text-[12px] font-medium text-slate-500">Mais antigo {formatDuration(queueMetrics.oldest)}</p>
           )}
           {tvMode && (
             <span className="flex items-center gap-2 text-xs font-semibold text-white/70">
@@ -1334,12 +1336,12 @@ export const GrillQueue = () => {
                 {order.status === "preparing" && order.type !== "pickup" && order.type !== "delivery" && (
                   <div className="w-full sm:w-auto">
                     <div className="mb-2 text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-lg px-2.5 py-1">
-                      Pedido pronto? Clique para finalizar.
+                      Pedido pronto para servir.
                     </div>
                     <button
-                      onClick={() => { pulseCta(order.id + '-pay'); openPaymentConfirm(order); }}
+                      onClick={() => { pulseCta(order.id + '-ready'); handleAdvance(order.id, "ready"); }}
                       disabled={updating === order.id}
-                      style={ctaPulseId === order.id + '-pay' ? { animation: 'btnPop 220ms ease' } : undefined}
+                      style={ctaPulseId === order.id + '-ready' ? { animation: 'btnPop 220ms ease' } : undefined}
                       className="w-full sm:w-auto px-3 py-2 rounded-lg bg-emerald-600 text-white text-xs font-bold flex items-center justify-center gap-1 disabled:opacity-60 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95"
                     >
                       <CheckSquare size={16} weight="duotone" /> Marcar pronto
