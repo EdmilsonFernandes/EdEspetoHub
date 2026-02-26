@@ -434,12 +434,27 @@ export const GrillQueue = () => {
   }, []);
 
   const handleAdvance = async (orderId, status) => {
+    const previousQueue = queue;
     try {
       setUpdating(orderId);
+      // Mantém a operação previsível: sempre volta para "Todos" após qualquer ação.
+      setQueueFilter('all');
+      // Atualização otimista para o pedido sumir/andar imediatamente na UI.
+      setQueue((prev) =>
+        prev.map((order) =>
+          order.id === orderId
+            ? {
+                ...order,
+                status,
+              }
+            : order
+        )
+      );
       await orderService.updateStatus(orderId, status);
       await loadQueue();
     } catch (err) {
       console.error('Erro ao atualizar status', err);
+      setQueue(previousQueue);
       setError('Não foi possível atualizar o status agora. Tente novamente.');
     } finally {
       setUpdating(null);
