@@ -529,6 +529,19 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
                 />
                 <p className="text-xs text-gray-500">Mostrado no checkout quando o cliente escolhe entrega.</p>
               </div>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700">SLA de preparo (min)</label>
+                <input
+                  type="number"
+                  step="1"
+                  min="5"
+                  value={branding.prepBaseMinutes ?? ''}
+                  onChange={(e) => handleChange("prepBaseMinutes", e.target.value)}
+                  className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
+                  placeholder="20"
+                />
+                <p className="text-xs text-gray-500">Usado na fila para indicar atraso e atenção dos pedidos.</p>
+              </div>
             </div>
           </div>
         </div>

@@ -255,6 +255,11 @@ export class StoreService
       {
         store.settings.deliveryFee = this.parseNumber(data.deliveryFee) ?? null;
       }
+      if (data.prepBaseMinutes !== undefined)
+      {
+        const parsed = Number(data.prepBaseMinutes);
+        store.settings.prepBaseMinutes = Number.isFinite(parsed) ? Math.max(5, Math.round(parsed)) : null;
+      }
 
       if (data.socialLinks)
       {

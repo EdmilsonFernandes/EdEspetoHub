@@ -37,14 +37,19 @@ import { useAuth } from "../../contexts/AuthContext";
 import { buildPixPayload } from "../../utils/pixPayload";
 
 export const GrillQueue = () => {
-  const PREP_SLA_MS = 20 * 60 * 1000;
-  const PREP_ATTENTION_MS = 15 * 60 * 1000;
   // Tap feedback animation
   const pulseCta = (key: string) => {
     setCtaPulseId(key);
     window.setTimeout(() => setCtaPulseId(null), 220);
   };
   const { auth } = useAuth();
+  const prepSlaMinutes = useMemo(() => {
+    const raw = Number(auth?.store?.settings?.prepBaseMinutes ?? 20);
+    if (!Number.isFinite(raw)) return 20;
+    return Math.max(5, Math.round(raw));
+  }, [auth?.store?.settings?.prepBaseMinutes]);
+  const PREP_SLA_MS = prepSlaMinutes * 60 * 1000;
+  const PREP_ATTENTION_MS = Math.max(5, prepSlaMinutes - 5) * 60 * 1000;
   const [queue, setQueue] = useState([]);
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState([]);
@@ -758,7 +763,7 @@ export const GrillQueue = () => {
           </span>
           {!tvMode && (
             <p className="text-[12px] font-medium text-slate-500">
-              Pendentes {queueMetrics.pending} • Em atendimento {queueMetrics.preparing} • Prontos {queueMetrics.ready} • Atrasados {queueMetrics.late} • Aguardando motoboy {awaitingMotoboyQueue.length} • Mais antigo {formatDuration(queueMetrics.oldest)}
+              Pendentes {queueMetrics.pending} • Em atendimento {queueMetrics.preparing} • Prontos {queueMetrics.ready} • Atrasados {queueMetrics.late} • Aguardando motoboy {awaitingMotoboyQueue.length} • SLA alvo {prepSlaMinutes}min • Mais antigo {formatDuration(queueMetrics.oldest)}
             </p>
           )}
           {tvMode && (
