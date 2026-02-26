@@ -37,6 +37,8 @@ import { useAuth } from "../../contexts/AuthContext";
 import { buildPixPayload } from "../../utils/pixPayload";
 
 export const GrillQueue = () => {
+  const PREP_SLA_MS = 20 * 60 * 1000;
+  const PREP_ATTENTION_MS = 15 * 60 * 1000;
   // Tap feedback animation
   const pulseCta = (key: string) => {
     setCtaPulseId(key);
@@ -562,9 +564,19 @@ export const GrillQueue = () => {
   );
 
   const productionQueue = useMemo(() => {
-    const statuses = new Set([ 'pending', 'preparing', 'ready', 'ready_for_delivery', 'waiting_for_motoboy' ]);
+    const statuses = new Set([ 'pending', 'preparing', 'ready' ]);
     return [...queue]
       .filter((order) => statuses.has(order.status))
+      .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+  }, [queue]);
+
+  const awaitingMotoboyQueue = useMemo(() => {
+    return [...queue]
+      .filter(
+        (order) =>
+          order.type === 'delivery' &&
+          [ 'ready_for_delivery', 'waiting_for_motoboy' ].includes(order.status)
+      )
       .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
   }, [queue]);
 
@@ -605,33 +617,33 @@ export const GrillQueue = () => {
     });
     const pending = withAges.filter((o) => o.status === 'pending').length;
     const preparing = withAges.filter((o) => o.status === 'preparing').length;
-    const ready = withAges.filter((o) => [ 'ready', 'ready_for_delivery', 'waiting_for_motoboy' ].includes(o.status)).length;
-    const late = withAges.filter((o) => o.ageMs > 10 * 60 * 1000).length;
+    const ready = withAges.filter((o) => o.status === 'ready').length;
+    const late = withAges.filter((o) => o.ageMs > PREP_SLA_MS).length;
     const avgMs =
       withAges.length > 0
         ? withAges.reduce((acc, cur) => acc + cur.ageMs, 0) / withAges.length
         : 0;
     const oldest = withAges.reduce((acc, cur) => (cur.ageMs > acc ? cur.ageMs : acc), 0);
     return { pending, preparing, ready, late, avgMs, oldest };
-  }, [productionQueue, currentTime]);
+  }, [productionQueue, currentTime, PREP_SLA_MS]);
 
   const filteredProductionQueue = useMemo(() => {
     if (queueFilter === 'all') return productionQueue;
     if (queueFilter === 'pending') return productionQueue.filter((order) => order.status === 'pending');
     if (queueFilter === 'preparing') return productionQueue.filter((order) => order.status === 'preparing');
     if (queueFilter === 'ready') {
-      return productionQueue.filter((order) => [ 'ready', 'ready_for_delivery', 'waiting_for_motoboy' ].includes(order.status));
+      return productionQueue.filter((order) => order.status === 'ready');
     }
     if (queueFilter === 'late') {
       const now = Date.now();
       return productionQueue.filter((order) => {
         const createdAt = order?.createdAt ? new Date(order.createdAt).getTime() : now;
         const ageMs = Math.max(0, now - createdAt);
-        return ageMs > 10 * 60 * 1000;
+        return ageMs > PREP_SLA_MS;
       });
     }
     return productionQueue;
-  }, [productionQueue, queueFilter, currentTime]);
+  }, [productionQueue, queueFilter, currentTime, PREP_SLA_MS]);
 
   useEffect(() => {
     if (activeTab === 'completed') {
@@ -742,11 +754,11 @@ export const GrillQueue = () => {
           <ChefHat className={tvMode ? "text-white" : "text-brand-primary"} weight="duotone" />
           Central de Pedidos
           <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${tvMode ? "bg-white/15 text-white" : "bg-orange-100 text-orange-700 border border-orange-200"}`}>
-            {productionQueue.length} pedidos
+            {productionQueue.length} em produção
           </span>
           {!tvMode && (
             <p className="text-[12px] font-medium text-slate-500">
-              Pendentes {queueMetrics.pending} • Em atendimento {queueMetrics.preparing} • Prontos {queueMetrics.ready} • Atrasados {queueMetrics.late} • Mais antigo {formatDuration(queueMetrics.oldest)}
+              Pendentes {queueMetrics.pending} • Em atendimento {queueMetrics.preparing} • Prontos {queueMetrics.ready} • Atrasados {queueMetrics.late} • Aguardando motoboy {awaitingMotoboyQueue.length} • Mais antigo {formatDuration(queueMetrics.oldest)}
             </p>
           )}
           {tvMode && (
@@ -886,23 +898,46 @@ export const GrillQueue = () => {
       )}
 
       {activeTab === 'queue' && (
-        <div
-          className={`grid gap-3 xl:gap-4 ${
-            tvMode
-              ? "grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"
-              : "grid-cols-1"
-          }`}
-        >
+        <div className="space-y-3">
+          {awaitingMotoboyQueue.length > 0 && (
+            <div className="rounded-2xl border border-indigo-200 bg-indigo-50/70 p-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-indigo-800">Aguardando motoboy</p>
+                <span className="rounded-full border border-indigo-200 bg-white px-2.5 py-1 text-[11px] font-bold text-indigo-700">
+                  {awaitingMotoboyQueue.length} pedido(s)
+                </span>
+              </div>
+              <div className="mt-2 grid grid-cols-1 gap-2 md:grid-cols-2">
+                {awaitingMotoboyQueue.map((order) => (
+                  <div key={`awaiting-${order.id}`} className="rounded-xl border border-indigo-200 bg-white px-3 py-2">
+                    <p className="text-xs font-bold text-slate-800">
+                      Pedido #{formatOrderDisplayId(order.id, storeSlug)} • {order.customerName || 'Cliente'}
+                    </p>
+                    <p className="mt-0.5 text-[11px] text-slate-500">
+                      Pronto há {formatDuration(order.createdAt ? Date.now() - new Date(order.createdAt).getTime() : 0)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          <div
+            className={`grid gap-3 xl:gap-4 ${
+              tvMode
+                ? "grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"
+                : "grid-cols-1"
+            }`}
+          >
           {filteredProductionQueue.map((order, index) => {
             const orderAgeMs = order?.createdAt ? Date.now() - new Date(order.createdAt).getTime() : 0;
-            const isLate = orderAgeMs > 10 * 60 * 1000;
+            const isLate = orderAgeMs > PREP_SLA_MS;
             const isNew = newOrderIds.includes(order.id);
             const slaTone = isLate
               ? 'bg-rose-100 text-rose-700 border-rose-200'
-              : orderAgeMs > 6 * 60 * 1000
+              : orderAgeMs > PREP_ATTENTION_MS
               ? 'bg-amber-100 text-amber-700 border-amber-200'
               : 'bg-emerald-100 text-emerald-700 border-emerald-200';
-            const slaLabel = isLate ? 'Crítico' : orderAgeMs > 6 * 60 * 1000 ? 'Atenção' : 'No prazo';
+            const slaLabel = isLate ? 'Crítico' : orderAgeMs > PREP_ATTENTION_MS ? 'Atenção' : 'No prazo';
             const toneKey =
               order.status === "ready_for_delivery" || order.status === "waiting_for_motoboy"
                 ? "ready"
@@ -1267,7 +1302,7 @@ export const GrillQueue = () => {
           );
           })}
 
-          {productionQueue.length === 0 && !loading && (
+          {productionQueue.length === 0 && awaitingMotoboyQueue.length === 0 && !loading && (
             <div className="col-span-full text-center text-gray-500 py-12 bg-slate-50 rounded-2xl border border-dashed border-slate-300">
               <div className="mx-auto max-w-sm space-y-2">
                 <div className="text-4xl">🔥</div>
@@ -1278,6 +1313,7 @@ export const GrillQueue = () => {
               </div>
             </div>
           )}
+          </div>
         </div>
       )}
 
