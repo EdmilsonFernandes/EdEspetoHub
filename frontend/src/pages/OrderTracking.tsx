@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Bicycle, ChefHat, CheckCircle, Clock, CircleNotch, MapPin, Star } from '@phosphor-icons/react';
 import { orderService } from '../services/orderService';
 import { mapsService } from '../services/mapsService';
@@ -82,6 +82,7 @@ const firstName = (fullName?: string | null) => {
 
 export function OrderTracking() {
   const { orderId } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
   const [order, setOrder] = useState(null);
   const [error, setError] = useState('');
@@ -102,6 +103,8 @@ export function OrderTracking() {
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [reviewState, setReviewState] = useState<any>(null);
   const [reviewError, setReviewError] = useState('');
+  const [reviewAccessDenied, setReviewAccessDenied] = useState(false);
+  const [orderAccessToken, setOrderAccessToken] = useState('');
   const [showItemsSheetMobile, setShowItemsSheetMobile] = useState(false);
   const [tipPixCopied, setTipPixCopied] = useState(false);
   const [reviewForm, setReviewForm] = useState({
@@ -112,6 +115,19 @@ export function OrderTracking() {
     deliveryTags: [] as string[],
     tipAmount: 0,
   });
+
+  useEffect(() => {
+    if (!orderId || typeof window === 'undefined') return;
+    const params = new URLSearchParams(location.search || '');
+    const queryToken = String(params.get('ot') || '').trim();
+    const storageKey = `orderAccess:${orderId}`;
+    if (queryToken) {
+      localStorage.setItem(storageKey, queryToken);
+      setOrderAccessToken(queryToken);
+      return;
+    }
+    setOrderAccessToken(String(localStorage.getItem(storageKey) || '').trim());
+  }, [orderId, location.search]);
 
   useEffect(() => {
     if (!orderId) return;
@@ -308,8 +324,9 @@ export function OrderTracking() {
     let active = true;
     setReviewLoading(true);
     setReviewError('');
+    setReviewAccessDenied(false);
     orderService
-      .getReviewByOrder(order.id)
+      .getReviewByOrder(order.id, orderAccessToken)
       .then((payload) => {
         if (!active) return;
         setReviewState(payload || null);
@@ -326,6 +343,12 @@ export function OrderTracking() {
       })
       .catch((error: any) => {
         if (!active) return;
+        if (Number(error?.status || 0) === 403) {
+          setReviewAccessDenied(true);
+          setReviewState(null);
+          setReviewError('');
+          return;
+        }
         setReviewError(error?.message || 'Não foi possível carregar avaliação.');
       })
       .finally(() => {
@@ -334,7 +357,7 @@ export function OrderTracking() {
     return () => {
       active = false;
     };
-  }, [order?.id, isReady]);
+  }, [order?.id, isReady, orderAccessToken]);
 
   const storeTagOptions = ['Sabor', 'Temperatura', 'Embalagem', 'Custo-benefício'];
   const deliveryTagOptions = ['Rápido', 'Educado', 'Pedido intacto', 'Boa comunicação'];
@@ -379,7 +402,7 @@ export function OrderTracking() {
     if (!order?.id) return;
     try {
       if (!silent) setReviewLoading(true);
-      const payload = await orderService.getReviewByOrder(order.id);
+      const payload = await orderService.getReviewByOrder(order.id, orderAccessToken);
       setReviewState(payload || null);
       return String(payload?.review?.tipStatus || '').toUpperCase();
     } catch (error: any) {
@@ -433,9 +456,14 @@ export function OrderTracking() {
         storeTags: reviewForm.storeTags || [],
         deliveryTags: canRateDelivery ? (reviewForm.deliveryTags || []) : [],
         tipAmount: canUseTipFlow ? Number(reviewForm.tipAmount || 0) : 0,
-      });
+      }, orderAccessToken);
       setReviewState({ ...(reviewState || {}), review: payload });
     } catch (error: any) {
+      if (Number(error?.status || 0) === 403) {
+        setReviewAccessDenied(true);
+        setReviewError('');
+        return;
+      }
       setReviewError(error?.message || 'Não foi possível enviar sua avaliação.');
     } finally {
       setReviewSubmitting(false);
@@ -1244,9 +1272,14 @@ export function OrderTracking() {
                   {isReady && (
                     <div className="rounded-xl border border-slate-200 bg-white p-3 space-y-3">
                       <p className="text-sm font-semibold text-slate-900">Avaliar pedido</p>
+                      {reviewAccessDenied ? (
+                        <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800">
+                          Avaliação disponível somente no dispositivo em que o pedido foi criado.
+                        </div>
+                      ) : null}
                       {reviewLoading ? (
                         <p className="text-xs text-slate-500">Carregando avaliação...</p>
-                      ) : (
+                      ) : reviewAccessDenied ? null : (
                         <>
                           <div>
                             <p className="text-xs font-semibold text-slate-600 mb-1">Nota da loja</p>

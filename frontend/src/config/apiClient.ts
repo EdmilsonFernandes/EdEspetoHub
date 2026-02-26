@@ -137,11 +137,11 @@ const rawRequest = async (path: string, options: any = {}) =>
 };
 
 export const apiClient = {
-  get: (path: string) => request(path),
-  post: (path: string, body: any) => request(path, { method: 'POST', body }),
-  put: (path: string, body: any) => request(path, { method: 'PUT', body }),
-  patch: (path: string, body: any) => request(path, { method: 'PATCH', body }),
-  delete: (path: string) => request(path, { method: 'DELETE' }),
+  get: (path: string, options: any = {}) => request(path, { ...options }),
+  post: (path: string, body: any, options: any = {}) => request(path, { method: 'POST', body, ...options }),
+  put: (path: string, body: any, options: any = {}) => request(path, { method: 'PUT', body, ...options }),
+  patch: (path: string, body: any, options: any = {}) => request(path, { method: 'PATCH', body, ...options }),
+  delete: (path: string, options: any = {}) => request(path, { method: 'DELETE', ...options }),
 
   rawGet: (path: string) => rawRequest(path, { method: 'GET' }),
   rawPost: (path: string, body: any) => rawRequest(path, { method: 'POST', body }),

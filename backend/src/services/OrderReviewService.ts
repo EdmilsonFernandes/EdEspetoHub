@@ -22,6 +22,7 @@ import { StoreRepository } from '../repositories/StoreRepository';
 import { SubscriptionRepository } from '../repositories/SubscriptionRepository';
 import { saveBase64Image } from '../utils/imageStorage';
 import { resolvePlanFeatures } from '../config/planFeatures';
+import { verifyOrderAccessToken } from '../utils/orderAccessToken';
 
 type SubmitReviewInput = {
   storeRating: number;
@@ -73,6 +74,13 @@ export class OrderReviewService {
       .map((item) => String(item || '').trim())
       .filter(Boolean)
       .slice(0, 8);
+  }
+
+  private ensureOrderAccess(orderId: string, accessToken?: string | null) {
+    const ok = verifyOrderAccessToken(String(accessToken || ''), orderId);
+    if (!ok) {
+      throw new AppError('AUTH-003', 403, { reason: 'order_access_required' });
+    }
   }
 
   private async ensureTipPayment(order: any, review: any) {
@@ -162,9 +170,10 @@ export class OrderReviewService {
     return Math.round(n);
   }
 
-  async submitByOrderId(orderId: string, input: SubmitReviewInput) {
+  async submitByOrderId(orderId: string, input: SubmitReviewInput, accessToken?: string | null) {
     const order = await this.orderRepository.findById(orderId);
     if (!order) throw new AppError('ORDER-001', 404);
+    this.ensureOrderAccess(order.id, accessToken);
 
     const status = String(order.status || '').toLowerCase();
     const isFinished = [ 'done', 'delivered', 'finished' ].includes(status);
@@ -203,9 +212,10 @@ export class OrderReviewService {
     return this.ensureTipPayment(order, review);
   }
 
-  async getByOrderId(orderId: string) {
+  async getByOrderId(orderId: string, accessToken?: string | null) {
     const order = await this.orderRepository.findById(orderId);
     if (!order) throw new AppError('ORDER-001', 404);
+    this.ensureOrderAccess(order.id, accessToken);
     const review = await this.orderReviewRepository.findByOrderId(order.id);
     const normalizedOrderType = String(order.type || '').trim().toLowerCase();
     const delivery = await this.orderDeliveryRepository.findByOrderId(order.id);

@@ -250,7 +250,7 @@ export function StorePage() {
   const normalizeRecentPublicEntries = (entries: any[]) => {
     const now = Date.now();
     const unique = new Set<string>();
-    const normalized: Array<{ id: string; createdAt: number; type?: string }> = [];
+    const normalized: Array<{ id: string; createdAt: number; type?: string; accessToken?: string }> = [];
     (Array.isArray(entries) ? entries : []).forEach((entry) => {
       const id = String(entry?.id || '').trim();
       const createdAt = Number(entry?.createdAt || 0);
@@ -258,7 +258,12 @@ export function StorePage() {
       if (now - createdAt > publicOrderTtlMs) return;
       if (unique.has(id)) return;
       unique.add(id);
-      normalized.push({ id, createdAt, type: entry?.type });
+      normalized.push({
+        id,
+        createdAt,
+        type: entry?.type,
+        accessToken: entry?.accessToken ? String(entry.accessToken) : undefined,
+      });
     });
     return normalized.slice(0, 3);
   };
@@ -993,8 +998,16 @@ export function StorePage() {
       table: customer.table,
     });
     if (createdOrder?.id && !user?.token) {
-      const entry = { id: createdOrder.id, createdAt: Date.now(), type: customer.type };
+      const entry = {
+        id: createdOrder.id,
+        createdAt: Date.now(),
+        type: customer.type,
+        accessToken: createdOrder?.accessToken ? String(createdOrder.accessToken) : undefined,
+      };
       localStorage.setItem(`lastOrder:${storeSlug}`, JSON.stringify(entry));
+      if (entry.accessToken) {
+        localStorage.setItem(`orderAccess:${entry.id}`, entry.accessToken);
+      }
       setLastPublicOrderId(createdOrder.id);
       try {
         const rawList = localStorage.getItem(`lastOrders:${storeSlug}`);
@@ -1032,12 +1045,6 @@ export function StorePage() {
       return;
     }
     navigate('/admin/queue');
-  };
-  const handleRepeatFromMenu = () => {
-    if (!storeSlug || !lastOrderItems.length) return;
-    localStorage.setItem(`reorder:${storeSlug}`, JSON.stringify({ items: lastOrderItems }));
-    setReorderApplied(false);
-    setView('cart');
   };
   const goToDemoGuide = () => {
     if (typeof window !== 'undefined') {
@@ -1335,7 +1342,13 @@ export function StorePage() {
                     {recentPublicOrders.map((entry) => (
                       <button
                         key={entry.id}
-                        onClick={() => navigate(`/pedido/${entry.id}`)}
+                        onClick={() =>
+                          navigate(
+                            entry.accessToken
+                              ? `/pedido/${entry.id}?ot=${encodeURIComponent(entry.accessToken)}`
+                              : `/pedido/${entry.id}`
+                          )
+                        }
                         className="btn-press px-3 py-1.5 rounded-full bg-white/70 text-emerald-900 text-[11px] font-extrabold border border-emerald-200 hover:bg-emerald-100/70"
                       >
                         #{formatOrderDisplayId(entry.id, storeSlug)}
@@ -1345,19 +1358,17 @@ export function StorePage() {
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <button
-                    onClick={() => navigate(`/pedido/${recentPublicOrders[0].id}`)}
+                    onClick={() =>
+                      navigate(
+                        recentPublicOrders[0]?.accessToken
+                          ? `/pedido/${recentPublicOrders[0].id}?ot=${encodeURIComponent(recentPublicOrders[0].accessToken)}`
+                          : `/pedido/${recentPublicOrders[0].id}`
+                      )
+                    }
                     className="btn-press px-4 py-2 rounded-xl bg-[linear-gradient(120deg,#16a34a,#059669)] text-white text-xs font-extrabold shadow-[0_22px_48px_-32px_rgba(5,150,105,0.6)]"
                   >
                     Acompanhar agora
                   </button>
-                  {lastOrderItems.length > 0 && (
-                    <button
-                      onClick={handleRepeatFromMenu}
-                      className="btn-press px-4 py-2 rounded-xl border border-emerald-300 bg-white/70 text-emerald-900 text-xs font-extrabold hover:bg-emerald-100/70"
-                    >
-                      Pedir novamente
-                    </button>
-                  )}
                 </div>
               </div>
             )}

@@ -21,6 +21,7 @@ import { logger } from '../utils/logger';
 import { AppError } from '../errors/AppError';
 import { respondWithError } from '../errors/respondWithError';
 import { env } from '../config/env';
+import { createOrderAccessToken } from '../utils/orderAccessToken';
 
 const orderService = new OrderService();
 const orderEtaServiceV2 = new OrderEtaServiceV2();
@@ -43,7 +44,10 @@ export class OrderController {
       log.info('Order create request', { storeId: req.params.storeId });
       const order = await orderService.create({ ...req.body, storeId: req.params.storeId });
       log.info('Order created', { orderId: order?.id, storeId: req.params.storeId });
-      return res.status(201).json(order);
+      return res.status(201).json({
+        ...order,
+        accessToken: order?.id ? createOrderAccessToken(order.id) : null,
+      });
     } catch (error: any) {
       log.warn('Order create failed', { storeId: req.params.storeId, error });
       return respondWithError(req, res, error, 400);
@@ -84,7 +88,10 @@ export class OrderController {
       log.info('Order create by slug request', { slug: req.params.slug });
       const order = await orderService.createBySlug({ ...req.body, storeSlug: req.params.slug });
       log.info('Order created by slug', { orderId: order?.id, slug: req.params.slug });
-      return res.status(201).json(order);
+      return res.status(201).json({
+        ...order,
+        accessToken: order?.id ? createOrderAccessToken(order.id) : null,
+      });
     } catch (error: any) {
       log.warn('Order create by slug failed', { slug: req.params.slug, error });
       return respondWithError(req, res, error, 400);

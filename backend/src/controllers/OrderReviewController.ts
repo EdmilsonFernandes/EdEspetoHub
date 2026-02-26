@@ -22,9 +22,22 @@ const motoboyService = new MotoboyService();
 const log = logger.child({ scope: 'OrderReviewController' });
 
 export class OrderReviewController {
+  private static resolveAccessToken(req: Request) {
+    const headerToken =
+      typeof req.headers['x-order-access-token'] === 'string'
+        ? req.headers['x-order-access-token']
+        : '';
+    const queryToken = typeof req.query?.accessToken === 'string' ? req.query.accessToken : '';
+    const bodyToken = typeof req.body?.accessToken === 'string' ? req.body.accessToken : '';
+    return String(headerToken || queryToken || bodyToken || '').trim();
+  }
+
   static async getByOrder(req: Request, res: Response) {
     try {
-      const payload = await orderReviewService.getByOrderId(req.params.orderId);
+      const payload = await orderReviewService.getByOrderId(
+        req.params.orderId,
+        OrderReviewController.resolveAccessToken(req)
+      );
       return res.json(payload);
     } catch (error: any) {
       log.warn('Order review get failed', { orderId: req.params.orderId, error });
@@ -34,7 +47,11 @@ export class OrderReviewController {
 
   static async submitByOrder(req: Request, res: Response) {
     try {
-      const payload = await orderReviewService.submitByOrderId(req.params.orderId, req.body || {});
+      const payload = await orderReviewService.submitByOrderId(
+        req.params.orderId,
+        req.body || {},
+        OrderReviewController.resolveAccessToken(req)
+      );
       return res.status(201).json(payload);
     } catch (error: any) {
       log.warn('Order review submit failed', { orderId: req.params.orderId, error });

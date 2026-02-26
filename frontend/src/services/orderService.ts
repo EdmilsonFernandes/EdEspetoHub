@@ -248,12 +248,16 @@ export const orderService = {
     return apiClient.get(`/v2/orders/${orderId}/tracking`);
   },
 
-  async getReviewByOrder(orderId: string) {
-    return apiClient.get(`/orders/${orderId}/review`);
+  async getReviewByOrder(orderId: string, accessToken?: string) {
+    return apiClient.get(`/orders/${orderId}/review`, {
+      headers: accessToken ? { 'X-Order-Access-Token': accessToken } : {},
+    });
   },
 
-  async submitReviewByOrder(orderId: string, payload: any) {
-    return apiClient.post(`/orders/${orderId}/review`, payload);
+  async submitReviewByOrder(orderId: string, payload: any, accessToken?: string) {
+    return apiClient.post(`/orders/${orderId}/review`, payload, {
+      headers: accessToken ? { 'X-Order-Access-Token': accessToken } : {},
+    });
   },
 
   async listReviewsByStore(storeId: string, limit = 100) {
