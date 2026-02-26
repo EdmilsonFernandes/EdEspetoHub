@@ -2793,7 +2793,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
       {commandOpen && (
         <div
-          className="fixed inset-0 z-[140] bg-slate-900/45 backdrop-blur-sm flex items-start justify-center px-4 pt-20"
+          className="fixed inset-0 z-[12050] bg-slate-900/45 backdrop-blur-sm flex items-start justify-center px-4 pt-20"
           onClick={() => setCommandOpen(false)}
         >
           <div
