@@ -2511,8 +2511,52 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             className="premium-card-soft"
             contentClassName="space-y-4"
           >
-            <div className="space-y-3 pb-24 sm:pb-4">
-              <section className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
+            <div className="space-y-4 pb-24 sm:pb-4">
+              <div className="rounded-2xl border border-slate-200 bg-white/90 px-4 py-3 shadow-[0_14px_30px_-24px_rgba(15,23,42,0.35)]">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-[10px] uppercase tracking-[0.22em] font-bold text-slate-400">Setup da loja</p>
+                    <p className="text-sm font-bold text-slate-800">Organize por etapas para configurar mais rápido</p>
+                  </div>
+                  <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-semibold text-slate-600">
+                    {hasBrandingChanges ? 'Alterações pendentes' : 'Tudo atualizado'}
+                  </span>
+                </div>
+                <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
+                  <button
+                    type="button"
+                    onClick={() => setConfigPanels((prev) => ({ ...prev, branding: true, orderTypes: false, hours: false }))}
+                    className={`text-left rounded-xl border px-3 py-2 transition ${
+                      configPanels.branding ? 'border-brand-primary/40 bg-brand-primary-soft' : 'border-slate-200 bg-white hover:bg-slate-50'
+                    }`}
+                  >
+                    <p className="text-xs font-bold text-slate-800">1. Perfil da loja</p>
+                    <p className="text-[11px] text-slate-500">Marca, banner, contato e endereço</p>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setConfigPanels((prev) => ({ ...prev, branding: false, orderTypes: true, hours: false }))}
+                    className={`text-left rounded-xl border px-3 py-2 transition ${
+                      configPanels.orderTypes ? 'border-brand-primary/40 bg-brand-primary-soft' : 'border-slate-200 bg-white hover:bg-slate-50'
+                    }`}
+                  >
+                    <p className="text-xs font-bold text-slate-800">2. Tipos de pedido</p>
+                    <p className="text-[11px] text-slate-500">Entrega, retirada e mesa por plano</p>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setConfigPanels((prev) => ({ ...prev, branding: false, orderTypes: false, hours: true }))}
+                    className={`text-left rounded-xl border px-3 py-2 transition ${
+                      configPanels.hours ? 'border-brand-primary/40 bg-brand-primary-soft' : 'border-slate-200 bg-white hover:bg-slate-50'
+                    }`}
+                  >
+                    <p className="text-xs font-bold text-slate-800">3. Horários da loja</p>
+                    <p className="text-[11px] text-slate-500">Abertura e fechamento por dia</p>
+                  </button>
+                </div>
+              </div>
+
+              <section className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-[0_12px_28px_-24px_rgba(15,23,42,0.4)]">
                 <button
                   type="button"
                   onClick={() => setConfigPanels((prev) => ({ ...prev, branding: !prev.branding }))}
@@ -2531,7 +2575,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                   </span>
                 </button>
                 {configPanels.branding && (
-                  <div className="border-t border-slate-100 p-4">
+                  <div className="border-t border-slate-100 p-3 sm:p-4 bg-slate-50/40">
                     <BrandingSettings
                       branding={brandingDraft}
                       onChange={setBrandingDraft}
@@ -2542,7 +2586,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                   </div>
                 )}
               </section>
-              <section className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
+              <section className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-[0_12px_28px_-24px_rgba(15,23,42,0.4)]">
                 <button
                   type="button"
                   onClick={() => setConfigPanels((prev) => ({ ...prev, orderTypes: !prev.orderTypes }))}
@@ -2566,7 +2610,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                   </div>
                 )}
               </section>
-              <section className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
+              <section className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-[0_12px_28px_-24px_rgba(15,23,42,0.4)]">
                 <button
                   type="button"
                   onClick={() => setConfigPanels((prev) => ({ ...prev, hours: !prev.hours }))}
@@ -2591,12 +2635,12 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                 )}
               </section>
             </div>
-            <div className="hidden sm:flex sticky bottom-3 z-40 items-center justify-between rounded-2xl border border-slate-200 bg-white/90 backdrop-blur px-4 py-3 shadow-[0_16px_30px_-22px_rgba(15,23,42,0.45)]">
+            <div className="hidden sm:flex sticky bottom-3 z-40 items-center justify-between rounded-2xl border border-slate-200 bg-white/95 backdrop-blur px-4 py-3 shadow-[0_16px_30px_-22px_rgba(15,23,42,0.45)]">
               <div>
                 <p className="text-xs font-semibold text-slate-700">
                   {hasBrandingChanges ? 'Alterações prontas para salvar' : 'Tudo sincronizado'}
                 </p>
-                <p className="text-[11px] text-slate-500">A ação abaixo salva os dados de identidade da loja.</p>
+                <p className="text-[11px] text-slate-500">Salva os dados de perfil e identidade visual da loja.</p>
               </div>
               <button
                 type="button"
