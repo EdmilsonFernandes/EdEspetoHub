@@ -29,6 +29,8 @@ export interface CreateStoreDto {
   segment?: string;
   deliveryRadiusKm?: number;
   deliveryFee?: number;
+  prepBaseMinutes?: number;
+  prepAttentionMinutes?: number;
   address?: string;
   city?: string;
   state?: string;
