@@ -82,8 +82,6 @@ export const GrillQueue = () => {
     return localStorage.getItem("queueTvMode") === "true";
   });
   const [queueFilter, setQueueFilter] = useState<'all' | 'pending' | 'preparing' | 'ready' | 'late'>('all');
-  const [quickActionMode, setQuickActionMode] = useState<'auto' | 'manual'>('auto');
-  const [quickActionOrderId, setQuickActionOrderId] = useState('');
   const previousIdsRef = useRef<string[]>([]);
   const audioContextRef = useRef<AudioContext | null>(null);
 
@@ -620,79 +618,6 @@ export const GrillQueue = () => {
     return productionQueue;
   }, [productionQueue, queueFilter, currentTime]);
 
-  const quickActionOptions = useMemo(
-    () => productionQueue.slice(0, 5),
-    [productionQueue]
-  );
-
-  const quickActionCandidates = useMemo(() => {
-    const start = productionQueue.filter((order) => order.status === 'pending');
-    const ready = productionQueue.filter((order) => order.status === 'preparing');
-    const finish = productionQueue.filter((order) =>
-      [ 'ready', 'waiting_for_motoboy' ].includes(order.status) && order.type !== 'delivery'
-    );
-    return { start, ready, finish };
-  }, [productionQueue]);
-
-  const resolveQuickActionTarget = (kind: 'start' | 'ready' | 'finish') => {
-    const fallbackMap = {
-      start: quickActionCandidates.start,
-      ready: quickActionCandidates.ready,
-      finish: quickActionCandidates.finish,
-    } as const;
-    if (quickActionMode === 'manual') {
-      if (!quickActionOrderId) return null;
-      const selected = productionQueue.find((order) => order.id === quickActionOrderId);
-      if (selected && fallbackMap[kind].some((candidate) => candidate.id === selected.id)) return selected;
-      return null;
-    }
-    return fallbackMap[kind][0] || null;
-  };
-
-  const describeQuickActionTarget = (kind: 'start' | 'ready' | 'finish') => {
-    if (quickActionMode === 'manual' && !quickActionOrderId) {
-      return 'Selecione um pedido para aplicar';
-    }
-    const target = resolveQuickActionTarget(kind);
-    if (!target) return 'Sem pedido elegível agora';
-    return `Pedido #${formatOrderDisplayId(target.id, storeSlug)} • ${target.customerName || 'Cliente'}${
-      quickActionMode === 'manual' && quickActionOrderId ? ' (selecionado)' : ' (mais antigo)'
-    }`;
-  };
-
-  useEffect(() => {
-    if (!quickActionOrderId) return;
-    const exists = productionQueue.some((order) => order.id === quickActionOrderId);
-    if (!exists) {
-      setQuickActionOrderId('');
-    }
-  }, [productionQueue, quickActionOrderId]);
-
-  const focusAndRunQuickAction = async (kind: 'start' | 'ready' | 'finish') => {
-    if (kind === 'start') {
-      const target = resolveQuickActionTarget('start');
-      if (!target) return;
-      pulseCta(target.id + '-prep');
-      await handleAdvance(target.id, 'preparing');
-      return;
-    }
-    if (kind === 'ready') {
-      const target = resolveQuickActionTarget('ready');
-      if (!target) return;
-      const nextStatus =
-        target.type === 'delivery'
-          ? 'ready_for_delivery'
-          : 'ready';
-      pulseCta(target.id + '-ready');
-      await handleAdvance(target.id, nextStatus);
-      return;
-    }
-    const target = resolveQuickActionTarget('finish');
-    if (!target) return;
-    pulseCta(target.id + '-done');
-    await handleAdvance(target.id, 'done');
-  };
-
   useEffect(() => {
     if (activeTab === 'completed') {
       setCompletedPage(1);
@@ -942,73 +867,6 @@ export const GrillQueue = () => {
               <p className="text-lg font-black leading-tight">{kpi.value}</p>
             </button>
           ))}
-        </div>
-      )}
-
-      {!tvMode && activeTab === 'queue' && (
-        <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="text-xs font-bold text-slate-700 uppercase tracking-[0.18em]">Ações rápidas</p>
-            <div className="flex items-center gap-2">
-              <select
-                value={quickActionMode}
-                onChange={(event) => setQuickActionMode(event.target.value as 'auto' | 'manual')}
-                className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-slate-600"
-              >
-                <option value="auto">Automático (mais antigo)</option>
-                <option value="manual">Selecionar pedido</option>
-              </select>
-              {quickActionMode === 'manual' && (
-                <select
-                  value={quickActionOrderId}
-                  onChange={(event) => setQuickActionOrderId(event.target.value)}
-                  className="min-w-[220px] rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-slate-600"
-                >
-                  <option value="">Escolha um pedido...</option>
-                  {quickActionOptions.map((order) => (
-                    <option key={order.id} value={order.id}>
-                      #{formatOrderDisplayId(order.id, storeSlug)} • {order.customerName || 'Cliente'}
-                    </option>
-                  ))}
-                </select>
-              )}
-            </div>
-          </div>
-          <div className="mt-2.5 grid grid-cols-1 sm:grid-cols-3 gap-2">
-            <div className="rounded-xl border border-amber-200 bg-amber-50/70 px-2.5 py-2">
-              <button
-                type="button"
-                onClick={() => focusAndRunQuickAction('start')}
-                disabled={!resolveQuickActionTarget('start')}
-                className="w-full rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-700 hover:bg-amber-100 transition disabled:opacity-45 disabled:cursor-not-allowed"
-              >
-                Iniciar atendimento
-              </button>
-              <p className="mt-1 text-[11px] text-amber-800/80">{describeQuickActionTarget('start')}</p>
-            </div>
-            <div className="rounded-xl border border-sky-200 bg-sky-50/70 px-2.5 py-2">
-              <button
-                type="button"
-                onClick={() => focusAndRunQuickAction('ready')}
-                disabled={!resolveQuickActionTarget('ready')}
-                className="w-full rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-xs font-bold text-sky-700 hover:bg-sky-100 transition disabled:opacity-45 disabled:cursor-not-allowed"
-              >
-                Marcar pronto
-              </button>
-              <p className="mt-1 text-[11px] text-sky-900/80">{describeQuickActionTarget('ready')}</p>
-            </div>
-            <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 px-2.5 py-2">
-              <button
-                type="button"
-                onClick={() => focusAndRunQuickAction('finish')}
-                disabled={!resolveQuickActionTarget('finish')}
-                className="w-full rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700 hover:bg-emerald-100 transition disabled:opacity-45 disabled:cursor-not-allowed"
-              >
-                Finalizar próximo
-              </button>
-              <p className="mt-1 text-[11px] text-emerald-900/80">{describeQuickActionTarget('finish')}</p>
-            </div>
-          </div>
         </div>
       )}
 
