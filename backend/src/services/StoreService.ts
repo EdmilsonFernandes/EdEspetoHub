@@ -260,6 +260,11 @@ export class StoreService
         const parsed = Number(data.prepBaseMinutes);
         store.settings.prepBaseMinutes = Number.isFinite(parsed) ? Math.max(5, Math.round(parsed)) : null;
       }
+      if (data.prepAttentionMinutes !== undefined)
+      {
+        const parsed = Number(data.prepAttentionMinutes);
+        store.settings.prepAttentionMinutes = Number.isFinite(parsed) ? Math.max(1, Math.round(parsed)) : null;
+      }
 
       if (data.socialLinks)
       {

@@ -1324,6 +1324,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     deliveryRadiusKm: session?.store?.settings?.deliveryRadiusKm || '',
     deliveryFee: session?.store?.settings?.deliveryFee || '',
     prepBaseMinutes: session?.store?.settings?.prepBaseMinutes || '20',
+    prepAttentionMinutes: session?.store?.settings?.prepAttentionMinutes || '15',
   }));
 
   useEffect(() => {
@@ -1452,6 +1453,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       deliveryRadiusKm: session?.store?.settings?.deliveryRadiusKm || '',
       deliveryFee: session?.store?.settings?.deliveryFee || '',
       prepBaseMinutes: session?.store?.settings?.prepBaseMinutes || '20',
+      prepAttentionMinutes: session?.store?.settings?.prepAttentionMinutes || '15',
     });
   }, [
     session?.store?.name,
@@ -1469,6 +1471,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     session?.store?.settings?.deliveryRadiusKm,
     session?.store?.settings?.deliveryFee,
     session?.store?.settings?.prepBaseMinutes,
+    session?.store?.settings?.prepAttentionMinutes,
     instagramHandle,
   ]);
   const hasBrandingChanges = useMemo(() => {
@@ -1489,6 +1492,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       deliveryRadiusKm: normalize(session?.store?.settings?.deliveryRadiusKm),
       deliveryFee: normalize(session?.store?.settings?.deliveryFee),
       prepBaseMinutes: normalize(session?.store?.settings?.prepBaseMinutes || '20'),
+      prepAttentionMinutes: normalize(session?.store?.settings?.prepAttentionMinutes || '15'),
     };
     const draft = {
       brandName: normalize(brandingDraft.brandName),
@@ -1506,6 +1510,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       deliveryRadiusKm: normalize(brandingDraft.deliveryRadiusKm),
       deliveryFee: normalize(brandingDraft.deliveryFee),
       prepBaseMinutes: normalize(brandingDraft.prepBaseMinutes || '20'),
+      prepAttentionMinutes: normalize(brandingDraft.prepAttentionMinutes || '15'),
     };
     const fieldsChanged = Object.keys(current).some((key) => current[key] !== draft[key]);
     return fieldsChanged || Boolean(brandingDraft.logoFile || brandingDraft.bannerFile);
@@ -2036,6 +2041,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         deliveryRadiusKm: brandingDraft.deliveryRadiusKm,
         deliveryFee: brandingDraft.deliveryFee,
         prepBaseMinutes: brandingDraft.prepBaseMinutes,
+        prepAttentionMinutes: brandingDraft.prepAttentionMinutes,
         socialLinks: brandingDraft.instagram ? [{ type: 'instagram', value: brandingDraft.instagram }] : [],
       };
       const updated = await storeService.update(storeId, payload);

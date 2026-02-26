@@ -48,8 +48,14 @@ export const GrillQueue = () => {
     if (!Number.isFinite(raw)) return 20;
     return Math.max(5, Math.round(raw));
   }, [auth?.store?.settings?.prepBaseMinutes]);
+  const prepAttentionMinutes = useMemo(() => {
+    const fallback = Math.max(1, prepSlaMinutes - 5);
+    const raw = Number(auth?.store?.settings?.prepAttentionMinutes ?? fallback);
+    if (!Number.isFinite(raw)) return fallback;
+    return Math.min(prepSlaMinutes, Math.max(1, Math.round(raw)));
+  }, [auth?.store?.settings?.prepAttentionMinutes, prepSlaMinutes]);
   const PREP_SLA_MS = prepSlaMinutes * 60 * 1000;
-  const PREP_ATTENTION_MS = Math.max(5, prepSlaMinutes - 5) * 60 * 1000;
+  const PREP_ATTENTION_MS = prepAttentionMinutes * 60 * 1000;
   const [queue, setQueue] = useState([]);
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState([]);
@@ -763,7 +769,7 @@ export const GrillQueue = () => {
           </span>
           {!tvMode && (
             <p className="text-[12px] font-medium text-slate-500">
-              Pendentes {queueMetrics.pending} • Em atendimento {queueMetrics.preparing} • Prontos {queueMetrics.ready} • Atrasados {queueMetrics.late} • Aguardando motoboy {awaitingMotoboyQueue.length} • SLA alvo {prepSlaMinutes}min • Mais antigo {formatDuration(queueMetrics.oldest)}
+              Pendentes {queueMetrics.pending} • Em atendimento {queueMetrics.preparing} • Prontos {queueMetrics.ready} • Atrasados {queueMetrics.late} • Aguardando motoboy {awaitingMotoboyQueue.length} • Atenção {prepAttentionMinutes}min • SLA alvo {prepSlaMinutes}min • Mais antigo {formatDuration(queueMetrics.oldest)}
             </p>
           )}
           {tvMode && (

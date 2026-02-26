@@ -72,6 +72,9 @@ export class StoreSettings
   @Column({ name: 'prep_per_item_minutes', type: 'int', nullable: true })
   prepPerItemMinutes?: number | null;
 
+  @Column({ name: 'prep_attention_minutes', type: 'int', nullable: true })
+  prepAttentionMinutes?: number | null;
+
   @Column({ name: 'queue_capacity_per_hour', type: 'int', nullable: true })
   queueCapacityPerHour?: number | null;
 
