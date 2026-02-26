@@ -805,7 +805,9 @@ export const GrillQueue = () => {
             {productionQueue.length} pedidos
           </span>
           {!tvMode && (
-            <p className="text-[12px] font-medium text-slate-500">Mais antigo {formatDuration(queueMetrics.oldest)}</p>
+            <p className="text-[12px] font-medium text-slate-500">
+              Pendentes {queueMetrics.pending} • Em atendimento {queueMetrics.preparing} • Prontos {queueMetrics.ready} • Atrasados {queueMetrics.late} • Mais antigo {formatDuration(queueMetrics.oldest)}
+            </p>
           )}
           {tvMode && (
             <span className="flex items-center gap-2 text-xs font-semibold text-white/70">
