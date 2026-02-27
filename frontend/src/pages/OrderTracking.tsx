@@ -106,6 +106,7 @@ export function OrderTracking() {
   const [reviewAccessDenied, setReviewAccessDenied] = useState(false);
   const [orderAccessToken, setOrderAccessToken] = useState('');
   const [showItemsSheetMobile, setShowItemsSheetMobile] = useState(false);
+  const [mobileSection, setMobileSection] = useState<'status' | 'summary' | 'info'>('status');
   const [tipPixCopied, setTipPixCopied] = useState(false);
   const [reviewForm, setReviewForm] = useState({
     storeRating: 0,
@@ -499,6 +500,10 @@ export function OrderTracking() {
   }, [order?.id]);
 
   useEffect(() => {
+    setMobileSection('status');
+  }, [order?.id]);
+
+  useEffect(() => {
     setFrozenElapsedMs(null);
   }, [order?.id]);
 
@@ -829,7 +834,28 @@ export function OrderTracking() {
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-gray-100 p-4 bg-gray-50">
+              <div className="sm:hidden rounded-2xl border border-slate-200 bg-white p-1 flex items-center gap-1">
+                {[
+                  { id: 'status', label: 'Andamento' },
+                  { id: 'summary', label: 'Resumo' },
+                  { id: 'info', label: 'Infos' },
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setMobileSection(tab.id as 'status' | 'summary' | 'info')}
+                    className={`flex-1 rounded-xl px-3 py-2 text-xs font-bold transition-all ${
+                      mobileSection === tab.id
+                        ? 'bg-slate-900 text-white'
+                        : 'bg-slate-50 text-slate-600 border border-slate-200'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+
+              <div className={`${mobileSection === 'status' ? 'block' : 'hidden'} sm:block rounded-2xl border border-gray-100 p-4 bg-gray-50`}>
                 <div className="flex items-center gap-3 mb-4">
                   <ChefHat className="text-red-500" weight="duotone" />
                   <div>
@@ -963,7 +989,10 @@ export function OrderTracking() {
               </div>
 
               <div className="grid sm:grid-cols-2 gap-4">
-                <div id="order-summary" className="rounded-3xl premium-card p-5">
+                <div
+                  id="order-summary"
+                  className={`${mobileSection === 'summary' ? 'block' : 'hidden'} sm:block rounded-3xl premium-card p-5`}
+                >
                   <div className="flex items-center justify-between gap-3 mb-4">
                     <p className="text-sm font-semibold text-gray-900">Resumo do pedido</p>
                     {paymentMeta?.label && (
@@ -1049,7 +1078,7 @@ export function OrderTracking() {
                     </span>
                   </div>
                 </div>
-                <div className="rounded-3xl premium-card p-5 space-y-3">
+                <div className={`${mobileSection === 'info' ? 'block' : 'hidden'} sm:block rounded-3xl premium-card p-5 space-y-3`}>
                   <p className="text-sm font-semibold text-gray-900">Informações</p>
                   <div className="text-sm text-gray-600 space-y-2">
                     <p>
