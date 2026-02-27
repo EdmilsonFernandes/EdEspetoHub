@@ -856,11 +856,17 @@ export function OrderTracking() {
                   <button
                     key={tab.id}
                     type="button"
-                    onClick={() => setMobileSection(tab.id as 'status' | 'summary' | 'info')}
+                    onClick={() => {
+                      if (mobileSection === tab.id) return;
+                      setMobileSection(tab.id as 'status' | 'summary' | 'info');
+                    }}
+                    aria-current={mobileSection === tab.id ? 'page' : undefined}
+                    aria-pressed={mobileSection === tab.id}
+                    disabled={mobileSection === tab.id}
                     className={`flex-1 rounded-xl px-3 py-2 text-xs font-bold transition-all ${
                       mobileSection === tab.id
-                        ? 'bg-slate-900 text-white'
-                        : 'bg-slate-50 text-slate-600 border border-slate-200'
+                        ? 'bg-slate-900 text-white cursor-default shadow-sm'
+                        : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-white'
                     }`}
                   >
                     {tab.label}
