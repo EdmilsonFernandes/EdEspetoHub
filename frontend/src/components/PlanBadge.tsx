@@ -79,7 +79,7 @@ export const PlanBadge = ({ planName, displayName, variant = 'light', details })
   }, [isOpen]);
 
   return (
-    <div className="relative z-[120]" ref={detailsRef}>
+    <div className="relative z-[1200]" ref={detailsRef}>
       <button
         onClick={() => !isVip && setIsOpen(!isOpen)}
         className={`list-none cursor-pointer select-none rounded-full px-3 py-1.5 text-xs font-semibold ring-1 shadow-md flex items-center gap-2 ${
@@ -95,7 +95,7 @@ export const PlanBadge = ({ planName, displayName, variant = 'light', details })
 
       {isOpen && !isVip && (
         <div
-          className={`absolute right-0 mt-3 w-64 rounded-2xl border border-white/20 bg-white p-4 text-gray-700 shadow-xl backdrop-blur-lg z-[140] ${
+          className={`absolute right-0 mt-3 w-64 rounded-2xl border border-white/20 bg-white p-4 text-gray-700 shadow-xl backdrop-blur-lg z-[1300] ${
             variant === 'dark' ? 'bg-white/95' : ''
           }`}
         >
