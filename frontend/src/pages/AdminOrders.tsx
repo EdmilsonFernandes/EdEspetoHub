@@ -203,7 +203,7 @@ export function AdminOrders() {
           </div>
 
             <div className="flex flex-col lg:flex-row lg:items-center gap-3 mb-4">
-              <div className="flex flex-wrap gap-2">
+              <div className="inline-flex flex-wrap items-center gap-1 rounded-lg bg-slate-100 p-1">
 	                {[
 	                  { id: 'all', label: 'Todos', count: statusCounts.all },
 	                  { id: 'pending', label: 'Pendentes', count: statusCounts.pending },
@@ -215,10 +215,10 @@ export function AdminOrders() {
                 <button
                   key={filter.id}
                   onClick={() => setStatusFilter(filter.id)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition ${
+                  className={`px-3 py-1.5 rounded-md text-xs font-semibold border transition-colors duration-150 ${
                     statusFilter === filter.id
-                      ? 'bg-brand-primary text-white border-brand-primary'
-                      : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                      ? 'bg-white text-slate-900 border-slate-300 shadow-sm'
+                      : 'bg-transparent text-slate-600 border-transparent hover:bg-white/70'
                   }`}
                 >
                   {filter.label} ({filter.count})
@@ -230,14 +230,14 @@ export function AdminOrders() {
                 type="date"
                 value={dateFilter}
                 onChange={(event) => setDateFilter(event.target.value)}
-                className="w-full sm:w-44 rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-brand-primary"
+                className="w-full sm:w-44 ds-select ds-focus-ring py-2 text-sm"
               />
               <input
                 type="text"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Buscar cliente, telefone ou ID do pedido"
-                className="w-full sm:w-64 rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-brand-primary"
+                className="w-full sm:w-64 ds-input ds-focus-ring py-2 text-sm"
               />
               <div className="flex gap-2">
                 <button
@@ -485,8 +485,8 @@ export function AdminOrders() {
               </div>
             </div>
           ) : (
-	            <div className="overflow-x-auto">
-	              <table className="min-w-full text-sm border-separate border-spacing-y-3">
+	            <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+	              <table className="min-w-full text-sm">
 	                <thead className="text-left text-xs uppercase text-slate-500">
 	                  <tr>
 	                    <th className="py-2 pr-4 pl-3">Data</th>
@@ -498,16 +498,16 @@ export function AdminOrders() {
 	                    <th className="py-2 pr-3 text-right">Total</th>
 	                  </tr>
 	                </thead>
-	                <tbody>
+	                <tbody className="divide-y divide-slate-100">
 	                  {filteredOrders.map((order, index) => {
 	                    const paymentMeta = getPaymentMethodMeta(order.payment);
 	                    const typeMeta = orderTypeMeta(order);
 	                    return (
 	                      <tr
 	                        key={order.id || `${order.customerName}-${index}`}
-	                        className={`text-slate-700 border border-slate-200 rounded-2xl shadow-sm ${statusAccent(order.status)}`}
+	                        className="text-slate-700 hover:bg-slate-50 transition-colors duration-150"
 	                      >
-	                        <td className="py-3 pr-4 pl-4 whitespace-nowrap rounded-l-2xl">
+	                        <td className="py-3 pr-4 pl-4 whitespace-nowrap">
 	                          {formatDateTime(order.createdAt)}
 	                        </td>
 	                        <td className="py-3 pr-4">
@@ -546,7 +546,7 @@ export function AdminOrders() {
 	                            {formatOrderStatus(order.status, order.type)}
 	                          </span>
 	                        </td>
-	                        <td className="py-3 pr-4 rounded-r-2xl min-w-[220px]">
+	                        <td className="py-3 pr-4 min-w-[220px]">
                             {renderMoneyBreakdown(order)}
 	                        </td>
 	                      </tr>

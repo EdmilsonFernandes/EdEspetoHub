@@ -697,18 +697,18 @@ body {
   }
 
   .ds-metric-card-success {
-    border-color: rgb(167 243 208);
-    background: linear-gradient(180deg, rgb(236 253 245), #ffffff);
+    border-color: rgba(226, 232, 240, 0.95);
+    background: #ffffff;
   }
 
   .ds-metric-card-warning {
-    border-color: rgb(253 230 138);
-    background: linear-gradient(180deg, rgb(254 252 232), #ffffff);
+    border-color: rgba(226, 232, 240, 0.95);
+    background: #ffffff;
   }
 
   .ds-metric-card-neutral {
-    border-color: rgb(226 232 240);
-    background: linear-gradient(180deg, rgb(248 250 252), #ffffff);
+    border-color: rgba(226, 232, 240, 0.95);
+    background: #ffffff;
   }
 }
   .ds-card {

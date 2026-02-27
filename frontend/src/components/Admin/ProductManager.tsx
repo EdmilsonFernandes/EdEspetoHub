@@ -1041,24 +1041,26 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
       </div>
 
       <div className="overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-[0_16px_34px_-26px_rgba(15,23,42,0.45)]">
-        <div className="flex flex-wrap items-center gap-2 px-4 py-3 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white">
-          {categoryTabs.map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => {
-                setCategoryFilter(tab.id);
-                setPage(1);
-              }}
-              className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all hover:-translate-y-0.5 active:scale-95 ${
-                categoryFilter === tab.id
-                  ? 'bg-brand-gradient text-white border-transparent shadow-[0_12px_24px_-18px_rgba(59,130,246,0.9)]'
-                  : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
-              }`}
-            >
-              {tab.label} ({tab.count})
-            </button>
-          ))}
+        <div className="px-4 py-3 border-b border-slate-100 bg-white">
+          <div className="inline-flex flex-wrap items-center gap-1 rounded-lg bg-slate-100 p-1">
+            {categoryTabs.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => {
+                  setCategoryFilter(tab.id);
+                  setPage(1);
+                }}
+                className={`px-3 py-1.5 rounded-md text-xs font-semibold border transition-colors duration-150 ${
+                  categoryFilter === tab.id
+                    ? 'bg-white text-slate-900 border-slate-300 shadow-sm'
+                    : 'bg-transparent text-slate-600 border-transparent hover:bg-white/70'
+                }`}
+              >
+                {tab.label} ({tab.count})
+              </button>
+            ))}
+          </div>
         </div>
         <div className="sm:hidden space-y-3">
           {pagedProducts.map((product) => (
@@ -1171,7 +1173,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
             {pagedProducts.map((product) => (
               <React.Fragment key={product.id}>
               <tr
-                className={`hover:bg-slate-50/75 transition-colors ${
+                className={`group hover:bg-slate-50/75 transition-colors duration-150 ${
                   inlineEditId === product.id ? 'bg-amber-50/60' : ''
                 } ${product.active === false ? 'opacity-70' : ''}`}
               >
@@ -1250,7 +1252,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                   <td className="p-4">
                     {renderAvailabilityBadges(product.availabilityDays)}
                   </td>
-                  <td className="p-4 text-right space-x-2">
+                  <td className="p-4 text-right space-x-2 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 transition-opacity duration-150">
                     <button
                       onClick={() => handleEditMobile(product)}
                       className="text-brand-primary hover:bg-brand-primary-soft p-2 rounded transition-all hover:-translate-y-0.5 active:scale-95"
