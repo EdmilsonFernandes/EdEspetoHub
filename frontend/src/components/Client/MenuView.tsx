@@ -73,7 +73,6 @@ const Header = ({
     outros: "Comércio",
   };
   const segmentLabel = segmentLabelMap[String(segment || "").toLowerCase()] || "Comércio";
-  const bannerUrl = resolveAssetUrl(branding?.bannerUrl || "");
 
   return (
     <div className={`w-full sticky top-0 z-50 ${compact ? 'pb-2' : 'pb-3'} pt-2`}>
@@ -81,10 +80,8 @@ const Header = ({
         <div
           className={`relative overflow-hidden rounded-2xl border border-white/70 px-3 sm:px-5 ${compact ? 'py-2' : 'py-3 sm:py-3.5'} shadow-[0_14px_32px_-22px_rgba(15,23,42,0.36)]`}
           style={{
-            backgroundImage: bannerUrl
-              ? `linear-gradient(110deg, rgba(8,15,30,0.5), rgba(8,15,30,0.32)), url(${bannerUrl})`
-              : `linear-gradient(115deg, color-mix(in srgb, ${branding?.primaryColor || '#0ea5e9'} 56%, #0f172a 44%), color-mix(in srgb, ${branding?.accentColor || '#22c55e'} 44%, #0f172a 56%))`,
-            backgroundSize: bannerUrl ? 'cover' : '100% 100%',
+            backgroundImage: `linear-gradient(118deg, color-mix(in srgb, ${branding?.primaryColor || '#0ea5e9'} 34%, #0f172a 66%), color-mix(in srgb, ${branding?.accentColor || '#22c55e'} 18%, #0f172a 82%))`,
+            backgroundSize: '100% 100%',
             backgroundPosition: 'center',
           }}
         >
@@ -111,9 +108,11 @@ const Header = ({
                 {branding?.brandName || "Sua Loja"}
               </h1>
               <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-1 rounded-full border border-white/30 bg-white/20 px-2.5 py-1 text-[10px] font-semibold text-white">
-                  {segmentLabel}
-                </span>
+                {segmentLabel !== "Comércio" && (
+                  <span className="inline-flex items-center gap-1 rounded-full border border-white/30 bg-white/20 px-2.5 py-1 text-[10px] font-semibold text-white">
+                    {segmentLabel}
+                  </span>
+                )}
                 <span
                   className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[10px] font-semibold ${
                     isOpenNow
@@ -223,6 +222,7 @@ export const MenuView = ({
   showHeader = true,
   onOpenQueue,
   onOpenAdmin,
+  onProceed,
   compactHeader = false
 }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -325,6 +325,23 @@ export const MenuView = ({
     });
     return map;
   }, [cart]);
+  const cartItemsCount = useMemo(
+    () =>
+      Object.values(cart || {}).reduce(
+        (acc: number, entry: any) => acc + Number(entry?.qty || 0),
+        0
+      ),
+    [cart]
+  );
+  const cartTotalValue = useMemo(
+    () =>
+      Object.values(cart || {}).reduce((acc: number, entry: any) => {
+        const qty = Number(entry?.qty || 0);
+        const unitPrice = Number(entry?.price || 0);
+        return acc + unitPrice * qty;
+      }, 0),
+    [cart]
+  );
 
   const buildCartOptions = (entry: any) => ({
     cookingPoint: entry?.cookingPoint || "",
@@ -412,7 +429,7 @@ export const MenuView = ({
         />
       )}
 
-      <div className="space-y-8 p-4 max-w-6xl mx-auto">
+      <div className={`space-y-8 p-4 max-w-6xl mx-auto ${cartItemsCount > 0 ? 'pb-28 sm:pb-8' : ''}`}>
         <section className="relative overflow-hidden rounded-2xl premium-card-glass p-4">
           <div className="absolute -top-24 -right-20 h-56 w-56 rounded-full opacity-20 ds-menu-orb-primary" />
           <div className="absolute -bottom-24 -left-20 h-56 w-56 rounded-full opacity-20 ds-menu-orb-secondary" />
@@ -510,7 +527,7 @@ export const MenuView = ({
         </section>
         {filteredGrouped.length > 1 && (
           <div
-            className={`sticky ${showHeader ? "top-16 sm:top-[88px]" : "top-3"} z-40 -mx-4 px-4 pb-2`}
+            className={`sticky ${showHeader ? "top-[72px] sm:top-[92px]" : "top-3"} z-40 -mx-4 px-4 pb-2`}
           >
             <div className="rounded-2xl premium-card-glass px-3 py-2 ds-tabs">
               <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
@@ -701,12 +718,6 @@ export const MenuView = ({
                         Promo do dia
                       </span>
                     )}
-                    {isEspetoCategory(item.category) && (
-                      <div className="inline-flex items-center gap-2 text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full">
-                        <ChefHat size={12} weight="duotone" />
-                        Toque para escolher o ponto da carne
-                      </div>
-                    )}
                     {Array.isArray(item?.modifiers) && item.modifiers.some((modifier) => modifier?.active !== false) && (
                       <div className="inline-flex items-center gap-2 text-[11px] font-semibold text-brand-primary bg-brand-primary-soft border border-brand-primary/20 px-2.5 py-1 rounded-full">
                         <Plus size={12} weight="bold" />
@@ -835,6 +846,26 @@ export const MenuView = ({
         onClose={closeProductModal}
         onAddToCart={onUpdateCart}
       />
+
+      {cartItemsCount > 0 && (
+        <div className="fixed bottom-4 left-4 right-4 z-40 sm:max-w-md sm:left-auto sm:right-6">
+          <button
+            onClick={() => onProceed?.()}
+            className="w-full bg-brand-gradient text-white p-3 sm:p-4 rounded-xl sm:rounded-2xl shadow-2xl flex justify-between items-center transform hover:scale-[1.01] transition-all text-sm sm:text-base"
+          >
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+              <span
+                className="px-2.5 sm:px-3 py-1 rounded-lg sm:rounded-xl text-xs sm:text-sm font-bold text-white shadow-lg"
+                style={{ backgroundColor: branding?.primaryColor || "#0ea5e9" }}
+              >
+                {cartItemsCount}
+              </span>
+              <span className="font-bold truncate">Ver sacola</span>
+            </div>
+            <span className="font-bold text-base sm:text-lg ml-2 flex-shrink-0">{formatCurrency(cartTotalValue)}</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 };

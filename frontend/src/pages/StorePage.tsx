@@ -1412,26 +1412,6 @@ export function StorePage() {
         )}
       </main>
 
-      {view === 'menu' && Object.keys(cart).length > 0 && (
-        <div className="fixed bottom-4 left-4 right-4 z-40 sm:max-w-md sm:left-auto sm:right-6">
-          <button
-            onClick={() => setView('cart')}
-            className="w-full bg-brand-gradient text-white p-3 sm:p-4 rounded-xl sm:rounded-2xl shadow-2xl flex justify-between items-center transform hover:scale-[1.02] transition-all text-sm sm:text-base"
-          >
-            <div className="flex items-center gap-2 sm:gap-3">
-              <span
-                className="px-2.5 sm:px-3 py-1 rounded-lg sm:rounded-xl text-xs sm:text-sm font-bold text-white shadow-lg"
-                style={{ backgroundColor: branding.primaryColor }}
-              >
-                {Object.values(cart).reduce((acc, item) => acc + item.qty, 0)}
-              </span>
-              <span className="font-bold truncate">Ver pedido</span>
-            </div>
-            <span className="font-bold text-base sm:text-lg ml-2 flex-shrink-0">{formatCurrency(orderTotal)}</span>
-          </button>
-        </div>
-      )}
-
       {view === 'cart' && (
         <div
           className="fixed bottom-6 right-6 text-white rounded-full p-3 sm:p-4 shadow-2xl sm:hidden cursor-pointer transform hover:scale-110 transition-all"
