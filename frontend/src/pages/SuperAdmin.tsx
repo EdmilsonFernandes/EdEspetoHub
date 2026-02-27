@@ -2547,8 +2547,9 @@ export function SuperAdmin() {
         </FormSection>
 
       {selectedEventPayload && (
-        <div className="ds-modal-backdrop flex items-center justify-center p-4">
-          <div className="ds-modal w-full max-w-3xl p-6 space-y-4">
+        <div className="ds-sheet-backdrop">
+          <div className="ds-sheet-panel w-full max-w-3xl rounded-t-3xl sm:rounded-3xl p-6 space-y-4">
+            <div className="sm:hidden ds-sheet-handle" />
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-bold text-slate-800">Payload do webhook</h3>
               <button
@@ -2566,8 +2567,9 @@ export function SuperAdmin() {
       )}
 
       {kycHistoryOpen && (
-        <div className="ds-modal-backdrop flex items-center justify-center p-4">
-          <div className="ds-modal w-full max-w-5xl p-5 space-y-4 max-h-[88vh] overflow-hidden">
+        <div className="ds-sheet-backdrop">
+          <div className="ds-sheet-panel w-full max-w-5xl rounded-t-3xl sm:rounded-3xl p-5 space-y-4 max-h-[88vh] overflow-hidden">
+            <div className="sm:hidden ds-sheet-handle" />
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0 flex items-center gap-2.5">
                 <KycAvatar

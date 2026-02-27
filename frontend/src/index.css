@@ -716,6 +716,7 @@ body {
     border: 1px solid rgb(226 232 240);
     background: #fff;
     box-shadow: var(--shadow-soft);
+    transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
   }
 
   .ds-card-elevated {
@@ -821,11 +822,11 @@ body {
   .ds-btn {
     border-radius: var(--radius-sm);
     font-weight: 800;
-    transition: transform 150ms ease, filter 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
+    transition: all 200ms ease;
   }
 
   .ds-btn:active {
-    transform: scale(0.99);
+    transform: scale(0.95);
   }
 
   .ds-btn-primary {
@@ -906,6 +907,42 @@ body {
     box-shadow: 0 40px 90px -48px rgba(15, 23, 42, 0.65);
   }
 
+  .ds-interactive-card {
+    transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
+  }
+
+  .ds-interactive-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 42px -26px rgba(15, 23, 42, 0.34);
+  }
+
+  .ds-skeleton {
+    border-radius: 12px;
+    background: linear-gradient(
+      110deg,
+      rgba(226, 232, 240, 0.9) 8%,
+      rgba(241, 245, 249, 0.95) 18%,
+      rgba(226, 232, 240, 0.9) 33%
+    );
+    background-size: 200% 100%;
+    animation: dsSkeletonShimmer 1.2s linear infinite;
+  }
+
+  .ds-sheet-panel {
+    width: 100%;
+    border: 1px solid rgb(226 232 240);
+    background: #fff;
+    box-shadow: 0 28px 68px -34px rgba(15, 23, 42, 0.58);
+  }
+
+  .ds-sheet-handle {
+    width: 52px;
+    height: 5px;
+    border-radius: 999px;
+    background: rgb(203 213 225);
+    margin: 10px auto 2px;
+  }
+
   .ds-alert {
     border-radius: var(--radius-sm);
     border: 1px solid rgb(226 232 240);
@@ -979,6 +1016,25 @@ body {
     backdrop-filter: blur(4px);
   }
 
+  .ds-sheet-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: rgba(2, 6, 23, 0.55);
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 12px;
+  }
+
+  @media (min-width: 640px) {
+    .ds-sheet-backdrop {
+      align-items: center;
+      padding: 16px;
+    }
+  }
+
   .ds-table-wrap {
     border: 1px solid rgb(226 232 240);
     border-radius: var(--radius-sm);
@@ -1009,4 +1065,10 @@ body {
 
   .ds-table tbody tr + tr {
     border-top: 1px solid rgb(241 245 249);
+  }
+
+  @keyframes dsSkeletonShimmer {
+    to {
+      background-position-x: -200%;
+    }
   }

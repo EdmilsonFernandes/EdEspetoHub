@@ -398,7 +398,11 @@ export function PortfolioPage() {
           )}
 
           {loading && (
-            <div className="ds-card p-5 text-sm text-slate-500">Carregando cases...</div>
+            <div className="ds-card p-5 space-y-3">
+              <div className="ds-skeleton h-5 w-48" />
+              <div className="ds-skeleton h-20 w-full" />
+              <div className="ds-skeleton h-20 w-full" />
+            </div>
           )}
 
           {error && !loading && (

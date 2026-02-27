@@ -993,15 +993,16 @@ export function AdminMotoboys() {
 
       {payoutModal.open && payoutModal.row ? (
         <div
-          className="fixed inset-0 z-[96] bg-black/60 flex items-center justify-center p-4"
+          className="ds-sheet-backdrop z-[96]"
           role="dialog"
           aria-modal="true"
           onClick={() => !payoutModal.submitting && setPayoutModal({ open: false, row: null, notes: '', proofFile: null, submitting: false })}
         >
           <div
-            className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-4 space-y-3"
+            className="ds-sheet-panel w-full max-w-lg rounded-t-3xl sm:rounded-2xl p-4 space-y-3"
             onClick={(e) => e.stopPropagation()}
           >
+            <div className="sm:hidden ds-sheet-handle" />
             <div>
               <div className="text-[11px] uppercase tracking-[0.16em] text-slate-500">Repasse da gorjeta</div>
               <div className="text-base font-black text-slate-900">{payoutModal.row?.motoboyName || 'Entregador'}</div>
@@ -1054,15 +1055,16 @@ export function AdminMotoboys() {
 
       {docsModalOpen && docsModalMotoboyId && (
         <div
-          className="fixed inset-0 z-[89] bg-black/60 flex items-end sm:items-center justify-center p-4"
+          className="ds-sheet-backdrop z-[89]"
           role="dialog"
           aria-modal="true"
           onClick={() => setDocsModalOpen(false)}
         >
           <div
-            className="w-full max-w-5xl rounded-3xl bg-white border border-slate-200 shadow-2xl max-h-[85vh] overflow-hidden flex flex-col"
+            className="ds-sheet-panel w-full max-w-5xl rounded-t-3xl sm:rounded-3xl max-h-[85vh] overflow-hidden flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
+            <div className="sm:hidden ds-sheet-handle" />
             <div className="p-4 sm:p-5 flex items-start justify-between gap-3 border-b border-slate-100">
               <div className="min-w-0">
                 <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Documentos</p>
@@ -1141,7 +1143,7 @@ export function AdminMotoboys() {
 
       {rejectRequestOpen && (
         <div
-          className="fixed inset-0 z-[90] bg-black/60 flex items-end sm:items-center justify-center p-4"
+          className="ds-sheet-backdrop z-[90]"
           role="dialog"
           aria-modal="true"
           onClick={() => {
@@ -1150,9 +1152,10 @@ export function AdminMotoboys() {
           }}
         >
           <div
-            className="w-full max-w-xl rounded-3xl bg-white p-5 border border-slate-200 shadow-2xl"
+            className="ds-sheet-panel w-full max-w-xl rounded-t-3xl sm:rounded-3xl p-5"
             onClick={(e) => e.stopPropagation()}
           >
+            <div className="sm:hidden ds-sheet-handle" />
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Reprovação</p>
@@ -1255,7 +1258,7 @@ export function AdminMotoboys() {
 
       {reuploadDocOpen && (
         <div
-          className="fixed inset-0 z-[91] bg-black/60 flex items-end sm:items-center justify-center p-4"
+          className="ds-sheet-backdrop z-[91]"
           role="dialog"
           aria-modal="true"
           onClick={() => {
@@ -1264,9 +1267,10 @@ export function AdminMotoboys() {
           }}
         >
           <div
-            className="w-full max-w-lg rounded-3xl bg-white p-5 border border-slate-200 shadow-2xl"
+            className="ds-sheet-panel w-full max-w-lg rounded-t-3xl sm:rounded-3xl p-5"
             onClick={(e) => e.stopPropagation()}
           >
+            <div className="sm:hidden ds-sheet-handle" />
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Reenvio</p>
@@ -1424,7 +1428,7 @@ export function AdminMotoboys() {
               return (
                 <div
                   key={request.id}
-                  className="rounded-2xl border border-slate-200 bg-white p-4 flex flex-col gap-3 shadow-[0_26px_60px_-48px_rgba(15,23,42,0.35)]"
+                  className="rounded-2xl border border-slate-200 bg-white p-4 flex flex-col gap-3 shadow-[0_18px_42px_-30px_rgba(15,23,42,0.24)] ds-interactive-card"
                   style={{ borderLeftWidth: 6, borderLeftColor: 'rgb(245 158 11)' }}
                 >
                 <div className="flex items-center justify-between">
@@ -1596,11 +1600,17 @@ export function AdminMotoboys() {
         </div>
 
         {loading ? (
-          <div className="px-4 py-4 text-sm text-slate-600">Carregando...</div>
+          <div className="px-4 py-4 space-y-3">
+            <div className="ds-skeleton h-16 w-full" />
+            <div className="ds-skeleton h-16 w-full" />
+            <div className="ds-skeleton h-16 w-full" />
+          </div>
         ) : filteredMotoboys.length === 0 ? (
           <div className="px-4 py-4">
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
-              Nenhum entregador vinculado ainda.
+            <div className="ds-empty-state px-4 py-7 text-center">
+              <div className="text-slate-400 text-2xl">📭</div>
+              <p className="mt-2 text-base font-semibold text-slate-800">Nenhum entregador vinculado</p>
+              <p className="mt-1 text-xs text-slate-500">Use o link de cadastro para convidar entregadores para sua loja.</p>
             </div>
           </div>
         ) : (
@@ -1608,7 +1618,7 @@ export function AdminMotoboys() {
             {filteredMotoboys.map((link) => (
               <div
                 key={link.id}
-                className="rounded-2xl border border-slate-200 bg-white p-4 flex flex-col gap-3 overflow-hidden shadow-[0_26px_60px_-48px_rgba(15,23,42,0.35)]"
+                className="rounded-2xl border border-slate-200 bg-white p-4 flex flex-col gap-3 overflow-hidden shadow-[0_18px_42px_-30px_rgba(15,23,42,0.24)] ds-interactive-card"
                 style={{
                   borderLeftWidth: 6,
                   borderLeftColor: link.active ? (link.busy ? 'rgb(245 158 11)' : 'rgb(16 185 129)') : 'rgb(244 63 94)',
