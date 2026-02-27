@@ -173,7 +173,7 @@ export function MotoboyHome() {
       </section>
 
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <article className="rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)] motoboy-fade-up">
+        <article className="rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)] motoboy-fade-up ds-interactive-card">
           <div className="flex items-center justify-between gap-3">
             <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Ganhos de hoje</p>
             <span className="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 inline-flex items-center justify-center">
@@ -188,7 +188,7 @@ export function MotoboyHome() {
           </p>
         </article>
 
-        <article className="rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)] motoboy-fade-up">
+        <article className="rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)] motoboy-fade-up ds-interactive-card">
           <div className="flex items-center justify-between gap-3">
             <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Fila agora</p>
             <span className="h-10 w-10 rounded-xl bg-slate-100 text-slate-700 border border-slate-200 inline-flex items-center justify-center">
@@ -201,7 +201,7 @@ export function MotoboyHome() {
           </p>
         </article>
 
-        <article className="rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)] motoboy-fade-up">
+        <article className="rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)] motoboy-fade-up ds-interactive-card">
           <div className="flex items-center justify-between gap-3">
             <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Lojas vinculadas</p>
             <span className="h-10 w-10 rounded-xl bg-blue-50 text-blue-700 border border-blue-200 inline-flex items-center justify-center">
@@ -214,7 +214,7 @@ export function MotoboyHome() {
           </p>
         </article>
 
-        <article className="rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)] motoboy-fade-up">
+        <article className="rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)] motoboy-fade-up ds-interactive-card">
           <div className="flex items-center justify-between gap-3">
             <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Conta e documentos</p>
             <span className="h-10 w-10 rounded-xl bg-violet-50 text-violet-700 border border-violet-200 inline-flex items-center justify-center">
@@ -230,7 +230,7 @@ export function MotoboyHome() {
         </article>
       </section>
 
-      <section className="rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)] motoboy-fade-up">
+      <section className="rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)] motoboy-fade-up ds-interactive-card">
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">{hasActive ? 'Entrega ativa' : 'Próximo pedido'}</p>
@@ -261,7 +261,7 @@ export function MotoboyHome() {
         <button
           type="button"
           onClick={() => navigate('/motoboy/available')}
-          className="btn-press rounded-2xl border border-slate-200 bg-white/80 p-4 text-left shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)] motoboy-fade-up"
+          className="btn-press rounded-2xl border border-slate-200 bg-white/80 p-4 text-left shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)] motoboy-fade-up ds-interactive-card"
         >
           <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Fila de pedidos</p>
           <p className="text-lg font-black text-slate-900 mt-2">Gerenciar fila</p>
@@ -271,7 +271,7 @@ export function MotoboyHome() {
         <button
           type="button"
           onClick={() => navigate('/motoboy/earnings')}
-          className="btn-press rounded-2xl border border-slate-200 bg-white/80 p-4 text-left shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)] motoboy-fade-up"
+          className="btn-press rounded-2xl border border-slate-200 bg-white/80 p-4 text-left shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)] motoboy-fade-up ds-interactive-card"
         >
           <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Ganhos e histórico</p>
           <p className="text-lg font-black text-slate-900 mt-2">Ver detalhes financeiros</p>
@@ -281,7 +281,7 @@ export function MotoboyHome() {
         <button
           type="button"
           onClick={() => navigate('/motoboy/delivery')}
-          className="btn-press rounded-2xl border border-slate-200 bg-white/80 p-4 text-left shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)] motoboy-fade-up"
+          className="btn-press rounded-2xl border border-slate-200 bg-white/80 p-4 text-left shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)] motoboy-fade-up ds-interactive-card"
         >
           <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Entrega em andamento</p>
           <p className="text-lg font-black text-slate-900 mt-2">Abrir entrega atual</p>
@@ -293,7 +293,7 @@ export function MotoboyHome() {
         <button
           type="button"
           onClick={() => navigate('/motoboy/profile')}
-          className="btn-press rounded-2xl border border-slate-200 bg-white/80 p-4 text-left shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)] motoboy-fade-up"
+          className="btn-press rounded-2xl border border-slate-200 bg-white/80 p-4 text-left shadow-[0_18px_40px_-32px_rgba(15,23,42,0.45)] motoboy-fade-up ds-interactive-card"
         >
           <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Perfil e documentos</p>
           <p className="text-lg font-black text-slate-900 mt-2">Atualizar cadastro</p>
@@ -302,7 +302,7 @@ export function MotoboyHome() {
       </section>
 
       {!loading && queueCount === 0 && !hasActive ? (
-        <section className="rounded-2xl border border-dashed border-slate-300 bg-white/60 p-5 text-center text-slate-600 motoboy-fade-up">
+        <section className="ds-empty-state rounded-2xl border border-dashed border-slate-300 bg-white/60 p-5 text-center text-slate-600 motoboy-fade-up">
           <div className="mx-auto h-11 w-11 rounded-2xl border border-slate-200 bg-slate-50 text-slate-600 inline-flex items-center justify-center">
             <UserCircle size={22} weight="duotone" />
           </div>

@@ -187,7 +187,7 @@ export function MotoboyEarnings() {
       </section>
 
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
-        <article className="rounded-2xl border border-slate-200 bg-white p-4 flex items-center justify-between">
+        <article className="rounded-2xl border border-slate-200 bg-white p-4 flex items-center justify-between ds-interactive-card">
           <div>
             <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Seu ganho hoje</p>
             <p className="text-2xl font-black text-emerald-600 mt-2">{toCurrency(totalToday)}</p>
@@ -198,7 +198,7 @@ export function MotoboyEarnings() {
           </div>
         </article>
 
-        <article className="rounded-2xl border border-slate-200 bg-white p-4 flex items-center justify-between">
+        <article className="rounded-2xl border border-slate-200 bg-white p-4 flex items-center justify-between ds-interactive-card">
           <div>
             <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Frete (30 dias)</p>
             <p className="text-2xl font-black text-slate-800 mt-2">{toCurrency(totalMonth)}</p>
@@ -209,7 +209,7 @@ export function MotoboyEarnings() {
           </div>
         </article>
 
-        <article className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 flex items-center justify-between">
+        <article className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 flex items-center justify-between ds-interactive-card">
           <div>
             <p className="text-xs uppercase tracking-[0.2em] text-emerald-700">Gorjetas pagas pelo cliente (30 dias)</p>
             <p className="text-2xl font-black text-emerald-700 mt-2">{toCurrency(totalTipsMonth)}</p>
@@ -220,7 +220,7 @@ export function MotoboyEarnings() {
           </div>
         </article>
 
-        <article className="rounded-2xl border border-amber-200 bg-amber-50 p-4 flex items-center justify-between">
+        <article className="rounded-2xl border border-amber-200 bg-amber-50 p-4 flex items-center justify-between ds-interactive-card">
           <div>
             <p className="text-xs uppercase tracking-[0.2em] text-amber-700">Repasse pendente</p>
             <p className="text-2xl font-black text-amber-700 mt-2">{toCurrency(totalTipsPending)}</p>
@@ -231,7 +231,7 @@ export function MotoboyEarnings() {
           </div>
         </article>
 
-        <article className="rounded-2xl border border-blue-200 bg-blue-50 p-4 flex items-center justify-between">
+        <article className="rounded-2xl border border-blue-200 bg-blue-50 p-4 flex items-center justify-between ds-interactive-card">
           <div>
             <p className="text-xs uppercase tracking-[0.2em] text-blue-700">Seu ganho total (30 dias)</p>
             <p className="text-2xl font-black text-blue-700 mt-2">{toCurrency(totalGross30d)}</p>
@@ -243,7 +243,7 @@ export function MotoboyEarnings() {
           </div>
         </article>
 
-        <article className="rounded-2xl border border-violet-200 bg-violet-50 p-4 flex items-center justify-between">
+        <article className="rounded-2xl border border-violet-200 bg-violet-50 p-4 flex items-center justify-between ds-interactive-card">
           <div>
             <p className="text-xs uppercase tracking-[0.2em] text-violet-700">Valor dos pedidos (30 dias)</p>
             <p className="text-2xl font-black text-violet-700 mt-2">{toCurrency(deliveredOrdersValue30d)}</p>
@@ -256,7 +256,7 @@ export function MotoboyEarnings() {
       </section>
 
       <section className="grid gap-3 lg:grid-cols-[1.1fr_0.9fr]">
-        <div className="rounded-2xl border border-slate-200 bg-white p-4">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 ds-interactive-card">
           <div className="flex items-center justify-between gap-2">
             <p className="text-xs uppercase tracking-[0.2em] text-slate-500 font-bold">Últimas entregas (30 dias)</p>
             <button
@@ -277,7 +277,10 @@ export function MotoboyEarnings() {
                 <div className="motoboy-skeleton h-[92px]" />
               </div>
             ) : orders.length === 0 ? (
-              <div className="text-center text-sm text-slate-500 py-6">Nenhuma entrega finalizada ainda.</div>
+              <div className="ds-empty-state text-center py-6">
+                <p className="text-base font-semibold text-slate-800">Nenhuma entrega finalizada ainda</p>
+                <p className="mt-1 text-xs text-slate-500">Quando concluir entregas, seus ganhos aparecerão aqui.</p>
+              </div>
             ) : (
               <div className="grid gap-4">
                 {paginatedOrders.map((order) => {
@@ -344,7 +347,7 @@ export function MotoboyEarnings() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-3">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-3 ds-interactive-card">
           <p className="text-xs uppercase tracking-[0.2em] text-slate-500 font-bold">Histórico de repasses</p>
           <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
             Repassado: <span className="font-extrabold">{toCurrency(totalTipsPaid)}</span>
@@ -354,8 +357,9 @@ export function MotoboyEarnings() {
           </div>
 
           {recentTipPayouts.length === 0 ? (
-            <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-4 text-xs text-slate-500 text-center">
-              Ainda não há gorjetas registradas.
+            <div className="ds-empty-state rounded-xl border border-slate-200 bg-slate-50 px-3 py-4 text-center">
+              <p className="text-sm font-semibold text-slate-800">Ainda não há gorjetas registradas</p>
+              <p className="mt-1 text-xs text-slate-500">As gorjetas pagas pelos clientes aparecerão neste histórico.</p>
             </div>
           ) : (
             <div className="space-y-2">

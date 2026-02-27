@@ -186,7 +186,13 @@ export function AdminOrders() {
   }, [viewMode]);
 
   if (!auth?.store) {
-    return <div style={{ padding: 24 }}>Carregando pedidos...</div>;
+    return (
+      <div className="p-6 space-y-3">
+        <div className="ds-skeleton h-20 w-full" />
+        <div className="ds-skeleton h-24 w-full" />
+        <div className="ds-skeleton h-24 w-full" />
+      </div>
+    );
   }
 
   return (
@@ -272,12 +278,19 @@ export function AdminOrders() {
 
           {filteredOrders.length === 0 ? (
             <div className="py-12 text-center text-slate-500">
-              <div className="mx-auto max-w-md rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-6 py-8">
+              <div className="mx-auto max-w-md ds-empty-state rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-6 py-8">
                 <div className="text-4xl">🧾</div>
                 <p className="mt-3 text-sm font-semibold text-slate-700">Nenhum pedido por aqui ainda.</p>
                 <p className="text-xs text-slate-500 mt-1">
                   Assim que entrarem pedidos, eles aparecem aqui com status e detalhes.
                 </p>
+                <button
+                  type="button"
+                  onClick={clearFilters}
+                  className="mt-3 ds-btn ds-btn-secondary ds-focus-ring px-4 py-2 text-xs font-bold"
+                >
+                  Limpar filtros
+                </button>
               </div>
             </div>
           ) : viewMode === 'cards' ? (
@@ -290,7 +303,7 @@ export function AdminOrders() {
                   return (
                     <div
                       key={order.id || `${order.customerName}-${index}`}
-                      className={`rounded-2xl border border-slate-200 border-l-4 ${statusAccent(order.status)} p-4 shadow-sm space-y-3`}
+                      className={`rounded-2xl border border-slate-200 border-l-4 ${statusAccent(order.status)} p-4 shadow-sm space-y-3 ds-interactive-card`}
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="space-y-1">
@@ -358,7 +371,7 @@ export function AdminOrders() {
                 {filteredOrders.map((order, index) => (
                   <div
                     key={order.id || `${order.customerName}-${index}`}
-                    className={`border border-slate-200 border-l-4 ${statusAccent(order.status)} rounded-2xl p-5 shadow-sm flex flex-col gap-4`}
+                    className={`border border-slate-200 border-l-4 ${statusAccent(order.status)} rounded-2xl p-5 shadow-sm flex flex-col gap-4 ds-interactive-card`}
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                       <div>
