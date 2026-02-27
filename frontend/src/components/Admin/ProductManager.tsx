@@ -1252,7 +1252,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                   <td className="p-4">
                     {renderAvailabilityBadges(product.availabilityDays)}
                   </td>
-                  <td className="p-4 text-right space-x-2 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 transition-opacity duration-150">
+                  <td className="p-4 text-right space-x-2">
                     <button
                       onClick={() => handleEditMobile(product)}
                       className="text-brand-primary hover:bg-brand-primary-soft p-2 rounded transition-all hover:-translate-y-0.5 active:scale-95"
