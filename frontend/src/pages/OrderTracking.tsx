@@ -17,8 +17,12 @@ const statusLabels: Record<string, string> = {
   pending: 'Recebido',
   preparing: 'Em atendimento',
   ready: 'Pronto para retirada',
+  ready_for_delivery: 'Pronto para entrega',
+  waiting_for_motoboy: 'Aguardando entregador',
+  in_delivery: 'Em rota',
   done: 'Pronto',
   delivered: 'Entregue',
+  finished: 'Finalizado',
 };
 
 const typeLabels: Record<string, string> = {
@@ -191,20 +195,34 @@ export function OrderTracking() {
   useEffect(() => {
     if (!orderId) return;
     let active = true;
-    setTrackingLoading(true);
-    orderService
-      .getTrackingV2(orderId)
-      .then((data) => {
+    let timer: number | undefined;
+    const loadTracking = async (silent = false) => {
+      if (!silent) setTrackingLoading(true);
+      try {
+        const data = await orderService.getTrackingV2(orderId);
         if (active) setTrackingV2(data);
-      })
-      .catch(() => null)
-      .finally(() => {
-        if (active) setTrackingLoading(false);
-      });
+      } catch {
+        // Silencioso para não quebrar UX do acompanhamento.
+      } finally {
+        if (!silent && active) setTrackingLoading(false);
+      }
+    };
+    loadTracking(false);
+    const orderStatus = String(order?.status || '').toLowerCase();
+    const dStatus = String((order as any)?.delivery?.status || '').toUpperCase();
+    const terminal =
+      orderStatus === 'done' ||
+      orderStatus === 'delivered' ||
+      orderStatus === 'finished' ||
+      dStatus === 'DELIVERED';
+    if (polling && !terminal) {
+      timer = window.setInterval(() => loadTracking(true), 15000);
+    }
     return () => {
       active = false;
+      if (timer) window.clearInterval(timer);
     };
-  }, [orderId]);
+  }, [orderId, polling, order?.status, (order as any)?.delivery?.status]);
 
   const status = order?.status || 'pending';
   const normalizedOrderType = String(order?.type || '').toLowerCase();
@@ -244,7 +262,7 @@ export function OrderTracking() {
     resolveAssetUrl(order?.store?.settings?.logoUrl) || '/janocaminho.jpg';
   const statusLabel = useMemo(() => {
     if (isDelivery && (deliveryStatus === 'DELIVERED' || status === 'delivered' || status === 'finished')) return 'Entregue';
-    if (isDelivery && deliveryStatus === 'IN_TRANSIT') return 'Em rota';
+    if (isDelivery && (deliveryStatus === 'IN_TRANSIT' || status === 'in_delivery')) return 'Em rota';
     if (isDelivery && (deliveryStatus === 'ACCEPTED' || deliveryStatus === 'PICKED_UP')) return 'Entregador a caminho';
     if (isDelivery && status === 'waiting_for_motoboy') return 'Aguardando entregador';
     if (isDelivery && status === 'ready_for_delivery') return 'Pronto para entrega';
@@ -295,6 +313,7 @@ export function OrderTracking() {
     ? `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(pixPayload)}`
     : '';
   const etaDetails = trackingV2?.eta || order?.eta || null;
+  const hasTrackingEta = Boolean(trackingV2?.eta && Number((trackingV2 as any)?.eta?.totalMinutes) > 0);
   const etaTotalMinutes = etaDetails?.totalMinutes
     ? Number(etaDetails.totalMinutes)
     : null;
@@ -302,17 +321,70 @@ export function OrderTracking() {
   const etaWindowMax = etaDetails?.windowMax ? Number(etaDetails.windowMax) : null;
   const estimateMinutes = etaTotalMinutes;
   const deliveryFeeValue = hasDeliveryFee ? Number(order?.deliveryFee || 0) : null;
+  const routeDurationMinutes = useMemo(() => {
+    const routeDuration = Number(deliveryRoute?.durationMin || 0);
+    if (Number.isFinite(routeDuration) && routeDuration > 0) return Math.round(routeDuration);
+    const etaTravel = Number((etaDetails as any)?.travelMinutes || 0);
+    if (Number.isFinite(etaTravel) && etaTravel > 0) return Math.round(etaTravel);
+    const etaMax = Number(etaWindowMax || 0);
+    if (Number.isFinite(etaMax) && etaMax > 0) return Math.round(etaMax);
+    return null;
+  }, [deliveryRoute?.durationMin, (etaDetails as any)?.travelMinutes, etaWindowMax]);
+  const routeEtaRemainingMinutes = useMemo(() => {
+    if (!isDelivery) return null;
+    const deliveryInRoute = deliveryStatus === 'IN_TRANSIT' || status === 'in_delivery';
+    if (!deliveryInRoute) return null;
+    if (!routeDurationMinutes || routeDurationMinutes <= 0) return null;
+    const startCandidates = [
+      (order as any)?.delivery?.pickedUpAt,
+      (order as any)?.delivery?.acceptedAt,
+      (order as any)?.delivery?.updatedAt,
+      order?.updatedAt,
+      order?.createdAt,
+    ];
+    for (const candidate of startCandidates) {
+      if (!candidate) continue;
+      const parsed = new Date(candidate).getTime();
+      if (!Number.isFinite(parsed)) continue;
+      const elapsedMin = Math.max(0, (Date.now() - parsed) / 60000);
+      return Math.max(0, Math.round(routeDurationMinutes - elapsedMin));
+    }
+    return Math.max(0, Math.round(routeDurationMinutes));
+  }, [isDelivery, deliveryStatus, status, routeDurationMinutes, (order as any)?.delivery?.pickedUpAt, (order as any)?.delivery?.acceptedAt, (order as any)?.delivery?.updatedAt, order?.updatedAt, order?.createdAt]);
+  const remainingEstimateMinutes = useMemo(() => {
+    if (isReady) return null;
+    if (routeEtaRemainingMinutes !== null) return routeEtaRemainingMinutes;
+    if (!estimateMinutes) return null;
+    // ETA v2 já vem como estimativa corrente do backend (não descontar elapsed no frontend).
+    if (hasTrackingEta) return Math.max(0, Math.round(estimateMinutes));
+    const elapsedMin = Math.max(0, elapsedMs / 60000);
+    return Math.max(0, Math.round(estimateMinutes - elapsedMin));
+  }, [isReady, routeEtaRemainingMinutes, estimateMinutes, elapsedMs, hasTrackingEta]);
+  const isEstimateDelayed = useMemo(() => {
+    if (isReady || !estimateMinutes) return false;
+    const elapsedMin = Math.max(0, elapsedMs / 60000);
+    return elapsedMin > estimateMinutes + 2 && remainingEstimateMinutes === 0;
+  }, [isReady, estimateMinutes, elapsedMs, remainingEstimateMinutes]);
   const estimatedReadyAt = useMemo(() => {
+    if (isReady) return null;
+    if (remainingEstimateMinutes !== null) {
+      return new Date(Date.now() + remainingEstimateMinutes * 60 * 1000);
+    }
     if (!estimateMinutes || !order?.createdAt) return null;
     const base = new Date(order.createdAt).getTime();
     if (!Number.isFinite(base)) return null;
     return new Date(base + estimateMinutes * 60 * 1000);
-  }, [estimateMinutes, order?.createdAt]);
+  }, [isReady, remainingEstimateMinutes, estimateMinutes, order?.createdAt]);
   const deliveryEta = useMemo(() => {
-    if (!deliveryRoute?.durationMin) return null;
-    const base = order?.updatedAt ? new Date(order.updatedAt).getTime() : Date.now();
-    return new Date(base + Number(deliveryRoute.durationMin) * 60 * 1000);
-  }, [deliveryRoute?.durationMin, order?.updatedAt]);
+    if (!isDelivery || isReady) return null;
+    if (routeEtaRemainingMinutes !== null) {
+      return new Date(Date.now() + routeEtaRemainingMinutes * 60 * 1000);
+    }
+    if (remainingEstimateMinutes !== null) {
+      return new Date(Date.now() + remainingEstimateMinutes * 60 * 1000);
+    }
+    return null;
+  }, [isDelivery, isReady, routeEtaRemainingMinutes, remainingEstimateMinutes]);
   const storeWhatsappLink = storePhone
     ? `https://wa.me/55${String(storePhone || '').replace(/\D/g, '').replace(/^55/, '')}`
     : '';
@@ -679,7 +751,7 @@ export function OrderTracking() {
     if (deliveryStatus === 'IN_TRANSIT') return 'in_delivery';
     if (deliveryStatus === 'ACCEPTED' || deliveryStatus === 'PICKED_UP') return 'ready';
     if (status === 'ready_for_delivery' || status === 'waiting_for_motoboy' || status === 'ready') return 'ready';
-    if (status === 'in_delivery') return 'ready';
+    if (status === 'in_delivery') return 'in_delivery';
     if (status === 'delivered' || status === 'finished') return 'delivered';
     return status;
   })();
@@ -807,9 +879,14 @@ export function OrderTracking() {
                         Tempo total: {formatDuration(elapsedMs)}
                       </div>
                     )}
-                    {estimateMinutes && !isReady && (
+                    {remainingEstimateMinutes !== null && !isReady && (
                       <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold animate-pulse">
-                        Previsão de entrega: ~{estimateMinutes} min
+                        Tempo restante: ~{remainingEstimateMinutes} min
+                      </div>
+                    )}
+                    {isEstimateDelayed && (
+                      <div className="mt-2 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-rose-100 text-rose-800 text-xs font-semibold">
+                        Pedido em atraso. Atualizando automaticamente.
                       </div>
                     )}
                     {etaWindowMin && etaWindowMax && !isReady && (
@@ -1234,7 +1311,7 @@ export function OrderTracking() {
                       <div className="flex items-center justify-between text-xs text-slate-600">
                         <span>Tempo estimado</span>
                         <span className="font-semibold text-slate-800">
-                          {deliveryRoute?.durationMin ? `${deliveryRoute.durationMin} min` : routeLoading ? 'Calculando...' : '-'}
+                          {routeDurationMinutes !== null ? `${routeDurationMinutes} min` : routeLoading ? 'Calculando...' : '-'}
                         </span>
                       </div>
                       {deliveryEta && (
@@ -1308,9 +1385,14 @@ export function OrderTracking() {
                         <span className="font-semibold">Tempo total:</span> {formatDuration(elapsedMs)}
                       </p>
                     )}
-                    {estimateMinutes && !isReady && (
+                    {remainingEstimateMinutes !== null && !isReady && (
                       <p>
-                        <span className="font-semibold">Previsão total:</span> ~{estimateMinutes} min
+                        <span className="font-semibold">Tempo restante:</span> ~{remainingEstimateMinutes} min
+                      </p>
+                    )}
+                    {isEstimateDelayed && (
+                      <p>
+                        <span className="font-semibold">Status da previsão:</span> Em atraso (acompanhamento em tempo real)
                       </p>
                     )}
                   {etaWindowMin && etaWindowMax && !isReady && (
