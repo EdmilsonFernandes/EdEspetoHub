@@ -11,7 +11,7 @@ import { MenuView } from '../components/Client/MenuView';
 import { CartView } from '../components/Client/CartView';
 import { SuccessView } from '../components/Client/SuccessView';
 import { useToast } from '../contexts/ToastContext';
-import { formatCurrency, formatOrderDisplayId, formatPaymentMethod } from '../utils/format';
+import { formatCurrency, formatOrderDisplayId, formatOrderType, formatPaymentMethod } from '../utils/format';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getPersistedBranding, brandingStorageKey, defaultBranding, initialCustomer, defaultPaymentMethod, WHATSAPP_NUMBER, PIX_KEY } from '../constants';
 import { formatOpeningHoursSummary, isStoreOpenNow, normalizeOpeningHours } from '../utils/storeHours';
@@ -568,13 +568,9 @@ export function StorePage() {
       autoTrackRef.current = false;
       return;
     }
-    if (autoTrackRef.current) return;
+    // Mantém o usuário na tela de sucesso para evitar confusão com múltiplas abas/janelas.
     autoTrackRef.current = true;
-    const timeout = window.setTimeout(() => {
-      navigate(`/pedido/${lastOrder.id}`);
-    }, 1500);
-    return () => window.clearTimeout(timeout);
-  }, [view, lastOrder?.id, navigate]);
+  }, [view, lastOrder?.id]);
 
   useEffect(() => {
     if (user?.token) {
@@ -817,7 +813,6 @@ export function StorePage() {
       }
     }
 
-    const isPickup = customer.type === 'pickup';
     const payment = paymentMethod;
     const cashTendered =
       payment === 'dinheiro' && extra?.cashTendered !== undefined && extra?.cashTendered !== null
@@ -920,71 +915,47 @@ export function StorePage() {
     localStorage.setItem(customersStorageKey, JSON.stringify(nextCustomers));
     customerService.fetchAll().then(setCustomers).catch(() => {});
 
+    const trackingLink =
+      typeof window !== 'undefined' && createdOrder?.id
+        ? createdOrder?.accessToken
+          ? `${window.location.origin}/pedido/${createdOrder.id}?ot=${encodeURIComponent(String(createdOrder.accessToken))}`
+          : `${window.location.origin}/pedido/${createdOrder.id}`
+        : '';
     const shouldNotifyOwner = !isStoreAdmin && (customer.type === 'pickup' || customer.type === 'table');
     if (shouldNotifyOwner) {
-    const itemsList = Object.values(cart)
-      .map((item) => `▪ ${item.qty}x ${item.name} ${formatItemOptions(item)}`.trim())
-      .join('\n');
-    const customerLabel = customer.phone
-      ? `👤 *${customer.name}* (${customer.phone})`
-      : `👤 *${customer.name}*`;
+      const itemsList = Object.values(cart)
+        .map((item) => `• ${item.qty}x ${item.name} ${formatItemOptions(item)}`.trim())
+        .join('\n');
+      const customerLabel = customer.phone
+        ? `👤 Cliente: *${customer.name}* (${customer.phone})`
+        : `👤 Cliente: *${customer.name}*`;
 
-    const messageLines = [
-      `*NOVO PEDIDO - ${branding?.brandName || 'Já no Caminho'}*`,
-      storeSlug ? `🏷️ *Loja:* ${storeSlug}` : '',
-      storeAddress ? `📍 *Endereço da loja:* ${storeAddress}` : '',
-      '------------------',
-      customerLabel,
-      `🛒 *Tipo:* ${customer.type}`,
-      customer.table ? `🪑 *Mesa:* ${customer.table}` : '',
-      payment ? `💳 Pagamento: ${formatPaymentMethod(payment)}` : '',
-        customer.address ? `📍 End: ${customer.address}` : '',
-        '------------------',
+      const messageLines = [
+        `*Novo pedido - ${branding?.brandName || 'Já no Caminho'}*`,
+        storeSlug ? `🏷️ Loja: ${storeSlug}` : '',
+        storeAddress ? `📍 Loja: ${storeAddress}` : '',
+        '',
+        customerLabel,
+        `🛒 Tipo: ${formatOrderType(customer.type)}`,
+        customer.table ? `🪑 Mesa: ${customer.table}` : '',
+        payment ? `💳 Pagamento: ${formatPaymentMethod(payment)}` : '',
+        customer.address ? `📌 Endereço do cliente: ${customer.address}` : '',
+        '',
+        '*Itens do pedido:*',
         itemsList,
-        '------------------',
+        '',
         deliveryFeeValue > 0 ? `🚚 Frete: ${formatCurrency(deliveryFeeValue)}` : '',
-        `💰 *TOTAL: ${formatCurrency(orderTotal)}*`,
-        payment === 'pix' && pixKey ? `💳 Pagamento via PIX: ${pixKey}` : '',
-        payment === 'pix'
-          ? PIX_KEY
-            ? `💳 Pagamento via PIX: ${PIX_KEY}`
-            : '💳 Gerar Pix para retirada na loja'
-          : ''
+        `💰 *Total: ${formatCurrency(orderTotal)}*`,
+        payment === 'pix' && pixKey ? `🔑 Pix da loja: ${pixKey}` : '',
+        trackingLink ? `🔎 Acompanhar pedido: ${trackingLink}` : '',
       ].filter(Boolean);
 
       const encodedMessage = encodeURIComponent(messageLines.join('\n'));
       const targetNumber = resolvedWhatsApp || WHATSAPP_NUMBER;
       window.open(`https://wa.me/${targetNumber}?text=${encodedMessage}`, '_blank');
     }
-
-    const trackingLink =
-      typeof window !== 'undefined' && createdOrder?.id
-        ? `${window.location.origin}/pedido/${createdOrder.id}`
-        : '';
-    const customerItemsList = Object.values(cart)
-      .map((item) => `- ${item.qty}x ${item.name} ${formatItemOptions(item)}`.trim())
-      .join('\n');
-    const customerMessageLines = [
-      `Pedido #${formatOrderDisplayId(createdOrder?.id, storeSlug)} - ${branding?.brandName || 'Já no Caminho'}`,
-      customerItemsList ? `Itens:\n${customerItemsList}` : '',
-      deliveryFeeValue > 0 ? `Frete: ${formatCurrency(deliveryFeeValue)}` : '',
-      `Total: ${formatCurrency(orderTotal)}`,
-      trackingLink ? `Acompanhar: ${trackingLink}` : '',
-    ]
-      .filter(Boolean)
-      .join('\n');
-    const customerNumber =
-      sanitizedPhone.length >= 10
-        ? sanitizedPhone.startsWith('55')
-          ? sanitizedPhone
-          : `55${sanitizedPhone}`
-        : '';
-    if (customerNumber && !isStoreAdmin) {
-      window.open(
-        `https://wa.me/${customerNumber}?text=${encodeURIComponent(customerMessageLines)}`,
-        '_blank'
-      );
-    }
+    // Evita abrir uma segunda janela do WhatsApp automaticamente.
+    // O acompanhamento fica no botão da tela de sucesso e no histórico recente.
 
     setCart({});
     setCustomer(initialCustomer);
