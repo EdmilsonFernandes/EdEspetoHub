@@ -269,6 +269,17 @@ export function OrderTracking() {
     order?.pixKey ||
     '';
   const isPixPayment = (paymentValue || '').toString().trim().toLowerCase() === 'pix';
+  const paymentStatusNormalized = String(order?.paymentStatus || '').toUpperCase();
+  const shouldHidePixPaymentBlockBase =
+    isPixPayment &&
+    (
+      paymentStatusNormalized === 'PAID' ||
+      [ 'ready', 'ready_for_delivery', 'done', 'delivered', 'finished' ].includes(status) ||
+      isReady
+    );
+  const isReadyStageForMobileBase =
+    [ 'ready', 'ready_for_delivery', 'done', 'delivered', 'finished' ].includes(status) ||
+    isReady;
   const hasDeliveryFee =
     order?.deliveryFee !== null && order?.deliveryFee !== undefined && isDelivery;
   const pixPayload = pixKey
@@ -887,8 +898,12 @@ export function OrderTracking() {
                         )}
                       </span>
                       <div className="min-w-0">
-                        <p className="text-sm font-extrabold text-slate-900">{currentStepItem?.label || statusLabel}</p>
-                        <p className="text-[11px] text-slate-600">Atualizando automaticamente</p>
+                        <p className="text-sm font-extrabold text-slate-900">
+                          {isReadyStageForMobileBase || progress >= 100 ? 'Pronto para Retirada' : (currentStepItem?.label || statusLabel)}
+                        </p>
+                        <p className="text-[11px] text-slate-600">
+                          {isReadyStageForMobileBase || progress >= 100 ? 'Status finalizado' : 'Atualizando automaticamente'}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -1128,44 +1143,52 @@ export function OrderTracking() {
                         <span className="text-emerald-700 font-semibold">{formatCurrency(order.deliveryFee)}</span>
                       </p>
                     ) : null}
-                    {isPixPayment && (
-                      <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 space-y-3">
-                        <div className="flex items-center justify-between">
-                          <span className="font-semibold text-slate-700">Pagamento via Pix</span>
-                          <span className="text-xs text-slate-400">Use o QR Code ou chave</span>
+                    {isPixPayment ? (
+                      shouldHidePixPaymentBlockBase || progress >= 100 ? (
+                        <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3">
+                          <span className="inline-flex items-center rounded-full border border-emerald-300 bg-white px-3 py-1 text-xs font-bold text-emerald-700">
+                            Pagamento confirmado
+                          </span>
                         </div>
-                        {pixKey ? (
-                          <>
-                            <div className="flex items-center justify-center">
-                              <img
-                                src={pixQrUrl}
-                                alt="QR Code Pix"
-                                className="w-40 h-40 rounded-xl bg-white border border-slate-200 object-contain"
-                              />
-                            </div>
-                            <button
-                              type="button"
-                              onClick={async () => {
-                                try {
-                                  await navigator.clipboard.writeText(pixPayload || pixKey);
-                                  setPixCopied(true);
-                                  window.setTimeout(() => setPixCopied(false), 2000);
-                                } catch (err) {
-                                  console.error('Falha ao copiar Pix', err);
-                                }
-                              }}
-                              className="w-full px-3 py-2 rounded-lg border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-100"
-                            >
-                              {pixCopied ? 'Copiado!' : 'Copiar código Pix'}
-                            </button>
-                          </>
-                        ) : (
-                          <div className="text-xs text-slate-500">
-                            A chave Pix da loja ainda não foi cadastrada.
+                      ) : (
+                        <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="font-semibold text-slate-700">Pagamento via Pix</span>
+                            <span className="text-xs text-slate-400">Use o QR Code ou chave</span>
                           </div>
-                        )}
-                      </div>
-                    )}
+                          {pixKey ? (
+                            <>
+                              <div className="flex items-center justify-center">
+                                <img
+                                  src={pixQrUrl}
+                                  alt="QR Code Pix"
+                                  className="w-40 h-40 rounded-xl bg-white border border-slate-200 object-contain"
+                                />
+                              </div>
+                              <button
+                                type="button"
+                                onClick={async () => {
+                                  try {
+                                    await navigator.clipboard.writeText(pixPayload || pixKey);
+                                    setPixCopied(true);
+                                    window.setTimeout(() => setPixCopied(false), 2000);
+                                  } catch (err) {
+                                    console.error('Falha ao copiar Pix', err);
+                                  }
+                                }}
+                                className="w-full px-3 py-2 rounded-lg border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-100"
+                              >
+                                {pixCopied ? 'Copiado!' : 'Copiar código Pix'}
+                              </button>
+                            </>
+                          ) : (
+                            <div className="text-xs text-slate-500">
+                              A chave Pix da loja ainda não foi cadastrada.
+                            </div>
+                          )}
+                        </div>
+                      )
+                    ) : null}
                   {storeWhatsappLink && (
                     <div className="flex flex-col gap-2">
                       {storeWhatsappLink && (
@@ -1291,8 +1314,8 @@ export function OrderTracking() {
                   {isReady && !isDelivery && (
                     <div className="rounded-xl border border-green-200 bg-green-50 p-3 text-sm text-green-700">
                       {order?.type === 'table'
-                        ? 'Seu pedido esta pronto. Aguarde o atendimento na sua mesa.'
-                        : 'Seu pedido esta pronto! Pode ir retirar. Bom apetite!'}
+                        ? 'Seu pedido está pronto. Aguarde o atendimento na sua mesa.'
+                        : 'Seu pedido está pronto! Pode ir retirar. Bom apetite!'}
                     </div>
                   )}
                   {isReady && (
@@ -1569,21 +1592,6 @@ export function OrderTracking() {
           )}
         </div>
       </main>
-
-      {!loading && !error && order ? (
-        <div className="sm:hidden fixed bottom-0 inset-x-0 z-40 border-t border-slate-200 bg-white/95 backdrop-blur px-4 py-3 shadow-[0_-16px_36px_-28px_rgba(15,23,42,0.65)]">
-          <button
-            type="button"
-            onClick={() => setShowItemsSheetMobile(true)}
-            className="w-full rounded-2xl bg-slate-900 text-white px-4 py-3 flex items-center justify-between"
-          >
-            <span className="text-sm font-bold">
-              Ver itens do pedido ({Array.isArray(order?.items) ? order.items.length : 0})
-            </span>
-            <span className="text-sm font-black">{formatCurrency(order?.total || 0)}</span>
-          </button>
-        </div>
-      ) : null}
 
       {showItemsSheetMobile && order ? (
         <div className="sm:hidden fixed inset-0 z-50">
