@@ -1564,8 +1564,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         description: 'Pedidos novos aguardando início da operação.',
         generatedAt: oldestPendingTs,
         tone: 'warning',
-        actionLabel: 'Ver pedidos',
-        action: () => setActiveTab('pedidos'),
+        actionLabel: 'Abrir operação',
+        action: () => navigate('/admin/queue'),
       });
     }
     if (readyOrders > 0) {
@@ -2803,11 +2803,11 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
       {commandOpen && (
         <div
-          className="ds-sheet-backdrop z-[12050] px-4 sm:items-start sm:pt-20"
+          className="ds-sheet-backdrop z-[13000] px-4 sm:items-start sm:pt-24"
           onClick={() => setCommandOpen(false)}
         >
           <div
-            className="ds-sheet-panel w-full max-w-2xl rounded-t-3xl sm:rounded-2xl overflow-hidden"
+            className="ds-sheet-panel relative z-[13010] w-full max-w-2xl rounded-t-3xl sm:rounded-2xl overflow-hidden"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="sm:hidden ds-sheet-handle" />
