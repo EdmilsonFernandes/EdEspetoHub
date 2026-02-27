@@ -613,6 +613,25 @@ export const GrillQueue = () => {
       .filter((order) => completedStatuses.has(order.status) && isSameDay(order.createdAt))
       .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
   }, [queue]);
+  const completedSummary = useMemo(() => {
+    const totals = completedToday.reduce(
+      (acc, order) => {
+        const { total, fee } = calcMoney(order);
+        acc.sales += Number.isFinite(total) ? total : 0;
+        acc.deliveryFees += Number.isFinite(fee) ? fee : 0;
+        return acc;
+      },
+      { sales: 0, deliveryFees: 0 }
+    );
+    const ordersCount = completedToday.length;
+    const averageTicket = ordersCount > 0 ? totals.sales / ordersCount : 0;
+    return {
+      ordersCount,
+      sales: totals.sales,
+      deliveryFees: totals.deliveryFees,
+      averageTicket,
+    };
+  }, [completedToday]);
   const completedTotalPages = Math.max(1, Math.ceil(completedToday.length / completedPageSize));
   const pagedCompleted = useMemo(() => {
     const start = (completedPage - 1) * completedPageSize;
@@ -1593,6 +1612,31 @@ export const GrillQueue = () => {
 
       {activeTab === 'completed' && (
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 sm:p-6">
+          <div className="mb-4 rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-50 via-white to-teal-50 p-4 shadow-[0_16px_32px_-26px_rgba(16,185,129,0.4)]">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-[11px] uppercase tracking-[0.2em] font-bold text-emerald-700">Finalizados hoje</p>
+                <p className="text-sm text-slate-600 mt-0.5">Resumo de vendas dos pedidos concluídos no dia.</p>
+              </div>
+              <span className="inline-flex items-center rounded-full border border-emerald-200 bg-white px-3 py-1 text-xs font-semibold text-emerald-700">
+                {completedSummary.ordersCount} pedido(s)
+              </span>
+            </div>
+            <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
+                <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500">Vendido no dia</p>
+                <p className="text-lg font-black text-slate-900">{formatCurrency(completedSummary.sales)}</p>
+              </div>
+              <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
+                <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500">Ticket médio</p>
+                <p className="text-lg font-black text-slate-900">{formatCurrency(completedSummary.averageTicket)}</p>
+              </div>
+              <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
+                <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500">Frete no dia</p>
+                <p className="text-lg font-black text-slate-900">{formatCurrency(completedSummary.deliveryFees)}</p>
+              </div>
+            </div>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
             {pagedCompleted.map((order) => (
               <div
