@@ -1593,6 +1593,24 @@ export function OrderTracking() {
         </div>
       </main>
 
+      {!loading && !error && order && !showItemsSheetMobile ? (
+        <div className="sm:hidden fixed bottom-0 inset-x-0 z-40 px-4 pb-3">
+          <button
+            type="button"
+            onClick={() => setShowItemsSheetMobile(true)}
+            className="w-full rounded-2xl border border-slate-200/70 bg-white/90 backdrop-blur px-4 py-3.5 shadow-[0_-2px_24px_-16px_rgba(15,23,42,0.7)] flex items-center justify-between"
+          >
+            <span className="inline-flex items-center gap-2 text-sm font-extrabold text-slate-900">
+              <span className="h-2 w-2 rounded-full bg-emerald-500" />
+              Ver itens do pedido ({Array.isArray(order?.items) ? order.items.length : 0})
+            </span>
+            <span className="text-sm font-black px-3 py-1 rounded-full bg-slate-900 text-white">
+              {formatCurrency(order?.total || 0)}
+            </span>
+          </button>
+        </div>
+      ) : null}
+
       {showItemsSheetMobile && order ? (
         <div className="sm:hidden fixed inset-0 z-50">
           <button
