@@ -720,7 +720,7 @@ export function OrderTracking() {
 
           {!loading && !error && order && (
             <div className="space-y-6">
-              <div className="rounded-3xl premium-card-soft p-4 sm:p-6">
+              <div className="rounded-2xl sm:rounded-3xl premium-card-soft p-4 sm:p-6 border border-slate-100">
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                   <div>
                     <p className="text-xs uppercase tracking-[0.3em] text-gray-400">
@@ -747,7 +747,7 @@ export function OrderTracking() {
                       {isReady ? 'Finalizado' : 'Em andamento'}
                     </span>
                     </div>
-                    <p className="text-sm text-gray-500 mt-2">
+                    <p className="text-sm text-gray-500 mt-1.5">
                       {storeName} • {typeLabel}
                     </p>
 
@@ -809,7 +809,7 @@ export function OrderTracking() {
                     <Clock size={16} weight="duotone" />
                     {order.createdAt ? formatDateTime(order.createdAt) : 'Agora'}
                     {elapsedMs > 0 && (
-                      <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-600">
+                      <span className="hidden sm:inline-flex ml-2 items-center gap-1 rounded-full bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-600">
                         Tempo corrido: {formatDuration(elapsedMs)}
                       </span>
                     )}
@@ -824,11 +824,12 @@ export function OrderTracking() {
                     <p className="text-sm font-semibold text-slate-800 mt-1">
                       {totalItems} item(ns) • {formatCurrency(order.total || 0)}
                     </p>
+                    <p className="text-[11px] text-slate-500 mt-1">Toque nas abas para ver andamento, itens e detalhes.</p>
                   </div>
                 </div>
               </div>
 
-              <div className="sm:hidden rounded-2xl border border-slate-200 bg-white p-1 flex items-center gap-1">
+              <div className="sm:hidden sticky top-[74px] z-20 rounded-2xl border border-slate-200 bg-white/95 backdrop-blur p-1 flex items-center gap-1 shadow-sm">
                 {[
                   { id: 'status', label: 'Andamento' },
                   { id: 'summary', label: 'Resumo' },
@@ -853,7 +854,7 @@ export function OrderTracking() {
                 <div className="flex items-center gap-3 mb-4">
                   <ChefHat className="text-red-500" weight="duotone" />
                   <div>
-                    <p className="text-sm font-semibold text-gray-800">Andamento do pedido</p>
+                    <p className="text-sm font-semibold text-gray-800">Acompanhe seu pedido</p>
                     <p className="text-xs text-gray-500">
                       {polling ? 'Atualizando automaticamente' : 'Status finalizado'}
                     </p>
