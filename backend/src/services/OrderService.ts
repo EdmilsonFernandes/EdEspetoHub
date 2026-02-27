@@ -37,6 +37,40 @@ export class OrderService
   private deliveryBillingService = new DeliveryBillingService();
   private subscriptionService = new SubscriptionService();
 
+  private async reconcileDeliveredOrdersByStore(storeId: string) {
+    if (!storeId) return;
+    await AppDataSource.query(
+      `
+        UPDATE orders o
+           SET status = 'delivered'
+          FROM order_deliveries od
+         WHERE o.id = od.order_id
+           AND o.store_id = $1
+           AND o.type = 'delivery'
+           AND o.status = 'in_delivery'
+           AND od.status = 'DELIVERED'
+      `,
+      [storeId]
+    );
+  }
+
+  private async reconcileDeliveredOrderById(orderId: string) {
+    if (!orderId) return;
+    await AppDataSource.query(
+      `
+        UPDATE orders o
+           SET status = 'delivered'
+          FROM order_deliveries od
+         WHERE o.id = od.order_id
+           AND o.id = $1
+           AND o.type = 'delivery'
+           AND o.status = 'in_delivery'
+           AND od.status = 'DELIVERED'
+      `,
+      [orderId]
+    );
+  }
+
   /**
    * Resolves the price used for an item.
    *
@@ -196,6 +230,7 @@ export class OrderService
   {
     const store = await this.storeRepository.findById(storeId);
     this.ensureStoreAccess(store, authStoreId);
+    await this.reconcileDeliveredOrdersByStore(store!.id);
     return this.orderRepository.findByStoreId(store!.id);
   }
 
@@ -212,6 +247,7 @@ export class OrderService
   {
     const store = await this.storeRepository.findBySlug(slug);
     this.ensureStoreAccess(store, authStoreId);
+    await this.reconcileDeliveredOrdersByStore(store!.id);
     return this.orderRepository.findByStoreId(store!.id);
   }
 
@@ -363,6 +399,7 @@ export class OrderService
    */
   async getPublicById(orderId: string)
   {
+    await this.reconcileDeliveredOrderById(orderId);
     const order = await this.orderRepository.findById(orderId);
     if (!order) return null;
     const queueStatuses = [ 'pending', 'preparing', 'ready' ];
