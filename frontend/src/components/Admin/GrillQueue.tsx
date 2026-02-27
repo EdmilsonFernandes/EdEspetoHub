@@ -619,9 +619,10 @@ export const GrillQueue = () => {
         const { total, fee } = calcMoney(order);
         acc.sales += Number.isFinite(total) ? total : 0;
         acc.deliveryFees += Number.isFinite(fee) ? fee : 0;
+        acc.items += (order?.items || []).reduce((sum, item) => sum + Number(item?.qty || 0), 0);
         return acc;
       },
-      { sales: 0, deliveryFees: 0 }
+      { sales: 0, deliveryFees: 0, items: 0 }
     );
     const ordersCount = completedToday.length;
     const averageTicket = ordersCount > 0 ? totals.sales / ordersCount : 0;
@@ -630,6 +631,7 @@ export const GrillQueue = () => {
       sales: totals.sales,
       deliveryFees: totals.deliveryFees,
       averageTicket,
+      itemsCount: totals.items,
     };
   }, [completedToday]);
   const completedTotalPages = Math.max(1, Math.ceil(completedToday.length / completedPageSize));
@@ -1622,7 +1624,7 @@ export const GrillQueue = () => {
                 {completedSummary.ordersCount} pedido(s)
               </span>
             </div>
-            <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2">
               <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
                 <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500">Vendido no dia</p>
                 <p className="text-lg font-black text-slate-900">{formatCurrency(completedSummary.sales)}</p>
@@ -1634,6 +1636,10 @@ export const GrillQueue = () => {
               <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
                 <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500">Frete no dia</p>
                 <p className="text-lg font-black text-slate-900">{formatCurrency(completedSummary.deliveryFees)}</p>
+              </div>
+              <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
+                <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500">Itens vendidos</p>
+                <p className="text-lg font-black text-slate-900">{completedSummary.itemsCount}</p>
               </div>
             </div>
           </div>
