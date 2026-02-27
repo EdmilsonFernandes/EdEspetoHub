@@ -866,7 +866,7 @@ export function OrderTracking() {
                     className={`flex-1 rounded-xl px-3 py-2 text-xs font-bold transition-all ${
                       mobileSection === tab.id
                         ? 'bg-slate-900 text-white cursor-default shadow-sm'
-                        : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-white'
+                        : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-white active:scale-[0.98] active:brightness-[0.98]'
                     }`}
                   >
                     {tab.label}
