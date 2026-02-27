@@ -107,6 +107,7 @@ export function OrderTracking() {
   const [orderAccessToken, setOrderAccessToken] = useState('');
   const [showItemsSheetMobile, setShowItemsSheetMobile] = useState(false);
   const [mobileSection, setMobileSection] = useState<'status' | 'summary' | 'info'>('status');
+  const [openingItemsSheet, setOpeningItemsSheet] = useState(false);
   const [tipPixCopied, setTipPixCopied] = useState(false);
   const [reviewForm, setReviewForm] = useState({
     storeRating: 0,
@@ -515,6 +516,12 @@ export function OrderTracking() {
   }, [order?.id]);
 
   useEffect(() => {
+    if (isReady && mobileSection === 'status') {
+      setMobileSection('summary');
+    }
+  }, [isReady, mobileSection]);
+
+  useEffect(() => {
     setFrozenElapsedMs(null);
   }, [order?.id]);
 
@@ -730,7 +737,7 @@ export function OrderTracking() {
           )}
 
           {!loading && !error && order && (
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               <div className="rounded-2xl sm:rounded-3xl premium-card-soft p-4 sm:p-6 border border-slate-100">
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                   <div>
@@ -1597,16 +1604,33 @@ export function OrderTracking() {
         <div className="sm:hidden fixed bottom-0 inset-x-0 z-40 px-4 pb-3">
           <button
             type="button"
-            onClick={() => setShowItemsSheetMobile(true)}
-            className="w-full rounded-2xl border border-slate-200/70 bg-white/90 backdrop-blur px-4 py-3.5 shadow-[0_-2px_24px_-16px_rgba(15,23,42,0.7)] flex items-center justify-between"
+            onClick={() => {
+              setOpeningItemsSheet(true);
+              window.setTimeout(() => {
+                setShowItemsSheetMobile(true);
+                setOpeningItemsSheet(false);
+              }, 120);
+            }}
+            className={`w-full rounded-2xl border backdrop-blur px-4 py-3.5 shadow-[0_-2px_24px_-16px_rgba(15,23,42,0.7)] flex items-center justify-between transition-all ${
+              mobileSection === 'summary'
+                ? 'border-slate-200/60 bg-white/80'
+                : 'border-slate-200/70 bg-white/90'
+            }`}
           >
             <span className="inline-flex items-center gap-2 text-sm font-extrabold text-slate-900">
               <span className="h-2 w-2 rounded-full bg-emerald-500" />
-              Ver itens do pedido ({Array.isArray(order?.items) ? order.items.length : 0})
+              {openingItemsSheet
+                ? 'Abrindo itens...'
+                : `Ver itens do pedido (${Array.isArray(order?.items) ? order.items.length : 0})`}
             </span>
-            <span className="text-sm font-black px-3 py-1 rounded-full bg-slate-900 text-white">
-              {formatCurrency(order?.total || 0)}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-bold px-2 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                {statusLabel}
+              </span>
+              <span className="text-sm font-black px-3 py-1 rounded-full bg-slate-900 text-white">
+                {formatCurrency(order?.total || 0)}
+              </span>
+            </div>
           </button>
         </div>
       ) : null}
@@ -1629,6 +1653,30 @@ export function OrderTracking() {
               >
                 Fechar
               </button>
+            </div>
+
+            <div className="px-4 py-2 border-b border-slate-100 bg-slate-50/70">
+              <div className="grid grid-cols-3 gap-2 text-[11px]">
+                <div className="rounded-xl border border-slate-200 bg-white px-2 py-1.5">
+                  <p className="text-slate-500">Itens</p>
+                  <p className="font-extrabold text-slate-900">{totalItems}</p>
+                </div>
+                <div className="rounded-xl border border-slate-200 bg-white px-2 py-1.5">
+                  <p className="text-slate-500">Subtotal</p>
+                  <p className="font-extrabold text-slate-900">
+                    {formatCurrency(Math.max(0, Number(order?.total || 0) - Number(deliveryFeeValue || 0)))}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-2 py-1.5">
+                  <p className="text-emerald-700">Total</p>
+                  <p className="font-extrabold text-emerald-700">{formatCurrency(order?.total || 0)}</p>
+                </div>
+              </div>
+              {Number(deliveryFeeValue || 0) > 0 ? (
+                <p className="mt-1 text-[11px] text-slate-500">
+                  Frete: <span className="font-semibold text-slate-700">{formatCurrency(deliveryFeeValue || 0)}</span>
+                </p>
+              ) : null}
             </div>
 
             <div className="px-4 py-3 space-y-3">
