@@ -2803,7 +2803,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
       {commandOpen && (
         <div
-          className="ds-sheet-backdrop z-[13000] px-4 sm:items-start sm:pt-24"
+          className="ds-sheet-backdrop z-[13000] px-4 items-center sm:items-center"
           onClick={() => setCommandOpen(false)}
         >
           <div
