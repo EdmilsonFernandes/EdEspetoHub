@@ -13,6 +13,7 @@ export function MotoboyAvailable() {
   const [pendingCount, setPendingCount] = useState(0);
   const [blocked, setBlocked] = useState(false);
   const [hasActive, setHasActive] = useState(false);
+  const [currentOrder, setCurrentOrder] = useState<any | null>(null);
   const [profile, setProfile] = useState<any | null>(null);
   const [documents, setDocuments] = useState<any[]>([]);
   const [requests, setRequests] = useState<any[]>([]);
@@ -81,9 +82,12 @@ export function MotoboyAvailable() {
       try {
         const current = await motoboyService.getCurrentOrder();
         const d = String(current?.delivery?.status || '').toUpperCase();
-        setHasActive(Boolean(current?.id && ['ACCEPTED', 'PICKED_UP', 'IN_TRANSIT'].includes(d)));
+        const active = Boolean(current?.id && ['ACCEPTED', 'PICKED_UP', 'IN_TRANSIT'].includes(d));
+        setHasActive(active);
+        setCurrentOrder(active ? current : null);
       } catch {
         setHasActive(false);
+        setCurrentOrder(null);
       }
       setBlocked(false);
     } catch (error: any) {
@@ -327,8 +331,28 @@ export function MotoboyAvailable() {
           <div className="motoboy-skeleton h-[92px]" />
         </div>
       ) : orders.length === 0 ? (
-        <div className="text-center text-sm text-slate-500">
-          Nenhum pedido disponível. A loja precisa marcar o pedido como “Pronto para entrega” ou “Aguardando entregador”.
+        <div className="space-y-3">
+          {hasActive && currentOrder ? (
+            <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4">
+              <p className="text-xs uppercase tracking-[0.2em] text-sky-600 font-extrabold">Entrega ativa</p>
+              <p className="mt-1 text-sm font-bold text-slate-900">
+                Pedido #{String(currentOrder?.id || '').slice(0, 8)}
+              </p>
+              <p className="text-xs text-slate-600 mt-1">
+                Você já está em rota. Abra a entrega atual para confirmar pagamento e finalizar.
+              </p>
+              <button
+                type="button"
+                onClick={() => navigate('/motoboy/delivery')}
+                className="mt-3 w-full sm:w-auto btn-press rounded-xl bg-[linear-gradient(120deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_60%,#0ea5e9))] px-4 py-2.5 text-sm font-extrabold text-white shadow-[0_22px_48px_-32px_rgba(14,165,233,0.85)]"
+              >
+                Abrir entrega atual
+              </button>
+            </div>
+          ) : null}
+          <div className="text-center text-sm text-slate-500">
+            Nenhum pedido disponível. A loja precisa marcar o pedido como “Pronto para entrega” ou “Aguardando entregador”.
+          </div>
         </div>
       ) : (
         <div className="grid gap-4" ref={listRef}>
