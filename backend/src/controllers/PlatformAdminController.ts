@@ -495,4 +495,91 @@ export class PlatformAdminController {
       return respondWithError(req, res, error, 400);
     }
   }
+
+  /**
+   * Audits queue consistency for delivery statuses and can optionally repair.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
+   * @date 2026-02-27
+   */
+  static async queueHealth(req: Request, res: Response) {
+    const repair =
+      String(req.query?.repair || '').toLowerCase() === '1' ||
+      String(req.query?.repair || '').toLowerCase() === 'true';
+    const storeSlug = String(req.query?.storeSlug || '').trim();
+    const storeId = String(req.query?.storeId || '').trim();
+
+    try {
+      const params: any[] = [];
+      const where: string[] = [
+        "o.type = 'delivery'",
+        "o.status = 'in_delivery'",
+        "od.status = 'DELIVERED'",
+      ];
+
+      if (storeId) {
+        params.push(storeId);
+        where.push(`o.store_id = $${params.length}`);
+      }
+      if (storeSlug) {
+        params.push(storeSlug);
+        where.push(`s.slug = $${params.length}`);
+      }
+
+      const baseWhere = where.join(' AND ');
+
+      const rows = await AppDataSource.query(
+        `
+          SELECT o.id AS "orderId",
+                 o.status AS "orderStatus",
+                 od.status AS "deliveryStatus",
+                 o.updated_at AS "orderUpdatedAt",
+                 od.delivered_at AS "deliveredAt",
+                 s.id AS "storeId",
+                 s.slug AS "storeSlug",
+                 s.name AS "storeName"
+            FROM orders o
+            JOIN order_deliveries od ON od.order_id = o.id
+            JOIN stores s ON s.id = o.store_id
+           WHERE ${baseWhere}
+           ORDER BY o.updated_at DESC
+           LIMIT 500
+        `,
+        params
+      );
+
+      let repaired = 0;
+      if (repair && rows.length > 0) {
+        repaired = await AppDataSource.transaction(async (manager) => {
+          const result = await manager.query(
+            `
+              UPDATE orders o
+                 SET status = 'delivered'
+                FROM order_deliveries od, stores s
+               WHERE o.id = od.order_id
+                 AND s.id = o.store_id
+                 AND ${baseWhere}
+            `,
+            params
+          );
+          return Number((result && (result.rowCount ?? result.affectedRows)) || 0);
+        });
+      }
+
+      return res.json({
+        ok: true,
+        totalIssues: rows.length,
+        repaired,
+        filters: {
+          storeId: storeId || null,
+          storeSlug: storeSlug || null,
+          repair,
+        },
+        issues: rows,
+      });
+    } catch (error: any) {
+      log.warn('Admin queue health failed', { storeId, storeSlug, repair, error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
 }
