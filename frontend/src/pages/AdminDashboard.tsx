@@ -218,7 +218,7 @@ const OrdersView = ({ orders, products, storeSlug }) => {
 
       <div className="sticky top-2 z-10 rounded-2xl border border-slate-200 bg-white/95 px-3 py-3 shadow-sm backdrop-blur-sm">
         <div className="flex flex-col lg:flex-row lg:items-center gap-3">
-          <div className="flex flex-wrap gap-2">
+          <div className="inline-flex flex-wrap items-center gap-1 rounded-lg bg-slate-100 p-1">
           {[
             { id: 'all', label: 'Todos', count: statusCounts.all },
             { id: 'pending', label: 'Pendentes', count: statusCounts.pending },
@@ -230,10 +230,10 @@ const OrdersView = ({ orders, products, storeSlug }) => {
             <button
               key={filter.id}
               onClick={() => setStatusFilter(filter.id)}
-              className={`ds-btn ds-focus-ring px-3 py-1.5 rounded-full text-xs font-semibold border transition-all hover:-translate-y-0.5 active:scale-95 ${
+              className={`ds-btn ds-focus-ring px-3 py-1.5 rounded-md text-xs font-semibold border transition-colors duration-150 ${
                 statusFilter === filter.id
-                  ? 'bg-brand-primary text-white border-brand-primary'
-                  : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                  ? 'bg-white text-slate-900 border-slate-300 shadow-sm'
+                  : 'bg-transparent text-slate-600 border-transparent hover:bg-white/70'
               }`}
             >
               {filter.label} ({filter.count})
@@ -290,7 +290,7 @@ const OrdersView = ({ orders, products, storeSlug }) => {
               {group.list.map((order, index) => (
                 <div
                   key={order.id || `${order.customerName}-${index}`}
-                  className="border border-slate-200 rounded-3xl bg-white p-5 shadow-sm space-y-4"
+                  className="border border-slate-200 rounded-3xl bg-white p-5 shadow-sm space-y-4 hover:bg-slate-50/60 transition-colors duration-150"
                 >
 	              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
 	                <div>
@@ -370,9 +370,8 @@ const OrdersView = ({ orders, products, storeSlug }) => {
                       return (
                         <div
                           key={item.id || item.name}
-                          className="relative overflow-hidden rounded-xl border border-brand-primary/20 bg-gradient-to-br from-brand-primary-soft/50 via-white to-emerald-50/40 p-2.5 sm:p-3 shadow-[0_10px_22px_-16px_rgba(14,165,233,0.45)]"
+                          className="relative overflow-hidden rounded-xl border border-slate-200 bg-white p-2.5 sm:p-3 shadow-sm hover:bg-slate-50 transition-colors duration-150"
                         >
-                          <div className="pointer-events-none absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-brand-primary to-emerald-400" />
                           <div className="flex items-center justify-between gap-3">
                             <div className="flex items-center gap-3 min-w-0">
                               <div className="w-11 h-11 rounded-lg overflow-hidden border border-slate-200 bg-slate-100 flex-shrink-0">
@@ -446,7 +445,7 @@ const OrdersView = ({ orders, products, storeSlug }) => {
                   <select
                     value={ordersPageSize}
                     onChange={(event) => setOrdersPageSize(Number(event.target.value))}
-                    className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-600 focus:ring-2 focus:ring-brand-primary"
+                    className="ds-select ds-focus-ring py-1 text-xs text-slate-600"
                   >
                     {[10, 20, 30].map((size) => (
                       <option key={size} value={size}>
@@ -879,16 +878,16 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
       : '';
   const rawStatus = (subscription?.status || '').toUpperCase();
   const statusMap: Record<string, { label: string; tone: string; accent: string }> = {
-    TRIAL: { label: 'Trial ativo (7 dias)', tone: 'bg-emerald-100 text-emerald-700', accent: 'border-l-emerald-400 bg-gradient-to-r from-emerald-50/70 to-white' },
-    ACTIVE: { label: 'Assinatura ativa', tone: 'bg-emerald-100 text-emerald-700', accent: 'border-l-emerald-400 bg-gradient-to-r from-emerald-50/70 to-white' },
-    PENDING: { label: 'Aguardando pagamento', tone: 'bg-amber-100 text-amber-700', accent: 'border-l-amber-400 bg-gradient-to-r from-amber-50/70 to-white' },
-    EXPIRED: { label: 'Assinatura expirada', tone: 'bg-rose-100 text-rose-700', accent: 'border-l-rose-400 bg-gradient-to-r from-rose-50/70 to-white' },
-    SUSPENDED: { label: 'Assinatura suspensa', tone: 'bg-rose-100 text-rose-700', accent: 'border-l-rose-400 bg-gradient-to-r from-rose-50/70 to-white' },
-    CANCELLED: { label: 'Assinatura cancelada', tone: 'bg-slate-100 text-slate-600', accent: 'border-l-slate-300 bg-gradient-to-r from-slate-50 to-white' },
+    TRIAL: { label: 'Trial ativo (7 dias)', tone: 'bg-emerald-100 text-emerald-700', accent: 'border-l-emerald-400 bg-white' },
+    ACTIVE: { label: 'Assinatura ativa', tone: 'bg-emerald-100 text-emerald-700', accent: 'border-l-emerald-400 bg-white' },
+    PENDING: { label: 'Aguardando pagamento', tone: 'bg-amber-100 text-amber-700', accent: 'border-l-amber-400 bg-white' },
+    EXPIRED: { label: 'Assinatura expirada', tone: 'bg-rose-100 text-rose-700', accent: 'border-l-rose-400 bg-white' },
+    SUSPENDED: { label: 'Assinatura suspensa', tone: 'bg-rose-100 text-rose-700', accent: 'border-l-rose-400 bg-white' },
+    CANCELLED: { label: 'Assinatura cancelada', tone: 'bg-slate-100 text-slate-600', accent: 'border-l-slate-300 bg-white' },
   };
   const statusLabel = isVip ? 'VIP ativo' : (statusMap[rawStatus]?.label || subscription?.status || '—');
   const statusTone = isVip ? 'bg-emerald-100 text-emerald-700' : (statusMap[rawStatus]?.tone || 'bg-slate-100 text-slate-600');
-  const statusAccent = isVip ? 'border-l-emerald-400 bg-gradient-to-r from-emerald-50/70 to-white' : (statusMap[rawStatus]?.accent || 'border-l-slate-200 bg-white');
+  const statusAccent = isVip ? 'border-l-emerald-400 bg-white' : (statusMap[rawStatus]?.accent || 'border-l-slate-200 bg-white');
   const paidAtLabel = subscription?.latestPaymentAt ? formatDateTime(subscription.latestPaymentAt) : '—';
   const rawPaymentStatus = (subscription?.latestPaymentStatus || '').toUpperCase();
   const paymentStatusMap: Record<string, string> = {
@@ -919,11 +918,11 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
     EXPIRED: 'bg-slate-100 text-slate-600',
   };
   const historyAccentMap: Record<string, string> = {
-    PAID: 'border-l-emerald-400 bg-gradient-to-r from-emerald-50/70 to-white',
-    PENDING: 'border-l-amber-400 bg-gradient-to-r from-amber-50/70 to-white',
-    FAILED: 'border-l-rose-400 bg-gradient-to-r from-rose-50/70 to-white',
-    CANCELLED: 'border-l-slate-300 bg-gradient-to-r from-slate-50 to-white',
-    EXPIRED: 'border-l-slate-300 bg-gradient-to-r from-slate-50 to-white',
+    PAID: 'border-l-emerald-400 bg-white',
+    PENDING: 'border-l-amber-400 bg-white',
+    FAILED: 'border-l-rose-400 bg-white',
+    CANCELLED: 'border-l-slate-300 bg-white',
+    EXPIRED: 'border-l-slate-300 bg-white',
   };
   const paymentInsights = useMemo(() => {
     const rows = Array.isArray(payments) ? payments : [];
@@ -1004,12 +1003,12 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
         </div>
       </div>
 
-      <div className="rounded-3xl border border-slate-200 border-l-4 border-l-violet-400 bg-white p-6 shadow-[0_20px_60px_-50px_rgba(15,23,42,0.35)] space-y-4">
+      <div className="rounded-3xl border border-slate-200 border-l-4 border-l-slate-300 bg-white p-6 shadow-[0_20px_60px_-50px_rgba(15,23,42,0.35)] space-y-4">
         <div>
           <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Ciclo</p>
           <h3 className="text-lg font-bold text-slate-900 mt-2">{isVip ? 'Acesso VIP' : 'Próximo vencimento'}</h3>
         </div>
-        <div className="rounded-2xl border border-slate-200 border-l-4 border-l-emerald-400 bg-slate-50 p-4">
+        <div className="rounded-2xl border border-slate-200 border-l-4 border-l-slate-300 bg-white p-4">
           <p className="text-xs uppercase tracking-[0.25em] text-slate-400">{isVip ? 'Vencimento' : 'Expira em'}</p>
           <p className="text-lg font-semibold text-slate-900 mt-2">{expiresLabel}</p>
           {expiresHint && (
@@ -1020,7 +1019,7 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
           </p>
         </div>
         {isBasicPlan && (
-          <div className="rounded-2xl border border-violet-200 border-l-4 border-l-violet-400 bg-violet-50 p-4">
+          <div className="rounded-2xl border border-slate-200 border-l-4 border-l-slate-300 bg-white p-4">
             <p className="text-xs uppercase tracking-[0.25em] text-violet-700">Upgrade</p>
             <p className="text-sm font-bold text-violet-900 mt-2">Desbloqueie recursos Pro</p>
             <p className="text-xs text-violet-700/90 mt-1">
@@ -1029,27 +1028,27 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
             <button
               type="button"
               onClick={() => navigate('/admin/renewal')}
-              className="mt-3 rounded-lg border border-violet-300 bg-white px-3 py-1.5 text-xs font-bold text-violet-700 hover:bg-violet-100"
+              className="mt-3 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-100"
             >
               Trocar para Pro
             </button>
           </div>
         )}
         {Array.isArray(payments) && payments.length > 0 && (
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+          <div className="rounded-2xl border border-slate-200 bg-white p-3">
             <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500 font-bold">Resumo financeiro</p>
             <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
-              <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2">
+              <div className="rounded-xl border border-slate-200 bg-white px-3 py-2">
                 <p className="text-[11px] text-emerald-700">Recebido</p>
                 <p className="text-sm font-black text-emerald-800">{formatCurrency(paymentInsights.paidAmount)}</p>
                 <p className="text-[11px] text-emerald-700/80">{paymentInsights.paidCount} pagamento(s)</p>
               </div>
-              <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2">
+              <div className="rounded-xl border border-slate-200 bg-white px-3 py-2">
                 <p className="text-[11px] text-amber-700">Em análise</p>
                 <p className="text-sm font-black text-amber-800">{formatCurrency(paymentInsights.pendingAmount)}</p>
                 <p className="text-[11px] text-amber-700/80">{paymentInsights.pendingCount} pendente(s)</p>
               </div>
-              <div className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2">
+              <div className="rounded-xl border border-slate-200 bg-white px-3 py-2">
                 <p className="text-[11px] text-rose-700">Não concluído</p>
                 <p className="text-sm font-black text-rose-800">{formatCurrency(paymentInsights.failedAmount)}</p>
                 <p className="text-[11px] text-rose-700/80">{paymentInsights.failedCount} tentativa(s)</p>
@@ -2409,17 +2408,17 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                       {Number(reviewsSummary?.summary?.total_delivery_reviews || 0) < 10 ? ' · amostra baixa' : ''}
                     </div>
                   </div>
-                  <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2">
+                  <div className="rounded-xl border border-slate-200 bg-white px-3 py-2">
                     <div className="text-[11px] text-emerald-700">Gorjetas pagas</div>
                     <div className="text-lg font-black text-emerald-700">{formatCurrency(tipsOverview.paidAmount || 0)}</div>
                     <div className="text-[11px] text-emerald-700/80">{tipsOverview.paidTipOrders} pagamento(s)</div>
                   </div>
-                  <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2">
+                  <div className="rounded-xl border border-slate-200 bg-white px-3 py-2">
                     <div className="text-[11px] text-amber-700">Gorjetas pendentes (cliente)</div>
                     <div className="text-lg font-black text-amber-700">{formatCurrency(tipsOverview.pendingAmount || 0)}</div>
                     <div className="text-[11px] text-amber-700/80">{tipsOverview.pendingTipOrders} pendente(s)</div>
                   </div>
-                  <div className="rounded-xl border border-orange-200 bg-orange-50 px-3 py-2">
+                  <div className="rounded-xl border border-slate-200 bg-white px-3 py-2">
                     <div className="text-[11px] text-orange-700">Repasse pendente (motoboy)</div>
                     <div className="text-lg font-black text-orange-700">{formatCurrency(tipsOverview.payoutPendingAmount || 0)}</div>
                     <div className="text-[11px] text-orange-700/80">{tipsOverview.payoutPendingCount} aguardando repasse</div>
@@ -2435,13 +2434,13 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                   </div>
                 </>
               ) : (
-                <div className="rounded-xl border border-violet-200 bg-violet-50 px-3 py-2 sm:col-span-1 xl:col-span-2">
+                <div className="rounded-xl border border-slate-200 bg-white px-3 py-2 sm:col-span-1 xl:col-span-2">
                   <div className="text-[11px] text-violet-700">Avaliações de entrega e gorjetas</div>
                   <div className="text-sm font-bold text-violet-900">Disponível no plano Pro</div>
                   <button
                     type="button"
                     onClick={() => navigate('/admin/renewal')}
-                    className="mt-2 rounded-lg border border-violet-300 bg-white px-2.5 py-1 text-xs font-bold text-violet-700 hover:bg-violet-100"
+                    className="mt-2 rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs font-bold text-slate-700 hover:bg-slate-100"
                   >
                     Trocar assinatura
                   </button>
