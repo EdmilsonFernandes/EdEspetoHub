@@ -703,7 +703,7 @@ export function OrderTracking() {
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24 sm:pb-12 sm:py-12">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4 pb-24 sm:pb-12 sm:py-12">
         <div className="bg-white border border-gray-100 rounded-3xl shadow-xl p-6 sm:p-8">
           {loading && (
             <div className="flex flex-col items-center justify-center py-12 gap-3 text-gray-500">
@@ -720,14 +720,14 @@ export function OrderTracking() {
 
           {!loading && !error && order && (
             <div className="space-y-6">
-              <div className="rounded-3xl premium-card-soft p-5 sm:p-6">
+              <div className="rounded-3xl premium-card-soft p-4 sm:p-6">
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                   <div>
                     <p className="text-xs uppercase tracking-[0.3em] text-gray-400">
                       Pedido #{formatOrderDisplayId(order.id, storeSlug)}
                     </p>
                     <div className="mt-2 flex items-center gap-3 flex-wrap">
-                      <h1 className="text-2xl sm:text-3xl font-black text-gray-900">{statusLabel}</h1>
+                      <h1 className="text-[30px] leading-none sm:text-3xl font-black text-gray-900">{statusLabel}</h1>
                       {isDelivery && (String((order as any)?.delivery?.status || '').toUpperCase() === 'IN_TRANSIT' || status === 'in_delivery') && (
                         <span
                           className="inline-flex items-center rounded-full bg-amber-100 text-amber-800 text-xs font-semibold px-3 py-1"
@@ -785,7 +785,7 @@ export function OrderTracking() {
                     ) : null}
 
                     {isReady && elapsedMs > 0 && (
-                      <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-brand-primary text-white text-xs font-semibold px-4 py-2 shadow-sm">
+                      <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-brand-primary text-white text-xs font-semibold px-3 py-1.5 shadow-sm">
                         Tempo total: {formatDuration(elapsedMs)}
                       </div>
                     )}
@@ -805,7 +805,7 @@ export function OrderTracking() {
                       </div>
                     )}
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
                     <Clock size={16} weight="duotone" />
                     {order.createdAt ? formatDateTime(order.createdAt) : 'Agora'}
                     {elapsedMs > 0 && (
@@ -825,12 +825,6 @@ export function OrderTracking() {
                       {totalItems} item(ns) • {formatCurrency(order.total || 0)}
                     </p>
                   </div>
-                  <a
-                    href="#order-summary"
-                    className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700"
-                  >
-                    Ver itens
-                  </a>
                 </div>
               </div>
 
@@ -898,41 +892,43 @@ export function OrderTracking() {
                     </div>
                   </div>
 
-                  {nextStepItem ? (
+                  {!isReady && nextStepItem ? (
                     <div className="rounded-2xl border border-slate-200 bg-white px-3 py-2">
                       <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500 font-bold">Próximo passo</p>
                       <p className="text-xs font-semibold text-slate-700 mt-1">{nextStepItem.label}</p>
                     </div>
                   ) : null}
 
-                  <div className="rounded-2xl border border-slate-200 bg-white px-3 py-2.5">
-                    <p className="text-[10px] uppercase tracking-[0.16em] text-slate-500 font-bold">Linha do pedido</p>
-                    <div className="space-y-1.5 mt-2">
-                      {steps.map((step) => {
-                        const stepIndex = steps.findIndex((item) => item.id === step.id);
-                        const isCompleted = stepIndex >= 0 && stepIndex < currentIndex;
-                        const isCurrent = stepIndex === currentIndex;
-                        return (
-                          <div key={`mobile-line-${step.id}`} className="flex items-center gap-2">
-                            <span
-                              className={`h-5 w-5 rounded-full border grid place-items-center ${
-                                isCurrent
-                                  ? 'border-brand-primary bg-brand-primary text-white'
-                                  : isCompleted
-                                    ? 'border-emerald-300 bg-emerald-50 text-emerald-700'
-                                    : 'border-slate-200 bg-slate-50 text-slate-400'
-                              }`}
-                            >
-                              {isCompleted ? <CheckCircle size={12} weight="fill" /> : <span className="text-[9px] font-bold">{stepIndex + 1}</span>}
-                            </span>
-                            <span className={`text-[12px] ${isCurrent ? 'font-extrabold text-slate-900' : isCompleted ? 'font-semibold text-slate-700' : 'text-slate-500'}`}>
-                              {step.label}
-                            </span>
-                          </div>
-                        );
-                      })}
+                  {!isReady ? (
+                    <div className="rounded-2xl border border-slate-200 bg-white px-3 py-2.5">
+                      <p className="text-[10px] uppercase tracking-[0.16em] text-slate-500 font-bold">Linha do pedido</p>
+                      <div className="space-y-1.5 mt-2">
+                        {steps.map((step) => {
+                          const stepIndex = steps.findIndex((item) => item.id === step.id);
+                          const isCompleted = stepIndex >= 0 && stepIndex < currentIndex;
+                          const isCurrent = stepIndex === currentIndex;
+                          return (
+                            <div key={`mobile-line-${step.id}`} className="flex items-center gap-2">
+                              <span
+                                className={`h-5 w-5 rounded-full border grid place-items-center ${
+                                  isCurrent
+                                    ? 'border-brand-primary bg-brand-primary text-white'
+                                    : isCompleted
+                                      ? 'border-emerald-300 bg-emerald-50 text-emerald-700'
+                                      : 'border-slate-200 bg-slate-50 text-slate-400'
+                                }`}
+                              >
+                                {isCompleted ? <CheckCircle size={12} weight="fill" /> : <span className="text-[9px] font-bold">{stepIndex + 1}</span>}
+                              </span>
+                              <span className={`text-[12px] ${isCurrent ? 'font-extrabold text-slate-900' : isCompleted ? 'font-semibold text-slate-700' : 'text-slate-500'}`}>
+                                {step.label}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
+                  ) : null}
                 </div>
 
                 <div className="hidden sm:flex flex-nowrap gap-2 sm:gap-3 overflow-x-auto overflow-y-visible no-scrollbar py-1 pb-2">
