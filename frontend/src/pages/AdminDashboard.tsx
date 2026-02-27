@@ -952,7 +952,13 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
   }, [payments]);
 
   if (loading) {
-    return <div className="py-8 text-sm text-slate-500">Carregando dados de pagamento...</div>;
+    return (
+      <div className="py-4 space-y-3">
+        <div className="ds-skeleton h-20 w-full" />
+        <div className="ds-skeleton h-16 w-full" />
+        <div className="ds-skeleton h-16 w-full" />
+      </div>
+    );
   }
 
   if (error) {
@@ -960,7 +966,12 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
   }
 
   if (!subscription) {
-    return <div className="py-8 text-sm text-slate-500">Nenhuma assinatura encontrada.</div>;
+    return (
+      <div className="ds-empty-state py-8 text-center">
+        <p className="text-base font-semibold text-slate-800">Nenhuma assinatura encontrada</p>
+        <p className="mt-1 text-xs text-slate-500">Ative um plano para liberar os recursos da loja.</p>
+      </div>
+    );
   }
 
   return (
@@ -2705,9 +2716,9 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       </div>
 
       {!isDesktopLayout && notificationsOpen && (
-        <div className="lg:hidden fixed inset-0 z-[130]">
-          <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onClick={() => setNotificationsOpen(false)} />
-          <aside className="absolute inset-x-0 bottom-0 rounded-t-3xl border border-slate-200 bg-white shadow-[0_-24px_56px_-30px_rgba(15,23,42,0.55)] max-h-[78vh] overflow-y-auto">
+        <div className="lg:hidden ds-sheet-backdrop z-[130]" onClick={() => setNotificationsOpen(false)}>
+          <aside className="ds-sheet-panel rounded-t-3xl max-h-[78vh] overflow-y-auto" onClick={(event) => event.stopPropagation()}>
+            <div className="sm:hidden ds-sheet-handle" />
             <div className="sticky top-0 z-10 bg-white/95 backdrop-blur border-b border-slate-100 px-4 py-3 flex items-center justify-between">
               <div>
                 <p className="text-[11px] uppercase tracking-[0.2em] font-bold text-slate-500">Notificações</p>
@@ -2792,13 +2803,14 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
       {commandOpen && (
         <div
-          className="fixed inset-0 z-[12050] bg-slate-900/45 backdrop-blur-sm flex items-start justify-center px-4 pt-20"
+          className="ds-sheet-backdrop z-[12050] px-4 sm:items-start sm:pt-20"
           onClick={() => setCommandOpen(false)}
         >
           <div
-            className="w-full max-w-2xl rounded-2xl border border-slate-200 bg-white shadow-[0_28px_60px_-35px_rgba(15,23,42,0.6)] overflow-hidden"
+            className="ds-sheet-panel w-full max-w-2xl rounded-t-3xl sm:rounded-2xl overflow-hidden"
             onClick={(event) => event.stopPropagation()}
           >
+            <div className="sm:hidden ds-sheet-handle" />
             <div className="px-4 py-3 border-b border-slate-100">
               <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
                 <MagnifyingGlass size={16} className="text-slate-500" />
@@ -2845,9 +2857,9 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       )}
 
       {!isDesktopLayout && mobileDrawerOpen && (
-        <div className="lg:hidden fixed inset-0 z-[120]">
-          <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onClick={() => setMobileDrawerOpen(false)} />
-          <aside className="absolute inset-x-0 bottom-0 rounded-t-3xl border border-slate-200 bg-white shadow-[0_-24px_56px_-30px_rgba(15,23,42,0.55)] max-h-[78vh] overflow-y-auto">
+        <div className="lg:hidden ds-sheet-backdrop z-[120]" onClick={() => setMobileDrawerOpen(false)}>
+          <aside className="ds-sheet-panel rounded-t-3xl max-h-[78vh] overflow-y-auto" onClick={(event) => event.stopPropagation()}>
+            <div className="sm:hidden ds-sheet-handle" />
             <div className="sticky top-0 z-10 bg-white/95 backdrop-blur border-b border-slate-100 px-4 py-3 flex items-center justify-between">
               <div>
                 <p className="text-[11px] uppercase tracking-[0.2em] font-bold text-slate-500">Navegação</p>

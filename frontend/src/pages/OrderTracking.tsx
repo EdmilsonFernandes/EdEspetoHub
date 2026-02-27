@@ -796,9 +796,10 @@ export function OrderTracking() {
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4 pb-24 sm:pb-12 sm:py-12">
         <div className="bg-white border border-gray-100 rounded-3xl shadow-xl p-6 sm:p-8">
           {loading && (
-            <div className="flex flex-col items-center justify-center py-12 gap-3 text-gray-500">
-              <CircleNotch className="animate-spin" weight="duotone" />
-              Carregando seu pedido...
+            <div className="py-6 space-y-4">
+              <div className="ds-skeleton h-24 w-full" />
+              <div className="ds-skeleton h-28 w-full" />
+              <div className="ds-skeleton h-20 w-full" />
             </div>
           )}
 
@@ -1724,14 +1725,15 @@ export function OrderTracking() {
       ) : null}
 
       {showItemsSheetMobile && order ? (
-        <div className="sm:hidden fixed inset-0 z-50">
+        <div className="sm:hidden ds-sheet-backdrop z-50">
           <button
             type="button"
             aria-label="Fechar itens do pedido"
             onClick={() => setShowItemsSheetMobile(false)}
-            className="absolute inset-0 bg-black/45"
+            className="absolute inset-0 bg-transparent"
           />
-          <div className="absolute inset-x-0 bottom-0 rounded-t-3xl border border-slate-200 bg-white max-h-[78vh] overflow-y-auto">
+          <div className="ds-sheet-panel absolute inset-x-0 bottom-0 rounded-t-3xl max-h-[78vh] overflow-y-auto">
+            <div className="ds-sheet-handle" />
             <div className="sticky top-0 z-10 bg-white/95 backdrop-blur border-b border-slate-100 px-4 py-3 flex items-center justify-between">
               <p className="text-sm font-black text-slate-900">Itens do pedido</p>
               <button
