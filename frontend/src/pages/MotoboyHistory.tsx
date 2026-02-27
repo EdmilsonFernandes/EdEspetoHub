@@ -105,9 +105,16 @@ export function MotoboyHistory() {
       </div>
 
       {loading ? (
-        <div className="text-center text-sm text-slate-500">Carregando...</div>
+        <div className="space-y-3">
+          <div className="ds-skeleton h-20 w-full" />
+          <div className="ds-skeleton h-20 w-full" />
+          <div className="ds-skeleton h-20 w-full" />
+        </div>
       ) : orders.length === 0 ? (
-        <div className="text-center text-sm text-slate-500">Nenhum pedido finalizado ainda.</div>
+        <div className="ds-empty-state text-center py-6">
+          <p className="text-base font-semibold text-slate-800">Nenhum pedido finalizado ainda</p>
+          <p className="mt-1 text-xs text-slate-500">Quando concluir entregas, elas aparecerão aqui.</p>
+        </div>
       ) : (
         <div className="grid gap-4">
           {orders.map((order) => {

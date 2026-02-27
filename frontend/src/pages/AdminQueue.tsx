@@ -15,7 +15,13 @@ export function AdminQueue() {
   const storeName = String(auth?.store?.name || 'Minha loja');
 
   if (!auth?.store) {
-    return <div style={{ padding: 24 }}>Carregando fila da loja...</div>;
+    return (
+      <div className="p-6 space-y-3">
+        <div className="ds-skeleton h-16 w-full" />
+        <div className="ds-skeleton h-20 w-full" />
+        <div className="ds-skeleton h-20 w-full" />
+      </div>
+    );
   }
 
   return (

@@ -746,7 +746,13 @@ export function AdminMotoboys() {
   }, [storeId]);
 
   if (!storeId) {
-    return <div className="p-6">Carregando loja...</div>;
+    return (
+      <div className="p-6 space-y-3">
+        <div className="ds-skeleton h-12 w-56" />
+        <div className="ds-skeleton h-20 w-full" />
+        <div className="ds-skeleton h-20 w-full" />
+      </div>
+    );
   }
 
   return (
@@ -1769,15 +1775,16 @@ export function AdminMotoboys() {
 
       {previewDoc && (
         <div
-          className="fixed inset-0 z-[95] bg-black/60 flex items-center justify-center p-4"
+          className="ds-sheet-backdrop z-[95]"
           onClick={() => setPreviewDoc(null)}
           role="dialog"
           aria-modal="true"
         >
           <div
-            className="w-full max-w-4xl rounded-2xl bg-white p-3"
+            className="ds-sheet-panel w-full max-w-4xl rounded-t-3xl sm:rounded-2xl p-3"
             onClick={(e) => e.stopPropagation()}
           >
+            <div className="sm:hidden ds-sheet-handle" />
             <div className="flex items-center justify-between gap-3 px-2 pb-2">
               <div className="flex items-center gap-2">
                 <div className="text-sm font-extrabold text-slate-900">{previewDoc.docType || 'Documento'}</div>
