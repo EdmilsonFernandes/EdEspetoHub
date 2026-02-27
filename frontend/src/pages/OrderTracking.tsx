@@ -313,7 +313,7 @@ export function OrderTracking() {
     ? `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(pixPayload)}`
     : '';
   const etaDetails = trackingV2?.eta || order?.eta || null;
-  const hasTrackingEta = Boolean(trackingV2?.eta && Number((trackingV2 as any)?.eta?.totalMinutes) > 0);
+  const hasAnyEtaTotal = Boolean(Number((etaDetails as any)?.totalMinutes) > 0);
   const etaTotalMinutes = etaDetails?.totalMinutes
     ? Number(etaDetails.totalMinutes)
     : null;
@@ -355,11 +355,11 @@ export function OrderTracking() {
     if (isReady) return null;
     if (routeEtaRemainingMinutes !== null) return routeEtaRemainingMinutes;
     if (!estimateMinutes) return null;
-    // ETA v2 já vem como estimativa corrente do backend (não descontar elapsed no frontend).
-    if (hasTrackingEta) return Math.max(0, Math.round(estimateMinutes));
+    // ETA já vem calculada pelo backend (trackingV2 ou order.eta); não descontar elapsed no frontend.
+    if (hasAnyEtaTotal) return Math.max(0, Math.round(estimateMinutes));
     const elapsedMin = Math.max(0, elapsedMs / 60000);
     return Math.max(0, Math.round(estimateMinutes - elapsedMin));
-  }, [isReady, routeEtaRemainingMinutes, estimateMinutes, elapsedMs, hasTrackingEta]);
+  }, [isReady, routeEtaRemainingMinutes, estimateMinutes, elapsedMs, hasAnyEtaTotal]);
   const isEstimateDelayed = useMemo(() => {
     if (isReady || !estimateMinutes) return false;
     const elapsedMin = Math.max(0, elapsedMs / 60000);
