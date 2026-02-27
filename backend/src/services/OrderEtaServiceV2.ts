@@ -59,7 +59,7 @@ export class OrderEtaServiceV2 {
     const storeSettings = order.store?.settings as StoreSettings | undefined;
     const itemCount = (order.items || []).reduce((acc, item) => acc + (item.quantity || 0), 0);
 
-    const prepBase = this.toNumber(storeSettings?.prepBaseMinutes, env.etaV2.defaultPrepMinutes);
+    const prepBase = Math.max(5, this.toNumber(storeSettings?.prepBaseMinutes, env.etaV2.defaultPrepMinutes));
     const prepPerItem = this.toNumber(storeSettings?.prepPerItemMinutes, env.etaV2.defaultPrepPerItemMinutes);
     const prepMinutes = Math.max(1, Math.round(prepBase + prepPerItem * itemCount));
 

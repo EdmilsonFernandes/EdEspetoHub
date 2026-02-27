@@ -163,6 +163,29 @@ export async function runMigrations() {
     ADD COLUMN IF NOT EXISTS eta_buffer_minutes INT;
   `);
   await AppDataSource.query(`
+    UPDATE store_settings
+    SET prep_base_minutes = 20
+    WHERE prep_base_minutes IS NULL OR prep_base_minutes < 5;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS store_settings
+    ALTER COLUMN prep_base_minutes SET DEFAULT 20;
+  `);
+  await AppDataSource.query(`
+    DO $$
+    BEGIN
+      IF NOT EXISTS (
+        SELECT 1
+        FROM pg_constraint
+        WHERE conname = 'chk_store_settings_prep_base_minutes_min'
+      ) THEN
+        ALTER TABLE store_settings
+        ADD CONSTRAINT chk_store_settings_prep_base_minutes_min
+        CHECK (prep_base_minutes IS NULL OR prep_base_minutes >= 5);
+      END IF;
+    END $$;
+  `);
+  await AppDataSource.query(`
     ALTER TABLE IF EXISTS orders
     ADD COLUMN IF NOT EXISTS table_number TEXT;
   `);
