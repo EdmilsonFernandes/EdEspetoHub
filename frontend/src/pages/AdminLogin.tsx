@@ -198,7 +198,7 @@ export function AdminLogin() {
                 type="text"
                 value={loginForm.identifier}
                 onChange={e => setLoginForm(prev => ({ ...prev, identifier: e.target.value }))}
-                className="ds-input ds-focus-ring pl-10"
+                className="ds-input ds-focus-ring pl-10 transition-shadow focus:ring-2 focus:ring-sky-500/25 focus:border-sky-300"
                 placeholder="Slug ou e-mail"
                 autoCapitalize="none"
               />
@@ -211,7 +211,7 @@ export function AdminLogin() {
                 type={showPassword ? 'text' : 'password'}
                 value={loginForm.password}
                 onChange={e => setLoginForm(prev => ({ ...prev, password: e.target.value }))}
-                className="ds-input ds-focus-ring pr-10"
+                className="ds-input ds-focus-ring pr-10 transition-shadow focus:ring-2 focus:ring-sky-500/25 focus:border-sky-300"
                 placeholder="Digite sua senha"
               />
               <button

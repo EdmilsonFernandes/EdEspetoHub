@@ -14,17 +14,17 @@ export function AuthLayout({ children }: AuthLayoutProps) {
           <div className="absolute inset-0">
             <img src="/janocaminho.jpg" alt="" aria-hidden className="h-full w-full object-cover object-center" />
           </div>
-          <div className="absolute inset-0 bg-[linear-gradient(160deg,rgba(2,6,23,0.68),rgba(2,6,23,0.5))]" />
+          <div className="absolute inset-0 bg-[linear-gradient(160deg,rgba(2,6,23,0.62),rgba(2,6,23,0.46))]" />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(2,6,23,0.22),_transparent_46%),radial-gradient(circle_at_top,_rgba(47,157,247,0.3),_transparent_58%),radial-gradient(circle_at_bottom,_rgba(95,211,90,0.2),_transparent_62%)]" />
           <div className="relative z-10 flex flex-col justify-between h-full w-full">
             <div className="space-y-5">
-              <p className="text-2xl sm:text-3xl font-black tracking-tight text-white drop-shadow-[0_6px_24px_rgba(2,6,23,0.55)]">Já no Caminho</p>
-              <p className="pointer-events-none select-none text-[68px] sm:text-[92px] lg:text-[110px] font-black leading-none tracking-tight text-white/[0.08] -mb-2">
+              <p className="text-2xl sm:text-3xl font-black tracking-tight text-white drop-shadow-[0_6px_24px_rgba(2,6,23,0.45)]">Já no Caminho</p>
+              <p className="pointer-events-none select-none text-[68px] sm:text-[92px] lg:text-[110px] font-black leading-none tracking-tight text-white/[0.05] -mb-2">
                 JANO
               </p>
               <p className="text-[11px] uppercase tracking-[0.35em] text-sky-200 font-semibold">Plataforma SaaS</p>
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black leading-tight">Gestão de pedidos e entregas para operações reais</h1>
-              <p className="text-xs sm:text-sm text-slate-200/95 max-w-md">
+              <h1 className="text-2xl sm:text-3xl lg:text-[2.6rem] font-black leading-[1.08]">Gestão de pedidos e entregas para operações reais</h1>
+              <p className="text-xs sm:text-sm text-slate-100/95 max-w-md">
                 Estruture vitrine, pedidos, operação e atendimento em uma experiência moderna, rápida e escalável.
               </p>
             </div>

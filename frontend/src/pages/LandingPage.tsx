@@ -117,14 +117,14 @@ export function LandingPage() {
                   href={ctaPrimaryHref}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center justify-center rounded-2xl bg-brand-gradient px-5 py-3 text-sm font-black text-white shadow-[0_18px_46px_-32px_rgba(30,64,175,0.8)]"
+                  className="inline-flex items-center justify-center rounded-2xl bg-brand-gradient px-5 py-3 text-sm font-black text-white shadow-[0_20px_52px_-28px_rgba(30,64,175,0.9)] hover:brightness-105 transition-all"
                 >
                   Solicitar demonstração
                 </a>
                 <button
                   type="button"
                   onClick={() => navigate('/create')}
-                  className="inline-flex items-center justify-center rounded-2xl border border-white/30 bg-white/10 backdrop-blur px-5 py-3 text-sm font-black text-white hover:bg-white/15"
+                  className="inline-flex items-center justify-center rounded-2xl border border-white/40 bg-transparent px-5 py-3 text-sm font-black text-white hover:bg-white/10 transition-all"
                 >
                   Criar minha loja
                 </button>
@@ -138,15 +138,15 @@ export function LandingPage() {
                 className="w-full h-52 sm:h-60 rounded-2xl bg-slate-950 object-contain p-2"
               />
               <div className="grid grid-cols-3 gap-2 mt-4">
-                <div className="rounded-xl border border-white/15 bg-white/10 p-3">
+                <div className="rounded-xl border border-white/25 bg-white/10 backdrop-blur-md p-3">
                   <p className="text-[11px] text-slate-300 uppercase tracking-[0.2em]">Lojas ativas</p>
                   <p className="text-lg font-black text-white">{metrics?.activeStores ?? '-'}</p>
                 </div>
-                <div className="rounded-xl border border-white/15 bg-white/10 p-3">
+                <div className="rounded-xl border border-white/25 bg-white/10 backdrop-blur-md p-3">
                   <p className="text-[11px] text-slate-300 uppercase tracking-[0.2em]">Pedidos processados</p>
                   <p className="text-lg font-black text-white">{metrics?.totalOrders ?? '-'}</p>
                 </div>
-                <div className="rounded-xl border border-emerald-300/30 bg-emerald-400/10 p-3">
+                <div className="rounded-xl border border-emerald-300/35 bg-emerald-400/10 backdrop-blur-md p-3">
                   <p className="text-[11px] text-emerald-200 uppercase tracking-[0.2em]">Receita pública</p>
                   <p className="text-lg font-black text-emerald-100">
                     {metrics ? formatCurrency(metrics.totalRevenue || 0) : '-'}

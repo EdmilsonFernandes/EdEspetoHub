@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowUpRight, FunnelSimple, MagnifyingGlass, MapPin, Storefront } from '@phosphor-icons/react';
+import { ArrowUpRight, CaretDown, FunnelSimple, MagnifyingGlass, MapPin, Storefront } from '@phosphor-icons/react';
 import { Link, useNavigate } from 'react-router-dom';
 import { LandingPageLayout } from '../layouts/LandingPageLayout';
 import { storeService } from '../services/storeService';
@@ -285,56 +285,68 @@ export function PortfolioPage() {
                     className="ds-input ds-focus-ring pl-10"
                   />
                 </div>
-                <select
-                  value={segmentFilter}
-                  onChange={(event) => setSegmentFilter(event.target.value)}
-                  className="ds-select ds-focus-ring"
-                >
-                  <option value="all">Todos segmentos</option>
-                  {segmentOptions.map((segment) => (
-                    <option key={segment} value={segment}>
-                      {segment}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  value={stateFilter}
-                  onChange={(event) => setStateFilter(event.target.value)}
-                  className="ds-select ds-focus-ring"
-                >
-                  <option value="all">Todas UFs</option>
-                  {stateOptions.map((uf) => (
-                    <option key={uf} value={uf}>
-                      {uf}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  value={cityFilter}
-                  onChange={(event) => setCityFilter(event.target.value)}
-                  className="ds-select ds-focus-ring"
-                >
-                  <option value="all">Todas cidades</option>
-                  {cityOptions.map((city) => (
-                    <option key={city} value={city}>
-                      {city}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  value={sortBy}
-                  onChange={(event) => {
-                    const value = String(event.target.value);
-                    if (value === 'recent' || value === 'name_asc' || value === 'name_desc') {
-                      setSortBy(value);
-                    }
-                  }}
-                  className="ds-select ds-focus-ring"
-                >
-                  <option value="recent">Mais recentes</option>
-                  <option value="name_asc">Nome A-Z</option>
-                  <option value="name_desc">Nome Z-A</option>
-                </select>
+                <div className="relative">
+                  <select
+                    value={segmentFilter}
+                    onChange={(event) => setSegmentFilter(event.target.value)}
+                    className="ds-select ds-focus-ring appearance-none pr-9"
+                  >
+                    <option value="all">Todos segmentos</option>
+                    {segmentOptions.map((segment) => (
+                      <option key={segment} value={segment}>
+                        {segment}
+                      </option>
+                    ))}
+                  </select>
+                  <CaretDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                </div>
+                <div className="relative">
+                  <select
+                    value={stateFilter}
+                    onChange={(event) => setStateFilter(event.target.value)}
+                    className="ds-select ds-focus-ring appearance-none pr-9"
+                  >
+                    <option value="all">Todas UFs</option>
+                    {stateOptions.map((uf) => (
+                      <option key={uf} value={uf}>
+                        {uf}
+                      </option>
+                    ))}
+                  </select>
+                  <CaretDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                </div>
+                <div className="relative">
+                  <select
+                    value={cityFilter}
+                    onChange={(event) => setCityFilter(event.target.value)}
+                    className="ds-select ds-focus-ring appearance-none pr-9"
+                  >
+                    <option value="all">Todas cidades</option>
+                    {cityOptions.map((city) => (
+                      <option key={city} value={city}>
+                        {city}
+                      </option>
+                    ))}
+                  </select>
+                  <CaretDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                </div>
+                <div className="relative">
+                  <select
+                    value={sortBy}
+                    onChange={(event) => {
+                      const value = String(event.target.value);
+                      if (value === 'recent' || value === 'name_asc' || value === 'name_desc') {
+                        setSortBy(value);
+                      }
+                    }}
+                    className="ds-select ds-focus-ring appearance-none pr-9"
+                  >
+                    <option value="recent">Mais recentes</option>
+                    <option value="name_asc">Nome A-Z</option>
+                    <option value="name_desc">Nome Z-A</option>
+                  </select>
+                  <CaretDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                </div>
                 <button
                   type="button"
                   onClick={() => {
@@ -419,7 +431,7 @@ export function PortfolioPage() {
             <div className="space-y-4">
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {visibleCases.map((item) => (
-                <article key={item.id} className="ds-card overflow-hidden h-full flex flex-col transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_20px_40px_-28px_rgba(15,23,42,0.4)]">
+                <article key={item.id} className="ds-card overflow-hidden h-full flex flex-col transition-all duration-200 hover:translate-y-[-4px] hover:shadow-[0_28px_60px_-30px_rgba(15,23,42,0.38)]">
                   <div className="aspect-[16/7] bg-slate-100">
                     <img src={item.screenshot} alt={`Screenshot - ${item.name}`} className="w-full h-full object-cover" />
                   </div>

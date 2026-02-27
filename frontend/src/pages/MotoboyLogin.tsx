@@ -127,12 +127,12 @@ export function MotoboyLogin() {
                 <div className="absolute inset-0">
                   <img src="/janocaminho.jpg" alt="" aria-hidden className="h-full w-full object-cover object-center" />
                 </div>
-                <div className="absolute inset-0 bg-[linear-gradient(160deg,rgba(2,6,23,0.68),rgba(2,6,23,0.5))]" />
+                <div className="absolute inset-0 bg-[linear-gradient(160deg,rgba(2,6,23,0.62),rgba(2,6,23,0.46))]" />
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(2,6,23,0.22),_transparent_46%),radial-gradient(circle_at_top,_rgba(47,157,247,0.3),_transparent_58%),radial-gradient(circle_at_bottom,_rgba(95,211,90,0.2),_transparent_62%)]" />
                 <div className="relative z-10 h-full p-7 text-white flex flex-col justify-between">
                   <div className="space-y-5">
                     <p className="text-2xl font-black tracking-tight text-white/95">Já no Caminho</p>
-                    <p className="pointer-events-none select-none text-[92px] font-black leading-none tracking-tight text-white/[0.07] -mb-2">
+                    <p className="pointer-events-none select-none text-[92px] font-black leading-none tracking-tight text-white/[0.05] -mb-2">
                       JANO
                     </p>
                     <p className="text-[11px] uppercase tracking-[0.28em] text-sky-200 font-semibold">Área do entregador</p>
@@ -270,7 +270,7 @@ export function MotoboyLogin() {
                       placeholder="E-mail"
                       value={form.email}
                       onChange={(e) => setForm({ ...form, email: e.target.value })}
-                      className="ds-input"
+                      className="ds-input ds-focus-ring transition-shadow focus:ring-2 focus:ring-emerald-500/25 focus:border-emerald-300"
                     />
                   </label>
 
@@ -282,7 +282,7 @@ export function MotoboyLogin() {
                         placeholder="Senha"
                         value={form.password}
                         onChange={(e) => setForm({ ...form, password: e.target.value })}
-                        className="ds-input pr-11"
+                        className="ds-input ds-focus-ring pr-11 transition-shadow focus:ring-2 focus:ring-emerald-500/25 focus:border-emerald-300"
                       />
                       <button
                         type="button"

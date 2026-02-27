@@ -966,7 +966,7 @@ export function SuperAdmin() {
                   type="text"
                   value={loginForm.email}
                   onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
-                  className="ds-input ds-focus-ring"
+                  className="ds-input ds-focus-ring transition-shadow focus:ring-2 focus:ring-violet-500/25 focus:border-violet-300"
                   placeholder="Usuário"
                 />
               </div>
@@ -977,7 +977,7 @@ export function SuperAdmin() {
                     type={showPassword ? 'text' : 'password'}
                     value={loginForm.password}
                     onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
-                    className="ds-input ds-focus-ring pr-10"
+                    className="ds-input ds-focus-ring pr-10 transition-shadow focus:ring-2 focus:ring-violet-500/25 focus:border-violet-300"
                     placeholder="Senha"
                   />
                   <button
