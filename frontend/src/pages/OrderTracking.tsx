@@ -111,6 +111,7 @@ export function OrderTracking() {
   const [orderAccessToken, setOrderAccessToken] = useState('');
   const [showItemsSheetMobile, setShowItemsSheetMobile] = useState(false);
   const [mobileSection, setMobileSection] = useState<'status' | 'summary' | 'info'>('status');
+  const [didAutoJumpForReady, setDidAutoJumpForReady] = useState(false);
   const [openingItemsSheet, setOpeningItemsSheet] = useState(false);
   const [tipPixCopied, setTipPixCopied] = useState(false);
   const [reviewForm, setReviewForm] = useState({
@@ -278,6 +279,7 @@ export function OrderTracking() {
     status === 'delivered' ||
     status === 'finished' ||
     String((order as any)?.delivery?.status || '').toUpperCase() === 'DELIVERED';
+  const shouldHighlightReviewTab = isReady && !reviewState?.review && !reviewAccessDenied;
   const canRateDelivery = Boolean(reviewState?.features?.deliveryFeedbackEnabled ?? reviewState?.isDelivery ?? isDelivery);
   const canUseTipFlow = Boolean(reviewState?.features?.tipEnabled ?? canRateDelivery);
   const storePhone = order?.store?.phone;
@@ -585,13 +587,18 @@ export function OrderTracking() {
 
   useEffect(() => {
     setMobileSection('summary');
+    setDidAutoJumpForReady(false);
   }, [order?.id]);
 
   useEffect(() => {
-    if (isReady && mobileSection === 'status') {
+    if (!isReady || didAutoJumpForReady) return;
+    if (shouldHighlightReviewTab) {
+      setMobileSection('info');
+    } else if (mobileSection === 'status') {
       setMobileSection('summary');
     }
-  }, [isReady, mobileSection]);
+    setDidAutoJumpForReady(true);
+  }, [isReady, didAutoJumpForReady, shouldHighlightReviewTab, mobileSection]);
 
   useEffect(() => {
     setFrozenElapsedMs(null);
@@ -944,9 +951,9 @@ export function OrderTracking() {
 
               <div className="sm:hidden sticky top-[74px] z-20 rounded-2xl border border-slate-200 bg-white/95 backdrop-blur p-1 flex items-center gap-1 shadow-sm">
                 {[
-                  { id: 'status', label: 'Andamento' },
+                  { id: 'status', label: 'Status' },
                   { id: 'summary', label: 'Resumo' },
-                  { id: 'info', label: 'Infos' },
+                  { id: 'info', label: shouldHighlightReviewTab ? 'Avaliar' : 'Infos', alert: shouldHighlightReviewTab },
                 ].map((tab) => (
                   <button
                     key={tab.id}
@@ -958,13 +965,16 @@ export function OrderTracking() {
                     aria-current={mobileSection === tab.id ? 'page' : undefined}
                     aria-pressed={mobileSection === tab.id}
                     disabled={mobileSection === tab.id}
-                    className={`flex-1 rounded-xl px-3 py-2 text-xs font-bold transition-all ${
+                    className={`relative flex-1 rounded-xl px-3 py-2 text-xs font-bold transition-all ${
                       mobileSection === tab.id
                         ? 'bg-slate-900 text-white cursor-default shadow-sm'
                         : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-white active:scale-[0.98] active:brightness-[0.98]'
                     }`}
                   >
                     {tab.label}
+                    {tab.alert && mobileSection !== tab.id && (
+                      <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-amber-500" />
+                    )}
                   </button>
                 ))}
               </div>
