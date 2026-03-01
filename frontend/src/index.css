@@ -544,7 +544,7 @@ body {
   }
 
   .ds-safe-fab {
-    bottom: calc(env(safe-area-inset-bottom) + 96px);
+    bottom: calc(env(safe-area-inset-bottom) + 12px);
   }
 
   .ds-menu-orb-primary {
