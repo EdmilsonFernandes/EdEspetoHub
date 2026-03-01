@@ -130,16 +130,6 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
           <h3 className="text-lg font-bold text-gray-800 mb-1">Identidade visual</h3>
           <p className="text-sm text-gray-500">Defina a presença digital da sua marca com elegância.</p>
         </div>
-        {onSave && (
-          <button
-            type="button"
-            onClick={onSave}
-            disabled={saving}
-            className="w-full sm:w-auto px-4 py-2 rounded-lg bg-brand-primary text-white text-xs font-semibold hover:opacity-90 transition-all disabled:opacity-60"
-          >
-            {saving ? "Salvando..." : "Salvar identidade"}
-          </button>
-        )}
       </div>
 
       <div className="p-4 sm:p-5 space-y-5">
@@ -653,21 +643,6 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
             <p className="text-xs text-gray-500">Use esse slug para acessar o painel e a vitrine.</p>
           </div>
         </div>
-        {onSave && (
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3">
-            <div className="text-xs text-slate-500">
-              Salve para aplicar todas as mudanças da identidade.
-            </div>
-            <button
-              type="button"
-              onClick={onSave}
-              disabled={saving}
-              className="w-full sm:w-auto px-4 py-2 rounded-lg bg-brand-primary text-white text-xs font-semibold hover:opacity-90 transition-all disabled:opacity-60"
-            >
-              {saving ? "Salvando..." : "Salvar alterações"}
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );
