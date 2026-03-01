@@ -963,6 +963,10 @@ export class AuthService
    */
   private async throwPendingPayment(storeId: string)
   {
+    const store = await this.storeRepository.findById(storeId);
+    if (store?.settings?.planExempt) {
+      return;
+    }
     const payment = await this.paymentRepository.findLatestByStoreId(storeId);
     throw new AppError('PAY-010', 402, {
       paymentUrl: payment?.id ? `${env.appUrl}/payment/${payment.id}` : null,
