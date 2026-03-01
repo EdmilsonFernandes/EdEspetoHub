@@ -115,7 +115,7 @@ export function MotoboyLogin() {
   };
 
   return (
-    <div className="min-h-screen motoboy-bg overflow-x-clip px-4 py-6 sm:py-10">
+    <div className="min-h-screen bg-slate-100 overflow-x-clip px-4 py-6 sm:py-10">
       <div className="max-w-5xl mx-auto space-y-5">
         <div className="lg:hidden">
           <MotoboyHeader title="Entrar" subtitle="Acesse suas entregas em segundos." />
@@ -132,9 +132,6 @@ export function MotoboyLogin() {
                 <div className="relative z-10 h-full p-7 text-white flex flex-col justify-between">
                   <div className="space-y-5">
                     <p className="text-2xl font-black tracking-tight text-white/95">Já no Caminho</p>
-                    <p className="pointer-events-none select-none text-[92px] font-black leading-none tracking-tight text-white/[0.05] -mb-2">
-                      JANO
-                    </p>
                     <p className="text-[11px] uppercase tracking-[0.28em] text-sky-200 font-semibold">Área do entregador</p>
                     <h2 className="text-[2rem] font-black leading-[1.1]">
                       Operação de entregas rápida, clara e profissional
@@ -162,17 +159,19 @@ export function MotoboyLogin() {
           </aside>
 
           <div className="space-y-5">
+            <div className="mx-auto w-full max-w-md rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_20px_48px_-34px_rgba(15,23,42,0.4)]">
+              <div className="flex items-center justify-center gap-3">
+                <div className="h-12 w-12 rounded-xl border border-slate-200 bg-slate-50 p-1.5">
+                  <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full object-contain" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500 font-bold">Já no Caminho</p>
+                  <p className="text-sm font-black text-slate-900">Área do Entregador</p>
+                </div>
+              </div>
+            </div>
             {alreadyLoggedIn ? (
               <div className="ds-card-elevated ds-login-card-enter p-5 sm:p-6 space-y-4 motoboy-fade-up ds-anim-delay-20">
-                <div className="rounded-2xl border border-slate-200/80 bg-white/80 backdrop-blur p-2.5 shadow-[0_20px_40px_-24px_rgba(15,23,42,0.35)]">
-                  <div className="relative h-24 sm:h-28 w-full rounded-xl overflow-hidden bg-[linear-gradient(120deg,#0f172a,#1e293b)]">
-                    <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full object-contain object-center" />
-                    <div className="pointer-events-none absolute inset-0 bg-black/10" />
-                  </div>
-                  <p className="mt-2 px-1 text-center text-[11px] font-bold tracking-[0.22em] uppercase text-slate-700">
-                    Área do entregador
-                  </p>
-                </div>
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-xs uppercase tracking-[0.25em] text-slate-500">Sessão ativa</p>
@@ -208,15 +207,6 @@ export function MotoboyLogin() {
               </div>
             ) : (
               <div className="ds-card-elevated ds-login-card-enter p-5 sm:p-6 space-y-4 motoboy-fade-up ds-anim-delay-40">
-                <div className="rounded-2xl border border-slate-200/80 bg-white/80 backdrop-blur p-2.5 shadow-[0_20px_40px_-24px_rgba(15,23,42,0.35)]">
-                  <div className="relative h-24 sm:h-28 w-full rounded-xl overflow-hidden bg-[linear-gradient(120deg,#0f172a,#1e293b)]">
-                    <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full object-contain object-center" />
-                    <div className="pointer-events-none absolute inset-0 bg-black/10" />
-                  </div>
-                  <p className="mt-2 px-1 text-center text-[11px] font-bold tracking-[0.22em] uppercase text-slate-700">
-                    Área do entregador
-                  </p>
-                </div>
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-700">Área do Entregador</p>
@@ -270,7 +260,7 @@ export function MotoboyLogin() {
                       placeholder="E-mail"
                       value={form.email}
                       onChange={(e) => setForm({ ...form, email: e.target.value })}
-                      className="ds-input ds-focus-ring transition-shadow focus:ring-2 focus:ring-emerald-500/25 focus:border-emerald-300"
+                      className="ds-input h-12 ds-focus-ring transition-shadow focus:ring-2 focus:ring-emerald-500/25 focus:border-emerald-300 border-slate-200"
                     />
                   </label>
 
@@ -282,7 +272,7 @@ export function MotoboyLogin() {
                         placeholder="Senha"
                         value={form.password}
                         onChange={(e) => setForm({ ...form, password: e.target.value })}
-                        className="ds-input ds-focus-ring pr-11 transition-shadow focus:ring-2 focus:ring-emerald-500/25 focus:border-emerald-300"
+                        className="ds-input h-12 ds-focus-ring pr-11 transition-shadow focus:ring-2 focus:ring-emerald-500/25 focus:border-emerald-300 border-slate-200"
                       />
                       <button
                         type="button"

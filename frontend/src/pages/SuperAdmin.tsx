@@ -966,7 +966,7 @@ export function SuperAdmin() {
                   type="text"
                   value={loginForm.email}
                   onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
-                  className="ds-input ds-focus-ring transition-shadow focus:ring-2 focus:ring-violet-500/25 focus:border-violet-300"
+                  className="ds-input h-12 border-slate-200 ds-focus-ring transition-shadow focus:ring-2 focus:ring-violet-500/25 focus:border-violet-300"
                   placeholder="Usuário"
                 />
               </div>
@@ -977,7 +977,7 @@ export function SuperAdmin() {
                     type={showPassword ? 'text' : 'password'}
                     value={loginForm.password}
                     onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
-                    className="ds-input ds-focus-ring pr-10 transition-shadow focus:ring-2 focus:ring-violet-500/25 focus:border-violet-300"
+                    className="ds-input h-12 border-slate-200 ds-focus-ring pr-10 transition-shadow focus:ring-2 focus:ring-violet-500/25 focus:border-violet-300"
                     placeholder="Senha"
                   />
                   <button
@@ -1004,7 +1004,7 @@ export function SuperAdmin() {
             <button
               type="submit"
               disabled={loading || !loginForm.email || !loginForm.password}
-              className="w-full ds-btn ds-btn-primary ds-btn-shine ds-focus-ring text-white py-3 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full h-12 ds-btn ds-btn-primary ds-btn-shine ds-focus-ring text-white py-3 rounded-xl font-semibold transition-all shadow-[0_14px_30px_-22px_rgba(15,23,42,0.8)] hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {loading ? 'Entrando...' : 'Acessar administração'}
             </button>

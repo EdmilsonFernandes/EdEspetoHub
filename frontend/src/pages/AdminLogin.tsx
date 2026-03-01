@@ -198,7 +198,7 @@ export function AdminLogin() {
                 type="text"
                 value={loginForm.identifier}
                 onChange={e => setLoginForm(prev => ({ ...prev, identifier: e.target.value }))}
-                className="ds-input ds-focus-ring pl-10 transition-shadow focus:ring-2 focus:ring-sky-500/25 focus:border-sky-300"
+                className="ds-input h-12 border-slate-200 ds-focus-ring pl-10 transition-shadow focus:ring-2 focus:ring-sky-500/25 focus:border-sky-300"
                 placeholder="Slug ou e-mail"
                 autoCapitalize="none"
               />
@@ -211,7 +211,7 @@ export function AdminLogin() {
                 type={showPassword ? 'text' : 'password'}
                 value={loginForm.password}
                 onChange={e => setLoginForm(prev => ({ ...prev, password: e.target.value }))}
-                className="ds-input ds-focus-ring pr-10 transition-shadow focus:ring-2 focus:ring-sky-500/25 focus:border-sky-300"
+                className="ds-input h-12 border-slate-200 ds-focus-ring pr-10 transition-shadow focus:ring-2 focus:ring-sky-500/25 focus:border-sky-300"
                 placeholder="Digite sua senha"
               />
               <button
@@ -234,12 +234,12 @@ export function AdminLogin() {
         </div>
 
         <div className="space-y-3">
-          <button
-            type="submit"
-            className="w-full ds-btn ds-btn-primary ds-btn-shine ds-focus-ring text-white py-3 font-semibold"
-          >
-            Acessar painel da loja
-          </button>
+            <button
+              type="submit"
+              className="w-full h-12 ds-btn ds-btn-primary ds-btn-shine ds-focus-ring text-white py-3 font-semibold shadow-[0_14px_30px_-22px_rgba(15,23,42,0.8)]"
+            >
+              Acessar painel da loja
+            </button>
           <button
             type="button"
             onClick={() => navigate('/')}
