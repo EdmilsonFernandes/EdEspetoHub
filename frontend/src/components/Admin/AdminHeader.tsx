@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { SignOut, Globe, Sparkle, Storefront } from '@phosphor-icons/react';
+import { SignOut, Globe, Sparkle, Storefront, List, X } from '@phosphor-icons/react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -7,7 +7,6 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { subscriptionService } from '../../services/subscriptionService';
 import { storeService } from '../../services/storeService';
 import { PlanBadge } from '../PlanBadge';
-import { resolveAssetUrl } from '../../utils/resolveAssetUrl';
 
 type Props = {
   contextLabel?: string;
@@ -27,10 +26,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
   const storeSlug = auth?.store?.slug;
   const storeNameFromAuth = auth?.store?.name;
   const [storeNameOverride, setStoreNameOverride] = useState('');
-  const storeName =
-    storeNameOverride ||
-    storeNameFromAuth ||
-    branding?.brandName;
+  const storeName = storeNameOverride || storeNameFromAuth || branding?.brandName;
   const storeUrl = storeSlug ? `https://www.janocaminho.com.br/${storeSlug}` : '';
   const storeDescription = auth?.store?.settings?.description || '';
   const storeSegmentRaw = String(auth?.store?.settings?.segment || '').toLowerCase();
@@ -53,9 +49,6 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
   const socialLinks = auth?.store?.settings?.socialLinks || [];
   const instagramLink = socialLinks.find((link) => link?.type === 'instagram')?.value;
   const instagramHandle = instagramLink ? `@${instagramLink.replace('@', '')}` : '';
-  const bannerUrl = resolveAssetUrl(auth?.store?.settings?.bannerUrl || '') || '';
-  const bannerPosition = auth?.store?.settings?.bannerPosition === 'top' ? 'top center' : 'center';
-  const hasBanner = Boolean(bannerUrl);
   const userName = auth?.user?.fullName || auth?.user?.name || auth?.user?.email || 'Admin';
   const userRole = auth?.user?.role || 'ADMIN';
   const userInitials = userName
@@ -65,6 +58,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
     .map((part) => part[0]?.toUpperCase())
     .join('');
   const showDetails = !isMobile || showMobileDetails;
+
   const infoChips = [
     {
       id: 'segment',
@@ -101,29 +95,23 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
         ]
       : []),
   ];
+
   const visibleDesktopChips = infoChips.slice(0, 2);
   const headerLabel = (contextLabel || 'Painel admin').trim() || 'Painel admin';
   const opsCards = [
     { id: 'segment', label: 'Segmento', value: storeSegmentLabel },
     { id: 'location', label: 'Local', value: storeLocation || 'Não definido' },
   ];
-  const headerBackgroundStyle = hasBanner
-    ? {
-        backgroundColor: '#0f172a',
-        backgroundImage: `linear-gradient(120deg, rgba(15,23,42,0.26) 0%, rgba(15,23,42,0.38) 100%), url(${bannerUrl})`,
-        backgroundSize: 'cover',
-        backgroundPosition: `center, ${bannerPosition}`,
-        backgroundRepeat: 'no-repeat',
-        color: '#fff',
-      }
-    : {
-        backgroundColor: '#111827',
-        backgroundImage: `linear-gradient(120deg, color-mix(in srgb, ${branding?.primaryColor || 'var(--color-primary)'} 28%, #0f172a 72%) 0%, color-mix(in srgb, ${branding?.secondaryColor || 'var(--color-secondary)'} 18%, #111827 82%) 100%)`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        color: '#fff',
-      };
+
+  const headerBackgroundStyle = {
+    backgroundColor: '#0b1220',
+    backgroundImage:
+      'linear-gradient(135deg, rgba(15,23,42,0.98) 0%, rgba(17,24,39,0.95) 60%, rgba(2,6,23,0.94) 100%)',
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+    color: '#fff',
+  };
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -199,9 +187,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
         setPlanDetails({
           status: subscription?.status || null,
           planName: subscription?.planExempt ? 'vip' : subscription?.plan?.name || '',
-          displayName: subscription?.planExempt
-            ? 'Isento de plano'
-            : subscription?.plan?.displayName || '',
+          displayName: subscription?.planExempt ? 'Isento de plano' : subscription?.plan?.displayName || '',
           startDate: subscription?.startDate || null,
           endDate: subscription?.endDate || null,
           latestPaymentAt: subscription?.latestPaymentAt || null,
@@ -242,21 +228,15 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
 
   return (
     <header
-      className="relative z-[500] isolate w-full -mx-3 sm:-mx-4 lg:-mx-6 xl:-mx-8 rounded-2xl border border-slate-200/80 shadow-[0_14px_32px_-22px_rgba(15,23,42,0.38)] overflow-visible"
+      className="relative z-[500] isolate w-full -mx-3 sm:-mx-4 lg:-mx-6 xl:-mx-8 rounded-2xl border border-slate-700/40 shadow-[0_14px_32px_-22px_rgba(15,23,42,0.38)] overflow-visible"
       style={headerBackgroundStyle}
     >
-      <div className="pointer-events-none absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.18),_transparent_58%)]" />
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-slate-900/6 via-transparent to-slate-900/12" />
-      <div className="pointer-events-none absolute inset-y-0 right-0 w-[32%] bg-gradient-to-l from-slate-950/20 via-slate-900/8 to-transparent" />
-      <div className="pointer-events-none absolute top-0 left-8 right-8 h-0.5 rounded-full bg-white/24" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-black/10" />
       <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-white/10" />
-      <div className={`md:hidden px-3 transition-all duration-200 ${mobileCompact ? 'py-1 space-y-2' : 'py-1.5 space-y-2'}`}>
-        <button
-          type="button"
-          onClick={() => setShowMobileDetails(true)}
-          className={`w-full flex items-center gap-2.5 rounded-xl border border-white/18 bg-slate-950/22 px-2.5 backdrop-blur-[4px] transition-all duration-200 text-left ${mobileCompact ? 'py-1.5' : 'py-2'}`}
-        >
-          <div className={`${mobileCompact ? 'w-9 h-9 rounded-lg' : 'w-11 h-11 rounded-xl'} bg-white/90 ring-1 ring-white/80 overflow-hidden flex items-center justify-center shadow-[0_14px_28px_-18px_rgba(0,0,0,0.55)] transition-all duration-200`}>
+
+      <div className={`md:hidden px-3 transition-all duration-200 ${mobileCompact ? 'py-1.5' : 'py-2'}`}>
+        <div className={`w-full flex items-center gap-2.5 rounded-xl border border-white/15 bg-white/[0.05] px-2.5 ${mobileCompact ? 'py-1.5' : 'py-2'}`}>
+          <div className={`${mobileCompact ? 'w-9 h-9 rounded-lg' : 'w-11 h-11 rounded-xl'} bg-white/95 ring-1 ring-white/80 overflow-hidden flex items-center justify-center shadow-[0_14px_28px_-18px_rgba(0,0,0,0.55)]`}>
             {branding?.logoUrl ? (
               <img src={branding.logoUrl} alt={storeName} className="w-full h-full object-contain p-1" />
             ) : (
@@ -264,49 +244,24 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
             )}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-[10px] uppercase tracking-[0.22em] font-semibold text-white/80">{headerLabel}</p>
-            <h1 className={`${mobileCompact ? 'text-sm' : 'text-base'} font-black text-white truncate transition-all duration-200`}>{storeName}</h1>
-            <p className={`text-[11px] text-white/80 truncate ${mobileCompact ? 'hidden' : ''}`}>
-              {storeSegmentLabel}{storeLocation ? ` • ${storeLocation}` : ''}
-            </p>
+            <p className="text-[10px] uppercase tracking-[0.22em] font-semibold text-white/70">{headerLabel}</p>
+            <h1 className={`${mobileCompact ? 'text-sm' : 'text-base'} font-black text-white truncate`}>{storeName}</h1>
+            <p className="text-[11px] text-white/70 truncate">{storeSegmentLabel}{storeLocation ? ` • ${storeLocation}` : ''}</p>
           </div>
-          <div className="shrink-0">
-            <PlanBadge
-              planName={planDetails?.planName}
-              displayName={planDetails?.displayName}
-              variant="dark"
-              details={planDetails}
-            />
-          </div>
-        </button>
-
-        <div className={`flex items-center justify-between gap-2 rounded-xl border border-white/18 bg-slate-950/20 px-2.5 transition-all duration-200 ${mobileCompact ? 'py-1.5' : 'py-2'}`}>
-          {onToggleHeader && (
-            <button
-              type="button"
-              onClick={() => {
-                window.dispatchEvent(new CustomEvent('adminHeader:set', { detail: { visible: false } }));
-              }}
-              className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-full bg-white/15 hover:bg-white/25 border border-white/20 text-[11px] font-semibold text-white"
-            >
-              Modo foco
-            </button>
-          )}
           <button
-            onClick={() => {
-              logout();
-              navigate('/admin');
-            }}
-            className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-full bg-white/15 hover:bg-white/25 border border-white/20 text-[11px] font-semibold text-white"
+            type="button"
+            onClick={() => setShowMobileDetails(true)}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/20 bg-white/10 text-white"
+            aria-label="Abrir menu"
           >
-            <SignOut size={13} weight="duotone" /> Sair
+            <List size={18} weight="bold" />
           </button>
         </div>
       </div>
 
       <div className={`hidden md:flex md:flex-col px-4 pb-1 lg:grid lg:grid-cols-[minmax(0,1.5fr)_minmax(280px,0.8fr)_auto] gap-2 transition-all duration-200 ${compactDesktop ? 'pt-1 min-h-[88px] lg:items-center' : 'pt-1.5 min-h-[110px] lg:items-start'}`}>
-        <div className={`flex items-start gap-3 rounded-xl border border-white/18 bg-slate-950/18 backdrop-blur-[4px] max-w-[920px] shadow-[0_10px_24px_-18px_rgba(0,0,0,0.52)] transition-all duration-200 ${compactDesktop ? 'px-3 py-1.5' : 'px-3 py-1.5'}`}>
-          <div className={`rounded-xl bg-white/90 backdrop-blur flex items-center justify-center overflow-hidden shadow-[0_14px_24px_-16px_rgba(0,0,0,0.5)] ring-1 ring-white/80 transition-all duration-200 ${compactDesktop ? 'w-11 h-11' : 'w-14 h-14'}`}>
+        <div className="flex items-start gap-3 rounded-xl border border-white/16 bg-white/[0.05] backdrop-blur max-w-[920px] shadow-[0_10px_24px_-18px_rgba(0,0,0,0.52)] px-3 py-1.5">
+          <div className={`rounded-xl bg-white/95 flex items-center justify-center overflow-hidden shadow-[0_14px_24px_-16px_rgba(0,0,0,0.5)] ring-1 ring-white/80 ${compactDesktop ? 'w-11 h-11' : 'w-14 h-14'}`}>
             {branding?.logoUrl ? (
               <img src={branding.logoUrl} alt={storeName} className="w-full h-full object-contain p-1" />
             ) : (
@@ -315,15 +270,15 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
           </div>
           <div className="space-y-0.5 min-w-0">
             <div className="flex items-center gap-2">
-              <p className="text-[10px] uppercase tracking-[0.32em] font-semibold text-white/90">{headerLabel}</p>
+              <p className="text-[10px] uppercase tracking-[0.28em] font-semibold text-white/75">{headerLabel}</p>
               {planDetails?.planExempt && (
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-[0.2em] bg-emerald-100 text-emerald-700">
                   VIP
                 </span>
               )}
             </div>
-            <h1 className={`font-black leading-tight truncate max-w-[42ch] drop-shadow-[0_2px_8px_rgba(0,0,0,0.28)] transition-all duration-200 ${compactDesktop ? 'text-[18px] sm:text-[21px]' : 'text-[20px] sm:text-[25px]'}`}>{storeName}</h1>
-            <div className={`${showMobileDetails ? 'flex' : 'hidden'} lg:flex flex-wrap items-center gap-2 text-xs ${compactDesktop ? 'lg:mt-0.5' : ''}`}>
+            <h1 className={`font-black leading-tight truncate max-w-[42ch] ${compactDesktop ? 'text-[18px] sm:text-[21px]' : 'text-[20px] sm:text-[25px]'}`}>{storeName}</h1>
+            <div className={`${showMobileDetails ? 'flex' : 'hidden'} lg:flex flex-wrap items-center gap-2 text-xs`}>
               {visibleDesktopChips.map((chip) =>
                 chip.href ? (
                   <a
@@ -331,7 +286,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
                     href={chip.href}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/12 border border-white/24 opacity-90 shadow-sm hover:opacity-100 hover:bg-white/18 transition"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 border border-white/16 opacity-90 hover:opacity-100 hover:bg-white/14 transition"
                   >
                     {chip.image ? (
                       <img src={chip.image} alt="" className="h-4 w-4 rounded-full" />
@@ -343,7 +298,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
                 ) : (
                   <span
                     key={chip.id}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/12 border border-white/24 opacity-90 shadow-sm"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 border border-white/16 opacity-90"
                   >
                     {chip.icon}
                     <span className="truncate">{chip.label}</span>
@@ -353,26 +308,21 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
             </div>
           </div>
         </div>
+
         {!compactDesktop && (
-          <div className="hidden lg:grid grid-cols-1 gap-1.5 rounded-xl border border-white/14 bg-slate-950/14 backdrop-blur-[4px] p-2 shadow-[0_8px_18px_-16px_rgba(0,0,0,0.36)]">
+          <div className="hidden lg:grid grid-cols-1 gap-1.5 rounded-xl border border-white/14 bg-white/[0.05] backdrop-blur p-2 shadow-[0_8px_18px_-16px_rgba(0,0,0,0.36)]">
             {opsCards.map((card) => (
-              <div key={card.id} className="rounded-lg border border-white/10 bg-white/6 px-2.5 py-1.5">
+              <div key={card.id} className="rounded-lg border border-white/10 bg-white/[0.03] px-2.5 py-1.5">
                 <p className="text-[10px] uppercase tracking-[0.18em] text-white/70">{card.label}</p>
                 <p className="text-[13px] font-semibold text-white truncate">{card.value}</p>
               </div>
             ))}
           </div>
         )}
-        <div className={`flex items-center gap-2 rounded-xl border border-white/18 bg-slate-950/18 backdrop-blur-[4px] px-2.5 shadow-[0_10px_20px_-16px_rgba(0,0,0,0.44)] transition-all duration-200 ${compactDesktop ? 'py-1.5' : 'py-1.5'}`}>
-          <button
-            type="button"
-            onClick={() => setShowMobileDetails((prev) => !prev)}
-            className="lg:hidden px-3 py-2 rounded-full text-xs font-semibold bg-white/15 hover:bg-white/25 transition border border-white/20"
-          >
-            {showMobileDetails ? 'Fechar' : 'Detalhes'}
-          </button>
+
+        <div className="flex items-center gap-2 rounded-xl border border-white/16 bg-white/[0.05] backdrop-blur px-2.5 py-1.5 shadow-[0_10px_20px_-16px_rgba(0,0,0,0.44)]">
           {showDetails && (
-            <div className="hidden lg:flex items-center gap-2 bg-slate-950/32 rounded-full px-2.5 py-1 border border-white/20 backdrop-blur-[2px]" title="Conta logada">
+            <div className="hidden lg:flex items-center gap-2 bg-black/20 rounded-full px-2.5 py-1 border border-white/20" title="Conta logada">
               <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-xs font-bold">
                 {userInitials || 'AD'}
               </div>
@@ -392,7 +342,8 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
           )}
         </div>
       </div>
-      <div className={`px-4 flex flex-col lg:flex-row lg:items-center lg:justify-end gap-2 rounded-b-2xl border-t border-white/10 transition-all duration-200 ${compactDesktop ? 'pb-1' : 'pb-2'}`}>
+
+      <div className={`hidden md:flex px-4 flex-col lg:flex-row lg:items-center lg:justify-end gap-2 rounded-b-2xl border-t border-white/10 transition-all duration-200 ${compactDesktop ? 'pb-1' : 'pb-2'}`}>
         <div className="flex flex-wrap items-center gap-2">
           <a
             href="https://www.janocaminho.com.br"
@@ -441,22 +392,33 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
           </button>
         </div>
       </div>
+
       {showMobileDetails && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm md:hidden flex items-end justify-center px-4 pb-6">
-          <div className="w-full max-w-md rounded-3xl bg-white p-5 shadow-2xl border border-slate-200 overflow-hidden">
+        <div className="fixed inset-0 z-50 bg-slate-900/45 backdrop-blur-sm md:hidden flex items-end justify-center px-4 pb-6" onClick={() => setShowMobileDetails(false)}>
+          <div className="w-full max-w-md rounded-3xl bg-white p-5 shadow-2xl border border-slate-200 overflow-hidden" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Info da loja</p>
-                <p className="text-lg font-bold text-slate-900">{storeName}</p>
+                <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Menu da loja</p>
+                <p className="text-lg font-bold text-slate-900 truncate">{storeName}</p>
               </div>
               <button
                 type="button"
                 onClick={() => setShowMobileDetails(false)}
-                className="px-3 py-1.5 rounded-full text-xs font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50 transition"
+                className="inline-flex items-center justify-center h-9 w-9 rounded-full text-xs font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50 transition"
+                aria-label="Fechar menu"
               >
-                Fechar
+                <X size={16} weight="bold" />
               </button>
             </div>
+
+            <div className="mt-3">
+              <PlanBadge
+                planName={planDetails?.planName}
+                displayName={planDetails?.displayName}
+                details={planDetails}
+              />
+            </div>
+
             <div className="mt-4 space-y-2 text-sm text-slate-700">
               {storeSegmentLabel && (
                 <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
@@ -501,6 +463,55 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
                   <span className="text-xs text-slate-400">Abrir</span>
                 </a>
               )}
+            </div>
+
+            <div className="mt-4 pt-3 border-t border-slate-200 space-y-2">
+              <a
+                href="https://www.janocaminho.com.br"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700"
+              >
+                <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-4 w-4 rounded-full object-cover" />
+                Já no Caminho
+              </a>
+
+              {onToggleHeader && (
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700"
+                    onClick={() => {
+                      window.dispatchEvent(new CustomEvent('adminHeader:set', { detail: { visible: true } }));
+                      setShowMobileDetails(false);
+                    }}
+                  >
+                    Mostrar painel
+                  </button>
+                  <button
+                    type="button"
+                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 inline-flex items-center justify-center gap-1.5"
+                    onClick={() => {
+                      window.dispatchEvent(new CustomEvent('adminHeader:set', { detail: { visible: false } }));
+                      setShowMobileDetails(false);
+                    }}
+                  >
+                    <Sparkle size={12} weight="duotone" />
+                    Modo foco
+                  </button>
+                </div>
+              )}
+
+              <button
+                onClick={() => {
+                  logout();
+                  navigate('/admin');
+                }}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700"
+              >
+                <SignOut size={14} weight="duotone" />
+                Sair
+              </button>
             </div>
           </div>
         </div>
