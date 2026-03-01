@@ -1243,12 +1243,12 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     { id: 'pagamentos', label: 'Pagamentos', icon: CreditCard },
     { id: 'motoboys', label: 'Entregadores', icon: Scooter, disabled: !canUseMotoboys },
     { id: 'config', label: 'Configurações', icon: Gear },
-    { id: 'fila', label: 'Operação', icon: ChefHat },
+    { id: 'fila', label: 'Monitor de Pedidos', icon: ChefHat },
   ];
   const navItems = useMemo(
     () => [
       ...desktopTabItems,
-      { id: 'cardapio', label: 'Vitrine pública', icon: BookOpen, disabled: false, standalone: true },
+      { id: 'cardapio', label: 'Catálogo Online', icon: BookOpen, disabled: false, standalone: true },
     ],
     [desktopTabItems]
   );

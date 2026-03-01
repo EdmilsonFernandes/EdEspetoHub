@@ -586,7 +586,7 @@ export function OrderTracking() {
   }, [order?.id]);
 
   useEffect(() => {
-    setMobileSection('summary');
+    setMobileSection('status');
     setDidAutoJumpForReady(false);
   }, [order?.id]);
 
@@ -594,8 +594,6 @@ export function OrderTracking() {
     if (!isReady || didAutoJumpForReady) return;
     if (shouldHighlightReviewTab) {
       setMobileSection('info');
-    } else if (mobileSection === 'status') {
-      setMobileSection('summary');
     }
     setDidAutoJumpForReady(true);
   }, [isReady, didAutoJumpForReady, shouldHighlightReviewTab, mobileSection]);
