@@ -49,6 +49,7 @@ export function StorePage() {
   const [openingHours, setOpeningHours] = useState([]);
   const [orderTypes, setOrderTypes] = useState([ 'delivery', 'pickup', 'table' ]);
   const [storeSubscription, setStoreSubscription] = useState(null);
+  const [storePlanExempt, setStorePlanExempt] = useState(false);
   const [storeReviewSummary, setStoreReviewSummary] = useState<any | null>(null);
   const [topProducts, setTopProducts] = useState([]);
   const [reorderApplied, setReorderApplied] = useState(false);
@@ -171,6 +172,7 @@ export function StorePage() {
   const subscriptionStatus = storeSubscription?.status;
   const isSubscriptionKnown = storeSubscription !== null && storeSubscription !== undefined;
   const isSubscriptionActive =
+    storePlanExempt ||
     !isSubscriptionKnown ||
     (subscriptionStatus &&
       ![ 'PENDING', 'CANCELLED', 'SUSPENDED', 'EXPIRED' ].includes(subscriptionStatus));
@@ -355,6 +357,7 @@ export function StorePage() {
           setDeliveryFee(data.settings?.deliveryFee ?? '');
           setStoreOpenNow(isStoreOpenNow(normalizedHours));
           setStoreSubscription(data.subscription || null);
+          setStorePlanExempt(Boolean(data.settings?.planExempt || data.subscription?.planExempt));
           setStoreReviewSummary(data.reviewSummary || null);
           applyStoreMeta(data);
         }
@@ -768,6 +771,7 @@ export function StorePage() {
 
   const checkout = async (extra?: { cashTendered?: number | null } | null) => {
     const isSubscriptionActive =
+      storePlanExempt ||
       subscriptionStatus &&
       ![ 'PENDING', 'CANCELLED', 'SUSPENDED', 'EXPIRED' ].includes(subscriptionStatus);
     if (!isSubscriptionActive) {

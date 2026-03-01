@@ -2602,8 +2602,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                       branding={brandingDraft}
                       onChange={setBrandingDraft}
                       storeSlug={storeSlug}
-                      onSave={handleSaveBranding}
-                      saving={savingBranding}
                     />
                   </div>
                 )}

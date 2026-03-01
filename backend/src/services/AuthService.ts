@@ -551,7 +551,7 @@ export class AuthService
     let currentSubscription: any = null;
     if (sanitizedStore) {
       currentSubscription = await this.subscriptionService.getCurrentByStore(firstStore.id);
-      const isActive = this.subscriptionService.isActiveSubscription(currentSubscription);
+      const isActive = Boolean(firstStore?.settings?.planExempt) || this.subscriptionService.isActiveSubscription(currentSubscription);
       if (!isActive) {
         await this.throwPendingPayment(firstStore.id);
       }
@@ -624,7 +624,7 @@ export class AuthService
       });
     }
     const currentSubscription = await this.subscriptionService.getCurrentByStore(store.id);
-    const isActive = this.subscriptionService.isActiveSubscription(currentSubscription);
+    const isActive = Boolean(store?.settings?.planExempt) || this.subscriptionService.isActiveSubscription(currentSubscription);
     if (!isActive) {
       await this.throwPendingPayment(store.id);
     }

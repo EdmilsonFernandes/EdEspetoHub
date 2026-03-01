@@ -584,7 +584,7 @@ export function OrderTracking() {
   }, [order?.id]);
 
   useEffect(() => {
-    setMobileSection('status');
+    setMobileSection('summary');
   }, [order?.id]);
 
   useEffect(() => {
@@ -924,6 +924,23 @@ export function OrderTracking() {
                   </div>
                 </div>
               </div>
+
+              {isReady && !reviewState?.review && !reviewAccessDenied && (
+                <div className="sm:hidden rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2.5">
+                  <p className="text-xs font-semibold text-amber-800">Pedido finalizado. Falta sua avaliação.</p>
+                  <p className="text-[11px] text-amber-700 mt-1">
+                    Abra a aba <span className="font-bold">Infos</span> para avaliar e
+                    {canUseTipFlow ? ' deixar gorjeta para o entregador.' : ' concluir sua avaliação.'}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setMobileSection('info')}
+                    className="mt-2 inline-flex items-center rounded-lg border border-amber-300 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-amber-800 hover:bg-amber-100"
+                  >
+                    Avaliar agora
+                  </button>
+                </div>
+              )}
 
               <div className="sm:hidden sticky top-[74px] z-20 rounded-2xl border border-slate-200 bg-white/95 backdrop-blur p-1 flex items-center gap-1 shadow-sm">
                 {[
