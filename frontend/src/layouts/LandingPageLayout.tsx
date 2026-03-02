@@ -1,9 +1,9 @@
 // @ts-nocheck
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
-import { ChatCircleText, Moon, SignOut, Storefront, Sun, Truck } from '@phosphor-icons/react';
+import { ChatCircleText, House, List, Moon, SignOut, Storefront, Sun, Truck, X } from '@phosphor-icons/react';
 
 interface LandingPageLayoutProps {
   children: React.ReactNode;
@@ -12,7 +12,21 @@ interface LandingPageLayoutProps {
 export function LandingPageLayout({ children }: LandingPageLayoutProps) {
   const { auth, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { theme, toggleTheme } = useTheme();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    document.body.style.overflow = mobileMenuOpen ? 'hidden' : '';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileMenuOpen]);
 
   const goToDemoGuide = () => {
     if (typeof window !== 'undefined') {
@@ -26,6 +40,28 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
     { id: 'portfolio', label: 'Portfólio', onClick: () => navigate('/portfolio') },
     { id: 'architecture', label: 'Arquitetura', onClick: () => navigate('/arquitetura') },
   ];
+
+  const mobilePrimaryNav = useMemo(
+    () => [
+      { id: 'home', label: 'Início', icon: House, onClick: () => navigate('/'), active: location.pathname === '/' },
+      {
+        id: 'admin',
+        label: 'Admin',
+        icon: Storefront,
+        onClick: () => navigate('/admin'),
+        active: location.pathname.startsWith('/admin'),
+      },
+      {
+        id: 'motoboy',
+        label: 'Entregador',
+        icon: Truck,
+        onClick: () => navigate('/motoboy/login'),
+        active: location.pathname.startsWith('/motoboy'),
+      },
+      { id: 'menu', label: 'Menu', icon: List, onClick: () => setMobileMenuOpen(true), active: mobileMenuOpen },
+    ],
+    [location.pathname, mobileMenuOpen, navigate]
+  );
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(47,157,247,0.14),_transparent_48%),radial-gradient(circle_at_bottom_right,_rgba(95,211,90,0.16),_transparent_45%)] bg-gray-50 dark:bg-slate-950">
@@ -55,6 +91,23 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                 <p className="hidden sm:block text-xs text-slate-300">Pedidos e gestão em um só lugar</p>
               </div>
             </a>
+            <div className="sm:hidden flex items-center gap-2">
+              <button
+                onClick={toggleTheme}
+                className="cursor-pointer p-2 rounded-full border border-white/20 text-slate-100 hover:bg-white/10 transition-colors"
+                aria-label="Toggle theme"
+              >
+                {theme === 'light' ? <Moon size={18} weight="duotone" /> : <Sun size={18} weight="duotone" />}
+              </button>
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(true)}
+                className="inline-flex items-center justify-center p-2 rounded-full border border-white/20 text-slate-100 hover:bg-white/10 transition-colors"
+                aria-label="Abrir menu"
+              >
+                <List size={18} weight="bold" />
+              </button>
+            </div>
 
             <nav className="hidden lg:flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-2.5 py-1.5 shadow-sm">
               {navLinks.map((item) => {
@@ -114,89 +167,120 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
               </button>
             </div>
           </div>
-
-          <div className="sm:hidden pb-3">
-            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
-              {!auth && (
-                <button
-                  type="button"
-                  onClick={() => navigate('/create')}
-                  className="inline-flex items-center gap-2 px-3 py-2 text-xs rounded-full bg-brand-gradient text-white font-black whitespace-nowrap shadow-sm"
-                >
-                  <Storefront size={14} weight="duotone" />
-                  Criar loja
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={() => navigate('/')}
-                className="inline-flex items-center gap-2 px-3 py-2 text-xs rounded-full border border-white/20 bg-white/10 text-slate-100 whitespace-nowrap"
-              >
-                Início
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate('/portfolio')}
-                className="inline-flex items-center gap-2 px-3 py-2 text-xs rounded-full border border-white/20 bg-white/10 text-slate-100 whitespace-nowrap"
-              >
-                <Storefront size={14} weight="duotone" />
-                Portfólio
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate('/arquitetura')}
-                className="inline-flex items-center gap-2 px-3 py-2 text-xs rounded-full border border-white/20 bg-white/10 text-slate-100 whitespace-nowrap"
-              >
-                Arquitetura
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate('/admin')}
-                className="inline-flex items-center gap-2 px-3 py-2 text-xs rounded-full border border-white/20 bg-white/10 text-slate-100 whitespace-nowrap"
-              >
-                Admin
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate('/motoboy/login')}
-                className="inline-flex items-center gap-2 px-3 py-2 text-xs rounded-full border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-200 whitespace-nowrap"
-              >
-                <Truck size={14} weight="duotone" />
-                Entregador
-              </button>
-              <button
-                type="button"
-                onClick={toggleTheme}
-                className="inline-flex items-center gap-2 px-3 py-2 text-xs rounded-full border border-white/20 bg-white/10 text-slate-100 whitespace-nowrap"
-                aria-label="Toggle theme"
-              >
-                {theme === 'light' ? <Moon size={14} weight="duotone" /> : <Sun size={14} weight="duotone" />}
-                {theme === 'light' ? 'Escuro' : 'Claro'}
-              </button>
-              {auth && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    logout();
-                    navigate('/');
-                  }}
-                  className="inline-flex items-center gap-2 px-3 py-2 text-xs rounded-full border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-300 whitespace-nowrap"
-                >
-                  <SignOut size={14} weight="bold" />
-                  Sair
-                </button>
-              )}
-            </div>
-          </div>
         </div>
       </header>
 
-      <main> {children} </main>
+      <main className="pb-24 sm:pb-0"> {children} </main>
+
+      <div className={`sm:hidden fixed inset-0 z-[75] transition ${mobileMenuOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}>
+        <button
+          type="button"
+          onClick={() => setMobileMenuOpen(false)}
+          className={`absolute inset-0 bg-slate-950/45 transition-opacity duration-250 ${mobileMenuOpen ? 'opacity-100' : 'opacity-0'}`}
+          aria-label="Fechar menu"
+        />
+        <aside
+          className={`absolute right-0 top-0 h-full w-[84vw] max-w-[22rem] bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl transition-transform duration-300 ease-out ${
+            mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
+          }`}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Menu mobile"
+        >
+          <div className="flex items-center justify-between px-4 py-4 border-b border-slate-100 dark:border-slate-800">
+            <div>
+              <p className="text-sm font-black text-slate-900 dark:text-slate-100">Menu</p>
+              <p className="text-xs text-slate-500">Já no Caminho</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(false)}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200"
+              aria-label="Fechar"
+            >
+              <X size={16} weight="bold" />
+            </button>
+          </div>
+          <div className="p-4 space-y-2">
+            {!auth && (
+              <button
+                type="button"
+                onClick={() => navigate('/create')}
+                className="w-full inline-flex items-center justify-between rounded-xl px-4 py-3 bg-brand-gradient text-white font-black"
+              >
+                Criar loja
+                <Storefront size={18} weight="duotone" />
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => navigate('/portfolio')}
+              className="w-full inline-flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-200"
+            >
+              Portfólio
+              <Storefront size={18} weight="duotone" />
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/arquitetura')}
+              className="w-full inline-flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-200"
+            >
+              Arquitetura
+              <House size={18} weight="duotone" />
+            </button>
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="w-full inline-flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-200"
+            >
+              {theme === 'light' ? 'Modo escuro' : 'Modo claro'}
+              {theme === 'light' ? <Moon size={18} weight="duotone" /> : <Sun size={18} weight="duotone" />}
+            </button>
+            {auth && (
+              <button
+                type="button"
+                onClick={() => {
+                  logout();
+                  navigate('/');
+                }}
+                className="w-full inline-flex items-center justify-between rounded-xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/20 px-4 py-3 text-sm font-semibold text-red-700 dark:text-red-300"
+              >
+                Sair
+                <SignOut size={18} weight="bold" />
+              </button>
+            )}
+          </div>
+        </aside>
+      </div>
+
+      <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-[70] border-t border-slate-200/80 dark:border-slate-800 bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl shadow-[0_-12px_24px_-20px_rgba(2,6,23,0.9)]">
+        <div className="grid grid-cols-4 gap-1 px-2 pt-1 pb-[max(env(safe-area-inset-bottom),0.5rem)]">
+          {mobilePrimaryNav.map((item) => {
+            const Icon = item.icon;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={item.onClick}
+                className={`flex flex-col items-center justify-center rounded-xl py-2 text-[10px] font-bold tracking-[0.08em] transition ${
+                  item.active
+                    ? 'text-sky-600 dark:text-sky-300 bg-sky-50 dark:bg-sky-900/30'
+                    : 'text-slate-600 dark:text-slate-300'
+                }`}
+              >
+                <Icon size={18} weight={item.active ? 'fill' : 'duotone'} />
+                <span className="mt-1 leading-none">{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </nav>
+
       <a
         href="https://wa.me/5512997822784"
         target="_blank"
         rel="noreferrer"
-        className="fixed bottom-5 right-4 z-50 inline-flex items-center gap-2 rounded-full bg-emerald-600 px-4 py-3 text-white shadow-[0_18px_42px_-24px_rgba(5,150,105,0.75)] hover:bg-emerald-500 transition"
+        className="fixed bottom-24 sm:bottom-5 right-4 z-50 inline-flex items-center gap-2 rounded-full bg-emerald-600 px-4 py-3 text-white shadow-[0_18px_42px_-24px_rgba(5,150,105,0.75)] hover:bg-emerald-500 transition"
         aria-label="Falar no WhatsApp"
       >
         <ChatCircleText size={18} weight="duotone" />
