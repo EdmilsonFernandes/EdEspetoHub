@@ -17,9 +17,12 @@ import { logger } from '../utils/logger';
 import { env } from '../config/env';
 import { OrderEtaEstimate } from '../entities/OrderEtaEstimate';
 import { OrderEtaEstimateRepository } from '../repositories/OrderEtaEstimateRepository';
+import { AppDataSource } from '../config/database';
+import { OrderDelivery } from '../entities/OrderDelivery';
 
 type MapsCoords = { lat: number; lng: number; formattedAddress?: string };
 type MapsRoute = { distanceKm: number; durationMin: number };
+type DeliveryStatus = 'AVAILABLE' | 'ACCEPTED' | 'PICKED_UP' | 'IN_TRANSIT' | 'DELIVERED' | 'EXPIRED' | 'CANCELED';
 
 type EtaBreakdown = {
   algoVersion: string;
@@ -66,9 +69,16 @@ export class OrderEtaServiceV2 {
     const queueMinutes = this.calculateQueueMinutes(queuePosition, storeSettings);
     const bufferMinutes = this.toNumber(storeSettings?.etaBufferMinutes, env.etaV2.defaultEtaBufferMinutes);
 
+    const orderStatus = String(order.status || '').trim().toLowerCase();
+    const delivery = order.type === 'delivery' ? await this.findDeliveryByOrderId(order.id) : null;
+    const deliveryStatus = this.normalizeDeliveryStatus(delivery?.status);
+
     let travelMinutes: number | null = null;
     let distanceKm: number | null = null;
     let confidence: 'low' | 'medium' | 'high' = 'medium';
+    let effectivePrepMinutes = prepMinutes;
+    let effectiveQueueMinutes = queueMinutes;
+    let effectiveBufferMinutes = bufferMinutes;
 
     if (order.type === 'delivery' && order.address && storeSettings?.address) {
       const travel = await this.getTravelData(storeSettings.address, order.address, correlationId);
@@ -83,19 +93,43 @@ export class OrderEtaServiceV2 {
       confidence = 'medium';
     }
 
+    if (order.type === 'delivery') {
+      if (deliveryStatus === 'IN_TRANSIT' || orderStatus === 'in_delivery') {
+        const routeStart = this.resolveRouteStart(delivery);
+        const travelRemaining = this.resolveRemainingTravelMinutes(travelMinutes, routeStart);
+        effectivePrepMinutes = 0;
+        effectiveQueueMinutes = 0;
+        effectiveBufferMinutes = 0;
+        travelMinutes = travelRemaining;
+        confidence = travelRemaining !== null ? 'high' : confidence;
+      } else if (deliveryStatus === 'ACCEPTED' || deliveryStatus === 'PICKED_UP') {
+        // Courier already assigned: remaining time should prioritize route, not kitchen queue/prep.
+        effectivePrepMinutes = 0;
+        effectiveQueueMinutes = 0;
+        confidence = travelMinutes !== null ? 'high' : confidence;
+      } else if (
+        [ 'ready_for_delivery', 'waiting_for_motoboy', 'ready' ].includes(orderStatus) ||
+        deliveryStatus === 'AVAILABLE'
+      ) {
+        // Order is ready and waiting for courier: don't keep prep/queue in ETA.
+        effectivePrepMinutes = 0;
+        effectiveQueueMinutes = 0;
+      }
+    }
+
     const totalMinutes = Math.max(
       1,
-      Math.round(prepMinutes + queueMinutes + bufferMinutes + (travelMinutes || 0))
+      Math.round(effectivePrepMinutes + effectiveQueueMinutes + effectiveBufferMinutes + (travelMinutes || 0))
     );
     const windowMin = Math.max(1, Math.round(totalMinutes * 0.8));
     const windowMax = Math.max(windowMin, Math.round(totalMinutes * 1.2));
 
     const eta: EtaBreakdown = {
       algoVersion: this.algoVersion,
-      prepMinutes,
-      queueMinutes,
+      prepMinutes: effectivePrepMinutes,
+      queueMinutes: effectiveQueueMinutes,
       travelMinutes,
-      bufferMinutes,
+      bufferMinutes: effectiveBufferMinutes,
       totalMinutes,
       windowMin,
       windowMax,
@@ -152,6 +186,40 @@ export class OrderEtaServiceV2 {
       this.log.warn('Maps travel data failed', { correlationId, error });
       return null;
     }
+  }
+
+  private async findDeliveryByOrderId(orderId: string): Promise<OrderDelivery | null> {
+    if (!orderId) return null;
+    if (!AppDataSource.isInitialized || !AppDataSource.hasMetadata(OrderDelivery)) return null;
+    return AppDataSource.getRepository(OrderDelivery).findOne({ where: { orderId } });
+  }
+
+  private normalizeDeliveryStatus(value: unknown): DeliveryStatus | null {
+    const status = String(value || '').trim().toUpperCase();
+    if (!status) return null;
+    if (
+      [ 'AVAILABLE', 'ACCEPTED', 'PICKED_UP', 'IN_TRANSIT', 'DELIVERED', 'EXPIRED', 'CANCELED' ].includes(status)
+    ) {
+      return status as DeliveryStatus;
+    }
+    return null;
+  }
+
+  private resolveRouteStart(delivery?: OrderDelivery | null): Date | null {
+    const candidates = [ delivery?.inTransitAt, delivery?.pickedUpAt ];
+    for (const candidate of candidates) {
+      if (!candidate) continue;
+      const parsed = new Date(candidate);
+      if (!Number.isNaN(parsed.getTime())) return parsed;
+    }
+    return null;
+  }
+
+  private resolveRemainingTravelMinutes(travelMinutes: number | null, startedAt: Date | null): number | null {
+    if (travelMinutes === null || !Number.isFinite(Number(travelMinutes))) return null;
+    if (!startedAt) return Math.max(1, Math.round(Number(travelMinutes)));
+    const elapsedMinutes = Math.max(0, (Date.now() - startedAt.getTime()) / 60000);
+    return Math.max(1, Math.round(Number(travelMinutes) - elapsedMinutes));
   }
 
   private async geocode(address: string, correlationId?: string): Promise<MapsCoords | null> {

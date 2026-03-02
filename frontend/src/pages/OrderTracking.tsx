@@ -338,11 +338,8 @@ export function OrderTracking() {
     if (!deliveryInRoute) return null;
     if (!routeDurationMinutes || routeDurationMinutes <= 0) return null;
     const startCandidates = [
+      (order as any)?.delivery?.inTransitAt,
       (order as any)?.delivery?.pickedUpAt,
-      (order as any)?.delivery?.acceptedAt,
-      (order as any)?.delivery?.updatedAt,
-      order?.updatedAt,
-      order?.createdAt,
     ];
     for (const candidate of startCandidates) {
       if (!candidate) continue;
@@ -352,7 +349,10 @@ export function OrderTracking() {
       return Math.max(0, Math.round(routeDurationMinutes - elapsedMin));
     }
     return Math.max(0, Math.round(routeDurationMinutes));
-  }, [isDelivery, deliveryStatus, status, routeDurationMinutes, (order as any)?.delivery?.pickedUpAt, (order as any)?.delivery?.acceptedAt, (order as any)?.delivery?.updatedAt, order?.updatedAt, order?.createdAt]);
+  }, [isDelivery, deliveryStatus, status, routeDurationMinutes, (order as any)?.delivery?.inTransitAt, (order as any)?.delivery?.pickedUpAt]);
+  const isInTransitPhase = isDelivery && (deliveryStatus === 'IN_TRANSIT' || status === 'in_delivery');
+  const etaPhaseLabel = isInTransitPhase ? 'Tempo de trajeto' : 'Tempo de preparo';
+  const etaForecastLabel = isInTransitPhase ? 'Previsão de chegada' : 'Previsão de entrega';
   const remainingEstimateMinutes = useMemo(() => {
     if (isReady) return null;
     if (routeEtaRemainingMinutes !== null) return routeEtaRemainingMinutes;
@@ -887,7 +887,7 @@ export function OrderTracking() {
                     )}
                     {remainingEstimateMinutes !== null && !isReady && (
                       <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold animate-pulse">
-                        Tempo restante: ~{remainingEstimateMinutes} min
+                        {etaPhaseLabel} restante: ~{remainingEstimateMinutes} min
                       </div>
                     )}
                     {isEstimateDelayed && (
@@ -902,7 +902,7 @@ export function OrderTracking() {
                     )}
                     {estimatedReadyAt && !isReady && (
                       <div className="mt-2 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold">
-                        Previsão de entrega: {estimatedReadyAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                        {etaForecastLabel}: {estimatedReadyAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                       </div>
                     )}
                   </div>
@@ -1335,20 +1335,20 @@ export function OrderTracking() {
                         compact
                       />
                       <div className="flex items-center justify-between text-xs text-slate-600">
-                        <span>Tempo estimado</span>
+                        <span>Tempo de trajeto</span>
                         <span className="font-semibold text-slate-800">
                           {routeDurationMinutes !== null ? `${routeDurationMinutes} min` : routeLoading ? 'Calculando...' : '-'}
                         </span>
                       </div>
                       {deliveryEta && (
                         <div className="text-xs font-semibold text-emerald-700">
-                          Previsão de chegada: {deliveryEta.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                          {etaForecastLabel}: {deliveryEta.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                         </div>
                       )}
                       {etaDetails && (
                         <div className="rounded-xl border border-slate-100 bg-slate-50 p-3 space-y-2">
                           <div className="flex items-center justify-between text-xs font-semibold text-slate-700">
-                            <span>Tempo total estimado</span>
+                            <span>{isInTransitPhase ? 'Tempo de trajeto estimado' : 'Tempo de preparo estimado'}</span>
                             <span className="text-slate-900">
                               {etaTotalMinutes ? `~${etaTotalMinutes} min` : '-'}
                             </span>
@@ -1357,7 +1357,7 @@ export function OrderTracking() {
                             <div className="flex flex-wrap gap-2 text-[11px] font-semibold text-slate-600">
                               {etaDetails.prepMinutes !== undefined && (
                                 <span className="px-2 py-1 rounded-full bg-white border border-slate-200">
-                                  Preparo: {etaDetails.prepMinutes} min
+                                  Tempo de preparo: {etaDetails.prepMinutes} min
                                 </span>
                               )}
                               {etaDetails.queueMinutes !== undefined && (
@@ -1367,7 +1367,7 @@ export function OrderTracking() {
                               )}
                               {etaDetails.travelMinutes !== undefined && etaDetails.travelMinutes !== null && (
                                 <span className="px-2 py-1 rounded-full bg-white border border-slate-200">
-                                  Rota: {etaDetails.travelMinutes} min
+                                  Tempo de trajeto: {etaDetails.travelMinutes} min
                                 </span>
                               )}
                               {etaDetails.bufferMinutes !== undefined && (
@@ -1413,7 +1413,7 @@ export function OrderTracking() {
                     )}
                     {remainingEstimateMinutes !== null && !isReady && (
                       <p>
-                        <span className="font-semibold">Tempo restante:</span> ~{remainingEstimateMinutes} min
+                        <span className="font-semibold">{etaPhaseLabel} restante:</span> ~{remainingEstimateMinutes} min
                       </p>
                     )}
                     {isEstimateDelayed && (
