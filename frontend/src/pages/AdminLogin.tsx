@@ -6,7 +6,7 @@ import { getPersistedBranding } from '../constants';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { AuthLayout } from '../layouts/AuthLayout';
-import { ArrowLeft, Eye, EyeSlash, Storefront } from '@phosphor-icons/react';
+import { ArrowLeft, Eye, EyeSlash, LockKey, User } from '@phosphor-icons/react';
 
 export function AdminLogin() {
   const navigate = useNavigate();
@@ -125,23 +125,18 @@ export function AdminLogin() {
     <AuthLayout>
       <form onSubmit={handleLogin} className="space-y-6">
         <div className="text-center">
-          <div className="mx-auto h-14 w-14 rounded-2xl bg-[linear-gradient(135deg,#e0f2fe,#dbeafe)] border border-sky-200 flex items-center justify-center text-sky-700 shadow-sm">
-            <Storefront size={26} weight="duotone" />
-          </div>
-          <p className="mt-3 inline-flex rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-sky-700">
-            Área da Loja
-          </p>
-          <h2 className="mt-4 text-2xl sm:text-3xl font-black text-gray-900 mb-1 tracking-tight">Painel da Loja</h2>
-          <p className="text-sm text-gray-500">Acesso do administrador</p>
+          <img src="/logo.svg" alt="Já no Caminho" className="mx-auto h-16 sm:h-20 w-auto object-contain drop-shadow-[0_14px_30px_rgba(34,211,238,0.35)]" />
+          <h2 className="mt-4 text-2xl sm:text-3xl font-black text-slate-100 mb-1 tracking-tight">Painel de Administração da Loja</h2>
+          <p className="text-sm text-slate-300/90">Acesse sua operação com segurança</p>
         </div>
 
         {loginError && (
-          <div className="ds-alert ds-alert-error space-y-3">
-            <p>{loginError}</p>
+          <div className="rounded-2xl border border-rose-400/35 bg-rose-500/10 px-4 py-3 space-y-3 text-rose-100 text-sm">
+            <p className="font-semibold">{loginError}</p>
             {pendingPayment?.paymentUrl && (
               <a
                 href={pendingPayment.paymentUrl}
-                className="inline-flex items-center justify-center ds-btn ds-btn-primary ds-focus-ring px-4 py-2 text-xs font-semibold"
+                className="inline-flex items-center justify-center rounded-xl bg-white text-slate-900 px-4 py-2 text-xs font-semibold"
               >
                 Acessar pagamento
               </a>
@@ -151,7 +146,7 @@ export function AdminLogin() {
                 href={pendingPayment.paymentLink}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center justify-center ds-btn ds-btn-primary ds-focus-ring px-4 py-2 text-xs font-semibold"
+                className="inline-flex items-center justify-center rounded-xl bg-white text-slate-900 px-4 py-2 text-xs font-semibold"
               >
                 Acessar pagamento
               </a>
@@ -160,7 +155,7 @@ export function AdminLogin() {
         )}
 
         {verifyPrompt && (
-          <div className="ds-alert ds-alert-warning space-y-3">
+          <div className="rounded-2xl border border-amber-300/30 bg-amber-500/10 px-4 py-3 space-y-3 text-amber-100 text-sm">
             <p className="font-semibold">Sua conta ainda não foi ativada.</p>
             <p>
               {verifyPrompt.emailMasked
@@ -172,14 +167,14 @@ export function AdminLogin() {
                 type="button"
                 onClick={handleResendVerification}
                 disabled={resendLoading || resendCooldown > 0 || !verifyPrompt.email}
-                className="ds-btn ds-btn-primary ds-focus-ring text-white font-semibold text-xs px-3 py-2 disabled:opacity-60"
+                className="rounded-xl bg-[linear-gradient(120deg,#22d3ee,#0ea5e9)] text-slate-950 font-semibold text-xs px-3 py-2.5 disabled:opacity-60"
               >
                 {resendLoading ? 'Reenviando...' : resendCooldown > 0 ? `Reenviar em ${resendCooldown}s` : 'Reenviar código de ativação'}
               </button>
               <button
                 type="button"
                 onClick={() => navigate('/verify-email', { state: { email: verifyPrompt.email } })}
-                className="ds-btn ds-btn-secondary px-3 py-2 text-amber-800 font-semibold text-xs hover:bg-amber-100"
+                className="rounded-xl border border-amber-200/45 bg-slate-900/40 px-3 py-2.5 text-amber-100 font-semibold text-xs hover:bg-amber-200/10 transition"
               >
                 Já tenho o código
               </button>
@@ -189,35 +184,38 @@ export function AdminLogin() {
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-gray-700">Slug ou e-mail</label>
+            <label className="text-sm font-semibold text-slate-200">Slug ou e-mail</label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                <Storefront size={18} weight="duotone" />
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                <User size={18} weight="duotone" />
               </span>
               <input
                 type="text"
                 value={loginForm.identifier}
                 onChange={e => setLoginForm(prev => ({ ...prev, identifier: e.target.value }))}
-                className="ds-input h-12 border-slate-200 ds-focus-ring pl-10 transition-shadow focus:ring-2 focus:ring-sky-500/25 focus:border-sky-300"
+                className="h-12 w-full rounded-2xl border border-slate-300/20 bg-slate-950/45 text-slate-100 placeholder:text-slate-400/80 pl-10 pr-4 transition-shadow outline-none focus:ring-2 focus:ring-cyan-300/40 focus:border-cyan-300/50"
                 placeholder="Slug ou e-mail"
                 autoCapitalize="none"
               />
             </div>
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-gray-700">Senha</label>
+            <label className="text-sm font-semibold text-slate-200">Senha</label>
             <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                <LockKey size={18} weight="duotone" />
+              </span>
               <input
                 type={showPassword ? 'text' : 'password'}
                 value={loginForm.password}
                 onChange={e => setLoginForm(prev => ({ ...prev, password: e.target.value }))}
-                className="ds-input h-12 border-slate-200 ds-focus-ring pr-10 transition-shadow focus:ring-2 focus:ring-sky-500/25 focus:border-sky-300"
+                className="h-12 w-full rounded-2xl border border-slate-300/20 bg-slate-950/45 text-slate-100 placeholder:text-slate-400/80 pl-10 pr-12 transition-shadow outline-none focus:ring-2 focus:ring-cyan-300/40 focus:border-cyan-300/50"
                 placeholder="Digite sua senha"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 h-9 w-9 rounded-xl border border-gray-200 bg-white/80 flex items-center justify-center text-gray-500 hover:text-gray-800 ds-btn ds-focus-ring"
+                className="absolute right-2 top-1/2 -translate-y-1/2 h-9 w-9 rounded-xl border border-slate-300/25 bg-slate-900/60 flex items-center justify-center text-slate-300 hover:text-slate-100"
                 aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
               >
                 {showPassword ? <EyeSlash size={18} weight="duotone" /> : <Eye size={18} weight="duotone" />}
@@ -226,7 +224,7 @@ export function AdminLogin() {
             <button
               type="button"
               onClick={() => navigate('/forgot-password')}
-              className="text-xs font-semibold text-brand-primary underline hover:no-underline cursor-pointer"
+              className="text-xs font-semibold text-cyan-300 underline hover:no-underline cursor-pointer"
             >
               Esqueci minha senha
             </button>
@@ -236,14 +234,14 @@ export function AdminLogin() {
         <div className="space-y-3">
             <button
               type="submit"
-              className="w-full h-12 ds-btn ds-btn-primary ds-btn-shine ds-focus-ring text-white py-3 font-semibold shadow-[0_14px_30px_-22px_rgba(15,23,42,0.8)]"
+              className="w-full h-12 rounded-2xl bg-[linear-gradient(120deg,#22d3ee,#0284c7)] text-slate-950 py-3 font-black tracking-[0.01em] shadow-[0_16px_36px_-22px_rgba(6,182,212,0.85)] hover:brightness-110 active:scale-[0.995] transition"
             >
-              Acessar painel da loja
+              Acessar painel
             </button>
           <button
             type="button"
             onClick={() => navigate('/')}
-            className="w-full ds-btn ds-btn-secondary ds-focus-ring border-2 text-gray-700 py-3 font-semibold"
+            className="w-full rounded-2xl border border-slate-300/25 bg-slate-900/50 text-slate-100 py-3 font-semibold hover:bg-slate-900/70 transition"
           >
             <span className="inline-flex items-center justify-center gap-2">
               <ArrowLeft size={18} weight="duotone" />
