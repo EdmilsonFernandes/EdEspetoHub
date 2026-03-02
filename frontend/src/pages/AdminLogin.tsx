@@ -125,7 +125,7 @@ export function AdminLogin() {
     <AuthLayout>
       <form onSubmit={handleLogin} className="space-y-6">
         <div className="text-center">
-          <img src="/logo.svg" alt="Já no Caminho" className="mx-auto h-16 sm:h-20 w-auto object-contain drop-shadow-[0_14px_30px_rgba(34,211,238,0.35)]" />
+          <img src="/janocaminho.jpg" alt="Já no Caminho" className="mx-auto h-16 sm:h-20 w-auto object-contain rounded-xl drop-shadow-[0_14px_30px_rgba(34,211,238,0.35)]" />
           <h2 className="mt-4 text-2xl sm:text-3xl font-black text-slate-100 mb-1 tracking-tight">Painel de Administração da Loja</h2>
           <p className="text-sm text-slate-300/90">Acesse sua operação com segurança</p>
         </div>

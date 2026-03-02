@@ -120,13 +120,13 @@ export function MotoboyLogin() {
           <aside className="hidden lg:block">
             <div className="relative overflow-hidden rounded-3xl min-h-[640px] border border-sky-200/20 shadow-[0_34px_80px_-48px_rgba(8,145,178,0.65)]">
               <div className="absolute inset-0">
-                <img src="/logo.svg" alt="" aria-hidden className="h-full w-full object-cover object-center opacity-[0.34]" />
+                <img src="/janocaminho.jpg" alt="" aria-hidden className="h-full w-full object-cover object-center opacity-[0.34]" />
               </div>
               <div className="absolute inset-0 bg-[linear-gradient(160deg,rgba(2,6,23,0.72),rgba(15,23,42,0.56))]" />
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.26),_transparent_56%),radial-gradient(circle_at_bottom,_rgba(16,185,129,0.2),_transparent_62%)]" />
               <div className="relative z-10 h-full p-8 text-white flex flex-col justify-between">
                 <div className="space-y-5">
-                  <img src="/logo.svg" alt="Já no Caminho" className="h-20 w-auto object-contain drop-shadow-[0_12px_30px_rgba(34,211,238,0.35)]" />
+                  <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-20 w-auto object-contain rounded-xl drop-shadow-[0_12px_30px_rgba(34,211,238,0.35)]" />
                   <p className="text-[11px] uppercase tracking-[0.3em] text-cyan-200 font-semibold">Área do Entregador</p>
                   <h2 className="text-[2rem] font-black leading-[1.08]">
                     Operação de entrega rápida, clara e profissional
@@ -156,7 +156,7 @@ export function MotoboyLogin() {
           <div className="mx-auto w-full max-w-md">
             <div className="rounded-3xl border border-sky-200/20 bg-[linear-gradient(165deg,rgba(15,23,42,0.86),rgba(15,23,42,0.64))] p-5 sm:p-7 shadow-[0_32px_80px_-44px_rgba(6,182,212,0.5)] backdrop-blur-xl space-y-5">
               <div className="text-center">
-                <img src="/logo.svg" alt="Já no Caminho" className="mx-auto h-16 sm:h-20 w-auto object-contain drop-shadow-[0_12px_28px_rgba(34,211,238,0.35)]" />
+                <img src="/janocaminho.jpg" alt="Já no Caminho" className="mx-auto h-16 sm:h-20 w-auto object-contain rounded-xl drop-shadow-[0_12px_28px_rgba(34,211,238,0.35)]" />
                 <p className="mt-3 text-[11px] uppercase tracking-[0.28em] text-cyan-200 font-semibold">Área do Entregador</p>
                 <h2 className="mt-2 text-xl sm:text-2xl font-black text-slate-100">
                   {alreadyLoggedIn ? 'Sessão ativa do entregador' : 'Bem-vindo de volta, Entregador'}
