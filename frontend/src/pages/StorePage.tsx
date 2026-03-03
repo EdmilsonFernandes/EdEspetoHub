@@ -1270,7 +1270,7 @@ export function StorePage() {
                         rel="noreferrer"
                         className="font-semibold text-slate-500 hover:text-slate-700 underline-offset-2 hover:underline"
                       >
-                        Powered by Já no Caminho
+                        Desenvolvido por Já no Caminho
                       </a>
                     </div>
                   </div>

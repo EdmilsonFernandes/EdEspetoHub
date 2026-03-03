@@ -833,7 +833,7 @@ export const MenuView = ({
             rel="noreferrer"
             className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500 hover:text-slate-700 hover:border-slate-300 transition"
           >
-            Powered by Já no Caminho
+            Desenvolvido por Já no Caminho
           </a>
         </div>
         </div>

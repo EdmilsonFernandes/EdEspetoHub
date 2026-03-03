@@ -355,7 +355,7 @@ export function AdminHeader({ contextLabel = 'Painel da Loja', onToggleHeader }:
             <span className="h-5 w-5 rounded-full overflow-hidden bg-slate-900/70 ring-1 ring-white/35">
               <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full object-cover object-center" />
             </span>
-            <span className="hidden sm:inline">Powered by</span>
+            <span className="hidden sm:inline">Desenvolvido por</span>
             <span className="font-bold">Já no Caminho</span>
           </a>
           {onToggleHeader && (
