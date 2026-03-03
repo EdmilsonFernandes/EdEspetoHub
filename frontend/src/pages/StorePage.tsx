@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ShoppingCart, PaperPlaneTilt } from '@phosphor-icons/react';
+import { ShoppingCart, PaperPlaneTilt, Clock, MapPinLine, InstagramLogo, ArrowLeft } from '@phosphor-icons/react';
 import { productService } from '../services/productService';
 import { orderService } from '../services/orderService';
 import { customerService } from '../services/customerService';
@@ -14,7 +14,7 @@ import { useToast } from '../contexts/ToastContext';
 import { formatCurrency, formatOrderDisplayId, formatOrderType, formatPaymentMethod } from '../utils/format';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getPersistedBranding, brandingStorageKey, defaultBranding, initialCustomer, defaultPaymentMethod, WHATSAPP_NUMBER, PIX_KEY } from '../constants';
-import { formatOpeningHoursSummary, isStoreOpenNow, normalizeOpeningHours } from '../utils/storeHours';
+import { isStoreOpenNow, normalizeOpeningHours } from '../utils/storeHours';
 import {
   formatSelectedModifiers,
   getModifiersSignature,
@@ -22,6 +22,8 @@ import {
   normalizeSelectedModifiers,
 } from '../utils/productModifiers';
 import { getCartPricing } from '../utils/orderPricing';
+
+const WEEKDAY_LABELS = [ 'Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado' ];
 
 export function StorePage() {
   const { storeSlug } = useParams();
@@ -116,7 +118,26 @@ export function StorePage() {
     if (!intervals.length) return '';
     return intervals.map((interval) => `${interval.start}–${interval.end}`).join(' • ');
   }, [openingHours]);
-  const weeklyHours = useMemo(() => formatOpeningHoursSummary(openingHours), [openingHours]);
+  const weeklyHoursRows = useMemo(() => {
+    const normalized = normalizeOpeningHours(openingHours);
+    const today = new Date().getDay();
+    return normalized.map((entry) => {
+      const label = WEEKDAY_LABELS[entry.day] || `Dia ${entry.day}`;
+      const intervals = Array.isArray(entry.intervals) ? entry.intervals : [];
+      const value =
+        entry.enabled === false
+          ? 'Fechado'
+          : intervals.length
+            ? intervals.map((interval) => `${interval.start} - ${interval.end}`).join(' • ')
+            : 'Horário livre';
+      return {
+        day: entry.day,
+        label,
+        value,
+        isToday: entry.day === today,
+      };
+    });
+  }, [openingHours]);
   const closedStateStoreName = useMemo(() => {
     const exactName = String(storeName || '').trim();
     if (exactName) return exactName;
@@ -1187,92 +1208,111 @@ export function StorePage() {
           </div>
         )}
         {showClosedState && (
-          <div className="min-h-[70vh] flex items-center justify-center">
-            <div className="w-full max-w-4xl px-4">
-              <div className="relative overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-[0_30px_80px_-50px_rgba(15,23,42,0.65)]">
-                <div className="absolute inset-x-0 top-0 h-2 bg-gradient-to-r from-amber-400 via-orange-500 to-red-500" />
-                <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] p-6 sm:p-8">
-                  <div className="space-y-6">
-                    <div className="flex items-center gap-4">
-                      <div className="w-16 h-16 rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-white">
+          <div className="min-h-[72vh] bg-[#f7f7f7]">
+            <div className="w-full max-w-5xl mx-auto px-4 py-6 sm:py-8">
+              <div className="grid gap-4 md:grid-cols-2 md:items-start">
+                <div className="space-y-4">
+                  <div className="rounded-3xl bg-white p-5 sm:p-6 shadow-[0_10px_28px_-22px_rgba(15,23,42,0.45)]">
+                    <div className="flex items-center gap-4 min-w-0">
+                      <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-2xl overflow-hidden bg-slate-100 shrink-0">
                         <img
                           src={branding?.logoUrl || '/janocaminho.jpg'}
                           alt={closedStateStoreName}
                           className="w-full h-full object-cover"
                         />
                       </div>
-                      <div>
-                        <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Atendimento</p>
-                        <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">
+                      <div className="min-w-0">
+                        <p className="text-[11px] uppercase tracking-[0.24em] text-slate-400">Perfil da loja</p>
+                        <h1 className="text-2xl sm:text-3xl font-black text-[#1a1a1a] break-words">
                           {closedStateStoreName}
-                        </h2>
+                        </h1>
+                        <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-700">
+                          <Clock size={14} weight="bold" />
+                          Fechado no momento
+                        </div>
                       </div>
                     </div>
-                    <div className="inline-flex items-center gap-2 rounded-full bg-amber-100 px-4 py-2 text-xs font-semibold text-amber-800">
-                      🕒 Loja fechada no momento
-                    </div>
-                    <p className="text-slate-600">
-                      O atendimento esta fechado. Volte no proximo horario de funcionamento.
+                    <p className="mt-4 text-sm text-[#666666]">
+                      O atendimento está fechado agora. Veja os horários abaixo e volte no próximo período.
                     </p>
                     {todayHoursLabel && (
-                      <p className="text-sm text-slate-500">Horario de hoje: {todayHoursLabel}</p>
+                      <p className="mt-2 text-sm text-slate-600">
+                        <span className="font-semibold text-slate-800">Hoje:</span> {todayHoursLabel}
+                      </p>
                     )}
-                    {storeDescription && (
-                      <div className="rounded-2xl premium-card-soft p-4 text-sm text-slate-600">
-                        <p className="text-xs uppercase tracking-[0.25em] text-slate-400 mb-2">Sobre a loja</p>
-                        <p>{storeDescription}</p>
-                      </div>
-                    )}
-                    <div className="flex flex-col sm:flex-row gap-3">
-                      <button
-                        onClick={() => navigate('/')}
-                        className="px-6 py-3 rounded-xl border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50 transition-all"
-                      >
-                        Voltar ao inicio
-                      </button>
-                    </div>
                   </div>
-                  <div className="rounded-3xl border border-slate-200 bg-white/80 p-5 space-y-4">
-                    <div className="rounded-2xl premium-card-soft p-4 text-sm text-slate-600 space-y-2">
-                      <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Contato</p>
+
+                  {storeDescription && (
+                    <div className="rounded-3xl bg-white p-5 shadow-[0_10px_28px_-22px_rgba(15,23,42,0.45)]">
+                      <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400">Sobre</p>
+                      <p className="mt-2 text-sm text-[#666666] break-words">{storeDescription}</p>
+                    </div>
+                  )}
+
+                  <button
+                    onClick={() => navigate('/')}
+                    className="w-full md:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl border border-slate-200 bg-white text-slate-700 font-semibold hover:bg-slate-50 transition-all"
+                  >
+                    <ArrowLeft size={16} weight="bold" />
+                    Voltar ao início
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="rounded-3xl bg-white p-5 shadow-[0_10px_28px_-22px_rgba(15,23,42,0.45)]">
+                    <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400">Contato e endereço</p>
+                    <div className="mt-3 space-y-3">
                       {instagramHandle && (
                         <a
                           href={`https://instagram.com/${instagramHandle.replace('@', '')}`}
                           target="_blank"
                           rel="noreferrer"
-                          className="flex items-center justify-between gap-2 text-sm font-semibold text-[#0a66c2]"
+                          className="flex items-start gap-2 text-sm font-semibold text-[#0a66c2] hover:underline break-all"
                         >
-                          <span>Instagram</span>
+                          <InstagramLogo size={18} weight="fill" className="mt-0.5 shrink-0" />
                           <span>{instagramHandle}</span>
                         </a>
                       )}
                       {storeAddress && (
-                        <div className="text-sm text-slate-500">
-                          <p className="font-semibold text-slate-700">Endereço</p>
-                          <p>{storeAddress}</p>
+                        <div className="flex items-start gap-2 text-sm text-[#666666] break-words">
+                          <MapPinLine size={18} weight="bold" className="mt-0.5 shrink-0 text-slate-500" />
+                          <span>{storeAddress}</span>
                         </div>
                       )}
+                      {!instagramHandle && !storeAddress && (
+                        <p className="text-sm text-slate-500">Nenhum contato cadastrado.</p>
+                      )}
                     </div>
-                    {weeklyHours.length > 0 && (
-                      <div className="rounded-2xl premium-card p-4 text-xs text-slate-600">
-                        <p className="text-xs font-semibold text-slate-700 mb-2">Horarios da semana</p>
-                        <div className="grid sm:grid-cols-2 gap-2">
-                          {weeklyHours.map((line) => (
-                            <p key={line}>{line}</p>
-                          ))}
-                        </div>
+                  </div>
+
+                  {weeklyHoursRows.length > 0 && (
+                    <div className="rounded-3xl bg-white p-5 shadow-[0_10px_28px_-22px_rgba(15,23,42,0.45)]">
+                      <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400">Horários da semana</p>
+                      <div className="mt-3 divide-y divide-slate-100">
+                        {weeklyHoursRows.map((row) => (
+                          <div
+                            key={`${row.day}-${row.label}`}
+                            className={`flex items-center justify-between gap-3 py-2 text-sm ${
+                              row.isToday ? 'font-bold text-slate-900 bg-amber-50/70 px-2 rounded-lg' : 'text-[#666666]'
+                            }`}
+                          >
+                            <span className="min-w-0">{row.label}</span>
+                            <span className="text-right break-words">{row.value}</span>
+                          </div>
+                        ))}
                       </div>
-                    )}
-                    <div className="text-xs text-slate-400 text-center">
-                      <a
-                        href="https://www.janocaminho.com.br"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="font-semibold text-slate-500 hover:text-slate-700 underline-offset-2 hover:underline"
-                      >
-                        Desenvolvido por Já no Caminho
-                      </a>
                     </div>
+                  )}
+
+                  <div className="text-xs text-slate-400 text-center">
+                    <a
+                      href="https://www.janocaminho.com.br"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="font-semibold text-slate-500 hover:text-slate-700 underline-offset-2 hover:underline"
+                    >
+                      Desenvolvido por Já no Caminho
+                    </a>
                   </div>
                 </div>
               </div>
