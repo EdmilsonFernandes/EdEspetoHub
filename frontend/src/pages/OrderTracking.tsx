@@ -718,10 +718,10 @@ export function OrderTracking() {
   const itemsToRender = Array.isArray(order?.items) ? order.items : [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-slate-50">
       <style>{`@keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}`}</style>
-      <header className="sticky top-0 z-50 border-b border-white/60 bg-white/85 backdrop-blur-xl shadow-[0_18px_36px_-28px_rgba(15,23,42,0.5)]">
-        <div className="h-1 bg-[linear-gradient(90deg,#ef4444,#f97316,#f59e0b)]" />
+      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur-xl shadow-[0_18px_36px_-28px_rgba(15,23,42,0.5)]">
+        <div className="h-1 bg-slate-200" />
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between py-2.5 sm:py-4">
             <button onClick={handleBack} className="flex items-center gap-2.5 min-w-0">
@@ -729,13 +729,13 @@ export function OrderTracking() {
                 <img src={storeLogo} alt={storeName} className="w-full h-full object-cover" />
               </div>
               <div className="text-left leading-tight min-w-0">
-                <p className="text-sm sm:text-lg font-black text-gray-900 truncate">{storeName}</p>
-                <p className="text-[10px] sm:text-xs text-gray-500 uppercase tracking-[0.22em]">Acompanhar pedido</p>
+                <p className="text-sm sm:text-lg font-black text-slate-900 truncate">{storeName}</p>
+                <p className="text-[10px] sm:text-xs text-slate-500 uppercase tracking-[0.22em]">Acompanhar pedido</p>
               </div>
             </button>
             <button
               onClick={handleBack}
-              className="px-3 py-2 sm:px-4 text-xs sm:text-sm rounded-full border border-slate-200 text-gray-700 hover:bg-gray-50 transition-colors shrink-0"
+              className="px-3 py-2 sm:px-4 text-xs sm:text-sm rounded-full border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors shrink-0"
             >
               Voltar
             </button>
@@ -744,7 +744,7 @@ export function OrderTracking() {
       </header>
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4 pb-32 sm:pb-12 sm:py-12">
-        <div className="bg-white border border-gray-100 rounded-3xl shadow-xl p-6 sm:p-8">
+        <div className="bg-white border border-slate-200 rounded-3xl shadow-xl p-6 sm:p-8">
           {loading && (
             <div className="py-6 space-y-4">
               <div className="ds-skeleton h-24 w-full" />
@@ -764,14 +764,14 @@ export function OrderTracking() {
               <div className="rounded-2xl sm:rounded-3xl border border-slate-100 bg-white shadow-sm p-5 sm:p-6">
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                   <div>
-                    <p className="text-xs uppercase tracking-[0.3em] text-gray-400">
+                    <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
                       Pedido #{formatOrderDisplayId(order.id, storeSlug)}
                     </p>
                     <div className="mt-2 flex items-center gap-3 flex-wrap">
-                      <h1 className="text-[26px] leading-none sm:text-3xl font-black text-gray-900">{statusLabel}</h1>
+                      <h1 className="text-[26px] leading-none sm:text-3xl font-black text-slate-900">{statusLabel}</h1>
                       {isDelivery && (String((order as any)?.delivery?.status || '').toUpperCase() === 'IN_TRANSIT' || status === 'in_delivery') && (
                         <span
-                          className="inline-flex items-center rounded-full bg-amber-100 text-amber-800 text-xs font-semibold px-3 py-1"
+                          className="inline-flex items-center rounded-full bg-orange-50 text-orange-600 text-xs font-semibold px-3 py-1"
                           title="Saiu para entrega"
                           aria-label="Saiu para entrega"
                         >
@@ -779,16 +779,16 @@ export function OrderTracking() {
                         </span>
                       )}
                       <span
-                        className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                        className={`px-3 py-1 rounded-full text-xs font-semibold border ${
                           isReady
-                            ? 'bg-brand-primary text-white'
-                            : 'bg-brand-primary-soft text-brand-primary animate-pulse'
+                            ? 'bg-emerald-50 text-emerald-600 border-emerald-200'
+                            : 'bg-orange-50 text-orange-600 border-orange-200'
                         }`}
                       >
                       {isReady ? 'Finalizado' : 'Em andamento'}
                     </span>
                     </div>
-                    <p className="text-sm text-gray-500 mt-1.5">{typeLabel}</p>
+                    <p className="text-sm text-slate-500 mt-1.5">{typeLabel}</p>
 
                     {estimatedReadyAt && !isReady ? (
                       <div className="mt-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
@@ -852,19 +852,19 @@ export function OrderTracking() {
                 </div>
               )}
 
-              <div id="order-status-section" className="rounded-2xl border border-gray-100 p-5 bg-gray-50">
+              <div id="order-status-section" className="rounded-2xl border border-slate-200 p-5 bg-white">
                 <div className="mb-4">
-                  <div className="h-2 w-full rounded-full bg-gray-200 overflow-hidden">
+                  <div className="h-2 w-full rounded-full bg-slate-200 overflow-hidden">
                     <div
                       className="h-full transition-all"
                       style={{
                         width: `${progress}%`,
                         backgroundImage:
-                          'linear-gradient(90deg, var(--color-primary), var(--color-secondary))',
+                          'linear-gradient(90deg, #f97316, #ea580c)',
                       }}
                     />
                   </div>
-                  <div className="mt-2 text-xs text-gray-500">{progress}% completo</div>
+                  <div className="mt-2 text-xs text-slate-500">{progress}% completo</div>
                 </div>
                 {(isReady && elapsedMs > 0) || (remainingEstimateMinutes !== null && !isReady) || (etaWindowMin && etaWindowMax && !isReady) || isEstimateDelayed ? (
                   <div className="mb-4 space-y-1.5">
@@ -909,7 +909,7 @@ export function OrderTracking() {
                           <span
                             className={`h-5 w-5 rounded-full border grid place-items-center ${
                               isCurrent
-                                ? 'border-brand-primary bg-brand-primary text-white'
+                                ? 'border-orange-500 bg-orange-500 text-white'
                                 : isCompleted
                                   ? 'border-slate-300 bg-slate-200 text-slate-700'
                                   : 'border-slate-200 bg-slate-50 text-slate-400'
@@ -917,7 +917,7 @@ export function OrderTracking() {
                           >
                             {isCompleted ? <CheckCircle size={12} weight="fill" /> : <span className="text-[9px] font-bold">{stepIndex + 1}</span>}
                           </span>
-                          <span className={`text-[12px] ${isCurrent ? 'font-extrabold text-brand-primary' : isCompleted ? 'font-semibold text-slate-700' : 'text-slate-400'}`}>
+                          <span className={`text-[12px] ${isCurrent ? 'font-extrabold text-orange-600' : isCompleted ? 'font-semibold text-slate-700' : 'text-slate-400'}`}>
                             {step.label}
                           </span>
                         </div>
@@ -934,9 +934,9 @@ export function OrderTracking() {
                   className="rounded-3xl premium-card p-6"
                 >
                   <div className="flex items-center justify-between gap-3 mb-4">
-                    <p className="text-sm font-semibold text-gray-900">Resumo do pedido</p>
+                    <p className="text-sm font-semibold text-slate-900">Resumo do pedido</p>
                     {paymentMeta?.label && (
-                      <span className="px-3 py-1 rounded-full text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 inline-flex items-center gap-2">
+                      <span className="px-3 py-1 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-600 border border-slate-200 inline-flex items-center gap-2">
                         {paymentMeta.icon && (
                           <img src={paymentMeta.icon} alt={paymentMeta.label} className="h-4 w-4 object-contain" />
                         )}
@@ -944,7 +944,7 @@ export function OrderTracking() {
                       </span>
                     )}
                   </div>
-                  <div className="space-y-3 text-sm text-gray-600">
+                  <div className="space-y-3 text-sm text-slate-600">
                     {itemsToRender.map((item) => (
                       <div key={item.id || item.productId} className="flex items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-white px-3 py-2.5">
                         <div className="flex items-center gap-3 min-w-0">
@@ -960,7 +960,7 @@ export function OrderTracking() {
                             </div>
                           )}
                           <div className="flex flex-col min-w-0">
-                            <span className="font-semibold text-gray-800 break-words">
+                            <span className="font-semibold text-slate-800 break-words">
                               <span className="inline-flex items-center justify-center min-w-[28px] px-1.5 mr-1 rounded-md bg-slate-100 text-slate-700 text-xs font-bold">
                                 {item.quantity}x
                               </span>
@@ -990,7 +990,7 @@ export function OrderTracking() {
                         </div>
                         {item.originalPrice && Number(item.originalPrice) > Number(item.price) ? (
                           <span className="flex flex-col items-end gap-0.5 flex-shrink-0">
-                            <span className="text-[11px] line-through text-gray-400">
+                            <span className="text-[11px] line-through text-slate-400">
                               {formatCurrency(Number(item.originalPrice) * (item.quantity || 1))}
                             </span>
                             <span className="font-semibold text-emerald-600">
@@ -998,7 +998,7 @@ export function OrderTracking() {
                             </span>
                           </span>
                         ) : (
-                          <span className="font-semibold text-gray-800 flex-shrink-0">R$ {Number(item.price).toFixed(2)}</span>
+                          <span className="font-semibold text-slate-800 flex-shrink-0">R$ {Number(item.price).toFixed(2)}</span>
                         )}
                       </div>
                     ))}
@@ -1019,8 +1019,8 @@ export function OrderTracking() {
                   </div>
                 </div>
                 <div id="order-info-section" className="rounded-3xl premium-card p-6 space-y-3">
-                  <p className="text-sm font-semibold text-gray-900">Informações</p>
-                  <div className="text-sm text-gray-600 space-y-2">
+                  <p className="text-sm font-semibold text-slate-900">Informações</p>
+                  <div className="text-sm text-slate-600 space-y-2">
                     <p>
                       <span className="font-semibold">Cliente:</span> {order.customerName || 'Cliente'}
                     </p>
@@ -1061,7 +1061,7 @@ export function OrderTracking() {
                     )}
                     {isDelivery && formatAddress(order.address || order.deliveryAddress) && (
                       <p className="flex items-start gap-2">
-                        <MapPin size={16} weight="duotone" className="text-gray-400 mt-0.5" />
+                        <MapPin size={16} weight="duotone" className="text-slate-400 mt-0.5" />
                         <span>{formatAddress(order.address || order.deliveryAddress)}</span>
                       </p>
                     )}
@@ -1536,7 +1536,7 @@ export function OrderTracking() {
           <div className="rounded-2xl border border-slate-200/80 bg-white/95 backdrop-blur px-4 py-2.5 shadow-[0_-2px_24px_-16px_rgba(15,23,42,0.7)]">
             <div className="flex items-center justify-between gap-2 text-xs">
               <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-2.5 py-1 font-semibold text-slate-700 border border-slate-200">
-                <span className={`h-1.5 w-1.5 rounded-full ${isReady ? 'bg-emerald-500' : 'bg-brand-primary'}`} />
+                <span className={`h-1.5 w-1.5 rounded-full ${isReady ? 'bg-emerald-500' : 'bg-orange-500'}`} />
                 {statusLabel}
               </span>
               <span className="text-base font-black text-slate-900">{formatCurrency(order?.total || 0)}</span>
