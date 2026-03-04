@@ -84,6 +84,12 @@ const Header = ({
     outros: "Comércio",
   };
   const segmentLabel = segmentLabelMap[String(segment || "").toLowerCase()] || "Comércio";
+  const closingHour = todayHoursLabel
+    ? todayHoursLabel
+        .split("-")
+        .map((part) => part.trim())
+        .filter(Boolean)[1] || todayHoursLabel
+    : "";
 
   return (
     <div className={`w-full sticky top-0 z-50 ${compact ? 'pb-2' : 'pb-3'} pt-2`}>
@@ -117,21 +123,13 @@ const Header = ({
                     {segmentLabel}
                   </span>
                 )}
-                <span
-                  className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[10px] font-semibold ${
-                    isOpenNow
-                      ? 'border-emerald-200 bg-emerald-50 text-emerald-600'
-                      : 'border-orange-200 bg-orange-50 text-orange-500'
-                  }`}
-                >
-                  <span className={`h-1.5 w-1.5 rounded-full ${isOpenNow ? 'bg-emerald-500' : 'bg-orange-500'}`} />
-                  {isOpenNow ? 'Aberto agora' : 'Fechado no momento'}
-                </span>
-                {todayHoursLabel && (
-                  <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-semibold text-slate-500 max-w-[20ch] truncate">
-                    Hoje {todayHoursLabel}
+                <div className="inline-flex items-center gap-1.5 text-sm text-slate-600 font-medium">
+                  <span className={`h-2 w-2 rounded-full ${isOpenNow ? "bg-emerald-500 animate-pulse" : "bg-orange-500"}`} />
+                  <span>
+                    {isOpenNow ? "Aberto" : "Fechado"}
+                    {closingHour ? `  ${isOpenNow ? "Fecha às" : "Hoje até"} ${closingHour}` : ""}
                   </span>
-                )}
+                </div>
               </div>
               {!compact && (
                 <div className="mt-2 flex flex-wrap items-center gap-1.5 sm:gap-2">
@@ -545,8 +543,6 @@ export const MenuView = ({
                 <div className="flex-1 flex overflow-x-auto gap-3 pr-20 no-scrollbar scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                   {filteredGrouped.map((category) => {
                     const isActive = activeCategoryKey === category.key;
-                    const meta = categoryVisualMeta(category.key);
-                    const Icon = meta.icon;
 
                     return (
                       <button
@@ -564,9 +560,6 @@ export const MenuView = ({
                       >
                         <span className="text-xs leading-none" aria-hidden="true">
                           {categoryGlyph(category.key)}
-                        </span>
-                        <span className={`inline-flex h-5 w-5 items-center justify-center rounded-full ${isActive ? "bg-white/15 text-white" : "bg-slate-50 text-slate-600 border border-slate-200"}`}>
-                          <Icon size={11} weight="duotone" />
                         </span>
                         <span className="whitespace-nowrap">{category.label}</span>
                         <span className={`rounded-full px-2 py-0.5 text-[10px] ${isActive ? "bg-white/15 text-white/90" : "bg-slate-100 text-slate-400"}`}>
@@ -927,8 +920,6 @@ export const MenuView = ({
           <div className="grid grid-cols-2 gap-3 p-5 pt-3 max-h-[65vh] overflow-y-auto">
             {filteredGrouped.map((category) => {
               const isActive = activeCategoryKey === category.key;
-              const meta = categoryVisualMeta(category.key);
-              const Icon = meta.icon;
 
               return (
                 <button
@@ -948,9 +939,6 @@ export const MenuView = ({
                   <div className="flex items-center gap-2">
                     <span className="text-sm leading-none" aria-hidden="true">
                       {categoryGlyph(category.key)}
-                    </span>
-                    <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full ${isActive ? "bg-white/15 text-white" : "bg-white border border-slate-200 text-slate-600"}`}>
-                      <Icon size={12} weight="duotone" />
                     </span>
                     <span className="text-sm font-medium truncate">{category.label}</span>
                   </div>
