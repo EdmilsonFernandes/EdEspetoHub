@@ -109,10 +109,6 @@ export function OrderTracking() {
   const [reviewError, setReviewError] = useState('');
   const [reviewAccessDenied, setReviewAccessDenied] = useState(false);
   const [orderAccessToken, setOrderAccessToken] = useState('');
-  const [showItemsSheetMobile, setShowItemsSheetMobile] = useState(false);
-  const [mobileSection, setMobileSection] = useState<'status' | 'summary' | 'info'>('status');
-  const [didAutoJumpForReady, setDidAutoJumpForReady] = useState(false);
-  const [openingItemsSheet, setOpeningItemsSheet] = useState(false);
   const [tipPixCopied, setTipPixCopied] = useState(false);
   const [reviewForm, setReviewForm] = useState({
     storeRating: 0,
@@ -279,7 +275,7 @@ export function OrderTracking() {
     status === 'delivered' ||
     status === 'finished' ||
     String((order as any)?.delivery?.status || '').toUpperCase() === 'DELIVERED';
-  const shouldHighlightReviewTab = isReady && !reviewState?.review && !reviewAccessDenied;
+  const shouldShowReviewCta = isReady && !reviewState?.review && !reviewAccessDenied;
   const canRateDelivery = Boolean(reviewState?.features?.deliveryFeedbackEnabled ?? reviewState?.isDelivery ?? isDelivery);
   const canUseTipFlow = Boolean(reviewState?.features?.tipEnabled ?? canRateDelivery);
   const storePhone = order?.store?.phone;
@@ -404,6 +400,13 @@ export function OrderTracking() {
     };
     localStorage.setItem(`reorder:${storeSlug}`, JSON.stringify(payload));
     navigate(storeHomePath);
+  };
+  const scrollToBlock = (blockId: string) => {
+    if (typeof window === 'undefined') return;
+    const block = document.getElementById(blockId);
+    if (block) {
+      block.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   };
 
   useEffect(() => {
@@ -582,23 +585,6 @@ export function OrderTracking() {
   }, [order?.id]);
 
   useEffect(() => {
-    setShowItemsSheetMobile(false);
-  }, [order?.id]);
-
-  useEffect(() => {
-    setMobileSection('status');
-    setDidAutoJumpForReady(false);
-  }, [order?.id]);
-
-  useEffect(() => {
-    if (!isReady || didAutoJumpForReady) return;
-    if (shouldHighlightReviewTab) {
-      setMobileSection('info');
-    }
-    setDidAutoJumpForReady(true);
-  }, [isReady, didAutoJumpForReady, shouldHighlightReviewTab, mobileSection]);
-
-  useEffect(() => {
     setFrozenElapsedMs(null);
   }, [order?.id]);
 
@@ -775,22 +761,22 @@ export function OrderTracking() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <style>{`@keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}`}</style>
-      <header className="sticky top-0 z-50 border-b border-white/60 bg-white/80 backdrop-blur-xl shadow-[0_18px_36px_-28px_rgba(15,23,42,0.5)]">
+      <header className="sticky top-0 z-50 border-b border-white/60 bg-white/85 backdrop-blur-xl shadow-[0_18px_36px_-28px_rgba(15,23,42,0.5)]">
         <div className="h-1 bg-[linear-gradient(90deg,#ef4444,#f97316,#f59e0b)]" />
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-3 sm:py-4">
-            <button onClick={handleBack} className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-2xl overflow-hidden shadow-[0_14px_26px_-18px_rgba(239,68,68,0.7)] border border-white bg-white">
+          <div className="flex items-center justify-between py-2.5 sm:py-4">
+            <button onClick={handleBack} className="flex items-center gap-2.5 min-w-0">
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl overflow-hidden shadow-[0_14px_26px_-18px_rgba(239,68,68,0.7)] border border-white bg-white shrink-0">
                 <img src={storeLogo} alt={storeName} className="w-full h-full object-cover" />
               </div>
-              <div className="hidden sm:block text-left leading-tight">
-                <p className="text-lg font-black text-gray-900">{storeName}</p>
-                <p className="text-xs text-gray-500 uppercase tracking-[0.25em]">Acompanhar pedido</p>
+              <div className="text-left leading-tight min-w-0">
+                <p className="text-sm sm:text-lg font-black text-gray-900 truncate">{storeName}</p>
+                <p className="text-[10px] sm:text-xs text-gray-500 uppercase tracking-[0.22em]">Acompanhar pedido</p>
               </div>
             </button>
             <button
               onClick={handleBack}
-              className="px-3 py-2 sm:px-4 text-sm rounded-full border border-slate-200 text-gray-700 hover:bg-gray-50 transition-colors"
+              className="px-3 py-2 sm:px-4 text-xs sm:text-sm rounded-full border border-slate-200 text-gray-700 hover:bg-gray-50 transition-colors shrink-0"
             >
               Voltar
             </button>
@@ -798,7 +784,7 @@ export function OrderTracking() {
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4 pb-24 sm:pb-12 sm:py-12">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4 pb-32 sm:pb-12 sm:py-12">
         <div className="bg-white border border-gray-100 rounded-3xl shadow-xl p-6 sm:p-8">
           {loading && (
             <div className="py-6 space-y-4">
@@ -823,7 +809,7 @@ export function OrderTracking() {
                       Pedido #{formatOrderDisplayId(order.id, storeSlug)}
                     </p>
                     <div className="mt-2 flex items-center gap-3 flex-wrap">
-                      <h1 className="text-[30px] leading-none sm:text-3xl font-black text-gray-900">{statusLabel}</h1>
+                      <h1 className="text-[26px] leading-none sm:text-3xl font-black text-gray-900">{statusLabel}</h1>
                       {isDelivery && (String((order as any)?.delivery?.status || '').toUpperCase() === 'IN_TRANSIT' || status === 'in_delivery') && (
                         <span
                           className="inline-flex items-center rounded-full bg-amber-100 text-amber-800 text-xs font-semibold px-3 py-1"
@@ -918,28 +904,16 @@ export function OrderTracking() {
                 </div>
               </div>
 
-              <div className="sm:hidden rounded-2xl border border-slate-200 bg-white p-3">
-                <div className="flex items-center justify-between gap-2">
-                  <div>
-                    <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500 font-bold">Resumo rápido</p>
-                    <p className="text-sm font-semibold text-slate-800 mt-1">
-                      {totalItems} item(ns) • {formatCurrency(order.total || 0)}
-                    </p>
-                    <p className="text-[11px] text-slate-500 mt-1">Toque nas abas para ver andamento, itens e detalhes.</p>
-                  </div>
-                </div>
-              </div>
-
               {isReady && !reviewState?.review && !reviewAccessDenied && (
                 <div className="sm:hidden rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2.5">
                   <p className="text-xs font-semibold text-amber-800">Pedido finalizado. Falta sua avaliação.</p>
                   <p className="text-[11px] text-amber-700 mt-1">
-                    Abra a aba <span className="font-bold">Infos</span> para avaliar e
+                    Role até a seção <span className="font-bold">Avaliar pedido</span> para avaliar e
                     {canUseTipFlow ? ' deixar gorjeta para o entregador.' : ' concluir sua avaliação.'}
                   </p>
                   <button
                     type="button"
-                    onClick={() => setMobileSection('info')}
+                    onClick={() => scrollToBlock('order-review-section')}
                     className="mt-2 inline-flex items-center rounded-lg border border-amber-300 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-amber-800 hover:bg-amber-100"
                   >
                     Avaliar agora
@@ -947,37 +921,7 @@ export function OrderTracking() {
                 </div>
               )}
 
-              <div className="sm:hidden sticky top-[74px] z-20 rounded-2xl border border-slate-200 bg-white/95 backdrop-blur p-1 flex items-center gap-1 shadow-sm">
-                {[
-                  { id: 'status', label: 'Status' },
-                  { id: 'summary', label: 'Resumo' },
-                  { id: 'info', label: shouldHighlightReviewTab ? 'Avaliar' : 'Infos', alert: shouldHighlightReviewTab },
-                ].map((tab) => (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => {
-                      if (mobileSection === tab.id) return;
-                      setMobileSection(tab.id as 'status' | 'summary' | 'info');
-                    }}
-                    aria-current={mobileSection === tab.id ? 'page' : undefined}
-                    aria-pressed={mobileSection === tab.id}
-                    disabled={mobileSection === tab.id}
-                    className={`relative flex-1 rounded-xl px-3 py-2 text-xs font-bold transition-all ${
-                      mobileSection === tab.id
-                        ? 'bg-slate-900 text-white cursor-default shadow-sm'
-                        : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-white active:scale-[0.98] active:brightness-[0.98]'
-                    }`}
-                  >
-                    {tab.label}
-                    {tab.alert && mobileSection !== tab.id && (
-                      <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-amber-500" />
-                    )}
-                  </button>
-                ))}
-              </div>
-
-              <div className={`${mobileSection === 'status' ? 'block' : 'hidden'} sm:block rounded-2xl border border-gray-100 p-4 bg-gray-50`}>
+              <div id="order-status-section" className="rounded-2xl border border-gray-100 p-4 bg-gray-50">
                 <div className="flex items-center gap-3 mb-4">
                   <ChefHat className="text-red-500" weight="duotone" />
                   <div>
@@ -1118,8 +1062,8 @@ export function OrderTracking() {
 
               <div className="grid sm:grid-cols-2 gap-4">
                 <div
-                  id="order-summary"
-                  className={`${mobileSection === 'summary' ? 'block' : 'hidden'} sm:block rounded-3xl premium-card p-5`}
+                  id="order-items-section"
+                  className="rounded-3xl premium-card p-5"
                 >
                   <div className="flex items-center justify-between gap-3 mb-4">
                     <p className="text-sm font-semibold text-gray-900">Resumo do pedido</p>
@@ -1134,16 +1078,16 @@ export function OrderTracking() {
                   </div>
                   <div className="space-y-3 text-sm text-gray-600">
                     {itemsToRender.map((item) => (
-                      <div key={item.id || item.productId} className="flex items-center justify-between gap-3">
+                      <div key={item.id || item.productId} className="flex items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-white px-3 py-2.5">
                         <div className="flex items-center gap-3 min-w-0">
                           {item.imageUrl || item.image || item.product?.imageUrl ? (
                             <img
                               src={resolveAssetUrl(item.imageUrl || item.image || item.product?.imageUrl)}
                               alt={item.name}
-                              className="w-11 h-11 rounded-xl object-cover border border-gray-200"
+                              className="w-11 h-11 rounded-full object-cover border border-gray-200"
                             />
                           ) : (
-                            <div className="w-11 h-11 rounded-xl bg-gray-100 border border-gray-200 flex items-center justify-center text-xs text-gray-400">
+                            <div className="w-11 h-11 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-xs text-gray-400">
                               🍖
                             </div>
                           )}
@@ -1156,12 +1100,12 @@ export function OrderTracking() {
                             </span>
                             <div className="flex flex-wrap gap-1 mt-1">
                               {item?.cookingPoint && (
-                                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800 border border-amber-200">
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
                                   {item.cookingPoint}
                                 </span>
                               )}
                               {item?.passSkewer && (
-                                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-fuchsia-100 text-fuchsia-700 border border-fuchsia-200">
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
                                   passar farinha
                                 </span>
                               )}
@@ -1206,7 +1150,7 @@ export function OrderTracking() {
                     </span>
                   </div>
                 </div>
-                <div className={`${mobileSection === 'info' ? 'block' : 'hidden'} sm:block rounded-3xl premium-card p-5 space-y-3`}>
+                <div id="order-info-section" className="rounded-3xl premium-card p-5 space-y-3">
                   <p className="text-sm font-semibold text-gray-900">Informações</p>
                   <div className="text-sm text-gray-600 space-y-2">
                     <p>
@@ -1312,7 +1256,7 @@ export function OrderTracking() {
                           href={storeWhatsappLink}
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-flex items-center justify-center px-3 py-2 rounded-lg border border-green-600 text-green-700 text-xs font-semibold hover:bg-green-50"
+                          className="w-full min-h-[48px] inline-flex items-center justify-center px-3 py-2 rounded-xl border border-green-600 text-green-700 text-sm font-semibold hover:bg-green-50"
                         >
                           Falar com a loja no WhatsApp
                         </a>
@@ -1397,7 +1341,7 @@ export function OrderTracking() {
                         window.setTimeout(() => setCtaPulse(false), 220);
                         handleRepeatOrder();
                       }}
-                      className="inline-flex items-center justify-center px-3 py-2 rounded-lg border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50"
+                      className="w-full min-h-[48px] inline-flex items-center justify-center px-3 py-2 rounded-xl border border-slate-200 text-slate-700 text-sm font-semibold hover:bg-slate-50"
                       style={ctaPulse ? { animation: 'btnPop 220ms ease' } : undefined}
                     >
                       Pedir novamente
@@ -1440,7 +1384,7 @@ export function OrderTracking() {
                     </div>
                   )}
                   {isReady && (
-                    <div className="rounded-xl border border-slate-200 bg-white p-3 space-y-3">
+                    <div id="order-review-section" className="rounded-xl border border-slate-200 bg-white p-3 space-y-3">
                       <p className="text-sm font-semibold text-slate-900">Avaliar pedido</p>
                       {reviewAccessDenied ? (
                         <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800">
@@ -1714,149 +1658,32 @@ export function OrderTracking() {
         </div>
       </main>
 
-      {!loading && !error && order && !showItemsSheetMobile ? (
+      {!loading && !error && order ? (
         <div className="sm:hidden fixed bottom-0 inset-x-0 z-40 px-4 pb-3">
-          <button
-            type="button"
-            onClick={() => {
-              setOpeningItemsSheet(true);
-              window.setTimeout(() => {
-                setShowItemsSheetMobile(true);
-                setOpeningItemsSheet(false);
-              }, 120);
-            }}
-            className={`w-full rounded-2xl border backdrop-blur px-4 py-3.5 shadow-[0_-2px_24px_-16px_rgba(15,23,42,0.7)] flex items-center justify-between transition-all ${
-              mobileSection === 'summary'
-                ? 'border-slate-200/60 bg-white/80'
-                : 'border-slate-200/70 bg-white/90'
-            }`}
-          >
-            <span className="inline-flex items-center gap-2 text-sm font-extrabold text-slate-900">
-              <span className="h-2 w-2 rounded-full bg-emerald-500" />
-              {openingItemsSheet
-                ? 'Abrindo itens...'
-                : `Ver itens do pedido (${Array.isArray(order?.items) ? order.items.length : 0})`}
-            </span>
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] font-bold px-2 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
-                {statusLabel}
-              </span>
-              <span className="text-sm font-black px-3 py-1 rounded-full bg-slate-900 text-white">
-                {formatCurrency(order?.total || 0)}
-              </span>
-            </div>
-          </button>
-        </div>
-      ) : null}
-
-      {showItemsSheetMobile && order ? (
-        <div className="sm:hidden ds-sheet-backdrop z-50">
-          <button
-            type="button"
-            aria-label="Fechar itens do pedido"
-            onClick={() => setShowItemsSheetMobile(false)}
-            className="absolute inset-0 bg-transparent"
-          />
-          <div className="ds-sheet-panel absolute inset-x-0 bottom-0 rounded-t-3xl max-h-[78vh] overflow-y-auto">
-            <div className="ds-sheet-handle" />
-            <div className="sticky top-0 z-10 bg-white/95 backdrop-blur border-b border-slate-100 px-4 py-3 flex items-center justify-between">
-              <p className="text-sm font-black text-slate-900">Itens do pedido</p>
+          <div className="rounded-2xl border border-slate-200/80 bg-white/95 backdrop-blur px-4 py-3 shadow-[0_-2px_24px_-16px_rgba(15,23,42,0.7)] space-y-2.5">
+            {shouldShowReviewCta ? (
               <button
                 type="button"
-                onClick={() => setShowItemsSheetMobile(false)}
-                className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 bg-slate-50"
+                onClick={() => scrollToBlock('order-review-section')}
+                className="w-full min-h-[48px] rounded-xl bg-slate-900 text-white text-sm font-extrabold"
               >
-                Fechar
+                Avaliar pedido e gorjeta
               </button>
-            </div>
-
-            <div className="px-4 py-2 border-b border-slate-100 bg-slate-50/70">
-              <div className="grid grid-cols-3 gap-2 text-[11px]">
-                <div className="rounded-xl border border-slate-200 bg-white px-2 py-1.5">
-                  <p className="text-slate-500">Itens</p>
-                  <p className="font-extrabold text-slate-900">{totalItems}</p>
-                </div>
-                <div className="rounded-xl border border-slate-200 bg-white px-2 py-1.5">
-                  <p className="text-slate-500">Subtotal</p>
-                  <p className="font-extrabold text-slate-900">
-                    {formatCurrency(Math.max(0, Number(order?.total || 0) - Number(deliveryFeeValue || 0)))}
-                  </p>
-                </div>
-                <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-2 py-1.5">
-                  <p className="text-emerald-700">Total</p>
-                  <p className="font-extrabold text-emerald-700">{formatCurrency(order?.total || 0)}</p>
-                </div>
-              </div>
-              {Number(deliveryFeeValue || 0) > 0 ? (
-                <p className="mt-1 text-[11px] text-slate-500">
-                  Frete: <span className="font-semibold text-slate-700">{formatCurrency(deliveryFeeValue || 0)}</span>
-                </p>
-              ) : null}
-            </div>
-
-            <div className="px-4 py-3 space-y-3">
-              {(order.items || []).map((item) => (
-                <div key={`sheet-${item.id || item.productId}`} className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-start gap-2 min-w-0">
-                      {item.imageUrl || item.image || item.product?.imageUrl ? (
-                        <img
-                          src={resolveAssetUrl(item.imageUrl || item.image || item.product?.imageUrl)}
-                          alt={item.name}
-                          className="w-10 h-10 rounded-xl object-cover border border-gray-200"
-                        />
-                      ) : (
-                        <div className="w-10 h-10 rounded-xl bg-gray-100 border border-gray-200 flex items-center justify-center text-xs text-gray-400">
-                          🍽️
-                        </div>
-                      )}
-                      <div className="min-w-0">
-                        <p className="text-sm font-semibold text-slate-900 break-words">
-                          {item.quantity}x {item.name}
-                        </p>
-                        <div className="flex flex-wrap gap-1 mt-1">
-                          {item?.cookingPoint && (
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800 border border-amber-200">
-                              {item.cookingPoint}
-                            </span>
-                          )}
-                          {item?.passSkewer && (
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-fuchsia-100 text-fuchsia-700 border border-fuchsia-200">
-                              passar farinha
-                            </span>
-                          )}
-                          {formatSelectedModifiers(item?.selectedModifiers || []).map((modifierName) => (
-                            <span
-                              key={`sheet-${item.id || item.productId}-${modifierName}`}
-                              className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200"
-                            >
-                              + {modifierName}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                    <span className="text-sm font-bold text-slate-900">
-                      {item.originalPrice && Number(item.originalPrice) > Number(item.price)
-                        ? formatCurrency(Number(item.price))
-                        : formatCurrency(Number(item.price || 0))}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="border-t border-slate-100 px-4 py-3 space-y-2 bg-white">
-              {hasDeliveryFee ? (
-                <div className="flex items-center justify-between text-xs font-semibold text-slate-600">
-                  <span>Frete</span>
-                  <span>{formatCurrency(order?.deliveryFee || 0)}</span>
-                </div>
-              ) : null}
-              <div className="flex items-center justify-between text-sm font-black text-slate-900">
-                <span>Total do pedido</span>
-                <span>{formatCurrency(order?.total || 0)}</span>
-              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => scrollToBlock('order-items-section')}
+                className="w-full min-h-[48px] rounded-xl bg-slate-900 text-white text-sm font-extrabold"
+              >
+                Ver itens do pedido
+              </button>
+            )}
+            <div className="flex items-center justify-between gap-2 text-xs">
+              <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-2.5 py-1 font-semibold text-slate-700 border border-slate-200">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                {statusLabel}
+              </span>
+              <span className="font-black text-slate-900">{formatCurrency(order?.total || 0)}</span>
             </div>
           </div>
         </div>
