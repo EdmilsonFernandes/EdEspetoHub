@@ -878,8 +878,8 @@ export function CreateStore() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between py-3 sm:py-4">
             <button onClick={() => navigate('/')} className="flex items-center gap-3">
-              <div className="h-11 w-11 rounded-2xl bg-white shadow-[0_14px_26px_-18px_rgba(239,68,68,0.7)] ring-1 ring-red-200 flex items-center justify-center text-slate-700">
-                <Buildings size={21} weight="duotone" />
+              <div className="h-11 w-11 rounded-2xl overflow-hidden bg-white shadow-[0_14px_26px_-18px_rgba(239,68,68,0.7)] ring-1 ring-red-200 flex items-center justify-center">
+                <img src={platformLogo} alt="Já no Caminho" className="h-full w-full object-cover" />
               </div>
               <div className="hidden sm:block leading-tight">
                 <p className="text-lg font-black text-gray-900">Já no Caminho</p>

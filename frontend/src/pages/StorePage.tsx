@@ -1309,8 +1309,11 @@ export function StorePage() {
                       href="https://www.janocaminho.com.br"
                       target="_blank"
                       rel="noreferrer"
-                      className="font-semibold text-slate-500 hover:text-slate-700 underline-offset-2 hover:underline"
+                      className="inline-flex items-center gap-2 font-semibold text-slate-500 hover:text-slate-700 underline-offset-2 hover:underline"
                     >
+                      <span className="h-4 w-4 rounded-full overflow-hidden border border-slate-200">
+                        <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full object-cover" />
+                      </span>
                       Desenvolvido por Já no Caminho
                     </a>
                   </div>

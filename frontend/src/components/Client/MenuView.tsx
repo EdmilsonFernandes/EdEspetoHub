@@ -888,6 +888,9 @@ export const MenuView = ({
             rel="noreferrer"
             className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500 hover:text-slate-700 hover:border-slate-300 transition"
           >
+            <span className="h-4 w-4 rounded-full overflow-hidden border border-slate-200">
+              <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full object-cover" />
+            </span>
             Desenvolvido por Já no Caminho
           </a>
         </div>
