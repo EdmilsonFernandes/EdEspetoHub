@@ -2,6 +2,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
   SquaresFour,
+  X,
   Plus,
   MagnifyingGlass,
   MapPin,
@@ -233,6 +234,7 @@ export const MenuView = ({
   const [query, setQuery] = useState("");
   const [showStoreDetails, setShowStoreDetails] = useState(false);
   const [activeCategoryKey, setActiveCategoryKey] = useState("");
+  const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false);
   const categoryRefs = React.useRef({});
   const formatStoreAddress = (address = "") => {
     const raw = address.toString().trim();
@@ -540,7 +542,7 @@ export const MenuView = ({
           >
             <div className="rounded-2xl border border-slate-100 bg-white/90 backdrop-blur-md shadow-sm ds-tabs px-2 py-2">
               <div className="relative w-full flex items-center mb-0">
-                <div className="flex-1 flex overflow-x-auto gap-3 pr-20 no-scrollbar scrollbar-hide">
+                <div className="flex-1 flex overflow-x-auto gap-3 pr-20 no-scrollbar scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                   {filteredGrouped.map((category) => {
                     const isActive = activeCategoryKey === category.key;
                     const meta = categoryVisualMeta(category.key);
@@ -576,7 +578,12 @@ export const MenuView = ({
                 </div>
 
                 <div className="absolute right-0 top-0 bottom-0 w-28 flex items-center justify-end pr-4 bg-gradient-to-l from-slate-50 via-slate-50/90 to-transparent pointer-events-none">
-                  <button className="w-12 h-12 rounded-full bg-white shadow-[0_4px_12px_rgba(0,0,0,0.1)] flex items-center justify-center text-slate-800 pointer-events-auto border border-slate-100 active:scale-95 transition-all">
+                  <button
+                    type="button"
+                    aria-label="Abrir categorias"
+                    onClick={() => setIsCategorySheetOpen(true)}
+                    className="w-12 h-12 rounded-full bg-white shadow-[0_4px_12px_rgba(0,0,0,0.1)] flex items-center justify-center text-slate-800 pointer-events-auto border border-slate-100 active:scale-95 transition-all"
+                  >
                     <SquaresFour size={24} weight="duotone" />
                   </button>
                 </div>
@@ -601,7 +608,7 @@ export const MenuView = ({
               </p>
               <span className="text-xs text-slate-500">Top {topItems.length}</span>
             </div>
-            <div className="mt-3 flex gap-3 overflow-x-auto pb-1 sm:grid sm:grid-cols-3 sm:gap-3 sm:overflow-visible no-scrollbar">
+            <div className="mt-3 flex gap-3 overflow-x-auto pb-1 sm:grid sm:grid-cols-3 sm:gap-3 sm:overflow-visible no-scrollbar scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
               {topItems.map((item) => {
                 const mappedProduct =
                   products.find((entry) => entry.id === item.productId) ||
@@ -889,6 +896,68 @@ export const MenuView = ({
             Desenvolvido por Já no Caminho
           </a>
         </div>
+        </div>
+      </div>
+
+      <div
+        className={`fixed inset-0 z-50 transition-opacity duration-300 ${isCategorySheetOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+      >
+        <button
+          type="button"
+          aria-label="Fechar menu de categorias"
+          onClick={() => setIsCategorySheetOpen(false)}
+          className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        />
+        <div
+          className={`absolute bottom-0 left-0 w-full bg-white rounded-t-3xl shadow-2xl transform transition-transform duration-300 ease-out ${isCategorySheetOpen ? "translate-y-0" : "translate-y-full"}`}
+          onClick={(event) => event.stopPropagation()}
+        >
+          <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mt-3" />
+          <div className="flex items-center justify-between px-5 pt-4 pb-2">
+            <h3 className="text-lg font-bold text-slate-800">Todas as categorias</h3>
+            <button
+              type="button"
+              aria-label="Fechar"
+              onClick={() => setIsCategorySheetOpen(false)}
+              className="h-9 w-9 rounded-full border border-slate-200 bg-white text-slate-600 hover:text-slate-800 hover:border-slate-300 transition inline-flex items-center justify-center"
+            >
+              <X size={18} weight="bold" />
+            </button>
+          </div>
+          <div className="grid grid-cols-2 gap-3 p-5 pt-3 max-h-[65vh] overflow-y-auto">
+            {filteredGrouped.map((category) => {
+              const isActive = activeCategoryKey === category.key;
+              const meta = categoryVisualMeta(category.key);
+              const Icon = meta.icon;
+
+              return (
+                <button
+                  key={`sheet-${category.key}`}
+                  type="button"
+                  onClick={() => {
+                    setActiveCategoryKey(category.key);
+                    scrollToCategory(category.key);
+                    setIsCategorySheetOpen(false);
+                  }}
+                  className={`rounded-xl border p-3 text-left transition active:scale-[0.98] ${
+                    isActive
+                      ? "bg-slate-900 text-white border-slate-900"
+                      : "bg-slate-50 text-slate-700 border-slate-100"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm leading-none" aria-hidden="true">
+                      {categoryGlyph(category.key)}
+                    </span>
+                    <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full ${isActive ? "bg-white/15 text-white" : "bg-white border border-slate-200 text-slate-600"}`}>
+                      <Icon size={12} weight="duotone" />
+                    </span>
+                    <span className="text-sm font-medium truncate">{category.label}</span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
