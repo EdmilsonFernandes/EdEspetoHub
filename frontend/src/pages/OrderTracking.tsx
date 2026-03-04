@@ -318,7 +318,10 @@ export function OrderTracking() {
   }, [isDelivery, deliveryStatus, status, routeDurationMinutes, (order as any)?.delivery?.inTransitAt, (order as any)?.delivery?.pickedUpAt]);
   const isInTransitPhase = isDelivery && (deliveryStatus === 'IN_TRANSIT' || status === 'in_delivery');
   const etaPhaseLabel = isInTransitPhase ? 'Tempo de trajeto' : 'Tempo de preparo';
-  const etaForecastLabel = isInTransitPhase ? 'Previsão de chegada' : 'Previsão de entrega';
+  const etaForecastLabel = isDelivery
+    ? (isInTransitPhase ? 'Previsão de chegada' : 'Previsão de entrega')
+    : 'Previsão de preparo';
+  const etaForecastPrefix = isDelivery ? 'Chega por volta de' : 'Pronto por volta de';
   const remainingEstimateMinutes = useMemo(() => {
     if (isReady) return null;
     if (routeEtaRemainingMinutes !== null) return routeEtaRemainingMinutes;
@@ -811,7 +814,7 @@ export function OrderTracking() {
                       <div className="mt-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
                         <p className="text-xs uppercase tracking-[0.16em] text-slate-500 font-semibold">{etaForecastLabel}</p>
                         <p className="mt-1 text-xl font-extrabold text-slate-900">
-                          Chega por volta de {estimatedReadyAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                          {etaForecastPrefix} {estimatedReadyAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                         </p>
                       </div>
                     ) : null}
