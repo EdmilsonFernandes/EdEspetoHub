@@ -233,6 +233,7 @@ export const MenuView = ({
   const [showStoreDetails, setShowStoreDetails] = useState(false);
   const [activeCategoryKey, setActiveCategoryKey] = useState("");
   const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false);
+  const buttonColor = branding?.secondaryColor || "#0f172a";
   const categoryRefs = React.useRef({});
   const formatStoreAddress = (address = "") => {
     const raw = address.toString().trim();
@@ -826,7 +827,8 @@ export const MenuView = ({
                             <button
                               onClick={handleIncrement}
                               title="Adicionar"
-                              className="h-9 px-4 py-1.5 rounded-full border border-amber-500 text-amber-600 hover:bg-amber-50 text-sm font-medium transition-all active:scale-[0.98] inline-flex items-center justify-center gap-1"
+                              className="h-9 px-4 py-1.5 rounded-full border hover:bg-slate-50 text-sm font-medium transition-all active:scale-[0.98] inline-flex items-center justify-center gap-1"
+                              style={{ borderColor: buttonColor, color: buttonColor }}
                             >
                               <Plus size={14} weight="duotone" />
                               Adicionar
