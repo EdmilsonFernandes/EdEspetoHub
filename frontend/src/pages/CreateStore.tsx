@@ -1,4 +1,4 @@
-﻿// @ts-nocheck
+// @ts-nocheck
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { storeService } from '../services/storeService';
@@ -899,7 +899,7 @@ export function CreateStore() {
 
       <main className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         <div className="grid gap-6 lg:grid-cols-[35%_65%] items-start">
-        <aside className="order-2 lg:order-1 lg:sticky lg:top-[96px] hidden lg:block">
+        <aside className="order-2 lg:order-1 lg:sticky lg:top-24 hidden lg:block">
           {previewPanel}
         </aside>
 
@@ -966,7 +966,7 @@ export function CreateStore() {
             </div>
           )}
 
-          <form className="space-y-6" onSubmit={handleCreateStore}>
+          <form className="space-y-6 pb-24 md:pb-0 [&_label]:text-xs [&_label]:font-bold [&_label]:text-slate-500 [&_label]:uppercase [&_label]:tracking-wider" onSubmit={handleCreateStore}>
             <div ref={personalSectionRef} className="scroll-mt-36" onFocusCapture={() => setCurrentStep(1)}>
             <FormSection
               title="Informações pessoais"
@@ -980,7 +980,7 @@ export function CreateStore() {
                     required
                     value={registerForm.fullName}
                     onChange={(e) => setRegisterForm((prev) => ({ ...prev, fullName: e.target.value }))}
-                    className="ds-input ds-focus-ring"
+                    className="ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all"
                     placeholder="Seu nome completo"
                   />
                 </div>
@@ -1000,7 +1000,7 @@ export function CreateStore() {
                         }
                       }}
                       onBlur={() => updateFieldError('email', validateEmail(registerForm.email))}
-                      className={`ds-input ds-focus-ring ${
+                      className={`ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all ${
                         fieldErrors.email ? 'border-red-400' : 'border-gray-200'
                       }`}
                       placeholder="seu@email.com"
@@ -1017,7 +1017,7 @@ export function CreateStore() {
                       <select
                         value={storePhoneParts.ddd || ''}
                         onChange={(e) => handleCreateStorePhoneDddChange(e.target.value)}
-                        className="ds-select ds-focus-ring w-full min-w-0 text-sm font-semibold"
+                        className="ds-select ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all w-full min-w-0 text-sm font-semibold"
                       >
                         <option value="" disabled>
                           DDD
@@ -1033,7 +1033,7 @@ export function CreateStore() {
                         onChange={(e) => handleCreateStorePhoneLocalChange(e.target.value)}
                         placeholder={storePhoneParts.ddd ? '99999-9999' : 'Selecione o DDD'}
                         disabled={!storePhoneParts.ddd}
-                        className="ds-input ds-focus-ring w-full min-w-0 disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
+                        className="ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all w-full min-w-0 disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
                       />
                     </div>
                   </div>
@@ -1052,7 +1052,7 @@ export function CreateStore() {
                             updateFieldError('document', validateDocument(registerForm.document, nextType));
                           }
                         }}
-                        className="ds-select ds-focus-ring min-w-0 text-sm"
+                        className="ds-select ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all min-w-0 text-sm"
                       >
                         <option value="CPF">CPF</option>
                         <option value="CNPJ">CNPJ</option>
@@ -1068,7 +1068,7 @@ export function CreateStore() {
                           }
                         }}
                         onBlur={() => updateFieldError('document', validateDocument(registerForm.document, registerForm.documentType))}
-                        className={`ds-input ds-focus-ring min-w-0 ${
+                        className={`ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all min-w-0 ${
                           fieldErrors.document ? 'border-red-400' : 'border-gray-200'
                         }`}
                         placeholder={registerForm.documentType === 'CNPJ' ? '00.000.000/0000-00' : '000.000.000-00'}
@@ -1086,7 +1086,7 @@ export function CreateStore() {
                         type={showPassword ? 'text' : 'password'}
                         value={registerForm.password}
                         onChange={(e) => setRegisterForm((prev) => ({ ...prev, password: e.target.value }))}
-                        className="ds-input ds-focus-ring w-full pr-10"
+                        className="ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all w-full pr-10"
                         placeholder="Mínimo 6 caracteres"
                       />
                       <button
@@ -1125,7 +1125,7 @@ export function CreateStore() {
                           }}
                           onBlur={(e) => handleCepLookup(e.target.value)}
                           disabled={isCepLoading}
-                          className="ds-input ds-focus-ring min-w-0 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          className="ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all min-w-0 disabled:bg-gray-100 disabled:cursor-not-allowed"
                           placeholder="00000-000"
                         />
                         <button
@@ -1158,7 +1158,7 @@ export function CreateStore() {
                             }))
                           }
                           disabled={isCepLoading}
-                          className="ds-select ds-focus-ring min-w-0 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          className="ds-select ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all min-w-0 disabled:bg-gray-100 disabled:cursor-not-allowed"
                         >
                           <option value="">Selecione</option>
                           {BRAZIL_STATES.map((uf) => (
@@ -1186,7 +1186,7 @@ export function CreateStore() {
                             setRegisterForm((prev) => ({ ...prev, city: e.target.value }));
                           }}
                           disabled={isCepLoading}
-                          className="ds-input ds-focus-ring min-w-0 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          className="ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all min-w-0 disabled:bg-gray-100 disabled:cursor-not-allowed"
                           placeholder={isLoadingCities ? 'Carregando cidades...' : 'Digite ou selecione a cidade'}
                         />
                         {registerForm.state && cityOptions.length > 0 && (
@@ -1217,7 +1217,7 @@ export function CreateStore() {
                             setRegisterForm((prev) => ({ ...prev, street: e.target.value }));
                           }}
                           disabled={isCepLoading}
-                          className="ds-input ds-focus-ring min-w-0 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          className="ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all min-w-0 disabled:bg-gray-100 disabled:cursor-not-allowed"
                           placeholder="Nome da rua"
                         />
                       </div>
@@ -1231,7 +1231,7 @@ export function CreateStore() {
                             setRegisterForm((prev) => ({ ...prev, neighborhood: e.target.value }));
                           }}
                           disabled={isCepLoading}
-                          className="ds-input ds-focus-ring min-w-0 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          className="ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all min-w-0 disabled:bg-gray-100 disabled:cursor-not-allowed"
                           placeholder="Bairro"
                         />
                       </div>
@@ -1245,7 +1245,7 @@ export function CreateStore() {
                           value={registerForm.number}
                           onChange={(e) => setRegisterForm((prev) => ({ ...prev, number: e.target.value }))}
                           disabled={isCepLoading}
-                          className="ds-input ds-focus-ring min-w-0 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          className="ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all min-w-0 disabled:bg-gray-100 disabled:cursor-not-allowed"
                           placeholder="123"
                         />
                       </div>
@@ -1255,7 +1255,7 @@ export function CreateStore() {
                           value={registerForm.complement}
                           onChange={(e) => setRegisterForm((prev) => ({ ...prev, complement: e.target.value }))}
                           disabled={isCepLoading}
-                          className="ds-input ds-focus-ring min-w-0 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          className="ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all min-w-0 disabled:bg-gray-100 disabled:cursor-not-allowed"
                           placeholder="Apto, sala, bloco (opcional)"
                         />
                       </div>
@@ -1285,7 +1285,7 @@ export function CreateStore() {
                   }
                 }}
                 onBlur={() => updateFieldError('storeName', validateStoreName(registerForm.storeName))}
-                className={`ds-input ds-focus-ring ${
+                className={`ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all ${
                   fieldErrors.storeName ? 'border-red-400' : 'border-gray-200'
                 }`}
                 placeholder="Nome da sua loja"
@@ -1317,7 +1317,7 @@ export function CreateStore() {
               <textarea
                 value={registerForm.storeDescription}
                 onChange={(e) => setRegisterForm((prev) => ({ ...prev, storeDescription: e.target.value }))}
-                className="ds-input ds-focus-ring min-h-[110px]"
+                className="ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all min-h-[110px]"
                 placeholder="Conte em poucas palavras o que torna sua loja especial."
                 maxLength={220}
               />
@@ -1332,7 +1332,7 @@ export function CreateStore() {
               <select
                 value={registerForm.segment}
                 onChange={(e) => handleStoreSegmentChange(e.target.value)}
-                className="ds-select ds-focus-ring"
+                className="ds-select ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all"
               >
                 {STORE_SEGMENTS.map((segment) => (
                   <option key={segment.value} value={segment.value}>
@@ -1361,7 +1361,7 @@ export function CreateStore() {
               <input
                 value={registerForm.pixKey}
                 onChange={(e) => setRegisterForm((prev) => ({ ...prev, pixKey: e.target.value }))}
-                className="ds-input ds-focus-ring"
+                className="ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all"
                 placeholder="012999999999 ou email@pix.com"
               />
               <p className="text-xs text-gray-500">Telefone com DDD pode começar com 0 que ajustamos para +55.</p>
@@ -1430,7 +1430,7 @@ export function CreateStore() {
                       key={color}
                       type="button"
                       onClick={() => setRegisterForm((prev) => ({ ...prev, primaryColor: color }))}
-                      className={`w-8 h-8 rounded-full border-2 transition-all ${registerForm.primaryColor === color ? 'border-gray-900 scale-110' : 'border-gray-200 hover:scale-105'}`}
+                      className={`w-8 h-8 rounded-full border-2 transition-all ${registerForm.primaryColor === color ? 'border-gray-900 scale-110 ring-2 ring-offset-2 ring-slate-400' : 'border-gray-200 hover:scale-105'}`}
                       style={{ backgroundColor: color }}
                       aria-label={`Selecionar cor ${color}`}
                     />
@@ -1453,7 +1453,7 @@ export function CreateStore() {
                       key={color}
                       type="button"
                       onClick={() => setRegisterForm((prev) => ({ ...prev, secondaryColor: color }))}
-                      className={`w-8 h-8 rounded-full border-2 transition-all ${registerForm.secondaryColor === color ? 'border-gray-900 scale-110' : 'border-gray-200 hover:scale-105'}`}
+                      className={`w-8 h-8 rounded-full border-2 transition-all ${registerForm.secondaryColor === color ? 'border-gray-900 scale-110 ring-2 ring-offset-2 ring-slate-400' : 'border-gray-200 hover:scale-105'}`}
                       style={{ backgroundColor: color }}
                       aria-label={`Selecionar cor ${color}`}
                     />
@@ -1471,7 +1471,7 @@ export function CreateStore() {
                           <select
                             value={link.type}
                             onChange={(e) => updateSocialLink(index, 'type', e.target.value)}
-                            className="ds-select ds-focus-ring min-w-[132px] text-sm"
+                            className="ds-select ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all min-w-[132px] text-sm"
                           >
                             <option value="instagram">Instagram</option>
                             <option value="facebook">Facebook</option>
@@ -1480,7 +1480,7 @@ export function CreateStore() {
                           <input
                             value={link.value}
                             onChange={(e) => updateSocialLink(index, 'value', e.target.value)}
-                            className="ds-input ds-focus-ring min-w-0 flex-1"
+                            className="ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all min-w-0 flex-1"
                             placeholder="@usuário ou URL"
                           />
                           {registerForm.socialLinks.length > 1 && (
@@ -1545,15 +1545,15 @@ export function CreateStore() {
               </span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <button
-                  type="button"
-                  onClick={() => setSelectedPlanId('test-plan-7days')}
-                  className={`border-2 rounded-2xl p-4 text-left transition-all relative cursor-pointer ${selectedPlanId === 'test-plan-7days'
-                    ? 'border-amber-500 shadow-lg bg-amber-50'
-                    : 'border-amber-300 hover:border-amber-400'
+                  <button
+                    type="button"
+                    onClick={() => setSelectedPlanId('test-plan-7days')}
+                    className={`border-2 rounded-2xl p-4 text-left transition-all relative cursor-pointer ${selectedPlanId === 'test-plan-7days'
+                    ? 'border-2 border-slate-900 shadow-md bg-white'
+                    : 'border border-slate-200 opacity-80 hover:opacity-100'
                   }`}
                 >
-                  <span className="absolute -top-3 left-4 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                  <span className="absolute -top-3 left-4 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm">
                     7 DIAS GRATIS
                   </span>
                   <p className="text-sm uppercase font-semibold text-amber-700">Trial completo</p>
@@ -1589,9 +1589,9 @@ export function CreateStore() {
                     key={planKey}
                     onClick={() => plan?.id && setSelectedPlanId(plan.id)}
                     disabled={isDisabled}
-                    className={`cursor-pointer border rounded-2xl p-4 text-left transition-all relative ${isSelected
-                      ? 'border-red-500 shadow-lg bg-red-50'
-                      : 'border-gray-200 hover:border-red-200'
+                    className={`cursor-pointer rounded-2xl p-4 text-left transition-all relative ${isSelected
+                      ? 'border-2 border-slate-900 shadow-md bg-white'
+                      : 'border border-slate-200 opacity-80 hover:opacity-100'
                       } ${isDisabled ? 'opacity-60 cursor-not-allowed' : ''}`}
                   >
                     <p className="text-sm uppercase font-semibold text-gray-500">{tier.label}</p>
@@ -1613,7 +1613,7 @@ export function CreateStore() {
                       ))}
                     </ul>
                     {tier.popular && (
-                      <span className="absolute -top-3 left-13 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                      <span className="absolute -top-3 left-4 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm">
                         MAIS POPULAR
                       </span>
                     )}
@@ -1635,7 +1635,7 @@ export function CreateStore() {
                       onClick={() => setPaymentMethod('PIX')}
                       className={`rounded-2xl px-4 py-3 text-left transition-all border active:scale-[0.98] ${
                         paymentMethod === 'PIX'
-                          ? 'border-brand-primary bg-gradient-to-br from-brand-primary/15 via-white to-white text-brand-primary shadow-lg ring-2 ring-brand-primary/30'
+                          ? 'border-2 border-slate-900 bg-white text-slate-900 shadow-md'
                           : 'border-gray-200 text-gray-600 bg-white/80 hover:border-brand-primary/40 hover:shadow-sm'
                       }`}
                     >
@@ -1653,7 +1653,7 @@ export function CreateStore() {
                       onClick={() => setPaymentMethod('CREDIT_CARD')}
                       className={`rounded-2xl px-4 py-3 text-left transition-all border active:scale-[0.98] ${
                         paymentMethod === 'CREDIT_CARD'
-                          ? 'border-brand-primary bg-gradient-to-br from-brand-primary/15 via-white to-white text-brand-primary shadow-lg ring-2 ring-brand-primary/30'
+                          ? 'border-2 border-slate-900 bg-white text-slate-900 shadow-md'
                           : 'border-gray-200 text-gray-600 bg-white/80 hover:border-brand-primary/40 hover:shadow-sm'
                       }`}
                     >
@@ -1671,7 +1671,7 @@ export function CreateStore() {
                       onClick={() => setPaymentMethod('BOLETO')}
                       className={`rounded-2xl px-4 py-3 text-left transition-all border active:scale-[0.98] ${
                         paymentMethod === 'BOLETO'
-                          ? 'border-brand-primary bg-gradient-to-br from-brand-primary/15 via-white to-white text-brand-primary shadow-lg ring-2 ring-brand-primary/30'
+                          ? 'border-2 border-slate-900 bg-white text-slate-900 shadow-md'
                           : 'border-gray-200 text-gray-600 bg-white/80 hover:border-brand-primary/40 hover:shadow-sm'
                       }`}
                     >
@@ -1725,7 +1725,7 @@ export function CreateStore() {
               </label>
             </div>
 
-            <div className="sticky bottom-3 z-20 rounded-2xl border border-slate-200/90 bg-white/90 backdrop-blur-xl p-3 shadow-[0_24px_46px_-30px_rgba(15,23,42,0.55)]">
+            <div className="fixed bottom-0 left-0 w-full z-50 rounded-none border-t border-slate-200 bg-white/90 backdrop-blur-md p-4 shadow-[0_-10px_26px_-20px_rgba(15,23,42,0.45)] md:static md:rounded-2xl md:border md:border-slate-200/90 md:p-3 md:shadow-[0_24px_46px_-30px_rgba(15,23,42,0.55)]">
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
                 <div className="text-[11px] text-slate-500">
                   Etapa atual <span className="font-semibold text-slate-700">{currentStep} de 3</span>
@@ -1735,7 +1735,7 @@ export function CreateStore() {
                     type="button"
                     onClick={() => scrollToStep(Math.max(1, currentStep - 1))}
                     disabled={currentStep === 1}
-                    className="ds-btn ds-btn-secondary ds-focus-ring px-4 py-2 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Voltar
                   </button>
@@ -1744,7 +1744,7 @@ export function CreateStore() {
                       type="button"
                       onClick={handleNextStep}
                       disabled={!canAdvanceFromStep(currentStep)}
-                      className="ds-btn ds-btn-primary ds-btn-shine ds-focus-ring px-4 py-2 text-sm font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white hover:bg-slate-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Próximo
                     </button>
@@ -1752,7 +1752,7 @@ export function CreateStore() {
                     <button
                       type="submit"
                       disabled={isRegistering}
-                      className="ds-btn ds-btn-primary ds-btn-shine ds-focus-ring px-4 py-2 text-sm font-semibold text-white disabled:opacity-60 disabled:cursor-not-allowed"
+                      className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white hover:bg-slate-800 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                     >
                       {isRegistering ? (
                         <span className="inline-flex items-center justify-center gap-2">
@@ -1947,4 +1947,5 @@ export function CreateStore() {
     </div>
   );
 }
+
 
