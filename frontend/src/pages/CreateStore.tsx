@@ -913,39 +913,31 @@ export function CreateStore() {
               <p className="text-xs uppercase tracking-[0.22em] font-semibold text-slate-500">Onboarding</p>
               <span className="text-[11px] text-slate-500 font-semibold">Etapa {currentStep} de 3</span>
             </div>
-            <div className="flex gap-2 overflow-x-auto pb-1">
+            <div className="flex items-center justify-between w-full relative mb-2">
+              <div className="absolute top-1/2 left-0 w-full h-[2px] bg-slate-100 -z-10 -translate-y-1/2" />
               {steps.map((step) => (
                 <button
                   type="button"
                   key={step.id}
                   onClick={() => scrollToStep(step.id)}
-                  className={`min-w-[140px] sm:min-w-0 sm:flex-1 rounded-xl border px-3 py-2 ${
-                    currentStep === step.id
-                      ? 'border-slate-900 bg-slate-50'
-                      : step.done
-                        ? 'border-emerald-200 bg-emerald-50/70'
-                        : 'border-slate-200 bg-white'
-                  } text-left`}
+                  className="flex flex-col items-center gap-2 bg-white px-2 py-1 transition-all"
                 >
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`h-6 w-6 rounded-full text-[11px] font-bold flex items-center justify-center ${
-                        currentStep === step.id
-                          ? 'bg-brand-primary text-white'
-                          : step.done
-                            ? 'bg-emerald-500 text-white'
-                            : 'bg-white text-slate-600 border border-slate-300'
-                      }`}
-                    >
-                      {step.id}
-                    </span>
-                    <div className="min-w-0">
-                      <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Etapa</p>
-                      <p className={`truncate text-xs sm:text-sm font-bold ${
-                        currentStep === step.id ? 'text-slate-900' : step.done ? 'text-emerald-700' : 'text-slate-700'
-                      }`}>{step.title}</p>
-                    </div>
-                  </div>
+                  <span
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${
+                      currentStep === step.id || step.done
+                        ? 'bg-slate-900 text-white'
+                        : 'bg-slate-100 text-slate-400'
+                    }`}
+                  >
+                    {step.id}
+                  </span>
+                  <span
+                    className={`text-[11px] uppercase tracking-wider font-bold ${
+                      currentStep === step.id ? 'text-slate-800' : 'text-slate-400'
+                    }`}
+                  >
+                    {step.id === 1 ? 'Dados' : step.id === 2 ? 'Endereço' : 'Loja'}
+                  </span>
                 </button>
               ))}
             </div>
