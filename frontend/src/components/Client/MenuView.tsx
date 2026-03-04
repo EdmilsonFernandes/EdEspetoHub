@@ -506,11 +506,11 @@ export const MenuView = ({
             )}
 
             <div className="relative">
-              <MagnifyingGlass className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <MagnifyingGlass className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                className="w-full rounded-full border border-slate-200 bg-white py-2 pl-9 pr-4 text-sm text-slate-700 placeholder:text-slate-400 shadow-sm outline-none focus:ring-2 focus:ring-slate-200"
+                className="w-full rounded-2xl border border-transparent bg-slate-100 py-2.5 pl-10 pr-4 text-sm text-slate-700 placeholder:text-slate-400 shadow-sm outline-none focus:bg-white focus:border-slate-200 focus:ring-2 focus:ring-slate-200/70 transition"
                 placeholder="Buscar produtos por nome ou categoria"
               />
             </div>
@@ -527,13 +527,13 @@ export const MenuView = ({
                     key={category.key}
                     type="button"
                     onClick={() => scrollToCategory(category.key)}
-                    className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-semibold text-slate-600 hover:border-slate-900 hover:text-slate-900 active:bg-slate-900 active:text-white transition"
+                    className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-semibold text-slate-600 hover:border-slate-300 hover:text-slate-800 active:bg-slate-900 active:border-slate-900 active:text-white focus-visible:bg-slate-900 focus-visible:border-slate-900 focus-visible:text-white focus-visible:outline-none transition"
                   >
                     {(() => {
                       const meta = categoryVisualMeta(category.key);
                       const Icon = meta.icon;
                       return (
-                        <span className={`inline-flex h-5 w-5 items-center justify-center rounded-full border ${meta.tone}`}>
+                        <span className={`inline-flex h-5 w-5 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-600`}>
                           <Icon size={11} weight="duotone" />
                         </span>
                       );
@@ -559,36 +559,54 @@ export const MenuView = ({
         {topItems.length > 0 && (
           <div className="rounded-3xl border border-slate-100 bg-white p-4 sm:p-5 shadow-sm">
             <div className="flex items-center justify-between">
-              <p className="text-[11px] uppercase tracking-[0.3em] text-slate-400 font-semibold">Mais pedidos hoje</p>
+              <p className="inline-flex items-center gap-2 text-lg font-bold tracking-tight text-slate-800">
+                <Sparkle size={16} weight="fill" className="text-amber-500" />
+                Mais pedidos hoje
+              </p>
               <span className="text-xs text-slate-500">Top {topItems.length}</span>
             </div>
             <div className="mt-3 flex gap-3 overflow-x-auto pb-1 sm:grid sm:grid-cols-3 sm:gap-3 sm:overflow-visible no-scrollbar">
-              {topItems.map((item) => (
-                <button
-                  key={item.productId || item.name}
-                  type="button"
-                  onClick={() =>
-                    openProductModal(
-                      products.find((entry) => entry.id === item.productId) ||
-                        products.find((entry) => entry.name === item.name) ||
-                        item
-                    )
-                  }
-                  className="group flex min-w-[220px] sm:min-w-0 items-center gap-3 rounded-2xl border border-slate-100 bg-white shadow-sm px-3 py-2 text-left transition"
-                >
-                  <div className="w-12 h-12 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 flex items-center justify-center text-[10px] text-slate-400">
-                    {item.imageUrl ? (
-                      <img src={resolveAssetUrl(item.imageUrl)} alt={item.name} className="w-full h-full object-cover" />
-                    ) : (
-                      "🍖"
-                    )}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-slate-900 truncate">{item.name}</p>
-                    <p className="text-[11px] text-slate-500">{item.qty} pedidos</p>
-                  </div>
-                </button>
-              ))}
+              {topItems.map((item) => {
+                const mappedProduct =
+                  products.find((entry) => entry.id === item.productId) ||
+                  products.find((entry) => entry.name === item.name);
+                const displayPrice =
+                  mappedProduct && resolvePromoPrice(mappedProduct)
+                    ? resolvePromoPrice(mappedProduct)
+                    : mappedProduct?.price ?? item?.price;
+
+                return (
+                  <button
+                    key={item.productId || item.name}
+                    type="button"
+                    onClick={() =>
+                      openProductModal(
+                        mappedProduct || item
+                      )
+                    }
+                    className="group min-w-[240px] sm:min-w-0 rounded-2xl border border-slate-100 bg-white shadow-sm px-3 py-3 text-left transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 active:scale-[0.99]"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="aspect-square w-14 rounded-lg overflow-hidden bg-slate-100 border border-slate-200 flex items-center justify-center text-[10px] text-slate-400">
+                        {item.imageUrl ? (
+                          <img src={resolveAssetUrl(item.imageUrl)} alt={item.name} className="w-full h-full object-cover" />
+                        ) : (
+                          "🍖"
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-semibold text-slate-900 truncate">{item.name}</p>
+                        <p className="text-[11px] text-slate-500">{item.qty} pedidos</p>
+                        {displayPrice ? (
+                          <p className="mt-1 text-sm font-bold tracking-tight text-slate-800">
+                            {formatCurrency(displayPrice)}
+                          </p>
+                        ) : null}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}
