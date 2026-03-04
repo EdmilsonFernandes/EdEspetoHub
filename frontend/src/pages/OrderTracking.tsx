@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { Bicycle, ChefHat, CheckCircle, Clock, CircleNotch, MapPin, Star } from '@phosphor-icons/react';
+import { Bicycle, CheckCircle, Clock, CircleNotch, MapPin, Star } from '@phosphor-icons/react';
 import { orderService } from '../services/orderService';
 import { mapsService } from '../services/mapsService';
 import { formatAddress, formatCurrency, formatDateTime, formatDuration, formatOrderDisplayId } from '../utils/format';
@@ -31,35 +31,6 @@ const typeLabels: Record<string, string> = {
   table: 'Comer no local',
 };
 
-const stepStyles: Record<string, { current: string }> = {
-  pending: {
-    current: 'bg-amber-100 text-amber-800 border-amber-200',
-  },
-  preparing: {
-    current: 'bg-sky-100 text-sky-700 border-sky-200',
-  },
-  ready: {
-    current: 'bg-violet-100 text-violet-700 border-violet-200',
-  },
-  in_delivery: {
-    current: 'bg-blue-100 text-blue-700 border-blue-200',
-  },
-  done: {
-    current: 'bg-emerald-100 text-emerald-700 border-emerald-200',
-  },
-  delivered: {
-    current: 'bg-emerald-100 text-emerald-700 border-emerald-200',
-  },
-};
-
-const stepIconById: Record<string, any> = {
-  pending: Clock,
-  preparing: ChefHat,
-  ready: CheckCircle,
-  in_delivery: Bicycle,
-  done: CheckCircle,
-  delivered: CheckCircle,
-};
 
 const buildDemoStatus = (createdAt: number) => {
   const diff = Date.now() - createdAt;
@@ -293,9 +264,6 @@ export function OrderTracking() {
       [ 'ready', 'ready_for_delivery', 'done', 'delivered', 'finished' ].includes(status) ||
       isReady
     );
-  const isReadyStageForMobileBase =
-    [ 'ready', 'ready_for_delivery', 'done', 'delivered', 'finished' ].includes(status) ||
-    isReady;
   const hasDeliveryFee =
     order?.deliveryFee !== null && order?.deliveryFee !== undefined && isDelivery;
   const pixPayload = pixKey
@@ -747,14 +715,6 @@ export function OrderTracking() {
   })();
   const currentIndex = Math.max(0, steps.findIndex((item) => item.id === currentStep));
   const progress = steps.length > 1 ? Math.round((currentIndex / (steps.length - 1)) * 100) : 0;
-  const completedStepClass = 'bg-slate-100 text-slate-500 border-slate-200';
-  const upcomingStepClass = 'bg-white text-slate-400 border-slate-200 opacity-70';
-  const currentStepItem = steps[currentIndex] || steps[0];
-  const nextStepItem = currentIndex >= 0 && currentIndex < steps.length - 1 ? steps[currentIndex + 1] : null;
-  const CurrentStepIcon = stepIconById[currentStepItem?.id] || CheckCircle;
-  const totalItems = Array.isArray(order?.items)
-    ? order.items.reduce((acc: number, item: any) => acc + Number(item?.quantity || 1), 0)
-    : 0;
   const itemsToRender = Array.isArray(order?.items) ? order.items : [];
 
   return (
@@ -801,7 +761,7 @@ export function OrderTracking() {
 
           {!loading && !error && order && (
             <div className="space-y-4 sm:space-y-6">
-              <div className="rounded-2xl sm:rounded-3xl premium-card-soft p-5 sm:p-6 border border-slate-100">
+              <div className="rounded-2xl sm:rounded-3xl border border-slate-100 bg-white shadow-sm p-5 sm:p-6">
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                   <div>
                     <p className="text-xs uppercase tracking-[0.3em] text-gray-400">
@@ -830,8 +790,17 @@ export function OrderTracking() {
                     </div>
                     <p className="text-sm text-gray-500 mt-1.5">{typeLabel}</p>
 
+                    {estimatedReadyAt && !isReady ? (
+                      <div className="mt-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+                        <p className="text-xs uppercase tracking-[0.16em] text-slate-500 font-semibold">{etaForecastLabel}</p>
+                        <p className="mt-1 text-xl font-extrabold text-slate-900">
+                          Chega por volta de {estimatedReadyAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                      </div>
+                    ) : null}
+
                     {isDelivery && motoboyFirst && ['ACCEPTED', 'PICKED_UP', 'IN_TRANSIT', 'DELIVERED'].includes(deliveryStatus) ? (
-                      <div className="mt-3 rounded-2xl border border-slate-200 bg-white/70 px-4 py-3 text-sm text-slate-800">
+                      <div className="mt-3 rounded-2xl bg-slate-50/80 px-4 py-3 text-sm text-slate-800">
                         <div className="flex items-start gap-3">
                           {motoboyProfileImageUrl ? (
                             <img
@@ -840,7 +809,7 @@ export function OrderTracking() {
                               className="h-10 w-10 rounded-2xl border border-slate-200 object-cover shrink-0 bg-white"
                             />
                           ) : (
-                            <div className="h-10 w-10 rounded-2xl border border-slate-200 bg-slate-50 flex items-center justify-center text-slate-700 shrink-0">
+                            <div className="h-10 w-10 rounded-2xl border border-slate-200 bg-white flex items-center justify-center text-slate-700 shrink-0">
                               <Bicycle size={18} weight="duotone" />
                             </div>
                           )}
@@ -862,52 +831,6 @@ export function OrderTracking() {
                         </div>
                       </div>
                     ) : null}
-
-                    {(isReady && elapsedMs > 0) || (remainingEstimateMinutes !== null && !isReady) || (etaWindowMin && etaWindowMax && !isReady) || (estimatedReadyAt && !isReady) || isEstimateDelayed ? (
-                      <div className="mt-3 space-y-1.5">
-                        {isReady && elapsedMs > 0 && (
-                          <div className="inline-flex items-center gap-2 text-xs text-slate-700">
-                            <Clock size={13} weight="duotone" className="text-slate-400" />
-                            <span className="font-medium">Tempo total: {formatDuration(elapsedMs)}</span>
-                          </div>
-                        )}
-                        {remainingEstimateMinutes !== null && !isReady && (
-                          <div className="inline-flex items-center gap-2 text-xs text-slate-700">
-                            <Clock size={13} weight="duotone" className="text-slate-400" />
-                            <span className="font-medium">{etaPhaseLabel} restante: ~{remainingEstimateMinutes} min</span>
-                          </div>
-                        )}
-                        {etaWindowMin && etaWindowMax && !isReady && (
-                          <div className="inline-flex items-center gap-2 text-xs text-slate-700">
-                            <Clock size={13} weight="duotone" className="text-slate-400" />
-                            <span className="font-medium">Janela prevista: {etaWindowMin}–{etaWindowMax} min</span>
-                          </div>
-                        )}
-                        {estimatedReadyAt && !isReady && (
-                          <div className="inline-flex items-center gap-2 text-xs text-slate-700">
-                            <Clock size={13} weight="duotone" className="text-slate-400" />
-                            <span className="font-medium">
-                              {etaForecastLabel}: {estimatedReadyAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                            </span>
-                          </div>
-                        )}
-                        {isEstimateDelayed && (
-                          <div className="inline-flex items-center gap-2 text-xs text-slate-600">
-                            <Clock size={13} weight="duotone" className="text-slate-400" />
-                            <span className="font-medium">Pedido em atraso. Atualizando automaticamente.</span>
-                          </div>
-                        )}
-                      </div>
-                    ) : null}
-                  </div>
-                  <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
-                    <Clock size={16} weight="duotone" />
-                    {order.createdAt ? formatDateTime(order.createdAt) : 'Agora'}
-                    {elapsedMs > 0 && (
-                      <span className="hidden sm:inline-flex ml-2 items-center gap-1 rounded-full bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-600">
-                        Tempo corrido: {formatDuration(elapsedMs)}
-                      </span>
-                    )}
                   </div>
                 </div>
               </div>
@@ -930,15 +853,6 @@ export function OrderTracking() {
               )}
 
               <div id="order-status-section" className="rounded-2xl border border-gray-100 p-5 bg-gray-50">
-                <div className="flex items-center gap-3 mb-4">
-                  <ChefHat className="text-red-500" weight="duotone" />
-                  <div>
-                    <p className="text-sm font-semibold text-gray-800">Acompanhe seu pedido</p>
-                    <p className="text-xs text-gray-500">
-                      {polling ? 'Atualizando automaticamente' : 'Status finalizado'}
-                    </p>
-                  </div>
-                </div>
                 <div className="mb-4">
                   <div className="h-2 w-full rounded-full bg-gray-200 overflow-hidden">
                     <div
@@ -952,122 +866,65 @@ export function OrderTracking() {
                   </div>
                   <div className="mt-2 text-xs text-gray-500">{progress}% completo</div>
                 </div>
-                <div className="sm:hidden space-y-2 py-1 pb-2">
-                  <div className="rounded-2xl border border-brand-primary/25 bg-brand-primary-soft px-3 py-2.5">
-                    <p className="text-[10px] uppercase tracking-[0.18em] text-brand-primary/80 font-bold">Etapa atual</p>
-                    <div className="mt-1.5 flex items-center gap-2.5">
-                      <span className="h-8 w-8 rounded-xl border border-brand-primary/20 bg-white grid place-items-center text-brand-primary">
-                        {isDelivery && currentStepItem?.id === 'in_delivery' ? (
-                          <Bicycle size={16} weight="duotone" />
-                        ) : !isReady ? (
-                          <CircleNotch size={16} weight="duotone" className="animate-spin" />
-                        ) : (
-                          <CurrentStepIcon size={16} weight="duotone" />
-                        )}
-                      </span>
-                      <div className="min-w-0">
-                        <p className="text-sm font-extrabold text-slate-900">
-                          {isReadyStageForMobileBase || progress >= 100 ? 'Pronto para Retirada' : (currentStepItem?.label || statusLabel)}
-                        </p>
-                        <p className="text-[11px] text-slate-600">
-                          {isReadyStageForMobileBase || progress >= 100 ? 'Status finalizado' : 'Atualizando automaticamente'}
-                        </p>
+                {(isReady && elapsedMs > 0) || (remainingEstimateMinutes !== null && !isReady) || (etaWindowMin && etaWindowMax && !isReady) || isEstimateDelayed ? (
+                  <div className="mb-4 space-y-1.5">
+                    {isReady && elapsedMs > 0 && (
+                      <div className="inline-flex items-center gap-2 text-sm text-slate-500">
+                        <Clock size={13} weight="duotone" className="text-slate-400" />
+                        <span className="font-medium">Tempo total: {formatDuration(elapsedMs)}</span>
                       </div>
-                    </div>
+                    )}
+                    {remainingEstimateMinutes !== null && !isReady && (
+                      <div className="inline-flex items-center gap-2 text-sm text-slate-500">
+                        <Clock size={13} weight="duotone" className="text-slate-400" />
+                        <span className="font-medium">{etaPhaseLabel} restante: ~{remainingEstimateMinutes} min</span>
+                      </div>
+                    )}
+                    {etaWindowMin && etaWindowMax && !isReady && (
+                      <div className="inline-flex items-center gap-2 text-sm text-slate-500">
+                        <Clock size={13} weight="duotone" className="text-slate-400" />
+                        <span className="font-medium">Janela prevista: {etaWindowMin}–{etaWindowMax} min</span>
+                      </div>
+                    )}
+                    {isEstimateDelayed && (
+                      <div className="inline-flex items-center gap-2 text-sm text-slate-500">
+                        <Clock size={13} weight="duotone" className="text-slate-400" />
+                        <span className="font-medium">Pedido em atraso. Atualizando automaticamente.</span>
+                      </div>
+                    )}
                   </div>
+                ) : null}
 
-                  {!isReady && nextStepItem ? (
-                    <div className="rounded-2xl border border-slate-200 bg-white px-3 py-2">
-                      <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500 font-bold">Próximo passo</p>
-                      <p className="text-xs font-semibold text-slate-700 mt-1">{nextStepItem.label}</p>
-                    </div>
-                  ) : null}
-
-                  {!isReady ? (
-                    <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
-                      <p className="text-[10px] uppercase tracking-[0.16em] text-slate-500 font-bold">Linha do pedido</p>
-                      <div className="relative mt-2 pl-0.5">
-                        <span className="pointer-events-none absolute left-[9px] top-2 bottom-2 w-px bg-slate-200" />
-                        <div className="space-y-2">
-                        {steps.map((step) => {
-                          const stepIndex = steps.findIndex((item) => item.id === step.id);
-                          const isCompleted = stepIndex >= 0 && stepIndex < currentIndex;
-                          const isCurrent = stepIndex === currentIndex;
-                          return (
-                            <div key={`mobile-line-${step.id}`} className="relative z-[1] flex items-center gap-2">
-                              <span
-                                className={`h-5 w-5 rounded-full border grid place-items-center ${
-                                  isCurrent
-                                    ? 'border-brand-primary bg-brand-primary text-white'
-                                    : isCompleted
-                                      ? 'border-slate-300 bg-slate-200 text-slate-700'
-                                      : 'border-slate-200 bg-slate-50 text-slate-400'
-                                }`}
-                              >
-                                {isCompleted ? <CheckCircle size={12} weight="fill" /> : <span className="text-[9px] font-bold">{stepIndex + 1}</span>}
-                              </span>
-                              <span className={`text-[12px] ${isCurrent ? 'font-extrabold text-brand-primary' : isCompleted ? 'font-semibold text-slate-700' : 'text-slate-400'}`}>
-                                {step.label}
-                              </span>
-                            </div>
-                          );
-                        })}
-                        </div>
-                      </div>
-                    </div>
-                  ) : null}
-                </div>
-
-                <div className="hidden sm:flex flex-nowrap gap-2 sm:gap-3 overflow-x-auto overflow-y-visible no-scrollbar py-1 pb-2">
-                  {steps.map((step) => {
-                    const stepIndex = steps.findIndex((item) => item.id === step.id);
-                    const isCompleted = stepIndex >= 0 && stepIndex < currentIndex;
-                    const isCurrent = stepIndex === currentIndex;
-                    const showBike = isDelivery && step.id === 'in_delivery';
-                    const styleKey = step.id === 'ready' ? 'ready' : step.id;
-                    const stepTone = stepStyles[styleKey] || stepStyles.pending;
-                    const StepIcon = stepIconById[step.id] || Clock;
-                    return (
-                      <div
-                        key={step.id}
-                        aria-current={isCurrent ? 'step' : undefined}
-                        className={[
-                          'rounded-2xl border px-3 py-2.5 sm:px-3.5 flex items-center gap-2.5 text-xs whitespace-nowrap select-none min-w-[132px]',
-                          isCurrent
-                            ? `${stepTone.current} ring-2 ring-brand-primary/40 shadow-sm`
-                            : isCompleted
-                              ? completedStepClass
-                              : upcomingStepClass,
-                        ].join(' ')}
-                      >
-                        <span
-                          className={`h-8 w-8 rounded-xl border grid place-items-center ${
-                            isCurrent
-                              ? 'bg-white/80 border-white/70'
-                              : isCompleted
-                                ? 'bg-white/70 border-slate-200'
-                                : 'bg-slate-50 border-slate-200'
-                          }`}
-                        >
-                          {showBike ? (
-                            <Bicycle size={16} weight="duotone" />
-                          ) : isCurrent && !isReady ? (
-                            <CircleNotch size={16} weight="duotone" className="animate-spin" />
-                          ) : (
-                            <StepIcon size={16} weight="duotone" />
-                          )}
-                        </span>
-                        <span className="leading-tight">
-                          <span className={`block text-[12px] sm:text-sm ${isCurrent ? 'font-extrabold' : 'font-semibold'}`}>
+                <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                  <p className="text-[10px] uppercase tracking-[0.16em] text-slate-500 font-bold">Linha do pedido</p>
+                  <div className="relative mt-2 pl-0.5">
+                    <span className="pointer-events-none absolute left-[9px] top-2 bottom-2 w-px bg-slate-200" />
+                    <div className="space-y-2">
+                    {steps.map((step) => {
+                      const stepIndex = steps.findIndex((item) => item.id === step.id);
+                      const isCompleted = stepIndex >= 0 && stepIndex < currentIndex;
+                      const isCurrent = stepIndex === currentIndex;
+                      return (
+                        <div key={`mobile-line-${step.id}`} className="relative z-[1] flex items-center gap-2">
+                          <span
+                            className={`h-5 w-5 rounded-full border grid place-items-center ${
+                              isCurrent
+                                ? 'border-brand-primary bg-brand-primary text-white'
+                                : isCompleted
+                                  ? 'border-slate-300 bg-slate-200 text-slate-700'
+                                  : 'border-slate-200 bg-slate-50 text-slate-400'
+                            }`}
+                          >
+                            {isCompleted ? <CheckCircle size={12} weight="fill" /> : <span className="text-[9px] font-bold">{stepIndex + 1}</span>}
+                          </span>
+                          <span className={`text-[12px] ${isCurrent ? 'font-extrabold text-brand-primary' : isCompleted ? 'font-semibold text-slate-700' : 'text-slate-400'}`}>
                             {step.label}
                           </span>
-                          <span className="block text-[10px] uppercase tracking-[0.14em] opacity-75">
-                            {isCurrent ? 'Agora' : isCompleted ? 'Concluído' : 'Próximo'}
-                          </span>
-                        </span>
-                      </div>
-                    );
-                  })}
+                        </div>
+                      );
+                    })}
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -1358,6 +1215,11 @@ export function OrderTracking() {
                       Pedir novamente
                     </button>
                   )}
+                    {order.createdAt ? (
+                      <p className="text-slate-500">
+                        <span className="font-semibold">Pedido feito em:</span> {formatDateTime(order.createdAt)}
+                      </p>
+                    ) : null}
                     <p>
                       <span className="font-semibold">Status:</span> {statusLabel}
                     </p>
