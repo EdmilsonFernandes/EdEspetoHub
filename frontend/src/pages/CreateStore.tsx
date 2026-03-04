@@ -897,14 +897,9 @@ export function CreateStore() {
         </div>
       </header>
 
-      <main className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        <div className="grid gap-6 lg:grid-cols-[35%_65%] items-start">
-        <aside className="order-2 lg:order-1 lg:sticky lg:top-24 hidden lg:block">
-          {previewPanel}
-        </aside>
-
-        <div className="order-1 lg:order-2 min-w-0 ds-card-elevated rounded-3xl p-4 sm:p-6 lg:p-8">
-          <div className="mb-5 flex flex-col gap-3 sm:gap-2">
+      <main className="max-w-3xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <div className="min-w-0 rounded-2xl border border-slate-100 bg-white p-6 md:p-10 shadow-sm">
+          <div className="mb-5 flex flex-col items-center text-center gap-3 sm:gap-2">
             <div className="inline-flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.24em] text-slate-600">
               <Buildings size={12} weight="duotone" />
               Criar nova loja
@@ -913,7 +908,7 @@ export function CreateStore() {
             <p className="text-sm sm:text-base text-slate-600">Em 3 etapas você publica seu link e começa a vender.</p>
           </div>
 
-          <div className="sticky top-[72px] sm:top-[84px] z-20 mb-6 ds-card p-3 sm:p-4 backdrop-blur bg-white/95 border border-slate-200">
+          <div className="sticky top-[72px] sm:top-[84px] z-20 mb-6 rounded-2xl border border-slate-200 bg-white/95 p-3 sm:p-4 backdrop-blur">
             <div className="mb-2 flex items-center justify-between gap-2">
               <p className="text-xs uppercase tracking-[0.22em] font-semibold text-slate-500">Onboarding</p>
               <span className="text-[11px] text-slate-500 font-semibold">Etapa {currentStep} de 3</span>
@@ -924,12 +919,12 @@ export function CreateStore() {
                   type="button"
                   key={step.id}
                   onClick={() => scrollToStep(step.id)}
-                  className={`min-w-[170px] sm:min-w-0 sm:flex-1 rounded-xl border px-3 py-2 ${
+                  className={`min-w-[140px] sm:min-w-0 sm:flex-1 rounded-xl border px-3 py-2 ${
                     currentStep === step.id
-                      ? 'border-brand-primary bg-brand-primary/10 ring-2 ring-brand-primary/20'
+                      ? 'border-slate-900 bg-slate-50'
                       : step.done
-                        ? 'border-emerald-200 bg-emerald-50'
-                        : 'border-slate-200 bg-slate-50'
+                        ? 'border-emerald-200 bg-emerald-50/70'
+                        : 'border-slate-200 bg-white'
                   } text-left`}
                 >
                   <div className="flex items-center gap-2">
@@ -946,18 +941,14 @@ export function CreateStore() {
                     </span>
                     <div className="min-w-0">
                       <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Etapa</p>
-                      <p className={`truncate text-sm font-bold ${
-                        currentStep === step.id ? 'text-brand-primary' : step.done ? 'text-emerald-700' : 'text-slate-800'
+                      <p className={`truncate text-xs sm:text-sm font-bold ${
+                        currentStep === step.id ? 'text-slate-900' : step.done ? 'text-emerald-700' : 'text-slate-700'
                       }`}>{step.title}</p>
                     </div>
                   </div>
                 </button>
               ))}
             </div>
-          </div>
-
-          <div className="lg:hidden mb-6">
-            {previewPanel}
           </div>
 
           {storeError && (
@@ -1113,8 +1104,8 @@ export function CreateStore() {
                   <h4 className="text-sm font-semibold text-gray-700">Endereço</h4>
                   <p className="text-xs text-slate-500 mb-3">Onde sua loja opera e recebe pedidos.</p>
                   <div className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 min-w-0">
-                      <div className="md:col-span-2 space-y-2 min-w-0">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 min-w-0">
+                      <div className="space-y-2 min-w-0">
                         <label className="text-sm font-semibold text-gray-700">CEP</label>
                         <input
                           required
@@ -1844,7 +1835,6 @@ export function CreateStore() {
               Ao criar sua conta, você confirma a veracidade dos dados fornecidos.
             </p>
           </form>
-        </div>
         </div>
       </main>
       {showTerms && (
