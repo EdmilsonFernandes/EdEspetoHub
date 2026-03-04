@@ -109,7 +109,7 @@ export const CartView = ({
   const [cashTenderedInput, setCashTenderedInput] = useState("");
   const nameInputRef = useRef<HTMLInputElement | null>(null);
   const premiumInputClass =
-    "w-full rounded-xl border border-slate-200 bg-white/90 px-3 py-2.5 sm:py-3 text-slate-800 outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]";
+    "w-full rounded-2xl bg-slate-100 px-4 py-3 text-slate-800 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all";
 
   const visibleOrderTypes = Array.isArray(allowedOrderTypes) && allowedOrderTypes.length
     ? allowedOrderTypes
@@ -424,9 +424,7 @@ export const CartView = ({
   }, []);
 
   return (
-    <div className="animate-in slide-in-from-right pb-24 relative overflow-x-hidden no-x-scroll">
-      <div className="pointer-events-none absolute -top-8 -right-10 h-28 w-28 rounded-full bg-brand-primary/10 blur-2xl" />
-      <div className="pointer-events-none absolute top-52 -left-8 h-24 w-24 rounded-full bg-emerald-300/10 blur-2xl" />
+    <div className="animate-in slide-in-from-right pb-24 relative overflow-x-hidden no-x-scroll bg-slate-50">
       <style>{`@keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}`}</style>
       {/* voltar */}
       <button
@@ -437,7 +435,7 @@ export const CartView = ({
       </button>
 
       {/* Resumo compacto (mobile) */}
-      <div className={`sm:hidden mb-4 rounded-2xl border border-slate-200 bg-gradient-to-r from-white via-slate-50 to-white px-4 ${summaryCompact ? 'py-2' : 'py-2.5'} flex items-center justify-between sticky top-2 z-40 transition-all shadow-[0_20px_42px_-32px_rgba(15,23,42,0.45)]`}>
+      <div className={`sm:hidden mb-4 rounded-2xl border border-slate-100 bg-white px-4 ${summaryCompact ? 'py-2' : 'py-2.5'} flex items-center justify-between sticky top-2 z-40 transition-all shadow-sm`}>
         <div>
           <p className="text-[11px] uppercase tracking-[0.3em] text-slate-400">Resumo rápido</p>
           <p className="text-sm font-semibold text-slate-800">
@@ -451,8 +449,7 @@ export const CartView = ({
       </div>
 
       {/* Dados do cliente */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-white via-slate-50 to-white rounded-3xl border border-slate-200 p-4 sm:p-6 mb-4 sm:mb-6 shadow-[0_30px_60px_-46px_rgba(15,23,42,0.45)]">
-        <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-brand-primary/80 via-red-500/70 to-orange-400/80" />
+      <div className="relative overflow-hidden bg-white rounded-3xl border border-slate-100 p-4 sm:p-6 mb-4 sm:mb-6 shadow-sm">
         <div className="flex items-center justify-between mb-4 sm:mb-6">
           <div>
             <h2 className="font-black text-slate-900 text-base sm:text-lg tracking-tight">Detalhes do Pedido</h2>
@@ -465,8 +462,8 @@ export const CartView = ({
 
         <div className="space-y-4 sm:space-y-5">
           {/* Nome */}
-          <div className="rounded-xl sm:rounded-2xl border border-gray-100 p-3 sm:p-4">
-            <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+          <div className="rounded-2xl border border-slate-100 p-3 sm:p-4 bg-white">
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
               Seu Nome
             </label>
             <div className="relative mt-2">
@@ -483,9 +480,9 @@ export const CartView = ({
                   allowCustomerAutocomplete && setTimeout(() => setSuggestionsOpen(false), 150)
                 }
                 placeholder="Nome completo"
-                className="w-full border-b-2 border-gray-200 py-2.5 sm:py-3 pl-9 text-base sm:text-lg outline-none focus:border-brand-primary placeholder:text-gray-300 bg-transparent"
+                className="w-full rounded-2xl bg-slate-100 py-3 pl-10 pr-4 text-base sm:text-lg text-slate-800 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all"
               />
-              <MagnifyingGlass size={18} className="absolute left-0 top-1/2 -translate-y-1/2 text-gray-300" />
+              <MagnifyingGlass size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               {allowCustomerAutocomplete && suggestionsOpen && filteredCustomers.length > 0 && (
                 <div className="absolute z-10 mt-2 w-full bg-white border border-gray-100 rounded-xl shadow-lg overflow-hidden">
                   {filteredCustomers.slice(0, 6).map((entry) => (
@@ -509,8 +506,8 @@ export const CartView = ({
           </div>
 
           {/* WhatsApp */}
-          <div className="rounded-xl sm:rounded-2xl border border-gray-100 p-3 sm:p-4">
-            <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+          <div className="rounded-2xl border border-slate-100 p-3 sm:p-4 bg-white">
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
               WhatsApp {customer.type === "table" ? "(opcional)" : ""}
             </label>
             <div className="mt-2 grid grid-cols-1 sm:grid-cols-[110px_1fr] gap-3 items-end">
@@ -540,7 +537,7 @@ export const CartView = ({
                   onChange={(e) => handlePhoneLocalNumberChange(e.target.value)}
                   placeholder={selectedDdd ? "90000-0000" : "Selecione o DDD"}
                   disabled={!selectedDdd}
-                  className={`${premiumInputClass} mt-1 text-base sm:text-lg placeholder:text-gray-300 disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed`}
+                  className={`${premiumInputClass} mt-1 text-base sm:text-lg disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed`}
                 />
               </div>
             </div>
@@ -552,22 +549,22 @@ export const CartView = ({
           </div>
 
           {/* Tipo de pedido */}
-          <div className="rounded-xl sm:rounded-2xl border border-gray-100 p-3 sm:p-4">
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
+          <div className="rounded-2xl border border-slate-100 p-3 sm:p-4 bg-white">
+            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
               Tipo de pedido
             </p>
-            <div className="flex gap-2 sm:gap-3 flex-wrap sm:flex-nowrap">
+            <div className="flex gap-1 rounded-2xl bg-slate-100 p-1 flex-wrap sm:flex-nowrap">
               {visibleOrderTypes.map((type) => (
                 <button
                   key={type}
                   onClick={() => onChangeCustomer({ ...customer, type })}
-                  className={`flex-1 min-w-0 py-2.5 sm:py-3 rounded-2xl border flex flex-col items-center justify-center gap-1 transition-all active:scale-[0.98] ${
+                  className={`flex-1 min-w-0 py-2.5 sm:py-3 rounded-xl flex flex-col items-center justify-center gap-1 transition-all active:scale-[0.98] ${
                     customer.type === type
-                      ? "border-brand-primary bg-gradient-to-br from-brand-primary-soft/70 to-white text-brand-primary shadow-md"
-                      : "border-gray-100 text-gray-500 hover:border-brand-primary hover:shadow-sm hover:-translate-y-0.5"
+                      ? "bg-slate-900 text-white shadow-sm"
+                      : "bg-transparent text-slate-500 hover:text-slate-700 font-medium"
                   }`}
                 >
-                  <span className={`h-9 w-9 rounded-xl flex items-center justify-center ${customer.type === type ? 'bg-brand-primary text-white' : 'bg-slate-100 text-slate-600'}`}>
+                  <span className={`h-9 w-9 rounded-xl flex items-center justify-center ${customer.type === type ? 'bg-white/15 text-white' : 'bg-transparent text-slate-600'}`}>
                     {type === "delivery" && <Bicycle size={16} weight="duotone" />}
                     {type === "pickup" && <House size={16} weight="duotone" />}
                     {type === "table" && <ForkKnife size={16} weight="duotone" />}
@@ -586,7 +583,7 @@ export const CartView = ({
 
           {/* Endereço */}
           {customer.type === "delivery" && (
-            <div className="rounded-2xl premium-card p-3 sm:p-4">
+            <div className="rounded-2xl premium-card p-3 sm:p-4 bg-white border border-slate-100 shadow-sm">
               <div className="flex items-center justify-between mb-3">
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
                   Endereço de entrega
@@ -599,14 +596,14 @@ export const CartView = ({
                 <div className="space-y-3">
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div className="sm:col-span-2">
-                      <label className="text-xs font-semibold text-gray-500">CEP</label>
+                      <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">CEP</label>
                       <input
                         value={customer.cep || ""}
                         onChange={(e) => updateDeliveryField("cep", e.target.value)}
                         onBlur={handleCepLookup}
                         disabled={cepLoading}
                         placeholder="00000-000"
-                        className="w-full p-2.5 sm:p-3 rounded-xl bg-gray-50 border border-gray-100 text-gray-700 outline-none focus:ring-2 focus:ring-brand-primary disabled:opacity-60"
+                        className={`${premiumInputClass} disabled:opacity-60`}
                       />
                     </div>
                     <div className="flex items-end">
@@ -614,7 +611,7 @@ export const CartView = ({
                         type="button"
                         onClick={handleCepLookup}
                         disabled={cepLoading}
-                        className="w-full px-3 py-2.5 sm:py-3 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-60"
+                        className="w-full px-3 py-3 rounded-xl bg-slate-100 text-sm text-slate-700 hover:bg-slate-200 transition disabled:opacity-60"
                       >
                         {cepLoading ? "Buscando..." : "Buscar CEP"}
                       </button>
@@ -623,66 +620,66 @@ export const CartView = ({
                   {cepError && <p className="text-xs text-red-600">{cepError}</p>}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="text-xs font-semibold text-gray-500">Rua / Avenida</label>
+                      <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Rua / Avenida</label>
                       <input
                         value={customer.street || ""}
                         onChange={(e) => updateDeliveryField("street", e.target.value)}
                         placeholder="Rua, avenida"
-                        className="w-full p-2.5 sm:p-3 rounded-xl bg-gray-50 border border-gray-100 text-gray-700 outline-none focus:ring-2 focus:ring-brand-primary"
+                        className={premiumInputClass}
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-semibold text-gray-500">Numero</label>
+                      <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Numero</label>
                       <input
                         value={customer.number || ""}
                         onChange={(e) => updateDeliveryField("number", e.target.value)}
                         placeholder="Numero"
-                        className="w-full p-2.5 sm:p-3 rounded-xl bg-gray-50 border border-gray-100 text-gray-700 outline-none focus:ring-2 focus:ring-brand-primary"
+                        className={premiumInputClass}
                       />
                     </div>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="text-xs font-semibold text-gray-500">Bairro</label>
+                      <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Bairro</label>
                       <input
                         value={customer.neighborhood || ""}
                         onChange={(e) => updateDeliveryField("neighborhood", e.target.value)}
                         placeholder="Bairro"
-                        className="w-full p-2.5 sm:p-3 rounded-xl bg-gray-50 border border-gray-100 text-gray-700 outline-none focus:ring-2 focus:ring-brand-primary"
+                        className={premiumInputClass}
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-semibold text-gray-500">Complemento</label>
+                      <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Complemento</label>
                       <input
                         value={customer.complement || ""}
                         onChange={(e) => updateDeliveryField("complement", e.target.value)}
                         placeholder="Apto, bloco, referencia"
-                        className="w-full p-2.5 sm:p-3 rounded-xl bg-gray-50 border border-gray-100 text-gray-700 outline-none focus:ring-2 focus:ring-brand-primary"
+                        className={premiumInputClass}
                       />
                     </div>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div className="sm:col-span-2">
-                      <label className="text-xs font-semibold text-gray-500">Cidade</label>
+                      <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Cidade</label>
                       <input
                         value={customer.city || ""}
                         onChange={(e) => updateDeliveryField("city", e.target.value)}
                         placeholder="Cidade"
-                        className="w-full p-2.5 sm:p-3 rounded-xl bg-gray-50 border border-gray-100 text-gray-700 outline-none focus:ring-2 focus:ring-brand-primary"
+                        className={premiumInputClass}
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-semibold text-gray-500">UF</label>
+                      <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">UF</label>
                       <input
                         value={customer.state || ""}
                         onChange={(e) => updateDeliveryField("state", e.target.value)}
                         placeholder="UF"
-                        className="w-full p-2.5 sm:p-3 rounded-xl bg-gray-50 border border-gray-100 text-gray-700 outline-none focus:ring-2 focus:ring-brand-primary"
+                        className={premiumInputClass}
                       />
                     </div>
                   </div>
                 </div>
-                <div className="rounded-2xl premium-card-soft p-4 space-y-4">
+                <div className="rounded-2xl premium-card-soft p-4 space-y-4 bg-slate-50 border border-slate-100">
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Entrega</p>
@@ -690,8 +687,8 @@ export const CartView = ({
                         {radiusValue ? `Raio até ${radiusValue} km` : 'Sem limite de raio'}
                       </p>
                     </div>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-semibold px-2 py-1">
-                      <Truck size={12} weight="duotone" />
+                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-semibold px-2 py-1 border border-emerald-100">
+                      <MapPinLine size={12} weight="duotone" />
                       Frete
                     </span>
                   </div>
@@ -790,8 +787,7 @@ export const CartView = ({
       </div>
 
       {/* Resumo */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-white via-emerald-50/40 to-white rounded-2xl border border-emerald-100 p-4 sm:p-6 mb-4 sm:mb-6 transition-all hover:-translate-y-0.5 active:scale-[0.99] shadow-[0_28px_56px_-44px_rgba(5,150,105,0.45)]">
-        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-400/80 via-emerald-500/60 to-white" />
+      <div className="relative overflow-hidden bg-white rounded-2xl border border-slate-100 p-4 sm:p-6 mb-4 sm:mb-6 transition-all hover:-translate-y-0.5 active:scale-[0.99] shadow-sm">
         <h2 className="font-black text-slate-900 mb-3 sm:mb-4 text-base sm:text-lg tracking-tight">Resumo</h2>
 
         {cartItems.map((item) => (
@@ -1057,7 +1053,7 @@ export const CartView = ({
       )}
 
       {/* Botão Finalizar */}
-      <div className="fixed bottom-0 left-0 right-0 w-full box-border p-4 border-t border-slate-200 bg-white/90 backdrop-blur-md max-w-lg mx-auto z-40 shadow-[0_-18px_36px_-28px_rgba(15,23,42,0.35)]">
+      <div className="fixed bottom-0 left-0 right-0 w-full box-border p-4 border-t border-slate-100 bg-white/90 backdrop-blur-md max-w-lg mx-auto z-50 shadow-[0_-14px_28px_-22px_rgba(15,23,42,0.28)]">
         <button
           onClick={() => {
             setCtaPulse(true);
@@ -1068,10 +1064,10 @@ export const CartView = ({
             });
           }}
           disabled={checkoutDisabled || cashValidation.blocked}
-          className={`w-full font-bold py-4 rounded-xl shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2 ${
+          className={`w-full font-bold text-lg py-4 rounded-2xl shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 ${
             checkoutDisabled || cashValidation.blocked
-              ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-              : "bg-gradient-to-r from-brand-primary via-red-500 to-orange-500 text-white cursor-pointer shadow-[0_24px_46px_-28px_rgba(239,68,68,0.75)]"
+              ? "bg-slate-300 text-slate-600 cursor-not-allowed"
+              : "bg-slate-900 text-white cursor-pointer"
           }`}
           style={ctaPulse ? { animation: 'btnPop 220ms ease' } : undefined}
         >
