@@ -275,7 +275,6 @@ export function OrderTracking() {
     status === 'delivered' ||
     status === 'finished' ||
     String((order as any)?.delivery?.status || '').toUpperCase() === 'DELIVERED';
-  const shouldShowReviewCta = isReady && !reviewState?.review && !reviewAccessDenied;
   const canRateDelivery = Boolean(reviewState?.features?.deliveryFeedbackEnabled ?? reviewState?.isDelivery ?? isDelivery);
   const canUseTipFlow = Boolean(reviewState?.features?.tipEnabled ?? canRateDelivery);
   const storePhone = order?.store?.phone;
@@ -802,7 +801,7 @@ export function OrderTracking() {
 
           {!loading && !error && order && (
             <div className="space-y-4 sm:space-y-6">
-              <div className="rounded-2xl sm:rounded-3xl premium-card-soft p-4 sm:p-6 border border-slate-100">
+              <div className="rounded-2xl sm:rounded-3xl premium-card-soft p-5 sm:p-6 border border-slate-100">
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                   <div>
                     <p className="text-xs uppercase tracking-[0.3em] text-gray-400">
@@ -829,9 +828,7 @@ export function OrderTracking() {
                       {isReady ? 'Finalizado' : 'Em andamento'}
                     </span>
                     </div>
-                    <p className="text-sm text-gray-500 mt-1.5">
-                      {storeName} • {typeLabel}
-                    </p>
+                    <p className="text-sm text-gray-500 mt-1.5">{typeLabel}</p>
 
                     {isDelivery && motoboyFirst && ['ACCEPTED', 'PICKED_UP', 'IN_TRANSIT', 'DELIVERED'].includes(deliveryStatus) ? (
                       <div className="mt-3 rounded-2xl border border-slate-200 bg-white/70 px-4 py-3 text-sm text-slate-800">
@@ -866,31 +863,42 @@ export function OrderTracking() {
                       </div>
                     ) : null}
 
-                    {isReady && elapsedMs > 0 && (
-                      <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-brand-primary text-white text-xs font-semibold px-3 py-1.5 shadow-sm">
-                        Tempo total: {formatDuration(elapsedMs)}
+                    {(isReady && elapsedMs > 0) || (remainingEstimateMinutes !== null && !isReady) || (etaWindowMin && etaWindowMax && !isReady) || (estimatedReadyAt && !isReady) || isEstimateDelayed ? (
+                      <div className="mt-3 space-y-1.5">
+                        {isReady && elapsedMs > 0 && (
+                          <div className="inline-flex items-center gap-2 text-xs text-slate-700">
+                            <Clock size={13} weight="duotone" className="text-slate-400" />
+                            <span className="font-medium">Tempo total: {formatDuration(elapsedMs)}</span>
+                          </div>
+                        )}
+                        {remainingEstimateMinutes !== null && !isReady && (
+                          <div className="inline-flex items-center gap-2 text-xs text-slate-700">
+                            <Clock size={13} weight="duotone" className="text-slate-400" />
+                            <span className="font-medium">{etaPhaseLabel} restante: ~{remainingEstimateMinutes} min</span>
+                          </div>
+                        )}
+                        {etaWindowMin && etaWindowMax && !isReady && (
+                          <div className="inline-flex items-center gap-2 text-xs text-slate-700">
+                            <Clock size={13} weight="duotone" className="text-slate-400" />
+                            <span className="font-medium">Janela prevista: {etaWindowMin}–{etaWindowMax} min</span>
+                          </div>
+                        )}
+                        {estimatedReadyAt && !isReady && (
+                          <div className="inline-flex items-center gap-2 text-xs text-slate-700">
+                            <Clock size={13} weight="duotone" className="text-slate-400" />
+                            <span className="font-medium">
+                              {etaForecastLabel}: {estimatedReadyAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                          </div>
+                        )}
+                        {isEstimateDelayed && (
+                          <div className="inline-flex items-center gap-2 text-xs text-slate-600">
+                            <Clock size={13} weight="duotone" className="text-slate-400" />
+                            <span className="font-medium">Pedido em atraso. Atualizando automaticamente.</span>
+                          </div>
+                        )}
                       </div>
-                    )}
-                    {remainingEstimateMinutes !== null && !isReady && (
-                      <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold animate-pulse">
-                        {etaPhaseLabel} restante: ~{remainingEstimateMinutes} min
-                      </div>
-                    )}
-                    {isEstimateDelayed && (
-                      <div className="mt-2 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-rose-100 text-rose-800 text-xs font-semibold">
-                        Pedido em atraso. Atualizando automaticamente.
-                      </div>
-                    )}
-                    {etaWindowMin && etaWindowMax && !isReady && (
-                      <div className="mt-2 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 text-xs font-semibold">
-                        Janela prevista: {etaWindowMin}–{etaWindowMax} min
-                      </div>
-                    )}
-                    {estimatedReadyAt && !isReady && (
-                      <div className="mt-2 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold">
-                        {etaForecastLabel}: {estimatedReadyAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                      </div>
-                    )}
+                    ) : null}
                   </div>
                   <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
                     <Clock size={16} weight="duotone" />
@@ -921,7 +929,7 @@ export function OrderTracking() {
                 </div>
               )}
 
-              <div id="order-status-section" className="rounded-2xl border border-gray-100 p-4 bg-gray-50">
+              <div id="order-status-section" className="rounded-2xl border border-gray-100 p-5 bg-gray-50">
                 <div className="flex items-center gap-3 mb-4">
                   <ChefHat className="text-red-500" weight="duotone" />
                   <div>
@@ -976,32 +984,35 @@ export function OrderTracking() {
                   ) : null}
 
                   {!isReady ? (
-                    <div className="rounded-2xl border border-slate-200 bg-white px-3 py-2.5">
+                    <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
                       <p className="text-[10px] uppercase tracking-[0.16em] text-slate-500 font-bold">Linha do pedido</p>
-                      <div className="space-y-1.5 mt-2">
+                      <div className="relative mt-2 pl-0.5">
+                        <span className="pointer-events-none absolute left-[9px] top-2 bottom-2 w-px bg-slate-200" />
+                        <div className="space-y-2">
                         {steps.map((step) => {
                           const stepIndex = steps.findIndex((item) => item.id === step.id);
                           const isCompleted = stepIndex >= 0 && stepIndex < currentIndex;
                           const isCurrent = stepIndex === currentIndex;
                           return (
-                            <div key={`mobile-line-${step.id}`} className="flex items-center gap-2">
+                            <div key={`mobile-line-${step.id}`} className="relative z-[1] flex items-center gap-2">
                               <span
                                 className={`h-5 w-5 rounded-full border grid place-items-center ${
                                   isCurrent
                                     ? 'border-brand-primary bg-brand-primary text-white'
                                     : isCompleted
-                                      ? 'border-emerald-300 bg-emerald-50 text-emerald-700'
+                                      ? 'border-slate-300 bg-slate-200 text-slate-700'
                                       : 'border-slate-200 bg-slate-50 text-slate-400'
                                 }`}
                               >
                                 {isCompleted ? <CheckCircle size={12} weight="fill" /> : <span className="text-[9px] font-bold">{stepIndex + 1}</span>}
                               </span>
-                              <span className={`text-[12px] ${isCurrent ? 'font-extrabold text-slate-900' : isCompleted ? 'font-semibold text-slate-700' : 'text-slate-500'}`}>
+                              <span className={`text-[12px] ${isCurrent ? 'font-extrabold text-brand-primary' : isCompleted ? 'font-semibold text-slate-700' : 'text-slate-400'}`}>
                                 {step.label}
                               </span>
                             </div>
                           );
                         })}
+                        </div>
                       </div>
                     </div>
                   ) : null}
@@ -1063,7 +1074,7 @@ export function OrderTracking() {
               <div className="grid sm:grid-cols-2 gap-4">
                 <div
                   id="order-items-section"
-                  className="rounded-3xl premium-card p-5"
+                  className="rounded-3xl premium-card p-6"
                 >
                   <div className="flex items-center justify-between gap-3 mb-4">
                     <p className="text-sm font-semibold text-gray-900">Resumo do pedido</p>
@@ -1143,14 +1154,14 @@ export function OrderTracking() {
                       </span>
                     </div>
                   ) : null}
-                  <div className="mt-2 flex items-center justify-between text-sm font-semibold text-gray-800">
-                    <span>Total</span>
-                    <span className="text-base px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-4">
+                    <span className="text-lg font-bold text-slate-900">Total</span>
+                    <span className="text-lg font-bold text-slate-900">
                       {formatCurrency(order.total || 0)}
                     </span>
                   </div>
                 </div>
-                <div id="order-info-section" className="rounded-3xl premium-card p-5 space-y-3">
+                <div id="order-info-section" className="rounded-3xl premium-card p-6 space-y-3">
                   <p className="text-sm font-semibold text-gray-900">Informações</p>
                   <div className="text-sm text-gray-600 space-y-2">
                     <p>
@@ -1660,30 +1671,13 @@ export function OrderTracking() {
 
       {!loading && !error && order ? (
         <div className="sm:hidden fixed bottom-0 inset-x-0 z-40 px-4 pb-3">
-          <div className="rounded-2xl border border-slate-200/80 bg-white/95 backdrop-blur px-4 py-3 shadow-[0_-2px_24px_-16px_rgba(15,23,42,0.7)] space-y-2.5">
-            {shouldShowReviewCta ? (
-              <button
-                type="button"
-                onClick={() => scrollToBlock('order-review-section')}
-                className="w-full min-h-[48px] rounded-xl bg-slate-900 text-white text-sm font-extrabold"
-              >
-                Avaliar pedido e gorjeta
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => scrollToBlock('order-items-section')}
-                className="w-full min-h-[48px] rounded-xl bg-slate-900 text-white text-sm font-extrabold"
-              >
-                Ver itens do pedido
-              </button>
-            )}
+          <div className="rounded-2xl border border-slate-200/80 bg-white/95 backdrop-blur px-4 py-2.5 shadow-[0_-2px_24px_-16px_rgba(15,23,42,0.7)]">
             <div className="flex items-center justify-between gap-2 text-xs">
               <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-2.5 py-1 font-semibold text-slate-700 border border-slate-200">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                <span className={`h-1.5 w-1.5 rounded-full ${isReady ? 'bg-emerald-500' : 'bg-brand-primary'}`} />
                 {statusLabel}
               </span>
-              <span className="font-black text-slate-900">{formatCurrency(order?.total || 0)}</span>
+              <span className="text-base font-black text-slate-900">{formatCurrency(order?.total || 0)}</span>
             </div>
           </div>
         </div>
