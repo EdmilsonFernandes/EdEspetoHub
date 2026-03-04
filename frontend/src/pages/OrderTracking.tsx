@@ -17,10 +17,12 @@ const statusLabels: Record<string, string> = {
   pending: 'Recebido',
   preparing: 'Em atendimento',
   ready: 'Pronto para retirada',
+  ready_for_pickup: 'Pronto para retirada',
   ready_for_delivery: 'Pronto para entrega',
   waiting_for_motoboy: 'Aguardando entregador',
   in_delivery: 'Em rota',
   done: 'Pronto',
+  paid: 'Pago',
   delivered: 'Entregue',
   finished: 'Finalizado',
 };
@@ -193,6 +195,7 @@ export function OrderTracking() {
   }, [orderId, polling, order?.status, (order as any)?.delivery?.status]);
 
   const status = order?.status || 'pending';
+  const normalizedStatus = String(status || '').toLowerCase().trim();
   const normalizedOrderType = String(order?.type || '').toLowerCase();
   const isDelivery = normalizedOrderType === 'delivery' || Boolean((order as any)?.delivery);
   const typeLabel = typeLabels[normalizedOrderType] || (isDelivery ? 'Entrega' : 'Pedido');
@@ -229,18 +232,18 @@ export function OrderTracking() {
   const storeLogo =
     resolveAssetUrl(order?.store?.settings?.logoUrl) || '/janocaminho.jpg';
   const statusLabel = useMemo(() => {
-    if (isDelivery && (deliveryStatus === 'DELIVERED' || status === 'delivered' || status === 'finished')) return 'Entregue';
-    if (isDelivery && (deliveryStatus === 'IN_TRANSIT' || status === 'in_delivery')) return 'Em rota';
+    if (isDelivery && (deliveryStatus === 'DELIVERED' || normalizedStatus === 'delivered' || normalizedStatus === 'finished')) return 'Entregue';
+    if (isDelivery && (deliveryStatus === 'IN_TRANSIT' || normalizedStatus === 'in_delivery')) return 'Em rota';
     if (isDelivery && (deliveryStatus === 'ACCEPTED' || deliveryStatus === 'PICKED_UP')) return 'Entregador a caminho';
-    if (isDelivery && status === 'waiting_for_motoboy') return 'Aguardando entregador';
-    if (isDelivery && status === 'ready_for_delivery') return 'Pronto para entrega';
-    if (isDelivery && status === 'ready') return 'Aguardando entregador';
+    if (isDelivery && normalizedStatus === 'waiting_for_motoboy') return 'Aguardando entregador';
+    if (isDelivery && normalizedStatus === 'ready_for_delivery') return 'Pronto para entrega';
+    if (isDelivery && normalizedStatus === 'ready') return 'Aguardando entregador';
     // Legacy delivery orders that still use "done".
-    if (isDelivery && status === 'done') return 'Entregue';
-    if (order?.type === 'table' && status === 'done') return 'Pronto para servir';
-    if (order?.type === 'pickup' && status === 'ready') return 'Pronto para retirada';
-    return statusLabels[status] || status;
-  }, [isDelivery, order?.type, status, (order as any)?.delivery?.status]);
+    if (isDelivery && normalizedStatus === 'done') return 'Entregue';
+    if (order?.type === 'table' && normalizedStatus === 'done') return 'Pronto para servir';
+    if (order?.type === 'pickup' && (normalizedStatus === 'ready' || normalizedStatus === 'ready_for_pickup')) return 'Pronto para retirada';
+    return statusLabels[normalizedStatus] || statusLabels[status] || status;
+  }, [isDelivery, order?.type, status, normalizedStatus, (order as any)?.delivery?.status]);
   const isReady =
     status === 'done' ||
     status === 'delivered' ||
@@ -703,15 +706,29 @@ export function OrderTracking() {
     ];
   }, [isDelivery, order?.type]);
   const currentStep = (() => {
-    if (!isDelivery) return status;
+    if (!isDelivery) {
+      const st = normalizedStatus;
+      const known = new Set(steps.map((item) => item.id));
+      if (known.has(st)) return st;
+      if (order?.type === 'pickup') {
+        if ([ 'ready_for_pickup', 'ready_for_delivery', 'waiting_for_motoboy', 'ready' ].includes(st)) return 'ready';
+        if ([ 'paid', 'done', 'finished', 'delivered' ].includes(st)) return 'done';
+      }
+      if (order?.type === 'table') {
+        if ([ 'ready', 'ready_for_pickup', 'paid', 'done', 'finished' ].includes(st)) return 'done';
+      }
+      if (st.includes('prepar')) return 'preparing';
+      if (st.includes('pend')) return 'pending';
+      return steps[0]?.id || 'pending';
+    }
     const deliveryStatus = String((order as any)?.delivery?.status || '').toUpperCase();
     if (deliveryStatus === 'DELIVERED') return 'delivered';
     if (deliveryStatus === 'IN_TRANSIT') return 'in_delivery';
     if (deliveryStatus === 'ACCEPTED' || deliveryStatus === 'PICKED_UP') return 'ready';
-    if (status === 'ready_for_delivery' || status === 'waiting_for_motoboy' || status === 'ready') return 'ready';
-    if (status === 'in_delivery') return 'in_delivery';
-    if (status === 'delivered' || status === 'finished') return 'delivered';
-    return status;
+    if (normalizedStatus === 'ready_for_delivery' || normalizedStatus === 'waiting_for_motoboy' || normalizedStatus === 'ready') return 'ready';
+    if (normalizedStatus === 'in_delivery') return 'in_delivery';
+    if (normalizedStatus === 'delivered' || normalizedStatus === 'finished') return 'delivered';
+    return normalizedStatus || status;
   })();
   const currentIndex = Math.max(0, steps.findIndex((item) => item.id === currentStep));
   const progress = steps.length > 1 ? Math.round((currentIndex / (steps.length - 1)) * 100) : 0;
