@@ -39,6 +39,16 @@ const categoryVisualMeta = (key = "") => {
   return { icon: SquaresFour, tone: "text-slate-700 bg-white border-slate-200" };
 };
 
+const categoryGlyph = (key = "") => {
+  const normalized = String(key || "").toLowerCase();
+  if (normalized.includes("espeto")) return "🥩";
+  if (normalized.includes("bebida")) return "🥤";
+  if (normalized.includes("lanche")) return "🍔";
+  if (normalized.includes("sobremesa")) return "🍰";
+  if (normalized.includes("entrada")) return "🍽️";
+  return "📋";
+};
+
 const Header = ({
   branding,
   segment,
@@ -518,32 +528,50 @@ export const MenuView = ({
         </section>
         {filteredGrouped.length > 1 && (
           <div
-            className={`sticky ${showHeader ? "top-[72px] sm:top-[92px]" : "top-3"} z-40 -mx-4 px-4 pb-2`}
+            className={`sticky ${showHeader ? "top-[72px] sm:top-[92px]" : "top-0"} z-40 -mx-4 px-4 pb-2 pt-1`}
           >
-            <div className="rounded-2xl border border-slate-100 bg-white px-3 py-2 shadow-sm ds-tabs">
-              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
-                {filteredGrouped.map((category) => (
-                  <button
-                    key={category.key}
-                    type="button"
-                    onClick={() => scrollToCategory(category.key)}
-                    className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-semibold text-slate-600 hover:border-slate-300 hover:text-slate-800 active:bg-slate-900 active:border-slate-900 active:text-white focus-visible:bg-slate-900 focus-visible:border-slate-900 focus-visible:text-white focus-visible:outline-none transition"
-                  >
-                    {(() => {
-                      const meta = categoryVisualMeta(category.key);
-                      const Icon = meta.icon;
-                      return (
-                        <span className={`inline-flex h-5 w-5 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-600`}>
-                          <Icon size={11} weight="duotone" />
+            <div className="rounded-2xl border border-slate-100 bg-white/90 backdrop-blur-md shadow-sm ds-tabs">
+              <div className="relative flex items-center px-2 py-2">
+                <div className="relative min-w-0 flex-1">
+                  <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pr-12">
+                    {filteredGrouped.map((category) => (
+                      <button
+                        key={category.key}
+                        type="button"
+                        onClick={() => scrollToCategory(category.key)}
+                        className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-semibold text-slate-600 hover:border-slate-300 hover:text-slate-800 active:bg-slate-900 active:border-slate-900 active:text-white focus-visible:bg-slate-900 focus-visible:border-slate-900 focus-visible:text-white focus-visible:outline-none transition"
+                      >
+                        {(() => {
+                          const meta = categoryVisualMeta(category.key);
+                          const Icon = meta.icon;
+                          return (
+                            <>
+                              <span className="text-xs leading-none" aria-hidden="true">
+                                {categoryGlyph(category.key)}
+                              </span>
+                              <span className={`inline-flex h-5 w-5 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-600`}>
+                                <Icon size={11} weight="duotone" />
+                              </span>
+                            </>
+                          );
+                        })()}
+                        <span>{category.label}</span>
+                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] text-slate-400">
+                          {category.items.length}
                         </span>
-                      );
-                    })()}
-                    {category.label}
-                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] text-slate-500">
-                      {category.items.length}
-                    </span>
-                  </button>
-                ))}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-white via-white/85 to-transparent" />
+                </div>
+
+                <button
+                  type="button"
+                  aria-label="Menu de categorias"
+                  className="ml-2 shrink-0 inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-[0_2px_10px_rgba(15,23,42,0.08),-10px_0_14px_rgba(255,255,255,0.96)] hover:text-slate-800 hover:border-slate-300 transition"
+                >
+                  <SquaresFour size={16} weight="duotone" />
+                </button>
               </div>
             </div>
           </div>
