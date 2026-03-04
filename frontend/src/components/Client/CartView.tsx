@@ -2,7 +2,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeft,
-  CaretDown,
   Bicycle,
   House,
   ForkKnife,
@@ -102,7 +101,6 @@ export const CartView = ({
   const [suggestionsOpen, setSuggestionsOpen] = useState(false);
   const [cepLoading, setCepLoading] = useState(false);
   const [cepError, setCepError] = useState("");
-  const [showTips, setShowTips] = useState(false);
   const [summaryCompact, setSummaryCompact] = useState(false);
   const [ctaPulse, setCtaPulse] = useState(false);
   const [cashNeedsChange, setCashNeedsChange] = useState(false);
@@ -965,35 +963,6 @@ export const CartView = ({
             </button>
           ))}
         </div>
-      </div>
-
-      <div className="rounded-2xl border border-slate-200 bg-gradient-to-r from-white via-slate-50 to-white shadow-[0_20px_42px_-34px_rgba(15,23,42,0.35)] transition-all hover:-translate-y-0.5 active:scale-[0.99]">
-        <button
-          type="button"
-          onClick={() => setShowTips((prev) => !prev)}
-          className="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-slate-700"
-        >
-          Dicas do pagamento
-          <CaretDown
-            size={18}
-            className={`transition-transform ${showTips ? "rotate-180" : ""}`}
-            weight="duotone"
-          />
-        </button>
-        {showTips && (
-          <div className="px-4 pb-4 text-[11px] sm:text-xs text-gray-500 leading-relaxed space-y-2">
-            {isPickup &&
-              "Pagamento via Pix será gerado automaticamente e enviado junto com o pedido."}
-            {isDelivery &&
-              "Você finaliza o pedido agora e paga na entrega ou conforme combinado."}
-            {isPix &&
-              "O QR Code do Pix aparecerá após finalizar o pedido."}
-            {isCash &&
-              "Pagamento em dinheiro será confirmado na entrega ou no balcão."}
-            {!isDelivery && !isPickup && !isPix && !isCash &&
-              "Pedido será direcionado para atendimento na mesa."}
-          </div>
-        )}
       </div>
 
       {isCash && (
