@@ -674,34 +674,18 @@ export const MenuView = ({
                   className="group bg-white rounded-2xl border border-slate-100 shadow-sm p-3 sm:p-4 grid grid-cols-[1fr_auto] gap-3 hover:-translate-y-0.5 active:scale-[0.99] transition cursor-pointer"
                   onClick={() => openProductModal(item)}
                 >
-                  <div className="flex-1 min-w-0 space-y-1">
+                  <div className="flex-1 min-w-0 space-y-1.5">
                     <p className="font-semibold text-slate-900 text-[15px] leading-tight line-clamp-2">
                       {item.name}
                     </p>
                     {item.description && (
-                      <p className="text-xs text-slate-500 line-clamp-2">{item.description}</p>
+                      <p className="text-sm text-slate-600 leading-relaxed line-clamp-2">{item.description}</p>
                     )}
-                    <div className="flex items-center gap-2 pt-0.5">
-                      {resolvePromoPrice(item) ? (
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-[11px] font-semibold text-slate-400 line-through">
-                            {formatCurrency(item.price)}
-                          </span>
-                          <span className="text-sm font-bold tracking-tight text-emerald-600">
-                            {formatCurrency(resolvePromoPrice(item))}
-                          </span>
-                        </div>
-                      ) : (
-                        <span className="text-sm font-bold tracking-tight text-slate-800">
-                          {formatCurrency(item.price)}
-                        </span>
-                      )}
-                      {itemQtyMap.get(String(item.id)) > 0 && (
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                          {itemQtyMap.get(String(item.id))} no carrinho
-                        </span>
-                      )}
-                    </div>
+                    {itemQtyMap.get(String(item.id)) > 0 && (
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        {itemQtyMap.get(String(item.id))} no carrinho
+                      </span>
+                    )}
                     {item.isFeatured && (
                       <span className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">
                         <Sparkle size={10} weight="fill" />
@@ -722,8 +706,8 @@ export const MenuView = ({
                     )}
                   </div>
 
-                  <div className="flex flex-col items-end gap-2">
-                    <div className="w-[108px] h-[108px] rounded-2xl overflow-hidden bg-gray-100 border border-gray-200 shadow-sm">
+                  <div className="flex flex-col items-end gap-2 min-w-[118px]">
+                    <div className="aspect-square w-[108px] rounded-2xl overflow-hidden bg-gray-100 border border-gray-200 shadow-sm">
                       {item.imageUrl ? (
                         <img
                           src={resolveAssetUrl(item.imageUrl)}
@@ -762,41 +746,66 @@ export const MenuView = ({
                         onUpdateCart(item, -1, buildCartOptions(entry));
                       };
 
+                      const priceNode = (
+                        <div className="flex flex-col items-end leading-none">
+                          {resolvePromoPrice(item) ? (
+                            <>
+                              <span className="text-[11px] font-semibold text-slate-400 line-through">
+                                {formatCurrency(item.price)}
+                              </span>
+                              <span className="text-lg font-bold tracking-tight text-slate-800">
+                                {formatCurrency(resolvePromoPrice(item))}
+                              </span>
+                            </>
+                          ) : (
+                            <span className="text-lg font-bold tracking-tight text-slate-800">
+                              {formatCurrency(item.price)}
+                            </span>
+                          )}
+                        </div>
+                      );
+
                       if (itemQty <= 0) {
                         return (
-                          <button
-                            onClick={handleIncrement}
-                            title="Adicionar"
-                            className="relative h-10 min-w-[102px] px-3 rounded-lg bg-slate-900 text-white flex items-center justify-center gap-1 shadow-sm text-xs font-medium hover:bg-slate-800 transition"
-                          >
-                            <Plus size={14} weight="duotone" />
-                            Adicionar
-                          </button>
+                          <div className="w-full flex items-center justify-end gap-2">
+                            {priceNode}
+                            <button
+                              onClick={handleIncrement}
+                              title="Adicionar"
+                              className="h-9 px-4 py-1.5 rounded-full border border-amber-500 text-amber-600 hover:bg-amber-50 text-sm font-medium transition-all active:scale-[0.98] inline-flex items-center justify-center gap-1"
+                            >
+                              <Plus size={14} weight="duotone" />
+                              Adicionar
+                            </button>
+                          </div>
                         );
                       }
 
                       return (
-                        <div
-                          className="h-10 min-w-[112px] rounded-lg border border-slate-200 bg-white px-1.5 flex items-center justify-between gap-1 shadow-sm"
-                          onClick={(event) => event.stopPropagation()}
-                        >
-                          <button
-                            type="button"
-                            onClick={handleDecrement}
-                            className="h-7 w-7 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-100 transition flex items-center justify-center"
-                            aria-label={`Remover uma unidade de ${item.name}`}
+                        <div className="w-full flex items-center justify-end gap-2">
+                          {priceNode}
+                          <div
+                            className="h-10 min-w-[112px] rounded-lg border border-slate-200 bg-white px-1.5 flex items-center justify-between gap-1 shadow-sm"
+                            onClick={(event) => event.stopPropagation()}
                           >
-                            -
-                          </button>
-                          <span className="min-w-[26px] text-center text-xs font-black text-slate-900">{itemQty}</span>
-                          <button
-                            type="button"
-                            onClick={handleIncrement}
-                            className="h-7 w-7 rounded-lg bg-slate-900 text-white hover:bg-slate-800 transition flex items-center justify-center"
-                            aria-label={`Adicionar uma unidade de ${item.name}`}
-                          >
-                            +
-                          </button>
+                            <button
+                              type="button"
+                              onClick={handleDecrement}
+                              className="h-7 w-7 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-100 transition flex items-center justify-center"
+                              aria-label={`Remover uma unidade de ${item.name}`}
+                            >
+                              -
+                            </button>
+                            <span className="min-w-[26px] text-center text-xs font-black text-slate-900">{itemQty}</span>
+                            <button
+                              type="button"
+                              onClick={handleIncrement}
+                              className="h-7 w-7 rounded-lg bg-slate-900 text-white hover:bg-slate-800 transition flex items-center justify-center"
+                              aria-label={`Adicionar uma unidade de ${item.name}`}
+                            >
+                              +
+                            </button>
+                          </div>
                         </div>
                       );
                     })()}
