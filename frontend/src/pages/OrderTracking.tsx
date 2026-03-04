@@ -720,7 +720,7 @@ export function OrderTracking() {
   return (
     <div className="min-h-screen bg-slate-50">
       <style>{`@keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}`}</style>
-      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur-xl shadow-[0_18px_36px_-28px_rgba(15,23,42,0.5)]">
+      <header className="sticky top-0 z-50 border-b border-white/20 bg-white/85 backdrop-blur-md shadow-[0_18px_36px_-28px_rgba(15,23,42,0.5)]">
         <div className="h-1 bg-slate-200" />
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between py-2.5 sm:py-4">
@@ -735,7 +735,7 @@ export function OrderTracking() {
             </button>
             <button
               onClick={handleBack}
-              className="px-3 py-2 sm:px-4 text-xs sm:text-sm rounded-full border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors shrink-0"
+              className="px-3 py-2 sm:px-4 text-xs sm:text-sm rounded-full border border-slate-200 text-slate-700 hover:bg-slate-50 transition-all duration-200 active:scale-[0.97] active:opacity-80 shrink-0"
             >
               Voltar
             </button>
@@ -856,7 +856,7 @@ export function OrderTracking() {
                 <div className="mb-4">
                   <div className="h-2 w-full rounded-full bg-slate-200 overflow-hidden">
                     <div
-                      className="h-full transition-all"
+                      className="h-full transition-all duration-700 ease-out"
                       style={{
                         width: `${progress}%`,
                         backgroundImage:
@@ -909,7 +909,7 @@ export function OrderTracking() {
                           <span
                             className={`h-5 w-5 rounded-full border grid place-items-center ${
                               isCurrent
-                                ? 'border-orange-500 bg-orange-500 text-white'
+                                ? 'border-orange-500 bg-orange-500 text-white animate-pulse'
                                 : isCompleted
                                   ? 'border-slate-300 bg-slate-200 text-slate-700'
                                   : 'border-slate-200 bg-slate-50 text-slate-400'
@@ -952,7 +952,7 @@ export function OrderTracking() {
                             <img
                               src={resolveAssetUrl(item.imageUrl || item.image || item.product?.imageUrl)}
                               alt={item.name}
-                              className="w-11 h-11 rounded-full object-cover border border-gray-200"
+                              className="w-11 h-11 rounded-full object-cover border border-gray-200 transition-opacity duration-300"
                             />
                           ) : (
                             <div className="w-11 h-11 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-xs text-gray-400">
@@ -993,12 +993,12 @@ export function OrderTracking() {
                             <span className="text-[11px] line-through text-slate-400">
                               {formatCurrency(Number(item.originalPrice) * (item.quantity || 1))}
                             </span>
-                            <span className="font-semibold text-emerald-600">
+                            <span className="font-semibold text-emerald-600 tracking-tight">
                               {formatCurrency(Number(item.price))}
                             </span>
                           </span>
                         ) : (
-                          <span className="font-semibold text-slate-800 flex-shrink-0">R$ {Number(item.price).toFixed(2)}</span>
+                          <span className="font-semibold text-slate-800 tracking-tight flex-shrink-0">R$ {Number(item.price).toFixed(2)}</span>
                         )}
                       </div>
                     ))}
@@ -1013,7 +1013,7 @@ export function OrderTracking() {
                   ) : null}
                   <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-4">
                     <span className="text-lg font-bold text-slate-900">Total</span>
-                    <span className="text-lg font-bold text-slate-900">
+                    <span className="text-lg font-bold tracking-tight text-slate-900">
                       {formatCurrency(order.total || 0)}
                     </span>
                   </div>
@@ -1104,7 +1104,7 @@ export function OrderTracking() {
                                     console.error('Falha ao copiar Pix', err);
                                   }
                                 }}
-                                className="w-full px-3 py-2 rounded-lg border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-100"
+                                className="w-full px-3 py-2 rounded-lg border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-100 transition-all duration-200 active:scale-[0.97] active:opacity-80"
                               >
                                 {pixCopied ? 'Copiado!' : 'Copiar código Pix'}
                               </button>
@@ -1124,7 +1124,7 @@ export function OrderTracking() {
                           href={storeWhatsappLink}
                           target="_blank"
                           rel="noreferrer"
-                          className="w-full min-h-[48px] inline-flex items-center justify-center px-3 py-2 rounded-xl border border-green-600 text-green-700 text-sm font-semibold hover:bg-green-50"
+                          className="w-full min-h-[48px] inline-flex items-center justify-center px-3 py-2 rounded-xl border border-green-600 text-green-700 text-sm font-semibold hover:bg-green-50 transition-all duration-200 active:scale-[0.97] active:opacity-80"
                         >
                           Falar com a loja no WhatsApp
                         </a>
@@ -1209,7 +1209,7 @@ export function OrderTracking() {
                         window.setTimeout(() => setCtaPulse(false), 220);
                         handleRepeatOrder();
                       }}
-                      className="w-full min-h-[48px] inline-flex items-center justify-center px-3 py-2 rounded-xl border border-slate-200 text-slate-700 text-sm font-semibold hover:bg-slate-50"
+                      className="w-full min-h-[48px] inline-flex items-center justify-center px-3 py-2 rounded-xl border border-slate-200 text-slate-700 text-sm font-semibold hover:bg-slate-50 transition-all duration-200 active:scale-[0.97] active:opacity-80"
                       style={ctaPulse ? { animation: 'btnPop 220ms ease' } : undefined}
                     >
                       Pedir novamente
@@ -1515,7 +1515,7 @@ export function OrderTracking() {
                               type="button"
                               onClick={submitReview}
                               disabled={reviewSubmitting}
-                              className="w-full rounded-xl bg-slate-900 text-white text-xs font-extrabold px-3 py-2 disabled:opacity-60"
+                              className="w-full rounded-xl bg-slate-900 text-white text-xs font-extrabold px-3 py-2 disabled:opacity-60 transition-all duration-200 active:scale-[0.97] active:opacity-90"
                             >
                               {reviewSubmitting ? 'Enviando...' : 'Enviar avaliação'}
                             </button>
@@ -1533,13 +1533,13 @@ export function OrderTracking() {
 
       {!loading && !error && order ? (
         <div className="sm:hidden fixed bottom-0 inset-x-0 z-40 px-4 pb-3">
-          <div className="rounded-2xl border border-slate-200/80 bg-white/95 backdrop-blur px-4 py-2.5 shadow-[0_-2px_24px_-16px_rgba(15,23,42,0.7)]">
+          <div className="rounded-2xl border border-white/25 bg-white/85 backdrop-blur-md px-4 py-2.5 shadow-[0_-2px_24px_-16px_rgba(15,23,42,0.7)]">
             <div className="flex items-center justify-between gap-2 text-xs">
               <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-2.5 py-1 font-semibold text-slate-700 border border-slate-200">
-                <span className={`h-1.5 w-1.5 rounded-full ${isReady ? 'bg-emerald-500' : 'bg-orange-500'}`} />
+                <span className={`h-1.5 w-1.5 rounded-full ${isReady ? 'bg-emerald-500' : 'bg-orange-500 animate-pulse'}`} />
                 {statusLabel}
               </span>
-              <span className="text-base font-black text-slate-900">{formatCurrency(order?.total || 0)}</span>
+              <span className="text-base font-black tracking-tight text-slate-900">{formatCurrency(order?.total || 0)}</span>
             </div>
           </div>
         </div>
