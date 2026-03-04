@@ -232,6 +232,7 @@ export const MenuView = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [showStoreDetails, setShowStoreDetails] = useState(false);
+  const [activeCategoryKey, setActiveCategoryKey] = useState("");
   const categoryRefs = React.useRef({});
   const formatStoreAddress = (address = "") => {
     const raw = address.toString().trim();
@@ -415,6 +416,13 @@ export const MenuView = ({
     }
   };
 
+  useEffect(() => {
+    if (!filteredGrouped.length) return;
+    if (!filteredGrouped.some((category) => category.key === activeCategoryKey)) {
+      setActiveCategoryKey(filteredGrouped[0].key);
+    }
+  }, [filteredGrouped, activeCategoryKey]);
+
   return (
     <div className="bg-slate-50 overflow-x-clip">
 
@@ -530,48 +538,47 @@ export const MenuView = ({
           <div
             className={`sticky ${showHeader ? "top-[72px] sm:top-[92px]" : "top-0"} z-40 -mx-4 px-4 pb-2 pt-1`}
           >
-            <div className="rounded-2xl border border-slate-100 bg-white/90 backdrop-blur-md shadow-sm ds-tabs">
-              <div className="relative px-2 py-2">
-                <div className="relative min-w-0">
-                  <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pr-16">
-                    {filteredGrouped.map((category) => (
+            <div className="rounded-2xl border border-slate-100 bg-white/90 backdrop-blur-md shadow-sm ds-tabs px-2 py-2">
+              <div className="relative w-full flex items-center mb-0">
+                <div className="flex-1 flex overflow-x-auto gap-3 pr-20 no-scrollbar scrollbar-hide">
+                  {filteredGrouped.map((category) => {
+                    const isActive = activeCategoryKey === category.key;
+                    const meta = categoryVisualMeta(category.key);
+                    const Icon = meta.icon;
+
+                    return (
                       <button
                         key={category.key}
                         type="button"
-                        onClick={() => scrollToCategory(category.key)}
-                        className="group inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 hover:border-slate-300 hover:text-slate-800 active:bg-slate-900 active:border-transparent active:text-white active:px-6 active:py-2.5 active:text-base active:font-extrabold focus-visible:bg-slate-900 focus-visible:border-transparent focus-visible:text-white focus-visible:px-6 focus-visible:py-2.5 focus-visible:text-base focus-visible:font-extrabold aria-[current=true]:bg-slate-900 aria-[current=true]:border-transparent aria-[current=true]:text-white aria-[current=true]:px-6 aria-[current=true]:py-2.5 aria-[current=true]:text-base aria-[current=true]:font-extrabold data-[active=true]:bg-slate-900 data-[active=true]:border-transparent data-[active=true]:text-white data-[active=true]:px-6 data-[active=true]:py-2.5 data-[active=true]:text-base data-[active=true]:font-extrabold focus-visible:outline-none transition"
+                        onClick={() => {
+                          setActiveCategoryKey(category.key);
+                          scrollToCategory(category.key);
+                        }}
+                        className={
+                          isActive
+                            ? "flex items-center gap-2 px-5 py-2.5 rounded-full bg-slate-900 text-white font-bold transition-all"
+                            : "flex items-center gap-2 px-5 py-2.5 rounded-full bg-white text-slate-600 font-medium border border-slate-200 transition-all"
+                        }
                       >
-                        {(() => {
-                          const meta = categoryVisualMeta(category.key);
-                          const Icon = meta.icon;
-                          return (
-                            <>
-                              <span className="text-xs leading-none" aria-hidden="true">
-                                {categoryGlyph(category.key)}
-                              </span>
-                              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-600 group-active:border-white/20 group-active:bg-white/15 group-active:text-white group-focus-visible:border-white/20 group-focus-visible:bg-white/15 group-focus-visible:text-white group-aria-[current=true]:border-white/20 group-aria-[current=true]:bg-white/15 group-aria-[current=true]:text-white group-data-[active=true]:border-white/20 group-data-[active=true]:bg-white/15 group-data-[active=true]:text-white">
-                                <Icon size={11} weight="duotone" />
-                              </span>
-                            </>
-                          );
-                        })()}
-                        <span>{category.label}</span>
-                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] text-slate-400 group-active:bg-white/15 group-active:text-white group-focus-visible:bg-white/15 group-focus-visible:text-white group-aria-[current=true]:bg-white/15 group-aria-[current=true]:text-white group-data-[active=true]:bg-white/15 group-data-[active=true]:text-white">
+                        <span className="text-xs leading-none" aria-hidden="true">
+                          {categoryGlyph(category.key)}
+                        </span>
+                        <span className={`inline-flex h-5 w-5 items-center justify-center rounded-full ${isActive ? "bg-white/15 text-white" : "bg-slate-50 text-slate-600 border border-slate-200"}`}>
+                          <Icon size={11} weight="duotone" />
+                        </span>
+                        <span className="whitespace-nowrap">{category.label}</span>
+                        <span className={`rounded-full px-2 py-0.5 text-[10px] ${isActive ? "bg-white/15 text-white/90" : "bg-slate-100 text-slate-400"}`}>
                           {category.items.length}
                         </span>
                       </button>
-                    ))}
-                  </div>
-                  <div className="pointer-events-none absolute inset-y-0 right-12 w-8 bg-gradient-to-l from-white to-transparent z-[1]" />
-                  <div className="absolute inset-y-0 right-0 flex items-center pr-1 bg-gradient-to-l from-white via-white/90 to-transparent z-[2]">
-                    <button
-                      type="button"
-                      aria-label="Menu de categorias"
-                      className="pointer-events-auto inline-flex w-12 h-12 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-800 shadow-lg hover:shadow-xl hover:border-slate-300 transition active:scale-[0.98] z-10"
-                    >
-                      <SquaresFour size={24} weight="duotone" />
-                    </button>
-                  </div>
+                    );
+                  })}
+                </div>
+
+                <div className="absolute right-0 top-0 bottom-0 w-28 flex items-center justify-end pr-4 bg-gradient-to-l from-slate-50 via-slate-50/90 to-transparent pointer-events-none">
+                  <button className="w-12 h-12 rounded-full bg-white shadow-[0_4px_12px_rgba(0,0,0,0.1)] flex items-center justify-center text-slate-800 pointer-events-auto border border-slate-100 active:scale-95 transition-all">
+                    <SquaresFour size={24} weight="duotone" />
+                  </button>
                 </div>
               </div>
             </div>
