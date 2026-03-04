@@ -1,6 +1,6 @@
 ﻿# PROJECT CONTEXT - EdEspetoHub
 
-Atualizado em: 2026-02-12
+Atualizado em: 2026-03-04
 
 ## Objetivo do produto
 Plataforma de pedidos "like app" para restaurantes (estilo iFood), com:
@@ -15,6 +15,10 @@ Plataforma de pedidos "like app" para restaurantes (estilo iFood), com:
 - Infra: Docker + Nginx + EC2
 
 ## Principais mudancas recentes (ja em `main`)
+0. Ajuste de tracking por tipo de pedido
+- `OrderTracking`: "previsão de entrega/chegada" agora só aparece para `delivery`.
+- Para `pickup/table`: copy ajustada para "previsão de preparo" / "pronto por volta de".
+
 1. Mobile/admin UX fixes
 - Modal de produto no admin com botoes salvar/cancelar visiveis no mobile.
 - Ajustes de telas de entregadores/vinculos para layout like-app.
@@ -51,7 +55,21 @@ Plataforma de pedidos "like app" para restaurantes (estilo iFood), com:
 - Remocao de wrappers/guards duplicados causando possivel travamento.
 - Normalizacao de endereco para evitar crash React quando endereco vem como objeto.
 
+8. Premium UI rollout (marco de 2026-03-04)
+- Landing: secao de prova social ("lojas em destaque").
+- Catalogo: barra de categorias sticky + bottom-sheet, busca premium, cards refinados.
+- Checkout: limpeza visual mobile e CTA fixo premium, menos ruido.
+- Onboarding/Criar loja: coluna unica, stepper mobile sem overflow, inputs/planos refinados.
+- Branding: "Desenvolvido por" e logo oficial Ja no Caminho em pontos principais.
+
 ## Commits de referencia (mais recentes)
+- `c91f6e7` fix(order-tracking): hide delivery forecast wording for pickup/table
+- `ae56073` style(onboarding): replace broken mobile stepper with connected minimalist progress line
+- `dea8331` style(onboarding): switch create-store to single-column clean layout and remove preview panel
+- `d5d2abc` style(onboarding): premiumize create-store inputs, sticky nav bar and plan selection visuals
+- `39a0f9e` style(branding): add Ja no Caminho logo to powered-by links and create-store header
+- `2261502` fix(menu): use branding accentColor for dynamic add button theme
+- `c0fb56a` feat(menu): make add button color inherit store secondary color with fallback
 - `2edb6b5` fix(checkout): remove default DDD and handle full phone paste reliably
 - `22d6053` feat(ui): refresh menu, modal, tracking and order money breakdown
 - `73135ea` fix(admin): remove duplicate dashboard wrappers and guard loop
