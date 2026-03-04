@@ -533,13 +533,13 @@ export const MenuView = ({
             <div className="rounded-2xl border border-slate-100 bg-white/90 backdrop-blur-md shadow-sm ds-tabs">
               <div className="relative px-2 py-2">
                 <div className="relative min-w-0">
-                  <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pr-14">
+                  <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pr-16">
                     {filteredGrouped.map((category) => (
                       <button
                         key={category.key}
                         type="button"
                         onClick={() => scrollToCategory(category.key)}
-                        className="group inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-semibold text-slate-600 hover:border-slate-300 hover:text-slate-800 active:bg-slate-900 active:border-transparent active:text-white focus-visible:bg-slate-900 focus-visible:border-transparent focus-visible:text-white aria-[current=true]:bg-slate-900 aria-[current=true]:border-transparent aria-[current=true]:text-white data-[active=true]:bg-slate-900 data-[active=true]:border-transparent data-[active=true]:text-white focus-visible:outline-none transition"
+                        className="group inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 hover:border-slate-300 hover:text-slate-800 active:bg-slate-900 active:border-transparent active:text-white active:px-6 active:py-2.5 active:text-base active:font-extrabold focus-visible:bg-slate-900 focus-visible:border-transparent focus-visible:text-white focus-visible:px-6 focus-visible:py-2.5 focus-visible:text-base focus-visible:font-extrabold aria-[current=true]:bg-slate-900 aria-[current=true]:border-transparent aria-[current=true]:text-white aria-[current=true]:px-6 aria-[current=true]:py-2.5 aria-[current=true]:text-base aria-[current=true]:font-extrabold data-[active=true]:bg-slate-900 data-[active=true]:border-transparent data-[active=true]:text-white data-[active=true]:px-6 data-[active=true]:py-2.5 data-[active=true]:text-base data-[active=true]:font-extrabold focus-visible:outline-none transition"
                       >
                         {(() => {
                           const meta = categoryVisualMeta(category.key);
@@ -562,14 +562,14 @@ export const MenuView = ({
                       </button>
                     ))}
                   </div>
-                  <div className="pointer-events-none absolute inset-y-0 right-10 w-8 bg-gradient-to-l from-white to-transparent z-[1]" />
+                  <div className="pointer-events-none absolute inset-y-0 right-12 w-8 bg-gradient-to-l from-white to-transparent z-[1]" />
                   <div className="absolute inset-y-0 right-0 flex items-center pr-1 bg-gradient-to-l from-white via-white/90 to-transparent z-[2]">
                     <button
                       type="button"
                       aria-label="Menu de categorias"
-                      className="pointer-events-auto inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-800 shadow-md hover:shadow-lg hover:border-slate-300 transition active:scale-[0.98] z-10"
+                      className="pointer-events-auto inline-flex w-12 h-12 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-800 shadow-lg hover:shadow-xl hover:border-slate-300 transition active:scale-[0.98] z-10"
                     >
-                      <SquaresFour size={17} weight="duotone" />
+                      <SquaresFour size={24} weight="duotone" />
                     </button>
                   </div>
                 </div>
