@@ -233,7 +233,7 @@ export const MenuView = ({
   const [showStoreDetails, setShowStoreDetails] = useState(false);
   const [activeCategoryKey, setActiveCategoryKey] = useState("");
   const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false);
-  const buttonColor = branding?.secondaryColor || "#0f172a";
+  const buttonColor = branding?.accentColor || branding?.secondaryColor || "#0f172a";
   const categoryRefs = React.useRef({});
   const formatStoreAddress = (address = "") => {
     const raw = address.toString().trim();
