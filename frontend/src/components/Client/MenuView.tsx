@@ -539,7 +539,7 @@ export const MenuView = ({
                         key={category.key}
                         type="button"
                         onClick={() => scrollToCategory(category.key)}
-                        className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-slate-200 bg-white/95 px-3 py-1.5 text-[11px] font-semibold text-slate-600 hover:border-slate-300 hover:text-slate-800 active:bg-slate-900 active:border-slate-900 active:text-white focus-visible:bg-slate-900 focus-visible:border-slate-900 focus-visible:text-white aria-[current=true]:bg-slate-900 aria-[current=true]:border-slate-900 aria-[current=true]:text-white data-[active=true]:bg-slate-900 data-[active=true]:border-slate-900 data-[active=true]:text-white focus-visible:outline-none transition"
+                        className="group inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-semibold text-slate-600 hover:border-slate-300 hover:text-slate-800 active:bg-slate-900 active:border-transparent active:text-white focus-visible:bg-slate-900 focus-visible:border-transparent focus-visible:text-white aria-[current=true]:bg-slate-900 aria-[current=true]:border-transparent aria-[current=true]:text-white data-[active=true]:bg-slate-900 data-[active=true]:border-transparent data-[active=true]:text-white focus-visible:outline-none transition"
                       >
                         {(() => {
                           const meta = categoryVisualMeta(category.key);
@@ -549,25 +549,25 @@ export const MenuView = ({
                               <span className="text-xs leading-none" aria-hidden="true">
                                 {categoryGlyph(category.key)}
                               </span>
-                              <span className={`inline-flex h-5 w-5 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-600`}>
+                              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-slate-600 group-active:border-white/20 group-active:bg-white/15 group-active:text-white group-focus-visible:border-white/20 group-focus-visible:bg-white/15 group-focus-visible:text-white group-aria-[current=true]:border-white/20 group-aria-[current=true]:bg-white/15 group-aria-[current=true]:text-white group-data-[active=true]:border-white/20 group-data-[active=true]:bg-white/15 group-data-[active=true]:text-white">
                                 <Icon size={11} weight="duotone" />
                               </span>
                             </>
                           );
                         })()}
                         <span>{category.label}</span>
-                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] text-slate-400">
+                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] text-slate-400 group-active:bg-white/15 group-active:text-white group-focus-visible:bg-white/15 group-focus-visible:text-white group-aria-[current=true]:bg-white/15 group-aria-[current=true]:text-white group-data-[active=true]:bg-white/15 group-data-[active=true]:text-white">
                           {category.items.length}
                         </span>
                       </button>
                     ))}
                   </div>
-                  <div className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-slate-50 via-slate-50/80 to-transparent" />
-                  <div className="absolute inset-y-0 right-0 flex items-center pr-1 bg-gradient-to-l from-slate-50 via-slate-50/80 to-transparent">
+                  <div className="pointer-events-none absolute inset-y-0 right-10 w-8 bg-gradient-to-l from-white to-transparent z-[1]" />
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-1 bg-gradient-to-l from-white via-white/90 to-transparent z-[2]">
                     <button
                       type="button"
                       aria-label="Menu de categorias"
-                      className="pointer-events-auto inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-800 shadow-md hover:shadow-lg hover:border-slate-300 transition active:scale-[0.98]"
+                      className="pointer-events-auto inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-800 shadow-md hover:shadow-lg hover:border-slate-300 transition active:scale-[0.98] z-10"
                     >
                       <SquaresFour size={17} weight="duotone" />
                     </button>
