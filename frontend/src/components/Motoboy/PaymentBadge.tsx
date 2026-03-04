@@ -1,6 +1,6 @@
 const STATUS_STYLES: Record<string, { pill: string; dot: string }> = {
-  paid: { pill: 'bg-emerald-50 text-emerald-800 border-emerald-200', dot: 'bg-emerald-500' },
-  pending: { pill: 'bg-amber-50 text-amber-800 border-amber-200', dot: 'bg-amber-500' },
+  paid: { pill: 'bg-emerald-50 text-emerald-600 border-emerald-200', dot: 'bg-emerald-500' },
+  pending: { pill: 'bg-orange-50 text-orange-600 border-orange-200', dot: 'bg-orange-500' },
 };
 
 const METHOD_LABELS: Record<string, string> = {
@@ -21,7 +21,7 @@ export function PaymentBadge({ method, status }: { method?: string; status?: str
 
   return (
     <div className="flex flex-wrap items-center gap-2 justify-start sm:justify-end">
-      <span className="min-w-0 max-w-full px-2.5 py-1 rounded-full text-[11px] font-semibold bg-white/70 border border-slate-200 text-slate-700">
+      <span className="min-w-0 max-w-full px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-100 border border-slate-200 text-slate-600">
         <span className="truncate">{methodLabel}</span>
       </span>
       <span

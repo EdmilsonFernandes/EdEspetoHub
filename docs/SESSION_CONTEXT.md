@@ -51,6 +51,24 @@ Este arquivo mantém o estado de trabalho para retomada rápida entre sessões.
 - Próximo passo:
   - validar a tela em mobile real (fluxos `in_delivery`, `done`, `delivered`) e então commit/push.
 
+### Atualização adicional
+- Data/Hora: 2026-03-04
+- Resumo objetivo:
+  - Aplicado padrão Premium Mobile-First no módulo de entregador via componentes compartilhados.
+  - Ajustes visuais e de microinteração feitos sem alterar lógica:
+    - `MotoboyHeader`: glassmorphism clean, neutralização de cores e feedback tátil no botão sair.
+    - `StatusBadge`: semântica unificada (laranja para andamento, verde para concluído, neutro para fallback).
+    - `PaymentBadge`: método sempre neutro e status com semântica clara (pendente/paid).
+    - `OrderCard`: neutralização de tags e pills, bordas/sombras suaves, padding maior, tracking-tight em valores, transição de imagem.
+- Arquivos impactados:
+  - `frontend/src/components/Motoboy/MotoboyHeader.tsx`
+  - `frontend/src/components/Motoboy/StatusBadge.tsx`
+  - `frontend/src/components/Motoboy/PaymentBadge.tsx`
+  - `frontend/src/components/Motoboy/OrderCard.tsx`
+  - `docs/SESSION_CONTEXT.md`
+- Validação:
+  - `npx tsc --noEmit` passou
+
 ### Observações operacionais (Git/Deploy)
 - Em alguns ambientes houve instabilidade com `ssh.github.com:443`.
 - Fluxo que funcionou: push usando URL `git@github.com:EdmilsonFernandes/EdEspetoHub.git`.

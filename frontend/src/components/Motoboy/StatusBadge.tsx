@@ -1,11 +1,11 @@
 ﻿const STATUS_STYLES: Record<string, { pill: string; dot: string; pulse?: boolean }> = {
-  pending: { pill: 'bg-amber-50 text-amber-900 border-amber-200', dot: 'bg-amber-500', pulse: true },
-  preparing: { pill: 'bg-sky-50 text-sky-900 border-sky-200', dot: 'bg-sky-500', pulse: true },
-  ready_for_delivery: { pill: 'bg-violet-50 text-violet-900 border-violet-200', dot: 'bg-violet-500' },
-  waiting_for_motoboy: { pill: 'bg-indigo-50 text-indigo-900 border-indigo-200', dot: 'bg-indigo-500', pulse: true },
-  in_delivery: { pill: 'bg-blue-50 text-blue-900 border-blue-200', dot: 'bg-blue-500', pulse: true },
-  delivered: { pill: 'bg-emerald-50 text-emerald-900 border-emerald-200', dot: 'bg-emerald-500' },
-  finished: { pill: 'bg-emerald-100 text-emerald-900 border-emerald-200', dot: 'bg-emerald-600' },
+  pending: { pill: 'bg-orange-50 text-orange-600 border-orange-200', dot: 'bg-orange-500', pulse: true },
+  preparing: { pill: 'bg-orange-50 text-orange-600 border-orange-200', dot: 'bg-orange-500', pulse: true },
+  ready_for_delivery: { pill: 'bg-orange-50 text-orange-600 border-orange-200', dot: 'bg-orange-500', pulse: true },
+  waiting_for_motoboy: { pill: 'bg-orange-50 text-orange-600 border-orange-200', dot: 'bg-orange-500', pulse: true },
+  in_delivery: { pill: 'bg-orange-50 text-orange-600 border-orange-200', dot: 'bg-orange-500', pulse: true },
+  delivered: { pill: 'bg-emerald-50 text-emerald-600 border-emerald-200', dot: 'bg-emerald-500' },
+  finished: { pill: 'bg-emerald-50 text-emerald-600 border-emerald-200', dot: 'bg-emerald-500' },
 };
 
 const STATUS_LABELS: Record<string, string> = {

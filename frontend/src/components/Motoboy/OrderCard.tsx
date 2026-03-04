@@ -57,7 +57,7 @@ export function OrderCard({ order, compact, actions, showCourierEarnings = false
   const isCashPayment = paymentMethod === 'dinheiro' || paymentMethod === 'cash';
 
   return (
-    <div className="premium-card p-4 sm:p-5 space-y-4 relative overflow-hidden w-full min-w-0 no-x-scroll">
+    <div className="premium-card bg-white border border-slate-100 shadow-sm p-5 sm:p-6 space-y-4 relative overflow-hidden w-full min-w-0 no-x-scroll">
       <div
         className="absolute left-0 top-0 bottom-0 w-1.5"
         style={{
@@ -93,7 +93,7 @@ export function OrderCard({ order, compact, actions, showCourierEarnings = false
         </div>
       </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-3 sm:p-4">
+      <div className="rounded-2xl border border-slate-100 bg-white p-4 sm:p-5">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <p className="text-xs text-slate-500">Cliente</p>
@@ -117,17 +117,17 @@ export function OrderCard({ order, compact, actions, showCourierEarnings = false
             <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500 mb-1">Valores</p>
             <div className="flex flex-wrap justify-end gap-1.5">
               <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
-                Pedido: <strong className="ml-1 text-slate-900">{formatCurrency(order?.total || 0)}</strong>
+                Pedido: <strong className="ml-1 text-slate-900 tracking-tight">{formatCurrency(order?.total || 0)}</strong>
               </span>
               {isDelivery && (
-                <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">
-                  Frete: <strong className="ml-1">{formatCurrency(Number.isFinite(Number(deliveryFee)) ? Number(deliveryFee) : 0)}</strong>
+                <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
+                  Frete: <strong className="ml-1 tracking-tight text-slate-800">{formatCurrency(Number.isFinite(Number(deliveryFee)) ? Number(deliveryFee) : 0)}</strong>
                 </span>
               )}
             </div>
             {showCourierEarnings && isDelivery && (
               <div className="mt-1.5 space-y-0.5">
-                <p className="text-[11px] text-blue-700 font-semibold">
+                <p className="text-[11px] text-emerald-600 font-semibold tracking-tight">
                   Seu ganho: {formatCurrency(deliveryGain)}
                 </p>
                 {safeTipAmount > 0 ? (
@@ -141,11 +141,11 @@ export function OrderCard({ order, compact, actions, showCourierEarnings = false
             )}
             {isCashPayment && cashTendered !== null ? (
               <div className="mt-1 space-y-0.5">
-                <p className="text-[11px] text-emerald-700 font-semibold">
+                <p className="text-[11px] text-emerald-600 font-semibold tracking-tight">
                   Cliente paga com: {formatCurrency(cashTendered)}
                 </p>
                 {cashChangeDue !== null && cashChangeDue > 0 ? (
-                  <p className="text-[11px] text-amber-700 font-semibold">
+                  <p className="text-[11px] text-orange-500 font-semibold tracking-tight">
                     Troco: {formatCurrency(cashChangeDue)}
                   </p>
                 ) : (
@@ -159,14 +159,14 @@ export function OrderCard({ order, compact, actions, showCourierEarnings = false
 
       {!compact && (
         <div className="grid gap-3 sm:grid-cols-2">
-          <div className="rounded-2xl border border-slate-200 bg-white p-3 sm:p-4">
+          <div className="rounded-2xl border border-slate-100 bg-white p-4 sm:p-5">
             <p className="text-xs font-semibold text-slate-600">Retirada na loja</p>
             <p className="text-sm font-bold text-slate-900 mt-1">{storeName || 'Loja'}</p>
             {(storeAddress || storeSlug) && (
               <p className="text-xs text-slate-600 mt-1">{storeAddress || (storeSlug ? `/${storeSlug}` : '')}</p>
             )}
           </div>
-          <div className="rounded-2xl border border-slate-200 bg-white p-3 sm:p-4">
+          <div className="rounded-2xl border border-slate-100 bg-white p-4 sm:p-5">
             <p className="text-xs font-semibold text-slate-600">Entrega</p>
             <p className="text-xs text-slate-700 mt-1 leading-relaxed">{address}</p>
           </div>
@@ -174,7 +174,7 @@ export function OrderCard({ order, compact, actions, showCourierEarnings = false
       )}
 
       {!compact && items.length > 0 && (
-        <div className="rounded-2xl border border-slate-200 bg-white p-3 sm:p-4">
+        <div className="rounded-2xl border border-slate-100 bg-white p-4 sm:p-5">
           <p className="text-xs font-semibold text-slate-600 mb-3">Itens</p>
           <div className="space-y-3">
             {items.map((item: any) => (
@@ -185,7 +185,7 @@ export function OrderCard({ order, compact, actions, showCourierEarnings = false
                       <img
                         src={resolveAssetUrl(item.imageUrl || item?.product?.imageUrl)}
                         alt={item.name || item?.product?.name || 'Item'}
-                        className="h-10 w-10 rounded-xl object-cover border border-slate-200"
+                        className="h-10 w-10 rounded-xl object-cover border border-slate-200 transition-opacity duration-300"
                       />
                     ) : (
                       <div className="h-10 w-10 rounded-xl bg-slate-100 border border-slate-200" />
@@ -196,15 +196,15 @@ export function OrderCard({ order, compact, actions, showCourierEarnings = false
                       </p>
                       <div className="mt-1 flex flex-wrap gap-1">
                         {item?.cookingPoint && (
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800 border border-amber-200">
-                            {item.cookingPoint}
-                          </span>
-                        )}
-                        {item?.passSkewer && (
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-fuchsia-100 text-fuchsia-700 border border-fuchsia-200">
-                            passar farinha
-                          </span>
-                        )}
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">
+                              {item.cookingPoint}
+                            </span>
+                          )}
+                          {item?.passSkewer && (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">
+                              passar farinha
+                            </span>
+                          )}
                         {formatSelectedModifiers(item?.selectedModifiers || []).map((modifierName) => (
                           <span
                             key={`${item.id || item.productId}-${modifierName}`}
@@ -218,7 +218,7 @@ export function OrderCard({ order, compact, actions, showCourierEarnings = false
                   </div>
                 </div>
                 <div className="shrink-0 text-right">
-                  <p className="text-sm font-bold text-slate-900">{formatCurrency(Number(item.price || 0))}</p>
+                  <p className="text-sm font-bold tracking-tight text-slate-900">{formatCurrency(Number(item.price || 0))}</p>
                 </div>
               </div>
             ))}
