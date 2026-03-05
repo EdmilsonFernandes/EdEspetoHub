@@ -1754,13 +1754,32 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     localStorage.setItem(key, JSON.stringify(dismissedNotificationKeys));
   }, [storeId, dismissedNotificationKeys]);
   const markNotificationRead = (noteKey: string) => {
-    setDismissedNotificationKeys((prev) => (prev.includes(noteKey) ? prev : [...prev, noteKey]));
+    if (!storeId) {
+      setDismissedNotificationKeys((prev) => (prev.includes(noteKey) ? prev : [...prev, noteKey]));
+      return;
+    }
+    const storageKey = `adminNotifications:dismissed:${storeId}`;
+    setDismissedNotificationKeys((prev) => {
+      const next = prev.includes(noteKey) ? prev : [...prev, noteKey];
+      localStorage.setItem(storageKey, JSON.stringify(next));
+      return next;
+    });
   };
   const clearAllNotifications = () => {
+    const keys = activeNotifications.map((note) => note.key);
+    if (!storeId) {
+      setDismissedNotificationKeys((prev) => {
+        const merged = new Set([...prev, ...keys]);
+        return Array.from(merged);
+      });
+      return;
+    }
+    const storageKey = `adminNotifications:dismissed:${storeId}`;
     setDismissedNotificationKeys((prev) => {
-      const keys = activeNotifications.map((note) => note.key);
       const merged = new Set([...prev, ...keys]);
-      return Array.from(merged);
+      const next = Array.from(merged);
+      localStorage.setItem(storageKey, JSON.stringify(next));
+      return next;
     });
   };
 
@@ -2282,7 +2301,11 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                     {activeNotifications.length > 0 && (
                     <button
                       type="button"
-                      onClick={clearAllNotifications}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        clearAllNotifications();
+                        setNotificationsOpen(false);
+                      }}
                       className="text-[11px] font-semibold text-slate-600 hover:text-slate-900"
                     >
                       Marcar todas como lidas
@@ -2811,7 +2834,11 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                           </button>
                           <button
                             type="button"
-                            onClick={() => markNotificationRead(note.key)}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              markNotificationRead(note.key);
+                              setNotificationsOpen(false);
+                            }}
                             className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-500 hover:bg-slate-100"
                           >
                             Marcar lida
