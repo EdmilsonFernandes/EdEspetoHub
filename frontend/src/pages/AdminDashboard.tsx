@@ -1865,6 +1865,13 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   }, [activeTab]);
 
   useEffect(() => {
+    const shouldOpen = Boolean((location.state as any)?.openNotifications);
+    if (!shouldOpen) return;
+    setNotificationsOpen(true);
+    navigate('/admin/dashboard', { replace: true, state: {} });
+  }, [location.state, navigate]);
+
+  useEffect(() => {
     if (typeof window === 'undefined') return;
     const media = window.matchMedia('(min-width: 1024px)');
     const onChange = () => setIsDesktopLayout(media.matches);
