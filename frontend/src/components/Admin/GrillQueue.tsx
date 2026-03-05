@@ -36,6 +36,76 @@ import { getPaymentMethodMeta } from "../../utils/paymentAssets";
 import { useAuth } from "../../contexts/AuthContext";
 import { buildPixPayload } from "../../utils/pixPayload";
 
+const OrderSummaryCard = ({
+  order,
+  index,
+  isLate,
+  elapsedLabel,
+  statusMeta,
+  typeMeta,
+  paymentLabel,
+  totalLabel,
+  itemsCount,
+  onClick,
+}: any) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className="w-full rounded-xl border border-slate-200 bg-white p-4 text-left shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5 cursor-pointer"
+  >
+    <div className="flex items-center justify-between gap-2">
+      <div className="flex items-center gap-2">
+        <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${index === 0 ? 'bg-orange-500 text-white' : 'bg-orange-100 text-orange-700'}`}>
+          #{String(index + 1).padStart(2, '0')}
+        </span>
+        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${statusMeta.className}`}>{statusMeta.label}</span>
+      </div>
+      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${isLate ? 'bg-rose-100 text-rose-700 border-rose-200' : 'bg-emerald-100 text-emerald-700 border-emerald-200'}`}>
+        {elapsedLabel}
+      </span>
+    </div>
+
+    <div className="mt-3">
+      <p className="font-bold text-lg text-slate-900 truncate">{order.customerName || order.name || 'Cliente'}</p>
+      <div className="mt-1 flex items-center gap-2 flex-wrap">
+        <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-[0.16em] ${typeMeta.pill}`}>
+          {typeMeta.icon}
+          {typeMeta.label}
+        </span>
+        <span className="text-xs text-slate-500 font-semibold">{paymentLabel}</span>
+      </div>
+    </div>
+
+    <div className="mt-3 border-t border-slate-100 pt-2 flex items-center justify-between text-xs text-slate-600 font-semibold">
+      <span>{itemsCount} {itemsCount === 1 ? 'item' : 'itens'}</span>
+      <span className="text-slate-900 font-black">{totalLabel}</span>
+    </div>
+  </button>
+);
+
+const OrderDetailsDrawer = ({ open, onClose, children }: any) => {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-[80]">
+      <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" onClick={onClose} />
+      <aside className="absolute inset-y-0 right-0 w-full sm:w-[420px] bg-white border-l border-slate-200 shadow-2xl overflow-y-auto">
+        <div className="sticky top-0 z-10 bg-white/95 backdrop-blur border-b border-slate-100 px-4 py-3 flex items-center justify-between">
+          <p className="text-sm font-bold text-slate-900">Detalhes do pedido</p>
+          <button
+            type="button"
+            onClick={onClose}
+            className="h-9 w-9 inline-flex items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition"
+            aria-label="Fechar"
+          >
+            <X size={16} weight="bold" />
+          </button>
+        </div>
+        <div className="p-4">{children}</div>
+      </aside>
+    </div>
+  );
+};
+
 export const GrillQueue = () => {
   // Tap feedback animation
   const pulseCta = (key: string) => {
@@ -95,6 +165,7 @@ export const GrillQueue = () => {
     return localStorage.getItem("queueTvMode") === "true";
   });
   const [queueFilter, setQueueFilter] = useState<'all' | 'pending' | 'preparing' | 'ready' | 'late'>('all');
+  const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
   const previousIdsRef = useRef<string[]>([]);
   const audioContextRef = useRef<AudioContext | null>(null);
 
@@ -682,6 +753,24 @@ export const GrillQueue = () => {
       setCompletedPage(1);
     }
   }, [activeTab]);
+
+  useEffect(() => {
+    if (activeTab !== 'queue') {
+      setSelectedOrder(null);
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (!selectedOrder) return;
+    const latest = filteredProductionQueue.find((order) => order.id === selectedOrder.id);
+    if (!latest) {
+      setSelectedOrder(null);
+      return;
+    }
+    if (latest !== selectedOrder) {
+      setSelectedOrder(latest);
+    }
+  }, [filteredProductionQueue, selectedOrder]);
   useEffect(() => {
     setCompletedPage(1);
   }, [completedPageSize]);
@@ -953,6 +1042,45 @@ export const GrillQueue = () => {
               </div>
             </div>
           )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {filteredProductionQueue.map((order, index) => {
+              const orderAgeMs = order?.createdAt ? Date.now() - new Date(order.createdAt).getTime() : 0;
+              const isLate = orderAgeMs > PREP_SLA_MS;
+              const statusMeta = getStatusStyles(order.status, order.type);
+              const typeMeta = orderTypeMeta(order);
+              const paymentLabel = getPaymentMethodMeta(order.payment).label;
+              const totalLabel = formatCurrency(Number(order.total || 0));
+              const itemsCount = (order.items || []).reduce((sum, item) => sum + Number(item?.qty || 0), 0);
+
+              return (
+                <OrderSummaryCard
+                  key={`summary-${order.id}`}
+                  order={order}
+                  index={index}
+                  isLate={isLate}
+                  elapsedLabel={elapsedTime[order.id] || "0s"}
+                  statusMeta={statusMeta}
+                  typeMeta={typeMeta}
+                  paymentLabel={paymentLabel}
+                  totalLabel={totalLabel}
+                  itemsCount={itemsCount}
+                  onClick={() => setSelectedOrder(order)}
+                />
+              );
+            })}
+          </div>
+          {filteredProductionQueue.length === 0 && awaitingMotoboyQueue.length === 0 && !loading && (
+            <div className="col-span-full text-center text-gray-500 py-12 bg-slate-50 rounded-2xl border border-dashed border-slate-300">
+              <div className="mx-auto max-w-sm space-y-2">
+                <div className="text-4xl">🔥</div>
+                <p className="text-sm font-semibold text-slate-700">Nenhum pedido aguardando.</p>
+                <p className="text-xs text-slate-500">
+                  Assim que chegar um pedido, ele aparece aqui com prioridade.
+                </p>
+              </div>
+            </div>
+          )}
+          <OrderDetailsDrawer open={Boolean(selectedOrder)} onClose={() => setSelectedOrder(null)}>
           <div
             className={`grid gap-3 xl:gap-4 ${
               tvMode
@@ -960,7 +1088,9 @@ export const GrillQueue = () => {
                 : "grid-cols-1"
             }`}
           >
-          {filteredProductionQueue.map((order, index) => {
+          {filteredProductionQueue
+            .filter((order) => order.id === selectedOrder?.id)
+            .map((order, index) => {
             const orderAgeMs = order?.createdAt ? Date.now() - new Date(order.createdAt).getTime() : 0;
             const isLate = orderAgeMs > PREP_SLA_MS;
             const isNew = newOrderIds.includes(order.id);
@@ -1334,18 +1464,8 @@ export const GrillQueue = () => {
           );
           })}
 
-          {productionQueue.length === 0 && awaitingMotoboyQueue.length === 0 && !loading && (
-            <div className="col-span-full text-center text-gray-500 py-12 bg-slate-50 rounded-2xl border border-dashed border-slate-300">
-              <div className="mx-auto max-w-sm space-y-2">
-                <div className="text-4xl">🔥</div>
-                <p className="text-sm font-semibold text-slate-700">Nenhum pedido aguardando.</p>
-                <p className="text-xs text-slate-500">
-                  Assim que chegar um pedido, ele aparece aqui com prioridade.
-                </p>
-              </div>
-            </div>
-          )}
           </div>
+          </OrderDetailsDrawer>
         </div>
       )}
 
