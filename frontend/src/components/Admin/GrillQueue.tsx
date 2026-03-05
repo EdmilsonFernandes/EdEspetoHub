@@ -1,5 +1,6 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   CheckSquare,
   Clock,
@@ -1195,10 +1196,10 @@ export const GrillQueue = () => {
               </div>
             </div>
           )}
-          {isDrawerOpen && (
-            <div className="fixed inset-0 z-[100] flex justify-end">
+          {isDrawerOpen && createPortal(
+            <div className="fixed inset-0 z-[9999] flex justify-end">
               <div
-                className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm transition-opacity"
+                className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
                 onClick={closeOrderOverlays}
               />
               <div className="relative w-full md:w-[450px] h-full bg-white shadow-2xl flex flex-col">
@@ -1486,13 +1487,14 @@ export const GrillQueue = () => {
                   {selectedOrder ? renderOrderFooterActions(selectedOrder) : null}
                 </div>
               </div>
-            </div>
+            </div>,
+            document.body
           )}
         </div>
       )}
 
-      {isPaymentModalOpen && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/50 px-4">
+      {isPaymentModalOpen && createPortal(
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-slate-900/50 px-4">
           <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-slate-200">
             {(() => {
               const normalizedPayment = (confirmModal.payment || '').toString().trim().toLowerCase();
@@ -1693,7 +1695,8 @@ export const GrillQueue = () => {
               );
             })()}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {activeTab === 'inroute' && (
