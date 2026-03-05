@@ -979,156 +979,157 @@ export const GrillQueue = () => {
     <div className={tvMode ? "space-y-6 rounded-3xl bg-slate-900/95 p-4 sm:p-6 text-white" : "space-y-5"}>
       <style>{`@keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}`}</style>
       <div className={`${tvMode ? "" : "rounded-2xl border border-slate-200 bg-white px-3 py-3"}`}>
-        <div className="flex flex-col gap-3 border-b border-slate-100 pb-4 mb-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-2">
-            <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${tvMode ? "bg-white/15 text-white" : "bg-orange-100 text-orange-700 border border-orange-200"}`}>
-              {productionQueue.length} em produção
-            </span>
-            {tvMode && (
+        <div className="flex flex-col gap-4 mb-6 border-b border-slate-100 pb-4">
+          {!tvMode ? (
+            <>
+              <div className="flex justify-between items-center w-full gap-3 flex-wrap">
+                <div className="inline-flex items-center gap-1 rounded-lg bg-slate-100 p-1">
+                  {[
+                    { id: 'queue', label: 'Operação', count: productionQueue.length },
+                    { id: 'inroute', label: 'Em rota', count: inRouteQueue.length },
+                    { id: 'completed', label: 'Finalizados hoje', count: completedToday.length },
+                  ].map((tab) => (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setActiveTab(tab.id as 'queue' | 'inroute' | 'completed')}
+                      className={`inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-md transition-colors ${
+                        activeTab === tab.id
+                          ? 'bg-white shadow-sm font-semibold text-slate-900'
+                          : 'text-slate-500 hover:text-slate-700'
+                      }`}
+                    >
+                      <span>{tab.label}</span>
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                        activeTab === tab.id ? 'bg-slate-100 text-slate-700' : 'bg-white text-slate-500 border border-slate-200'
+                      }`}>
+                        {tab.count}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+
+                <div className="flex items-center gap-2 flex-wrap justify-end">
+                  <span className="text-xs font-medium text-slate-700 bg-orange-50 border border-orange-100 px-2 py-1 rounded-md">
+                    {productionQueue.length} em produção
+                  </span>
+                  <span className="text-xs font-medium text-slate-500 bg-slate-50 px-2 py-1 rounded-md">
+                    SLA alvo {prepSlaMinutes}min
+                  </span>
+                  <span className="text-xs font-medium text-slate-500 bg-slate-50 px-2 py-1 rounded-md">
+                    Mais antigo {formatDuration(queueMetrics.oldest)}
+                  </span>
+                  <div className="relative" data-queue-actions>
+                    <button
+                      type="button"
+                      onClick={() => setActionsOpen((prev) => !prev)}
+                      className="inline-flex items-center gap-2 text-xs font-medium text-slate-600 bg-slate-50 px-2.5 py-1.5 rounded-md hover:bg-slate-100 transition-colors"
+                    >
+                      <DotsThreeVertical size={14} weight="duotone" />
+                      Opções
+                    </button>
+                    {actionsOpen && (
+                      <div className="absolute right-0 mt-2 w-52 rounded-xl border border-gray-200 bg-white shadow-lg overflow-hidden z-20">
+                        <button
+                          onClick={() => {
+                            toggleTvMode();
+                            setActionsOpen(false);
+                          }}
+                          className="w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                        >
+                          <Monitor size={16} weight="duotone" />
+                          Ativar modo TV
+                        </button>
+                        <button
+                          onClick={() => {
+                            handleToggleSound();
+                            setActionsOpen(false);
+                          }}
+                          className="w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                        >
+                          {soundEnabled ? <SpeakerHigh size={16} weight="duotone" /> : <SpeakerX size={16} weight="duotone" />}
+                          {soundEnabled ? "Som ligado" : "Som desligado"}
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (!soundEnabled) {
+                              setSoundEnabled(true);
+                            }
+                            ensureAudioContext().then(() => playNewOrderSound()).catch(() => {});
+                            setActionsOpen(false);
+                          }}
+                          className="w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                        >
+                          <SpeakerHigh size={16} weight="duotone" />
+                          Testar som
+                        </button>
+                        <button
+                          onClick={() => {
+                            loadQueue();
+                            setActionsOpen(false);
+                          }}
+                          className="w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                        >
+                          <ArrowsClockwise size={16} weight="duotone" />
+                          Atualizar fila
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {activeTab === 'queue' && (
+                <div className="flex flex-wrap items-center gap-2">
+                  {[
+                    { id: 'all', label: 'Todos', value: productionQueue.length },
+                    { id: 'pending', label: 'Pendentes', value: queueMetrics.pending },
+                    { id: 'preparing', label: 'Em atendimento', value: queueMetrics.preparing },
+                    { id: 'ready', label: 'Prontos', value: queueMetrics.ready },
+                    { id: 'late', label: 'Atrasados', value: queueMetrics.late },
+                  ].map((kpi) => (
+                    <button
+                      key={kpi.id}
+                      type="button"
+                      onClick={() => setQueueFilter(kpi.id as any)}
+                      className={`flex items-center gap-2 px-4 py-1.5 rounded-full border text-sm font-medium transition-colors ${
+                        queueFilter === kpi.id
+                          ? 'bg-slate-900 border-slate-900 text-white'
+                          : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      <span>{kpi.label}</span>
+                      <span className={`px-2 py-0.5 rounded-full text-xs ${
+                        queueFilter === kpi.id ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
+                      }`}>
+                        {kpi.value}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="flex items-center justify-between gap-2">
+              <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-white/15 text-white">
+                {productionQueue.length} em produção
+              </span>
               <span className="flex items-center gap-2 text-xs font-semibold text-white/70">
                 <Clock size={14} weight="duotone" />
                 {new Date(currentTime).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
               </span>
-            )}
-          </div>
-          <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 sm:justify-end">
-            {!tvMode && (
-              <>
-                <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-700">
-                  Mais antigo {formatDuration(queueMetrics.oldest)}
-                </span>
-              </>
-            )}
-          {!tvMode && (
-            <div className="flex flex-wrap gap-2 order-2 sm:order-none">
-              {[
-                { id: 'queue', label: 'Operação', count: productionQueue.length },
-                { id: 'inroute', label: 'Em rota', count: inRouteQueue.length },
-                { id: 'completed', label: 'Finalizados hoje', count: completedToday.length },
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => setActiveTab(tab.id as 'queue' | 'inroute' | 'completed')}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-full text-xs font-semibold transition-all hover:-translate-y-0.5 active:scale-95 ${
-                    activeTab === tab.id
-                      ? 'bg-orange-500 text-white shadow-sm'
-                      : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
-                  }`}
-                >
-                  <span>{tab.label}</span>
-                  <span
-                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                      activeTab === tab.id ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
-                    }`}
-                  >
-                    {tab.count}
-                  </span>
-                </button>
-              ))}
+              <button
+                type="button"
+                onClick={toggleTvMode}
+                className="inline-flex items-center gap-2 text-xs font-medium bg-white/15 text-white border border-white/20 px-2.5 py-1.5 rounded-md"
+              >
+                <Monitor size={14} weight="duotone" />
+                Sair do modo TV
+              </button>
             </div>
           )}
-          <div className="relative w-full sm:w-auto" data-queue-actions>
-            <button
-              type="button"
-              onClick={() => {
-                if (tvMode) {
-                  toggleTvMode();
-                  return;
-                }
-                setActionsOpen((prev) => !prev);
-              }}
-              className={`flex items-center justify-between gap-2 text-sm px-3 py-2 rounded-lg w-full sm:w-auto transition-all hover:-translate-y-0.5 active:scale-95 ${
-                tvMode
-                  ? "bg-white/15 text-white border border-white/20"
-                  : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-50"
-              }`}
-            >
-              <span className="flex items-center gap-2">
-                {tvMode ? <Monitor size={16} weight="duotone" /> : <DotsThreeVertical size={16} weight="duotone" />}
-                {tvMode ? "Sair do modo TV" : "Opções"}
-              </span>
-              {!tvMode && (
-                <span className="text-xs text-gray-400">{soundEnabled ? "Som ligado" : "Som desligado"}</span>
-              )}
-            </button>
-            {actionsOpen && !tvMode && (
-              <div className="absolute right-0 mt-2 w-full sm:w-52 rounded-xl border border-gray-200 bg-white shadow-lg overflow-hidden z-20">
-                <button
-                  onClick={() => {
-                    toggleTvMode();
-                    setActionsOpen(false);
-                  }}
-                  className="w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                >
-                  <Monitor size={16} weight="duotone" />
-                  Ativar modo TV
-                </button>
-                <button
-                  onClick={() => {
-                    handleToggleSound();
-                    setActionsOpen(false);
-                  }}
-                  className="w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                >
-                  {soundEnabled ? <SpeakerHigh size={16} weight="duotone" /> : <SpeakerX size={16} weight="duotone" />}
-                  {soundEnabled ? "Som ligado" : "Som desligado"}
-                </button>
-                <button
-                  onClick={() => {
-                    if (!soundEnabled) {
-                      setSoundEnabled(true);
-                    }
-                    ensureAudioContext().then(() => playNewOrderSound()).catch(() => {});
-                    setActionsOpen(false);
-                  }}
-                  className="w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                >
-                  <SpeakerHigh size={16} weight="duotone" />
-                  Testar som
-                </button>
-                <button
-                  onClick={() => {
-                    loadQueue();
-                    setActionsOpen(false);
-                  }}
-                  className="w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                >
-                  <ArrowsClockwise size={16} weight="duotone" />
-                  Atualizar fila
-                </button>
-              </div>
-            )}
-          </div>
-          </div>
         </div>
       </div>
-
-      {!tvMode && activeTab === 'queue' && (
-        <div className="grid grid-cols-2 xl:grid-cols-5 gap-2">
-          {[
-            { id: 'all', label: 'Todos', value: productionQueue.length, activeTone: 'bg-slate-100 text-slate-800' },
-            { id: 'pending', label: 'Pendentes', value: queueMetrics.pending, activeTone: 'bg-amber-50 text-amber-700' },
-            { id: 'preparing', label: 'Em atendimento', value: queueMetrics.preparing, activeTone: 'bg-sky-50 text-sky-700' },
-            { id: 'ready', label: 'Prontos', value: queueMetrics.ready, activeTone: 'bg-violet-50 text-violet-700' },
-            { id: 'late', label: 'Atrasados', value: queueMetrics.late, activeTone: 'bg-rose-50 text-rose-700' },
-          ].map((kpi) => (
-            <button
-              key={kpi.id}
-              type="button"
-              onClick={() => setQueueFilter(kpi.id as any)}
-              className={`rounded-lg px-3 py-2 text-left transition-all ${
-                queueFilter === kpi.id
-                  ? `${kpi.activeTone} shadow-sm`
-                  : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
-              }`}
-            >
-              <p className="text-[10px] uppercase tracking-[0.14em] font-bold opacity-80">{kpi.label}</p>
-              <p className="text-lg font-black leading-tight">{kpi.value}</p>
-            </button>
-          ))}
-        </div>
-      )}
 
       {activeTab === 'queue' && (
         <div className="space-y-3">
