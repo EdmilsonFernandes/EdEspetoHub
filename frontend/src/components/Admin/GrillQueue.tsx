@@ -48,10 +48,14 @@ const OrderSummaryCard = ({
   itemsCount,
   onClick,
 }: any) => (
+  (() => {
+    const isDelivery = String(order?.type || '').toLowerCase() === 'delivery';
+    const leftAccent = isDelivery ? 'border-l-[3px] border-l-blue-500' : 'border-l-[3px] border-l-orange-500';
+    return (
   <button
     type="button"
     onClick={onClick}
-    className="w-full rounded-xl border border-slate-200 bg-white p-4 text-left flex flex-col gap-3 transition-all hover:border-slate-300 hover:shadow-sm cursor-pointer"
+    className={`w-full rounded-xl border border-slate-200 ${leftAccent} bg-white p-4 text-left flex flex-col gap-3 transition-all duration-300 hover:border-slate-300 hover:shadow-lg hover:-translate-y-0.5 cursor-pointer`}
   >
     <div className="flex justify-between items-start gap-2 mb-3">
       <div className="flex items-center gap-2 flex-wrap min-w-0">
@@ -80,10 +84,14 @@ const OrderSummaryCard = ({
     </div>
 
     <div className="border-t border-slate-100 pt-3 mt-1 flex justify-between items-center">
-      <span className="text-sm text-slate-500">{itemsCount} {itemsCount === 1 ? 'item' : 'itens'}</span>
-      <span className="text-sm font-semibold text-slate-900">{totalLabel}</span>
+      <span className="bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full text-[11px] font-bold border border-indigo-100">
+        {itemsCount} {itemsCount === 1 ? 'item' : 'itens'}
+      </span>
+      <span className="text-sm font-bold text-slate-900">{totalLabel}</span>
     </div>
   </button>
+    );
+  })()
 );
 
 export const GrillQueue = () => {
@@ -774,18 +782,18 @@ export const GrillQueue = () => {
 
   const getStatusStyles = (status, orderType) => {
     if (status === "preparing") {
-      return { label: "Em atendimento", className: "bg-amber-100 text-amber-700" };
+      return { label: "Em atendimento", className: "bg-blue-50 text-blue-700 border-blue-100" };
     }
-    if (status === "ready") {
+    if (status === "ready" || status === "ready_for_delivery" || status === "waiting_for_motoboy") {
       const label =
         orderType === "delivery"
-          ? "Aguardando entregador"
+          ? "Pronto"
           : orderType === "pickup"
-          ? "Aguardando retirada"
-          : "Pronto para servir";
-      return { label, className: "bg-sky-100 text-sky-700" };
+          ? "Pronto"
+          : "Pronto";
+      return { label, className: "bg-emerald-50 text-emerald-700 border-emerald-100" };
     }
-    return { label: "Aguardando", className: "bg-red-100 text-red-700" };
+    return { label: "Aguardando", className: "bg-amber-50 text-amber-700 border-amber-100" };
   };
   const timelineStyles = {
     pending: { dot: "bg-amber-500", text: "text-amber-700" },
@@ -981,7 +989,10 @@ export const GrillQueue = () => {
 
   return (
     <div className={tvMode ? "space-y-6 rounded-3xl bg-slate-900/95 p-4 sm:p-6 text-white" : "space-y-5"}>
-      <style>{`@keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}`}</style>
+      <style>{`
+        @keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
+        @keyframes drawerIn{0%{transform:translateX(100%)}100%{transform:translateX(0)}}
+      `}</style>
       <div className={`${tvMode ? "" : "rounded-2xl border border-slate-200 bg-white px-3 py-3"}`}>
         <div className="flex flex-col gap-4 mb-6 border-b border-slate-100 pb-4">
           {!tvMode ? (
@@ -1198,12 +1209,12 @@ export const GrillQueue = () => {
             </div>
           )}
           {isDrawerOpen && createPortal(
-            <div className="fixed inset-0 z-[9999] flex justify-end">
+            <>
               <div
-                className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
+                className="fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-sm transition-opacity"
                 onClick={closeOrderOverlays}
               />
-              <div className="relative w-full md:w-[450px] h-full bg-white shadow-2xl flex flex-col">
+              <div className="fixed right-0 top-0 h-full w-full md:w-[450px] z-[110] bg-white shadow-2xl flex flex-col animate-[drawerIn_220ms_ease-out]">
                 <div className="shrink-0 flex justify-between items-center px-4 py-3 border-b border-slate-200 bg-white">
                   <p className="text-sm font-bold text-slate-900">Detalhes do pedido</p>
                   <button
@@ -1479,7 +1490,7 @@ export const GrillQueue = () => {
                   {selectedOrder ? renderOrderFooterActions(selectedOrder) : null}
                 </div>
               </div>
-            </div>,
+            </>,
             document.body
           )}
         </div>
