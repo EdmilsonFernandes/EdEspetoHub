@@ -50,7 +50,7 @@ const OrderSummaryCard = ({
 }: any) => (
   (() => {
     const isDelivery = String(order?.type || '').toLowerCase() === 'delivery';
-    const leftAccent = isDelivery ? 'border-l-[3px] border-l-blue-500' : 'border-l-[3px] border-l-orange-500';
+    const leftAccent = isDelivery ? 'border-l-4 border-l-blue-500' : 'border-l-4 border-l-orange-500';
     return (
   <button
     type="button"
@@ -564,7 +564,8 @@ export const GrillQueue = () => {
     if (!confirmModal?.id) return;
     const success = await handleAdvance(confirmModal.id, 'done');
     if (success) {
-      closeOrderOverlays();
+      setConfirmModal(null);
+      setSelectedOrder(null);
     }
   };
 
@@ -1209,7 +1210,7 @@ export const GrillQueue = () => {
             </div>
           )}
           {isDrawerOpen && createPortal(
-            <>
+            <div className="fixed inset-0 z-[100] overflow-hidden">
               <div
                 className="fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-sm transition-opacity"
                 onClick={closeOrderOverlays}
@@ -1490,14 +1491,14 @@ export const GrillQueue = () => {
                   {selectedOrder ? renderOrderFooterActions(selectedOrder) : null}
                 </div>
               </div>
-            </>,
+            </div>,
             document.body
           )}
         </div>
       )}
 
       {isPaymentModalOpen && createPortal(
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-slate-900/50 px-4">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/50 px-4">
           <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-slate-200">
             {(() => {
               const normalizedPayment = (confirmModal.payment || '').toString().trim().toLowerCase();
