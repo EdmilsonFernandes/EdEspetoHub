@@ -85,14 +85,24 @@ const OrderSummaryCard = ({
 );
 
 const OrderDetailsDrawer = ({ open, onClose, children, footer }: any) => {
-  if (!open) return null;
   return createPortal(
-    <div className="fixed inset-0 z-[9999] flex justify-end">
+    <div
+      className={`fixed inset-0 z-[100] flex justify-end overflow-hidden transition-opacity duration-300 ${
+        open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+      }`}
+      aria-hidden={!open}
+    >
       <div
-        className="absolute inset-0 z-[9999] bg-black/50 backdrop-blur-sm transition-opacity"
+        className={`absolute inset-0 z-[100] bg-black/50 backdrop-blur-sm transition-opacity duration-300 ${
+          open ? 'opacity-100' : 'opacity-0'
+        }`}
         onClick={onClose}
       />
-      <aside className="relative z-[10000] w-full md:w-[450px] h-full bg-slate-50 flex flex-col shadow-2xl transform transition-transform">
+      <aside
+        className={`relative z-[101] w-full h-full md:w-[450px] bg-white shadow-2xl flex flex-col transition-transform duration-300 ease-in-out ${
+          open ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
         <div className="shrink-0 flex items-center justify-between p-4 border-b border-slate-200 bg-white">
           <p className="text-sm font-bold text-slate-900">Detalhes do pedido</p>
           <button
@@ -1481,7 +1491,7 @@ export const GrillQueue = () => {
       )}
 
       {confirmModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 px-4">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/50 px-4">
           <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-slate-200">
             {(() => {
               const normalizedPayment = (confirmModal.payment || '').toString().trim().toLowerCase();
