@@ -10,6 +10,7 @@ import {
   ArrowCounterClockwise,
 } from '@phosphor-icons/react';
 import { formatCurrency } from '../utils/format';
+import { useToast } from '../contexts/ToastContext';
 
 const demoStorageKey = 'adminDemoProducts';
 const initialForm = { name: '', price: '', category: 'espetos', imageUrl: '', imageFile: '', desc: '' };
@@ -50,6 +51,7 @@ const loadProducts = () => {
 
 export function AdminDemo() {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [products, setProducts] = useState(loadProducts);
   const [editing, setEditing] = useState(null);
   const [formData, setFormData] = useState(initialForm);
@@ -345,9 +347,10 @@ export function AdminDemo() {
                     </button>
                     <button
                       onClick={() => {
-                        if (window.confirm('Excluir produto?')) {
-                          persist(products.filter((item) => item.id !== product.id));
-                        }
+                        showToast(`Excluir "${product.name}"?`, 'warning', {
+                          actionLabel: 'Excluir',
+                          onAction: () => persist(products.filter((item) => item.id !== product.id)),
+                        });
                       }}
                       className="text-red-600 hover:bg-red-50 p-2 rounded"
                     >

@@ -706,9 +706,6 @@ export function MotoboyProfile() {
       return;
     }
 
-    const label = documentTypes.find((d) => d.key === normalized)?.label || normalized;
-    if (!window.confirm(`Confirma que este arquivo é: ${label}?`)) return;
-
     setUploading(true);
     try {
       const reader = new FileReader();
@@ -1940,15 +1937,20 @@ export function MotoboyProfile() {
                       </div>
                       <button
                         type="button"
-                        onClick={async () => {
-                          if (!window.confirm(`Deseja desfazer o vínculo com ${store?.name || store?.slug || 'a loja'}?`)) return;
-                          try {
-                            await motoboyService.leaveStore(storeId);
-                            showToast('Vinculo removido.', 'success');
-                            await loadRequests();
-                          } catch (error: any) {
-                            showToast(error?.message || 'Não foi possível desfazer o vínculo.', 'error');
-                          }
+                        onClick={() => {
+                          const targetStore = store?.name || store?.slug || 'a loja';
+                          showToast(`Desfazer vínculo com ${targetStore}?`, 'warning', {
+                            actionLabel: 'Confirmar',
+                            onAction: async () => {
+                              try {
+                                await motoboyService.leaveStore(storeId);
+                                showToast('Vinculo removido.', 'success');
+                                await loadRequests();
+                              } catch (error: any) {
+                                showToast(error?.message || 'Não foi possível desfazer o vínculo.', 'error');
+                              }
+                            },
+                          });
                         }}
                         className="btn-press w-full sm:w-auto rounded-xl border border-emerald-200 bg-white px-3 py-2 text-[11px] font-extrabold text-emerald-800"
                         title="Sair da loja"

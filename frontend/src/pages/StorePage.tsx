@@ -796,30 +796,30 @@ export function StorePage() {
       subscriptionStatus &&
       ![ 'PENDING', 'CANCELLED', 'SUSPENDED', 'EXPIRED' ].includes(subscriptionStatus);
     if (!isSubscriptionActive) {
-      alert('Loja com assinatura inativa. Tente novamente mais tarde.');
+      showToast('Loja com assinatura inativa. Tente novamente mais tarde.', 'warning');
       return;
     }
     if (!storeOpenNow) {
-      alert('Loja fechada no momento. Tente novamente durante o horario de atendimento.');
+      showToast('Loja fechada no momento. Tente novamente durante o horário de atendimento.', 'warning');
       return;
     }
     const requiresPhone = customer.type !== 'table';
     if (!customer.name || (requiresPhone && !customer.phone)) {
-      alert(requiresPhone ? 'Preencha Nome e Telefone' : 'Preencha o Nome');
+      showToast(requiresPhone ? 'Preencha nome e telefone para continuar.' : 'Preencha seu nome para continuar.', 'warning');
       return;
     }
 
     if (customer.type === 'delivery' && !customer.address) {
-      alert('Informe o endereço completo para entrega.');
+      showToast('Informe o endereço completo para entrega.', 'warning');
       return;
     }
     if (customer.type === 'delivery' && !String(customer.number || '').trim()) {
-      alert('Informe o número do endereço para entrega.');
+      showToast('Informe o número da casa para entrega.', 'warning');
       return;
     }
 
     if (customer.type === 'table' && !customer.table) {
-      alert('Informe o número da mesa.');
+      showToast('Informe o número da mesa.', 'warning');
       return;
     }
 
@@ -867,7 +867,7 @@ export function StorePage() {
     };
 
     if (!storeSlug) {
-      alert('Loja não especificada.');
+      showToast('Loja não especificada.', 'error');
       return;
     }
 

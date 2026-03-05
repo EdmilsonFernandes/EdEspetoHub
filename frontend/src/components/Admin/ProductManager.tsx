@@ -1142,7 +1142,6 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                   <button
                     type="button"
                     onClick={() => {
-                      if (!window.confirm('Excluir produto?')) return;
                       handleDeleteProduct(product);
                     }}
                     disabled={pendingDeleteIds.includes(product.id)}
@@ -1279,7 +1278,6 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                     </button>
                     <button
                       onClick={() => {
-                        if (!window.confirm('Excluir produto?')) return;
                         handleDeleteProduct(product);
                       }}
                       disabled={pendingDeleteIds.includes(product.id)}
