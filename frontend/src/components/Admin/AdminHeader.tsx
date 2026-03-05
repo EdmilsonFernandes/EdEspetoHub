@@ -13,10 +13,14 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { subscriptionService } from '../../services/subscriptionService';
 import { storeService } from '../../services/storeService';
+import { formatCurrency } from '../../utils/format';
 
 type Props = {
   contextLabel?: string;
   onToggleHeader?: () => void;
+  storeColor?: string;
+  planValueLabel?: string;
+  planDueDateLabel?: string;
 };
 
 const planTone = (planName?: string | null) => {
@@ -27,14 +31,23 @@ const planTone = (planName?: string | null) => {
   return 'PLANO';
 };
 
-export function AdminHeader({ onToggleHeader }: Props) {
+const formatDateLabel = (value?: string | null) => {
+  if (!value) return '—';
+  const parsed = new Date(value);
+  if (!Number.isFinite(parsed.getTime())) return '—';
+  return parsed.toLocaleDateString('pt-BR');
+};
+
+export function AdminHeader({ onToggleHeader, storeColor, planValueLabel, planDueDateLabel }: Props) {
   const navigate = useNavigate();
   const { auth, logout } = useAuth();
   const { branding } = useTheme();
   const [planDetails, setPlanDetails] = useState<any>(null);
   const [storeNameOverride, setStoreNameOverride] = useState('');
   const [isFocusMode, setIsFocusMode] = useState(false);
+  const [openPlanMenu, setOpenPlanMenu] = useState(false);
   const [openUserMenu, setOpenUserMenu] = useState(false);
+  const planMenuRef = useRef<HTMLDivElement | null>(null);
   const userMenuRef = useRef<HTMLDivElement | null>(null);
 
   const storeSlug = auth?.store?.slug;
@@ -43,6 +56,11 @@ export function AdminHeader({ onToggleHeader }: Props) {
   const storeCity = String(auth?.store?.settings?.city || '').trim();
   const storeState = String(auth?.store?.settings?.state || '').trim().toUpperCase();
   const storeLocation = [storeCity, storeState].filter(Boolean).join(' · ') || 'Local não informado';
+  const accentColor =
+    storeColor ||
+    auth?.store?.settings?.primaryColor ||
+    branding?.primaryColor ||
+    '#0f172a';
   const userName = auth?.user?.fullName || auth?.user?.name || auth?.user?.email || 'Admin';
   const userShortName = userName
     .split(' ')
@@ -61,6 +79,16 @@ export function AdminHeader({ onToggleHeader }: Props) {
     () => planTone(planDetails?.planName || planDetails?.displayName),
     [planDetails?.planName, planDetails?.displayName]
   );
+  const resolvedPlanValue = useMemo(() => {
+    if (planValueLabel) return planValueLabel;
+    const amount = Number(planDetails?.latestPaymentAmount || 0);
+    if (Number.isFinite(amount) && amount > 0) return `${formatCurrency(amount)}/mês`;
+    return 'R$ 99,90/mês';
+  }, [planDetails?.latestPaymentAmount, planValueLabel]);
+  const resolvedPlanDueDate = useMemo(() => {
+    if (planDueDateLabel) return planDueDateLabel;
+    return formatDateLabel(planDetails?.endDate) || '—';
+  }, [planDetails?.endDate, planDueDateLabel]);
 
   useEffect(() => {
     const storeId = auth?.store?.id;
@@ -71,6 +99,8 @@ export function AdminHeader({ onToggleHeader }: Props) {
         setPlanDetails({
           planName: subscription?.planExempt ? 'vip' : subscription?.plan?.name || '',
           displayName: subscription?.planExempt ? 'Isento de plano' : subscription?.plan?.displayName || '',
+          latestPaymentAmount: subscription?.latestPaymentAmount || null,
+          endDate: subscription?.endDate || null,
         });
       })
       .catch(() => setPlanDetails(null));
@@ -87,15 +117,21 @@ export function AdminHeader({ onToggleHeader }: Props) {
   }, [storeSlug]);
 
   useEffect(() => {
-    if (!openUserMenu) return;
+    if (!openUserMenu && !openPlanMenu) return;
     const onClickAway = (event: MouseEvent) => {
-      if (!userMenuRef.current) return;
-      if (!userMenuRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      if (userMenuRef.current && !userMenuRef.current.contains(target)) {
         setOpenUserMenu(false);
+      }
+      if (planMenuRef.current && !planMenuRef.current.contains(target)) {
+        setOpenPlanMenu(false);
       }
     };
     const onEsc = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setOpenUserMenu(false);
+      if (event.key === 'Escape') {
+        setOpenUserMenu(false);
+        setOpenPlanMenu(false);
+      }
     };
     window.addEventListener('mousedown', onClickAway);
     window.addEventListener('keydown', onEsc);
@@ -103,7 +139,7 @@ export function AdminHeader({ onToggleHeader }: Props) {
       window.removeEventListener('mousedown', onClickAway);
       window.removeEventListener('keydown', onEsc);
     };
-  }, [openUserMenu]);
+  }, [openUserMenu, openPlanMenu]);
 
   const toggleFocusMode = () => {
     const next = !isFocusMode;
@@ -113,7 +149,10 @@ export function AdminHeader({ onToggleHeader }: Props) {
   };
 
   return (
-    <header className="w-full border-b border-slate-200 bg-white">
+    <header
+      className="w-full border-b border-slate-200 bg-white"
+      style={{ borderTop: `4px solid ${accentColor}` }}
+    >
       <div className="h-20 px-3 sm:px-4 lg:px-6 xl:px-8 flex items-center justify-between gap-3 sm:gap-4">
         <div className="min-w-0 flex items-center gap-3">
           <div className="h-11 w-11 rounded-full border border-slate-200 bg-slate-50 overflow-hidden grid place-items-center shrink-0">
@@ -171,9 +210,43 @@ export function AdminHeader({ onToggleHeader }: Props) {
             <Bell size={16} />
           </button>
 
-          <span className="hidden sm:inline-flex rounded-full bg-slate-900 text-white text-[11px] font-semibold uppercase tracking-[0.14em] px-3 py-1">
-            {planLabel}
-          </span>
+          <div className="relative hidden sm:block" ref={planMenuRef}>
+            <button
+              type="button"
+              onClick={() => setOpenPlanMenu((prev) => !prev)}
+              className="inline-flex items-center gap-1.5 rounded-full text-white text-[11px] font-semibold uppercase tracking-[0.14em] px-3 py-1 shadow-sm"
+              style={{ backgroundColor: accentColor }}
+              aria-label="Detalhes da assinatura"
+            >
+              {planLabel}
+              <ChevronDown size={12} />
+            </button>
+            {openPlanMenu && (
+              <div className="absolute right-0 top-[calc(100%+10px)] w-64 rounded-lg border border-slate-100 bg-white shadow-lg p-3 z-[1200]">
+                <p className="text-xs uppercase tracking-[0.18em] text-slate-400 font-semibold">Assinatura</p>
+                <div className="mt-2 space-y-1.5 text-sm text-slate-700">
+                  <p>
+                    <span className="text-slate-500">Valor:</span>{' '}
+                    <span className="font-semibold">{resolvedPlanValue}</span>
+                  </p>
+                  <p>
+                    <span className="text-slate-500">Vencimento:</span>{' '}
+                    <span className="font-semibold">{resolvedPlanDueDate}</span>
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOpenPlanMenu(false);
+                    navigate('/admin/renewal');
+                  }}
+                  className="mt-3 w-full rounded-md border border-slate-200 bg-slate-50 px-2.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition-colors"
+                >
+                  Gerenciar assinatura
+                </button>
+              </div>
+            )}
+          </div>
 
           <div className="relative" ref={userMenuRef}>
             <button
@@ -212,4 +285,3 @@ export function AdminHeader({ onToggleHeader }: Props) {
     </header>
   );
 }
-
