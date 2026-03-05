@@ -1568,13 +1568,16 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     const pendingOrders = (orders || []).filter((order: any) => normalizeStatus(order?.status) === 'pending').length;
     const readyOrders = (orders || []).filter((order: any) => normalizeStatus(order?.status) === 'ready').length;
     if (pendingOrders > 0) {
-      const oldestPendingTs = (orders || [])
+      const pendingTimestamps = (orders || [])
         .filter((order: any) => normalizeStatus(order?.status) === 'pending')
         .map((order: any) => normalizeTime(order?.createdAt))
-        .filter((ts: number) => ts > 0)
-        .sort((a: number, b: number) => a - b)[0] || Date.now();
+        .filter((ts: number) => ts > 0);
+      const oldestPendingTs =
+        pendingTimestamps.length > 0 ? Math.min(...pendingTimestamps) : Date.now();
+      const newestPendingTs =
+        pendingTimestamps.length > 0 ? Math.max(...pendingTimestamps) : Date.now();
       result.push({
-        key: `pending-orders:${pendingOrders}`,
+        key: `pending-orders:${pendingOrders}:${newestPendingTs}`,
         id: 'pending-orders',
         title: `${pendingOrders} pedido(s) pendente(s)`,
         description: 'Pedidos novos aguardando início da operação.',
@@ -1585,13 +1588,16 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       });
     }
     if (readyOrders > 0) {
-      const oldestReadyTs = (orders || [])
+      const readyTimestamps = (orders || [])
         .filter((order: any) => normalizeStatus(order?.status) === 'ready')
         .map((order: any) => normalizeTime(order?.createdAt))
-        .filter((ts: number) => ts > 0)
-        .sort((a: number, b: number) => a - b)[0] || Date.now();
+        .filter((ts: number) => ts > 0);
+      const oldestReadyTs =
+        readyTimestamps.length > 0 ? Math.min(...readyTimestamps) : Date.now();
+      const newestReadyTs =
+        readyTimestamps.length > 0 ? Math.max(...readyTimestamps) : Date.now();
       result.push({
-        key: `ready-orders:${readyOrders}`,
+        key: `ready-orders:${readyOrders}:${newestReadyTs}`,
         id: 'ready-orders',
         title: `${readyOrders} pedido(s) pronto(s)`,
         description: 'Pedidos prontos aguardando retirada/expedição.',
