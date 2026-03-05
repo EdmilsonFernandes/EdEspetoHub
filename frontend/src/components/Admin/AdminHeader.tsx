@@ -197,15 +197,15 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
       <div className="h-20 px-3 sm:px-4 lg:px-6 xl:px-8 flex items-center justify-between gap-3 sm:gap-4">
         <div className="min-w-0 w-full max-w-md lg:max-w-lg shrink-0">
           <div
-            className="relative overflow-hidden rounded-2xl h-14 px-3 sm:px-4 flex items-center"
+            className="relative overflow-hidden h-14 px-3 sm:px-4 flex items-center rounded-full border-t border-white/20 shadow-[0_12px_28px_-18px_rgba(15,23,42,0.55)]"
             style={
               storeBanner
                 ? {
                     backgroundImage: `url(${storeBanner})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
-                    WebkitMaskImage: 'linear-gradient(to right, black 60%, transparent 100%)',
-                    maskImage: 'linear-gradient(to right, black 60%, transparent 100%)',
+                    WebkitMaskImage: 'linear-gradient(to right, black 58%, transparent 100%)',
+                    maskImage: 'linear-gradient(to right, black 58%, transparent 100%)',
                   }
                 : { backgroundColor: primaryColor }
             }
@@ -244,8 +244,8 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
           </div>
         </div>
 
-        <div className="flex-1 bg-white" />
-        <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 shrink-0">
+        <div className="flex-1" />
+        <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 shrink-0 bg-white rounded-l-2xl border-l border-slate-100 pl-3 sm:pl-4 py-1">
           <button
             type="button"
             onClick={toggleFocusMode}

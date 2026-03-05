@@ -1315,7 +1315,11 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         run: () => navigate('/admin/renewal'),
       },
     ];
-    return items;
+    // Hard guard: nunca exibir entrada de "Resumo/Resumo executivo" na paleta.
+    return items.filter((item) => {
+      const haystack = `${item.id} ${item.label} ${item.description}`.toLowerCase();
+      return !haystack.includes('resumo executivo') && !/^tab-resumo$/.test(item.id) && item.label.toLowerCase() !== 'resumo';
+    });
   }, [desktopTabItems, tabMeta, storeSlug, navigate, openQueueMonitor]);
   const filteredCommandActions = useMemo(() => {
     const q = commandQuery.trim().toLowerCase();
