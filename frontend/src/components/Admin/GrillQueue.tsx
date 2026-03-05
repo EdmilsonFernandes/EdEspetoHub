@@ -1,5 +1,6 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   CheckSquare,
   Clock,
@@ -85,16 +86,19 @@ const OrderSummaryCard = ({
 
 const OrderDetailsDrawer = ({ open, onClose, children, footer }: any) => {
   if (!open) return null;
-  return (
-    <div className="fixed inset-0 z-[100] flex justify-end">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity" onClick={onClose} />
-      <aside className="relative w-full md:w-[450px] h-full bg-slate-50 flex flex-col shadow-2xl transform transition-transform">
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex justify-end">
+      <div
+        className="absolute inset-0 z-[9999] bg-black/50 backdrop-blur-sm transition-opacity"
+        onClick={onClose}
+      />
+      <aside className="relative z-[10000] w-full md:w-[450px] h-full bg-slate-50 flex flex-col shadow-2xl transform transition-transform">
         <div className="shrink-0 flex items-center justify-between p-4 border-b border-slate-200 bg-white">
           <p className="text-sm font-bold text-slate-900">Detalhes do pedido</p>
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-full text-slate-600 hover:bg-slate-100 transition"
+            className="flex items-center justify-center w-[40px] h-[40px] bg-red-50 text-red-600 rounded-full hover:bg-red-100 hover:scale-105 active:scale-95 transition-all shadow-sm focus:outline-none"
             aria-label="Fechar"
           >
             <X size={20} weight="bold" />
@@ -105,7 +109,8 @@ const OrderDetailsDrawer = ({ open, onClose, children, footer }: any) => {
           {footer}
         </div>
       </aside>
-    </div>
+    </div>,
+    document.body
   );
 };
 
