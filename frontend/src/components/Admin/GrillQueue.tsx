@@ -1,6 +1,5 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import {
   CheckSquare,
   Clock,
@@ -82,38 +81,6 @@ const OrderSummaryCard = ({
     </div>
   </button>
 );
-
-const OrderDetailsDrawer = ({ open, onClose, children, footer }: any) => {
-  if (!open) return null;
-  return createPortal(
-    <div className="fixed inset-0 z-[999] flex justify-end overflow-hidden" aria-hidden={!open}>
-      <div
-        className="absolute inset-0 z-[999] bg-black/50 backdrop-blur-sm"
-        onClick={onClose}
-      />
-      <aside
-        className="relative z-[101] w-full h-full md:w-[450px] bg-white shadow-2xl flex flex-col transition-transform duration-300 ease-in-out translate-x-0"
-      >
-        <div className="shrink-0 flex justify-between items-center px-4 py-3 border-b border-slate-200 bg-white">
-          <p className="text-sm font-bold text-slate-900">Detalhes do pedido</p>
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex items-center justify-center w-[40px] h-[40px] bg-red-50 text-red-600 rounded-full hover:bg-red-100 hover:scale-105 active:scale-95 transition-all shadow-sm focus:outline-none"
-            aria-label="Fechar"
-          >
-            <X size={20} weight="bold" />
-          </button>
-        </div>
-        <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">{children}</div>
-        <div className="shrink-0 p-4 border-t border-slate-200 bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-          {footer}
-        </div>
-      </aside>
-    </div>,
-    document.body
-  );
-};
 
 export const GrillQueue = () => {
   // Tap feedback animation
@@ -1229,21 +1196,34 @@ export const GrillQueue = () => {
             </div>
           )}
           {isDrawerOpen && (
-          <OrderDetailsDrawer
-            open={isDrawerOpen}
-            onClose={closeOrderOverlays}
-            footer={selectedOrder ? renderOrderFooterActions(selectedOrder) : null}
-          >
-          <div
-            className={`grid gap-3 xl:gap-4 ${
-              tvMode
-                ? "grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"
-                : "grid-cols-1"
-            }`}
-          >
-          {filteredProductionQueue
-            .filter((order) => order.id === selectedOrder?.id)
-            .map((order, index) => {
+            <div className="fixed inset-0 z-[100] flex justify-end">
+              <div
+                className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm transition-opacity"
+                onClick={closeOrderOverlays}
+              />
+              <div className="relative w-full md:w-[450px] h-full bg-white shadow-2xl flex flex-col">
+                <div className="shrink-0 flex justify-between items-center px-4 py-3 border-b border-slate-200 bg-white">
+                  <p className="text-sm font-bold text-slate-900">Detalhes do pedido</p>
+                  <button
+                    type="button"
+                    onClick={closeOrderOverlays}
+                    className="flex items-center justify-center w-[40px] h-[40px] bg-red-50 text-red-600 rounded-full hover:bg-red-100 hover:scale-105 active:scale-95 transition-all shadow-sm focus:outline-none"
+                    aria-label="Fechar"
+                  >
+                    <X size={20} weight="bold" />
+                  </button>
+                </div>
+                <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
+                  <div
+                    className={`grid gap-3 xl:gap-4 ${
+                      tvMode
+                        ? "grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"
+                        : "grid-cols-1"
+                    }`}
+                  >
+                  {filteredProductionQueue
+                    .filter((order) => order.id === selectedOrder?.id)
+                    .map((order, index) => {
             const orderAgeMs = order?.createdAt ? Date.now() - new Date(order.createdAt).getTime() : 0;
             const isLate = orderAgeMs > PREP_SLA_MS;
             const isNew = newOrderIds.includes(order.id);
@@ -1496,12 +1476,17 @@ export const GrillQueue = () => {
               <div className="mt-3">
                 {renderMoneyBreakdown(order)}
               </div>
-            </div>
-          );
-          })}
+                    </div>
+                  );
+                  })}
 
-          </div>
-          </OrderDetailsDrawer>
+                  </div>
+                </div>
+                <div className="shrink-0 p-4 border-t border-slate-200 bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+                  {selectedOrder ? renderOrderFooterActions(selectedOrder) : null}
+                </div>
+              </div>
+            </div>
           )}
         </div>
       )}
