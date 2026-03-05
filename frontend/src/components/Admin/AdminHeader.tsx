@@ -195,7 +195,7 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
   return (
     <header className="w-full bg-white border-b border-slate-200">
       <div className="h-20 px-3 sm:px-4 lg:px-6 xl:px-8 flex items-center justify-between gap-3 sm:gap-4">
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 w-full max-w-md lg:max-w-lg shrink-0">
           <div
             className="relative overflow-hidden rounded-2xl h-14 px-3 sm:px-4 flex items-center"
             style={
@@ -204,6 +204,8 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
                     backgroundImage: `url(${storeBanner})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
+                    WebkitMaskImage: 'linear-gradient(to right, black 60%, transparent 100%)',
+                    maskImage: 'linear-gradient(to right, black 60%, transparent 100%)',
                   }
                 : { backgroundColor: primaryColor }
             }
@@ -242,6 +244,7 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
           </div>
         </div>
 
+        <div className="flex-1 bg-white" />
         <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 shrink-0">
           <button
             type="button"
@@ -343,4 +346,3 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
     </header>
   );
 }
-

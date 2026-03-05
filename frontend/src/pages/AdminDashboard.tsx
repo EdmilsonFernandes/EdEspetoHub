@@ -1282,7 +1282,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   const commandActions = useMemo(() => {
     const items = [
       ...desktopTabItems
-        .filter((item) => !item.disabled)
+        .filter((item) => !item.disabled && item.id !== 'resumo')
         .map((item) => ({
           id: `tab-${item.id}`,
           label: item.label,
