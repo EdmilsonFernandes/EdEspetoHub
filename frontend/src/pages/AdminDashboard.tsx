@@ -1298,11 +1298,9 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         })),
       {
         id: 'go-menu',
-        label: 'Abrir vitrine pública',
-        description: 'Abre a página pública da loja em nova aba.',
-        run: () => {
-          if (storeSlug) window.open(`/${storeSlug}`, '_blank', 'noopener,noreferrer');
-        },
+        label: 'Monitor de pedidos',
+        description: 'Abre o monitor operacional da loja.',
+        run: () => openQueueMonitor(),
       },
       {
         id: 'go-queue',
@@ -2330,14 +2328,13 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             </div>
           )}
           {storeSlug && (
-            <a
-              href={`/${storeSlug}`}
-              target="_blank"
-              rel="noreferrer"
+            <button
+              type="button"
+              onClick={() => openQueueMonitor()}
               className="ds-focus-ring rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
             >
-              Abrir vitrine
-            </a>
+              Monitor de pedidos
+            </button>
           )}
           <button
             type="button"
