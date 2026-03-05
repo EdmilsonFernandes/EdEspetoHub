@@ -38,7 +38,7 @@ import { buildPixPayload } from "../../utils/pixPayload";
 
 const OrderSummaryCard = ({
   order,
-  orderCode,
+  index,
   isLate,
   elapsedLabel,
   statusMeta,
@@ -53,19 +53,23 @@ const OrderSummaryCard = ({
     onClick={onClick}
     className="w-full rounded-xl border border-slate-200 bg-white p-4 text-left flex flex-col gap-3 transition-all hover:border-slate-300 hover:shadow-sm cursor-pointer"
   >
-    <div className="flex justify-between items-start gap-2">
-      <div className="flex items-center gap-2 min-w-0">
-        <span className="text-sm font-bold text-slate-400">#{orderCode}</span>
-        <span className="text-xs font-medium text-slate-500 truncate">{statusMeta.label}</span>
+    <div className="flex justify-between items-start gap-2 mb-3">
+      <div className="flex items-center gap-2 flex-wrap min-w-0">
+        <span className="px-2 py-1 bg-slate-800 text-white text-xs font-bold rounded-md shadow-sm">
+          #{String(index + 1).padStart(2, '0')}
+        </span>
+        <span className={`px-2 py-1 text-[10px] uppercase tracking-wider font-bold rounded-md whitespace-nowrap border ${statusMeta.className}`}>
+          {statusMeta.label}
+        </span>
       </div>
-      <span className={`text-xs px-2 py-1 rounded-md font-semibold ${isLate ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}`}>
+      <span className={`px-2 py-1 text-xs font-bold rounded-md shrink-0 whitespace-nowrap border ${isLate ? 'bg-red-100 text-red-700 border-red-200' : 'bg-emerald-100 text-emerald-700 border-emerald-200'}`}>
         {elapsedLabel}
       </span>
     </div>
 
     <div>
-      <p className="font-bold text-lg text-slate-900 truncate">{order.customerName || order.name || 'Cliente'}</p>
-      <div className="flex items-center gap-2 text-sm text-slate-500 mt-1">
+      <h3 className="text-base font-bold text-slate-900 line-clamp-1">{order.customerName || order.name || 'Cliente'}</h3>
+      <div className="flex items-center gap-2 text-xs text-slate-500 font-medium mt-1">
         <span className="inline-flex items-center gap-1">
           {typeMeta.icon}
           <span>{typeMeta.label}</span>
@@ -1169,7 +1173,7 @@ export const GrillQueue = () => {
                 <OrderSummaryCard
                   key={`summary-${order.id}`}
                   order={order}
-                  orderCode={formatOrderDisplayId(order.id, storeSlug)}
+                  index={index}
                   isLate={isLate}
                   elapsedLabel={elapsedTime[order.id] || "0s"}
                   statusMeta={statusMeta}
