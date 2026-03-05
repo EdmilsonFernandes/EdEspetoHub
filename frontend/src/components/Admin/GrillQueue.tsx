@@ -39,7 +39,6 @@ import { buildPixPayload } from "../../utils/pixPayload";
 const OrderSummaryCard = ({
   order,
   orderCode,
-  index,
   isLate,
   elapsedLabel,
   statusMeta,
@@ -52,35 +51,33 @@ const OrderSummaryCard = ({
   <button
     type="button"
     onClick={onClick}
-    className="w-full rounded-xl border border-slate-200 bg-white p-4 text-left shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5 cursor-pointer"
+    className="w-full rounded-xl border border-slate-200 bg-white p-4 text-left flex flex-col gap-3 transition-all hover:border-slate-300 hover:shadow-sm cursor-pointer"
   >
-    <div className="flex items-center justify-between gap-2">
-      <div className="flex items-center gap-2">
-        <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${index === 0 ? 'bg-orange-500 text-white' : 'bg-orange-100 text-orange-700'}`}>
-          #{String(index + 1).padStart(2, '0')}
-        </span>
-        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${statusMeta.className}`}>{statusMeta.label}</span>
+    <div className="flex justify-between items-start gap-2">
+      <div className="flex items-center gap-2 min-w-0">
+        <span className="text-sm font-bold text-slate-400">#{orderCode}</span>
+        <span className="text-xs font-medium text-slate-500 truncate">{statusMeta.label}</span>
       </div>
-      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${isLate ? 'bg-rose-100 text-rose-700 border-rose-200' : 'bg-emerald-100 text-emerald-700 border-emerald-200'}`}>
+      <span className={`text-xs px-2 py-1 rounded-md font-semibold ${isLate ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}`}>
         {elapsedLabel}
       </span>
     </div>
 
-    <div className="mt-3">
-      <p className="text-[11px] font-semibold text-slate-500">Pedido #{orderCode}</p>
+    <div>
       <p className="font-bold text-lg text-slate-900 truncate">{order.customerName || order.name || 'Cliente'}</p>
-      <div className="mt-1 flex items-center gap-2 flex-wrap">
-        <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-[0.16em] ${typeMeta.pill}`}>
+      <div className="flex items-center gap-2 text-sm text-slate-500 mt-1">
+        <span className="inline-flex items-center gap-1">
           {typeMeta.icon}
-          {typeMeta.label}
+          <span>{typeMeta.label}</span>
         </span>
-        <span className="text-xs text-slate-500 font-semibold">{paymentLabel}</span>
+        <span className="text-slate-300">•</span>
+        <span>{paymentLabel}</span>
       </div>
     </div>
 
-    <div className="mt-3 border-t border-slate-100 pt-2 flex items-center justify-between text-xs text-slate-600 font-semibold">
-      <span>{itemsCount} {itemsCount === 1 ? 'item' : 'itens'}</span>
-      <span className="text-slate-900 font-black">{totalLabel}</span>
+    <div className="border-t border-slate-100 pt-3 mt-1 flex justify-between items-center">
+      <span className="text-sm text-slate-500">{itemsCount} {itemsCount === 1 ? 'item' : 'itens'}</span>
+      <span className="text-sm font-semibold text-slate-900">{totalLabel}</span>
     </div>
   </button>
 );
@@ -1172,7 +1169,6 @@ export const GrillQueue = () => {
                   key={`summary-${order.id}`}
                   order={order}
                   orderCode={formatOrderDisplayId(order.id, storeSlug)}
-                  index={index}
                   isLate={isLate}
                   elapsedLabel={elapsedTime[order.id] || "0s"}
                   statusMeta={statusMeta}
