@@ -1265,6 +1265,20 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     }),
     []
   );
+  const openQueueMonitor = React.useCallback(
+    (options?: { replace?: boolean }) => {
+      const isDashboard = location.pathname === '/admin/dashboard';
+      if (isDashboard) {
+        setActiveTab('fila');
+        setNotificationsOpen(false);
+        setCommandOpen(false);
+        setMobileDrawerOpen(false);
+        return;
+      }
+      navigate('/admin/queue', { replace: Boolean(options?.replace) });
+    },
+    [location.pathname, navigate]
+  );
   const commandActions = useMemo(() => {
     const items = [
       ...desktopTabItems
@@ -1275,7 +1289,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
           description: tabMeta[item.id]?.subtitle || 'Abrir seção',
           run: () => {
             if (item.id === 'fila') {
-              navigate('/admin/queue');
+              openQueueMonitor();
               return;
             }
             setActiveTab(item.id as typeof activeTab);
@@ -1294,7 +1308,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         id: 'go-queue',
         label: 'Abrir operação',
         description: 'Acessa a central de operação dos pedidos.',
-        run: () => navigate('/admin/queue'),
+        run: () => openQueueMonitor(),
       },
       {
         id: 'go-renewal',
@@ -1304,7 +1318,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       },
     ];
     return items;
-  }, [desktopTabItems, tabMeta, storeSlug, navigate]);
+  }, [desktopTabItems, tabMeta, storeSlug, navigate, openQueueMonitor]);
   const filteredCommandActions = useMemo(() => {
     const q = commandQuery.trim().toLowerCase();
     if (!q) return commandActions;
@@ -1418,9 +1432,9 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   }, [storeId, canUseDeliveryReviewsAndTips]);
   useEffect(() => {
     if ((location.state as any)?.activeTab === 'fila') {
-      navigate('/admin/queue', { replace: true });
+      openQueueMonitor({ replace: true });
     }
-  }, [location.state, navigate]);
+  }, [location.state, openQueueMonitor]);
   const [savingBranding, setSavingBranding] = useState(false);
   const [configPanels, setConfigPanels] = useState({
     branding: true,
@@ -1565,7 +1579,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         generatedAt: oldestPendingTs,
         tone: 'warning',
         actionLabel: 'Abrir operação',
-        action: () => navigate('/admin/queue'),
+        action: () => openQueueMonitor(),
       });
     }
     if (readyOrders > 0) {
@@ -1582,7 +1596,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         generatedAt: oldestReadyTs,
         tone: 'info',
         actionLabel: 'Abrir operação',
-        action: () => navigate('/admin/queue'),
+        action: () => openQueueMonitor(),
       });
     }
     if (pendingMotoboyRequests > 0) {
@@ -1665,6 +1679,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     isVip,
     paymentsHistory,
     navigate,
+    openQueueMonitor,
   ]);
   const activeNotifications = useMemo(() => {
     const filtered = headerNotifications.filter((note) => !dismissedNotificationKeys.includes(note.key));
@@ -2079,7 +2094,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       return;
     }
     if (id === 'fila') {
-      navigate('/admin/queue');
+    openQueueMonitor();
       return;
     }
     if (id === 'motoboys' && !canUseMotoboys) {

@@ -168,18 +168,18 @@ export function LandingPage() {
                 alt="Já no Caminho"
                 className="w-full h-52 sm:h-60 rounded-2xl bg-slate-950 object-contain p-2"
               />
-              <div className="grid grid-cols-3 gap-2 mt-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-4">
                 <div className="rounded-xl border border-white/25 bg-white/10 backdrop-blur-md p-3">
                   <p className="text-[11px] text-slate-300 uppercase tracking-[0.2em]">Lojas ativas</p>
-                  <p className="text-lg font-black text-white">{metrics?.activeStores ?? '-'}</p>
+                  <p className="text-base sm:text-lg font-black text-white leading-tight">{metrics?.activeStores ?? '-'}</p>
                 </div>
                 <div className="rounded-xl border border-white/25 bg-white/10 backdrop-blur-md p-3">
                   <p className="text-[11px] text-slate-300 uppercase tracking-[0.2em]">Pedidos processados</p>
-                  <p className="text-lg font-black text-white">{metrics?.totalOrders ?? '-'}</p>
+                  <p className="text-base sm:text-lg font-black text-white leading-tight">{metrics?.totalOrders ?? '-'}</p>
                 </div>
-                <div className="rounded-xl border border-emerald-300/35 bg-emerald-400/10 backdrop-blur-md p-3">
+                <div className="col-span-2 sm:col-span-1 rounded-xl border border-emerald-300/35 bg-emerald-400/10 backdrop-blur-md p-3">
                   <p className="text-[11px] text-emerald-200 uppercase tracking-[0.2em]">Receita pública</p>
-                  <p className="text-lg font-black text-emerald-100">
+                  <p className="text-base sm:text-lg font-black text-emerald-100 leading-tight">
                     {metrics ? formatCurrency(metrics.totalRevenue || 0) : '-'}
                   </p>
                 </div>
