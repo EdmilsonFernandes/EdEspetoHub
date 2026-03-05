@@ -17,7 +17,7 @@ import { LandingPageLayout } from '../layouts/LandingPageLayout';
 import { platformService } from '../services/platformService';
 import { storeService } from '../services/storeService';
 import { formatCurrency } from '../utils/format';
-import { resolveAssetUrl } from '../utils/resolveAssetUrl';
+import { SocialProofMarquee } from '../components/Landing/SocialProofMarquee';
 
 const upsertMeta = (name: string, content: string, attr: 'name' | 'property' = 'name') => {
   if (typeof document === 'undefined') return;
@@ -189,46 +189,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      {featuredStores.length > 0 && (
-        <section className="relative overflow-hidden bg-[linear-gradient(145deg,#050b16_0%,#0f172a_50%,#111827_100%)] pb-8 sm:pb-10">
-          <div className="max-w-7xl mx-auto px-4 relative">
-            <p className="text-slate-400 text-sm uppercase tracking-widest text-center">
-              Quem já vende todos os dias com o Já no Caminho
-            </p>
-
-            <div className="relative mt-4">
-              <div
-                className="flex gap-3 overflow-x-auto py-1 pr-2 no-scrollbar [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-                style={{ maskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)' }}
-              >
-                {featuredStores.map((store) => (
-                  <a
-                    key={store.id}
-                    href={`/${store.slug}`}
-                    className="shrink-0 inline-flex items-center gap-2.5 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 px-3 py-2 text-slate-200 font-medium hover:bg-white/10 hover:scale-105 transition-all cursor-pointer"
-                  >
-                    <span className="w-10 h-10 rounded-full overflow-hidden bg-white/10 border border-white/10 grid place-items-center">
-                      {store.logoUrl ? (
-                        <img
-                          src={resolveAssetUrl(store.logoUrl)}
-                          alt={store.name}
-                          className="w-full h-full object-cover"
-                          loading="lazy"
-                        />
-                      ) : (
-                        <Storefront size={18} weight="duotone" className="text-slate-300" />
-                      )}
-                    </span>
-                    <span className="text-sm whitespace-nowrap">{store.name}</span>
-                  </a>
-                ))}
-              </div>
-              <div className="pointer-events-none absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-[#0f172a] to-transparent" />
-              <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-[#0f172a] to-transparent" />
-            </div>
-          </div>
-        </section>
-      )}
+      {featuredStores.length > 0 && <SocialProofMarquee clients={featuredStores} />}
 
       <section className="bg-white py-14 sm:py-16">
         <div className="max-w-7xl mx-auto px-4">

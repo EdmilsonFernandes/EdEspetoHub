@@ -166,6 +166,15 @@ body {
   100% { transform: translateX(240%) skewX(-18deg); opacity: 0; }
 }
 
+@keyframes clientMarquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
 /* Utility classes */
 .animate-flame {
   animation: flame 3s ease-in-out infinite;
@@ -197,6 +206,27 @@ body {
 
 .status-blink {
   animation: statusBlink 1.2s ease-in-out infinite;
+}
+
+.client-marquee-track {
+  animation: clientMarquee 32s linear infinite;
+  will-change: transform;
+}
+
+.client-marquee-track:hover {
+  animation-play-state: paused;
+}
+
+@media (max-width: 640px) {
+  .client-marquee-track {
+    animation-duration: 24s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .client-marquee-track {
+    animation: none;
+  }
 }
 
 @layer utilities {
