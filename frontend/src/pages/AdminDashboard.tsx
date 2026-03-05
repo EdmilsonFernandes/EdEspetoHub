@@ -2256,6 +2256,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         </aside>
 
         <div className="min-w-0 space-y-4">
+      {activeTab !== 'fila' && (
       <section className="hidden md:flex relative z-[220] items-start justify-between gap-4 rounded-2xl border border-slate-200 bg-white/90 backdrop-blur-sm px-4 py-3 shadow-[0_20px_45px_-36px_rgba(15,23,42,0.5)] overflow-visible">
         <div className="min-w-0">
           <p className="text-[10px] uppercase tracking-[0.24em] font-bold text-slate-400">Workspace</p>
@@ -2390,6 +2391,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
           </button>
         </div>
       </section>
+      )}
 
       {activeTab === 'resumo' && (
         <div className="space-y-4">

@@ -989,13 +989,13 @@ export const GrillQueue = () => {
   );
 
   return (
-    <div className={tvMode ? "space-y-6 rounded-3xl bg-slate-900/95 p-4 sm:p-6 text-white" : "space-y-5"}>
+    <div className={tvMode ? "space-y-6 rounded-3xl bg-slate-900/95 p-4 sm:p-6 text-white" : "space-y-3"}>
       <style>{`
         @keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
         @keyframes drawerIn{0%{transform:translateX(100%)}100%{transform:translateX(0)}}
       `}</style>
       <div className={`${tvMode ? "" : "rounded-2xl border border-slate-200 bg-white px-3 py-3"}`}>
-        <div className="flex flex-col gap-4 mb-6 border-b border-slate-100 pb-4">
+        <div className="flex flex-col gap-3 mb-3 border-b border-slate-100 pb-3">
           {!tvMode ? (
             <>
               <div className="flex justify-between items-center w-full gap-3 flex-wrap">
@@ -1150,22 +1150,35 @@ export const GrillQueue = () => {
       {activeTab === 'queue' && (
         <div className="space-y-3">
           {awaitingMotoboyQueue.length > 0 && (
-            <div className="rounded-2xl border border-indigo-200 bg-indigo-50/70 p-3">
+            <div className="rounded-xl border-2 border-dashed border-indigo-200 bg-indigo-50/30 p-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-xs font-bold uppercase tracking-[0.16em] text-indigo-800">Aguardando motoboy</p>
+                <p className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.14em] text-indigo-900">
+                  <Truck size={14} weight="duotone" />
+                  Aguardando Coleta / Motoboy
+                </p>
                 <span className="rounded-full border border-indigo-200 bg-white px-2.5 py-1 text-[11px] font-bold text-indigo-700">
                   {awaitingMotoboyQueue.length} pedido(s)
                 </span>
               </div>
-              <div className="mt-2 grid grid-cols-1 gap-2 md:grid-cols-2">
-                {awaitingMotoboyQueue.map((order) => (
-                  <div key={`awaiting-${order.id}`} className="rounded-xl border border-indigo-200 bg-white px-3 py-2">
-                    <p className="text-xs font-bold text-slate-800">
-                      Pedido #{formatOrderDisplayId(order.id, storeSlug)} • {order.customerName || 'Cliente'}
-                    </p>
-                    <p className="mt-0.5 text-[11px] text-slate-500">
+              <div className="mt-2 space-y-1.5">
+                {awaitingMotoboyQueue.map((order, idx) => (
+                  <div
+                    key={`awaiting-${order.id}`}
+                    className={`flex flex-wrap items-center gap-x-2 gap-y-0.5 rounded-lg px-2.5 py-1.5 text-[12px] font-medium ${
+                      idx % 2 === 0 ? 'bg-white/75' : 'bg-indigo-100/35'
+                    }`}
+                  >
+                    <span className="font-extrabold text-indigo-800">
+                      #{formatOrderDisplayId(order.id, storeSlug)}
+                    </span>
+                    <span className="text-indigo-300">•</span>
+                    <span className="text-indigo-900 truncate max-w-[240px]">
+                      {order.customerName || 'Cliente'}
+                    </span>
+                    <span className="text-indigo-300">•</span>
+                    <span className="text-indigo-700">
                       Pronto há {formatDuration(order.createdAt ? Date.now() - new Date(order.createdAt).getTime() : 0)}
-                    </p>
+                    </span>
                   </div>
                 ))}
               </div>
@@ -1214,12 +1227,12 @@ export const GrillQueue = () => {
             </div>
           )}
           {isDrawerOpen && createPortal(
-            <div className="fixed inset-0 z-[100] overflow-hidden">
+            <div className="fixed inset-0 z-[9999] overflow-hidden">
               <div
-                className="fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-sm transition-opacity"
+                className="fixed inset-0 z-[9999] bg-slate-900/40 backdrop-blur-sm transition-opacity"
                 onClick={closeOrderOverlays}
               />
-              <div className="fixed right-0 top-0 h-full w-full md:w-[450px] z-[110] bg-white shadow-2xl flex flex-col animate-[drawerIn_220ms_ease-out]">
+              <div className="fixed right-0 top-0 h-full w-full md:w-[450px] z-[10000] bg-white shadow-2xl flex flex-col animate-[drawerIn_220ms_ease-out]">
                 <div className="shrink-0 flex justify-between items-center px-4 py-3 border-b border-slate-200 bg-white">
                   <p className="text-sm font-bold text-slate-900">Detalhes do pedido</p>
                   <button
