@@ -67,13 +67,13 @@ const OrderSummaryCard = ({
           {statusMeta.label}
         </span>
       </div>
-      <span className={`px-2 py-1 text-xs font-bold rounded-md shrink-0 whitespace-nowrap border ${isLate ? 'bg-red-100 text-red-700 border-red-200' : 'bg-emerald-100 text-emerald-700 border-emerald-200'}`}>
+      <span className={`px-2 py-1 text-xs font-bold font-mono rounded-md shrink-0 whitespace-nowrap border ${isLate ? 'bg-red-100 text-red-700 border-red-200' : 'bg-emerald-100 text-emerald-700 border-emerald-200'}`}>
         {elapsedLabel}
       </span>
     </div>
 
     <div>
-      <h3 className="text-base font-bold text-slate-900 line-clamp-1">{order.customerName || order.name || 'Cliente'}</h3>
+      <h3 className="text-lg font-black text-slate-800 line-clamp-1">{order.customerName || order.name || 'Cliente'}</h3>
       <p className="mt-1 text-[11px] font-semibold text-slate-500">Pedido #{orderDisplayId}</p>
       <div className="flex items-center gap-2 text-xs text-slate-500 font-medium mt-1">
         <span className="inline-flex items-center gap-1">
@@ -86,7 +86,7 @@ const OrderSummaryCard = ({
     </div>
 
     <div className="border-t border-slate-100 pt-3 mt-1 flex justify-between items-center">
-      <span className="bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full text-[11px] font-bold border border-indigo-100">
+      <span className="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-lg text-[11px] font-bold border border-indigo-100">
         {itemsCount} {itemsCount === 1 ? 'item' : 'itens'}
       </span>
       <span className="text-sm font-bold text-slate-900">{totalLabel}</span>
@@ -1171,7 +1171,7 @@ export const GrillQueue = () => {
                 {awaitingMotoboyQueue.map((order, idx) => (
                   <div
                     key={`awaiting-${order.id}`}
-                    className={`flex flex-wrap items-center gap-x-2 gap-y-0.5 rounded-lg px-2.5 py-1.5 text-[12px] font-medium ${
+                    className={`flex flex-wrap items-center gap-x-2 gap-y-0.5 rounded-lg px-2.5 py-1.5 text-[12px] font-medium shadow-sm ${
                       idx % 2 === 0 ? 'bg-white/75' : 'bg-indigo-100/35'
                     }`}
                   >
@@ -1191,7 +1191,7 @@ export const GrillQueue = () => {
               </div>
             </div>
           )}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 px-1 sm:px-0">
             {filteredProductionQueue.map((order, index) => {
               const orderAgeMs = order?.createdAt ? Date.now() - new Date(order.createdAt).getTime() : 0;
               const isLate = orderAgeMs > PREP_SLA_MS;

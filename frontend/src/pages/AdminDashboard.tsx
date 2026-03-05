@@ -2742,10 +2742,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
         {activeTab === 'fila' && (
           <FormSection
-            title="Central de Pedidos"
-            subtitle="Operação em tempo real dos pedidos da loja."
+            title="Operação"
+            subtitle="Monitor de pedidos em tempo real."
             variant="neutral"
-            className="bg-white premium-card"
+            className="bg-white premium-card !p-4 sm:!p-4 lg:!p-5"
           >
             <GrillQueue />
           </FormSection>
