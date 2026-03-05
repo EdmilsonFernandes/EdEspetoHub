@@ -177,6 +177,13 @@ export const GrillQueue = () => {
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
   const previousIdsRef = useRef<string[]>([]);
   const audioContextRef = useRef<AudioContext | null>(null);
+  const isDrawerOpen = selectedOrder !== null;
+  const isPaymentModalOpen = confirmModal !== null;
+
+  const closeOrderOverlays = () => {
+    setConfirmModal(null);
+    setSelectedOrder(null);
+  };
 
   const orderTypeMeta = (order: any) => {
     const type = String(order?.type || '').toLowerCase();
@@ -578,8 +585,7 @@ export const GrillQueue = () => {
     if (!confirmModal?.id) return;
     const success = await handleAdvance(confirmModal.id, 'done');
     if (success) {
-      setConfirmModal(null);
-      setSelectedOrder(null);
+      closeOrderOverlays();
     }
   };
 
@@ -770,7 +776,7 @@ export const GrillQueue = () => {
 
   useEffect(() => {
     if (activeTab !== 'queue') {
-      setSelectedOrder(null);
+      closeOrderOverlays();
     }
   }, [activeTab]);
 
@@ -778,7 +784,7 @@ export const GrillQueue = () => {
     if (!selectedOrder) return;
     const latest = filteredProductionQueue.find((order) => order.id === selectedOrder.id);
     if (!latest) {
-      setSelectedOrder(null);
+      closeOrderOverlays();
       return;
     }
     if (latest !== selectedOrder) {
@@ -1222,9 +1228,10 @@ export const GrillQueue = () => {
               </div>
             </div>
           )}
+          {isDrawerOpen && (
           <OrderDetailsDrawer
-            open={Boolean(selectedOrder)}
-            onClose={() => setSelectedOrder(null)}
+            open={isDrawerOpen}
+            onClose={closeOrderOverlays}
             footer={selectedOrder ? renderOrderFooterActions(selectedOrder) : null}
           >
           <div
@@ -1495,10 +1502,11 @@ export const GrillQueue = () => {
 
           </div>
           </OrderDetailsDrawer>
+          )}
         </div>
       )}
 
-      {confirmModal && (
+      {isPaymentModalOpen && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/50 px-4">
           <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-slate-200">
             {(() => {
@@ -1536,7 +1544,7 @@ export const GrillQueue = () => {
               </div>
               <button
                 type="button"
-                onClick={() => setConfirmModal(null)}
+                onClick={closeOrderOverlays}
                 className="text-slate-400 hover:text-slate-600 transition-all hover:-translate-y-0.5 active:scale-95"
               >
                 <X size={18} weight="duotone" />
@@ -1675,7 +1683,7 @@ export const GrillQueue = () => {
             <div className="mt-6 flex flex-col sm:flex-row gap-2">
               <button
                 type="button"
-                onClick={() => setConfirmModal(null)}
+                onClick={closeOrderOverlays}
                 className="w-full sm:w-auto px-4 py-2 rounded-lg border border-slate-200 text-slate-600 text-sm font-semibold hover:bg-slate-50 transition-all hover:-translate-y-0.5 active:scale-95"
               >
                 Voltar
