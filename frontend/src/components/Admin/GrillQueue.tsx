@@ -4,7 +4,6 @@ import { createPortal } from "react-dom";
 import {
   CheckSquare,
   Clock,
-  ChefHat,
   Monitor,
   ArrowsClockwise,
   Plus,
@@ -1006,27 +1005,30 @@ export const GrillQueue = () => {
   return (
     <div className={tvMode ? "space-y-6 rounded-3xl bg-slate-900/95 p-4 sm:p-6 text-white" : "space-y-5"}>
       <style>{`@keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}`}</style>
-      {/* Header */}
-      <div className={`flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between ${tvMode ? "" : "rounded-2xl border border-slate-200 bg-white px-3 py-3"}`}>
-        <div className={`flex flex-wrap items-center gap-2 font-semibold ${tvMode ? "text-white" : "text-slate-800"}`}>
-          <ChefHat className={tvMode ? "text-white" : "text-brand-primary"} weight="duotone" />
-          Central de Pedidos
-          <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${tvMode ? "bg-white/15 text-white" : "bg-orange-100 text-orange-700 border border-orange-200"}`}>
-            {productionQueue.length} em produção
-          </span>
-          {!tvMode && (
-            <p className="text-[12px] font-medium text-slate-500">
-              Pendentes {queueMetrics.pending} • Em atendimento {queueMetrics.preparing} • Prontos {queueMetrics.ready} • Atrasados {queueMetrics.late} • Aguardando motoboy {awaitingMotoboyQueue.length} • Atenção {prepAttentionMinutes}min • SLA alvo {prepSlaMinutes}min • Mais antigo {formatDuration(queueMetrics.oldest)}
-            </p>
-          )}
-          {tvMode && (
-            <span className="flex items-center gap-2 text-xs font-semibold text-white/70">
-              <Clock size={14} weight="duotone" />
-              {new Date(currentTime).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+      <div className={`${tvMode ? "" : "rounded-2xl border border-slate-200 bg-white px-3 py-3"}`}>
+        <div className="flex flex-col gap-3 border-b border-slate-100 pb-4 mb-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-2">
+            <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${tvMode ? "bg-white/15 text-white" : "bg-orange-100 text-orange-700 border border-orange-200"}`}>
+              {productionQueue.length} em produção
             </span>
-          )}
-        </div>
-        <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2">
+            {tvMode && (
+              <span className="flex items-center gap-2 text-xs font-semibold text-white/70">
+                <Clock size={14} weight="duotone" />
+                {new Date(currentTime).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+              </span>
+            )}
+          </div>
+          <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 sm:justify-end">
+            {!tvMode && (
+              <>
+                <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-700">
+                  SLA alvo {prepSlaMinutes}min
+                </span>
+                <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-700">
+                  Mais antigo {formatDuration(queueMetrics.oldest)}
+                </span>
+              </>
+            )}
           {!tvMode && (
             <div className="flex flex-wrap gap-2 order-2 sm:order-none">
               {[
@@ -1128,25 +1130,28 @@ export const GrillQueue = () => {
               </div>
             )}
           </div>
+          </div>
         </div>
       </div>
 
       {!tvMode && activeTab === 'queue' && (
         <div className="grid grid-cols-2 xl:grid-cols-5 gap-2">
           {[
-            { id: 'all', label: 'Todos', value: productionQueue.length, tone: 'border-slate-200 bg-white text-slate-700' },
-            { id: 'pending', label: 'Pendentes', value: queueMetrics.pending, tone: 'border-amber-200 bg-amber-50 text-amber-700' },
-            { id: 'preparing', label: 'Em atendimento', value: queueMetrics.preparing, tone: 'border-sky-200 bg-sky-50 text-sky-700' },
-            { id: 'ready', label: 'Prontos', value: queueMetrics.ready, tone: 'border-violet-200 bg-violet-50 text-violet-700' },
-            { id: 'late', label: 'Atrasados', value: queueMetrics.late, tone: 'border-rose-200 bg-rose-50 text-rose-700' },
+            { id: 'all', label: 'Todos', value: productionQueue.length, activeTone: 'bg-slate-100 text-slate-800' },
+            { id: 'pending', label: 'Pendentes', value: queueMetrics.pending, activeTone: 'bg-amber-50 text-amber-700' },
+            { id: 'preparing', label: 'Em atendimento', value: queueMetrics.preparing, activeTone: 'bg-sky-50 text-sky-700' },
+            { id: 'ready', label: 'Prontos', value: queueMetrics.ready, activeTone: 'bg-violet-50 text-violet-700' },
+            { id: 'late', label: 'Atrasados', value: queueMetrics.late, activeTone: 'bg-rose-50 text-rose-700' },
           ].map((kpi) => (
             <button
               key={kpi.id}
               type="button"
               onClick={() => setQueueFilter(kpi.id as any)}
-              className={`rounded-xl border px-3 py-2 text-left transition hover:-translate-y-0.5 ${
-                queueFilter === kpi.id ? 'ring-2 ring-brand-primary/25' : ''
-              } ${kpi.tone}`}
+              className={`rounded-lg px-3 py-2 text-left transition-all ${
+                queueFilter === kpi.id
+                  ? `${kpi.activeTone} shadow-sm`
+                  : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
+              }`}
             >
               <p className="text-[10px] uppercase tracking-[0.14em] font-bold opacity-80">{kpi.label}</p>
               <p className="text-lg font-black leading-tight">{kpi.value}</p>
