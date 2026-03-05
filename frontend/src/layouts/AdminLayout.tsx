@@ -1,7 +1,6 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
 import { AdminHeader } from '../components/Admin/AdminHeader';
-import { CaretDown } from '@phosphor-icons/react';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -19,17 +18,6 @@ export function AdminLayout({
     const stored = localStorage.getItem('adminHeader:visible');
     return stored ? stored === 'true' : true;
   });
-  const storeSlug = useMemo(() => {
-    if (typeof window === 'undefined') return '';
-    try {
-      const raw = localStorage.getItem('adminSession');
-      if (!raw) return '';
-      const parsed = JSON.parse(raw);
-      return parsed?.store?.slug || '';
-    } catch (error) {
-      return '';
-    }
-  }, []);
   const handleToggleHeader = () => {
     setHeaderVisible((prev) => {
       const next = !prev;
@@ -63,41 +51,6 @@ export function AdminLayout({
       <div className="w-full max-w-[1560px] mx-auto px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-4 xl:px-8 space-y-3 sm:space-y-4">
         {shouldShowHeader && (
           <AdminHeader contextLabel={contextLabel} onToggleHeader={handleToggleHeader} />
-        )}
-        {!shouldShowHeader && showHeader && (
-          <div className="sticky top-3 z-10">
-            <div className="mx-auto max-w-md bg-white/90 backdrop-blur rounded-full border border-slate-200 shadow-md px-3 py-2 flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
-                <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                Modo cozinha ativo
-              </div>
-              <div className="flex items-center rounded-full bg-slate-100 border border-slate-200 p-0.5 text-[11px] font-semibold">
-                <button
-                  type="button"
-                  className="px-3 py-1.5 rounded-full bg-slate-900 text-white shadow-sm"
-                  title="Modo foco da fila"
-                >
-                  Fila compacta
-                </button>
-                {storeSlug && (
-                  <a
-                    href={`/${storeSlug}`}
-                    className="px-3 py-1.5 rounded-full bg-white text-slate-900 border border-slate-200 shadow-sm hover:shadow-md transition"
-                  >
-                    Vitrine
-                  </a>
-                )}
-                <button
-                  type="button"
-                  onClick={handleToggleHeader}
-                  className="px-3 py-1.5 rounded-full text-slate-600 hover:bg-white transition flex items-center gap-1.5"
-                >
-                  <CaretDown size={14} weight="duotone" className="rotate-180" />
-                  Mostrar painel
-                </button>
-              </div>
-            </div>
-          </div>
         )}
         {children}
       </div>
