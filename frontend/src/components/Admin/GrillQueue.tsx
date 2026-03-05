@@ -554,10 +554,12 @@ export const GrillQueue = () => {
       );
       await orderService.updateStatus(orderId, status);
       await loadQueue();
+      return true;
     } catch (err) {
       console.error('Erro ao atualizar status', err);
       setQueue(previousQueue);
       setError('Não foi possível atualizar o status agora. Tente novamente.');
+      return false;
     } finally {
       setUpdating(null);
     }
@@ -583,8 +585,11 @@ export const GrillQueue = () => {
 
   const handleConfirmPaid = async () => {
     if (!confirmModal?.id) return;
-    await handleAdvance(confirmModal.id, 'done');
-    setConfirmModal(null);
+    const success = await handleAdvance(confirmModal.id, 'done');
+    if (success) {
+      setConfirmModal(null);
+      setSelectedOrder(null);
+    }
   };
 
   const applyItemsChange = async (orderId, updater) => {
