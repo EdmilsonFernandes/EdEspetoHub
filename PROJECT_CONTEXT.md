@@ -1,6 +1,6 @@
 ﻿# PROJECT CONTEXT - EdEspetoHub
 
-Atualizado em: 2026-03-04
+Atualizado em: 2026-03-05
 
 ## Objetivo do produto
 Plataforma de pedidos "like app" para restaurantes (estilo iFood), com:
@@ -15,47 +15,55 @@ Plataforma de pedidos "like app" para restaurantes (estilo iFood), com:
 - Infra: Docker + Nginx + EC2
 
 ## Principais mudancas recentes (ja em `main`)
-0. Ajuste de tracking por tipo de pedido
+0. Admin UX premium (2026-03-05)
+- Header admin evoluido para visual premium minimalista com identidade dinamica da loja.
+- Bloco da loja com banner/cor principal, overlay para contraste e transicao fade para lado branco.
+- Badge de plano virou trigger de popover com dados de assinatura e CTA de gerenciamento.
+- Dropdown do avatar concentra acao de logout no desktop.
+- Command Palette (Ctrl+K) limpa com remocao definitiva de "Resumo/Resumo executivo".
+- Atalho textual no dashboard ajustado para "Monitor de pedidos".
+
+1. Ajuste de tracking por tipo de pedido
 - `OrderTracking`: "previsão de entrega/chegada" agora só aparece para `delivery`.
 - Para `pickup/table`: copy ajustada para "previsão de preparo" / "pronto por volta de".
 
-1. Mobile/admin UX fixes
+2. Mobile/admin UX fixes
 - Modal de produto no admin com botoes salvar/cancelar visiveis no mobile.
 - Ajustes de telas de entregadores/vinculos para layout like-app.
 
-2. Checkout telefone (DDD)
+3. Checkout telefone (DDD)
 - Combo de DDD Brasil adicionado.
 - Depois removido default forcado `12`.
 - Correcao de colar numero completo para aplicar DDD na primeira tentativa.
 
-3. Adicionais de produto (core feature)
+4. Adicionais de produto (core feature)
 - Produto agora suporta adicionais pagos (modifiers) com quantidade.
 - Preco final = preco base + adicionais selecionados.
 - Refletido em carrinho, pedido, admin, fila, tracking, motoboy.
 - Validacao e normalizacao no backend/frontend.
 
-4. Exibicao de adicionais
+5. Exibicao de adicionais
 - Cardapio/modal: selecao por `+/-`.
 - Lista de pedidos/admin/fila/tracking: adicionais visiveis.
 - Carrinho: resumo de adicionais no valor.
 
-5. Pedidos recentes (cliente)
+6. Pedidos recentes (cliente)
 - Mantem ultimos 3 pedidos no storage.
 - TTL de 24h.
 - Mostra apenas pedidos que realmente existem no backend.
 
-6. Melhorias visuais (like app)
+7. Melhorias visuais (like app)
 - Cardapio com hierarquia visual mais forte.
 - Modal de item com CTA sticky e controles mais intuitivos.
 - Timeline de acompanhamento de pedido mais visual.
 - Lista de pedidos (admin/dashboard) com bloco claro: Itens | Frete | Total.
 
-7. Estabilidade runtime
+8. Estabilidade runtime
 - Correcoes no `AdminDashboard` (listeners/guard redundante).
 - Remocao de wrappers/guards duplicados causando possivel travamento.
 - Normalizacao de endereco para evitar crash React quando endereco vem como objeto.
 
-8. Premium UI rollout (marco de 2026-03-04)
+9. Premium UI rollout (marco de 2026-03-04)
 - Landing: secao de prova social ("lojas em destaque").
 - Catalogo: barra de categorias sticky + bottom-sheet, busca premium, cards refinados.
 - Checkout: limpeza visual mobile e CTA fixo premium, menos ruido.
@@ -63,6 +71,14 @@ Plataforma de pedidos "like app" para restaurantes (estilo iFood), com:
 - Branding: "Desenvolvido por" e logo oficial Ja no Caminho em pontos principais.
 
 ## Commits de referencia (mais recentes)
+- `3c7dbf9` refactor(ui): premium floating store pill header and hard-remove resumo from command palette
+- `5d6d2c5` fix(ui): add smooth banner fade in admin header and remove resumo from command palette
+- `34373e6` refactor(admin-header): premium split layout with dynamic store banner/color identity
+- `7edad7a` chore(admin-dashboard): rename storefront shortcut to monitor de pedidos
+- `6954ffe` feat(admin-header): add dynamic accent color and subscription popover trigger
+- `04dd2a0` refactor(admin-header): premium minimal vercel-style header with lucide icons
+- `28e4552` fix(ui): prevent landing revenue truncation on mobile and normalize admin notification routing
+- `f19e42f` feat(landing): add premium mobile-first social proof marquee with gradient mask
 - `c91f6e7` fix(order-tracking): hide delivery forecast wording for pickup/table
 - `ae56073` style(onboarding): replace broken mobile stepper with connected minimalist progress line
 - `dea8331` style(onboarding): switch create-store to single-column clean layout and remove preview panel

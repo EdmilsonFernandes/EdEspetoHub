@@ -14,51 +14,58 @@ Este arquivo mantém o estado de trabalho para retomada rápida entre sessões.
 ---
 
 ## Snapshot atual
-- Data: 2026-03-04
+- Data: 2026-03-05
 - Branch: `main`
-- HEAD: `c91f6e7`
+- HEAD: `3c7dbf9`
 - Status local: limpo (sem alterações pendentes)
 
 ### Últimos commits
-1. `c91f6e7` fix(order-tracking): hide delivery forecast wording for pickup/table
-2. `ae56073` style(onboarding): replace broken mobile stepper with connected minimalist progress line
-3. `dea8331` style(onboarding): switch create-store to single-column clean layout and remove preview panel
-4. `d5d2abc` style(onboarding): premiumize create-store inputs, sticky nav bar and plan selection visuals
-5. `39a0f9e` style(branding): add Ja no Caminho logo to powered-by links and create-store header
-6. `2261502` fix(menu): use branding accentColor for dynamic add button theme
-7. `c0fb56a` feat(menu): make add button color inherit store secondary color with fallback
-8. `ddad8cc` feat(landing): add featured stores social proof strip below hero
+1. `3c7dbf9` refactor(ui): premium floating store pill header and hard-remove resumo from command palette
+2. `5d6d2c5` fix(ui): add smooth banner fade in admin header and remove resumo from command palette
+3. `34373e6` refactor(admin-header): premium split layout with dynamic store banner/color identity
+4. `7edad7a` chore(admin-dashboard): rename storefront shortcut to monitor de pedidos
+5. `6954ffe` feat(admin-header): add dynamic accent color and subscription popover trigger
+6. `04dd2a0` refactor(admin-header): premium minimal vercel-style header with lucide icons
+7. `28e4552` fix(ui): prevent landing revenue truncation on mobile and normalize admin notification routing
+8. `f19e42f` feat(landing): add premium mobile-first social proof marquee with gradient mask
 
 ### Estado funcional recente
-- `OrderTracking`: correção de texto/semântica de previsão:
-  - `delivery`: mantém “Previsão de entrega/chegada” e “Chega por volta de”.
-  - `pickup/table`: usa “Previsão de preparo” e “Pronto por volta de”.
-- Catálogo:
-  - botão de adicionar agora herda cor de identidade da loja (fallback seguro).
-  - barra de categorias sticky com contraste forte e ação de menu (bottom-sheet).
-  - melhorias de cards, busca, categorias e seção “mais pedidos”.
-- Checkout:
-  - limpeza visual premium mobile e remoção da dica de pagamento para ganhar tela.
+- Admin Header:
+  - refatorado para padrão premium minimalista.
+  - bloco de loja com identidade dinâmica (banner/cor principal).
+  - badge de plano com popover de assinatura.
+  - avatar com dropdown de usuário.
+- Ajuste fino visual:
+  - bloco da loja em formato pílula flutuante com transição fade para o lado branco.
+  - brilho sutil de topo no bloco da loja.
+- Command Palette (Ctrl+K):
+  - remoção definitiva de “Resumo/Resumo executivo” na origem dos dados + hard guard final.
+- Admin Dashboard:
+  - CTA textual alterado para “Monitor de pedidos”.
+  - navegação de notificações/atalhos para operação normalizada.
 - Landing:
-  - seção de prova social com lojas em destaque.
-- Onboarding/Criar loja:
-  - layout em coluna única.
-  - stepper mobile conectado sem scroll horizontal.
-  - refinos visuais de inputs, planos e navegação.
+  - social proof em marquee premium e correção de truncamento do KPI “Receita pública” no mobile.
+- Front feedback:
+  - popups nativos substituídos por toasts estilo app nos fluxos críticos.
 
 ### Atualização desta sessão
-- Data/Hora: 2026-03-04
+- Data/Hora: 2026-03-05
 - Resumo objetivo:
-  - Salvo e publicado o ajuste do `OrderTracking` para impedir comunicação de entrega em pedidos não-delivery.
-  - Mensagens ajustadas conforme tipo de pedido sem alterar regra de negócio.
+  - Conjunto de melhorias premium no admin e landing, com foco em consistência visual e fluxo operacional.
+  - Header administrativo remodelado com identidade de loja dinâmica e UX mais limpa.
+  - Command Palette limpa sem item de resumo.
 - Arquivos impactados:
-  - `frontend/src/pages/OrderTracking.tsx`
+  - `frontend/src/components/Admin/AdminHeader.tsx`
+  - `frontend/src/pages/AdminDashboard.tsx`
+  - `frontend/src/pages/LandingPage.tsx`
+  - `frontend/src/components/Landing/SocialProofMarquee.tsx`
+  - `frontend/src/index.css`
 - Commit:
-  - `c91f6e7` (push em `origin/main`)
+  - série até `3c7dbf9` (push em `origin/main`)
 - Validação:
   - `npm run build` em `frontend` passou.
 - Próximo passo:
-  - validar em produção os 3 fluxos: `delivery`, `pickup` e `table` no acompanhamento.
+  - smoke test final em produção do header/admin notifications e fluxo Ctrl+K.
 
 ### Observações operacionais (Git/Deploy)
 - Em alguns ambientes houve instabilidade com `ssh.github.com:443`.
