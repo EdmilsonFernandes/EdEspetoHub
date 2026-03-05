@@ -85,23 +85,15 @@ const OrderSummaryCard = ({
 );
 
 const OrderDetailsDrawer = ({ open, onClose, children, footer }: any) => {
+  if (!open) return null;
   return createPortal(
-    <div
-      className={`fixed inset-0 z-[999] flex justify-end overflow-hidden transition-opacity duration-300 ${
-        open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-      }`}
-      aria-hidden={!open}
-    >
+    <div className="fixed inset-0 z-[999] flex justify-end overflow-hidden" aria-hidden={!open}>
       <div
-        className={`absolute inset-0 z-[999] bg-black/50 backdrop-blur-sm transition-opacity duration-300 ${
-          open ? 'opacity-100' : 'opacity-0'
-        }`}
+        className="absolute inset-0 z-[999] bg-black/50 backdrop-blur-sm"
         onClick={onClose}
       />
       <aside
-        className={`relative z-[101] w-full h-full md:w-[450px] bg-white shadow-2xl flex flex-col transition-transform duration-300 ease-in-out ${
-          open ? 'translate-x-0' : 'translate-x-full'
-        }`}
+        className="relative z-[101] w-full h-full md:w-[450px] bg-white shadow-2xl flex flex-col transition-transform duration-300 ease-in-out translate-x-0"
       >
         <div className="shrink-0 flex justify-between items-center px-4 py-3 border-b border-slate-200 bg-white">
           <p className="text-sm font-bold text-slate-900">Detalhes do pedido</p>
@@ -891,6 +883,12 @@ export const GrillQueue = () => {
 
   const renderOrderFooterActions = (order: any) => (
     <div className="w-full flex flex-wrap gap-2 md:justify-end">
+      {updating === order.id && (
+        <div className="w-full rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-xs font-semibold text-sky-700 inline-flex items-center gap-2">
+          <ArrowsClockwise size={14} weight="duotone" className="animate-spin" />
+          Atualizando pedido...
+        </div>
+      )}
       {order.status === "pending" && (
         <div className="w-full">
           <div className="mb-2 text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-2.5 py-1">
@@ -1680,10 +1678,17 @@ export const GrillQueue = () => {
               <button
                 type="button"
                 onClick={handleConfirmPaid}
-                disabled={!cashValid}
-                className="w-full sm:w-auto px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:opacity-90 transition-all hover:-translate-y-0.5 active:scale-95"
+                disabled={!cashValid || updating === confirmModal?.id}
+                className="w-full sm:w-auto px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:opacity-90 transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                Pagamento recebido
+                {updating === confirmModal?.id ? (
+                  <span className="inline-flex items-center gap-2">
+                    <ArrowsClockwise size={14} weight="duotone" className="animate-spin" />
+                    Confirmando...
+                  </span>
+                ) : (
+                  'Pagamento recebido'
+                )}
               </button>
             </div>
                 </>
