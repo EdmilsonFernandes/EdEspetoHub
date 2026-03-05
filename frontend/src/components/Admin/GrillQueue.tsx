@@ -38,7 +38,8 @@ import { buildPixPayload } from "../../utils/pixPayload";
 
 const OrderSummaryCard = ({
   order,
-  index,
+  queueRank,
+  orderDisplayId,
   isLate,
   elapsedLabel,
   statusMeta,
@@ -60,7 +61,7 @@ const OrderSummaryCard = ({
     <div className="flex justify-between items-start gap-2 mb-3">
       <div className="flex items-center gap-2 flex-wrap min-w-0">
         <span className="px-2 py-1 bg-slate-800 text-white text-xs font-bold rounded-md shadow-sm">
-          #{String(index + 1).padStart(2, '0')}
+          #{String(queueRank).padStart(2, '0')}
         </span>
         <span className={`px-2 py-1 text-[10px] uppercase tracking-wider font-bold rounded-md whitespace-nowrap border ${statusMeta.className}`}>
           {statusMeta.label}
@@ -73,6 +74,7 @@ const OrderSummaryCard = ({
 
     <div>
       <h3 className="text-base font-bold text-slate-900 line-clamp-1">{order.customerName || order.name || 'Cliente'}</h3>
+      <p className="mt-1 text-[11px] font-semibold text-slate-500">Pedido #{orderDisplayId}</p>
       <div className="flex items-center gap-2 text-xs text-slate-500 font-medium mt-1">
         <span className="inline-flex items-center gap-1">
           {typeMeta.icon}
@@ -747,6 +749,11 @@ export const GrillQueue = () => {
     }
     return productionQueue;
   }, [productionQueue, queueFilter, currentTime, PREP_SLA_MS]);
+  const selectedOrderRank = useMemo(() => {
+    if (!selectedOrder?.id) return 1;
+    const idx = filteredProductionQueue.findIndex((order) => order.id === selectedOrder.id);
+    return idx >= 0 ? idx + 1 : 1;
+  }, [filteredProductionQueue, selectedOrder?.id]);
 
   useEffect(() => {
     if (activeTab === 'completed') {
@@ -1198,7 +1205,8 @@ export const GrillQueue = () => {
                 <OrderSummaryCard
                   key={`summary-${order.id}`}
                   order={order}
-                  index={index}
+                  queueRank={index + 1}
+                  orderDisplayId={formatOrderDisplayId(order.id, storeSlug)}
                   isLate={isLate}
                   elapsedLabel={elapsedTime[order.id] || "0s"}
                   statusMeta={statusMeta}
@@ -1284,8 +1292,8 @@ export const GrillQueue = () => {
                 <div className="relative flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1 text-[10px] text-slate-500 uppercase font-bold">
                     <Hash size={14} weight="duotone" className="text-slate-400" /> Prioridade
-                    <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] font-black ${getPriorityTone(index + 1)}`}>
-                      #{String(index + 1).padStart(2, "0")}
+                    <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] font-black ${getPriorityTone(selectedOrderRank)}`}>
+                      #{String(selectedOrderRank).padStart(2, "0")}
                     </span>
                   </div>
 
