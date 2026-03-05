@@ -56,7 +56,7 @@ const OrderSummaryCard = ({
   <button
     type="button"
     onClick={onClick}
-    className={`w-full rounded-xl border border-slate-200 ${leftAccent} bg-white p-4 text-left flex flex-col gap-3 transition-all duration-300 hover:border-slate-300 hover:shadow-lg hover:-translate-y-0.5 cursor-pointer`}
+    className={`w-full rounded-xl border border-slate-200 ${leftAccent} bg-white p-4 text-left flex flex-col gap-3 transition-all duration-300 transition-transform hover:border-slate-300 hover:shadow-lg hover:-translate-y-0.5 hover:scale-[1.01] cursor-pointer`}
   >
     <div className="flex justify-between items-start gap-2 mb-3">
       <div className="flex items-center gap-2 flex-wrap min-w-0">
@@ -996,13 +996,13 @@ export const GrillQueue = () => {
   );
 
   return (
-    <div className={tvMode ? "space-y-6 rounded-3xl bg-slate-900/95 p-4 sm:p-6 text-white" : "space-y-3"}>
+    <div className={tvMode ? "space-y-6 rounded-3xl bg-slate-900/95 p-4 sm:p-6 text-white" : "space-y-2"}>
       <style>{`
         @keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
         @keyframes drawerIn{0%{transform:translateX(100%)}100%{transform:translateX(0)}}
       `}</style>
       <div className={`${tvMode ? "" : "rounded-2xl border border-slate-200 bg-white px-3 py-3"}`}>
-        <div className="flex flex-col gap-3 mb-3 border-b border-slate-100 pb-3">
+        <div className="flex flex-col gap-2 mb-2 border-b border-slate-100 pb-2">
           {!tvMode ? (
             <>
               <div className="flex justify-between items-center w-full gap-3 flex-wrap">
@@ -1155,7 +1155,7 @@ export const GrillQueue = () => {
       </div>
 
       {activeTab === 'queue' && (
-        <div className="space-y-3">
+        <div className="space-y-2">
           {awaitingMotoboyQueue.length > 0 && (
             <div className="rounded-xl border-2 border-dashed border-indigo-200 bg-indigo-50/30 p-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
@@ -1168,14 +1168,13 @@ export const GrillQueue = () => {
                 </span>
               </div>
               <div className="mt-2 space-y-1.5">
-                {awaitingMotoboyQueue.map((order, idx) => (
+                {awaitingMotoboyQueue.map((order) => (
                   <div
                     key={`awaiting-${order.id}`}
-                    className={`flex flex-wrap items-center gap-x-2 gap-y-0.5 rounded-lg px-2.5 py-1.5 text-[12px] font-medium shadow-sm ${
-                      idx % 2 === 0 ? 'bg-white/75' : 'bg-indigo-100/35'
-                    }`}
+                    className="flex flex-wrap items-center gap-x-2 gap-y-0.5 rounded-full border border-slate-100 bg-white px-3 py-1 text-xs font-medium shadow-sm"
                   >
-                    <span className="font-extrabold text-indigo-800">
+                    <span className="inline-flex items-center gap-1.5 font-extrabold text-indigo-800">
+                      <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse" />
                       #{formatOrderDisplayId(order.id, storeSlug)}
                     </span>
                     <span className="text-indigo-300">•</span>
