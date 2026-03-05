@@ -1193,7 +1193,11 @@ export const GrillQueue = () => {
                   paymentLabel={paymentLabel}
                   totalLabel={totalLabel}
                   itemsCount={itemsCount}
-                  onClick={() => setSelectedOrder(order)}
+                  onClick={() => {
+                    setActionsOpen(false);
+                    setConfirmModal(null);
+                    setSelectedOrder(order);
+                  }}
                 />
               );
             })}
