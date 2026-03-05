@@ -87,13 +87,13 @@ const OrderSummaryCard = ({
 const OrderDetailsDrawer = ({ open, onClose, children, footer }: any) => {
   return createPortal(
     <div
-      className={`fixed inset-0 z-[100] flex justify-end overflow-hidden transition-opacity duration-300 ${
+      className={`fixed inset-0 z-[999] flex justify-end overflow-hidden transition-opacity duration-300 ${
         open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
       }`}
       aria-hidden={!open}
     >
       <div
-        className={`absolute inset-0 z-[100] bg-black/50 backdrop-blur-sm transition-opacity duration-300 ${
+        className={`absolute inset-0 z-[999] bg-black/50 backdrop-blur-sm transition-opacity duration-300 ${
           open ? 'opacity-100' : 'opacity-0'
         }`}
         onClick={onClose}
@@ -103,7 +103,7 @@ const OrderDetailsDrawer = ({ open, onClose, children, footer }: any) => {
           open ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
-        <div className="shrink-0 flex items-center justify-between p-4 border-b border-slate-200 bg-white">
+        <div className="shrink-0 flex justify-between items-center px-4 py-3 border-b border-slate-200 bg-white">
           <p className="text-sm font-bold text-slate-900">Detalhes do pedido</p>
           <button
             type="button"
@@ -114,7 +114,7 @@ const OrderDetailsDrawer = ({ open, onClose, children, footer }: any) => {
             <X size={20} weight="bold" />
           </button>
         </div>
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">{children}</div>
+        <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">{children}</div>
         <div className="shrink-0 p-4 border-t border-slate-200 bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
           {footer}
         </div>
