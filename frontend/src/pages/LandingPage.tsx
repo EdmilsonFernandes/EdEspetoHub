@@ -111,9 +111,21 @@ export function LandingPage() {
     'Mobile-first para equipes',
   ];
   const proofVisuals = [
-    { title: 'Dashboard de gestão', image: '/marketing/dashboard-real.png' },
-    { title: 'Fila de pedidos', image: '/marketing/fila-real.png' },
-    { title: 'Painel de pedidos', image: '/marketing/pedidos-real.png' },
+    {
+      title: 'Dashboard de gestão',
+      image: '/marketing/dashboard-real.png',
+      alt: 'Dashboard administrativo com indicadores de vendas, operação e desempenho da loja',
+    },
+    {
+      title: 'Fila de pedidos',
+      image: '/marketing/fila-real.png',
+      alt: 'Tela de fila de pedidos em tempo real com status operacionais e priorização',
+    },
+    {
+      title: 'Painel de pedidos',
+      image: '/marketing/pedidos-real.png',
+      alt: 'Painel de pedidos com controle de produção, pagamento e acompanhamento logístico',
+    },
   ];
 
   return (
@@ -128,10 +140,10 @@ export function LandingPage() {
                 Plataforma SaaS profissional
               </span>
               <h1 className="bg-gradient-to-r from-white via-cyan-100 to-blue-200 bg-clip-text text-3xl sm:text-5xl font-black text-transparent leading-[1.05]">
-                Já no Caminho, a plataforma empresarial para pedidos e entregas
+                Transforme sua operação em um padrão de alta performance
               </h1>
               <p className="text-sm sm:text-lg text-slate-200 max-w-2xl mx-auto lg:mx-0">
-                Centralize canais de venda, organize operação em tempo real e escale com governança, previsibilidade e foco em resultado.
+                Estruture pedidos, produção e entrega em um único fluxo profissional, com experiência mobile e dados em tempo real.
               </p>
               <div className="flex flex-wrap gap-2 justify-center lg:justify-start">
                 {trustBadges.map((badge) => (
@@ -148,14 +160,16 @@ export function LandingPage() {
                   href={ctaPrimaryHref}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 px-5 py-3 text-sm font-black text-white shadow-lg shadow-cyan-500/20 hover:scale-105 transition-all"
+                  aria-label="Solicitar demonstração no WhatsApp"
+                  className="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 px-5 py-3 text-base sm:text-sm font-black text-white shadow-lg shadow-cyan-500/20 hover:scale-105 transition-all"
                 >
                   Solicitar demonstração
                 </a>
                 <button
                   type="button"
                   onClick={() => navigate('/create')}
-                  className="inline-flex items-center justify-center rounded-2xl border border-white/40 bg-transparent px-5 py-3 text-sm font-black text-white hover:bg-white/10 transition-all"
+                  aria-label="Criar minha loja agora"
+                  className="inline-flex items-center justify-center rounded-2xl border border-white/40 bg-transparent px-5 py-3 text-base sm:text-sm font-black text-white hover:bg-white/10 transition-all"
                 >
                   Criar minha loja
                 </button>
@@ -165,7 +179,7 @@ export function LandingPage() {
             <div className="rounded-3xl border border-white/15 bg-white/5 backdrop-blur p-5 shadow-[0_26px_64px_-36px_rgba(0,0,0,0.6)]">
               <img
                 src="/janocaminho.jpg"
-                alt="Já no Caminho"
+                alt="Logo da plataforma Já no Caminho em destaque no hero"
                 className="w-full h-52 sm:h-60 rounded-2xl bg-slate-950 object-contain p-2"
               />
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-4">
@@ -312,10 +326,11 @@ export function LandingPage() {
                 key={item.title}
                 type="button"
                 onClick={() => setActiveProof(item)}
+                aria-label={`Abrir visual do painel: ${item.title}`}
                 className="rounded-3xl border border-slate-200 bg-slate-50 p-3 text-left transition hover:-translate-y-0.5 hover:shadow-[0_20px_42px_-26px_rgba(15,23,42,0.35)]"
               >
                 <div className="rounded-[2rem] border-[8px] border-slate-800 bg-slate-900 shadow-2xl overflow-hidden">
-                  <img src={item.image} alt={item.title} className="w-full h-56 object-cover" />
+                  <img src={item.image} alt={item.alt} loading="lazy" className="w-full h-40 sm:h-56 object-cover" />
                 </div>
                 <p className="text-sm italic text-slate-400 mt-3">{item.title}</p>
               </button>
@@ -339,7 +354,7 @@ export function LandingPage() {
               </button>
             </div>
             <div className="bg-slate-950 p-3 sm:p-5">
-              <img src={activeProof.image} alt={activeProof.title} className="w-full max-h-[78vh] object-contain rounded-2xl" />
+              <img src={activeProof.image} alt={`Visual ampliado: ${activeProof.title}`} className="w-full max-h-[78vh] object-contain rounded-2xl" />
             </div>
           </div>
         </div>
@@ -360,14 +375,16 @@ export function LandingPage() {
                 href={ctaPrimaryHref}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-black text-slate-900"
+                aria-label="Solicitar demonstração com especialista"
+                className="inline-flex items-center justify-center rounded-2xl bg-white px-5 py-3 text-base sm:text-sm font-black text-slate-900"
               >
                 Solicitar demonstração
               </a>
               <button
                 type="button"
                 onClick={() => navigate('/create')}
-                className="inline-flex items-center justify-center rounded-2xl border border-white/30 bg-transparent px-5 py-3 text-sm font-black text-white hover:bg-white/10"
+                aria-label="Criar minha loja e começar agora"
+                className="inline-flex items-center justify-center rounded-2xl border border-white/30 bg-transparent px-5 py-3 text-base sm:text-sm font-black text-white hover:bg-white/10"
               >
                 Criar minha loja
               </button>

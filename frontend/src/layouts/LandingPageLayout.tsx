@@ -15,6 +15,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
   const location = useLocation();
   const { theme, toggleTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showWhatsappHint, setShowWhatsappHint] = useState(false);
 
   useEffect(() => {
     setMobileMenuOpen(false);
@@ -28,6 +29,22 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
     };
   }, [mobileMenuOpen]);
 
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const previous = document.documentElement.style.scrollBehavior;
+    document.documentElement.style.scrollBehavior = 'smooth';
+    return () => {
+      document.documentElement.style.scrollBehavior = previous;
+    };
+  }, []);
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => {
+      setShowWhatsappHint(true);
+    }, 5000);
+    return () => window.clearTimeout(timeout);
+  }, []);
+
   const goToDemoGuide = () => {
     if (typeof window !== 'undefined') {
       sessionStorage.setItem('scrollToDemoFlow', 'true');
@@ -36,7 +53,17 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
   };
 
   const navLinks = [
-    { id: 'home', label: 'Início', onClick: () => navigate('/') },
+    {
+      id: 'home',
+      label: 'Início',
+      onClick: () => {
+        if (location.pathname === '/') {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return;
+        }
+        navigate('/');
+      },
+    },
     { id: 'portfolio', label: 'Portfólio', onClick: () => navigate('/portfolio') },
     { id: 'architecture', label: 'Arquitetura', onClick: () => navigate('/arquitetura') },
   ];
@@ -283,12 +310,18 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
         href="https://wa.me/5512997822784"
         target="_blank"
         rel="noreferrer"
-        className="fixed bottom-24 sm:bottom-5 right-4 z-50 inline-flex items-center gap-2 rounded-full bg-emerald-600 px-4 py-3 text-white shadow-[0_18px_42px_-24px_rgba(5,150,105,0.75)] hover:bg-emerald-500 transition"
+        onClick={() => setShowWhatsappHint(false)}
+        className="fixed bottom-24 sm:bottom-5 right-4 z-50 inline-flex items-center gap-2 rounded-full bg-emerald-600 px-4 py-3 text-white shadow-[0_22px_50px_-20px_rgba(5,150,105,0.8)] ring-1 ring-emerald-300/30 hover:bg-emerald-500 transition"
         aria-label="Falar no WhatsApp"
       >
         <ChatCircleText size={18} weight="duotone" />
         <span className="hidden sm:inline text-sm font-bold">WhatsApp</span>
       </a>
+      {showWhatsappHint && (
+        <div className="fixed bottom-[7.1rem] sm:bottom-[4.5rem] right-4 z-50 rounded-2xl border border-emerald-200 bg-white px-3 py-2 text-xs font-semibold text-emerald-700 shadow-[0_16px_36px_-20px_rgba(16,185,129,0.6)]">
+          Dúvidas? Fale com um especialista
+        </div>
+      )}
       {/* Footer */}
       <footer className="bg-gradient-to-b from-transparent to-slate-900/50 dark:to-black text-gray-300 dark:text-gray-400 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
