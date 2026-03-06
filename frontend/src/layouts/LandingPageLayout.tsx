@@ -64,7 +64,10 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
   );
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(47,157,247,0.14),_transparent_48%),radial-gradient(circle_at_bottom_right,_rgba(95,211,90,0.16),_transparent_45%)] bg-gray-50 dark:bg-slate-950">
+    <div
+      className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(47,157,247,0.14),_transparent_48%),radial-gradient(circle_at_bottom_right,_rgba(95,211,90,0.16),_transparent_45%)] bg-gray-50 dark:bg-slate-950"
+      style={{ fontFamily: 'Inter, Geist, system-ui, -apple-system, Segoe UI, sans-serif' }}
+    >
       <header className="sticky top-0 z-50 border-b border-white/10 bg-[linear-gradient(120deg,rgba(5,11,22,0.9),rgba(17,24,39,0.9))] backdrop-blur-xl shadow-[0_20px_40px_-30px_rgba(0,0,0,0.75)]">
         <div className="h-1 bg-[linear-gradient(90deg,#2f9df7,#18b3f9,#5fd35a)]" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -287,7 +290,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
         <span className="hidden sm:inline text-sm font-bold">WhatsApp</span>
       </a>
       {/* Footer */}
-      <footer className="bg-gray-900 dark:bg-black text-gray-300 dark:text-gray-400 py-12">
+      <footer className="bg-gradient-to-b from-transparent to-slate-900/50 dark:to-black text-gray-300 dark:text-gray-400 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
             <div>
@@ -297,7 +300,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
               <p className="text-sm text-gray-400">Plataforma completa para gestão de pedidos e entregas online.</p>
             </div>
             <div>
-              <h3 className="font-bold text-white mb-3">Links Rápidos</h3>
+              <h3 className="font-bold text-white mb-3">Links rápidos</h3>
               <div className="space-y-2 text-sm">
                 <button onClick={() => navigate('/create')} className="block hover:text-sky-400 transition-colors">
                   Criar Loja

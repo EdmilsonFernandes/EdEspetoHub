@@ -120,14 +120,14 @@ export function LandingPage() {
     <LandingPageLayout>
       <section className="relative overflow-hidden bg-[linear-gradient(145deg,#050b16_0%,#0f172a_50%,#111827_100%)]">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(47,157,247,0.24),_transparent_55%)]" />
-        <div className="max-w-7xl mx-auto px-4 py-14 sm:py-20 lg:py-24 relative">
+        <div className="max-w-7xl mx-auto px-4 py-20 sm:py-28 lg:py-32 relative">
           <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] items-center">
             <div className="space-y-5 text-center lg:text-left">
               <span className="inline-flex items-center gap-2 rounded-full border border-sky-300/40 bg-sky-400/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-sky-200">
                 <Rocket size={14} weight="duotone" />
                 Plataforma SaaS profissional
               </span>
-              <h1 className="text-3xl sm:text-5xl font-black text-white leading-[1.05]">
+              <h1 className="bg-gradient-to-r from-white via-cyan-100 to-blue-200 bg-clip-text text-3xl sm:text-5xl font-black text-transparent leading-[1.05]">
                 Já no Caminho, a plataforma empresarial para pedidos e entregas
               </h1>
               <p className="text-sm sm:text-lg text-slate-200 max-w-2xl mx-auto lg:mx-0">
@@ -148,7 +148,7 @@ export function LandingPage() {
                   href={ctaPrimaryHref}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center justify-center rounded-2xl bg-brand-gradient px-5 py-3 text-sm font-black text-white shadow-[0_20px_52px_-28px_rgba(30,64,175,0.9)] hover:brightness-105 transition-all"
+                  className="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 px-5 py-3 text-sm font-black text-white shadow-lg shadow-cyan-500/20 hover:scale-105 transition-all"
                 >
                   Solicitar demonstração
                 </a>
@@ -191,29 +191,29 @@ export function LandingPage() {
 
       {featuredStores.length > 0 && <SocialProofMarquee clients={featuredStores} />}
 
-      <section className="bg-white py-14 sm:py-16">
+      <section className="bg-[linear-gradient(140deg,#020617,#0f172a_55%,#111827)] py-16 sm:py-20">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="mb-8 rounded-2xl border border-slate-200 bg-[linear-gradient(120deg,#f8fafc,#f1f5f9)] p-4 sm:p-5">
-            <p className="text-xs uppercase tracking-[0.3em] text-slate-500 font-semibold">Padrão empresarial</p>
+          <div className="mb-8 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-4 sm:p-5">
+            <p className="text-xs uppercase tracking-[0.3em] text-slate-300 font-semibold">Padrão empresarial</p>
             <div className="mt-3 grid gap-3 sm:grid-cols-3">
-              <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
-                <p className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Disponibilidade</p>
-                <p className="text-sm font-black text-slate-900">Infraestrutura escalável</p>
+              <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-md px-3 py-2.5">
+                <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Disponibilidade</p>
+                <p className="text-sm font-black text-white">Infraestrutura escalável</p>
               </div>
-              <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
-                <p className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Confiabilidade</p>
-                <p className="text-sm font-black text-slate-900">Fluxo estável de operação</p>
+              <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-md px-3 py-2.5">
+                <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Confiabilidade</p>
+                <p className="text-sm font-black text-white">Fluxo estável de operação</p>
               </div>
-              <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
-                <p className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Crescimento</p>
-                <p className="text-sm font-black text-slate-900">Pronto para expansão</p>
+              <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-md px-3 py-2.5">
+                <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Crescimento</p>
+                <p className="text-sm font-black text-white">Pronto para expansão</p>
               </div>
             </div>
           </div>
           <div className="text-center mb-8 sm:mb-10">
-            <p className="text-xs uppercase tracking-[0.3em] text-sky-700 font-semibold">Como funciona</p>
-            <h2 className="text-2xl sm:text-4xl font-black text-slate-900 mt-2">Fluxo simples para vender todos os dias</h2>
-            <p className="mt-2 text-sm text-slate-500 max-w-2xl mx-auto">
+            <p className="text-xs uppercase tracking-[0.3em] text-sky-300 font-semibold">Como funciona</p>
+            <h2 className="text-2xl sm:text-4xl font-black text-white mt-2">Fluxo simples para vender todos os dias</h2>
+            <p className="mt-2 text-sm text-slate-300 max-w-2xl mx-auto">
               Um processo claro, auditável e padronizado para qualquer operação comercial.
             </p>
           </div>
@@ -237,12 +237,12 @@ export function LandingPage() {
             ].map((item) => {
               const Icon = item.icon;
               return (
-                <div key={item.title} className="rounded-3xl border border-slate-200 bg-slate-50 p-5 sm:p-6">
-                  <div className="h-10 w-10 rounded-2xl bg-slate-900 text-white grid place-items-center">
+                <div key={item.title} className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-8 transition-all hover:border-cyan-300/40 hover:shadow-[0_22px_52px_-30px_rgba(34,211,238,0.55)]">
+                  <div className="h-10 w-10 rounded-2xl bg-white/10 text-white grid place-items-center">
                     <Icon size={18} weight="duotone" />
                   </div>
-                  <h3 className="text-base font-black text-slate-900 mt-4">{item.title}</h3>
-                  <p className="text-sm text-slate-600 mt-2">{item.text}</p>
+                  <h3 className="text-base font-black text-white mt-4">{item.title}</h3>
+                  <p className="text-sm text-slate-300 mt-2">{item.text}</p>
                 </div>
               );
             })}
@@ -250,11 +250,11 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section className="bg-slate-50 py-14 sm:py-16">
+      <section className="bg-[linear-gradient(135deg,#0b1220,#111827_60%,#0f172a)] py-16 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 space-y-10">
           <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-sky-700 font-semibold">Benefícios</p>
-            <h2 className="text-2xl sm:text-4xl font-black text-slate-900 mt-2">Valor direto para o seu negócio</h2>
+            <p className="text-xs uppercase tracking-[0.3em] text-sky-300 font-semibold">Benefícios</p>
+            <h2 className="text-2xl sm:text-4xl font-black text-white mt-2">Valor direto para o seu negócio</h2>
             <div className="mt-5 grid gap-4 md:grid-cols-2">
               {[
                 'Aumente suas vendas com pedidos online',
@@ -262,18 +262,18 @@ export function LandingPage() {
                 'Controle entregas e retirada em tempo real',
                 'Compatível com qualquer tipo de comércio',
               ].map((text) => (
-                <div key={text} className="rounded-2xl border border-slate-200 bg-white p-4 flex items-center gap-3">
+                <div key={text} className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-8 flex items-center gap-3 transition-all hover:border-cyan-300/40 hover:shadow-[0_22px_52px_-30px_rgba(34,211,238,0.55)]">
                   <CheckCircle size={18} weight="duotone" className="text-emerald-600 shrink-0" />
-                  <p className="text-sm font-semibold text-slate-800">{text}</p>
+                  <p className="text-sm font-semibold text-slate-100">{text}</p>
                 </div>
               ))}
             </div>
           </div>
 
           <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-sky-700 font-semibold">Segmentos atendidos</p>
-            <h2 className="text-2xl sm:text-4xl font-black text-slate-900 mt-2">Pronto para diferentes operações</h2>
-            <p className="mt-2 text-sm text-slate-500 max-w-2xl">
+            <p className="text-xs uppercase tracking-[0.3em] text-sky-300 font-semibold">Segmentos atendidos</p>
+            <h2 className="text-2xl sm:text-4xl font-black text-white mt-2">Pronto para diferentes operações</h2>
+            <p className="mt-2 text-sm text-slate-300 max-w-2xl">
               Arquitetura flexível para restaurantes, varejo local, conveniência, farmácia, adega e novos formatos.
             </p>
             <div className="mt-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
@@ -286,11 +286,11 @@ export function LandingPage() {
               ].map((item) => {
                 const Icon = item.icon;
                 return (
-                  <div key={item.label} className="rounded-2xl border border-slate-200 bg-white px-3 py-4 text-center">
-                    <div className="mx-auto h-10 w-10 rounded-2xl bg-slate-900 text-white grid place-items-center">
+                  <div key={item.label} className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md px-3 py-4 text-center transition-all hover:border-cyan-300/40 hover:shadow-[0_22px_52px_-30px_rgba(34,211,238,0.55)]">
+                    <div className="mx-auto h-10 w-10 rounded-2xl bg-white/10 text-white grid place-items-center">
                       <Icon size={18} weight="duotone" />
                     </div>
-                    <p className="text-sm font-semibold text-slate-800 mt-3">{item.label}</p>
+                    <p className="text-sm font-semibold text-slate-100 mt-3">{item.label}</p>
                   </div>
                 );
               })}
@@ -299,7 +299,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section className="bg-white py-14 sm:py-16">
+      <section className="bg-white py-16 sm:py-20">
         <div className="max-w-7xl mx-auto px-4">
           <p className="text-xs uppercase tracking-[0.3em] text-sky-700 font-semibold">Prova visual</p>
           <h2 className="text-2xl sm:text-4xl font-black text-slate-900 mt-2">Painel administrativo em operação real</h2>
@@ -314,8 +314,10 @@ export function LandingPage() {
                 onClick={() => setActiveProof(item)}
                 className="rounded-3xl border border-slate-200 bg-slate-50 p-3 text-left transition hover:-translate-y-0.5 hover:shadow-[0_20px_42px_-26px_rgba(15,23,42,0.35)]"
               >
-                <img src={item.image} alt={item.title} className="w-full h-52 rounded-2xl object-cover" />
-                <p className="text-sm font-semibold text-slate-800 mt-3">{item.title}</p>
+                <div className="rounded-[2rem] border-[8px] border-slate-800 bg-slate-900 shadow-2xl overflow-hidden">
+                  <img src={item.image} alt={item.title} className="w-full h-56 object-cover" />
+                </div>
+                <p className="text-sm italic text-slate-400 mt-3">{item.title}</p>
               </button>
             ))}
           </div>
