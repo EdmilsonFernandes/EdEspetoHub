@@ -121,4 +121,23 @@ export class StoreRepository {
   countAll() {
     return this.repository.count();
   }
+
+  /**
+   * Counts stores considered active for public metrics:
+   * - VIP / plan-exempt stores
+   * - stores with subscription in active statuses
+   */
+  countActiveForPublicMetrics() {
+    return this.repository
+      .createQueryBuilder('store')
+      .leftJoin('store.settings', 'settings')
+      .leftJoin('store.subscriptions', 'subscription')
+      .where('COALESCE(settings.planExempt, false) = true')
+      .orWhere('subscription.status IN (:...statuses)', {
+        statuses: ['ACTIVE', 'EXPIRING', 'TRIAL'],
+      })
+      .select('COUNT(DISTINCT store.id)', 'count')
+      .getRawOne()
+      .then((row: any) => Number(row?.count || 0));
+  }
 }
