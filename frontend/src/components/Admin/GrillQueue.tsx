@@ -106,11 +106,11 @@ const OrderSummaryCard = ({
             event.stopPropagation();
             onPrint();
           }}
-          className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-all no-print"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-700 shadow-sm hover:bg-slate-100 hover:text-slate-900 transition-all no-print"
           aria-label={`Imprimir pedido ${orderDisplayId}`}
           title="Imprimir pedido"
         >
-          <Printer size={14} weight="duotone" />
+          <Printer size={15} weight="duotone" />
         </button>
       </div>
     </div>
@@ -1337,11 +1337,12 @@ export const GrillQueue = () => {
                       <button
                         type="button"
                         onClick={() => handlePrintOrder(selectedOrder, selectedOrderRank)}
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-all no-print"
+                        className="inline-flex h-9 px-3 items-center justify-center gap-1.5 rounded-lg border border-slate-300 bg-white text-slate-700 shadow-sm hover:bg-slate-100 hover:text-slate-900 transition-all no-print"
                         aria-label="Imprimir pedido"
                         title="Imprimir pedido"
                       >
                         <Printer size={16} weight="duotone" />
+                        <span className="text-xs font-semibold">Imprimir</span>
                       </button>
                     )}
                     <button
