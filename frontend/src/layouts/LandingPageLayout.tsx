@@ -157,7 +157,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
             <div className="hidden sm:flex items-center gap-2 sm:gap-3 flex-wrap justify-end">
               {!auth && (
                 <button
-                  onClick={() => navigate('/create')}
+                  onClick={() => navigate('/create?plan=trial')}
                   className="inline-flex px-4 py-2 text-sm rounded-full bg-brand-gradient text-white font-black shadow-[0_16px_30px_-20px_rgba(239,68,68,0.9)] hover:opacity-95 active:scale-[0.99] transition"
                 >
                   Criar loja
@@ -235,7 +235,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
             {!auth && (
               <button
                 type="button"
-                onClick={() => navigate('/create')}
+                onClick={() => navigate('/create?plan=trial')}
                 className="w-full inline-flex items-center justify-between rounded-xl px-4 py-3 bg-brand-gradient text-white font-black"
               >
                 Criar loja
@@ -335,7 +335,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
             <div>
               <h3 className="font-bold text-white mb-3">Links rápidos</h3>
               <div className="space-y-2 text-sm">
-                <button onClick={() => navigate('/create')} className="block hover:text-sky-400 transition-colors">
+                <button onClick={() => navigate('/create?plan=trial')} className="block hover:text-sky-400 transition-colors">
                   Criar Loja
                 </button>
                 <button onClick={goToDemoGuide} className="block hover:text-sky-400 transition-colors">

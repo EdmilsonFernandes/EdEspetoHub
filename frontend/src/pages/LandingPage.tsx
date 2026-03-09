@@ -167,7 +167,7 @@ export function LandingPage() {
                 </a>
                 <button
                   type="button"
-                  onClick={() => navigate('/create')}
+                  onClick={() => navigate('/create?plan=trial')}
                   aria-label="Criar minha loja agora"
                   className="inline-flex items-center justify-center rounded-2xl border border-white/40 bg-transparent px-5 py-3 text-base sm:text-sm font-black text-white hover:bg-white/10 transition-all"
                 >
@@ -445,7 +445,7 @@ export function LandingPage() {
               </a>
               <button
                 type="button"
-                onClick={() => navigate('/create')}
+                onClick={() => navigate('/create?plan=trial')}
                 aria-label="Criar minha loja e começar agora"
                 className="inline-flex items-center justify-center rounded-2xl border border-white/30 bg-transparent px-5 py-3 text-base sm:text-sm font-black text-white hover:bg-white/10"
               >
