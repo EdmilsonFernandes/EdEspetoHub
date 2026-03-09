@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React from "react";
-import { CheckCircle, QrCode, ArrowLeft, CreditCard } from "@phosphor-icons/react";
+import { CheckCircle, QrCode, ArrowLeft, CreditCard, Printer } from "@phosphor-icons/react";
 import { formatPaymentMethod } from "../../utils/format";
 import { getPaymentMethodMeta } from "../../utils/paymentAssets";
 
@@ -114,6 +114,7 @@ export const SuccessView = ({
   table,
   orderId,
   onTrackOrder,
+  onPrintReceipt,
 }) => {
   return (
     <div className="flex flex-col items-center justify-center min-h-[80vh] text-center px-6 animate-in zoom-in">
@@ -142,6 +143,14 @@ export const SuccessView = ({
       />
 
       <div className="flex flex-col sm:flex-row gap-3">
+        {orderId && onPrintReceipt && (
+          <button
+            onClick={onPrintReceipt}
+            className="flex items-center justify-center gap-2 text-amber-800 bg-amber-50 border border-amber-200 font-bold px-6 py-3 rounded-xl transition-colors hover:bg-amber-100"
+          >
+            <Printer size={18} weight="duotone" /> Imprimir comprovante
+          </button>
+        )}
         {orderId && (
           <button
             onClick={onTrackOrder}

@@ -871,6 +871,20 @@ export function StorePage() {
       return;
     }
 
+    const printableItems = Object.values(cart).map((item: any) => {
+      const unitBase = resolveItemPrice(item);
+      const modifiersTotal = getModifiersTotal(item.selectedModifiers || []);
+      const unitPrice = Number(unitBase + modifiersTotal);
+      const quantity = Number(item.qty || 0);
+      return {
+        name: item.name,
+        quantity,
+        unitPrice,
+        lineTotal: unitPrice * quantity,
+        options: formatItemOptions(item),
+      };
+    });
+
     if (isDemo) {
       const demoId = `demo-${Date.now()}`;
       setCart({});
@@ -883,6 +897,11 @@ export function StorePage() {
         phone: sanitizedPhoneKey || customer.phone,
         pixKey,
         table: customer.table,
+        customerName: customer.name,
+        address: deliveryAddress || customer.address,
+        total: orderTotal,
+        items: printableItems,
+        createdAt: Date.now(),
       });
       localStorage.setItem(
         `lastOrder:${storeSlug}`,
@@ -992,6 +1011,11 @@ export function StorePage() {
       phone: sanitizedPhoneKey || customer.phone,
       pixKey,
       table: customer.table,
+      customerName: customer.name,
+      address: deliveryAddress || customer.address,
+      total: orderTotal,
+      items: printableItems,
+      createdAt: Date.now(),
     });
     if (createdOrder?.id && !user?.token) {
       const entry = {
@@ -1062,6 +1086,81 @@ export function StorePage() {
       return;
     }
     navigate('/admin');
+  };
+
+  const printLastOrderReceipt = () => {
+    if (!lastOrder?.id) return;
+    const orderDisplayId = formatOrderDisplayId(lastOrder.id, storeSlug);
+    const createdAt = lastOrder?.createdAt ? new Date(lastOrder.createdAt) : new Date();
+    const items = Array.isArray(lastOrder?.items) ? lastOrder.items : [];
+    const total = Number(lastOrder?.total || 0);
+    const escapeHtml = (value: any) =>
+      String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+
+    const lines = items
+      .map((item: any) => `
+        <div class="line">
+          <div>${escapeHtml(item.quantity)}x ${escapeHtml(item.name)}</div>
+          <div class="right">${escapeHtml(formatCurrency(Number(item.lineTotal || 0)))}</div>
+        </div>
+        ${item.options ? `<div class="muted">${escapeHtml(item.options)}</div>` : ''}
+      `)
+      .join('');
+
+    const html = `
+      <!doctype html>
+      <html>
+      <head>
+        <meta charset="utf-8" />
+        <title>Cupom ${escapeHtml(orderDisplayId)}</title>
+        <style>
+          @page { size: 58mm auto; margin: 0; }
+          html, body { margin: 0; padding: 0; width: 58mm; }
+          body { font-family: monospace; color: #000; font-size: 12px; line-height: 1.35; }
+          .receipt { width: 58mm; padding: 2mm; box-sizing: border-box; }
+          .center { text-align: center; }
+          .title { font-weight: 700; font-size: 13px; }
+          .sep { border-top: 1px dashed #000; margin: 4px 0; }
+          .line { display: flex; justify-content: space-between; gap: 6px; }
+          .right { text-align: right; white-space: nowrap; }
+          .muted { color: #333; font-size: 10px; margin: 1px 0 2px; }
+          .total { font-weight: 700; font-size: 13px; }
+        </style>
+      </head>
+      <body>
+        <div class="receipt">
+          <div class="center title">${escapeHtml(storeName || branding?.brandName || 'Já no Caminho')}</div>
+          <div class="center">Comprovante de pedido</div>
+          <div>Pedido: #${escapeHtml(orderDisplayId)}</div>
+          <div>Cliente: ${escapeHtml(lastOrder?.customerName || 'Cliente')}</div>
+          <div>Tipo: ${escapeHtml(formatOrderType(lastOrder?.type))}</div>
+          <div>Data: ${escapeHtml(createdAt.toLocaleString('pt-BR'))}</div>
+          <div class="sep"></div>
+          ${lines}
+          <div class="sep"></div>
+          <div class="line total"><span>Total</span><span class="right">${escapeHtml(formatCurrency(total))}</span></div>
+        </div>
+        <script>
+          window.onload = function () {
+            window.focus();
+            window.print();
+            window.onafterprint = function () { window.close(); };
+          };
+        </script>
+      </body>
+      </html>
+    `;
+
+    const printWindow = window.open('', '_blank', 'noopener,noreferrer,width=420,height=640');
+    if (!printWindow) return;
+    printWindow.document.open();
+    printWindow.document.write(html);
+    printWindow.document.close();
   };
 
   // Loading state
@@ -1448,6 +1547,7 @@ export function StorePage() {
               phone={lastOrder?.phone}
               table={lastOrder?.table}
               orderId={lastOrder?.id}
+              onPrintReceipt={printLastOrderReceipt}
               onTrackOrder={() => {
                 if (lastOrder?.id) {
                   navigate(`/pedido/${lastOrder.id}`);
