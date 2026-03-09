@@ -106,7 +106,7 @@ const OrderSummaryCard = ({
             event.stopPropagation();
             onPrint();
           }}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-700 shadow-sm hover:bg-slate-100 hover:text-slate-900 transition-all no-print"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-amber-300 bg-amber-50 text-amber-700 shadow-sm hover:bg-amber-100 hover:text-amber-900 transition-all no-print"
           aria-label={`Imprimir pedido ${orderDisplayId}`}
           title="Imprimir pedido"
         >
@@ -118,42 +118,6 @@ const OrderSummaryCard = ({
     );
   })()
 );
-
-const PrintTemplate58mm = ({ order, queueRank, orderDisplayId }: any) => {
-  if (!order) return null;
-  const items = Array.isArray(order?.items) ? order.items : [];
-  const createdAt = order?.createdAt ? new Date(order.createdAt) : new Date();
-  const total = Number(order?.total || 0);
-  return (
-    <div id="print-template-58mm" className="print-only hidden text-black">
-      <div style={{ width: "58mm", fontFamily: "monospace", fontSize: "11px", lineHeight: 1.3, padding: "2mm" }}>
-        <div style={{ textAlign: "center", fontWeight: 700 }}>JA NO CAMINHO</div>
-        <div style={{ textAlign: "center", marginBottom: "4px" }}>Cupom de pedido</div>
-        <div>Fila: #{String(queueRank || 1).padStart(2, "0")}</div>
-        <div>Pedido: #{orderDisplayId || "-"}</div>
-        <div>Cliente: {order?.customerName || order?.name || "Cliente"}</div>
-        <div>Data: {createdAt.toLocaleString("pt-BR")}</div>
-        <div style={{ borderTop: "1px dashed #000", margin: "4px 0" }} />
-        {items.map((item: any, idx: number) => {
-          const qty = Number(item?.qty || 0);
-          const unit = Number(item?.unitPrice ?? item?.price ?? 0);
-          const lineTotal = qty * unit;
-          return (
-            <div key={`${item?.id || idx}`}>
-              <div>{qty}x {String(item?.name || "Item")}</div>
-              <div style={{ textAlign: "right" }}>{formatCurrency(lineTotal)}</div>
-            </div>
-          );
-        })}
-        <div style={{ borderTop: "1px dashed #000", margin: "4px 0" }} />
-        <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700 }}>
-          <span>Total</span>
-          <span>{formatCurrency(total)}</span>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 export const GrillQueue = () => {
   // Tap feedback animation
@@ -215,9 +179,6 @@ export const GrillQueue = () => {
   });
   const [queueFilter, setQueueFilter] = useState<'all' | 'pending' | 'preparing' | 'ready' | 'late'>('all');
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
-  const [printOrder, setPrintOrder] = useState<any | null>(null);
-  const [printQueueRank, setPrintQueueRank] = useState<number>(1);
-  const [printOrderDisplayId, setPrintOrderDisplayId] = useState<string>('');
   const previousIdsRef = useRef<string[]>([]);
   const audioContextRef = useRef<AudioContext | null>(null);
   const isDrawerOpen = selectedOrder !== null;
@@ -230,10 +191,80 @@ export const GrillQueue = () => {
 
   const handlePrintOrder = (order: any, queueRank = 1) => {
     if (!order?.id) return;
-    setPrintOrder(order);
-    setPrintQueueRank(queueRank);
-    setPrintOrderDisplayId(formatOrderDisplayId(order.id, storeSlug));
-    window.setTimeout(() => window.print(), 80);
+    const orderDisplayId = formatOrderDisplayId(order.id, storeSlug);
+    const createdAt = order?.createdAt ? new Date(order.createdAt) : new Date();
+    const items = Array.isArray(order?.items) ? order.items : [];
+    const total = Number(order?.total || 0);
+    const escapeHtml = (value: any) =>
+      String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+
+    const lines = items
+      .map((item: any) => {
+        const qty = Number(item?.qty || 0);
+        const unit = Number(item?.unitPrice ?? item?.price ?? 0);
+        const lineTotal = qty * unit;
+        return `
+          <div class="line">
+            <div>${escapeHtml(qty)}x ${escapeHtml(item?.name || 'Item')}</div>
+            <div class="right">${escapeHtml(formatCurrency(lineTotal))}</div>
+          </div>
+        `;
+      })
+      .join('');
+
+    const html = `
+      <!doctype html>
+      <html>
+      <head>
+        <meta charset="utf-8" />
+        <title>Cupom ${escapeHtml(orderDisplayId)}</title>
+        <style>
+          @page { size: 58mm auto; margin: 0; }
+          html, body { margin: 0; padding: 0; width: 58mm; }
+          body { font-family: monospace; color: #000; font-size: 11px; line-height: 1.3; }
+          .receipt { width: 58mm; padding: 2mm; box-sizing: border-box; }
+          .center { text-align: center; }
+          .title { font-weight: 700; }
+          .sep { border-top: 1px dashed #000; margin: 4px 0; }
+          .line { display: flex; justify-content: space-between; gap: 6px; }
+          .right { text-align: right; white-space: nowrap; }
+          .total { font-weight: 700; font-size: 12px; }
+        </style>
+      </head>
+      <body>
+        <div class="receipt">
+          <div class="center title">JA NO CAMINHO</div>
+          <div class="center">Cupom de pedido</div>
+          <div>Fila: #${escapeHtml(String(queueRank).padStart(2, '0'))}</div>
+          <div>Pedido: #${escapeHtml(orderDisplayId)}</div>
+          <div>Cliente: ${escapeHtml(order?.customerName || order?.name || 'Cliente')}</div>
+          <div>Data: ${escapeHtml(createdAt.toLocaleString('pt-BR'))}</div>
+          <div class="sep"></div>
+          ${lines}
+          <div class="sep"></div>
+          <div class="line total"><span>Total</span><span class="right">${escapeHtml(formatCurrency(total))}</span></div>
+        </div>
+        <script>
+          window.onload = function () {
+            window.focus();
+            window.print();
+            window.onafterprint = function () { window.close(); };
+          };
+        </script>
+      </body>
+      </html>
+    `;
+
+    const printWindow = window.open('', '_blank', 'noopener,noreferrer,width=420,height=640');
+    if (!printWindow) return;
+    printWindow.document.open();
+    printWindow.document.write(html);
+    printWindow.document.close();
   };
 
   const orderTypeMeta = (order: any) => {
@@ -1075,20 +1106,6 @@ export const GrillQueue = () => {
       <style>{`
         @keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
         @keyframes drawerIn{0%{transform:translateX(100%)}100%{transform:translateX(0)}}
-        @media print {
-          @page { size: 58mm auto; margin: 0; }
-          .no-print { display: none !important; }
-          .print-only { display: block !important; }
-          body * { visibility: hidden !important; }
-          #print-template-58mm, #print-template-58mm * { visibility: visible !important; }
-          #print-template-58mm {
-            display: block !important;
-            position: fixed;
-            inset: 0 auto auto 0;
-            width: 58mm;
-            background: #fff;
-          }
-        }
       `}</style>
       <div className={`${tvMode ? "" : "rounded-2xl border border-slate-200 bg-white px-3 py-3"}`}>
         <div className="flex flex-col gap-2 mb-2 border-b border-slate-100 pb-2">
@@ -1337,7 +1354,7 @@ export const GrillQueue = () => {
                       <button
                         type="button"
                         onClick={() => handlePrintOrder(selectedOrder, selectedOrderRank)}
-                        className="inline-flex h-9 px-3 items-center justify-center gap-1.5 rounded-lg border border-slate-300 bg-white text-slate-700 shadow-sm hover:bg-slate-100 hover:text-slate-900 transition-all no-print"
+                        className="inline-flex h-9 px-3 items-center justify-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 text-amber-700 shadow-sm hover:bg-amber-100 hover:text-amber-900 transition-all no-print"
                         aria-label="Imprimir pedido"
                         title="Imprimir pedido"
                       >
@@ -2084,7 +2101,6 @@ export const GrillQueue = () => {
         <div className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg p-3">{error}</div>
       )}
     </div>
-    <PrintTemplate58mm order={printOrder} queueRank={printQueueRank} orderDisplayId={printOrderDisplayId} />
     </>
   );
 };
