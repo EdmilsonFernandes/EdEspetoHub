@@ -226,14 +226,14 @@ export const GrillQueue = () => {
         <style>
           @page { size: 58mm auto; margin: 0; }
           html, body { margin: 0; padding: 0; width: 58mm; }
-          body { font-family: monospace; color: #000; font-size: 11px; line-height: 1.3; }
+          body { font-family: monospace; color: #000; font-size: 12px; line-height: 1.35; }
           .receipt { width: 58mm; padding: 2mm; box-sizing: border-box; }
           .center { text-align: center; }
-          .title { font-weight: 700; }
+          .title { font-weight: 700; font-size: 13px; }
           .sep { border-top: 1px dashed #000; margin: 4px 0; }
           .line { display: flex; justify-content: space-between; gap: 6px; }
           .right { text-align: right; white-space: nowrap; }
-          .total { font-weight: 700; font-size: 12px; }
+          .total { font-weight: 700; font-size: 13px; }
         </style>
       </head>
       <body>
