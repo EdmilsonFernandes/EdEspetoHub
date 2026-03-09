@@ -47,6 +47,10 @@ export const ProductModal = ({ product, cart = {}, isOpen, onClose, onAddToCart 
   const modifiersTotal = getModifiersTotal(selectedModifiers);
   const unitFinalPrice = basePrice + modifiersTotal;
   const totalFinalPrice = unitFinalPrice * itemQty;
+  let subtotalAmount = 0;
+  if (itemQty > 0) {
+    subtotalAmount = unitFinalPrice * itemQty;
+  }
   const isEspetoCategory = (category: any) => {
   const normalized = (category || "").toString().trim().toLowerCase();
   return normalized.includes("espeto");
@@ -97,6 +101,15 @@ export const ProductModal = ({ product, cart = {}, isOpen, onClose, onAddToCart 
     setTimeout(() => {
       onClose();
     }, 200);
+  };
+
+  const handleCloseImmediate = () => {
+    setItemQty(1);
+    setModifierCounts({});
+    setCookingPoint("ao ponto");
+    setPassSkewer(false);
+    setIsAnimating(false);
+    onClose();
   };
 
   const incrementModifier = (modifierId: string) => {
@@ -268,7 +281,7 @@ export const ProductModal = ({ product, cart = {}, isOpen, onClose, onAddToCart 
               <div className="flex items-center justify-between">
                 <span className="font-semibold">Subtotal do item</span>
                 <span className="text-base font-bold text-slate-900">
-                  {formatCurrency(itemQty > 0 ? totalFinalPrice : 0)}
+                  {formatCurrency(subtotalAmount)}
                 </span>
               </div>
             </div>
@@ -302,8 +315,7 @@ export const ProductModal = ({ product, cart = {}, isOpen, onClose, onAddToCart 
                     if (currentSelectionQty > 0) {
                       onAddToCart(product, -currentSelectionQty, selectedOptions);
                     }
-                    setItemQty(1);
-                    handleClose();
+                    handleCloseImmediate();
                     return;
                   }
                   const deltaQty = currentSelectionQty > 0 ? itemQty - currentSelectionQty : itemQty;
@@ -313,18 +325,17 @@ export const ProductModal = ({ product, cart = {}, isOpen, onClose, onAddToCart 
                   setItemQty(1);
                   handleClose();
                 }}
-                disabled={itemQty === 0 && currentSelectionQty <= 0}
                 className={`w-full py-3 rounded-2xl font-semibold flex items-center justify-between px-4 transition ${
                   itemQty > 0
                     ? "bg-brand-primary text-white hover:bg-brand-primary/90"
-                    : "border border-slate-200 bg-slate-100 text-slate-500 hover:bg-slate-200"
-                } disabled:opacity-60 disabled:cursor-not-allowed`}
+                    : "border border-slate-200 bg-slate-200 text-slate-500 hover:bg-slate-300"
+                }`}
               >
                 <span className="inline-flex items-center gap-1.5">
                   {itemQty > 0 ? <Plus size={16} weight="bold" /> : <Trash size={16} weight="bold" />}
                   {itemQty > 0
                     ? `${currentSelectionQty > 0 ? "Atualizar" : "Adicionar"} ${formatCurrency(totalFinalPrice)}`
-                    : "Remover item"}
+                    : "Remover do pedido"}
                 </span>
                 {itemQty > 0 ? <span className="font-bold">{formatCurrency(totalFinalPrice)}</span> : null}
               </button>
