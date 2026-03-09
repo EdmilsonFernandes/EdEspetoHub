@@ -82,7 +82,7 @@ export const ProductModal = ({ product, cart = {}, isOpen, onClose, onAddToCart 
   useEffect(() => {
     if (!isOpen) return;
     setItemQty(currentSelectionQty > 0 ? currentSelectionQty : 1);
-  }, [isOpen, product?.id]);
+  }, [isOpen, product?.id, currentSelectionQty]);
 
   const [isAnimating, setIsAnimating] = useState(false);
 
@@ -327,14 +327,14 @@ export const ProductModal = ({ product, cart = {}, isOpen, onClose, onAddToCart 
                 }}
                 className={`w-full py-3 rounded-2xl font-semibold flex items-center justify-between px-4 transition ${
                   itemQty > 0
-                    ? "bg-brand-primary text-white hover:bg-brand-primary/90"
+                    ? "bg-orange-500 text-white font-bold shadow-md hover:bg-orange-600 active:scale-95 transition-all"
                     : "border border-slate-200 bg-slate-200 text-slate-500 hover:bg-slate-300"
                 }`}
               >
                 <span className="inline-flex items-center gap-1.5">
                   {itemQty > 0 ? <Plus size={16} weight="bold" /> : <Trash size={16} weight="bold" />}
                   {itemQty > 0
-                    ? `${currentSelectionQty > 0 ? "Atualizar" : "Adicionar"} ${formatCurrency(totalFinalPrice)}`
+                    ? `${currentSelectionQty > 0 ? "Atualizar" : "Adicionar"}`
                     : "Remover do pedido"}
                 </span>
                 {itemQty > 0 ? <span className="font-bold">{formatCurrency(totalFinalPrice)}</span> : null}
