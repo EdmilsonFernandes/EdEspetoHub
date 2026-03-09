@@ -251,15 +251,6 @@ export const GrillQueue = () => {
           <div class="line total"><span>Total</span><span class="right">${escapeHtml(formatCurrency(total))}</span></div>
           <div class="feed"></div>
         </div>
-        <script>
-          window.onload = function () {
-            if (window.__receiptPrinted) return;
-            window.__receiptPrinted = true;
-            window.focus();
-            setTimeout(function () { window.print(); }, 60);
-            window.onafterprint = function () { window.close(); };
-          };
-        </script>
       </body>
       </html>
     `;
@@ -269,6 +260,30 @@ export const GrillQueue = () => {
     printWindow.document.open();
     printWindow.document.write(html);
     printWindow.document.close();
+    let printed = false;
+    const runPrint = () => {
+      if (printed) return;
+      printed = true;
+      try {
+        printWindow.focus();
+        printWindow.print();
+      } catch {}
+      printWindow.onafterprint = () => {
+        try {
+          printWindow.close();
+        } catch {}
+      };
+      window.setTimeout(() => {
+        try {
+          printWindow.close();
+        } catch {}
+      }, 3000);
+    };
+    if (printWindow.document.readyState === 'complete') {
+      window.setTimeout(runPrint, 80);
+    } else {
+      printWindow.onload = () => window.setTimeout(runPrint, 80);
+    }
   };
 
   const orderTypeMeta = (order: any) => {
