@@ -162,6 +162,8 @@ export function CreateStore() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const planIdFromUrl = searchParams.get('planId');
+  const planFromUrl = String(searchParams.get('plan') || '').toLowerCase();
+  const billingFromUrl = String(searchParams.get('billing') || '').toLowerCase();
   const [storeError, setStoreError] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
   const [plans, setPlans] = useState([]);
@@ -472,6 +474,23 @@ export function CreateStore() {
           return;
         }
 
+        // Friendly landing params: /create?plan=trial|basic|pro&billing=monthly|yearly
+        if (planFromUrl === 'trial') {
+          setSelectedPlanId('test-plan-7days');
+          return;
+        }
+
+        if ((planFromUrl === 'basic' || planFromUrl === 'pro') && Array.isArray(response) && response.length) {
+          const resolvedBilling = billingFromUrl === 'yearly' ? 'yearly' : 'monthly';
+          const planName = getPlanName(planFromUrl, resolvedBilling);
+          const matchedPlan = response.find((plan) => plan.name === planName);
+          if (matchedPlan?.id) {
+            setSelectedPlanId(matchedPlan.id);
+            setIsAnnual(resolvedBilling === 'yearly');
+            return;
+          }
+        }
+
         // If the test plan is already selected (default), keep it
         // Otherwise set a default paid plan
         setSelectedPlanId((current) => {
@@ -492,7 +511,7 @@ export function CreateStore() {
     };
 
     fetchPlans();
-  }, [planIdFromUrl]);
+  }, [planIdFromUrl, planFromUrl, billingFromUrl]);
 
   useEffect(() => {
     const uf = String(registerForm.state || '').toUpperCase();

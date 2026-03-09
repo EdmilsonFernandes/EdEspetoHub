@@ -329,6 +329,7 @@ export function LandingPage() {
                 caption: 'sem cartão de crédito',
                 cta: 'Iniciar trial',
                 featured: false,
+                route: '/create?plan=trial',
               },
               {
                 name: 'Basic Mensal',
@@ -336,6 +337,7 @@ export function LandingPage() {
                 caption: 'por mês',
                 cta: 'Escolher Basic',
                 featured: false,
+                route: '/create?plan=basic&billing=monthly',
               },
               {
                 name: 'Pro Mensal',
@@ -343,6 +345,7 @@ export function LandingPage() {
                 caption: 'por mês',
                 cta: 'Escolher Pro',
                 featured: true,
+                route: '/create?plan=pro&billing=monthly',
               },
             ].map((plan) => (
               <div
@@ -358,7 +361,7 @@ export function LandingPage() {
                 <p className="text-xs text-slate-400">{plan.caption}</p>
                 <button
                   type="button"
-                  onClick={() => navigate('/create')}
+                  onClick={() => navigate(plan.route)}
                   className={`mt-5 w-full rounded-2xl px-4 py-2.5 text-sm font-black transition-all ${
                     plan.featured
                       ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20'
