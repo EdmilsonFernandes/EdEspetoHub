@@ -89,6 +89,10 @@ export const ProductModal = ({ product, cart = {}, isOpen, onClose, onAddToCart 
   }, [isOpen]);
 
   const handleClose = () => {
+    setItemQty(1);
+    setModifierCounts({});
+    setCookingPoint("ao ponto");
+    setPassSkewer(false);
     setIsAnimating(false);
     setTimeout(() => {
       onClose();
@@ -263,7 +267,9 @@ export const ProductModal = ({ product, cart = {}, isOpen, onClose, onAddToCart 
             <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700">
               <div className="flex items-center justify-between">
                 <span className="font-semibold">Subtotal do item</span>
-                <span className="text-base font-bold text-slate-900">{formatCurrency(unitFinalPrice)}</span>
+                <span className="text-base font-bold text-slate-900">
+                  {formatCurrency(itemQty > 0 ? totalFinalPrice : 0)}
+                </span>
               </div>
             </div>
           )}
@@ -296,6 +302,7 @@ export const ProductModal = ({ product, cart = {}, isOpen, onClose, onAddToCart 
                     if (currentSelectionQty > 0) {
                       onAddToCart(product, -currentSelectionQty, selectedOptions);
                     }
+                    setItemQty(1);
                     handleClose();
                     return;
                   }
@@ -303,20 +310,21 @@ export const ProductModal = ({ product, cart = {}, isOpen, onClose, onAddToCart 
                   if (deltaQty !== 0) {
                     onAddToCart(product, deltaQty, selectedOptions);
                   }
+                  setItemQty(1);
                   handleClose();
                 }}
                 disabled={itemQty === 0 && currentSelectionQty <= 0}
                 className={`w-full py-3 rounded-2xl font-semibold flex items-center justify-between px-4 transition ${
                   itemQty > 0
                     ? "bg-brand-primary text-white hover:bg-brand-primary/90"
-                    : "border border-rose-200 bg-white text-rose-700 hover:bg-rose-50"
+                    : "border border-slate-200 bg-slate-100 text-slate-500 hover:bg-slate-200"
                 } disabled:opacity-60 disabled:cursor-not-allowed`}
               >
                 <span className="inline-flex items-center gap-1.5">
                   {itemQty > 0 ? <Plus size={16} weight="bold" /> : <Trash size={16} weight="bold" />}
                   {itemQty > 0
                     ? `${currentSelectionQty > 0 ? "Atualizar" : "Adicionar"} ${formatCurrency(totalFinalPrice)}`
-                    : "Remover do pedido"}
+                    : "Remover item"}
                 </span>
                 {itemQty > 0 ? <span className="font-bold">{formatCurrency(totalFinalPrice)}</span> : null}
               </button>
