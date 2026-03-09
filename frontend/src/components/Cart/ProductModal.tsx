@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-import { Minus, Plus, Sparkle, X } from "@phosphor-icons/react";
+import { Minus, Plus, Sparkle, Trash, X } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 import { formatCurrency } from "../../utils/format";
 import {
@@ -73,8 +73,12 @@ export const ProductModal = ({ product, cart = {}, isOpen, onClose, onAddToCart 
     setCookingPoint("ao ponto");
     setPassSkewer(false);
     setModifierCounts({});
-    setItemQty(1);
   }, [product?.id]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setItemQty(currentSelectionQty > 0 ? currentSelectionQty : 1);
+  }, [isOpen, product?.id]);
 
   const [isAnimating, setIsAnimating] = useState(false);
 
@@ -264,16 +268,16 @@ export const ProductModal = ({ product, cart = {}, isOpen, onClose, onAddToCart 
             </div>
           )}
         </div>
-        <div className="sticky bottom-0 z-20 border-t border-slate-200 bg-white/95 backdrop-blur px-4 py-3">
+        <div className="sticky bottom-0 z-20 border-t border-slate-200 bg-white px-4 py-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-2 py-1.5">
               <button
                 type="button"
-                onClick={() => setItemQty((prev) => Math.max(1, prev - 1))}
+                onClick={() => setItemQty((prev) => Math.max(0, prev - 1))}
                 className="h-8 w-8 rounded-full border border-slate-200 bg-white text-slate-700 grid place-items-center"
-                aria-label="Diminuir quantidade"
+                aria-label={itemQty <= 1 ? "Remover item" : "Diminuir quantidade"}
               >
-                <Minus size={14} weight="bold" />
+                {itemQty <= 1 ? <Trash size={14} weight="bold" /> : <Minus size={14} weight="bold" />}
               </button>
               <span className="min-w-[24px] text-center text-sm font-extrabold text-slate-900">{itemQty}</span>
               <button
@@ -286,53 +290,35 @@ export const ProductModal = ({ product, cart = {}, isOpen, onClose, onAddToCart 
               </button>
             </div>
             <div className="flex-1 space-y-2">
-              {currentSelectionQty > 0 && (
-                <div
-                  className={`flex items-center justify-between rounded-xl border px-3 py-2 text-xs shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] ${
-                    currentSelectionQty >= 3
-                      ? "border-amber-200 bg-amber-50/90"
-                      : "border-emerald-200 bg-emerald-50/80"
-                  }`}
-                >
-                  <span className="inline-flex items-center gap-1.5 text-slate-700">
-                    <span
-                      className={`h-2 w-2 rounded-full ${
-                        currentSelectionQty >= 3 ? "bg-amber-500" : "bg-emerald-500"
-                      }`}
-                    />
-                    No pedido:
-                    <strong className="text-slate-900">{currentSelectionQty}</strong>
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => onAddToCart(product, -1, selectedOptions)}
-                      className="rounded-lg border border-slate-300 bg-white px-2 py-1 font-semibold text-slate-700 hover:bg-slate-100 transition"
-                    >
-                      -1
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => onAddToCart(product, -currentSelectionQty, selectedOptions)}
-                      className="rounded-lg border border-rose-200 bg-rose-50 px-2 py-1 font-semibold text-rose-700 hover:bg-rose-100 transition"
-                    >
-                      Remover tudo
-                    </button>
-                  </div>
-                </div>
-              )}
               <button
                 onClick={() => {
-                  onAddToCart(product, itemQty, selectedOptions);
+                  if (itemQty === 0) {
+                    if (currentSelectionQty > 0) {
+                      onAddToCart(product, -currentSelectionQty, selectedOptions);
+                    }
+                    handleClose();
+                    return;
+                  }
+                  const deltaQty = currentSelectionQty > 0 ? itemQty - currentSelectionQty : itemQty;
+                  if (deltaQty !== 0) {
+                    onAddToCart(product, deltaQty, selectedOptions);
+                  }
                   handleClose();
                 }}
-                className="w-full bg-brand-primary text-white py-3 rounded-2xl font-semibold flex items-center justify-between px-4 hover:bg-brand-primary/90 transition"
+                disabled={itemQty === 0 && currentSelectionQty <= 0}
+                className={`w-full py-3 rounded-2xl font-semibold flex items-center justify-between px-4 transition ${
+                  itemQty > 0
+                    ? "bg-brand-primary text-white hover:bg-brand-primary/90"
+                    : "border border-rose-200 bg-white text-rose-700 hover:bg-rose-50"
+                } disabled:opacity-60 disabled:cursor-not-allowed`}
               >
                 <span className="inline-flex items-center gap-1.5">
-                  <Plus size={16} weight="bold" />
-                  Adicionar
+                  {itemQty > 0 ? <Plus size={16} weight="bold" /> : <Trash size={16} weight="bold" />}
+                  {itemQty > 0
+                    ? `${currentSelectionQty > 0 ? "Atualizar" : "Adicionar"} ${formatCurrency(totalFinalPrice)}`
+                    : "Remover do pedido"}
                 </span>
-                <span className="font-extrabold">{formatCurrency(totalFinalPrice)}</span>
+                {itemQty > 0 ? <span className="font-bold">{formatCurrency(totalFinalPrice)}</span> : null}
               </button>
             </div>
           </div>
