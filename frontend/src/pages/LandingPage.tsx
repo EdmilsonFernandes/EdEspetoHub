@@ -313,6 +313,66 @@ export function LandingPage() {
         </div>
       </section>
 
+      <section className="bg-[linear-gradient(145deg,#020617,#0f172a_55%,#111827)] py-16 sm:py-20">
+        <div className="max-w-7xl mx-auto px-4">
+          <p className="text-xs uppercase tracking-[0.3em] text-sky-300 font-semibold">Planos</p>
+          <h2 className="text-2xl sm:text-4xl font-black text-white mt-2">Escolha o plano ideal para sua operação</h2>
+          <p className="mt-2 text-sm text-slate-300 max-w-2xl">
+            Comece rápido e evolua sem trocar de plataforma. Todos os planos já incluem cardápio online, operação e monitoramento.
+          </p>
+
+          <div className="mt-6 grid gap-4 md:grid-cols-3">
+            {[
+              {
+                name: 'Basic Mensal',
+                price: 'R$ 49,90',
+                caption: 'por mês',
+                cta: 'Começar agora',
+                featured: false,
+              },
+              {
+                name: 'Pro Mensal',
+                price: 'R$ 79,90',
+                caption: 'por mês',
+                cta: 'Escolher Pro',
+                featured: true,
+              },
+              {
+                name: 'Pro Anual',
+                price: 'R$ 69,90',
+                caption: 'equivalente mensal',
+                cta: 'Falar com especialista',
+                featured: false,
+              },
+            ].map((plan) => (
+              <div
+                key={plan.name}
+                className={`rounded-3xl border p-6 backdrop-blur-md bg-white/5 transition-all ${
+                  plan.featured
+                    ? 'border-cyan-300/40 shadow-[0_28px_60px_-40px_rgba(34,211,238,0.8)]'
+                    : 'border-white/10'
+                }`}
+              >
+                <p className="text-xs uppercase tracking-[0.2em] text-slate-300 font-semibold">{plan.name}</p>
+                <p className="mt-3 text-3xl font-black text-white">{plan.price}</p>
+                <p className="text-xs text-slate-400">{plan.caption}</p>
+                <button
+                  type="button"
+                  onClick={() => navigate('/create')}
+                  className={`mt-5 w-full rounded-2xl px-4 py-2.5 text-sm font-black transition-all ${
+                    plan.featured
+                      ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/20'
+                      : 'border border-white/20 bg-white/10 text-white hover:bg-white/15'
+                  }`}
+                >
+                  {plan.cta}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section className="bg-white py-16 sm:py-20">
         <div className="max-w-7xl mx-auto px-4">
           <p className="text-xs uppercase tracking-[0.3em] text-sky-700 font-semibold">Prova visual</p>

@@ -56,7 +56,7 @@ const OrderSummaryCard = ({
   <button
     type="button"
     onClick={onClick}
-    className={`w-full rounded-xl border border-slate-200 ${leftAccent} bg-white p-4 text-left flex flex-col gap-3 transition-all duration-300 transition-transform hover:border-slate-300 hover:shadow-lg hover:-translate-y-0.5 hover:scale-[1.01] cursor-pointer`}
+    className={`w-full rounded-xl border ${isLate ? 'border-red-400 animate-pulse' : 'border-slate-200'} ${leftAccent} bg-white p-4 text-left flex flex-col gap-3 transition-all duration-300 transition-transform hover:border-slate-300 hover:shadow-lg hover:-translate-y-0.5 hover:scale-[1.01] cursor-pointer`}
   >
     <div className="flex justify-between items-start gap-2 mb-3">
       <div className="flex items-center gap-2 flex-wrap min-w-0">
@@ -67,7 +67,7 @@ const OrderSummaryCard = ({
           {statusMeta.label}
         </span>
       </div>
-      <span className={`px-2 py-1 text-xs font-bold font-mono rounded-md shrink-0 whitespace-nowrap border ${isLate ? 'bg-red-100 text-red-700 border-red-200' : 'bg-emerald-100 text-emerald-700 border-emerald-200'}`}>
+      <span className={`px-2 py-1 text-xs font-bold font-mono rounded-md shrink-0 whitespace-nowrap border ${isLate ? 'bg-red-500 text-white border-red-500' : 'bg-emerald-100 text-emerald-700 border-emerald-200'}`}>
         {elapsedLabel}
       </span>
     </div>
@@ -961,7 +961,11 @@ export const GrillQueue = () => {
             Pedido pronto para retirada.
           </div>
           <button
-            onClick={() => { pulseCta(order.id + '-ready'); handleAdvance(order.id, "ready"); }}
+            onClick={async () => {
+              pulseCta(order.id + '-ready');
+              const success = await handleAdvance(order.id, "ready");
+              if (success) setSelectedOrder(null);
+            }}
             disabled={updating === order.id}
             style={ctaPulseId === order.id + '-ready' ? { animation: 'btnPop 220ms ease' } : undefined}
             className="w-full px-3 py-3 rounded-lg bg-sky-600 text-white text-sm font-bold flex items-center justify-center gap-1 disabled:opacity-60 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95"
