@@ -318,31 +318,31 @@ export function LandingPage() {
           <p className="text-xs uppercase tracking-[0.3em] text-sky-300 font-semibold">Planos</p>
           <h2 className="text-2xl sm:text-4xl font-black text-white mt-2">Escolha o plano ideal para sua operação</h2>
           <p className="mt-2 text-sm text-slate-300 max-w-2xl">
-            Comece rápido e evolua sem trocar de plataforma. Todos os planos já incluem cardápio online, operação e monitoramento.
+            Comece no trial completo e evolua sem trocar de plataforma. Todos os planos incluem cardápio online, operação e monitoramento.
           </p>
 
           <div className="mt-6 grid gap-4 md:grid-cols-3">
             {[
               {
+                name: 'Trial completo',
+                price: '7 dias grátis',
+                caption: 'sem cartão de crédito',
+                cta: 'Iniciar trial',
+                featured: false,
+              },
+              {
                 name: 'Basic Mensal',
-                price: 'R$ 49,90',
+                price: 'R$ 79,00',
                 caption: 'por mês',
-                cta: 'Começar agora',
+                cta: 'Escolher Basic',
                 featured: false,
               },
               {
                 name: 'Pro Mensal',
-                price: 'R$ 79,90',
+                price: 'R$ 119,00',
                 caption: 'por mês',
                 cta: 'Escolher Pro',
                 featured: true,
-              },
-              {
-                name: 'Pro Anual',
-                price: 'R$ 69,90',
-                caption: 'equivalente mensal',
-                cta: 'Falar com especialista',
-                featured: false,
               },
             ].map((plan) => (
               <div
