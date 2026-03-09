@@ -15,6 +15,7 @@ import {
   Truck,
   Storefront,
   ForkKnife,
+  Printer,
   X
 } from "@phosphor-icons/react";
 import { orderService } from "../../services/orderService";
@@ -48,14 +49,22 @@ const OrderSummaryCard = ({
   totalLabel,
   itemsCount,
   onClick,
+  onPrint,
 }: any) => (
   (() => {
     const isDelivery = String(order?.type || '').toLowerCase() === 'delivery';
     const leftAccent = isDelivery ? 'border-l-4 border-l-blue-500' : 'border-l-4 border-l-orange-500';
     return (
-  <button
-    type="button"
+  <div
+    role="button"
+    tabIndex={0}
     onClick={onClick}
+    onKeyDown={(event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        onClick();
+      }
+    }}
     className={`w-full rounded-xl border ${isLate ? 'border-red-400 animate-pulse' : 'border-slate-200'} ${leftAccent} bg-white p-4 text-left flex flex-col gap-3 transition-all duration-300 transition-transform hover:border-slate-300 hover:shadow-lg hover:-translate-y-0.5 hover:scale-[1.01] cursor-pointer`}
   >
     <div className="flex justify-between items-start gap-2 mb-3">
@@ -89,12 +98,62 @@ const OrderSummaryCard = ({
       <span className="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-lg text-[11px] font-bold border border-indigo-100">
         {itemsCount} {itemsCount === 1 ? 'item' : 'itens'}
       </span>
-      <span className="text-sm font-bold text-slate-900">{totalLabel}</span>
+      <div className="flex items-center gap-1.5">
+        <span className="text-sm font-bold text-slate-900">{totalLabel}</span>
+        <button
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation();
+            onPrint();
+          }}
+          className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-all no-print"
+          aria-label={`Imprimir pedido ${orderDisplayId}`}
+          title="Imprimir pedido"
+        >
+          <Printer size={14} weight="duotone" />
+        </button>
+      </div>
     </div>
-  </button>
+  </div>
     );
   })()
 );
+
+const PrintTemplate58mm = ({ order, queueRank, orderDisplayId }: any) => {
+  if (!order) return null;
+  const items = Array.isArray(order?.items) ? order.items : [];
+  const createdAt = order?.createdAt ? new Date(order.createdAt) : new Date();
+  const total = Number(order?.total || 0);
+  return (
+    <div id="print-template-58mm" className="print-only hidden text-black">
+      <div style={{ width: "58mm", fontFamily: "monospace", fontSize: "11px", lineHeight: 1.3, padding: "2mm" }}>
+        <div style={{ textAlign: "center", fontWeight: 700 }}>JA NO CAMINHO</div>
+        <div style={{ textAlign: "center", marginBottom: "4px" }}>Cupom de pedido</div>
+        <div>Fila: #{String(queueRank || 1).padStart(2, "0")}</div>
+        <div>Pedido: #{orderDisplayId || "-"}</div>
+        <div>Cliente: {order?.customerName || order?.name || "Cliente"}</div>
+        <div>Data: {createdAt.toLocaleString("pt-BR")}</div>
+        <div style={{ borderTop: "1px dashed #000", margin: "4px 0" }} />
+        {items.map((item: any, idx: number) => {
+          const qty = Number(item?.qty || 0);
+          const unit = Number(item?.unitPrice ?? item?.price ?? 0);
+          const lineTotal = qty * unit;
+          return (
+            <div key={`${item?.id || idx}`}>
+              <div>{qty}x {String(item?.name || "Item")}</div>
+              <div style={{ textAlign: "right" }}>{formatCurrency(lineTotal)}</div>
+            </div>
+          );
+        })}
+        <div style={{ borderTop: "1px dashed #000", margin: "4px 0" }} />
+        <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700 }}>
+          <span>Total</span>
+          <span>{formatCurrency(total)}</span>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export const GrillQueue = () => {
   // Tap feedback animation
@@ -156,6 +215,9 @@ export const GrillQueue = () => {
   });
   const [queueFilter, setQueueFilter] = useState<'all' | 'pending' | 'preparing' | 'ready' | 'late'>('all');
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
+  const [printOrder, setPrintOrder] = useState<any | null>(null);
+  const [printQueueRank, setPrintQueueRank] = useState<number>(1);
+  const [printOrderDisplayId, setPrintOrderDisplayId] = useState<string>('');
   const previousIdsRef = useRef<string[]>([]);
   const audioContextRef = useRef<AudioContext | null>(null);
   const isDrawerOpen = selectedOrder !== null;
@@ -164,6 +226,14 @@ export const GrillQueue = () => {
   const closeOrderOverlays = () => {
     setConfirmModal(null);
     setSelectedOrder(null);
+  };
+
+  const handlePrintOrder = (order: any, queueRank = 1) => {
+    if (!order?.id) return;
+    setPrintOrder(order);
+    setPrintQueueRank(queueRank);
+    setPrintOrderDisplayId(formatOrderDisplayId(order.id, storeSlug));
+    window.setTimeout(() => window.print(), 80);
   };
 
   const orderTypeMeta = (order: any) => {
@@ -1000,10 +1070,25 @@ export const GrillQueue = () => {
   );
 
   return (
-    <div className={tvMode ? "space-y-6 rounded-3xl bg-slate-900/95 p-4 sm:p-6 text-white" : "space-y-2"}>
+    <>
+    <div className={`no-print ${tvMode ? "space-y-6 rounded-3xl bg-slate-900/95 p-4 sm:p-6 text-white" : "space-y-2"}`}>
       <style>{`
         @keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
         @keyframes drawerIn{0%{transform:translateX(100%)}100%{transform:translateX(0)}}
+        @media print {
+          @page { size: 58mm auto; margin: 0; }
+          .no-print { display: none !important; }
+          .print-only { display: block !important; }
+          body * { visibility: hidden !important; }
+          #print-template-58mm, #print-template-58mm * { visibility: visible !important; }
+          #print-template-58mm {
+            display: block !important;
+            position: fixed;
+            inset: 0 auto auto 0;
+            width: 58mm;
+            background: #fff;
+          }
+        }
       `}</style>
       <div className={`${tvMode ? "" : "rounded-2xl border border-slate-200 bg-white px-3 py-3"}`}>
         <div className="flex flex-col gap-2 mb-2 border-b border-slate-100 pb-2">
@@ -1217,6 +1302,7 @@ export const GrillQueue = () => {
                   paymentLabel={paymentLabel}
                   totalLabel={totalLabel}
                   itemsCount={itemsCount}
+                  onPrint={() => handlePrintOrder(order, index + 1)}
                   onClick={() => {
                     setActionsOpen(false);
                     setConfirmModal(null);
@@ -1246,14 +1332,27 @@ export const GrillQueue = () => {
               <div className="fixed right-0 top-0 h-full w-full md:w-[450px] z-[10000] bg-white shadow-2xl flex flex-col animate-[drawerIn_220ms_ease-out]">
                 <div className="shrink-0 flex justify-between items-center px-4 py-3 border-b border-slate-200 bg-white">
                   <p className="text-sm font-bold text-slate-900">Detalhes do pedido</p>
-                  <button
-                    type="button"
-                    onClick={closeOrderOverlays}
-                    className="flex items-center justify-center w-[40px] h-[40px] bg-red-50 text-red-600 rounded-full hover:bg-red-100 hover:scale-105 active:scale-95 transition-all shadow-sm focus:outline-none"
-                    aria-label="Fechar"
-                  >
-                    <X size={20} weight="bold" />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    {selectedOrder && (
+                      <button
+                        type="button"
+                        onClick={() => handlePrintOrder(selectedOrder, selectedOrderRank)}
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-all no-print"
+                        aria-label="Imprimir pedido"
+                        title="Imprimir pedido"
+                      >
+                        <Printer size={16} weight="duotone" />
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={closeOrderOverlays}
+                      className="flex items-center justify-center w-[40px] h-[40px] bg-red-50 text-red-600 rounded-full hover:bg-red-100 hover:scale-105 active:scale-95 transition-all shadow-sm focus:outline-none no-print"
+                      aria-label="Fechar"
+                    >
+                      <X size={20} weight="bold" />
+                    </button>
+                  </div>
                 </div>
                 <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
                   <div
@@ -1984,6 +2083,8 @@ export const GrillQueue = () => {
         <div className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg p-3">{error}</div>
       )}
     </div>
+    <PrintTemplate58mm order={printOrder} queueRank={printQueueRank} orderDisplayId={printOrderDisplayId} />
+    </>
   );
 };
 
