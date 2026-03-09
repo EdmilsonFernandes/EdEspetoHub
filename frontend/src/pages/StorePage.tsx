@@ -1151,34 +1151,41 @@ export function StorePage() {
       </html>
     `;
 
-    const printWindow = window.open('', '_blank', 'noopener,noreferrer,width=420,height=640');
-    if (!printWindow) return;
-    printWindow.document.open();
-    printWindow.document.write(html);
-    printWindow.document.close();
+    const frame = document.createElement('iframe');
+    frame.setAttribute('aria-hidden', 'true');
+    frame.style.position = 'fixed';
+    frame.style.right = '0';
+    frame.style.bottom = '0';
+    frame.style.width = '0';
+    frame.style.height = '0';
+    frame.style.border = '0';
+    document.body.appendChild(frame);
+
+    const frameDoc = frame.contentDocument || frame.contentWindow?.document;
+    if (!frameDoc) {
+      frame.remove();
+      return;
+    }
+
+    frameDoc.open();
+    frameDoc.write(html);
+    frameDoc.close();
+
     let printed = false;
     const runPrint = () => {
       if (printed) return;
       printed = true;
       try {
-        printWindow.focus();
-        printWindow.print();
+        frame.contentWindow?.focus();
+        frame.contentWindow?.print();
       } catch {}
-      printWindow.onafterprint = () => {
-        try {
-          printWindow.close();
-        } catch {}
-      };
-      window.setTimeout(() => {
-        try {
-          printWindow.close();
-        } catch {}
-      }, 3000);
+      window.setTimeout(() => frame.remove(), 2500);
     };
-    if (printWindow.document.readyState === 'complete') {
+
+    if (frame.contentWindow?.document.readyState === 'complete') {
       window.setTimeout(runPrint, 80);
     } else {
-      printWindow.onload = () => window.setTimeout(runPrint, 80);
+      frame.onload = () => window.setTimeout(runPrint, 80);
     }
   };
 
