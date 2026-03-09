@@ -1130,6 +1130,7 @@ export function StorePage() {
           .right { text-align: right; white-space: nowrap; }
           .muted { color: #333; font-size: 10px; margin: 1px 0 2px; }
           .total { font-weight: 700; font-size: 13px; }
+          .feed { height: 14mm; }
         </style>
       </head>
       <body>
@@ -1144,11 +1145,14 @@ export function StorePage() {
           ${lines}
           <div class="sep"></div>
           <div class="line total"><span>Total</span><span class="right">${escapeHtml(formatCurrency(total))}</span></div>
+          <div class="feed"></div>
         </div>
         <script>
           window.onload = function () {
+            if (window.__receiptPrinted) return;
+            window.__receiptPrinted = true;
             window.focus();
-            window.print();
+            setTimeout(function () { window.print(); }, 60);
             window.onafterprint = function () { window.close(); };
           };
         </script>
