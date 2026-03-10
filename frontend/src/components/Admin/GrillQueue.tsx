@@ -266,44 +266,43 @@ export const GrillQueue = () => {
   <div class="tail">\n\n</div>
 </body>
 </html>`;
-    const blob = new Blob([receiptHtml], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
     const frame = document.getElementById('silent-printer') as HTMLIFrameElement | null;
     if (!frame) {
-      URL.revokeObjectURL(url);
       setIsGeneratingPrint(false);
       setError('Falha ao iniciar impressão.');
       return;
     }
-    let cleaned = false;
-    const cleanup = () => {
-      if (cleaned) return;
-      cleaned = true;
-      frame.onload = null;
-      frame.src = 'about:blank';
-      URL.revokeObjectURL(url);
+    const frameDoc = frame.contentDocument || frame.contentWindow?.document;
+    const frameWin = frame.contentWindow;
+    if (!frameDoc || !frameWin) {
       setIsGeneratingPrint(false);
-      setError('');
-    };
-    frame.onload = () => {
-      const win = frame.contentWindow;
-      if (!win) {
-        cleanup();
-        return;
+      setError('Falha ao iniciar impressão.');
+      return;
+    }
+    frameDoc.open();
+    frameDoc.write(receiptHtml);
+    frameDoc.close();
+    window.setTimeout(() => {
+      try {
+        frameWin.focus();
+        frameWin.print();
+      } catch (error) {
+        console.error('[print] erro ao imprimir', error);
+        alert('Clique novamente para confirmar a impressão');
+      } finally {
+        window.setTimeout(() => {
+          setIsGeneratingPrint(false);
+          setError('');
+          try {
+            frameDoc.open();
+            frameDoc.write('<html><body></body></html>');
+            frameDoc.close();
+          } catch {
+            // noop
+          }
+        }, 1500);
       }
-      window.setTimeout(() => {
-        try {
-          win.focus();
-          win.print();
-        } catch (error) {
-          console.error('[print] erro ao imprimir', error);
-          alert('Clique novamente para confirmar a impressão');
-        } finally {
-          window.setTimeout(cleanup, 2000);
-        }
-      }, 300);
-    };
-    frame.src = url;
+    }, 500);
   };
 
   const orderTypeMeta = (order: any) => {
