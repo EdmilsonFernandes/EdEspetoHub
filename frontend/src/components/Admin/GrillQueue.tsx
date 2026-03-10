@@ -240,10 +240,12 @@ export const GrillQueue = () => {
   <title>Imprimir</title>
   <style>
     * { box-sizing: border-box; }
+    html, body { height: auto !important; min-height: 100px; }
     body { width: 58mm; margin: 0; padding: 2mm; font-family: 'Courier New', monospace; font-size: 12px; color: black; background: white; line-height: 1.35; }
     .center { text-align: center; }
     .header { text-align: center; font-weight: bold; text-transform: uppercase; }
     .item { display: flex; justify-content: space-between; margin: 2px 0; }
+    .items-block { min-height: 40px; }
     .opt { font-size: 10px; margin-left: 2ch; }
     hr { border: none; border-top: 1px dashed black; margin: 4px 0; }
     .strong { font-weight: 700; }
@@ -260,12 +262,13 @@ export const GrillQueue = () => {
   <div>Cliente: ${escapeHtml(payload.order?.customerName || payload.order?.name || 'Cliente')}</div>
   <div>Data: ${escapeHtml(payload.createdAt)}</div>
   <hr />
-  ${itemsHtml}
+  <div class="items-block">${itemsHtml}</div>
   <hr />
   <div class="item strong"><span>Total</span><span>${escapeHtml(formatCurrency(payload.total))}</span></div>
   <div class="tail">\n\n</div>
 </body>
 </html>`;
+    console.log('HTML do Cupom:', receiptHtml);
     const frame = document.getElementById('silent-printer') as HTMLIFrameElement | null;
     if (!frame) {
       setIsGeneratingPrint(false);
@@ -282,9 +285,9 @@ export const GrillQueue = () => {
     frameDoc.open();
     frameDoc.write(receiptHtml);
     frameDoc.close();
+    frameWin.focus();
     window.setTimeout(() => {
       try {
-        frameWin.focus();
         frameWin.print();
       } catch (error) {
         console.error('[print] erro ao imprimir', error);
@@ -302,7 +305,7 @@ export const GrillQueue = () => {
           }
         }, 1500);
       }
-    }, 500);
+    }, 800);
   };
 
   const orderTypeMeta = (order: any) => {
