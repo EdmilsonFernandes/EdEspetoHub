@@ -57,6 +57,7 @@ const OrderSummaryCard = ({
   (() => {
     const isDelivery = String(order?.type || '').toLowerCase() === 'delivery';
     const leftAccent = isDelivery ? 'border-l-4 border-l-blue-500' : 'border-l-4 border-l-orange-500';
+    const compactMeta = `${order?.table ? `Mesa ${order.table}` : typeMeta.label} • ${paymentLabel} • ID ${orderDisplayId}`;
     return (
   <div
     role="button"
@@ -68,41 +69,33 @@ const OrderSummaryCard = ({
         onClick();
       }
     }}
-    className={`w-full rounded-xl border ${isLate ? 'border-red-400 animate-pulse' : 'border-slate-200'} ${leftAccent} bg-white p-4 text-left flex flex-col gap-3 transition-all duration-300 transition-transform hover:border-slate-300 hover:shadow-lg hover:-translate-y-0.5 hover:scale-[1.01] cursor-pointer`}
+    className={`w-full rounded-xl border ${isLate ? 'border-red-400 animate-pulse' : 'border-slate-200'} ${leftAccent} bg-white p-3 text-left flex flex-col gap-2 transition-all duration-300 transition-transform hover:border-slate-300 hover:shadow-lg hover:-translate-y-0.5 hover:scale-[1.01] cursor-pointer`}
   >
-    <div className="flex justify-between items-start gap-2 mb-3">
-      <div className="flex items-center gap-2 flex-wrap min-w-0">
+    <div className="grid grid-cols-[auto_1fr_auto] items-center gap-2">
+      <div className="min-w-0">
         <span className="px-2 py-1 bg-slate-800 text-white text-xs font-bold rounded-md shadow-sm">
           #{String(queueRank).padStart(2, '0')}
         </span>
+      </div>
+      <div className="flex justify-center min-w-0">
         <span className={`px-2 py-1 text-[10px] uppercase tracking-wider font-bold rounded-md whitespace-nowrap border ${statusMeta.className}`}>
           {statusMeta.label}
         </span>
       </div>
-      <span className={`px-2 py-1 text-xs font-bold font-mono rounded-md shrink-0 whitespace-nowrap border ${isLate ? 'bg-red-500 text-white border-red-500' : 'bg-emerald-100 text-emerald-700 border-emerald-200'}`}>
-        {elapsedLabel}
-      </span>
-    </div>
-
-    <div>
-      <h3 className="text-lg font-black text-slate-800 line-clamp-1">{order.customerName || order.name || 'Cliente'}</h3>
-      <p className="mt-1 text-[11px] font-semibold text-slate-500">Pedido #{orderDisplayId}</p>
-      <div className="flex items-center gap-2 text-xs text-slate-500 font-medium mt-1">
-        <span className="inline-flex items-center gap-1">
-          {typeMeta.icon}
-          <span>{typeMeta.label}</span>
+      <div className="flex justify-end">
+        <span className={`px-2 py-1 text-xs font-bold font-mono rounded-md shrink-0 whitespace-nowrap border ${isLate ? 'bg-red-500 text-white border-red-500' : 'bg-emerald-100 text-emerald-700 border-emerald-200'}`}>
+          {elapsedLabel}
         </span>
-        <span className="text-slate-300">•</span>
-        <span>{paymentLabel}</span>
       </div>
     </div>
 
-    <div className="border-t border-slate-100 pt-3 mt-1 flex justify-between items-center">
-      <span className="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-lg text-[11px] font-bold border border-indigo-100">
-        {itemsCount} {itemsCount === 1 ? 'item' : 'itens'}
-      </span>
+    <div className="min-w-0">
+      <h3 className="text-base font-black text-slate-800 line-clamp-1">{order.customerName || order.name || 'Cliente'}</h3>
+      <p className="mt-1 text-xs text-slate-500 font-medium line-clamp-1">{compactMeta}</p>
+    </div>
+
+    <div className="border-t border-slate-100 pt-2 mt-1 flex justify-between items-center">
       <div className="flex items-center gap-1.5">
-        <span className="text-sm font-bold text-slate-900">{totalLabel}</span>
         {canPrint && (
           <button
             type="button"
@@ -118,6 +111,10 @@ const OrderSummaryCard = ({
             <Printer size={15} weight="duotone" />
           </button>
         )}
+      </div>
+      <div className="text-right">
+        <span className="text-sm font-bold text-slate-900">{totalLabel}</span>
+        <span className="ml-2 text-[11px] text-slate-500">{itemsCount} {itemsCount === 1 ? 'item' : 'itens'}</span>
       </div>
     </div>
   </div>
@@ -1189,7 +1186,7 @@ export const GrillQueue = () => {
               </div>
 
               {activeTab === 'queue' && (
-                <div className="flex items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                <div className="flex flex-nowrap items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                   {[
                     { id: 'all', label: 'Todos', value: productionQueue.length },
                     { id: 'pending', label: 'Pendentes', value: queueMetrics.pending },

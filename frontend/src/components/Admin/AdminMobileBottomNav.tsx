@@ -63,7 +63,7 @@ export function AdminMobileBottomNav() {
   const items = [
     {
       id: 'monitor',
-      label: 'Pedidos',
+      label: 'Monitor',
       icon: ChefHat,
       active: path === '/admin/queue',
       onClick: () => navigate('/admin/queue'),
@@ -78,7 +78,7 @@ export function AdminMobileBottomNav() {
     },
     {
       id: 'pedidos',
-      label: 'Pedidos',
+      label: 'Vendas',
       icon: ShoppingCart,
       active: path === '/admin/dashboard' && dashboardTab === 'pedidos',
       onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'pedidos' } }),
@@ -104,7 +104,7 @@ export function AdminMobileBottomNav() {
                 onClick={item.onClick}
                 className={`w-full rounded-xl py-2 text-[11px] font-bold flex flex-col items-center justify-center gap-1 transition ${
                   item.active
-                    ? 'bg-slate-900 text-white shadow-sm'
+                    ? 'bg-slate-900 text-white shadow-[0_10px_24px_-14px_rgba(15,23,42,0.85)] ring-1 ring-slate-700'
                     : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
                 }`}
               >
