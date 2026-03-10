@@ -164,6 +164,7 @@ export function StorePage() {
     Boolean(isStoreAdmin);
   const [showPrintPrompt, setShowPrintPrompt] = useState(false);
   const [printReceiptPayload, setPrintReceiptPayload] = useState<any | null>(null);
+  const [isPrinting, setIsPrinting] = useState(false);
 
   const cartPricing = useMemo(() => getCartPricing(cart), [cart]);
   const cartItemsTotal = cartPricing.discountedSubtotal;
@@ -1129,6 +1130,7 @@ export function StorePage() {
       paymentMethod: formatPaymentMethod(lastOrder?.payment),
       storeName: storeName || branding?.brandName || 'Já no Caminho',
     });
+    setIsPrinting(true);
   };
 
   useEffect(() => {
@@ -1138,24 +1140,16 @@ export function StorePage() {
   }, [hasAdminPrintAccess]);
 
   useEffect(() => {
-    if (!printReceiptPayload) return;
-    let rafA = 0;
-    let rafB = 0;
-    let timer = 0;
-    rafA = window.requestAnimationFrame(() => {
-      rafB = window.requestAnimationFrame(() => {
-        timer = window.setTimeout(() => window.print(), 40);
-      });
-    });
-    return () => {
-      if (rafA) window.cancelAnimationFrame(rafA);
-      if (rafB) window.cancelAnimationFrame(rafB);
-      if (timer) window.clearTimeout(timer);
-    };
-  }, [printReceiptPayload]);
+    if (!isPrinting || !printReceiptPayload) return;
+    const timer = window.setTimeout(() => window.print(), 500);
+    return () => window.clearTimeout(timer);
+  }, [isPrinting, printReceiptPayload]);
 
   useEffect(() => {
-    const clearPrint = () => setPrintReceiptPayload(null);
+    const clearPrint = () => {
+      setIsPrinting(false);
+      setPrintReceiptPayload(null);
+    };
     window.addEventListener('afterprint', clearPrint);
     return () => window.removeEventListener('afterprint', clearPrint);
   }, []);
@@ -1182,30 +1176,18 @@ export function StorePage() {
       <style>{`
         @media print{
           @page{size:58mm auto;margin:0}
-          *{
-            box-sizing:border-box!important;
-            margin:0!important;
-            padding:0!important;
-          }
+          *{box-sizing:border-box!important}
           html,body{
             margin:0!important;
             padding:0!important;
             height:auto!important;
             overflow:visible!important;
             background:#fff!important;
-            width:58mm!important;
-            max-width:58mm!important;
-            min-width:58mm!important;
           }
-          body *{visibility:hidden!important}
-          .print-container,.print-container *{visibility:visible!important}
-          .no-print,
-          [role="dialog"],
-          [data-headlessui-portal],
-          [class*="modal"],
-          [class*="drawer"],
-          [class*="sidebar"]{
+          body > *:not(#print-area){
             display:none!important;
+            height:0!important;
+            overflow:hidden!important;
           }
           .print-container{
             display:block!important;
@@ -1225,12 +1207,15 @@ export function StorePage() {
             page-break-after:avoid!important;
             zoom:1!important;
             transform:none!important;
+            box-shadow:none!important;
+            border-radius:0!important;
           }
           .print-container *{
-            background:transparent!important;
+            background:#fff!important;
             color:#000!important;
             box-shadow:none!important;
             border-color:#000!important;
+            border-radius:0!important;
           }
           .no-print{display:none!important}
         }
@@ -1658,12 +1643,12 @@ export function StorePage() {
       )}
 
       {printReceiptPayload && createPortal(
-        <div className="print-container">
+        <div id="print-area" className="print-container">
           <div style={{ textAlign: 'center', fontWeight: 700, textTransform: 'uppercase' }}>
             {String(printReceiptPayload.storeName || 'Sertanejo no Espeto')}
           </div>
           <div style={{ textAlign: 'center', fontSize: '11px' }}>Pedido via Ja no Caminho</div>
-          <div style={{ margin: '3px 0' }}>--------------------------------</div>
+          <div style={{ borderTop: '1px dashed #000', margin: '4px 0' }} />
           <div style={{ fontWeight: 700 }}>
             [[ FILA: {printReceiptPayload.queueRank ? `#${String(printReceiptPayload.queueRank).padStart(2, '0')}` : '--'} ]]
           </div>
@@ -1673,7 +1658,7 @@ export function StorePage() {
           <div>Tipo: {printReceiptPayload.type}</div>
           <div>Pagamento: {printReceiptPayload.paymentMethod || '-'}</div>
           <div>Data: {printReceiptPayload.createdAt}</div>
-          <div style={{ margin: '3px 0' }}>--------------------------------</div>
+          <div style={{ borderTop: '1px dashed #000', margin: '4px 0' }} />
           {(Array.isArray(printReceiptPayload.items) ? printReceiptPayload.items : []).map((item: any, idx: number) => (
             <div key={`${item?.name || 'item'}-${idx}`}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -1683,7 +1668,7 @@ export function StorePage() {
               {item?.options ? <div style={{ fontSize: '10px' }}>{`  ${item.options}`}</div> : null}
             </div>
           ))}
-          <div style={{ margin: '3px 0' }}>--------------------------------</div>
+          <div style={{ borderTop: '1px dashed #000', margin: '4px 0' }} />
           <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700 }}>
             <span>TOTAL</span>
             <span>{formatCurrency(Number(printReceiptPayload.total || 0))}</span>
