@@ -183,8 +183,6 @@ export const GrillQueue = () => {
   });
   const [queueFilter, setQueueFilter] = useState<'all' | 'pending' | 'preparing' | 'ready' | 'late'>('all');
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
-  const [printPayload, setPrintPayload] = useState<any | null>(null);
-  const [isPrinting, setIsPrinting] = useState(false);
   const previousIdsRef = useRef<string[]>([]);
   const audioContextRef = useRef<AudioContext | null>(null);
   const isDrawerOpen = selectedOrder !== null;
@@ -197,29 +195,85 @@ export const GrillQueue = () => {
 
   const handlePrintOrder = (order: any, queueRank = 1) => {
     if (!hasAdminPrintAccess || !order?.id) return;
-    setPrintPayload({
+    const payload = {
       order,
       queueRank,
       orderDisplayId: formatOrderDisplayId(order.id, storeSlug),
       createdAt: order?.createdAt ? new Date(order.createdAt).toLocaleString('pt-BR') : new Date().toLocaleString('pt-BR'),
-    });
-    setIsPrinting(true);
-  };
-
-  useEffect(() => {
-    const clearPrint = () => {
-      setIsPrinting(false);
-      setPrintPayload(null);
+      items: Array.isArray(order?.items) ? order.items : [],
+      total: Number(order?.total || 0),
+      storeName: String(order?.storeName || auth?.store?.name || 'Sertanejo no Espeto'),
     };
-    window.addEventListener('afterprint', clearPrint);
-    return () => window.removeEventListener('afterprint', clearPrint);
-  }, []);
-
-  useEffect(() => {
-    if (!isPrinting || !printPayload) return;
-    const timer = window.setTimeout(() => window.print(), 500);
-    return () => window.clearTimeout(timer);
-  }, [isPrinting, printPayload]);
+    if (!payload.items.length) {
+      setError('Pedido sem itens para impressão.');
+      return;
+    }
+    const escapeHtml = (value: any) =>
+      String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    const itemsHtml = payload.items
+      .map((item: any) => {
+        const qty = Number(item?.qty ?? item?.quantity ?? 0);
+        const unit = Number(item?.unitPrice ?? item?.price ?? 0);
+        const lineTotal = formatCurrency(qty * unit);
+        const name = escapeHtml(item?.name || 'Item');
+        const options = item?.cookingPoint || item?.options ? `<div class="opt">  ${escapeHtml(item?.cookingPoint || item?.options || '')}</div>` : '';
+        return `<div class="line"><span>${qty}x ${name}</span><span>${lineTotal}</span></div>${options}`;
+      })
+      .join('');
+    const receiptHtml = `<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Imprimir</title>
+  <style>
+    * { box-sizing: border-box; color: #000 !important; background: #fff !important; }
+    html, body { width: 58mm; margin: 0; padding: 0; font-family: monospace; }
+    body { padding: 2mm; font-size: 12px; line-height: 1.35; }
+    .center { text-align: center; }
+    .title { font-weight: 700; text-transform: uppercase; }
+    .sep { border-top: 1px dashed #000; margin: 4px 0; }
+    .strong { font-weight: 700; }
+    .line { display: flex; justify-content: space-between; }
+    .opt { font-size: 10px; }
+    .tail { white-space: pre-line; }
+    @media print { @page { size: 58mm auto; margin: 0; } }
+  </style>
+</head>
+<body>
+  <div class="center title">${escapeHtml(payload.storeName)}</div>
+  <div class="center">Pedido via Ja no Caminho</div>
+  <div class="sep"></div>
+  <div class="strong">[[ FILA: #${String(payload.queueRank || 1).padStart(2, '0')} ]]</div>
+  <div>Pedido: #${escapeHtml(payload.orderDisplayId)}</div>
+  <div>Cliente: ${escapeHtml(payload.order?.customerName || payload.order?.name || 'Cliente')}</div>
+  <div>Data: ${escapeHtml(payload.createdAt)}</div>
+  <div class="sep"></div>
+  ${itemsHtml}
+  <div class="sep"></div>
+  <div class="line strong"><span>Total</span><span>${escapeHtml(formatCurrency(payload.total))}</span></div>
+  <div class="tail">\n\n</div>
+</body>
+</html>`;
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      setError('Não foi possível abrir a janela de impressão. Libere pop-up no navegador.');
+      return;
+    }
+    printWindow.document.open();
+    printWindow.document.write(receiptHtml);
+    printWindow.document.close();
+    window.setTimeout(() => {
+      printWindow.focus();
+      printWindow.print();
+      window.setTimeout(() => printWindow.close(), 300);
+    }, 300);
+  };
 
   const orderTypeMeta = (order: any) => {
     const type = String(order?.type || '').toLowerCase();
@@ -2098,47 +2152,6 @@ export const GrillQueue = () => {
         <div className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg p-3">{error}</div>
       )}
     </div>
-    {printPayload && createPortal(
-      <div id="print-area" className="print-container print-only">
-        <div style={{ width: '58mm', fontFamily: 'monospace', fontSize: '12px', lineHeight: 1.35, padding: '2mm' }}>
-          <div style={{ textAlign: 'center', fontWeight: 700, textTransform: 'uppercase' }}>
-            {String(printPayload.order?.storeName || 'Sertanejo no Espeto')}
-          </div>
-          <div style={{ textAlign: 'center', fontSize: '11px' }}>Pedido via Ja no Caminho</div>
-          <div style={{ borderTop: '1px dashed #000', margin: '4px 0' }} />
-          <div style={{ fontWeight: 700 }}>
-            [[ FILA: #{String(printPayload.queueRank || 1).padStart(2, '0')} ]]
-          </div>
-          <div>Pedido: #{printPayload.orderDisplayId}</div>
-          <div>Cliente: {printPayload.order?.customerName || printPayload.order?.name || 'Cliente'}</div>
-          <div>Data: {printPayload.createdAt}</div>
-          <div style={{ borderTop: '1px dashed #000', margin: '4px 0' }} />
-          {(Array.isArray(printPayload.order?.items) ? printPayload.order.items : []).map((item: any, idx: number) => {
-            const qty = Number(item?.qty ?? item?.quantity ?? 0);
-            const unit = Number(item?.unitPrice ?? item?.price ?? 0);
-            const lineTotal = qty * unit;
-            return (
-              <div key={`${item?.id || idx}`}>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span>{qty}x {String(item?.name || 'Item')}</span>
-                  <span>{formatCurrency(lineTotal)}</span>
-                </div>
-                {(item?.cookingPoint || item?.options) ? (
-                  <div style={{ fontSize: '10px' }}>{`  ${String(item?.cookingPoint || item?.options || '')}`}</div>
-                ) : null}
-              </div>
-            );
-          })}
-          <div style={{ borderTop: '1px dashed #000', margin: '4px 0' }} />
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700 }}>
-            <span>Total</span>
-            <span>{formatCurrency(Number(printPayload.order?.total || 0))}</span>
-          </div>
-          <div style={{ whiteSpace: 'pre-line' }}>{'\n\n'}</div>
-        </div>
-      </div>,
-      document.body
-    )}
     </>
   );
 };

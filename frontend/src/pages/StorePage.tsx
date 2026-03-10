@@ -1,6 +1,5 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ShoppingCart, PaperPlaneTilt, Clock, MapPinLine, InstagramLogo, ArrowLeft } from '@phosphor-icons/react';
 import { productService } from '../services/productService';
@@ -163,8 +162,6 @@ export function StorePage() {
     normalizedRole === 'super_admin' ||
     Boolean(isStoreAdmin);
   const [showPrintPrompt, setShowPrintPrompt] = useState(false);
-  const [printReceiptPayload, setPrintReceiptPayload] = useState<any | null>(null);
-  const [isPrinting, setIsPrinting] = useState(false);
 
   const cartPricing = useMemo(() => getCartPricing(cart), [cart]);
   const cartItemsTotal = cartPricing.discountedSubtotal;
@@ -1108,7 +1105,8 @@ export function StorePage() {
   const printLastOrderReceipt = () => {
     if (!hasAdminPrintAccess) return;
     if (!lastOrder?.id) return;
-    setPrintReceiptPayload({
+
+    const payload = {
       orderId: lastOrder.id,
       orderDisplayId: formatOrderDisplayId(lastOrder.id, storeSlug),
       createdAt: (lastOrder?.createdAt ? new Date(lastOrder.createdAt) : new Date()).toLocaleString('pt-BR'),
@@ -1129,8 +1127,84 @@ export function StorePage() {
       total: Number(lastOrder?.total || 0),
       paymentMethod: formatPaymentMethod(lastOrder?.payment),
       storeName: storeName || branding?.brandName || 'Já no Caminho',
-    });
-    setIsPrinting(true);
+    };
+
+    if (!payload.items.length) {
+      showToast('Pedido sem itens para imprimir.', 'error');
+      return;
+    }
+
+    const escapeHtml = (value: any) =>
+      String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+
+    const itemsHtml = payload.items
+      .map((item: any) => {
+        const qty = Number(item?.quantity || 0);
+        const name = escapeHtml(item?.name || 'Item');
+        const lineTotal = formatCurrency(Number(item?.lineTotal || 0));
+        const options = item?.options ? `<div class="opt">  ${escapeHtml(item.options)}</div>` : '';
+        return `<div class="line"><span>${qty}x ${name}</span><span>${lineTotal}</span></div>${options}`;
+      })
+      .join('');
+
+    const queueText = payload.queueRank ? `#${String(payload.queueRank).padStart(2, '0')}` : '--';
+    const receiptHtml = `<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Imprimir</title>
+  <style>
+    * { box-sizing: border-box; color: #000 !important; background: #fff !important; }
+    html, body { width: 58mm; margin: 0; padding: 0; font-family: monospace; }
+    body { padding: 2mm; font-size: 12px; line-height: 1.35; }
+    .center { text-align: center; }
+    .title { font-weight: 700; text-transform: uppercase; }
+    .sep { border-top: 1px dashed #000; margin: 4px 0; }
+    .strong { font-weight: 700; }
+    .line { display: flex; justify-content: space-between; }
+    .opt { font-size: 10px; }
+    .tail { white-space: pre-line; }
+    @media print { @page { size: 58mm auto; margin: 0; } }
+  </style>
+</head>
+<body>
+  <div class="center title">${escapeHtml(payload.storeName || 'SERTANEJO NO ESPETO')}</div>
+  <div class="center">Pedido via Ja no Caminho</div>
+  <div class="sep"></div>
+  <div class="strong">[[ FILA: ${queueText} ]]</div>
+  <div>Pedido: #${escapeHtml(payload.orderDisplayId)}</div>
+  <div>Cliente: ${escapeHtml(payload.customerName)}</div>
+  ${payload.table ? `<div>Mesa: ${escapeHtml(payload.table)}</div>` : ''}
+  <div>Tipo: ${escapeHtml(payload.type)}</div>
+  <div>Pagamento: ${escapeHtml(payload.paymentMethod || '-')}</div>
+  <div>Data: ${escapeHtml(payload.createdAt)}</div>
+  <div class="sep"></div>
+  ${itemsHtml}
+  <div class="sep"></div>
+  <div class="line strong"><span>TOTAL</span><span>${escapeHtml(formatCurrency(Number(payload.total || 0)))}</span></div>
+  <div class="tail">\n\n</div>
+</body>
+</html>`;
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      showToast('Não foi possível abrir a janela de impressão. Libere pop-up no navegador.', 'error');
+      return;
+    }
+    printWindow.document.open();
+    printWindow.document.write(receiptHtml);
+    printWindow.document.close();
+    window.setTimeout(() => {
+      printWindow.focus();
+      printWindow.print();
+      window.setTimeout(() => printWindow.close(), 300);
+    }, 300);
   };
 
   useEffect(() => {
@@ -1138,21 +1212,6 @@ export function StorePage() {
       setShowPrintPrompt(false);
     }
   }, [hasAdminPrintAccess]);
-
-  useEffect(() => {
-    if (!isPrinting || !printReceiptPayload) return;
-    const timer = window.setTimeout(() => window.print(), 500);
-    return () => window.clearTimeout(timer);
-  }, [isPrinting, printReceiptPayload]);
-
-  useEffect(() => {
-    const clearPrint = () => {
-      setIsPrinting(false);
-      setPrintReceiptPayload(null);
-    };
-    window.addEventListener('afterprint', clearPrint);
-    return () => window.removeEventListener('afterprint', clearPrint);
-  }, []);
 
   // Loading state
   if (isLoading) {
@@ -1640,42 +1699,6 @@ export function StorePage() {
         >
           <PaperPlaneTilt size={20} weight="duotone" />
         </div>
-      )}
-
-      {printReceiptPayload && createPortal(
-        <div id="print-area" className="print-container">
-          <div style={{ textAlign: 'center', fontWeight: 700, textTransform: 'uppercase' }}>
-            {String(printReceiptPayload.storeName || 'Sertanejo no Espeto')}
-          </div>
-          <div style={{ textAlign: 'center', fontSize: '11px' }}>Pedido via Ja no Caminho</div>
-          <div style={{ borderTop: '1px dashed #000', margin: '4px 0' }} />
-          <div style={{ fontWeight: 700 }}>
-            [[ FILA: {printReceiptPayload.queueRank ? `#${String(printReceiptPayload.queueRank).padStart(2, '0')}` : '--'} ]]
-          </div>
-          <div>Pedido: #{printReceiptPayload.orderDisplayId}</div>
-          <div>Cliente: {printReceiptPayload.customerName}</div>
-          {printReceiptPayload.table ? <div>Mesa: {printReceiptPayload.table}</div> : null}
-          <div>Tipo: {printReceiptPayload.type}</div>
-          <div>Pagamento: {printReceiptPayload.paymentMethod || '-'}</div>
-          <div>Data: {printReceiptPayload.createdAt}</div>
-          <div style={{ borderTop: '1px dashed #000', margin: '4px 0' }} />
-          {(Array.isArray(printReceiptPayload.items) ? printReceiptPayload.items : []).map((item: any, idx: number) => (
-            <div key={`${item?.name || 'item'}-${idx}`}>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span>{Number(item?.quantity || 0)}x {String(item?.name || 'Item')}</span>
-                <span>{formatCurrency(Number(item?.lineTotal || 0))}</span>
-              </div>
-              {item?.options ? <div style={{ fontSize: '10px' }}>{`  ${item.options}`}</div> : null}
-            </div>
-          ))}
-          <div style={{ borderTop: '1px dashed #000', margin: '4px 0' }} />
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700 }}>
-            <span>TOTAL</span>
-            <span>{formatCurrency(Number(printReceiptPayload.total || 0))}</span>
-          </div>
-          <div style={{ whiteSpace: 'pre-line' }}>{'\n\n'}</div>
-        </div>,
-        document.body
       )}
 
     </div>
