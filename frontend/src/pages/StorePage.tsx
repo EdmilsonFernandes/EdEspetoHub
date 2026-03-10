@@ -1192,15 +1192,12 @@ export function StorePage() {
 </body>
 </html>`;
 
+    const existing = document.getElementById('print-frame');
+    if (existing) existing.remove();
     const iframe = document.createElement('iframe');
+    iframe.id = 'print-frame';
     iframe.setAttribute('aria-hidden', 'true');
-    iframe.style.position = 'fixed';
-    iframe.style.right = '0';
-    iframe.style.bottom = '0';
-    iframe.style.width = '0';
-    iframe.style.height = '0';
-    iframe.style.border = '0';
-    iframe.style.opacity = '0';
+    iframe.style.display = 'none';
     document.body.appendChild(iframe);
 
     const frameDoc = iframe.contentDocument || iframe.contentWindow?.document;
@@ -1211,22 +1208,26 @@ export function StorePage() {
       return;
     }
 
-    frameDoc.open();
-    frameDoc.write(receiptHtml);
-    frameDoc.close();
-
     let cleaned = false;
     const cleanup = () => {
       if (cleaned) return;
       cleaned = true;
       iframe.remove();
     };
-    frameWin.onafterprint = cleanup;
-    window.setTimeout(() => {
-      frameWin.focus();
-      frameWin.print();
-      window.setTimeout(cleanup, 2000);
-    }, 300);
+    const runPrint = () => {
+      frameWin.onafterprint = cleanup;
+      window.setTimeout(() => {
+        frameWin.focus();
+        frameWin.print();
+        window.setTimeout(cleanup, 2500);
+      }, 300);
+    };
+    iframe.onload = runPrint;
+    frameDoc.open();
+    frameDoc.write(receiptHtml);
+    frameDoc.close();
+    // fallback para browsers que não disparam onload com document.write
+    window.setTimeout(runPrint, 500);
   };
 
   useEffect(() => {
@@ -1254,53 +1255,6 @@ export function StorePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 font-sans pb-28 sm:pb-24 overflow-x-hidden no-x-scroll">
-      <style>{`
-        @media print{
-          @page{size:58mm auto;margin:0}
-          *{box-sizing:border-box!important}
-          html,body{
-            margin:0!important;
-            padding:0!important;
-            height:auto!important;
-            overflow:visible!important;
-            background:#fff!important;
-          }
-          body > *:not(#print-area){
-            display:none!important;
-            height:0!important;
-            overflow:hidden!important;
-          }
-          .print-container{
-            display:block!important;
-            float:none!important;
-            position:absolute!important;
-            top:0!important;
-            left:0!important;
-            width:58mm!important;
-            padding:2mm!important;
-            background:#fff!important;
-            color:#000!important;
-            font-family:monospace!important;
-            font-size:12px!important;
-            line-height:1.35!important;
-            page-break-inside:avoid!important;
-            break-inside:avoid-page!important;
-            page-break-after:avoid!important;
-            zoom:1!important;
-            transform:none!important;
-            box-shadow:none!important;
-            border-radius:0!important;
-          }
-          .print-container *{
-            background:#fff!important;
-            color:#000!important;
-            box-shadow:none!important;
-            border-color:#000!important;
-            border-radius:0!important;
-          }
-          .no-print{display:none!important}
-        }
-      `}</style>
       {isDemo && view === 'menu' && (
         <div className="bg-amber-50 border-b border-amber-200">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm text-amber-900">
