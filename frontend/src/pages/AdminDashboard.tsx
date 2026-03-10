@@ -846,6 +846,9 @@ const ReviewsView = ({ reviews = [], canUseDeliveryReviewsAndTips = false, onUpg
 const PaymentsView = ({ subscription, loading, error, payments }) => {
   const navigate = useNavigate();
   const [showAllHistory, setShowAllHistory] = useState(false);
+  const planSectionRef = useRef<HTMLDivElement | null>(null);
+  const summarySectionRef = useRef<HTMLDivElement | null>(null);
+  const historySectionRef = useRef<HTMLDivElement | null>(null);
   const isVip = Boolean(subscription?.planExempt) || subscription?.plan?.name === 'vip';
   const plan = subscription?.plan;
   const planName = String(plan?.name || '').toLowerCase();
@@ -975,8 +978,39 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
   }
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
-      <div className={`rounded-3xl border border-slate-200 border-l-4 ${statusAccent} p-6 shadow-[0_20px_60px_-50px_rgba(15,23,42,0.45)] space-y-6`}>
+    <div className="space-y-3">
+      <div className="md:hidden sticky top-2 z-20 rounded-2xl border border-slate-200 bg-white/95 backdrop-blur px-3 py-2 shadow-sm">
+        <p className="text-[10px] font-black tracking-[0.18em] uppercase text-slate-500">Acesso rápido</p>
+        <div className="mt-2 grid grid-cols-3 gap-2">
+          <button
+            type="button"
+            onClick={() => planSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+            className="btn-press rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-[11px] font-extrabold text-sky-800"
+          >
+            Assinatura
+          </button>
+          <button
+            type="button"
+            onClick={() => summarySectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+            className="btn-press rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-[11px] font-extrabold text-emerald-800"
+          >
+            Resumo
+          </button>
+          <button
+            type="button"
+            onClick={() => historySectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+            className="btn-press rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-[11px] font-extrabold text-slate-700"
+          >
+            Histórico
+          </button>
+        </div>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
+      <div
+        ref={planSectionRef}
+        className={`scroll-mt-24 rounded-3xl border border-slate-200 border-l-4 ${statusAccent} p-4 sm:p-6 shadow-[0_20px_60px_-50px_rgba(15,23,42,0.45)] space-y-6`}
+      >
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Plano atual</p>
@@ -1014,7 +1048,7 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
         </div>
       </div>
 
-      <div className="rounded-3xl border border-slate-200 border-l-4 border-l-slate-300 bg-white p-6 shadow-[0_20px_60px_-50px_rgba(15,23,42,0.35)] space-y-4">
+      <div className="rounded-3xl border border-slate-200 border-l-4 border-l-slate-300 bg-white p-4 sm:p-6 shadow-[0_20px_60px_-50px_rgba(15,23,42,0.35)] space-y-4">
         <div>
           <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Ciclo</p>
           <h3 className="text-lg font-bold text-slate-900 mt-2">{isVip ? 'Acesso VIP' : 'Próximo vencimento'}</h3>
@@ -1046,7 +1080,7 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
           </div>
         )}
         {Array.isArray(payments) && payments.length > 0 && (
-          <div className="rounded-2xl border border-slate-200 bg-white p-3">
+          <div ref={summarySectionRef} className="scroll-mt-24 rounded-2xl border border-slate-200 bg-white p-3">
             <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500 font-bold">Resumo financeiro</p>
             <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
               <div className="rounded-xl border border-slate-200 bg-white px-3 py-2">
@@ -1068,8 +1102,8 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
           </div>
         )}
         {Array.isArray(payments) && payments.length > 0 && (
-          <div className="pt-2 border-t border-slate-200">
-            <div className="flex items-center justify-between gap-3">
+          <div ref={historySectionRef} className="scroll-mt-24 pt-2 border-t border-slate-200">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Histórico de pagamentos</p>
               <label className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600">
                 <input
@@ -1143,8 +1177,18 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
               payments.filter((payment) => (payment.status || '').toUpperCase() === 'PAID').length === 0 && (
               <p className="mt-3 text-xs text-slate-500">Nenhum pagamento aprovado ainda.</p>
             )}
+            <div className="mt-3 md:hidden">
+              <button
+                type="button"
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                className="btn-press w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-700"
+              >
+                Voltar ao topo
+              </button>
+            </div>
           </div>
         )}
+      </div>
       </div>
     </div>
   );
