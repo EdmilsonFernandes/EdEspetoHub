@@ -1,13 +1,64 @@
 // @ts-nocheck
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ChartBar, ChefHat, Package, Users } from '@phosphor-icons/react';
+import { ChartBar, ChefHat, Package, ShoppingCart } from '@phosphor-icons/react';
+import { orderService } from '../../services/orderService';
+import { useAuth } from '../../contexts/AuthContext';
 
 export function AdminMobileBottomNav() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { auth } = useAuth();
   const path = location.pathname || '';
   const dashboardTab = (location.state as any)?.activeTab || '';
+  const [monitorCount, setMonitorCount] = useState(0);
+  const storeSlug = useMemo(() => {
+    const fromAuth = String(auth?.store?.slug || '').trim();
+    if (fromAuth) return fromAuth;
+    if (typeof window === 'undefined') return '';
+    const fromQuery = new URLSearchParams(window.location.search).get('slug');
+    if (fromQuery) return String(fromQuery).trim();
+    const fromSessionRedirect = sessionStorage.getItem('admin:redirectSlug');
+    if (fromSessionRedirect) return String(fromSessionRedirect).trim();
+    try {
+      const raw = localStorage.getItem('adminSession');
+      const parsed = raw ? JSON.parse(raw) : null;
+      return String(parsed?.store?.slug || '').trim();
+    } catch {
+      return '';
+    }
+  }, [auth?.store?.slug]);
+
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      try {
+        const queue = await orderService.fetchQueue();
+        if (!active) return;
+        const count = (Array.isArray(queue) ? queue : []).filter((order: any) => {
+          const st = String(order?.status || '').toLowerCase();
+          return st !== 'done' && st !== 'delivered' && st !== 'cancelled';
+        }).length;
+        setMonitorCount(count);
+      } catch {
+        if (active) setMonitorCount(0);
+      }
+    };
+    load();
+    const timer = window.setInterval(load, 10000);
+    return () => {
+      active = false;
+      window.clearInterval(timer);
+    };
+  }, []);
+
+  const openCatalog = () => {
+    if (storeSlug) {
+      navigate(`/${storeSlug}`);
+      return;
+    }
+    navigate('/admin/dashboard', { state: { activeTab: 'resumo' } });
+  };
 
   const items = [
     {
@@ -16,18 +67,19 @@ export function AdminMobileBottomNav() {
       icon: ChefHat,
       active: path === '/admin/queue',
       onClick: () => navigate('/admin/queue'),
+      badge: monitorCount > 0 ? (monitorCount > 99 ? '99+' : String(monitorCount)) : '',
     },
     {
       id: 'catalogo',
       label: 'Catálogo',
       icon: Package,
-      active: path === '/admin/dashboard' && dashboardTab === 'produtos',
-      onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'produtos' } }),
+      active: Boolean(storeSlug && (path === `/${storeSlug}` || path === `/store/${storeSlug}` || path === `/chamanoespeto/${storeSlug}`)),
+      onClick: openCatalog,
     },
     {
-      id: 'clientes',
-      label: 'Clientes',
-      icon: Users,
+      id: 'pedidos',
+      label: 'Pedidos',
+      icon: ShoppingCart,
       active: path === '/admin/dashboard' && dashboardTab === 'pedidos',
       onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'pedidos' } }),
     },
@@ -56,7 +108,14 @@ export function AdminMobileBottomNav() {
                     : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
                 }`}
               >
-                <Icon size={16} weight="duotone" />
+                <span className="relative inline-flex">
+                  <Icon size={16} weight="duotone" />
+                  {item.badge ? (
+                    <span className="absolute -top-2 -right-3 min-w-[18px] h-[18px] rounded-full bg-rose-500 px-1 text-[10px] font-black text-white flex items-center justify-center">
+                      {item.badge}
+                    </span>
+                  ) : null}
+                </span>
                 <span>{item.label}</span>
               </button>
             </li>
@@ -66,4 +125,3 @@ export function AdminMobileBottomNav() {
     </nav>
   );
 }
-

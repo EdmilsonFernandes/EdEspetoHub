@@ -1432,10 +1432,16 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     };
   }, [storeId, canUseDeliveryReviewsAndTips]);
   useEffect(() => {
-    if ((location.state as any)?.activeTab === 'fila') {
+    const nextTab = String((location.state as any)?.activeTab || '').trim();
+    if (!nextTab) return;
+    if (nextTab === 'fila') {
       openQueueMonitor({ replace: true });
+      return;
     }
-  }, [location.state, openQueueMonitor]);
+    if (nextTab !== activeTab) {
+      setActiveTab(nextTab as typeof activeTab);
+    }
+  }, [location.state, activeTab, openQueueMonitor]);
   const [savingBranding, setSavingBranding] = useState(false);
   const [configPanels, setConfigPanels] = useState({
     branding: true,
