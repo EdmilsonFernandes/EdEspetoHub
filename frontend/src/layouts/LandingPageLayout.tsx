@@ -318,7 +318,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
         <span className="hidden sm:inline text-sm font-bold">WhatsApp</span>
       </a>
       {showWhatsappHint && (
-        <div className="fixed bottom-[7.1rem] sm:bottom-[4.5rem] right-4 z-50 rounded-2xl border border-emerald-200 bg-white px-3 py-2 text-xs font-semibold text-emerald-700 shadow-[0_16px_36px_-20px_rgba(16,185,129,0.6)]">
+        <div className="fixed bottom-[10.2rem] sm:bottom-[4.5rem] right-4 z-50 rounded-2xl border border-emerald-200 bg-white px-3 py-2 text-xs font-semibold text-emerald-700 shadow-[0_16px_36px_-20px_rgba(16,185,129,0.6)] pointer-events-none">
           Dúvidas? Fale com um especialista
         </div>
       )}
