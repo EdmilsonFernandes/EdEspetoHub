@@ -909,6 +909,7 @@ export function StorePage() {
         address: deliveryAddress || customer.address,
         total: orderTotal,
         items: printableItems,
+        queueRank: null,
         createdAt: Date.now(),
       });
       if (hasAdminPrintAccess) {
@@ -1026,6 +1027,7 @@ export function StorePage() {
       address: deliveryAddress || customer.address,
       total: orderTotal,
       items: printableItems,
+      queueRank: createdOrder?.queueRank ?? createdOrder?.queuePosition ?? null,
       createdAt: Date.now(),
     });
     if (hasAdminPrintAccess) {
@@ -1112,6 +1114,7 @@ export function StorePage() {
       customerName: lastOrder?.customerName || 'Cliente',
       table: lastOrder?.table || '',
       type: formatOrderType(lastOrder?.type),
+      queueRank: Number(lastOrder?.queueRank ?? 0) || null,
       items: (Array.isArray(lastOrder?.items) ? lastOrder.items : []).map((item: any) => {
         const quantity = Number(item?.quantity ?? item?.qty ?? 0);
         const unitPrice = Number(item?.unitPrice ?? item?.price ?? 0);
@@ -1136,8 +1139,19 @@ export function StorePage() {
 
   useEffect(() => {
     if (!printReceiptPayload) return;
-    const timer = window.setTimeout(() => window.print(), 80);
-    return () => window.clearTimeout(timer);
+    let rafA = 0;
+    let rafB = 0;
+    let timer = 0;
+    rafA = window.requestAnimationFrame(() => {
+      rafB = window.requestAnimationFrame(() => {
+        timer = window.setTimeout(() => window.print(), 40);
+      });
+    });
+    return () => {
+      if (rafA) window.cancelAnimationFrame(rafA);
+      if (rafB) window.cancelAnimationFrame(rafB);
+      if (timer) window.clearTimeout(timer);
+    };
   }, [printReceiptPayload]);
 
   useEffect(() => {
@@ -1175,10 +1189,10 @@ export function StorePage() {
             overflow:visible!important;
             background:#fff!important;
           }
-          body > *:not(.print-container){display:none!important}
+          body *{visibility:hidden!important}
+          .print-container,.print-container *{visibility:visible!important}
           .print-container{
             display:block!important;
-            visibility:visible!important;
             position:absolute!important;
             top:0!important;
             left:0!important;
@@ -1626,11 +1640,12 @@ export function StorePage() {
           <div style={{ textAlign: 'center', fontWeight: 700, textTransform: 'uppercase' }}>
             {String(printReceiptPayload.storeName || 'Sertanejo no Espeto')}
           </div>
-          <div style={{ textAlign: 'center', fontSize: '11px' }}>Plataforma: Ja no Caminho</div>
+          <div style={{ textAlign: 'center', fontSize: '11px' }}>Pedido via Ja no Caminho</div>
           <div style={{ margin: '3px 0' }}>--------------------------------</div>
           <div style={{ fontWeight: 700 }}>
-            [[ PEDIDO: #{printReceiptPayload.orderDisplayId} ]]
+            [[ FILA: {printReceiptPayload.queueRank ? `#${String(printReceiptPayload.queueRank).padStart(2, '0')}` : '--'} ]]
           </div>
+          <div>Pedido: #{printReceiptPayload.orderDisplayId}</div>
           <div>Cliente: {printReceiptPayload.customerName}</div>
           {printReceiptPayload.table ? <div>Mesa: {printReceiptPayload.table}</div> : null}
           <div>Tipo: {printReceiptPayload.type}</div>

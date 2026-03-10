@@ -212,8 +212,19 @@ export const GrillQueue = () => {
 
   useEffect(() => {
     if (!printPayload) return;
-    const timer = window.setTimeout(() => window.print(), 80);
-    return () => window.clearTimeout(timer);
+    let rafA = 0;
+    let rafB = 0;
+    let timer = 0;
+    rafA = window.requestAnimationFrame(() => {
+      rafB = window.requestAnimationFrame(() => {
+        timer = window.setTimeout(() => window.print(), 40);
+      });
+    });
+    return () => {
+      if (rafA) window.cancelAnimationFrame(rafA);
+      if (rafB) window.cancelAnimationFrame(rafB);
+      if (timer) window.clearTimeout(timer);
+    };
   }, [printPayload]);
 
   const orderTypeMeta = (order: any) => {
@@ -1066,10 +1077,10 @@ export const GrillQueue = () => {
           }
           .no-print{display:none!important}
           .print-only{display:block!important}
-          body > *:not(.print-container){display:none!important}
+          body *{visibility:hidden!important}
+          .print-container,.print-container *{visibility:visible!important}
           .print-container{
             display:block!important;
-            visibility:visible!important;
             position:absolute!important;
             top:0!important;
             left:0!important;
@@ -2087,7 +2098,7 @@ export const GrillQueue = () => {
           <div style={{ textAlign: 'center', fontWeight: 700, textTransform: 'uppercase' }}>
             {String(printPayload.order?.storeName || 'Sertanejo no Espeto')}
           </div>
-          <div style={{ textAlign: 'center', fontSize: '11px' }}>Plataforma: Ja no Caminho</div>
+          <div style={{ textAlign: 'center', fontSize: '11px' }}>Pedido via Ja no Caminho</div>
           <div style={{ margin: '3px 0' }}>--------------------------------</div>
           <div style={{ fontWeight: 700 }}>
             [[ FILA: #{String(printPayload.queueRank || 1).padStart(2, '0')} ]]
