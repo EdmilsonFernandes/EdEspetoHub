@@ -1127,6 +1127,7 @@ export function StorePage() {
     };
 
     if (!payload.items.length) {
+      console.error('[print] payload vazio ou sem itens', payload);
       showToast('Pedido sem itens para imprimir.', 'error');
       return;
     }
@@ -1158,9 +1159,9 @@ export function StorePage() {
   <title>Imprimir</title>
   <style>
     * { box-sizing: border-box; }
-    body { width: 58mm; margin: 0; padding: 2mm; font-family: monospace; font-size: 12px; color: black; background: white; line-height: 1.35; }
+    body { width: 58mm; margin: 0; padding: 2mm; font-family: 'Courier New', monospace; font-size: 12px; color: black; background: white; line-height: 1.35; }
     .center { text-align: center; }
-    .title { font-weight: 700; text-transform: uppercase; }
+    .header { text-align: center; font-weight: bold; text-transform: uppercase; }
     .item { display: flex; justify-content: space-between; margin: 2px 0; }
     .opt { font-size: 10px; margin-left: 2ch; }
     hr { border: none; border-top: 1px dashed black; margin: 4px 0; }
@@ -1170,7 +1171,7 @@ export function StorePage() {
   </style>
 </head>
 <body>
-  <div class="center title">${escapeHtml(payload.storeName || 'SERTANEJO NO ESPETO')}</div>
+  <div class="header">${escapeHtml(payload.storeName || 'SERTANEJO NO ESPETO')}</div>
   <div class="center">Ja no Caminho</div>
   <hr />
   <div class="strong">#Fila: ${queueText}</div>
@@ -1184,43 +1185,19 @@ export function StorePage() {
   <div class="tail">\n\n</div>
 </body>
 </html>`;
-
-    const existing = document.getElementById('print-frame');
-    if (existing) existing.remove();
-    const iframe = document.createElement('iframe');
-    iframe.id = 'print-frame';
-    iframe.setAttribute('aria-hidden', 'true');
-    iframe.style.display = 'none';
-    document.body.appendChild(iframe);
-
-    const frameDoc = iframe.contentDocument || iframe.contentWindow?.document;
-    const frameWin = iframe.contentWindow;
-    if (!frameDoc || !frameWin) {
-      iframe.remove();
-      showToast('Não foi possível preparar a impressão no navegador.', 'error');
+    const printWindow = window.open('', '_blank', 'width=300,height=600');
+    if (!printWindow) {
+      showToast('Não foi possível abrir a janela de impressão. Libere pop-up no navegador.', 'error');
       return;
     }
-
-    let cleaned = false;
-    const cleanup = () => {
-      if (cleaned) return;
-      cleaned = true;
-      iframe.remove();
-    };
-    const runPrint = () => {
-      frameWin.onafterprint = cleanup;
-      window.setTimeout(() => {
-        frameWin.focus();
-        frameWin.print();
-        window.setTimeout(cleanup, 2500);
-      }, 300);
-    };
-    iframe.onload = runPrint;
-    frameDoc.open();
-    frameDoc.write(receiptHtml);
-    frameDoc.close();
-    // fallback para browsers que não disparam onload com document.write
-    window.setTimeout(runPrint, 500);
+    printWindow.document.open();
+    printWindow.document.write(receiptHtml);
+    printWindow.document.close();
+    window.setTimeout(() => {
+      printWindow.focus();
+      printWindow.print();
+      window.setTimeout(() => printWindow.close(), 800);
+    }, 300);
   };
 
   useEffect(() => {
