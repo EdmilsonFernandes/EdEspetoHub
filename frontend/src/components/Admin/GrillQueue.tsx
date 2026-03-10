@@ -94,8 +94,10 @@ const OrderSummaryCard = ({
       <p className="mt-1 text-xs text-slate-500 font-medium line-clamp-1">{compactMeta}</p>
     </div>
 
-    <div className="border-t border-slate-100 pt-2 mt-1 flex justify-between items-center">
-      <div className="flex items-center gap-1.5">
+    <div className="border-t border-slate-100 pt-2 mt-1 flex justify-end items-center">
+      <div className="text-right flex items-center gap-1.5">
+        <span className="text-sm font-bold text-slate-900">{totalLabel}</span>
+        <span className="text-[11px] text-slate-500">{itemsCount} {itemsCount === 1 ? 'item' : 'itens'}</span>
         {canPrint && (
           <button
             type="button"
@@ -111,10 +113,6 @@ const OrderSummaryCard = ({
             <Printer size={15} weight="duotone" />
           </button>
         )}
-      </div>
-      <div className="text-right">
-        <span className="text-sm font-bold text-slate-900">{totalLabel}</span>
-        <span className="ml-2 text-[11px] text-slate-500">{itemsCount} {itemsCount === 1 ? 'item' : 'itens'}</span>
       </div>
     </div>
   </div>
@@ -1090,7 +1088,7 @@ export const GrillQueue = () => {
           {!tvMode ? (
             <>
               <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <div className="inline-flex w-full sm:w-auto items-center gap-1 rounded-lg bg-slate-100 p-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                <div className="inline-flex w-full sm:w-auto items-center gap-1 rounded-lg bg-slate-100 p-1 overflow-x-auto [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
                   {[
                     { id: 'queue', label: 'Pedidos', count: productionQueue.length },
                     { id: 'inroute', label: 'Em rota', count: inRouteQueue.length },
@@ -1100,7 +1098,7 @@ export const GrillQueue = () => {
                       key={tab.id}
                       type="button"
                       onClick={() => setActiveTab(tab.id as 'queue' | 'inroute' | 'completed')}
-                      className={`inline-flex flex-shrink-0 items-center gap-1.5 text-sm px-3 py-1.5 rounded-md transition-colors ${
+                      className={`inline-flex flex-shrink-0 items-center gap-1 text-xs sm:text-sm px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-md transition-colors whitespace-nowrap ${
                         activeTab === tab.id
                           ? 'bg-white shadow-sm font-semibold text-slate-900'
                           : 'text-slate-500 hover:text-slate-700'
@@ -1116,12 +1114,12 @@ export const GrillQueue = () => {
                   ))}
                 </div>
 
-                <div className="flex w-full sm:w-auto items-center gap-2 flex-wrap sm:justify-end">
-                  <span className="text-xs font-medium text-slate-700 bg-orange-50 border border-orange-100 px-2 py-1 rounded-md">
+                <div className="flex w-full sm:w-auto items-center gap-2 overflow-x-auto [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden whitespace-nowrap sm:justify-end">
+                  <span className="text-[11px] sm:text-xs font-medium text-slate-700 bg-orange-50 border border-orange-100 px-2 py-1 rounded-md whitespace-nowrap">
                     {productionQueue.length} em produção
                   </span>
                   {queueMetrics.late > 0 && (
-                    <span className="text-xs font-semibold text-red-700 bg-red-50 border border-red-100 px-2 py-1 rounded-md">
+                    <span className="text-[11px] sm:text-xs font-semibold text-red-700 bg-red-50 border border-red-100 px-2 py-1 rounded-md whitespace-nowrap">
                       Prazo estourado: {queueMetrics.late}
                     </span>
                   )}
@@ -1129,7 +1127,7 @@ export const GrillQueue = () => {
                     <button
                       type="button"
                       onClick={() => setActionsOpen((prev) => !prev)}
-                      className="inline-flex items-center gap-2 text-xs font-medium text-slate-600 bg-slate-50 px-2.5 py-1.5 rounded-md hover:bg-slate-100 transition-colors"
+                      className="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-medium text-slate-600 bg-slate-50 px-2 py-1 rounded-md hover:bg-slate-100 transition-colors whitespace-nowrap"
                     >
                       <DotsThreeVertical size={14} weight="duotone" />
                       Opções
@@ -1186,7 +1184,7 @@ export const GrillQueue = () => {
               </div>
 
               {activeTab === 'queue' && (
-                <div className="flex flex-nowrap items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                <div className="flex flex-nowrap items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
                   {[
                     { id: 'all', label: 'Todos', value: productionQueue.length },
                     { id: 'pending', label: 'Pendentes', value: queueMetrics.pending },
@@ -1198,7 +1196,7 @@ export const GrillQueue = () => {
                       key={kpi.id}
                       type="button"
                       onClick={() => setQueueFilter(kpi.id as any)}
-                      className={`flex shrink-0 items-center gap-2 px-4 py-1.5 rounded-full border text-sm font-medium transition-colors ${
+                      className={`flex shrink-0 items-center gap-2 px-3 py-1.5 rounded-full border text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
                         queueFilter === kpi.id
                           ? 'bg-slate-900 border-slate-900 text-white'
                           : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
@@ -1238,7 +1236,7 @@ export const GrillQueue = () => {
       </div>
 
       {activeTab === 'queue' && (
-        <div className="space-y-2">
+        <div className="space-y-2 mt-2">
           {awaitingMotoboyQueue.length > 0 && (
             <div className="rounded-xl border-2 border-dashed border-indigo-200 bg-indigo-50/30 p-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
