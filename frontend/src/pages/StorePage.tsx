@@ -1192,18 +1192,40 @@ export function StorePage() {
 </body>
 </html>`;
 
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) {
-      showToast('Não foi possível abrir a janela de impressão. Libere pop-up no navegador.', 'error');
+    const iframe = document.createElement('iframe');
+    iframe.setAttribute('aria-hidden', 'true');
+    iframe.style.position = 'fixed';
+    iframe.style.right = '0';
+    iframe.style.bottom = '0';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = '0';
+    iframe.style.opacity = '0';
+    document.body.appendChild(iframe);
+
+    const frameDoc = iframe.contentDocument || iframe.contentWindow?.document;
+    const frameWin = iframe.contentWindow;
+    if (!frameDoc || !frameWin) {
+      iframe.remove();
+      showToast('Não foi possível preparar a impressão no navegador.', 'error');
       return;
     }
-    printWindow.document.open();
-    printWindow.document.write(receiptHtml);
-    printWindow.document.close();
+
+    frameDoc.open();
+    frameDoc.write(receiptHtml);
+    frameDoc.close();
+
+    let cleaned = false;
+    const cleanup = () => {
+      if (cleaned) return;
+      cleaned = true;
+      iframe.remove();
+    };
+    frameWin.onafterprint = cleanup;
     window.setTimeout(() => {
-      printWindow.focus();
-      printWindow.print();
-      window.setTimeout(() => printWindow.close(), 300);
+      frameWin.focus();
+      frameWin.print();
+      window.setTimeout(cleanup, 2000);
     }, 300);
   };
 
