@@ -58,6 +58,7 @@ export function AdminMotoboys() {
   const pendingRequests = requests.filter((request) => request.status === 'PENDING');
   const requestsSectionRef = useRef<HTMLDivElement | null>(null);
   const linkedSectionRef = useRef<HTMLDivElement | null>(null);
+  const linkedFiltersRef = useRef<HTMLDivElement | null>(null);
 
   const formatMotoboyStatus = (raw: any) => {
     const status = String(raw || '').toUpperCase();
@@ -759,15 +760,22 @@ export function AdminMotoboys() {
 
   return (
     <div className="space-y-6">
-      <div className="md:hidden sticky top-2 z-20 rounded-2xl border border-slate-200 bg-white/95 backdrop-blur px-3 py-2">
+      <div className="md:hidden sticky top-2 z-20 rounded-2xl border border-slate-200 bg-white/95 backdrop-blur px-3 py-2 shadow-sm">
         <p className="text-[10px] font-black tracking-[0.18em] uppercase text-slate-500">Acesso rápido</p>
-        <div className="mt-2 grid grid-cols-2 gap-2">
+        <div className="mt-2 grid grid-cols-3 gap-2">
           <button
             type="button"
             onClick={() => requestsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
             className="btn-press rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] font-extrabold text-amber-800"
           >
             Solicitações ({pendingRequests.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => linkedFiltersRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+            className="btn-press rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-[11px] font-extrabold text-slate-700"
+          >
+            Filtros
           </button>
           <button
             type="button"
@@ -1412,7 +1420,7 @@ export function AdminMotoboys() {
         </div>
       </FormSection>
 
-      <div ref={requestsSectionRef}>
+      <div ref={requestsSectionRef} className="scroll-mt-24">
       <FormSection
         title="Solicitações de vínculo"
         subtitle="Motoboys que pediram para entrar na sua loja."
@@ -1443,6 +1451,24 @@ export function AdminMotoboys() {
             </div>
           }
         />
+        <div className="px-4 pt-3 md:hidden">
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => linkedSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+              className="btn-press flex-1 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-[11px] font-extrabold text-emerald-800"
+            >
+              Ir para vinculados
+            </button>
+            <button
+              type="button"
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="btn-press rounded-xl border border-slate-200 bg-white px-3 py-2 text-[11px] font-extrabold text-slate-700"
+            >
+              Topo
+            </button>
+          </div>
+        </div>
         {pendingRequests.length === 0 ? (
           <div className="px-4 py-4">
             <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
@@ -1539,7 +1565,7 @@ export function AdminMotoboys() {
       </FormSection>
       </div>
 
-      <div ref={linkedSectionRef}>
+      <div ref={linkedSectionRef} className="scroll-mt-24">
       <FormSection
         title="Entregadores vinculados"
         subtitle="Status, documentos e vínculo por loja."
@@ -1564,7 +1590,7 @@ export function AdminMotoboys() {
           }
         />
 
-        <div className="px-4 pt-4">
+        <div ref={linkedFiltersRef} className="px-4 pt-4 scroll-mt-24">
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3 flex flex-col gap-3">
             <div className="flex flex-col sm:flex-row sm:items-center gap-2">
               <div className="relative flex-1">
@@ -1628,6 +1654,24 @@ export function AdminMotoboys() {
                 <span className="text-[10px] opacity-80">{showInactive ? 'ON' : 'OFF'}</span>
               </button>
             </div>
+          </div>
+        </div>
+        <div className="px-4 pt-3 md:hidden">
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => requestsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+              className="btn-press flex-1 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] font-extrabold text-amber-800"
+            >
+              Ir para solicitações
+            </button>
+            <button
+              type="button"
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="btn-press rounded-xl border border-slate-200 bg-white px-3 py-2 text-[11px] font-extrabold text-slate-700"
+            >
+              Topo
+            </button>
           </div>
         </div>
 
