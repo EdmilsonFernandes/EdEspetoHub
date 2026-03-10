@@ -1068,19 +1068,35 @@ export const GrillQueue = () => {
         @keyframes drawerIn{0%{transform:translateX(100%)}100%{transform:translateX(0)}}
         @media print{
           @page{size:58mm auto;margin:0}
+          *{
+            box-sizing:border-box!important;
+            margin:0!important;
+            padding:0!important;
+          }
           html,body{
             margin:0!important;
             padding:0!important;
             height:auto!important;
             overflow:visible!important;
             background:#fff!important;
+            width:58mm!important;
+            max-width:58mm!important;
+            min-width:58mm!important;
           }
           .no-print{display:none!important}
           .print-only{display:block!important}
           body *{visibility:hidden!important}
           .print-container,.print-container *{visibility:visible!important}
+          [role="dialog"],
+          [data-headlessui-portal],
+          [class*="modal"],
+          [class*="drawer"],
+          [class*="sidebar"]{
+            display:none!important;
+          }
           .print-container{
             display:block!important;
+            float:none!important;
             position:absolute!important;
             top:0!important;
             left:0!important;
@@ -1089,6 +1105,11 @@ export const GrillQueue = () => {
             color:#000!important;
             box-shadow:none!important;
             border:0!important;
+            page-break-inside:avoid!important;
+            break-inside:avoid-page!important;
+            page-break-after:avoid!important;
+            zoom:1!important;
+            transform:none!important;
           }
           .print-container *{
             background:transparent!important;

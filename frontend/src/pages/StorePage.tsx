@@ -1182,17 +1182,34 @@ export function StorePage() {
       <style>{`
         @media print{
           @page{size:58mm auto;margin:0}
+          *{
+            box-sizing:border-box!important;
+            margin:0!important;
+            padding:0!important;
+          }
           html,body{
             margin:0!important;
             padding:0!important;
             height:auto!important;
             overflow:visible!important;
             background:#fff!important;
+            width:58mm!important;
+            max-width:58mm!important;
+            min-width:58mm!important;
           }
           body *{visibility:hidden!important}
           .print-container,.print-container *{visibility:visible!important}
+          .no-print,
+          [role="dialog"],
+          [data-headlessui-portal],
+          [class*="modal"],
+          [class*="drawer"],
+          [class*="sidebar"]{
+            display:none!important;
+          }
           .print-container{
             display:block!important;
+            float:none!important;
             position:absolute!important;
             top:0!important;
             left:0!important;
@@ -1203,6 +1220,11 @@ export function StorePage() {
             font-family:monospace!important;
             font-size:12px!important;
             line-height:1.35!important;
+            page-break-inside:avoid!important;
+            break-inside:avoid-page!important;
+            page-break-after:avoid!important;
+            zoom:1!important;
+            transform:none!important;
           }
           .print-container *{
             background:transparent!important;
