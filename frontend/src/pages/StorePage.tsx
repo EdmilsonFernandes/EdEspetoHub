@@ -157,7 +157,11 @@ export function StorePage() {
     Boolean(user?.store?.slug) &&
     Boolean(storeSlug) &&
     user.store.slug === storeSlug;
-  const hasAdminPrintAccess = String(user?.role || '').toLowerCase() === 'admin';
+  const normalizedRole = String(user?.role || '').toLowerCase();
+  const hasAdminPrintAccess =
+    normalizedRole === 'admin' ||
+    normalizedRole === 'super_admin' ||
+    Boolean(isStoreAdmin);
   const [showPrintPrompt, setShowPrintPrompt] = useState(false);
   const [printReceiptPayload, setPrintReceiptPayload] = useState<any | null>(null);
 
@@ -907,6 +911,9 @@ export function StorePage() {
         items: printableItems,
         createdAt: Date.now(),
       });
+      if (hasAdminPrintAccess) {
+        setShowPrintPrompt(true);
+      }
       localStorage.setItem(
         `lastOrder:${storeSlug}`,
         JSON.stringify({ id: demoId, createdAt: Date.now(), type: customer.type })
@@ -1021,6 +1028,9 @@ export function StorePage() {
       items: printableItems,
       createdAt: Date.now(),
     });
+    if (hasAdminPrintAccess) {
+      setShowPrintPrompt(true);
+    }
     if (createdOrder?.id && !user?.token) {
       const entry = {
         id: createdOrder.id,
@@ -1102,19 +1112,27 @@ export function StorePage() {
       customerName: lastOrder?.customerName || 'Cliente',
       table: lastOrder?.table || '',
       type: formatOrderType(lastOrder?.type),
-      items: Array.isArray(lastOrder?.items) ? lastOrder.items : [],
+      items: (Array.isArray(lastOrder?.items) ? lastOrder.items : []).map((item: any) => {
+        const quantity = Number(item?.quantity ?? item?.qty ?? 0);
+        const unitPrice = Number(item?.unitPrice ?? item?.price ?? 0);
+        return {
+          name: String(item?.name || 'Item'),
+          quantity,
+          lineTotal: Number(item?.lineTotal ?? quantity * unitPrice),
+          options: item?.options ? String(item.options) : '',
+        };
+      }),
       total: Number(lastOrder?.total || 0),
+      paymentMethod: formatPaymentMethod(lastOrder?.payment),
       storeName: storeName || branding?.brandName || 'Já no Caminho',
     });
   };
 
   useEffect(() => {
-    if (view === 'success' && hasAdminPrintAccess && lastOrder?.id) {
-      setShowPrintPrompt(true);
-      return;
+    if (!hasAdminPrintAccess) {
+      setShowPrintPrompt(false);
     }
-    setShowPrintPrompt(false);
-  }, [view, hasAdminPrintAccess, lastOrder?.id]);
+  }, [hasAdminPrintAccess]);
 
   useEffect(() => {
     if (!printReceiptPayload) return;
@@ -1160,6 +1178,10 @@ export function StorePage() {
           body > *:not(.print-container){display:none!important}
           .print-container{
             display:block!important;
+            visibility:visible!important;
+            position:absolute!important;
+            top:0!important;
+            left:0!important;
             width:58mm!important;
             padding:2mm!important;
             background:#fff!important;
@@ -1607,6 +1629,7 @@ export function StorePage() {
           <div>Cliente: {printReceiptPayload.customerName}</div>
           {printReceiptPayload.table ? <div>Mesa: {printReceiptPayload.table}</div> : null}
           <div>Tipo: {printReceiptPayload.type}</div>
+          <div>Pagamento: {printReceiptPayload.paymentMethod || '-'}</div>
           <div>Data: {printReceiptPayload.createdAt}</div>
           <div style={{ borderTop: '1px dashed #000', margin: '4px 0' }} />
           {(Array.isArray(printReceiptPayload.items) ? printReceiptPayload.items : []).map((item: any, idx: number) => (

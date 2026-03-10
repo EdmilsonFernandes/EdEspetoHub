@@ -1069,6 +1069,10 @@ export const GrillQueue = () => {
           body > *:not(.print-container){display:none!important}
           .print-container{
             display:block!important;
+            visibility:visible!important;
+            position:absolute!important;
+            top:0!important;
+            left:0!important;
             width:58mm!important;
             background:#fff!important;
             color:#000!important;
@@ -2078,7 +2082,7 @@ export const GrillQueue = () => {
       )}
     </div>
     {printPayload && createPortal(
-      <div className="print-container print-only hidden">
+      <div className="print-container print-only">
         <div style={{ width: '58mm', fontFamily: 'monospace', fontSize: '12px', lineHeight: 1.35, padding: '2mm' }}>
           <div style={{ textAlign: 'center', fontWeight: 700 }}>JA NO CAMINHO</div>
           <div style={{ textAlign: 'center' }}>Cupom de pedido</div>
@@ -2088,7 +2092,7 @@ export const GrillQueue = () => {
           <div>Data: {printPayload.createdAt}</div>
           <div style={{ borderTop: '1px dashed #000', margin: '4px 0' }} />
           {(Array.isArray(printPayload.order?.items) ? printPayload.order.items : []).map((item: any, idx: number) => {
-            const qty = Number(item?.qty || 0);
+            const qty = Number(item?.qty ?? item?.quantity ?? 0);
             const unit = Number(item?.unitPrice ?? item?.price ?? 0);
             const lineTotal = qty * unit;
             return (
