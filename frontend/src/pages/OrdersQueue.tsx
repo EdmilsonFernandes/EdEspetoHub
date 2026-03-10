@@ -72,7 +72,7 @@ export function OrdersQueue() {
             >
               <Truck size={20} weight="duotone" />
             </div>
-            <h3 className="text-xl font-bold">Visão da Operação</h3>
+            <h3 className="text-xl font-bold">Pedidos ao vivo</h3>
           </div>
           <GrillQueue />
         </div>

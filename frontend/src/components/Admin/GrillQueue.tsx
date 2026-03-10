@@ -1095,7 +1095,7 @@ export const GrillQueue = () => {
               <div className="flex justify-between items-center w-full gap-3 flex-wrap">
                 <div className="inline-flex items-center gap-1 rounded-lg bg-slate-100 p-1">
                   {[
-                    { id: 'queue', label: 'Operação', count: productionQueue.length },
+                    { id: 'queue', label: 'Pedidos', count: productionQueue.length },
                     { id: 'inroute', label: 'Em rota', count: inRouteQueue.length },
                     { id: 'completed', label: 'Finalizados hoje', count: completedToday.length },
                   ].map((tab) => (

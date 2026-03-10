@@ -183,7 +183,7 @@ const Header = ({
                     onClick={onOpenQueue}
                     className="px-3 py-1.5 rounded-full text-xs font-semibold text-slate-600 hover:text-slate-800"
                   >
-                    Operação
+                    Pedidos
                   </button>
                 </div>
               )}

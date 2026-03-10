@@ -2288,7 +2288,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         <div className="min-w-0">
           <p className="text-[10px] uppercase tracking-[0.24em] font-bold text-slate-400">Workspace</p>
           <h2 className="text-lg font-black text-slate-900 leading-tight">{tabMeta[activeTab]?.title || 'Painel da loja'}</h2>
-          <p className="text-xs text-slate-500 mt-0.5 truncate">{tabMeta[activeTab]?.subtitle || 'Operação centralizada da loja.'}</p>
+          <p className="text-xs text-slate-500 mt-0.5 truncate">{tabMeta[activeTab]?.subtitle || 'Gestão centralizada dos pedidos da loja.'}</p>
         </div>
         <div className="relative z-[260] flex items-center gap-2 shrink-0" ref={notificationsRef}>
           <button
@@ -2345,7 +2345,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
               <div className="max-h-[58vh] overflow-y-auto p-2 space-y-1.5">
                 {activeNotifications.length === 0 ? (
                   <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2">
-                    <p className="text-sm font-semibold text-emerald-700">Operação estável</p>
+                    <p className="text-sm font-semibold text-emerald-700">Pedidos em dia</p>
                     <p className="text-xs text-emerald-700/80 mt-1">Sem pendências críticas no momento.</p>
                   </div>
                 ) : (
@@ -2832,7 +2832,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             <div className="p-4 space-y-2.5">
               {activeNotifications.length === 0 ? (
                 <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2">
-                  <p className="text-sm font-semibold text-emerald-700">Operação estável</p>
+                  <p className="text-sm font-semibold text-emerald-700">Pedidos em dia</p>
                   <p className="text-xs text-emerald-700/80 mt-1">Sem pendências críticas no momento.</p>
                 </div>
               ) : (
