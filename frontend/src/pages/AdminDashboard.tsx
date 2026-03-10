@@ -3003,8 +3003,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       )}
 
       {!isDesktopLayout && mobileDrawerOpen && (
-        <div className="lg:hidden ds-sheet-backdrop z-[120]" onClick={() => setMobileDrawerOpen(false)}>
-          <aside className="ds-sheet-panel rounded-t-3xl max-h-[78vh] overflow-y-auto" onClick={(event) => event.stopPropagation()}>
+        <div className="lg:hidden ds-sheet-backdrop z-[400]" onClick={() => setMobileDrawerOpen(false)}>
+          <aside className="ds-sheet-panel rounded-t-3xl max-h-[82vh] overflow-y-auto pb-[calc(env(safe-area-inset-bottom)+88px)]" onClick={(event) => event.stopPropagation()}>
             <div className="sm:hidden ds-sheet-handle" />
             <div className="sticky top-0 z-10 bg-white/95 backdrop-blur border-b border-slate-100 px-4 py-3 flex items-center justify-between">
               <div>
@@ -3020,7 +3020,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                 <X size={16} weight="bold" />
               </button>
             </div>
-            <div className="p-4 grid grid-cols-1 gap-2.5">
+            <div className="p-4 grid grid-cols-1 gap-2.5 pb-6">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = activeTab === item.id;

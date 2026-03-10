@@ -1,11 +1,14 @@
 // @ts-nocheck
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { GrillQueue } from '../components/Admin/GrillQueue';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { useAuth } from '../contexts/AuthContext';
+import { SquaresFour } from '@phosphor-icons/react';
 
 export function AdminQueue() {
   const { auth } = useAuth();
+  const navigate = useNavigate();
 
   if (!auth?.store) {
     return (
@@ -20,6 +23,16 @@ export function AdminQueue() {
   return (
     <AdminLayout contextLabel="Central de Pedidos" showHeader={false}>
       <div className="mx-auto w-full max-w-[1320px] space-y-4">
+        <div className="hidden lg:flex items-center justify-end">
+          <button
+            type="button"
+            onClick={() => navigate('/admin/dashboard', { state: { activeTab: 'resumo' } })}
+            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors"
+          >
+            <SquaresFour size={14} weight="duotone" />
+            Abrir painel completo
+          </button>
+        </div>
         <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm overflow-x-hidden">
           <GrillQueue />
         </div>
