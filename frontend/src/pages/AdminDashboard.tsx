@@ -1247,7 +1247,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     { id: 'pagamentos', label: 'Pagamentos', icon: CreditCard },
     { id: 'motoboys', label: 'Entregadores', icon: Scooter, disabled: !canUseMotoboys },
     { id: 'config', label: 'Configurações', icon: Gear },
-    { id: 'fila', label: 'Monitor de Pedidos', icon: ChefHat },
+    { id: 'fila', label: 'Pedidos ao vivo', icon: ChefHat },
   ];
   const navItems = useMemo(
     () => [
@@ -1264,7 +1264,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       produtos: { title: 'Produtos', subtitle: 'Gerencie catálogo, preço, disponibilidade e destaque da vitrine.' },
       pagamentos: { title: 'Pagamentos', subtitle: 'Controle assinatura, ciclo e eventos de cobrança da loja.' },
       config: { title: 'Configurações', subtitle: 'Ajuste identidade, canais, tipos de pedido e horários da operação.' },
-      fila: { title: 'Operação', subtitle: 'Acompanhe pedidos em andamento e o fluxo de atendimento da loja.' },
+      fila: { title: 'Pedidos ao vivo', subtitle: 'Acompanhe pedidos em andamento e a fila da loja em tempo real.' },
       motoboys: { title: 'Entregadores', subtitle: 'Vínculos, documentos, solicitações e status de entrega.' },
     }),
     []
@@ -1297,14 +1297,14 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         })),
       {
         id: 'go-menu',
-        label: 'Monitor de pedidos',
-        description: 'Abre o monitor operacional da loja.',
+        label: 'Pedidos ao vivo',
+        description: 'Abre a fila de pedidos em tempo real.',
         run: () => openQueueMonitor(),
       },
       {
         id: 'go-queue',
-        label: 'Abrir operação',
-        description: 'Acessa a central de operação dos pedidos.',
+        label: 'Ver pedidos',
+        description: 'Acessa a fila de pedidos da loja.',
         run: () => openQueueMonitor(),
       },
       {
@@ -1588,7 +1588,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         description: 'Pedidos novos aguardando início da operação.',
         generatedAt: oldestPendingTs,
         tone: 'warning',
-        actionLabel: 'Abrir operação',
+        actionLabel: 'Ver pedidos',
         action: () => openQueueMonitor(),
       });
     }
@@ -1608,7 +1608,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         description: 'Pedidos prontos aguardando retirada/expedição.',
         generatedAt: oldestReadyTs,
         tone: 'info',
-        actionLabel: 'Abrir operação',
+        actionLabel: 'Ver pedidos',
         action: () => openQueueMonitor(),
       });
     }
@@ -2394,7 +2394,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
               onClick={() => openQueueMonitor()}
               className="ds-focus-ring rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
             >
-              Monitor de pedidos
+              Pedidos ao vivo
             </button>
           )}
           <button
@@ -2786,8 +2786,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
         {activeTab === 'fila' && (
           <FormSection
-            title="Operação"
-            subtitle="Monitor de pedidos em tempo real."
+            title="Pedidos ao vivo"
+            subtitle="Fila de pedidos em tempo real."
             variant="neutral"
             className="bg-white premium-card !p-4 sm:!p-4 lg:!p-5"
           >

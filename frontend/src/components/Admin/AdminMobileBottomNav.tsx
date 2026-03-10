@@ -63,7 +63,7 @@ export function AdminMobileBottomNav() {
   const items = [
     {
       id: 'monitor',
-      label: 'Monitor',
+      label: 'Pedidos',
       icon: ChefHat,
       active: path === '/admin/queue',
       onClick: () => navigate('/admin/queue'),
