@@ -65,6 +65,7 @@ export const CartView = ({
   customers = [],
   paymentMethod,
   allowCustomerAutocomplete = false,
+  tablePhoneOptional = false,
   allowedOrderTypes = [ "delivery", "pickup", "table" ],
   deliveryRadiusKm = null,
   deliveryFee = 0,
@@ -506,7 +507,7 @@ export const CartView = ({
           {/* WhatsApp */}
           <div className="rounded-2xl border border-slate-100 p-3 sm:p-4 bg-white">
             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              WhatsApp {customer.type === "table" ? "(opcional)" : ""}
+              WhatsApp {customer.type === "table" && tablePhoneOptional ? "(opcional)" : ""}
             </label>
             <div className="mt-2 grid grid-cols-1 sm:grid-cols-[110px_1fr] gap-3 items-end">
               <div>
@@ -539,7 +540,7 @@ export const CartView = ({
                 />
               </div>
             </div>
-            {customer.type === "table" && (
+            {customer.type === "table" && tablePhoneOptional && (
               <p className="mt-1 text-[11px] text-gray-400">
                 Para pedidos na mesa, o telefone pode ficar em branco.
               </p>

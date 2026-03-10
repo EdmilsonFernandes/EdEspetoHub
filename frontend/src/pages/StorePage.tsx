@@ -809,7 +809,7 @@ export function StorePage() {
       showToast('Loja fechada no momento. Tente novamente durante o horário de atendimento.', 'warning');
       return;
     }
-    const requiresPhone = customer.type !== 'table';
+    const requiresPhone = !(customer.type === 'table' && canUseAdminPrintFlow);
     if (!customer.name || (requiresPhone && !customer.phone)) {
       showToast(requiresPhone ? 'Preencha nome e telefone para continuar.' : 'Preencha seu nome para continuar.', 'warning');
       return;
@@ -1525,6 +1525,7 @@ export function StorePage() {
             paymentMethod={paymentMethod}
             allowedOrderTypes={orderTypes}
             allowCustomerAutocomplete={Boolean(user?.token)}
+            tablePhoneOptional={canUseAdminPrintFlow}
             deliveryRadiusKm={deliveryRadiusValue}
             deliveryFee={deliveryFeeValue}
             deliveryCheck={deliveryCheck}
