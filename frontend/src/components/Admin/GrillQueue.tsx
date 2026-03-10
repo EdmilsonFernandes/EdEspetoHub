@@ -848,15 +848,19 @@ export const GrillQueue = () => {
 
   useEffect(() => {
     if (!selectedOrder) return;
-    const latest = filteredProductionQueue.find((order) => order.id === selectedOrder.id);
+    const latest = queue.find((order) => order.id === selectedOrder.id);
     if (!latest) {
+      closeOrderOverlays();
+      return;
+    }
+    if (String(latest.status || '').toLowerCase() === 'done' || String(latest.status || '').toLowerCase() === 'cancelled') {
       closeOrderOverlays();
       return;
     }
     if (latest !== selectedOrder) {
       setSelectedOrder(latest);
     }
-  }, [filteredProductionQueue, selectedOrder]);
+  }, [queue, selectedOrder]);
   useEffect(() => {
     setCompletedPage(1);
   }, [completedPageSize]);
@@ -1042,8 +1046,7 @@ export const GrillQueue = () => {
           <button
             onClick={async () => {
               pulseCta(order.id + '-ready');
-              const success = await handleAdvance(order.id, "ready");
-              if (success) setSelectedOrder(null);
+              await handleAdvance(order.id, "ready");
             }}
             disabled={updating === order.id}
             style={ctaPulseId === order.id + '-ready' ? { animation: 'btnPop 220ms ease' } : undefined}
