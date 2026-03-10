@@ -36,6 +36,7 @@ import { formatSelectedModifiers, getModifiersSignature } from "../../utils/prod
 import { getPaymentMethodMeta } from "../../utils/paymentAssets";
 import { useAuth } from "../../contexts/AuthContext";
 import { buildPixPayload } from "../../utils/pixPayload";
+import { printReceiptAsImage } from "../../utils/printReceiptImage";
 
 const OrderSummaryCard = ({
   order,
@@ -196,7 +197,7 @@ export const GrillQueue = () => {
     setSelectedOrder(null);
   };
 
-  const handlePrintOrder = (order: any, queueRank = 1) => {
+  const handlePrintOrder = async (order: any, queueRank = 1) => {
     if (!hasAdminPrintAccess || !order?.id) return;
     if (isGeneratingPrint) return;
     const payload = {
@@ -215,110 +216,35 @@ export const GrillQueue = () => {
     }
     setIsGeneratingPrint(true);
     setError('Gerando cupom...');
-    const escapeHtml = (value: any) =>
-      String(value ?? '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-    const itemsHtml = payload.items
-      .map((item: any) => {
-        const qty = Number(item?.qty ?? item?.quantity ?? 0);
-        const unit = Number(item?.unitPrice ?? item?.price ?? 0);
-        const lineTotal = formatCurrency(qty * unit);
-        const name = escapeHtml(item?.name || 'Item');
-        const options = item?.cookingPoint || item?.options ? `<div class="opt">  ${escapeHtml(item?.cookingPoint || item?.options || '')}</div>` : '';
-        return `<div class="item"><span>${qty}x ${name}</span><span class="price">${lineTotal}</span></div>${options}`;
-      })
-      .join('');
-    const receiptHtml = `<!doctype html>
-<html lang="pt-BR">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Imprimir</title>
-  <style>
-    * { box-sizing: border-box; }
-    html, body { height: auto !important; min-height: 100px; }
-    body { width: 72mm; margin: 0; padding: 2mm 4mm 2mm 2mm !important; font-family: 'Courier New', monospace; font-size: 12px; color: black; background: white; line-height: 1.35; }
-    .center { text-align: center; }
-    .header { text-align: center; font-weight: bold; text-transform: uppercase; }
-    .item { display: flex; justify-content: space-between; margin: 2px 0; font-size: 11px; gap: 6px; }
-    .price { min-width: 16mm; text-align: right; }
-    .items-block { min-height: 40px; }
-    .opt { font-size: 10px; margin-left: 2ch; }
-    hr { border: none; border-top: 1px dashed black; margin: 4px 0; }
-    .strong { font-weight: 700; }
-    .tail { white-space: pre-line; }
-  </style>
-</head>
-<body>
-  <span>.</span>
-  <div class="header">${escapeHtml(payload.storeName)}</div>
-  <div class="center">Já no Caminho</div>
-  <hr />
-  <div class="strong">#Fila: #${String(payload.queueRank || 1).padStart(2, '0')}</div>
-  <div>Pedido: #${escapeHtml(payload.orderDisplayId)}</div>
-  <div>Cliente: ${escapeHtml(payload.order?.customerName || payload.order?.name || 'Cliente')}</div>
-  <div>Data: ${escapeHtml(payload.createdAt)}</div>
-  <hr />
-  <div class="center">-- TESTE DE IMPRESSAO --</div>
-  <div class="items-block">${itemsHtml}</div>
-  <hr />
-  <div class="item strong"><span>Total</span><span>${escapeHtml(formatCurrency(payload.total))}</span></div>
-  <div class="tail">\n\n</div>
-</body>
-</html>`;
-    console.log('HTML do Cupom:', receiptHtml);
-    const frame = document.getElementById('silent-printer') as HTMLIFrameElement | null;
-    if (!frame) {
+    try {
+      await printReceiptAsImage({
+        storeName: payload.storeName || 'SERTANEJO NO ESPETO',
+        platformName: 'Já no Caminho',
+        queueLabel: `#${String(payload.queueRank || 1).padStart(2, '0')}`,
+        orderLabel: `#${payload.orderDisplayId}`,
+        customerLabel: payload.order?.customerName || payload.order?.name || 'Cliente',
+        dateLabel: payload.createdAt,
+        items: payload.items.map((item: any) => {
+          const qty = Number(item?.qty ?? item?.quantity ?? 0);
+          const unit = Number(item?.unitPrice ?? item?.price ?? 0);
+          return {
+            quantity: qty,
+            name: String(item?.name || 'Item'),
+            lineTotal: formatCurrency(qty * unit),
+            notes: item?.cookingPoint || item?.options ? String(item?.cookingPoint || item?.options || '') : '',
+          };
+        }),
+        totalLabel: formatCurrency(payload.total),
+        widthPx: 400,
+        debugLine: '-- TESTE DE IMPRESSAO --',
+      });
+    } catch (printError) {
+      console.error('[print] erro ao imprimir', printError);
+      setError('Falha ao imprimir. Verifique popup/permissões no navegador.');
+    } finally {
       setIsGeneratingPrint(false);
-      setError('Falha ao iniciar impressão.');
-      return;
+      setError('');
     }
-    const frameDoc = frame.contentDocument || frame.contentWindow?.document;
-    const frameWin = frame.contentWindow;
-    if (!frameDoc || !frameWin) {
-      setIsGeneratingPrint(false);
-      setError('Falha ao iniciar impressão.');
-      return;
-    }
-    let handled = false;
-    frameDoc.open();
-    frameDoc.write(receiptHtml);
-    frameDoc.close();
-
-    const triggerPrint = () => {
-      if (handled) return;
-      handled = true;
-      window.setTimeout(() => {
-        try {
-          frameWin.focus();
-          frameWin.print();
-        } catch (error) {
-          console.error('[print] erro ao imprimir', error);
-          alert('Clique novamente para confirmar a impressão');
-        } finally {
-          window.setTimeout(() => {
-            setIsGeneratingPrint(false);
-            setError('');
-            try {
-              frameDoc.open();
-              frameDoc.write('<html><body></body></html>');
-              frameDoc.close();
-            } catch {
-              // noop
-            }
-          }, 1500);
-        }
-      }, 1500);
-    };
-    frame.onload = triggerPrint;
-
-    window.setTimeout(() => {
-      if (!handled) triggerPrint();
-    }, 1800);
   };
 
   const orderTypeMeta = (order: any) => {
@@ -2158,19 +2084,6 @@ export const GrillQueue = () => {
         <div className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg p-3">{error}</div>
       )}
     </div>
-    <iframe
-      id="silent-printer"
-      title="silent-printer"
-      style={{
-        visibility: 'hidden',
-        position: 'absolute',
-        top: -1000,
-        left: -1000,
-        width: 0,
-        height: 0,
-        border: 'none',
-      }}
-    />
     </>
   );
 };

@@ -22,6 +22,7 @@ import {
   normalizeSelectedModifiers,
 } from '../utils/productModifiers';
 import { getCartPricing } from '../utils/orderPricing';
+import { printReceiptAsImage } from '../utils/printReceiptImage';
 
 const WEEKDAY_LABELS = [ 'Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado' ];
 
@@ -1100,7 +1101,7 @@ export function StorePage() {
     navigate('/admin');
   };
 
-  const printLastOrderReceipt = () => {
+  const printLastOrderReceipt = async () => {
     if (!hasAdminPrintAccess) return;
     if (!lastOrder?.id) return;
     if (isGeneratingPrint) return;
@@ -1135,113 +1136,31 @@ export function StorePage() {
     }
     setIsGeneratingPrint(true);
     showToast('Gerando cupom...', 'success');
-
-    const escapeHtml = (value: any) =>
-      String(value ?? '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-
-    const itemsHtml = payload.items
-      .map((item: any) => {
-        const qty = Number(item?.quantity || 0);
-        const name = escapeHtml(item?.name || 'Item');
-        const lineTotal = formatCurrency(Number(item?.lineTotal || 0));
-        const options = item?.options ? `<div class="opt">  ${escapeHtml(item.options)}</div>` : '';
-        return `<div class="item"><span>${qty}x ${name}</span><span class="price">${lineTotal}</span></div>${options}`;
-      })
-      .join('');
-
-    const queueText = payload.queueRank ? `#${String(payload.queueRank).padStart(2, '0')}` : '--';
-    const receiptHtml = `<!doctype html>
-<html lang="pt-BR">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Imprimir</title>
-  <style>
-    * { box-sizing: border-box; }
-    html, body { height: auto !important; min-height: 100px; }
-    body { width: 72mm; margin: 0; padding: 2mm 4mm 2mm 2mm !important; font-family: 'Courier New', monospace; font-size: 12px; color: black; background: white; line-height: 1.35; }
-    .center { text-align: center; }
-    .header { text-align: center; font-weight: bold; text-transform: uppercase; }
-    .item { display: flex; justify-content: space-between; margin: 2px 0; font-size: 11px; gap: 6px; }
-    .price { min-width: 16mm; text-align: right; }
-    .items-block { min-height: 40px; }
-    .opt { font-size: 10px; margin-left: 2ch; }
-    hr { border: none; border-top: 1px dashed black; margin: 4px 0; }
-    .strong { font-weight: 700; }
-    .tail { white-space: pre-line; }
-  </style>
-</head>
-<body>
-  <span>.</span>
-  <div class="header">${escapeHtml(payload.storeName || 'SERTANEJO NO ESPETO')}</div>
-  <div class="center">Já no Caminho</div>
-  <hr />
-  <div class="strong">#Fila: ${queueText}</div>
-  <div>Pedido: #${escapeHtml(payload.orderDisplayId)}</div>
-  <div>Cliente: ${escapeHtml(payload.customerName)}</div>
-  <div>Data: ${escapeHtml(payload.createdAt)}</div>
-  <hr />
-  <div class="items-block">
-    <div>-- TESTE DE IMPRESSAO --</div>
-    ${itemsHtml}
-  </div>
-  <hr />
-  <div class="item strong"><span>TOTAL</span><span>${escapeHtml(formatCurrency(Number(payload.total || 0)))}</span></div>
-  <div class="tail">\n\n</div>
-</body>
-</html>`;
-    console.log('HTML do Cupom:', receiptHtml);
-    const frame = document.getElementById('silent-printer') as HTMLIFrameElement | null;
-    if (!frame) {
+    try {
+      const queueText = payload.queueRank ? `#${String(payload.queueRank).padStart(2, '0')}` : '--';
+      await printReceiptAsImage({
+        storeName: payload.storeName || 'SERTANEJO NO ESPETO',
+        platformName: 'Já no Caminho',
+        queueLabel: queueText,
+        orderLabel: `#${payload.orderDisplayId}`,
+        customerLabel: payload.customerName,
+        dateLabel: payload.createdAt,
+        items: payload.items.map((item: any) => ({
+          quantity: Number(item?.quantity || 0),
+          name: String(item?.name || 'Item'),
+          lineTotal: formatCurrency(Number(item?.lineTotal || 0)),
+          notes: item?.options ? String(item.options) : '',
+        })),
+        totalLabel: formatCurrency(Number(payload.total || 0)),
+        widthPx: 400,
+        debugLine: '-- TESTE DE IMPRESSAO --',
+      });
+    } catch (printError) {
+      console.error('[print] erro ao imprimir', printError);
+      showToast('Falha ao imprimir. Verifique popup/permissões no navegador.', 'error');
+    } finally {
       setIsGeneratingPrint(false);
-      showToast('Falha ao iniciar impressão.', 'error');
-      return;
     }
-    const frameDoc = frame.contentDocument || frame.contentWindow?.document;
-    const frameWin = frame.contentWindow;
-    if (!frameDoc || !frameWin) {
-      setIsGeneratingPrint(false);
-      showToast('Falha ao iniciar impressão.', 'error');
-      return;
-    }
-    let printed = false;
-    frame.onload = () => {
-      if (printed) return;
-      printed = true;
-      window.setTimeout(() => {
-        try {
-          frameWin.focus();
-          frameWin.print();
-        } catch (error) {
-          console.error('[print] erro ao imprimir', error);
-          alert('Clique novamente para confirmar a impressão');
-        } finally {
-          window.setTimeout(() => {
-            setIsGeneratingPrint(false);
-            try {
-              frameDoc.open();
-              frameDoc.write('<!doctype html><html><head><meta charset="utf-8" /></head><body></body></html>');
-              frameDoc.close();
-            } catch {
-              // noop
-            }
-          }, 1500);
-        }
-      }, 1500);
-    };
-    frameDoc.open();
-    frameDoc.write(receiptHtml);
-    frameDoc.close();
-    window.setTimeout(() => {
-      if (!printed && frame.onload) {
-        (frame.onload as any)();
-      }
-    }, 1800);
   };
 
   useEffect(() => {
@@ -1693,20 +1612,6 @@ export function StorePage() {
           <PaperPlaneTilt size={20} weight="duotone" />
         </div>
       )}
-
-      <iframe
-        id="silent-printer"
-        title="silent-printer"
-        style={{
-          visibility: 'hidden',
-          position: 'absolute',
-          top: -1000,
-          left: -1000,
-          width: 0,
-          height: 0,
-          border: 'none',
-        }}
-      />
 
     </div>
   );
