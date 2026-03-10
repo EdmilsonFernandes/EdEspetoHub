@@ -241,7 +241,7 @@ export const GrillQueue = () => {
   <style>
     * { box-sizing: border-box; }
     html, body { height: auto !important; min-height: 100px; }
-    body { width: 58mm; margin: 0; padding: 2mm 4mm 2mm 2mm !important; font-family: 'Courier New', monospace; font-size: 12px; color: black; background: white; line-height: 1.35; }
+    body { width: 72mm; margin: 0; padding: 2mm 4mm 2mm 2mm !important; font-family: 'Courier New', monospace; font-size: 12px; color: black; background: white; line-height: 1.35; }
     .center { text-align: center; }
     .header { text-align: center; font-weight: bold; text-transform: uppercase; }
     .item { display: flex; justify-content: space-between; margin: 2px 0; font-size: 11px; gap: 6px; }
@@ -251,7 +251,6 @@ export const GrillQueue = () => {
     hr { border: none; border-top: 1px dashed black; margin: 4px 0; }
     .strong { font-weight: 700; }
     .tail { white-space: pre-line; }
-    @media print { @page { size: 58mm auto; margin: 0; } }
   </style>
 </head>
 <body>
@@ -264,6 +263,7 @@ export const GrillQueue = () => {
   <div>Cliente: ${escapeHtml(payload.order?.customerName || payload.order?.name || 'Cliente')}</div>
   <div>Data: ${escapeHtml(payload.createdAt)}</div>
   <hr />
+  <div class="center">-- TESTE DE IMPRESSAO --</div>
   <div class="items-block">${itemsHtml}</div>
   <hr />
   <div class="item strong"><span>Total</span><span>${escapeHtml(formatCurrency(payload.total))}</span></div>
@@ -284,30 +284,41 @@ export const GrillQueue = () => {
       setError('Falha ao iniciar impressão.');
       return;
     }
+    let handled = false;
     frameDoc.open();
     frameDoc.write(receiptHtml);
     frameDoc.close();
-    frameWin.focus();
+
+    const triggerPrint = () => {
+      if (handled) return;
+      handled = true;
+      window.setTimeout(() => {
+        try {
+          frameWin.focus();
+          frameWin.print();
+        } catch (error) {
+          console.error('[print] erro ao imprimir', error);
+          alert('Clique novamente para confirmar a impressão');
+        } finally {
+          window.setTimeout(() => {
+            setIsGeneratingPrint(false);
+            setError('');
+            try {
+              frameDoc.open();
+              frameDoc.write('<html><body></body></html>');
+              frameDoc.close();
+            } catch {
+              // noop
+            }
+          }, 1500);
+        }
+      }, 1500);
+    };
+    frame.onload = triggerPrint;
+
     window.setTimeout(() => {
-      try {
-        frameWin.print();
-      } catch (error) {
-        console.error('[print] erro ao imprimir', error);
-        alert('Clique novamente para confirmar a impressão');
-      } finally {
-        window.setTimeout(() => {
-          setIsGeneratingPrint(false);
-          setError('');
-          try {
-            frameDoc.open();
-            frameDoc.write('<html><body></body></html>');
-            frameDoc.close();
-          } catch {
-            // noop
-          }
-        }, 1500);
-      }
-    }, 1200);
+      if (!handled) triggerPrint();
+    }, 1800);
   };
 
   const orderTypeMeta = (order: any) => {
