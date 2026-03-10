@@ -78,7 +78,7 @@ export function AdminMobileBottomNav() {
     },
     {
       id: 'pedidos',
-      label: 'Pedidos',
+      label: 'Vendas',
       icon: ShoppingCart,
       active: path === '/admin/dashboard' && dashboardTab === 'pedidos',
       onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'pedidos' } }),
