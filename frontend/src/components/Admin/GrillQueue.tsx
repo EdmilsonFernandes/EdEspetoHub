@@ -2084,30 +2084,40 @@ export const GrillQueue = () => {
     {printPayload && createPortal(
       <div className="print-container print-only">
         <div style={{ width: '58mm', fontFamily: 'monospace', fontSize: '12px', lineHeight: 1.35, padding: '2mm' }}>
-          <div style={{ textAlign: 'center', fontWeight: 700 }}>JA NO CAMINHO</div>
-          <div style={{ textAlign: 'center' }}>Cupom de pedido</div>
-          <div>Fila: #{String(printPayload.queueRank || 1).padStart(2, '0')}</div>
+          <div style={{ textAlign: 'center', fontWeight: 700, textTransform: 'uppercase' }}>
+            {String(printPayload.order?.storeName || 'Sertanejo no Espeto')}
+          </div>
+          <div style={{ textAlign: 'center', fontSize: '11px' }}>Plataforma: Ja no Caminho</div>
+          <div style={{ margin: '3px 0' }}>--------------------------------</div>
+          <div style={{ fontWeight: 700 }}>
+            [[ FILA: #{String(printPayload.queueRank || 1).padStart(2, '0')} ]]
+          </div>
           <div>Pedido: #{printPayload.orderDisplayId}</div>
           <div>Cliente: {printPayload.order?.customerName || printPayload.order?.name || 'Cliente'}</div>
           <div>Data: {printPayload.createdAt}</div>
-          <div style={{ borderTop: '1px dashed #000', margin: '4px 0' }} />
+          <div style={{ margin: '3px 0' }}>--------------------------------</div>
           {(Array.isArray(printPayload.order?.items) ? printPayload.order.items : []).map((item: any, idx: number) => {
             const qty = Number(item?.qty ?? item?.quantity ?? 0);
             const unit = Number(item?.unitPrice ?? item?.price ?? 0);
             const lineTotal = qty * unit;
             return (
               <div key={`${item?.id || idx}`}>
-                <div>{qty}x {String(item?.name || 'Item')}</div>
-                <div style={{ textAlign: 'right' }}>{formatCurrency(lineTotal)}</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span>{qty}x {String(item?.name || 'Item')}</span>
+                  <span>{formatCurrency(lineTotal)}</span>
+                </div>
+                {(item?.cookingPoint || item?.options) ? (
+                  <div style={{ fontSize: '10px' }}>{`  ${String(item?.cookingPoint || item?.options || '')}`}</div>
+                ) : null}
               </div>
             );
           })}
-          <div style={{ borderTop: '1px dashed #000', margin: '4px 0' }} />
+          <div style={{ margin: '3px 0' }}>--------------------------------</div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700 }}>
             <span>Total</span>
             <span>{formatCurrency(Number(printPayload.order?.total || 0))}</span>
           </div>
-          <div style={{ height: '14mm', whiteSpace: 'pre-line' }}>{'\n\n\n\n'}</div>
+          <div style={{ whiteSpace: 'pre-line' }}>{'\n\n'}</div>
         </div>
       </div>,
       document.body

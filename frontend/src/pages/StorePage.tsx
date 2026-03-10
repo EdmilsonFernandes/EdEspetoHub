@@ -1623,30 +1623,35 @@ export function StorePage() {
 
       {printReceiptPayload && createPortal(
         <div className="print-container">
-          <div style={{ textAlign: 'center', fontWeight: 700 }}>{printReceiptPayload.storeName}</div>
-          <div style={{ textAlign: 'center' }}>Comprovante de pedido</div>
-          <div>Pedido: #{printReceiptPayload.orderDisplayId}</div>
+          <div style={{ textAlign: 'center', fontWeight: 700, textTransform: 'uppercase' }}>
+            {String(printReceiptPayload.storeName || 'Sertanejo no Espeto')}
+          </div>
+          <div style={{ textAlign: 'center', fontSize: '11px' }}>Plataforma: Ja no Caminho</div>
+          <div style={{ margin: '3px 0' }}>--------------------------------</div>
+          <div style={{ fontWeight: 700 }}>
+            [[ PEDIDO: #{printReceiptPayload.orderDisplayId} ]]
+          </div>
           <div>Cliente: {printReceiptPayload.customerName}</div>
           {printReceiptPayload.table ? <div>Mesa: {printReceiptPayload.table}</div> : null}
           <div>Tipo: {printReceiptPayload.type}</div>
           <div>Pagamento: {printReceiptPayload.paymentMethod || '-'}</div>
           <div>Data: {printReceiptPayload.createdAt}</div>
-          <div style={{ borderTop: '1px dashed #000', margin: '4px 0' }} />
+          <div style={{ margin: '3px 0' }}>--------------------------------</div>
           {(Array.isArray(printReceiptPayload.items) ? printReceiptPayload.items : []).map((item: any, idx: number) => (
             <div key={`${item?.name || 'item'}-${idx}`}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span>{Number(item?.quantity || 0)}x {String(item?.name || 'Item')}</span>
                 <span>{formatCurrency(Number(item?.lineTotal || 0))}</span>
               </div>
-              {item?.options ? <div style={{ fontSize: '10px' }}>{item.options}</div> : null}
+              {item?.options ? <div style={{ fontSize: '10px' }}>{`  ${item.options}`}</div> : null}
             </div>
           ))}
-          <div style={{ borderTop: '1px dashed #000', margin: '4px 0' }} />
+          <div style={{ margin: '3px 0' }}>--------------------------------</div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700 }}>
             <span>TOTAL</span>
             <span>{formatCurrency(Number(printReceiptPayload.total || 0))}</span>
           </div>
-          <div style={{ height: '14mm', whiteSpace: 'pre-line' }}>{'\n\n\n\n'}</div>
+          <div style={{ whiteSpace: 'pre-line' }}>{'\n\n'}</div>
         </div>,
         document.body
       )}
