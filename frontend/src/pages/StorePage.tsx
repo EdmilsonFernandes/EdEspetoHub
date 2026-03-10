@@ -1,5 +1,6 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ShoppingCart, PaperPlaneTilt, Clock, MapPinLine, InstagramLogo, ArrowLeft } from '@phosphor-icons/react';
 import { productService } from '../services/productService';
@@ -158,6 +159,7 @@ export function StorePage() {
     user.store.slug === storeSlug;
   const hasAdminPrintAccess = String(user?.role || '').toLowerCase() === 'admin';
   const [showPrintPrompt, setShowPrintPrompt] = useState(false);
+  const [printReceiptPayload, setPrintReceiptPayload] = useState<any | null>(null);
 
   const cartPricing = useMemo(() => getCartPricing(cart), [cart]);
   const cartItemsTotal = cartPricing.discountedSubtotal;
@@ -1093,103 +1095,17 @@ export function StorePage() {
   const printLastOrderReceipt = () => {
     if (!hasAdminPrintAccess) return;
     if (!lastOrder?.id) return;
-    const orderDisplayId = formatOrderDisplayId(lastOrder.id, storeSlug);
-    const createdAt = lastOrder?.createdAt ? new Date(lastOrder.createdAt) : new Date();
-    const items = Array.isArray(lastOrder?.items) ? lastOrder.items : [];
-    const total = Number(lastOrder?.total || 0);
-    const escapeHtml = (value: any) =>
-      String(value ?? '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-
-    const lines = items
-      .map((item: any) => `
-        <div class="line">
-          <div>${escapeHtml(item.quantity)}x ${escapeHtml(item.name)}</div>
-          <div class="right">${escapeHtml(formatCurrency(Number(item.lineTotal || 0)))}</div>
-        </div>
-        ${item.options ? `<div class="muted">${escapeHtml(item.options)}</div>` : ''}
-      `)
-      .join('');
-
-    const html = `
-      <!doctype html>
-      <html>
-      <head>
-        <meta charset="utf-8" />
-        <title>Cupom ${escapeHtml(orderDisplayId)}</title>
-        <style>
-          @page { size: 58mm auto; margin: 0; }
-          html, body { margin: 0; padding: 0; width: 58mm; }
-          body { font-family: monospace; color: #000; font-size: 12px; line-height: 1.35; }
-          .receipt { width: 58mm; padding: 2mm; box-sizing: border-box; }
-          .center { text-align: center; }
-          .title { font-weight: 700; font-size: 13px; }
-          .sep { border-top: 1px dashed #000; margin: 4px 0; }
-          .line { display: flex; justify-content: space-between; gap: 6px; }
-          .right { text-align: right; white-space: nowrap; }
-          .muted { color: #333; font-size: 10px; margin: 1px 0 2px; }
-          .total { font-weight: 700; font-size: 13px; }
-          .feed { height: 14mm; }
-        </style>
-      </head>
-      <body>
-        <div class="receipt">
-          <div class="center title">${escapeHtml(storeName || branding?.brandName || 'Já no Caminho')}</div>
-          <div class="center">Comprovante de pedido</div>
-          <div>Pedido: #${escapeHtml(orderDisplayId)}</div>
-          <div>Cliente: ${escapeHtml(lastOrder?.customerName || 'Cliente')}</div>
-          <div>Tipo: ${escapeHtml(formatOrderType(lastOrder?.type))}</div>
-          <div>Data: ${escapeHtml(createdAt.toLocaleString('pt-BR'))}</div>
-          <div class="sep"></div>
-          ${lines}
-          <div class="sep"></div>
-          <div class="line total"><span>Total</span><span class="right">${escapeHtml(formatCurrency(total))}</span></div>
-          <div class="feed"></div>
-        </div>
-      </body>
-      </html>
-    `;
-
-    const frame = document.createElement('iframe');
-    frame.setAttribute('aria-hidden', 'true');
-    frame.style.position = 'fixed';
-    frame.style.right = '0';
-    frame.style.bottom = '0';
-    frame.style.width = '0';
-    frame.style.height = '0';
-    frame.style.border = '0';
-    document.body.appendChild(frame);
-
-    const frameDoc = frame.contentDocument || frame.contentWindow?.document;
-    if (!frameDoc) {
-      frame.remove();
-      return;
-    }
-
-    frameDoc.open();
-    frameDoc.write(html);
-    frameDoc.close();
-
-    let printed = false;
-    const runPrint = () => {
-      if (printed) return;
-      printed = true;
-      try {
-        frame.contentWindow?.focus();
-        frame.contentWindow?.print();
-      } catch {}
-      window.setTimeout(() => frame.remove(), 2500);
-    };
-
-    if (frame.contentWindow?.document.readyState === 'complete') {
-      window.setTimeout(runPrint, 80);
-    } else {
-      frame.onload = () => window.setTimeout(runPrint, 80);
-    }
+    setPrintReceiptPayload({
+      orderId: lastOrder.id,
+      orderDisplayId: formatOrderDisplayId(lastOrder.id, storeSlug),
+      createdAt: (lastOrder?.createdAt ? new Date(lastOrder.createdAt) : new Date()).toLocaleString('pt-BR'),
+      customerName: lastOrder?.customerName || 'Cliente',
+      table: lastOrder?.table || '',
+      type: formatOrderType(lastOrder?.type),
+      items: Array.isArray(lastOrder?.items) ? lastOrder.items : [],
+      total: Number(lastOrder?.total || 0),
+      storeName: storeName || branding?.brandName || 'Já no Caminho',
+    });
   };
 
   useEffect(() => {
@@ -1199,6 +1115,18 @@ export function StorePage() {
     }
     setShowPrintPrompt(false);
   }, [view, hasAdminPrintAccess, lastOrder?.id]);
+
+  useEffect(() => {
+    if (!printReceiptPayload) return;
+    const timer = window.setTimeout(() => window.print(), 80);
+    return () => window.clearTimeout(timer);
+  }, [printReceiptPayload]);
+
+  useEffect(() => {
+    const clearPrint = () => setPrintReceiptPayload(null);
+    window.addEventListener('afterprint', clearPrint);
+    return () => window.removeEventListener('afterprint', clearPrint);
+  }, []);
 
   // Loading state
   if (isLoading) {
@@ -1219,6 +1147,36 @@ export function StorePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 font-sans pb-28 sm:pb-24 overflow-x-hidden no-x-scroll">
+      <style>{`
+        @media print{
+          @page{size:58mm auto;margin:0}
+          html,body{
+            margin:0!important;
+            padding:0!important;
+            height:auto!important;
+            overflow:visible!important;
+            background:#fff!important;
+          }
+          body > *:not(.print-container){display:none!important}
+          .print-container{
+            display:block!important;
+            width:58mm!important;
+            padding:2mm!important;
+            background:#fff!important;
+            color:#000!important;
+            font-family:monospace!important;
+            font-size:12px!important;
+            line-height:1.35!important;
+          }
+          .print-container *{
+            background:transparent!important;
+            color:#000!important;
+            box-shadow:none!important;
+            border-color:#000!important;
+          }
+          .no-print{display:none!important}
+        }
+      `}</style>
       {isDemo && view === 'menu' && (
         <div className="bg-amber-50 border-b border-amber-200">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm text-amber-900">
@@ -1639,6 +1597,35 @@ export function StorePage() {
         >
           <PaperPlaneTilt size={20} weight="duotone" />
         </div>
+      )}
+
+      {printReceiptPayload && createPortal(
+        <div className="print-container">
+          <div style={{ textAlign: 'center', fontWeight: 700 }}>{printReceiptPayload.storeName}</div>
+          <div style={{ textAlign: 'center' }}>Comprovante de pedido</div>
+          <div>Pedido: #{printReceiptPayload.orderDisplayId}</div>
+          <div>Cliente: {printReceiptPayload.customerName}</div>
+          {printReceiptPayload.table ? <div>Mesa: {printReceiptPayload.table}</div> : null}
+          <div>Tipo: {printReceiptPayload.type}</div>
+          <div>Data: {printReceiptPayload.createdAt}</div>
+          <div style={{ borderTop: '1px dashed #000', margin: '4px 0' }} />
+          {(Array.isArray(printReceiptPayload.items) ? printReceiptPayload.items : []).map((item: any, idx: number) => (
+            <div key={`${item?.name || 'item'}-${idx}`}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span>{Number(item?.quantity || 0)}x {String(item?.name || 'Item')}</span>
+                <span>{formatCurrency(Number(item?.lineTotal || 0))}</span>
+              </div>
+              {item?.options ? <div style={{ fontSize: '10px' }}>{item.options}</div> : null}
+            </div>
+          ))}
+          <div style={{ borderTop: '1px dashed #000', margin: '4px 0' }} />
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700 }}>
+            <span>TOTAL</span>
+            <span>{formatCurrency(Number(printReceiptPayload.total || 0))}</span>
+          </div>
+          <div style={{ height: '14mm', whiteSpace: 'pre-line' }}>{'\n\n\n\n'}</div>
+        </div>,
+        document.body
       )}
 
     </div>

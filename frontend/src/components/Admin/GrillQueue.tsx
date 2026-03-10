@@ -202,7 +202,6 @@ export const GrillQueue = () => {
       orderDisplayId: formatOrderDisplayId(order.id, storeSlug),
       createdAt: order?.createdAt ? new Date(order.createdAt).toLocaleString('pt-BR') : new Date().toLocaleString('pt-BR'),
     });
-    window.setTimeout(() => window.print(), 70);
   };
 
   useEffect(() => {
@@ -210,6 +209,12 @@ export const GrillQueue = () => {
     window.addEventListener('afterprint', clearPrint);
     return () => window.removeEventListener('afterprint', clearPrint);
   }, []);
+
+  useEffect(() => {
+    if (!printPayload) return;
+    const timer = window.setTimeout(() => window.print(), 80);
+    return () => window.clearTimeout(timer);
+  }, [printPayload]);
 
   const orderTypeMeta = (order: any) => {
     const type = String(order?.type || '').toLowerCase();
@@ -1052,9 +1057,29 @@ export const GrillQueue = () => {
         @keyframes drawerIn{0%{transform:translateX(100%)}100%{transform:translateX(0)}}
         @media print{
           @page{size:58mm auto;margin:0}
+          html,body{
+            margin:0!important;
+            padding:0!important;
+            height:auto!important;
+            overflow:visible!important;
+            background:#fff!important;
+          }
           .no-print{display:none!important}
           .print-only{display:block!important}
-          html,body{background:#fff!important;margin:0;padding:0}
+          body > *:not(.print-container){display:none!important}
+          .print-container{
+            display:block!important;
+            width:58mm!important;
+            background:#fff!important;
+            color:#000!important;
+            box-shadow:none!important;
+            border:0!important;
+          }
+          .print-container *{
+            background:transparent!important;
+            color:#000!important;
+            box-shadow:none!important;
+          }
         }
       `}</style>
       <div className={`${tvMode ? "" : "rounded-2xl border border-slate-200 bg-white px-3 py-3"}`}>
@@ -2052,8 +2077,8 @@ export const GrillQueue = () => {
         <div className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg p-3">{error}</div>
       )}
     </div>
-    {printPayload && (
-      <div className="print-only hidden bg-white text-black">
+    {printPayload && createPortal(
+      <div className="print-container print-only hidden">
         <div style={{ width: '58mm', fontFamily: 'monospace', fontSize: '12px', lineHeight: 1.35, padding: '2mm' }}>
           <div style={{ textAlign: 'center', fontWeight: 700 }}>JA NO CAMINHO</div>
           <div style={{ textAlign: 'center' }}>Cupom de pedido</div>
@@ -2078,9 +2103,10 @@ export const GrillQueue = () => {
             <span>Total</span>
             <span>{formatCurrency(Number(printPayload.order?.total || 0))}</span>
           </div>
-          <div style={{ height: '14mm' }} />
+          <div style={{ height: '14mm', whiteSpace: 'pre-line' }}>{'\n\n\n\n'}</div>
         </div>
-      </div>
+      </div>,
+      document.body
     )}
     </>
   );
