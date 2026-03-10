@@ -22,13 +22,27 @@ const sanitizeText = (value: unknown) =>
     .replace(/\n/g, " ")
     .trim();
 
-const dotsLine = (left: string, right: string, size = 40) => {
-  const safeLeft = sanitizeText(left);
+const LINE_WIDTH = 48;
+
+const centerText = (value: string, width = LINE_WIDTH) => {
+  const text = sanitizeText(value);
+  if (!text) return "";
+  if (text.length >= width) return text.slice(0, width);
+  const left = Math.floor((width - text.length) / 2);
+  const right = width - text.length - left;
+  return `${" ".repeat(left)}${text}${" ".repeat(right)}`;
+};
+
+const separator = (width = LINE_WIDTH) => "-".repeat(width);
+
+const fitLeftRight = (left: string, right: string, width = LINE_WIDTH) => {
   const safeRight = sanitizeText(right);
-  const minDots = 3;
-  const rawDots = size - safeLeft.length - safeRight.length;
-  const dots = ".".repeat(Math.max(minDots, rawDots));
-  return `${safeLeft} ${dots} ${safeRight}`;
+  const rightWidth = Math.min(10, Math.max(8, safeRight.length));
+  const leftMax = Math.max(8, width - rightWidth);
+  const safeLeft = sanitizeText(left).slice(0, leftMax);
+  const leftPadded = safeLeft.padEnd(leftMax, ".");
+  const rightPadded = safeRight.padStart(rightWidth, " ");
+  return `${leftPadded}${rightPadded}`;
 };
 
 const toBase64Utf8 = (value: string) => {
@@ -44,24 +58,24 @@ const buildRawBtText = (payload: PrintReceiptRawBtInput) => {
     const name = sanitizeText(item.name || "Item");
     const lineTotal = sanitizeText(item.lineTotal || "R$ 0,00");
     const note = sanitizeText(item.notes || "");
-    const lines = [dotsLine(`${qty}x ${name}`, lineTotal)];
+    const lines = [fitLeftRight(`${qty}x ${name}`, lineTotal)];
     if (note) {
-      lines.push(`  - ${note}`);
+      lines.push(`  - ${note.slice(0, LINE_WIDTH - 4)}`);
     }
     return lines;
   });
 
   const chunks = [
-    `<center><big>${sanitizeText(payload.storeName || "SERTANEJO NO ESPETO").toUpperCase()}</big></center>`,
-    `<center>Plataforma: ${sanitizeText(payload.platformName || "Já no Caminho")}</center>`,
-    "--------------------------------",
-    `Fila: ${sanitizeText(payload.queueLabel || "--")} | Pedido: ${sanitizeText(payload.orderLabel || "--")}`,
-    `Cliente: ${sanitizeText(payload.customerLabel || "Cliente")}`,
-    `Data: ${sanitizeText(payload.dateLabel || "")}`,
-    "--------------------------------",
+    centerText(sanitizeText(payload.storeName || "SERTANEJO NO ESPETO").toUpperCase()),
+    centerText(`Plataforma: ${sanitizeText(payload.platformName || "Já no Caminho")}`),
+    separator(),
+    fitLeftRight(`Fila: ${sanitizeText(payload.queueLabel || "--")}`, `Pedido: ${sanitizeText(payload.orderLabel || "--")}`),
+    `Cliente: ${sanitizeText(payload.customerLabel || "Cliente")}`.slice(0, LINE_WIDTH),
+    `Data: ${sanitizeText(payload.dateLabel || "")}`.slice(0, LINE_WIDTH),
+    separator(),
     ...itemsLines,
-    "--------------------------------",
-    `<right><big>TOTAL: ${sanitizeText(payload.totalLabel || "R$ 0,00")}</big></right>`,
+    separator(),
+    fitLeftRight("TOTAL:", sanitizeText(payload.totalLabel || "R$ 0,00")),
     "",
     "",
   ];
