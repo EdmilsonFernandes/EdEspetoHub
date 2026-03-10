@@ -22,26 +22,53 @@ const sanitizeText = (value: unknown) =>
     .replace(/\n/g, " ")
     .trim();
 
-// 42 columns is safer across 58/80mm profiles in RawBT and avoids wrapping.
-const LINE_WIDTH = 42;
+// Conservative width for mobile + mixed RawBT profiles (58mm/80mm).
+const LINE_WIDTH = 32;
+
+const wrapWords = (value: string, width = LINE_WIDTH) => {
+  const text = sanitizeText(value);
+  if (!text) return [""];
+  const words = text.split(/\s+/);
+  const lines: string[] = [];
+  let current = "";
+
+  for (const word of words) {
+    if (!current) {
+      current = word.slice(0, width);
+      continue;
+    }
+    const candidate = `${current} ${word}`;
+    if (candidate.length <= width) {
+      current = candidate;
+      continue;
+    }
+    lines.push(current);
+    current = word.slice(0, width);
+  }
+  if (current) lines.push(current);
+  return lines;
+};
 
 const centerText = (value: string, width = LINE_WIDTH) => {
-  const text = sanitizeText(value);
-  if (!text) return "";
-  if (text.length >= width) return text.slice(0, width);
-  const left = Math.floor((width - text.length) / 2);
-  const right = width - text.length - left;
-  return `${" ".repeat(left)}${text}${" ".repeat(right)}`;
+  const lines = wrapWords(value, width);
+  return lines
+    .map((line) => {
+      if (line.length >= width) return line;
+      const left = Math.floor((width - line.length) / 2);
+      const right = width - line.length - left;
+      return `${" ".repeat(left)}${line}${" ".repeat(right)}`;
+    })
+    .join("\n");
 };
 
 const separator = (width = LINE_WIDTH) => "-".repeat(width);
 
 const fitLeftRight = (left: string, right: string, width = LINE_WIDTH) => {
   const safeRight = sanitizeText(right);
-  const rightWidth = Math.min(10, Math.max(8, safeRight.length));
+  const rightWidth = Math.min(12, Math.max(8, safeRight.length));
   const leftMax = Math.max(8, width - rightWidth);
   const safeLeft = sanitizeText(left).slice(0, leftMax);
-  const leftPadded = safeLeft.padEnd(leftMax, ".");
+  const leftPadded = safeLeft.padEnd(leftMax, " ");
   const rightPadded = safeRight.padStart(rightWidth, " ");
   return `${leftPadded}${rightPadded}`;
 };
@@ -59,10 +86,17 @@ const buildRawBtText = (payload: PrintReceiptRawBtInput) => {
     const name = sanitizeText(item.name || "Item");
     const lineTotal = sanitizeText(item.lineTotal || "R$ 0,00");
     const note = sanitizeText(item.notes || "");
-    const lines = [fitLeftRight(`${qty}x ${name}`, lineTotal)];
+    const nameLines = wrapWords(`${qty}x ${name}`, LINE_WIDTH);
+    const lines = [...nameLines];
+    // Price always at right edge, on dedicated line to avoid wrapping.
+    lines.push(lineTotal.padStart(LINE_WIDTH, " "));
     if (note) {
-      lines.push(`  - ${note.slice(0, LINE_WIDTH - 4)}`);
+      const noteLines = wrapWords(note, LINE_WIDTH - 4);
+      noteLines.forEach((n, index) => {
+        lines.push(index === 0 ? `  - ${n}` : `    ${n}`);
+      });
     }
+    lines.push("");
     return lines;
   });
 
@@ -70,11 +104,13 @@ const buildRawBtText = (payload: PrintReceiptRawBtInput) => {
     centerText(sanitizeText(payload.storeName || "SERTANEJO NO ESPETO").toUpperCase()),
     centerText(`Plataforma: ${sanitizeText(payload.platformName || "Já no Caminho")}`),
     separator(),
-    `Fila: ${sanitizeText(payload.queueLabel || "--")}`.slice(0, LINE_WIDTH),
-    `Pedido: ${sanitizeText(payload.orderLabel || "--")}`.slice(0, LINE_WIDTH),
-    `Cliente: ${sanitizeText(payload.customerLabel || "Cliente")}`.slice(0, LINE_WIDTH),
-    `Data: ${sanitizeText(payload.dateLabel || "")}`.slice(0, LINE_WIDTH),
+    ...wrapWords(`Fila: ${sanitizeText(payload.queueLabel || "--")}`, LINE_WIDTH),
+    ...wrapWords(`Pedido: ${sanitizeText(payload.orderLabel || "--")}`, LINE_WIDTH),
+    ...wrapWords(`Cliente: ${sanitizeText(payload.customerLabel || "Cliente")}`, LINE_WIDTH),
+    ...wrapWords(`Data: ${sanitizeText(payload.dateLabel || "")}`, LINE_WIDTH),
     centerText("FMT: RAWBT-TXT-V2"),
+    separator(),
+    "ITENS",
     separator(),
     ...itemsLines,
     separator(),
