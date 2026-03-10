@@ -1438,10 +1438,12 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       openQueueMonitor({ replace: true });
       return;
     }
+    const allowedTabs = new Set(['resumo', 'pedidos', 'avaliacoes', 'produtos', 'config', 'pagamentos', 'motoboys']);
+    if (!allowedTabs.has(nextTab)) return;
     if (nextTab !== activeTab) {
       setActiveTab(nextTab as typeof activeTab);
     }
-  }, [location.state, activeTab, openQueueMonitor]);
+  }, [location.state, openQueueMonitor]);
   const [savingBranding, setSavingBranding] = useState(false);
   const [configPanels, setConfigPanels] = useState({
     branding: true,
