@@ -235,8 +235,6 @@ export const GrillQueue = () => {
           };
         }),
         totalLabel: formatCurrency(payload.total),
-        widthPx: 400,
-        debugLine: '-- TESTE DE IMPRESSAO --',
       });
     } catch (printError) {
       console.error('[print] erro ao imprimir', printError);

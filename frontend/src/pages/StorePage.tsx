@@ -1152,8 +1152,6 @@ export function StorePage() {
           notes: item?.options ? String(item.options) : '',
         })),
         totalLabel: formatCurrency(Number(payload.total || 0)),
-        widthPx: 400,
-        debugLine: '-- TESTE DE IMPRESSAO --',
       });
     } catch (printError) {
       console.error('[print] erro ao imprimir', printError);

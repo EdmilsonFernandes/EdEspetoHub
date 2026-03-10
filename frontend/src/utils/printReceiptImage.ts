@@ -14,7 +14,6 @@ type PrintReceiptRawBtInput = {
   dateLabel: string;
   items: ReceiptItem[];
   totalLabel: string;
-  debugLine?: string;
 };
 
 const sanitizeText = (value: unknown) =>
@@ -54,13 +53,12 @@ const buildRawBtText = (payload: PrintReceiptRawBtInput) => {
 
   const chunks = [
     `<center><big>${sanitizeText(payload.storeName || "SERTANEJO NO ESPETO").toUpperCase()}</big></center>`,
-    `<center>${sanitizeText(payload.platformName || "Já no Caminho")}</center>`,
+    `<center>Plataforma: ${sanitizeText(payload.platformName || "Já no Caminho")}</center>`,
     "--------------------------------",
     `Fila: ${sanitizeText(payload.queueLabel || "--")} | Pedido: ${sanitizeText(payload.orderLabel || "--")}`,
     `Cliente: ${sanitizeText(payload.customerLabel || "Cliente")}`,
     `Data: ${sanitizeText(payload.dateLabel || "")}`,
     "--------------------------------",
-    ...(payload.debugLine ? [sanitizeText(payload.debugLine)] : []),
     ...itemsLines,
     "--------------------------------",
     `<right><big>TOTAL: ${sanitizeText(payload.totalLabel || "R$ 0,00")}</big></right>`,
