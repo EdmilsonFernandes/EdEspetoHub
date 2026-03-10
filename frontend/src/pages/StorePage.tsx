@@ -157,10 +157,7 @@ export function StorePage() {
     Boolean(storeSlug) &&
     user.store.slug === storeSlug;
   const normalizedRole = String(user?.role || '').toLowerCase();
-  const hasAdminPrintAccess =
-    normalizedRole === 'admin' ||
-    normalizedRole === 'super_admin' ||
-    Boolean(isStoreAdmin);
+  const hasAdminPrintAccess = normalizedRole === 'admin';
   const [showPrintPrompt, setShowPrintPrompt] = useState(false);
 
   const cartPricing = useMemo(() => getCartPricing(cart), [cart]);
@@ -1148,7 +1145,7 @@ export function StorePage() {
         const name = escapeHtml(item?.name || 'Item');
         const lineTotal = formatCurrency(Number(item?.lineTotal || 0));
         const options = item?.options ? `<div class="opt">  ${escapeHtml(item.options)}</div>` : '';
-        return `<div class="line"><span>${qty}x ${name}</span><span>${lineTotal}</span></div>${options}`;
+        return `<div class="item"><span>${qty}x ${name}</span><span>${lineTotal}</span></div>${options}`;
       })
       .join('');
 
@@ -1160,34 +1157,30 @@ export function StorePage() {
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Imprimir</title>
   <style>
-    * { box-sizing: border-box; color: #000 !important; background: #fff !important; }
-    html, body { width: 58mm; margin: 0; padding: 0; font-family: monospace; }
-    body { padding: 2mm; font-size: 12px; line-height: 1.35; }
+    * { box-sizing: border-box; }
+    body { width: 58mm; margin: 0; padding: 2mm; font-family: monospace; font-size: 12px; color: black; background: white; line-height: 1.35; }
     .center { text-align: center; }
     .title { font-weight: 700; text-transform: uppercase; }
-    .sep { border-top: 1px dashed #000; margin: 4px 0; }
+    .item { display: flex; justify-content: space-between; margin: 2px 0; }
+    .opt { font-size: 10px; margin-left: 2ch; }
+    hr { border: none; border-top: 1px dashed black; margin: 4px 0; }
     .strong { font-weight: 700; }
-    .line { display: flex; justify-content: space-between; }
-    .opt { font-size: 10px; }
     .tail { white-space: pre-line; }
     @media print { @page { size: 58mm auto; margin: 0; } }
   </style>
 </head>
 <body>
   <div class="center title">${escapeHtml(payload.storeName || 'SERTANEJO NO ESPETO')}</div>
-  <div class="center">Pedido via Ja no Caminho</div>
-  <div class="sep"></div>
-  <div class="strong">[[ FILA: ${queueText} ]]</div>
+  <div class="center">Ja no Caminho</div>
+  <hr />
+  <div class="strong">#Fila: ${queueText}</div>
   <div>Pedido: #${escapeHtml(payload.orderDisplayId)}</div>
   <div>Cliente: ${escapeHtml(payload.customerName)}</div>
-  ${payload.table ? `<div>Mesa: ${escapeHtml(payload.table)}</div>` : ''}
-  <div>Tipo: ${escapeHtml(payload.type)}</div>
-  <div>Pagamento: ${escapeHtml(payload.paymentMethod || '-')}</div>
   <div>Data: ${escapeHtml(payload.createdAt)}</div>
-  <div class="sep"></div>
+  <hr />
   ${itemsHtml}
-  <div class="sep"></div>
-  <div class="line strong"><span>TOTAL</span><span>${escapeHtml(formatCurrency(Number(payload.total || 0)))}</span></div>
+  <hr />
+  <div class="item strong"><span>TOTAL</span><span>${escapeHtml(formatCurrency(Number(payload.total || 0)))}</span></div>
   <div class="tail">\n\n</div>
 </body>
 </html>`;
