@@ -159,6 +159,7 @@ export function StorePage() {
   const normalizedRole = String(user?.role || '').toLowerCase();
   const hasAdminPrintAccess = normalizedRole === 'admin';
   const [showPrintPrompt, setShowPrintPrompt] = useState(false);
+  const [isGeneratingPrint, setIsGeneratingPrint] = useState(false);
 
   const cartPricing = useMemo(() => getCartPricing(cart), [cart]);
   const cartItemsTotal = cartPricing.discountedSubtotal;
@@ -1102,6 +1103,7 @@ export function StorePage() {
   const printLastOrderReceipt = () => {
     if (!hasAdminPrintAccess) return;
     if (!lastOrder?.id) return;
+    if (isGeneratingPrint) return;
 
     const payload = {
       orderId: lastOrder.id,
@@ -1131,6 +1133,8 @@ export function StorePage() {
       showToast('Pedido sem itens para imprimir.', 'error');
       return;
     }
+    setIsGeneratingPrint(true);
+    showToast('Gerando cupom...', 'success');
 
     const escapeHtml = (value: any) =>
       String(value ?? '')
@@ -1185,19 +1189,43 @@ export function StorePage() {
   <div class="tail">\n\n</div>
 </body>
 </html>`;
-    const printWindow = window.open('', '_blank', 'width=300,height=600');
-    if (!printWindow) {
-      showToast('Não foi possível abrir a janela de impressão. Libere pop-up no navegador.', 'error');
+    const blob = new Blob([receiptHtml], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const frame = document.getElementById('silent-printer') as HTMLIFrameElement | null;
+    if (!frame) {
+      URL.revokeObjectURL(url);
+      setIsGeneratingPrint(false);
+      showToast('Falha ao iniciar impressão.', 'error');
       return;
     }
-    printWindow.document.open();
-    printWindow.document.write(receiptHtml);
-    printWindow.document.close();
-    window.setTimeout(() => {
-      printWindow.focus();
-      printWindow.print();
-      window.setTimeout(() => printWindow.close(), 800);
-    }, 300);
+    let cleaned = false;
+    const cleanup = () => {
+      if (cleaned) return;
+      cleaned = true;
+      frame.onload = null;
+      frame.src = 'about:blank';
+      URL.revokeObjectURL(url);
+      setIsGeneratingPrint(false);
+    };
+    frame.onload = () => {
+      const win = frame.contentWindow;
+      if (!win) {
+        cleanup();
+        return;
+      }
+      window.setTimeout(() => {
+        try {
+          win.focus();
+          win.print();
+        } catch (error) {
+          console.error('[print] erro ao imprimir', error);
+          alert('Clique novamente para confirmar a impressão');
+        } finally {
+          window.setTimeout(cleanup, 2000);
+        }
+      }, 300);
+    };
+    frame.src = url;
   };
 
   useEffect(() => {
@@ -1628,9 +1656,10 @@ export function StorePage() {
                   setShowPrintPrompt(false);
                   printLastOrderReceipt();
                 }}
+                disabled={isGeneratingPrint}
                 className="flex-1 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white"
               >
-                Sim, imprimir agora
+                {isGeneratingPrint ? 'Gerando cupom...' : 'Sim, imprimir agora'}
               </button>
             </div>
           </div>
@@ -1646,6 +1675,20 @@ export function StorePage() {
           <PaperPlaneTilt size={20} weight="duotone" />
         </div>
       )}
+
+      <iframe
+        id="silent-printer"
+        title="silent-printer"
+        style={{
+          visibility: 'hidden',
+          position: 'absolute',
+          top: -1000,
+          left: -1000,
+          width: 0,
+          height: 0,
+          border: 'none',
+        }}
+      />
 
     </div>
   );

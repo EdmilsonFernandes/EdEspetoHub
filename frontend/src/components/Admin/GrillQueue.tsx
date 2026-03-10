@@ -51,6 +51,7 @@ const OrderSummaryCard = ({
   onClick,
   onPrint,
   canPrint,
+  printBusy,
 }: any) => (
   (() => {
     const isDelivery = String(order?.type || '').toLowerCase() === 'delivery';
@@ -108,7 +109,8 @@ const OrderSummaryCard = ({
               event.stopPropagation();
               onPrint();
             }}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-amber-300 bg-amber-50 text-amber-700 shadow-sm hover:bg-amber-100 hover:text-amber-900 transition-all no-print"
+            disabled={printBusy}
+            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-amber-300 bg-amber-50 text-amber-700 shadow-sm hover:bg-amber-100 hover:text-amber-900 transition-all no-print disabled:opacity-60"
             aria-label={`Imprimir pedido ${orderDisplayId}`}
             title="Imprimir pedido"
           >
@@ -183,6 +185,7 @@ export const GrillQueue = () => {
   });
   const [queueFilter, setQueueFilter] = useState<'all' | 'pending' | 'preparing' | 'ready' | 'late'>('all');
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
+  const [isGeneratingPrint, setIsGeneratingPrint] = useState(false);
   const previousIdsRef = useRef<string[]>([]);
   const audioContextRef = useRef<AudioContext | null>(null);
   const isDrawerOpen = selectedOrder !== null;
@@ -195,6 +198,7 @@ export const GrillQueue = () => {
 
   const handlePrintOrder = (order: any, queueRank = 1) => {
     if (!hasAdminPrintAccess || !order?.id) return;
+    if (isGeneratingPrint) return;
     const payload = {
       order,
       queueRank,
@@ -209,6 +213,8 @@ export const GrillQueue = () => {
       setError('Pedido sem itens para impressão.');
       return;
     }
+    setIsGeneratingPrint(true);
+    setError('Gerando cupom...');
     const escapeHtml = (value: any) =>
       String(value ?? '')
         .replace(/&/g, '&amp;')
@@ -260,19 +266,44 @@ export const GrillQueue = () => {
   <div class="tail">\n\n</div>
 </body>
 </html>`;
-    const printWindow = window.open('', '_blank', 'width=300,height=600');
-    if (!printWindow) {
-      setError('Não foi possível abrir a janela de impressão. Libere pop-up no navegador.');
+    const blob = new Blob([receiptHtml], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const frame = document.getElementById('silent-printer') as HTMLIFrameElement | null;
+    if (!frame) {
+      URL.revokeObjectURL(url);
+      setIsGeneratingPrint(false);
+      setError('Falha ao iniciar impressão.');
       return;
     }
-    printWindow.document.open();
-    printWindow.document.write(receiptHtml);
-    printWindow.document.close();
-    window.setTimeout(() => {
-      printWindow.focus();
-      printWindow.print();
-      window.setTimeout(() => printWindow.close(), 800);
-    }, 300);
+    let cleaned = false;
+    const cleanup = () => {
+      if (cleaned) return;
+      cleaned = true;
+      frame.onload = null;
+      frame.src = 'about:blank';
+      URL.revokeObjectURL(url);
+      setIsGeneratingPrint(false);
+      setError('');
+    };
+    frame.onload = () => {
+      const win = frame.contentWindow;
+      if (!win) {
+        cleanup();
+        return;
+      }
+      window.setTimeout(() => {
+        try {
+          win.focus();
+          win.print();
+        } catch (error) {
+          console.error('[print] erro ao imprimir', error);
+          alert('Clique novamente para confirmar a impressão');
+        } finally {
+          window.setTimeout(cleanup, 2000);
+        }
+      }, 300);
+    };
+    frame.src = url;
   };
 
   const orderTypeMeta = (order: any) => {
@@ -1327,6 +1358,7 @@ export const GrillQueue = () => {
                   paymentLabel={paymentLabel}
                   totalLabel={totalLabel}
                   itemsCount={itemsCount}
+                  printBusy={isGeneratingPrint}
                   canPrint={hasAdminPrintAccess}
                   onPrint={() => handlePrintOrder(order, index + 1)}
                   onClick={() => {
@@ -1363,12 +1395,13 @@ export const GrillQueue = () => {
                       <button
                         type="button"
                         onClick={() => handlePrintOrder(selectedOrder, selectedOrderRank)}
-                        className="inline-flex h-9 px-3 items-center justify-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 text-amber-700 shadow-sm hover:bg-amber-100 hover:text-amber-900 transition-all no-print"
+                        disabled={isGeneratingPrint}
+                        className="inline-flex h-9 px-3 items-center justify-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 text-amber-700 shadow-sm hover:bg-amber-100 hover:text-amber-900 transition-all no-print disabled:opacity-60"
                         aria-label="Imprimir pedido"
                         title="Imprimir pedido"
                       >
                         <Printer size={16} weight="duotone" />
-                        <span className="text-xs font-semibold">Imprimir</span>
+                        <span className="text-xs font-semibold">{isGeneratingPrint ? 'Gerando cupom...' : 'Imprimir'}</span>
                       </button>
                     )}
                     <button
@@ -2110,6 +2143,19 @@ export const GrillQueue = () => {
         <div className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg p-3">{error}</div>
       )}
     </div>
+    <iframe
+      id="silent-printer"
+      title="silent-printer"
+      style={{
+        visibility: 'hidden',
+        position: 'absolute',
+        top: -1000,
+        left: -1000,
+        width: 0,
+        height: 0,
+        border: 'none',
+      }}
+    />
     </>
   );
 };
