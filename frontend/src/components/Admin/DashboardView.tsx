@@ -25,9 +25,21 @@ export const DashboardView = ({
   storeDescription = "",
   linkStats = null,
 }) => {
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.matchMedia("(max-width: 767px)").matches;
+  });
   const [qrCopied, setQrCopied] = useState(false);
   const [showUtm, setShowUtm] = useState(false);
   const [showChecklistDetails, setShowChecklistDetails] = useState(false);
+  const [showChecklistCard, setShowChecklistCard] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return !window.matchMedia("(max-width: 767px)").matches;
+  });
+  const [showQrCard, setShowQrCard] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return !window.matchMedia("(max-width: 767px)").matches;
+  });
   const utmStorageKey = useMemo(() => (storeUrl ? `utm:store:${storeUrl}` : "utm:store"), [storeUrl]);
   const [utmSource, setUtmSource] = useState("instagram");
   const [utmMedium, setUtmMedium] = useState("bio");
@@ -91,6 +103,26 @@ export const DashboardView = ({
     if (!setupChecklist.length) return;
     setShowChecklistDetails(checklistPendingCount > 0);
   }, [setupChecklist.length, checklistPendingCount]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const media = window.matchMedia("(max-width: 767px)");
+    const update = () => {
+      const mobile = media.matches;
+      setIsMobile(mobile);
+      if (!mobile) {
+        setShowChecklistCard(true);
+        setShowQrCard(true);
+      }
+    };
+    update();
+    if (media.addEventListener) {
+      media.addEventListener("change", update);
+      return () => media.removeEventListener("change", update);
+    }
+    media.addListener(update);
+    return () => media.removeListener(update);
+  }, []);
 
   useEffect(() => {
     if (!storeUrl) return;
@@ -422,6 +454,19 @@ export const DashboardView = ({
     <div className="space-y-6 animate-in fade-in">
       {setupChecklist.length > 0 && (
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+          <div className="md:hidden mb-4 flex items-center justify-between">
+            <p className="text-xs uppercase tracking-[0.25em] font-bold text-slate-500">Checklist</p>
+            <button
+              type="button"
+              onClick={() => setShowChecklistCard((prev) => !prev)}
+              className="inline-flex items-center gap-1 rounded-full border border-slate-200 px-3 py-1 text-[11px] font-semibold text-slate-600"
+            >
+              {showChecklistCard ? 'Ocultar' : 'Mostrar'}
+              <CaretDown size={12} className={`transition-transform ${showChecklistCard ? 'rotate-180' : ''}`} />
+            </button>
+          </div>
+          {(showChecklistCard || !isMobile) && (
+          <>
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 rounded-2xl bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center">
@@ -511,10 +556,25 @@ export const DashboardView = ({
               </div>
             )}
           </div>
+          </>
+          )}
         </div>
       )}
       {storeUrl && (
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+          <div className="md:hidden mb-4 flex items-center justify-between">
+            <p className="text-xs uppercase tracking-[0.25em] font-bold text-slate-500">QR Vitrine</p>
+            <button
+              type="button"
+              onClick={() => setShowQrCard((prev) => !prev)}
+              className="inline-flex items-center gap-1 rounded-full border border-slate-200 px-3 py-1 text-[11px] font-semibold text-slate-600"
+            >
+              {showQrCard ? 'Ocultar' : 'Mostrar'}
+              <CaretDown size={12} className={`transition-transform ${showQrCard ? 'rotate-180' : ''}`} />
+            </button>
+          </div>
+          {(showQrCard || !isMobile) && (
+          <>
           <div className="flex flex-col lg:flex-row lg:items-center gap-5">
             <div className="flex-1 space-y-2">
               <p className="text-xs uppercase tracking-[0.35em] text-slate-400">QR da vitrine</p>
@@ -556,6 +616,8 @@ export const DashboardView = ({
               </div>
             </div>
           </div>
+          </>
+          )}
         </div>
       )}
       {/* ---------- CARDS RESUMO ---------- */}
@@ -794,7 +856,7 @@ export const DashboardView = ({
       {/* ---------- GRÁFICOS ---------- */}
       <div className="grid md:grid-cols-2 gap-6">
         {/* Faturamento por dia */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 h-80 overflow-hidden flex flex-col">
+        <div className={`bg-white p-6 rounded-2xl shadow-sm border border-slate-200 ${isMobile ? 'h-48' : 'h-80'} overflow-hidden flex flex-col`}>
           <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
             <h4 className="font-bold text-gray-700">Vendas por dia</h4>
             <div className="flex flex-wrap gap-2">
@@ -851,7 +913,7 @@ export const DashboardView = ({
         </div>
 
         {/* Top produtos */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 border-l-4 border-l-indigo-400 h-80 overflow-hidden">
+        <div className={`bg-white p-6 rounded-2xl shadow-sm border border-slate-200 border-l-4 border-l-indigo-400 ${isMobile ? 'h-48' : 'h-80'} overflow-hidden`}>
           <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
             <h4 className="font-bold text-gray-700">
               Top 5 Produtos Mais Vendidos

@@ -5,6 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { resolveAssetUrl } from '../../utils/resolveAssetUrl';
 import { subscriptionService } from '../../services/subscriptionService';
+import { AdminMobileBottomNav } from './AdminMobileBottomNav';
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
   const { auth, hydrated, setAuth } = useAuth();
@@ -136,7 +137,8 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       )}
-      {children}
+      <div className="pb-24 lg:pb-0">{children}</div>
+      <AdminMobileBottomNav />
     </>
   );
 }

@@ -1171,7 +1171,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   const [subscriptionError, setSubscriptionError] = useState('');
   const [subscriptionLoading, setSubscriptionLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'resumo' | 'pedidos' | 'avaliacoes' | 'produtos' | 'config' | 'fila' | 'pagamentos' | 'motoboys'>(() => {
-    return (location.state as any)?.activeTab || 'resumo';
+    return (location.state as any)?.activeTab || 'fila';
   });
   const [menuVisible, setMenuVisible] = useState(() => {
     if (typeof window === 'undefined') return true;
@@ -1207,6 +1207,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   });
   const prevTabRef = useRef(activeTab);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [showReviewsCardMobile, setShowReviewsCardMobile] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    return !window.matchMedia('(max-width: 767px)').matches;
+  });
   const notificationsRef = useRef<HTMLDivElement | null>(null);
   const [dismissedNotificationKeys, setDismissedNotificationKeys] = useState<string[]>([]);
   const isVip = Boolean(session?.store?.settings?.planExempt || session?.subscription?.planExempt);
@@ -1267,17 +1271,12 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   );
   const openQueueMonitor = React.useCallback(
     (options?: { replace?: boolean }) => {
-      const isDashboard = location.pathname === '/admin/dashboard';
-      if (isDashboard) {
-        setActiveTab('fila');
-        setNotificationsOpen(false);
-        setCommandOpen(false);
-        setMobileDrawerOpen(false);
-        return;
-      }
+      setNotificationsOpen(false);
+      setCommandOpen(false);
+      setMobileDrawerOpen(false);
       navigate('/admin/queue', { replace: Boolean(options?.replace) });
     },
-    [location.pathname, navigate]
+    [navigate]
   );
   const commandActions = useMemo(() => {
     const items = [
@@ -1733,6 +1732,20 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       document.removeEventListener('keydown', onKeyDown);
     };
   }, [notificationsOpen]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const media = window.matchMedia('(max-width: 767px)');
+    const update = () => {
+      if (!media.matches) setShowReviewsCardMobile(true);
+    };
+    if (media.addEventListener) {
+      media.addEventListener('change', update);
+      return () => media.removeEventListener('change', update);
+    }
+    media.addListener(update);
+    return () => media.removeListener(update);
+  }, []);
   useEffect(() => {
     if (!storeId) return;
     const key = `adminNotifications:dismissed:${storeId}`;
@@ -1765,22 +1778,30 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       return next;
     });
   };
-  const clearAllNotifications = () => {
+  const clearAllNotifications = async () => {
     const keys = activeNotifications.map((note) => note.key);
-    if (!storeId) {
-      setDismissedNotificationKeys((prev) => {
-        const merged = new Set([...prev, ...keys]);
-        return Array.from(merged);
-      });
-      return;
-    }
-    const storageKey = `adminNotifications:dismissed:${storeId}`;
+    // Optimistic update: badge some imediatamente no app.
     setDismissedNotificationKeys((prev) => {
       const merged = new Set([...prev, ...keys]);
-      const next = Array.from(merged);
-      localStorage.setItem(storageKey, JSON.stringify(next));
-      return next;
+      return Array.from(merged);
     });
+    setNotificationsOpen(false);
+
+    if (!storeId) {
+      return;
+    }
+    try {
+      await fetch('/api/admin/notifications/read-all', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session?.token || ''}`,
+        },
+        body: JSON.stringify({ storeId }),
+      });
+    } catch {
+      // Sem bloqueio: fallback local já aplicado.
+    }
   };
 
   /* =========================
@@ -2395,6 +2416,22 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
       {activeTab === 'resumo' && (
         <div className="space-y-4">
+          <div className="md:hidden rounded-2xl border border-slate-200 bg-white px-4 py-3 flex items-center justify-between">
+            <div>
+              <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-slate-500">Resumo</p>
+              <p className="text-sm font-semibold text-slate-800">Avaliações e gorjetas</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowReviewsCardMobile((prev) => !prev)}
+              className="inline-flex items-center gap-1 rounded-full border border-slate-200 px-3 py-1 text-[11px] font-semibold text-slate-600"
+            >
+              {showReviewsCardMobile ? 'Ocultar' : 'Mostrar'}
+              <CaretRight size={12} className={`transition-transform ${showReviewsCardMobile ? 'rotate-90' : ''}`} />
+            </button>
+          </div>
+
+          {showReviewsCardMobile && (
           <FormSection
             title="Avaliações e gorjetas"
             subtitle="Indicadores rápidos para acompanhar qualidade e repasse."
@@ -2513,6 +2550,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
               )}
             </div>
           </FormSection>
+          )}
 
           <DashboardView
             orders={orders}

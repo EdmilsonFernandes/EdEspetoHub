@@ -48,7 +48,7 @@ export function AdminLogin() {
       }
       sessionStorage.removeItem('admin:redirectTab');
       sessionStorage.removeItem('admin:redirectSlug');
-      navigate('/admin/dashboard');
+      navigate('/admin/queue');
     } catch (error: any) {
       const message = error.message || 'Não foi possível autenticar agora.';
       if (error?.code === 'PAY-010') {
@@ -106,7 +106,7 @@ export function AdminLogin() {
       }
       sessionStorage.removeItem('admin:redirectTab');
       sessionStorage.removeItem('admin:redirectSlug');
-      navigate('/admin/dashboard');
+      navigate('/admin/queue');
     }
   }, [auth?.token, auth?.user?.role, hydrated, navigate]);
 
