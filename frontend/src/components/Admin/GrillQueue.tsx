@@ -229,7 +229,7 @@ export const GrillQueue = () => {
         const lineTotal = formatCurrency(qty * unit);
         const name = escapeHtml(item?.name || 'Item');
         const options = item?.cookingPoint || item?.options ? `<div class="opt">  ${escapeHtml(item?.cookingPoint || item?.options || '')}</div>` : '';
-        return `<div class="item"><span>${qty}x ${name}</span><span>${lineTotal}</span></div>${options}`;
+        return `<div class="item"><span>${qty}x ${name}</span><span class="price">${lineTotal}</span></div>${options}`;
       })
       .join('');
     const receiptHtml = `<!doctype html>
@@ -241,10 +241,11 @@ export const GrillQueue = () => {
   <style>
     * { box-sizing: border-box; }
     html, body { height: auto !important; min-height: 100px; }
-    body { width: 58mm; margin: 0; padding: 2mm; font-family: 'Courier New', monospace; font-size: 12px; color: black; background: white; line-height: 1.35; }
+    body { width: 58mm; margin: 0; padding: 2mm 4mm 2mm 2mm !important; font-family: 'Courier New', monospace; font-size: 12px; color: black; background: white; line-height: 1.35; }
     .center { text-align: center; }
     .header { text-align: center; font-weight: bold; text-transform: uppercase; }
-    .item { display: flex; justify-content: space-between; margin: 2px 0; }
+    .item { display: flex; justify-content: space-between; margin: 2px 0; font-size: 11px; gap: 6px; }
+    .price { min-width: 16mm; text-align: right; }
     .items-block { min-height: 40px; }
     .opt { font-size: 10px; margin-left: 2ch; }
     hr { border: none; border-top: 1px dashed black; margin: 4px 0; }
