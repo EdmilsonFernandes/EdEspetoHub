@@ -62,6 +62,7 @@ const centerText = (value: string, width = LINE_WIDTH) => {
 };
 
 const separator = (width = LINE_WIDTH) => "-".repeat(width);
+const strongSeparator = (width = LINE_WIDTH) => "=".repeat(width);
 
 const fitLeftRight = (left: string, right: string, width = LINE_WIDTH) => {
   const safeRight = sanitizeText(right);
@@ -86,10 +87,12 @@ const buildRawBtText = (payload: PrintReceiptRawBtInput) => {
     const name = sanitizeText(item.name || "Item");
     const lineTotal = sanitizeText(item.lineTotal || "R$ 0,00");
     const note = sanitizeText(item.notes || "");
-    const nameLines = wrapWords(`${qty}x ${name}`, LINE_WIDTH);
-    const lines = [...nameLines];
-    // Price always at right edge, on dedicated line to avoid wrapping.
-    lines.push(lineTotal.padStart(LINE_WIDTH, " "));
+    const rightWidth = Math.min(12, Math.max(8, lineTotal.length));
+    const leftWidth = Math.max(8, LINE_WIDTH - rightWidth);
+    const nameLines = wrapWords(`${qty}x ${name}`, leftWidth);
+    const lines = nameLines.slice(0, -1);
+    const lastNameLine = (nameLines[nameLines.length - 1] || "").slice(0, leftWidth);
+    lines.push(`${lastNameLine.padEnd(leftWidth, ".")}${lineTotal.padStart(rightWidth, " ")}`);
     if (note) {
       const noteLines = wrapWords(note, LINE_WIDTH - 4);
       noteLines.forEach((n, index) => {
@@ -101,14 +104,14 @@ const buildRawBtText = (payload: PrintReceiptRawBtInput) => {
   });
 
   const chunks = [
+    strongSeparator(),
     centerText(sanitizeText(payload.storeName || "SERTANEJO NO ESPETO").toUpperCase()),
-    centerText(`Plataforma: ${sanitizeText(payload.platformName || "Já no Caminho")}`),
-    separator(),
+    centerText(`PLATAFORMA: ${sanitizeText(payload.platformName || "Já no Caminho")}`),
+    strongSeparator(),
     ...wrapWords(`Fila: ${sanitizeText(payload.queueLabel || "--")}`, LINE_WIDTH),
     ...wrapWords(`Pedido: ${sanitizeText(payload.orderLabel || "--")}`, LINE_WIDTH),
     ...wrapWords(`Cliente: ${sanitizeText(payload.customerLabel || "Cliente")}`, LINE_WIDTH),
     ...wrapWords(`Data: ${sanitizeText(payload.dateLabel || "")}`, LINE_WIDTH),
-    centerText("FMT: RAWBT-TXT-V2"),
     separator(),
     "ITENS",
     separator(),

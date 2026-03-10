@@ -159,6 +159,7 @@ export function StorePage() {
     user.store.slug === storeSlug;
   const normalizedRole = String(user?.role || '').toLowerCase();
   const hasAdminPrintAccess = normalizedRole === 'admin';
+  const canUseAdminPrintFlow = hasAdminPrintAccess || isStoreAdmin;
   const [showPrintPrompt, setShowPrintPrompt] = useState(false);
   const [isGeneratingPrint, setIsGeneratingPrint] = useState(false);
 
@@ -909,7 +910,7 @@ export function StorePage() {
         queueRank: null,
         createdAt: Date.now(),
       });
-      if (hasAdminPrintAccess) {
+      if (canUseAdminPrintFlow) {
         setShowPrintPrompt(true);
       }
       localStorage.setItem(
@@ -1027,7 +1028,7 @@ export function StorePage() {
       queueRank: createdOrder?.queueRank ?? createdOrder?.queuePosition ?? null,
       createdAt: Date.now(),
     });
-    if (hasAdminPrintAccess) {
+    if (canUseAdminPrintFlow) {
       setShowPrintPrompt(true);
     }
     if (createdOrder?.id && !user?.token) {
@@ -1102,7 +1103,7 @@ export function StorePage() {
   };
 
   const printLastOrderReceipt = async () => {
-    if (!hasAdminPrintAccess) return;
+    if (!canUseAdminPrintFlow) return;
     if (!lastOrder?.id) return;
     if (isGeneratingPrint) return;
 
@@ -1162,10 +1163,10 @@ export function StorePage() {
   };
 
   useEffect(() => {
-    if (!hasAdminPrintAccess) {
+    if (!canUseAdminPrintFlow) {
       setShowPrintPrompt(false);
     }
-  }, [hasAdminPrintAccess]);
+  }, [canUseAdminPrintFlow]);
 
   // Loading state
   if (isLoading) {
@@ -1553,9 +1554,9 @@ export function StorePage() {
               phone={lastOrder?.phone}
               table={lastOrder?.table}
               orderId={lastOrder?.id}
-              onPrintReceipt={hasAdminPrintAccess ? printLastOrderReceipt : undefined}
+              onPrintReceipt={canUseAdminPrintFlow ? printLastOrderReceipt : undefined}
               onTrackOrder={
-                hasAdminPrintAccess
+                canUseAdminPrintFlow
                   ? undefined
                   : () => {
                       if (lastOrder?.id) {
@@ -1583,7 +1584,7 @@ export function StorePage() {
                 onClick={() => setShowPrintPrompt(false)}
                 className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700"
               >
-                Fechar
+                Finalizar pedido
               </button>
               <button
                 type="button"
