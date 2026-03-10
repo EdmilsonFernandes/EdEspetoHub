@@ -1178,8 +1178,9 @@ export function StorePage() {
   </style>
 </head>
 <body>
+  <span>.</span>
   <div class="header">${escapeHtml(payload.storeName || 'SERTANEJO NO ESPETO')}</div>
-  <div class="center">Ja no Caminho</div>
+  <div class="center">Já no Caminho</div>
   <hr />
   <div class="strong">#Fila: ${queueText}</div>
   <div>Pedido: #${escapeHtml(payload.orderDisplayId)}</div>
@@ -1228,7 +1229,7 @@ export function StorePage() {
           }
         }, 1500);
       }
-    }, 800);
+    }, 1200);
   };
 
   useEffect(() => {
@@ -1320,18 +1321,20 @@ export function StorePage() {
                   #{formatOrderDisplayId(orderNotice.id, storeSlug)}
                 </span>
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  if (!orderNotice?.id) return;
-                  const link = `${window.location.origin}/pedido/${orderNotice.id}`;
-                  navigator.clipboard.writeText(link);
-                  showToast('Link do pedido copiado.', 'success');
-                }}
-                className="ml-auto px-3 py-1.5 rounded-full text-[11px] font-semibold bg-white/10 hover:bg-white/20 border border-white/10"
-              >
-                Copiar link
-              </button>
+              {!hasAdminPrintAccess && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!orderNotice?.id) return;
+                    const link = `${window.location.origin}/pedido/${orderNotice.id}`;
+                    navigator.clipboard.writeText(link);
+                    showToast('Link do pedido copiado.', 'success');
+                  }}
+                  className="ml-auto px-3 py-1.5 rounded-full text-[11px] font-semibold bg-white/10 hover:bg-white/20 border border-white/10"
+                >
+                  Copiar link
+                </button>
+              )}
             </div>
           </div>
         )}
@@ -1640,18 +1643,18 @@ export function StorePage() {
       {showPrintPrompt && (
         <div className="fixed inset-0 z-[90] bg-black/40 backdrop-blur-sm flex items-center justify-center px-4">
           <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-2xl border border-slate-200">
-            <p className="text-sm text-slate-500 uppercase tracking-[0.2em] font-semibold">Pedido confirmado</p>
+            <p className="text-sm text-slate-500 uppercase tracking-[0.2em] font-semibold">Pedido finalizado</p>
             <h3 className="mt-2 text-lg font-black text-slate-900">
-              Pedido #{formatOrderDisplayId(lastOrder?.id, storeSlug)} confirmado com sucesso!
+              Pedido #{formatOrderDisplayId(lastOrder?.id, storeSlug)} finalizado!
             </h3>
-            <p className="mt-2 text-sm text-slate-600">Deseja imprimir o cupom agora?</p>
+            <p className="mt-2 text-sm text-slate-600">Escolha a próxima ação.</p>
             <div className="mt-4 flex gap-2">
               <button
                 type="button"
                 onClick={() => setShowPrintPrompt(false)}
                 className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700"
               >
-                Não, apenas fechar
+                Fechar
               </button>
               <button
                 type="button"
@@ -1662,7 +1665,7 @@ export function StorePage() {
                 disabled={isGeneratingPrint}
                 className="flex-1 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white"
               >
-                {isGeneratingPrint ? 'Gerando cupom...' : 'Sim, imprimir agora'}
+                {isGeneratingPrint ? 'Gerando cupom...' : 'Imprimir Cupom'}
               </button>
             </div>
           </div>

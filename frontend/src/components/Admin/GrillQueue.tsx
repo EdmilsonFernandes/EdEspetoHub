@@ -255,8 +255,9 @@ export const GrillQueue = () => {
   </style>
 </head>
 <body>
+  <span>.</span>
   <div class="header">${escapeHtml(payload.storeName)}</div>
-  <div class="center">Ja no Caminho</div>
+  <div class="center">Já no Caminho</div>
   <hr />
   <div class="strong">#Fila: #${String(payload.queueRank || 1).padStart(2, '0')}</div>
   <div>Pedido: #${escapeHtml(payload.orderDisplayId)}</div>
@@ -306,7 +307,7 @@ export const GrillQueue = () => {
           }
         }, 1500);
       }
-    }, 800);
+    }, 1200);
   };
 
   const orderTypeMeta = (order: any) => {
