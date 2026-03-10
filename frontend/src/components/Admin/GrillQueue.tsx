@@ -1088,12 +1088,12 @@ export const GrillQueue = () => {
         @keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
         @keyframes drawerIn{0%{transform:translateX(100%)}100%{transform:translateX(0)}}
       `}</style>
-      <div className={`${tvMode ? "" : "rounded-2xl border border-slate-200 bg-white px-3 py-3"}`}>
-        <div className="flex flex-col gap-2 mb-2 border-b border-slate-100 pb-2">
+      <div className={`${tvMode ? "" : "rounded-2xl border border-slate-200 bg-white px-2 sm:px-3 py-2"}`}>
+        <div className="flex flex-col gap-2 mb-1 border-b border-slate-100 pb-2">
           {!tvMode ? (
             <>
-              <div className="flex justify-between items-center w-full gap-3 flex-wrap">
-                <div className="inline-flex items-center gap-1 rounded-lg bg-slate-100 p-1">
+              <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div className="inline-flex w-full sm:w-auto items-center gap-1 rounded-lg bg-slate-100 p-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                   {[
                     { id: 'queue', label: 'Pedidos', count: productionQueue.length },
                     { id: 'inroute', label: 'Em rota', count: inRouteQueue.length },
@@ -1103,7 +1103,7 @@ export const GrillQueue = () => {
                       key={tab.id}
                       type="button"
                       onClick={() => setActiveTab(tab.id as 'queue' | 'inroute' | 'completed')}
-                      className={`inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-md transition-colors ${
+                      className={`inline-flex flex-shrink-0 items-center gap-1.5 text-sm px-3 py-1.5 rounded-md transition-colors ${
                         activeTab === tab.id
                           ? 'bg-white shadow-sm font-semibold text-slate-900'
                           : 'text-slate-500 hover:text-slate-700'
@@ -1119,16 +1119,15 @@ export const GrillQueue = () => {
                   ))}
                 </div>
 
-                <div className="flex items-center gap-2 flex-wrap justify-end">
+                <div className="flex w-full sm:w-auto items-center gap-2 flex-wrap sm:justify-end">
                   <span className="text-xs font-medium text-slate-700 bg-orange-50 border border-orange-100 px-2 py-1 rounded-md">
                     {productionQueue.length} em produção
                   </span>
-                  <span className="text-xs font-medium text-slate-500 bg-slate-50 px-2 py-1 rounded-md">
-                    SLA alvo {prepSlaMinutes}min
-                  </span>
-                  <span className="text-xs font-medium text-slate-500 bg-slate-50 px-2 py-1 rounded-md">
-                    Mais antigo {formatDuration(queueMetrics.oldest)}
-                  </span>
+                  {queueMetrics.late > 0 && (
+                    <span className="text-xs font-semibold text-red-700 bg-red-50 border border-red-100 px-2 py-1 rounded-md">
+                      Prazo estourado: {queueMetrics.late}
+                    </span>
+                  )}
                   <div className="relative" data-queue-actions>
                     <button
                       type="button"
@@ -1190,7 +1189,7 @@ export const GrillQueue = () => {
               </div>
 
               {activeTab === 'queue' && (
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                   {[
                     { id: 'all', label: 'Todos', value: productionQueue.length },
                     { id: 'pending', label: 'Pendentes', value: queueMetrics.pending },
@@ -1202,7 +1201,7 @@ export const GrillQueue = () => {
                       key={kpi.id}
                       type="button"
                       onClick={() => setQueueFilter(kpi.id as any)}
-                      className={`flex items-center gap-2 px-4 py-1.5 rounded-full border text-sm font-medium transition-colors ${
+                      className={`flex shrink-0 items-center gap-2 px-4 py-1.5 rounded-full border text-sm font-medium transition-colors ${
                         queueFilter === kpi.id
                           ? 'bg-slate-900 border-slate-900 text-white'
                           : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
@@ -1277,7 +1276,7 @@ export const GrillQueue = () => {
               </div>
             </div>
           )}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 px-1 sm:px-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3 px-0 sm:px-0">
             {filteredProductionQueue.map((order, index) => {
               const orderAgeMs = order?.createdAt ? Date.now() - new Date(order.createdAt).getTime() : 0;
               const isLate = orderAgeMs > PREP_SLA_MS;
