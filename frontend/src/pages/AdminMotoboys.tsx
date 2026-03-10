@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Car, Camera, CheckCircle, IdentificationCard, WarningCircle, Clock, UsersThree, LinkSimpleHorizontal, MagnifyingGlass, FunnelSimple } from '@phosphor-icons/react';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
@@ -56,6 +56,8 @@ export function AdminMotoboys() {
   }>({ open: false, row: null, notes: '', proofFile: null, submitting: false });
   const storeId = auth?.store?.id || '';
   const pendingRequests = requests.filter((request) => request.status === 'PENDING');
+  const requestsSectionRef = useRef<HTMLDivElement | null>(null);
+  const linkedSectionRef = useRef<HTMLDivElement | null>(null);
 
   const formatMotoboyStatus = (raw: any) => {
     const status = String(raw || '').toUpperCase();
@@ -757,8 +759,28 @@ export function AdminMotoboys() {
 
   return (
     <div className="space-y-6">
+      <div className="md:hidden sticky top-2 z-20 rounded-2xl border border-slate-200 bg-white/95 backdrop-blur px-3 py-2">
+        <p className="text-[10px] font-black tracking-[0.18em] uppercase text-slate-500">Acesso rápido</p>
+        <div className="mt-2 grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={() => requestsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+            className="btn-press rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] font-extrabold text-amber-800"
+          >
+            Solicitações ({pendingRequests.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => linkedSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+            className="btn-press rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-[11px] font-extrabold text-emerald-800"
+          >
+            Vinculados ({motoboys.length})
+          </button>
+        </div>
+      </div>
+
       {reviewSummary && (
-        <FormSection title="Avaliações" variant="success" contentClassName="space-y-2">
+        <FormSection title="Avaliações" variant="success" className="hidden" contentClassName="space-y-2">
           <div className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
             <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
               <div className="text-[11px] text-slate-500">Nota da loja (média)</div>
@@ -813,6 +835,7 @@ export function AdminMotoboys() {
         title="Repasse de gorjetas"
         subtitle="Controle de pendentes e pagos com comprovante."
         variant="warning"
+        className="hidden"
         actions={
           <button
             type="button"
@@ -1351,14 +1374,14 @@ export function AdminMotoboys() {
         title="Entregadores"
         subtitle="Solicitações, documentos e vínculo por loja."
         variant="neutral"
-        className="bg-gradient-to-br from-white via-slate-50 to-white"
+        className="hidden"
       />
 
       <FormSection
         title="Link de cadastro"
         subtitle="Convide entregadores para sua loja. Copie e envie no WhatsApp."
         variant="primary"
-        className="premium-card overflow-hidden"
+        className="hidden"
         contentClassName="space-y-3"
       >
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -1389,6 +1412,7 @@ export function AdminMotoboys() {
         </div>
       </FormSection>
 
+      <div ref={requestsSectionRef}>
       <FormSection
         title="Solicitações de vínculo"
         subtitle="Motoboys que pediram para entrar na sua loja."
@@ -1513,7 +1537,9 @@ export function AdminMotoboys() {
           </div>
         )}
       </FormSection>
+      </div>
 
+      <div ref={linkedSectionRef}>
       <FormSection
         title="Entregadores vinculados"
         subtitle="Status, documentos e vínculo por loja."
@@ -1616,7 +1642,7 @@ export function AdminMotoboys() {
             <div className="ds-empty-state px-4 py-7 text-center">
               <div className="text-slate-400 text-2xl">📭</div>
               <p className="mt-2 text-base font-semibold text-slate-800">Nenhum entregador vinculado</p>
-              <p className="mt-1 text-xs text-slate-500">Use o link de cadastro para convidar entregadores para sua loja.</p>
+              <p className="mt-1 text-xs text-slate-500">Quando houver vínculo aprovado, os entregadores aparecerão aqui.</p>
             </div>
           </div>
         ) : (
@@ -1772,6 +1798,7 @@ export function AdminMotoboys() {
           </div>
         </div>
       </FormSection>
+      </div>
 
       {previewDoc && (
         <div
