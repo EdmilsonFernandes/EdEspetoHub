@@ -5,7 +5,7 @@ type ReceiptItem = {
   notes?: string;
 };
 
-type PrintReceiptImageInput = {
+type PrintReceiptRawBtInput = {
   storeName: string;
   platformName?: string;
   queueLabel?: string;
@@ -17,92 +17,66 @@ type PrintReceiptImageInput = {
   debugLine?: string;
 };
 
-const escapeHtml = (value: unknown) =>
+const sanitizeText = (value: unknown) =>
   String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
+    .replace(/\r/g, " ")
+    .replace(/\n/g, " ")
+    .trim();
 
-const buildReceiptMarkup = (payload: PrintReceiptImageInput) => {
-  const itemsHtml = payload.items
-    .map((item) => {
-      const qty = Math.max(0, Number(item.quantity || 0));
-      const notes = item.notes ? `<div class="opt">${escapeHtml(item.notes)}</div>` : "";
-      return `<div class="item"><span>${qty}x ${escapeHtml(item.name)}</span><span class="price">${escapeHtml(item.lineTotal)}</span></div>${notes}`;
-    })
-    .join("");
-
-  return `
-    <div id="receipt-root">
-      <div class="bold">${escapeHtml(payload.storeName || "SERTANEJO NO ESPETO")}</div>
-      <div class="center">${escapeHtml(payload.platformName || "Já no Caminho")}</div>
-      <hr />
-      <div><strong>#Fila:</strong> ${escapeHtml(payload.queueLabel || "--")}</div>
-      <div>Pedido: ${escapeHtml(payload.orderLabel)}</div>
-      <div>Cliente: ${escapeHtml(payload.customerLabel)}</div>
-      <div>Data: ${escapeHtml(payload.dateLabel)}</div>
-      <hr />
-      ${payload.debugLine ? `<div class="center">${escapeHtml(payload.debugLine)}</div>` : ""}
-      <div class="items-block">${itemsHtml}</div>
-      <hr />
-      <div class="item"><span><strong>TOTAL</strong></span><span class="price"><strong>${escapeHtml(payload.totalLabel)}</strong></span></div>
-      <div class="tail">\n\n</div>
-    </div>
-  `;
+const dotsLine = (left: string, right: string, size = 40) => {
+  const safeLeft = sanitizeText(left);
+  const safeRight = sanitizeText(right);
+  const minDots = 3;
+  const rawDots = size - safeLeft.length - safeRight.length;
+  const dots = ".".repeat(Math.max(minDots, rawDots));
+  return `${safeLeft} ${dots} ${safeRight}`;
 };
 
-export const printReceiptAsImage = async (payload: PrintReceiptImageInput) => {
+const toBase64Utf8 = (value: string) => {
+  const utf8 = encodeURIComponent(value).replace(/%([0-9A-F]{2})/g, (_, hex) =>
+    String.fromCharCode(parseInt(hex, 16))
+  );
+  return btoa(utf8);
+};
+
+const buildRawBtText = (payload: PrintReceiptRawBtInput) => {
+  const itemsLines = payload.items.flatMap((item) => {
+    const qty = Math.max(0, Number(item.quantity || 0));
+    const name = sanitizeText(item.name || "Item");
+    const lineTotal = sanitizeText(item.lineTotal || "R$ 0,00");
+    const note = sanitizeText(item.notes || "");
+    const lines = [dotsLine(`${qty}x ${name}`, lineTotal)];
+    if (note) {
+      lines.push(`  - ${note}`);
+    }
+    return lines;
+  });
+
+  const chunks = [
+    `<center><big>${sanitizeText(payload.storeName || "SERTANEJO NO ESPETO").toUpperCase()}</big></center>`,
+    `<center>${sanitizeText(payload.platformName || "Já no Caminho")}</center>`,
+    "--------------------------------",
+    `Fila: ${sanitizeText(payload.queueLabel || "--")} | Pedido: ${sanitizeText(payload.orderLabel || "--")}`,
+    `Cliente: ${sanitizeText(payload.customerLabel || "Cliente")}`,
+    `Data: ${sanitizeText(payload.dateLabel || "")}`,
+    "--------------------------------",
+    ...(payload.debugLine ? [sanitizeText(payload.debugLine)] : []),
+    ...itemsLines,
+    "--------------------------------",
+    `<right><big>TOTAL: ${sanitizeText(payload.totalLabel || "R$ 0,00")}</big></right>`,
+    "",
+    "",
+  ];
+
+  return chunks.join("\n");
+};
+
+export const printReceiptAsImage = async (payload: PrintReceiptRawBtInput) => {
   if (!payload?.items?.length) {
     throw new Error("Pedido sem itens para impressão.");
   }
 
-  const win = window.open("", "_blank", "width=400,height=600");
-  if (!win) {
-    throw new Error("Bloqueio de popup ativo. Permita popups para imprimir.");
-  }
-
-  const html = `<!doctype html>
-<html lang="pt-BR">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Imprimir cupom</title>
-    <style>
-      * { box-sizing: border-box; }
-      body { width: 75mm; margin: 0; padding: 2mm; font-family: monospace; font-size: 14px; color: #000; background: #fff; line-height: 1.35; }
-      .bold { font-weight: 700; text-align: center; font-size: 18px; text-transform: uppercase; }
-      .center { text-align: center; }
-      .item { display: flex; justify-content: space-between; gap: 8px; margin: 2px 0; align-items: flex-start; }
-      .price { text-align: right; white-space: nowrap; }
-      .opt { margin-left: 2ch; font-size: 12px; }
-      hr { border: 0; border-top: 1px dashed #000; margin: 8px 0; }
-      .tail { white-space: pre-line; }
-    </style>
-  </head>
-  <body>
-    ${buildReceiptMarkup(payload)}
-  </body>
-</html>`;
-
-  win.document.open();
-  win.document.write(html);
-  win.document.close();
-
-  await new Promise<void>((resolve) => {
-    setTimeout(() => {
-      try {
-        win.focus();
-        win.print();
-      } finally {
-        try {
-          win.close();
-        } catch {
-          // noop
-        }
-        resolve();
-      }
-    }, 500);
-  });
+  const rawText = buildRawBtText(payload);
+  const base64 = toBase64Utf8(rawText);
+  window.location.href = `rawbt:base64,${base64}`;
 };
