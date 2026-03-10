@@ -22,7 +22,8 @@ const sanitizeText = (value: unknown) =>
     .replace(/\n/g, " ")
     .trim();
 
-const LINE_WIDTH = 48;
+// 42 columns is safer across 58/80mm profiles in RawBT and avoids wrapping.
+const LINE_WIDTH = 42;
 
 const centerText = (value: string, width = LINE_WIDTH) => {
   const text = sanitizeText(value);
@@ -69,9 +70,11 @@ const buildRawBtText = (payload: PrintReceiptRawBtInput) => {
     centerText(sanitizeText(payload.storeName || "SERTANEJO NO ESPETO").toUpperCase()),
     centerText(`Plataforma: ${sanitizeText(payload.platformName || "Já no Caminho")}`),
     separator(),
-    fitLeftRight(`Fila: ${sanitizeText(payload.queueLabel || "--")}`, `Pedido: ${sanitizeText(payload.orderLabel || "--")}`),
+    `Fila: ${sanitizeText(payload.queueLabel || "--")}`.slice(0, LINE_WIDTH),
+    `Pedido: ${sanitizeText(payload.orderLabel || "--")}`.slice(0, LINE_WIDTH),
     `Cliente: ${sanitizeText(payload.customerLabel || "Cliente")}`.slice(0, LINE_WIDTH),
     `Data: ${sanitizeText(payload.dateLabel || "")}`.slice(0, LINE_WIDTH),
+    centerText("FMT: RAWBT-TXT-V2"),
     separator(),
     ...itemsLines,
     separator(),
