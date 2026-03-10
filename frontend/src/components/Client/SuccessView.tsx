@@ -151,7 +151,7 @@ export const SuccessView = ({
             <Printer size={18} weight="duotone" /> Imprimir comprovante
           </button>
         )}
-        {orderId && (
+        {orderId && onTrackOrder && (
           <button
             onClick={onTrackOrder}
             className="flex items-center justify-center gap-2 text-white bg-emerald-600 font-bold px-6 py-3 rounded-xl transition-colors hover:opacity-90"

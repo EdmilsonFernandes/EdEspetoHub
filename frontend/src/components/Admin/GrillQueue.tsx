@@ -50,6 +50,7 @@ const OrderSummaryCard = ({
   itemsCount,
   onClick,
   onPrint,
+  canPrint,
 }: any) => (
   (() => {
     const isDelivery = String(order?.type || '').toLowerCase() === 'delivery';
@@ -100,18 +101,20 @@ const OrderSummaryCard = ({
       </span>
       <div className="flex items-center gap-1.5">
         <span className="text-sm font-bold text-slate-900">{totalLabel}</span>
-        <button
-          type="button"
-          onClick={(event) => {
-            event.stopPropagation();
-            onPrint();
-          }}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-amber-300 bg-amber-50 text-amber-700 shadow-sm hover:bg-amber-100 hover:text-amber-900 transition-all no-print"
-          aria-label={`Imprimir pedido ${orderDisplayId}`}
-          title="Imprimir pedido"
-        >
-          <Printer size={15} weight="duotone" />
-        </button>
+        {canPrint && (
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              onPrint();
+            }}
+            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-amber-300 bg-amber-50 text-amber-700 shadow-sm hover:bg-amber-100 hover:text-amber-900 transition-all no-print"
+            aria-label={`Imprimir pedido ${orderDisplayId}`}
+            title="Imprimir pedido"
+          >
+            <Printer size={15} weight="duotone" />
+          </button>
+        )}
       </div>
     </div>
   </div>
@@ -126,6 +129,7 @@ export const GrillQueue = () => {
     window.setTimeout(() => setCtaPulseId(null), 220);
   };
   const { auth } = useAuth();
+  const hasAdminPrintAccess = String(auth?.user?.role || '').toLowerCase() === 'admin';
   const prepSlaMinutes = useMemo(() => {
     const raw = Number(auth?.store?.settings?.prepBaseMinutes ?? 20);
     if (!Number.isFinite(raw)) return 20;
@@ -179,6 +183,7 @@ export const GrillQueue = () => {
   });
   const [queueFilter, setQueueFilter] = useState<'all' | 'pending' | 'preparing' | 'ready' | 'late'>('all');
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
+  const [printPayload, setPrintPayload] = useState<any | null>(null);
   const previousIdsRef = useRef<string[]>([]);
   const audioContextRef = useRef<AudioContext | null>(null);
   const isDrawerOpen = selectedOrder !== null;
@@ -190,108 +195,21 @@ export const GrillQueue = () => {
   };
 
   const handlePrintOrder = (order: any, queueRank = 1) => {
-    if (!order?.id) return;
-    const orderDisplayId = formatOrderDisplayId(order.id, storeSlug);
-    const createdAt = order?.createdAt ? new Date(order.createdAt) : new Date();
-    const items = Array.isArray(order?.items) ? order.items : [];
-    const total = Number(order?.total || 0);
-    const escapeHtml = (value: any) =>
-      String(value ?? '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-
-    const lines = items
-      .map((item: any) => {
-        const qty = Number(item?.qty || 0);
-        const unit = Number(item?.unitPrice ?? item?.price ?? 0);
-        const lineTotal = qty * unit;
-        return `
-          <div class="line">
-            <div>${escapeHtml(qty)}x ${escapeHtml(item?.name || 'Item')}</div>
-            <div class="right">${escapeHtml(formatCurrency(lineTotal))}</div>
-          </div>
-        `;
-      })
-      .join('');
-
-    const html = `
-      <!doctype html>
-      <html>
-      <head>
-        <meta charset="utf-8" />
-        <title>Cupom ${escapeHtml(orderDisplayId)}</title>
-        <style>
-          @page { size: 58mm auto; margin: 0; }
-          html, body { margin: 0; padding: 0; width: 58mm; }
-          body { font-family: monospace; color: #000; font-size: 12px; line-height: 1.35; }
-          .receipt { width: 58mm; padding: 2mm; box-sizing: border-box; }
-          .center { text-align: center; }
-          .title { font-weight: 700; font-size: 13px; }
-          .sep { border-top: 1px dashed #000; margin: 4px 0; }
-          .line { display: flex; justify-content: space-between; gap: 6px; }
-          .right { text-align: right; white-space: nowrap; }
-          .total { font-weight: 700; font-size: 13px; }
-          .feed { height: 14mm; }
-        </style>
-      </head>
-      <body>
-        <div class="receipt">
-          <div class="center title">JA NO CAMINHO</div>
-          <div class="center">Cupom de pedido</div>
-          <div>Fila: #${escapeHtml(String(queueRank).padStart(2, '0'))}</div>
-          <div>Pedido: #${escapeHtml(orderDisplayId)}</div>
-          <div>Cliente: ${escapeHtml(order?.customerName || order?.name || 'Cliente')}</div>
-          <div>Data: ${escapeHtml(createdAt.toLocaleString('pt-BR'))}</div>
-          <div class="sep"></div>
-          ${lines}
-          <div class="sep"></div>
-          <div class="line total"><span>Total</span><span class="right">${escapeHtml(formatCurrency(total))}</span></div>
-          <div class="feed"></div>
-        </div>
-      </body>
-      </html>
-    `;
-
-    const frame = document.createElement('iframe');
-    frame.setAttribute('aria-hidden', 'true');
-    frame.style.position = 'fixed';
-    frame.style.right = '0';
-    frame.style.bottom = '0';
-    frame.style.width = '0';
-    frame.style.height = '0';
-    frame.style.border = '0';
-    document.body.appendChild(frame);
-
-    const frameDoc = frame.contentDocument || frame.contentWindow?.document;
-    if (!frameDoc) {
-      frame.remove();
-      return;
-    }
-
-    frameDoc.open();
-    frameDoc.write(html);
-    frameDoc.close();
-
-    let printed = false;
-    const runPrint = () => {
-      if (printed) return;
-      printed = true;
-      try {
-        frame.contentWindow?.focus();
-        frame.contentWindow?.print();
-      } catch {}
-      window.setTimeout(() => frame.remove(), 2500);
-    };
-
-    if (frame.contentWindow?.document.readyState === 'complete') {
-      window.setTimeout(runPrint, 80);
-    } else {
-      frame.onload = () => window.setTimeout(runPrint, 80);
-    }
+    if (!hasAdminPrintAccess || !order?.id) return;
+    setPrintPayload({
+      order,
+      queueRank,
+      orderDisplayId: formatOrderDisplayId(order.id, storeSlug),
+      createdAt: order?.createdAt ? new Date(order.createdAt).toLocaleString('pt-BR') : new Date().toLocaleString('pt-BR'),
+    });
+    window.setTimeout(() => window.print(), 70);
   };
+
+  useEffect(() => {
+    const clearPrint = () => setPrintPayload(null);
+    window.addEventListener('afterprint', clearPrint);
+    return () => window.removeEventListener('afterprint', clearPrint);
+  }, []);
 
   const orderTypeMeta = (order: any) => {
     const type = String(order?.type || '').toLowerCase();
@@ -1132,6 +1050,12 @@ export const GrillQueue = () => {
       <style>{`
         @keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
         @keyframes drawerIn{0%{transform:translateX(100%)}100%{transform:translateX(0)}}
+        @media print{
+          @page{size:58mm auto;margin:0}
+          .no-print{display:none!important}
+          .print-only{display:block!important}
+          html,body{background:#fff!important;margin:0;padding:0}
+        }
       `}</style>
       <div className={`${tvMode ? "" : "rounded-2xl border border-slate-200 bg-white px-3 py-3"}`}>
         <div className="flex flex-col gap-2 mb-2 border-b border-slate-100 pb-2">
@@ -1345,6 +1269,7 @@ export const GrillQueue = () => {
                   paymentLabel={paymentLabel}
                   totalLabel={totalLabel}
                   itemsCount={itemsCount}
+                  canPrint={hasAdminPrintAccess}
                   onPrint={() => handlePrintOrder(order, index + 1)}
                   onClick={() => {
                     setActionsOpen(false);
@@ -1376,7 +1301,7 @@ export const GrillQueue = () => {
                 <div className="shrink-0 flex justify-between items-center px-4 py-3 border-b border-slate-200 bg-white">
                   <p className="text-sm font-bold text-slate-900">Detalhes do pedido</p>
                   <div className="flex items-center gap-2">
-                    {selectedOrder && (
+                    {selectedOrder && hasAdminPrintAccess && (
                       <button
                         type="button"
                         onClick={() => handlePrintOrder(selectedOrder, selectedOrderRank)}
@@ -2127,6 +2052,36 @@ export const GrillQueue = () => {
         <div className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg p-3">{error}</div>
       )}
     </div>
+    {printPayload && (
+      <div className="print-only hidden bg-white text-black">
+        <div style={{ width: '58mm', fontFamily: 'monospace', fontSize: '12px', lineHeight: 1.35, padding: '2mm' }}>
+          <div style={{ textAlign: 'center', fontWeight: 700 }}>JA NO CAMINHO</div>
+          <div style={{ textAlign: 'center' }}>Cupom de pedido</div>
+          <div>Fila: #{String(printPayload.queueRank || 1).padStart(2, '0')}</div>
+          <div>Pedido: #{printPayload.orderDisplayId}</div>
+          <div>Cliente: {printPayload.order?.customerName || printPayload.order?.name || 'Cliente'}</div>
+          <div>Data: {printPayload.createdAt}</div>
+          <div style={{ borderTop: '1px dashed #000', margin: '4px 0' }} />
+          {(Array.isArray(printPayload.order?.items) ? printPayload.order.items : []).map((item: any, idx: number) => {
+            const qty = Number(item?.qty || 0);
+            const unit = Number(item?.unitPrice ?? item?.price ?? 0);
+            const lineTotal = qty * unit;
+            return (
+              <div key={`${item?.id || idx}`}>
+                <div>{qty}x {String(item?.name || 'Item')}</div>
+                <div style={{ textAlign: 'right' }}>{formatCurrency(lineTotal)}</div>
+              </div>
+            );
+          })}
+          <div style={{ borderTop: '1px dashed #000', margin: '4px 0' }} />
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700 }}>
+            <span>Total</span>
+            <span>{formatCurrency(Number(printPayload.order?.total || 0))}</span>
+          </div>
+          <div style={{ height: '14mm' }} />
+        </div>
+      </div>
+    )}
     </>
   );
 };

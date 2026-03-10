@@ -156,6 +156,8 @@ export function StorePage() {
     Boolean(user?.store?.slug) &&
     Boolean(storeSlug) &&
     user.store.slug === storeSlug;
+  const hasAdminPrintAccess = String(user?.role || '').toLowerCase() === 'admin';
+  const [showPrintPrompt, setShowPrintPrompt] = useState(false);
 
   const cartPricing = useMemo(() => getCartPricing(cart), [cart]);
   const cartItemsTotal = cartPricing.discountedSubtotal;
@@ -1089,6 +1091,7 @@ export function StorePage() {
   };
 
   const printLastOrderReceipt = () => {
+    if (!hasAdminPrintAccess) return;
     if (!lastOrder?.id) return;
     const orderDisplayId = formatOrderDisplayId(lastOrder.id, storeSlug);
     const createdAt = lastOrder?.createdAt ? new Date(lastOrder.createdAt) : new Date();
@@ -1188,6 +1191,14 @@ export function StorePage() {
       frame.onload = () => window.setTimeout(runPrint, 80);
     }
   };
+
+  useEffect(() => {
+    if (view === 'success' && hasAdminPrintAccess && lastOrder?.id) {
+      setShowPrintPrompt(true);
+      return;
+    }
+    setShowPrintPrompt(false);
+  }, [view, hasAdminPrintAccess, lastOrder?.id]);
 
   // Loading state
   if (isLoading) {
@@ -1573,17 +1584,52 @@ export function StorePage() {
               phone={lastOrder?.phone}
               table={lastOrder?.table}
               orderId={lastOrder?.id}
-              onPrintReceipt={printLastOrderReceipt}
-              onTrackOrder={() => {
-                if (lastOrder?.id) {
-                  navigate(`/pedido/${lastOrder.id}`);
-                }
-              }}
+              onPrintReceipt={hasAdminPrintAccess ? printLastOrderReceipt : undefined}
+              onTrackOrder={
+                hasAdminPrintAccess
+                  ? undefined
+                  : () => {
+                      if (lastOrder?.id) {
+                        navigate(`/pedido/${lastOrder.id}`);
+                      }
+                    }
+              }
               onNewOrder={() => setView('menu')}
             />
           </div>
         )}
       </main>
+
+      {showPrintPrompt && (
+        <div className="fixed inset-0 z-[90] bg-black/40 backdrop-blur-sm flex items-center justify-center px-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-2xl border border-slate-200">
+            <p className="text-sm text-slate-500 uppercase tracking-[0.2em] font-semibold">Pedido confirmado</p>
+            <h3 className="mt-2 text-lg font-black text-slate-900">
+              Pedido #{formatOrderDisplayId(lastOrder?.id, storeSlug)} confirmado com sucesso!
+            </h3>
+            <p className="mt-2 text-sm text-slate-600">Deseja imprimir o cupom agora?</p>
+            <div className="mt-4 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setShowPrintPrompt(false)}
+                className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700"
+              >
+                Não, apenas fechar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowPrintPrompt(false);
+                  printLastOrderReceipt();
+                }}
+                className="flex-1 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white"
+              >
+                Sim, imprimir agora
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {view === 'cart' && (
         <div
