@@ -410,6 +410,7 @@ export const CartView = ({
   const showRouteMap = Boolean(storeCoords?.lat && deliveryCoords?.lat);
   const showDeliveryStatus = deliveryStatus && deliveryCheck?.status !== "ok" && deliveryCheck?.status !== "out";
   const showDeliveryDebug = deliveryDebug && deliveryCheck?.status !== "ok";
+  const hideOutOfRangeInlineReason = isDelivery && deliveryCheck?.status === "out";
 
   useEffect(() => {
     if (isDelivery && deliveryCheck?.status === "out") {
@@ -1069,7 +1070,7 @@ export const CartView = ({
           {isPickup ? <Wallet size={20} weight="duotone" /> : <PaperPlaneTilt size={20} weight="duotone" />}
           {actionLabel}
         </button>
-        {(checkoutDisabled || cashValidation.blocked) && (checkoutDisabledReason || cashValidation.reason) && (
+        {(checkoutDisabled || cashValidation.blocked) && !hideOutOfRangeInlineReason && (checkoutDisabledReason || cashValidation.reason) && (
           <p className="mt-2 text-center text-[11px] text-rose-600 font-semibold">
             {cashValidation.blocked ? cashValidation.reason : checkoutDisabledReason}
           </p>
