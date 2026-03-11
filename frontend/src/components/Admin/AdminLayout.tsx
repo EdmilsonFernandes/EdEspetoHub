@@ -6,9 +6,10 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { resolveAssetUrl } from '../../utils/resolveAssetUrl';
 import { subscriptionService } from '../../services/subscriptionService';
 import { AdminMobileBottomNav } from './AdminMobileBottomNav';
+import { SignOut } from '@phosphor-icons/react';
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { auth, hydrated, setAuth } = useAuth();
+  const { auth, hydrated, setAuth, logout } = useAuth();
   const { setBranding } = useTheme();
   const brandingKeyRef = useRef('');
   const navigate = useNavigate();
@@ -138,6 +139,18 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
         </div>
       )}
       <div className="pb-24 lg:pb-0">{children}</div>
+      <button
+        type="button"
+        onClick={() => {
+          logout();
+          navigate('/admin');
+        }}
+        className="lg:hidden fixed right-3 bottom-[calc(env(safe-area-inset-bottom)+4.9rem)] z-[320] inline-flex items-center gap-1.5 rounded-full border border-rose-200 bg-white px-3 py-2 text-[11px] font-extrabold text-rose-700 shadow-[0_16px_30px_-24px_rgba(244,63,94,0.7)]"
+        aria-label="Sair da conta"
+      >
+        <SignOut size={14} weight="bold" />
+        Sair
+      </button>
       <AdminMobileBottomNav />
     </>
   );
