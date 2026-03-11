@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeft,
   Bicycle,
+  Crosshair,
   House,
   ForkKnife,
   PaperPlaneTilt,
@@ -70,6 +71,7 @@ export const CartView = ({
   deliveryRadiusKm = null,
   deliveryFee = 0,
   deliveryCheck = { status: "idle", distanceKm: null, durationMin: null },
+  onUseCurrentLocation,
   storeAddress = "",
   storeCoords = null,
   deliveryCoords = null,
@@ -106,7 +108,9 @@ export const CartView = ({
   const [ctaPulse, setCtaPulse] = useState(false);
   const [cashNeedsChange, setCashNeedsChange] = useState(false);
   const [cashTenderedInput, setCashTenderedInput] = useState("");
+  const [showOutOfRangeSheet, setShowOutOfRangeSheet] = useState(false);
   const nameInputRef = useRef<HTMLInputElement | null>(null);
+  const cepInputRef = useRef<HTMLInputElement | null>(null);
   const premiumInputClass =
     "w-full rounded-2xl bg-slate-100 px-4 py-3 text-slate-800 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all";
 
@@ -404,8 +408,18 @@ export const CartView = ({
   ]);
 
   const showRouteMap = Boolean(storeCoords?.lat && deliveryCoords?.lat);
-  const showDeliveryStatus = deliveryStatus && deliveryCheck?.status !== "ok";
+  const showDeliveryStatus = deliveryStatus && deliveryCheck?.status !== "ok" && deliveryCheck?.status !== "out";
   const showDeliveryDebug = deliveryDebug && deliveryCheck?.status !== "ok";
+
+  useEffect(() => {
+    if (isDelivery && deliveryCheck?.status === "out") {
+      setShowOutOfRangeSheet(true);
+      return;
+    }
+    if (!isDelivery) {
+      setShowOutOfRangeSheet(false);
+    }
+  }, [isDelivery, deliveryCheck?.status]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -596,7 +610,18 @@ export const CartView = ({
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div className="sm:col-span-2">
                       <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">CEP</label>
+                      {!!onUseCurrentLocation && (
+                        <button
+                          type="button"
+                          onClick={onUseCurrentLocation}
+                          className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-[11px] font-semibold text-sky-700 hover:bg-sky-100 transition"
+                        >
+                          <Crosshair size={12} weight="duotone" />
+                          Usar minha localização atual
+                        </button>
+                      )}
                       <input
+                        ref={cepInputRef}
                         value={customer.cep || ""}
                         onChange={(e) => updateDeliveryField("cep", e.target.value)}
                         onBlur={handleCepLookup}
@@ -1050,6 +1075,46 @@ export const CartView = ({
           </p>
         )}
       </div>
+
+      {showOutOfRangeSheet && (
+        <div className="fixed inset-0 z-[70]">
+          <button
+            type="button"
+            onClick={() => setShowOutOfRangeSheet(false)}
+            className="absolute inset-0 bg-slate-900/45 backdrop-blur-[1px]"
+            aria-label="Fechar aviso de raio"
+          />
+          <div className="absolute bottom-0 left-0 right-0 rounded-t-3xl border border-slate-200 bg-white p-4 pb-[max(env(safe-area-inset-bottom),1rem)] shadow-[0_-20px_44px_-24px_rgba(15,23,42,0.45)]">
+            <p className="text-sm font-black text-slate-900">Não chegamos até aí ainda 😥</p>
+            <p className="mt-2 text-sm text-slate-600">
+              Sua localização está a {deliveryCheck?.distanceKm ? deliveryCheck.distanceKm.toFixed(1) : '-'} km de nós,
+              e nosso limite de entrega é de {radiusValue || '-'} km.
+            </p>
+            <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowOutOfRangeSheet(false);
+                  cepInputRef.current?.focus();
+                }}
+                className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700"
+              >
+                Trocar Endereço
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  onChangeCustomer({ ...customer, type: "pickup" });
+                  setShowOutOfRangeSheet(false);
+                }}
+                className="rounded-xl bg-slate-900 px-4 py-3 text-sm font-bold text-white"
+              >
+                Quero retirar na loja
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
