@@ -109,10 +109,11 @@ export const CartView = ({
   const [cashNeedsChange, setCashNeedsChange] = useState(false);
   const [cashTenderedInput, setCashTenderedInput] = useState("");
   const [showOutOfRangeSheet, setShowOutOfRangeSheet] = useState(false);
+  const [hasTriedCheckout, setHasTriedCheckout] = useState(false);
   const nameInputRef = useRef<HTMLInputElement | null>(null);
   const cepInputRef = useRef<HTMLInputElement | null>(null);
   const premiumInputClass =
-    "w-full rounded-2xl bg-slate-100 px-4 py-3 text-slate-800 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all";
+    "w-full rounded-2xl bg-slate-100 px-4 py-3 text-slate-800 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all shadow-sm";
 
   const visibleOrderTypes = Array.isArray(allowedOrderTypes) && allowedOrderTypes.length
     ? allowedOrderTypes
@@ -151,6 +152,10 @@ export const CartView = ({
     if (isPix) return "Finalizar pedido (Pix)";
     return "Finalizar pedido na mesa";
   }, [isDelivery, isPickup, isPix, isCredit, isDebit, isCash]);
+  const isDeliveryAddressValidated = !isDelivery || deliveryCheck?.status === "ok";
+  const primaryCtaLabel = isDelivery && !isDeliveryAddressValidated ? "Validar Endereço" : actionLabel;
+  const isDeliveryValidationMode = isDelivery && !isDeliveryAddressValidated;
+  const primaryCtaDisabled = isDeliveryValidationMode ? cepLoading : (checkoutDisabled || cashValidation.blocked);
 
   const [selectedDdd, setSelectedDdd] = useState(() => extractPhoneParts(customer.phone || "").ddd);
   const [localPhoneDigits, setLocalPhoneDigits] = useState(() => extractPhoneParts(customer.phone || "").localNumber);
@@ -607,29 +612,35 @@ export const CartView = ({
                 </span>
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-4">
-                <div className="space-y-3">
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="space-y-4">
+                  <div className="rounded-2xl border border-sky-100 bg-sky-50/70 px-3 py-2.5 text-xs text-sky-800">
+                    Insira seu CEP para conferirmos a distância e o tempo de entrega.
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="sm:col-span-2">
                       <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">CEP</label>
-                      {!!onUseCurrentLocation && (
-                        <button
-                          type="button"
-                          onClick={onUseCurrentLocation}
-                          className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-[11px] font-semibold text-sky-700 hover:bg-sky-100 transition"
-                        >
-                          <Crosshair size={12} weight="duotone" />
-                          Usar minha localização atual
-                        </button>
-                      )}
-                      <input
-                        ref={cepInputRef}
-                        value={customer.cep || ""}
-                        onChange={(e) => updateDeliveryField("cep", e.target.value)}
-                        onBlur={handleCepLookup}
-                        disabled={cepLoading}
-                        placeholder="00000-000"
-                        className={`${premiumInputClass} disabled:opacity-60`}
-                      />
+                      <div className="relative mt-1">
+                        <input
+                          ref={cepInputRef}
+                          value={customer.cep || ""}
+                          onChange={(e) => updateDeliveryField("cep", e.target.value)}
+                          onBlur={handleCepLookup}
+                          disabled={cepLoading}
+                          placeholder="00000-000"
+                          className={`${premiumInputClass} pr-12 disabled:opacity-60`}
+                        />
+                        {!!onUseCurrentLocation && (
+                          <button
+                            type="button"
+                            onClick={onUseCurrentLocation}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 inline-flex h-8 w-8 items-center justify-center rounded-xl border border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-100 transition active:scale-[0.97]"
+                            aria-label="Usar minha localização"
+                            title="Usar minha localização"
+                          >
+                            <Crosshair size={14} weight="duotone" />
+                          </button>
+                        )}
+                      </div>
                     </div>
                     <div className="flex items-end">
                       <button
@@ -642,8 +653,8 @@ export const CartView = ({
                       </button>
                     </div>
                   </div>
-                  {cepError && <p className="text-xs text-red-600">{cepError}</p>}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {hasTriedCheckout && cepError && <p className="text-xs text-red-600">{cepError}</p>}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Rua / Avenida</label>
                       <input
@@ -663,7 +674,7 @@ export const CartView = ({
                       />
                     </div>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Bairro</label>
                       <input
@@ -683,7 +694,7 @@ export const CartView = ({
                       />
                     </div>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="sm:col-span-2">
                       <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Cidade</label>
                       <input
@@ -1051,26 +1062,37 @@ export const CartView = ({
       {/* Botão Finalizar */}
       <div className="fixed bottom-0 left-0 right-0 w-full box-border p-4 border-t border-slate-100 bg-white/90 backdrop-blur-md max-w-lg mx-auto z-50 shadow-[0_-14px_28px_-22px_rgba(15,23,42,0.28)]">
         <button
-          onClick={() => {
+          onClick={async () => {
+            setHasTriedCheckout(true);
             setCtaPulse(true);
             window.setTimeout(() => setCtaPulse(false), 220);
+            if (isDeliveryValidationMode) {
+              const rawCep = (customer.cep || "").replace(/\D/g, "");
+              if (rawCep.length !== 8) {
+                setCepError("Informe um CEP válido para validar a entrega.");
+                cepInputRef.current?.focus();
+                return;
+              }
+              await handleCepLookup();
+              return;
+            }
             onCheckout({
               cashTendered:
                 isCash && cashNeedsChange && cashTenderedValue !== null ? Number(cashTenderedValue) : null,
             });
           }}
-          disabled={checkoutDisabled || cashValidation.blocked}
+          disabled={primaryCtaDisabled}
           className={`w-full font-bold text-lg py-4 rounded-2xl shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 ${
-            checkoutDisabled || cashValidation.blocked
+            primaryCtaDisabled
               ? "bg-slate-300 text-slate-600 cursor-not-allowed"
               : "bg-slate-900 text-white cursor-pointer"
           }`}
           style={ctaPulse ? { animation: 'btnPop 220ms ease' } : undefined}
         >
           {isPickup ? <Wallet size={20} weight="duotone" /> : <PaperPlaneTilt size={20} weight="duotone" />}
-          {actionLabel}
+          {primaryCtaLabel}
         </button>
-        {(checkoutDisabled || cashValidation.blocked) && !hideOutOfRangeInlineReason && (checkoutDisabledReason || cashValidation.reason) && (
+        {hasTriedCheckout && !isDeliveryValidationMode && (checkoutDisabled || cashValidation.blocked) && !hideOutOfRangeInlineReason && (checkoutDisabledReason || cashValidation.reason) && (
           <p className="mt-2 text-center text-[11px] text-rose-600 font-semibold">
             {cashValidation.blocked ? cashValidation.reason : checkoutDisabledReason}
           </p>
@@ -1119,4 +1141,5 @@ export const CartView = ({
     </div>
   );
 };
+
 
