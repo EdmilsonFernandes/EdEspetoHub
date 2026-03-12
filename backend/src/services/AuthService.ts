@@ -40,6 +40,7 @@ import { AppError } from '../errors/AppError';
 import { PlatformAdmin } from '../entities/PlatformAdmin';
 import { getStoreSegmentPreset, sanitizeStoreSegment } from '../utils/storeSegment';
 import { resolvePlanFeatures, resolvePlanTier } from '../config/planFeatures';
+import { StoreUserRepository } from '../repositories/StoreUserRepository';
 /**
  * Provides AuthService functionality.
  *
@@ -56,6 +57,7 @@ export class AuthService
   private paymentRepository = new PaymentRepository();
   private subscriptionService = new SubscriptionService();
   private settingsService = new SettingsService();
+  private storeUserRepository = new StoreUserRepository();
 
   private normalizePhone(value?: string | null) {
     return String(value || '').replace(/\D/g, '');
@@ -600,26 +602,46 @@ export class AuthService
     const normalizedIdentifier = String(identifier || '').trim().toLowerCase();
     if (!normalizedIdentifier) throw new AppError('GEN-002', 400);
 
-    let store = null as any;
+    let store: any = null;
+    let loginUser: any = null;
+    let loginRole: 'ADMIN' | 'OPERATOR' = 'ADMIN';
+
     if (normalizedIdentifier.includes('@')) {
-      const owner = await this.userRepository.findByEmail(normalizedIdentifier);
-      if (owner?.id) {
-        store = await this.storeRepository.findByOwnerId(owner.id);
+      const candidate = await this.userRepository.findByEmail(normalizedIdentifier);
+      if (!candidate) throw new AppError('AUTH-004', 401);
+      const valid = await bcrypt.compare(password, candidate.password);
+      if (!valid) throw new AppError('AUTH-004', 401);
+      loginUser = candidate;
+
+      const ownedStore = await this.storeRepository.findByOwnerId(candidate.id);
+      if (ownedStore) {
+        store = ownedStore;
+        loginRole = 'ADMIN';
+      } else {
+        const memberships = await this.storeUserRepository.findActiveByUserId(candidate.id);
+        const membership = memberships?.[0];
+        if (!membership?.store?.id) {
+          throw new AppError('STORE-001', 404);
+        }
+        store = membership.store;
+        loginRole = String(membership.role || 'OPERATOR').toUpperCase() === 'ADMIN' ? 'ADMIN' : 'OPERATOR';
       }
     } else {
       store = await this.storeRepository.findBySlug(normalizedIdentifier);
+      if (!store) throw new AppError('STORE-001', 404);
+      loginUser = store.owner;
+      const valid = await bcrypt.compare(password, loginUser.password);
+      if (!valid) throw new AppError('AUTH-004', 401);
+      loginRole = 'ADMIN';
     }
 
-    if (!store) throw new AppError('STORE-001', 404);
+    if (!store || !loginUser) throw new AppError('STORE-001', 404);
 
-    const owner = store.owner;
-    const valid = await bcrypt.compare(password, owner.password);
-    if (!valid) throw new AppError('AUTH-004', 401);
-    if (!owner.emailVerified) {
+    if (!loginUser.emailVerified) {
       throw new AppError('AUTH-005', 401, {
         next: 'VERIFY_EMAIL',
-        email: owner.email,
-        emailMasked: this.maskEmail(owner.email),
+        email: loginUser.email,
+        emailMasked: this.maskEmail(loginUser.email),
         resendCooldownSec: 60,
       });
     }
@@ -634,18 +656,18 @@ export class AuthService
     }
 
     const token = jwt.sign(
-      { sub: owner.id, storeId: store.id, role: 'ADMIN' },
+      { sub: loginUser.id, storeId: store.id, role: loginRole },
       env.jwtSecret,
       { expiresIn: '7d' }
     );
 
     const sanitizedOwner = {
-      id: owner.id,
-      fullName: owner.fullName,
-      email: owner.email,
-      phone: owner.phone,
-      address: owner.address,
-      role: 'ADMIN',
+      id: loginUser.id,
+      fullName: loginUser.fullName,
+      email: loginUser.email,
+      phone: loginUser.phone,
+      address: loginUser.address,
+      role: loginRole,
     };
 
     const sanitizedStore = {
@@ -656,9 +678,9 @@ export class AuthService
       createdAt: store.createdAt,
       settings: store.settings,
       owner: {
-        id: owner.id,
-        fullName: owner.fullName,
-        phone: owner.phone,
+        id: store.owner?.id,
+        fullName: store.owner?.fullName,
+        phone: store.owner?.phone,
       },
     };
     const planExempt = Boolean(store?.settings?.planExempt);

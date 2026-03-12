@@ -31,7 +31,7 @@ import { env } from '../config/env';
 import { AppError } from '../errors/AppError';
 import { respondWithError } from '../errors/respondWithError';
 
-export type UserRole = 'ADMIN' | 'OPERATOR' | 'CHURRASQUEIRO' | 'SUPER_ADMIN' | 'MOTOBOY';
+export type UserRole = 'ADMIN' | 'OPERATOR' | 'CHURRASQUEIRO' | 'SUPER_ADMIN' | 'MOTOBOY' | 'STORE_OWNER';
 
 type JwtPayload = {
   sub: string;        // userId

@@ -27,6 +27,7 @@ import { MotoboyKycController } from '../controllers/MotoboyKycController';
 import { DeliveryController } from '../controllers/DeliveryController';
 import { LegalController } from '../controllers/LegalController';
 import { DeliveryBillingController } from '../controllers/DeliveryBillingController';
+import { StoreUserController } from '../controllers/StoreUserController';
 
 import { requireAuth, requireRole } from '../middleware/authGuard';
 import { requireActiveSubscription } from '../middleware/subscriptionGuard';
@@ -105,6 +106,8 @@ routes.get('/public/stores/slug/:slug/tables/status', OrderController.listTableS
 routes.put('/stores/:storeId', requireAuth, requireRole('ADMIN'), StoreController.update);
 routes.put('/stores/:storeId/status', requireAuth, requireRole('ADMIN'), StoreController.updateStatus);
 routes.get('/stores/:storeId/link-stats', requireAuth, requireRole('ADMIN'), StoreController.getLinkStats);
+routes.get('/stores/:storeId/users', requireAuth, requireRole('ADMIN'), StoreUserController.list);
+routes.post('/stores/:storeId/users', requireAuth, requireRole('ADMIN'), StoreUserController.create);
 
 // Products admin (cadastro não depende de assinatura)
 routes.post('/stores/:storeId/products', requireAuth, requireRole('ADMIN'), ProductController.create);

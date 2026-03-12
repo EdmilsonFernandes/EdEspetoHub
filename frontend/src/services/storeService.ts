@@ -50,4 +50,17 @@ export const storeService = {
     const response = await apiClient.rawPut(`/stores/${storeId}/status`, { open: isOpen });
     return toJson(response);
   },
+
+  async listUsers(storeId: string) {
+    const response = await apiClient.rawGet(`/stores/${storeId}/users`);
+    return toJson(response);
+  },
+
+  async createUser(
+    storeId: string,
+    payload: { fullName: string; email: string; password: string; phone?: string; role: 'ADMIN' | 'OPERATOR' }
+  ) {
+    const response = await apiClient.rawPost(`/stores/${storeId}/users`, payload);
+    return toJson(response);
+  },
 };

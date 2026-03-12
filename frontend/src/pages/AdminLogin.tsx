@@ -95,7 +95,8 @@ export function AdminLogin() {
 
   useEffect(() => {
     if (!hydrated) return;
-    if (auth?.token && auth?.user?.role === 'ADMIN') {
+    const role = String(auth?.user?.role || '').toUpperCase();
+    if (auth?.token && (role === 'ADMIN' || role === 'OPERATOR' || role === 'CHURRASQUEIRO')) {
       const redirectTab = sessionStorage.getItem('admin:redirectTab');
       const redirectSlug = sessionStorage.getItem('admin:redirectSlug');
       if (redirectTab && (!redirectSlug || redirectSlug === auth.store?.slug)) {
