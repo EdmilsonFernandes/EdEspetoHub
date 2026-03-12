@@ -57,7 +57,8 @@ const OrderSummaryCard = ({
   (() => {
     const isDelivery = String(order?.type || '').toLowerCase() === 'delivery';
     const leftAccent = isDelivery ? 'border-l-4 border-l-blue-500' : 'border-l-4 border-l-orange-500';
-    const compactMeta = `${order?.table ? `Mesa ${order.table}` : typeMeta.label} • ${paymentLabel} • ID ${orderDisplayId}`;
+    const compactMeta = `${formatOrderType(order?.type)} • ${paymentLabel} • ID ${orderDisplayId}`;
+    const hasTable = String(order?.type || '').toLowerCase() === 'table' && order?.table;
     return (
   <div
     role="button"
@@ -71,7 +72,7 @@ const OrderSummaryCard = ({
     }}
     className={`w-full rounded-xl border ${isLate ? 'border-red-400 animate-pulse' : 'border-slate-200'} ${leftAccent} bg-white p-3 text-left flex flex-col gap-2 transition-all duration-300 transition-transform hover:border-slate-300 hover:shadow-lg hover:-translate-y-0.5 hover:scale-[1.01] cursor-pointer`}
   >
-    <div className="grid grid-cols-[auto_1fr_auto] items-center gap-2">
+    <div className="grid grid-cols-[auto_1fr_auto] items-start gap-2">
       <div className="min-w-0">
         <span className="px-2 py-1 bg-slate-800 text-white text-xs font-bold rounded-md shadow-sm">
           #{String(queueRank).padStart(2, '0')}
@@ -82,7 +83,13 @@ const OrderSummaryCard = ({
           {statusMeta.label}
         </span>
       </div>
-      <div className="flex justify-end">
+      <div className="flex flex-col items-end gap-1">
+        {hasTable && (
+          <span className="inline-flex items-center gap-1 rounded-md bg-slate-900 px-2.5 py-1 text-[12px] font-black tracking-wide text-white whitespace-nowrap">
+            <Hash size={12} weight="bold" />
+            MESA {String(order.table).padStart(2, "0")}
+          </span>
+        )}
         <span className={`px-2 py-1 text-xs font-bold font-mono rounded-md shrink-0 whitespace-nowrap border ${isLate ? 'bg-red-500 text-white border-red-500' : 'bg-emerald-100 text-emerald-700 border-emerald-200'}`}>
           {elapsedLabel}
         </span>
