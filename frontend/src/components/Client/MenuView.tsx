@@ -730,11 +730,11 @@ export const MenuView = ({
                   onClick={() => openProductModal(item)}
                 >
                   <div className="flex-1 min-w-0 space-y-1.5">
-                    <p className="font-semibold text-slate-900 text-[15px] leading-tight line-clamp-2">
+                    <p className="font-semibold text-slate-900 text-base sm:text-lg leading-tight line-clamp-2">
                       {item.name}
                     </p>
                     {item.description && (
-                      <p className="text-sm text-slate-600 leading-relaxed line-clamp-2">{item.description}</p>
+                      <p className="text-sm sm:text-[15px] text-slate-600 leading-relaxed line-clamp-2">{item.description}</p>
                     )}
                     {itemQtyMap.get(String(item.id)) > 0 && (
                       <span className="inline-flex items-center px-2 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">

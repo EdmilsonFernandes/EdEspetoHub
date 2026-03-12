@@ -889,7 +889,7 @@ export const CartView = ({
                     onClick={() => handleSelectTable(table)}
                     className={`py-2.5 rounded-xl text-sm font-semibold border transition shadow-sm ${
                       isSelected
-                        ? "bg-white text-slate-900 border-brand-primary ring-2 ring-brand-primary/30 shadow-[inset_0_0_0_1px_rgba(15,23,42,0.2)]"
+                        ? "bg-amber-500 text-white font-bold border-amber-500 ring-2 ring-amber-300/60 shadow-[inset_0_0_0_1px_rgba(217,119,6,0.35)]"
                         : "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100"
                     }`}
                   >
@@ -960,9 +960,9 @@ export const CartView = ({
                 )}
               </div>
               <div className="flex flex-col min-w-0">
-                <span className="text-gray-700 font-medium text-sm sm:text-base">{item.name}</span>
+                <span className="text-slate-800 font-semibold text-base sm:text-lg leading-tight">{item.name}</span>
                 {formatItemOptions(item) && (
-                  <span className="text-[11px] text-gray-500">{formatItemOptions(item)}</span>
+                  <span className="text-xs sm:text-sm text-slate-600">{formatItemOptions(item)}</span>
                 )}
                 {getModifiersTotal(item?.selectedModifiers || []) > 0 && (
                   <span className="text-[11px] text-emerald-700 font-semibold">

@@ -1378,7 +1378,7 @@ export function StorePage() {
       )}
 
       <main className="mx-auto px-0 sm:px-4 md:px-6 lg:px-8 py-0 sm:py-6">
-        {orderNotice && (
+        {orderNotice && !showPrintPrompt && (
           <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-4">
             <div className="flex flex-wrap items-center gap-3 bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-2xl border border-white/10">
               <div className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
@@ -1711,7 +1711,7 @@ export function StorePage() {
       </main>
 
       {showPrintPrompt && (
-        <div className="fixed inset-0 z-[90] bg-black/40 backdrop-blur-sm flex items-center justify-center px-4">
+        <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center px-4">
           <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-2xl border border-slate-200">
             <p className="text-sm text-slate-500 uppercase tracking-[0.2em] font-semibold">Pedido finalizado</p>
             <h3 className="mt-2 text-lg font-black text-slate-900">
