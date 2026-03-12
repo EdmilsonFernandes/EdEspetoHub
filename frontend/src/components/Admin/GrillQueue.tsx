@@ -2197,30 +2197,36 @@ export const GrillQueue = () => {
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-[11px] uppercase tracking-[0.2em] font-bold text-emerald-700">Finalizados hoje</p>
-                <p className="text-sm text-slate-600 mt-0.5">Resumo de vendas dos pedidos concluídos no dia.</p>
+                <p className="text-sm text-slate-600 mt-0.5">
+                  {isAdminUser
+                    ? 'Resumo de vendas dos pedidos concluídos no dia.'
+                    : 'Pedidos concluídos no dia para acompanhamento operacional.'}
+                </p>
               </div>
               <span className="inline-flex items-center rounded-full border border-emerald-200 bg-white px-3 py-1 text-xs font-semibold text-emerald-700">
                 {completedSummary.ordersCount} pedido(s)
               </span>
             </div>
-            <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2">
-              <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
-                <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500">Vendido no dia</p>
-                <p className="text-lg font-black text-slate-900">{formatCurrency(completedSummary.sales)}</p>
+            {isAdminUser ? (
+              <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2">
+                <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
+                  <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500">Vendido no dia</p>
+                  <p className="text-lg font-black text-slate-900">{formatCurrency(completedSummary.sales)}</p>
+                </div>
+                <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
+                  <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500">Ticket médio</p>
+                  <p className="text-lg font-black text-slate-900">{formatCurrency(completedSummary.averageTicket)}</p>
+                </div>
+                <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
+                  <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500">Frete no dia</p>
+                  <p className="text-lg font-black text-slate-900">{formatCurrency(completedSummary.deliveryFees)}</p>
+                </div>
+                <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
+                  <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500">Itens vendidos</p>
+                  <p className="text-lg font-black text-slate-900">{completedSummary.itemsCount}</p>
+                </div>
               </div>
-              <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
-                <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500">Ticket médio</p>
-                <p className="text-lg font-black text-slate-900">{formatCurrency(completedSummary.averageTicket)}</p>
-              </div>
-              <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
-                <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500">Frete no dia</p>
-                <p className="text-lg font-black text-slate-900">{formatCurrency(completedSummary.deliveryFees)}</p>
-              </div>
-              <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
-                <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500">Itens vendidos</p>
-                <p className="text-lg font-black text-slate-900">{completedSummary.itemsCount}</p>
-              </div>
-            </div>
+            ) : null}
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
             {pagedCompleted.map((order) => (
