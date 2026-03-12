@@ -11,6 +11,7 @@ type PrintReceiptRawBtInput = {
   queueLabel?: string;
   orderLabel: string;
   customerLabel: string;
+  tableLabel?: string;
   dateLabel: string;
   items: ReceiptItem[];
   totalLabel: string;
@@ -111,6 +112,9 @@ const buildRawBtText = (payload: PrintReceiptRawBtInput) => {
     ...wrapWords(`Fila: ${sanitizeText(payload.queueLabel || "--")}`, LINE_WIDTH),
     ...wrapWords(`Pedido: ${sanitizeText(payload.orderLabel || "--")}`, LINE_WIDTH),
     ...wrapWords(`Cliente: ${sanitizeText(payload.customerLabel || "Cliente")}`, LINE_WIDTH),
+    ...(payload.tableLabel
+      ? [strongSeparator(), centerText(`*** MESA ${sanitizeText(payload.tableLabel)} ***`), strongSeparator()]
+      : []),
     ...wrapWords(`Data: ${sanitizeText(payload.dateLabel || "")}`, LINE_WIDTH),
     separator(),
     "ITENS",

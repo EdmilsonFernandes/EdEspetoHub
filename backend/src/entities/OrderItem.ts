@@ -41,6 +41,9 @@ export class OrderItem {
   @Column({ name: 'selected_modifiers', type: 'jsonb', nullable: true })
   selectedModifiers?: Array<{ id: string; name: string; price: number; quantity?: number }> | null;
 
+  @Column({ name: 'is_printed', type: 'boolean', default: false })
+  isPrinted?: boolean;
+
   @ManyToOne(() => Product, (product) => product.orderItems, { eager: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'product_id' })
   product!: Product;

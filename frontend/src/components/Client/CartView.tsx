@@ -255,45 +255,17 @@ export const CartView = ({
       ),
     [occupiedTables]
   );
-  const [tableWarning, setTableWarning] = useState("");
-  const normalizedSelectedTable = String(customer.table || "").trim();
-  const isSelectedTableOccupied = Boolean(
-    customer.type === "table" &&
-    normalizedSelectedTable &&
-    occupiedTablesSet.has(normalizedSelectedTable)
-  );
 
   const handleSelectTable = (tableNumber: string) => {
     const normalized = String(tableNumber || "").trim();
     if (!normalized) return;
-    if (occupiedTablesSet.has(normalized)) {
-      setTableWarning("Ops! Esta mesa já está em atendimento.");
-      return;
-    }
-    setTableWarning("");
     onChangeCustomer({ ...customer, table: normalized });
   };
 
   const handleTableInputChange = (value: string) => {
     const normalized = String(value || "").replace(/\D/g, "").trim();
-    if (!normalized) {
-      setTableWarning("");
-      onChangeCustomer({ ...customer, table: "" });
-      return;
-    }
-    if (occupiedTablesSet.has(normalized)) {
-      setTableWarning("Ops! Esta mesa já está em atendimento.");
-      return;
-    }
-    setTableWarning("");
     onChangeCustomer({ ...customer, table: normalized });
   };
-
-  useEffect(() => {
-    if (customer.type !== "table") {
-      setTableWarning("");
-    }
-  }, [customer.type]);
   const formatItemOptions = (item) => {
     const labels = [];
     if (item?.cookingPoint) labels.push(item.cookingPoint);
@@ -850,10 +822,9 @@ export const CartView = ({
                     key={table}
                     type="button"
                     onClick={() => handleSelectTable(table)}
-                    disabled={isOccupied}
                     className={`py-2.5 rounded-xl text-sm font-semibold border transition shadow-sm ${
                       isOccupied
-                        ? "bg-red-50 border-red-200 text-slate-400 cursor-not-allowed pointer-events-none"
+                        ? "bg-red-50 border-red-200 text-red-700"
                         : isSelected
                         ? "bg-white text-slate-900 border-brand-primary ring-2 ring-brand-primary/30 shadow-[inset_0_0_0_1px_rgba(15,23,42,0.2)]"
                         : "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100"
@@ -867,25 +838,16 @@ export const CartView = ({
               <input
                 value={customer.table}
                 onChange={(e) => handleTableInputChange(e.target.value)}
-                onBlur={(e) => {
-                  const next = String(e.target.value || "").replace(/\D/g, "").trim();
-                  if (next && occupiedTablesSet.has(next)) {
-                    setTableWarning("Ops! Esta mesa já está em atendimento.");
-                  }
-                }}
                 type="tel"
                 inputMode="numeric"
                 pattern="[0-9]*"
                 enterKeyHint="done"
                 placeholder="Número da mesa"
-                className={`${premiumInputClass} sm:py-4 ${isSelectedTableOccupied ? "ring-2 ring-red-300 bg-red-50" : ""}`}
-                aria-invalid={isSelectedTableOccupied}
+                className={`${premiumInputClass} sm:py-4`}
               />
-              {(tableWarning || isSelectedTableOccupied) && (
-                <p className="text-xs font-semibold text-red-600">
-                  {tableWarning || "Ops! Esta mesa já está em atendimento."}
-                </p>
-              )}
+              <p className="text-xs text-slate-500">
+                Mesas em vermelho já têm pedidos em andamento, mas você pode lançar novos adicionais na mesma mesa.
+              </p>
             </div>
           )}
         </div>

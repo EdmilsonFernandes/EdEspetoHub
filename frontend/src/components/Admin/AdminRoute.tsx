@@ -15,7 +15,9 @@ export function AdminRoute({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (!auth?.token || auth?.user?.role !== 'ADMIN' || !auth?.store) {
+  const role = String(auth?.user?.role || '').toUpperCase();
+  const isAllowed = role === 'ADMIN' || role === 'OPERATOR' || role === 'CHURRASQUEIRO';
+  if (!auth?.token || !isAllowed || !auth?.store) {
     return <Navigate to="/admin" replace />;
   }
 

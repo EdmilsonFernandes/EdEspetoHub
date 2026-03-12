@@ -393,6 +393,7 @@ export class OrderService
       orderItem.price = Math.max(0, grossLine - bundleDiscount);
       orderItem.cookingPoint = item.cookingPoint;
       orderItem.passSkewer = Boolean(item.passSkewer);
+      orderItem.isPrinted = Boolean((item as any).isPrinted);
       nextItems.push(orderItem);
       total += orderItem.price;
     }
@@ -464,17 +465,7 @@ export class OrderService
     if (!safeAllowedTypes.includes(input.type)) {
       throw new AppError('ORDER-002', 400);
     }
-    if (input.type === 'table' && input.table) {
-      const activeStatuses = [ 'pending', 'preparing' ];
-      const activeCount = await this.orderRepository.countActiveByTable(
-        store!.id,
-        input.table,
-        activeStatuses
-      );
-      if (activeCount > 0) {
-        throw new AppError('ORDER-003', 409, { table: input.table });
-      }
-    }
+    // Mesa sem bloqueio: permite múltiplos pedidos ativos no mesmo número.
     const items: OrderItem[] = [];
     let total = 0;
 
@@ -497,6 +488,7 @@ export class OrderService
       orderItem.price = Math.max(0, grossLine - bundleDiscount);
       orderItem.cookingPoint = item.cookingPoint;
       orderItem.passSkewer = Boolean(item.passSkewer);
+      orderItem.isPrinted = false;
       items.push(orderItem);
       total += orderItem.price;
     }

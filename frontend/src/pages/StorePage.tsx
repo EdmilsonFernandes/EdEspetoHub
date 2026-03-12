@@ -937,15 +937,6 @@ export function StorePage() {
       showToast('Informe o número da mesa.', 'warning');
       return;
     }
-    if (customer.type === 'table') {
-      const normalizedTable = String(customer.table || '').trim();
-      const isOccupied = normalizedTable && occupiedTables.includes(normalizedTable);
-      if (isOccupied) {
-        showTableNotice('Ops! Esta mesa já está em atendimento.');
-        return;
-      }
-    }
-
     if (customer.type === 'delivery' && deliveryRadiusValue) {
       if (deliveryCheck.status === 'loading') {
         showErrorNotice('Validando distância de entrega. Aguarde um instante.');
@@ -1284,6 +1275,7 @@ export function StorePage() {
         queueLabel: queueText,
         orderLabel: `#${payload.orderDisplayId}`,
         customerLabel: payload.customerName,
+        tableLabel: payload.table ? String(payload.table) : '',
         dateLabel: payload.createdAt,
         items: payload.items.map((item: any) => ({
           quantity: Number(item?.quantity || 0),

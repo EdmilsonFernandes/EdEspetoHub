@@ -79,7 +79,7 @@ export const requireActiveSubscription = async (
   const role = getRoleFromAuthHeader(req);
 
   // ✅ ADMIN / CHURRASQUEIRO nunca bloqueia
-  if (role === 'ADMIN' || role === 'CHURRASQUEIRO')
+  if (role === 'ADMIN' || role === 'CHURRASQUEIRO' || role === 'OPERATOR')
   {
     return next();
   }

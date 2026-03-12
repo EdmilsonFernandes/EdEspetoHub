@@ -47,6 +47,7 @@ const normalizeOrder = (order: any) => ({
       id: item.id ?? item.item_id ?? item.orderItemId,
       qty: quantity,
       name: item.name ?? item.product?.name,
+      isPrinted: Boolean(item.isPrinted ?? item.is_printed ?? false),
       cookingPoint: item.cookingPoint ?? item.cooking_point,
       passSkewer: item.passSkewer ?? item.pass_skewer ?? false,
       selectedModifiers: normalizeProductModifiers(item.selectedModifiers ?? item.selected_modifiers ?? []),
@@ -240,6 +241,7 @@ export const orderService = {
     const normalizedItems = (items || []).map((item: any) => ({
       productId: item.productId ?? item.product?.id ?? item.id,
       quantity: Number(item.qty ?? item.quantity ?? 0),
+      isPrinted: Boolean(item.isPrinted),
       cookingPoint: item.cookingPoint,
       passSkewer: item.passSkewer,
       selectedModifiers: item.selectedModifiers,

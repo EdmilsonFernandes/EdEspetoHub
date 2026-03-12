@@ -150,7 +150,8 @@ CREATE TABLE IF NOT EXISTS order_items (
   price NUMERIC(10,2) NOT NULL,
   cooking_point TEXT,
   pass_skewer BOOLEAN NOT NULL DEFAULT FALSE,
-  selected_modifiers JSONB
+  selected_modifiers JSONB,
+  is_printed BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 ALTER TABLE products
@@ -174,6 +175,8 @@ ALTER TABLE order_items
 ADD COLUMN IF NOT EXISTS pass_skewer BOOLEAN NOT NULL DEFAULT FALSE;
 ALTER TABLE order_items
 ADD COLUMN IF NOT EXISTS selected_modifiers JSONB;
+ALTER TABLE order_items
+ADD COLUMN IF NOT EXISTS is_printed BOOLEAN NOT NULL DEFAULT FALSE;
 
 -- Índices multi-loja
 CREATE INDEX IF NOT EXISTS idx_products_store ON products(store_id);

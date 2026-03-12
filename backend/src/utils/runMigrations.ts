@@ -222,6 +222,10 @@ export async function runMigrations() {
     ADD COLUMN IF NOT EXISTS selected_modifiers JSONB;
   `);
   await AppDataSource.query(`
+    ALTER TABLE IF EXISTS order_items
+    ADD COLUMN IF NOT EXISTS is_printed BOOLEAN NOT NULL DEFAULT FALSE;
+  `);
+  await AppDataSource.query(`
     ALTER TABLE IF EXISTS products
     ADD COLUMN IF NOT EXISTS is_featured BOOLEAN DEFAULT FALSE;
   `);
@@ -316,6 +320,11 @@ export async function runMigrations() {
     SET user_role = 'STORE_OWNER'
     WHERE user_role IS NULL
       AND id IN (SELECT owner_id FROM stores);
+  `);
+  await AppDataSource.query(`
+    UPDATE users
+    SET user_role = 'OPERATOR'
+    WHERE UPPER(COALESCE(user_role, '')) = 'CHURRASQUEIRO';
   `);
   await AppDataSource.query(`
     CREATE TABLE IF NOT EXISTS email_verifications (

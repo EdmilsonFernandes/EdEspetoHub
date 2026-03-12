@@ -195,20 +195,39 @@ export const GrillQueue = () => {
   const handlePrintOrder = async (order: any, queueRank = 1) => {
     if (!hasAdminPrintAccess || !order?.id) return;
     if (isGeneratingPrint) return;
+    const orderItems = Array.isArray(order?.items) ? order.items : [];
+    if (!orderItems.length) {
+      setError('Pedido sem itens para impressão.');
+      return;
+    }
+    const hasPrintedItems = orderItems.some((item: any) => Boolean(item?.isPrinted));
+    const newItems = orderItems.filter((item: any) => !Boolean(item?.isPrinted));
+    let mode: 'all' | 'new' = 'all';
+    if (newItems.length === 0 && hasPrintedItems) {
+      const shouldReprint = window.confirm('Todos os itens já foram impressos. Reimprimir pedido completo?');
+      if (!shouldReprint) return;
+    } else if (newItems.length > 0 && hasPrintedItems) {
+      const onlyNew = window.confirm('Imprimir apenas novos itens?\nOK = apenas novos\nCancelar = imprimir tudo');
+      mode = onlyNew ? 'new' : 'all';
+    } else if (newItems.length > 0 && !hasPrintedItems) {
+      mode = 'all';
+    }
+    const itemsToPrint = mode === 'new' ? newItems : orderItems;
+    if (!itemsToPrint.length) {
+      setError('Nenhum item novo para imprimir.');
+      return;
+    }
+
     const payload = {
       order,
       queueRank,
       orderDisplayId: formatOrderDisplayId(order.id, storeSlug),
       createdAt: order?.createdAt ? new Date(order.createdAt).toLocaleString('pt-BR') : new Date().toLocaleString('pt-BR'),
-      items: Array.isArray(order?.items) ? order.items : [],
+      items: itemsToPrint,
       total: Number(order?.total || 0),
       storeName: String(order?.storeName || auth?.store?.name || 'Sertanejo no Espeto'),
+      table: order?.table || '',
     };
-    if (!payload.items.length) {
-      console.error('[print] payload vazio ou sem itens', payload);
-      setError('Pedido sem itens para impressão.');
-      return;
-    }
     setIsGeneratingPrint(true);
     setError('Gerando cupom...');
     try {
@@ -218,6 +237,7 @@ export const GrillQueue = () => {
         queueLabel: `#${String(payload.queueRank || 1).padStart(2, '0')}`,
         orderLabel: `#${payload.orderDisplayId}`,
         customerLabel: payload.order?.customerName || payload.order?.name || 'Cliente',
+        tableLabel: payload.table ? String(payload.table) : '',
         dateLabel: payload.createdAt,
         items: payload.items.map((item: any) => {
           const qty = Number(item?.qty ?? item?.quantity ?? 0);
@@ -231,6 +251,25 @@ export const GrillQueue = () => {
         }),
         totalLabel: formatCurrency(payload.total),
       });
+
+      const printedIds = new Set(
+        itemsToPrint
+          .map((item: any) => String(item?.id || '').trim())
+          .filter(Boolean)
+      );
+      const nextItems = orderItems.map((item: any) =>
+        printedIds.has(String(item?.id || '').trim()) ? { ...item, isPrinted: true } : item
+      );
+      const nextTotal = Number(order?.total || 0);
+      setQueue((prev) =>
+        prev.map((entry) =>
+          entry.id === order.id ? { ...entry, items: nextItems } : entry
+        )
+      );
+      if (selectedOrder?.id === order.id) {
+        setSelectedOrder((prev: any) => (prev ? { ...prev, items: nextItems } : prev));
+      }
+      await orderService.updateItems(order.id, nextItems, nextTotal);
     } catch (printError) {
       console.error('[print] erro ao imprimir', printError);
       setError('Falha ao imprimir. Verifique popup/permissões no navegador.');
@@ -682,7 +721,13 @@ export const GrillQueue = () => {
   const handleQuantityChange = (orderId, itemId, delta) => {
     applyItemsChange(orderId, (items) =>
       items.map((item) =>
-        item.id === itemId ? { ...item, qty: Math.max(0, item.qty + delta) } : item
+        item.id === itemId
+          ? {
+              ...item,
+              qty: Math.max(0, item.qty + delta),
+              isPrinted: delta > 0 ? false : Boolean(item.isPrinted),
+            }
+          : item
       )
     );
   };
@@ -693,18 +738,17 @@ export const GrillQueue = () => {
     if (!product) return;
 
     applyItemsChange(orderId, (items) => {
-      const existing = items.find((item) => item.id === product.id);
-      if (existing) {
-        return items.map((item) =>
-          item.id === product.id
-            ? { ...item, qty: item.qty + 1 }
-            : item
-        );
-      }
-
       return [
         ...items,
-        { id: product.id, productId: product.id, name: product.name, price: product.price, unitPrice: product.price, qty: 1 },
+        {
+          id: `${product.id}-${Date.now()}`,
+          productId: product.id,
+          name: product.name,
+          price: product.price,
+          unitPrice: product.price,
+          qty: 1,
+          isPrinted: false,
+        },
       ];
     });
   };
@@ -1485,8 +1529,15 @@ export const GrillQueue = () => {
 
               {/* LISTA DE ITENS */}
               <div className="mt-3 space-y-2">
-                {getOrderedItems(order.id, order.items || []).map((item) => (
-                  <div key={item.id} className="flex justify-between text-xs text-gray-700 items-center gap-3 bg-slate-50 border border-slate-200 rounded-2xl px-2.5 py-1.5">
+                {getOrderedItems(order.id, order.items || []).map((item, itemIndex) => (
+                  <div
+                    key={`${item.id || item.productId || item.name}-${itemIndex}`}
+                    className={`flex justify-between text-xs text-gray-700 items-center gap-3 rounded-2xl px-2.5 py-1.5 border ${
+                      item?.isPrinted
+                        ? "bg-slate-50 border-slate-200"
+                        : "bg-amber-50 border-amber-200"
+                    }`}
+                  >
                     <div className="flex items-center gap-2.5 min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-shrink-0">
                         <button
@@ -1526,6 +1577,11 @@ export const GrillQueue = () => {
                           <span className="truncate text-[12px]" title={item.name}>
                             {item.name}
                           </span>
+                          {!item?.isPrinted && (
+                            <span className="mt-1 inline-flex w-fit items-center rounded-full border border-amber-300 bg-amber-100 px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-[0.14em] text-amber-800">
+                              Novo
+                            </span>
+                          )}
                           <div className="flex flex-wrap gap-1 mt-1">
                             {item?.cookingPoint && (
                               <span className="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-amber-100 text-amber-800 border border-amber-200">

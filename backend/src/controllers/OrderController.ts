@@ -268,6 +268,7 @@ export class OrderController {
           name: item.product?.name || 'Produto',
           quantity: item.quantity,
           price: item.price,
+          isPrinted: Boolean((item as any).isPrinted),
           productId: item.product?.id,
           imageUrl: item.product?.imageUrl || null,
           cookingPoint: item.cookingPoint || null,

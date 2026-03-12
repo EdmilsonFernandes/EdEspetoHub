@@ -24,6 +24,7 @@ export interface CreateOrderItemInput {
   cookingPoint?: string;
   passSkewer?: boolean;
   selectedModifiers?: SelectedModifierInput[];
+  isPrinted?: boolean;
 }
 
 export interface CreateOrderDto {
