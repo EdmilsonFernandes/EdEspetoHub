@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
-import { ChatCircleText, House, List, Moon, SignOut, Storefront, Sun, Truck, X } from '@phosphor-icons/react';
+import { ChatCircleText, DownloadSimple, House, List, Moon, SignOut, Storefront, Sun, Truck, X } from '@phosphor-icons/react';
 
 interface LandingPageLayoutProps {
   children: React.ReactNode;
@@ -16,6 +16,8 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
   const { theme, toggleTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showWhatsappHint, setShowWhatsappHint] = useState(false);
+  const [deferredInstallPrompt, setDeferredInstallPrompt] = useState<any>(null);
+  const [showInstallCta, setShowInstallCta] = useState(false);
 
   useEffect(() => {
     setMobileMenuOpen(false);
@@ -44,6 +46,47 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
     }, 5000);
     return () => window.clearTimeout(timeout);
   }, []);
+
+  useEffect(() => {
+    const isStandalone =
+      (typeof window !== 'undefined' && window.matchMedia('(display-mode: standalone)').matches) ||
+      (typeof navigator !== 'undefined' && (navigator as any).standalone === true);
+    if (isStandalone) {
+      setShowInstallCta(false);
+      return;
+    }
+
+    const onBeforeInstallPrompt = (event: any) => {
+      event.preventDefault();
+      setDeferredInstallPrompt(event);
+      setShowInstallCta(true);
+    };
+
+    const onAppInstalled = () => {
+      setDeferredInstallPrompt(null);
+      setShowInstallCta(false);
+    };
+
+    window.addEventListener('beforeinstallprompt', onBeforeInstallPrompt);
+    window.addEventListener('appinstalled', onAppInstalled);
+    return () => {
+      window.removeEventListener('beforeinstallprompt', onBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', onAppInstalled);
+    };
+  }, []);
+
+  const handleInstallApp = async () => {
+    if (!deferredInstallPrompt) return;
+    try {
+      await deferredInstallPrompt.prompt();
+      await deferredInstallPrompt.userChoice;
+    } catch (error) {
+      console.error('Falha ao abrir prompt de instalação', error);
+    } finally {
+      setDeferredInstallPrompt(null);
+      setShowInstallCta(false);
+    }
+  };
 
   const goToDemoGuide = () => {
     if (typeof window !== 'undefined') {
@@ -317,6 +360,17 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
         <ChatCircleText size={18} weight="duotone" />
         <span className="hidden sm:inline text-sm font-bold">WhatsApp</span>
       </a>
+      {showInstallCta && (
+        <button
+          type="button"
+          onClick={handleInstallApp}
+          className="fixed bottom-[8.8rem] sm:bottom-[5.8rem] right-4 z-50 inline-flex items-center gap-2 rounded-full bg-slate-900 px-4 py-2.5 text-white shadow-[0_18px_38px_-18px_rgba(15,23,42,0.7)] ring-1 ring-slate-300/20 hover:bg-slate-800 transition"
+          aria-label="Instalar app"
+        >
+          <DownloadSimple size={16} weight="bold" />
+          <span className="text-xs sm:text-sm font-bold">Instalar app</span>
+        </button>
+      )}
       {showWhatsappHint && (
         <div className="fixed bottom-[10.2rem] sm:bottom-[4.5rem] right-4 z-50 rounded-2xl border border-emerald-200 bg-white px-3 py-2 text-xs font-semibold text-emerald-700 shadow-[0_16px_36px_-20px_rgba(16,185,129,0.6)] pointer-events-none">
           Dúvidas? Fale com um especialista
