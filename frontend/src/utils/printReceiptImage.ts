@@ -113,7 +113,13 @@ const buildRawBtText = (payload: PrintReceiptRawBtInput) => {
     ...wrapWords(`Pedido: ${sanitizeText(payload.orderLabel || "--")}`, LINE_WIDTH),
     ...wrapWords(`Cliente: ${sanitizeText(payload.customerLabel || "Cliente")}`, LINE_WIDTH),
     ...(payload.tableLabel
-      ? [strongSeparator(), centerText(`*** MESA ${sanitizeText(payload.tableLabel)} ***`), strongSeparator()]
+      ? [
+          strongSeparator(),
+          centerText("MESA"),
+          centerText(String(sanitizeText(payload.tableLabel)).toUpperCase()),
+          centerText(String(sanitizeText(payload.tableLabel)).toUpperCase()),
+          strongSeparator(),
+        ]
       : []),
     ...wrapWords(`Data: ${sanitizeText(payload.dateLabel || "")}`, LINE_WIDTH),
     separator(),
@@ -129,12 +135,103 @@ const buildRawBtText = (payload: PrintReceiptRawBtInput) => {
   return chunks.join("\n");
 };
 
+const buildHtmlReceipt = (payload: PrintReceiptRawBtInput) => {
+  const itemsHtml = payload.items
+    .map((item) => {
+      const qty = Math.max(0, Number(item.quantity || 0));
+      const name = sanitizeText(item.name || "Item");
+      const lineTotal = sanitizeText(item.lineTotal || "R$ 0,00");
+      const notes = sanitizeText(item.notes || "");
+      return `
+        <div class="item-row">
+          <span class="item-name">${qty}x ${name}</span>
+          <span class="item-price">${lineTotal}</span>
+        </div>
+        ${notes ? `<div class="item-note">- ${notes}</div>` : ''}
+      `;
+    })
+    .join('');
+
+  const tableHtml = payload.tableLabel
+    ? `<div class="table-block">MESA ${sanitizeText(payload.tableLabel).toUpperCase()}</div>`
+    : '';
+
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cupom</title>
+  <style>
+    @page { size: 80mm auto; margin: 0; }
+    html, body { margin: 0; padding: 0; background: #fff; color: #000; font-family: "Courier New", monospace; }
+    body { width: 72mm; padding: 2mm; }
+    .sep { border-top: 1px dashed #000; margin: 6px 0; }
+    .title { text-align: center; font-weight: 800; font-size: 16px; text-transform: uppercase; }
+    .subtitle { text-align: center; font-size: 11px; margin-top: 2px; }
+    .meta { font-size: 11px; margin: 2px 0; }
+    .table-block { margin: 8px 0; text-align: center; font-size: 24px; font-weight: 900; letter-spacing: 1px; }
+    .items-title { font-size: 11px; font-weight: 700; text-transform: uppercase; }
+    .item-row { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; margin: 2px 0; }
+    .item-name { flex: 1; padding-right: 6px; }
+    .item-price { white-space: nowrap; font-weight: 700; }
+    .item-note { font-size: 10px; margin-left: 8px; margin-bottom: 2px; }
+    .total { display: flex; justify-content: space-between; font-size: 14px; font-weight: 800; margin-top: 6px; }
+    .spacer { height: 16px; }
+  </style>
+</head>
+<body>
+  <div class="title">${sanitizeText(payload.storeName || "SERTANEJO NO ESPETO").toUpperCase()}</div>
+  <div class="subtitle">Plataforma: ${sanitizeText(payload.platformName || "Já no Caminho")}</div>
+  ${tableHtml}
+  <div class="sep"></div>
+  <div class="meta">Fila: ${sanitizeText(payload.queueLabel || "--")}</div>
+  <div class="meta">Pedido: ${sanitizeText(payload.orderLabel || "--")}</div>
+  <div class="meta">Cliente: ${sanitizeText(payload.customerLabel || "Cliente")}</div>
+  <div class="meta">Data: ${sanitizeText(payload.dateLabel || "")}</div>
+  <div class="sep"></div>
+  <div class="items-title">Itens</div>
+  ${itemsHtml}
+  <div class="sep"></div>
+  <div class="total"><span>TOTAL</span><span>${sanitizeText(payload.totalLabel || "R$ 0,00")}</span></div>
+  <div class="spacer"></div>
+</body>
+</html>`;
+};
+
+const isMobileUserAgent = () => {
+  if (typeof navigator === 'undefined') return false;
+  const ua = String(navigator.userAgent || '').toLowerCase();
+  return /android|iphone|ipad|ipod|mobile/.test(ua);
+};
+
 export const printReceiptAsImage = async (payload: PrintReceiptRawBtInput) => {
   if (!payload?.items?.length) {
     throw new Error("Pedido sem itens para impressão.");
   }
 
-  const rawText = buildRawBtText(payload);
-  const base64 = toBase64Utf8(rawText);
-  window.location.href = `rawbt:base64,${base64}`;
+  if (isMobileUserAgent()) {
+    const rawText = buildRawBtText(payload);
+    const base64 = toBase64Utf8(rawText);
+    window.location.href = `rawbt:base64,${base64}`;
+    return { mode: 'rawbt' as const };
+  }
+
+  const printWindow = window.open('', '_blank', 'width=420,height=760');
+  if (!printWindow) {
+    throw new Error('Popup bloqueado para impressão.');
+  }
+  printWindow.document.open();
+  printWindow.document.write(buildHtmlReceipt(payload));
+  printWindow.document.close();
+  window.setTimeout(() => {
+    try {
+      printWindow.focus();
+      printWindow.print();
+      printWindow.close();
+    } catch {
+      // no-op
+    }
+  }, 450);
+  return { mode: 'browser' as const };
 };

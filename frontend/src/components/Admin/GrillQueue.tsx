@@ -217,6 +217,13 @@ export const GrillQueue = () => {
       setError('Nenhum item novo para imprimir.');
       return;
     }
+    const printedIds = itemsToPrint
+      .map((item: any) => String(item?.id || '').trim())
+      .filter(Boolean);
+    if (!printedIds.length) {
+      setError('Itens sem ID para atualização de impressão.');
+      return;
+    }
 
     const payload = {
       order,
@@ -232,7 +239,7 @@ export const GrillQueue = () => {
     setError('Gerando cupom...');
     try {
       await printReceiptAsImage({
-        storeName: payload.storeName || 'SERTANEJO NO ESPETO',
+        storeName: 'SERTANEJO NO ESPETO',
         platformName: 'Já no Caminho',
         queueLabel: `#${String(payload.queueRank || 1).padStart(2, '0')}`,
         orderLabel: `#${payload.orderDisplayId}`,
@@ -251,16 +258,19 @@ export const GrillQueue = () => {
         }),
         totalLabel: formatCurrency(payload.total),
       });
-
-      const printedIds = new Set(
-        itemsToPrint
-          .map((item: any) => String(item?.id || '').trim())
-          .filter(Boolean)
-      );
+    } catch (printError) {
+      console.error('[print] erro ao imprimir', printError);
+      setError('Falha ao disparar impressão. Marcando itens como impressos no sistema.');
+    } finally {
+      try {
+        await orderService.markItemsPrinted(order.id, printedIds);
+      } catch (syncError) {
+        console.error('[print] erro ao sincronizar isPrinted', syncError);
+      }
+      const printedSet = new Set(printedIds);
       const nextItems = orderItems.map((item: any) =>
-        printedIds.has(String(item?.id || '').trim()) ? { ...item, isPrinted: true } : item
+        printedSet.has(String(item?.id || '').trim()) ? { ...item, isPrinted: true } : item
       );
-      const nextTotal = Number(order?.total || 0);
       setQueue((prev) =>
         prev.map((entry) =>
           entry.id === order.id ? { ...entry, items: nextItems } : entry
@@ -269,13 +279,39 @@ export const GrillQueue = () => {
       if (selectedOrder?.id === order.id) {
         setSelectedOrder((prev: any) => (prev ? { ...prev, items: nextItems } : prev));
       }
-      await orderService.updateItems(order.id, nextItems, nextTotal);
-    } catch (printError) {
-      console.error('[print] erro ao imprimir', printError);
-      setError('Falha ao imprimir. Verifique popup/permissões no navegador.');
+      setError('');
+      setIsGeneratingPrint(false);
+    }
+  };
+
+  const handleMarkAllPrinted = async (order: any) => {
+    if (!order?.id) return;
+    const orderItems = Array.isArray(order?.items) ? order.items : [];
+    const pendingIds = orderItems
+      .filter((item: any) => !Boolean(item?.isPrinted))
+      .map((item: any) => String(item?.id || '').trim())
+      .filter(Boolean);
+    if (!pendingIds.length) {
+      setError('Todos os itens já estão marcados como impressos.');
+      return;
+    }
+    try {
+      setIsGeneratingPrint(true);
+      await orderService.markItemsPrinted(order.id, pendingIds);
+      const pendingSet = new Set(pendingIds);
+      const nextItems = orderItems.map((item: any) =>
+        pendingSet.has(String(item?.id || '').trim()) ? { ...item, isPrinted: true } : item
+      );
+      setQueue((prev) => prev.map((entry) => (entry.id === order.id ? { ...entry, items: nextItems } : entry)));
+      if (selectedOrder?.id === order.id) {
+        setSelectedOrder((prev: any) => (prev ? { ...prev, items: nextItems } : prev));
+      }
+      setError('');
+    } catch (syncError) {
+      console.error('[print] erro ao marcar todos como impressos', syncError);
+      setError('Não foi possível marcar itens como impressos.');
     } finally {
       setIsGeneratingPrint(false);
-      setError('');
     }
   };
 
@@ -1372,17 +1408,29 @@ export const GrillQueue = () => {
                   <p className="text-sm font-bold text-slate-900">Detalhes do pedido</p>
                   <div className="flex items-center gap-2">
                     {selectedOrder && hasAdminPrintAccess && (
-                      <button
-                        type="button"
-                        onClick={() => handlePrintOrder(selectedOrder, selectedOrderRank)}
-                        disabled={isGeneratingPrint}
-                        className="inline-flex h-9 px-3 items-center justify-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 text-amber-700 shadow-sm hover:bg-amber-100 hover:text-amber-900 transition-all no-print disabled:opacity-60"
-                        aria-label="Imprimir pedido"
-                        title="Imprimir pedido"
-                      >
-                        <Printer size={16} weight="duotone" />
-                        <span className="text-xs font-semibold">{isGeneratingPrint ? 'Gerando cupom...' : 'Imprimir'}</span>
-                      </button>
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => handlePrintOrder(selectedOrder, selectedOrderRank)}
+                          disabled={isGeneratingPrint}
+                          className="inline-flex h-9 px-3 items-center justify-center gap-1.5 rounded-lg border border-amber-300 bg-amber-50 text-amber-700 shadow-sm hover:bg-amber-100 hover:text-amber-900 transition-all no-print disabled:opacity-60"
+                          aria-label="Imprimir pedido"
+                          title="Imprimir pedido"
+                        >
+                          <Printer size={16} weight="duotone" />
+                          <span className="text-xs font-semibold">{isGeneratingPrint ? 'Gerando cupom...' : 'Imprimir'}</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleMarkAllPrinted(selectedOrder)}
+                          disabled={isGeneratingPrint}
+                          className="inline-flex h-9 px-3 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-700 shadow-sm hover:bg-slate-50 transition-all no-print disabled:opacity-60"
+                          aria-label="Marcar todos como impressos"
+                          title="Marcar todos como impressos"
+                        >
+                          <span className="text-xs font-semibold">Marcar impressos</span>
+                        </button>
+                      </>
                     )}
                     <button
                       type="button"

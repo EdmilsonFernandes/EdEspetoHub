@@ -407,6 +407,15 @@ export class OrderService
     return this.orderRepository.save(order);
   }
 
+  async markItemsAsPrinted(orderId: string, itemIds: string[] | undefined, authStoreId?: string) {
+    const order = await this.orderRepository.findById(orderId);
+    if (!order) throw new AppError('ORDER-001', 404);
+    this.ensureStoreAccess(order.store, authStoreId);
+
+    const affected = await this.orderRepository.markItemsAsPrinted(order.id, itemIds);
+    return { orderId: order.id, updated: affected };
+  }
+
 
 
 

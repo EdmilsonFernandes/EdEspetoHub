@@ -249,6 +249,13 @@ export const orderService = {
     await apiClient.patch(`/orders/${id}`, { items: normalizedItems, total });
   },
 
+  async markItemsPrinted(id: string, itemIds?: string[]) {
+    const normalized = Array.isArray(itemIds)
+      ? itemIds.map((itemId) => String(itemId || '').trim()).filter(Boolean)
+      : [];
+    return apiClient.patch(`/orders/${id}/mark-as-printed`, { itemIds: normalized });
+  },
+
   async getPublicById(orderId: string)
   {
     return apiClient.get(`/orders/${orderId}/public`);

@@ -124,6 +124,7 @@ routes.get('/stores/:storeId/orders', requireAuth, requireRole('ADMIN', 'OPERATO
 routes.get('/stores/slug/:slug/orders', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), OrderController.listBySlug);
 routes.patch('/orders/:orderId/status', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), OrderController.updateStatus);
 routes.patch('/orders/:orderId', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), OrderController.updateItems);
+routes.patch('/orders/:orderId/mark-as-printed', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), OrderController.markItemsAsPrinted);
 routes.get('/orders/:orderId/public', OrderController.getPublic);
 routes.get('/v2/orders/:orderId/tracking', OrderController.getTrackingV2);
 routes.get('/orders/:orderId/review', OrderReviewController.getByOrder);

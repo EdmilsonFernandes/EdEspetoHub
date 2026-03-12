@@ -245,6 +245,25 @@ export class OrderRepository
       .getRawMany();
   }
 
+  async markItemsAsPrinted(orderId: string, itemIds?: string[]) {
+    const normalizedIds = Array.isArray(itemIds)
+      ? itemIds.map((id) => String(id || '').trim()).filter(Boolean)
+      : [];
+    const query = AppDataSource.getRepository(OrderItem)
+      .createQueryBuilder()
+      .update(OrderItem)
+      .set({ isPrinted: true })
+      .where('order_id = :orderId', { orderId })
+      .andWhere('is_printed = false');
+
+    if (normalizedIds.length > 0) {
+      query.andWhere('id IN (:...itemIds)', { itemIds: normalizedIds });
+    }
+
+    const result = await query.execute();
+    return Number(result?.affected || 0);
+  }
+
 
 
 

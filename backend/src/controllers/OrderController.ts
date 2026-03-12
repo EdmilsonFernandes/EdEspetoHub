@@ -198,6 +198,21 @@ export class OrderController {
     }
   }
 
+  static async markItemsAsPrinted(req: Request, res: Response) {
+    try {
+      const itemIds = Array.isArray(req.body?.itemIds) ? req.body.itemIds : undefined;
+      log.info('Order items mark-as-printed request', {
+        orderId: req.params.orderId,
+        itemIdsCount: Array.isArray(itemIds) ? itemIds.length : 0,
+      });
+      const result = await orderService.markItemsAsPrinted(req.params.orderId, itemIds, req.auth?.storeId);
+      return res.json(result);
+    } catch (error: any) {
+      log.warn('Order items mark-as-printed failed', { orderId: req.params.orderId, error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
 
 
 
