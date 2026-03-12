@@ -162,7 +162,8 @@ export const GrillQueue = () => {
     window.setTimeout(() => setCtaPulseId(null), 220);
   };
   const { auth } = useAuth();
-  const hasAdminPrintAccess = String(auth?.user?.role || '').toLowerCase() === 'admin';
+  const userRole = String(auth?.user?.role || '').toLowerCase();
+  const hasPrintAccess = userRole === 'admin' || userRole === 'operator';
   const isAdminUser = String(auth?.user?.role || '').toUpperCase() === 'ADMIN';
   const storeNameForPrint = String(auth?.store?.name || auth?.store?.settings?.name || 'Minha Loja').trim();
   const prepSlaMinutes = useMemo(() => {
@@ -245,7 +246,7 @@ export const GrillQueue = () => {
   };
 
   const executePrintOrder = async (order: any, queueRank = 1, mode: 'all' | 'new' = 'all') => {
-    if (!hasAdminPrintAccess || !order?.id) return;
+    if (!hasPrintAccess || !order?.id) return;
     if (isGeneratingPrint) return;
     const orderItems = Array.isArray(order?.items) ? order.items : [];
     if (!orderItems.length) {
@@ -346,7 +347,7 @@ export const GrillQueue = () => {
   };
 
   const handlePrintOrder = async (order: any, queueRank = 1) => {
-    if (!hasAdminPrintAccess || !order?.id) return;
+    if (!hasPrintAccess || !order?.id) return;
     const orderItems = Array.isArray(order?.items) ? order.items : [];
     if (!orderItems.length) {
       setError('Pedido sem itens para impressão.');
@@ -1540,7 +1541,7 @@ export const GrillQueue = () => {
                   totalLabel={totalLabel}
                   itemsCount={itemsCount}
                   printBusy={isGeneratingPrint}
-                  canPrint={hasAdminPrintAccess}
+                  canPrint={hasPrintAccess}
                   onPrint={() => handlePrintOrder(order, index + 1)}
                   onClick={() => {
                     setActionsOpen(false);
@@ -1572,7 +1573,7 @@ export const GrillQueue = () => {
                 <div className="shrink-0 flex justify-between items-center px-4 py-3 border-b border-slate-200 bg-white">
                   <p className="text-sm font-bold text-slate-900">Detalhes do pedido</p>
                   <div className="flex items-center gap-2">
-                    {selectedOrder && hasAdminPrintAccess && (
+                    {selectedOrder && hasPrintAccess && (
                       <>
                         <button
                           type="button"
