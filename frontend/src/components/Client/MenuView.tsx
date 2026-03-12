@@ -50,6 +50,16 @@ const categoryGlyph = (key = "") => {
   return "📋";
 };
 
+const categoryDotTone = (key = "") => {
+  const normalized = String(key || "").toLowerCase();
+  if (normalized.includes("espeto")) return "bg-rose-500";
+  if (normalized.includes("bebida")) return "bg-blue-500";
+  if (normalized.includes("lanche")) return "bg-amber-500";
+  if (normalized.includes("sobremesa")) return "bg-pink-500";
+  if (normalized.includes("entrada")) return "bg-emerald-500";
+  return "bg-violet-500";
+};
+
 const Header = ({
   branding,
   segment,
@@ -469,9 +479,10 @@ export const MenuView = ({
                       className={
                         isActive
                           ? "flex items-center gap-2 px-5 py-2.5 rounded-full bg-amber-500 text-white font-bold shadow-md transition-all"
-                          : "flex items-center gap-2 px-5 py-2.5 rounded-full bg-white text-slate-600 font-medium border border-slate-200 transition-all"
+                          : "flex items-center gap-2 px-5 py-2.5 rounded-full bg-slate-100 text-slate-700 font-medium border border-slate-200 transition-all"
                       }
                     >
+                      <span className={`inline-block h-2 w-2 rounded-full ${categoryDotTone(category.key)} ${isActive ? "ring-1 ring-white/80" : ""}`} />
                       <span className="text-base leading-none" aria-hidden="true">
                         {categoryGlyph(category.key)}
                       </span>
