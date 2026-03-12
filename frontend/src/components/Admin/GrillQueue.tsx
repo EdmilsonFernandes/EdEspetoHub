@@ -777,8 +777,18 @@ export const GrillQueue = () => {
             : order
         )
       );
+      setSelectedOrder((prev: any) =>
+        prev?.id === orderId
+          ? {
+              ...prev,
+              status,
+            }
+          : prev
+      );
       await orderService.updateStatus(orderId, status);
-      await loadQueue();
+      setError('');
+      // Não bloqueia a UI aguardando a recarga total da fila.
+      void loadQueue();
       return true;
     } catch (err) {
       console.error('Erro ao atualizar status', err);
@@ -832,11 +842,21 @@ export const GrillQueue = () => {
 
     if (sanitizedItems.length === 0) {
       setQueue((prev) => prev.filter((order) => order.id !== orderId));
+      setSelectedOrder((prev: any) => (prev?.id === orderId ? null : prev));
     } else {
       setQueue((prev) =>
         prev.map((order) =>
           order.id === orderId ? { ...order, items: sanitizedItems, total: nextTotal } : order
         )
+      );
+      setSelectedOrder((prev: any) =>
+        prev?.id === orderId
+          ? {
+              ...prev,
+              items: sanitizedItems,
+              total: nextTotal,
+            }
+          : prev
       );
     }
 
@@ -845,6 +865,9 @@ export const GrillQueue = () => {
       if (sanitizedItems.length === 0) {
         await orderService.updateStatus(orderId, 'cancelled');
       }
+      setError('');
+      // Sincroniza em background sem atrasar feedback local.
+      void loadQueue();
     } catch (err) {
       console.error('Erro ao atualizar itens', err);
       setError('Não foi possível atualizar os itens agora. Atualize a fila.');
