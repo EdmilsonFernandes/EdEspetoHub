@@ -21,6 +21,7 @@
   "AUTH-017": "Telefone inválido.",
   "AUTH-020": "SUPER_ADMIN não configurado no banco.",
   "AUTH-021": "Credenciais inválidas.",
+  "AUTH-022": "Usuário sem loja vinculada.",
   "AUTH-S001": "Se o e-mail existir, enviaremos instruções.",
   "AUTH-S002": "Se o e-mail existir, enviaremos instruções.",
   "AUTH-S003": "Senha atualizada com sucesso.",

@@ -12,8 +12,6 @@ export const authService = {
         const normalizedIdentifier = String(identifier || "").trim();
         const response = await apiClient.post("/auth/admin-login", {
             identifier: normalizedIdentifier,
-            slug: normalizedIdentifier.includes("@") ? undefined : normalizedIdentifier,
-            email: normalizedIdentifier.includes("@") ? normalizedIdentifier : undefined,
             password,
         });
         return response;

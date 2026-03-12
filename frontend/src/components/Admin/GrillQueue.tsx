@@ -1324,16 +1324,18 @@ export const GrillQueue = () => {
                           <SpeakerHigh size={16} weight="duotone" />
                           Testar som
                         </button>
-                        <button
-                          onClick={() => {
-                            setCloseDayModalOpen(true);
-                            setActionsOpen(false);
-                          }}
-                          className="w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                        >
-                          <CheckSquare size={16} weight="duotone" />
-                          Fechar dia
-                        </button>
+                        {isAdminUser && (
+                          <button
+                            onClick={() => {
+                              setCloseDayModalOpen(true);
+                              setActionsOpen(false);
+                            }}
+                            className="w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                          >
+                            <CheckSquare size={16} weight="duotone" />
+                            Fechar dia
+                          </button>
+                        )}
                         <button
                           onClick={() => {
                             loadQueue();
@@ -2295,7 +2297,7 @@ export const GrillQueue = () => {
       {error && (
         <div className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg p-3">{error}</div>
       )}
-      {closeDayModalOpen && createPortal(
+      {isAdminUser && closeDayModalOpen && createPortal(
         <div className="fixed inset-0 z-[10020]">
           <div
             className="absolute inset-0 bg-slate-900/45 backdrop-blur-sm"

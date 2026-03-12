@@ -62,6 +62,19 @@ export class UserRepository {
     return this.repository.findOne({ where: { email }, relations: ['stores', 'stores.settings'] });
   }
 
+  findByLoginIdentifier(identifier: string) {
+    const normalized = String(identifier || '').trim().toLowerCase();
+    if (!normalized) return Promise.resolve(null);
+    return this.repository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.stores', 'store')
+      .leftJoinAndSelect('store.settings', 'storeSettings')
+      .where('LOWER(user.email) = :identifier', { identifier: normalized })
+      .orWhere('LOWER(user.fullName) = :identifier', { identifier: normalized })
+      .orderBy('user.createdAt', 'DESC')
+      .getOne();
+  }
+
   /**
    * Handles find by id.
    *

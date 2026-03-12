@@ -21,6 +21,7 @@
   "AUTH-017": "Invalid phone number.",
   "AUTH-020": "SUPER_ADMIN not found in database.",
   "AUTH-021": "Invalid credentials.",
+  "AUTH-022": "User has no linked store.",
   "AUTH-S001": "If the email exists, we will send instructions.",
   "AUTH-S002": "If the email exists, we will send instructions.",
   "AUTH-S003": "Password updated successfully.",

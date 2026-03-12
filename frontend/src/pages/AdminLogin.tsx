@@ -121,11 +121,7 @@ export function AdminLogin() {
   }, [auth?.token, auth?.user?.role, hydrated, navigate]);
 
   useEffect(() => {
-    const slug = searchParams.get('slug');
     const tab = searchParams.get('tab');
-    if (slug) {
-      setLoginForm(prev => ({ ...prev, identifier: slug }));
-    }
     if (tab) {
       sessionStorage.setItem('admin:redirectTab', tab);
     }
@@ -194,7 +190,7 @@ export function AdminLogin() {
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-slate-200">Slug ou e-mail</label>
+            <label className="text-sm font-semibold text-slate-200">E-mail ou usuário</label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
                 <User size={18} weight="duotone" />
@@ -204,7 +200,7 @@ export function AdminLogin() {
                 value={loginForm.identifier}
                 onChange={e => setLoginForm(prev => ({ ...prev, identifier: e.target.value }))}
                 className="h-12 w-full rounded-2xl border border-slate-300/20 bg-slate-950/45 text-slate-100 placeholder:text-slate-400/80 pl-10 pr-4 transition-shadow outline-none focus:ring-2 focus:ring-cyan-300/40 focus:border-cyan-300/50"
-                placeholder="Slug ou e-mail"
+                placeholder="seu@email.com ou usuário"
                 autoCapitalize="none"
               />
             </div>

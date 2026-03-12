@@ -605,10 +605,8 @@ export class AuthService
     let store: any = null;
     let loginUser: any = null;
     let loginRole: 'ADMIN' | 'OPERATOR' = 'ADMIN';
-
-    if (normalizedIdentifier.includes('@')) {
-      const candidate = await this.userRepository.findByEmail(normalizedIdentifier);
-      if (!candidate) throw new AppError('AUTH-004', 401);
+    const candidate = await this.userRepository.findByLoginIdentifier(normalizedIdentifier);
+    if (candidate) {
       const valid = await bcrypt.compare(password, candidate.password);
       if (!valid) throw new AppError('AUTH-004', 401);
       loginUser = candidate;
@@ -621,14 +619,15 @@ export class AuthService
         const memberships = await this.storeUserRepository.findActiveByUserId(candidate.id);
         const membership = memberships?.[0];
         if (!membership?.store?.id) {
-          throw new AppError('STORE-001', 404);
+          throw new AppError('AUTH-022', 403);
         }
         store = membership.store;
         loginRole = String(membership.role || 'OPERATOR').toUpperCase() === 'ADMIN' ? 'ADMIN' : 'OPERATOR';
       }
     } else {
+      // Backward compatibility for old flow using store slug.
       store = await this.storeRepository.findBySlug(normalizedIdentifier);
-      if (!store) throw new AppError('STORE-001', 404);
+      if (!store) throw new AppError('AUTH-004', 401);
       loginUser = store.owner;
       const valid = await bcrypt.compare(password, loginUser.password);
       if (!valid) throw new AppError('AUTH-004', 401);
