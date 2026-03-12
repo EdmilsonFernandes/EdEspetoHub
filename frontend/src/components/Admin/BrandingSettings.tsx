@@ -1,6 +1,7 @@
 // @ts-nocheck
 import React, { useEffect, useRef, useState } from "react";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
+import { formatPhoneInput } from "../../utils/format";
 
 const primaryPalette = [ '#dc2626', '#ea580c', '#f59e0b', '#16a34a', '#0ea5e9', '#2563eb', '#7c3aed' ];
 const secondaryPalette = [ '#111827', '#1f2937', '#334155', '#0f172a', '#0f766e', '#065f46', '#4b5563' ];
@@ -371,7 +372,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
               <input
                 type="text"
                 value={branding.storePhone || ""}
-                onChange={(e) => handleChange("storePhone", e.target.value)}
+                onChange={(e) => handleChange("storePhone", formatPhoneInput(e.target.value))}
                 className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
                 placeholder="(11) 99999-9999"
               />
