@@ -121,6 +121,41 @@ const OrderSummaryCard = ({
 );
 
 export const GrillQueue = () => {
+  const SAO_PAULO_TZ = 'America/Sao_Paulo';
+  const getDayKeyInSaoPaulo = (value?: number | string | Date | null) => {
+    if (!value) return '';
+    try {
+      const date = new Date(value);
+      return new Intl.DateTimeFormat('en-CA', {
+        timeZone: SAO_PAULO_TZ,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      }).format(date);
+    } catch {
+      return '';
+    }
+  };
+  const getNowKeyInSaoPaulo = () =>
+    new Intl.DateTimeFormat('en-CA', {
+      timeZone: SAO_PAULO_TZ,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).format(new Date());
+  const resolvePaymentBucket = (payment: unknown): 'pix' | 'cash' | 'card' => {
+    const normalized = String(payment || '').toLowerCase();
+    if (normalized.includes('pix')) return 'pix';
+    if (
+      normalized.includes('dinheiro') ||
+      normalized.includes('cash') ||
+      normalized.includes('espécie') ||
+      normalized.includes('especie')
+    ) {
+      return 'cash';
+    }
+    return 'card';
+  };
   // Tap feedback animation
   const pulseCta = (key: string) => {
     setCtaPulseId(key);
@@ -175,6 +210,8 @@ export const GrillQueue = () => {
   });
   const [actionsOpen, setActionsOpen] = useState(false);
   const [activeMotoboysCount, setActiveMotoboysCount] = useState(0);
+  const [closeDayModalOpen, setCloseDayModalOpen] = useState(false);
+  const [isPrintingDaySummary, setIsPrintingDaySummary] = useState(false);
   const [tvMode, setTvMode] = useState(() => {
     if (typeof window === "undefined") return false;
     return localStorage.getItem("queueTvMode") === "true";
@@ -825,16 +862,8 @@ export const GrillQueue = () => {
   }, [queue]);
 
   const completedToday = useMemo(() => {
-    const today = new Date();
-    const isSameDay = (value) => {
-      if (!value) return false;
-      const date = new Date(value);
-      return (
-        date.getFullYear() === today.getFullYear() &&
-        date.getMonth() === today.getMonth() &&
-        date.getDate() === today.getDate()
-      );
-    };
+    const todayKey = getNowKeyInSaoPaulo();
+    const isSameDay = (value) => getDayKeyInSaoPaulo(value) === todayKey;
     const completedStatuses = new Set([ 'done', 'delivered', 'finished' ]);
     return [...queue]
       .filter((order) => completedStatuses.has(order.status) && isSameDay(order.createdAt))
@@ -861,6 +890,52 @@ export const GrillQueue = () => {
       itemsCount: totals.items,
     };
   }, [completedToday]);
+  const dailySalesSummary = useMemo(() => {
+    const totals = completedToday.reduce(
+      (acc, order) => {
+        const { total } = calcMoney(order);
+        const amount = Number.isFinite(total) ? total : 0;
+        const bucket = resolvePaymentBucket(order?.payment);
+        acc.total += amount;
+        acc.orders += 1;
+        acc[bucket] += amount;
+        return acc;
+      },
+      { total: 0, orders: 0, pix: 0, cash: 0, card: 0 }
+    );
+    return totals;
+  }, [completedToday]);
+  const handlePrintDailySummary = async () => {
+    if (isPrintingDaySummary) return;
+    const nowLabel = new Date().toLocaleString('pt-BR', { timeZone: SAO_PAULO_TZ });
+    const dayLabel = new Date().toLocaleDateString('pt-BR', { timeZone: SAO_PAULO_TZ });
+    const totalOrders = Number(dailySalesSummary.orders || 0);
+    setIsPrintingDaySummary(true);
+    try {
+      await printReceiptAsImage({
+        storeName: 'SERTANEJO NO ESPETO',
+        platformName: 'Já no Caminho',
+        queueLabel: 'FECHAMENTO DO DIA',
+        orderLabel: dayLabel,
+        customerLabel: 'Resumo operacional',
+        tableLabel: '',
+        dateLabel: nowLabel,
+        items: [
+          { quantity: 1, name: `Total de pedidos: ${totalOrders}`, lineTotal: '' },
+          { quantity: 1, name: 'Pix', lineTotal: formatCurrency(dailySalesSummary.pix) },
+          { quantity: 1, name: 'Dinheiro', lineTotal: formatCurrency(dailySalesSummary.cash) },
+          { quantity: 1, name: 'Cartão', lineTotal: formatCurrency(dailySalesSummary.card) },
+        ],
+        totalLabel: formatCurrency(dailySalesSummary.total),
+      });
+      setError('Fechamento enviado para impressão.');
+    } catch (printError) {
+      console.error('[print] erro ao imprimir fechamento', printError);
+      setError('Falha ao imprimir fechamento do dia.');
+    } finally {
+      setIsPrintingDaySummary(false);
+    }
+  };
   const completedTotalPages = Math.max(1, Math.ceil(completedToday.length / completedPageSize));
   const pagedCompleted = useMemo(() => {
     const start = (completedPage - 1) * completedPageSize;
@@ -1196,7 +1271,7 @@ export const GrillQueue = () => {
 
                 <div className="flex w-full sm:w-auto items-center gap-2 overflow-x-auto [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden whitespace-nowrap sm:justify-end">
                   <span className="text-[11px] sm:text-xs font-medium text-slate-700 bg-orange-50 border border-orange-100 px-2 py-1 rounded-md whitespace-nowrap">
-                    {productionQueue.length} em produção
+                    Pedidos ativos: {productionQueue.length}
                   </span>
                   {queueMetrics.late > 0 && (
                     <span className="text-[11px] sm:text-xs font-semibold text-red-700 bg-red-50 border border-red-100 px-2 py-1 rounded-md whitespace-nowrap">
@@ -1249,6 +1324,16 @@ export const GrillQueue = () => {
                         </button>
                         <button
                           onClick={() => {
+                            setCloseDayModalOpen(true);
+                            setActionsOpen(false);
+                          }}
+                          className="w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                        >
+                          <CheckSquare size={16} weight="duotone" />
+                          Fechar dia
+                        </button>
+                        <button
+                          onClick={() => {
                             loadQueue();
                             setActionsOpen(false);
                           }}
@@ -1292,6 +1377,22 @@ export const GrillQueue = () => {
                   ))}
                 </div>
               )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 flex items-center justify-between">
+                  <div>
+                    <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500 font-bold">Pedidos Ativos</p>
+                    <p className="text-lg font-black text-slate-900">{productionQueue.length}</p>
+                  </div>
+                  <Hash size={18} weight="duotone" className="text-slate-400" />
+                </div>
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 flex items-center justify-between">
+                  <div>
+                    <p className="text-[10px] uppercase tracking-[0.14em] text-emerald-700 font-bold">Vendas de Hoje (Bruto)</p>
+                    <p className="text-lg font-black text-emerald-800">{formatCurrency(dailySalesSummary.total)}</p>
+                  </div>
+                  <Clock size={18} weight="duotone" className="text-emerald-500" />
+                </div>
+              </div>
             </>
           ) : (
             <div className="flex items-center justify-between gap-2">
@@ -2181,6 +2282,76 @@ export const GrillQueue = () => {
 
       {error && (
         <div className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg p-3">{error}</div>
+      )}
+      {closeDayModalOpen && createPortal(
+        <div className="fixed inset-0 z-[10020]">
+          <div
+            className="absolute inset-0 bg-slate-900/45 backdrop-blur-sm"
+            onClick={() => setCloseDayModalOpen(false)}
+          />
+          <div className="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center p-3 sm:p-4">
+            <div className="w-full sm:max-w-lg rounded-2xl border border-slate-200 bg-white shadow-2xl overflow-hidden">
+              <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-black text-slate-900">Fechamento do dia</p>
+                  <p className="text-xs text-slate-500">
+                    {new Date().toLocaleDateString('pt-BR', { timeZone: SAO_PAULO_TZ })}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setCloseDayModalOpen(false)}
+                  className="h-9 w-9 rounded-full border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                  aria-label="Fechar fechamento do dia"
+                >
+                  <X size={16} weight="bold" />
+                </button>
+              </div>
+              <div className="p-4 space-y-3">
+                <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 flex items-center justify-between">
+                  <span className="text-sm font-semibold text-slate-600">Total de pedidos</span>
+                  <span className="text-base font-black text-slate-900">{dailySalesSummary.orders}</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <div className="rounded-xl border border-slate-200 bg-white px-3 py-2">
+                    <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500 font-bold">Pix</p>
+                    <p className="text-sm font-black text-slate-900">{formatCurrency(dailySalesSummary.pix)}</p>
+                  </div>
+                  <div className="rounded-xl border border-slate-200 bg-white px-3 py-2">
+                    <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500 font-bold">Dinheiro</p>
+                    <p className="text-sm font-black text-slate-900">{formatCurrency(dailySalesSummary.cash)}</p>
+                  </div>
+                  <div className="rounded-xl border border-slate-200 bg-white px-3 py-2">
+                    <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500 font-bold">Cartão</p>
+                    <p className="text-sm font-black text-slate-900">{formatCurrency(dailySalesSummary.card)}</p>
+                  </div>
+                </div>
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-3 flex items-center justify-between">
+                  <span className="text-sm font-bold text-emerald-700">Faturamento total</span>
+                  <span className="text-xl font-black text-emerald-800">{formatCurrency(dailySalesSummary.total)}</span>
+                </div>
+              </div>
+              <div className="px-4 py-3 border-t border-slate-100 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setCloseDayModalOpen(false)}
+                  className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                >
+                  Fechar
+                </button>
+                <button
+                  type="button"
+                  onClick={handlePrintDailySummary}
+                  disabled={isPrintingDaySummary}
+                  className="h-10 rounded-xl bg-slate-900 px-3 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-60"
+                >
+                  {isPrintingDaySummary ? 'Imprimindo...' : 'Imprimir Fechamento'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body
       )}
     </div>
     </>
