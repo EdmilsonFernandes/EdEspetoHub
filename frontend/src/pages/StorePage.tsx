@@ -1651,6 +1651,7 @@ export function StorePage() {
               storeAddress={storeAddress}
               storeCoords={storeCoords}
               compactHeader={isMobile}
+              staffView={Boolean(canUseAdminPrintFlow)}
             />
           </div>
         )}

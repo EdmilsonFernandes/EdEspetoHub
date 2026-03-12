@@ -225,7 +225,8 @@ export const MenuView = ({
   onOpenQueue,
   onOpenAdmin,
   onProceed,
-  compactHeader = false
+  compactHeader = false,
+  staffView = false,
 }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -413,7 +414,7 @@ export const MenuView = ({
   const scrollToCategory = (key) => {
     const target = categoryRefs.current[key];
     if (target?.scrollIntoView) {
-      target.scrollIntoView({ behavior: "smooth", block: "start" });
+      target.scrollIntoView({ behavior: staffView ? "auto" : "smooth", block: "start" });
     }
   };
 
@@ -439,6 +440,57 @@ export const MenuView = ({
           isOpenNow={isOpenNow}
           todayHoursLabel={todayHoursLabel}
         />
+      )}
+
+      {filteredGrouped.length > 1 && (
+        <div
+          className={`sticky ${showHeader ? "top-[72px] sm:top-[92px]" : "top-0"} z-40 px-4 pb-2 pt-1 max-w-6xl mx-auto`}
+        >
+          <div className="rounded-2xl border border-slate-100 bg-white/90 backdrop-blur-md shadow-sm ds-tabs px-2 py-2">
+            <div className="relative w-full flex items-center mb-0">
+              <div className="flex-1 flex overflow-x-auto gap-3 pr-20 no-scrollbar scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                {filteredGrouped.map((category) => {
+                  const isActive = activeCategoryKey === category.key;
+
+                  return (
+                    <button
+                      key={category.key}
+                      type="button"
+                      onClick={() => {
+                        setActiveCategoryKey(category.key);
+                        scrollToCategory(category.key);
+                      }}
+                      className={
+                        isActive
+                          ? "flex items-center gap-2 px-5 py-2.5 rounded-full bg-slate-900 text-white font-bold transition-all"
+                          : "flex items-center gap-2 px-5 py-2.5 rounded-full bg-white text-slate-600 font-medium border border-slate-200 transition-all"
+                      }
+                    >
+                      <span className="text-xs leading-none" aria-hidden="true">
+                        {categoryGlyph(category.key)}
+                      </span>
+                      <span className="whitespace-nowrap">{category.label}</span>
+                      <span className={`rounded-full px-2 py-0.5 text-[10px] ${isActive ? "bg-white/15 text-white/90" : "bg-slate-100 text-slate-400"}`}>
+                        {category.items.length}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="absolute right-0 top-0 bottom-0 w-28 flex items-center justify-end pr-4 bg-gradient-to-l from-slate-50 via-slate-50/90 to-transparent pointer-events-none">
+                <button
+                  type="button"
+                  aria-label="Abrir categorias"
+                  onClick={() => setIsCategorySheetOpen(true)}
+                  className="w-12 h-12 rounded-full bg-white shadow-[0_4px_12px_rgba(0,0,0,0.1)] flex items-center justify-center text-slate-800 pointer-events-auto border border-slate-100 active:scale-95 transition-all"
+                >
+                  <SquaresFour size={24} weight="duotone" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       <div className={`space-y-8 p-4 max-w-6xl mx-auto ${cartItemsCount > 0 ? 'pb-28 sm:pb-8' : ''}`}>
@@ -535,57 +587,6 @@ export const MenuView = ({
             </div>
           </div>
         </section>
-        {filteredGrouped.length > 1 && (
-          <div
-            className={`sticky ${showHeader ? "top-[72px] sm:top-[92px]" : "top-0"} z-40 -mx-4 px-4 pb-2 pt-1`}
-          >
-            <div className="rounded-2xl border border-slate-100 bg-white/90 backdrop-blur-md shadow-sm ds-tabs px-2 py-2">
-              <div className="relative w-full flex items-center mb-0">
-                <div className="flex-1 flex overflow-x-auto gap-3 pr-20 no-scrollbar scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                  {filteredGrouped.map((category) => {
-                    const isActive = activeCategoryKey === category.key;
-
-                    return (
-                      <button
-                        key={category.key}
-                        type="button"
-                        onClick={() => {
-                          setActiveCategoryKey(category.key);
-                          scrollToCategory(category.key);
-                        }}
-                        className={
-                          isActive
-                            ? "flex items-center gap-2 px-5 py-2.5 rounded-full bg-slate-900 text-white font-bold transition-all"
-                            : "flex items-center gap-2 px-5 py-2.5 rounded-full bg-white text-slate-600 font-medium border border-slate-200 transition-all"
-                        }
-                      >
-                        <span className="text-xs leading-none" aria-hidden="true">
-                          {categoryGlyph(category.key)}
-                        </span>
-                        <span className="whitespace-nowrap">{category.label}</span>
-                        <span className={`rounded-full px-2 py-0.5 text-[10px] ${isActive ? "bg-white/15 text-white/90" : "bg-slate-100 text-slate-400"}`}>
-                          {category.items.length}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <div className="absolute right-0 top-0 bottom-0 w-28 flex items-center justify-end pr-4 bg-gradient-to-l from-slate-50 via-slate-50/90 to-transparent pointer-events-none">
-                  <button
-                    type="button"
-                    aria-label="Abrir categorias"
-                    onClick={() => setIsCategorySheetOpen(true)}
-                    className="w-12 h-12 rounded-full bg-white shadow-[0_4px_12px_rgba(0,0,0,0.1)] flex items-center justify-center text-slate-800 pointer-events-auto border border-slate-100 active:scale-95 transition-all"
-                  >
-                    <SquaresFour size={24} weight="duotone" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
         <div id="menu-list" className="space-y-10">
         {promoMessage && (
           <div className="rounded-3xl border border-slate-100 bg-white p-4 sm:p-5 shadow-sm">
@@ -593,7 +594,7 @@ export const MenuView = ({
             <p className="text-sm font-semibold text-slate-900 mt-2">{promoMessage}</p>
           </div>
         )}
-        {topItems.length > 0 && (
+        {!staffView && topItems.length > 0 && (
           <div className="rounded-3xl border border-slate-100 bg-white p-4 sm:p-5 shadow-sm">
             <div className="flex items-center justify-between">
               <p className="inline-flex items-center gap-2 text-lg font-bold tracking-tight text-slate-800">
@@ -653,7 +654,7 @@ export const MenuView = ({
               <div>
                 <p className="text-[11px] uppercase tracking-[0.3em] text-amber-500 font-semibold">Promoção do dia</p>
                 <h3 className="text-lg font-bold text-slate-900 mt-1">{featuredProduct.name}</h3>
-                {featuredProduct.description && (
+                {!staffView && featuredProduct.description && (
                   <p className="text-xs text-slate-600 mt-1">{featuredProduct.description}</p>
                 )}
               </div>
@@ -733,7 +734,7 @@ export const MenuView = ({
                     <p className="font-semibold text-slate-900 text-base sm:text-lg leading-tight line-clamp-2">
                       {item.name}
                     </p>
-                    {item.description && (
+                    {!staffView && item.description && (
                       <p className="text-sm sm:text-[15px] text-slate-600 leading-relaxed line-clamp-2">{item.description}</p>
                     )}
                     {itemQtyMap.get(String(item.id)) > 0 && (
@@ -761,8 +762,8 @@ export const MenuView = ({
                     )}
                   </div>
 
-                  <div className="flex flex-col items-end gap-2 min-w-[118px]">
-                    <div className="aspect-square w-[108px] rounded-2xl overflow-hidden bg-gray-100 border border-gray-200 shadow-sm">
+                  <div className={`flex flex-col items-end gap-2 ${staffView ? "min-w-[78px]" : "min-w-[118px]"}`}>
+                    <div className={`aspect-square ${staffView ? "w-[56px] rounded-xl" : "w-[108px] rounded-2xl"} overflow-hidden bg-gray-100 border border-gray-200 shadow-sm`}>
                       {item.imageUrl ? (
                         <img
                           src={resolveAssetUrl(item.imageUrl)}
@@ -819,6 +820,37 @@ export const MenuView = ({
                           )}
                         </div>
                       );
+
+                      if (staffView) {
+                        return (
+                          <div className="w-full flex items-center justify-end gap-2">
+                            {priceNode}
+                            <div
+                              className="h-10 min-w-[112px] rounded-lg border border-slate-200 bg-white px-1.5 flex items-center justify-between gap-1 shadow-sm"
+                              onClick={(event) => event.stopPropagation()}
+                            >
+                              <button
+                                type="button"
+                                onClick={handleDecrement}
+                                disabled={itemQty <= 0}
+                                className="h-7 w-7 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-100 transition flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed"
+                                aria-label={`Remover uma unidade de ${item.name}`}
+                              >
+                                -
+                              </button>
+                              <span className="min-w-[26px] text-center text-xs font-black text-slate-900">{itemQty}</span>
+                              <button
+                                type="button"
+                                onClick={handleIncrement}
+                                className="h-7 w-7 rounded-lg bg-slate-900 text-white hover:bg-slate-800 transition flex items-center justify-center"
+                                aria-label={`Adicionar uma unidade de ${item.name}`}
+                              >
+                                +
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      }
 
                       if (itemQty <= 0) {
                         return (
