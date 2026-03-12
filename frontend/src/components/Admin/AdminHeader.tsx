@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Bell,
   ChevronDown,
+  KeyRound,
   LogOut,
   MapPin,
   Store as StoreIcon,
@@ -11,8 +12,10 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useToast } from '../../contexts/ToastContext';
 import { subscriptionService } from '../../services/subscriptionService';
 import { storeService } from '../../services/storeService';
+import { authService } from '../../services/authService';
 import { resolveAssetUrl } from '../../utils/resolveAssetUrl';
 
 export interface Store {
@@ -71,6 +74,7 @@ const toDisplayDate = (raw?: string | null) => {
 export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }: HeaderProps) {
   const navigate = useNavigate();
   const { auth, logout } = useAuth();
+  const { showToast } = useToast();
   const { branding } = useTheme();
 
   const [storeNameOverride, setStoreNameOverride] = useState('');
@@ -78,6 +82,13 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
   const [isFocusMode, setIsFocusMode] = useState(false);
   const [openPlanMenu, setOpenPlanMenu] = useState(false);
   const [openUserMenu, setOpenUserMenu] = useState(false);
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
 
   const planMenuRef = useRef<HTMLDivElement | null>(null);
   const userMenuRef = useRef<HTMLDivElement | null>(null);
@@ -190,6 +201,35 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
     setIsFocusMode(next);
     window.dispatchEvent(new CustomEvent('adminHeader:set', { detail: { visible: !next } }));
     onToggleHeader?.();
+  };
+
+  const handleChangePassword = async () => {
+    const currentPassword = String(passwordForm.currentPassword || '');
+    const newPassword = String(passwordForm.newPassword || '');
+    const confirmPassword = String(passwordForm.confirmPassword || '');
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      showToast('Preencha todos os campos de senha.', 'warning');
+      return;
+    }
+    if (newPassword.length < 6) {
+      showToast('A nova senha deve ter pelo menos 6 caracteres.', 'warning');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      showToast('A confirmação da nova senha não confere.', 'warning');
+      return;
+    }
+    setChangingPassword(true);
+    try {
+      await authService.changePassword(currentPassword, newPassword);
+      showToast('Senha atualizada com sucesso.', 'success');
+      setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      setChangePasswordOpen(false);
+    } catch (error: any) {
+      showToast(error?.message || 'Não foi possível trocar a senha agora.', 'error');
+    } finally {
+      setChangingPassword(false);
+    }
   };
 
   return (
@@ -330,6 +370,17 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
                   type="button"
                   onClick={() => {
                     setOpenUserMenu(false);
+                    setChangePasswordOpen(true);
+                  }}
+                  className="w-full inline-flex items-center gap-2 rounded-md px-2.5 py-2 text-sm text-slate-700 hover:bg-slate-100 transition-colors"
+                >
+                  <KeyRound size={14} />
+                  Trocar senha
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOpenUserMenu(false);
                     logout();
                     navigate('/admin');
                   }}
@@ -343,6 +394,76 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
           </div>
         </div>
       </div>
+      {changePasswordOpen && (
+        <div className="fixed inset-0 z-[1500] bg-slate-900/45 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white shadow-2xl">
+            <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+              <p className="text-sm font-bold text-slate-900">Trocar senha</p>
+              <button
+                type="button"
+                onClick={() => {
+                  if (changingPassword) return;
+                  setChangePasswordOpen(false);
+                }}
+                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-100"
+                aria-label="Fechar"
+              >
+                <ChevronDown size={14} className="rotate-45" />
+              </button>
+            </div>
+            <div className="p-4 space-y-3">
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">Senha atual</label>
+                <input
+                  type="password"
+                  value={passwordForm.currentPassword}
+                  onChange={(event) => setPasswordForm((prev) => ({ ...prev, currentPassword: event.target.value }))}
+                  className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
+                  placeholder="Digite sua senha atual"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">Nova senha</label>
+                <input
+                  type="password"
+                  value={passwordForm.newPassword}
+                  onChange={(event) => setPasswordForm((prev) => ({ ...prev, newPassword: event.target.value }))}
+                  className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
+                  placeholder="Mínimo de 6 caracteres"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">Confirmar nova senha</label>
+                <input
+                  type="password"
+                  value={passwordForm.confirmPassword}
+                  onChange={(event) => setPasswordForm((prev) => ({ ...prev, confirmPassword: event.target.value }))}
+                  className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
+                  placeholder="Repita a nova senha"
+                />
+              </div>
+            </div>
+            <div className="px-4 py-3 border-t border-slate-100 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setChangePasswordOpen(false)}
+                disabled={changingPassword}
+                className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleChangePassword}
+                disabled={changingPassword}
+                className="h-10 rounded-xl bg-slate-900 px-3 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-60"
+              >
+                {changingPassword ? 'Salvando...' : 'Salvar nova senha'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

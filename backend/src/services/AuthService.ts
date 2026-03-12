@@ -824,6 +824,23 @@ export class AuthService
     return { code: 'AUTH-S003' };
   }
 
+  async changePassword(userId: string, currentPassword: string, newPassword: string) {
+    const normalizedUserId = String(userId || '').trim();
+    if (!normalizedUserId) throw new AppError('AUTH-001', 401);
+    if (!currentPassword) throw new AppError('AUTH-006', 400);
+    if (!newPassword || newPassword.length < 6) throw new AppError('AUTH-008', 400);
+
+    const user = await this.userRepository.findById(normalizedUserId);
+    if (!user) throw new AppError('AUTH-004', 401);
+
+    const matches = await bcrypt.compare(currentPassword, user.password);
+    if (!matches) throw new AppError('AUTH-004', 401);
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    await this.userRepository.save(user as any);
+    return { code: 'AUTH-S005' };
+  }
+
   /**
    * Handles verify email.
    *

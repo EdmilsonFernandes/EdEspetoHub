@@ -234,4 +234,18 @@ export class AuthController
       return respondWithError(req, res, error, 400);
     }
   }
+
+  static async changePassword(req: Request, res: Response) {
+    const currentPassword = String(req.body?.currentPassword || '');
+    const newPassword = String(req.body?.newPassword || '');
+    try {
+      log.info('Change password request', { userId: req.auth?.sub });
+      const result = await authService.changePassword(req.auth?.sub || '', currentPassword, newPassword);
+      const { code, ...data } = result;
+      return respondWithSuccess(req, res, code, data);
+    } catch (error: any) {
+      log.warn('Change password failed', { userId: req.auth?.sub, error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
 }

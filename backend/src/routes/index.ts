@@ -46,6 +46,7 @@ routes.post('/auth/reset-password', AuthController.resetPassword);
 routes.post('/auth/verify-email', AuthController.verifyEmail);
 routes.get('/auth/verify-email', AuthController.verifyEmail);
 routes.post('/auth/resend-verification', AuthController.resendVerification);
+routes.post('/auth/change-password', requireAuth, AuthController.changePassword);
 
 // Plans / payments
 routes.get('/plans', PlanController.list);
