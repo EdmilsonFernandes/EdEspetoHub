@@ -745,7 +745,7 @@ export const MenuView = ({
                 const hasActiveModifiers = Array.isArray(item?.modifiers)
                   ? item.modifiers.some((modifier: any) => modifier?.active !== false)
                   : false;
-                const hasConfigurableOptions = hasActiveModifiers;
+                const hasConfigurableOptions = hasActiveModifiers || isEspetoCategory(item?.category);
 
                 const handleOpenOptions = (event?: React.MouseEvent) => {
                   event?.stopPropagation();
@@ -795,7 +795,7 @@ export const MenuView = ({
                         className="inline-flex items-center gap-2 text-[11px] font-semibold text-slate-600 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-full hover:bg-slate-200 transition cursor-pointer"
                       >
                         <Plus size={12} weight="bold" />
-                        Possui opções
+                        {isEspetoCategory(item?.category) ? "Opções: ponto/farinha" : "Possui opções"}
                       </button>
                     )}
                     {item?.bundlePromoActive && Number(item?.bundlePromoQty) >= 2 && Number(item?.bundlePromoPrice) > 0 && (
