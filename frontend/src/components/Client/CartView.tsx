@@ -111,6 +111,7 @@ export const CartView = ({
   const [cashTenderedInput, setCashTenderedInput] = useState("");
   const [showOutOfRangeSheet, setShowOutOfRangeSheet] = useState(false);
   const [hasTriedCheckout, setHasTriedCheckout] = useState(false);
+  const [showOptionalPhoneFields, setShowOptionalPhoneFields] = useState(false);
   const nameInputRef = useRef<HTMLInputElement | null>(null);
   const cepInputRef = useRef<HTMLInputElement | null>(null);
   const premiumInputClass =
@@ -121,6 +122,7 @@ export const CartView = ({
     : [ "delivery", "pickup", "table" ];
   const isPickup = customer.type === "pickup";
   const isDelivery = customer.type === "delivery";
+  const isTableOptionalPhoneMode = customer.type === "table" && tablePhoneOptional;
   const isPix = paymentMethod === "pix";
   const isCredit = paymentMethod === "credito";
   const isDebit = paymentMethod === "debito";
@@ -160,6 +162,14 @@ export const CartView = ({
 
   const [selectedDdd, setSelectedDdd] = useState(() => extractPhoneParts(customer.phone || "").ddd);
   const [localPhoneDigits, setLocalPhoneDigits] = useState(() => extractPhoneParts(customer.phone || "").localNumber);
+
+  useEffect(() => {
+    if (isTableOptionalPhoneMode) {
+      setShowOptionalPhoneFields(false);
+      return;
+    }
+    setShowOptionalPhoneFields(true);
+  }, [isTableOptionalPhoneMode]);
 
   useEffect(() => {
     const parsed = extractPhoneParts(customer.phone || "");
@@ -250,6 +260,9 @@ export const CartView = ({
   const handleSelectTable = (tableNumber: string) => {
     const normalized = String(tableNumber || "").trim();
     if (!normalized) return;
+    if (typeof document !== "undefined" && document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
     onChangeCustomer({ ...customer, table: normalized });
   };
 
@@ -537,47 +550,107 @@ export const CartView = ({
           </div>
 
           {/* WhatsApp */}
-          <div className="rounded-2xl border border-slate-100 p-3 sm:p-4 bg-white">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              WhatsApp {customer.type === "table" && tablePhoneOptional ? "(opcional)" : ""}
-            </label>
-            <div className="mt-2 grid grid-cols-1 sm:grid-cols-[110px_1fr] gap-3 items-end">
-              <div>
-                <span className="text-[11px] font-semibold text-slate-500">DDD</span>
-                <select
-                  value={selectedDdd || ""}
-                  onChange={(e) => handleDddChange(e.target.value)}
-                  className={`${premiumInputClass} mt-1 text-sm font-semibold text-slate-700`}
-                >
-                  <option value="" disabled>
-                    Selecione
-                  </option>
-                  {BRAZIL_DDDS.map((ddd) => (
-                    <option key={ddd} value={ddd}>
-                      {ddd}
+          {!isTableOptionalPhoneMode && (
+            <div className="rounded-2xl border border-slate-100 p-3 sm:p-4 bg-white">
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                WhatsApp
+              </label>
+              <div className="mt-2 grid grid-cols-1 sm:grid-cols-[110px_1fr] gap-3 items-end">
+                <div>
+                  <span className="text-[11px] font-semibold text-slate-500">DDD</span>
+                  <select
+                    value={selectedDdd || ""}
+                    onChange={(e) => handleDddChange(e.target.value)}
+                    className={`${premiumInputClass} mt-1 text-sm font-semibold text-slate-700`}
+                  >
+                    <option value="" disabled>
+                      Selecione
                     </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <span className="text-[11px] font-semibold text-slate-500">Número</span>
-                <input
-                  type="tel"
-                  inputMode="numeric"
-                  value={formatLocalPhoneNumber(localPhoneDigits)}
-                  onChange={(e) => handlePhoneLocalNumberChange(e.target.value)}
-                  placeholder={selectedDdd ? "90000-0000" : "Selecione o DDD"}
-                  disabled={!selectedDdd}
-                  className={`${premiumInputClass} mt-1 text-base sm:text-lg disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed`}
-                />
+                    {BRAZIL_DDDS.map((ddd) => (
+                      <option key={ddd} value={ddd}>
+                        {ddd}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <span className="text-[11px] font-semibold text-slate-500">Número</span>
+                  <input
+                    type="tel"
+                    inputMode="numeric"
+                    value={formatLocalPhoneNumber(localPhoneDigits)}
+                    onChange={(e) => handlePhoneLocalNumberChange(e.target.value)}
+                    placeholder={selectedDdd ? "90000-0000" : "Selecione o DDD"}
+                    disabled={!selectedDdd}
+                    className={`${premiumInputClass} mt-1 text-base sm:text-lg disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed`}
+                  />
+                </div>
               </div>
             </div>
-            {customer.type === "table" && tablePhoneOptional && (
+          )}
+
+          {isTableOptionalPhoneMode && !showOptionalPhoneFields && (
+            <div className="rounded-2xl border border-slate-100 p-3 sm:p-4 bg-white">
+              <button
+                type="button"
+                onClick={() => setShowOptionalPhoneFields(true)}
+                className="text-sm font-semibold text-slate-700 hover:text-slate-900 transition-colors"
+              >
+                + Adicionar Telefone/WhatsApp (Opcional)
+              </button>
+            </div>
+          )}
+
+          {isTableOptionalPhoneMode && showOptionalPhoneFields && (
+            <div className="rounded-2xl border border-slate-100 p-3 sm:p-4 bg-white">
+              <div className="flex items-center justify-between gap-2">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  WhatsApp (opcional)
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowOptionalPhoneFields(false)}
+                  className="text-[11px] font-semibold text-slate-500 hover:text-slate-700"
+                >
+                  Ocultar
+                </button>
+              </div>
+              <div className="mt-2 grid grid-cols-1 sm:grid-cols-[110px_1fr] gap-3 items-end">
+                <div>
+                  <span className="text-[11px] font-semibold text-slate-500">DDD</span>
+                  <select
+                    value={selectedDdd || ""}
+                    onChange={(e) => handleDddChange(e.target.value)}
+                    className={`${premiumInputClass} mt-1 text-sm font-semibold text-slate-700`}
+                  >
+                    <option value="" disabled>
+                      Selecione
+                    </option>
+                    {BRAZIL_DDDS.map((ddd) => (
+                      <option key={ddd} value={ddd}>
+                        {ddd}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <span className="text-[11px] font-semibold text-slate-500">Número</span>
+                  <input
+                    type="tel"
+                    inputMode="numeric"
+                    value={formatLocalPhoneNumber(localPhoneDigits)}
+                    onChange={(e) => handlePhoneLocalNumberChange(e.target.value)}
+                    placeholder={selectedDdd ? "90000-0000" : "Selecione o DDD"}
+                    disabled={!selectedDdd}
+                    className={`${premiumInputClass} mt-1 text-base sm:text-lg disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed`}
+                  />
+                </div>
+              </div>
               <p className="mt-1 text-[11px] text-gray-400">
                 Para pedidos na mesa, o telefone pode ficar em branco.
               </p>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Tipo de pedido */}
           <div className="rounded-2xl border border-slate-100 p-3 sm:p-4 bg-white">

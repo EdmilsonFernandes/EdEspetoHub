@@ -918,8 +918,13 @@ export function StorePage() {
       showToast('Loja fechada no momento. Tente novamente durante o horário de atendimento.', 'warning');
       return;
     }
+    const isStaffTableOrder = customer.type === 'table' && canUseAdminPrintFlow;
+    const normalizedTable = String(customer.table || '').trim();
+    const effectiveCustomerName =
+      String(customer.name || '').trim() || (isStaffTableOrder && normalizedTable ? `Cliente Mesa ${normalizedTable}` : '');
+
     const requiresPhone = !(customer.type === 'table' && canUseAdminPrintFlow);
-    if (!customer.name || (requiresPhone && !customer.phone)) {
+    if (!effectiveCustomerName || (requiresPhone && !customer.phone)) {
       showToast(requiresPhone ? 'Preencha nome e telefone para continuar.' : 'Preencha seu nome para continuar.', 'warning');
       return;
     }
@@ -963,7 +968,7 @@ export function StorePage() {
     const pixKey = storePixKey || PIX_KEY || sanitizedPhoneKey;
 
     const order = {
-      customerName: customer.name,
+      customerName: effectiveCustomerName,
       phone: customer.phone,
       address: deliveryAddress || customer.address,
       table: customer.table,
@@ -1012,7 +1017,7 @@ export function StorePage() {
         phone: sanitizedPhoneKey || customer.phone,
         pixKey,
         table: customer.table,
-        customerName: customer.name,
+        customerName: effectiveCustomerName,
         address: deliveryAddress || customer.address,
         total: orderTotal,
         items: printableItems,
@@ -1024,7 +1029,7 @@ export function StorePage() {
       }
       localStorage.setItem(
         checkoutCustomerStorageKey,
-        JSON.stringify({ name: customer.name, phone: customer.phone })
+        JSON.stringify({ name: effectiveCustomerName, phone: customer.phone })
       );
       if (customer.type === 'table' && customer.table) {
         setOccupiedTables((prev) => {
@@ -1044,7 +1049,7 @@ export function StorePage() {
           status: 'pending',
           type: customer.type,
           table: customer.table,
-          customerName: customer.name,
+          customerName: effectiveCustomerName,
           paymentMethod: payment,
           cashTendered: cashTendered !== null ? cashTendered : null,
           items: Object.values(cart).map((item) => ({
@@ -1082,14 +1087,14 @@ export function StorePage() {
       return;
     }
     const nextCustomers = [
-      { name: customer.name, phone: customer.phone, table: customer.table },
-      ...customers.filter((entry) => entry.name !== customer.name),
+      { name: effectiveCustomerName, phone: customer.phone, table: customer.table },
+      ...customers.filter((entry) => entry.name !== effectiveCustomerName),
     ].slice(0, 50);
     setCustomers(nextCustomers);
     localStorage.setItem(customersStorageKey, JSON.stringify(nextCustomers));
     localStorage.setItem(
       checkoutCustomerStorageKey,
-      JSON.stringify({ name: customer.name, phone: customer.phone })
+      JSON.stringify({ name: effectiveCustomerName, phone: customer.phone })
     );
     customerService.fetchAll().then(setCustomers).catch(() => {});
 
@@ -1105,8 +1110,8 @@ export function StorePage() {
         .map((item) => `• ${item.qty}x ${item.name} ${formatItemOptions(item)}`.trim())
         .join('\n');
       const customerLabel = customer.phone
-        ? `👤 Cliente: *${customer.name}* (${customer.phone})`
-        : `👤 Cliente: *${customer.name}*`;
+        ? `👤 Cliente: *${effectiveCustomerName}* (${customer.phone})`
+        : `👤 Cliente: *${effectiveCustomerName}*`;
 
       const messageLines = [
         `*Novo pedido - ${branding?.brandName || 'Já no Caminho'}*`,
@@ -1145,7 +1150,7 @@ export function StorePage() {
       phone: sanitizedPhoneKey || customer.phone,
       pixKey,
       table: customer.table,
-      customerName: customer.name,
+      customerName: effectiveCustomerName,
       address: deliveryAddress || customer.address,
       total: orderTotal,
       items: printableItems,
