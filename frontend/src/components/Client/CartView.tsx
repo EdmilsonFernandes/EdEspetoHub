@@ -246,15 +246,6 @@ export const CartView = ({
   };
 
   const tableOptions = Array.from({ length: 12 }, (_, index) => `${index + 1}`);
-  const occupiedTablesSet = useMemo(
-    () =>
-      new Set(
-        (Array.isArray(occupiedTables) ? occupiedTables : [])
-          .map((table) => String(table || "").trim())
-          .filter(Boolean)
-      ),
-    [occupiedTables]
-  );
 
   const handleSelectTable = (tableNumber: string) => {
     const normalized = String(tableNumber || "").trim();
@@ -815,7 +806,6 @@ export const CartView = ({
               </p>
               <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
                 {tableOptions.map((table) => {
-                  const isOccupied = occupiedTablesSet.has(String(table).trim());
                   const isSelected = customer.table === table;
                   return (
                   <button
@@ -823,9 +813,7 @@ export const CartView = ({
                     type="button"
                     onClick={() => handleSelectTable(table)}
                     className={`py-2.5 rounded-xl text-sm font-semibold border transition shadow-sm ${
-                      isOccupied
-                        ? "bg-red-50 border-red-200 text-red-700"
-                        : isSelected
+                      isSelected
                         ? "bg-white text-slate-900 border-brand-primary ring-2 ring-brand-primary/30 shadow-[inset_0_0_0_1px_rgba(15,23,42,0.2)]"
                         : "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100"
                     }`}
@@ -846,7 +834,7 @@ export const CartView = ({
                 className={`${premiumInputClass} sm:py-4`}
               />
               <p className="text-xs text-slate-500">
-                Mesas em vermelho já têm pedidos em andamento, mas você pode lançar novos adicionais na mesma mesa.
+                Você pode lançar múltiplos pedidos na mesma mesa.
               </p>
             </div>
           )}
