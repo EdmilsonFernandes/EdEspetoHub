@@ -138,6 +138,23 @@ export class OrderController {
     }
   }
 
+  /**
+   * Lists public table occupancy by slug.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-03-12
+   */
+  static async listTableStatusBySlug(req: Request, res: Response) {
+    try {
+      log.debug('Order table status by slug request', { slug: req.params.slug });
+      const status = await orderService.listTableStatusBySlug(req.params.slug);
+      return res.json(status);
+    } catch (error: any) {
+      log.warn('Order table status by slug failed', { slug: req.params.slug, error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
 
 
 

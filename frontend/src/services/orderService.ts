@@ -115,6 +115,14 @@ export const orderService = {
     }
     return apiClient.get(`/public/stores/slug/${storeSlug}/highlights`);
   },
+  async fetchTableStatusBySlug(storeSlug: string)
+  {
+    if (!storeSlug)
+    {
+      return Promise.reject(new Error("Loja inválida"));
+    }
+    return apiClient.get(`/public/stores/slug/${storeSlug}/tables/status`);
+  },
   async save(orderData: any, storeId?: string)
   {
     const targetStore = resolveStoreIdentifier(storeId);

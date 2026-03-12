@@ -277,6 +277,24 @@ export class OrderService
     }));
   }
 
+  /**
+   * Lists public table occupancy status by store slug.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-03-12
+   */
+  async listTableStatusBySlug(slug: string)
+  {
+    const store = await this.storeRepository.findBySlug(slug);
+    if (!store) throw new AppError('STORE-001', 404);
+    const activeStatuses = [ 'pending', 'preparing' ];
+    const occupiedTables = await this.orderRepository.findActiveTablesByStore(store.id, activeStatuses);
+    return {
+      occupiedTables,
+      updatedAt: new Date().toISOString(),
+    };
+  }
+
 
 
 

@@ -99,6 +99,7 @@ routes.get('/janocaminho/:slug', StoreController.getBySlug);
 routes.get('/stores/slug/:slug/products', ProductController.listPublicBySlug);
 routes.get('/public/stores/slug/:slug/products', ProductController.listPublicBySlug);
 routes.get('/public/stores/slug/:slug/highlights', OrderController.listHighlightsBySlug);
+routes.get('/public/stores/slug/:slug/tables/status', OrderController.listTableStatusBySlug);
 
 // Store admin
 routes.put('/stores/:storeId', requireAuth, requireRole('ADMIN'), StoreController.update);

@@ -65,12 +65,17 @@ export function StorePage() {
   const [isMobile, setIsMobile] = useState(false);
   const [orderNotice, setOrderNotice] = useState(null);
   const [tableNotice, setTableNotice] = useState(null);
+  const [occupiedTables, setOccupiedTables] = useState<string[]>([]);
   const [storeCoords, setStoreCoords] = useState(null);
   const [deliveryCoords, setDeliveryCoords] = useState(null);
   const [manualDeliveryCoords, setManualDeliveryCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [deliveryCheck, setDeliveryCheck] = useState({ status: 'idle', distanceKm: null, durationMin: null });
   const customersStorageKey = useMemo(
     () => `customers:${storeSlug || defaultBranding.espetoId}`,
+    [storeSlug]
+  );
+  const checkoutCustomerStorageKey = useMemo(
+    () => `checkoutCustomer:${storeSlug || defaultBranding.espetoId}`,
     [storeSlug]
   );
   const resolvedWhatsApp = useMemo(() => {
@@ -334,6 +339,23 @@ export function StorePage() {
         console.error('Falha ao carregar clientes salvos', error);
       }
     }
+    const savedCheckoutCustomer = localStorage.getItem(checkoutCustomerStorageKey);
+    if (savedCheckoutCustomer) {
+      try {
+        const parsed = JSON.parse(savedCheckoutCustomer);
+        const savedName = String(parsed?.name || '').trim();
+        const savedPhone = String(parsed?.phone || '').trim();
+        if (savedName || savedPhone) {
+          setCustomer((prev) => ({
+            ...prev,
+            name: prev.name || savedName,
+            phone: prev.phone || savedPhone,
+          }));
+        }
+      } catch (error) {
+        console.error('Falha ao carregar dados salvos do checkout', error);
+      }
+    }
 
     if (!storeSlug) {
       console.warn('No store slug provided');
@@ -513,6 +535,34 @@ export function StorePage() {
     return () => {
       cancelledRecentLoad = true;
       document.removeEventListener('visibilitychange', handleVisibility);
+    };
+  }, [storeSlug, customersStorageKey, checkoutCustomerStorageKey]);
+
+  useEffect(() => {
+    if (!storeSlug) return undefined;
+    let cancelled = false;
+    let intervalId: any = null;
+
+    const loadTableStatus = async () => {
+      try {
+        const data = await orderService.fetchTableStatusBySlug(storeSlug);
+        if (cancelled) return;
+        const next = Array.isArray(data?.occupiedTables)
+          ? data.occupiedTables.map((value: any) => String(value || '').trim()).filter(Boolean)
+          : [];
+        setOccupiedTables(next);
+      } catch {
+        if (!cancelled) {
+          setOccupiedTables([]);
+        }
+      }
+    };
+
+    loadTableStatus();
+    intervalId = window.setInterval(loadTableStatus, 15000);
+    return () => {
+      cancelled = true;
+      if (intervalId) window.clearInterval(intervalId);
     };
   }, [storeSlug]);
 
@@ -887,6 +937,14 @@ export function StorePage() {
       showToast('Informe o número da mesa.', 'warning');
       return;
     }
+    if (customer.type === 'table') {
+      const normalizedTable = String(customer.table || '').trim();
+      const isOccupied = normalizedTable && occupiedTables.includes(normalizedTable);
+      if (isOccupied) {
+        showTableNotice('Ops! Esta mesa já está em atendimento.');
+        return;
+      }
+    }
 
     if (customer.type === 'delivery' && deliveryRadiusValue) {
       if (deliveryCheck.status === 'loading') {
@@ -973,6 +1031,17 @@ export function StorePage() {
         setShowPrintPrompt(true);
       }
       localStorage.setItem(
+        checkoutCustomerStorageKey,
+        JSON.stringify({ name: customer.name, phone: customer.phone })
+      );
+      if (customer.type === 'table' && customer.table) {
+        setOccupiedTables((prev) => {
+          const normalized = String(customer.table || '').trim();
+          if (!normalized || prev.includes(normalized)) return prev;
+          return [ ...prev, normalized ];
+        });
+      }
+      localStorage.setItem(
         `lastOrder:${storeSlug}`,
         JSON.stringify({ id: demoId, createdAt: Date.now(), type: customer.type })
       );
@@ -1026,6 +1095,10 @@ export function StorePage() {
     ].slice(0, 50);
     setCustomers(nextCustomers);
     localStorage.setItem(customersStorageKey, JSON.stringify(nextCustomers));
+    localStorage.setItem(
+      checkoutCustomerStorageKey,
+      JSON.stringify({ name: customer.name, phone: customer.phone })
+    );
     customerService.fetchAll().then(setCustomers).catch(() => {});
 
     const trackingLink =
@@ -1089,6 +1162,13 @@ export function StorePage() {
     });
     if (canUseAdminPrintFlow) {
       setShowPrintPrompt(true);
+    }
+    if (customer.type === 'table' && customer.table) {
+      setOccupiedTables((prev) => {
+        const normalized = String(customer.table || '').trim();
+        if (!normalized || prev.includes(normalized)) return prev;
+        return [ ...prev, normalized ];
+      });
     }
     if (createdOrder?.id && !user?.token) {
       const entry = {
@@ -1585,6 +1665,7 @@ export function StorePage() {
             allowedOrderTypes={orderTypes}
             allowCustomerAutocomplete={Boolean(user?.token)}
             tablePhoneOptional={canUseAdminPrintFlow}
+            occupiedTables={occupiedTables}
             deliveryRadiusKm={deliveryRadiusValue}
             deliveryFee={deliveryFeeValue}
             deliveryCheck={deliveryCheck}

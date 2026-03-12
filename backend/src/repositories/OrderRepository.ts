@@ -166,6 +166,29 @@ export class OrderRepository
       .getCount();
   }
 
+  /**
+   * Finds active occupied tables for a store.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-03-12
+   */
+  async findActiveTablesByStore(storeId: string, statuses: string[])
+  {
+    const rows = await this.repository
+      .createQueryBuilder('o')
+      .select('DISTINCT o.table_number', 'table')
+      .where('o.store_id = :storeId', { storeId })
+      .andWhere('o.status IN (:...statuses)', { statuses })
+      .andWhere('o.table_number IS NOT NULL')
+      .andWhere("TRIM(o.table_number) <> ''")
+      .orderBy('o.table_number', 'ASC')
+      .getRawMany<{ table: string }>();
+
+    return rows
+      .map((entry) => String(entry?.table || '').trim())
+      .filter(Boolean);
+  }
+
 
 
 

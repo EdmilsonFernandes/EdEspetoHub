@@ -67,6 +67,7 @@ export const CartView = ({
   paymentMethod,
   allowCustomerAutocomplete = false,
   tablePhoneOptional = false,
+  occupiedTables = [],
   allowedOrderTypes = [ "delivery", "pickup", "table" ],
   deliveryRadiusKm = null,
   deliveryFee = 0,
@@ -245,6 +246,54 @@ export const CartView = ({
   };
 
   const tableOptions = Array.from({ length: 12 }, (_, index) => `${index + 1}`);
+  const occupiedTablesSet = useMemo(
+    () =>
+      new Set(
+        (Array.isArray(occupiedTables) ? occupiedTables : [])
+          .map((table) => String(table || "").trim())
+          .filter(Boolean)
+      ),
+    [occupiedTables]
+  );
+  const [tableWarning, setTableWarning] = useState("");
+  const normalizedSelectedTable = String(customer.table || "").trim();
+  const isSelectedTableOccupied = Boolean(
+    customer.type === "table" &&
+    normalizedSelectedTable &&
+    occupiedTablesSet.has(normalizedSelectedTable)
+  );
+
+  const handleSelectTable = (tableNumber: string) => {
+    const normalized = String(tableNumber || "").trim();
+    if (!normalized) return;
+    if (occupiedTablesSet.has(normalized)) {
+      setTableWarning("Ops! Esta mesa já está em atendimento.");
+      return;
+    }
+    setTableWarning("");
+    onChangeCustomer({ ...customer, table: normalized });
+  };
+
+  const handleTableInputChange = (value: string) => {
+    const normalized = String(value || "").replace(/\D/g, "").trim();
+    if (!normalized) {
+      setTableWarning("");
+      onChangeCustomer({ ...customer, table: "" });
+      return;
+    }
+    if (occupiedTablesSet.has(normalized)) {
+      setTableWarning("Ops! Esta mesa já está em atendimento.");
+      return;
+    }
+    setTableWarning("");
+    onChangeCustomer({ ...customer, table: normalized });
+  };
+
+  useEffect(() => {
+    if (customer.type !== "table") {
+      setTableWarning("");
+    }
+  }, [customer.type]);
   const formatItemOptions = (item) => {
     const labels = [];
     if (item?.cookingPoint) labels.push(item.cookingPoint);
@@ -793,30 +842,50 @@ export const CartView = ({
                 Escolha a mesa
               </p>
               <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
-                {tableOptions.map((table) => (
+                {tableOptions.map((table) => {
+                  const isOccupied = occupiedTablesSet.has(String(table).trim());
+                  const isSelected = customer.table === table;
+                  return (
                   <button
                     key={table}
                     type="button"
-                    onClick={() => onChangeCustomer({ ...customer, table })}
+                    onClick={() => handleSelectTable(table)}
+                    disabled={isOccupied}
                     className={`py-2.5 rounded-xl text-sm font-semibold border transition shadow-sm ${
-                      customer.table === table
+                      isOccupied
+                        ? "bg-red-50 border-red-200 text-slate-400 cursor-not-allowed pointer-events-none"
+                        : isSelected
                         ? "bg-white text-slate-900 border-brand-primary ring-2 ring-brand-primary/30 shadow-[inset_0_0_0_1px_rgba(15,23,42,0.2)]"
-                        : "bg-white/80 border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-brand-primary/40"
+                        : "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100"
                     }`}
                   >
                     {table}
                   </button>
-                ))}
+                  );
+                })}
               </div>
               <input
                 value={customer.table}
-                onChange={(e) =>
-                  onChangeCustomer({ ...customer, table: e.target.value })
-                }
+                onChange={(e) => handleTableInputChange(e.target.value)}
+                onBlur={(e) => {
+                  const next = String(e.target.value || "").replace(/\D/g, "").trim();
+                  if (next && occupiedTablesSet.has(next)) {
+                    setTableWarning("Ops! Esta mesa já está em atendimento.");
+                  }
+                }}
+                type="tel"
                 inputMode="numeric"
+                pattern="[0-9]*"
+                enterKeyHint="done"
                 placeholder="Número da mesa"
-                className={`${premiumInputClass} sm:py-4`}
+                className={`${premiumInputClass} sm:py-4 ${isSelectedTableOccupied ? "ring-2 ring-red-300 bg-red-50" : ""}`}
+                aria-invalid={isSelectedTableOccupied}
               />
+              {(tableWarning || isSelectedTableOccupied) && (
+                <p className="text-xs font-semibold text-red-600">
+                  {tableWarning || "Ops! Esta mesa já está em atendimento."}
+                </p>
+              )}
             </div>
           )}
         </div>
