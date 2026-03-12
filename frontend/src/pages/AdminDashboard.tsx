@@ -10,6 +10,7 @@ import { GrillQueue } from '../components/Admin/GrillQueue';
 import { OpeningHoursCard } from '../components/Admin/OpeningHoursCard';
 import { ProductManager } from '../components/Admin/ProductManager';
 import { OrderTypeSettingsCard } from '../components/Admin/OrderTypeSettingsCard';
+import { StoreUsersPanel } from '../components/Admin/StoreUsersPanel';
 import { AdminMotoboys } from './AdminMotoboys';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -1214,7 +1215,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   const [linkStats, setLinkStats] = useState<any>(null);
   const [subscriptionError, setSubscriptionError] = useState('');
   const [subscriptionLoading, setSubscriptionLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'resumo' | 'pedidos' | 'avaliacoes' | 'produtos' | 'config' | 'fila' | 'pagamentos' | 'motoboys'>(() => {
+  const [activeTab, setActiveTab] = useState<'resumo' | 'pedidos' | 'avaliacoes' | 'produtos' | 'config' | 'fila' | 'pagamentos' | 'motoboys' | 'usuarios'>(() => {
     return (location.state as any)?.activeTab || 'fila';
   });
   const [menuVisible, setMenuVisible] = useState(() => {
@@ -1344,7 +1345,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
           description: tabMeta[item.id]?.subtitle || 'Abrir seção',
           run: () => {
             if (item.id === 'usuarios') {
-              navigate('/admin/users');
+              setActiveTab('usuarios');
+              setMobileDrawerOpen(false);
               return;
             }
             if (item.id === 'fila') {
@@ -1506,7 +1508,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       openQueueMonitor({ replace: true });
       return;
     }
-    const allowedTabs = new Set(['resumo', 'pedidos', 'avaliacoes', 'produtos', 'config', 'pagamentos', 'motoboys']);
+    const allowedTabs = new Set(['resumo', 'pedidos', 'avaliacoes', 'produtos', 'config', 'pagamentos', 'motoboys', 'usuarios']);
     if (!allowedTabs.has(nextTab)) return;
     if (nextTab !== activeTab) {
       setActiveTab(nextTab as typeof activeTab);
@@ -2227,7 +2229,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       return;
     }
     if (id === 'usuarios') {
-      navigate('/admin/users');
+      setActiveTab('usuarios' as typeof activeTab);
+      setMobileDrawerOpen(false);
       return;
     }
     if (id === 'fila') {
@@ -2880,6 +2883,17 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             className="premium-card"
           >
             <AdminMotoboys />
+          </FormSection>
+        )}
+
+        {activeTab === 'usuarios' && (
+          <FormSection
+            title="Usuários"
+            subtitle="Cadastre e gerencie acessos internos da loja."
+            variant="neutral"
+            className="premium-card"
+          >
+            <StoreUsersPanel />
           </FormSection>
         )}
       </div>
