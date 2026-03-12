@@ -97,7 +97,15 @@ export const requireActiveSubscription = async (
       : await storeRepository.findBySlug(slug!);
 
     const storeIdentifier = store?.id || storeId;
-    if (storeIdentifier) {
+    const requestedOrderType = String(
+      req.body?.type || req.body?.orderType || req.body?.customer?.type || ''
+    )
+      .trim()
+      .toLowerCase();
+    const isOrderCreationRoute = /\/orders(?:\/|$)/i.test(String(req.path || ''));
+    const mustCheckDeliveryBilling = !isOrderCreationRoute || requestedOrderType === 'delivery';
+
+    if (storeIdentifier && mustCheckDeliveryBilling) {
       const blockedByDelivery = await deliveryBillingService.isStoreBlocked(storeIdentifier);
       if (blockedByDelivery) {
         return respondWithError(
