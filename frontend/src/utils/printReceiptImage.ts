@@ -106,7 +106,7 @@ const buildRawBtText = (payload: PrintReceiptRawBtInput) => {
 
   const chunks = [
     strongSeparator(),
-    centerText(sanitizeText(payload.storeName || "SERTANEJO NO ESPETO").toUpperCase()),
+    centerText(sanitizeText(payload.storeName || "MINHA LOJA").toUpperCase()),
     centerText(`PLATAFORMA: ${sanitizeText(payload.platformName || "Já no Caminho")}`),
     strongSeparator(),
     ...wrapWords(`Fila: ${sanitizeText(payload.queueLabel || "--")}`, LINE_WIDTH),
@@ -181,7 +181,7 @@ const buildHtmlReceipt = (payload: PrintReceiptRawBtInput) => {
   </style>
 </head>
 <body>
-  <div class="title">${sanitizeText(payload.storeName || "SERTANEJO NO ESPETO").toUpperCase()}</div>
+  <div class="title">${sanitizeText(payload.storeName || "MINHA LOJA").toUpperCase()}</div>
   <div class="subtitle">Plataforma: ${sanitizeText(payload.platformName || "Já no Caminho")}</div>
   ${tableHtml}
   <div class="sep"></div>

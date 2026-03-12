@@ -163,6 +163,8 @@ export const GrillQueue = () => {
   };
   const { auth } = useAuth();
   const hasAdminPrintAccess = String(auth?.user?.role || '').toLowerCase() === 'admin';
+  const isAdminUser = String(auth?.user?.role || '').toUpperCase() === 'ADMIN';
+  const storeNameForPrint = String(auth?.store?.name || auth?.store?.settings?.name || 'Minha Loja').trim();
   const prepSlaMinutes = useMemo(() => {
     const raw = Number(auth?.store?.settings?.prepBaseMinutes ?? 20);
     if (!Number.isFinite(raw)) return 20;
@@ -276,7 +278,7 @@ export const GrillQueue = () => {
     setError('Gerando cupom...');
     try {
       await printReceiptAsImage({
-        storeName: 'SERTANEJO NO ESPETO',
+        storeName: (payload.storeName || storeNameForPrint || 'Minha Loja').toUpperCase(),
         platformName: 'Já no Caminho',
         queueLabel: `#${String(payload.queueRank || 1).padStart(2, '0')}`,
         orderLabel: `#${payload.orderDisplayId}`,
@@ -913,7 +915,7 @@ export const GrillQueue = () => {
     setIsPrintingDaySummary(true);
     try {
       await printReceiptAsImage({
-        storeName: 'SERTANEJO NO ESPETO',
+        storeName: (storeNameForPrint || 'Minha Loja').toUpperCase(),
         platformName: 'Já no Caminho',
         queueLabel: 'FECHAMENTO DO DIA',
         orderLabel: dayLabel,
@@ -1385,13 +1387,23 @@ export const GrillQueue = () => {
                   </div>
                   <Hash size={18} weight="duotone" className="text-slate-400" />
                 </div>
-                <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 flex items-center justify-between">
-                  <div>
-                    <p className="text-[10px] uppercase tracking-[0.14em] text-emerald-700 font-bold">Vendas de Hoje (Bruto)</p>
-                    <p className="text-lg font-black text-emerald-800">{formatCurrency(dailySalesSummary.total)}</p>
+                {isAdminUser ? (
+                  <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] uppercase tracking-[0.14em] text-emerald-700 font-bold">Vendas de Hoje (R$)</p>
+                      <p className="text-lg font-black text-emerald-800">{formatCurrency(dailySalesSummary.total)}</p>
+                    </div>
+                    <Clock size={18} weight="duotone" className="text-emerald-500" />
                   </div>
-                  <Clock size={18} weight="duotone" className="text-emerald-500" />
-                </div>
+                ) : (
+                  <div className="rounded-xl border border-slate-200 bg-white px-3 py-2 flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500 font-bold">Pedidos realizados</p>
+                      <p className="text-lg font-black text-slate-900">{dailySalesSummary.orders}</p>
+                    </div>
+                    <CheckSquare size={18} weight="duotone" className="text-slate-400" />
+                  </div>
+                )}
               </div>
             </>
           ) : (

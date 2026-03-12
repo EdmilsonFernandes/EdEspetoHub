@@ -31,7 +31,7 @@ function App() {
               path="/admin/dashboard"
               element={
                 <AppErrorBoundary>
-                  <AdminRoute>
+                  <AdminRoute allowedRoles={['ADMIN']} fallbackTo="/admin/queue">
                     <AdminDashboard />
                   </AdminRoute>
                 </AppErrorBoundary>

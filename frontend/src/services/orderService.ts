@@ -62,13 +62,15 @@ const normalizeOrder = (order: any) => ({
 });
 
 const handleSessionError = (error: any) => {
-  const message = (error?.message || '').toString();
-  if (!message) return;
-  if (
-    message.includes('Token') ||
-    message.includes('Sessão') ||
-    message.includes('Loja não encontrada')
-  ) {
+  const status = Number(error?.status || 0);
+  const code = String(error?.code || '').toUpperCase();
+  const message = String(error?.message || '').toLowerCase();
+  const shouldInvalidate =
+    status === 401 ||
+    [ 'AUTH-001', 'AUTH-002', 'AUTH-007' ].includes(code) ||
+    message.includes('token inválido') ||
+    message.includes('jwt');
+  if (shouldInvalidate) {
     localStorage.removeItem('adminSession');
     if (typeof window !== 'undefined') {
       window.location.href = '/admin';
