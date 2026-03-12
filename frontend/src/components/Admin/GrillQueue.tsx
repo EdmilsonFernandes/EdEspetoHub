@@ -1782,9 +1782,9 @@ export const GrillQueue = () => {
 
                       <div className="flex items-center gap-2 min-w-0">
                         <div className="w-9 h-9 rounded-lg overflow-hidden border border-gray-200 bg-gray-100 flex-shrink-0">
-                          {item.imageUrl || productsById.get(item.productId || item.id)?.imageUrl ? (
+                          {item.imageUrl || item.image_url || productsById.get(item.productId || item.id)?.imageUrl ? (
                             <img
-                              src={resolveAssetUrl(item.imageUrl || productsById.get(item.productId || item.id)?.imageUrl)}
+                              src={resolveAssetUrl(item.imageUrl || item.image_url || productsById.get(item.productId || item.id)?.imageUrl)}
                               alt={item.name}
                               className="w-full h-full object-cover"
                             />

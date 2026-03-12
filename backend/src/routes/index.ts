@@ -114,7 +114,7 @@ routes.delete('/stores/:storeId/users/:userId', requireAuth, requireRole('ADMIN'
 
 // Products admin (cadastro não depende de assinatura)
 routes.post('/stores/:storeId/products', requireAuth, requireRole('ADMIN'), ProductController.create);
-routes.get('/stores/:storeId/products', requireAuth, requireRole('ADMIN'), ProductController.list);
+routes.get('/stores/:storeId/products', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), ProductController.list);
 routes.put('/stores/:storeId/products/:productId', requireAuth, requireRole('ADMIN'), ProductController.update);
 routes.delete('/stores/:storeId/products/:productId', requireAuth, requireRole('ADMIN'), ProductController.remove);
 
