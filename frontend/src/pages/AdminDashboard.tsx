@@ -1289,7 +1289,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     () =>
       (isOperatorUser
         ? [
-            { id: 'produtos', label: 'Catálogo', icon: Package },
+            { id: 'cardapio', label: 'Catálogo', icon: Package },
             { id: 'fila', label: 'Pedidos ao vivo', icon: ChefHat },
           ]
         : [
@@ -1344,6 +1344,11 @@ export function AdminDashboard({ session: sessionProp }: Props) {
           label: item.label,
           description: tabMeta[item.id]?.subtitle || 'Abrir seção',
           run: () => {
+            if (item.id === 'cardapio') {
+              if (storeSlug) navigate(`/${storeSlug}`);
+              setMobileDrawerOpen(false);
+              return;
+            }
             if (item.id === 'usuarios') {
               setActiveTab('usuarios');
               setMobileDrawerOpen(false);
@@ -2226,6 +2231,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   const handleNavSelect = (id: string) => {
     if (id === 'cardapio') {
       if (storeSlug) navigate(`/${storeSlug}`);
+      setMobileDrawerOpen(false);
       return;
     }
     if (id === 'usuarios') {
