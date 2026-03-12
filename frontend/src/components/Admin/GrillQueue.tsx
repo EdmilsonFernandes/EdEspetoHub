@@ -221,6 +221,19 @@ export const GrillQueue = () => {
   const [queueFilter, setQueueFilter] = useState<'all' | 'pending' | 'preparing' | 'ready' | 'late'>('all');
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
   const [isGeneratingPrint, setIsGeneratingPrint] = useState(false);
+  const [printSelectionModal, setPrintSelectionModal] = useState<{
+    open: boolean;
+    order: any | null;
+    queueRank: number;
+    hasPrintedItems: boolean;
+    hasNewItems: boolean;
+  }>({
+    open: false,
+    order: null,
+    queueRank: 1,
+    hasPrintedItems: false,
+    hasNewItems: false,
+  });
   const previousIdsRef = useRef<string[]>([]);
   const audioContextRef = useRef<AudioContext | null>(null);
   const isDrawerOpen = selectedOrder !== null;
@@ -231,7 +244,7 @@ export const GrillQueue = () => {
     setSelectedOrder(null);
   };
 
-  const handlePrintOrder = async (order: any, queueRank = 1) => {
+  const executePrintOrder = async (order: any, queueRank = 1, mode: 'all' | 'new' = 'all') => {
     if (!hasAdminPrintAccess || !order?.id) return;
     if (isGeneratingPrint) return;
     const orderItems = Array.isArray(order?.items) ? order.items : [];
@@ -239,18 +252,7 @@ export const GrillQueue = () => {
       setError('Pedido sem itens para impressão.');
       return;
     }
-    const hasPrintedItems = orderItems.some((item: any) => Boolean(item?.isPrinted));
     const newItems = orderItems.filter((item: any) => !Boolean(item?.isPrinted));
-    let mode: 'all' | 'new' = 'all';
-    if (newItems.length === 0 && hasPrintedItems) {
-      const shouldReprint = window.confirm('Todos os itens já foram impressos. Reimprimir pedido completo?');
-      if (!shouldReprint) return;
-    } else if (newItems.length > 0 && hasPrintedItems) {
-      const onlyNew = window.confirm('Imprimir apenas novos itens?\nOK = apenas novos\nCancelar = imprimir tudo');
-      mode = onlyNew ? 'new' : 'all';
-    } else if (newItems.length > 0 && !hasPrintedItems) {
-      mode = 'all';
-    }
     const itemsToPrint = mode === 'new' ? newItems : orderItems;
     if (!itemsToPrint.length) {
       setError('Nenhum item novo para imprimir.');
@@ -328,6 +330,47 @@ export const GrillQueue = () => {
       setError('');
       setIsGeneratingPrint(false);
     }
+  };
+
+  const openPrintSelectionModal = (order: any, queueRank = 1) => {
+    const orderItems = Array.isArray(order?.items) ? order.items : [];
+    const hasPrintedItems = orderItems.some((item: any) => Boolean(item?.isPrinted));
+    const hasNewItems = orderItems.some((item: any) => !Boolean(item?.isPrinted));
+    setPrintSelectionModal({
+      open: true,
+      order,
+      queueRank,
+      hasPrintedItems,
+      hasNewItems,
+    });
+  };
+
+  const handlePrintOrder = async (order: any, queueRank = 1) => {
+    if (!hasAdminPrintAccess || !order?.id) return;
+    const orderItems = Array.isArray(order?.items) ? order.items : [];
+    if (!orderItems.length) {
+      setError('Pedido sem itens para impressão.');
+      return;
+    }
+    openPrintSelectionModal(order, queueRank);
+  };
+
+  const closePrintSelectionModal = () => {
+    if (isGeneratingPrint) return;
+    setPrintSelectionModal({
+      open: false,
+      order: null,
+      queueRank: 1,
+      hasPrintedItems: false,
+      hasNewItems: false,
+    });
+  };
+
+  const handleSelectPrintMode = async (mode: 'all' | 'new') => {
+    const order = printSelectionModal.order;
+    const queueRank = printSelectionModal.queueRank || 1;
+    closePrintSelectionModal();
+    await executePrintOrder(order, queueRank, mode);
   };
 
   const handleMarkAllPrinted = async (order: any) => {
@@ -2367,6 +2410,58 @@ export const GrillQueue = () => {
                   className="h-10 rounded-xl bg-slate-900 px-3 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-60"
                 >
                   {isPrintingDaySummary ? 'Imprimindo...' : 'Imprimir Fechamento'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+      {printSelectionModal.open && createPortal(
+        <div className="fixed inset-0 z-[10030]">
+          <div
+            className="absolute inset-0 bg-slate-900/45 backdrop-blur-sm"
+            onClick={closePrintSelectionModal}
+          />
+          <div className="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center p-3 sm:p-4">
+            <div className="w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl border border-slate-200 bg-white shadow-2xl overflow-hidden">
+              <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-black text-slate-900">O que deseja imprimir?</p>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Escolha entre enviar apenas os novos itens para a cozinha ou imprimir o pedido completo.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={closePrintSelectionModal}
+                  className="h-9 w-9 rounded-full border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                  aria-label="Fechar seleção de impressão"
+                >
+                  <X size={16} weight="bold" />
+                </button>
+              </div>
+              <div className="p-4 space-y-2">
+                {printSelectionModal.hasPrintedItems && !printSelectionModal.hasNewItems && (
+                  <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-600">
+                    Todos os itens ja foram impressos neste pedido.
+                  </div>
+                )}
+                <button
+                  type="button"
+                  disabled={!printSelectionModal.hasNewItems || isGeneratingPrint}
+                  onClick={() => handleSelectPrintMode('new')}
+                  className="w-full h-11 rounded-xl bg-amber-500 text-white text-sm font-bold hover:bg-amber-600 disabled:opacity-50"
+                >
+                  {printSelectionModal.hasNewItems ? 'Imprimir Apenas Novos' : 'Sem itens novos para imprimir'}
+                </button>
+                <button
+                  type="button"
+                  disabled={isGeneratingPrint}
+                  onClick={() => handleSelectPrintMode('all')}
+                  className="w-full h-11 rounded-xl border border-amber-300 bg-white text-amber-700 text-sm font-semibold hover:bg-amber-50"
+                >
+                  Imprimir Tudo
                 </button>
               </div>
             </div>
