@@ -977,6 +977,7 @@ export function StorePage() {
         cookingPoint: item.cookingPoint,
         passSkewer: item.passSkewer,
         selectedModifiers: item.selectedModifiers || [],
+        isPrinted: Boolean(canUseAdminPrintFlow),
       })),
     };
 

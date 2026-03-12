@@ -497,7 +497,7 @@ export class OrderService
       orderItem.price = Math.max(0, grossLine - bundleDiscount);
       orderItem.cookingPoint = item.cookingPoint;
       orderItem.passSkewer = Boolean(item.passSkewer);
-      orderItem.isPrinted = false;
+      orderItem.isPrinted = Boolean(item.isPrinted);
       items.push(orderItem);
       total += orderItem.price;
     }

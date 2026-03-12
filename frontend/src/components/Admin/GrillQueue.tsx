@@ -270,7 +270,14 @@ export const GrillQueue = () => {
       orderDisplayId: formatOrderDisplayId(order.id, storeSlug),
       createdAt: order?.createdAt ? new Date(order.createdAt).toLocaleString('pt-BR') : new Date().toLocaleString('pt-BR'),
       items: itemsToPrint,
-      total: Number(order?.total || 0),
+      total:
+        mode === 'new'
+          ? itemsToPrint.reduce((acc: number, item: any) => {
+              const qty = Number(item?.qty ?? item?.quantity ?? 0);
+              const unit = Number(item?.unitPrice ?? item?.price ?? 0);
+              return acc + qty * unit;
+            }, 0)
+          : Number(order?.total || 0),
       storeName: String(order?.storeName || auth?.store?.name || 'Sertanejo no Espeto'),
       table: order?.table || '',
     };
