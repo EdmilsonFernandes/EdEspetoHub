@@ -173,6 +173,14 @@ export function LandingPage() {
                 >
                   Criar minha loja
                 </button>
+                <button
+                  type="button"
+                  onClick={() => navigate('/instalar')}
+                  aria-label="Ver como instalar no Android e iPhone"
+                  className="inline-flex items-center justify-center rounded-2xl border border-sky-300/40 bg-sky-400/10 px-5 py-3 text-base sm:text-sm font-black text-sky-100 hover:bg-sky-400/20 transition-all"
+                >
+                  Instalar no Android e iPhone
+                </button>
               </div>
             </div>
 

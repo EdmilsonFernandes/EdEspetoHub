@@ -109,6 +109,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
     },
     { id: 'portfolio', label: 'Portfólio', onClick: () => navigate('/portfolio') },
     { id: 'architecture', label: 'Arquitetura', onClick: () => navigate('/arquitetura') },
+    { id: 'install', label: 'Instalar app', onClick: () => navigate('/instalar') },
   ];
 
   const mobilePrimaryNav = useMemo(
@@ -303,6 +304,14 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
             </button>
             <button
               type="button"
+              onClick={() => navigate('/instalar')}
+              className="w-full inline-flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-200"
+            >
+              Instalar app
+              <DownloadSimple size={18} weight="duotone" />
+            </button>
+            <button
+              type="button"
               onClick={toggleTheme}
               className="w-full inline-flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-3 text-sm font-semibold text-slate-700 dark:text-slate-200"
             >
@@ -397,6 +406,9 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
                 </button>
                 <button onClick={() => navigate('/arquitetura')} className="block hover:text-sky-400 transition-colors">
                   Arquitetura
+                </button>
+                <button onClick={() => navigate('/instalar')} className="block hover:text-sky-400 transition-colors">
+                  Instalar app
                 </button>
                 <a href="/terms" className="block hover:text-sky-400 transition-colors">
                   Termos e Privacidade
