@@ -1288,8 +1288,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     () =>
       (isOperatorUser
         ? [
-            { id: 'pedidos', label: 'Pedidos', icon: ShoppingCart },
-            { id: 'produtos', label: 'Produtos', icon: Package },
+            { id: 'produtos', label: 'Catálogo', icon: Package },
             { id: 'fila', label: 'Pedidos ao vivo', icon: ChefHat },
           ]
         : [
@@ -1299,18 +1298,19 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             { id: 'produtos', label: 'Produtos', icon: Package },
             { id: 'pagamentos', label: 'Pagamentos', icon: CreditCard },
             { id: 'motoboys', label: 'Entregadores', icon: Scooter, disabled: !canUseMotoboys },
+            { id: 'usuarios', label: 'Usuários', icon: Gear, standalone: true },
             { id: 'config', label: 'Configurações', icon: Gear },
             { id: 'fila', label: 'Pedidos ao vivo', icon: ChefHat },
           ]),
     [canUseMotoboys, isOperatorUser]
   );
-  const navItems = useMemo(
-    () => [
+  const navItems = useMemo(() => {
+    if (isOperatorUser) return desktopTabItems;
+    return [
       ...desktopTabItems,
       { id: 'cardapio', label: 'Catálogo Online', icon: BookOpen, disabled: false, standalone: true },
-    ],
-    [desktopTabItems]
-  );
+    ];
+  }, [desktopTabItems, isOperatorUser]);
   const tabMeta = useMemo(
     () => ({
       resumo: { title: 'Resumo executivo', subtitle: 'Visão consolidada da operação, receita e qualidade da loja.' },
@@ -1321,6 +1321,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       config: { title: 'Configurações', subtitle: 'Ajuste identidade, canais, tipos de pedido e horários da operação.' },
       fila: { title: 'Pedidos ao vivo', subtitle: 'Acompanhe pedidos em andamento e a fila da loja em tempo real.' },
       motoboys: { title: 'Entregadores', subtitle: 'Vínculos, documentos, solicitações e status de entrega.' },
+      usuarios: { title: 'Usuários', subtitle: 'Cadastre e gerencie acessos de admin e operador da loja.' },
     }),
     []
   );
@@ -1342,6 +1343,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
           label: item.label,
           description: tabMeta[item.id]?.subtitle || 'Abrir seção',
           run: () => {
+            if (item.id === 'usuarios') {
+              navigate('/admin/users');
+              return;
+            }
             if (item.id === 'fila') {
               openQueueMonitor();
               return;
@@ -1389,7 +1394,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
   useEffect(() => {
     if (!isOperatorUser) return;
-    const disallowed = new Set(['resumo', 'pagamentos', 'avaliacoes', 'config', 'motoboys']);
+    const disallowed = new Set(['resumo', 'pedidos', 'pagamentos', 'avaliacoes', 'config', 'motoboys', 'usuarios']);
     if (disallowed.has(activeTab)) {
       setActiveTab('fila');
     }
@@ -1513,16 +1518,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     orderTypes: false,
     hours: false,
   });
-  const [storeUsers, setStoreUsers] = useState<any[]>([]);
-  const [loadingStoreUsers, setLoadingStoreUsers] = useState(false);
-  const [creatingStoreUser, setCreatingStoreUser] = useState(false);
-  const [staffForm, setStaffForm] = useState({
-    fullName: '',
-    email: '',
-    phone: '',
-    password: '',
-    role: 'OPERATOR',
-  });
 
   const updateAuthStore = (updates) => {
     if (!auth?.store) return;
@@ -1622,23 +1617,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     return fieldsChanged || Boolean(brandingDraft.logoFile || brandingDraft.bannerFile);
   }, [brandingDraft, session?.store, instagramHandle]);
 
-  const loadStoreUsers = React.useCallback(async () => {
-    if (!storeId || isOperatorUser) return;
-    setLoadingStoreUsers(true);
-    try {
-      const data = await storeService.listUsers(storeId);
-      setStoreUsers(Array.isArray(data) ? data : []);
-    } catch (error) {
-      setStoreUsers([]);
-    } finally {
-      setLoadingStoreUsers(false);
-    }
-  }, [storeId, isOperatorUser]);
-
-  useEffect(() => {
-    if (activeTab !== 'config') return;
-    loadStoreUsers();
-  }, [activeTab, loadStoreUsers]);
   const headerNotifications = useMemo(() => {
     const normalizeTime = (value: any) => {
       if (!value) return 0;
@@ -2242,35 +2220,14 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     }
   };
 
-  const handleCreateStoreUser = async () => {
-    if (!storeId || isOperatorUser) return;
-    const payload = {
-      fullName: staffForm.fullName.trim(),
-      email: staffForm.email.trim().toLowerCase(),
-      phone: staffForm.phone.trim(),
-      password: staffForm.password,
-      role: String(staffForm.role || 'OPERATOR').toUpperCase() === 'ADMIN' ? 'ADMIN' : 'OPERATOR',
-    };
-    if (!payload.fullName || !payload.email || !payload.password) {
-      showToast('Preencha nome, e-mail e senha para cadastrar o usuário.', 'warning');
-      return;
-    }
-    setCreatingStoreUser(true);
-    try {
-      await storeService.createUser(storeId, payload as any);
-      showToast('Usuário cadastrado com sucesso.', 'success');
-      setStaffForm({ fullName: '', email: '', phone: '', password: '', role: 'OPERATOR' });
-      await loadStoreUsers();
-    } catch (error: any) {
-      showToast(error?.message || 'Não foi possível cadastrar o usuário agora.', 'error');
-    } finally {
-      setCreatingStoreUser(false);
-    }
-  };
 
   const handleNavSelect = (id: string) => {
     if (id === 'cardapio') {
       if (storeSlug) navigate(`/${storeSlug}`);
+      return;
+    }
+    if (id === 'usuarios') {
+      navigate('/admin/users');
       return;
     }
     if (id === 'fila') {
@@ -2872,132 +2829,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                 )}
               </section>
 
-              {!isOperatorUser && (
-                <section className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-[0_12px_28px_-24px_rgba(15,23,42,0.4)]">
-                  <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/60">
-                    <p className="text-sm font-bold text-slate-800">Usuários da loja</p>
-                    <p className="text-xs text-slate-500">Cadastre acessos internos com perfil admin ou operador.</p>
-                  </div>
-                  <div className="p-4 space-y-4">
-                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                      <div className="space-y-1.5">
-                        <label className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">Nome</label>
-                        <input
-                          type="text"
-                          value={staffForm.fullName}
-                          onChange={(event) => setStaffForm((prev) => ({ ...prev, fullName: event.target.value }))}
-                          className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
-                          placeholder="Nome completo"
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">E-mail</label>
-                        <input
-                          type="email"
-                          value={staffForm.email}
-                          onChange={(event) => setStaffForm((prev) => ({ ...prev, email: event.target.value }))}
-                          className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
-                          placeholder="usuario@loja.com"
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">Telefone</label>
-                        <input
-                          type="tel"
-                          value={staffForm.phone}
-                          onChange={(event) => setStaffForm((prev) => ({ ...prev, phone: event.target.value }))}
-                          className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
-                          placeholder="(11) 99999-9999"
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">Senha</label>
-                        <input
-                          type="password"
-                          value={staffForm.password}
-                          onChange={(event) => setStaffForm((prev) => ({ ...prev, password: event.target.value }))}
-                          className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
-                          placeholder="Mínimo recomendado: 8 caracteres"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                      <div className="space-y-1.5 sm:w-56">
-                        <label className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">Perfil</label>
-                        <select
-                          value={staffForm.role}
-                          onChange={(event) => setStaffForm((prev) => ({ ...prev, role: event.target.value }))}
-                          className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
-                        >
-                          <option value="OPERATOR">Operador</option>
-                          <option value="ADMIN">Admin</option>
-                        </select>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={handleCreateStoreUser}
-                        disabled={creatingStoreUser}
-                        className="h-11 rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-60"
-                      >
-                        {creatingStoreUser ? 'Cadastrando...' : 'Cadastrar usuário'}
-                      </button>
-                    </div>
-
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <p className="text-xs font-bold uppercase tracking-[0.12em] text-slate-500">Acessos ativos</p>
-                        <button
-                          type="button"
-                          onClick={loadStoreUsers}
-                          disabled={loadingStoreUsers}
-                          className="text-xs font-semibold text-slate-600 hover:text-slate-900 disabled:opacity-60"
-                        >
-                          {loadingStoreUsers ? 'Atualizando...' : 'Atualizar'}
-                        </button>
-                      </div>
-                      <div className="space-y-2">
-                        {loadingStoreUsers && storeUsers.length === 0 ? (
-                          <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-500">
-                            Carregando usuários...
-                          </div>
-                        ) : storeUsers.length === 0 ? (
-                          <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-3 py-3 text-xs text-slate-500">
-                            Nenhum usuário interno cadastrado ainda.
-                          </div>
-                        ) : (
-                          storeUsers.map((user) => (
-                            <div
-                              key={user.id}
-                              className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 flex items-center justify-between gap-3"
-                            >
-                              <div className="min-w-0">
-                                <p className="text-sm font-semibold text-slate-800 truncate">{user.fullName || 'Usuário'}</p>
-                                <p className="text-xs text-slate-500 truncate">{user.email}</p>
-                                {user.phone && <p className="text-xs text-slate-400">{user.phone}</p>}
-                              </div>
-                              <div className="shrink-0 text-right space-y-1">
-                                <span
-                                  className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.08em] ${
-                                    String(user.role).toUpperCase() === 'ADMIN'
-                                      ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
-                                      : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                  }`}
-                                >
-                                  {String(user.role).toUpperCase() === 'ADMIN' ? 'Admin' : 'Operador'}
-                                </span>
-                                <p className="text-[11px] text-slate-400">
-                                  {user.createdAt ? `Criado em ${new Date(user.createdAt).toLocaleDateString('pt-BR')}` : ''}
-                                </p>
-                              </div>
-                            </div>
-                          ))
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </section>
-              )}
             </div>
             <div className="hidden sm:flex sticky bottom-3 z-40 items-center justify-between rounded-2xl border border-slate-200 bg-white/95 backdrop-blur px-4 py-3 shadow-[0_16px_30px_-22px_rgba(15,23,42,0.45)]">
               <div>

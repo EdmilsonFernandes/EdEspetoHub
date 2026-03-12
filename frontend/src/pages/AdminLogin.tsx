@@ -48,6 +48,11 @@ export function AdminLogin() {
       }
       sessionStorage.removeItem('admin:redirectTab');
       sessionStorage.removeItem('admin:redirectSlug');
+      const loginRole = String(session?.user?.role || '').toUpperCase();
+      if (loginRole === 'ADMIN') {
+        navigate('/admin/dashboard', { state: { activeTab: 'resumo' } });
+        return;
+      }
       navigate('/admin/queue');
     } catch (error: any) {
       const message = error.message || 'Não foi possível autenticar agora.';
@@ -107,6 +112,10 @@ export function AdminLogin() {
       }
       sessionStorage.removeItem('admin:redirectTab');
       sessionStorage.removeItem('admin:redirectSlug');
+      if (role === 'ADMIN') {
+        navigate('/admin/dashboard', { state: { activeTab: 'resumo' } });
+        return;
+      }
       navigate('/admin/queue');
     }
   }, [auth?.token, auth?.user?.role, hydrated, navigate]);

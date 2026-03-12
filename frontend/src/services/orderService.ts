@@ -67,8 +67,7 @@ const handleSessionError = (error: any) => {
   if (
     message.includes('Token') ||
     message.includes('Sessão') ||
-    message.includes('Loja não encontrada') ||
-    message.includes('Sem permissão')
+    message.includes('Loja não encontrada')
   ) {
     localStorage.removeItem('adminSession');
     if (typeof window !== 'undefined') {

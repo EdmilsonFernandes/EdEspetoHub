@@ -3,7 +3,17 @@ import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
-export function AdminRoute({ children }: { children: React.ReactNode }) {
+type AdminAllowedRole = 'ADMIN' | 'OPERATOR' | 'CHURRASQUEIRO';
+
+export function AdminRoute({
+  children,
+  allowedRoles,
+  fallbackTo = '/admin/queue',
+}: {
+  children: React.ReactNode;
+  allowedRoles?: AdminAllowedRole[];
+  fallbackTo?: string;
+}) {
   const { auth, hydrated } = useAuth();
   const location = useLocation();
 
@@ -15,10 +25,14 @@ export function AdminRoute({ children }: { children: React.ReactNode }) {
     );
   }
 
-  const role = String(auth?.user?.role || '').toUpperCase();
-  const isAllowed = role === 'ADMIN' || role === 'OPERATOR' || role === 'CHURRASQUEIRO';
-  if (!auth?.token || !isAllowed || !auth?.store) {
+  const role = String(auth?.user?.role || '').toUpperCase() as AdminAllowedRole;
+  const hasSession = Boolean(auth?.token && auth?.store);
+  const hasAdminContext = role === 'ADMIN' || role === 'OPERATOR' || role === 'CHURRASQUEIRO';
+  if (!hasSession || !hasAdminContext) {
     return <Navigate to="/admin" replace />;
+  }
+  if (Array.isArray(allowedRoles) && allowedRoles.length > 0 && !allowedRoles.includes(role)) {
+    return <Navigate to={fallbackTo} replace state={{ accessDenied: true }} />;
   }
 
   const subscriptionStatus = auth?.subscription?.status;

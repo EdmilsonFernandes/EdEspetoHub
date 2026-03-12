@@ -9,6 +9,8 @@ export function AdminMobileBottomNav() {
   const navigate = useNavigate();
   const location = useLocation();
   const { auth } = useAuth();
+  const role = String(auth?.user?.role || '').toUpperCase();
+  const isOperator = role === 'OPERATOR' || role === 'CHURRASQUEIRO';
   const path = location.pathname || '';
   const dashboardTab = (location.state as any)?.activeTab || '';
   const [monitorCount, setMonitorCount] = useState(0);
@@ -60,7 +62,7 @@ export function AdminMobileBottomNav() {
     navigate('/admin/dashboard', { state: { activeTab: 'resumo' } });
   };
 
-  const items = [
+  const baseItems = [
     {
       id: 'monitor',
       label: 'Pedidos',
@@ -91,10 +93,11 @@ export function AdminMobileBottomNav() {
       onClick: () => navigate('/admin/dashboard', { state: { activeTab: 'resumo' } }),
     },
   ];
+  const items = isOperator ? baseItems.filter((item) => item.id === 'monitor' || item.id === 'catalogo') : baseItems;
 
   return (
     <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-[260] border-t border-slate-200 bg-white/95 backdrop-blur-sm pb-[max(env(safe-area-inset-bottom),8px)] pt-2 px-2">
-      <ul className="grid grid-cols-4 gap-1">
+      <ul className={`grid ${items.length <= 2 ? 'grid-cols-2' : 'grid-cols-4'} gap-1`}>
         {items.map((item) => {
           const Icon = item.icon;
           return (

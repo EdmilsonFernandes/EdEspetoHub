@@ -86,6 +86,20 @@ const handleResponse = async (
   return response.json();
 };
 
+const getAdminRole = (): string =>
+{
+  try
+  {
+    const raw = localStorage.getItem('adminSession');
+    if (!raw) return '';
+    const parsed = JSON.parse(raw);
+    return String(parsed?.user?.role || '').toUpperCase();
+  } catch
+  {
+    return '';
+  }
+};
+
 const request = async (path: string, options: any = {}) =>
 {
   const url = buildUrl(path);
@@ -108,7 +122,10 @@ const request = async (path: string, options: any = {}) =>
   }
 
   const response = await fetch(url, finalOptions);
-  return handleResponse(response, isMotoboyRoute ? 'motoboy' : 'admin', Boolean(token)); // ⬅️ NÃO mascarar erro
+  const adminRole = getAdminRole();
+  const isOperator = adminRole === 'OPERATOR' || adminRole === 'CHURRASQUEIRO';
+  const canAutoLogout = Boolean(token) && !(response.status === 403 && isOperator && !isMotoboyRoute);
+  return handleResponse(response, isMotoboyRoute ? 'motoboy' : 'admin', canAutoLogout); // ⬅️ NÃO mascarar erro
 };
 
 // RAW (para download/export etc)

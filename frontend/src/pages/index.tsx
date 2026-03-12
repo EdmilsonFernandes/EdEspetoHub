@@ -7,6 +7,7 @@ export { OrdersQueue } from './OrdersQueue';
 export { AdminDashboard } from './AdminDashboard';
 export { AdminOrders } from './AdminOrders';
 export { AdminQueue } from './AdminQueue';
+export { AdminUsers } from './AdminUsers';
 export { AdminRenewal } from './AdminRenewal';
 export { AdminDemo } from './AdminDemo';
 export { PaymentPage } from './PaymentPage';

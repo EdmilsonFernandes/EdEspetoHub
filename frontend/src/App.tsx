@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-    import { LandingPage, CreateStore, AdminLogin, StorePage, OrdersQueue, AdminDashboard, AdminOrders, AdminQueue, AdminRenewal, AdminDemo, PaymentPage, SuperAdmin, ForgotPassword, ResetPassword, VerifyEmail, TermsOfUse, OrderTracking, AddressDistance, AdminMotoboys, MotoboyAvailable, MotoboyCurrent, MotoboyHistory, MotoboyProfile, MotoboyDone, MotoboyLogin, MotoboyRegister, MotoboyHome, MotoboyEarnings, ArchitecturePage } from './pages';
+    import { LandingPage, CreateStore, AdminLogin, StorePage, OrdersQueue, AdminDashboard, AdminOrders, AdminQueue, AdminUsers, AdminRenewal, AdminDemo, PaymentPage, SuperAdmin, ForgotPassword, ResetPassword, VerifyEmail, TermsOfUse, OrderTracking, AddressDistance, AdminMotoboys, MotoboyAvailable, MotoboyCurrent, MotoboyHistory, MotoboyProfile, MotoboyDone, MotoboyLogin, MotoboyRegister, MotoboyHome, MotoboyEarnings, ArchitecturePage } from './pages';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { ToastProvider } from './contexts/ToastContext';
 import { AdminRoute } from './components/Admin/AdminRoute';
@@ -41,7 +41,7 @@ function App() {
               path="/admin/orders"
               element={
                 <AppErrorBoundary>
-                  <AdminRoute>
+                  <AdminRoute allowedRoles={['ADMIN']}>
                     <AdminLayout>
                       <AdminOrders />
                     </AdminLayout>
@@ -63,10 +63,20 @@ function App() {
               path="/admin/motoboys"
               element={
                 <AppErrorBoundary>
-                  <AdminRoute>
+                  <AdminRoute allowedRoles={['ADMIN']}>
                     <AdminLayout>
                       <AdminMotoboys />
                     </AdminLayout>
+                  </AdminRoute>
+                </AppErrorBoundary>
+              }
+            />
+            <Route
+              path="/admin/users"
+              element={
+                <AppErrorBoundary>
+                  <AdminRoute allowedRoles={['ADMIN']}>
+                    <AdminUsers />
                   </AdminRoute>
                 </AppErrorBoundary>
               }
