@@ -741,18 +741,36 @@ export const MenuView = ({
 
             {/* Lista de itens */}
             <div className="space-y-3">
-              {category.items.map((item) => (
+              {category.items.map((item) => {
+                const hasActiveModifiers = Array.isArray(item?.modifiers)
+                  ? item.modifiers.some((modifier: any) => modifier?.active !== false)
+                  : false;
+                const hasConfigurableOptions = hasActiveModifiers || isEspetoCategory(item?.category);
+                const canOpenOptions = !staffView || hasConfigurableOptions;
+
+                const handleOpenOptions = (event?: React.MouseEvent) => {
+                  event?.stopPropagation();
+                  if (!canOpenOptions) return;
+                  openProductModal(item);
+                };
+
+                return (
                 <div
                   key={item.id}
-                  className={`group bg-white rounded-2xl border border-slate-100 shadow-sm p-3 sm:p-4 grid grid-cols-[1fr_auto] gap-3 hover:-translate-y-0.5 active:scale-[0.99] transition ${staffView ? "cursor-default" : "cursor-pointer"}`}
+                  className={`group bg-white rounded-2xl border border-slate-100 shadow-sm p-3 sm:p-4 grid grid-cols-[1fr_auto] gap-3 hover:-translate-y-0.5 active:scale-[0.99] transition ${canOpenOptions ? "cursor-pointer" : "cursor-default"}`}
                   onClick={() => {
                     if (!staffView) openProductModal(item);
+                    if (staffView && hasConfigurableOptions) openProductModal(item);
                   }}
                 >
                   <div className="flex-1 min-w-0 space-y-1.5">
-                    <p className="font-semibold text-slate-900 text-base sm:text-lg leading-tight line-clamp-2">
+                    <button
+                      type="button"
+                      onClick={handleOpenOptions}
+                      className={`text-left font-semibold text-slate-900 text-base sm:text-lg leading-tight line-clamp-2 ${canOpenOptions ? 'cursor-pointer hover:text-slate-700' : 'cursor-default'}`}
+                    >
                       {item.name}
-                    </p>
+                    </button>
                     {item.description && (
                       <p className="text-sm sm:text-[15px] text-slate-600 leading-relaxed line-clamp-2">{item.description}</p>
                     )}
@@ -767,10 +785,10 @@ export const MenuView = ({
                         Promo do dia
                       </span>
                     )}
-                    {Array.isArray(item?.modifiers) && item.modifiers.some((modifier) => modifier?.active !== false) && (
+                    {hasConfigurableOptions && (
                       <div className="inline-flex items-center gap-2 text-[11px] font-semibold text-slate-600 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-full">
                         <Plus size={12} weight="bold" />
-                        Tem adicionais
+                        Possui opções
                       </div>
                     )}
                     {item?.bundlePromoActive && Number(item?.bundlePromoQty) >= 2 && Number(item?.bundlePromoPrice) > 0 && (
@@ -782,7 +800,11 @@ export const MenuView = ({
                   </div>
 
                   <div className={`flex flex-col items-end gap-2 ${staffView ? "min-w-[132px]" : "min-w-[118px]"}`}>
-                    <div className={`aspect-square ${staffView ? "w-[120px] rounded-2xl" : "w-[108px] rounded-2xl"} overflow-hidden bg-gray-100 border border-gray-200 shadow-sm`}>
+                    <button
+                      type="button"
+                      onClick={handleOpenOptions}
+                      className={`aspect-square ${staffView ? "w-[120px] rounded-2xl" : "w-[108px] rounded-2xl"} overflow-hidden bg-gray-100 border border-gray-200 shadow-sm ${canOpenOptions ? 'cursor-pointer' : 'cursor-default'}`}
+                    >
                       {item.imageUrl ? (
                         <img
                           src={resolveAssetUrl(item.imageUrl)}
@@ -794,16 +816,13 @@ export const MenuView = ({
                           sem foto
                         </div>
                       )}
-                    </div>
+                    </button>
                     {(() => {
                       const itemQty = itemQtyMap.get(String(item.id)) || 0;
-                      const hasActiveModifiers = Array.isArray(item?.modifiers)
-                        ? item.modifiers.some((modifier: any) => modifier?.active !== false)
-                        : false;
 
                       const handleIncrement = (event: React.MouseEvent) => {
                         event.stopPropagation();
-                        if (hasActiveModifiers) {
+                        if (hasConfigurableOptions) {
                           openProductModal(item);
                           return;
                         }
@@ -926,7 +945,7 @@ export const MenuView = ({
                     })()}
                   </div>
                 </div>
-              ))}
+              )})}
               {category.items.length === 0 && (
                 <div className="text-sm text-gray-500 px-2">Sem produtos nessa categoria.</div>
               )}
