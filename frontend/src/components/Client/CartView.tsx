@@ -4,6 +4,7 @@ import {
   ArrowLeft,
   Bicycle,
   Crosshair,
+  Phone,
   House,
   ForkKnife,
   PaperPlaneTilt,
@@ -553,7 +554,7 @@ export const CartView = ({
           {!isTableOptionalPhoneMode && (
             <div className="rounded-2xl border border-slate-100 p-3 sm:p-4 bg-white">
               <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                WhatsApp
+                WhatsApp <span className="text-rose-500 font-extrabold">Obrigatório</span>
               </label>
               <div className="mt-2 grid grid-cols-1 sm:grid-cols-[110px_1fr] gap-3 items-end">
                 <div>
@@ -594,9 +595,10 @@ export const CartView = ({
               <button
                 type="button"
                 onClick={() => setShowOptionalPhoneFields(true)}
-                className="text-sm font-semibold text-slate-700 hover:text-slate-900 transition-colors"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm font-semibold text-amber-700 shadow-sm transition-all hover:bg-amber-100 hover:border-amber-300 active:scale-[0.98]"
               >
-                + Adicionar Telefone/WhatsApp (Opcional)
+                <Phone size={14} weight="duotone" />
+                Adicionar WhatsApp / Telefone (Opcional)
               </button>
             </div>
           )}
