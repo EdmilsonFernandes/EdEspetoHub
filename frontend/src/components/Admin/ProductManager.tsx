@@ -229,6 +229,10 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
   const pendingDeleteTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
   const formRef = useRef<HTMLDivElement | null>(null);
   const createNameInputRef = useRef<HTMLInputElement | null>(null);
+  const createCameraInputRef = useRef<HTMLInputElement | null>(null);
+  const createFileInputRef = useRef<HTMLInputElement | null>(null);
+  const inlineCameraInputRef = useRef<HTMLInputElement | null>(null);
+  const inlineFileInputRef = useRef<HTMLInputElement | null>(null);
   const [editing, setEditing] = useState(null);
   const [inlineEditId, setInlineEditId] = useState<string | null>(null);
   const [mobileEditOpen, setMobileEditOpen] = useState(false);
@@ -251,8 +255,8 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
     modifiers: [],
   });
   const [inlineImageFile, setInlineImageFile] = useState('');
+  const [inlineImagePreview, setInlineImagePreview] = useState('');
   const [formData, setFormData] = useState(initialForm);
-  const [imageMode, setImageMode] = useState('url');
   const [imagePreview, setImagePreview] = useState('');
   const [categorySelect, setCategorySelect] = useState(initialForm.category);
   const [customCategory, setCustomCategory] = useState('');
@@ -306,8 +310,10 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
     return () => {
       pendingDeleteTimersRef.current.forEach((timer) => clearTimeout(timer));
       pendingDeleteTimersRef.current.clear();
+      if (imagePreview?.startsWith('blob:')) URL.revokeObjectURL(imagePreview);
+      if (inlineImagePreview?.startsWith('blob:')) URL.revokeObjectURL(inlineImagePreview);
     };
-  }, []);
+  }, [imagePreview, inlineImagePreview]);
 
   const categoryTabs = useMemo(() => {
     const counts = new Map();
@@ -343,7 +349,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
   const resetForm = () => {
     setEditing(null);
     setFormData({ ...initialForm, category: defaultCategoryId });
-    setImageMode('url');
+    if (imagePreview?.startsWith('blob:')) URL.revokeObjectURL(imagePreview);
     setImagePreview('');
     setCategorySelect(defaultCategoryId);
     setCustomCategory('');
@@ -374,8 +380,8 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
       bundlePromoQty: formData.bundlePromoQty ? Number(formData.bundlePromoQty) : undefined,
       bundlePromoPrice: formData.bundlePromoPrice ? parseFloat(formData.bundlePromoPrice) : undefined,
       bundlePromoActive: Boolean(formData.bundlePromoActive),
-      imageFile: imageMode === 'upload' ? formData.imageFile : undefined,
-      imageUrl: imageMode === 'url' ? formData.imageUrl : undefined,
+      imageFile: formData.imageFile || undefined,
+      imageUrl: undefined,
       description: formData.description || undefined,
       availabilityDays: buildAvailabilityPayload(formData.availabilityDays),
       modifiers: normalizeProductModifiers(formData.modifiers || []),
@@ -402,6 +408,8 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
     setInlineCustomCategory(isKnown ? '' : normalizedCategory);
     setInlineEditId(product.id);
     setInlineImageFile('');
+    if (inlineImagePreview?.startsWith('blob:')) URL.revokeObjectURL(inlineImagePreview);
+    setInlineImagePreview('');
     setInlineForm({
       name: product.name || '',
       price: product.price != null ? String(product.price) : '',
@@ -473,6 +481,8 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
   const handleInlineCancel = () => {
     setInlineEditId(null);
     setInlineImageFile('');
+    if (inlineImagePreview?.startsWith('blob:')) URL.revokeObjectURL(inlineImagePreview);
+    setInlineImagePreview('');
     setMobileEditOpen(false);
   };
 
@@ -557,15 +567,38 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
   const handleUpload = (file) => {
     if (!file) {
       setFormData((prev) => ({ ...prev, imageFile: '' }));
+      if (imagePreview?.startsWith('blob:')) URL.revokeObjectURL(imagePreview);
       setImagePreview('');
       return;
     }
+    const objectUrl = URL.createObjectURL(file);
+    if (imagePreview?.startsWith('blob:')) URL.revokeObjectURL(imagePreview);
+    setImagePreview(objectUrl);
 
     const reader = new FileReader();
     reader.onload = () => {
       const result = reader.result?.toString() || '';
-      setFormData((prev) => ({ ...prev, imageFile: result }));
-      setImagePreview(result);
+      setFormData((prev) => ({ ...prev, imageFile: result, imageUrl: '' }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleInlineUpload = (file) => {
+    if (!file) {
+      setInlineImageFile('');
+      if (inlineImagePreview?.startsWith('blob:')) URL.revokeObjectURL(inlineImagePreview);
+      setInlineImagePreview('');
+      return;
+    }
+    const objectUrl = URL.createObjectURL(file);
+    if (inlineImagePreview?.startsWith('blob:')) URL.revokeObjectURL(inlineImagePreview);
+    setInlineImagePreview(objectUrl);
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result?.toString() || '';
+      setInlineImageFile(result);
+      setInlineForm((prev) => ({ ...prev, imageUrl: '' }));
     };
     reader.readAsDataURL(file);
   };
@@ -784,106 +817,64 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
 
           <div className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
             <label className="text-sm font-medium text-gray-700">Imagem do Produto</label>
-
-            {/* Toggle buttons */}
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <button
                 type="button"
-                onClick={() => setImageMode('url')}
-                className={`px-4 py-2.5 rounded-lg text-sm font-semibold transition-all hover:-translate-y-0.5 active:scale-95 ${
-                  imageMode === 'url'
-                    ? 'bg-brand-primary text-white shadow-md'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
+                onClick={() => createCameraInputRef.current?.click()}
+                className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-slate-900 text-white shadow-sm hover:bg-slate-800 transition-all"
               >
-                URL da Imagem
+                Tirar Foto
               </button>
               <button
                 type="button"
-                onClick={() => setImageMode('upload')}
-                className={`px-4 py-2.5 rounded-lg text-sm font-semibold transition-all hover:-translate-y-0.5 active:scale-95 ${
-                  imageMode === 'upload'
-                    ? 'bg-brand-primary text-white shadow-md'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
+                onClick={() => createFileInputRef.current?.click()}
+                className="px-4 py-2.5 rounded-xl text-sm font-semibold border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition-all"
               >
-                Fazer Upload
+                Selecionar Arquivo
               </button>
+              <input
+                ref={createCameraInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                onChange={(e) => handleUpload(e.target.files?.[0])}
+                className="hidden"
+              />
+              <input
+                ref={createFileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleUpload(e.target.files?.[0])}
+                className="hidden"
+              />
             </div>
-
-            {/* URL input */}
-            {imageMode === 'url' && (
-              <div className="space-y-2">
-                <input
-                  className="p-3 border border-gray-200 rounded-lg w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent"
-                  placeholder="https://exemplo.com/imagem.jpg"
-                  value={formData.imageUrl}
-                  onChange={(e) => {
-                    setFormData({ ...formData, imageUrl: e.target.value });
-                    setImagePreview(e.target.value);
-                  }}
+            <div className="relative h-[200px] w-[200px] rounded-xl overflow-hidden border border-slate-200 bg-slate-50 flex items-center justify-center">
+              {imagePreview ? (
+                <img
+                  src={imagePreview}
+                  alt="Preview do produto"
+                  className="h-full w-full object-cover"
                 />
-                {imagePreview && (
-                  <div className="relative rounded-lg overflow-hidden border border-gray-200 bg-gray-50 max-w-48">
-                    <img
-                      src={imagePreview}
-                      alt="Preview"
-                      className="w-full h-48 object-cover"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setImagePreview('');
-                        setFormData({ ...formData, imageUrl: '', imageFile: '' });
-                      }}
-                      className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg transition-all hover:-translate-y-0.5 active:scale-95 shadow-lg"
-                    >
-                      <Trash size={18} weight="duotone" />
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Upload area */}
-            {imageMode === 'upload' && (
-              <div className="space-y-2">
-                {!imagePreview && (
-                  <label className="relative flex flex-col items-center justify-center w-full p-6 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-brand-primary hover:bg-brand-primary/5 transition">
-                    <div className="flex flex-col items-center justify-center">
-                    <ImageIcon size={24} weight="duotone" className="text-gray-400 mb-2" />
-                      <p className="text-sm font-semibold text-gray-700">Arraste uma imagem aqui</p>
-                      <p className="text-xs text-gray-500">ou clique para selecionar</p>
-                    </div>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleUpload(e.target.files?.[0])}
-                      className="hidden"
-                    />
-                  </label>
-                )}
-                {imagePreview && (
-                  <div className="relative rounded-lg overflow-hidden border border-gray-200 bg-gray-50 max-w-48">
-                    <img
-                      src={imagePreview}
-                      alt="Preview"
-                      className="w-48 h-48 object-cover"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setImagePreview('');
-                        setFormData({ ...formData, imageUrl: '', imageFile: '' });
-                      }}
-                      className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg transition-all hover:-translate-y-0.5 active:scale-95 shadow-lg"
-                    >
-                      <Trash size={18} weight="duotone" />
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
+              ) : (
+                <div className="text-center px-3">
+                  <ImageIcon size={22} weight="duotone" className="mx-auto text-slate-400 mb-1" />
+                  <p className="text-xs text-slate-500">Prévia 200x200</p>
+                </div>
+              )}
+              {imagePreview && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (imagePreview?.startsWith('blob:')) URL.revokeObjectURL(imagePreview);
+                    setImagePreview('');
+                    setFormData({ ...formData, imageUrl: '', imageFile: '' });
+                  }}
+                  className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg transition-all shadow-lg"
+                >
+                  <Trash size={16} weight="duotone" />
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="space-y-2 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
@@ -1544,54 +1535,61 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                 </button>
               </div>
               <div className="rounded-2xl border border-slate-200 bg-white p-3.5">
-                <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">Imagem (URL)</label>
-                <input
-                  className="w-full p-3 border border-gray-200 rounded-xl text-sm mt-2 bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
-                  placeholder="https://..."
-                  value={inlineForm.imageUrl}
-                  onChange={(e) => setInlineForm((prev) => ({ ...prev, imageUrl: e.target.value }))}
-                />
-                <div className="mt-3 flex items-center justify-between">
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">Imagem</label>
+                <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => inlineCameraInputRef.current?.click()}
+                    className="px-3 py-2.5 rounded-xl text-xs font-semibold bg-slate-900 text-white hover:bg-slate-800 transition"
+                  >
+                    Tirar Foto
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => inlineFileInputRef.current?.click()}
+                    className="px-3 py-2.5 rounded-xl text-xs font-semibold border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition"
+                  >
+                    Selecionar Arquivo
+                  </button>
                   <input
+                    ref={inlineCameraInputRef}
                     type="file"
                     accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-                      if (file.size > 3 * 1024 * 1024) {
-                        showToast('Imagem acima de 3MB. Reduza e tente novamente.', 'error');
-                        e.target.value = '';
-                        return;
-                      }
-                      const reader = new FileReader();
-                      reader.onload = () => {
-                        const result = reader.result?.toString() || '';
-                        setInlineImageFile(result);
-                        setInlineForm((prev) => ({ ...prev, imageUrl: '' }));
-                      };
-                      reader.readAsDataURL(file);
-                    }}
-                    className="text-xs"
+                    capture="environment"
+                    onChange={(e) => handleInlineUpload(e.target.files?.[0])}
+                    className="hidden"
                   />
-                  {inlineImageFile && (
-                    <button
-                      type="button"
-                      onClick={() => setInlineImageFile('')}
-                      className="text-xs font-semibold text-red-600 hover:underline"
-                    >
-                      Limpar
-                    </button>
-                  )}
+                  <input
+                    ref={inlineFileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleInlineUpload(e.target.files?.[0])}
+                    className="hidden"
+                  />
                 </div>
-                <div className="mt-3 rounded-xl border border-gray-200 overflow-hidden bg-gray-50 h-32 flex items-center justify-center">
-                  {inlineImageFile || inlineForm.imageUrl ? (
+                <div className="mt-3 relative h-[200px] w-[200px] rounded-xl border border-gray-200 overflow-hidden bg-gray-50 flex items-center justify-center">
+                  {inlineImagePreview || inlineForm.imageUrl ? (
                     <img
-                      src={inlineImageFile || resolveAssetUrl(inlineForm.imageUrl)}
+                      src={inlineImagePreview || resolveAssetUrl(inlineForm.imageUrl)}
                       alt="Preview"
-                      className="w-full h-full object-contain"
+                      className="w-full h-full object-cover"
                     />
                   ) : (
                     <span className="text-xs text-gray-400">Sem imagem</span>
+                  )}
+                  {(inlineImagePreview || inlineImageFile || inlineForm.imageUrl) && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (inlineImagePreview?.startsWith('blob:')) URL.revokeObjectURL(inlineImagePreview);
+                        setInlineImageFile('');
+                        setInlineImagePreview('');
+                        setInlineForm((prev) => ({ ...prev, imageUrl: '' }));
+                      }}
+                      className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg transition-all"
+                    >
+                      <Trash size={16} weight="duotone" />
+                    </button>
                   )}
                 </div>
               </div>
