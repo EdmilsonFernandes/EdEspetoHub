@@ -25,6 +25,7 @@ export interface CreateStoreDto {
   secondaryColor?: string;
   pixKey?: string;
   contactEmail?: string;
+  storePhone?: string;
   promoMessage?: string;
   segment?: string;
   deliveryRadiusKm?: number;

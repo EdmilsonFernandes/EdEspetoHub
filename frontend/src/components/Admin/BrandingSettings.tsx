@@ -367,6 +367,17 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
               <p className="text-xs text-gray-500">Opcional, aparece na vitrine para contato.</p>
             </div>
             <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700">Telefone da loja</label>
+              <input
+                type="text"
+                value={branding.storePhone || ""}
+                onChange={(e) => handleChange("storePhone", e.target.value)}
+                className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
+                placeholder="(11) 99999-9999"
+              />
+              <p className="text-xs text-gray-500">Usado no contato oficial e WhatsApp da loja.</p>
+            </div>
+            <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700">Endereço da loja</label>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="sm:col-span-1">

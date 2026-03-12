@@ -293,11 +293,20 @@ export class StoreService
         store.settings.orderTypes = segmentPreset.orderTypes;
       }
 
+      let ownerNeedsSave = false;
+      if (store.owner && data.storePhone !== undefined) {
+        const trimmedPhone = data.storePhone?.toString().trim();
+        store.owner.phone = trimmedPhone || undefined;
+        ownerNeedsSave = true;
+      }
       if (data.address !== undefined && store.owner)
       {
         const trimmedAddress = data.address?.toString().trim();
         store.settings.address = trimmedAddress || null;
         store.owner.address = trimmedAddress || undefined;
+        ownerNeedsSave = true;
+      }
+      if (ownerNeedsSave && store.owner) {
         const userRepo = manager.getRepository(User);
         await userRepo.save(store.owner);
       }
