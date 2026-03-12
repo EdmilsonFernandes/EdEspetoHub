@@ -224,6 +224,55 @@ const createEmptyModifier = (index = 0) => ({
   active: true,
 });
 
+const readFileAsDataUrl = (file: File) =>
+  new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ''));
+    reader.onerror = () => reject(new Error('file_read_error'));
+    reader.readAsDataURL(file);
+  });
+
+const compressImageFileToDataUrl = (file: File, maxEdge = 1280) =>
+  new Promise<string>((resolve, reject) => {
+    const objectUrl = URL.createObjectURL(file);
+    const image = new Image();
+    image.onload = () => {
+      try {
+        const width = Number(image.width || 0);
+        const height = Number(image.height || 0);
+        if (!width || !height) throw new Error('invalid_image');
+
+        const ratio = Math.min(1, maxEdge / Math.max(width, height));
+        const targetWidth = Math.max(1, Math.round(width * ratio));
+        const targetHeight = Math.max(1, Math.round(height * ratio));
+
+        const canvas = document.createElement('canvas');
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) throw new Error('canvas_error');
+        ctx.drawImage(image, 0, 0, targetWidth, targetHeight);
+
+        let quality = 0.86;
+        let dataUrl = canvas.toDataURL('image/jpeg', quality);
+        while (dataUrl.length > 1_200_000 && quality > 0.62) {
+          quality -= 0.06;
+          dataUrl = canvas.toDataURL('image/jpeg', quality);
+        }
+        resolve(dataUrl);
+      } catch (error) {
+        reject(error);
+      } finally {
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
+    image.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error('image_load_error'));
+    };
+    image.src = objectUrl;
+  });
+
 export const ProductManager = ({ products, onProductsChange, storeSegment = 'outros' }) => {
   const { showToast } = useToast();
   const pendingDeleteTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
@@ -564,7 +613,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
     });
   };
 
-  const handleUpload = (file) => {
+  const handleUpload = async (file) => {
     if (!file) {
       setFormData((prev) => ({ ...prev, imageFile: '' }));
       if (imagePreview?.startsWith('blob:')) URL.revokeObjectURL(imagePreview);
@@ -575,15 +624,21 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
     if (imagePreview?.startsWith('blob:')) URL.revokeObjectURL(imagePreview);
     setImagePreview(objectUrl);
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = reader.result?.toString() || '';
-      setFormData((prev) => ({ ...prev, imageFile: result, imageUrl: '' }));
-    };
-    reader.readAsDataURL(file);
+    try {
+      const compressed = await compressImageFileToDataUrl(file);
+      setFormData((prev) => ({ ...prev, imageFile: compressed, imageUrl: '' }));
+    } catch (error) {
+      console.error('Falha ao comprimir imagem do produto', error);
+      try {
+        const fallback = await readFileAsDataUrl(file);
+        setFormData((prev) => ({ ...prev, imageFile: fallback, imageUrl: '' }));
+      } catch {
+        showToast('Não foi possível processar a imagem.', 'error');
+      }
+    }
   };
 
-  const handleInlineUpload = (file) => {
+  const handleInlineUpload = async (file) => {
     if (!file) {
       setInlineImageFile('');
       if (inlineImagePreview?.startsWith('blob:')) URL.revokeObjectURL(inlineImagePreview);
@@ -594,13 +649,20 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
     if (inlineImagePreview?.startsWith('blob:')) URL.revokeObjectURL(inlineImagePreview);
     setInlineImagePreview(objectUrl);
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = reader.result?.toString() || '';
-      setInlineImageFile(result);
+    try {
+      const compressed = await compressImageFileToDataUrl(file);
+      setInlineImageFile(compressed);
       setInlineForm((prev) => ({ ...prev, imageUrl: '' }));
-    };
-    reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('Falha ao comprimir imagem de edição do produto', error);
+      try {
+        const fallback = await readFileAsDataUrl(file);
+        setInlineImageFile(fallback);
+        setInlineForm((prev) => ({ ...prev, imageUrl: '' }));
+      } catch {
+        showToast('Não foi possível processar a imagem.', 'error');
+      }
+    }
   };
 
 
