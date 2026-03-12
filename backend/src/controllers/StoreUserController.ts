@@ -26,4 +26,23 @@ export class StoreUserController {
       return respondWithError(req, res, error, 400);
     }
   }
+
+  static async updatePassword(req: Request, res: Response) {
+    try {
+      const result = await service.updatePasswordForStoreUser(
+        req.params.storeId,
+        req.params.userId,
+        req.body || {},
+        req.auth?.storeId
+      );
+      return res.json(result);
+    } catch (error: any) {
+      log.warn('Store user password update failed', {
+        storeId: req.params.storeId,
+        userId: req.params.userId,
+        error,
+      });
+      return respondWithError(req, res, error, 400);
+    }
+  }
 }

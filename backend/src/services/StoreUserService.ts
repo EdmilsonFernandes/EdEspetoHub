@@ -88,4 +88,36 @@ export class StoreUserService {
       createdAt: membership.createdAt,
     };
   }
+
+  async updatePasswordForStoreUser(
+    storeId: string,
+    userId: string,
+    input: { newPassword?: string },
+    authStoreId?: string
+  ) {
+    this.ensureStoreAccess(storeId, authStoreId);
+    const store = await this.storeRepository.findById(storeId);
+    if (!store) throw new AppError('STORE-001', 404);
+
+    const targetUserId = String(userId || '').trim();
+    if (!targetUserId) throw new AppError('GEN-002', 400);
+
+    const membership = await this.storeUserRepository.findByStoreAndUser(storeId, targetUserId);
+    if (!membership || !membership.isActive) {
+      throw new AppError('AUTH-003', 403);
+    }
+
+    const newPassword = String(input?.newPassword || '').trim();
+    if (!newPassword || newPassword.length < 6) {
+      throw new AppError('AUTH-008', 400);
+    }
+
+    const user = await this.userRepository.findById(targetUserId);
+    if (!user) throw new AppError('AUTH-004', 404);
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    await this.userRepository.save(user as any);
+
+    return { id: targetUserId, updated: true };
+  }
 }

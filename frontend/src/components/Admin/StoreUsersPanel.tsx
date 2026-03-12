@@ -11,6 +11,13 @@ export function StoreUsersPanel() {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [updatingPassword, setUpdatingPassword] = useState(false);
+  const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+  const [passwordTarget, setPasswordTarget] = useState<any | null>(null);
+  const [passwordForm, setPasswordForm] = useState({
+    newPassword: '',
+    confirmPassword: '',
+  });
   const [form, setForm] = useState({
     fullName: '',
     email: '',
@@ -63,6 +70,42 @@ export function StoreUsersPanel() {
       showToast(error?.message || 'Não foi possível cadastrar usuário.', 'error');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const openPasswordModal = (user: any) => {
+    setPasswordTarget(user);
+    setPasswordForm({ newPassword: '', confirmPassword: '' });
+    setPasswordModalOpen(true);
+  };
+
+  const handleUpdateUserPassword = async () => {
+    if (!storeId || !passwordTarget?.id) return;
+    const newPassword = String(passwordForm.newPassword || '');
+    const confirmPassword = String(passwordForm.confirmPassword || '');
+    if (!newPassword || !confirmPassword) {
+      showToast('Preencha e confirme a nova senha.', 'warning');
+      return;
+    }
+    if (newPassword.length < 6) {
+      showToast('A nova senha deve ter pelo menos 6 caracteres.', 'warning');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      showToast('A confirmação da senha não confere.', 'warning');
+      return;
+    }
+    setUpdatingPassword(true);
+    try {
+      await storeService.updateUserPassword(storeId, passwordTarget.id, { newPassword });
+      showToast('Senha do usuário atualizada com sucesso.', 'success');
+      setPasswordModalOpen(false);
+      setPasswordTarget(null);
+      setPasswordForm({ newPassword: '', confirmPassword: '' });
+    } catch (error: any) {
+      showToast(error?.message || 'Não foi possível atualizar a senha.', 'error');
+    } finally {
+      setUpdatingPassword(false);
     }
   };
 
@@ -157,21 +200,79 @@ export function StoreUsersPanel() {
                   <p className="text-sm font-semibold text-slate-800 truncate">{user.fullName || 'Usuário'}</p>
                   <p className="text-xs text-slate-500 truncate">{user.email}</p>
                 </div>
-                <span
-                  className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.08em] ${
-                    String(user.role).toUpperCase() === 'ADMIN'
-                      ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
-                      : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                  }`}
-                >
-                  {String(user.role).toUpperCase() === 'ADMIN' ? 'Admin' : 'Operador'}
-                </span>
+                <div className="shrink-0 flex items-center gap-2">
+                  <span
+                    className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.08em] ${
+                      String(user.role).toUpperCase() === 'ADMIN'
+                        ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
+                        : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                    }`}
+                  >
+                    {String(user.role).toUpperCase() === 'ADMIN' ? 'Admin' : 'Operador'}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => openPasswordModal(user)}
+                    className="h-8 rounded-lg border border-slate-200 bg-white px-2.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
+                  >
+                    Trocar senha
+                  </button>
+                </div>
               </div>
             ))
           )}
         </div>
       </section>
+      {passwordModalOpen && (
+        <div className="fixed inset-0 z-[1500] bg-slate-900/45 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white shadow-2xl">
+            <div className="px-4 py-3 border-b border-slate-100">
+              <p className="text-sm font-bold text-slate-900">Trocar senha do usuário</p>
+              <p className="text-xs text-slate-500 mt-0.5">{passwordTarget?.email || ''}</p>
+            </div>
+            <div className="p-4 space-y-3">
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">Nova senha</label>
+                <input
+                  type="password"
+                  value={passwordForm.newPassword}
+                  onChange={(event) => setPasswordForm((prev) => ({ ...prev, newPassword: event.target.value }))}
+                  className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
+                  placeholder="Mínimo de 6 caracteres"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">Confirmar nova senha</label>
+                <input
+                  type="password"
+                  value={passwordForm.confirmPassword}
+                  onChange={(event) => setPasswordForm((prev) => ({ ...prev, confirmPassword: event.target.value }))}
+                  className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
+                  placeholder="Repita a nova senha"
+                />
+              </div>
+            </div>
+            <div className="px-4 py-3 border-t border-slate-100 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setPasswordModalOpen(false)}
+                disabled={updatingPassword}
+                className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleUpdateUserPassword}
+                disabled={updatingPassword}
+                className="h-10 rounded-xl bg-slate-900 px-3 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-60"
+              >
+                {updatingPassword ? 'Salvando...' : 'Salvar nova senha'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
-

@@ -63,4 +63,9 @@ export const storeService = {
     const response = await apiClient.rawPost(`/stores/${storeId}/users`, payload);
     return toJson(response);
   },
+
+  async updateUserPassword(storeId: string, userId: string, payload: { newPassword: string }) {
+    const response = await apiClient.rawPatch(`/stores/${storeId}/users/${userId}/password`, payload);
+    return toJson(response);
+  },
 };

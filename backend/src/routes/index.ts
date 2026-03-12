@@ -109,6 +109,7 @@ routes.put('/stores/:storeId/status', requireAuth, requireRole('ADMIN'), StoreCo
 routes.get('/stores/:storeId/link-stats', requireAuth, requireRole('ADMIN'), StoreController.getLinkStats);
 routes.get('/stores/:storeId/users', requireAuth, requireRole('ADMIN'), StoreUserController.list);
 routes.post('/stores/:storeId/users', requireAuth, requireRole('ADMIN'), StoreUserController.create);
+routes.patch('/stores/:storeId/users/:userId/password', requireAuth, requireRole('ADMIN'), StoreUserController.updatePassword);
 
 // Products admin (cadastro não depende de assinatura)
 routes.post('/stores/:storeId/products', requireAuth, requireRole('ADMIN'), ProductController.create);
