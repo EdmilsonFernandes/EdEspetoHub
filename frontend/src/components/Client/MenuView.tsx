@@ -234,6 +234,7 @@ export const MenuView = ({
   const [showStoreDetails, setShowStoreDetails] = useState(false);
   const [activeCategoryKey, setActiveCategoryKey] = useState("");
   const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false);
+  const [qtyPulseId, setQtyPulseId] = useState<string | null>(null);
   const buttonColor = branding?.accentColor || branding?.secondaryColor || "#0f172a";
   const categoryRefs = React.useRef({});
   const formatStoreAddress = (address = "") => {
@@ -418,6 +419,11 @@ export const MenuView = ({
     }
   };
 
+  const pulseQty = (id: string) => {
+    setQtyPulseId(id);
+    window.setTimeout(() => setQtyPulseId((prev) => (prev === id ? null : prev)), 220);
+  };
+
   useEffect(() => {
     if (!filteredGrouped.length) return;
     if (!filteredGrouped.some((category) => category.key === activeCategoryKey)) {
@@ -446,7 +452,7 @@ export const MenuView = ({
         <div
           className={`sticky ${showHeader ? "top-[72px] sm:top-[92px]" : "top-0"} z-40 px-4 pb-2 pt-1 max-w-6xl mx-auto`}
         >
-          <div className="rounded-2xl border border-slate-100 bg-white/90 backdrop-blur-md shadow-sm ds-tabs px-2 py-2">
+          <div className="rounded-2xl border border-amber-100 bg-amber-50/70 backdrop-blur-md shadow-sm ds-tabs px-2 py-2">
             <div className="relative w-full flex items-center mb-0">
               <div className="flex-1 flex overflow-x-auto gap-3 pr-20 no-scrollbar scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                 {filteredGrouped.map((category) => {
@@ -462,11 +468,11 @@ export const MenuView = ({
                       }}
                       className={
                         isActive
-                          ? "flex items-center gap-2 px-5 py-2.5 rounded-full bg-slate-900 text-white font-bold transition-all"
+                          ? "flex items-center gap-2 px-5 py-2.5 rounded-full bg-amber-500 text-white font-bold shadow-md transition-all"
                           : "flex items-center gap-2 px-5 py-2.5 rounded-full bg-white text-slate-600 font-medium border border-slate-200 transition-all"
                       }
                     >
-                      <span className="text-xs leading-none" aria-hidden="true">
+                      <span className="text-base leading-none" aria-hidden="true">
                         {categoryGlyph(category.key)}
                       </span>
                       <span className="whitespace-nowrap">{category.label}</span>
@@ -727,14 +733,16 @@ export const MenuView = ({
               {category.items.map((item) => (
                 <div
                   key={item.id}
-                  className="group bg-white rounded-2xl border border-slate-100 shadow-sm p-3 sm:p-4 grid grid-cols-[1fr_auto] gap-3 hover:-translate-y-0.5 active:scale-[0.99] transition cursor-pointer"
-                  onClick={() => openProductModal(item)}
+                  className={`group bg-white rounded-2xl border border-slate-100 shadow-sm p-3 sm:p-4 grid grid-cols-[1fr_auto] gap-3 hover:-translate-y-0.5 active:scale-[0.99] transition ${staffView ? "cursor-default" : "cursor-pointer"}`}
+                  onClick={() => {
+                    if (!staffView) openProductModal(item);
+                  }}
                 >
                   <div className="flex-1 min-w-0 space-y-1.5">
                     <p className="font-semibold text-slate-900 text-base sm:text-lg leading-tight line-clamp-2">
                       {item.name}
                     </p>
-                    {!staffView && item.description && (
+                    {item.description && (
                       <p className="text-sm sm:text-[15px] text-slate-600 leading-relaxed line-clamp-2">{item.description}</p>
                     )}
                     {itemQtyMap.get(String(item.id)) > 0 && (
@@ -762,8 +770,8 @@ export const MenuView = ({
                     )}
                   </div>
 
-                  <div className={`flex flex-col items-end gap-2 ${staffView ? "min-w-[78px]" : "min-w-[118px]"}`}>
-                    <div className={`aspect-square ${staffView ? "w-[56px] rounded-xl" : "w-[108px] rounded-2xl"} overflow-hidden bg-gray-100 border border-gray-200 shadow-sm`}>
+                  <div className={`flex flex-col items-end gap-2 ${staffView ? "min-w-[132px]" : "min-w-[118px]"}`}>
+                    <div className={`aspect-square ${staffView ? "w-[120px] rounded-2xl" : "w-[108px] rounded-2xl"} overflow-hidden bg-gray-100 border border-gray-200 shadow-sm`}>
                       {item.imageUrl ? (
                         <img
                           src={resolveAssetUrl(item.imageUrl)}
@@ -788,6 +796,7 @@ export const MenuView = ({
                           openProductModal(item);
                           return;
                         }
+                        pulseQty(String(item.id));
                         if (isEspetoCategory(item.category)) {
                           onUpdateCart(item, 1, { cookingPoint: "ao ponto", passSkewer: false });
                           return;
@@ -799,6 +808,7 @@ export const MenuView = ({
                         event.stopPropagation();
                         const entry = resolveQuickAdjustEntry(item);
                         if (!entry) return;
+                        pulseQty(String(item.id));
                         onUpdateCart(item, -1, buildCartOptions(entry));
                       };
 
@@ -809,12 +819,12 @@ export const MenuView = ({
                               <span className="text-[11px] font-semibold text-slate-400 line-through">
                                 {formatCurrency(item.price)}
                               </span>
-                              <span className="text-lg font-bold tracking-tight text-slate-800">
+                              <span className="text-xl font-bold tracking-tight text-slate-800">
                                 {formatCurrency(resolvePromoPrice(item))}
                               </span>
                             </>
                           ) : (
-                            <span className="text-lg font-bold tracking-tight text-slate-800">
+                            <span className="text-xl font-bold tracking-tight text-slate-800">
                               {formatCurrency(item.price)}
                             </span>
                           )}
@@ -838,7 +848,13 @@ export const MenuView = ({
                               >
                                 -
                               </button>
-                              <span className="min-w-[26px] text-center text-xs font-black text-slate-900">{itemQty}</span>
+                              <span
+                                className={`min-w-[26px] text-center text-xs font-black transition-all duration-200 ${
+                                  qtyPulseId === String(item.id) ? "scale-110 text-amber-600" : "text-slate-900"
+                                }`}
+                              >
+                                {itemQty}
+                              </span>
                               <button
                                 type="button"
                                 onClick={handleIncrement}
