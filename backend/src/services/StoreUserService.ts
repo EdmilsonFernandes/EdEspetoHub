@@ -120,4 +120,28 @@ export class StoreUserService {
 
     return { id: targetUserId, updated: true };
   }
+
+  async removeForStore(storeId: string, userId: string, authStoreId?: string, authUserId?: string) {
+    this.ensureStoreAccess(storeId, authStoreId);
+    const store = await this.storeRepository.findByIdWithOwner(storeId);
+    if (!store) throw new AppError('STORE-001', 404);
+
+    const targetUserId = String(userId || '').trim();
+    if (!targetUserId) throw new AppError('GEN-002', 400);
+
+    if (String(store.owner?.id || '') === targetUserId) {
+      throw new AppError('AUTH-003', 403);
+    }
+    if (String(authUserId || '') === targetUserId) {
+      throw new AppError('AUTH-003', 403);
+    }
+
+    const membership = await this.storeUserRepository.findByStoreAndUser(storeId, targetUserId);
+    if (!membership) {
+      return { id: targetUserId, removed: true };
+    }
+
+    await this.storeUserRepository.remove(membership as any);
+    return { id: targetUserId, removed: true };
+  }
 }

@@ -17,6 +17,10 @@ export class StoreUserRepository {
     return this.repository.save(entity);
   }
 
+  remove(entity: StoreUser) {
+    return this.repository.remove(entity);
+  }
+
   findActiveByUserId(userId: string) {
     return this.repository.find({
       where: { user: { id: userId }, isActive: true } as any,

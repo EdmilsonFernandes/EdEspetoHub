@@ -164,4 +164,5 @@ export const apiClient = {
   rawPost: (path: string, body: any) => rawRequest(path, { method: 'POST', body }),
   rawPut: (path: string, body: any) => rawRequest(path, { method: 'PUT', body }),
   rawPatch: (path: string, body: any) => rawRequest(path, { method: 'PATCH', body }),
+  rawDelete: (path: string) => rawRequest(path, { method: 'DELETE' }),
 };

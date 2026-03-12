@@ -12,8 +12,11 @@ export function StoreUsersPanel() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [updatingPassword, setUpdatingPassword] = useState(false);
+  const [removingUser, setRemovingUser] = useState(false);
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
   const [passwordTarget, setPasswordTarget] = useState<any | null>(null);
+  const [removeModalOpen, setRemoveModalOpen] = useState(false);
+  const [removeTarget, setRemoveTarget] = useState<any | null>(null);
   const [passwordForm, setPasswordForm] = useState({
     newPassword: '',
     confirmPassword: '',
@@ -79,6 +82,11 @@ export function StoreUsersPanel() {
     setPasswordModalOpen(true);
   };
 
+  const openRemoveModal = (user: any) => {
+    setRemoveTarget(user);
+    setRemoveModalOpen(true);
+  };
+
   const handleUpdateUserPassword = async () => {
     if (!storeId || !passwordTarget?.id) return;
     const newPassword = String(passwordForm.newPassword || '');
@@ -106,6 +114,22 @@ export function StoreUsersPanel() {
       showToast(error?.message || 'Não foi possível atualizar a senha.', 'error');
     } finally {
       setUpdatingPassword(false);
+    }
+  };
+
+  const handleRemoveUser = async () => {
+    if (!storeId || !removeTarget?.id) return;
+    setRemovingUser(true);
+    try {
+      await storeService.deleteUser(storeId, removeTarget.id);
+      showToast('Usuário removido da loja com sucesso.', 'success');
+      setRemoveModalOpen(false);
+      setRemoveTarget(null);
+      await loadUsers();
+    } catch (error: any) {
+      showToast(error?.message || 'Não foi possível remover o usuário.', 'error');
+    } finally {
+      setRemovingUser(false);
     }
   };
 
@@ -217,6 +241,13 @@ export function StoreUsersPanel() {
                   >
                     Trocar senha
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => openRemoveModal(user)}
+                    className="h-8 rounded-lg border border-rose-200 bg-rose-50 px-2.5 text-[11px] font-semibold text-rose-700 hover:bg-rose-100"
+                  >
+                    Remover
+                  </button>
                 </div>
               </div>
             ))
@@ -268,6 +299,39 @@ export function StoreUsersPanel() {
                 className="h-10 rounded-xl bg-slate-900 px-3 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-60"
               >
                 {updatingPassword ? 'Salvando...' : 'Salvar nova senha'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {removeModalOpen && (
+        <div className="fixed inset-0 z-[1500] bg-slate-900/45 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white shadow-2xl">
+            <div className="px-4 py-3 border-b border-slate-100">
+              <p className="text-sm font-bold text-slate-900">Remover usuário da loja</p>
+              <p className="text-xs text-slate-500 mt-0.5">{removeTarget?.email || ''}</p>
+            </div>
+            <div className="p-4">
+              <p className="text-sm text-slate-700">
+                Essa ação remove o acesso do usuário ao painel desta loja. Deseja continuar?
+              </p>
+            </div>
+            <div className="px-4 py-3 border-t border-slate-100 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setRemoveModalOpen(false)}
+                disabled={removingUser}
+                className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleRemoveUser}
+                disabled={removingUser}
+                className="h-10 rounded-xl bg-rose-600 px-3 text-xs font-semibold text-white hover:bg-rose-700 disabled:opacity-60"
+              >
+                {removingUser ? 'Removendo...' : 'Confirmar remoção'}
               </button>
             </div>
           </div>

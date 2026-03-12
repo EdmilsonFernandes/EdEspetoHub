@@ -68,4 +68,9 @@ export const storeService = {
     const response = await apiClient.rawPatch(`/stores/${storeId}/users/${userId}/password`, payload);
     return toJson(response);
   },
+
+  async deleteUser(storeId: string, userId: string) {
+    const response = await apiClient.rawDelete(`/stores/${storeId}/users/${userId}`);
+    return toJson(response);
+  },
 };

@@ -45,4 +45,23 @@ export class StoreUserController {
       return respondWithError(req, res, error, 400);
     }
   }
+
+  static async remove(req: Request, res: Response) {
+    try {
+      const result = await service.removeForStore(
+        req.params.storeId,
+        req.params.userId,
+        req.auth?.storeId,
+        req.auth?.sub
+      );
+      return res.json(result);
+    } catch (error: any) {
+      log.warn('Store user remove failed', {
+        storeId: req.params.storeId,
+        userId: req.params.userId,
+        error,
+      });
+      return respondWithError(req, res, error, 400);
+    }
+  }
 }
