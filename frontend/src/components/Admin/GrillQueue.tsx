@@ -9,9 +9,6 @@ import {
   Plus,
   Minus,
   Hash,
-  SpeakerHigh,
-  SpeakerX,
-  DotsThreeVertical,
   Truck,
   Storefront,
   ForkKnife,
@@ -238,7 +235,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     const saved = localStorage.getItem("queueSoundEnabled");
     return saved ? saved === "true" : true;
   });
-  const [actionsOpen, setActionsOpen] = useState(false);
   const [activeMotoboysCount, setActiveMotoboysCount] = useState(0);
   const [closeDayModalOpen, setCloseDayModalOpen] = useState(false);
   const [isPrintingDaySummary, setIsPrintingDaySummary] = useState(false);
@@ -792,17 +788,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(Date.now()), 1000);
     return () => clearInterval(timer);
-  }, []);
-
-  useEffect(() => {
-    const handleClick = (event) => {
-      const target = event.target as HTMLElement;
-      if (!target.closest("[data-queue-actions]")) {
-        setActionsOpen(false);
-      }
-    };
-    document.addEventListener("click", handleClick);
-    return () => document.removeEventListener("click", handleClick);
   }, []);
 
   const handleAdvance = async (orderId, status) => {
@@ -1477,7 +1462,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
 
   return (
     <>
-    <div className={`no-print ${tvMode ? "space-y-6 rounded-3xl bg-slate-900/95 p-4 sm:p-6 text-white" : "space-y-2"}`}>
+    <div className={`no-print ${tvMode ? "space-y-6 rounded-3xl bg-slate-900/95 p-4 sm:p-6 text-white" : "space-y-1"}`}>
       <style>{`
         @keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
         @keyframes drawerIn{0%{transform:translateX(100%)}100%{transform:translateX(0)}}
@@ -1486,7 +1471,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         <div className="flex flex-col gap-2 mb-1 border-b border-slate-100 pb-2">
           {!tvMode ? (
             <>
-              <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex w-full items-center">
                 <div className="inline-flex w-full sm:w-auto items-center gap-1 rounded-lg bg-slate-100 p-1 overflow-x-auto [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
                   {[
                     { id: 'queue', label: 'Pedidos', count: allActiveQueue.length },
@@ -1515,86 +1500,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                       </span>
                     </button>
                   ))}
-                </div>
-
-                <div className="flex w-full sm:w-auto items-center gap-2 overflow-x-auto [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden whitespace-nowrap sm:justify-end">
-                  <span className="text-[11px] sm:text-xs font-medium text-slate-700 bg-orange-50 border border-orange-100 px-2 py-1 rounded-md whitespace-nowrap">
-                    Pedidos ativos: {allActiveQueue.length}
-                  </span>
-                  {queueMetrics.late > 0 && (
-                    <span className="text-[11px] sm:text-xs font-semibold text-red-700 bg-red-50 border border-red-100 px-2 py-1 rounded-md whitespace-nowrap animate-pulse">
-                      Prazo estourado: {queueMetrics.late}
-                    </span>
-                  )}
-                  <div className="relative" data-queue-actions>
-                    <button
-                      type="button"
-                      onClick={() => setActionsOpen((prev) => !prev)}
-                      className="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-medium text-slate-600 bg-slate-50 px-2 py-1 rounded-md hover:bg-slate-100 transition-colors whitespace-nowrap"
-                    >
-                      <DotsThreeVertical size={14} weight="duotone" />
-                      Opções
-                    </button>
-                    {actionsOpen && (
-                      <div className="absolute right-0 mt-2 w-52 rounded-xl border border-gray-200 bg-white shadow-lg overflow-hidden z-20">
-                        <button
-                          onClick={() => {
-                            toggleTvMode();
-                            setActionsOpen(false);
-                          }}
-                          className="w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                        >
-                          <Monitor size={16} weight="duotone" />
-                          Ativar modo TV
-                        </button>
-                        <button
-                          onClick={() => {
-                            handleToggleSound();
-                            setActionsOpen(false);
-                          }}
-                          className="w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                        >
-                          {soundEnabled ? <SpeakerHigh size={16} weight="duotone" /> : <SpeakerX size={16} weight="duotone" />}
-                          {soundEnabled ? "Som ligado" : "Som desligado"}
-                        </button>
-                        <button
-                          onClick={() => {
-                            if (!soundEnabled) {
-                              setSoundEnabled(true);
-                            }
-                            ensureAudioContext().then(() => playNewOrderSound()).catch(() => {});
-                            setActionsOpen(false);
-                          }}
-                          className="w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                        >
-                          <SpeakerHigh size={16} weight="duotone" />
-                          Testar som
-                        </button>
-                        {isAdminUser && (
-                          <button
-                            onClick={() => {
-                              setCloseDayModalOpen(true);
-                              setActionsOpen(false);
-                            }}
-                            className="w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                          >
-                            <CheckSquare size={16} weight="duotone" />
-                            Fechar dia
-                          </button>
-                        )}
-                        <button
-                          onClick={() => {
-                            loadQueue();
-                            setActionsOpen(false);
-                          }}
-                          className="w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                        >
-                          <ArrowsClockwise size={16} weight="duotone" />
-                          Atualizar fila
-                        </button>
-                      </div>
-                    )}
-                  </div>
                 </div>
               </div>
 
@@ -1720,7 +1625,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                   onPrint={() => handlePrintOrder(order, index + 1)}
                   archived={isArchived}
                   onClick={() => {
-                    setActionsOpen(false);
                     setConfirmModal(null);
                     setSelectedOrder(order);
                   }}
