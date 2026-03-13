@@ -2347,24 +2347,9 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       )}
 
       {activeTab === 'completed' && (
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 sm:p-6">
-          <div className="mb-4 rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-50 via-white to-teal-50 p-4 shadow-[0_16px_32px_-26px_rgba(16,185,129,0.4)]">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className="text-[11px] uppercase tracking-[0.2em] font-bold text-emerald-700">
-                  {isAdminUser ? 'Faturamento & Relatórios' : 'Pedidos Finalizados'}
-                </p>
-                <p className="text-sm text-slate-600 mt-0.5">
-                  {isAdminUser
-                    ? 'Resumo de vendas com filtro de período e comparativo.'
-                    : 'Pedidos concluídos no período para acompanhamento operacional.'}
-                </p>
-              </div>
-              <span className="inline-flex items-center rounded-full border border-emerald-200 bg-white px-3 py-1 text-xs font-semibold text-emerald-700">
-                {reportSummary.ordersCount} pedido(s)
-              </span>
-            </div>
-            <div className="mt-3 flex flex-wrap items-center gap-2">
+        <div className="bg-slate-50 rounded-2xl border border-slate-200 shadow-sm p-3 sm:p-5">
+          <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-3 sm:p-4 shadow-sm">
+            <div className="flex items-center gap-2 overflow-x-auto [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden whitespace-nowrap">
               {[
                 { id: 'today', label: 'Hoje' },
                 { id: 'yesterday', label: 'Ontem' },
@@ -2377,8 +2362,8 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                   onClick={() => setReportRange(period.id as any)}
                   className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
                     reportRange === period.id
-                      ? 'bg-slate-900 border-slate-900 text-white'
-                      : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                      ? 'bg-amber-500 border-amber-500 text-white shadow-sm'
+                      : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-white'
                   }`}
                 >
                   {period.label}
@@ -2401,52 +2386,79 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                 />
               </div>
             )}
+          </div>
+
+          <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm relative overflow-hidden">
+            <p className="text-xs uppercase tracking-[0.18em] font-bold text-slate-500">
+              {isAdminUser ? 'Faturamento' : 'Pedidos finalizados'}
+            </p>
+            <p className="mt-2 text-3xl font-black tracking-tight text-slate-900">
+              {isAdminUser ? formatCurrency(reportSummary.sales) : `${reportSummary.ordersCount}`}
+            </p>
+            <p className="text-xs text-slate-500 mt-1">
+              {isAdminUser ? 'Total vendido no período' : 'Pedidos concluídos no período'}
+            </p>
+            {isAdminUser && (
+              <span className={`absolute right-4 top-4 inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-bold border ${
+                reportComparison.positive
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                  : 'bg-rose-50 text-rose-700 border-rose-200'
+              }`}>
+                {reportComparison.positive ? '▲' : '▼'} {reportComparison.hasBase ? `${Math.abs(reportComparison.deltaPct).toFixed(1)}%` : 'sem base'}
+              </span>
+            )}
+          </div>
+
+          <div className="mb-4 grid grid-cols-2 gap-2.5">
             {isAdminUser ? (
-              <div className="mt-3 space-y-2">
-                <div className="rounded-xl border border-slate-200 bg-white px-3 py-2">
-                  <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500">Dinheiro em caixa (período)</p>
-                  <div className="mt-1 grid grid-cols-1 sm:grid-cols-3 gap-2">
-                    <div className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5">
-                      <p className="text-[10px] text-slate-500">Pix</p>
-                      <p className="text-sm font-black text-slate-900">{formatCurrency(reportSummary.pix)}</p>
-                    </div>
-                    <div className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5">
-                      <p className="text-[10px] text-slate-500">Dinheiro</p>
-                      <p className="text-sm font-black text-slate-900">{formatCurrency(reportSummary.cash)}</p>
-                    </div>
-                    <div className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5">
-                      <p className="text-[10px] text-slate-500">Cartão</p>
-                      <p className="text-sm font-black text-slate-900">{formatCurrency(reportSummary.card)}</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-2">
-                <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
-                  <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500">Vendido no período</p>
-                  <p className="text-lg font-black text-slate-900">{formatCurrency(reportSummary.sales)}</p>
-                </div>
-                <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
-                  <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500">Ticket médio</p>
-                  <p className="text-lg font-black text-slate-900">{formatCurrency(reportSummary.averageTicket)}</p>
-                </div>
-                <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
-                  <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500">Frete no período</p>
-                  <p className="text-lg font-black text-slate-900">{formatCurrency(reportSummary.deliveryFees)}</p>
-                </div>
-                <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
-                  <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500">Itens vendidos</p>
-                  <p className="text-lg font-black text-slate-900">{reportSummary.itemsCount}</p>
-                </div>
-                <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
-                  <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500">Comparativo</p>
-                  <p className={`text-lg font-black ${reportComparison.positive ? 'text-emerald-700' : 'text-rose-700'}`}>
-                    {reportComparison.positive ? '▲' : '▼'} {reportComparison.hasBase ? `${Math.abs(reportComparison.deltaPct).toFixed(1)}%` : 'Sem base'}
+              <>
+                <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 shadow-sm">
+                  <p className="text-[10px] text-slate-500 inline-flex items-center gap-1">
+                    <Clock size={12} weight="duotone" /> Ticket médio
+                  </p>
+                  <p className="text-base font-black text-slate-900 mt-1">
+                    {formatCurrency(reportSummary.averageTicket)}
                   </p>
                 </div>
-              </div>
-              </div>
-            ) : null}
+                <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 shadow-sm">
+                  <p className="text-[10px] text-slate-500 inline-flex items-center gap-1">
+                    <Hash size={12} weight="duotone" /> Qtd pedidos
+                  </p>
+                  <p className="text-base font-black text-slate-900 mt-1">{reportSummary.ordersCount}</p>
+                </div>
+                <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 shadow-sm">
+                  <p className="text-[10px] text-slate-500 inline-flex items-center gap-1">
+                    <CheckSquare size={12} weight="duotone" /> Itens vendidos
+                  </p>
+                  <p className="text-base font-black text-slate-900 mt-1">{reportSummary.itemsCount}</p>
+                </div>
+                <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 shadow-sm">
+                  <p className="text-[10px] text-slate-500 inline-flex items-center gap-1">
+                    <Truck size={12} weight="duotone" /> Total frete
+                  </p>
+                  <p className="text-base font-black text-slate-900 mt-1">
+                    {formatCurrency(reportSummary.deliveryFees)}
+                  </p>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 shadow-sm">
+                  <p className="text-[10px] text-slate-500 inline-flex items-center gap-1">
+                    <Hash size={12} weight="duotone" /> Qtd pedidos
+                  </p>
+                  <p className="text-base font-black text-slate-900 mt-1">{reportSummary.ordersCount}</p>
+                </div>
+                <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 shadow-sm">
+                  <p className="text-[10px] text-slate-500 inline-flex items-center gap-1">
+                    <CheckSquare size={12} weight="duotone" /> Itens vendidos
+                  </p>
+                  <p className="text-base font-black text-slate-900 mt-1">{reportSummary.itemsCount}</p>
+                </div>
+              </>
+            )}
           </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
             {pagedCompleted.map((order) => (
               <div
