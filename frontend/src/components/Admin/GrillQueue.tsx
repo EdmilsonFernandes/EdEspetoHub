@@ -53,6 +53,7 @@ const OrderSummaryCard = ({
   onPrint,
   canPrint,
   printBusy,
+  archived = false,
 }: any) => (
   (() => {
     const isDelivery = String(order?.type || '').toLowerCase() === 'delivery';
@@ -70,7 +71,7 @@ const OrderSummaryCard = ({
         onClick();
       }
     }}
-    className={`w-full rounded-xl border ${isLate ? 'border-red-300' : 'border-slate-200'} ${leftAccent} bg-white p-3 text-left flex flex-col gap-2 transition-all duration-300 transition-transform hover:border-slate-300 hover:shadow-lg hover:-translate-y-0.5 hover:scale-[1.01] cursor-pointer`}
+    className={`w-full rounded-xl border ${isLate ? 'border-red-300' : 'border-slate-200'} ${leftAccent} ${archived ? 'bg-slate-50/90 opacity-90' : 'bg-white'} p-3 text-left flex flex-col gap-2 transition-all duration-300 transition-transform hover:border-slate-300 hover:shadow-lg hover:-translate-y-0.5 hover:scale-[1.01] cursor-pointer`}
   >
     <div className="grid grid-cols-[auto_1fr_auto] items-start gap-2">
       <div className="min-w-0">
@@ -245,7 +246,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     if (typeof window === "undefined") return false;
     return localStorage.getItem("queueTvMode") === "true";
   });
-  const [queueFilter, setQueueFilter] = useState<'pending' | 'preparing' | 'ready' | 'late'>('pending');
+  const [queueFilter, setQueueFilter] = useState<'all' | 'pending' | 'preparing' | 'ready' | 'late' | 'finalized'>('all');
   const [reportRange, setReportRange] = useState<'today' | 'yesterday' | 'last7' | 'custom'>('today');
   const [reportFrom, setReportFrom] = useState(() => getNowKeyInSaoPaulo());
   const [reportTo, setReportTo] = useState(() => getNowKeyInSaoPaulo());
@@ -808,8 +809,8 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     const previousQueue = queue;
     try {
       setUpdating(orderId);
-      // Mantém a operação previsível: volta para pendentes após qualquer ação.
-      setQueueFilter('pending');
+      // Mantém visão panorâmica após qualquer ação.
+      setQueueFilter('all');
       // Atualização otimista para o pedido sumir/andar imediatamente na UI.
       setQueue((prev) =>
         prev.map((order) =>
@@ -997,6 +998,10 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   const completedToday = useMemo(() => {
     const todayKey = getNowKeyInSaoPaulo();
     return completedOrders.filter((order) => getDayKeyInSaoPaulo(order.createdAt) === todayKey);
+  }, [completedOrders]);
+  const completedRecent12h = useMemo(() => {
+    const since = Date.now() - 12 * 60 * 60 * 1000;
+    return completedOrders.filter((order) => Number(order?.createdAt || 0) >= since);
   }, [completedOrders]);
   const reportCompleted = useMemo(() => {
     const todayKey = getNowKeyInSaoPaulo();
@@ -1187,22 +1192,30 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     return { pending, preparing, ready, late, avgMs, oldest };
   }, [productionQueue, currentTime, PREP_SLA_MS]);
 
+  const allActiveQueue = useMemo(() => {
+    const activeStatuses = new Set([ 'pending', 'preparing', 'ready', 'waiting_for_motoboy', 'ready_for_delivery', 'in_delivery' ]);
+    return [...queue]
+      .filter((order) => activeStatuses.has(String(order?.status || '').toLowerCase()))
+      .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+  }, [queue]);
   const filteredProductionQueue = useMemo(() => {
-    if (queueFilter === 'pending') return productionQueue.filter((order) => order.status === 'pending');
-    if (queueFilter === 'preparing') return productionQueue.filter((order) => order.status === 'preparing');
+    if (queueFilter === 'all') return allActiveQueue;
+    if (queueFilter === 'finalized') return completedRecent12h;
+    if (queueFilter === 'pending') return allActiveQueue.filter((order) => order.status === 'pending');
+    if (queueFilter === 'preparing') return allActiveQueue.filter((order) => order.status === 'preparing');
     if (queueFilter === 'ready') {
-      return productionQueue.filter((order) => order.status === 'ready');
+      return allActiveQueue.filter((order) => order.status === 'ready');
     }
     if (queueFilter === 'late') {
       const now = Date.now();
-      return productionQueue.filter((order) => {
+      return allActiveQueue.filter((order) => {
         const createdAt = order?.createdAt ? new Date(order.createdAt).getTime() : now;
         const ageMs = Math.max(0, now - createdAt);
         return ageMs > PREP_SLA_MS;
       });
     }
-    return productionQueue;
-  }, [productionQueue, queueFilter, currentTime, PREP_SLA_MS]);
+    return allActiveQueue;
+  }, [allActiveQueue, completedRecent12h, queueFilter, currentTime, PREP_SLA_MS]);
   const selectedOrderRank = useMemo(() => {
     if (!selectedOrder?.id) return 1;
     const idx = filteredProductionQueue.findIndex((order) => order.id === selectedOrder.id);
@@ -1476,7 +1489,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
               <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div className="inline-flex w-full sm:w-auto items-center gap-1 rounded-lg bg-slate-100 p-1 overflow-x-auto [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
                   {[
-                    { id: 'queue', label: 'Pedidos', count: productionQueue.length },
+                    { id: 'queue', label: 'Pedidos', count: allActiveQueue.length },
                     { id: 'inroute', label: 'Em rota', count: inRouteQueue.length },
                     {
                       id: 'completed',
@@ -1506,7 +1519,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
 
                 <div className="flex w-full sm:w-auto items-center gap-2 overflow-x-auto [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden whitespace-nowrap sm:justify-end">
                   <span className="text-[11px] sm:text-xs font-medium text-slate-700 bg-orange-50 border border-orange-100 px-2 py-1 rounded-md whitespace-nowrap">
-                    Pedidos ativos: {productionQueue.length}
+                    Pedidos ativos: {allActiveQueue.length}
                   </span>
                   {queueMetrics.late > 0 && (
                     <span className="text-[11px] sm:text-xs font-semibold text-red-700 bg-red-50 border border-red-100 px-2 py-1 rounded-md whitespace-nowrap animate-pulse">
@@ -1588,10 +1601,12 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
               {activeTab === 'queue' && (
                 <div className="flex flex-nowrap items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
                   {[
+                    { id: 'all', label: 'Todos', value: allActiveQueue.length },
                     { id: 'pending', label: 'Pendentes', value: queueMetrics.pending },
                     { id: 'preparing', label: 'Em atendimento', value: queueMetrics.preparing },
                     { id: 'ready', label: 'Prontos', value: queueMetrics.ready },
                     { id: 'late', label: 'Atrasados', value: queueMetrics.late },
+                    { id: 'finalized', label: 'Finalizados', value: completedRecent12h.length },
                   ].map((kpi) => (
                     <button
                       key={kpi.id}
@@ -1605,7 +1620,11 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                     >
                       <span>{kpi.label}</span>
                       <span className={`px-2 py-0.5 rounded-full text-xs ${
-                        queueFilter === kpi.id ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
+                        queueFilter === kpi.id
+                          ? 'bg-white/20 text-white'
+                          : Number(kpi.value) === 0
+                            ? 'bg-slate-100 text-slate-400'
+                            : 'bg-slate-100 text-slate-600'
                       }`}>
                         {kpi.value}
                       </span>
@@ -1675,7 +1694,8 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3 px-0 sm:px-0">
             {filteredProductionQueue.map((order, index) => {
               const orderAgeMs = order?.createdAt ? Date.now() - new Date(order.createdAt).getTime() : 0;
-              const isLate = orderAgeMs > PREP_SLA_MS;
+              const isArchived = queueFilter === 'finalized';
+              const isLate = !isArchived && orderAgeMs > PREP_SLA_MS;
               const statusMeta = getStatusStyles(order.status, order.type);
               const typeMeta = orderTypeMeta(order);
               const paymentLabel = getPaymentMethodMeta(order.payment).label;
@@ -1698,6 +1718,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                   printBusy={isGeneratingPrint}
                   canPrint={hasPrintAccess}
                   onPrint={() => handlePrintOrder(order, index + 1)}
+                  archived={isArchived}
                   onClick={() => {
                     setActionsOpen(false);
                     setConfirmModal(null);
