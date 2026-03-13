@@ -70,7 +70,7 @@ const OrderSummaryCard = ({
         onClick();
       }
     }}
-    className={`w-full rounded-xl border ${isLate ? 'border-red-400 animate-pulse' : 'border-slate-200'} ${leftAccent} bg-white p-3 text-left flex flex-col gap-2 transition-all duration-300 transition-transform hover:border-slate-300 hover:shadow-lg hover:-translate-y-0.5 hover:scale-[1.01] cursor-pointer`}
+    className={`w-full rounded-xl border ${isLate ? 'border-red-300' : 'border-slate-200'} ${leftAccent} bg-white p-3 text-left flex flex-col gap-2 transition-all duration-300 transition-transform hover:border-slate-300 hover:shadow-lg hover:-translate-y-0.5 hover:scale-[1.01] cursor-pointer`}
   >
     <div className="grid grid-cols-[auto_1fr_auto] items-start gap-2">
       <div className="min-w-0">
@@ -150,6 +150,23 @@ export const GrillQueue = () => {
       month: '2-digit',
       day: '2-digit',
     }).format(new Date());
+  const getMinutesInSaoPaulo = (value?: number | string | Date | null) => {
+    if (!value) return 0;
+    try {
+      const date = new Date(value);
+      const parts = new Intl.DateTimeFormat('pt-BR', {
+        timeZone: SAO_PAULO_TZ,
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      }).formatToParts(date);
+      const hour = Number(parts.find((part) => part.type === 'hour')?.value || 0);
+      const minute = Number(parts.find((part) => part.type === 'minute')?.value || 0);
+      return hour * 60 + minute;
+    } catch {
+      return 0;
+    }
+  };
   const resolvePaymentBucket = (payment: unknown): 'pix' | 'cash' | 'card' => {
     const normalized = String(payment || '').toLowerCase();
     if (normalized.includes('pix')) return 'pix';
@@ -451,11 +468,31 @@ export const GrillQueue = () => {
     const total = Number(order?.total || 0);
     const safeFee = Number.isFinite(fee) ? fee : 0;
     const itemsTotal = Math.max(0, total - safeFee);
-    return { fee: safeFee, total, itemsTotal };
+    const itemsVolume = (order?.items || []).reduce((sum: number, item: any) => sum + Number(item?.qty || 0), 0);
+    return { fee: safeFee, total, itemsTotal, itemsVolume };
   };
 
   const renderMoneyBreakdown = (order: any, alignRight = false) => {
-    const { fee, total, itemsTotal } = calcMoney(order);
+    const { fee, total, itemsVolume } = calcMoney(order);
+    if (fee <= 0) {
+      return (
+        <div
+          className={[
+            'grid w-full min-w-0 grid-cols-1 gap-2 text-[10px] sm:grid-cols-2 sm:text-[11px] font-semibold',
+            alignRight ? 'sm:ml-auto' : '',
+          ].join(' ')}
+        >
+          <span className="flex min-w-0 flex-col rounded-xl border border-slate-200 bg-white px-2.5 py-1.5">
+            <span className="text-slate-500 font-semibold text-[10px]">Volume</span>
+            <span className="truncate">{itemsVolume} {itemsVolume === 1 ? 'item' : 'itens'}</span>
+          </span>
+          <span className="flex min-w-0 flex-col rounded-xl border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-emerald-700">
+            <span className="text-emerald-600 font-semibold text-[10px]">Total</span>
+            <span className="truncate">{formatCurrency(total)}</span>
+          </span>
+        </div>
+      );
+    }
     return (
       <div
         className={[
@@ -464,8 +501,8 @@ export const GrillQueue = () => {
         ].join(' ')}
       >
         <span className="flex min-w-0 flex-col rounded-xl border border-slate-200 bg-white/70 px-2.5 py-1.5">
-          <span className="text-slate-500 font-semibold text-[10px]">Itens</span>
-          <span className="truncate">{formatCurrency(itemsTotal)}</span>
+          <span className="text-slate-500 font-semibold text-[10px]">Volume</span>
+          <span className="truncate">{itemsVolume} {itemsVolume === 1 ? 'item' : 'itens'}</span>
         </span>
         <span className="flex min-w-0 flex-col rounded-xl border border-slate-200 bg-slate-100 px-2.5 py-1.5">
           <span className="text-slate-500 font-semibold text-[10px]">Frete</span>
@@ -988,6 +1025,32 @@ export const GrillQueue = () => {
     );
     return totals;
   }, [completedToday]);
+  const salesVsYesterday = useMemo(() => {
+    const completedStatuses = new Set([ 'done', 'delivered', 'finished' ]);
+    const now = Date.now();
+    const yesterdayKey = getDayKeyInSaoPaulo(now - 24 * 60 * 60 * 1000);
+    const currentMinutes = getMinutesInSaoPaulo(now);
+    const yesterdayUntilNow = queue
+      .filter((order) => {
+        if (!completedStatuses.has(order.status)) return false;
+        if (getDayKeyInSaoPaulo(order.createdAt) !== yesterdayKey) return false;
+        return getMinutesInSaoPaulo(order.createdAt) <= currentMinutes;
+      })
+      .reduce((sum, order) => {
+        const { total } = calcMoney(order);
+        return sum + (Number.isFinite(total) ? total : 0);
+      }, 0);
+    const today = Number(dailySalesSummary.total || 0);
+    const delta = today - yesterdayUntilNow;
+    const deltaPct = yesterdayUntilNow > 0 ? (delta / yesterdayUntilNow) * 100 : 0;
+    return {
+      yesterdayUntilNow,
+      delta,
+      deltaPct,
+      positive: delta >= 0,
+      hasBase: yesterdayUntilNow > 0,
+    };
+  }, [queue, dailySalesSummary.total]);
   const handlePrintDailySummary = async () => {
     if (isPrintingDaySummary) return;
     const nowLabel = new Date().toLocaleString('pt-BR', { timeZone: SAO_PAULO_TZ });
@@ -1357,7 +1420,7 @@ export const GrillQueue = () => {
                     Pedidos ativos: {productionQueue.length}
                   </span>
                   {queueMetrics.late > 0 && (
-                    <span className="text-[11px] sm:text-xs font-semibold text-red-700 bg-red-50 border border-red-100 px-2 py-1 rounded-md whitespace-nowrap">
+                    <span className="text-[11px] sm:text-xs font-semibold text-red-700 bg-red-50 border border-red-100 px-2 py-1 rounded-md whitespace-nowrap animate-pulse">
                       Prazo estourado: {queueMetrics.late}
                     </span>
                   )}
@@ -1462,32 +1525,33 @@ export const GrillQueue = () => {
                   ))}
                 </div>
               )}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 flex items-center justify-between">
-                  <div>
-                    <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500 font-bold">Pedidos Ativos</p>
-                    <p className="text-lg font-black text-slate-900">{productionQueue.length}</p>
+              {activeTab === 'queue' && (
+                <div className="sticky top-2 z-20 rounded-xl border border-slate-200 bg-white/95 backdrop-blur px-3 py-2 shadow-sm">
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] sm:text-xs">
+                    {isAdminUser ? (
+                      <>
+                        <span className="font-semibold text-slate-600">Vendas hoje</span>
+                        <span className="font-black text-emerald-700">{formatCurrency(dailySalesSummary.total)}</span>
+                        <span className={`inline-flex items-center gap-1 font-semibold ${salesVsYesterday.positive ? 'text-emerald-600' : 'text-rose-600'}`}>
+                          {salesVsYesterday.positive ? '▲' : '▼'}
+                          {salesVsYesterday.hasBase ? `${Math.abs(salesVsYesterday.deltaPct).toFixed(1)}% vs ontem` : 'sem base de ontem'}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="font-semibold text-slate-600">Pedidos hoje</span>
+                        <span className="font-black text-slate-900">{dailySalesSummary.orders}</span>
+                      </>
+                    )}
+                    <span className="text-slate-300">|</span>
+                    <span className="font-semibold text-slate-600">Qtd pedidos</span>
+                    <span className="font-black text-slate-900">{dailySalesSummary.orders}</span>
+                    <span className="text-slate-300">|</span>
+                    <span className="font-semibold text-slate-600">Ticket médio</span>
+                    <span className="font-black text-slate-900">{formatCurrency(dailySalesSummary.orders > 0 ? dailySalesSummary.total / dailySalesSummary.orders : 0)}</span>
                   </div>
-                  <Hash size={18} weight="duotone" className="text-slate-400" />
                 </div>
-                {isAdminUser ? (
-                  <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 flex items-center justify-between">
-                    <div>
-                      <p className="text-[10px] uppercase tracking-[0.14em] text-emerald-700 font-bold">Vendas de Hoje (R$)</p>
-                      <p className="text-lg font-black text-emerald-800">{formatCurrency(dailySalesSummary.total)}</p>
-                    </div>
-                    <Clock size={18} weight="duotone" className="text-emerald-500" />
-                  </div>
-                ) : (
-                  <div className="rounded-xl border border-slate-200 bg-white px-3 py-2 flex items-center justify-between">
-                    <div>
-                      <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500 font-bold">Pedidos realizados</p>
-                      <p className="text-lg font-black text-slate-900">{dailySalesSummary.orders}</p>
-                    </div>
-                    <CheckSquare size={18} weight="duotone" className="text-slate-400" />
-                  </div>
-                )}
-              </div>
+              )}
             </>
           ) : (
             <div className="flex items-center justify-between gap-2">
@@ -1764,7 +1828,7 @@ export const GrillQueue = () => {
                     </span>
                   </div>
                   {isLate && (
-                    <span className="px-2 py-0.5 text-[10px] font-bold rounded-full border bg-rose-100 text-rose-700 border-rose-200">
+                    <span className="px-2 py-0.5 text-[10px] font-bold rounded-full border bg-rose-100 text-rose-700 border-rose-200 animate-pulse">
                       Prazo estourado
                     </span>
                   )}
@@ -1945,6 +2009,7 @@ export const GrillQueue = () => {
 	                  ? Number(confirmModal.deliveryFee)
 	                  : 0;
 	              const itemsSubtotal = Math.max(0, totalValue - (Number.isFinite(deliveryFeeValue) ? deliveryFeeValue : 0));
+                const itemsVolume = (confirmModal.items || []).reduce((sum, item) => sum + Number(item?.qty || 0), 0);
               const cashValue = Number((cashConfirmValue || '').toString().replace(',', '.'));
               const cashValid = !isCashPayment || (cashConfirmValue && !Number.isNaN(cashValue) && cashValue >= totalValue);
               const changeValue = isCashPayment && cashValid ? cashValue - totalValue : 0;
@@ -1988,11 +2053,19 @@ export const GrillQueue = () => {
                 </span>
               </div>
 	              <div className="flex items-center justify-between">
-	                <span>Itens</span>
+	                <span>Volume</span>
 	                <span className="px-3 py-1 rounded-full bg-white text-slate-700 border border-slate-200 text-sm font-bold">
-	                  {formatCurrency(itemsSubtotal)}
+	                  {itemsVolume} {itemsVolume === 1 ? 'item' : 'itens'}
 	                </span>
 	              </div>
+                {itemsSubtotal !== totalValue && (
+	                <div className="flex items-center justify-between">
+	                  <span>Subtotal</span>
+	                  <span className="px-3 py-1 rounded-full bg-white text-slate-700 border border-slate-200 text-sm font-bold">
+	                    {formatCurrency(itemsSubtotal)}
+	                  </span>
+	                </div>
+                )}
 	              {confirmModal.type === 'delivery' && deliveryFeeValue > 0 && (
 	                <div className="flex items-center justify-between">
 	                  <span>Frete</span>

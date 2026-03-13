@@ -948,6 +948,39 @@ export const DashboardView = ({
                 <p className="text-xs text-slate-400">Quando vender, o ranking aparece aqui.</p>
               </div>
             </div>
+          ) : isMobile ? (
+            <div className="flex gap-3 overflow-x-auto pb-1 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
+              {sortedTopProducts.map((product, index) => {
+                const maxQty = sortedTopProducts[0]?.qty || 1;
+                const percent = Math.max(8, Math.round((product.qty / maxQty) * 100));
+                return (
+                  <div
+                    key={`${product.name}-${index}`}
+                    className="min-w-[210px] rounded-xl border border-slate-200 bg-gradient-to-r from-white via-slate-50 to-white px-3 py-2"
+                  >
+                    <div className="flex items-center justify-between text-sm text-slate-700">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span
+                          className="h-2.5 w-2.5 rounded-full"
+                          style={{ background: COLORS[index % COLORS.length] }}
+                        />
+                        <span className="font-semibold truncate">{product.name}</span>
+                      </div>
+                      <span className="text-xs text-slate-500">{product.qty}x</span>
+                    </div>
+                    <div className="mt-2 h-2 rounded-full bg-slate-100 overflow-hidden">
+                      <div
+                        className="h-full rounded-full"
+                        style={{
+                          width: `${percent}%`,
+                          background: COLORS[index % COLORS.length],
+                        }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           ) : (
             <div className="space-y-3">
               {sortedTopProducts.map((product, index) => {
