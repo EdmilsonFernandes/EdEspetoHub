@@ -11,6 +11,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { formatCurrency, formatPhoneInput } from "../../utils/format";
+import { APP_TIMEZONE } from "../../utils/format";
 import { exportToCsv } from "../../utils/export";
 
 const COLORS = ["var(--color-primary)", "var(--color-secondary)", "#10b981", "#3b82f6"];
@@ -160,7 +161,12 @@ export const DashboardView = ({
     if (!raw) return null;
     const date = raw instanceof Date ? raw : new Date(raw);
     if (Number.isNaN(date.getTime())) return null;
-    return date.toISOString().slice(0, 10);
+    return new Intl.DateTimeFormat('en-CA', {
+      timeZone: APP_TIMEZONE,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).format(date);
   };
 
   const resolveDateLabel = (key) => {
@@ -191,7 +197,11 @@ export const DashboardView = ({
     orders.forEach((order) => {
       const ts = resolveTimestamp(order);
       if (!ts) return;
-      const key = new Date(ts).toISOString().slice(0, 7);
+      const key = new Intl.DateTimeFormat('en-CA', {
+        timeZone: APP_TIMEZONE,
+        year: 'numeric',
+        month: '2-digit',
+      }).format(new Date(ts));
       set.add(key);
     });
     const sorted = Array.from(set).sort((a, b) => (a > b ? -1 : 1));

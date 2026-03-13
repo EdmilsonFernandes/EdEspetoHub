@@ -245,6 +245,31 @@ export class OrderRepository
       .getRawMany();
   }
 
+  async findTopItemsByStoreToday(storeId: string, limit = 3, tz = process.env.APP_TZ || 'America/Sao_Paulo')
+  {
+    return AppDataSource.getRepository(OrderItem)
+      .createQueryBuilder('oi')
+      .innerJoin('oi.order', 'o')
+      .innerJoin('oi.product', 'p')
+      .select('p.id', 'productId')
+      .addSelect('p.name', 'name')
+      .addSelect('p.image_url', 'imageUrl')
+      .addSelect('p.price', 'price')
+      .addSelect('SUM(oi.quantity)', 'qty')
+      .addSelect('SUM(oi.price)', 'total')
+      .where('o.store_id = :storeId', { storeId })
+      .andWhere("o.created_at >= (date_trunc('day', now() AT TIME ZONE :tz) AT TIME ZONE :tz)", { tz })
+      .andWhere("o.created_at < ((date_trunc('day', now() AT TIME ZONE :tz) + interval '1 day') AT TIME ZONE :tz)", { tz })
+      .andWhere('o.status != :cancelled', { cancelled: 'cancelled' })
+      .groupBy('p.id')
+      .addGroupBy('p.name')
+      .addGroupBy('p.image_url')
+      .addGroupBy('p.price')
+      .orderBy('qty', 'DESC')
+      .limit(limit)
+      .getRawMany();
+  }
+
   async markItemsAsPrinted(orderId: string, itemIds?: string[]) {
     const normalizedIds = Array.isArray(itemIds)
       ? itemIds.map((id) => String(id || '').trim()).filter(Boolean)

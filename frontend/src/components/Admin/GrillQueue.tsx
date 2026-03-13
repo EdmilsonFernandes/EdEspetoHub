@@ -300,7 +300,9 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       order,
       queueRank,
       orderDisplayId: formatOrderDisplayId(order.id, storeSlug),
-      createdAt: order?.createdAt ? new Date(order.createdAt).toLocaleString('pt-BR') : new Date().toLocaleString('pt-BR'),
+      createdAt: order?.createdAt
+        ? new Date(order.createdAt).toLocaleString('pt-BR', { timeZone: SAO_PAULO_TZ })
+        : new Date().toLocaleString('pt-BR', { timeZone: SAO_PAULO_TZ }),
       items: itemsToPrint,
       total:
         mode === 'new'
@@ -1619,7 +1621,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
               </span>
               <span className="flex items-center gap-2 text-xs font-semibold text-white/70">
                 <Clock size={14} weight="duotone" />
-                {new Date(currentTime).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                {new Date(currentTime).toLocaleTimeString("pt-BR", { timeZone: SAO_PAULO_TZ, hour: "2-digit", minute: "2-digit" })}
               </span>
               <button
                 type="button"

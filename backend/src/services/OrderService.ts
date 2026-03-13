@@ -36,6 +36,7 @@ export class OrderService
   private productRepository = new ProductRepository();
   private deliveryBillingService = new DeliveryBillingService();
   private subscriptionService = new SubscriptionService();
+  private tz = process.env.APP_TZ || 'America/Sao_Paulo';
 
   private async reconcileDeliveredOrdersByStore(storeId: string) {
     if (!storeId) return;
@@ -264,9 +265,7 @@ export class OrderService
   {
     const store = await this.storeRepository.findBySlug(slug);
     if (!store) throw new AppError('STORE-001', 404);
-    const since = new Date();
-    since.setHours(0, 0, 0, 0);
-    const rows = await this.orderRepository.findTopItemsByStoreSince(store.id, since, limit);
+    const rows = await this.orderRepository.findTopItemsByStoreToday(store.id, limit, this.tz);
     return rows.map((row) => ({
       productId: row.productId,
       name: row.name,

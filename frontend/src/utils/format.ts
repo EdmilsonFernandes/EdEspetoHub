@@ -1,4 +1,6 @@
-﻿export const formatCurrency = (value: number | string | null | undefined) => {
+export const APP_TIMEZONE = 'America/Sao_Paulo';
+
+export const formatCurrency = (value: number | string | null | undefined) => {
   const numeric = Number(value);
   const safeValue = Number.isFinite(numeric) ? numeric : 0;
   return safeValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -6,18 +8,22 @@
 
 export const formatDateTime = (timestamp: Date | number | string | { seconds: number } | null | undefined) => {
   if (!timestamp) return '';
-  if (typeof timestamp === 'object' && 'seconds' in timestamp) {
-    return new Date(timestamp.seconds * 1000).toLocaleString('pt-BR');
-  }
-  return new Date(timestamp).toLocaleString('pt-BR');
+  const parsed =
+    typeof timestamp === 'object' && 'seconds' in timestamp
+      ? new Date(timestamp.seconds * 1000)
+      : new Date(timestamp);
+  if (Number.isNaN(parsed.getTime())) return '';
+  return parsed.toLocaleString('pt-BR', { timeZone: APP_TIMEZONE });
 };
 
 export const formatDate = (timestamp: Date | number | string | { seconds: number } | null | undefined) => {
   if (!timestamp) return '';
-  if (typeof timestamp === 'object' && 'seconds' in timestamp) {
-    return new Date(timestamp.seconds * 1000).toLocaleDateString('pt-BR');
-  }
-  return new Date(timestamp).toLocaleDateString('pt-BR');
+  const parsed =
+    typeof timestamp === 'object' && 'seconds' in timestamp
+      ? new Date(timestamp.seconds * 1000)
+      : new Date(timestamp);
+  if (Number.isNaN(parsed.getTime())) return '';
+  return parsed.toLocaleDateString('pt-BR', { timeZone: APP_TIMEZONE });
 };
 
 export const formatDuration = (milliseconds: number | null | undefined) => {
@@ -160,4 +166,5 @@ export const formatAddress = (value: unknown) => {
   const line3 = [city, state].filter(Boolean).join(' - ');
   return [line1, line2, line3, zipCode].filter(Boolean).join(' | ');
 };
+
 
