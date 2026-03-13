@@ -1476,7 +1476,11 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                   {[
                     { id: 'queue', label: 'Pedidos', count: productionQueue.length },
                     { id: 'inroute', label: 'Em rota', count: inRouteQueue.length },
-                    { id: 'completed', label: 'Faturamento & Relatórios', count: reportCompleted.length },
+                    {
+                      id: 'completed',
+                      label: isAdminUser ? 'Faturamento & Relatórios' : 'Finalizados',
+                      count: reportCompleted.length,
+                    },
                   ].map((tab) => (
                     <button
                       key={tab.id}
@@ -2324,7 +2328,9 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
           <div className="mb-4 rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-50 via-white to-teal-50 p-4 shadow-[0_16px_32px_-26px_rgba(16,185,129,0.4)]">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-[11px] uppercase tracking-[0.2em] font-bold text-emerald-700">Faturamento & Relatórios</p>
+                <p className="text-[11px] uppercase tracking-[0.2em] font-bold text-emerald-700">
+                  {isAdminUser ? 'Faturamento & Relatórios' : 'Pedidos Finalizados'}
+                </p>
                 <p className="text-sm text-slate-600 mt-0.5">
                   {isAdminUser
                     ? 'Resumo de vendas com filtro de período e comparativo.'
@@ -2373,7 +2379,25 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
               </div>
             )}
             {isAdminUser ? (
-              <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-2">
+              <div className="mt-3 space-y-2">
+                <div className="rounded-xl border border-slate-200 bg-white px-3 py-2">
+                  <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500">Dinheiro em caixa (período)</p>
+                  <div className="mt-1 grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <div className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5">
+                      <p className="text-[10px] text-slate-500">Pix</p>
+                      <p className="text-sm font-black text-slate-900">{formatCurrency(reportSummary.pix)}</p>
+                    </div>
+                    <div className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5">
+                      <p className="text-[10px] text-slate-500">Dinheiro</p>
+                      <p className="text-sm font-black text-slate-900">{formatCurrency(reportSummary.cash)}</p>
+                    </div>
+                    <div className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5">
+                      <p className="text-[10px] text-slate-500">Cartão</p>
+                      <p className="text-sm font-black text-slate-900">{formatCurrency(reportSummary.card)}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-2">
                 <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
                   <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500">Vendido no período</p>
                   <p className="text-lg font-black text-slate-900">{formatCurrency(reportSummary.sales)}</p>
@@ -2396,6 +2420,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                     {reportComparison.positive ? '▲' : '▼'} {reportComparison.hasBase ? `${Math.abs(reportComparison.deltaPct).toFixed(1)}%` : 'Sem base'}
                   </p>
                 </div>
+              </div>
               </div>
             ) : null}
           </div>
