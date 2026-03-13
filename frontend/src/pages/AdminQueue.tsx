@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { GrillQueue } from '../components/Admin/GrillQueue';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { useAuth } from '../contexts/AuthContext';
@@ -9,9 +9,15 @@ import { BookOpen, SignOut, SquaresFour } from '@phosphor-icons/react';
 export function AdminQueue() {
   const { auth, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const userRole = String(auth?.user?.role || '').toUpperCase();
   const isOperatorUser = userRole === 'OPERATOR' || userRole === 'CHURRASQUEIRO';
   const storeSlug = String(auth?.store?.slug || '').trim();
+  const forcedTab = (() => {
+    const tab = String((location.state as any)?.activeTab || '').toLowerCase();
+    if (tab === 'completed' || tab === 'inroute' || tab === 'queue') return tab;
+    return 'queue';
+  })();
 
   if (!auth?.store) {
     return (
@@ -81,7 +87,7 @@ export function AdminQueue() {
           </div>
         </div>
         <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm overflow-x-hidden">
-          <GrillQueue />
+          <GrillQueue forcedTab={forcedTab as 'queue' | 'inroute' | 'completed'} />
         </div>
       </div>
     </AdminLayout>

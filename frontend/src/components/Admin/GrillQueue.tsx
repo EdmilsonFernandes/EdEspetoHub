@@ -85,7 +85,7 @@ const OrderSummaryCard = ({
       </div>
       <div className="flex flex-col items-end gap-1">
         {hasTable && (
-          <span className="inline-flex items-center gap-1 rounded-md bg-slate-900 px-2.5 py-1 text-[12px] font-black tracking-wide text-white whitespace-nowrap">
+          <span className="inline-flex items-center gap-1 rounded-md bg-amber-500 px-2.5 py-1 text-[13px] font-black tracking-wide text-white whitespace-nowrap shadow-sm">
             <Hash size={12} weight="bold" />
             MESA {String(order.table).padStart(2, "0")}
           </span>
@@ -127,7 +127,7 @@ const OrderSummaryCard = ({
   })()
 );
 
-export const GrillQueue = () => {
+export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inroute' | 'completed' }) => {
   const SAO_PAULO_TZ = 'America/Sao_Paulo';
   const getDayKeyInSaoPaulo = (value?: number | string | Date | null) => {
     if (!value) return '';
@@ -220,7 +220,9 @@ export const GrillQueue = () => {
       return '';
     }
   }, []);
-  const [activeTab, setActiveTab] = useState<'queue' | 'inroute' | 'completed'>('queue');
+  const [activeTab, setActiveTab] = useState<'queue' | 'inroute' | 'completed'>(
+    forcedTab === 'inroute' || forcedTab === 'completed' ? forcedTab : 'queue'
+  );
   const [completedPage, setCompletedPage] = useState(1);
   const [completedPageSize, setCompletedPageSize] = useState(9);
   const [currentTime, setCurrentTime] = useState(Date.now());
@@ -243,7 +245,10 @@ export const GrillQueue = () => {
     if (typeof window === "undefined") return false;
     return localStorage.getItem("queueTvMode") === "true";
   });
-  const [queueFilter, setQueueFilter] = useState<'all' | 'pending' | 'preparing' | 'ready' | 'late'>('all');
+  const [queueFilter, setQueueFilter] = useState<'pending' | 'preparing' | 'ready' | 'late'>('pending');
+  const [reportRange, setReportRange] = useState<'today' | 'yesterday' | 'last7' | 'custom'>('today');
+  const [reportFrom, setReportFrom] = useState(() => getNowKeyInSaoPaulo());
+  const [reportTo, setReportTo] = useState(() => getNowKeyInSaoPaulo());
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
   const [isGeneratingPrint, setIsGeneratingPrint] = useState(false);
   const [printSelectionModal, setPrintSelectionModal] = useState<{
@@ -487,7 +492,7 @@ export const GrillQueue = () => {
             <span className="truncate">{itemsVolume} {itemsVolume === 1 ? 'item' : 'itens'}</span>
           </span>
           <span className="flex min-w-0 flex-col rounded-xl border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-emerald-700">
-            <span className="text-emerald-600 font-semibold text-[10px]">Total</span>
+            <span className="text-emerald-600 font-semibold text-[10px]">Total a pagar</span>
             <span className="truncate">{formatCurrency(total)}</span>
           </span>
         </div>
@@ -509,7 +514,7 @@ export const GrillQueue = () => {
           <span className="truncate">{fee > 0 ? formatCurrency(fee) : '—'}</span>
         </span>
         <span className="flex min-w-0 flex-col rounded-xl border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-emerald-700">
-          <span className="text-emerald-600 font-semibold text-[10px]">Total</span>
+          <span className="text-emerald-600 font-semibold text-[10px]">Total a pagar</span>
           <span className="truncate">{formatCurrency(total)}</span>
         </span>
       </div>
@@ -801,8 +806,8 @@ export const GrillQueue = () => {
     const previousQueue = queue;
     try {
       setUpdating(orderId);
-      // Mantém a operação previsível: sempre volta para "Todos" após qualquer ação.
-      setQueueFilter('all');
+      // Mantém a operação previsível: volta para pendentes após qualquer ação.
+      setQueueFilter('pending');
       // Atualização otimista para o pedido sumir/andar imediatamente na UI.
       setQueue((prev) =>
         prev.map((order) =>
@@ -981,26 +986,50 @@ export const GrillQueue = () => {
       .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
   }, [queue]);
 
-  const completedToday = useMemo(() => {
-    const todayKey = getNowKeyInSaoPaulo();
-    const isSameDay = (value) => getDayKeyInSaoPaulo(value) === todayKey;
+  const completedOrders = useMemo(() => {
     const completedStatuses = new Set([ 'done', 'delivered', 'finished' ]);
     return [...queue]
-      .filter((order) => completedStatuses.has(order.status) && isSameDay(order.createdAt))
+      .filter((order) => completedStatuses.has(order.status))
       .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
   }, [queue]);
-  const completedSummary = useMemo(() => {
-    const totals = completedToday.reduce(
+  const completedToday = useMemo(() => {
+    const todayKey = getNowKeyInSaoPaulo();
+    return completedOrders.filter((order) => getDayKeyInSaoPaulo(order.createdAt) === todayKey);
+  }, [completedOrders]);
+  const reportCompleted = useMemo(() => {
+    const todayKey = getNowKeyInSaoPaulo();
+    const yesterdayKey = getDayKeyInSaoPaulo(Date.now() - 24 * 60 * 60 * 1000);
+    if (reportRange === 'today') {
+      return completedOrders.filter((order) => getDayKeyInSaoPaulo(order.createdAt) === todayKey);
+    }
+    if (reportRange === 'yesterday') {
+      return completedOrders.filter((order) => getDayKeyInSaoPaulo(order.createdAt) === yesterdayKey);
+    }
+    if (reportRange === 'last7') {
+      const startMs = Date.now() - 6 * 24 * 60 * 60 * 1000;
+      return completedOrders.filter((order) => Number(order.createdAt || 0) >= startMs);
+    }
+    const from = reportFrom || todayKey;
+    const to = reportTo || from;
+    return completedOrders.filter((order) => {
+      const key = getDayKeyInSaoPaulo(order.createdAt);
+      return key >= from && key <= to;
+    });
+  }, [completedOrders, reportRange, reportFrom, reportTo]);
+  const reportSummary = useMemo(() => {
+    const totals = reportCompleted.reduce(
       (acc, order) => {
         const { total, fee } = calcMoney(order);
         acc.sales += Number.isFinite(total) ? total : 0;
         acc.deliveryFees += Number.isFinite(fee) ? fee : 0;
         acc.items += (order?.items || []).reduce((sum, item) => sum + Number(item?.qty || 0), 0);
+        const bucket = resolvePaymentBucket(order?.payment);
+        acc[bucket] += Number.isFinite(total) ? total : 0;
         return acc;
       },
-      { sales: 0, deliveryFees: 0, items: 0 }
+      { sales: 0, deliveryFees: 0, items: 0, pix: 0, cash: 0, card: 0 }
     );
-    const ordersCount = completedToday.length;
+    const ordersCount = reportCompleted.length;
     const averageTicket = ordersCount > 0 ? totals.sales / ordersCount : 0;
     return {
       ordersCount,
@@ -1008,8 +1037,11 @@ export const GrillQueue = () => {
       deliveryFees: totals.deliveryFees,
       averageTicket,
       itemsCount: totals.items,
+      pix: totals.pix,
+      cash: totals.cash,
+      card: totals.card,
     };
-  }, [completedToday]);
+  }, [reportCompleted]);
   const dailySalesSummary = useMemo(() => {
     const totals = completedToday.reduce(
       (acc, order) => {
@@ -1051,6 +1083,52 @@ export const GrillQueue = () => {
       hasBase: yesterdayUntilNow > 0,
     };
   }, [queue, dailySalesSummary.total]);
+  const reportComparison = useMemo(() => {
+    const oneDay = 24 * 60 * 60 * 1000;
+    const toDateMs = (dateKey: string, endOfDay = false) => {
+      const [year, month, day] = String(dateKey || '').split('-').map(Number);
+      if (!year || !month || !day) return Date.now();
+      const date = new Date(year, month - 1, day, endOfDay ? 23 : 0, endOfDay ? 59 : 0, endOfDay ? 59 : 0, endOfDay ? 999 : 0);
+      return date.getTime();
+    };
+    let currentStart = 0;
+    let currentEnd = Date.now();
+    if (reportRange === 'today') {
+      currentStart = toDateMs(getNowKeyInSaoPaulo());
+    } else if (reportRange === 'yesterday') {
+      const key = getDayKeyInSaoPaulo(Date.now() - oneDay);
+      currentStart = toDateMs(key);
+      currentEnd = toDateMs(key, true);
+    } else if (reportRange === 'last7') {
+      currentStart = Date.now() - 6 * oneDay;
+    } else {
+      currentStart = toDateMs(reportFrom || getNowKeyInSaoPaulo());
+      currentEnd = toDateMs(reportTo || reportFrom || getNowKeyInSaoPaulo(), true);
+    }
+    const span = Math.max(oneDay, currentEnd - currentStart + 1);
+    const prevEnd = currentStart - 1;
+    const prevStart = prevEnd - span + 1;
+    const previousSales = completedOrders
+      .filter((order) => {
+        const createdAt = Number(order?.createdAt || 0);
+        return createdAt >= prevStart && createdAt <= prevEnd;
+      })
+      .reduce((sum, order) => {
+        const { total } = calcMoney(order);
+        return sum + (Number.isFinite(total) ? total : 0);
+      }, 0);
+    const currentSales = Number(reportSummary.sales || 0);
+    const delta = currentSales - previousSales;
+    const deltaPct = previousSales > 0 ? (delta / previousSales) * 100 : 0;
+    return {
+      previousSales,
+      currentSales,
+      delta,
+      deltaPct,
+      positive: delta >= 0,
+      hasBase: previousSales > 0,
+    };
+  }, [reportRange, reportFrom, reportTo, completedOrders, reportSummary.sales]);
   const handlePrintDailySummary = async () => {
     if (isPrintingDaySummary) return;
     const nowLabel = new Date().toLocaleString('pt-BR', { timeZone: SAO_PAULO_TZ });
@@ -1082,11 +1160,11 @@ export const GrillQueue = () => {
       setIsPrintingDaySummary(false);
     }
   };
-  const completedTotalPages = Math.max(1, Math.ceil(completedToday.length / completedPageSize));
+  const completedTotalPages = Math.max(1, Math.ceil(reportCompleted.length / completedPageSize));
   const pagedCompleted = useMemo(() => {
     const start = (completedPage - 1) * completedPageSize;
-    return completedToday.slice(start, start + completedPageSize);
-  }, [completedToday, completedPage]);
+    return reportCompleted.slice(start, start + completedPageSize);
+  }, [reportCompleted, completedPage]);
 
   const queueMetrics = useMemo(() => {
     const now = Date.now();
@@ -1108,7 +1186,6 @@ export const GrillQueue = () => {
   }, [productionQueue, currentTime, PREP_SLA_MS]);
 
   const filteredProductionQueue = useMemo(() => {
-    if (queueFilter === 'all') return productionQueue;
     if (queueFilter === 'pending') return productionQueue.filter((order) => order.status === 'pending');
     if (queueFilter === 'preparing') return productionQueue.filter((order) => order.status === 'preparing');
     if (queueFilter === 'ready') {
@@ -1135,6 +1212,12 @@ export const GrillQueue = () => {
       setCompletedPage(1);
     }
   }, [activeTab]);
+
+  useEffect(() => {
+    if (forcedTab === 'queue' || forcedTab === 'inroute' || forcedTab === 'completed') {
+      setActiveTab(forcedTab);
+    }
+  }, [forcedTab]);
 
   useEffect(() => {
     if (activeTab !== 'queue') {
@@ -1393,7 +1476,7 @@ export const GrillQueue = () => {
                   {[
                     { id: 'queue', label: 'Pedidos', count: productionQueue.length },
                     { id: 'inroute', label: 'Em rota', count: inRouteQueue.length },
-                    { id: 'completed', label: 'Finalizados hoje', count: completedToday.length },
+                    { id: 'completed', label: 'Faturamento & Relatórios', count: reportCompleted.length },
                   ].map((tab) => (
                     <button
                       key={tab.id}
@@ -1499,7 +1582,6 @@ export const GrillQueue = () => {
               {activeTab === 'queue' && (
                 <div className="flex flex-nowrap items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
                   {[
-                    { id: 'all', label: 'Todos', value: productionQueue.length },
                     { id: 'pending', label: 'Pendentes', value: queueMetrics.pending },
                     { id: 'preparing', label: 'Em atendimento', value: queueMetrics.preparing },
                     { id: 'ready', label: 'Prontos', value: queueMetrics.ready },
@@ -1523,33 +1605,6 @@ export const GrillQueue = () => {
                       </span>
                     </button>
                   ))}
-                </div>
-              )}
-              {activeTab === 'queue' && (
-                <div className="sticky top-2 z-20 rounded-xl border border-slate-200 bg-white/95 backdrop-blur px-3 py-2 shadow-sm">
-                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] sm:text-xs">
-                    {isAdminUser ? (
-                      <>
-                        <span className="font-semibold text-slate-600">Vendas hoje</span>
-                        <span className="font-black text-emerald-700">{formatCurrency(dailySalesSummary.total)}</span>
-                        <span className={`inline-flex items-center gap-1 font-semibold ${salesVsYesterday.positive ? 'text-emerald-600' : 'text-rose-600'}`}>
-                          {salesVsYesterday.positive ? '▲' : '▼'}
-                          {salesVsYesterday.hasBase ? `${Math.abs(salesVsYesterday.deltaPct).toFixed(1)}% vs ontem` : 'sem base de ontem'}
-                        </span>
-                      </>
-                    ) : (
-                      <>
-                        <span className="font-semibold text-slate-600">Pedidos hoje</span>
-                        <span className="font-black text-slate-900">{dailySalesSummary.orders}</span>
-                      </>
-                    )}
-                    <span className="text-slate-300">|</span>
-                    <span className="font-semibold text-slate-600">Qtd pedidos</span>
-                    <span className="font-black text-slate-900">{dailySalesSummary.orders}</span>
-                    <span className="text-slate-300">|</span>
-                    <span className="font-semibold text-slate-600">Ticket médio</span>
-                    <span className="font-black text-slate-900">{formatCurrency(dailySalesSummary.orders > 0 ? dailySalesSummary.total / dailySalesSummary.orders : 0)}</span>
-                  </div>
                 </div>
               )}
             </>
@@ -2075,7 +2130,7 @@ export const GrillQueue = () => {
 	                </div>
 	              )}
 	              <div className="flex items-center justify-between">
-	                <span>Total</span>
+	                <span>Total a pagar</span>
 	                <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-sm font-bold">
 	                  {formatCurrency(totalValue)}
 	                </span>
@@ -2269,34 +2324,77 @@ export const GrillQueue = () => {
           <div className="mb-4 rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-50 via-white to-teal-50 p-4 shadow-[0_16px_32px_-26px_rgba(16,185,129,0.4)]">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-[11px] uppercase tracking-[0.2em] font-bold text-emerald-700">Finalizados hoje</p>
+                <p className="text-[11px] uppercase tracking-[0.2em] font-bold text-emerald-700">Faturamento & Relatórios</p>
                 <p className="text-sm text-slate-600 mt-0.5">
                   {isAdminUser
-                    ? 'Resumo de vendas dos pedidos concluídos no dia.'
-                    : 'Pedidos concluídos no dia para acompanhamento operacional.'}
+                    ? 'Resumo de vendas com filtro de período e comparativo.'
+                    : 'Pedidos concluídos no período para acompanhamento operacional.'}
                 </p>
               </div>
               <span className="inline-flex items-center rounded-full border border-emerald-200 bg-white px-3 py-1 text-xs font-semibold text-emerald-700">
-                {completedSummary.ordersCount} pedido(s)
+                {reportSummary.ordersCount} pedido(s)
               </span>
             </div>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              {[
+                { id: 'today', label: 'Hoje' },
+                { id: 'yesterday', label: 'Ontem' },
+                { id: 'last7', label: 'Últimos 7 dias' },
+                { id: 'custom', label: 'Calendário' },
+              ].map((period) => (
+                <button
+                  key={period.id}
+                  type="button"
+                  onClick={() => setReportRange(period.id as any)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                    reportRange === period.id
+                      ? 'bg-slate-900 border-slate-900 text-white'
+                      : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  {period.label}
+                </button>
+              ))}
+            </div>
+            {reportRange === 'custom' && (
+              <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <input
+                  type="date"
+                  value={reportFrom}
+                  onChange={(event) => setReportFrom(event.target.value)}
+                  className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700"
+                />
+                <input
+                  type="date"
+                  value={reportTo}
+                  onChange={(event) => setReportTo(event.target.value)}
+                  className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700"
+                />
+              </div>
+            )}
             {isAdminUser ? (
-              <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2">
+              <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-2">
                 <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
-                  <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500">Vendido no dia</p>
-                  <p className="text-lg font-black text-slate-900">{formatCurrency(completedSummary.sales)}</p>
+                  <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500">Vendido no período</p>
+                  <p className="text-lg font-black text-slate-900">{formatCurrency(reportSummary.sales)}</p>
                 </div>
                 <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
                   <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500">Ticket médio</p>
-                  <p className="text-lg font-black text-slate-900">{formatCurrency(completedSummary.averageTicket)}</p>
+                  <p className="text-lg font-black text-slate-900">{formatCurrency(reportSummary.averageTicket)}</p>
                 </div>
                 <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
-                  <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500">Frete no dia</p>
-                  <p className="text-lg font-black text-slate-900">{formatCurrency(completedSummary.deliveryFees)}</p>
+                  <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500">Frete no período</p>
+                  <p className="text-lg font-black text-slate-900">{formatCurrency(reportSummary.deliveryFees)}</p>
                 </div>
                 <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
                   <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500">Itens vendidos</p>
-                  <p className="text-lg font-black text-slate-900">{completedSummary.itemsCount}</p>
+                  <p className="text-lg font-black text-slate-900">{reportSummary.itemsCount}</p>
+                </div>
+                <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5">
+                  <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500">Comparativo</p>
+                  <p className={`text-lg font-black ${reportComparison.positive ? 'text-emerald-700' : 'text-rose-700'}`}>
+                    {reportComparison.positive ? '▲' : '▼'} {reportComparison.hasBase ? `${Math.abs(reportComparison.deltaPct).toFixed(1)}%` : 'Sem base'}
+                  </p>
                 </div>
               </div>
             ) : null}
@@ -2400,7 +2498,7 @@ export const GrillQueue = () => {
               </div>
             ))}
 
-            {completedToday.length === 0 && (
+            {reportCompleted.length === 0 && (
               <div className="col-span-full text-center text-slate-500 py-8 border border-dashed rounded-xl bg-slate-50">
                 <div className="mx-auto max-w-sm space-y-2">
                   <div className="text-4xl">✅</div>
@@ -2412,7 +2510,7 @@ export const GrillQueue = () => {
               </div>
             )}
           </div>
-          {completedToday.length > completedPageSize && (
+          {reportCompleted.length > completedPageSize && (
             <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
               <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
                 <span>Pagina {completedPage} de {completedTotalPages}</span>
