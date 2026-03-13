@@ -1,6 +1,6 @@
 ﻿# PROJECT CONTEXT - EdEspetoHub
 
-Atualizado em: 2026-03-05
+Atualizado em: 2026-03-13
 
 ## Objetivo do produto
 Plataforma de pedidos "like app" para restaurantes (estilo iFood), com:
@@ -13,6 +13,44 @@ Plataforma de pedidos "like app" para restaurantes (estilo iFood), com:
 - Frontend: React + Vite + TypeScript
 - Backend: Node/Nest-like APIs (estrutura em `backend/`)
 - Infra: Docker + Nginx + EC2
+
+## Status atual (ok para retomada)
+- Build frontend validado em 2026-03-13 (`tsc --noEmit` e `vite build`).
+- Fluxo Admin separado entre visao operacional e visao financeira/relatorios sem alterar regras de negocio.
+- PWA habilitado com rota de instrucoes de instalacao para Android/iPhone.
+- Ultimos pushes em `main` concluidos.
+
+## Atualizacoes recentes (2026-03-10 a 2026-03-13)
+1. PWA e instalacao
+- PWA consolidado (service worker + manifest + icones).
+- Nova pagina `/instalar` com passo a passo Android (Chrome) e iPhone (Safari).
+- Landing com CTAs para instalacao (menu, hero, footer).
+
+2. Queue/operacao (Admin)
+- Removida barra financeira da aba operacional de pedidos.
+- Removido filtro redundante `Todos` da fila; filtros focados em status.
+- Destaque de mesa reforcado (badge forte em laranja).
+- "Prazo estourado" com pulso suave para alerta visual.
+
+3. Financeiro/relatorios
+- Aba `Finalizados hoje` evoluida para `Faturamento & Relatorios` (admin).
+- Para operador, rotulo e foco em `Pedidos Finalizados` (sem poluicao financeira).
+- Filtros de periodo:
+  - Hoje
+  - Ontem
+  - Ultimos 7 dias
+  - Calendario (intervalo customizado)
+- Card de comparativo (% vs periodo anterior).
+- Bloco "Dinheiro em caixa (periodo)" com Pix, Dinheiro e Cartao (admin).
+
+4. Mobile footer
+- Botao `Vendas` no rodape mobile abre a visao de relatorios via `/admin/queue` com `activeTab: completed`.
+- Botao `Pedidos` permanece no monitor operacional.
+
+5. Semantica de valores no detalhe do pedido
+- Troca de "Itens: R$..." para "Volume: X itens".
+- Linha final padronizada para "Total a pagar".
+- Se frete for zero, exibicao simplificada (sem subtotal/frete desnecessario).
 
 ## Principais mudancas recentes (ja em `main`)
 0. Admin UX premium (2026-03-05)
@@ -71,6 +109,21 @@ Plataforma de pedidos "like app" para restaurantes (estilo iFood), com:
 - Branding: "Desenvolvido por" e logo oficial Ja no Caminho em pontos principais.
 
 ## Commits de referencia (mais recentes)
+- `ffa7d3f` refactor(queue): split financial reports from operational finalized view
+- `db6367e` refactor(queue): split operational view from revenue reports and streamline filters
+- `d06040f` refactor(queue): sticky performance bar, yesterday comparison, and cleaner order totals
+- `c6484de` feat(landing): add dedicated install page and CTA links for Android/iPhone
+- `227307b` feat(landing): add explicit install app CTA with beforeinstallprompt handling
+- `ce6a9bf` feat(pwa): enable vite pwa plugin with service worker and app icons
+- `f3db56b` feat(product-images): compress/resize uploads before base64 persist
+- `d994f75` feat(product-images): replace URL input with camera/file upload and instant preview
+- `fa6198d` fix(menu): restore options indicator for skewer products in staff mode
+- `5d58bca` fix(menu): keep plus quick-add for staff and open modal only from options badge
+- `c181c39` fix(menu): restore product options modal flow after catalog refactor
+- `9db20bb` fix(guard): bypass BILL-001 debt blocking for public storefront checkout
+- `5c58403` fix(guard): apply unpaid-delivery block only for delivery orders
+- `fa5077e` fix(phone-mask): apply mobile phone mask on store phone settings field
+- `6242047` feat(config): add store phone field in branding settings and persist owner phone
 - `3c7dbf9` refactor(ui): premium floating store pill header and hard-remove resumo from command palette
 - `5d6d2c5` fix(ui): add smooth banner fade in admin header and remove resumo from command palette
 - `34373e6` refactor(admin-header): premium split layout with dynamic store banner/color identity
@@ -114,7 +167,7 @@ Plataforma de pedidos "like app" para restaurantes (estilo iFood), com:
 ## Como retomar rapidamente em nova sessao Codex
 1. Abrir repo `EdEspetoHub`.
 2. Pedir: "leia PROJECT_CONTEXT.md e os ultimos commits".
-3. Informar bug atual e tela exata + passos de reproducao.
+3. Informar perfil afetado (admin/operator/public), tela exata e passos de reproducao.
 
 ## Arquivos mais sensiveis tocados recentemente
 - `frontend/src/components/Client/CartView.tsx`
