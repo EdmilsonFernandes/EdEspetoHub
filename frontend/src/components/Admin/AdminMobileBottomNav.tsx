@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ChartBar, ChefHat, Package, ShoppingCart } from '@phosphor-icons/react';
+import { ChartBar, ChefHat, CurrencyDollar, Package } from '@phosphor-icons/react';
 import { orderService } from '../../services/orderService';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -81,7 +81,7 @@ export function AdminMobileBottomNav() {
     {
       id: 'pedidos',
       label: 'Vendas',
-      icon: ShoppingCart,
+      icon: CurrencyDollar,
       active: path === '/admin/queue' && dashboardTab === 'completed',
       onClick: () => navigate('/admin/queue', { state: { activeTab: 'completed' } }),
     },

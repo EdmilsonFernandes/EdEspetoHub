@@ -14,7 +14,8 @@ import {
   Storefront,
   ForkKnife,
   Printer,
-  X
+  X,
+  CurrencyDollar
 } from "@phosphor-icons/react";
 import { orderService } from "../../services/orderService";
 import { storeService } from "../../services/storeService";
@@ -1164,24 +1165,15 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
   }, [queue]);
 
-  const awaitingMotoboyQueue = useMemo(() => {
-    return [...queue]
-      .filter(
-        (order) =>
-          order.type === 'delivery' &&
-          [ 'ready_for_delivery', 'waiting_for_motoboy' ].includes(order.status)
-      )
-      .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
-  }, [queue]);
-
   const inRouteQueue = useMemo(() => {
+    const routeStatuses = new Set([ 'ready_for_delivery', 'waiting_for_motoboy', 'in_delivery' ]);
     return [...queue]
-      .filter((order) => order.status === 'in_delivery')
+      .filter((order) => routeStatuses.has(String(order?.status || '').toLowerCase()))
       .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
   }, [queue]);
 
   const completedOrders = useMemo(() => {
-    const completedStatuses = new Set([ 'done', 'delivered', 'finished' ]);
+    const completedStatuses = new Set([ 'done', 'delivered', 'finished', 'cancelled' ]);
     return [...queue]
       .filter((order) => completedStatuses.has(String(order?.status || '').toLowerCase()))
       .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
@@ -1189,10 +1181,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   const completedToday = useMemo(() => {
     const todayKey = getNowKeyInSaoPaulo();
     return completedOrders.filter((order) => getDayKeyInSaoPaulo(order.createdAt) === todayKey);
-  }, [completedOrders]);
-  const completedRecent12h = useMemo(() => {
-    const since = Date.now() - 12 * 60 * 60 * 1000;
-    return completedOrders.filter((order) => Number(order?.createdAt || 0) >= since);
   }, [completedOrders]);
   const reportCompleted = useMemo(() => {
     const todayKey = getNowKeyInSaoPaulo();
@@ -1217,12 +1205,18 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   const reportSummary = useMemo(() => {
     const totals = reportCompleted.reduce(
       (acc, order) => {
+        const status = String(order?.status || '').toLowerCase();
+        const isRevenueStatus = status === 'done' || status === 'delivered' || status === 'finished';
         const { total, fee } = calcMoney(order);
-        acc.sales += Number.isFinite(total) ? total : 0;
-        acc.deliveryFees += Number.isFinite(fee) ? fee : 0;
-        acc.items += (order?.items || []).reduce((sum, item) => sum + Number(item?.qty || 0), 0);
+        if (isRevenueStatus) {
+          acc.sales += Number.isFinite(total) ? total : 0;
+          acc.deliveryFees += Number.isFinite(fee) ? fee : 0;
+          acc.items += (order?.items || []).reduce((sum, item) => sum + Number(item?.qty || 0), 0);
+        }
         const bucket = resolvePaymentBucket(order?.payment);
-        acc[bucket] += Number.isFinite(total) ? total : 0;
+        if (isRevenueStatus) {
+          acc[bucket] += Number.isFinite(total) ? total : 0;
+        }
         return acc;
       },
       { sales: 0, deliveryFees: 0, items: 0, pix: 0, cash: 0, card: 0 }
@@ -1243,12 +1237,18 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   const dailySalesSummary = useMemo(() => {
     const totals = completedToday.reduce(
       (acc, order) => {
+        const status = String(order?.status || '').toLowerCase();
+        const isRevenueStatus = status === 'done' || status === 'delivered' || status === 'finished';
         const { total } = calcMoney(order);
         const amount = Number.isFinite(total) ? total : 0;
         const bucket = resolvePaymentBucket(order?.payment);
-        acc.total += amount;
+        if (isRevenueStatus) {
+          acc.total += amount;
+        }
         acc.orders += 1;
-        acc[bucket] += amount;
+        if (isRevenueStatus) {
+          acc[bucket] += amount;
+        }
         return acc;
       },
       { total: 0, orders: 0, pix: 0, cash: 0, card: 0 }
@@ -1384,14 +1384,13 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   }, [productionQueue, currentTime, PREP_SLA_MS]);
 
   const allActiveQueue = useMemo(() => {
-    const activeStatuses = new Set([ 'pending', 'preparing', 'ready', 'waiting_for_motoboy', 'ready_for_delivery', 'in_delivery' ]);
+    const activeStatuses = new Set([ 'pending', 'preparing', 'ready' ]);
     return [...queue]
       .filter((order) => activeStatuses.has(String(order?.status || '').toLowerCase()))
       .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
   }, [queue]);
   const filteredProductionQueue = useMemo(() => {
     if (queueFilter === 'all') return allActiveQueue;
-    if (queueFilter === 'finalized') return completedRecent12h;
     if (queueFilter === 'pending') return allActiveQueue.filter((order) => order.status === 'pending');
     if (queueFilter === 'preparing') return allActiveQueue.filter((order) => order.status === 'preparing');
     if (queueFilter === 'ready') {
@@ -1406,10 +1405,10 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       });
     }
     return allActiveQueue;
-  }, [allActiveQueue, completedRecent12h, queueFilter, currentTime, PREP_SLA_MS]);
+  }, [allActiveQueue, queueFilter, currentTime, PREP_SLA_MS]);
 
   const bulkFinalizeCandidates = useMemo(() => {
-    const merged = [ ...productionQueue, ...awaitingMotoboyQueue ];
+    const merged = [ ...productionQueue ];
     const seen = new Set<string>();
     return merged.filter((order) => {
       const id = String(order?.id || '');
@@ -1417,7 +1416,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       seen.add(id);
       return true;
     });
-  }, [productionQueue, awaitingMotoboyQueue]);
+  }, [productionQueue]);
   const selectedOrderRank = useMemo(() => {
     if (!selectedOrder?.id) return 1;
     const idx = filteredProductionQueue.findIndex((order) => order.id === selectedOrder.id);
@@ -1725,7 +1724,11 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                           : 'text-slate-500 hover:text-slate-700'
                       }`}
                     >
-                      <span className="truncate">{tab.label}</span>
+                      <span className="inline-flex items-center gap-1.5 truncate">
+                        {tab.id === 'queue' && <ChefHat size={13} weight="duotone" />}
+                        {tab.id === 'completed' && <CurrencyDollar size={13} weight="duotone" />}
+                        <span>{tab.label}</span>
+                      </span>
                       <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
                         activeTab === tab.id ? 'bg-slate-100 text-slate-700' : 'bg-white text-slate-500 border border-slate-200'
                       }`}>
@@ -1758,7 +1761,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                     { id: 'preparing', label: 'Em atendimento', value: queueMetrics.preparing },
                     { id: 'ready', label: 'Prontos', value: queueMetrics.ready },
                     { id: 'late', label: 'Atrasados', value: queueMetrics.late },
-                    { id: 'finalized', label: 'Finalizados', value: completedRecent12h.length },
                   ].map((kpi) => (
                     <button
                       key={kpi.id}
@@ -1811,45 +1813,11 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
 
       {activeTab === 'queue' && (
         <div className="space-y-2 mt-2">
-          {awaitingMotoboyQueue.length > 0 && (
-            <div className="rounded-xl border-2 border-dashed border-indigo-200 bg-indigo-50/30 p-3">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.14em] text-indigo-900">
-                  <Truck size={14} weight="duotone" />
-                  Aguardando Coleta / Motoboy
-                </p>
-                <span className="rounded-full border border-indigo-200 bg-white px-2.5 py-1 text-[11px] font-bold text-indigo-700">
-                  {awaitingMotoboyQueue.length} pedido(s)
-                </span>
-              </div>
-              <div className="mt-2 space-y-1.5">
-                {awaitingMotoboyQueue.map((order) => (
-                  <div
-                    key={`awaiting-${order.id}`}
-                    className="flex flex-wrap items-center gap-x-2 gap-y-0.5 rounded-full border border-slate-100 bg-white px-3 py-1 text-xs font-medium shadow-sm"
-                  >
-                    <span className="inline-flex items-center gap-1.5 font-extrabold text-indigo-800">
-                      <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse" />
-                      #{formatOrderDisplayId(order.id, storeSlug)}
-                    </span>
-                    <span className="text-indigo-300">•</span>
-                    <span className="text-indigo-900 truncate max-w-[240px]">
-                      {order.customerName || 'Cliente'}
-                    </span>
-                    <span className="text-indigo-300">•</span>
-                    <span className="text-indigo-700">
-                      Pronto há {formatDuration(order.createdAt ? Date.now() - new Date(order.createdAt).getTime() : 0)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3 px-1 sm:px-0">
             {filteredProductionQueue.map((order, index) => {
               const orderAgeMs = order?.createdAt ? Date.now() - new Date(order.createdAt).getTime() : 0;
-              const isArchived = queueFilter === 'finalized';
-              const isLate = !isArchived && orderAgeMs > PREP_SLA_MS;
+              const isArchived = false;
+              const isLate = orderAgeMs > PREP_SLA_MS;
               const statusMeta = getStatusStyles(order.status, order.type);
               const typeMeta = orderTypeMeta(order);
               const paymentLabel = getPaymentMethodMeta(order.payment).label;
@@ -1873,7 +1841,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                   canPrint={hasPrintAccess}
                   onPrint={() => handlePrintOrder(order, index + 1)}
                   archived={isArchived}
-                  onReopen={isArchived ? () => openReopenModal(order) : undefined}
                   onClick={() => {
                     setConfirmModal(null);
                     setEditingFinalizedOrder(false);
@@ -1883,7 +1850,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
               );
             })}
           </div>
-          {filteredProductionQueue.length === 0 && awaitingMotoboyQueue.length === 0 && !loading && (
+          {filteredProductionQueue.length === 0 && !loading && (
             <div className="col-span-full text-center text-gray-500 py-5 bg-slate-50 rounded-2xl border border-dashed border-slate-300">
               <div className="mx-auto max-w-sm space-y-1">
                 <div className="mx-auto inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500">
