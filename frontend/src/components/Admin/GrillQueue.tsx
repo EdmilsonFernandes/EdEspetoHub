@@ -54,7 +54,7 @@ const OrderSummaryCard = ({
 }: any) => (
   (() => {
     const isDelivery = String(order?.type || '').toLowerCase() === 'delivery';
-    const leftAccent = isDelivery ? 'border-l-4 border-l-blue-500' : 'border-l-4 border-l-orange-500';
+    const leftAccent = isDelivery ? 'border-l-0 sm:border-l-4 sm:border-l-blue-500' : 'border-l-0 sm:border-l-4 sm:border-l-orange-500';
     const compactMeta = `${formatOrderType(order?.type)} • ${paymentLabel} • ID ${orderDisplayId}`;
     const hasTable = String(order?.type || '').toLowerCase() === 'table' && order?.table;
     return (
@@ -68,7 +68,7 @@ const OrderSummaryCard = ({
         onClick();
       }
     }}
-    className={`w-full rounded-xl border ${isLate ? 'border-red-300' : 'border-slate-200'} ${leftAccent} ${archived ? 'bg-slate-50/90 opacity-90' : 'bg-white'} p-3 text-left flex flex-col gap-2 transition-all duration-300 transition-transform hover:border-slate-300 hover:shadow-lg hover:-translate-y-0.5 hover:scale-[1.01] cursor-pointer`}
+    className={`w-full rounded-xl border ${isLate ? 'border-red-300' : 'border-slate-200'} ${leftAccent} ${archived ? 'bg-slate-50/90 opacity-90' : 'bg-white'} p-2.5 sm:p-3 text-left flex flex-col gap-2 transition-all duration-300 transition-transform hover:border-slate-300 hover:shadow-lg hover:-translate-y-0.5 hover:scale-[1.01] cursor-pointer`}
   >
     <div className="grid grid-cols-[auto_1fr_auto] items-start gap-2">
       <div className="min-w-0">
@@ -1646,12 +1646,13 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         @keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
         @keyframes drawerIn{0%{transform:translateX(100%)}100%{transform:translateX(0)}}
       `}</style>
-      <div className={`${tvMode ? "" : "rounded-2xl border border-slate-200 bg-white px-2 sm:px-3 py-2"}`}>
-        <div className="flex flex-col gap-2 mb-1 border-b border-slate-100 pb-2">
+      <div className={`${tvMode ? "" : "rounded-2xl border border-slate-200 bg-white/95 backdrop-blur-md px-2 sm:px-3 py-2 sticky top-0 z-30"}`}>
+        <div className="flex flex-col gap-2 mb-0">
           {!tvMode ? (
             <>
-              <div className="flex w-full items-center justify-between gap-2">
-                <div className="inline-flex flex-1 sm:flex-none min-w-0 items-center gap-1 rounded-lg bg-slate-100 p-1 overflow-x-auto [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
+              <div className="flex w-full items-center justify-between gap-2 border-b border-slate-100 pb-2">
+                <div className="relative inline-flex flex-1 sm:flex-none min-w-0 items-center">
+                  <div className="inline-flex w-full min-w-0 items-center gap-1 rounded-lg bg-slate-100 p-1 overflow-x-auto snap-x snap-mandatory [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
                   {[
                     { id: 'queue', label: 'Pedidos', count: allActiveQueue.length },
                     { id: 'inroute', label: 'Em rota', count: inRouteQueue.length },
@@ -1665,7 +1666,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                       key={tab.id}
                       type="button"
                       onClick={() => setActiveTab(tab.id as 'queue' | 'inroute' | 'completed')}
-                      className={`inline-flex flex-shrink-0 items-center gap-1 text-xs sm:text-sm px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-md transition-colors whitespace-nowrap ${
+                      className={`inline-flex snap-start flex-shrink-0 items-center gap-1 text-xs sm:text-sm px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-md transition-colors whitespace-nowrap ${
                         activeTab === tab.id
                           ? 'bg-white shadow-sm font-semibold text-slate-900'
                           : 'text-slate-500 hover:text-slate-700'
@@ -1679,6 +1680,8 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                       </span>
                     </button>
                   ))}
+                  </div>
+                  <div className="pointer-events-none absolute right-0 top-0 h-full w-8 bg-gradient-to-l from-white/95 to-transparent" />
                 </div>
                 {activeTab === 'queue' && (
                   <button
@@ -1695,7 +1698,8 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
               </div>
 
               {activeTab === 'queue' && (
-                <div className="flex flex-nowrap items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
+                <div className="relative">
+                  <div className="flex flex-nowrap items-center gap-2 overflow-x-auto snap-x snap-mandatory pb-1 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
                   {[
                     { id: 'all', label: 'Todos', value: allActiveQueue.length },
                     { id: 'pending', label: 'Pendentes', value: queueMetrics.pending },
@@ -1708,7 +1712,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                       key={kpi.id}
                       type="button"
                       onClick={() => setQueueFilter(kpi.id as any)}
-                      className={`flex shrink-0 items-center gap-2 px-3 py-1.5 rounded-full border text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
+                      className={`flex snap-start shrink-0 items-center gap-2 px-3 py-1.5 rounded-full border text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
                         queueFilter === kpi.id
                           ? 'bg-slate-900 border-slate-900 text-white'
                           : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
@@ -1726,6 +1730,8 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                       </span>
                     </button>
                   ))}
+                  </div>
+                  <div className="pointer-events-none absolute right-0 top-0 h-full w-10 bg-gradient-to-l from-white/95 via-white/80 to-transparent" />
                 </div>
               )}
             </>
@@ -1787,7 +1793,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
               </div>
             </div>
           )}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3 px-0 sm:px-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3 px-1 sm:px-0">
             {filteredProductionQueue.map((order, index) => {
               const orderAgeMs = order?.createdAt ? Date.now() - new Date(order.createdAt).getTime() : 0;
               const isArchived = queueFilter === 'finalized';
