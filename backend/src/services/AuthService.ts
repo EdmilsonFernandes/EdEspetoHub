@@ -63,6 +63,26 @@ export class AuthService
     return String(value || '').replace(/\D/g, '');
   }
 
+  private async comparePasswordWithLegacy(rawPassword: string, user?: User | null) {
+    if (!user?.password) return false;
+    const stored = String(user.password);
+    const isBcryptHash =
+      stored.startsWith('$2a$') || stored.startsWith('$2b$') || stored.startsWith('$2y$');
+
+    if (isBcryptHash) {
+      return bcrypt.compare(rawPassword, stored);
+    }
+
+    // Legacy/plain-text fallback for old seeded accounts.
+    const plainMatch = stored === rawPassword;
+    if (!plainMatch) return false;
+
+    // Auto-migrate legacy password to bcrypt on successful login.
+    user.password = await bcrypt.hash(rawPassword, 10);
+    await this.userRepository.save(user);
+    return true;
+  }
+
   private maskEmail(email: string) {
     const [local = '', domain = ''] = String(email || '').split('@');
     if (!local || !domain) return '';
@@ -607,7 +627,7 @@ export class AuthService
     let loginRole: 'ADMIN' | 'OPERATOR' = 'ADMIN';
     const candidate = await this.userRepository.findByLoginIdentifier(normalizedIdentifier);
     if (candidate) {
-      const valid = await bcrypt.compare(password, candidate.password);
+      const valid = await this.comparePasswordWithLegacy(password, candidate);
       if (!valid) throw new AppError('AUTH-004', 401);
       loginUser = candidate;
 
@@ -629,7 +649,7 @@ export class AuthService
       store = await this.storeRepository.findBySlugWithOwner(normalizedIdentifier);
       if (!store) throw new AppError('AUTH-004', 401);
       const ownerUser = store.owner;
-      const ownerValid = ownerUser ? await bcrypt.compare(password, ownerUser.password) : false;
+      const ownerValid = ownerUser ? await this.comparePasswordWithLegacy(password, ownerUser) : false;
 
       if (ownerValid) {
         loginUser = ownerUser;
@@ -641,7 +661,7 @@ export class AuthService
         for (const membership of memberships || []) {
           const memberUser = membership?.user;
           if (!memberUser?.password) continue;
-          const valid = await bcrypt.compare(password, memberUser.password);
+          const valid = await this.comparePasswordWithLegacy(password, memberUser);
           if (!valid) continue;
           matchedMembership = membership;
           break;
