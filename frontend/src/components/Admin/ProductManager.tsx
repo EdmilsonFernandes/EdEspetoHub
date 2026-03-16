@@ -195,6 +195,11 @@ const defaultCategoryPriority = (value = '') => {
   return 99;
 };
 
+const CATEGORY_PRIORITY_OPTIONS = [
+  ...Array.from({ length: 10 }, (_, index) => String(index + 1)),
+  '99',
+];
+
 const getBundleEconomyPreview = ({
   unitPrice,
   promoActive,
@@ -1313,14 +1318,17 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
               <label className="text-xs font-semibold text-slate-600 uppercase tracking-[0.15em]">
                 Ordem da categoria
               </label>
-              <input
-                type="number"
-                min="1"
-                step="1"
+              <select
                 value={formCategoryPriority}
                 onChange={(e) => setFormCategoryPriority(e.target.value)}
                 className="w-full sm:w-40 p-2.5 border border-gray-200 rounded-xl bg-white text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-brand-primary focus:border-transparent"
-              />
+              >
+                {CATEGORY_PRIORITY_OPTIONS.map((option) => (
+                  <option key={`create-priority-${option}`} value={option}>
+                    {option === '99' ? '99 (fim da lista)' : option}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
@@ -1914,14 +1922,17 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                 )}
                 <div className="mt-3 grid grid-cols-1 sm:grid-cols-[180px_1fr] items-center gap-2">
                   <label className="text-[11px] font-semibold text-slate-500 uppercase tracking-[0.2em]">Ordem da categoria</label>
-                  <input
-                    type="number"
-                    min="1"
-                    step="1"
+                  <select
                     className="w-full sm:w-36 p-3 border border-gray-200 rounded-xl text-sm bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
                     value={inlineCategoryPriority}
                     onChange={(e) => setInlineCategoryPriority(e.target.value)}
-                  />
+                  >
+                    {CATEGORY_PRIORITY_OPTIONS.map((option) => (
+                      <option key={`edit-priority-${option}`} value={option}>
+                        {option === '99' ? '99 (fim da lista)' : option}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
               <div className="rounded-2xl border border-slate-200 bg-white p-3.5">
