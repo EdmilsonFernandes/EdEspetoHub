@@ -149,7 +149,32 @@ export function AdminOrders() {
     const total = Number(order.total || 0);
     const safeFee = Number.isFinite(fee) ? fee : 0;
     const itemsTotal = Math.max(0, total - safeFee);
-    return { total, fee: safeFee, itemsTotal };
+    const itemCount = (order?.items || []).reduce(
+      (sum: number, item: any) => sum + Number(item?.qty ?? item?.quantity ?? 1),
+      0
+    );
+    return { total, fee: safeFee, itemsTotal, itemCount };
+  };
+  const groupOrderItems = (items: any[] = []) => {
+    const map = new Map<string, any>();
+    items.forEach((item: any) => {
+      const qty = Number(item?.qty ?? item?.quantity ?? 1);
+      const unitPrice = Number(item?.unitPrice ?? item?.price ?? 0);
+      const mods = formatSelectedModifiers(item?.selectedModifiers || []).join('|');
+      const key = [
+        String(item?.productId || item?.id || item?.name || ''),
+        String(item?.name || ''),
+        String(item?.cookingPoint || ''),
+        item?.passSkewer ? '1' : '0',
+        mods,
+        String(unitPrice),
+      ].join('::');
+      if (!map.has(key)) map.set(key, { ...item, qty: 0, unitPrice });
+      const current = map.get(key);
+      current.qty = Number(current.qty || 0) + qty;
+      map.set(key, current);
+    });
+    return Array.from(map.values());
   };
   const renderMoneyBreakdown = (order: any, compact = false) => {
     const money = getOrderMoney(order);
@@ -157,8 +182,10 @@ export function AdminOrders() {
       <div className={compact ? 'w-full rounded-2xl border border-slate-200 bg-white p-2.5' : 'w-full sm:w-auto'}>
         <div className="grid grid-cols-3 gap-1.5 text-[10px] sm:text-[11px] font-semibold">
           <span className="flex flex-col rounded-xl border border-slate-200 bg-slate-50 px-2 py-1.5">
-            <span className="text-slate-500">Itens</span>
-            <span className="text-slate-800">{formatCurrency(money.itemsTotal)}</span>
+            <span className="text-slate-500">Volume</span>
+            <span className="text-slate-800">
+              {money.itemCount} item{money.itemCount === 1 ? '' : 's'}
+            </span>
           </span>
           <span className="flex flex-col rounded-xl border border-slate-200 bg-white px-2 py-1.5">
             <span className="text-slate-500">Frete</span>
@@ -298,8 +325,9 @@ export function AdminOrders() {
               <div className="sm:hidden space-y-3">
                 {filteredOrders.map((order, index) => {
                   const paymentMeta = getPaymentMethodMeta(order.payment);
-                  const previewItems = (order.items || []).slice(0, 2);
-                  const remaining = (order.items || []).length - previewItems.length;
+                  const groupedItems = groupOrderItems(order.items || []);
+                  const previewItems = groupedItems.slice(0, 2);
+                  const remaining = groupedItems.length - previewItems.length;
                   return (
                     <div
                       key={order.id || `${order.customerName}-${index}`}
@@ -345,8 +373,8 @@ export function AdminOrders() {
                       </div>
                       {previewItems.length > 0 && (
                         <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3 text-xs text-slate-600 space-y-2">
-                          {previewItems.map((item) => (
-                            <div key={item.id || item.name} className="flex items-center justify-between gap-2">
+                          {previewItems.map((item, itemIndex) => (
+                            <div key={`${item.id || item.productId || item.name || 'item'}-${itemIndex}`} className="flex items-center justify-between gap-2">
                               <span className="font-semibold text-slate-700">
                                 {item.qty}x {item.name}
                               </span>
@@ -439,12 +467,12 @@ export function AdminOrders() {
                       </div>
                     </div>
 
-                    {(order.items || []).length > 0 && (
+                    {groupOrderItems(order.items || []).length > 0 && (
                       <div className="border-t border-slate-100 pt-3">
                         <p className="text-xs uppercase text-slate-400 mb-2">Itens</p>
                         <div className="grid sm:grid-cols-2 gap-2 text-sm text-slate-700">
-                          {order.items.map((item) => (
-                            <div key={item.id || item.name} className="flex items-center justify-between gap-3">
+                          {groupOrderItems(order.items || []).map((item, itemIndex) => (
+                            <div key={`${item.id || item.productId || item.name || 'item'}-${itemIndex}`} className="flex items-center justify-between gap-3">
                               <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-lg overflow-hidden border border-slate-200 bg-slate-100 flex-shrink-0">
                                   {item.imageUrl ? (
