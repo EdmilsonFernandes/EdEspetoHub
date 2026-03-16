@@ -748,10 +748,16 @@ export const MenuView = ({
                   ? item.modifiers.some((modifier: any) => modifier?.active !== false)
                   : false;
                 const hasConfigurableOptions = hasActiveModifiers || isEspetoCategory(item?.category);
+                const hasLongDescription = String(item?.description || '').trim().length > 90;
 
                 const handleOpenOptions = (event?: React.MouseEvent) => {
                   event?.stopPropagation();
                   if (!hasConfigurableOptions) return;
+                  openProductModal(item);
+                };
+
+                const handleOpenDetails = (event?: React.MouseEvent) => {
+                  event?.stopPropagation();
                   openProductModal(item);
                 };
 
@@ -767,12 +773,12 @@ export const MenuView = ({
                     <button
                       type="button"
                       onClick={(event) => {
-                        if (!staffView) {
-                          event.stopPropagation();
+                        event.stopPropagation();
+                        if (!staffView || hasConfigurableOptions || hasLongDescription) {
                           openProductModal(item);
                         }
                       }}
-                      className={`text-left font-semibold text-slate-900 text-base sm:text-lg leading-tight line-clamp-2 ${!staffView ? 'cursor-pointer hover:text-slate-700' : 'cursor-default'}`}
+                      className={`text-left font-semibold text-slate-900 text-base sm:text-lg leading-tight line-clamp-2 ${(!staffView || hasConfigurableOptions || hasLongDescription) ? 'cursor-pointer hover:text-slate-700' : 'cursor-default'}`}
                     >
                       {item.name}
                     </button>
@@ -800,6 +806,15 @@ export const MenuView = ({
                         {isEspetoCategory(item?.category) ? "Opções: ponto/farinha" : "Possui opções"}
                       </button>
                     )}
+                    {staffView && !hasConfigurableOptions && hasLongDescription && (
+                      <button
+                        type="button"
+                        onClick={handleOpenDetails}
+                        className="inline-flex items-center gap-2 text-[11px] font-semibold text-slate-600 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-full hover:bg-slate-200 transition cursor-pointer"
+                      >
+                        Ver descrição completa
+                      </button>
+                    )}
                     {item?.bundlePromoActive && Number(item?.bundlePromoQty) >= 2 && Number(item?.bundlePromoPrice) > 0 && (
                       <div className="inline-flex items-center gap-2 text-[11px] font-semibold text-slate-600 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-full">
                         <Sparkle size={12} weight="duotone" />
@@ -812,12 +827,12 @@ export const MenuView = ({
                     <button
                       type="button"
                       onClick={(event) => {
-                        if (!staffView) {
-                          event.stopPropagation();
+                        event.stopPropagation();
+                        if (!staffView || hasConfigurableOptions || hasLongDescription) {
                           openProductModal(item);
                         }
                       }}
-                      className={`aspect-square ${staffView ? "w-[120px] rounded-2xl" : "w-[108px] rounded-2xl"} overflow-hidden bg-gray-100 border border-gray-200 shadow-sm ${!staffView ? 'cursor-pointer' : 'cursor-default'}`}
+                      className={`aspect-square ${staffView ? "w-[120px] rounded-2xl" : "w-[108px] rounded-2xl"} overflow-hidden bg-gray-100 border border-gray-200 shadow-sm ${(!staffView || hasConfigurableOptions || hasLongDescription) ? 'cursor-pointer' : 'cursor-default'}`}
                     >
                       {item.imageUrl ? (
                         <img

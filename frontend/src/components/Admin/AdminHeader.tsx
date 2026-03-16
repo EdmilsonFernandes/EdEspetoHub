@@ -297,7 +297,9 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
 
       <div className="md:hidden sticky top-0 z-[80] rounded-2xl border border-slate-200 bg-white overflow-hidden">
         <div
-          className={`relative transition-all duration-300 ease-out ${mobileCollapsed ? 'h-0 opacity-0' : 'h-40 opacity-100'}`}
+          className={`relative origin-top transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform ${
+            mobileCollapsed ? 'h-0 opacity-0 -translate-y-2 scale-[0.97]' : 'h-40 opacity-100 translate-y-0 scale-100'
+          }`}
           style={
             mobileCollapsed
               ? {}
@@ -312,7 +314,7 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
         >
           {!mobileCollapsed && <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-black/30 to-black/65" />}
           {!mobileCollapsed && (
-            <div className="absolute inset-x-0 bottom-0 px-4 pb-4 flex items-end gap-3">
+            <div className="absolute inset-x-0 bottom-0 px-4 pb-4 flex items-end gap-3 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]">
               <div className="h-14 w-14 rounded-full border-2 border-white bg-white shadow-lg overflow-hidden grid place-items-center shrink-0">
                 {storeLogo ? (
                   <img src={storeLogo} alt={storeName} className="h-full w-full object-cover" />
