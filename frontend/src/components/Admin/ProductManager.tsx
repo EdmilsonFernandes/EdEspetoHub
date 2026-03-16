@@ -333,6 +333,12 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
   const [bulkOpen, setBulkOpen] = useState(false);
   const [bulkText, setBulkText] = useState('');
   const [bulkImporting, setBulkImporting] = useState(false);
+  const [categoryPriorityRows, setCategoryPriorityRows] = useState<
+    Array<{ key: string; name: string; priority: number; count: number }>
+  >([]);
+  const [categoryPriorityDrafts, setCategoryPriorityDrafts] = useState<Record<string, string>>({});
+  const [categoryPriorityLoading, setCategoryPriorityLoading] = useState(false);
+  const [categoryPrioritySavingKey, setCategoryPrioritySavingKey] = useState<string | null>(null);
 
   const categoryOptions = useMemo(() => {
     const segmentKey = normalizeCategory(storeSegment) || 'outros';
@@ -464,6 +470,26 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
     }
   };
 
+  const loadCategoryPriorities = async () => {
+    setCategoryPriorityLoading(true);
+    try {
+      const rows = await productService.listCategories();
+      const safeRows = Array.isArray(rows) ? rows : [];
+      setCategoryPriorityRows(safeRows);
+      const nextDrafts: Record<string, string> = {};
+      safeRows.forEach((row: any) => {
+        const key = normalizeCategory(row?.key || row?.name || '');
+        if (!key) return;
+        nextDrafts[key] = String(Math.max(1, Number(row?.priority || defaultCategoryPriority(key) || 99)));
+      });
+      setCategoryPriorityDrafts(nextDrafts);
+    } catch (error) {
+      console.error('Falha ao carregar prioridades de categoria', error);
+    } finally {
+      setCategoryPriorityLoading(false);
+    }
+  };
+
   const removeProductFromListImmediately = (productId: string) => {
     if (!onProductsChange) return;
     const next = (products || []).filter((item) => String(item?.id || '') !== String(productId));
@@ -562,6 +588,29 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
     await refreshProducts();
     setBulkImporting(false);
     showToast(`Limpeza concluída: ${invalidProducts.length} produto(s) removido(s).`, 'success');
+  };
+
+  const handleSaveCategoryPriority = async (row: any) => {
+    const key = normalizeCategory(row?.key || row?.name || '');
+    if (!key) return;
+    const rawDraft = categoryPriorityDrafts[key];
+    const parsed = Math.max(1, Math.floor(Number(rawDraft || row?.priority || 99)));
+    if (!Number.isFinite(parsed)) {
+      showToast('Informe uma ordem válida.', 'warning');
+      return;
+    }
+    setCategoryPrioritySavingKey(key);
+    try {
+      await productService.setCategoryPriority(key, parsed);
+      showToast('Ordem de categoria atualizada.', 'success');
+      await refreshProducts();
+      await loadCategoryPriorities();
+    } catch (error) {
+      console.error('Falha ao salvar prioridade da categoria', error);
+      showToast('Não foi possível salvar a ordem da categoria.', 'error');
+    } finally {
+      setCategoryPrioritySavingKey(null);
+    }
   };
 
   const handleSubmit = async (event) => {
@@ -816,6 +865,11 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
     }
   };
 
+  useEffect(() => {
+    void loadCategoryPriorities();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
 
   return (
     <div className="space-y-6">
@@ -957,6 +1011,70 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
               )}
             </div>
           )}
+        </div>
+
+        <div className="mb-5 rounded-2xl border border-slate-200 bg-white/90 p-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-bold text-slate-800">Ordem de Exibição das Categorias</p>
+              <p className="text-xs text-slate-500">Números menores aparecem primeiro no catálogo.</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => void loadCategoryPriorities()}
+              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+              disabled={categoryPriorityLoading || Boolean(categoryPrioritySavingKey)}
+            >
+              {categoryPriorityLoading ? 'Atualizando...' : 'Recarregar'}
+            </button>
+          </div>
+
+          <div className="mt-3 space-y-2">
+            {categoryPriorityRows.length === 0 ? (
+              <p className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-500">
+                Cadastre produtos para liberar o controle de prioridade por categoria.
+              </p>
+            ) : (
+              categoryPriorityRows.map((row) => {
+                const key = normalizeCategory(row?.key || row?.name || '');
+                const isSaving = categoryPrioritySavingKey === key;
+                return (
+                  <div
+                    key={key}
+                    className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 bg-slate-50/70 px-3 py-2"
+                  >
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-slate-800">{row?.name || formatCategoryLabel(key)}</p>
+                      <p className="text-[11px] text-slate-500">{row?.count || 0} produto(s)</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        min="1"
+                        step="1"
+                        value={categoryPriorityDrafts[key] ?? String(row?.priority ?? 99)}
+                        onChange={(e) =>
+                          setCategoryPriorityDrafts((prev) => ({
+                            ...prev,
+                            [key]: e.target.value,
+                          }))
+                        }
+                        className="w-20 rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm font-semibold text-slate-800 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => void handleSaveCategoryPriority(row)}
+                        disabled={isSaving}
+                        className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-bold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {isSaving ? 'Salvando...' : 'Salvar'}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
         </div>
 
         <div className="grid gap-6">
