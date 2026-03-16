@@ -1092,15 +1092,20 @@ export function StorePage() {
     try {
       createdOrder = await orderService.createBySlug(order, storeSlug);
     } catch (error) {
+      const backendMessage =
+        error?.details?.message ||
+        error?.error?.details?.message ||
+        error?.error?.message ||
+        error?.message;
       if (error?.code === 'ORDER-005') {
-        showErrorNotice(error.message || 'Adicione ao menos 1 item válido para finalizar o pedido.');
+        showErrorNotice(backendMessage || 'Adicione ao menos 1 item válido para finalizar o pedido.');
         return;
       }
       if (error?.code === 'ORDER-003') {
-        showTableNotice(error.message || 'Mesa já está ocupada. Finalize o pedido atual antes de criar outro.');
+        showTableNotice(backendMessage || 'Mesa já está ocupada. Finalize o pedido atual antes de criar outro.');
         return;
       }
-      showErrorNotice(error?.message || 'Não foi possível enviar o pedido agora.');
+      showErrorNotice(backendMessage || 'Não foi possível enviar o pedido agora.');
       return;
     }
     const nextCustomers = [

@@ -111,8 +111,10 @@ export const CartView = ({
   const [cashNeedsChange, setCashNeedsChange] = useState(false);
   const [cashTenderedInput, setCashTenderedInput] = useState("");
   const [showOutOfRangeSheet, setShowOutOfRangeSheet] = useState(false);
+  const [showEmptyCartSheet, setShowEmptyCartSheet] = useState(false);
   const [hasTriedCheckout, setHasTriedCheckout] = useState(false);
   const [showOptionalPhoneFields, setShowOptionalPhoneFields] = useState(false);
+  const previousCartItemsCountRef = useRef<number>(cartItems.length);
   const nameInputRef = useRef<HTMLInputElement | null>(null);
   const cepInputRef = useRef<HTMLInputElement | null>(null);
   const premiumInputClass =
@@ -171,6 +173,14 @@ export const CartView = ({
     }
     setShowOptionalPhoneFields(true);
   }, [isTableOptionalPhoneMode]);
+
+  useEffect(() => {
+    const previousCount = previousCartItemsCountRef.current;
+    if (previousCount > 0 && cartItems.length === 0) {
+      setShowEmptyCartSheet(true);
+    }
+    previousCartItemsCountRef.current = cartItems.length;
+  }, [cartItems.length]);
 
   useEffect(() => {
     const parsed = extractPhoneParts(customer.phone || "");
@@ -1227,6 +1237,42 @@ export const CartView = ({
                 className="rounded-xl bg-slate-900 px-4 py-3 text-sm font-bold text-white"
               >
                 Quero retirar na loja
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showEmptyCartSheet && (
+        <div className="fixed inset-0 z-[71]">
+          <button
+            type="button"
+            onClick={() => setShowEmptyCartSheet(false)}
+            className="absolute inset-0 bg-slate-900/45 backdrop-blur-[1px]"
+            aria-label="Fechar aviso de carrinho vazio"
+          />
+          <div className="absolute bottom-0 left-0 right-0 rounded-t-3xl border border-slate-200 bg-white p-4 pb-[max(env(safe-area-inset-bottom),1rem)] shadow-[0_-20px_44px_-24px_rgba(15,23,42,0.45)]">
+            <p className="text-sm font-black text-slate-900">Seu pedido ficou sem itens</p>
+            <p className="mt-2 text-sm text-slate-600">
+              Você removeu todos os itens. Deseja voltar para o catálogo para continuar comprando?
+            </p>
+            <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <button
+                type="button"
+                onClick={() => setShowEmptyCartSheet(false)}
+                className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowEmptyCartSheet(false);
+                  onBack();
+                }}
+                className="rounded-xl bg-slate-900 px-4 py-3 text-sm font-bold text-white"
+              >
+                Voltar ao catálogo
               </button>
             </div>
           </div>
