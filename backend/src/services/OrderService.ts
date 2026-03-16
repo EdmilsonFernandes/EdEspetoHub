@@ -58,6 +58,22 @@ export class OrderService
       `,
       [storeId]
     );
+
+    // Auto-close stale operational orders (older than 6h) to avoid stuck queue.
+    await AppDataSource.query(
+      `
+        UPDATE orders o
+           SET status = 'done',
+               payment_status = CASE
+                 WHEN UPPER(COALESCE(o.payment_status, '')) = 'PAID' THEN 'PAID'
+                 ELSE 'PAID'
+               END
+         WHERE o.store_id = $1
+           AND o.status IN ('pending', 'preparing', 'ready', 'ready_for_delivery', 'waiting_for_motoboy')
+           AND o.created_at <= (NOW() - INTERVAL '6 hours')
+      `,
+      [storeId]
+    );
   }
 
   private async reconcileDeliveredOrderById(orderId: string) {

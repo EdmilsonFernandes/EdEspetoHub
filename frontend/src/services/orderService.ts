@@ -17,6 +17,11 @@ const normalizeOrder = (order: any) => ({
     : order.created_at
     ? new Date(order.created_at).getTime()
     : order.createdAt,
+  updatedAt: order.updatedAt
+    ? new Date(order.updatedAt).getTime()
+    : order.updated_at
+    ? new Date(order.updated_at).getTime()
+    : order.updatedAt || null,
   payment: order.payment ?? order.paymentMethod ?? order.payment_method,
   cashTendered: order.cashTendered ?? order.cash_tendered ?? null,
   deliveryFee: order.deliveryFee ?? order.delivery_fee ?? null,

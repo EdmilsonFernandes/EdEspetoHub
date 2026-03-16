@@ -1086,7 +1086,18 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       queue.reduce(
         (acc, order) => ({
           ...acc,
-          [order.id]: formatDuration(order.createdAt ? currentTime - order.createdAt : 0),
+          [order.id]: (() => {
+            const status = String(order?.status || '').toLowerCase();
+            const isFinal = status === 'done' || status === 'delivered' || status === 'finished';
+            const createdAt = Number(order?.createdAt || 0);
+            if (!createdAt) return '0s';
+            if (isFinal) {
+              const updatedAt = Number(order?.updatedAt || createdAt);
+              const totalMs = Math.max(0, updatedAt - createdAt);
+              return formatDuration(totalMs);
+            }
+            return formatDuration(Math.max(0, currentTime - createdAt));
+          })(),
         }),
         {}
       ),
