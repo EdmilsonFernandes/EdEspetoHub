@@ -4,7 +4,7 @@ import { createPortal } from "react-dom";
 import {
   CheckSquare,
   Clock,
-  ClipboardText,
+  ChefHat,
   Monitor,
   ArrowsClockwise,
   Plus,
@@ -1688,14 +1688,14 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
           {!tvMode ? (
             <>
               <div className="flex w-full items-center justify-between gap-2 border-b border-slate-100 pb-1.5">
-                <div className="relative inline-flex flex-1 sm:flex-none min-w-0 items-center">
-                  <div className="inline-flex w-full min-w-0 items-center gap-1 rounded-lg bg-slate-100 p-1 overflow-x-auto snap-x snap-mandatory [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
+                <div className="relative inline-flex flex-1 min-w-0 items-center">
+                  <div className="grid w-full min-w-0 grid-cols-3 items-center gap-1 rounded-lg bg-slate-100 p-1">
                   {[
                     { id: 'queue', label: 'Pedidos', count: allActiveQueue.length },
                     { id: 'inroute', label: 'Em rota', count: inRouteQueue.length },
                     {
                       id: 'completed',
-                      label: isAdminUser ? 'Faturamento & Relatórios' : 'Finalizados',
+                      label: isAdminUser ? 'Vendas' : 'Finalizados',
                       count: reportCompleted.length,
                     },
                   ].map((tab) => (
@@ -1703,13 +1703,13 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                       key={tab.id}
                       type="button"
                       onClick={() => setActiveTab(tab.id as 'queue' | 'inroute' | 'completed')}
-                      className={`inline-flex snap-start flex-shrink-0 items-center gap-1 text-xs sm:text-sm px-3.5 sm:px-4 py-1.5 sm:py-1.5 rounded-lg font-medium transition-colors whitespace-nowrap ${
+                      className={`inline-flex w-full min-w-0 items-center justify-center gap-1 text-[11px] sm:text-sm px-2 sm:px-3 py-1.5 rounded-lg font-medium transition-colors whitespace-nowrap ${
                         activeTab === tab.id
                           ? 'bg-white shadow-sm font-semibold text-slate-900'
                           : 'text-slate-500 hover:text-slate-700'
                       }`}
                     >
-                      <span>{tab.label}</span>
+                      <span className="truncate">{tab.label}</span>
                       <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
                         activeTab === tab.id ? 'bg-slate-100 text-slate-700' : 'bg-white text-slate-500 border border-slate-200'
                       }`}>
@@ -1718,9 +1718,8 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                     </button>
                   ))}
                   </div>
-                  <div className="pointer-events-none absolute right-0 top-0 h-full w-8 bg-gradient-to-l from-white/95 to-transparent" />
                 </div>
-                {activeTab === 'queue' && (
+                {activeTab === 'queue' && bulkFinalizeCandidates.length > 0 && (
                   <button
                     type="button"
                     onClick={openFinalizeAllReadyModal}
@@ -1729,14 +1728,14 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                     title="Finalizar rapidamente todos os pedidos ativos"
                   >
                     <CheckSquare size={13} weight="duotone" />
-                    {bulkFinishing ? 'Finalizando...' : `Finalizar tudo (${bulkFinalizeCandidates.length})`}
+                    <span className="hidden sm:inline">{bulkFinishing ? 'Finalizando...' : `Finalizar tudo (${bulkFinalizeCandidates.length})`}</span>
                   </button>
                 )}
               </div>
 
               {activeTab === 'queue' && (
                 <div className="relative mt-0.5">
-                  <div className="flex flex-nowrap items-center gap-2 overflow-x-auto snap-x snap-mandatory pb-1 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
+                  <div className="flex flex-nowrap items-center gap-1.5 overflow-x-auto snap-x snap-mandatory pb-1 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
                   {[
                     { id: 'all', label: 'Todos', value: allActiveQueue.length },
                     { id: 'pending', label: 'Pendentes', value: queueMetrics.pending },
@@ -1749,14 +1748,14 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                       key={kpi.id}
                       type="button"
                       onClick={() => setQueueFilter(kpi.id as any)}
-                      className={`flex snap-start shrink-0 items-center gap-2 px-5 py-2 rounded-full text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
+                      className={`flex snap-start shrink-0 items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] sm:text-xs font-medium transition-colors whitespace-nowrap ${
                         queueFilter === kpi.id
-                          ? 'bg-slate-900 text-white shadow-sm'
+                          ? 'bg-amber-500 text-white shadow-sm'
                           : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                       }`}
                     >
                       <span>{kpi.label}</span>
-                      <span className={`px-2 py-0.5 rounded-full text-xs ${
+                      <span className={`px-1.5 py-0.5 rounded-full text-[10px] ${
                         queueFilter === kpi.id
                           ? 'bg-white/20 text-white'
                           : Number(kpi.value) === 0
@@ -1768,7 +1767,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                     </button>
                   ))}
                   </div>
-                  <div className="pointer-events-none absolute right-0 top-0 h-full w-10 bg-gradient-to-l from-white/95 via-white/80 to-transparent" />
+                  <div className="pointer-events-none absolute right-0 top-0 h-full w-8 bg-gradient-to-l from-white via-white/80 to-transparent" />
                 </div>
               )}
             </>
@@ -1869,13 +1868,13 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
             })}
           </div>
           {filteredProductionQueue.length === 0 && awaitingMotoboyQueue.length === 0 && !loading && (
-            <div className="col-span-full text-center text-gray-500 py-12 bg-slate-50 rounded-2xl border border-dashed border-slate-300">
-              <div className="mx-auto max-w-sm space-y-2">
-                <div className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-500">
-                  <ClipboardText size={24} weight="duotone" />
+            <div className="col-span-full text-center text-gray-500 py-7 bg-slate-50 rounded-2xl border border-dashed border-slate-300">
+              <div className="mx-auto max-w-sm space-y-1.5">
+                <div className="mx-auto inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500">
+                  <ChefHat size={18} weight="duotone" />
                 </div>
-                <p className="text-sm font-semibold text-slate-700">Nenhum pedido aguardando.</p>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs font-semibold text-slate-700">Nenhum pedido aguardando.</p>
+                <p className="text-[11px] text-slate-500">
                   Assim que chegar um pedido, ele aparece aqui com prioridade.
                 </p>
               </div>
