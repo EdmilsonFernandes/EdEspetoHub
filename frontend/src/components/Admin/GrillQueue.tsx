@@ -249,6 +249,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
   const [isGeneratingPrint, setIsGeneratingPrint] = useState(false);
   const [bulkFinishing, setBulkFinishing] = useState(false);
+  const [bulkFinalizeModalOpen, setBulkFinalizeModalOpen] = useState(false);
   const [printSelectionModal, setPrintSelectionModal] = useState<{
     open: boolean;
     order: any | null;
@@ -858,17 +859,18 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     }
   };
 
+  const openFinalizeAllReadyModal = () => {
+    if (bulkFinishing || !readyToFinalizeOrders.length) return;
+    setBulkFinalizeModalOpen(true);
+  };
+
   const handleFinalizeAllReady = async () => {
     if (bulkFinishing) return;
     const targetOrders = readyToFinalizeOrders;
     if (!targetOrders.length) return;
 
-    const proceed = window.confirm(
-      `Finalizar ${targetOrders.length} pedido(s) prontos agora?\n\nEsta ação confirma pagamento e conclui os pedidos.`
-    );
-    if (!proceed) return;
-
     setBulkFinishing(true);
+    setBulkFinalizeModalOpen(false);
     setError('');
     const targetIds = new Set(targetOrders.map((order) => String(order.id)));
     const previousQueue = queue;
@@ -1562,7 +1564,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                 {activeTab === 'queue' && (
                   <button
                     type="button"
-                    onClick={handleFinalizeAllReady}
+                    onClick={openFinalizeAllReadyModal}
                     disabled={bulkFinishing || readyToFinalizeOrders.length === 0}
                     className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-[11px] sm:text-xs font-bold text-emerald-700 hover:bg-emerald-100 transition disabled:opacity-45 disabled:cursor-not-allowed"
                     title="Finalizar rapidamente todos os pedidos prontos"
@@ -2652,6 +2654,63 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                   className="h-10 rounded-xl bg-slate-900 px-3 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-60"
                 >
                   {isPrintingDaySummary ? 'Imprimindo...' : 'Imprimir Fechamento'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+      {bulkFinalizeModalOpen && createPortal(
+        <div className="fixed inset-0 z-[10025]">
+          <div
+            className="absolute inset-0 bg-slate-900/45 backdrop-blur-sm"
+            onClick={() => !bulkFinishing && setBulkFinalizeModalOpen(false)}
+          />
+          <div className="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center p-3 sm:p-4">
+            <div className="w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl border border-slate-200 bg-white shadow-2xl overflow-hidden">
+              <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-black text-slate-900">Finalização rápida</p>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Confirme para concluir em lote os pedidos prontos.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setBulkFinalizeModalOpen(false)}
+                  disabled={bulkFinishing}
+                  className="h-9 w-9 rounded-full border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+                  aria-label="Fechar finalização rápida"
+                >
+                  <X size={16} weight="bold" />
+                </button>
+              </div>
+              <div className="p-4 space-y-3">
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-3 flex items-center justify-between">
+                  <span className="text-sm font-semibold text-emerald-700">Pedidos prontos agora</span>
+                  <span className="text-lg font-black text-emerald-800">{readyToFinalizeOrders.length}</span>
+                </div>
+                <p className="text-xs text-slate-500">
+                  Esta ação registra como pago e finalizado. Use quando a cobrança já foi concluída no balcão.
+                </p>
+              </div>
+              <div className="px-4 py-3 border-t border-slate-100 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setBulkFinalizeModalOpen(false)}
+                  disabled={bulkFinishing}
+                  className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={handleFinalizeAllReady}
+                  disabled={bulkFinishing || readyToFinalizeOrders.length === 0}
+                  className="h-10 rounded-xl bg-emerald-600 px-3 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
+                >
+                  {bulkFinishing ? 'Finalizando...' : `Finalizar ${readyToFinalizeOrders.length}`}
                 </button>
               </div>
             </div>
