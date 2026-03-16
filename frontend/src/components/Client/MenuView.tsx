@@ -289,8 +289,33 @@ export const MenuView = ({
 
   const grouped = useMemo(() => {
     const normalize = (value) => (value || "outros").toString().trim().toLowerCase();
+    const normalizeKey = (value) =>
+      normalize(value)
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[_-]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    const canonicalCategoryLabels: Record<string, string> = {
+      refeicoes: "Refeições",
+      refeicao: "Refeição",
+      porcoes: "Porções",
+      porcao: "Porção",
+      acai: "Açaí",
+      acais: "Açaís",
+      bebidas: "Bebidas",
+      cervejas: "Cervejas",
+      destilados: "Destilados",
+      lanches: "Lanches",
+      sobremesas: "Sobremesas",
+      entradas: "Entradas",
+      outros: "Outros",
+    };
     const labelize = (value) => {
-      const key = normalize(value);
+      const key = normalizeKey(value);
+      const compactKey = key.replace(/\s+/g, "");
+      if (canonicalCategoryLabels[compactKey]) return canonicalCategoryLabels[compactKey];
+      if (canonicalCategoryLabels[key]) return canonicalCategoryLabels[key];
       return key
         .split(" ")
         .map((part) => part.charAt(0).toUpperCase() + part.slice(1))

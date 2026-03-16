@@ -57,6 +57,7 @@ export function StorePage() {
   const [topProducts, setTopProducts] = useState([]);
   const [reorderApplied, setReorderApplied] = useState(false);
   const autoTrackRef = useRef(false);
+  const staffDefaultTypeAppliedRef = useRef(false);
   const reorderTtlMs = 30 * 24 * 60 * 60 * 1000;
   const publicOrderTtlMs = 24 * 60 * 60 * 1000;
   const [lastPublicOrderId, setLastPublicOrderId] = useState('');
@@ -574,12 +575,35 @@ export function StorePage() {
     };
   }, [storeSlug]);
 
+  const resolveDefaultOrderType = (types: string[]) => {
+    if (!Array.isArray(types) || !types.length) return 'table';
+    if (canUseAdminPrintFlow && types.includes('table')) return 'table';
+    if (types.includes('delivery')) return 'delivery';
+    return types[0];
+  };
+
   useEffect(() => {
     if (!Array.isArray(orderTypes) || !orderTypes.length) return;
-    if (orderTypes.includes(customer.type)) return;
-    const fallbackType = orderTypes.includes('delivery') ? 'delivery' : orderTypes[0];
+    const current = String(customer.type || '').trim();
+    if (orderTypes.includes(current)) return;
+    const fallbackType = resolveDefaultOrderType(orderTypes);
     setCustomer((prev) => ({ ...prev, type: fallbackType }));
-  }, [orderTypes, customer.type]);
+  }, [orderTypes, customer.type, canUseAdminPrintFlow]);
+
+  useEffect(() => {
+    if (!canUseAdminPrintFlow) {
+      staffDefaultTypeAppliedRef.current = false;
+      return;
+    }
+    if (staffDefaultTypeAppliedRef.current) return;
+    if (!Array.isArray(orderTypes) || !orderTypes.includes('table')) return;
+    if (customer.type === 'table') {
+      staffDefaultTypeAppliedRef.current = true;
+      return;
+    }
+    setCustomer((prev) => ({ ...prev, type: 'table' }));
+    staffDefaultTypeAppliedRef.current = true;
+  }, [canUseAdminPrintFlow, orderTypes, customer.type]);
 
   useEffect(() => {
     if (!storeSlug || typeof window === 'undefined') return;
@@ -635,13 +659,6 @@ export function StorePage() {
       console.error('Falha ao aplicar pedido repetido', error);
     }
   }, [products, storeSlug, reorderApplied]);
-
-  useEffect(() => {
-    if (!orderTypes.length) return;
-    if (!orderTypes.includes(customer.type)) {
-      setCustomer((prev) => ({ ...prev, type: orderTypes[0] }));
-    }
-  }, [orderTypes, customer.type]);
 
   useEffect(() => {
     const storageKey = brandingStorageKey(branding.espetoId);
