@@ -4,12 +4,14 @@ import {
   SquaresFour,
   X,
   Plus,
+  Minus,
   MagnifyingGlass,
   MapPin,
   ChefHat,
   Sparkle,
   ShoppingCart,
   ForkKnife,
+  SlidersHorizontal,
 } from "@phosphor-icons/react";
 import { formatCurrency } from "../../utils/format";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
@@ -766,7 +768,7 @@ export const MenuView = ({
                 return (
                 <div
                   key={item.id}
-                  className={`group bg-white rounded-2xl border border-slate-100 shadow-sm p-3 sm:p-4 grid grid-cols-[1fr_auto] gap-3 hover:-translate-y-0.5 active:scale-[0.99] transition ${!staffView ? "cursor-pointer" : "cursor-default"}`}
+                  className={`group bg-white rounded-2xl border border-slate-100 shadow-sm p-3 sm:p-4 grid grid-cols-[1fr_auto] gap-3 md:hover:scale-[1.01] md:hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99] transition ${!staffView ? "cursor-pointer" : "cursor-default"}`}
                   onClick={() => {
                     if (!staffView) openProductModal(item);
                   }}
@@ -802,10 +804,10 @@ export const MenuView = ({
                       <button
                         type="button"
                         onClick={handleOpenOptions}
-                        className="inline-flex items-center gap-2 text-[11px] font-semibold text-slate-600 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-full hover:bg-slate-200 transition cursor-pointer"
+                        className="inline-flex items-center gap-2 text-[11px] font-semibold text-slate-600 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-full hover:bg-slate-100 transition cursor-pointer"
                       >
-                        <Plus size={12} weight="bold" />
-                        {isEspetoCategory(item?.category) ? "Opções: ponto/farinha" : "Possui opções"}
+                        <SlidersHorizontal size={12} weight="bold" />
+                        {isEspetoCategory(item?.category) ? "Customizar espeto" : "Ver opções"}
                       </button>
                     )}
                     {staffView && !hasConfigurableOptions && hasAnyDescription && (
@@ -834,7 +836,7 @@ export const MenuView = ({
                           openProductModal(item);
                         }
                       }}
-                      className={`aspect-square ${staffView ? "w-[120px] rounded-2xl" : "w-[108px] rounded-2xl"} overflow-hidden bg-gray-100 border border-gray-200 shadow-sm ${(!staffView || allowStaffModal) ? 'cursor-pointer' : 'cursor-default'}`}
+                      className={`aspect-[4/3] sm:aspect-square ${staffView ? "w-[120px] rounded-2xl" : "w-[108px] rounded-2xl"} overflow-hidden bg-gray-100 border border-gray-200 shadow-sm ${(!staffView || allowStaffModal) ? 'cursor-pointer' : 'cursor-default'}`}
                     >
                       {item.imageUrl ? (
                         <img
@@ -876,54 +878,17 @@ export const MenuView = ({
                               <span className="text-[11px] font-semibold text-slate-400 line-through">
                                 {formatCurrency(item.price)}
                               </span>
-                              <span className="text-xl font-bold tracking-tight text-slate-800">
+                              <span className="text-xl font-bold tracking-tight text-amber-600">
                                 {formatCurrency(resolvePromoPrice(item))}
                               </span>
                             </>
                           ) : (
-                            <span className="text-xl font-bold tracking-tight text-slate-800">
+                            <span className="text-xl font-bold tracking-tight text-amber-600">
                               {formatCurrency(item.price)}
                             </span>
                           )}
                         </div>
                       );
-
-                      if (staffView) {
-                        return (
-                          <div className="w-full flex items-center justify-end gap-2">
-                            {priceNode}
-                            <div
-                              className="h-10 min-w-[112px] rounded-lg border border-slate-200 bg-white px-1.5 flex items-center justify-between gap-1 shadow-sm"
-                              onClick={(event) => event.stopPropagation()}
-                            >
-                              <button
-                                type="button"
-                                onClick={handleDecrement}
-                                disabled={itemQty <= 0}
-                                className="h-7 w-7 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-100 transition flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed"
-                                aria-label={`Remover uma unidade de ${item.name}`}
-                              >
-                                -
-                              </button>
-                              <span
-                                className={`min-w-[26px] text-center text-xs font-black transition-all duration-200 ${
-                                  qtyPulseId === String(item.id) ? "scale-110 text-amber-600" : "text-slate-900"
-                                }`}
-                              >
-                                {itemQty}
-                              </span>
-                              <button
-                                type="button"
-                                onClick={handleIncrement}
-                                className="h-7 w-7 rounded-lg bg-slate-900 text-white hover:bg-slate-800 transition flex items-center justify-center"
-                                aria-label={`Adicionar uma unidade de ${item.name}`}
-                              >
-                                +
-                              </button>
-                            </div>
-                          </div>
-                        );
-                      }
 
                       if (itemQty <= 0) {
                         return (
@@ -932,7 +897,7 @@ export const MenuView = ({
                             <button
                               onClick={handleIncrement}
                               title="Adicionar"
-                              className="h-9 px-4 py-1.5 rounded-full border hover:bg-slate-50 text-sm font-medium transition-all active:scale-[0.98] inline-flex items-center justify-center gap-1"
+                              className="h-9 px-4 py-1.5 rounded-full border text-sm font-semibold transition-all active:scale-[0.98] inline-flex items-center justify-center gap-1.5 hover:bg-slate-50"
                               style={{ borderColor: buttonColor, color: buttonColor }}
                             >
                               <Plus size={14} weight="duotone" />
@@ -946,25 +911,32 @@ export const MenuView = ({
                         <div className="w-full flex items-center justify-end gap-2">
                           {priceNode}
                           <div
-                            className="h-10 min-w-[112px] rounded-lg border border-slate-200 bg-white px-1.5 flex items-center justify-between gap-1 shadow-sm"
+                            className="h-10 min-w-[112px] rounded-full bg-slate-50 px-1.5 flex items-center justify-between gap-1"
                             onClick={(event) => event.stopPropagation()}
                           >
                             <button
                               type="button"
                               onClick={handleDecrement}
-                              className="h-7 w-7 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-100 transition flex items-center justify-center"
+                              disabled={itemQty <= 0}
+                              className="h-7 w-7 rounded-full bg-white text-slate-700 hover:bg-slate-100 transition flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed"
                               aria-label={`Remover uma unidade de ${item.name}`}
                             >
-                              -
+                              <Minus size={13} weight="bold" />
                             </button>
-                            <span className="min-w-[26px] text-center text-xs font-black text-slate-900">{itemQty}</span>
+                            <span
+                              className={`min-w-[26px] text-center text-xs font-black transition-all duration-200 ${
+                                qtyPulseId === String(item.id) ? "scale-110 text-amber-600" : "text-slate-900"
+                              }`}
+                            >
+                              {itemQty}
+                            </span>
                             <button
                               type="button"
                               onClick={handleIncrement}
-                              className="h-7 w-7 rounded-lg bg-slate-900 text-white hover:bg-slate-800 transition flex items-center justify-center"
+                              className="h-7 w-7 rounded-full bg-slate-900 text-white hover:bg-slate-800 transition flex items-center justify-center"
                               aria-label={`Adicionar uma unidade de ${item.name}`}
                             >
-                              +
+                              <Plus size={13} weight="bold" />
                             </button>
                           </div>
                         </div>
