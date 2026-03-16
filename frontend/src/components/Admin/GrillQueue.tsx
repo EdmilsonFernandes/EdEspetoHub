@@ -4,6 +4,7 @@ import { createPortal } from "react-dom";
 import {
   CheckSquare,
   Clock,
+  ClipboardText,
   Monitor,
   ArrowsClockwise,
   Plus,
@@ -1683,10 +1684,10 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         @keyframes drawerIn{0%{transform:translateX(100%)}100%{transform:translateX(0)}}
       `}</style>
       <div className={`${tvMode ? "" : "rounded-2xl border border-slate-200 bg-white/95 backdrop-blur-md px-2 sm:px-3 py-2 sticky top-0 z-30"}`}>
-        <div className="flex flex-col gap-2 mb-0">
+        <div className="flex flex-col gap-1 mb-0">
           {!tvMode ? (
             <>
-              <div className="flex w-full items-center justify-between gap-2 border-b border-slate-100 pb-2">
+              <div className="flex w-full items-center justify-between gap-2 border-b border-slate-100 pb-1.5">
                 <div className="relative inline-flex flex-1 sm:flex-none min-w-0 items-center">
                   <div className="inline-flex w-full min-w-0 items-center gap-1 rounded-lg bg-slate-100 p-1 overflow-x-auto snap-x snap-mandatory [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
                   {[
@@ -1702,7 +1703,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                       key={tab.id}
                       type="button"
                       onClick={() => setActiveTab(tab.id as 'queue' | 'inroute' | 'completed')}
-                      className={`inline-flex snap-start flex-shrink-0 items-center gap-1 text-xs sm:text-sm px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-md transition-colors whitespace-nowrap ${
+                      className={`inline-flex snap-start flex-shrink-0 items-center gap-1 text-xs sm:text-sm px-3.5 sm:px-4 py-1.5 sm:py-1.5 rounded-lg font-medium transition-colors whitespace-nowrap ${
                         activeTab === tab.id
                           ? 'bg-white shadow-sm font-semibold text-slate-900'
                           : 'text-slate-500 hover:text-slate-700'
@@ -1734,7 +1735,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
               </div>
 
               {activeTab === 'queue' && (
-                <div className="relative">
+                <div className="relative mt-0.5">
                   <div className="flex flex-nowrap items-center gap-2 overflow-x-auto snap-x snap-mandatory pb-1 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
                   {[
                     { id: 'all', label: 'Todos', value: allActiveQueue.length },
@@ -1748,10 +1749,10 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                       key={kpi.id}
                       type="button"
                       onClick={() => setQueueFilter(kpi.id as any)}
-                      className={`flex snap-start shrink-0 items-center gap-2 px-3 py-1.5 rounded-full border text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
+                      className={`flex snap-start shrink-0 items-center gap-2 px-5 py-2 rounded-full text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
                         queueFilter === kpi.id
-                          ? 'bg-slate-900 border-slate-900 text-white'
-                          : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                          ? 'bg-slate-900 text-white shadow-sm'
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                       }`}
                     >
                       <span>{kpi.label}</span>
@@ -1870,7 +1871,9 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
           {filteredProductionQueue.length === 0 && awaitingMotoboyQueue.length === 0 && !loading && (
             <div className="col-span-full text-center text-gray-500 py-12 bg-slate-50 rounded-2xl border border-dashed border-slate-300">
               <div className="mx-auto max-w-sm space-y-2">
-                <div className="text-4xl">🔥</div>
+                <div className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-500">
+                  <ClipboardText size={24} weight="duotone" />
+                </div>
                 <p className="text-sm font-semibold text-slate-700">Nenhum pedido aguardando.</p>
                 <p className="text-xs text-slate-500">
                   Assim que chegar um pedido, ele aparece aqui com prioridade.
