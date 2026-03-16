@@ -635,23 +635,28 @@ export class AuthService
     const candidate = await this.userRepository.findByLoginIdentifier(normalizedIdentifier);
     if (candidate) {
       const valid = await this.comparePasswordWithLegacy(password, candidate);
-      if (!valid) throw new AppError('AUTH-004', 401);
-      loginUser = candidate;
+      if (valid) {
+        loginUser = candidate;
 
-      const ownedStore = await this.storeRepository.findByOwnerId(candidate.id);
-      if (ownedStore) {
-        store = ownedStore;
-        loginRole = 'ADMIN';
-      } else {
-        const memberships = await this.storeUserRepository.findActiveByUserId(candidate.id);
-        const membership = memberships?.[0];
-        if (!membership?.store?.id) {
-          throw new AppError('AUTH-022', 403);
+        const ownedStore = await this.storeRepository.findByOwnerId(candidate.id);
+        if (ownedStore) {
+          store = ownedStore;
+          loginRole = 'ADMIN';
+        } else {
+          const memberships = await this.storeUserRepository.findActiveByUserId(candidate.id);
+          const membership = memberships?.[0];
+          if (!membership?.store?.id) {
+            throw new AppError('AUTH-022', 403);
+          }
+          store = membership.store;
+          loginRole = String(membership.role || 'OPERATOR').toUpperCase() === 'ADMIN' ? 'ADMIN' : 'OPERATOR';
         }
-        store = membership.store;
-        loginRole = String(membership.role || 'OPERATOR').toUpperCase() === 'ADMIN' ? 'ADMIN' : 'OPERATOR';
       }
-    } else {
+      // If identifier matched a user but password did not match, fallback to slug flow below.
+      // This avoids false AUTH-004 when identifier is also a valid store slug.
+    }
+
+    if (!store || !loginUser) {
       // Backward compatibility for old flow using store slug.
       store = await this.storeRepository.findBySlugWithOwner(normalizedIdentifier);
       if (!store) throw new AppError('AUTH-004', 401);
