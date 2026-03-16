@@ -57,8 +57,12 @@ const OrderSummaryCard = ({
   (() => {
     const isDelivery = String(order?.type || '').toLowerCase() === 'delivery';
     const leftAccent = isDelivery ? 'border-l-0 sm:border-l-4 sm:border-l-blue-500' : 'border-l-0 sm:border-l-4 sm:border-l-orange-500';
-    const compactMeta = `${formatOrderType(order?.type)} • ${paymentLabel}`;
     const hasTable = String(order?.type || '').toLowerCase() === 'table' && order?.table;
+    const createdAtLabel = (() => {
+      const base = Number(order?.createdAt || 0);
+      if (!base) return '--:--';
+      return new Date(base).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    })();
     const closedAtLabel = (() => {
       if (!archived) return '';
       const base = Number(order?.updatedAt || order?.createdAt || 0);
@@ -76,50 +80,57 @@ const OrderSummaryCard = ({
         onClick();
       }
     }}
-    className={`w-full rounded-xl border ${isLate ? 'border-red-300' : 'border-slate-200'} ${leftAccent} ${archived ? 'bg-slate-50/90 opacity-80' : 'bg-white'} p-2.5 sm:p-3 text-left flex flex-col gap-2 transition-all duration-300 transition-transform hover:border-slate-300 hover:shadow-lg hover:-translate-y-0.5 hover:scale-[1.01] cursor-pointer`}
+    className={`w-full rounded-xl border ${isLate ? 'border-red-300' : 'border-slate-200'} ${leftAccent} ${archived ? 'bg-slate-50/90 opacity-80' : 'bg-white'} p-2 sm:p-3 text-left flex flex-col gap-1.5 transition-all duration-300 transition-transform hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5 hover:scale-[1.01] cursor-pointer`}
   >
-    <div className="grid grid-cols-[auto_1fr_auto] items-start gap-2">
-      <div className="min-w-0">
+    <div className="flex items-center justify-between gap-2">
+      <div className="flex items-center gap-1.5 min-w-0">
         <span className="px-2 py-1 bg-slate-800 text-white text-xs font-bold rounded-md shadow-sm">
           #{String(queueRank).padStart(2, '0')}
         </span>
-      </div>
-      <div className="flex justify-center min-w-0">
-        {!archived ? (
-          <span className={`px-2 py-1 text-[10px] uppercase tracking-wider font-bold rounded-md whitespace-nowrap border ${statusMeta.className}`}>
-            {statusMeta.label}
-          </span>
-        ) : null}
-      </div>
-      <div className="flex flex-col items-end gap-1">
         {hasTable && (
-          <span className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-[13px] font-black tracking-wide text-white whitespace-nowrap shadow-sm ${archived ? 'bg-slate-600' : 'bg-amber-500'}`}>
+          <span className={`inline-flex items-center gap-1 rounded-md px-2 py-1 text-[12px] font-black tracking-wide text-white whitespace-nowrap shadow-sm ${archived ? 'bg-slate-600' : 'bg-amber-500'}`}>
             <Hash size={12} weight="bold" />
             MESA {String(order.table).padStart(2, "0")}
           </span>
         )}
+        {!hasTable && (
+          <span className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-[10px] font-semibold text-slate-700">
+            {formatOrderType(order?.type)}
+          </span>
+        )}
+      </div>
+      <div className="shrink-0">
         {!archived ? (
-          <span className={`px-2 py-1 text-xs font-bold font-mono rounded-md shrink-0 whitespace-nowrap border ${isLate ? 'bg-red-500 text-white border-red-500' : 'bg-emerald-100 text-emerald-700 border-emerald-200'}`}>
+          <span className={`px-2 py-1 text-[11px] font-bold font-mono rounded-md whitespace-nowrap border ${isLate ? 'bg-red-500 text-white border-red-500' : 'bg-emerald-100 text-emerald-700 border-emerald-200'}`}>
             {elapsedLabel}
           </span>
         ) : (
-          <span className="px-2 py-1 text-[11px] font-semibold rounded-md shrink-0 whitespace-nowrap border bg-slate-100 text-slate-700 border-slate-200">
-            Fechado às {closedAtLabel || '--:--'}
+          <span className="px-2 py-1 text-[11px] font-semibold rounded-md whitespace-nowrap border bg-slate-100 text-slate-700 border-slate-200">
+            {closedAtLabel || '--:--'}
           </span>
         )}
       </div>
     </div>
 
-    <div className="min-w-0">
+    <div className="flex items-start justify-between gap-2 min-w-0">
+      <div className="min-w-0 flex-1">
       <h3 className="text-base font-black text-slate-800 line-clamp-1">{order.customerName || order.name || 'Cliente'}</h3>
-      <p className="mt-1 text-xs text-slate-500 font-medium line-clamp-1">{compactMeta}</p>
-      <p className="mt-1 text-[11px] font-semibold text-slate-500">
-        Pedido #{orderDisplayId}
-      </p>
+      </div>
+      <div className="shrink-0 flex items-center gap-1.5">
+        <span className="rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
+          {paymentLabel}
+        </span>
+        {!archived ? (
+          <span className={`px-2 py-0.5 text-[10px] uppercase tracking-wide font-bold rounded-full whitespace-nowrap border ${statusMeta.className}`}>
+            {statusMeta.label}
+          </span>
+        ) : null}
+      </div>
     </div>
 
-    <div className="border-t border-slate-100 pt-2 mt-1 flex justify-end items-center">
-      <div className="text-right flex items-center gap-1.5">
+    <div className="border-t border-slate-100 pt-1.5 mt-0.5 flex items-center justify-between">
+      <span className="text-[11px] text-slate-500 font-medium">{createdAtLabel}</span>
+      <div className="text-right flex items-center gap-1.5 shrink-0">
         <span className="text-sm font-bold text-slate-900">{totalLabel}</span>
         <span className="text-[11px] text-slate-500">{itemsCount} {itemsCount === 1 ? 'item' : 'itens'}</span>
         {canPrint && (
@@ -130,7 +141,7 @@ const OrderSummaryCard = ({
               onPrint();
             }}
             disabled={printBusy}
-            className={`inline-flex h-8 w-8 items-center justify-center rounded-lg border shadow-sm transition-all no-print disabled:opacity-60 ${
+            className={`inline-flex h-7 w-7 items-center justify-center rounded-md border transition-all no-print disabled:opacity-60 ${
               archived
                 ? 'border-slate-300 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-800'
                 : 'border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 hover:text-amber-900'
@@ -138,7 +149,7 @@ const OrderSummaryCard = ({
             aria-label={`Imprimir pedido ${orderDisplayId}`}
             title="Imprimir pedido"
           >
-            <Printer size={15} weight="duotone" />
+            <Printer size={14} weight="duotone" />
           </button>
         )}
         {archived && typeof onReopen === 'function' && (
@@ -148,7 +159,7 @@ const OrderSummaryCard = ({
               event.stopPropagation();
               onReopen();
             }}
-            className="inline-flex h-8 items-center justify-center rounded-lg border border-amber-300 bg-amber-50 px-2.5 text-[11px] font-semibold text-amber-700 hover:bg-amber-100 transition-all"
+            className="inline-flex h-7 items-center justify-center rounded-md border border-amber-300 bg-amber-50 px-2 text-[10px] font-semibold text-amber-700 hover:bg-amber-100 transition-all"
             aria-label={`Reabrir pedido ${orderDisplayId}`}
             title="Reabrir pedido"
           >
@@ -1748,9 +1759,9 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                       key={kpi.id}
                       type="button"
                       onClick={() => setQueueFilter(kpi.id as any)}
-                      className={`flex snap-start shrink-0 items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] sm:text-xs font-medium transition-colors whitespace-nowrap ${
+                    className={`flex snap-start shrink-0 items-center gap-1.5 px-3 py-1 rounded-full text-[10px] sm:text-xs font-medium transition-colors whitespace-nowrap ${
                         queueFilter === kpi.id
-                          ? 'bg-amber-500 text-white shadow-sm'
+                          ? 'bg-amber-500 text-white'
                           : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                       }`}
                     >
@@ -1868,10 +1879,10 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
             })}
           </div>
           {filteredProductionQueue.length === 0 && awaitingMotoboyQueue.length === 0 && !loading && (
-            <div className="col-span-full text-center text-gray-500 py-7 bg-slate-50 rounded-2xl border border-dashed border-slate-300">
-              <div className="mx-auto max-w-sm space-y-1.5">
-                <div className="mx-auto inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500">
-                  <ChefHat size={18} weight="duotone" />
+            <div className="col-span-full text-center text-gray-500 py-5 bg-slate-50 rounded-2xl border border-dashed border-slate-300">
+              <div className="mx-auto max-w-sm space-y-1">
+                <div className="mx-auto inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500">
+                  <CheckSquare size={15} weight="duotone" />
                 </div>
                 <p className="text-xs font-semibold text-slate-700">Nenhum pedido aguardando.</p>
                 <p className="text-[11px] text-slate-500">
