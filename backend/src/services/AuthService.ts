@@ -628,10 +628,33 @@ export class AuthService
       // Backward compatibility for old flow using store slug.
       store = await this.storeRepository.findBySlug(normalizedIdentifier);
       if (!store) throw new AppError('AUTH-004', 401);
-      loginUser = store.owner;
-      const valid = await bcrypt.compare(password, loginUser.password);
-      if (!valid) throw new AppError('AUTH-004', 401);
-      loginRole = 'ADMIN';
+      const ownerUser = store.owner;
+      const ownerValid = ownerUser ? await bcrypt.compare(password, ownerUser.password) : false;
+
+      if (ownerValid) {
+        loginUser = ownerUser;
+        loginRole = 'ADMIN';
+      } else {
+        // Compatibilidade: slug + senha de usuário vinculado à loja (operador/admin).
+        const memberships = await this.storeUserRepository.listByStoreId(store.id);
+        let matchedMembership: any = null;
+        for (const membership of memberships || []) {
+          const memberUser = membership?.user;
+          if (!memberUser?.password) continue;
+          const valid = await bcrypt.compare(password, memberUser.password);
+          if (!valid) continue;
+          matchedMembership = membership;
+          break;
+        }
+        if (!matchedMembership?.user) {
+          throw new AppError('AUTH-004', 401);
+        }
+        loginUser = matchedMembership.user;
+        loginRole =
+          String(matchedMembership.role || 'OPERATOR').toUpperCase() === 'ADMIN'
+            ? 'ADMIN'
+            : 'OPERATOR';
+      }
     }
 
     if (!store || !loginUser) throw new AppError('STORE-001', 404);
