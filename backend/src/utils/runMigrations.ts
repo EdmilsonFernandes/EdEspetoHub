@@ -118,6 +118,91 @@ export async function runMigrations() {
     ADD COLUMN IF NOT EXISTS segment VARCHAR DEFAULT 'outros';
   `);
   await AppDataSource.query(`
+    ALTER TABLE IF EXISTS store_settings
+    ADD COLUMN IF NOT EXISTS category_priorities JSONB DEFAULT '{}'::jsonb;
+  `);
+  await AppDataSource.query(`
+    UPDATE store_settings
+    SET category_priorities = COALESCE(category_priorities, '{}'::jsonb)
+    WHERE category_priorities IS NULL;
+  `);
+  await AppDataSource.query(`
+    WITH category_seed AS (
+      SELECT
+        p.store_id,
+        LOWER(
+          REGEXP_REPLACE(
+            TRANSLATE(COALESCE(p.category, ''), 'ÁÀÂÃÄáàâãäÉÈÊËéèêëÍÌÎÏíìîïÓÒÔÕÖóòôõöÚÙÛÜúùûüÇç', 'AAAAAaaaaaEEEEeeeeIIIIiiiiOOOOOoooooUUUUuuuuCc'),
+            '[^a-zA-Z0-9]+',
+            '-',
+            'g'
+          )
+        ) AS category_key,
+        CASE
+          WHEN LOWER(
+            REGEXP_REPLACE(
+              TRANSLATE(COALESCE(p.category, ''), 'ÁÀÂÃÄáàâãäÉÈÊËéèêëÍÌÎÏíìîïÓÒÔÕÖóòôõöÚÙÛÜúùûüÇç', 'AAAAAaaaaaEEEEeeeeIIIIiiiiOOOOOoooooUUUUuuuuCc'),
+              '[^a-zA-Z0-9]+',
+              '-',
+              'g'
+            )
+          ) IN ('refeicao', 'refeicoes') THEN 1
+          WHEN LOWER(
+            REGEXP_REPLACE(
+              TRANSLATE(COALESCE(p.category, ''), 'ÁÀÂÃÄáàâãäÉÈÊËéèêëÍÌÎÏíìîïÓÒÔÕÖóòôõöÚÙÛÜúùûüÇç', 'AAAAAaaaaaEEEEeeeeIIIIiiiiOOOOOoooooUUUUuuuuCc'),
+              '[^a-zA-Z0-9]+',
+              '-',
+              'g'
+            )
+          ) IN ('porcao', 'porcoes') THEN 2
+          WHEN LOWER(
+            REGEXP_REPLACE(
+              TRANSLATE(COALESCE(p.category, ''), 'ÁÀÂÃÄáàâãäÉÈÊËéèêëÍÌÎÏíìîïÓÒÔÕÖóòôõöÚÙÛÜúùûüÇç', 'AAAAAaaaaaEEEEeeeeIIIIiiiiOOOOOoooooUUUUuuuuCc'),
+              '[^a-zA-Z0-9]+',
+              '-',
+              'g'
+            )
+          ) IN ('bebida', 'bebidas') THEN 3
+          WHEN LOWER(
+            REGEXP_REPLACE(
+              TRANSLATE(COALESCE(p.category, ''), 'ÁÀÂÃÄáàâãäÉÈÊËéèêëÍÌÎÏíìîïÓÒÔÕÖóòôõöÚÙÛÜúùûüÇç', 'AAAAAaaaaaEEEEeeeeIIIIiiiiOOOOOoooooUUUUuuuuCc'),
+              '[^a-zA-Z0-9]+',
+              '-',
+              'g'
+            )
+          ) IN ('cerveja', 'cervejas') THEN 4
+          WHEN LOWER(
+            REGEXP_REPLACE(
+              TRANSLATE(COALESCE(p.category, ''), 'ÁÀÂÃÄáàâãäÉÈÊËéèêëÍÌÎÏíìîïÓÒÔÕÖóòôõöÚÙÛÜúùûüÇç', 'AAAAAaaaaaEEEEeeeeIIIIiiiiOOOOOoooooUUUUuuuuCc'),
+              '[^a-zA-Z0-9]+',
+              '-',
+              'g'
+            )
+          ) IN ('destilado', 'destilados') THEN 5
+          ELSE 99
+        END AS priority
+      FROM products p
+      WHERE COALESCE(TRIM(p.category), '') <> ''
+    ),
+    grouped AS (
+      SELECT store_id, category_key, MIN(priority) AS priority
+      FROM category_seed
+      WHERE COALESCE(category_key, '') <> ''
+      GROUP BY store_id, category_key
+    ),
+    payload AS (
+      SELECT
+        store_id,
+        jsonb_object_agg(category_key, priority) AS priority_map
+      FROM grouped
+      GROUP BY store_id
+    )
+    UPDATE store_settings ss
+    SET category_priorities = COALESCE(ss.category_priorities, '{}'::jsonb) || payload.priority_map
+    FROM payload
+    WHERE ss.store_id = payload.store_id;
+  `);
+  await AppDataSource.query(`
     UPDATE store_settings
     SET segment = COALESCE(NULLIF(TRIM(segment), ''), 'outros')
     WHERE segment IS NULL OR TRIM(segment) = '';

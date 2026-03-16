@@ -27,6 +27,84 @@ export class ProductService
 {
   private productRepository = new ProductRepository();
   private storeRepository = new StoreRepository();
+  private normalizeCategoryKey(value: unknown)
+  {
+    return String(value || '')
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/&/g, ' e ')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  }
+
+  private defaultCategoryPriorityFor(rawCategory: unknown)
+  {
+    const key = this.normalizeCategoryKey(rawCategory);
+    if (!key) return 99;
+    if ([ 'refeicao', 'refeicoes' ].includes(key)) return 1;
+    if ([ 'porcao', 'porcoes' ].includes(key)) return 2;
+    if ([ 'bebida', 'bebidas' ].includes(key)) return 3;
+    if ([ 'cerveja', 'cervejas' ].includes(key)) return 4;
+    if ([ 'destilado', 'destilados' ].includes(key)) return 5;
+    if ([ 'acai', 'acais' ].includes(key)) return 6;
+    return 99;
+  }
+
+  private buildCategoryPriorityMap(store: Awaited<ReturnType<StoreRepository['findById']>>)
+  {
+    const map = new Map<string, number>();
+    const settingsMap = (store as any)?.settings?.categoryPriorities || {};
+    if (settingsMap && typeof settingsMap === 'object') {
+      Object.entries(settingsMap).forEach(([key, value]) => {
+        const normalized = this.normalizeCategoryKey(key);
+        const priority = Number(value);
+        if (!normalized || !Number.isFinite(priority)) return;
+        map.set(normalized, Math.max(1, Math.floor(priority)));
+      });
+    }
+    return map;
+  }
+
+  private getCategoryPriority(store: Awaited<ReturnType<StoreRepository['findById']>>, category: unknown)
+  {
+    const normalized = this.normalizeCategoryKey(category);
+    if (!normalized) return 99;
+    const map = this.buildCategoryPriorityMap(store);
+    if (map.has(normalized)) return Number(map.get(normalized));
+    return this.defaultCategoryPriorityFor(normalized);
+  }
+
+  private attachCategoryPriority(
+    store: Awaited<ReturnType<StoreRepository['findById']>>,
+    products: any[]
+  )
+  {
+    const list = Array.isArray(products) ? products : [];
+    const enriched = list.map((product) => {
+      const priority = this.getCategoryPriority(store, product?.category);
+      return { ...product, categoryPriority: priority };
+    });
+    return enriched.sort((a, b) => {
+      const pa = Number(a?.categoryPriority ?? 99);
+      const pb = Number(b?.categoryPriority ?? 99);
+      if (pa !== pb) return pa - pb;
+      const ca = new Date(a?.createdAt || 0).getTime();
+      const cb = new Date(b?.createdAt || 0).getTime();
+      return cb - ca;
+    });
+  }
+
+  private formatCategoryLabel(category: unknown)
+  {
+    const raw = String(category || '').trim();
+    if (!raw) return '';
+    return raw
+      .split(/\s+/)
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(' ');
+  }
   private normalizeModifierId(value: unknown)
   {
     return String(value || '')
@@ -171,7 +249,8 @@ export class ProductService
   {
     const store = await this.storeRepository.findById(storeId);
     this.ensureStoreAccess(store, authStoreId);
-    return this.productRepository.findByStoreId(store!.id);
+    const products = await this.productRepository.findByStoreId(store!.id);
+    return this.attachCategoryPriority(store, products as any[]);
   }
 
 
@@ -187,7 +266,8 @@ export class ProductService
   {
     const store = await this.storeRepository.findBySlug(slug);
     this.ensureStoreAccess(store, authStoreId);
-    return this.productRepository.findByStoreId(store!.id);
+    const products = await this.productRepository.findByStoreId(store!.id);
+    return this.attachCategoryPriority(store, products as any[]);
   }
 
 
@@ -204,7 +284,89 @@ export class ProductService
     const store = await this.storeRepository.findBySlug(slug);
     if (!store) throw new AppError('STORE-001', 404);
     const products = await this.productRepository.findActiveByStoreId(store.id);
-    return products.filter((product) => isProductAvailableToday(product));
+    const activeToday = products.filter((product) => isProductAvailableToday(product));
+    return this.attachCategoryPriority(store, activeToday as any[]);
+  }
+
+  async listCategoriesByStoreId(storeId: string, authStoreId?: string)
+  {
+    const store = await this.storeRepository.findById(storeId);
+    this.ensureStoreAccess(store, authStoreId);
+    const products = await this.productRepository.findByStoreId(store!.id);
+    const unique = new Map<string, { key: string; name: string; priority: number; count: number }>();
+    products.forEach((product: any) => {
+      const key = this.normalizeCategoryKey(product?.category || '');
+      if (!key) return;
+      const current = unique.get(key);
+      if (current) {
+        current.count += 1;
+        return;
+      }
+      unique.set(key, {
+        key,
+        name: this.formatCategoryLabel(product?.category || key),
+        priority: this.getCategoryPriority(store, product?.category),
+        count: 1,
+      });
+    });
+    return Array.from(unique.values()).sort((a, b) =>
+      a.priority === b.priority ? a.name.localeCompare(b.name) : a.priority - b.priority
+    );
+  }
+
+  async listCategoriesByStoreSlug(slug: string)
+  {
+    const store = await this.storeRepository.findBySlug(slug);
+    if (!store) throw new AppError('STORE-001', 404);
+    const products = await this.productRepository.findActiveByStoreId(store.id);
+    const activeToday = products.filter((product) => isProductAvailableToday(product));
+    const unique = new Map<string, { key: string; name: string; priority: number; count: number }>();
+    activeToday.forEach((product: any) => {
+      const key = this.normalizeCategoryKey(product?.category || '');
+      if (!key) return;
+      const current = unique.get(key);
+      if (current) {
+        current.count += 1;
+        return;
+      }
+      unique.set(key, {
+        key,
+        name: this.formatCategoryLabel(product?.category || key),
+        priority: this.getCategoryPriority(store, product?.category),
+        count: 1,
+      });
+    });
+    return Array.from(unique.values()).sort((a, b) =>
+      a.priority === b.priority ? a.name.localeCompare(b.name) : a.priority - b.priority
+    );
+  }
+
+  async setCategoryPriority(
+    storeId: string,
+    input: { name: string; priority: number },
+    authStoreId?: string
+  )
+  {
+    const store = await this.storeRepository.findById(storeId);
+    this.ensureStoreAccess(store, authStoreId);
+    const name = String(input?.name || '').trim();
+    const normalized = this.normalizeCategoryKey(name);
+    if (!normalized) throw new AppError('PROD-002', 400, { message: 'Categoria inválida' });
+    const parsedPriority = Math.max(1, Math.floor(Number(input?.priority || 99)));
+    const settings = (store as any).settings;
+    const current = (settings?.categoryPriorities && typeof settings.categoryPriorities === 'object')
+      ? settings.categoryPriorities
+      : {};
+    settings.categoryPriorities = {
+      ...current,
+      [normalized]: parsedPriority,
+    };
+    await this.storeRepository.save(store as any);
+    return {
+      key: normalized,
+      name: this.formatCategoryLabel(name),
+      priority: parsedPriority,
+    };
   }
 
 

@@ -66,6 +66,18 @@ export class StoreSettings
   @Column({ name: 'segment', type: 'varchar', nullable: true, default: 'outros' })
   segment?: string | null;
 
+  @Column({
+    name: 'category_priorities',
+    type: 'jsonb',
+    nullable: true,
+    default: () => "'{}'::jsonb",
+    transformer: {
+      to: (value?: Record<string, number> | null) => (value && typeof value === 'object' ? value : {}),
+      from: (value: Record<string, number> | null) => (value && typeof value === 'object' ? value : {}),
+    },
+  })
+  categoryPriorities?: Record<string, number> | null;
+
   @Column({ name: 'prep_base_minutes', type: 'int', nullable: true })
   prepBaseMinutes?: number | null;
 

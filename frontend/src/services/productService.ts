@@ -24,6 +24,7 @@ const normalizeProduct = (product: any) => {
     active: product.active ?? product.is_active ?? true,
     availabilityDays: product.availabilityDays ?? product.availability_days ?? null,
     modifiers: normalizeProductModifiers(product.modifiers ?? product.modifiers_json ?? []),
+    categoryPriority: Number(product.categoryPriority ?? product.category_priority ?? 99),
     description,
     desc: description,
   };
@@ -127,6 +128,25 @@ export const productService = {
   {
     const data = await apiClient.get(`/public/stores/slug/${slug}/products`);
     return data.map(normalizeProduct);
+  },
+
+  async listCategories(storeId?: string) {
+    const targetStore = resolveStoreIdentifier(storeId);
+    if (!targetStore) return Promise.reject(new Error('Sessão inválida'));
+    const path = isUuid(targetStore)
+      ? `/stores/${targetStore}/categories`
+      : `/stores/slug/${targetStore}/categories`;
+    return apiClient.get(path);
+  },
+
+  async listPublicCategoriesBySlug(slug: string) {
+    return apiClient.get(`/public/stores/slug/${slug}/categories`);
+  },
+
+  async setCategoryPriority(name: string, priority: number, storeId?: string) {
+    const targetStore = resolveStoreIdentifier(storeId);
+    if (!targetStore || !isUuid(targetStore)) return Promise.reject(new Error('Sessão inválida'));
+    return apiClient.patch(`/stores/${targetStore}/categories/priority`, { name, priority });
   },
 
   subscribe(callback: any, storeId?: string)

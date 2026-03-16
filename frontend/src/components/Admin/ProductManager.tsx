@@ -185,6 +185,16 @@ const buildAvailabilityPayload = (value) => {
   return normalized;
 };
 
+const defaultCategoryPriority = (value = '') => {
+  const key = normalizeCategory(value);
+  if ([ 'refeicao', 'refeicoes' ].includes(key)) return 1;
+  if ([ 'porcao', 'porcoes' ].includes(key)) return 2;
+  if ([ 'bebida', 'bebidas' ].includes(key)) return 3;
+  if ([ 'cerveja', 'cervejas' ].includes(key)) return 4;
+  if ([ 'destilado', 'destilados' ].includes(key)) return 5;
+  return 99;
+};
+
 const getBundleEconomyPreview = ({
   unitPrice,
   promoActive,
@@ -334,18 +344,38 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
           id: entry,
           label: formatCategoryLabel(entry),
           icon: DotsThree,
+          priority: defaultCategoryPriority(entry),
         }))
-      : defaultCategories.map((entry) => ({ id: entry.id, label: entry.label, icon: entry.icon }));
+      : defaultCategories.map((entry) => ({ id: entry.id, label: entry.label, icon: entry.icon, priority: defaultCategoryPriority(entry.id) }));
+    const priorityByCategory = new Map<string, number>(
+      baseDefaults.map((entry) => [entry.id, Number(entry.priority ?? 99)])
+    );
     const unique = new Set(baseDefaults.map((entry) => entry.id));
     (products || []).forEach((product) => {
       const key = normalizeCategory(product.category);
       if (key) unique.add(key);
+      const priority = Number(product?.categoryPriority);
+      if (Number.isFinite(priority)) {
+        const current = priorityByCategory.get(key);
+        priorityByCategory.set(key, Number.isFinite(current as number) ? Math.min(Number(current), priority) : priority);
+      }
     });
     const extras = Array.from(unique)
       .filter((entry) => !baseDefaults.find((item) => item.id === entry))
       .sort()
-      .map((entry) => ({ id: entry, label: formatCategoryLabel(entry), icon: DotsThree }));
-    return [ ...baseDefaults, ...extras ];
+      .map((entry) => ({
+        id: entry,
+        label: formatCategoryLabel(entry),
+        icon: DotsThree,
+        priority: priorityByCategory.get(entry) ?? defaultCategoryPriority(entry),
+      }));
+    const all = [ ...baseDefaults, ...extras ];
+    return all.sort((a, b) => {
+      const pa = Number(a.priority ?? 99);
+      const pb = Number(b.priority ?? 99);
+      if (pa !== pb) return pa - pb;
+      return String(a.label || '').localeCompare(String(b.label || ''), 'pt-BR');
+    });
   }, [products, storeSegment]);
 
   const defaultCategoryId = useMemo(
@@ -1082,7 +1112,10 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                     }`}
                   >
                     <Icon size={16} weight="duotone" />
-                    {option.label}
+                    <span>{option.label}</span>
+                    <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${isSelected ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-600'}`}>
+                      {Number(option.priority ?? 99)}
+                    </span>
                   </button>
                 );
               })}

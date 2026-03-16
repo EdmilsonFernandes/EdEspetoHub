@@ -100,6 +100,8 @@ routes.get('/chamanoespeto/:slug', StoreController.getBySlug);
 routes.get('/janocaminho/:slug', StoreController.getBySlug);
 routes.get('/stores/slug/:slug/products', ProductController.listPublicBySlug);
 routes.get('/public/stores/slug/:slug/products', ProductController.listPublicBySlug);
+routes.get('/stores/slug/:slug/categories', ProductController.listPublicCategoriesBySlug);
+routes.get('/public/stores/slug/:slug/categories', ProductController.listPublicCategoriesBySlug);
 routes.get('/public/stores/slug/:slug/highlights', OrderController.listHighlightsBySlug);
 routes.get('/public/stores/slug/:slug/tables/status', OrderController.listTableStatusBySlug);
 
@@ -117,6 +119,8 @@ routes.post('/stores/:storeId/products', requireAuth, requireRole('ADMIN'), Prod
 routes.get('/stores/:storeId/products', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), ProductController.list);
 routes.put('/stores/:storeId/products/:productId', requireAuth, requireRole('ADMIN'), ProductController.update);
 routes.delete('/stores/:storeId/products/:productId', requireAuth, requireRole('ADMIN'), ProductController.remove);
+routes.get('/stores/:storeId/categories', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), ProductController.listCategories);
+routes.patch('/stores/:storeId/categories/priority', requireAuth, requireRole('ADMIN'), ProductController.setCategoryPriority);
 
 // Orders - cliente cria (aqui sim assinatura com carência)
 routes.post('/stores/:storeId/orders', requireActiveSubscription, OrderController.create);

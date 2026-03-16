@@ -286,17 +286,9 @@ export const MenuView = ({
   };
 
   const grouped = useMemo(() => {
-    const defaults = [
-      { key: "espetos", label: "Espetos" },
-      { key: "bebidas", label: "Bebidas" },
-      { key: "porcoes", label: "Porções" },
-      { key: "outros", label: "Outros" },
-    ];
     const normalize = (value) => (value || "outros").toString().trim().toLowerCase();
     const labelize = (value) => {
       const key = normalize(value);
-      const known = defaults.find((entry) => entry.key === key);
-      if (known) return known.label;
       return key
         .split(" ")
         .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
@@ -307,22 +299,32 @@ export const MenuView = ({
     products.forEach((item) => {
       const key = normalize(item.category);
       if (!map[key]) {
-        map[key] = { key, label: labelize(key), items: [] };
+        map[key] = {
+          key,
+          label: labelize(item.category || key),
+          items: [],
+          priority: Number.isFinite(Number(item?.categoryPriority)) ? Number(item.categoryPriority) : 99,
+        };
       }
       map[key].items.push(item);
+      const itemPriority = Number(item?.categoryPriority);
+      if (Number.isFinite(itemPriority)) {
+        map[key].priority = Math.min(map[key].priority, itemPriority);
+      }
     });
 
-    const ordered = [
-      ...defaults.filter((entry) => map[entry.key]),
-      ...Object.keys(map)
-        .filter((key) => !defaults.find((entry) => entry.key === key))
-        .sort()
-        .map((key) => ({ key, label: labelize(key) })),
-    ].map((entry) => ({
-      key: entry.key,
-      label: entry.label,
-      items: map[entry.key]?.items || [],
-    }));
+    const ordered = Object.values(map)
+      .sort((a: any, b: any) => {
+        const pa = Number.isFinite(Number(a?.priority)) ? Number(a.priority) : 99;
+        const pb = Number.isFinite(Number(b?.priority)) ? Number(b.priority) : 99;
+        if (pa !== pb) return pa - pb;
+        return String(a?.label || "").localeCompare(String(b?.label || ""), "pt-BR");
+      })
+      .map((entry: any) => ({
+        key: entry.key,
+        label: entry.label,
+        items: entry.items || [],
+      }));
 
     return ordered.filter((category) => category.items.length > 0);
   }, [products]);
