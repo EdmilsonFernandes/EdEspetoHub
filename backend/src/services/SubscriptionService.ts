@@ -286,6 +286,7 @@ export class SubscriptionService {
     const pendingCutoff = new Date(Date.now() - env.pendingSignupTtlDays * 24 * 60 * 60 * 1000);
 
     for (const sub of subscriptions) {
+      const isVip = Boolean(sub.store?.settings?.planExempt);
       const endDate = new Date(sub.endDate);
       const now = new Date();
       const diffMs = endDate.getTime() - now.getTime();
@@ -296,6 +297,19 @@ export class SubscriptionService {
         updates.push(sub);
         if (sub.store?.open) {
           sub.store.open = false;
+          await this.storeRepository.save(sub.store);
+        }
+        continue;
+      }
+
+      // VIP stores are exempt from expiration and reminder lifecycle.
+      if (isVip) {
+        if (sub.status !== 'ACTIVE') {
+          sub.status = 'ACTIVE';
+          updates.push(sub);
+        }
+        if (sub.store && !sub.store.open) {
+          sub.store.open = true;
           await this.storeRepository.save(sub.store);
         }
         continue;
@@ -404,6 +418,7 @@ export class SubscriptionService {
     if (subscription.status === 'PENDING') return 'PENDING';
     if (subscription.status === 'SUSPENDED') return 'SUSPENDED';
     if (subscription.status === 'CANCELLED') return 'CANCELLED';
+    if (subscription.store?.settings?.planExempt) return 'ACTIVE';
 
     const now = new Date();
     const endDate = new Date(subscription.endDate);
