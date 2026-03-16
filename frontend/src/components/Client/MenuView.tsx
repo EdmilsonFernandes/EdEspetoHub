@@ -470,12 +470,18 @@ export const MenuView = ({
             <div className="relative w-full flex items-center gap-2">
               <div
                 className={`${
-                  filteredGrouped.length > 3
+                  filteredGrouped.length > 2
                     ? "flex-1 overflow-x-auto no-scrollbar scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] snap-x snap-mandatory"
                     : "flex-1"
                 }`}
               >
-                <div className={`flex items-center gap-2 ${filteredGrouped.length > 3 ? "w-max pr-1" : "w-full"}`}>
+                <div
+                  className={`${
+                    filteredGrouped.length <= 2
+                      ? "grid grid-cols-2 gap-2 w-full"
+                      : `flex items-center gap-2 ${filteredGrouped.length > 2 ? "w-max pr-1" : "w-full"}`
+                  }`}
+                >
                 {filteredGrouped.map((category) => {
                   const isActive = activeCategoryKey === category.key;
 
@@ -489,8 +495,8 @@ export const MenuView = ({
                       }}
                       className={
                         isActive
-                          ? `inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-amber-500 text-white font-semibold shadow-sm transition-all snap-start ${filteredGrouped.length <= 3 ? "flex-1 min-w-0" : ""}`
-                          : `inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-slate-50 text-slate-700 font-medium transition-all snap-start ${filteredGrouped.length <= 3 ? "flex-1 min-w-0" : ""}`
+                          ? `inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-amber-500 text-white font-semibold shadow-sm scale-105 transition-all snap-start ${filteredGrouped.length <= 2 ? "w-full min-w-0" : ""}`
+                          : `inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-gray-50 text-gray-500 font-medium transition-all snap-start ${filteredGrouped.length <= 2 ? "w-full min-w-0" : ""}`
                       }
                     >
                       <span className="text-[17px] leading-none" aria-hidden="true">
@@ -505,7 +511,7 @@ export const MenuView = ({
                 })}
               </div>
               </div>
-              {filteredGrouped.length > 3 && (
+              {filteredGrouped.length > 2 && (
                 <>
                   <div className="pointer-events-none absolute right-14 top-1 bottom-1 w-10 bg-gradient-to-l from-white/95 via-white/75 to-transparent rounded-r-2xl" />
                 <button
@@ -1050,14 +1056,14 @@ export const MenuView = ({
       />
 
       <div
-        className={`fixed bottom-6 left-1/2 z-40 w-[calc(100%-1.5rem)] max-w-md -translate-x-1/2 transition-all duration-300 ${
+        className={`fixed bottom-6 left-1/2 z-40 w-[92%] max-w-md -translate-x-1/2 transition-all duration-300 ${
           cartItemsCount > 0 ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0 pointer-events-none"
         }`}
       >
         {cartItemsCount > 0 && (
           <button
             onClick={() => onProceed?.()}
-            className="w-full bg-amber-500 text-white px-4 py-3 rounded-full shadow-xl shadow-amber-500/25 flex justify-between items-center hover:brightness-95 active:scale-[0.99] transition-all text-sm sm:text-base"
+            className="w-full bg-amber-500 text-white px-4 py-3 rounded-full shadow-2xl shadow-amber-500/35 flex justify-between items-center hover:brightness-95 active:scale-[0.99] transition-all text-sm sm:text-base"
           >
             <div className="flex items-center gap-2 sm:gap-3 min-w-0">
               <span className="h-7 min-w-7 px-2 rounded-full text-xs font-extrabold text-amber-600 bg-white inline-flex items-center justify-center">
