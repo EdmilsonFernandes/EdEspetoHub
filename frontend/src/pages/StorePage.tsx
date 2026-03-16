@@ -170,6 +170,14 @@ export function StorePage() {
   const [isGeneratingPrint, setIsGeneratingPrint] = useState(false);
 
   const cartPricing = useMemo(() => getCartPricing(cart), [cart]);
+  const validCartItems = useMemo(
+    () => Object.values(cart).filter((item: any) => Number(item?.qty || 0) > 0),
+    [cart]
+  );
+  const cartItemsCount = useMemo(
+    () => validCartItems.reduce((acc: number, item: any) => acc + Number(item?.qty || 0), 0),
+    [validCartItems]
+  );
   const cartItemsTotal = cartPricing.discountedSubtotal;
   const cartDiscountTotal = cartPricing.discountTotal;
   const deliveryRadiusValue = useMemo(() => {
@@ -923,6 +931,11 @@ export function StorePage() {
     const effectiveCustomerName =
       String(customer.name || '').trim() || (isStaffTableOrder && normalizedTable ? `Cliente Mesa ${normalizedTable}` : '');
 
+    if (!validCartItems.length) {
+      showToast('Adicione pelo menos 1 item para finalizar o pedido.', 'warning');
+      return;
+    }
+
     const requiresPhone = !(customer.type === 'table' && canUseAdminPrintFlow);
     if (!effectiveCustomerName || (requiresPhone && !customer.phone)) {
       showToast(requiresPhone ? 'Preencha nome e telefone para continuar.' : 'Preencha seu nome para continuar.', 'warning');
@@ -976,7 +989,7 @@ export function StorePage() {
       paymentMethod: payment,
       deliveryFee: customer.type === 'delivery' && deliveryFeeValue > 0 ? deliveryFeeValue : undefined,
       cashTendered: cashTendered !== null ? cashTendered : undefined,
-      items: Object.values(cart).map((item) => ({
+      items: validCartItems.map((item: any) => ({
         productId: item.id,
         quantity: item.qty,
         cookingPoint: item.cookingPoint,
@@ -991,7 +1004,7 @@ export function StorePage() {
       return;
     }
 
-    const printableItems = Object.values(cart).map((item: any) => {
+    const printableItems = validCartItems.map((item: any) => {
       const unitBase = resolveItemPrice(item);
       const modifiersTotal = getModifiersTotal(item.selectedModifiers || []);
       const unitPrice = Number(unitBase + modifiersTotal);
@@ -1052,7 +1065,7 @@ export function StorePage() {
           customerName: effectiveCustomerName,
           paymentMethod: payment,
           cashTendered: cashTendered !== null ? cashTendered : null,
-          items: Object.values(cart).map((item) => ({
+          items: validCartItems.map((item: any) => ({
             id: item.id,
             name: item.name,
             quantity: item.qty,
@@ -1079,6 +1092,10 @@ export function StorePage() {
     try {
       createdOrder = await orderService.createBySlug(order, storeSlug);
     } catch (error) {
+      if (error?.code === 'ORDER-005') {
+        showErrorNotice(error.message || 'Adicione ao menos 1 item válido para finalizar o pedido.');
+        return;
+      }
       if (error?.code === 'ORDER-003') {
         showTableNotice(error.message || 'Mesa já está ocupada. Finalize o pedido atual antes de criar outro.');
         return;
@@ -1106,8 +1123,8 @@ export function StorePage() {
         : '';
     const shouldNotifyOwner = !isStoreAdmin && (customer.type === 'pickup' || customer.type === 'table');
     if (shouldNotifyOwner) {
-      const itemsList = Object.values(cart)
-        .map((item) => `• ${item.qty}x ${item.name} ${formatItemOptions(item)}`.trim())
+      const itemsList = validCartItems
+        .map((item: any) => `• ${item.qty}x ${item.name} ${formatItemOptions(item)}`.trim())
         .join('\n');
       const customerLabel = customer.phone
         ? `👤 Cliente: *${effectiveCustomerName}* (${customer.phone})`
@@ -1191,7 +1208,7 @@ export function StorePage() {
       }
       const lastItemsPayload = {
         savedAt: Date.now(),
-        items: Object.values(cart).map((item: any) => ({
+        items: validCartItems.map((item: any) => ({
           productId: item.id,
           name: item.name,
           quantity: item.qty,
@@ -1672,8 +1689,12 @@ export function StorePage() {
             storeAddress={storeAddress}
             storeCoords={storeCoords}
             deliveryCoords={deliveryCoords}
-            checkoutDisabled={deliveryValidation.blocked}
-            checkoutDisabledReason={deliveryValidation.reason}
+            checkoutDisabled={!cartItemsCount || deliveryValidation.blocked}
+            checkoutDisabledReason={
+              !cartItemsCount
+                ? 'Adicione pelo menos 1 item para continuar.'
+                : deliveryValidation.reason
+            }
             pricingSummary={{
               subtotal: cartPricing.subtotal,
               discountTotal: cartDiscountTotal,

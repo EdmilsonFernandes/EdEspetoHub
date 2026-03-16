@@ -474,15 +474,26 @@ export class OrderService
       throw new AppError('ORDER-002', 400);
     }
     // Mesa sem bloqueio: permite múltiplos pedidos ativos no mesmo número.
+    const normalizedItems = Array.isArray(input.items)
+      ? input.items.filter((item) => Number(item?.quantity || 0) > 0 && Boolean(item?.productId))
+      : [];
+    if (!normalizedItems.length) {
+      throw new AppError('ORDER-005', 400, { message: 'Pedido precisa ter ao menos um item válido.' });
+    }
+
     const items: OrderItem[] = [];
     let total = 0;
 
-    for (const item of input.items)
+    for (const item of normalizedItems)
     {
       const product = await this.productRepository.findById(item.productId);
       if (!product || product.store.id !== store!.id)
       {
         throw new AppError('PROD-002', 400);
+      }
+
+      if (!Number.isFinite(Number(item.quantity)) || Number(item.quantity) <= 0) {
+        throw new AppError('ORDER-005', 400, { message: 'Item com quantidade inválida.' });
       }
 
       const orderItem = new OrderItem();
