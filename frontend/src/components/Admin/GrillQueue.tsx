@@ -248,6 +248,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   const [reportTo, setReportTo] = useState(() => getNowKeyInSaoPaulo());
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
   const [isGeneratingPrint, setIsGeneratingPrint] = useState(false);
+  const [bulkFinishing, setBulkFinishing] = useState(false);
   const [printSelectionModal, setPrintSelectionModal] = useState<{
     open: boolean;
     order: any | null;
@@ -857,6 +858,58 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     }
   };
 
+  const handleFinalizeAllReady = async () => {
+    if (bulkFinishing) return;
+    const targetOrders = readyToFinalizeOrders;
+    if (!targetOrders.length) return;
+
+    const proceed = window.confirm(
+      `Finalizar ${targetOrders.length} pedido(s) prontos agora?\n\nEsta ação confirma pagamento e conclui os pedidos.`
+    );
+    if (!proceed) return;
+
+    setBulkFinishing(true);
+    setError('');
+    const targetIds = new Set(targetOrders.map((order) => String(order.id)));
+    const previousQueue = queue;
+
+    setQueue((prev) =>
+      prev.map((order) =>
+        targetIds.has(String(order.id))
+          ? {
+              ...order,
+              status: 'done',
+            }
+          : order
+      )
+    );
+    setConfirmModal((prev) => (prev && targetIds.has(String(prev.id)) ? null : prev));
+    setSelectedOrder((prev: any) => (prev && targetIds.has(String(prev.id)) ? null : prev));
+
+    try {
+      const results = await Promise.allSettled(
+        targetOrders.map((order) => orderService.updateStatus(order.id, 'done'))
+      );
+      const failedCount = results.filter((result) => result.status === 'rejected').length;
+      if (failedCount > 0) {
+        setQueue(previousQueue);
+        setError(
+          failedCount === targetOrders.length
+            ? 'Não foi possível finalizar os pedidos agora. Tente novamente.'
+            : `${failedCount} pedido(s) falharam ao finalizar. Atualize a fila.`
+        );
+      } else {
+        setError('');
+      }
+    } catch (error) {
+      setQueue(previousQueue);
+      setError('Falha ao finalizar pedidos em lote. Tente novamente.');
+    } finally {
+      setBulkFinishing(false);
+      void loadQueue();
+    }
+  };
+
   const applyItemsChange = async (orderId, updater) => {
     const targetOrder = queue.find((entry) => entry.id === orderId);
     const baseItems = getOrderedItems(orderId, targetOrder?.items || []);
@@ -1201,6 +1254,11 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     }
     return allActiveQueue;
   }, [allActiveQueue, completedRecent12h, queueFilter, currentTime, PREP_SLA_MS]);
+
+  const readyToFinalizeOrders = useMemo(
+    () => allActiveQueue.filter((order) => String(order?.status || '').toLowerCase() === 'ready'),
+    [allActiveQueue]
+  );
   const selectedOrderRank = useMemo(() => {
     if (!selectedOrder?.id) return 1;
     const idx = filteredProductionQueue.findIndex((order) => order.id === selectedOrder.id);
@@ -1471,8 +1529,8 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         <div className="flex flex-col gap-2 mb-1 border-b border-slate-100 pb-2">
           {!tvMode ? (
             <>
-              <div className="flex w-full items-center">
-                <div className="inline-flex w-full sm:w-auto items-center gap-1 rounded-lg bg-slate-100 p-1 overflow-x-auto [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
+              <div className="flex w-full items-center justify-between gap-2">
+                <div className="inline-flex flex-1 sm:flex-none min-w-0 items-center gap-1 rounded-lg bg-slate-100 p-1 overflow-x-auto [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
                   {[
                     { id: 'queue', label: 'Pedidos', count: allActiveQueue.length },
                     { id: 'inroute', label: 'Em rota', count: inRouteQueue.length },
@@ -1501,6 +1559,18 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                     </button>
                   ))}
                 </div>
+                {activeTab === 'queue' && (
+                  <button
+                    type="button"
+                    onClick={handleFinalizeAllReady}
+                    disabled={bulkFinishing || readyToFinalizeOrders.length === 0}
+                    className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-[11px] sm:text-xs font-bold text-emerald-700 hover:bg-emerald-100 transition disabled:opacity-45 disabled:cursor-not-allowed"
+                    title="Finalizar rapidamente todos os pedidos prontos"
+                  >
+                    <CheckSquare size={13} weight="duotone" />
+                    {bulkFinishing ? 'Finalizando...' : `Finalizar prontos (${readyToFinalizeOrders.length})`}
+                  </button>
+                )}
               </div>
 
               {activeTab === 'queue' && (

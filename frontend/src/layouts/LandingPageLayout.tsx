@@ -10,6 +10,8 @@ interface LandingPageLayoutProps {
 }
 
 export function LandingPageLayout({ children }: LandingPageLayoutProps) {
+  const COOKIE_CONSENT_KEY = 'jnk_cookie_consent_v1';
+  const ATTRIBUTION_KEY = 'jnk_attribution_v1';
   const { auth, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -18,6 +20,7 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
   const [showWhatsappHint, setShowWhatsappHint] = useState(false);
   const [deferredInstallPrompt, setDeferredInstallPrompt] = useState<any>(null);
   const [showInstallCta, setShowInstallCta] = useState(false);
+  const [cookieConsent, setCookieConsent] = useState<'unknown' | 'accepted' | 'rejected'>('unknown');
 
   useEffect(() => {
     setMobileMenuOpen(false);
@@ -45,6 +48,16 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
       setShowWhatsappHint(true);
     }, 5000);
     return () => window.clearTimeout(timeout);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const stored = String(localStorage.getItem(COOKIE_CONSENT_KEY) || '').toLowerCase();
+    if (stored === 'accepted' || stored === 'rejected') {
+      setCookieConsent(stored as 'accepted' | 'rejected');
+      return;
+    }
+    setCookieConsent('unknown');
   }, []);
 
   useEffect(() => {
@@ -85,6 +98,38 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
     } finally {
       setDeferredInstallPrompt(null);
       setShowInstallCta(false);
+    }
+  };
+
+  const persistCookieConsent = (accepted: boolean) => {
+    const decision = accepted ? 'accepted' : 'rejected';
+    const maxAge = 60 * 60 * 24 * 365;
+    const payload = {
+      decision,
+      ts: Date.now(),
+      version: 1,
+    };
+    localStorage.setItem(COOKIE_CONSENT_KEY, decision);
+    localStorage.setItem('jnk_cookie_consent_meta', JSON.stringify(payload));
+    document.cookie = `jnk_cookie_consent=${decision}; path=/; max-age=${maxAge}; SameSite=Lax`;
+    setCookieConsent(decision);
+
+    // Coleta somente quando aceito, para manter origem de aquisição sem PII.
+    if (accepted && !localStorage.getItem(ATTRIBUTION_KEY)) {
+      const params = new URLSearchParams(window.location.search);
+      const attribution = {
+        ts: Date.now(),
+        referrer: document.referrer || '',
+        landingPath: `${window.location.pathname}${window.location.search}`,
+        utm_source: params.get('utm_source') || '',
+        utm_medium: params.get('utm_medium') || '',
+        utm_campaign: params.get('utm_campaign') || '',
+        utm_content: params.get('utm_content') || '',
+        utm_term: params.get('utm_term') || '',
+        gclid: params.get('gclid') || '',
+        fbclid: params.get('fbclid') || '',
+      };
+      localStorage.setItem(ATTRIBUTION_KEY, JSON.stringify(attribution));
     }
   };
 
@@ -383,6 +428,40 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
       {showWhatsappHint && (
         <div className="fixed bottom-[10.2rem] sm:bottom-[4.5rem] right-4 z-50 rounded-2xl border border-emerald-200 bg-white px-3 py-2 text-xs font-semibold text-emerald-700 shadow-[0_16px_36px_-20px_rgba(16,185,129,0.6)] pointer-events-none">
           Dúvidas? Fale com um especialista
+        </div>
+      )}
+      {cookieConsent === 'unknown' && (
+        <div className="fixed left-3 right-3 bottom-[5.8rem] sm:bottom-4 z-[90]">
+          <div className="mx-auto max-w-3xl rounded-2xl border border-slate-200 bg-white/95 backdrop-blur-md shadow-[0_16px_42px_-24px_rgba(2,6,23,0.5)] p-3 sm:p-4">
+            <p className="text-xs sm:text-sm font-semibold text-slate-800">
+              Usamos cookies essenciais para funcionamento e, com sua permissão, dados de navegação para melhorar aquisição e conversão.
+            </p>
+            <div className="mt-2 flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between">
+              <button
+                type="button"
+                onClick={() => navigate('/terms')}
+                className="text-xs font-semibold text-slate-500 hover:text-slate-700 underline"
+              >
+                Ver política e LGPD
+              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => persistCookieConsent(false)}
+                  className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 transition"
+                >
+                  Recusar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => persistCookieConsent(true)}
+                  className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-3 py-2 text-xs font-bold text-white hover:bg-slate-800 transition"
+                >
+                  Aceitar
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
       {/* Footer */}
