@@ -114,6 +114,11 @@ const OrderSummaryCard = ({
     <div className="min-w-0">
       <h3 className="text-base font-black text-slate-800 line-clamp-1">{order.customerName || order.name || 'Cliente'}</h3>
       <p className="mt-1 text-xs text-slate-500 font-medium line-clamp-1">{compactMeta}</p>
+      {archived && (
+        <p className="mt-1 text-[11px] font-semibold text-slate-500">
+          Pedido #{orderDisplayId}
+        </p>
+      )}
     </div>
 
     <div className="border-t border-slate-100 pt-2 mt-1 flex justify-end items-center">
