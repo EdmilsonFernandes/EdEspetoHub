@@ -2511,17 +2511,13 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
             )}
           </div>
 
-          <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm relative overflow-hidden">
-            <p className="text-xs uppercase tracking-[0.18em] font-bold text-slate-500">
-              {isAdminUser ? 'Faturamento' : 'Pedidos finalizados'}
-            </p>
-            <p className="mt-2 text-3xl font-black tracking-tight text-slate-900">
-              {isAdminUser ? formatCurrency(reportSummary.sales) : `${reportSummary.ordersCount}`}
-            </p>
-            <p className="text-xs text-slate-500 mt-1">
-              {isAdminUser ? 'Total vendido no período' : 'Pedidos concluídos no período'}
-            </p>
-            {isAdminUser && (
+          {isAdminUser && (
+            <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm relative overflow-hidden">
+              <p className="text-xs uppercase tracking-[0.18em] font-bold text-slate-500">Faturamento</p>
+              <p className="mt-2 text-3xl font-black tracking-tight text-slate-900">
+                {formatCurrency(reportSummary.sales)}
+              </p>
+              <p className="text-xs text-slate-500 mt-1">Total vendido no período</p>
               <span className={`absolute right-4 top-4 inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-bold border ${
                 reportComparison.positive
                   ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
@@ -2529,10 +2525,10 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
               }`}>
                 {reportComparison.positive ? '▲' : '▼'} {reportComparison.hasBase ? `${Math.abs(reportComparison.deltaPct).toFixed(1)}%` : 'sem base'}
               </span>
-            )}
-          </div>
+            </div>
+          )}
 
-          <div className="mb-4 grid grid-cols-2 gap-2.5">
+          <div className={`mb-4 grid gap-2.5 ${isAdminUser ? 'grid-cols-2' : 'grid-cols-1'}`}>
             {isAdminUser ? (
               <>
                 <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 shadow-sm">
@@ -2566,12 +2562,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
               </>
             ) : (
               <>
-                <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 shadow-sm">
-                  <p className="text-[10px] text-slate-500 inline-flex items-center gap-1">
-                    <Hash size={12} weight="duotone" /> Qtd pedidos
-                  </p>
-                  <p className="text-base font-black text-slate-900 mt-1">{reportSummary.ordersCount}</p>
-                </div>
                 <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 shadow-sm">
                   <p className="text-[10px] text-slate-500 inline-flex items-center gap-1">
                     <CheckSquare size={12} weight="duotone" /> Itens vendidos
