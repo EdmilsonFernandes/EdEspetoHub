@@ -434,6 +434,12 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
     }
   };
 
+  const removeProductFromListImmediately = (productId: string) => {
+    if (!onProductsChange) return;
+    const next = (products || []).filter((item) => String(item?.id || '') !== String(productId));
+    onProductsChange(next);
+  };
+
   const handleBulkUseTemplate = () => {
     setBulkText(buildBulkImportTemplate());
     setBulkOpen(true);
@@ -463,7 +469,6 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
     const runtimeKeys = new Set(existingProductKeys);
     let created = 0;
     let skipped = 0;
-    let failed = 0;
 
     for (const item of drafts) {
       const key = `${normalizeCategory(item.name)}::${normalizeCategory(item.category)}`;
@@ -485,23 +490,48 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
         runtimeKeys.add(key);
         created += 1;
       } catch (error) {
-        failed += 1;
         console.error('Falha no cadastro em lote', { item, error });
+        setBulkImporting(false);
+        showToast(
+          `Importação interrompida no item "${item.name}". Verifique os dados e tente novamente.`,
+          'error'
+        );
+        return;
       }
     }
 
     await refreshProducts();
     setBulkImporting(false);
 
-    if (failed > 0) {
-      showToast(
-        `Importação concluída com alertas: ${created} criados, ${skipped} ignorados, ${failed} com erro.`,
-        'warning'
-      );
+    showToast(`Importação concluída: ${created} criados, ${skipped} ignorados.`, 'success');
+  };
+
+  const handleBulkCleanupInvalid = async () => {
+    const invalidProducts = (products || []).filter((product) => {
+      const price = Number(product?.price || 0);
+      const name = String(product?.name || '');
+      return price > 500 || /\(meia:/i.test(name);
+    });
+
+    if (!invalidProducts.length) {
+      showToast('Nenhum produto inválido encontrado para limpeza.', 'success');
       return;
     }
 
-    showToast(`Importação concluída: ${created} criados, ${skipped} ignorados.`, 'success');
+    setBulkImporting(true);
+    for (const product of invalidProducts) {
+      try {
+        await productService.delete(String(product.id));
+      } catch (error) {
+        console.error('Falha ao remover produto inválido', { product, error });
+        setBulkImporting(false);
+        showToast(`Falha ao remover "${product.name}". Limpeza interrompida.`, 'error');
+        return;
+      }
+    }
+    await refreshProducts();
+    setBulkImporting(false);
+    showToast(`Limpeza concluída: ${invalidProducts.length} produto(s) removido(s).`, 'success');
   };
 
   const handleSubmit = async (event) => {
@@ -648,6 +678,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
     setSaving(true);
     try {
       await productService.delete(productId);
+      removeProductFromListImmediately(productId);
       showToast('Produto removido com sucesso.', 'success');
       try {
         await refreshProducts();
@@ -657,6 +688,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
     } catch (error: any) {
       const message = (error?.message || '').toString();
       if (error?.code === 'PROD-001' || error?.status === 404 || message.includes('Produto')) {
+        removeProductFromListImmediately(productId);
         showToast('Produto removido com sucesso.', 'success');
         try {
           await refreshProducts();
@@ -852,6 +884,16 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                     {bulkImporting ? 'Importando...' : `Importar ${bulkParse.items.length}`}
                   </button>
                 </div>
+              </div>
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={handleBulkCleanupInvalid}
+                  disabled={bulkImporting}
+                  className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  Limpar inválidos (preço &gt; 500 ou nome com (Meia:)
+                </button>
               </div>
               {bulkParse.items.length > 0 && (
                 <div className="max-h-48 overflow-auto rounded-xl border border-slate-200 bg-white">
