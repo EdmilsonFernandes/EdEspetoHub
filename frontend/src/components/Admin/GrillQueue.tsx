@@ -248,6 +248,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   const [reportFrom, setReportFrom] = useState(() => getNowKeyInSaoPaulo());
   const [reportTo, setReportTo] = useState(() => getNowKeyInSaoPaulo());
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
+  const [editingFinalizedOrder, setEditingFinalizedOrder] = useState(false);
   const [isGeneratingPrint, setIsGeneratingPrint] = useState(false);
   const [bulkFinishing, setBulkFinishing] = useState(false);
   const [bulkFinalizeModalOpen, setBulkFinalizeModalOpen] = useState(false);
@@ -289,6 +290,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   const closeOrderOverlays = () => {
     setConfirmModal(null);
     setSelectedOrder(null);
+    setEditingFinalizedOrder(false);
   };
 
   const executePrintOrder = async (order: any, queueRank = 1, mode: 'all' | 'new' = 'all') => {
@@ -926,8 +928,10 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       if (normalized?.id) {
         setQueue((prev) => [ normalized, ...prev.filter((order) => String(order.id) !== String(normalized.id)) ]);
       }
-      setActiveTab('queue');
-      setQueueFilter('all');
+      setEditingFinalizedOrder(true);
+      if (normalized?.id) {
+        setSelectedOrder(normalized);
+      }
       closeReopenModal();
       setError('');
       void loadQueue();
@@ -1355,6 +1359,10 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     const idx = filteredProductionQueue.findIndex((order) => order.id === selectedOrder.id);
     return idx >= 0 ? idx + 1 : 1;
   }, [filteredProductionQueue, selectedOrder?.id]);
+  const drawerOrder = useMemo(() => {
+    if (!selectedOrder?.id) return null;
+    return queue.find((order) => order.id === selectedOrder.id) || selectedOrder;
+  }, [queue, selectedOrder]);
 
   useEffect(() => {
     if (activeTab === 'completed') {
@@ -1381,14 +1389,16 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       closeOrderOverlays();
       return;
     }
-    if (String(latest.status || '').toLowerCase() === 'done' || String(latest.status || '').toLowerCase() === 'cancelled') {
+    const latestStatus = String(latest.status || '').toLowerCase();
+    const isFinal = latestStatus === 'done' || latestStatus === 'delivered' || latestStatus === 'finished';
+    if ((isFinal && !editingFinalizedOrder) || latestStatus === 'cancelled') {
       closeOrderOverlays();
       return;
     }
     if (latest !== selectedOrder) {
       setSelectedOrder(latest);
     }
-  }, [queue, selectedOrder]);
+  }, [queue, selectedOrder, editingFinalizedOrder]);
   useEffect(() => {
     setCompletedPage(1);
   }, [completedPageSize]);
@@ -1796,6 +1806,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                   archived={isArchived}
                   onClick={() => {
                     setConfirmModal(null);
+                    setEditingFinalizedOrder(false);
                     setSelectedOrder(order);
                   }}
                 />
@@ -1866,8 +1877,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                         : "grid-cols-1"
                     }`}
                   >
-                  {filteredProductionQueue
-                    .filter((order) => order.id === selectedOrder?.id)
+                  {(drawerOrder ? [drawerOrder] : [])
                     .map((order, index) => {
             const orderAgeMs = order?.createdAt ? Date.now() - new Date(order.createdAt).getTime() : 0;
             const isLate = orderAgeMs > PREP_SLA_MS;

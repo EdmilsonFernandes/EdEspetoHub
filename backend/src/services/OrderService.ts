@@ -391,9 +391,8 @@ export class OrderService
       }
     }
 
-    // Reopen into production flow without changing enums or payment rules.
-    order.status = 'preparing';
-    return this.orderRepository.save(order);
+    // Authorized for edit: keep final status and return current order.
+    return order;
   }
 
 
