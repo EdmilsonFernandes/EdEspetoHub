@@ -1,6 +1,6 @@
 // @ts-nocheck
 import * as React from 'react';
-import { ChartBar, BookOpen, ChefHat, CreditCard, Package, Gear, ShoppingCart, X, Scooter, ForkKnife, Storefront, Truck, List, CaretLeft, CaretRight, Star, Bell, WarningCircle, MagnifyingGlass } from '@phosphor-icons/react';
+import { ChartBar, BookOpen, ChefHat, CreditCard, Package, Gear, ShoppingCart, X, Scooter, ForkKnife, Storefront, Truck, List, CaretLeft, CaretRight, Star, Bell, WarningCircle, MagnifyingGlass, SignOut } from '@phosphor-icons/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AdminLayout } from '../layouts/AdminLayout';
@@ -1238,7 +1238,7 @@ interface Props {
 export function AdminDashboard({ session: sessionProp }: Props) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { auth, setAuth } = useAuth();
+  const { auth, setAuth, logout } = useAuth();
   const { branding, setBranding } = useTheme();
   const { showToast } = useToast();
 
@@ -2405,6 +2405,28 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                   </button>
                 );
               })}
+              <button
+                type="button"
+                onClick={() => {
+                  logout();
+                  navigate('/admin');
+                }}
+                className={`group relative ds-admin-sidebar-item ds-focus-ring flex items-center ${
+                  sidebarCompact ? 'justify-center px-2.5' : 'justify-between gap-2'
+                } text-rose-700 hover:bg-rose-50`}
+                aria-label="Sair da conta"
+                title="Sair"
+              >
+                <span className={`inline-flex items-center ${sidebarCompact ? '' : 'gap-2'}`}>
+                  <SignOut size={16} weight="bold" />
+                  {!sidebarCompact && 'Sair'}
+                </span>
+                {sidebarCompact && (
+                  <span className="pointer-events-none absolute left-[calc(100%+10px)] top-1/2 -translate-y-1/2 whitespace-nowrap rounded-lg border border-slate-700 bg-slate-900 px-2 py-1 text-[11px] font-semibold text-white opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100">
+                    Sair
+                  </span>
+                )}
+              </button>
             </div>
           </div>
         </aside>
@@ -3146,6 +3168,19 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                   </button>
                 );
               })}
+              <button
+                type="button"
+                onClick={() => {
+                  logout();
+                  navigate('/admin');
+                }}
+                className="ds-focus-ring flex items-center justify-between gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-3 py-3 text-sm font-semibold text-rose-700 transition hover:bg-rose-100"
+              >
+                <span className="inline-flex items-center gap-2">
+                  <SignOut size={17} weight="bold" />
+                  Sair
+                </span>
+              </button>
             </div>
           </aside>
         </div>
