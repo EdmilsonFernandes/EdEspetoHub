@@ -187,6 +187,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   const userRole = String(auth?.user?.role || '').toLowerCase();
   const hasPrintAccess = userRole === 'admin' || userRole === 'operator';
   const isAdminUser = String(auth?.user?.role || '').toUpperCase() === 'ADMIN';
+  const isOperatorUser = String(auth?.user?.role || '').toUpperCase() === 'OPERATOR' || String(auth?.user?.role || '').toUpperCase() === 'CHURRASQUEIRO';
   const storeNameForPrint = String(auth?.store?.name || auth?.store?.settings?.name || 'Minha Loja').trim();
   const prepSlaMinutes = useMemo(() => {
     const raw = Number(auth?.store?.settings?.prepBaseMinutes ?? 20);
@@ -250,6 +251,23 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   const [isGeneratingPrint, setIsGeneratingPrint] = useState(false);
   const [bulkFinishing, setBulkFinishing] = useState(false);
   const [bulkFinalizeModalOpen, setBulkFinalizeModalOpen] = useState(false);
+  const [reopenModal, setReopenModal] = useState<{
+    open: boolean;
+    order: any | null;
+    reason: string;
+    adminIdentifier: string;
+    adminPassword: string;
+    loading: boolean;
+    error: string;
+  }>({
+    open: false,
+    order: null,
+    reason: '',
+    adminIdentifier: '',
+    adminPassword: '',
+    loading: false,
+    error: '',
+  });
   const [printSelectionModal, setPrintSelectionModal] = useState<{
     open: boolean;
     order: any | null;
@@ -856,6 +874,71 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     if (success) {
       setConfirmModal(null);
       setSelectedOrder(null);
+    }
+  };
+
+  const openReopenModal = (order: any) => {
+    setReopenModal({
+      open: true,
+      order,
+      reason: '',
+      adminIdentifier: '',
+      adminPassword: '',
+      loading: false,
+      error: '',
+    });
+  };
+
+  const closeReopenModal = () => {
+    if (reopenModal.loading) return;
+    setReopenModal((prev) => ({
+      ...prev,
+      open: false,
+      order: null,
+      reason: '',
+      adminIdentifier: '',
+      adminPassword: '',
+      error: '',
+    }));
+  };
+
+  const handleConfirmReopen = async () => {
+    const targetOrder = reopenModal.order;
+    if (!targetOrder?.id || reopenModal.loading) return;
+
+    if (!isAdminUser) {
+      const idf = String(reopenModal.adminIdentifier || '').trim();
+      const pwd = String(reopenModal.adminPassword || '').trim();
+      if (!idf || !pwd) {
+        setReopenModal((prev) => ({ ...prev, error: 'Informe usuário/e-mail e senha do admin.' }));
+        return;
+      }
+    }
+
+    setReopenModal((prev) => ({ ...prev, loading: true, error: '' }));
+    try {
+      const reopened = await orderService.reopenOrder(targetOrder.id, {
+        reason: reopenModal.reason,
+        adminIdentifier: isAdminUser ? undefined : reopenModal.adminIdentifier,
+        adminPassword: isAdminUser ? undefined : reopenModal.adminPassword,
+      });
+      const normalized = reopened ? ({ ...reopened, createdAt: reopened.createdAt ? new Date(reopened.createdAt).getTime() : Date.now() }) : null;
+      if (normalized?.id) {
+        setQueue((prev) => [ normalized, ...prev.filter((order) => String(order.id) !== String(normalized.id)) ]);
+      }
+      setActiveTab('queue');
+      setQueueFilter('all');
+      closeReopenModal();
+      setError('');
+      void loadQueue();
+    } catch (err: any) {
+      const backendMessage = String(err?.details?.message || err?.message || '').trim();
+      setReopenModal((prev) => ({
+        ...prev,
+        error: backendMessage || 'Não foi possível reabrir este pedido agora.',
+      }));
+    } finally {
+      setReopenModal((prev) => ({ ...prev, loading: false }));
     }
   };
 
@@ -2544,12 +2627,21 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
 	                  <div className="w-full">
 	                    {renderMoneyBreakdown(order)}
 	                  </div>
-	                  <a
-	                    href={`/pedido/${order.id}`}
-	                    className="text-xs font-semibold text-brand-primary hover:underline"
-	                  >
-	                    Ver pedido
-	                  </a>
+                    <div className="flex items-center gap-2">
+                      <a
+                        href={`/pedido/${order.id}`}
+                        className="text-xs font-semibold text-brand-primary hover:underline"
+                      >
+                        Ver pedido
+                      </a>
+                      <button
+                        type="button"
+                        onClick={() => openReopenModal(order)}
+                        className="inline-flex items-center rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-700 hover:bg-amber-100 transition-all"
+                      >
+                        Reabrir
+                      </button>
+                    </div>
 	                </div>
               </div>
             ))}
@@ -2731,6 +2823,98 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                   className="h-10 rounded-xl bg-emerald-600 px-3 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
                 >
                   {bulkFinishing ? 'Finalizando...' : `Finalizar ${bulkFinalizeCandidates.length}`}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+      {reopenModal.open && createPortal(
+        <div className="fixed inset-0 z-[10028]">
+          <div
+            className="absolute inset-0 bg-slate-900/45 backdrop-blur-sm"
+            onClick={closeReopenModal}
+          />
+          <div className="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center p-3 sm:p-4">
+            <div className="w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl border border-slate-200 bg-white shadow-2xl overflow-hidden">
+              <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-black text-slate-900">Reabrir pedido</p>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Pedido #{formatOrderDisplayId(reopenModal.order?.id, storeSlug)} voltará para produção.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={closeReopenModal}
+                  disabled={reopenModal.loading}
+                  className="h-9 w-9 rounded-full border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+                  aria-label="Fechar reabertura"
+                >
+                  <X size={16} weight="bold" />
+                </button>
+              </div>
+              <div className="p-4 space-y-3">
+                <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                  {isAdminUser
+                    ? 'Você está como Admin. A reabertura será autorizada direto.'
+                    : 'Para operador, informe as credenciais de um Admin da mesma loja.'}
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-600">Motivo (opcional)</label>
+                  <input
+                    value={reopenModal.reason}
+                    onChange={(event) => setReopenModal((prev) => ({ ...prev, reason: event.target.value }))}
+                    placeholder="Ex.: faltou item no pedido"
+                    className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:ring-2 focus:ring-amber-300"
+                  />
+                </div>
+                {!isAdminUser && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-xs font-semibold text-slate-600">Admin (e-mail ou usuário)</label>
+                      <input
+                        value={reopenModal.adminIdentifier}
+                        onChange={(event) => setReopenModal((prev) => ({ ...prev, adminIdentifier: event.target.value, error: '' }))}
+                        placeholder="admin@loja.com"
+                        className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:ring-2 focus:ring-amber-300"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold text-slate-600">Senha do Admin</label>
+                      <input
+                        type="password"
+                        value={reopenModal.adminPassword}
+                        onChange={(event) => setReopenModal((prev) => ({ ...prev, adminPassword: event.target.value, error: '' }))}
+                        placeholder="••••••••"
+                        className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:ring-2 focus:ring-amber-300"
+                      />
+                    </div>
+                  </div>
+                )}
+                {reopenModal.error && (
+                  <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+                    {reopenModal.error}
+                  </div>
+                )}
+              </div>
+              <div className="px-4 py-3 border-t border-slate-100 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={closeReopenModal}
+                  disabled={reopenModal.loading}
+                  className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmReopen}
+                  disabled={reopenModal.loading}
+                  className="h-10 rounded-xl bg-amber-500 px-3 text-xs font-semibold text-white hover:bg-amber-600 disabled:opacity-60"
+                >
+                  {reopenModal.loading ? 'Reabrindo...' : 'Confirmar reabertura'}
                 </button>
               </div>
             </div>

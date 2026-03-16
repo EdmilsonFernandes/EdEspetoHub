@@ -23,6 +23,9 @@ import { DeliveryBillingService } from './DeliveryBillingService';
 import { deliveryService } from './DeliveryService';
 import { SubscriptionService } from './SubscriptionService';
 import { resolvePlanFeatures } from '../config/planFeatures';
+import { UserRepository } from '../repositories/UserRepository';
+import { StoreUserRepository } from '../repositories/StoreUserRepository';
+import bcrypt from 'bcryptjs';
 /**
  * Provides OrderService functionality.
  *
@@ -36,6 +39,8 @@ export class OrderService
   private productRepository = new ProductRepository();
   private deliveryBillingService = new DeliveryBillingService();
   private subscriptionService = new SubscriptionService();
+  private userRepository = new UserRepository();
+  private storeUserRepository = new StoreUserRepository();
   private tz = process.env.APP_TZ || 'America/Sao_Paulo';
 
   private async reconcileDeliveredOrdersByStore(storeId: string) {
@@ -343,6 +348,52 @@ export class OrderService
       await this.deliveryBillingService.recordDelivery(saved);
     }
     return saved;
+  }
+
+  async reopenOrder(
+    orderId: string,
+    input: { reason?: string; adminIdentifier?: string; adminPassword?: string },
+    auth?: { storeId?: string; role?: string; sub?: string }
+  ) {
+    const order = await this.orderRepository.findById(orderId);
+    if (!order) throw new AppError('ORDER-001', 404);
+    this.ensureStoreAccess(order.store, auth?.storeId);
+
+    const currentStatus = String(order.status || '').toLowerCase();
+    const allowedFinalStatuses = new Set([ 'done', 'finished', 'delivered' ]);
+    if (!allowedFinalStatuses.has(currentStatus)) {
+      throw new AppError('ORDER-004', 400, { message: 'Apenas pedidos finalizados podem ser reabertos.' });
+    }
+
+    const requesterRole = String(auth?.role || '').toUpperCase();
+    const isRequesterAdmin = requesterRole === 'ADMIN';
+
+    if (!isRequesterAdmin) {
+      const identifier = String(input?.adminIdentifier || '').trim().toLowerCase();
+      const password = String(input?.adminPassword || '').trim();
+      if (!identifier || !password) {
+        throw new AppError('AUTH-004', 401, { message: 'Credenciais de admin obrigatórias para reabrir.' });
+      }
+
+      const adminUser = await this.userRepository.findByLoginIdentifier(identifier);
+      if (!adminUser) throw new AppError('AUTH-004', 401);
+
+      const validPassword = await bcrypt.compare(password, adminUser.password);
+      if (!validPassword) throw new AppError('AUTH-004', 401);
+
+      const isStoreOwnerAdmin = String(order.store?.owner?.id || '') === String(adminUser.id || '');
+      const membership = await this.storeUserRepository.findByStoreAndUser(order.store.id, adminUser.id);
+      const isStoreAdminMember =
+        Boolean(membership?.isActive) && String(membership?.role || '').toUpperCase() === 'ADMIN';
+
+      if (!isStoreOwnerAdmin && !isStoreAdminMember) {
+        throw new AppError('AUTH-004', 401, { message: 'Admin inválido para esta loja.' });
+      }
+    }
+
+    // Reopen into production flow without changing enums or payment rules.
+    order.status = 'preparing';
+    return this.orderRepository.save(order);
   }
 
 

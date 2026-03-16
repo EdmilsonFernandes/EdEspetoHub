@@ -198,6 +198,28 @@ export class OrderController {
     }
   }
 
+  static async reopen(req: Request, res: Response) {
+    try {
+      const order = await orderService.reopenOrder(
+        req.params.orderId,
+        {
+          reason: req.body?.reason,
+          adminIdentifier: req.body?.adminIdentifier,
+          adminPassword: req.body?.adminPassword,
+        },
+        {
+          storeId: req.auth?.storeId,
+          role: req.auth?.role,
+          sub: req.auth?.sub,
+        }
+      );
+      return res.json(order);
+    } catch (error: any) {
+      log.warn('Order reopen failed', { orderId: req.params.orderId, error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
   static async markItemsAsPrinted(req: Request, res: Response) {
     try {
       const itemIds = Array.isArray(req.body?.itemIds) ? req.body.itemIds : undefined;

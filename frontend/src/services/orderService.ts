@@ -250,6 +250,13 @@ export const orderService = {
     await apiClient.patch(`/orders/${id}`, { items: normalizedItems, total });
   },
 
+  async reopenOrder(
+    id: string,
+    payload?: { reason?: string; adminIdentifier?: string; adminPassword?: string }
+  ) {
+    return apiClient.patch(`/orders/${id}/reopen`, payload || {});
+  },
+
   async markItemsPrinted(id: string, itemIds?: string[]) {
     const normalized = Array.isArray(itemIds)
       ? itemIds.map((itemId) => String(itemId || '').trim()).filter(Boolean)
