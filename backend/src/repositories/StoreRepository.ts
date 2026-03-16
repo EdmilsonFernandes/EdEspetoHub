@@ -63,6 +63,16 @@ export class StoreRepository {
   }
 
   /**
+   * Handles find by slug with owner.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-03-16
+   */
+  findBySlugWithOwner(slug: string) {
+    return this.repository.findOne({ where: { slug }, relations: ['settings', 'owner'] });
+  }
+
+  /**
    * Handles find by id.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)

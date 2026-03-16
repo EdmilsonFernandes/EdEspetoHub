@@ -626,7 +626,7 @@ export class AuthService
       }
     } else {
       // Backward compatibility for old flow using store slug.
-      store = await this.storeRepository.findBySlug(normalizedIdentifier);
+      store = await this.storeRepository.findBySlugWithOwner(normalizedIdentifier);
       if (!store) throw new AppError('AUTH-004', 401);
       const ownerUser = store.owner;
       const ownerValid = ownerUser ? await bcrypt.compare(password, ownerUser.password) : false;
