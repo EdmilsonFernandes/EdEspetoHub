@@ -73,9 +73,16 @@ export class AuthService
       return bcrypt.compare(rawPassword, stored);
     }
 
-    // Legacy/plain-text fallback for old seeded accounts.
+    // Legacy fallbacks for old/imported accounts.
     const plainMatch = stored === rawPassword;
-    if (!plainMatch) return false;
+    const md5Match =
+      /^[a-f0-9]{32}$/i.test(stored) &&
+      crypto.createHash('md5').update(rawPassword, 'utf8').digest('hex').toLowerCase() === stored.toLowerCase();
+    const sha1Match =
+      /^[a-f0-9]{40}$/i.test(stored) &&
+      crypto.createHash('sha1').update(rawPassword, 'utf8').digest('hex').toLowerCase() === stored.toLowerCase();
+
+    if (!plainMatch && !md5Match && !sha1Match) return false;
 
     // Auto-migrate legacy password to bcrypt on successful login.
     user.password = await bcrypt.hash(rawPassword, 10);
