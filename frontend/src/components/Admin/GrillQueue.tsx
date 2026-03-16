@@ -860,13 +860,13 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   };
 
   const openFinalizeAllReadyModal = () => {
-    if (bulkFinishing || !readyToFinalizeOrders.length) return;
+    if (bulkFinishing || !bulkFinalizeCandidates.length) return;
     setBulkFinalizeModalOpen(true);
   };
 
   const handleFinalizeAllReady = async () => {
     if (bulkFinishing) return;
-    const targetOrders = readyToFinalizeOrders;
+    const targetOrders = bulkFinalizeCandidates;
     if (!targetOrders.length) return;
 
     setBulkFinishing(true);
@@ -1257,10 +1257,16 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     return allActiveQueue;
   }, [allActiveQueue, completedRecent12h, queueFilter, currentTime, PREP_SLA_MS]);
 
-  const readyToFinalizeOrders = useMemo(
-    () => allActiveQueue.filter((order) => String(order?.status || '').toLowerCase() === 'ready'),
-    [allActiveQueue]
-  );
+  const bulkFinalizeCandidates = useMemo(() => {
+    const merged = [ ...productionQueue, ...awaitingMotoboyQueue ];
+    const seen = new Set<string>();
+    return merged.filter((order) => {
+      const id = String(order?.id || '');
+      if (!id || seen.has(id)) return false;
+      seen.add(id);
+      return true;
+    });
+  }, [productionQueue, awaitingMotoboyQueue]);
   const selectedOrderRank = useMemo(() => {
     if (!selectedOrder?.id) return 1;
     const idx = filteredProductionQueue.findIndex((order) => order.id === selectedOrder.id);
@@ -1565,12 +1571,12 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                   <button
                     type="button"
                     onClick={openFinalizeAllReadyModal}
-                    disabled={bulkFinishing || readyToFinalizeOrders.length === 0}
+                    disabled={bulkFinishing || bulkFinalizeCandidates.length === 0}
                     className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-[11px] sm:text-xs font-bold text-emerald-700 hover:bg-emerald-100 transition disabled:opacity-45 disabled:cursor-not-allowed"
-                    title="Finalizar rapidamente todos os pedidos prontos"
+                    title="Finalizar rapidamente todos os pedidos ativos"
                   >
                     <CheckSquare size={13} weight="duotone" />
-                    {bulkFinishing ? 'Finalizando...' : `Finalizar prontos (${readyToFinalizeOrders.length})`}
+                    {bulkFinishing ? 'Finalizando...' : `Finalizar tudo (${bulkFinalizeCandidates.length})`}
                   </button>
                 )}
               </div>
@@ -2673,7 +2679,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                 <div>
                   <p className="text-sm font-black text-slate-900">Finalização rápida</p>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    Confirme para concluir em lote os pedidos prontos.
+                    Confirme para concluir em lote os pedidos ativos da operação.
                   </p>
                 </div>
                 <button
@@ -2688,11 +2694,11 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
               </div>
               <div className="p-4 space-y-3">
                 <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-3 flex items-center justify-between">
-                  <span className="text-sm font-semibold text-emerald-700">Pedidos prontos agora</span>
-                  <span className="text-lg font-black text-emerald-800">{readyToFinalizeOrders.length}</span>
+                  <span className="text-sm font-semibold text-emerald-700">Pedidos para finalizar agora</span>
+                  <span className="text-lg font-black text-emerald-800">{bulkFinalizeCandidates.length}</span>
                 </div>
                 <p className="text-xs text-slate-500">
-                  Esta ação registra como pago e finalizado. Use quando a cobrança já foi concluída no balcão.
+                  Esta ação registra como pago e finalizado. Use quando a cobrança já foi concluída e você quer encerrar rápido sem passar por cada etapa.
                 </p>
               </div>
               <div className="px-4 py-3 border-t border-slate-100 flex items-center justify-end gap-2">
@@ -2707,10 +2713,10 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                 <button
                   type="button"
                   onClick={handleFinalizeAllReady}
-                  disabled={bulkFinishing || readyToFinalizeOrders.length === 0}
+                  disabled={bulkFinishing || bulkFinalizeCandidates.length === 0}
                   className="h-10 rounded-xl bg-emerald-600 px-3 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
                 >
-                  {bulkFinishing ? 'Finalizando...' : `Finalizar ${readyToFinalizeOrders.length}`}
+                  {bulkFinishing ? 'Finalizando...' : `Finalizar ${bulkFinalizeCandidates.length}`}
                 </button>
               </div>
             </div>
