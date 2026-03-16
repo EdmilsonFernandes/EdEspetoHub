@@ -51,6 +51,7 @@ const OrderSummaryCard = ({
   canPrint,
   printBusy,
   archived = false,
+  onReopen,
 }: any) => (
   (() => {
     const isDelivery = String(order?.type || '').toLowerCase() === 'delivery';
@@ -136,6 +137,20 @@ const OrderSummaryCard = ({
             title="Imprimir pedido"
           >
             <Printer size={15} weight="duotone" />
+          </button>
+        )}
+        {archived && typeof onReopen === 'function' && (
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              onReopen();
+            }}
+            className="inline-flex h-8 items-center justify-center rounded-lg border border-amber-300 bg-amber-50 px-2.5 text-[11px] font-semibold text-amber-700 hover:bg-amber-100 transition-all"
+            aria-label={`Reabrir pedido ${orderDisplayId}`}
+            title="Reabrir pedido"
+          >
+            Reabrir
           </button>
         )}
       </div>
@@ -1841,6 +1856,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                   canPrint={hasPrintAccess}
                   onPrint={() => handlePrintOrder(order, index + 1)}
                   archived={isArchived}
+                  onReopen={isArchived ? () => openReopenModal(order) : undefined}
                   onClick={() => {
                     setConfirmModal(null);
                     setEditingFinalizedOrder(false);
