@@ -749,6 +749,8 @@ export const MenuView = ({
                   : false;
                 const hasConfigurableOptions = hasActiveModifiers || isEspetoCategory(item?.category);
                 const hasLongDescription = String(item?.description || '').trim().length > 90;
+                const hasAnyDescription = String(item?.description || '').trim().length > 0;
+                const allowStaffModal = hasConfigurableOptions || hasAnyDescription;
 
                 const handleOpenOptions = (event?: React.MouseEvent) => {
                   event?.stopPropagation();
@@ -774,11 +776,11 @@ export const MenuView = ({
                       type="button"
                       onClick={(event) => {
                         event.stopPropagation();
-                        if (!staffView || hasConfigurableOptions || hasLongDescription) {
+                        if (!staffView || allowStaffModal) {
                           openProductModal(item);
                         }
                       }}
-                      className={`text-left font-semibold text-slate-900 text-base sm:text-lg leading-tight line-clamp-2 ${(!staffView || hasConfigurableOptions || hasLongDescription) ? 'cursor-pointer hover:text-slate-700' : 'cursor-default'}`}
+                      className={`text-left font-semibold text-slate-900 text-base sm:text-lg leading-tight line-clamp-2 ${(!staffView || allowStaffModal) ? 'cursor-pointer hover:text-slate-700' : 'cursor-default'}`}
                     >
                       {item.name}
                     </button>
@@ -806,13 +808,13 @@ export const MenuView = ({
                         {isEspetoCategory(item?.category) ? "Opções: ponto/farinha" : "Possui opções"}
                       </button>
                     )}
-                    {staffView && !hasConfigurableOptions && hasLongDescription && (
+                    {staffView && !hasConfigurableOptions && hasAnyDescription && (
                       <button
                         type="button"
                         onClick={handleOpenDetails}
                         className="inline-flex items-center gap-2 text-[11px] font-semibold text-slate-600 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-full hover:bg-slate-200 transition cursor-pointer"
                       >
-                        Ver descrição completa
+                        {hasLongDescription ? 'Ver descrição completa' : 'Ver detalhes'}
                       </button>
                     )}
                     {item?.bundlePromoActive && Number(item?.bundlePromoQty) >= 2 && Number(item?.bundlePromoPrice) > 0 && (
@@ -828,11 +830,11 @@ export const MenuView = ({
                       type="button"
                       onClick={(event) => {
                         event.stopPropagation();
-                        if (!staffView || hasConfigurableOptions || hasLongDescription) {
+                        if (!staffView || allowStaffModal) {
                           openProductModal(item);
                         }
                       }}
-                      className={`aspect-square ${staffView ? "w-[120px] rounded-2xl" : "w-[108px] rounded-2xl"} overflow-hidden bg-gray-100 border border-gray-200 shadow-sm ${(!staffView || hasConfigurableOptions || hasLongDescription) ? 'cursor-pointer' : 'cursor-default'}`}
+                      className={`aspect-square ${staffView ? "w-[120px] rounded-2xl" : "w-[108px] rounded-2xl"} overflow-hidden bg-gray-100 border border-gray-200 shadow-sm ${(!staffView || allowStaffModal) ? 'cursor-pointer' : 'cursor-default'}`}
                     >
                       {item.imageUrl ? (
                         <img
