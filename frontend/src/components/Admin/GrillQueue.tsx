@@ -1317,6 +1317,13 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   }, [completedPage, completedTotalPages]);
 
   const getStatusStyles = (status, orderType) => {
+    if (status === "done" || status === "delivered" || status === "finished") {
+      const label = orderType === "delivery" ? "Finalizado" : "Finalizado";
+      return { label, className: "bg-emerald-50 text-emerald-700 border-emerald-100" };
+    }
+    if (status === "in_delivery") {
+      return { label: "Em rota", className: "bg-blue-50 text-blue-700 border-blue-100" };
+    }
     if (status === "preparing") {
       return { label: "Em atendimento", className: "bg-blue-50 text-blue-700 border-blue-100" };
     }
@@ -2456,9 +2463,14 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                   </p>
                     <p className="text-xs text-slate-400">{formatDateTime(order.createdAt)}</p>
                   </div>
-                  <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-700 border border-emerald-200">
-                    Pronto
-                  </span>
+                  {(() => {
+                    const statusMeta = getStatusStyles(order.status, order.type);
+                    return (
+                      <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border ${statusMeta.className}`}>
+                        {statusMeta.label}
+                      </span>
+                    );
+                  })()}
                 </div>
 
                 <div className="text-xs text-slate-600 space-y-1">
