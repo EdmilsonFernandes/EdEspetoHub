@@ -800,7 +800,7 @@ export const MenuView = ({
                       <p className="text-sm sm:text-[15px] text-slate-600 leading-relaxed line-clamp-2">{item.description}</p>
                     )}
                     {itemQtyMap.get(String(item.id)) > 0 && (
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-[11px] font-semibold bg-lime-50 text-lime-700 border border-lime-200">
                         {itemQtyMap.get(String(item.id))} no carrinho
                       </span>
                     )}
@@ -1049,25 +1049,26 @@ export const MenuView = ({
         onAddToCart={onUpdateCart}
       />
 
-      {cartItemsCount > 0 && (
-        <div className="fixed bottom-4 left-4 right-4 z-40 sm:max-w-md sm:left-auto sm:right-6">
+      <div
+        className={`fixed bottom-6 left-1/2 z-40 w-[calc(100%-1.5rem)] max-w-md -translate-x-1/2 transition-all duration-300 ${
+          cartItemsCount > 0 ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0 pointer-events-none"
+        }`}
+      >
+        {cartItemsCount > 0 && (
           <button
             onClick={() => onProceed?.()}
-            className="w-full bg-slate-900 text-white p-3 sm:p-4 rounded-xl sm:rounded-2xl shadow-sm flex justify-between items-center transform hover:scale-[1.01] transition-all text-sm sm:text-base"
+            className="w-full bg-amber-500 text-white px-4 py-3 rounded-full shadow-xl shadow-amber-500/25 flex justify-between items-center hover:brightness-95 active:scale-[0.99] transition-all text-sm sm:text-base"
           >
             <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-              <span
-                className="px-2.5 sm:px-3 py-1 rounded-lg sm:rounded-xl text-xs sm:text-sm font-bold text-white shadow-lg"
-                style={{ backgroundColor: branding?.primaryColor || "#0ea5e9" }}
-              >
+              <span className="h-7 min-w-7 px-2 rounded-full text-xs font-extrabold text-amber-600 bg-white inline-flex items-center justify-center">
                 {cartItemsCount}
               </span>
               <span className="font-bold truncate">Ver sacola</span>
             </div>
             <span className="font-bold text-base sm:text-lg ml-2 flex-shrink-0">{formatCurrency(cartTotalValue)}</span>
           </button>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };
