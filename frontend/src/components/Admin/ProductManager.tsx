@@ -17,6 +17,10 @@ import { formatCurrency } from '../../utils/format';
 import { useToast } from '../../contexts/ToastContext';
 import { normalizeProductModifiers } from '../../utils/productModifiers';
 import { resolveAssetUrl } from '../../utils/resolveAssetUrl';
+import {
+  buildBulkImportTemplate,
+  parseBulkProductsInput,
+} from '../../utils/productBulkImport';
 
 const WEEK_DAYS = [
   { key: 'mon', label: 'Seg' },
@@ -315,6 +319,9 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
   const [page, setPage] = useState(1);
   const pageSize = 15;
   const [pendingDeleteIds, setPendingDeleteIds] = useState<string[]>([]);
+  const [bulkOpen, setBulkOpen] = useState(false);
+  const [bulkText, setBulkText] = useState('');
+  const [bulkImporting, setBulkImporting] = useState(false);
 
   const categoryOptions = useMemo(() => {
     const segmentKey = normalizeCategory(storeSegment) || 'outros';
@@ -395,6 +402,17 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
     return filteredProducts.slice(start, start + pageSize);
   }, [filteredProducts, page]);
 
+  const bulkParse = useMemo(() => parseBulkProductsInput(bulkText), [bulkText]);
+
+  const existingProductKeys = useMemo(() => {
+    const keys = new Set<string>();
+    (products || []).forEach((product) => {
+      const key = `${normalizeCategory(product?.name || '')}::${normalizeCategory(product?.category || '')}`;
+      if (key !== '::') keys.add(key);
+    });
+    return keys;
+  }, [products]);
+
   const resetForm = () => {
     setEditing(null);
     setFormData({ ...initialForm, category: defaultCategoryId });
@@ -413,6 +431,63 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
     } catch (error) {
       console.error('Não foi possível atualizar produtos', error);
     }
+  };
+
+  const handleBulkUseTemplate = () => {
+    setBulkText(buildBulkImportTemplate());
+    setBulkOpen(true);
+  };
+
+  const handleBulkImport = async () => {
+    const drafts = bulkParse.items || [];
+    if (!drafts.length) {
+      showToast('Cole os produtos no formato de lote para importar.', 'warning');
+      return;
+    }
+
+    setBulkImporting(true);
+    const runtimeKeys = new Set(existingProductKeys);
+    let created = 0;
+    let skipped = 0;
+    let failed = 0;
+
+    for (const item of drafts) {
+      const key = `${normalizeCategory(item.name)}::${normalizeCategory(item.category)}`;
+      if (runtimeKeys.has(key)) {
+        skipped += 1;
+        continue;
+      }
+      try {
+        await productService.save({
+          name: item.name,
+          price: Number(item.price),
+          category: item.category || defaultCategoryId || 'outros',
+          description: item.description || undefined,
+          promoActive: false,
+          bundlePromoActive: false,
+          active: true,
+          isFeatured: false,
+        });
+        runtimeKeys.add(key);
+        created += 1;
+      } catch (error) {
+        failed += 1;
+        console.error('Falha no cadastro em lote', { item, error });
+      }
+    }
+
+    await refreshProducts();
+    setBulkImporting(false);
+
+    if (failed > 0) {
+      showToast(
+        `Importação concluída com alertas: ${created} criados, ${skipped} ignorados, ${failed} com erro.`,
+        'warning'
+      );
+      return;
+    }
+
+    showToast(`Importação concluída: ${created} criados, ${skipped} ignorados.`, 'success');
   };
 
   const handleSubmit = async (event) => {
@@ -683,6 +758,102 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
           <span className="px-3 py-1 rounded-full text-xs font-semibold border border-brand-primary/25 bg-brand-primary-soft text-brand-primary">
             Novo item
           </span>
+        </div>
+
+        <div className="mb-5 rounded-2xl border border-slate-200 bg-white/90 p-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-bold text-slate-800">Cadastro em lote</p>
+              <p className="text-xs text-slate-500">Cole o texto do cardápio para criar vários produtos de uma vez.</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleBulkUseTemplate}
+                className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                Usar template
+              </button>
+              <button
+                type="button"
+                onClick={() => setBulkOpen((prev) => !prev)}
+                className={`rounded-xl px-3 py-2 text-xs font-semibold transition ${
+                  bulkOpen
+                    ? 'bg-slate-900 text-white'
+                    : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                }`}
+              >
+                {bulkOpen ? 'Fechar lote' : 'Cadastrar em lote'}
+              </button>
+            </div>
+          </div>
+
+          {bulkOpen && (
+            <div className="mt-4 space-y-3">
+              <textarea
+                value={bulkText}
+                onChange={(e) => setBulkText(e.target.value)}
+                placeholder="Ex.: CATEGORIA: REFEICOES\nFile de Tilapia (Meia) | R$ 63,00 | Desc: ..."
+                className="min-h-[180px] w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
+              />
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-xs text-slate-500">
+                  Prévia: <span className="font-semibold text-slate-800">{bulkParse.items.length}</span> item(ns)
+                  {bulkParse.warnings.length ? (
+                    <span className="ml-2 text-amber-700">• {bulkParse.warnings.length} linha(s) não reconhecida(s)</span>
+                  ) : null}
+                </p>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setBulkText('')}
+                    className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                    disabled={bulkImporting}
+                  >
+                    Limpar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleBulkImport}
+                    disabled={bulkImporting || bulkParse.items.length === 0}
+                    className="rounded-xl bg-brand-gradient px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {bulkImporting ? 'Importando...' : `Importar ${bulkParse.items.length}`}
+                  </button>
+                </div>
+              </div>
+              {bulkParse.items.length > 0 && (
+                <div className="max-h-48 overflow-auto rounded-xl border border-slate-200 bg-white">
+                  <table className="min-w-full text-xs">
+                    <thead className="sticky top-0 bg-slate-50 text-slate-500">
+                      <tr>
+                        <th className="px-3 py-2 text-left font-semibold">Produto</th>
+                        <th className="px-3 py-2 text-left font-semibold">Categoria</th>
+                        <th className="px-3 py-2 text-right font-semibold">Preço</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {bulkParse.items.slice(0, 80).map((item, index) => (
+                        <tr key={`${item.name}-${item.category}-${index}`} className="border-t border-slate-100">
+                          <td className="px-3 py-2 text-slate-700">{item.name}</td>
+                          <td className="px-3 py-2 text-slate-500">{formatCategoryLabel(item.category)}</td>
+                          <td className="px-3 py-2 text-right font-semibold text-slate-800">{formatCurrency(item.price)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+              {bulkParse.warnings.length > 0 && (
+                <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-3 text-xs text-amber-800">
+                  {bulkParse.warnings.slice(0, 5).map((warning, index) => (
+                    <p key={`${warning}-${index}`}>{warning}</p>
+                  ))}
+                  {bulkParse.warnings.length > 5 ? <p>... e mais {bulkParse.warnings.length - 5} aviso(s).</p> : null}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="grid gap-6">
