@@ -80,59 +80,64 @@ const OrderSummaryCard = ({
         onClick();
       }
     }}
-    className={`w-full rounded-xl border ${isLate ? 'border-red-300' : 'border-slate-200'} ${leftAccent} ${archived ? 'bg-slate-50/90 opacity-80' : 'bg-white'} p-2 sm:p-3 text-left flex flex-col gap-1.5 transition-all duration-300 transition-transform hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5 hover:scale-[1.01] cursor-pointer`}
+    className={`w-full rounded-xl border ${isLate ? 'border-red-200' : 'border-slate-100'} ${leftAccent} ${archived ? 'bg-slate-50/90 opacity-80' : 'bg-white'} p-3 sm:p-3 text-left flex flex-col gap-1 transition-all duration-200 transition-transform hover:border-slate-200 hover:shadow-sm hover:-translate-y-0.5 hover:scale-[1.01] cursor-pointer`}
   >
-    <div className="flex items-center justify-between gap-2">
+    <div className="flex items-center justify-between gap-2 text-xs">
       <div className="flex items-center gap-1.5 min-w-0">
-        <span className="px-2 py-1 bg-slate-800 text-white text-xs font-bold rounded-md shadow-sm">
+        <span className="px-2 py-0.5 bg-slate-800 text-white text-[11px] font-bold rounded-md">
           #{String(queueRank).padStart(2, '0')}
         </span>
+        {!archived ? (
+          <span className={`px-2 py-0.5 text-[10px] uppercase tracking-wide font-bold rounded-full whitespace-nowrap border ${statusMeta.className}`}>
+            {statusMeta.label}
+          </span>
+        ) : (
+          <span className="px-2 py-0.5 text-[10px] uppercase tracking-wide font-bold rounded-full whitespace-nowrap border border-slate-200 bg-slate-100 text-slate-600">
+            Finalizado
+          </span>
+        )}
         {hasTable && (
-          <span className={`inline-flex items-center gap-1 rounded-md px-2 py-1 text-[12px] font-black tracking-wide text-white whitespace-nowrap shadow-sm ${archived ? 'bg-slate-600' : 'bg-amber-500'}`}>
+          <span className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-black tracking-wide text-white whitespace-nowrap ${archived ? 'bg-slate-600' : 'bg-amber-500'}`}>
             <Hash size={12} weight="bold" />
             MESA {String(order.table).padStart(2, "0")}
           </span>
         )}
         {!hasTable && (
-          <span className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-[10px] font-semibold text-slate-700">
+          <span className="rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-slate-700">
             {formatOrderType(order?.type)}
           </span>
         )}
       </div>
       <div className="shrink-0">
         {!archived ? (
-          <span className={`px-2 py-1 text-[11px] font-bold font-mono rounded-md whitespace-nowrap border ${isLate ? 'bg-red-500 text-white border-red-500' : 'bg-emerald-100 text-emerald-700 border-emerald-200'}`}>
+          <span className={`px-2 py-0.5 text-[11px] font-bold font-mono rounded-md whitespace-nowrap border ${isLate ? 'bg-red-500 text-white border-red-500' : 'bg-emerald-100 text-emerald-700 border-emerald-200'}`}>
             {elapsedLabel}
           </span>
         ) : (
-          <span className="px-2 py-1 text-[11px] font-semibold rounded-md whitespace-nowrap border bg-slate-100 text-slate-700 border-slate-200">
+          <span className="px-2 py-0.5 text-[10px] font-semibold rounded-md whitespace-nowrap border bg-slate-100 text-slate-700 border-slate-200">
             {closedAtLabel || '--:--'}
           </span>
         )}
       </div>
     </div>
 
-    <div className="flex items-start justify-between gap-2 min-w-0">
+    <div className="flex items-center justify-between gap-2 min-w-0">
       <div className="min-w-0 flex-1">
-      <h3 className="text-base font-black text-slate-800 line-clamp-1">{order.customerName || order.name || 'Cliente'}</h3>
+      <h3 className="text-[15px] sm:text-base font-black text-slate-800 line-clamp-1">{order.customerName || order.name || 'Cliente'}</h3>
       </div>
       <div className="shrink-0 flex items-center gap-1.5">
         <span className="rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
           {paymentLabel}
         </span>
-        {!archived ? (
-          <span className={`px-2 py-0.5 text-[10px] uppercase tracking-wide font-bold rounded-full whitespace-nowrap border ${statusMeta.className}`}>
-            {statusMeta.label}
-          </span>
-        ) : null}
       </div>
     </div>
 
-    <div className="border-t border-slate-100 pt-1.5 mt-0.5 flex items-center justify-between">
-      <span className="text-[11px] text-slate-500 font-medium">{createdAtLabel}</span>
-      <div className="text-right flex items-center gap-1.5 shrink-0">
+    <div className="border-t border-slate-100 pt-1 mt-0.5 flex items-center justify-between">
+      <div className="flex items-center gap-1.5">
         <span className="text-sm font-bold text-slate-900">{totalLabel}</span>
         <span className="text-[11px] text-slate-500">{itemsCount} {itemsCount === 1 ? 'item' : 'itens'}</span>
+      </div>
+      <div className="text-right flex items-center gap-1.5 shrink-0">
         {canPrint && (
           <button
             type="button"
