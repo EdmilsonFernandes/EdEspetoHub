@@ -402,6 +402,15 @@ export class OrderService
 
     order.items = nextItems;
     order.total = total + deliveryFeeValue;
+    // Prevent status regression (race with status updates like done/delivered).
+    const statusRow = await AppDataSource.query(
+      `SELECT status FROM orders WHERE id = $1 LIMIT 1`,
+      [ order.id ]
+    );
+    const latestStatus = String(statusRow?.[0]?.status || '').trim().toLowerCase();
+    if (latestStatus) {
+      order.status = latestStatus;
+    }
 
     return this.orderRepository.save(order);
   }

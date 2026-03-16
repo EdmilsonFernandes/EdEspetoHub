@@ -1032,7 +1032,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   const completedOrders = useMemo(() => {
     const completedStatuses = new Set([ 'done', 'delivered', 'finished' ]);
     return [...queue]
-      .filter((order) => completedStatuses.has(order.status))
+      .filter((order) => completedStatuses.has(String(order?.status || '').toLowerCase()))
       .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
   }, [queue]);
   const completedToday = useMemo(() => {
@@ -1317,17 +1317,18 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   }, [completedPage, completedTotalPages]);
 
   const getStatusStyles = (status, orderType) => {
-    if (status === "done" || status === "delivered" || status === "finished") {
+    const normalizedStatus = String(status || '').toLowerCase();
+    if (normalizedStatus === "done" || normalizedStatus === "delivered" || normalizedStatus === "finished") {
       const label = orderType === "delivery" ? "Finalizado" : "Finalizado";
       return { label, className: "bg-emerald-50 text-emerald-700 border-emerald-100" };
     }
-    if (status === "in_delivery") {
+    if (normalizedStatus === "in_delivery") {
       return { label: "Em rota", className: "bg-blue-50 text-blue-700 border-blue-100" };
     }
-    if (status === "preparing") {
+    if (normalizedStatus === "preparing") {
       return { label: "Em atendimento", className: "bg-blue-50 text-blue-700 border-blue-100" };
     }
-    if (status === "ready" || status === "ready_for_delivery" || status === "waiting_for_motoboy") {
+    if (normalizedStatus === "ready" || normalizedStatus === "ready_for_delivery" || normalizedStatus === "waiting_for_motoboy") {
       const label =
         orderType === "delivery"
           ? "Pronto"
@@ -1347,10 +1348,11 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
 
   const renderTimeline = (status, orderType) => {
     const normalizedStatus = (() => {
-      if (orderType === 'delivery' && (status === 'ready_for_delivery' || status === 'waiting_for_motoboy')) return 'ready';
-      if (orderType === 'delivery' && status === 'in_delivery') return 'done';
-      if (status === 'delivered' || status === 'finished') return 'done';
-      return status;
+      const raw = String(status || '').toLowerCase();
+      if (orderType === 'delivery' && (raw === 'ready_for_delivery' || raw === 'waiting_for_motoboy')) return 'ready';
+      if (orderType === 'delivery' && raw === 'in_delivery') return 'done';
+      if (raw === 'delivered' || raw === 'finished') return 'done';
+      return raw;
     })();
     const steps =
       orderType === "pickup"
