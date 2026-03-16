@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-import { Minus, Plus, Sparkle, Trash, X } from "@phosphor-icons/react";
+import { ForkKnife, Minus, Plus, Sparkle, X } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 import { formatCurrency } from "../../utils/format";
 import {
@@ -150,7 +150,7 @@ export const ProductModal = ({ product, cart = {}, isOpen, onClose, onAddToCart 
         <div className="relative">
           <button
             onClick={handleClose}
-            className="absolute top-4 right-4 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center shadow-lg z-10"
+            className="absolute top-4 right-4 w-9 h-9 bg-black/35 text-white rounded-full flex items-center justify-center border border-white/30 backdrop-blur-sm shadow-lg z-10 hover:bg-black/45 transition"
           >
             <X size={16} weight="bold" />
           </button>
@@ -163,8 +163,8 @@ export const ProductModal = ({ product, cart = {}, isOpen, onClose, onAddToCart 
               className="w-full h-64 object-cover rounded-t-2xl"
             />
           ) : (
-            <div className="w-full h-64 bg-gray-100 rounded-t-2xl flex items-center justify-center text-gray-400">
-              Sem imagem
+            <div className="w-full h-64 bg-slate-100 rounded-t-2xl flex items-center justify-center text-slate-300">
+              <ForkKnife size={22} weight="duotone" />
             </div>
           )}
         </div>
@@ -173,21 +173,21 @@ export const ProductModal = ({ product, cart = {}, isOpen, onClose, onAddToCart 
           <div>
             <h3 className="text-xl font-bold text-gray-900">{product?.name}</h3>
             {promoPrice ? (
-              <div className="flex items-center gap-2 mt-1">
+              <div className="flex items-center gap-2 mt-1.5">
                 <span className="text-sm font-semibold text-slate-400 line-through">
                   {formatCurrency(product?.price)}
                 </span>
-                <span className="text-2xl font-bold text-emerald-600">{formatCurrency(promoPrice)}</span>
+                <span className="text-2xl font-bold text-brand-primary">{formatCurrency(promoPrice)}</span>
               </div>
             ) : (
-              <p className="text-2xl font-bold text-brand-primary mt-1">{formatCurrency(product?.price)}</p>
+              <p className="text-2xl font-bold text-brand-primary mt-1.5">{formatCurrency(product?.price)}</p>
             )}
           </div>
 
           {product?.desc && (
-            <div>
+            <div className="pt-1">
               <h4 className="font-semibold text-gray-700 mb-2">Descrição</h4>
-              <p className="text-gray-600 text-sm leading-relaxed">{product?.desc}</p>
+              <p className="text-slate-500 text-sm leading-relaxed">{product?.desc}</p>
             </div>
           )}
 
@@ -289,20 +289,20 @@ export const ProductModal = ({ product, cart = {}, isOpen, onClose, onAddToCart 
         </div>
         <div className="sticky bottom-0 z-20 border-t border-slate-200 bg-white px-4 py-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-2 py-1.5">
+            <div className="flex items-center gap-2 rounded-2xl bg-slate-100 px-2 py-1.5">
               <button
                 type="button"
                 onClick={() => setItemQty((prev) => Math.max(0, prev - 1))}
-                className="h-8 w-8 rounded-full border border-slate-200 bg-white text-slate-700 grid place-items-center"
-                aria-label={itemQty <= 1 ? "Remover item" : "Diminuir quantidade"}
+                className="h-8 w-8 rounded-full bg-white text-slate-700 grid place-items-center hover:bg-slate-50 transition"
+                aria-label="Diminuir quantidade"
               >
-                {itemQty <= 1 ? <Trash size={14} weight="bold" /> : <Minus size={14} weight="bold" />}
+                <Minus size={14} weight="bold" />
               </button>
               <span className="min-w-[24px] text-center text-sm font-extrabold text-slate-900">{itemQty}</span>
               <button
                 type="button"
                 onClick={() => setItemQty((prev) => Math.min(20, prev + 1))}
-                className="h-8 w-8 rounded-full border border-brand-primary bg-brand-primary text-white grid place-items-center"
+                className="h-8 w-8 rounded-full bg-brand-primary text-white grid place-items-center hover:brightness-95 transition"
                 aria-label="Aumentar quantidade"
               >
                 <Plus size={14} weight="bold" />
@@ -332,7 +332,7 @@ export const ProductModal = ({ product, cart = {}, isOpen, onClose, onAddToCart 
                 }`}
               >
                 <span className="inline-flex items-center gap-1.5">
-                  {itemQty > 0 ? <Plus size={16} weight="bold" /> : <Trash size={16} weight="bold" />}
+                  {itemQty > 0 ? <Plus size={16} weight="bold" /> : <Minus size={16} weight="bold" />}
                   {itemQty > 0
                     ? `${currentSelectionQty > 0 ? "Atualizar" : "Adicionar"}`
                     : "Remover do pedido"}

@@ -845,8 +845,8 @@ export const MenuView = ({
                           className="w-full h-full object-cover transition duration-300 group-hover:scale-[1.03]"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-400 text-[10px]">
-                          sem foto
+                        <div className="w-full h-full flex items-center justify-center text-slate-300">
+                          <ForkKnife size={18} weight="duotone" />
                         </div>
                       )}
                     </button>
