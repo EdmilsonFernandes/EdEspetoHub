@@ -284,6 +284,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
   const createNameInputRef = useRef<HTMLInputElement | null>(null);
   const createCameraInputRef = useRef<HTMLInputElement | null>(null);
   const createFileInputRef = useRef<HTMLInputElement | null>(null);
+  const bulkFileInputRef = useRef<HTMLInputElement | null>(null);
   const inlineCameraInputRef = useRef<HTMLInputElement | null>(null);
   const inlineFileInputRef = useRef<HTMLInputElement | null>(null);
   const [editing, setEditing] = useState(null);
@@ -436,6 +437,19 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
   const handleBulkUseTemplate = () => {
     setBulkText(buildBulkImportTemplate());
     setBulkOpen(true);
+  };
+
+  const handleBulkFileImport = async (file?: File) => {
+    if (!file) return;
+    try {
+      const text = await file.text();
+      setBulkText(text || '');
+      setBulkOpen(true);
+      showToast('Arquivo carregado. Revise a prévia antes de importar.', 'success');
+    } catch (error) {
+      console.error('Falha ao ler arquivo de lote', error);
+      showToast('Não foi possível ler o arquivo.', 'error');
+    }
   };
 
   const handleBulkImport = async () => {
@@ -774,6 +788,23 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
               >
                 Usar template
               </button>
+              <button
+                type="button"
+                onClick={() => bulkFileInputRef.current?.click()}
+                className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                Importar arquivo
+              </button>
+              <input
+                ref={bulkFileInputRef}
+                type="file"
+                accept=".txt,.csv,text/plain,text/csv"
+                className="hidden"
+                onChange={(e) => {
+                  void handleBulkFileImport(e.target.files?.[0]);
+                  e.currentTarget.value = '';
+                }}
+              />
               <button
                 type="button"
                 onClick={() => setBulkOpen((prev) => !prev)}

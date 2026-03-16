@@ -102,6 +102,35 @@ const parseCompactListLine = (line: string, category: string): BulkImportProduct
     .flatMap((chunk) => parseHalfWholeLine(chunk, category));
 };
 
+const parseCsvLine = (line: string, currentCategory: string): BulkImportProductDraft[] => {
+  if (!line.includes(';')) return [];
+  const cols = line.split(';').map((part) => normalizeText(part));
+  if (cols.length < 2) return [];
+
+  const first = (cols[0] || '').toLowerCase();
+  const second = (cols[1] || '').toLowerCase();
+  if (
+    (first.includes('nome') || first.includes('produto')) &&
+    (second.includes('preco') || second.includes('valor'))
+  ) {
+    return [];
+  }
+
+  const name = cols[0];
+  const price = parseMoney(cols[1]);
+  if (!name || !price) return [];
+  const category = ensureCategory(cols[2] || currentCategory);
+  const description = normalizeText(cols[3] || '');
+  return [
+    {
+      name,
+      price,
+      category,
+      description: description || undefined,
+    },
+  ];
+};
+
 export const parseBulkProductsInput = (rawText: string): BulkImportParseResult => {
   const lines = String(rawText || '')
     .split('\n')
@@ -127,7 +156,8 @@ export const parseBulkProductsInput = (rawText: string): BulkImportParseResult =
       line = sanitized;
     }
 
-    let parsed = parsePipeLine(line, currentCategory);
+    let parsed = parseCsvLine(line, currentCategory);
+    if (!parsed.length) parsed = parsePipeLine(line, currentCategory);
     if (!parsed.length) parsed = parseHalfWholeLine(line, currentCategory);
     if (!parsed.length) parsed = parseCompactListLine(line, currentCategory);
 
