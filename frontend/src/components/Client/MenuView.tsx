@@ -466,9 +466,16 @@ export const MenuView = ({
         <div
           className={`sticky ${showHeader ? "top-[72px] sm:top-[92px]" : "top-0"} z-40 px-4 pb-2 pt-1 max-w-6xl mx-auto`}
         >
-          <div className="rounded-2xl border border-amber-100 bg-amber-50/70 backdrop-blur-md shadow-sm ds-tabs px-2 py-2">
-            <div className="relative w-full flex items-center mb-0">
-              <div className="flex-1 flex overflow-x-auto gap-3 pr-20 no-scrollbar scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <div className="rounded-2xl border border-slate-200/80 bg-white/80 backdrop-blur-md shadow-sm ds-tabs px-2 py-2">
+            <div className="relative w-full flex items-center gap-2">
+              <div
+                className={`${
+                  filteredGrouped.length > 3
+                    ? "flex-1 overflow-x-auto no-scrollbar scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] snap-x snap-mandatory"
+                    : "flex-1"
+                }`}
+              >
+                <div className={`flex items-center gap-2 ${filteredGrouped.length > 3 ? "w-max pr-1" : "w-full"}`}>
                 {filteredGrouped.map((category) => {
                   const isActive = activeCategoryKey === category.key;
 
@@ -482,33 +489,36 @@ export const MenuView = ({
                       }}
                       className={
                         isActive
-                          ? "flex items-center gap-2 px-5 py-2.5 rounded-full bg-amber-500 text-white font-bold shadow-md transition-all"
-                          : "flex items-center gap-2 px-5 py-2.5 rounded-full bg-slate-100 text-slate-700 font-medium border border-slate-200 transition-all"
+                          ? `inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-amber-500 text-white font-semibold shadow-sm transition-all snap-start ${filteredGrouped.length <= 3 ? "flex-1 min-w-0" : ""}`
+                          : `inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-slate-50 text-slate-700 font-medium transition-all snap-start ${filteredGrouped.length <= 3 ? "flex-1 min-w-0" : ""}`
                       }
                     >
-                      <span className={`inline-block h-2 w-2 rounded-full ${categoryDotTone(category.key)} ${isActive ? "ring-1 ring-white/80" : ""}`} />
-                      <span className="text-base leading-none" aria-hidden="true">
+                      <span className="text-[17px] leading-none" aria-hidden="true">
                         {categoryGlyph(category.key)}
                       </span>
-                      <span className="whitespace-nowrap">{category.label}</span>
-                      <span className={`rounded-full px-2 py-0.5 text-[10px] ${isActive ? "bg-white/15 text-white/90" : "bg-slate-100 text-slate-400"}`}>
+                      <span className="whitespace-nowrap text-xs sm:text-sm">{category.label}</span>
+                      <span className={`rounded-full px-2 py-0.5 text-[10px] ${isActive ? "bg-white/20 text-white/95" : "bg-white text-slate-400 border border-slate-200"}`}>
                         {category.items.length}
                       </span>
                     </button>
                   );
                 })}
               </div>
-
-              <div className="absolute right-0 top-0 bottom-0 w-28 flex items-center justify-end pr-4 bg-gradient-to-l from-slate-50 via-slate-50/90 to-transparent pointer-events-none">
+              </div>
+              {filteredGrouped.length > 3 && (
+                <>
+                  <div className="pointer-events-none absolute right-14 top-1 bottom-1 w-10 bg-gradient-to-l from-white/95 via-white/75 to-transparent rounded-r-2xl" />
                 <button
                   type="button"
                   aria-label="Abrir categorias"
                   onClick={() => setIsCategorySheetOpen(true)}
-                  className="w-12 h-12 rounded-full bg-white shadow-[0_4px_12px_rgba(0,0,0,0.1)] flex items-center justify-center text-slate-800 pointer-events-auto border border-slate-100 active:scale-95 transition-all"
+                  className="h-9 px-3 rounded-full bg-white shadow-sm inline-flex items-center justify-center gap-1 text-slate-700 border border-slate-200 active:scale-95 transition-all"
                 >
-                  <SquaresFour size={24} weight="duotone" />
+                  <SquaresFour size={16} weight="duotone" />
+                  <span className="text-xs font-semibold">Mais</span>
                 </button>
-              </div>
+                </>
+              )}
             </div>
           </div>
         </div>
