@@ -55,8 +55,16 @@ const OrderSummaryCard = ({
   (() => {
     const isDelivery = String(order?.type || '').toLowerCase() === 'delivery';
     const leftAccent = isDelivery ? 'border-l-0 sm:border-l-4 sm:border-l-blue-500' : 'border-l-0 sm:border-l-4 sm:border-l-orange-500';
-    const compactMeta = `${formatOrderType(order?.type)} • ${paymentLabel} • ID ${orderDisplayId}`;
+    const compactMeta = archived
+      ? `${formatOrderType(order?.type)} • ${paymentLabel}`
+      : `${formatOrderType(order?.type)} • ${paymentLabel} • ID ${orderDisplayId}`;
     const hasTable = String(order?.type || '').toLowerCase() === 'table' && order?.table;
+    const closedAtLabel = (() => {
+      if (!archived) return '';
+      const base = Number(order?.updatedAt || order?.createdAt || 0);
+      if (!base) return '';
+      return new Date(base).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    })();
     return (
   <div
     role="button"
@@ -68,7 +76,7 @@ const OrderSummaryCard = ({
         onClick();
       }
     }}
-    className={`w-full rounded-xl border ${isLate ? 'border-red-300' : 'border-slate-200'} ${leftAccent} ${archived ? 'bg-slate-50/90 opacity-90' : 'bg-white'} p-2.5 sm:p-3 text-left flex flex-col gap-2 transition-all duration-300 transition-transform hover:border-slate-300 hover:shadow-lg hover:-translate-y-0.5 hover:scale-[1.01] cursor-pointer`}
+    className={`w-full rounded-xl border ${isLate ? 'border-red-300' : 'border-slate-200'} ${leftAccent} ${archived ? 'bg-slate-50/90 opacity-80' : 'bg-white'} p-2.5 sm:p-3 text-left flex flex-col gap-2 transition-all duration-300 transition-transform hover:border-slate-300 hover:shadow-lg hover:-translate-y-0.5 hover:scale-[1.01] cursor-pointer`}
   >
     <div className="grid grid-cols-[auto_1fr_auto] items-start gap-2">
       <div className="min-w-0">
@@ -77,20 +85,28 @@ const OrderSummaryCard = ({
         </span>
       </div>
       <div className="flex justify-center min-w-0">
-        <span className={`px-2 py-1 text-[10px] uppercase tracking-wider font-bold rounded-md whitespace-nowrap border ${statusMeta.className}`}>
-          {statusMeta.label}
-        </span>
+        {!archived ? (
+          <span className={`px-2 py-1 text-[10px] uppercase tracking-wider font-bold rounded-md whitespace-nowrap border ${statusMeta.className}`}>
+            {statusMeta.label}
+          </span>
+        ) : null}
       </div>
       <div className="flex flex-col items-end gap-1">
         {hasTable && (
-          <span className="inline-flex items-center gap-1 rounded-md bg-amber-500 px-2.5 py-1 text-[13px] font-black tracking-wide text-white whitespace-nowrap shadow-sm">
+          <span className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-[13px] font-black tracking-wide text-white whitespace-nowrap shadow-sm ${archived ? 'bg-slate-600' : 'bg-amber-500'}`}>
             <Hash size={12} weight="bold" />
             MESA {String(order.table).padStart(2, "0")}
           </span>
         )}
-        <span className={`px-2 py-1 text-xs font-bold font-mono rounded-md shrink-0 whitespace-nowrap border ${isLate ? 'bg-red-500 text-white border-red-500' : 'bg-emerald-100 text-emerald-700 border-emerald-200'}`}>
-          {elapsedLabel}
-        </span>
+        {!archived ? (
+          <span className={`px-2 py-1 text-xs font-bold font-mono rounded-md shrink-0 whitespace-nowrap border ${isLate ? 'bg-red-500 text-white border-red-500' : 'bg-emerald-100 text-emerald-700 border-emerald-200'}`}>
+            {elapsedLabel}
+          </span>
+        ) : (
+          <span className="px-2 py-1 text-[11px] font-semibold rounded-md shrink-0 whitespace-nowrap border bg-slate-100 text-slate-700 border-slate-200">
+            Fechado às {closedAtLabel || '--:--'}
+          </span>
+        )}
       </div>
     </div>
 
@@ -111,7 +127,11 @@ const OrderSummaryCard = ({
               onPrint();
             }}
             disabled={printBusy}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-amber-300 bg-amber-50 text-amber-700 shadow-sm hover:bg-amber-100 hover:text-amber-900 transition-all no-print disabled:opacity-60"
+            className={`inline-flex h-8 w-8 items-center justify-center rounded-lg border shadow-sm transition-all no-print disabled:opacity-60 ${
+              archived
+                ? 'border-slate-300 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-800'
+                : 'border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 hover:text-amber-900'
+            }`}
             aria-label={`Imprimir pedido ${orderDisplayId}`}
             title="Imprimir pedido"
           >
