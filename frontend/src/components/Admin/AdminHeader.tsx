@@ -84,6 +84,7 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
   const [openUserMenu, setOpenUserMenu] = useState(false);
   const [changePasswordOpen, setChangePasswordOpen] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
+  const [mobileCollapsed, setMobileCollapsed] = useState(false);
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: '',
     newPassword: '',
@@ -196,6 +197,20 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
     };
   }, [openPlanMenu, openUserMenu]);
 
+  useEffect(() => {
+    const update = () => {
+      const isMobile = window.innerWidth < 768;
+      setMobileCollapsed(isMobile && window.scrollY > 72);
+    };
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    return () => {
+      window.removeEventListener('scroll', update);
+      window.removeEventListener('resize', update);
+    };
+  }, []);
+
   const toggleFocusMode = () => {
     const next = !isFocusMode;
     setIsFocusMode(next);
@@ -233,59 +248,106 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
   };
 
   return (
-    <header className="w-full bg-white border-b border-slate-200">
-      <div className="h-20 px-3 sm:px-4 lg:px-6 xl:px-8 flex items-center justify-between gap-3 sm:gap-4">
-        <div className="min-w-0 w-full max-w-md lg:max-w-lg shrink-0">
-          <div
-            className="relative overflow-hidden h-14 px-3 sm:px-4 flex items-center rounded-full border-t border-white/20 shadow-[0_12px_28px_-18px_rgba(15,23,42,0.55)]"
-            style={
-              storeBanner
-                ? {
-                    backgroundImage: `url(${storeBanner})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    WebkitMaskImage: 'linear-gradient(to right, black 58%, transparent 100%)',
-                    maskImage: 'linear-gradient(to right, black 58%, transparent 100%)',
-                  }
-                : { backgroundColor: primaryColor }
-            }
-          >
-            {storeBanner ? <div className="absolute inset-0 bg-black/40" /> : null}
-            <div className="relative z-10 min-w-0 w-full flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-white/95 border border-white/60 overflow-hidden grid place-items-center shrink-0">
+    <header className="w-full">
+      <div className="hidden md:block rounded-3xl border border-slate-200 bg-white overflow-hidden">
+        <div
+          className="relative h-44 lg:h-52"
+          style={
+            storeBanner
+              ? {
+                  backgroundImage: `url(${storeBanner})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                }
+              : { backgroundColor: primaryColor }
+          }
+        >
+          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/30 to-black/65" />
+          <div className="absolute inset-x-0 bottom-0 px-6 pb-5 flex items-end justify-between gap-4">
+            <div className="flex items-end gap-4 min-w-0">
+              <div className="h-20 w-20 rounded-full border-4 border-white bg-white shadow-lg overflow-hidden grid place-items-center shrink-0">
                 {storeLogo ? (
                   <img src={storeLogo} alt={storeName} className="h-full w-full object-cover" />
                 ) : (
-                  <span className="text-xs font-black text-slate-800">{storeName.slice(0, 2).toUpperCase()}</span>
+                  <span className="text-xl font-black text-slate-800">{storeName.slice(0, 2).toUpperCase()}</span>
                 )}
               </div>
-
-              <div className="min-w-0">
+              <div className="pb-1 min-w-0">
                 <button
                   type="button"
-                  className="inline-flex items-center gap-1 text-left font-semibold text-white hover:text-white/90 transition-colors"
+                  className="inline-flex items-center gap-1 text-left text-2xl font-black text-white hover:text-white/90 transition-colors"
                   title="Trocar loja (em breve)"
                 >
-                  <span className="truncate max-w-[170px] sm:max-w-[280px]">{storeName}</span>
-                  <ChevronDown size={14} />
+                  <span className="truncate max-w-[480px]">{storeName}</span>
+                  <ChevronDown size={18} />
                 </button>
-                <div className="mt-0.5 flex items-center gap-1.5 flex-wrap">
-                  <span className="inline-flex items-center gap-1 rounded-full bg-white/18 border border-white/25 text-white text-[11px] px-2 py-0.5">
-                    <StoreIcon size={11} />
-                    {storeSegment}
-                  </span>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-white/18 border border-white/25 text-white text-[11px] px-2 py-0.5 max-w-[180px] sm:max-w-[260px]">
-                    <MapPin size={11} className="shrink-0" />
-                    <span className="truncate">{storeLocation}</span>
-                  </span>
+                <div className="mt-1 flex items-center gap-2 text-sm text-white/90">
+                  <MapPin size={14} className="shrink-0" />
+                  <span className="truncate">{storeLocation}</span>
+                </div>
+                <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-white/20 border border-white/25 text-white text-xs px-2.5 py-1">
+                  <StoreIcon size={12} />
+                  {storeSegment}
                 </div>
               </div>
             </div>
           </div>
         </div>
+      </div>
 
-        <div className="flex-1" />
-        <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 shrink-0 bg-white rounded-l-2xl border-l border-slate-100 pl-3 sm:pl-4 py-1">
+      <div className="md:hidden sticky top-0 z-[80] rounded-2xl border border-slate-200 bg-white overflow-hidden">
+        <div
+          className={`relative transition-all duration-300 ease-out ${mobileCollapsed ? 'h-0 opacity-0' : 'h-40 opacity-100'}`}
+          style={
+            mobileCollapsed
+              ? {}
+              : storeBanner
+              ? {
+                  backgroundImage: `url(${storeBanner})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                }
+              : { backgroundColor: primaryColor }
+          }
+        >
+          {!mobileCollapsed && <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-black/30 to-black/65" />}
+          {!mobileCollapsed && (
+            <div className="absolute inset-x-0 bottom-0 px-4 pb-4 flex items-end gap-3">
+              <div className="h-14 w-14 rounded-full border-2 border-white bg-white shadow-lg overflow-hidden grid place-items-center shrink-0">
+                {storeLogo ? (
+                  <img src={storeLogo} alt={storeName} className="h-full w-full object-cover" />
+                ) : (
+                  <span className="text-sm font-black text-slate-800">{storeName.slice(0, 2).toUpperCase()}</span>
+                )}
+              </div>
+              <div className="min-w-0 pb-0.5">
+                <p className="truncate text-lg font-black text-white">{storeName}</p>
+                <div className="mt-0.5 flex items-center gap-1.5 text-xs text-white/90">
+                  <MapPin size={12} className="shrink-0" />
+                  <span className="truncate">{storeLocation}</span>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="mt-2 rounded-2xl border border-slate-200 bg-white px-3 sm:px-4 py-2.5 flex items-center justify-between gap-2 sm:gap-3">
+        <div className="md:hidden flex items-center gap-2 min-w-0">
+          <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-900 text-white text-xs font-bold overflow-hidden shrink-0">
+            {storeLogo ? (
+              <img src={storeLogo} alt={storeName} className="h-full w-full object-cover" />
+            ) : (
+              storeName.slice(0, 2).toUpperCase()
+            )}
+          </span>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-bold text-slate-900">{storeName}</p>
+            <p className="truncate text-[11px] text-slate-500">{storeLocation}</p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 ml-auto">
           <button
             type="button"
             onClick={toggleFocusMode}
