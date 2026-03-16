@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 
 type AuthSession = {
   token: string;
@@ -20,6 +21,43 @@ const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [auth, setAuthState] = useState<AuthSession | null>(null);
   const [hydrated, setHydrated] = useState(false);
+  const previousStoreRef = useRef<{ id?: string; slug?: string } | null>(null);
+
+  const applyDocumentBranding = (session: AuthSession | null) => {
+    const storeName = String(session?.store?.name || '').trim();
+    const logoUrl = resolveAssetUrl(session?.store?.settings?.logoUrl || '') || '/janocaminho.jpg';
+    const title = storeName ? `${storeName} | Admin | Já no Caminho` : 'Admin | Já no Caminho';
+    document.title = title;
+
+    const iconHref = `${logoUrl}${logoUrl.includes('?') ? '&' : '?'}v=${Date.now()}`;
+    const iconLink =
+      (document.querySelector('link[rel="icon"]') as HTMLLinkElement | null) ||
+      document.createElement('link');
+    iconLink.setAttribute('rel', 'icon');
+    iconLink.setAttribute('href', iconHref);
+    document.head.appendChild(iconLink);
+  };
+
+  const clearStoreScopedClientState = (storeId?: string, storeSlug?: string) => {
+    if (!storeId && !storeSlug) return;
+
+    const keysToRemove = [
+      storeId ? `adminNotifications:dismissed:${storeId}` : '',
+      storeSlug ? `lastOrder:${storeSlug}` : '',
+      storeSlug ? `lastOrders:${storeSlug}` : '',
+      storeSlug ? `lastOrderItems:${storeSlug}` : '',
+      storeSlug ? `store:coords:${storeSlug}` : '',
+      storeSlug ? `reorder:${storeSlug}` : '',
+    ].filter(Boolean);
+
+    keysToRemove.forEach((key) => {
+      try {
+        localStorage.removeItem(key);
+      } catch {
+        // no-op
+      }
+    });
+  };
 
   useEffect(() => {
     const raw = localStorage.getItem('adminSession');
@@ -48,18 +86,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const setAuth = (session: AuthSession | null) => {
+    const previousStoreId = previousStoreRef.current?.id;
+    const previousStoreSlug = previousStoreRef.current?.slug;
+    const nextStoreId = session?.store?.id ? String(session.store.id) : '';
+    const nextStoreSlug = session?.store?.slug ? String(session.store.slug) : '';
+
+    const changedStore =
+      Boolean(previousStoreId || previousStoreSlug) &&
+      (previousStoreId !== nextStoreId || previousStoreSlug !== nextStoreSlug);
+
+    if (changedStore) {
+      clearStoreScopedClientState(previousStoreId, previousStoreSlug);
+    }
+
     if (session) {
       localStorage.setItem('adminSession', JSON.stringify(session));
     } else {
       localStorage.removeItem('adminSession');
     }
+
+    previousStoreRef.current = session
+      ? { id: nextStoreId, slug: nextStoreSlug }
+      : null;
+
+    applyDocumentBranding(session);
     setAuthState(session);
   };
 
   const logout = () => {
+    clearStoreScopedClientState(previousStoreRef.current?.id, previousStoreRef.current?.slug);
     localStorage.removeItem('adminSession');
+    previousStoreRef.current = null;
+    applyDocumentBranding(null);
     setAuthState(null);
   };
+
+  useEffect(() => {
+    if (!hydrated || auth) return;
+    applyDocumentBranding(null);
+  }, [auth, hydrated]);
 
   return <AuthContext.Provider value={{ auth, hydrated, setAuth, logout }}>{children}</AuthContext.Provider>;
 };
