@@ -1,6 +1,6 @@
 ﻿# PROJECT CONTEXT - EdEspetoHub
 
-Atualizado em: 2026-03-13
+Atualizado em: 2026-03-17
 
 ## Objetivo do produto
 Plataforma de pedidos "like app" para restaurantes (estilo iFood), com:
@@ -19,6 +19,40 @@ Plataforma de pedidos "like app" para restaurantes (estilo iFood), com:
 - Fluxo Admin separado entre visao operacional e visao financeira/relatorios sem alterar regras de negocio.
 - PWA habilitado com rota de instrucoes de instalacao para Android/iPhone.
 - Ultimos pushes em `main` concluidos.
+
+## Atualizacoes recentes (2026-03-16 a 2026-03-17)
+1. Blindagem de interacao (checkout/config)
+- Checkout protegido contra duplo clique:
+  - trava de envio (`lock`) + estado `checkoutLoading`.
+  - botao final muda para `Processando...` e desabilita durante requisicao.
+- `Buscar CEP` protegido contra chamadas concorrentes com lock dedicado.
+- Feedback de sucesso padronizado para 3s:
+  - finalizar pedido.
+  - salvar identidade/configuracoes da loja.
+- Arquivos:
+  - `frontend/src/pages/StorePage.tsx`
+  - `frontend/src/components/Client/CartView.tsx`
+  - `frontend/src/pages/AdminDashboard.tsx`
+
+2. Configuracoes com Dirty State real
+- Barra fixa no topo: `Alterações não salvas detectadas`.
+- Save em destaque (visual pulsante) quando houver alteracoes pendentes.
+- Guard de navegacao:
+  - troca de aba/menu pede confirmacao para descartar.
+  - refresh/fechamento de aba dispara `beforeunload` quando necessario.
+- Modal: `Você tem alterações não salvas` com opcoes continuar/sair sem salvar.
+- Arquivo:
+  - `frontend/src/pages/AdminDashboard.tsx`
+
+3. Correção de status logístico no monitor (fila)
+- Ajuste sem alterar enum/back-end:
+  - `waiting_for_motoboy` sem entregador atribuido => `Buscando entregador`.
+  - `waiting_for_motoboy` com entregador atribuido => `Aguardando retirada`.
+- Mensagem contextual do card:
+  - sem motoboy: "Buscando entregador para retirada."
+  - com motoboy: "Entregador <nome> está vindo buscar."
+- Arquivo:
+  - `frontend/src/components/Admin/GrillQueue.tsx`
 
 ## Atualizacoes recentes (2026-03-10 a 2026-03-13)
 1. PWA e instalacao
@@ -109,6 +143,8 @@ Plataforma de pedidos "like app" para restaurantes (estilo iFood), com:
 - Branding: "Desenvolvido por" e logo oficial Ja no Caminho em pontos principais.
 
 ## Commits de referencia (mais recentes)
+- `ec2e923` fix(queue): show awaiting pickup only after motoboy assignment
+- `997419b` feat(ui): prevent duplicate checkout and guard unsaved settings
 - `ffa7d3f` refactor(queue): split financial reports from operational finalized view
 - `db6367e` refactor(queue): split operational view from revenue reports and streamline filters
 - `d06040f` refactor(queue): sticky performance bar, yesterday comparison, and cleaner order totals

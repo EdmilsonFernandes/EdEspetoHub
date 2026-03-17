@@ -14,58 +14,55 @@ Este arquivo mantém o estado de trabalho para retomada rápida entre sessões.
 ---
 
 ## Snapshot atual
-- Data: 2026-03-05
+- Data: 2026-03-17
 - Branch: `main`
-- HEAD: `3c7dbf9`
-- Status local: limpo (sem alterações pendentes)
+- HEAD: `ec2e923`
+- Status local: com alteração somente em arquivos de contexto
 
 ### Últimos commits
-1. `3c7dbf9` refactor(ui): premium floating store pill header and hard-remove resumo from command palette
-2. `5d6d2c5` fix(ui): add smooth banner fade in admin header and remove resumo from command palette
-3. `34373e6` refactor(admin-header): premium split layout with dynamic store banner/color identity
-4. `7edad7a` chore(admin-dashboard): rename storefront shortcut to monitor de pedidos
-5. `6954ffe` feat(admin-header): add dynamic accent color and subscription popover trigger
-6. `04dd2a0` refactor(admin-header): premium minimal vercel-style header with lucide icons
-7. `28e4552` fix(ui): prevent landing revenue truncation on mobile and normalize admin notification routing
-8. `f19e42f` feat(landing): add premium mobile-first social proof marquee with gradient mask
+1. `ec2e923` fix(queue): show awaiting pickup only after motoboy assignment
+2. `997419b` feat(ui): prevent duplicate checkout and guard unsaved settings
+3. `f22a8a6` fix(layout): reset admin header state on route changes and keep menu/catalog visible
+4. `3ea2a64` fix(queue): align in-route semantics and copy with delivered pickup state
+5. `df85531` feat(mobile-nav): add smart bottom bar hide/show with hysteresis and safe-area support
 
 ### Estado funcional recente
-- Admin Header:
-  - refatorado para padrão premium minimalista.
-  - bloco de loja com identidade dinâmica (banner/cor principal).
-  - badge de plano com popover de assinatura.
-  - avatar com dropdown de usuário.
-- Ajuste fino visual:
-  - bloco da loja em formato pílula flutuante com transição fade para o lado branco.
-  - brilho sutil de topo no bloco da loja.
-- Command Palette (Ctrl+K):
-  - remoção definitiva de “Resumo/Resumo executivo” na origem dos dados + hard guard final.
-- Admin Dashboard:
-  - CTA textual alterado para “Monitor de pedidos”.
-  - navegação de notificações/atalhos para operação normalizada.
-- Landing:
-  - social proof em marquee premium e correção de truncamento do KPI “Receita pública” no mobile.
-- Front feedback:
-  - popups nativos substituídos por toasts estilo app nos fluxos críticos.
+- Checkout e entrega:
+  - anti-duplo clique no botão final de checkout (`Processando...` + lock).
+  - anti-duplo clique no `Buscar CEP`.
+  - toast de sucesso de finalização do pedido com 3s.
+- Configurações da loja:
+  - dirty state visual (`Alterações não salvas detectadas`).
+  - save destacado enquanto houver pendências.
+  - guard de navegação (modal para descartar alterações).
+  - guard de refresh/fechar aba com `beforeunload`.
+- Fila de pedidos (delivery):
+  - `waiting_for_motoboy` agora diferencia:
+    - sem motoboy => `Buscando entregador`
+    - com motoboy => `Aguardando retirada`
+  - mensagem contextual no card conforme vínculo.
 
 ### Atualização desta sessão
-- Data/Hora: 2026-03-05
+- Data/Hora: 2026-03-17
 - Resumo objetivo:
-  - Conjunto de melhorias premium no admin e landing, com foco em consistência visual e fluxo operacional.
-  - Header administrativo remodelado com identidade de loja dinâmica e UX mais limpa.
-  - Command Palette limpa sem item de resumo.
+  - Blindagem de interação para evitar duplicidade no checkout e CEP.
+  - Implementação de guard de alterações não salvas em Configurações.
+  - Correção semântica de status no fluxo de entregador (fila/admin).
 - Arquivos impactados:
-  - `frontend/src/components/Admin/AdminHeader.tsx`
+  - `frontend/src/pages/StorePage.tsx`
+  - `frontend/src/components/Client/CartView.tsx`
   - `frontend/src/pages/AdminDashboard.tsx`
-  - `frontend/src/pages/LandingPage.tsx`
-  - `frontend/src/components/Landing/SocialProofMarquee.tsx`
-  - `frontend/src/index.css`
-- Commit:
-  - série até `3c7dbf9` (push em `origin/main`)
+  - `frontend/src/components/Admin/GrillQueue.tsx`
+- Commits:
+  - `997419b` (anti-duplicidade + dirty guard)
+  - `ec2e923` (status de entrega aguardando retirada só após aceite)
 - Validação:
-  - `npm run build` em `frontend` passou.
+  - `npm --prefix frontend run build` passou após as mudanças.
 - Próximo passo:
-  - smoke test final em produção do header/admin notifications e fluxo Ctrl+K.
+  - smoke test em produção:
+    1) checkout com clique duplo
+    2) trocar aba em Config sem salvar
+    3) delivery: pronto -> aguardando motoboy -> aceite -> retirada -> em rota
 
 ### Observações operacionais (Git/Deploy)
 - Em alguns ambientes houve instabilidade com `ssh.github.com:443`.
@@ -74,4 +71,7 @@ Este arquivo mantém o estado de trabalho para retomada rápida entre sessões.
 ---
 
 ## Próximo passo sugerido
-- Rodar smoke test mobile completo: catálogo -> checkout -> tracking -> área do entregador -> onboarding.
+- Rodar smoke test focado em blindagem e fluxo logístico:
+  - checkout/CEP sem duplicidade
+  - guard de alterações não salvas
+  - status correto de entrega antes/depois do aceite do motoboy
