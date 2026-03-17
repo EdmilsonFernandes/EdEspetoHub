@@ -31,6 +31,9 @@ export interface CreateProductDto {
   imageUrl?: string;
   imageFile?: string | null;
   isFeatured?: boolean;
+  manageStock?: boolean;
+  stockQuantity?: number;
+  lowStockAlert?: number;
   active?: boolean;
   availabilityDays?: Record<string, boolean> | null;
   modifiers?: ProductModifierOptionDto[] | null;

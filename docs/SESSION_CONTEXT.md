@@ -75,3 +75,30 @@ Este arquivo mantém o estado de trabalho para retomada rápida entre sessões.
   - checkout/CEP sem duplicidade
   - guard de alterações não salvas
   - status correto de entrega antes/depois do aceite do motoboy
+
+---
+
+## Atualização desta sessão (estoque universal)
+- Data/Hora: 2026-03-17
+- Resumo objetivo:
+  - Implementado módulo de estoque opcional por produto com retrocompatibilidade.
+  - Adicionado decremento atômico em transação na criação de pedidos.
+  - Aplicada UX de estoque no admin e vitrine (esgotado/baixo estoque).
+- Arquivos impactados:
+  - `backend/src/entities/Product.ts`
+  - `backend/src/dto/CreateProductDto.ts`
+  - `backend/src/services/ProductService.ts`
+  - `backend/src/services/OrderService.ts`
+  - `backend/src/utils/runMigrations.ts`
+  - `backend/schema.sql`
+  - `frontend/src/services/productService.ts`
+  - `frontend/src/components/Admin/ProductManager.tsx`
+  - `frontend/src/components/Client/MenuView.tsx`
+- Validação:
+  - `npm --prefix backend run build` OK
+  - `npm --prefix frontend run build` OK
+- Próximo passo:
+  - Deploy backend+frontend e executar smoke test:
+    1) produto com estoque `0` bloqueado na vitrine
+    2) produto com estoque baixo exibindo aviso
+    3) duas finalizações simultâneas para validar proteção contra oversell

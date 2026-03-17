@@ -10,7 +10,8 @@ import {
   Wine,
   Package,
   DotsThree,
-  X
+  X,
+  WarningCircle
 } from '@phosphor-icons/react';
 import { productService } from '../../services/productService';
 import { formatCurrency } from '../../utils/format';
@@ -48,6 +49,9 @@ const initialForm = {
   imageFile: '',
   description: '',
   isFeatured: false,
+  manageStock: false,
+  stockQuantity: '',
+  lowStockAlert: '3',
   active: true,
   availabilityDays: { ...defaultAvailability },
   modifiers: [],
@@ -320,6 +324,9 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
     description: '',
     imageUrl: '',
     isFeatured: false,
+    manageStock: false,
+    stockQuantity: '',
+    lowStockAlert: '3',
     active: true,
     availabilityDays: { ...defaultAvailability },
     modifiers: [],
@@ -653,6 +660,9 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
       imageFile: formData.imageFile || undefined,
       imageUrl: undefined,
       description: formData.description || undefined,
+      manageStock: Boolean(formData.manageStock),
+      stockQuantity: formData.manageStock ? Math.max(0, Math.floor(Number(formData.stockQuantity || 0))) : 0,
+      lowStockAlert: Math.max(1, Math.floor(Number(formData.lowStockAlert || 3))),
       availabilityDays: buildAvailabilityPayload(formData.availabilityDays),
       modifiers: normalizeProductModifiers(formData.modifiers || []),
     };
@@ -702,6 +712,9 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
       description: product.description ?? product.desc ?? '',
       imageUrl: product.imageUrl || '',
       isFeatured: Boolean(product.isFeatured),
+      manageStock: Boolean(product.manageStock),
+      stockQuantity: String(Math.max(0, Number(product.stockQuantity ?? 0))),
+      lowStockAlert: String(Math.max(1, Number(product.lowStockAlert ?? 3))),
       active: product.active !== false,
       availabilityDays: normalizeAvailabilityState(product.availabilityDays),
       modifiers: normalizeProductModifiers(product.modifiers || []).map((modifier, index) => ({
@@ -742,6 +755,9 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
         imageUrl: inlineImageFile ? undefined : inlineForm.imageUrl || undefined,
         imageFile: inlineImageFile || undefined,
         isFeatured: inlineForm.isFeatured,
+        manageStock: Boolean(inlineForm.manageStock),
+        stockQuantity: inlineForm.manageStock ? Math.max(0, Math.floor(Number(inlineForm.stockQuantity || 0))) : 0,
+        lowStockAlert: Math.max(1, Math.floor(Number(inlineForm.lowStockAlert || 3))),
         active: inlineForm.active,
         availabilityDays: buildAvailabilityPayload(inlineForm.availabilityDays),
         modifiers: normalizeProductModifiers(inlineForm.modifiers || []),
@@ -1249,6 +1265,58 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
           </div>
           </div>
 
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 space-y-3">
+            <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+              <div>
+                <p className="text-sm font-semibold text-slate-800">Gestão de estoque</p>
+                <p className="text-[11px] text-slate-500">Ative para controlar quantidade e travar venda ao zerar.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    manageStock: !prev.manageStock,
+                    stockQuantity: !prev.manageStock ? (prev.stockQuantity || '0') : '0',
+                  }))
+                }
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition ${
+                  formData.manageStock
+                    ? 'bg-emerald-600 text-white border-emerald-600'
+                    : 'bg-white text-slate-600 border-slate-200'
+                }`}
+              >
+                {formData.manageStock ? 'Ativo' : 'Inativo'}
+              </button>
+            </div>
+            {formData.manageStock && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.15em]">Quantidade atual</label>
+                  <input
+                    className="p-3 border border-gray-200 rounded-xl w-full bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={formData.stockQuantity}
+                    onChange={(e) => setFormData({ ...formData, stockQuantity: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[11px] font-semibold text-slate-600 uppercase tracking-[0.15em]">Alerta baixo estoque</label>
+                  <input
+                    className="p-3 border border-gray-200 rounded-xl w-full bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={formData.lowStockAlert}
+                    onChange={(e) => setFormData({ ...formData, lowStockAlert: e.target.value })}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
             <div className="space-y-2 rounded-2xl border border-slate-200 bg-slate-50/60 p-4 sm:p-5">
             <label className="text-sm font-medium text-gray-700">Categoria</label>
             <div className="flex flex-wrap gap-2">
@@ -1587,6 +1655,12 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                 <div className="flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="font-semibold text-gray-900">{product.name}</p>
+                    {Boolean(product.manageStock) && Number(product.stockQuantity || 0) <= Number(product.lowStockAlert || 3) && (
+                      <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
+                        <WarningCircle size={11} weight="fill" />
+                        Baixo estoque ({Math.max(0, Number(product.stockQuantity || 0))})
+                      </span>
+                    )}
                     <span
                       className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
                         product.active === false
@@ -1697,6 +1771,12 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                     <div className="flex flex-wrap items-center gap-2">
                       <span className={`inline-flex h-2 w-2 rounded-full ${resolveCategoryDot(product.category)}`} />
                       <span>{product.name}</span>
+                      {Boolean(product.manageStock) && Number(product.stockQuantity || 0) <= Number(product.lowStockAlert || 3) && (
+                        <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
+                          <WarningCircle size={11} weight="fill" />
+                          {Math.max(0, Number(product.stockQuantity || 0))}
+                        </span>
+                      )}
                       {product.isFeatured && (
                         <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-700 border border-emerald-200">
                           Promo do dia
@@ -2067,6 +2147,57 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                 >
                   {inlineForm.isFeatured ? 'Destaque ativo' : 'Ativar destaque'}
                 </button>
+              </div>
+              <div className="rounded-2xl border border-slate-200 bg-white p-3.5 space-y-3">
+                <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
+                  <div>
+                    <p className="text-xs font-semibold text-slate-700 uppercase tracking-[0.18em]">Estoque</p>
+                    <p className="text-[11px] text-slate-500">Controle opcional por produto.</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setInlineForm((prev) => ({
+                        ...prev,
+                        manageStock: !prev.manageStock,
+                        stockQuantity: !prev.manageStock ? (prev.stockQuantity || '0') : '0',
+                      }))
+                    }
+                    className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border ${
+                      inlineForm.manageStock
+                        ? 'bg-emerald-600 text-white border-emerald-600'
+                        : 'bg-white text-slate-600 border-slate-200'
+                    }`}
+                  >
+                    {inlineForm.manageStock ? 'Ativo' : 'Inativo'}
+                  </button>
+                </div>
+                {inlineForm.manageStock && (
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-[11px] font-semibold text-slate-500">Qtd atual</label>
+                      <input
+                        className="w-full p-3 border border-gray-200 rounded-xl text-sm mt-1 bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+                        type="number"
+                        step="1"
+                        min="0"
+                        value={inlineForm.stockQuantity}
+                        onChange={(e) => setInlineForm((prev) => ({ ...prev, stockQuantity: e.target.value }))}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[11px] font-semibold text-slate-500">Alerta baixo</label>
+                      <input
+                        className="w-full p-3 border border-gray-200 rounded-xl text-sm mt-1 bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+                        type="number"
+                        step="1"
+                        min="1"
+                        value={inlineForm.lowStockAlert}
+                        onChange={(e) => setInlineForm((prev) => ({ ...prev, lowStockAlert: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
               <div className="rounded-2xl border border-slate-200 bg-white p-3.5">
                 <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">Imagem</label>

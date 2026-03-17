@@ -356,6 +356,33 @@ export async function runMigrations() {
     ADD COLUMN IF NOT EXISTS modifiers JSONB;
   `);
   await AppDataSource.query(`
+    ALTER TABLE IF EXISTS products
+    ADD COLUMN IF NOT EXISTS manage_stock BOOLEAN NOT NULL DEFAULT FALSE;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS products
+    ADD COLUMN IF NOT EXISTS stock_quantity INT NOT NULL DEFAULT 0;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS products
+    ADD COLUMN IF NOT EXISTS low_stock_alert INT NOT NULL DEFAULT 3;
+  `);
+  await AppDataSource.query(`
+    UPDATE products
+    SET manage_stock = FALSE
+    WHERE manage_stock IS NULL;
+  `);
+  await AppDataSource.query(`
+    UPDATE products
+    SET stock_quantity = 0
+    WHERE stock_quantity IS NULL;
+  `);
+  await AppDataSource.query(`
+    UPDATE products
+    SET low_stock_alert = 3
+    WHERE low_stock_alert IS NULL OR low_stock_alert < 1;
+  `);
+  await AppDataSource.query(`
     ALTER TABLE IF EXISTS plans
     ADD COLUMN IF NOT EXISTS display_name TEXT;
   `);

@@ -26,6 +26,8 @@ import { resolvePlanFeatures } from '../config/planFeatures';
 import { UserRepository } from '../repositories/UserRepository';
 import { StoreUserRepository } from '../repositories/StoreUserRepository';
 import bcrypt from 'bcryptjs';
+import { EntityManager } from 'typeorm';
+import { Product } from '../entities/Product';
 /**
  * Provides OrderService functionality.
  *
@@ -301,9 +303,10 @@ export class OrderService
   {
     const store = await this.storeRepository.findById(input.storeId);
     if (!store) throw new AppError('STORE-001', 404);
-
-    const order = await this.buildOrder(input, store);
-    return this.orderRepository.save(order);
+    return AppDataSource.transaction(async (manager) => {
+      const order = await this.buildOrder(input, store, manager);
+      return manager.getRepository(Order).save(order);
+    });
   }
 
 
@@ -319,9 +322,10 @@ export class OrderService
   {
     const store = await this.storeRepository.findBySlug(input.storeSlug);
     if (!store) throw new AppError('STORE-001', 404);
-
-    const order = await this.buildOrder(input, store);
-    return this.orderRepository.save(order);
+    return AppDataSource.transaction(async (manager) => {
+      const order = await this.buildOrder(input, store, manager);
+      return manager.getRepository(Order).save(order);
+    });
   }
 
 
@@ -617,7 +621,11 @@ export class OrderService
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
    */
-  private async buildOrder(input: Omit<CreateOrderDto, 'storeId'>, store: Awaited<ReturnType<StoreRepository[ 'findById' ]>>)
+  private async buildOrder(
+    input: Omit<CreateOrderDto, 'storeId'>,
+    store: Awaited<ReturnType<StoreRepository['findById']>>,
+    manager?: EntityManager
+  )
   {
     const subscription = store?.id ? await this.subscriptionService.getCurrentByStore(store.id) : null;
     const features = resolvePlanFeatures({
@@ -648,7 +656,9 @@ export class OrderService
 
     for (const item of normalizedItems)
     {
-      const product = await this.productRepository.findById(item.productId);
+      const product = manager
+        ? await manager.getRepository(Product).findOne({ where: { id: item.productId }, relations: [ 'store' ] })
+        : await this.productRepository.findById(item.productId);
       if (!product || product.store.id !== store!.id)
       {
         throw new AppError('PROD-002', 400);
@@ -656,6 +666,26 @@ export class OrderService
 
       if (!Number.isFinite(Number(item.quantity)) || Number(item.quantity) <= 0) {
         throw new AppError('ORDER-005', 400, { message: 'Item com quantidade inválida.' });
+      }
+
+      if (Boolean((product as any).manageStock)) {
+        const qty = Math.max(1, Math.floor(Number(item.quantity || 0)));
+        const rows = await (manager || AppDataSource).query(
+          `
+            UPDATE products
+               SET stock_quantity = stock_quantity - $1
+             WHERE id = $2
+               AND manage_stock = TRUE
+               AND stock_quantity >= $1
+           RETURNING id
+          `,
+          [qty, product.id]
+        );
+        if (!Array.isArray(rows) || rows.length === 0) {
+          throw new AppError('ORDER-005', 400, {
+            message: `Estoque insuficiente para "${product.name}".`,
+          });
+        }
       }
 
       const orderItem = new OrderItem();

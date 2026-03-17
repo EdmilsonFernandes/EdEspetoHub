@@ -605,6 +605,17 @@ export const MenuView = ({
     }
   };
 
+  const resolveStockState = (item) => {
+    const manageStock = Boolean(item?.manageStock);
+    const stockQuantityRaw = Number(item?.stockQuantity ?? 0);
+    const stockQuantity = Number.isFinite(stockQuantityRaw) ? Math.max(0, Math.floor(stockQuantityRaw)) : 0;
+    const lowStockAlertRaw = Number(item?.lowStockAlert ?? 3);
+    const lowStockAlert = Number.isFinite(lowStockAlertRaw) ? Math.max(1, Math.floor(lowStockAlertRaw)) : 3;
+    const soldOut = manageStock && stockQuantity <= 0;
+    const lowStock = manageStock && stockQuantity > 0 && stockQuantity <= lowStockAlert;
+    return { manageStock, stockQuantity, lowStockAlert, soldOut, lowStock };
+  };
+
   const pulseQty = (id: string) => {
     setQtyPulseId(id);
     window.setTimeout(() => setQtyPulseId((prev) => (prev === id ? null : prev)), 220);
@@ -949,6 +960,9 @@ export const MenuView = ({
                 const hasLongDescription = String(item?.description || '').trim().length > 90;
                 const hasAnyDescription = String(item?.description || '').trim().length > 0;
                 const allowStaffModal = hasConfigurableOptions || hasAnyDescription;
+                const stockState = resolveStockState(item);
+                const itemQty = itemQtyMap.get(String(item.id)) || 0;
+                const canIncrease = !stockState.soldOut && (!stockState.manageStock || itemQty < stockState.stockQuantity);
 
                 const handleOpenOptions = (event?: React.MouseEvent) => {
                   event?.stopPropagation();
@@ -1006,6 +1020,16 @@ export const MenuView = ({
                         {isEspetoCategory(item?.category) ? "Customizar espeto" : "Ver opções"}
                       </button>
                     )}
+                    {stockState.soldOut && (
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                        ESGOTADO
+                      </span>
+                    )}
+                    {!stockState.soldOut && stockState.lowStock && (
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                        Apenas {stockState.stockQuantity} unidade{stockState.stockQuantity === 1 ? '' : 's'}
+                      </span>
+                    )}
                     {staffView && !hasConfigurableOptions && hasAnyDescription && (
                       <button
                         type="button"
@@ -1032,8 +1056,13 @@ export const MenuView = ({
                           openProductModal(item);
                         }
                       }}
-                      className={`aspect-[4/3] sm:aspect-square ${staffView ? "w-[120px] rounded-2xl" : "w-[108px] rounded-2xl"} overflow-hidden bg-gray-100 border border-gray-200 shadow-sm ${(!staffView || allowStaffModal) ? 'cursor-pointer' : 'cursor-default'}`}
+                      className={`relative aspect-[4/3] sm:aspect-square ${staffView ? "w-[120px] rounded-2xl" : "w-[108px] rounded-2xl"} overflow-hidden bg-gray-100 border border-gray-200 shadow-sm ${(!staffView || allowStaffModal) ? 'cursor-pointer' : 'cursor-default'}`}
                     >
+                      {stockState.soldOut && (
+                        <span className="absolute z-10 top-2 left-2 rounded-full bg-rose-600 text-white text-[10px] font-bold px-2 py-1">
+                          ESGOTADO
+                        </span>
+                      )}
                       {item.imageUrl ? (
                         <img
                           src={resolveAssetUrl(item.imageUrl)}
@@ -1047,10 +1076,9 @@ export const MenuView = ({
                       )}
                     </button>
                     {(() => {
-                      const itemQty = itemQtyMap.get(String(item.id)) || 0;
-
                       const handleIncrement = (event: React.MouseEvent) => {
                         event.stopPropagation();
+                        if (!canIncrease) return;
                         pulseQty(String(item.id));
                         if (isEspetoCategory(item.category)) {
                           onUpdateCart(item, 1, { cookingPoint: "ao ponto", passSkewer: false });
@@ -1103,12 +1131,16 @@ export const MenuView = ({
                             {priceNode}
                             <button
                               onClick={handleIncrement}
-                              title="Adicionar"
-                              className="h-9 px-4 py-1.5 rounded-full border text-sm font-semibold transition-all active:scale-[0.98] inline-flex items-center justify-center gap-1.5 hover:bg-slate-50"
-                              style={{ borderColor: buttonColor, color: buttonColor }}
+                              title={stockState.soldOut ? "Esgotado" : "Adicionar"}
+                              disabled={stockState.soldOut}
+                              className="h-9 px-4 py-1.5 rounded-full border text-sm font-semibold transition-all active:scale-[0.98] inline-flex items-center justify-center gap-1.5 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                              style={{
+                                borderColor: stockState.soldOut ? '#e2e8f0' : buttonColor,
+                                color: stockState.soldOut ? '#94a3b8' : buttonColor,
+                              }}
                             >
                               <Plus size={14} weight="duotone" />
-                              Adicionar
+                              {stockState.soldOut ? 'Esgotado' : 'Adicionar'}
                             </button>
                           </div>
                         );
@@ -1140,7 +1172,8 @@ export const MenuView = ({
                             <button
                               type="button"
                               onClick={handleIncrement}
-                              className="h-7 w-7 rounded-full bg-slate-900 text-white hover:bg-slate-800 transition flex items-center justify-center"
+                              disabled={!canIncrease}
+                              className="h-7 w-7 rounded-full bg-slate-900 text-white hover:bg-slate-800 transition flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed"
                               aria-label={`Adicionar uma unidade de ${item.name}`}
                             >
                               <Plus size={13} weight="bold" />
@@ -1244,8 +1277,8 @@ export const MenuView = ({
         isOpen={isModalOpen}
         onClose={closeProductModal}
         onAddToCart={onUpdateCart}
-        readOnly={!canOrder}
-        readOnlyMessage="Pedidos apenas no balcão/mesa."
+        readOnly={!canOrder || resolveStockState(selectedProduct).soldOut}
+        readOnlyMessage={!canOrder ? "Pedidos apenas no balcão/mesa." : "Produto esgotado no momento."}
       />
 
       <div

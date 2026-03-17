@@ -59,6 +59,15 @@ export class Product {
   @Column({ name: 'is_featured', default: false })
   isFeatured!: boolean;
 
+  @Column({ name: 'manage_stock', default: false })
+  manageStock!: boolean;
+
+  @Column({ name: 'stock_quantity', type: 'int', default: 0 })
+  stockQuantity!: number;
+
+  @Column({ name: 'low_stock_alert', type: 'int', default: 3 })
+  lowStockAlert!: number;
+
   @Column({ default: true })
   active!: boolean;
 

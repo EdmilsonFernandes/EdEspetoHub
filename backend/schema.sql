@@ -110,6 +110,9 @@ CREATE TABLE IF NOT EXISTS products (
   description TEXT,
   image_url TEXT,
   is_featured BOOLEAN NOT NULL DEFAULT FALSE,
+  manage_stock BOOLEAN NOT NULL DEFAULT FALSE,
+  stock_quantity INT NOT NULL DEFAULT 0,
+  low_stock_alert INT NOT NULL DEFAULT 3,
   active BOOLEAN NOT NULL DEFAULT TRUE,
   availability_days JSONB,
   modifiers JSONB,
@@ -178,6 +181,12 @@ ALTER TABLE products
 ADD COLUMN IF NOT EXISTS availability_days JSONB;
 ALTER TABLE products
 ADD COLUMN IF NOT EXISTS modifiers JSONB;
+ALTER TABLE products
+ADD COLUMN IF NOT EXISTS manage_stock BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE products
+ADD COLUMN IF NOT EXISTS stock_quantity INT NOT NULL DEFAULT 0;
+ALTER TABLE products
+ADD COLUMN IF NOT EXISTS low_stock_alert INT NOT NULL DEFAULT 3;
 
 ALTER TABLE order_items
 ADD COLUMN IF NOT EXISTS cooking_point TEXT;

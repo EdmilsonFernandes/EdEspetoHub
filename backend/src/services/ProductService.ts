@@ -214,6 +214,11 @@ export class ProductService
     const bundlePromo = this.resolveBundlePromo(input, saleBasePrice);
     const availabilityDays = normalizeAvailabilityDays(input.availabilityDays);
     const modifiers = this.normalizeModifiers((input as any).modifiers);
+    const manageStock = Boolean((input as any).manageStock);
+    const stockQuantityRaw = Number((input as any).stockQuantity ?? 0);
+    const stockQuantity = Number.isFinite(stockQuantityRaw) ? Math.max(0, Math.floor(stockQuantityRaw)) : 0;
+    const lowStockAlertRaw = Number((input as any).lowStockAlert ?? 3);
+    const lowStockAlert = Number.isFinite(lowStockAlertRaw) ? Math.max(1, Math.floor(lowStockAlertRaw)) : 3;
 
     const product = this.productRepository.create({
       name: input.name,
@@ -227,6 +232,9 @@ export class ProductService
       description: (input as any).description ?? (input as any).desc,
       imageUrl: uploadedImage || input.imageUrl,
       isFeatured: Boolean(input.isFeatured),
+      manageStock,
+      stockQuantity: manageStock ? stockQuantity : 0,
+      lowStockAlert,
       active: input.active === false ? false : true,
       availabilityDays,
       modifiers,
@@ -404,6 +412,24 @@ export class ProductService
     }
     if (typeof data.active === 'boolean') {
       product.active = data.active;
+    }
+    if ((data as any).manageStock !== undefined) {
+      product.manageStock = Boolean((data as any).manageStock);
+      if (!product.manageStock) {
+        product.stockQuantity = 0;
+      }
+    }
+    if ((data as any).stockQuantity !== undefined) {
+      const stockQuantityRaw = Number((data as any).stockQuantity);
+      if (Number.isFinite(stockQuantityRaw)) {
+        product.stockQuantity = Math.max(0, Math.floor(stockQuantityRaw));
+      }
+    }
+    if ((data as any).lowStockAlert !== undefined) {
+      const lowStockAlertRaw = Number((data as any).lowStockAlert);
+      if (Number.isFinite(lowStockAlertRaw)) {
+        product.lowStockAlert = Math.max(1, Math.floor(lowStockAlertRaw));
+      }
     }
     if (data.availabilityDays !== undefined) {
       product.availabilityDays = normalizeAvailabilityDays(data.availabilityDays);
