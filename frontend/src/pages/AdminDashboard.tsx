@@ -2304,9 +2304,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     setMobileDrawerOpen(false);
   };
 
-  const sidebarGridClass = sidebarCompact
-    ? 'w-full lg:grid lg:grid-cols-[72px_minmax(0,1fr)] lg:gap-5 xl:gap-6 lg:items-start'
-    : 'w-full lg:grid lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-5 xl:gap-6 lg:items-start';
+  const sidebarWidth = sidebarCompact ? 72 : 280;
 
   return (
     <AdminLayout contextLabel="Painel da Loja">
@@ -2357,10 +2355,12 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         </div>
       </div>
 
-      <div className={sidebarGridClass}>
+      <div className="w-full">
         <aside className="hidden lg:block">
-          <div className={`sticky top-2 ds-admin-sidebar h-[calc(100vh-1rem)] p-2.5 border-r border-white/10 shadow-none overflow-hidden flex flex-col ${sidebarCompact ? 'w-[72px]' : 'w-[280px]'}`}>
-            <div className={`px-1 pb-2 flex items-center shrink-0 ${sidebarCompact ? 'justify-center' : 'justify-between'}`}>
+          <div
+            className={`fixed left-0 top-0 z-[140] h-screen border-r border-slate-800 bg-slate-950 overflow-hidden flex flex-col ${sidebarCompact ? 'w-[72px]' : 'w-[280px]'}`}
+          >
+            <div className={`px-3 pt-3 pb-2 flex items-center shrink-0 ${sidebarCompact ? 'justify-center' : 'justify-between'}`}>
               {!sidebarCompact && <p className="px-2 ds-admin-sidebar-title">Navegação</p>}
               <button
                 type="button"
@@ -2372,7 +2372,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                 {sidebarCompact ? <CaretRight size={16} weight="bold" /> : <CaretLeft size={16} weight="bold" />}
               </button>
             </div>
-            <div className="space-y-1.5 min-h-0 flex-1 overflow-y-auto overflow-x-visible pr-0.5">
+            <div className="space-y-1.5 min-h-0 flex-1 overflow-y-auto overflow-x-visible px-2 pb-2">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = activeTab === item.id;
@@ -2426,7 +2426,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                 );
               })}
             </div>
-            <div className="mt-2 pt-2 border-t border-white/10 shrink-0">
+            <div className="mt-2 pt-2 px-2 border-t border-white/10 shrink-0">
               <button
                 type="button"
                 onClick={() => {
@@ -2453,7 +2453,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
           </div>
         </aside>
 
-        <div className="min-w-0 space-y-4">
+        <div
+          className="min-w-0 space-y-4"
+          style={isDesktopLayout ? { marginLeft: `${sidebarWidth + 16}px` } : undefined}
+        >
       {activeTab !== 'fila' && (
       <section className="hidden md:flex relative z-[220] items-start justify-between gap-4 rounded-2xl border border-slate-200 bg-white/90 backdrop-blur-sm px-4 py-3 shadow-[0_20px_45px_-36px_rgba(15,23,42,0.5)] overflow-visible">
         <div className="min-w-0">
