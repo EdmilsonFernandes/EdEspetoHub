@@ -2364,7 +2364,11 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         </div>
       </div>
 
-      <div className="w-full lg:flex lg:items-start lg:gap-4">
+      <div
+        className={`w-full lg:grid lg:items-start lg:gap-0 ${
+          sidebarCompact ? 'lg:grid-cols-[80px_minmax(0,1fr)]' : 'lg:grid-cols-[260px_minmax(0,1fr)]'
+        }`}
+      >
         <AdminDesktopSidebar
           items={navItems.map((item) => ({
             id: item.id,
@@ -2391,10 +2395,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
           }}
         />
 
-        <div
-          className="min-w-0 space-y-4 flex-1 transition-[margin-left] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
-          style={isDesktopLayout ? { marginLeft: `${sidebarCompact ? 80 : 260}px` } : undefined}
-        >
+        <div className="min-w-0 space-y-4 flex-1">
       {activeTab !== 'fila' && (
       <section className="hidden md:flex relative z-[220] items-start justify-between gap-4 rounded-2xl border border-slate-200 bg-white/90 backdrop-blur-sm px-4 py-3 shadow-[0_20px_45px_-36px_rgba(15,23,42,0.5)] overflow-visible lg:-mt-12">
         <div className="min-w-0">

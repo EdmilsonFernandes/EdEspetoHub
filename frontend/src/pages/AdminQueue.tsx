@@ -111,7 +111,11 @@ export function AdminQueue() {
 
   return (
     <AdminLayout contextLabel="Central de Pedidos" showHeader={false} fluid>
-      <div className="w-full space-y-4 lg:flex lg:items-start lg:gap-4 lg:space-y-0">
+      <div
+        className={`w-full space-y-4 lg:space-y-0 lg:grid lg:items-start lg:gap-0 ${
+          sidebarCompact ? 'lg:grid-cols-[80px_minmax(0,1fr)]' : 'lg:grid-cols-[260px_minmax(0,1fr)]'
+        }`}
+      >
         <AdminDesktopSidebar
           items={desktopNavItems.map((item) => ({
             id: item.id,
@@ -130,10 +134,7 @@ export function AdminQueue() {
             navigate('/admin');
           }}
         />
-        <div
-          className="min-w-0 flex-1 space-y-4 transition-[margin-left] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
-          style={isDesktopLayout ? { marginLeft: `${sidebarCompact ? 80 : 260}px` } : undefined}
-        >
+        <div className="min-w-0 flex-1 space-y-4">
         <AdminHeader />
         <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm overflow-x-hidden lg:-mt-12 relative z-20">
           <GrillQueue forcedTab={forcedTab as 'queue' | 'inroute' | 'completed'} />

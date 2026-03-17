@@ -30,7 +30,7 @@ export function AdminDesktopSidebar({
 }: AdminDesktopSidebarProps) {
   return (
     <aside
-      className={`hidden lg:block fixed left-0 top-0 bottom-0 z-[50] transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+      className={`hidden lg:block sticky top-0 self-start h-[100dvh] z-[50] transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
         compact ? 'w-[80px]' : 'w-[260px]'
       }`}
     >
