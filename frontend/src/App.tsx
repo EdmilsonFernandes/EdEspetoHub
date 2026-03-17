@@ -6,7 +6,7 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { ToastProvider } from './contexts/ToastContext';
 import { AdminRoute } from './components/Admin/AdminRoute';
 import { MotoboyRoute } from './components/Motoboy/MotoboyRoute';
-import { AdminLayout } from './components/Admin/AdminLayout';
+import { AdminLayout } from './layouts/AdminLayout';
 import { AppErrorBoundary } from './components/common/AppErrorBoundary';
 import './index.css';
 import { PortfolioPage } from './pages/PortfolioPage';
@@ -43,9 +43,7 @@ function App() {
               element={
                 <AppErrorBoundary>
                   <AdminRoute allowedRoles={['ADMIN']}>
-                    <AdminLayout>
-                      <AdminOrders />
-                    </AdminLayout>
+                    <AdminOrders />
                   </AdminRoute>
                 </AppErrorBoundary>
               }
@@ -65,7 +63,7 @@ function App() {
               element={
                 <AppErrorBoundary>
                   <AdminRoute allowedRoles={['ADMIN']}>
-                    <AdminLayout>
+                    <AdminLayout contextLabel="Entregadores">
                       <AdminMotoboys />
                     </AdminLayout>
                   </AdminRoute>
