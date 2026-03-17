@@ -2339,8 +2339,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
       <div className={sidebarGridClass}>
         <aside className="hidden lg:block">
-          <div className={`sticky top-18 ds-admin-sidebar p-2.5 max-h-[calc(100vh-5.5rem)] overflow-y-auto overflow-x-visible ${sidebarCompact ? 'w-[72px]' : 'w-[280px]'}`}>
-            <div className={`px-1 pb-2 flex items-center ${sidebarCompact ? 'justify-center' : 'justify-between'}`}>
+          <div className={`sticky top-2 ds-admin-sidebar h-[calc(100vh-1rem)] p-2.5 border-r border-white/10 shadow-none overflow-hidden flex flex-col ${sidebarCompact ? 'w-[72px]' : 'w-[280px]'}`}>
+            <div className={`px-1 pb-2 flex items-center shrink-0 ${sidebarCompact ? 'justify-center' : 'justify-between'}`}>
               {!sidebarCompact && <p className="px-2 ds-admin-sidebar-title">Navegação</p>}
               <button
                 type="button"
@@ -2352,7 +2352,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                 {sidebarCompact ? <CaretRight size={16} weight="bold" /> : <CaretLeft size={16} weight="bold" />}
               </button>
             </div>
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 min-h-0 flex-1 overflow-y-auto overflow-x-visible pr-0.5">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = activeTab === item.id;
@@ -2405,6 +2405,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                   </button>
                 );
               })}
+            </div>
+            <div className="mt-2 pt-2 border-t border-white/10 shrink-0">
               <button
                 type="button"
                 onClick={() => {
