@@ -93,6 +93,7 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
 
   const planMenuRef = useRef<HTMLDivElement | null>(null);
   const userMenuRef = useRef<HTMLDivElement | null>(null);
+  const mobileCollapsedRef = useRef(false);
 
   const storeSlug = String(storeProp?.slug || auth?.store?.slug || '');
   const storeName =
@@ -200,20 +201,31 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
   useEffect(() => {
     let frame = 0;
     let ticking = false;
-    const collapseAt = 88;
-    const expandAt = 48;
+    const collapseAt = 104;
+    const expandAt = 52;
+    let lastY = 0;
 
     const update = () => {
       const isMobile = window.innerWidth < 768;
       if (!isMobile) {
+        mobileCollapsedRef.current = false;
         setMobileCollapsed(false);
         return;
       }
-      const y = window.scrollY || 0;
-      setMobileCollapsed((prev) => {
-        if (prev) return y > expandAt;
-        return y > collapseAt;
-      });
+      const y = window.scrollY || document.documentElement.scrollTop || 0;
+      const goingDown = y > lastY;
+      const goingUp = y < lastY;
+      const collapsed = mobileCollapsedRef.current;
+
+      if (!collapsed && goingDown && y >= collapseAt) {
+        mobileCollapsedRef.current = true;
+        setMobileCollapsed(true);
+      } else if (collapsed && goingUp && y <= expandAt) {
+        mobileCollapsedRef.current = false;
+        setMobileCollapsed(false);
+      }
+
+      lastY = y;
     };
 
     const onScroll = () => {

@@ -81,7 +81,7 @@ const Header = ({
   const isAdminUser = normalizedRole === "admin";
   const isOperatorUser = normalizedRole === "operator" || normalizedRole === "churrasqueiro";
   const isLogged = Boolean(isAuthenticated || isAdminUser || isOperatorUser);
-  const [mobileCollapsed, setMobileCollapsed] = useState(false);
+  const [mobileCollapsedStable, setMobileCollapsedStable] = useState(false);
   const storeSlug = branding?.espetoId || "";
   const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
   const storeUrl = storeSlug ? `${baseUrl}/${storeSlug}` : "";
@@ -118,12 +118,23 @@ const Header = ({
     if (!compact) return;
     let frame = 0;
     let ticking = false;
-    const collapseAt = 72;
-    const expandAt = 24;
+    const collapseAt = 96;
+    const expandAt = 36;
+    let collapsed = false;
+    let lastY = 0;
 
     const update = () => {
-      const y = window.scrollY || 0;
-      setMobileCollapsed((prev) => (prev ? y > expandAt : y > collapseAt));
+      const y = window.scrollY || document.documentElement.scrollTop || 0;
+      const goingDown = y > lastY;
+      const goingUp = y < lastY;
+      if (!collapsed && goingDown && y >= collapseAt) {
+        collapsed = true;
+        setMobileCollapsedStable(true);
+      } else if (collapsed && goingUp && y <= expandAt) {
+        collapsed = false;
+        setMobileCollapsedStable(false);
+      }
+      lastY = y;
     };
 
     const onScroll = () => {
@@ -145,6 +156,10 @@ const Header = ({
     };
   }, [compact]);
 
+  useEffect(() => {
+    if (!compact) setMobileCollapsedStable(false);
+  }, [compact]);
+
   return (
     <div className={`w-full sticky top-0 z-50 ${compact ? 'pb-1' : 'pb-3'} pt-2`}>
       <div className="max-w-6xl mx-auto px-3 sm:px-4">
@@ -152,7 +167,7 @@ const Header = ({
           <div
             className={`relative rounded-b-3xl overflow-hidden transition-all duration-300 ${
               compact
-                ? mobileCollapsed
+                ? mobileCollapsedStable
                   ? "h-0 opacity-0"
                   : "h-[118px] opacity-100"
                 : "h-[210px] sm:h-[240px] lg:h-[300px]"
@@ -168,7 +183,7 @@ const Header = ({
             }
           >
             <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/30 to-black/10" />
-            {compact && !mobileCollapsed && (
+            {compact && !mobileCollapsedStable && (
               <div className="sm:hidden absolute inset-x-0 bottom-0 px-4 pb-3">
                 <div className="pr-14">
                   <h1 className="text-base font-black text-white truncate">{branding?.brandName || "Sua Loja"}</h1>
