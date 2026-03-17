@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowUpRight, CaretDown, FunnelSimple, MagnifyingGlass, MapPin, Storefront } from '@phosphor-icons/react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { LandingPageLayout } from '../layouts/LandingPageLayout';
 import { storeService } from '../services/storeService';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
@@ -99,6 +99,19 @@ const caseResult = (store: PortfolioStore) => {
     return `${reviews} avaliação(ões) públicas e nota média ${rating.toFixed(1)}. Operação estabilizada com jornada mobile-first.`;
   }
   return 'Operação digital publicada com experiência mobile profissional e base pronta para escalar vendas.';
+};
+
+const caseTags = (store: PortfolioCase) => {
+  const tags: string[] = [];
+  tags.push(store.segment);
+  if (store.result.toLowerCase().includes('nota média') || store.result.toLowerCase().includes('nota media')) {
+    tags.push('Sucesso de Vendas');
+  }
+  if (store.segment.toLowerCase().includes('restaurante') || store.segment.toLowerCase().includes('hamburgueria')) {
+    tags.push('Entrega Rápida');
+  }
+  tags.push('Aberto agora');
+  return tags.slice(0, 3);
 };
 
 const parseCityStateFromAddress = (address?: string | null) => {
@@ -435,7 +448,14 @@ export function PortfolioPage() {
             <div className="space-y-4">
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {visibleCases.map((item) => (
-                <article key={item.id} className="ds-card overflow-hidden h-full flex flex-col transition-all duration-200 hover:translate-y-[-4px] hover:shadow-[0_28px_60px_-30px_rgba(15,23,42,0.38)]">
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => {
+                    if (item.slug) navigate(`/${item.slug}`);
+                  }}
+                  className="ds-card text-left overflow-hidden h-full flex flex-col transition-all duration-200 hover:scale-[1.02] hover:translate-y-[-4px] hover:shadow-[0_28px_60px_-30px_rgba(15,23,42,0.38)]"
+                >
                   <div className="aspect-[16/7] bg-slate-100">
                     <img src={item.screenshot} alt={`Screenshot - ${item.name}`} className="w-full h-full object-cover" />
                   </div>
@@ -452,15 +472,25 @@ export function PortfolioPage() {
                           {item.city}{item.state ? ` • ${item.state}` : ''}
                         </p>
                       </div>
-                      {item.slug ? (
-                        <Link
-                          to={`/${item.slug}`}
-                          className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700"
+                      <span className="inline-flex items-center justify-center h-8 w-8 rounded-full border border-slate-200 bg-slate-50 text-slate-700">
+                        <ArrowUpRight size={14} weight="bold" />
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {caseTags(item).map((tag) => (
+                        <span
+                          key={`${item.id}-${tag}`}
+                          className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${
+                            tag === 'Aberto agora'
+                              ? 'bg-emerald-100 text-emerald-700'
+                              : tag === 'Entrega Rápida'
+                              ? 'bg-sky-100 text-sky-700'
+                              : 'bg-violet-100 text-violet-700'
+                          }`}
                         >
-                          Ver loja
-                          <ArrowUpRight size={14} weight="bold" />
-                        </Link>
-                      ) : null}
+                          {tag}
+                        </span>
+                      ))}
                     </div>
 
                     <div className="flex-1 space-y-2">
@@ -479,7 +509,7 @@ export function PortfolioPage() {
                       </div>
                     </div>
                   </div>
-                </article>
+                </button>
               ))}
             </div>
               {canLoadMore && (

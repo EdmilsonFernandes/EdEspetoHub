@@ -4,8 +4,11 @@ import {
   Database,
   Linkedin,
   MapPinned,
+  Printer,
+  RadioTower,
   ServerCog,
   ShieldCheck,
+  Sparkles,
   SquareCode,
 } from 'lucide-react';
 import { LandingPageLayout } from '../layouts/LandingPageLayout';
@@ -49,6 +52,21 @@ const stackCards = [
     icon: MapPinned,
   },
   {
+    title: 'Auto-Print Engine',
+    description: 'Conexão direta com impressoras térmicas Bluetooth/RawBT para impressão operacional imediata.',
+    icon: Printer,
+  },
+  {
+    title: 'Real-Time Sync',
+    description: 'Sincronização instantânea de pedidos e status com arquitetura orientada a eventos e tempo real.',
+    icon: RadioTower,
+  },
+  {
+    title: 'Smart Dashboard',
+    description: 'Painel executivo com UX glassmorphism e visão operacional/financeira integrada.',
+    icon: Sparkles,
+  },
+  {
     title: 'Containers Docker (Deploy Cloud AWS)',
     description: 'Ambiente containerizado com deploy contínuo, isolamento de serviços e escalabilidade.',
     icon: Boxes,
@@ -59,29 +77,11 @@ const teamMembers = [
   {
     name: 'Edmilson Lopes Fernandes',
     role: 'Arquiteto de Software e Desenvolvedor Full Stack Sênior',
-    badge: 'Principal',
+    badge: 'Arquiteto Principal & Liderança Técnica',
     years: 15,
     profileUrl: 'https://www.linkedin.com/in/edmilson-santos-6805a515/',
     profileImage: '/team/ed.png',
     color: 'from-red-500 to-amber-500',
-  },
-  {
-    name: 'Gabriel Botega',
-    role: 'Desenvolvedor Backend',
-    badge: 'Backend',
-    years: 4,
-    profileUrl: 'https://www.linkedin.com/in/gabrielbotega/',
-    profileImage: '/team/botega.png',
-    color: 'from-sky-500 to-indigo-500',
-  },
-  {
-    name: 'Juan Felipe Rada',
-    role: 'Desenvolvedor Frontend',
-    badge: 'Frontend',
-    years: 4,
-    profileUrl: 'https://www.linkedin.com/in/radapls/',
-    profileImage: '/team/juan.png',
-    color: 'from-emerald-500 to-teal-500',
   },
 ];
 
@@ -113,12 +113,26 @@ export function ArchitecturePage() {
             </p>
           </div>
 
-          <div className="mt-10 rounded-3xl border border-white/15 bg-white/5 p-3 sm:p-5">
-            <img
-              src="/marketing/arquitetura-jano-caminho.png"
-              alt="Diagrama de arquitetura da plataforma Já no Caminho"
-              className="w-full max-w-[1100px] mx-auto rounded-2xl object-contain"
-            />
+          <div className="mt-10 rounded-3xl border border-white/15 bg-white/5 p-4 sm:p-6">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {[
+                { title: 'Clientes e Operação', desc: 'Vitrine, pedido e monitor em tempo real', icon: SquareCode },
+                { title: 'Core APIs', desc: 'Autenticação, pedidos, catálogo e pagamentos', icon: ServerCog },
+                { title: 'Integrações Locais', desc: 'RawBT, impressão térmica e logística local', icon: Printer },
+                { title: 'Dados e Escala', desc: 'PostgreSQL + Docker + AWS com observabilidade', icon: Database },
+              ].map((item) => {
+                const Icon = item.icon;
+                return (
+                  <article key={item.title} className="rounded-2xl border border-white/15 bg-white/10 p-4">
+                    <div className="h-10 w-10 rounded-xl bg-white/15 text-white grid place-items-center">
+                      <Icon size={18} />
+                    </div>
+                    <p className="mt-3 text-sm font-black text-white">{item.title}</p>
+                    <p className="mt-1 text-xs text-slate-200">{item.desc}</p>
+                  </article>
+                );
+              })}
+            </div>
           </div>
         </div>
       </section>
@@ -142,6 +156,8 @@ export function ArchitecturePage() {
               <li>Serviço de validação de identidade (KYC)</li>
               <li>Comunicação segura entre frontend e backend</li>
               <li>Processamento assíncrono via workers dedicados</li>
+              <li>Impressão térmica operacional via RawBT/Bluetooth</li>
+              <li>Sincronização instantânea via canais em tempo real</li>
             </ul>
             <p>
               Toda a infraestrutura é preparada para crescimento horizontal, permitindo expansão da plataforma
@@ -187,7 +203,7 @@ export function ArchitecturePage() {
                 Equipe técnica
               </span>
             </div>
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-2">
               {teamMembers.map((member) => (
                 <article key={member.name} className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
                   <div className={`h-16 bg-gradient-to-r ${member.color}`} />
@@ -216,6 +232,15 @@ export function ArchitecturePage() {
                   </div>
                 </article>
               ))}
+              <article className="rounded-2xl border border-slate-200 bg-white p-5">
+                <div className="h-11 w-11 rounded-2xl bg-[linear-gradient(135deg,#0f172a,#1d4ed8)] text-white grid place-items-center">
+                  <Boxes size={18} />
+                </div>
+                <h4 className="mt-4 text-base font-black text-slate-900">Infraestrutura Autogerenciada</h4>
+                <p className="mt-2 text-sm text-slate-600">
+                  Operação técnica com deploy contínuo em AWS, orquestração de serviços e monitoramento de ponta a ponta para garantir estabilidade da plataforma.
+                </p>
+              </article>
             </div>
           </div>
         </div>

@@ -109,6 +109,7 @@ export function LandingPage() {
     'Operação em tempo real',
     'Segurança e rastreabilidade',
     'Mobile-first para equipes',
+    'Impressão automática de pedidos',
   ];
   const proofVisuals = [
     {
@@ -138,6 +139,9 @@ export function LandingPage() {
               <span className="inline-flex items-center gap-2 rounded-full border border-sky-300/40 bg-sky-400/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-sky-200">
                 <Rocket size={14} weight="duotone" />
                 Plataforma SaaS profissional
+              </span>
+              <span className="inline-flex items-center gap-2 rounded-full border border-emerald-300/40 bg-emerald-400/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-100">
+                Totalmente integrado com impressoras Bluetooth/Térmicas
               </span>
               <h1 className="bg-gradient-to-r from-white via-cyan-100 to-blue-200 bg-clip-text text-3xl sm:text-5xl font-black text-transparent leading-[1.05]">
                 Transforme sua operação em um padrão de alta performance
@@ -282,7 +286,8 @@ export function LandingPage() {
                 'Aumente suas vendas com pedidos online',
                 'Centralize toda operação em um único painel',
                 'Controle entregas e retirada em tempo real',
-                'Compatível com qualquer tipo de comércio',
+                'Gestão financeira em tempo real',
+                'Impressão automática de pedidos',
               ].map((text) => (
                 <div key={text} className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-8 flex items-center gap-3 transition-all hover:border-cyan-300/40 hover:shadow-[0_22px_52px_-30px_rgba(34,211,238,0.55)]">
                   <CheckCircle size={18} weight="duotone" className="text-emerald-600 shrink-0" />
