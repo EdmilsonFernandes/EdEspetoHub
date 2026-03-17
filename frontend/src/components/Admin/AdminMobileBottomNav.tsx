@@ -109,8 +109,8 @@ export function AdminMobileBottomNav() {
   if (hiddenByOverlay) return null;
 
   return (
-    <nav className="lg:hidden fixed inset-x-0 bottom-4 z-[260] px-4 pointer-events-none">
-      <ul className={`pointer-events-auto mx-auto grid ${items.length <= 2 ? 'grid-cols-2' : 'grid-cols-4'} gap-1.5 max-w-2xl rounded-full border border-slate-700/80 bg-slate-900/95 p-2 shadow-[0_24px_48px_-28px_rgba(2,6,23,0.85)] backdrop-blur-xl`}>
+    <nav className="lg:hidden fixed inset-x-0 bottom-0 z-[260] pointer-events-none">
+      <ul className={`pointer-events-auto mx-auto grid ${items.length <= 2 ? 'grid-cols-2' : 'grid-cols-4'} gap-1.5 max-w-none rounded-none border-t border-slate-700/80 bg-slate-900 p-2 pb-[max(env(safe-area-inset-bottom),8px)] shadow-none backdrop-blur-none`}>
         {items.map((item) => {
           const Icon = item.icon;
           return (

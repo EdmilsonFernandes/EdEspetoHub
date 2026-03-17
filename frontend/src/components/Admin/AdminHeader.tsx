@@ -371,136 +371,143 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
         </div>
       </div>
 
-      <div className="mt-2 rounded-2xl border border-slate-200 bg-white px-3 sm:px-4 py-2.5 flex items-center justify-between gap-2 sm:gap-3 md:mt-0 md:absolute md:top-4 md:right-4 md:z-[90] md:w-auto md:border-white/20 md:bg-white/10 md:backdrop-blur-md md:rounded-full md:px-3 md:py-2 md:shadow-[0_14px_28px_-18px_rgba(2,6,23,0.75)]">
-        <div className="md:hidden flex items-center gap-2 min-w-0">
-          <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-900 text-white text-xs font-bold overflow-hidden shrink-0">
-            {storeLogo ? (
-              <img src={storeLogo} alt={storeName} className="h-full w-full object-cover" />
-            ) : (
-              storeName.slice(0, 2).toUpperCase()
-            )}
-          </span>
-          <div className="min-w-0">
-            <p className="truncate text-sm font-bold text-slate-900">{storeName}</p>
-            <p className="truncate text-[11px] text-slate-500">{storeLocation}</p>
-          </div>
+      <div className="mt-2 md:hidden rounded-2xl border border-slate-200 bg-white px-3 sm:px-4 py-2.5 flex items-center justify-end gap-2 sm:gap-3">
+        <button
+          type="button"
+          onClick={() => window.dispatchEvent(new CustomEvent('admin:open-global-nav'))}
+          className="inline-flex h-9 w-9 items-center justify-center rounded-md text-slate-600 hover:bg-slate-100 transition-colors"
+          title="Abrir menu"
+          aria-label="Abrir menu"
+        >
+          <Menu size={16} />
+        </button>
+        <button
+          type="button"
+          onClick={toggleFocusMode}
+          className={`inline-flex h-9 w-9 items-center justify-center rounded-md transition-colors ${
+            isFocusMode ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100'
+          }`}
+          title="Modo foco"
+          aria-label="Modo foco"
+        >
+          <Target size={16} />
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate('/admin/dashboard', { state: { openNotifications: true } })}
+          className="inline-flex h-9 w-9 items-center justify-center rounded-md text-slate-600 hover:bg-slate-100 transition-colors"
+          title="Notificações"
+          aria-label="Notificações"
+        >
+          <Bell size={16} />
+        </button>
+      </div>
+
+      <div className="hidden md:flex absolute top-4 right-4 z-[90] items-center gap-2 rounded-full border border-white/25 bg-black/20 px-3 py-2 backdrop-blur-sm shadow-[0_14px_28px_-18px_rgba(2,6,23,0.75)]">
+        <button
+          type="button"
+          onClick={toggleFocusMode}
+          className={`inline-flex h-9 w-9 items-center justify-center rounded-md transition-colors ${
+            isFocusMode ? 'bg-slate-900 text-white' : 'text-white hover:bg-white/20'
+          }`}
+          title="Modo foco"
+          aria-label="Modo foco"
+        >
+          <Target size={16} />
+        </button>
+
+        <button
+          type="button"
+          onClick={() => navigate('/admin/dashboard', { state: { openNotifications: true } })}
+          className="inline-flex h-9 w-9 items-center justify-center rounded-md text-white hover:bg-white/20 transition-colors"
+          title="Notificações"
+          aria-label="Notificações"
+        >
+          <Bell size={16} />
+        </button>
+
+        <div className="relative" ref={planMenuRef}>
+          <button
+            type="button"
+            onClick={() => setOpenPlanMenu((prev) => !prev)}
+            className="inline-flex items-center gap-1.5 rounded-full border border-white/30 bg-white/20 text-white text-[11px] font-semibold uppercase tracking-[0.14em] px-3 py-1 shadow-sm"
+            aria-label="Abrir detalhes da assinatura"
+          >
+            {planLabel}
+            <ChevronDown size={12} />
+          </button>
+          {openPlanMenu && (
+            <div className="absolute right-0 top-[calc(100%+10px)] w-64 rounded-lg border border-slate-100 bg-white shadow-lg p-3 z-[1200]">
+              <p className="text-xs uppercase tracking-[0.18em] text-slate-400 font-semibold">Assinatura</p>
+              <div className="mt-2 space-y-1.5 text-sm text-slate-700">
+                <p>
+                  <span className="text-slate-500">Valor:</span>{' '}
+                  <span className="font-semibold">{planValue}</span>
+                </p>
+                <p>
+                  <span className="text-slate-500">Vencimento:</span>{' '}
+                  <span className="font-semibold">{planDue}</span>
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setOpenPlanMenu(false);
+                  navigate('/admin/renewal');
+                }}
+                className="mt-3 w-full rounded-md border border-slate-200 bg-slate-50 px-2.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition-colors"
+              >
+                Gerenciar assinatura
+              </button>
+            </div>
+          )}
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-3 lg:gap-3 ml-auto">
+        <div className="relative" ref={userMenuRef}>
           <button
             type="button"
-            onClick={() => window.dispatchEvent(new CustomEvent('admin:open-global-nav'))}
-            className="md:hidden inline-flex h-9 w-9 items-center justify-center rounded-md text-slate-600 hover:bg-slate-100 transition-colors"
-            title="Abrir menu"
-            aria-label="Abrir menu"
+            onClick={() => setOpenUserMenu((prev) => !prev)}
+            className="inline-flex items-center gap-2 rounded-md px-1.5 py-1 hover:bg-white/20 transition-colors"
+            aria-label="Abrir menu do usuário"
           >
-            <Menu size={16} />
-          </button>
-          <button
-            type="button"
-            onClick={toggleFocusMode}
-            className={`inline-flex h-9 w-9 items-center justify-center rounded-md transition-colors ${
-              isFocusMode ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100 md:text-white md:hover:bg-white/20'
-            }`}
-            title="Modo foco"
-            aria-label="Modo foco"
-          >
-            <Target size={16} />
+            <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-900 text-white text-xs font-bold overflow-hidden border border-white/40">
+              {userAvatar ? (
+                <img src={userAvatar} alt={fullUserName} className="h-full w-full object-cover" />
+              ) : (
+                userInitials
+              )}
+            </span>
+            <span className="hidden lg:inline text-sm font-medium text-white">{userDisplay}</span>
+            <ChevronDown size={15} className="text-white/80" />
           </button>
 
-          <button
-            type="button"
-            onClick={() => navigate('/admin/dashboard', { state: { openNotifications: true } })}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-md text-slate-600 hover:bg-slate-100 transition-colors md:text-white md:hover:bg-white/20"
-            title="Notificações"
-            aria-label="Notificações"
-          >
-            <Bell size={16} />
-          </button>
-
-          <div className="relative hidden sm:block" ref={planMenuRef}>
-            <button
-              type="button"
-              onClick={() => setOpenPlanMenu((prev) => !prev)}
-              className="inline-flex items-center gap-1.5 rounded-full text-white text-[11px] font-semibold uppercase tracking-[0.14em] px-3 py-1 shadow-sm bg-slate-900 md:bg-white/20 md:border md:border-white/30"
-              aria-label="Abrir detalhes da assinatura"
-            >
-              {planLabel}
-              <ChevronDown size={12} />
-            </button>
-            {openPlanMenu && (
-              <div className="absolute right-0 top-[calc(100%+10px)] w-64 rounded-lg border border-slate-100 bg-white shadow-lg p-3 z-[1200]">
-                <p className="text-xs uppercase tracking-[0.18em] text-slate-400 font-semibold">Assinatura</p>
-                <div className="mt-2 space-y-1.5 text-sm text-slate-700">
-                  <p>
-                    <span className="text-slate-500">Valor:</span>{' '}
-                    <span className="font-semibold">{planValue}</span>
-                  </p>
-                  <p>
-                    <span className="text-slate-500">Vencimento:</span>{' '}
-                    <span className="font-semibold">{planDue}</span>
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setOpenPlanMenu(false);
-                    navigate('/admin/renewal');
-                  }}
-                  className="mt-3 w-full rounded-md border border-slate-200 bg-slate-50 px-2.5 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition-colors"
-                >
-                  Gerenciar assinatura
-                </button>
-              </div>
-            )}
-          </div>
-
-          <div className="relative" ref={userMenuRef}>
-            <button
-              type="button"
-              onClick={() => setOpenUserMenu((prev) => !prev)}
-              className="inline-flex items-center gap-2 rounded-md px-1.5 py-1 hover:bg-slate-100 transition-colors md:hover:bg-white/20"
-              aria-label="Abrir menu do usuário"
-            >
-              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-900 text-white text-xs font-bold overflow-hidden md:border md:border-white/40">
-                {userAvatar ? (
-                  <img src={userAvatar} alt={fullUserName} className="h-full w-full object-cover" />
-                ) : (
-                  userInitials
-                )}
-              </span>
-              <span className="hidden lg:inline text-sm font-medium text-slate-700 md:text-white">{userDisplay}</span>
-              <ChevronDown size={15} className="text-slate-500 md:text-white/80" />
-            </button>
-
-            {openUserMenu && (
-              <div className="absolute right-0 top-[calc(100%+8px)] w-44 rounded-lg border border-slate-100 bg-white shadow-lg p-1.5 z-[1200]">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setOpenUserMenu(false);
-                    setChangePasswordOpen(true);
-                  }}
-                  className="w-full inline-flex items-center gap-2 rounded-md px-2.5 py-2 text-sm text-slate-700 hover:bg-slate-100 transition-colors"
-                >
-                  <KeyRound size={14} />
-                  Trocar senha
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setOpenUserMenu(false);
-                    logout();
-                    navigate('/admin');
-                  }}
-                  className="w-full inline-flex items-center gap-2 rounded-md px-2.5 py-2 text-sm text-slate-700 hover:bg-slate-100 transition-colors"
-                >
-                  <LogOut size={14} />
-                  Sair
-                </button>
-              </div>
-            )}
-          </div>
+          {openUserMenu && (
+            <div className="absolute right-0 top-[calc(100%+8px)] w-44 rounded-lg border border-slate-100 bg-white shadow-lg p-1.5 z-[1200]">
+              <button
+                type="button"
+                onClick={() => {
+                  setOpenUserMenu(false);
+                  setChangePasswordOpen(true);
+                }}
+                className="w-full inline-flex items-center gap-2 rounded-md px-2.5 py-2 text-sm text-slate-700 hover:bg-slate-100 transition-colors"
+              >
+                <KeyRound size={14} />
+                Trocar senha
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setOpenUserMenu(false);
+                  logout();
+                  navigate('/admin');
+                }}
+                className="w-full inline-flex items-center gap-2 rounded-md px-2.5 py-2 text-sm text-slate-700 hover:bg-slate-100 transition-colors"
+              >
+                <LogOut size={14} />
+                Sair
+              </button>
+            </div>
+          )}
         </div>
       </div>
       {changePasswordOpen && (
