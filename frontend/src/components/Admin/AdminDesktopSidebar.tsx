@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React from 'react';
-import { CaretLeft, CaretRight, SignOut } from '@phosphor-icons/react';
+import { SignOut } from '@phosphor-icons/react';
 
 interface SidebarItem {
   id: string;
@@ -15,7 +15,7 @@ interface AdminDesktopSidebarProps {
   items: SidebarItem[];
   activeId: string;
   compact: boolean;
-  onToggleCompact: () => void;
+  onToggleCompact?: () => void;
   onSelect: (id: string) => void;
   onLogout: () => void;
 }
@@ -24,7 +24,6 @@ export function AdminDesktopSidebar({
   items,
   activeId,
   compact,
-  onToggleCompact,
   onSelect,
   onLogout,
 }: AdminDesktopSidebarProps) {
@@ -35,17 +34,8 @@ export function AdminDesktopSidebar({
       }`}
     >
       <div className="h-full border-r border-slate-800 bg-slate-950 overflow-hidden flex flex-col rounded-none shadow-none">
-        <div className={`px-3 pt-3 pb-2 flex items-center shrink-0 ${compact ? 'justify-center' : 'justify-between'}`}>
+        <div className={`px-3 pt-3 pb-2 flex items-center shrink-0 ${compact ? 'justify-center' : 'justify-start'}`}>
           {!compact && <p className="px-2 ds-admin-sidebar-title">Navegação</p>}
-          <button
-            type="button"
-            onClick={onToggleCompact}
-            className="ds-focus-ring inline-flex h-9 w-9 items-center justify-center rounded-xl border border-white/15 bg-white/10 text-slate-100 hover:bg-white/20 transition"
-            aria-label={compact ? 'Expandir menu' : 'Minimizar menu'}
-            title={compact ? 'Expandir menu' : 'Minimizar menu'}
-          >
-            {compact ? <CaretRight size={16} weight="bold" /> : <CaretLeft size={16} weight="bold" />}
-          </button>
         </div>
 
         <div className="space-y-1.5 min-h-0 flex-1 overflow-y-auto overflow-x-visible px-2 pb-2">

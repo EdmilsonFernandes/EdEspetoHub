@@ -109,8 +109,8 @@ export function AdminMobileBottomNav() {
   if (hiddenByOverlay) return null;
 
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-[260] border-t border-slate-200 bg-white/95 backdrop-blur-sm pb-[max(env(safe-area-inset-bottom),8px)] pt-2 px-2">
-      <ul className={`grid ${items.length <= 2 ? 'grid-cols-2' : 'grid-cols-4'} gap-1`}>
+    <nav className="lg:hidden fixed inset-x-0 bottom-4 z-[260] px-4 pointer-events-none">
+      <ul className={`pointer-events-auto mx-auto grid ${items.length <= 2 ? 'grid-cols-2' : 'grid-cols-4'} gap-1.5 max-w-2xl rounded-full border border-slate-700/80 bg-slate-900/95 p-2 shadow-[0_24px_48px_-28px_rgba(2,6,23,0.85)] backdrop-blur-xl`}>
         {items.map((item) => {
           const Icon = item.icon;
           return (
@@ -118,10 +118,10 @@ export function AdminMobileBottomNav() {
               <button
                 type="button"
                 onClick={item.onClick}
-                className={`w-full rounded-xl py-2 text-[11px] font-bold flex flex-col items-center justify-center gap-1 transition ${
+                className={`w-full rounded-full py-2 text-[11px] font-bold flex flex-col items-center justify-center gap-1 transition ${
                   item.active
-                    ? 'bg-slate-900 text-white shadow-[0_10px_24px_-14px_rgba(15,23,42,0.85)] ring-1 ring-slate-700'
-                    : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
+                    ? 'bg-white text-slate-900 shadow-[0_10px_24px_-14px_rgba(255,255,255,0.45)]'
+                    : 'bg-transparent text-slate-300 hover:bg-slate-800/70 hover:text-white'
                 }`}
               >
                 <span className="relative inline-flex">

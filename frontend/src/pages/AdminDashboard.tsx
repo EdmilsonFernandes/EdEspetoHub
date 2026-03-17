@@ -1,6 +1,6 @@
 // @ts-nocheck
 import * as React from 'react';
-import { ChartBar, BookOpen, ChefHat, CreditCard, Package, Gear, ShoppingCart, X, Scooter, ForkKnife, Storefront, Truck, List, CaretRight, Star, Bell, WarningCircle, MagnifyingGlass, SignOut, UsersThree } from '@phosphor-icons/react';
+import { ChartBar, BookOpen, ChefHat, CreditCard, Package, Gear, ShoppingCart, X, Scooter, ForkKnife, Storefront, Truck, CaretRight, Star, Bell, WarningCircle, MagnifyingGlass, UsersThree } from '@phosphor-icons/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AdminLayout } from '../layouts/AdminLayout';
@@ -1271,7 +1271,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     }
     return savedPreference === 'true';
   });
-  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [commandOpen, setCommandOpen] = useState(false);
   const [commandQuery, setCommandQuery] = useState('');
   const [notificationCriticalOnly, setNotificationCriticalOnly] = useState(false);
@@ -1298,6 +1297,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     return !window.matchMedia('(max-width: 767px)').matches;
   });
   const notificationsRef = useRef<HTMLDivElement | null>(null);
+  const notificationsModalRef = useRef<HTMLDivElement | null>(null);
   const [dismissedNotificationKeys, setDismissedNotificationKeys] = useState<string[]>([]);
   const isVip = Boolean(session?.store?.settings?.planExempt || session?.subscription?.planExempt);
   const planName = String(session?.subscription?.plan?.name || '').toLowerCase();
@@ -1371,7 +1371,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     (options?: { replace?: boolean }) => {
       setNotificationsOpen(false);
       setCommandOpen(false);
-      setMobileDrawerOpen(false);
       navigate('/admin/queue', { replace: Boolean(options?.replace) });
     },
     [navigate]
@@ -1387,12 +1386,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
           run: () => {
             if (item.id === 'cardapio') {
               if (storeSlug) navigate(`/${storeSlug}`);
-              setMobileDrawerOpen(false);
               return;
             }
             if (item.id === 'usuarios') {
               setActiveTab('usuarios');
-              setMobileDrawerOpen(false);
               return;
             }
             if (item.id === 'fila') {
@@ -1400,7 +1397,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
               return;
             }
             setActiveTab(item.id as typeof activeTab);
-            setMobileDrawerOpen(false);
           },
         })),
       {
@@ -1852,8 +1848,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   useEffect(() => {
     if (!notificationsOpen) return;
     const onPointerDown = (event: MouseEvent) => {
-      if (!notificationsRef.current) return;
-      if (!notificationsRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      const clickedToggle = Boolean(notificationsRef.current?.contains(target));
+      const clickedModal = Boolean(notificationsModalRef.current?.contains(target));
+      if (!clickedToggle && !clickedModal) {
         setNotificationsOpen(false);
       }
     };
@@ -2077,6 +2075,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     if (typeof window === 'undefined') return;
     localStorage.setItem('adminSidebar:compact', String(sidebarCompact));
   }, [sidebarCompact]);
+  useEffect(() => {
+    if (!isDesktopLayout || !sidebarCompact) return;
+    setSidebarCompact(false);
+  }, [isDesktopLayout, sidebarCompact]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -2091,42 +2093,15 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   }, []);
 
   useEffect(() => {
-    if (!mobileDrawerOpen && !commandOpen) return;
+    if (!commandOpen) return;
     const handleKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        setMobileDrawerOpen(false);
         setCommandOpen(false);
       }
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [mobileDrawerOpen, commandOpen]);
-
-  useEffect(() => {
-    if (isDesktopLayout && mobileDrawerOpen) {
-      setMobileDrawerOpen(false);
-    }
-  }, [isDesktopLayout, mobileDrawerOpen]);
-
-  useEffect(() => {
-    if (typeof document === 'undefined') return;
-    if (!mobileDrawerOpen) return;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [mobileDrawerOpen]);
-
-  useEffect(() => {
-    if (typeof document === 'undefined') return;
-    document.body.classList.toggle('admin-mobile-menu-open', Boolean(mobileDrawerOpen));
-    window.dispatchEvent(new CustomEvent('admin:mobile-menu', { detail: { open: Boolean(mobileDrawerOpen) } }));
-    return () => {
-      document.body.classList.remove('admin-mobile-menu-open');
-      window.dispatchEvent(new CustomEvent('admin:mobile-menu', { detail: { open: false } }));
-    };
-  }, [mobileDrawerOpen]);
+  }, [commandOpen]);
 
 
   useEffect(() => {
@@ -2294,12 +2269,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   const handleNavSelect = (id: string) => {
     if (id === 'cardapio') {
       if (storeSlug) navigate(`/${storeSlug}`);
-      setMobileDrawerOpen(false);
       return;
     }
     if (id === 'usuarios') {
       setActiveTab('usuarios' as typeof activeTab);
-      setMobileDrawerOpen(false);
       return;
     }
     if (id === 'fila') {
@@ -2312,58 +2285,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       return;
     }
     setActiveTab(id as typeof activeTab);
-    setMobileDrawerOpen(false);
   };
 
   return (
     <AdminLayout contextLabel="Painel da Loja" fluid>
-      <div className="lg:hidden sticky top-2 z-[95]">
-        <div className="rounded-2xl border border-slate-200 bg-white/95 backdrop-blur px-3 py-2.5 flex items-center justify-between shadow-sm">
-          <div className="inline-flex items-center gap-2 min-w-0">
-            <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-900 text-white text-xs font-black">
-              {String(storeName || 'LO')
-                .split(' ')
-                .filter(Boolean)
-                .slice(0, 2)
-                .map((part) => part[0]?.toUpperCase())
-                .join('')
-                .slice(0, 2) || 'LO'}
-            </span>
-            <div className="min-w-0">
-              <p className="text-xs font-semibold text-slate-700 truncate">{storeName}</p>
-              <p className="text-[11px] text-slate-500 truncate">{tabMeta[activeTab]?.title || 'Painel'}</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setNotificationsOpen((prev) => !prev)}
-              className={`ds-focus-ring relative inline-flex h-10 w-10 items-center justify-center rounded-xl border transition ${
-                notificationsOpen
-                  ? 'border-slate-900 bg-slate-900 text-white'
-                  : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
-              }`}
-              aria-label="Abrir notificações"
-            >
-              <Bell size={18} weight={notificationsOpen ? 'fill' : 'duotone'} />
-              {unreadNotifications > 0 && (
-                <span className="absolute -right-1 -top-1 min-w-[18px] h-[18px] rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white flex items-center justify-center">
-                  {unreadNotifications > 9 ? '9+' : unreadNotifications}
-                </span>
-              )}
-            </button>
-            <button
-              type="button"
-              onClick={() => setMobileDrawerOpen(true)}
-              className="ds-focus-ring inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-900 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-800"
-              aria-label="Abrir menu"
-            >
-              <List size={16} weight="duotone" />
-            </button>
-          </div>
-        </div>
-      </div>
-
       <div
         className={`w-full lg:grid lg:items-start lg:gap-0 ${
           sidebarCompact ? 'lg:grid-cols-[80px_minmax(0,1fr)]' : 'lg:grid-cols-[260px_minmax(0,1fr)]'
@@ -2421,86 +2346,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
               </span>
             )}
           </button>
-          {notificationsOpen && (
-            <div className="absolute right-0 top-[calc(100%+10px)] z-[9999] w-[min(92vw,360px)] rounded-2xl border border-slate-200 bg-white shadow-[0_22px_48px_-26px_rgba(15,23,42,0.48)] overflow-hidden">
-              <div className="px-3 py-2.5 border-b border-slate-100 bg-slate-50/80">
-                <p className="text-[11px] uppercase tracking-[0.2em] font-bold text-slate-500">Notificações</p>
-                <div className="mt-0.5 flex items-center justify-between gap-2">
-                  <p className="text-xs text-slate-600">Prioridades da operação em tempo real</p>
-                  <div className="inline-flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setNotificationCriticalOnly((prev) => !prev)}
-                      className={`text-[11px] font-semibold rounded-full border px-2 py-0.5 ${
-                        notificationCriticalOnly
-                          ? 'border-amber-300 bg-amber-50 text-amber-700'
-                          : 'border-slate-200 bg-white text-slate-600'
-                      }`}
-                    >
-                      {notificationCriticalOnly ? 'Só críticas' : 'Todas'}
-                    </button>
-                    {activeNotifications.length > 0 && (
-                    <button
-                      type="button"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        clearAllNotifications();
-                        setNotificationsOpen(false);
-                      }}
-                      className="text-[11px] font-semibold text-slate-600 hover:text-slate-900"
-                    >
-                      Marcar todas como lidas
-                    </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-              <div className="max-h-[58vh] overflow-y-auto p-2 space-y-1.5">
-                {activeNotifications.length === 0 ? (
-                  <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2">
-                    <p className="text-sm font-semibold text-emerald-700">Pedidos em dia</p>
-                    <p className="text-xs text-emerald-700/80 mt-1">Sem pendências críticas no momento.</p>
-                  </div>
-                ) : (
-                  activeNotifications.map((note) => {
-                    return (
-                      <div key={note.key} className={`rounded-xl border px-3 py-2 ${notificationToneClass(note.tone)}`}>
-                        <div className="flex items-start gap-2">
-                          <WarningCircle size={16} weight="duotone" className="mt-0.5 text-slate-600" />
-                          <div className="min-w-0">
-                            <div className="flex items-center justify-between gap-2">
-                              <p className="text-xs font-bold text-slate-800">{note.title}</p>
-                              <span className="text-[10px] text-slate-500 whitespace-nowrap">{notificationRelativeTime(note.generatedAt)}</span>
-                            </div>
-                            <p className="text-[11px] text-slate-600 mt-0.5">{note.description}</p>
-                            <div className="mt-1.5 flex items-center gap-1.5">
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  note.action();
-                                  setNotificationsOpen(false);
-                                }}
-                                className="rounded-lg border border-slate-300 bg-white px-2 py-1 text-[11px] font-semibold text-slate-700 hover:bg-slate-100"
-                              >
-                                {note.actionLabel}
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => markNotificationRead(note.key)}
-                                className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-[11px] font-semibold text-slate-500 hover:bg-slate-100"
-                              >
-                                Marcar lida
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            </div>
-          )}
           {storeSlug && (
             <button
               type="button"
@@ -2535,21 +2380,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
       {activeTab === 'resumo' && (
         <div className="space-y-4">
-          <div className="md:hidden rounded-2xl border border-slate-200 bg-white px-4 py-3 flex items-center justify-between">
-            <div>
-              <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-slate-500">Resumo</p>
-              <p className="text-sm font-semibold text-slate-800">Avaliações e gorjetas</p>
-            </div>
-            <button
-              type="button"
-              onClick={() => setShowReviewsCardMobile((prev) => !prev)}
-              className="inline-flex items-center gap-1 rounded-full border border-slate-200 px-3 py-1 text-[11px] font-semibold text-slate-600"
-            >
-              {showReviewsCardMobile ? 'Ocultar' : 'Mostrar'}
-              <CaretRight size={12} className={`transition-transform ${showReviewsCardMobile ? 'rotate-90' : ''}`} />
-            </button>
-          </div>
-
           {showReviewsCardMobile && (
           <FormSection
             title="Avaliações e gorjetas"
@@ -2936,11 +2766,14 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         </div>
       </div>
 
-      {!isDesktopLayout && notificationsOpen && (
-        <div className="lg:hidden ds-sheet-backdrop z-[130]" onClick={() => setNotificationsOpen(false)}>
-          <aside className="ds-sheet-panel rounded-t-3xl max-h-[78vh] overflow-y-auto" onClick={(event) => event.stopPropagation()}>
-            <div className="sm:hidden ds-sheet-handle" />
-            <div className="sticky top-0 z-10 bg-white/95 backdrop-blur border-b border-slate-100 px-4 py-3 flex items-center justify-between">
+      {notificationsOpen && (
+        <div className="fixed inset-0 z-[13000] bg-black/45 backdrop-blur-sm p-4 sm:p-6 flex items-center justify-center" onClick={() => setNotificationsOpen(false)}>
+          <div
+            ref={notificationsModalRef}
+            className="w-full max-w-xl max-h-[82vh] overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_28px_60px_-34px_rgba(15,23,42,0.55)]"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="sticky top-0 z-10 bg-white/95 backdrop-blur border-b border-slate-100 px-4 py-3 flex items-center justify-between gap-3">
               <div>
                 <p className="text-[11px] uppercase tracking-[0.2em] font-bold text-slate-500">Notificações</p>
                 <p className="text-sm font-semibold text-slate-800">Prioridades da operação</p>
@@ -2954,36 +2787,37 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                 <X size={16} weight="bold" />
               </button>
             </div>
-            <div className="p-4 space-y-2.5">
+            <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/70 flex items-center justify-between gap-2">
+              <button
+                type="button"
+                onClick={() => setNotificationCriticalOnly((prev) => !prev)}
+                className={`text-[11px] font-semibold rounded-full border px-2.5 py-1 ${
+                  notificationCriticalOnly
+                    ? 'border-amber-300 bg-amber-50 text-amber-700'
+                    : 'border-slate-200 bg-white text-slate-600'
+                }`}
+              >
+                {notificationCriticalOnly ? 'Só críticas' : 'Todas'}
+              </button>
+              {activeNotifications.length > 0 && (
+                <button
+                  type="button"
+                  onClick={clearAllNotifications}
+                  className="text-[11px] font-semibold text-slate-600 hover:text-slate-900"
+                >
+                  Marcar todas como lidas
+                </button>
+              )}
+            </div>
+            <div className="max-h-[calc(82vh-122px)] overflow-y-auto p-3 space-y-2">
               {activeNotifications.length === 0 ? (
                 <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2">
                   <p className="text-sm font-semibold text-emerald-700">Pedidos em dia</p>
                   <p className="text-xs text-emerald-700/80 mt-1">Sem pendências críticas no momento.</p>
                 </div>
               ) : (
-                <>
-                  <div className="flex items-center justify-end gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setNotificationCriticalOnly((prev) => !prev)}
-                      className={`text-[11px] font-semibold rounded-full border px-2 py-0.5 ${
-                        notificationCriticalOnly
-                          ? 'border-amber-300 bg-amber-50 text-amber-700'
-                          : 'border-slate-200 bg-white text-slate-600'
-                      }`}
-                    >
-                      {notificationCriticalOnly ? 'Só críticas' : 'Todas'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={clearAllNotifications}
-                      className="text-[11px] font-semibold text-slate-600 hover:text-slate-900"
-                    >
-                      Marcar todas como lidas
-                    </button>
-                  </div>
-                  {activeNotifications.map((note) => (
-                  <div key={`mobile-${note.key}`} className={`rounded-xl border px-3 py-2.5 ${notificationToneClass(note.tone)}`}>
+                activeNotifications.map((note) => (
+                  <div key={`notifications-${note.key}`} className={`rounded-xl border px-3 py-2.5 ${notificationToneClass(note.tone)}`}>
                     <div className="flex items-start gap-2">
                       <WarningCircle size={16} weight="duotone" className="mt-0.5 text-slate-600" />
                       <div className="min-w-0">
@@ -3005,11 +2839,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                           </button>
                           <button
                             type="button"
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              markNotificationRead(note.key);
-                              setNotificationsOpen(false);
-                            }}
+                            onClick={() => markNotificationRead(note.key)}
                             className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-500 hover:bg-slate-100"
                           >
                             Marcar lida
@@ -3018,11 +2848,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                       </div>
                     </div>
                   </div>
-                  ))}
-                </>
+                ))
               )}
             </div>
-          </aside>
+          </div>
         </div>
       )}
 
@@ -3081,73 +2910,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         </div>
       )}
 
-      {!isDesktopLayout && mobileDrawerOpen && (
-        <div className="lg:hidden ds-sheet-backdrop ds-mobile-menu-backdrop z-[400]" onClick={() => setMobileDrawerOpen(false)}>
-          <aside className="ds-sheet-panel ds-mobile-menu-panel h-full w-full rounded-none max-h-none overflow-y-auto pb-[calc(env(safe-area-inset-bottom)+20px)]" onClick={(event) => event.stopPropagation()}>
-            <div className="sticky top-0 z-10 bg-white/95 backdrop-blur border-b border-slate-100 px-4 py-3 flex items-center justify-between">
-              <div>
-                <p className="text-[11px] uppercase tracking-[0.2em] font-bold text-slate-500">Navegação</p>
-                <p className="text-sm font-semibold text-slate-800">Escolha uma seção</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setMobileDrawerOpen(false)}
-                className="ds-focus-ring inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition"
-                aria-label="Fechar menu"
-              >
-                <X size={16} weight="bold" />
-              </button>
-            </div>
-            <div className="p-4 grid grid-cols-1 gap-2.5 pb-6">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = activeTab === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => handleNavSelect(item.id)}
-                    title={item.disabled ? 'Disponível no plano Pro · clique para upgrade' : undefined}
-                    className={`ds-focus-ring flex items-center justify-between gap-2 rounded-2xl border px-3 py-3 text-sm font-semibold transition ${
-                      isActive
-                        ? 'border-slate-900 bg-slate-900 text-white'
-                        : 'border-slate-200 bg-white text-slate-700'
-                    } ${item.disabled ? 'opacity-85 cursor-pointer border-violet-300 bg-violet-50 text-violet-700 hover:bg-violet-100' : 'hover:bg-slate-50'}`}
-                  >
-                    <span className="inline-flex items-center gap-2">
-                      <Icon size={17} weight={isActive ? 'fill' : 'duotone'} />
-                      {item.label}
-                    </span>
-                    {item.id === 'motoboys' && item.disabled && (
-                      <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${isActive ? 'bg-white/20' : 'bg-violet-100 text-violet-700'}`}>
-                        Pro
-                      </span>
-                    )}
-                    {item.id === 'motoboys' && !item.disabled && pendingMotoboyRequests > 0 && (
-                      <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${isActive ? 'bg-white/20' : 'bg-amber-100 text-amber-700'}`}>
-                        {pendingMotoboyRequests}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-              <button
-                type="button"
-                onClick={() => {
-                  logout();
-                  navigate('/admin');
-                }}
-                className="ds-focus-ring flex items-center justify-between gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-3 py-3 text-sm font-semibold text-rose-700 transition hover:bg-rose-100"
-              >
-                <span className="inline-flex items-center gap-2">
-                  <SignOut size={17} weight="bold" />
-                  Sair
-                </span>
-              </button>
-            </div>
-          </aside>
-        </div>
-      )}
     </AdminLayout>
   );
 }
