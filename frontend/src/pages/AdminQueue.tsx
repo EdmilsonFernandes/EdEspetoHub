@@ -135,7 +135,7 @@ export function AdminQueue() {
           style={isDesktopLayout ? { marginLeft: `${sidebarCompact ? 80 : 260}px` } : undefined}
         >
         <AdminHeader />
-        <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm overflow-x-hidden lg:-mt-8 relative z-20">
+        <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm overflow-x-hidden lg:-mt-12 relative z-20">
           <GrillQueue forcedTab={forcedTab as 'queue' | 'inroute' | 'completed'} />
         </div>
         </div>

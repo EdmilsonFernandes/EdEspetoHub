@@ -2390,7 +2390,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
           style={isDesktopLayout ? { marginLeft: `${sidebarCompact ? 80 : 260}px` } : undefined}
         >
       {activeTab !== 'fila' && (
-      <section className="hidden md:flex relative z-[220] items-start justify-between gap-4 rounded-2xl border border-slate-200 bg-white/90 backdrop-blur-sm px-4 py-3 shadow-[0_20px_45px_-36px_rgba(15,23,42,0.5)] overflow-visible lg:-mt-8">
+      <section className="hidden md:flex relative z-[220] items-start justify-between gap-4 rounded-2xl border border-slate-200 bg-white/90 backdrop-blur-sm px-4 py-3 shadow-[0_20px_45px_-36px_rgba(15,23,42,0.5)] overflow-visible lg:-mt-12">
         <div className="min-w-0">
           <p className="text-[10px] uppercase tracking-[0.24em] font-bold text-slate-400">Workspace</p>
           <h2 className="text-lg font-black text-slate-900 leading-tight">{tabMeta[activeTab]?.title || 'Painel da loja'}</h2>

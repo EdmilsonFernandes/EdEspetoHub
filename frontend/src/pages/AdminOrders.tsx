@@ -334,7 +334,7 @@ export function AdminOrders() {
         >
         <AdminHeader contextLabel="Pedidos" />
 
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm lg:-mt-8 relative z-20">
+        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm lg:-mt-12 relative z-20">
           <div className="flex items-center justify-between gap-3 mb-4">
             <div>
               <h2 className="text-lg font-bold text-slate-800">Lista de pedidos</h2>

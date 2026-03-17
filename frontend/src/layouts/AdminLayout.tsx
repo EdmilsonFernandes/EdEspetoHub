@@ -102,7 +102,7 @@ export function AdminLayout({
       <div
         className={
           fluid
-            ? 'w-full px-3 py-3 sm:px-4 sm:py-4 lg:px-10 lg:py-4 xl:px-12 2xl:px-14 space-y-3 sm:space-y-4'
+            ? 'w-full px-3 py-3 sm:px-4 sm:py-4 lg:pl-0 lg:pr-10 lg:py-4 xl:pr-12 2xl:pr-14 space-y-3 sm:space-y-4'
             : 'w-full max-w-[1600px] mx-auto px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-4 xl:px-8 space-y-3 sm:space-y-4'
         }
       >
