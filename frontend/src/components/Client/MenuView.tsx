@@ -73,6 +73,7 @@ const Header = ({
   isOpenNow,
   todayHoursLabel
 }) => {
+  const [mobileCollapsed, setMobileCollapsed] = useState(false);
   const storeSlug = branding?.espetoId || "";
   const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
   const storeUrl = storeSlug ? `${baseUrl}/${storeSlug}` : "";
@@ -105,12 +106,49 @@ const Header = ({
         .filter(Boolean)[1] || todayHoursLabel
     : "";
 
+  useEffect(() => {
+    if (!compact) return;
+    let frame = 0;
+    let ticking = false;
+    const collapseAt = 72;
+    const expandAt = 24;
+
+    const update = () => {
+      const y = window.scrollY || 0;
+      setMobileCollapsed((prev) => (prev ? y > expandAt : y > collapseAt));
+    };
+
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      frame = window.requestAnimationFrame(() => {
+        update();
+        ticking = false;
+      });
+    };
+
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  }, [compact]);
+
   return (
-    <div className={`w-full sticky top-0 z-50 ${compact ? 'pb-2' : 'pb-3'} pt-2`}>
+    <div className={`w-full sticky top-0 z-50 ${compact ? 'pb-1' : 'pb-3'} pt-2`}>
       <div className="max-w-6xl mx-auto px-3 sm:px-4">
         <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
           <div
-            className={`relative ${compact ? "h-[190px] sm:h-[220px]" : "h-[210px] sm:h-[240px] lg:h-[300px]"} rounded-b-3xl overflow-hidden`}
+            className={`relative rounded-b-3xl overflow-hidden transition-all duration-300 ${
+              compact
+                ? mobileCollapsed
+                  ? "h-0 opacity-0"
+                  : "h-[118px] opacity-100"
+                : "h-[210px] sm:h-[240px] lg:h-[300px]"
+            }`}
             style={
               headerBanner
                 ? {
@@ -122,9 +160,30 @@ const Header = ({
             }
           >
             <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/30 to-black/10" />
+            {compact && !mobileCollapsed && (
+              <div className="sm:hidden absolute inset-x-0 bottom-0 px-4 pb-3">
+                <div className="pr-14">
+                  <h1 className="text-base font-black text-white truncate">{branding?.brandName || "Sua Loja"}</h1>
+                  <div className="mt-0.5 inline-flex items-center gap-1.5 text-[11px] text-white/95 font-semibold">
+                    <span className={`h-2 w-2 rounded-full ${isOpenNow ? "bg-emerald-400 animate-pulse" : "bg-amber-300"}`} />
+                    <span>
+                      {isOpenNow ? "Aberto" : "Fechado"}
+                      {closingHour ? ` · ${isOpenNow ? "Fecha" : "Hoje até"} ${closingHour}` : ""}
+                    </span>
+                  </div>
+                </div>
+                <div className="absolute right-4 top-1 h-11 w-11 rounded-full overflow-hidden border-2 border-white bg-white shadow-lg flex items-center justify-center">
+                  {branding?.logoUrl ? (
+                    <img src={branding.logoUrl} alt={branding.brandName} className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="font-black text-xs text-slate-700">{previewInitials || "JC"}</span>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
-          <div className="relative px-4 sm:px-6 pb-4 pt-11 sm:pt-4">
+          <div className={`relative px-4 sm:px-6 pb-4 pt-11 sm:pt-4 ${compact ? "hidden sm:block" : ""}`}>
             <div className="absolute -top-10 sm:-top-12 left-1/2 -translate-x-1/2 sm:left-6 sm:translate-x-0 h-20 w-20 sm:h-24 sm:w-24 rounded-full overflow-hidden border-4 border-white bg-white shadow-xl flex items-center justify-center">
               {branding?.logoUrl ? (
                 <img src={branding.logoUrl} alt={branding.brandName} className="w-full h-full object-cover" />
@@ -219,6 +278,35 @@ const Header = ({
               )}
             </div>
           </div>
+          {compact && !mobileCollapsed && (
+            <div className="sm:hidden relative px-3 pb-2">
+              <div className="flex flex-row items-center justify-end gap-2">
+                {onOpenQueue && (
+                  <div className="flex items-center rounded-full border border-slate-200 bg-slate-50 p-0.5">
+                    <button type="button" className="px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-900 text-white shadow-sm">
+                      Catálogo
+                    </button>
+                    <button
+                      type="button"
+                      onClick={onOpenQueue}
+                      className="px-3 py-1.5 rounded-full text-xs font-semibold text-slate-600 hover:text-slate-800"
+                    >
+                      Pedidos
+                    </button>
+                  </div>
+                )}
+                {onOpenAdmin && (
+                  <button
+                    onClick={onOpenAdmin}
+                    className="px-3 py-2 rounded-full text-xs font-semibold border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 transition flex items-center gap-1 whitespace-nowrap"
+                  >
+                    <SquaresFour size={12} weight="duotone" />
+                    Painel
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -498,7 +586,7 @@ export const MenuView = ({
 
       {filteredGrouped.length > 1 && (
         <div
-          className={`sticky ${showHeader ? "top-[72px] sm:top-[92px]" : "top-0"} z-40 px-4 pb-2 pt-1 max-w-6xl mx-auto`}
+          className={`sticky ${showHeader ? "top-0 sm:top-[92px]" : "top-0"} z-40 px-4 pb-2 pt-1 max-w-6xl mx-auto`}
         >
           <div className="rounded-2xl border border-slate-200/80 bg-white/80 backdrop-blur-md shadow-sm ds-tabs px-2 py-2">
             <div className="relative w-full flex items-center gap-2">
@@ -564,7 +652,7 @@ export const MenuView = ({
         </div>
       )}
 
-      <div className={`space-y-8 p-4 max-w-6xl mx-auto ${cartItemsCount > 0 ? 'pb-28 sm:pb-8' : ''}`}>
+      <div className={`space-y-6 sm:space-y-8 px-3 sm:px-4 py-3 sm:py-4 max-w-6xl mx-auto ${cartItemsCount > 0 ? 'pb-28 sm:pb-8' : ''}`}>
         <section className="relative overflow-hidden rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
           <div className="relative space-y-4">
             {!showHeader && (
