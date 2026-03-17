@@ -1521,7 +1521,13 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       return { label: "Em rota", className: "bg-blue-50 text-blue-700 border-blue-100" };
     }
     if (orderType === "delivery" && normalizedStatus === "waiting_for_motoboy") {
-      const hasAssignedMotoboy = Boolean(order?.delivery?.motoboy?.id || order?.delivery?.motoboyId);
+      const deliveryStatus = String(order?.delivery?.status || '').toUpperCase();
+      const hasAssignedMotoboy = Boolean(
+        order?.delivery?.motoboy?.id ||
+        order?.delivery?.motoboyId ||
+        order?.delivery?.motoboy_id ||
+        deliveryStatus === 'ACCEPTED'
+      );
       if (hasAssignedMotoboy) {
         return { label: "Aguardando retirada", className: "bg-indigo-50 text-indigo-700 border-indigo-100" };
       }
@@ -1740,9 +1746,11 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
 
       {order.status === "waiting_for_motoboy" && order.type === "delivery" && (
         <div className="w-full">
-          {order?.delivery?.motoboy?.name ? (
+          {(order?.delivery?.motoboy?.name || order?.delivery?.motoboyId || order?.delivery?.motoboy_id || String(order?.delivery?.status || '').toUpperCase() === 'ACCEPTED') ? (
             <div className="mb-2 text-[11px] font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100 rounded-lg px-2.5 py-1">
-              Entregador {String(order.delivery.motoboy.name).split(' ')[0]} está vindo buscar.
+              {order?.delivery?.motoboy?.name
+                ? `Entregador ${String(order.delivery.motoboy.name).split(' ')[0]} está vindo buscar.`
+                : 'Entregador vinculado está vindo buscar.'}
             </div>
           ) : (
             <div className="mb-2 text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-2.5 py-1">

@@ -93,6 +93,91 @@ export class OrderService
     );
   }
 
+  private async attachDeliverySnapshot(orders: any[]) {
+    if (!Array.isArray(orders) || orders.length === 0) return orders;
+    const orderIds = orders
+      .map((order: any) => String(order?.id || '').trim())
+      .filter(Boolean);
+    if (!orderIds.length) return orders;
+
+    const deliveryRows: Array<any> = await AppDataSource.query(
+      `
+        SELECT
+          od.order_id,
+          od.status,
+          od.motoboy_id,
+          od.accepted_at,
+          od.picked_up_at,
+          od.in_transit_at,
+          od.delivered_at
+        FROM order_deliveries od
+        WHERE od.order_id = ANY($1::uuid[])
+      `,
+      [orderIds]
+    );
+
+    if (!Array.isArray(deliveryRows) || deliveryRows.length === 0) return orders;
+    const motoboyIds = Array.from(
+      new Set(
+        deliveryRows
+          .map((row) => String(row?.motoboy_id || '').trim())
+          .filter(Boolean)
+      )
+    );
+
+    const motoboyRows: Array<any> =
+      motoboyIds.length > 0
+        ? await AppDataSource.query(
+            `
+              SELECT
+                m.id AS motoboy_id,
+                u.full_name,
+                u.profile_image_url
+              FROM motoboys m
+              LEFT JOIN users u ON u.id = m.user_id
+              WHERE m.id = ANY($1::uuid[])
+            `,
+            [motoboyIds]
+          )
+        : [];
+
+    const motoboyById = new Map<string, any>();
+    for (const row of motoboyRows) {
+      const id = String(row?.motoboy_id || '').trim();
+      if (!id) continue;
+      motoboyById.set(id, {
+        id,
+        name: row?.full_name || null,
+        profileImageUrl: row?.profile_image_url || null,
+      });
+    }
+
+    const deliveryByOrderId = new Map<string, any>();
+    for (const row of deliveryRows) {
+      const orderId = String(row?.order_id || '').trim();
+      if (!orderId) continue;
+      const motoboyId = row?.motoboy_id ? String(row.motoboy_id) : null;
+      deliveryByOrderId.set(orderId, {
+        status: row?.status || null,
+        motoboyId,
+        motoboy: motoboyId ? motoboyById.get(motoboyId) || { id: motoboyId, name: null, profileImageUrl: null } : null,
+        acceptedAt: row?.accepted_at || null,
+        pickedUpAt: row?.picked_up_at || null,
+        inTransitAt: row?.in_transit_at || null,
+        deliveredAt: row?.delivered_at || null,
+      });
+    }
+
+    return orders.map((order: any) => {
+      const orderId = String(order?.id || '').trim();
+      const snapshot = deliveryByOrderId.get(orderId) || null;
+      return {
+        ...order,
+        delivery: snapshot,
+      };
+    });
+  }
+
   /**
    * Resolves the price used for an item.
    *
@@ -253,7 +338,8 @@ export class OrderService
     const store = await this.storeRepository.findById(storeId);
     this.ensureStoreAccess(store, authStoreId);
     await this.reconcileDeliveredOrdersByStore(store!.id);
-    return this.orderRepository.findByStoreId(store!.id);
+    const orders = await this.orderRepository.findByStoreId(store!.id);
+    return this.attachDeliverySnapshot(orders as any[]);
   }
 
 
@@ -270,7 +356,8 @@ export class OrderService
     const store = await this.storeRepository.findBySlug(slug);
     this.ensureStoreAccess(store, authStoreId);
     await this.reconcileDeliveredOrdersByStore(store!.id);
-    return this.orderRepository.findByStoreId(store!.id);
+    const orders = await this.orderRepository.findByStoreId(store!.id);
+    return this.attachDeliverySnapshot(orders as any[]);
   }
 
 
