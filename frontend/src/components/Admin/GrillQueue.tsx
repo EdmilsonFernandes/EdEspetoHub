@@ -1167,7 +1167,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   }, [queue]);
 
   const inRouteQueue = useMemo(() => {
-    const routeStatuses = new Set([ 'ready_for_delivery', 'waiting_for_motoboy', 'in_delivery' ]);
+    const routeStatuses = new Set([ 'in_delivery' ]);
     return [...queue]
       .filter((order) => routeStatuses.has(String(order?.status || '').toLowerCase()))
       .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
@@ -1393,6 +1393,16 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     return reportCompleted.slice(start, start + completedPageSize);
   }, [reportCompleted, completedPage]);
 
+  const normalizeQueueStage = (order: any) => {
+    const status = String(order?.status || '').toLowerCase();
+    const type = String(order?.type || '').toLowerCase();
+    if (status === 'pending') return 'pending';
+    if (status === 'preparing') return 'preparing';
+    if (status === 'ready') return 'ready';
+    if (type === 'delivery' && (status === 'ready_for_delivery' || status === 'waiting_for_motoboy')) return 'ready';
+    return status;
+  };
+
   const queueMetrics = useMemo(() => {
     const now = Date.now();
     const withAges = productionQueue.map((order) => {
@@ -1400,9 +1410,9 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       const ageMs = Math.max(0, now - createdAt);
       return { ...order, ageMs };
     });
-    const pending = withAges.filter((o) => o.status === 'pending').length;
-    const preparing = withAges.filter((o) => o.status === 'preparing').length;
-    const ready = withAges.filter((o) => o.status === 'ready').length;
+    const pending = withAges.filter((o) => normalizeQueueStage(o) === 'pending').length;
+    const preparing = withAges.filter((o) => normalizeQueueStage(o) === 'preparing').length;
+    const ready = withAges.filter((o) => normalizeQueueStage(o) === 'ready').length;
     const late = withAges.filter((o) => o.ageMs > PREP_SLA_MS).length;
     const avgMs =
       withAges.length > 0
@@ -1413,17 +1423,17 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   }, [productionQueue, currentTime, PREP_SLA_MS]);
 
   const allActiveQueue = useMemo(() => {
-    const activeStatuses = new Set([ 'pending', 'preparing', 'ready' ]);
+    const activeStatuses = new Set([ 'pending', 'preparing', 'ready', 'ready_for_delivery', 'waiting_for_motoboy' ]);
     return [...queue]
       .filter((order) => activeStatuses.has(String(order?.status || '').toLowerCase()))
       .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
   }, [queue]);
   const filteredProductionQueue = useMemo(() => {
     if (queueFilter === 'all') return allActiveQueue;
-    if (queueFilter === 'pending') return allActiveQueue.filter((order) => order.status === 'pending');
-    if (queueFilter === 'preparing') return allActiveQueue.filter((order) => order.status === 'preparing');
+    if (queueFilter === 'pending') return allActiveQueue.filter((order) => normalizeQueueStage(order) === 'pending');
+    if (queueFilter === 'preparing') return allActiveQueue.filter((order) => normalizeQueueStage(order) === 'preparing');
     if (queueFilter === 'ready') {
-      return allActiveQueue.filter((order) => order.status === 'ready');
+      return allActiveQueue.filter((order) => normalizeQueueStage(order) === 'ready');
     }
     if (queueFilter === 'late') {
       const now = Date.now();
@@ -1510,10 +1520,16 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     if (normalizedStatus === "in_delivery") {
       return { label: "Em rota", className: "bg-blue-50 text-blue-700 border-blue-100" };
     }
+    if (orderType === "delivery" && normalizedStatus === "waiting_for_motoboy") {
+      return { label: "Aguardando retirada", className: "bg-indigo-50 text-indigo-700 border-indigo-100" };
+    }
+    if (orderType === "delivery" && normalizedStatus === "ready_for_delivery") {
+      return { label: "Pronto p/ retirada", className: "bg-violet-50 text-violet-700 border-violet-100" };
+    }
     if (normalizedStatus === "preparing") {
       return { label: "Em atendimento", className: "bg-blue-50 text-blue-700 border-blue-100" };
     }
-    if (normalizedStatus === "ready" || normalizedStatus === "ready_for_delivery" || normalizedStatus === "waiting_for_motoboy") {
+    if (normalizedStatus === "ready") {
       const label =
         orderType === "delivery"
           ? "Pronto"
@@ -1715,6 +1731,14 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
           >
             <CheckSquare size={16} weight="duotone" /> {order.type === "delivery" ? "Saiu para entrega" : "Confirmar pagamento"}
           </button>
+        </div>
+      )}
+
+      {order.status === "waiting_for_motoboy" && order.type === "delivery" && (
+        <div className="w-full">
+          <div className="mb-2 text-[11px] font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100 rounded-lg px-2.5 py-1">
+            Entregador {order?.delivery?.motoboy?.name ? `${String(order.delivery.motoboy.name).split(' ')[0]} ` : ''}está vindo buscar.
+          </div>
         </div>
       )}
     </div>
@@ -2436,7 +2460,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       {activeTab === 'inroute' && (
         <div className="space-y-3">
           <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600">
-            Pedidos em rota: o entregador já aceitou. Use “Acompanhar” para abrir a tela pública do cliente.
+            Pedidos em deslocamento: o entregador já retirou o pedido e está a caminho do cliente.
           </div>
           {inRouteQueue.length === 0 ? (
             <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center text-sm text-slate-500">
