@@ -7,11 +7,14 @@ import { formatAddress, formatCurrency, formatDateTime, formatOrderDisplayId, fo
 import { getPaymentMethodMeta } from '../utils/paymentAssets';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { formatSelectedModifiers } from '../utils/productModifiers';
-import { ForkKnife, Storefront, Truck } from '@phosphor-icons/react';
+import { ForkKnife, Storefront, Truck, ChartBar, CreditCard, Package, Gear, Scooter, Star, ChefHat, ShoppingCart } from '@phosphor-icons/react';
 import { AdminLayout } from '../layouts/AdminLayout';
+import { useNavigate } from 'react-router-dom';
+import { AdminDesktopSidebar } from '../components/Admin/AdminDesktopSidebar';
 
 export function AdminOrders() {
-  const { auth } = useAuth();
+  const { auth, logout } = useAuth();
+  const navigate = useNavigate();
   const [orders, setOrders] = useState<any[]>([]);
   const [statusFilter, setStatusFilter] = useState('all');
   const [query, setQuery] = useState('');
@@ -23,6 +26,71 @@ export function AdminOrders() {
 
   const storeId = auth?.store?.id;
   const storeSlug = auth?.store?.slug;
+  const [sidebarCompact, setSidebarCompact] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const savedPreference = localStorage.getItem('adminSidebar:compact');
+    if (savedPreference === null) {
+      return window.matchMedia('(min-width: 1024px)').matches;
+    }
+    return savedPreference === 'true';
+  });
+  const userRole = String(auth?.user?.role || '').toUpperCase();
+  const isOperatorUser = userRole === 'OPERATOR' || userRole === 'CHURRASQUEIRO';
+  const isVip = Boolean(auth?.store?.settings?.planExempt || auth?.subscription?.planExempt);
+  const planName = String(auth?.subscription?.plan?.name || '').toLowerCase();
+  const subscriptionStatus = String(auth?.subscription?.status || '').toUpperCase();
+  const canUseMotoboys = Boolean(
+    isVip ||
+      auth?.features?.motoboyManagement ||
+      subscriptionStatus === 'TRIAL' ||
+      planName.includes('pro') ||
+      planName.includes('vip')
+  );
+
+  useEffect(() => {
+    localStorage.setItem('adminSidebar:compact', String(sidebarCompact));
+  }, [sidebarCompact]);
+
+  const desktopNavItems = useMemo(
+    () =>
+      (isOperatorUser
+        ? [
+            { id: 'cardapio', label: 'Catálogo', icon: Package },
+            { id: 'fila', label: 'Pedidos ao vivo', icon: ChefHat },
+          ]
+        : [
+            { id: 'resumo', label: 'Resumo', icon: ChartBar },
+            { id: 'pedidos', label: 'Pedidos', icon: ShoppingCart },
+            { id: 'avaliacoes', label: 'Avaliações', icon: Star },
+            { id: 'produtos', label: 'Produtos', icon: Package },
+            { id: 'pagamentos', label: 'Pagamentos', icon: CreditCard },
+            { id: 'motoboys', label: 'Entregadores', icon: Scooter, disabled: !canUseMotoboys },
+            { id: 'usuarios', label: 'Usuários', icon: Gear },
+            { id: 'config', label: 'Configurações', icon: Gear },
+            { id: 'fila', label: 'Pedidos ao vivo', icon: ChefHat },
+          ]),
+    [isOperatorUser, canUseMotoboys]
+  );
+
+  const handleNavSelect = (id: string) => {
+    if (id === 'cardapio') {
+      if (storeSlug) navigate(`/${storeSlug}`);
+      return;
+    }
+    if (id === 'fila') {
+      navigate('/admin/queue');
+      return;
+    }
+    if (id === 'pedidos') {
+      navigate('/admin/orders');
+      return;
+    }
+    if (id === 'motoboys' && !canUseMotoboys) {
+      navigate('/admin/renewal?focus=pro');
+      return;
+    }
+    navigate('/admin/dashboard', { state: { activeTab: id } });
+  };
 
   useEffect(() => {
     if (!storeId && !storeSlug) return;
@@ -225,7 +293,26 @@ export function AdminOrders() {
 
   return (
     <AdminLayout contextLabel="Pedidos" showHeader={false} fluid>
-      <div className="w-full space-y-6">
+      <div className="w-full space-y-6 lg:flex lg:items-start lg:gap-4 lg:space-y-0">
+        <AdminDesktopSidebar
+          items={desktopNavItems.map((item) => ({
+            id: item.id,
+            label: item.label,
+            icon: item.icon,
+            disabled: item.disabled,
+            badge: item.id === 'motoboys' && item.disabled ? 'Pro' : undefined,
+            tone: item.id === 'motoboys' && item.disabled ? 'violet' : 'default',
+          }))}
+          activeId="pedidos"
+          compact={sidebarCompact}
+          onToggleCompact={() => setSidebarCompact((prev) => !prev)}
+          onSelect={handleNavSelect}
+          onLogout={() => {
+            logout();
+            navigate('/admin');
+          }}
+        />
+        <div className="min-w-0 flex-1 space-y-6">
         <AdminHeader contextLabel="Pedidos" />
 
         <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
@@ -598,6 +685,7 @@ export function AdminOrders() {
 	              </table>
 	            </div>
 	          )}
+        </div>
         </div>
       </div>
     </AdminLayout>

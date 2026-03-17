@@ -1,6 +1,6 @@
 // @ts-nocheck
 import * as React from 'react';
-import { ChartBar, BookOpen, ChefHat, CreditCard, Package, Gear, ShoppingCart, X, Scooter, ForkKnife, Storefront, Truck, List, CaretLeft, CaretRight, Star, Bell, WarningCircle, MagnifyingGlass, SignOut } from '@phosphor-icons/react';
+import { ChartBar, BookOpen, ChefHat, CreditCard, Package, Gear, ShoppingCart, X, Scooter, ForkKnife, Storefront, Truck, List, CaretRight, Star, Bell, WarningCircle, MagnifyingGlass, SignOut } from '@phosphor-icons/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AdminLayout } from '../layouts/AdminLayout';
@@ -26,6 +26,7 @@ import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAs
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { formatSelectedModifiers } from '../utils/productModifiers';
 import { FormSection } from '../components/common/FormSection';
+import { AdminDesktopSidebar } from '../components/Admin/AdminDesktopSidebar';
 
 const formatPlanCycle = (days: number) => {
   if (!Number.isFinite(days)) return '—';
@@ -2358,104 +2359,31 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       </div>
 
       <div className="w-full lg:flex lg:items-start lg:gap-4">
-        <aside
-          className={`hidden lg:block shrink-0 transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${sidebarCompact ? 'w-[72px]' : 'w-[280px]'}`}
-        >
-          <div
-            className="sticky top-0 z-[140] h-screen border-r border-slate-800 bg-slate-950 overflow-hidden flex flex-col"
-          >
-            <div className={`px-3 pt-3 pb-2 flex items-center shrink-0 ${sidebarCompact ? 'justify-center' : 'justify-between'}`}>
-              {!sidebarCompact && <p className="px-2 ds-admin-sidebar-title">Navegação</p>}
-              <button
-                type="button"
-                onClick={() => setSidebarCompact((prev) => !prev)}
-                className="ds-focus-ring inline-flex h-9 w-9 items-center justify-center rounded-xl border border-white/15 bg-white/10 text-slate-100 hover:bg-white/20 transition"
-                aria-label={sidebarCompact ? 'Expandir menu' : 'Minimizar menu'}
-                title={sidebarCompact ? 'Expandir menu' : 'Minimizar menu'}
-              >
-                {sidebarCompact ? <CaretRight size={16} weight="bold" /> : <CaretLeft size={16} weight="bold" />}
-              </button>
-            </div>
-            <div className="space-y-1.5 min-h-0 flex-1 overflow-y-auto overflow-x-visible px-2 pb-2">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = activeTab === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => handleNavSelect(item.id)}
-                    title={item.disabled ? 'Disponível no plano Pro · clique para upgrade' : undefined}
-                    aria-label={item.label}
-                    className={`group relative ds-admin-sidebar-item ds-focus-ring flex items-center ${
-                      sidebarCompact ? 'justify-center px-0' : 'justify-between gap-2'
-                    } ${
-                      isActive
-                        ? 'ds-admin-sidebar-item-active'
-                        : ''
-                    } ${item.disabled ? 'opacity-80 cursor-pointer border border-violet-300/50 bg-violet-500/10 hover:bg-violet-500/20' : ''}`}
-                  >
-                    <span className={`inline-flex items-center ${sidebarCompact ? '' : 'gap-2'}`}>
-                      <Icon size={16} weight={isActive ? 'fill' : 'duotone'} />
-                      {!sidebarCompact && item.label}
-                    </span>
-                    {!sidebarCompact && item.id === 'motoboys' && item.disabled && (
-                      <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${isActive ? 'bg-white/20' : 'bg-violet-100 text-violet-700'}`}>
-                        Pro
-                      </span>
-                    )}
-                    {!sidebarCompact && item.id === 'motoboys' && !item.disabled && pendingMotoboyRequests > 0 && (
-                      <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${isActive ? 'bg-white/20' : 'bg-amber-100 text-amber-700'}`}>
-                        {pendingMotoboyRequests}
-                      </span>
-                    )}
-                    {sidebarCompact && (
-                      <>
-                        {item.id === 'motoboys' && item.disabled && (
-                          <span className="absolute -top-1 -right-1 rounded-full bg-violet-600 text-white text-[9px] font-semibold px-1.5 py-0.5">
-                            Pro
-                          </span>
-                        )}
-                        {item.id === 'motoboys' && !item.disabled && pendingMotoboyRequests > 0 && (
-                          <span className="absolute -top-1 -right-1 rounded-full bg-amber-500 text-white text-[9px] font-semibold px-1.5 py-0.5">
-                            {pendingMotoboyRequests}
-                          </span>
-                        )}
-                        <span className="pointer-events-none absolute left-[calc(100%+10px)] top-1/2 -translate-y-1/2 whitespace-nowrap rounded-lg border border-slate-700 bg-slate-900 px-2 py-1 text-[11px] font-semibold text-white opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100">
-                          {item.label}
-                        </span>
-                      </>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-            <div className="mt-2 pt-2 px-2 border-t border-white/10 shrink-0">
-              <button
-                type="button"
-                onClick={() => {
-                  logout();
-                  navigate('/admin');
-                }}
-                className={`group relative ds-admin-sidebar-item ds-focus-ring flex items-center ${
-                  sidebarCompact ? 'justify-center px-0' : 'justify-between gap-2'
-                } text-rose-700 hover:bg-rose-50`}
-                aria-label="Sair da conta"
-                title="Sair"
-              >
-                <span className={`inline-flex items-center ${sidebarCompact ? '' : 'gap-2'}`}>
-                  <SignOut size={16} weight="bold" />
-                  {!sidebarCompact && 'Sair'}
-                </span>
-                {sidebarCompact && (
-                  <span className="pointer-events-none absolute left-[calc(100%+10px)] top-1/2 -translate-y-1/2 whitespace-nowrap rounded-lg border border-slate-700 bg-slate-900 px-2 py-1 text-[11px] font-semibold text-white opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100">
-                    Sair
-                  </span>
-                )}
-              </button>
-            </div>
-          </div>
-        </aside>
+        <AdminDesktopSidebar
+          items={navItems.map((item) => ({
+            id: item.id,
+            label: item.label,
+            icon: item.icon,
+            disabled: item.disabled,
+            badge:
+              item.id === 'motoboys'
+                ? item.disabled
+                  ? 'Pro'
+                  : pendingMotoboyRequests > 0
+                  ? pendingMotoboyRequests
+                  : undefined
+                : undefined,
+            tone: item.id === 'motoboys' && item.disabled ? 'violet' : item.id === 'motoboys' ? 'amber' : 'default',
+          }))}
+          activeId={activeTab}
+          compact={sidebarCompact}
+          onToggleCompact={() => setSidebarCompact((prev) => !prev)}
+          onSelect={handleNavSelect}
+          onLogout={() => {
+            logout();
+            navigate('/admin');
+          }}
+        />
 
         <div className="min-w-0 space-y-4 flex-1">
       {activeTab !== 'fila' && (
