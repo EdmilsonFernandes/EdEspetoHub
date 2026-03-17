@@ -653,6 +653,30 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
               className="w-full border border-gray-200 rounded-xl p-3 bg-gray-50/80 text-gray-500 cursor-not-allowed"
             />
             <p className="text-xs text-gray-500">Use esse slug para acessar o painel e a vitrine.</p>
+
+            <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold text-slate-800">Aceitar pedidos online</p>
+                  <p className="text-xs text-slate-500">Desative para usar a vitrine apenas como cardápio.</p>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={branding.isOrderingEnabled !== false}
+                  onClick={() => handleChange("isOrderingEnabled", !(branding.isOrderingEnabled !== false))}
+                  className={`relative inline-flex h-7 w-12 items-center rounded-full transition ${
+                    branding.isOrderingEnabled !== false ? 'bg-emerald-500' : 'bg-slate-300'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-5 w-5 transform rounded-full bg-white transition ${
+                      branding.isOrderingEnabled !== false ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>

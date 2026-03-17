@@ -27,6 +27,7 @@ export interface CreateStoreDto {
   contactEmail?: string;
   storePhone?: string;
   promoMessage?: string;
+  isOrderingEnabled?: boolean;
   segment?: string;
   deliveryRadiusKm?: number;
   deliveryFee?: number;

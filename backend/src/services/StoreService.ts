@@ -128,6 +128,7 @@ export class StoreService
         pixKey: normalizedPix ?? null,
         contactEmail: trimmedEmail || null,
         promoMessage: input.promoMessage?.toString().trim() || null,
+        isOrderingEnabled: input.isOrderingEnabled !== false,
         segment,
         deliveryRadiusKm: deliveryRadiusKm ?? null,
         deliveryFee: deliveryFee ?? null,
@@ -246,6 +247,10 @@ export class StoreService
       {
         const trimmedMessage = data.promoMessage?.toString().trim();
         store.settings.promoMessage = trimmedMessage || null;
+      }
+      if (data.isOrderingEnabled !== undefined)
+      {
+        store.settings.isOrderingEnabled = Boolean(data.isOrderingEnabled);
       }
       if (data.deliveryRadiusKm !== undefined)
       {

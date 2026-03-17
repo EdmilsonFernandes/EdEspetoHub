@@ -382,6 +382,7 @@ export const MenuView = ({
   onProceed,
   compactHeader = false,
   staffView = false,
+  isOrderingEnabled = true,
   userRole,
   isAuthenticated = false,
 }) => {
@@ -392,6 +393,7 @@ export const MenuView = ({
   const [activeCategoryKey, setActiveCategoryKey] = useState("");
   const [isCategorySheetOpen, setIsCategorySheetOpen] = useState(false);
   const [qtyPulseId, setQtyPulseId] = useState<string | null>(null);
+  const canOrder = isOrderingEnabled !== false;
   const buttonColor = branding?.accentColor || branding?.secondaryColor || "#0f172a";
   const categoryRefs = React.useRef({});
   const formatStoreAddress = (address = "") => {
@@ -894,6 +896,11 @@ export const MenuView = ({
             </div>
           </div>
         )}
+        {!canOrder && (
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+            Pedidos online desativados para esta loja. Consulte o cardápio e faça o pedido no balcão/mesa.
+          </div>
+        )}
         {filteredGrouped.map((category, index) => {
           const accentColors = [
             "ds-accent-red",
@@ -1079,6 +1086,17 @@ export const MenuView = ({
                         </div>
                       );
 
+                      if (!canOrder) {
+                        return (
+                          <div className="w-full flex flex-col items-end gap-2">
+                            {priceNode}
+                            <span className="text-[11px] font-semibold text-slate-500 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1">
+                              Pedidos só no balcão
+                            </span>
+                          </div>
+                        );
+                      }
+
                       if (itemQty <= 0) {
                         return (
                           <div className="w-full flex items-center justify-end gap-2">
@@ -1226,14 +1244,16 @@ export const MenuView = ({
         isOpen={isModalOpen}
         onClose={closeProductModal}
         onAddToCart={onUpdateCart}
+        readOnly={!canOrder}
+        readOnlyMessage="Pedidos apenas no balcão/mesa."
       />
 
       <div
         className={`fixed bottom-6 left-1/2 z-40 w-[92%] max-w-md -translate-x-1/2 transition-all duration-300 ${
-          cartItemsCount > 0 ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0 pointer-events-none"
+          cartItemsCount > 0 && canOrder ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0 pointer-events-none"
         }`}
       >
-        {cartItemsCount > 0 && (
+        {cartItemsCount > 0 && canOrder && (
           <button
             onClick={() => onProceed?.()}
             className="w-full bg-amber-500 text-white px-4 py-3 rounded-full shadow-2xl shadow-amber-500/35 flex justify-between items-center hover:brightness-95 active:scale-[0.99] transition-all text-sm sm:text-base"

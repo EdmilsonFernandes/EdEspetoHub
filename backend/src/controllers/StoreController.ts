@@ -60,6 +60,7 @@ const buildDemoStore = (slug: string) => {
         { day: 0, enabled: true, intervals: [ { start: '10:00', end: '21:00' } ] },
       ],
       orderTypes: [ 'delivery', 'pickup', 'table' ],
+      isOrderingEnabled: true,
     },
     owner: {
       id: 'demo-owner',

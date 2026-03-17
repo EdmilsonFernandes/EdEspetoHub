@@ -16,11 +16,13 @@ export interface ProductModalProps {
     cart?: Record<string, any>;
     isOpen: boolean;
     onClose: () => void;
-    onAddToCart: (product: any, quantity: number, options?: Record<string, any>) => void;
+    onAddToCart?: (product: any, quantity: number, options?: Record<string, any>) => void;
+    readOnly?: boolean;
+    readOnlyMessage?: string;
 
  }
 
-export const ProductModal = ({ product, cart = {}, isOpen, onClose, onAddToCart }: ProductModalProps) => {
+export const ProductModal = ({ product, cart = {}, isOpen, onClose, onAddToCart, readOnly = false, readOnlyMessage = 'Pedidos apenas no balcão.' }: ProductModalProps) => {
   const [cookingPoint, setCookingPoint] = useState("ao ponto");
   const [passSkewer, setPassSkewer] = useState(false);
   const [modifierCounts, setModifierCounts] = useState<Record<string, number>>({});
@@ -191,7 +193,7 @@ export const ProductModal = ({ product, cart = {}, isOpen, onClose, onAddToCart 
             </div>
           )}
 
-          {showEspetoOptions && (
+          {!readOnly && showEspetoOptions && (
             <div className="space-y-3">
               <div>
                 <label className="text-sm font-semibold text-gray-700">Ponto da carne</label>
@@ -215,7 +217,7 @@ export const ProductModal = ({ product, cart = {}, isOpen, onClose, onAddToCart 
               </label>
             </div>
           )}
-          {availableModifiers.length > 0 && (
+          {!readOnly && availableModifiers.length > 0 && (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <h4 className="text-sm font-bold uppercase tracking-wide text-slate-500 inline-flex items-center gap-1.5">
@@ -276,7 +278,7 @@ export const ProductModal = ({ product, cart = {}, isOpen, onClose, onAddToCart 
               </div>
             </div>
           )}
-          {(availableModifiers.length > 0 || showEspetoOptions) && (
+          {!readOnly && (availableModifiers.length > 0 || showEspetoOptions) && (
             <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700">
               <div className="flex items-center justify-between">
                 <span className="font-semibold">Subtotal do item</span>
@@ -286,7 +288,13 @@ export const ProductModal = ({ product, cart = {}, isOpen, onClose, onAddToCart 
               </div>
             </div>
           )}
+          {readOnly && (
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-700">
+              {readOnlyMessage}
+            </div>
+          )}
         </div>
+        {!readOnly && (
         <div className="sticky bottom-0 z-20 border-t border-slate-200 bg-white px-4 py-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 rounded-2xl bg-slate-100 px-2 py-1.5">
@@ -313,14 +321,14 @@ export const ProductModal = ({ product, cart = {}, isOpen, onClose, onAddToCart 
                 onClick={() => {
                   if (itemQty === 0) {
                     if (currentSelectionQty > 0) {
-                      onAddToCart(product, -currentSelectionQty, selectedOptions);
+                      onAddToCart?.(product, -currentSelectionQty, selectedOptions);
                     }
                     handleCloseImmediate();
                     return;
                   }
                   const deltaQty = currentSelectionQty > 0 ? itemQty - currentSelectionQty : itemQty;
                   if (deltaQty !== 0) {
-                    onAddToCart(product, deltaQty, selectedOptions);
+                    onAddToCart?.(product, deltaQty, selectedOptions);
                   }
                   setItemQty(1);
                   handleClose();
@@ -342,6 +350,7 @@ export const ProductModal = ({ product, cart = {}, isOpen, onClose, onAddToCart 
             </div>
           </div>
         </div>
+        )}
       </div>
     </div>
   );

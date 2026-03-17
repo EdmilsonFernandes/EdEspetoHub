@@ -63,6 +63,9 @@ export class StoreSettings
   @Column({ name: 'promo_message', type: 'text', nullable: true })
   promoMessage?: string | null;
 
+  @Column({ name: 'is_ordering_enabled', type: 'boolean', default: true })
+  isOrderingEnabled!: boolean;
+
   @Column({ name: 'segment', type: 'varchar', nullable: true, default: 'outros' })
   segment?: string | null;
 

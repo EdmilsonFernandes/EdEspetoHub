@@ -446,6 +446,7 @@ export class AuthService
         state: trimmedState || null,
         primaryColor: storePayload.primaryColor || segmentPreset.primaryColor,
         secondaryColor: storePayload.secondaryColor || segmentPreset.secondaryColor,
+        isOrderingEnabled: storePayload.isOrderingEnabled !== false,
         segment,
         socialLinks: sanitizeSocialLinks(storePayload.socialLinks),
         openingHours: storePayload.openingHours ?? [],

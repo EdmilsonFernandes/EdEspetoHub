@@ -54,6 +54,7 @@ export function StorePage() {
   const [storeSubscription, setStoreSubscription] = useState(null);
   const [storePlanExempt, setStorePlanExempt] = useState(false);
   const [storeReviewSummary, setStoreReviewSummary] = useState<any | null>(null);
+  const [storeOrderingEnabled, setStoreOrderingEnabled] = useState(true);
   const [topProducts, setTopProducts] = useState([]);
   const [reorderApplied, setReorderApplied] = useState(false);
   const autoTrackRef = useRef(false);
@@ -334,6 +335,14 @@ export function StorePage() {
   }, []);
 
   useEffect(() => {
+    if (storeOrderingEnabled || user?.token) return;
+    setCart({});
+    if (view === 'cart' || view === 'success') {
+      setView('menu');
+    }
+  }, [storeOrderingEnabled, user?.token, view]);
+
+  useEffect(() => {
     const savedSession = localStorage.getItem('adminSession');
     if (savedSession) {
       const parsedSession = JSON.parse(savedSession);
@@ -417,6 +426,7 @@ export function StorePage() {
           setStoreOpenNow(isStoreOpenNow(normalizedHours));
           setStoreSubscription(data.subscription || null);
           setStorePlanExempt(Boolean(data.settings?.planExempt || data.subscription?.planExempt));
+          setStoreOrderingEnabled(data.settings?.isOrderingEnabled !== false);
           setStoreReviewSummary(data.reviewSummary || null);
           applyStoreMeta(data);
         }
@@ -1705,6 +1715,7 @@ export function StorePage() {
               storeCoords={storeCoords}
               compactHeader={isMobile}
               staffView={Boolean(canUseAdminPrintFlow)}
+              isOrderingEnabled={storeOrderingEnabled || Boolean(user?.token)}
             />
           </div>
         )}

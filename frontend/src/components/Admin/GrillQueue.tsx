@@ -36,6 +36,7 @@ import { getPaymentMethodMeta } from "../../utils/paymentAssets";
 import { useAuth } from "../../contexts/AuthContext";
 import { buildPixPayload } from "../../utils/pixPayload";
 import { printReceiptAsImage } from "../../utils/printReceiptImage";
+import { exportToCsv } from "../../utils/export";
 
 const OrderSummaryCard = ({
   order,
@@ -1327,6 +1328,34 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       hasBase: previousSales > 0,
     };
   }, [reportRange, reportFrom, reportTo, completedOrders, reportSummary.sales]);
+  const handleExportSalesCsv = () => {
+    const headers = [ 'Data', 'Pedido', 'Cliente', 'Tipo', 'Pagamento', 'Itens', 'Total' ];
+    const rows = reportCompleted.map((order: any) => {
+      const created = Number(order?.createdAt || 0);
+      const dateLabel = created
+        ? new Date(created).toLocaleString('pt-BR', { timeZone: SAO_PAULO_TZ })
+        : '';
+      const itemsLabel = Array.isArray(order?.items)
+        ? order.items
+            .map((item: any) => {
+              const qty = Number(item?.qty ?? item?.quantity ?? 0);
+              const name = String(item?.name || item?.product?.name || 'Item');
+              return `${qty}x ${name}`;
+            })
+            .join(' | ')
+        : '';
+      return [
+        dateLabel,
+        formatOrderDisplayId(order?.id, storeSlug),
+        order?.customerName || order?.name || '',
+        formatOrderType(order?.type),
+        getPaymentMethodMeta(order?.payment)?.label || formatOrderType(order?.payment),
+        itemsLabel,
+        Number(order?.total || 0),
+      ];
+    });
+    exportToCsv(`vendas-${storeSlug || 'loja'}-${getNowKeyInSaoPaulo()}.csv`, headers, rows);
+  };
   const handlePrintDailySummary = async () => {
     if (isPrintingDaySummary) return;
     const nowLabel = new Date().toLocaleString('pt-BR', { timeZone: SAO_PAULO_TZ });
@@ -2472,7 +2501,8 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       {activeTab === 'completed' && (
         <div className="bg-slate-50 rounded-2xl border border-slate-200 shadow-sm p-3 sm:p-5">
           <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-3 sm:p-4 shadow-sm">
-            <div className="flex items-center gap-2 overflow-x-auto [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden whitespace-nowrap">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center gap-2 overflow-x-auto [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden whitespace-nowrap">
               {[
                 { id: 'today', label: 'Hoje' },
                 { id: 'yesterday', label: 'Ontem' },
@@ -2492,6 +2522,17 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                   {period.label}
                 </button>
               ))}
+              </div>
+              {isAdminUser && (
+                <button
+                  type="button"
+                  onClick={handleExportSalesCsv}
+                  className="ml-auto inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+                >
+                  <CurrencyDollar size={13} weight="duotone" />
+                  Exportar Excel (.csv)
+                </button>
+              )}
             </div>
             {reportRange === 'custom' && (
               <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">

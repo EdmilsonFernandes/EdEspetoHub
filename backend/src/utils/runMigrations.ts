@@ -115,6 +115,15 @@ export async function runMigrations() {
   `);
   await AppDataSource.query(`
     ALTER TABLE IF EXISTS store_settings
+    ADD COLUMN IF NOT EXISTS is_ordering_enabled BOOLEAN DEFAULT TRUE;
+  `);
+  await AppDataSource.query(`
+    UPDATE store_settings
+    SET is_ordering_enabled = TRUE
+    WHERE is_ordering_enabled IS NULL;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS store_settings
     ADD COLUMN IF NOT EXISTS segment VARCHAR DEFAULT 'outros';
   `);
   await AppDataSource.query(`
