@@ -1511,7 +1511,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     }
   }, [completedPage, completedTotalPages]);
 
-  const getStatusStyles = (status, orderType) => {
+  const getStatusStyles = (status, orderType, order?: any) => {
     const normalizedStatus = String(status || '').toLowerCase();
     if (normalizedStatus === "done" || normalizedStatus === "delivered" || normalizedStatus === "finished") {
       const label = orderType === "delivery" ? "Finalizado" : "Finalizado";
@@ -1521,7 +1521,11 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       return { label: "Em rota", className: "bg-blue-50 text-blue-700 border-blue-100" };
     }
     if (orderType === "delivery" && normalizedStatus === "waiting_for_motoboy") {
-      return { label: "Aguardando retirada", className: "bg-indigo-50 text-indigo-700 border-indigo-100" };
+      const hasAssignedMotoboy = Boolean(order?.delivery?.motoboy?.id || order?.delivery?.motoboyId);
+      if (hasAssignedMotoboy) {
+        return { label: "Aguardando retirada", className: "bg-indigo-50 text-indigo-700 border-indigo-100" };
+      }
+      return { label: "Buscando entregador", className: "bg-amber-50 text-amber-700 border-amber-100" };
     }
     if (orderType === "delivery" && normalizedStatus === "ready_for_delivery") {
       return { label: "Pronto p/ retirada", className: "bg-violet-50 text-violet-700 border-violet-100" };
@@ -1736,9 +1740,15 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
 
       {order.status === "waiting_for_motoboy" && order.type === "delivery" && (
         <div className="w-full">
-          <div className="mb-2 text-[11px] font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100 rounded-lg px-2.5 py-1">
-            Entregador {order?.delivery?.motoboy?.name ? `${String(order.delivery.motoboy.name).split(' ')[0]} ` : ''}está vindo buscar.
-          </div>
+          {order?.delivery?.motoboy?.name ? (
+            <div className="mb-2 text-[11px] font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100 rounded-lg px-2.5 py-1">
+              Entregador {String(order.delivery.motoboy.name).split(' ')[0]} está vindo buscar.
+            </div>
+          ) : (
+            <div className="mb-2 text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-2.5 py-1">
+              Buscando entregador para retirada.
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -1871,7 +1881,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
               const orderAgeMs = order?.createdAt ? Date.now() - new Date(order.createdAt).getTime() : 0;
               const isArchived = false;
               const isLate = orderAgeMs > PREP_SLA_MS;
-              const statusMeta = getStatusStyles(order.status, order.type);
+              const statusMeta = getStatusStyles(order.status, order.type, order);
               const typeMeta = orderTypeMeta(order);
               const paymentLabel = getPaymentMethodMeta(order.payment).label;
               const totalLabel = formatCurrency(Number(order.total || 0));
@@ -2075,9 +2085,9 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                     </div>
                   )}
                   <span
-                    className={`px-2 py-0.5 text-[11px] font-bold rounded-full border ${getStatusStyles(order.status, order.type).className}`}
+                    className={`px-2 py-0.5 text-[11px] font-bold rounded-full border ${getStatusStyles(order.status, order.type, order).className}`}
                   >
-                    {getStatusStyles(order.status, order.type).label}
+                    {getStatusStyles(order.status, order.type, order).label}
                   </span>
                   <div className="px-2.5 py-0.5 rounded-full bg-brand-primary text-white font-black flex items-center gap-1.5 shadow-sm text-[11px] ring-2 ring-white/40">
                     <Clock size={11} weight="duotone" className="text-white" />
@@ -2653,7 +2663,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                     <p className="text-xs text-slate-400">{formatDateTime(order.createdAt)}</p>
                   </div>
                   {(() => {
-                    const statusMeta = getStatusStyles(order.status, order.type);
+                    const statusMeta = getStatusStyles(order.status, order.type, order);
                     return (
                       <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border ${statusMeta.className}`}>
                         {statusMeta.label}
