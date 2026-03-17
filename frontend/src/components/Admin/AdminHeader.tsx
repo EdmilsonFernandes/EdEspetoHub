@@ -6,6 +6,7 @@ import {
   ChevronDown,
   KeyRound,
   LogOut,
+  Menu,
   MapPin,
   Store as StoreIcon,
   Target,
@@ -386,6 +387,15 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 ml-auto">
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new CustomEvent('admin:open-global-nav'))}
+            className="md:hidden inline-flex h-9 w-9 items-center justify-center rounded-md text-slate-600 hover:bg-slate-100 transition-colors"
+            title="Abrir menu"
+            aria-label="Abrir menu"
+          >
+            <Menu size={16} />
+          </button>
           <button
             type="button"
             onClick={toggleFocusMode}
