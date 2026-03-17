@@ -69,7 +69,10 @@ export function AdminMobileBottomNav() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     let lastY = window.scrollY || 0;
+    let anchorY = lastY;
     let ticking = false;
+    const HIDE_DELTA = 28;
+    const SHOW_DELTA = 18;
 
     const onScroll = () => {
       if (ticking) return;
@@ -77,21 +80,27 @@ export function AdminMobileBottomNav() {
       window.requestAnimationFrame(() => {
         const currentY = window.scrollY || 0;
         const delta = currentY - lastY;
-        if (Math.abs(delta) >= 6) {
+        if (Math.abs(delta) >= 4) {
           if (delta > 0 && currentY > 80) {
-            setIsVisible(false);
+            if (isVisible && currentY - anchorY >= HIDE_DELTA) {
+              setIsVisible(false);
+              anchorY = currentY;
+            }
           } else if (delta < 0) {
-            setIsVisible(true);
+            if (!isVisible && anchorY - currentY >= SHOW_DELTA) {
+              setIsVisible(true);
+              anchorY = currentY;
+            }
           }
-          lastY = currentY;
         }
+        lastY = currentY;
         ticking = false;
       });
     };
 
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+  }, [isVisible]);
 
   const openCatalog = () => {
     if (storeSlug) {
@@ -138,9 +147,10 @@ export function AdminMobileBottomNav() {
 
   return (
     <nav
-      className={`lg:hidden fixed inset-x-0 bottom-0 z-[260] pointer-events-none transition-transform duration-300 ease-in-out ${
-        isVisible ? 'translate-y-0' : 'translate-y-full'
-      }`}
+      className="lg:hidden fixed inset-x-0 bottom-0 z-[260] pointer-events-none transition-transform duration-300 ease-in-out"
+      style={{
+        transform: isVisible ? 'translateY(0)' : 'translateY(calc(100% - 4px))',
+      }}
     >
       <ul className={`pointer-events-auto mx-auto grid ${items.length <= 2 ? 'grid-cols-2' : 'grid-cols-4'} gap-1.5 max-w-none rounded-none border-t border-white/10 bg-slate-900/80 p-2 pb-[max(env(safe-area-inset-bottom),8px)] shadow-none backdrop-blur-lg`}>
         {items.map((item) => {
