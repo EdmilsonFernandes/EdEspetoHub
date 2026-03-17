@@ -2308,8 +2308,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     setMobileDrawerOpen(false);
   };
 
-  const sidebarWidth = sidebarCompact ? 72 : 280;
-
   return (
     <AdminLayout contextLabel="Painel da Loja" fluid>
       <div className="lg:hidden sticky top-2 z-[95]">
@@ -2359,10 +2357,12 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         </div>
       </div>
 
-      <div className="w-full">
-        <aside className="hidden lg:block">
+      <div className="w-full lg:flex lg:items-start lg:gap-4">
+        <aside
+          className={`hidden lg:block shrink-0 transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${sidebarCompact ? 'w-[72px]' : 'w-[280px]'}`}
+        >
           <div
-            className={`fixed left-0 top-0 z-[140] h-screen border-r border-slate-800 bg-slate-950 overflow-hidden flex flex-col transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${sidebarCompact ? 'w-[72px]' : 'w-[280px]'}`}
+            className="sticky top-0 z-[140] h-screen border-r border-slate-800 bg-slate-950 overflow-hidden flex flex-col"
           >
             <div className={`px-3 pt-3 pb-2 flex items-center shrink-0 ${sidebarCompact ? 'justify-center' : 'justify-between'}`}>
               {!sidebarCompact && <p className="px-2 ds-admin-sidebar-title">Navegação</p>}
@@ -2388,7 +2388,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                     title={item.disabled ? 'Disponível no plano Pro · clique para upgrade' : undefined}
                     aria-label={item.label}
                     className={`group relative ds-admin-sidebar-item ds-focus-ring flex items-center ${
-                      sidebarCompact ? 'justify-center px-2.5' : 'justify-between gap-2'
+                      sidebarCompact ? 'justify-center px-0' : 'justify-between gap-2'
                     } ${
                       isActive
                         ? 'ds-admin-sidebar-item-active'
@@ -2438,7 +2438,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                   navigate('/admin');
                 }}
                 className={`group relative ds-admin-sidebar-item ds-focus-ring flex items-center ${
-                  sidebarCompact ? 'justify-center px-2.5' : 'justify-between gap-2'
+                  sidebarCompact ? 'justify-center px-0' : 'justify-between gap-2'
                 } text-rose-700 hover:bg-rose-50`}
                 aria-label="Sair da conta"
                 title="Sair"
@@ -2457,10 +2457,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
           </div>
         </aside>
 
-        <div
-          className="min-w-0 space-y-4 transition-[margin-left] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
-          style={isDesktopLayout ? { marginLeft: `${sidebarWidth + 16}px` } : undefined}
-        >
+        <div className="min-w-0 space-y-4 flex-1">
       {activeTab !== 'fila' && (
       <section className="hidden md:flex relative z-[220] items-start justify-between gap-4 rounded-2xl border border-slate-200 bg-white/90 backdrop-blur-sm px-4 py-3 shadow-[0_20px_45px_-36px_rgba(15,23,42,0.5)] overflow-visible">
         <div className="min-w-0">
