@@ -1264,7 +1264,11 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   });
   const [sidebarCompact, setSidebarCompact] = useState(() => {
     if (typeof window === 'undefined') return false;
-    return localStorage.getItem('adminSidebar:compact') === 'true';
+    const savedPreference = localStorage.getItem('adminSidebar:compact');
+    if (savedPreference === null) {
+      return window.matchMedia('(min-width: 1024px)').matches;
+    }
+    return savedPreference === 'true';
   });
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [commandOpen, setCommandOpen] = useState(false);
