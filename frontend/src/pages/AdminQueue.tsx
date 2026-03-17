@@ -12,6 +12,10 @@ export function AdminQueue() {
   const { auth, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [isDesktopLayout, setIsDesktopLayout] = React.useState(() => {
+    if (typeof window === 'undefined') return true;
+    return window.matchMedia('(min-width: 1024px)').matches;
+  });
   const [sidebarCompact, setSidebarCompact] = React.useState(() => {
     if (typeof window === 'undefined') return false;
     const savedPreference = localStorage.getItem('adminSidebar:compact');
@@ -36,6 +40,18 @@ export function AdminQueue() {
   React.useEffect(() => {
     localStorage.setItem('adminSidebar:compact', String(sidebarCompact));
   }, [sidebarCompact]);
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const media = window.matchMedia('(min-width: 1024px)');
+    const onChange = () => setIsDesktopLayout(media.matches);
+    onChange();
+    if (media.addEventListener) {
+      media.addEventListener('change', onChange);
+      return () => media.removeEventListener('change', onChange);
+    }
+    media.addListener(onChange);
+    return () => media.removeListener(onChange);
+  }, []);
 
   const desktopNavItems = React.useMemo(
     () =>
@@ -114,9 +130,12 @@ export function AdminQueue() {
             navigate('/admin');
           }}
         />
-        <div className="min-w-0 flex-1 space-y-4">
+        <div
+          className="min-w-0 flex-1 space-y-4 transition-[margin-left] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
+          style={isDesktopLayout ? { marginLeft: `${sidebarCompact ? 80 : 260}px` } : undefined}
+        >
         <AdminHeader />
-        <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm overflow-x-hidden">
+        <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm overflow-x-hidden lg:-mt-8 relative z-20">
           <GrillQueue forcedTab={forcedTab as 'queue' | 'inroute' | 'completed'} />
         </div>
         </div>

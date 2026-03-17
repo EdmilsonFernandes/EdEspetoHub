@@ -15,6 +15,10 @@ import { AdminDesktopSidebar } from '../components/Admin/AdminDesktopSidebar';
 export function AdminOrders() {
   const { auth, logout } = useAuth();
   const navigate = useNavigate();
+  const [isDesktopLayout, setIsDesktopLayout] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    return window.matchMedia('(min-width: 1024px)').matches;
+  });
   const [orders, setOrders] = useState<any[]>([]);
   const [statusFilter, setStatusFilter] = useState('all');
   const [query, setQuery] = useState('');
@@ -50,6 +54,18 @@ export function AdminOrders() {
   useEffect(() => {
     localStorage.setItem('adminSidebar:compact', String(sidebarCompact));
   }, [sidebarCompact]);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const media = window.matchMedia('(min-width: 1024px)');
+    const onChange = () => setIsDesktopLayout(media.matches);
+    onChange();
+    if (media.addEventListener) {
+      media.addEventListener('change', onChange);
+      return () => media.removeEventListener('change', onChange);
+    }
+    media.addListener(onChange);
+    return () => media.removeListener(onChange);
+  }, []);
 
   const desktopNavItems = useMemo(
     () =>
@@ -312,10 +328,13 @@ export function AdminOrders() {
             navigate('/admin');
           }}
         />
-        <div className="min-w-0 flex-1 space-y-6">
+        <div
+          className="min-w-0 flex-1 space-y-6 transition-[margin-left] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
+          style={isDesktopLayout ? { marginLeft: `${sidebarCompact ? 80 : 260}px` } : undefined}
+        >
         <AdminHeader contextLabel="Pedidos" />
 
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm lg:-mt-8 relative z-20">
           <div className="flex items-center justify-between gap-3 mb-4">
             <div>
               <h2 className="text-lg font-bold text-slate-800">Lista de pedidos</h2>

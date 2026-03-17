@@ -30,11 +30,11 @@ export function AdminDesktopSidebar({
 }: AdminDesktopSidebarProps) {
   return (
     <aside
-      className={`hidden lg:block shrink-0 transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
-        compact ? 'w-[72px]' : 'w-[280px]'
+      className={`hidden lg:block fixed left-0 top-0 bottom-0 z-[50] transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+        compact ? 'w-[80px]' : 'w-[260px]'
       }`}
     >
-      <div className="sticky top-0 z-[140] h-screen border-r border-slate-800 bg-slate-950 overflow-hidden flex flex-col">
+      <div className="h-full border-r border-slate-800 bg-slate-950 overflow-hidden flex flex-col rounded-none shadow-none">
         <div className={`px-3 pt-3 pb-2 flex items-center shrink-0 ${compact ? 'justify-center' : 'justify-between'}`}>
           {!compact && <p className="px-2 ds-admin-sidebar-title">Navegação</p>}
           <button
@@ -131,4 +131,3 @@ export function AdminDesktopSidebar({
     </aside>
   );
 }
-
