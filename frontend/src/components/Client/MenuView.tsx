@@ -108,11 +108,9 @@ const Header = ({
   return (
     <div className={`w-full sticky top-0 z-50 ${compact ? 'pb-2' : 'pb-3'} pt-2`}>
       <div className="max-w-6xl mx-auto px-3 sm:px-4">
-        <div
-          className={`relative overflow-hidden rounded-2xl border border-slate-100 bg-white px-3 sm:px-5 ${compact ? 'py-2' : 'py-3 sm:py-3.5'} shadow-sm`}
-        >
+        <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
           <div
-            className="absolute inset-x-0 top-0 h-14 sm:h-16"
+            className={`relative ${compact ? "h-[190px] sm:h-[220px]" : "h-[210px] sm:h-[240px] lg:h-[300px]"} rounded-b-3xl overflow-hidden`}
             style={
               headerBanner
                 ? {
@@ -122,35 +120,30 @@ const Header = ({
                   }
                 : { backgroundColor: headerPrimaryColor }
             }
-          />
-          <div className="absolute inset-x-0 top-0 h-14 sm:h-16 bg-gradient-to-b from-black/25 via-black/20 to-transparent" />
+          >
+            <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/30 to-black/10" />
+          </div>
 
-          <div className="relative mt-2 flex flex-wrap items-start gap-3 sm:gap-4 sm:flex-nowrap">
-            {(!compact || (compact && branding?.logoUrl)) && (
-              <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-xl overflow-hidden border border-slate-200 bg-white shadow-sm flex-shrink-0 flex items-center justify-center">
-                {branding?.logoUrl ? (
-                  <img
-                    src={branding.logoUrl}
-                    alt={branding.brandName}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <span className="font-black text-base sm:text-lg text-slate-700">{previewInitials || "JC"}</span>
-                )}
-              </div>
-            )}
+          <div className="relative px-4 sm:px-6 pb-4 pt-11 sm:pt-4">
+            <div className="absolute -top-10 sm:-top-12 left-1/2 -translate-x-1/2 sm:left-6 sm:translate-x-0 h-20 w-20 sm:h-24 sm:w-24 rounded-full overflow-hidden border-4 border-white bg-white shadow-xl flex items-center justify-center">
+              {branding?.logoUrl ? (
+                <img src={branding.logoUrl} alt={branding.brandName} className="w-full h-full object-cover" />
+              ) : (
+                <span className="font-black text-xl text-slate-700">{previewInitials || "JC"}</span>
+              )}
+            </div>
 
-            <div className="min-w-0 flex-1">
-              <h1 className={`${compact ? 'text-sm' : 'text-lg sm:text-xl'} font-black text-slate-800 truncate`}>
+            <div className="sm:pl-32 flex flex-col items-center text-center sm:items-start sm:text-left">
+              <h1 className={`${compact ? 'text-lg' : 'text-xl sm:text-2xl'} font-black text-slate-900 truncate max-w-full`}>
                 {branding?.brandName || "Sua Loja"}
               </h1>
-              <div className="mt-1.5 flex flex-wrap items-center gap-2">
+              <div className="mt-1.5 flex flex-wrap items-center justify-center sm:justify-start gap-2">
                 {segmentLabel !== "Comércio" && (
-                  <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-slate-600">
+                  <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-slate-700">
                     {segmentLabel}
                   </span>
                 )}
-                <div className="inline-flex items-center gap-1.5 text-sm text-slate-600 font-medium">
+                <div className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-slate-600 font-semibold">
                   <span className={`h-2 w-2 rounded-full ${isOpenNow ? "bg-emerald-500 animate-pulse" : "bg-orange-500"}`} />
                   <span>
                     {isOpenNow ? "Aberto" : "Fechado"}
@@ -158,8 +151,9 @@ const Header = ({
                   </span>
                 </div>
               </div>
+
               {!compact && (
-                <div className="mt-2 flex flex-wrap items-center gap-1.5 sm:gap-2">
+                <div className="mt-2 flex flex-wrap items-center justify-center sm:justify-start gap-1.5 sm:gap-2">
                   {storeSlug && (
                     <a
                       href={storeUrl}
@@ -196,7 +190,7 @@ const Header = ({
               )}
             </div>
 
-            <div className="w-full sm:w-auto flex flex-row items-center justify-end gap-2 order-last sm:order-none sm:flex-shrink-0">
+            <div className="mt-3 sm:mt-0 sm:absolute sm:right-6 sm:bottom-4 flex flex-row items-center justify-center sm:justify-end gap-2">
               {onOpenQueue && (
                 <div className="flex items-center rounded-full border border-slate-200 bg-slate-50 p-0.5">
                   <button
