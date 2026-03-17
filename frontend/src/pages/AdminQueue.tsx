@@ -31,8 +31,8 @@ export function AdminQueue() {
   }
 
   return (
-    <AdminLayout contextLabel="Central de Pedidos" showHeader={false}>
-      <div className="mx-auto w-full max-w-[1320px] space-y-4">
+    <AdminLayout contextLabel="Central de Pedidos" showHeader={false} fluid>
+      <div className="w-full space-y-4">
         <AdminHeader />
         <div className="hidden lg:flex items-center justify-between gap-3">
           {isOperatorUser ? (
