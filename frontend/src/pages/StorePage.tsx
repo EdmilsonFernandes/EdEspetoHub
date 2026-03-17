@@ -1255,6 +1255,17 @@ export function StorePage() {
     }
     navigate('/admin/queue');
   };
+  const handleStoreSessionLogout = () => {
+    try {
+      localStorage.removeItem('adminSession');
+    } catch {}
+    setUser(null);
+    if (storeSlug) {
+      navigate(`/${storeSlug}`, { replace: true });
+      return;
+    }
+    navigate('/', { replace: true });
+  };
   const goToDemoGuide = () => {
     if (typeof window !== 'undefined') {
       sessionStorage.setItem('scrollToDemoFlow', 'true');
@@ -1682,7 +1693,10 @@ export function StorePage() {
               onUpdateCart={updateCart}
               onProceed={() => setView('cart')}
               onOpenQueue={isStoreAdmin ? requireAdminSession : undefined}
-              onOpenAdmin={isStoreAdmin ? () => navigate('/admin/dashboard') : undefined}
+              onOpenAdmin={isStoreAdmin && normalizedRole === 'admin' ? () => navigate('/admin/dashboard') : undefined}
+              onLogout={isStoreAdmin ? handleStoreSessionLogout : undefined}
+              userRole={normalizedRole}
+              isAuthenticated={Boolean(user?.token)}
               isOpenNow={storeOpenNow}
               whatsappNumber={storePhone}
               promoMessage={promoMessage}

@@ -2,6 +2,7 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { GrillQueue } from '../components/Admin/GrillQueue';
+import { AdminHeader } from '../components/Admin/AdminHeader';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { useAuth } from '../contexts/AuthContext';
 import { BookOpen, SignOut, SquaresFour } from '@phosphor-icons/react';
@@ -32,6 +33,7 @@ export function AdminQueue() {
   return (
     <AdminLayout contextLabel="Central de Pedidos" showHeader={false}>
       <div className="mx-auto w-full max-w-[1320px] space-y-4">
+        <AdminHeader />
         <div className="hidden lg:flex items-center justify-between gap-3">
           {isOperatorUser ? (
             <div className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white p-1 shadow-sm">

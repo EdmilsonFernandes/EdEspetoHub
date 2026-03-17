@@ -5,6 +5,7 @@ import {
   X,
   Plus,
   Minus,
+  SignOut,
   MagnifyingGlass,
   MapPin,
   ChefHat,
@@ -69,10 +70,17 @@ const Header = ({
   whatsappNumber,
   onOpenQueue,
   onOpenAdmin,
+  onLogout,
+  userRole,
+  isAuthenticated,
   compact,
   isOpenNow,
   todayHoursLabel
 }) => {
+  const normalizedRole = String(userRole || "").toLowerCase();
+  const isAdminUser = normalizedRole === "admin";
+  const isOperatorUser = normalizedRole === "operator" || normalizedRole === "churrasqueiro";
+  const isLogged = Boolean(isAuthenticated || isAdminUser || isOperatorUser);
   const [mobileCollapsed, setMobileCollapsed] = useState(false);
   const storeSlug = branding?.espetoId || "";
   const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
@@ -249,7 +257,8 @@ const Header = ({
               )}
             </div>
 
-            <div className="mt-3 sm:mt-0 sm:absolute sm:right-6 sm:bottom-4 flex flex-row items-center justify-center sm:justify-end gap-2">
+            {isLogged && (
+              <div className="mt-3 sm:mt-0 sm:absolute sm:right-6 sm:bottom-4 flex flex-row items-center justify-center sm:justify-end gap-2">
               {onOpenQueue && (
                 <div className="flex items-center rounded-full border border-slate-200 bg-slate-50 p-0.5">
                   <button
@@ -267,7 +276,7 @@ const Header = ({
                   </button>
                 </div>
               )}
-              {onOpenAdmin && (
+              {isAdminUser && onOpenAdmin && (
                 <button
                   onClick={onOpenAdmin}
                   className="px-3 py-2 rounded-full text-xs font-semibold border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 transition flex items-center gap-1 whitespace-nowrap"
@@ -276,9 +285,20 @@ const Header = ({
                   {!compact && <span className="hidden sm:inline">Painel</span>}
                 </button>
               )}
+              {isOperatorUser && onLogout && (
+                <button
+                  type="button"
+                  onClick={onLogout}
+                  className="px-3 py-2 rounded-full text-xs font-semibold border border-rose-200 bg-white text-rose-700 hover:bg-rose-50 transition inline-flex items-center gap-1 whitespace-nowrap"
+                >
+                  <SignOut size={12} weight="bold" />
+                  Sair
+                </button>
+              )}
             </div>
+            )}
           </div>
-          {compact && !mobileCollapsed && (
+          {compact && !mobileCollapsed && isLogged && (
             <div className="sm:hidden relative px-3 pb-2">
               <div className="flex flex-row items-center justify-end gap-2">
                 {onOpenQueue && (
@@ -295,13 +315,23 @@ const Header = ({
                     </button>
                   </div>
                 )}
-                {onOpenAdmin && (
+                {isAdminUser && onOpenAdmin && (
                   <button
                     onClick={onOpenAdmin}
                     className="px-3 py-2 rounded-full text-xs font-semibold border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 transition flex items-center gap-1 whitespace-nowrap"
                   >
                     <SquaresFour size={12} weight="duotone" />
                     Painel
+                  </button>
+                )}
+                {isOperatorUser && onLogout && (
+                  <button
+                    type="button"
+                    onClick={onLogout}
+                    className="px-3 py-2 rounded-full text-xs font-semibold border border-rose-200 bg-white text-rose-700 hover:bg-rose-50 transition inline-flex items-center gap-1 whitespace-nowrap"
+                  >
+                    <SignOut size={12} weight="bold" />
+                    Sair
                   </button>
                 )}
               </div>
@@ -333,9 +363,12 @@ export const MenuView = ({
   showHeader = true,
   onOpenQueue,
   onOpenAdmin,
+  onLogout,
   onProceed,
   compactHeader = false,
   staffView = false,
+  userRole,
+  isAuthenticated = false,
 }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -578,6 +611,9 @@ export const MenuView = ({
           whatsappNumber={whatsappNumber}
           onOpenQueue={onOpenQueue}
           onOpenAdmin={onOpenAdmin}
+          onLogout={onLogout}
+          userRole={userRole}
+          isAuthenticated={isAuthenticated}
           compact={compactHeader}
           isOpenNow={isOpenNow}
           todayHoursLabel={todayHoursLabel}
