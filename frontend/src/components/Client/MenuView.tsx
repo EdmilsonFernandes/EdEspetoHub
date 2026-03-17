@@ -313,7 +313,7 @@ const Header = ({
             </div>
             )}
           </div>
-          {compact && !mobileCollapsed && isLogged && (
+          {compact && !mobileCollapsedStable && isLogged && (
             <div className="sm:hidden relative px-3 pb-2">
               <div className="flex flex-row items-center justify-end gap-2">
                 {onOpenQueue && (
