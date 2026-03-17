@@ -3147,8 +3147,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       )}
 
       {!isDesktopLayout && mobileDrawerOpen && (
-        <div className="lg:hidden ds-sheet-backdrop z-[400]" onClick={() => setMobileDrawerOpen(false)}>
-          <aside className="ds-sheet-panel h-full w-full rounded-none max-h-none overflow-y-auto pb-[calc(env(safe-area-inset-bottom)+20px)]" onClick={(event) => event.stopPropagation()}>
+        <div className="lg:hidden ds-sheet-backdrop ds-mobile-menu-backdrop z-[400]" onClick={() => setMobileDrawerOpen(false)}>
+          <aside className="ds-sheet-panel ds-mobile-menu-panel h-full w-full rounded-none max-h-none overflow-y-auto pb-[calc(env(safe-area-inset-bottom)+20px)]" onClick={(event) => event.stopPropagation()}>
             <div className="sticky top-0 z-10 bg-white/95 backdrop-blur border-b border-slate-100 px-4 py-3 flex items-center justify-between">
               <div>
                 <p className="text-[11px] uppercase tracking-[0.2em] font-bold text-slate-500">Navegação</p>
