@@ -96,6 +96,8 @@ const Header = ({
     outros: "Comércio",
   };
   const segmentLabel = segmentLabelMap[String(segment || "").toLowerCase()] || "Comércio";
+  const headerBanner = resolveAssetUrl(branding?.bannerUrl || "");
+  const headerPrimaryColor = branding?.primaryColor || "#0f172a";
   const closingHour = todayHoursLabel
     ? todayHoursLabel
         .split("-")
@@ -109,8 +111,21 @@ const Header = ({
         <div
           className={`relative overflow-hidden rounded-2xl border border-slate-100 bg-white px-3 sm:px-5 ${compact ? 'py-2' : 'py-3 sm:py-3.5'} shadow-sm`}
         >
+          <div
+            className="absolute inset-x-0 top-0 h-14 sm:h-16"
+            style={
+              headerBanner
+                ? {
+                    backgroundImage: `url(${headerBanner})`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                  }
+                : { backgroundColor: headerPrimaryColor }
+            }
+          />
+          <div className="absolute inset-x-0 top-0 h-14 sm:h-16 bg-gradient-to-b from-black/25 via-black/20 to-transparent" />
 
-          <div className="relative flex flex-wrap items-start gap-3 sm:gap-4 sm:flex-nowrap">
+          <div className="relative mt-2 flex flex-wrap items-start gap-3 sm:gap-4 sm:flex-nowrap">
             {(!compact || (compact && branding?.logoUrl)) && (
               <div className="w-11 h-11 sm:w-14 sm:h-14 rounded-xl overflow-hidden border border-slate-200 bg-white shadow-sm flex-shrink-0 flex items-center justify-center">
                 {branding?.logoUrl ? (

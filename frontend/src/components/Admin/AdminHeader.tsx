@@ -198,16 +198,40 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
   }, [openPlanMenu, openUserMenu]);
 
   useEffect(() => {
+    let frame = 0;
+    let ticking = false;
+    const collapseAt = 88;
+    const expandAt = 48;
+
     const update = () => {
       const isMobile = window.innerWidth < 768;
-      setMobileCollapsed(isMobile && window.scrollY > 72);
+      if (!isMobile) {
+        setMobileCollapsed(false);
+        return;
+      }
+      const y = window.scrollY || 0;
+      setMobileCollapsed((prev) => {
+        if (prev) return y > expandAt;
+        return y > collapseAt;
+      });
     };
+
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      frame = window.requestAnimationFrame(() => {
+        update();
+        ticking = false;
+      });
+    };
+
     update();
-    window.addEventListener('scroll', update, { passive: true });
-    window.addEventListener('resize', update);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
     return () => {
-      window.removeEventListener('scroll', update);
-      window.removeEventListener('resize', update);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+      if (frame) window.cancelAnimationFrame(frame);
     };
   }, []);
 
