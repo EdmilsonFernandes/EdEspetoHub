@@ -1,5 +1,6 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { AdminHeader } from '../components/Admin/AdminHeader';
 import { AdminMobileBottomNav } from '../components/Admin/AdminMobileBottomNav';
 import { useAuth } from '../contexts/AuthContext';
@@ -21,6 +22,7 @@ export function AdminLayout({
 }: AdminLayoutProps) {
   const { auth, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const userRole = String(auth?.user?.role || '').toUpperCase();
   const isOperatorUser = userRole === 'OPERATOR' || userRole === 'CHURRASQUEIRO';
@@ -72,6 +74,14 @@ export function AdminLayout({
     };
   }, [mobileNavOpen]);
 
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    // Reset any global overflow/class leak from public pages when entering admin routes.
+    document.body.style.overflow = '';
+    document.documentElement.style.overflow = '';
+    document.body.classList.remove('admin-mobile-menu-open');
+  }, [location.pathname]);
+
   const handleNavSelect = (id: string) => {
     if (id === 'fila') {
       navigate('/admin/queue');
@@ -100,6 +110,7 @@ export function AdminLayout({
   return (
     <div className="ds-admin-bg overflow-x-clip pb-24 lg:pb-0">
       <div
+        key={location.pathname}
         className={
           fluid
             ? 'w-full px-3 py-3 sm:px-4 sm:py-4 lg:pl-0 lg:pr-10 lg:py-4 xl:pr-12 2xl:pr-14 space-y-3 sm:space-y-4'

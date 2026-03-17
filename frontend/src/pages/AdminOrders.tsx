@@ -75,7 +75,7 @@ export function AdminOrders() {
     () =>
       (isOperatorUser
         ? [
-            { id: 'cardapio', label: 'Catálogo', icon: Package },
+            { id: 'cardapio', label: 'Catálogo Online', icon: Package },
             { id: 'fila', label: 'Pedidos ao vivo', icon: ChefHat },
           ]
         : [
@@ -88,6 +88,7 @@ export function AdminOrders() {
             { id: 'usuarios', label: 'Usuários', icon: UsersThree },
             { id: 'config', label: 'Configurações', icon: Gear },
             { id: 'fila', label: 'Pedidos ao vivo', icon: ChefHat },
+            { id: 'cardapio', label: 'Catálogo Online', icon: Package },
           ]),
     [isOperatorUser, canUseMotoboys]
   );
