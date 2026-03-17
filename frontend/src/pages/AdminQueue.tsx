@@ -5,7 +5,7 @@ import { GrillQueue } from '../components/Admin/GrillQueue';
 import { AdminHeader } from '../components/Admin/AdminHeader';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { useAuth } from '../contexts/AuthContext';
-import { ChartBar, CreditCard, Package, Gear, Scooter, Star, ChefHat, ShoppingCart } from '@phosphor-icons/react';
+import { ChartBar, CreditCard, Package, Gear, Scooter, Star, ChefHat, ShoppingCart, UsersThree } from '@phosphor-icons/react';
 import { AdminDesktopSidebar } from '../components/Admin/AdminDesktopSidebar';
 
 export function AdminQueue() {
@@ -67,7 +67,7 @@ export function AdminQueue() {
             { id: 'produtos', label: 'Produtos', icon: Package },
             { id: 'pagamentos', label: 'Pagamentos', icon: CreditCard },
             { id: 'motoboys', label: 'Entregadores', icon: Scooter, disabled: !canUseMotoboys },
-            { id: 'usuarios', label: 'Usuários', icon: Gear },
+            { id: 'usuarios', label: 'Usuários', icon: UsersThree },
             { id: 'config', label: 'Configurações', icon: Gear },
             { id: 'fila', label: 'Pedidos ao vivo', icon: ChefHat },
           ]),
@@ -136,7 +136,7 @@ export function AdminQueue() {
         />
         <div className="min-w-0 flex-1 space-y-4">
         <AdminHeader />
-        <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm overflow-x-hidden lg:-mt-12 relative z-20">
+        <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm overflow-x-hidden relative z-20">
           <GrillQueue forcedTab={forcedTab as 'queue' | 'inroute' | 'completed'} />
         </div>
         </div>

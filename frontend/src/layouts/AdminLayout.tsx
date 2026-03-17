@@ -4,7 +4,7 @@ import { AdminHeader } from '../components/Admin/AdminHeader';
 import { AdminMobileBottomNav } from '../components/Admin/AdminMobileBottomNav';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { ChartBar, ChefHat, CreditCard, Gear, Package, ShoppingCart, SignOut, Scooter, Star, X } from '@phosphor-icons/react';
+import { ChartBar, ChefHat, CreditCard, Gear, Package, ShoppingCart, SignOut, Scooter, Star, X, UsersThree } from '@phosphor-icons/react';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -50,7 +50,7 @@ export function AdminLayout({
             { id: 'produtos', label: 'Catálogo', icon: Package },
             { id: 'pagamentos', label: 'Pagamentos', icon: CreditCard },
             { id: 'motoboys', label: 'Entregadores', icon: Scooter, disabled: !canUseMotoboys },
-            { id: 'usuarios', label: 'Usuários', icon: Gear },
+            { id: 'usuarios', label: 'Usuários', icon: UsersThree },
             { id: 'config', label: 'Configurações', icon: Gear },
             { id: 'avaliacoes', label: 'Avaliações', icon: Star },
           ]),

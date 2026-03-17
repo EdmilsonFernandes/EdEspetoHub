@@ -7,7 +7,7 @@ import { formatAddress, formatCurrency, formatDateTime, formatOrderDisplayId, fo
 import { getPaymentMethodMeta } from '../utils/paymentAssets';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { formatSelectedModifiers } from '../utils/productModifiers';
-import { ForkKnife, Storefront, Truck, ChartBar, CreditCard, Package, Gear, Scooter, Star, ChefHat, ShoppingCart } from '@phosphor-icons/react';
+import { ForkKnife, Storefront, Truck, ChartBar, CreditCard, Package, Gear, Scooter, Star, ChefHat, ShoppingCart, UsersThree } from '@phosphor-icons/react';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { useNavigate } from 'react-router-dom';
 import { AdminDesktopSidebar } from '../components/Admin/AdminDesktopSidebar';
@@ -81,7 +81,7 @@ export function AdminOrders() {
             { id: 'produtos', label: 'Produtos', icon: Package },
             { id: 'pagamentos', label: 'Pagamentos', icon: CreditCard },
             { id: 'motoboys', label: 'Entregadores', icon: Scooter, disabled: !canUseMotoboys },
-            { id: 'usuarios', label: 'Usuários', icon: Gear },
+            { id: 'usuarios', label: 'Usuários', icon: UsersThree },
             { id: 'config', label: 'Configurações', icon: Gear },
             { id: 'fila', label: 'Pedidos ao vivo', icon: ChefHat },
           ]),
@@ -335,7 +335,7 @@ export function AdminOrders() {
         <div className="min-w-0 flex-1 space-y-6">
         <AdminHeader contextLabel="Pedidos" />
 
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm lg:-mt-12 relative z-20">
+        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm relative z-20">
           <div className="flex items-center justify-between gap-3 mb-4">
             <div>
               <h2 className="text-lg font-bold text-slate-800">Lista de pedidos</h2>
