@@ -3,6 +3,7 @@ import * as React from 'react';
 import { ChartBar, BookOpen, ChefHat, CreditCard, Package, Gear, ShoppingCart, X, Scooter, ForkKnife, Storefront, Truck, CaretRight, Star, Bell, WarningCircle, MagnifyingGlass, UsersThree } from '@phosphor-icons/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { createPortal } from 'react-dom';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { BrandingSettings } from '../components/Admin/BrandingSettings';
 import DashboardView from '../components/Admin/DashboardView';
@@ -1273,6 +1274,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   });
   const [commandOpen, setCommandOpen] = useState(false);
   const [commandQuery, setCommandQuery] = useState('');
+  const [selectedCommandIndex, setSelectedCommandIndex] = useState(0);
   const [notificationCriticalOnly, setNotificationCriticalOnly] = useState(false);
   const [pendingMotoboyRequests, setPendingMotoboyRequests] = useState(0);
   const [reviewsLoading, setReviewsLoading] = useState(false);
@@ -1429,6 +1431,22 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     if (!q) return commandActions;
     return commandActions.filter((item) => `${item.label} ${item.description}`.toLowerCase().includes(q));
   }, [commandActions, commandQuery]);
+
+  useEffect(() => {
+    if (!commandOpen) return;
+    setSelectedCommandIndex(0);
+  }, [commandOpen, commandQuery]);
+
+  useEffect(() => {
+    if (!commandOpen) return;
+    if (filteredCommandActions.length === 0) {
+      setSelectedCommandIndex(0);
+      return;
+    }
+    if (selectedCommandIndex > filteredCommandActions.length - 1) {
+      setSelectedCommandIndex(filteredCommandActions.length - 1);
+    }
+  }, [commandOpen, filteredCommandActions, selectedCommandIndex]);
 
   useEffect(() => {
     if (!canUseMotoboys && activeTab === 'motoboys') {
@@ -2855,60 +2873,90 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         </div>
       )}
 
-      {commandOpen && (
-        <div
-          className="ds-sheet-backdrop z-[13000] px-4 items-center sm:items-center"
-          onClick={() => setCommandOpen(false)}
-        >
+      {commandOpen &&
+        typeof document !== 'undefined' &&
+        createPortal(
           <div
-            className="ds-sheet-panel relative z-[13010] w-full max-w-2xl rounded-t-3xl sm:rounded-2xl overflow-hidden"
-            onClick={(event) => event.stopPropagation()}
+            className="fixed inset-0 z-[22000] bg-black/45 backdrop-blur-sm px-4 flex items-center justify-center"
+            onClick={() => setCommandOpen(false)}
           >
-            <div className="sm:hidden ds-sheet-handle" />
-            <div className="px-4 py-3 border-b border-slate-100">
-              <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
-                <MagnifyingGlass size={16} className="text-slate-500" />
-                <input
-                  autoFocus
-                  value={commandQuery}
-                  onChange={(event) => setCommandQuery(event.target.value)}
-                  placeholder="Buscar ação no painel..."
-                  className="w-full bg-transparent text-sm text-slate-700 outline-none"
-                />
-                <button
-                  type="button"
-                  onClick={() => setCommandOpen(false)}
-                  className="text-xs font-semibold text-slate-500 hover:text-slate-900"
-                >
-                  Esc
-                </button>
+            <div
+              className="relative z-[22010] w-full max-w-2xl rounded-2xl border border-slate-200 bg-white shadow-2xl overflow-hidden"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="px-4 py-3 border-b border-slate-100">
+                <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+                  <MagnifyingGlass size={16} className="text-slate-500" />
+                  <input
+                    autoFocus
+                    value={commandQuery}
+                    onChange={(event) => setCommandQuery(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (filteredCommandActions.length === 0) return;
+                      if (event.key === 'ArrowDown') {
+                        event.preventDefault();
+                        setSelectedCommandIndex((prev) => (prev + 1) % filteredCommandActions.length);
+                        return;
+                      }
+                      if (event.key === 'ArrowUp') {
+                        event.preventDefault();
+                        setSelectedCommandIndex((prev) =>
+                          prev <= 0 ? filteredCommandActions.length - 1 : prev - 1
+                        );
+                        return;
+                      }
+                      if (event.key === 'Enter') {
+                        event.preventDefault();
+                        const target = filteredCommandActions[selectedCommandIndex] || filteredCommandActions[0];
+                        if (target) {
+                          target.run();
+                          setCommandOpen(false);
+                        }
+                      }
+                    }}
+                    placeholder="Buscar ação no painel..."
+                    className="w-full bg-transparent text-sm text-slate-700 outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setCommandOpen(false)}
+                    className="text-xs font-semibold text-slate-500 hover:text-slate-900"
+                  >
+                    Esc
+                  </button>
+                </div>
+              </div>
+              <div className="max-h-[60vh] overflow-y-auto p-2">
+                {filteredCommandActions.length === 0 ? (
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-4 text-center text-sm text-slate-500">
+                    Nenhuma ação encontrada.
+                  </div>
+                ) : (
+                  filteredCommandActions.map((action, index) => (
+                    <button
+                      key={action.id}
+                      type="button"
+                      onMouseEnter={() => setSelectedCommandIndex(index)}
+                      onClick={() => {
+                        action.run();
+                        setCommandOpen(false);
+                      }}
+                      className={`w-full text-left rounded-xl border px-3 py-2.5 transition ${
+                        index === selectedCommandIndex
+                          ? 'border-slate-300 bg-slate-100'
+                          : 'border-transparent hover:border-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      <p className="text-sm font-semibold text-slate-800">{action.label}</p>
+                      <p className="text-xs text-slate-500 mt-0.5">{action.description}</p>
+                    </button>
+                  ))
+                )}
               </div>
             </div>
-            <div className="max-h-[60vh] overflow-y-auto p-2">
-              {filteredCommandActions.length === 0 ? (
-                <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-4 text-center text-sm text-slate-500">
-                  Nenhuma ação encontrada.
-                </div>
-              ) : (
-                filteredCommandActions.map((action) => (
-                  <button
-                    key={action.id}
-                    type="button"
-                    onClick={() => {
-                      action.run();
-                      setCommandOpen(false);
-                    }}
-                    className="w-full text-left rounded-xl border border-transparent hover:border-slate-200 hover:bg-slate-50 px-3 py-2.5 transition"
-                  >
-                    <p className="text-sm font-semibold text-slate-800">{action.label}</p>
-                    <p className="text-xs text-slate-500 mt-0.5">{action.description}</p>
-                  </button>
-                ))
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
 
     </AdminLayout>
   );
