@@ -14,7 +14,7 @@ import { formatCurrency, formatPhoneInput } from "../../utils/format";
 import { APP_TIMEZONE } from "../../utils/format";
 import { exportToCsv } from "../../utils/export";
 
-const COLORS = ["var(--color-primary)", "var(--color-secondary)", "#10b981", "#3b82f6"];
+const TOP_PRODUCT_BAR_COLORS = ["#1d4ed8", "#2563eb", "#3b82f6", "#60a5fa", "#93c5fd"];
 
 export const DashboardView = ({
   orders = [],
@@ -904,18 +904,40 @@ export const DashboardView = ({
               <BarChart data={stats.chartData} barSize={24}>
                 <defs>
                   <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="var(--color-primary)" stopOpacity={0.9} />
-                    <stop offset="100%" stopColor="var(--color-secondary)" stopOpacity={0.7} />
+                    <stop offset="0%" stopColor="#2563eb" stopOpacity={0.96} />
+                    <stop offset="70%" stopColor="#3b82f6" stopOpacity={0.72} />
+                    <stop offset="100%" stopColor="#60a5fa" stopOpacity={0.14} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="label" fontSize={11} interval="preserveStartEnd" />
-                <YAxis fontSize={11} tickFormatter={(value) => `R$ ${value}`} />
+                <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" vertical={false} />
+                <XAxis
+                  dataKey="label"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 11, fontWeight: 500, fill: "#64748b" }}
+                  interval="preserveStartEnd"
+                />
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 11, fontWeight: 400, fill: "#64748b" }}
+                  tickFormatter={(value) => `R$ ${value}`}
+                />
                 <RechartsTooltip
                   formatter={(value) => formatCurrency(value)}
                   labelFormatter={(label) => `Dia ${label}`}
+                  contentStyle={{
+                    borderRadius: "14px",
+                    border: "1px solid #dbeafe",
+                    boxShadow: "0 18px 34px -24px rgba(15,23,42,0.55)",
+                    backgroundColor: "#ffffff",
+                    color: "#0f172a",
+                  }}
+                  labelStyle={{ color: "#475569", fontWeight: 500, marginBottom: 6 }}
+                  itemStyle={{ color: "#1d4ed8", fontWeight: 700 }}
+                  cursor={{ fill: "rgba(37,99,235,0.06)" }}
                 />
-                <Bar dataKey="total" fill="url(#salesGradient)" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="total" fill="url(#salesGradient)" radius={[8, 8, 0, 0]} />
               </BarChart>
               </ResponsiveContainer>
             </div>
@@ -963,6 +985,7 @@ export const DashboardView = ({
               {sortedTopProducts.map((product, index) => {
                 const maxQty = sortedTopProducts[0]?.qty || 1;
                 const percent = Math.max(8, Math.round((product.qty / maxQty) * 100));
+                const barColor = TOP_PRODUCT_BAR_COLORS[index] || TOP_PRODUCT_BAR_COLORS[TOP_PRODUCT_BAR_COLORS.length - 1];
                 return (
                   <div
                     key={`${product.name}-${index}`}
@@ -972,7 +995,7 @@ export const DashboardView = ({
                       <div className="flex items-center gap-2 min-w-0">
                         <span
                           className="h-2.5 w-2.5 rounded-full"
-                          style={{ background: COLORS[index % COLORS.length] }}
+                          style={{ background: barColor }}
                         />
                         <span className="font-semibold truncate">{product.name}</span>
                       </div>
@@ -983,7 +1006,7 @@ export const DashboardView = ({
                         className="h-full rounded-full"
                         style={{
                           width: `${percent}%`,
-                          background: COLORS[index % COLORS.length],
+                          background: barColor,
                         }}
                       />
                     </div>
@@ -996,13 +1019,14 @@ export const DashboardView = ({
               {sortedTopProducts.map((product, index) => {
                 const maxQty = sortedTopProducts[0]?.qty || 1;
                 const percent = Math.max(8, Math.round((product.qty / maxQty) * 100));
+                const barColor = TOP_PRODUCT_BAR_COLORS[index] || TOP_PRODUCT_BAR_COLORS[TOP_PRODUCT_BAR_COLORS.length - 1];
                 return (
                   <div key={`${product.name}-${index}`} className="space-y-1 rounded-xl border border-slate-200 bg-gradient-to-r from-white via-slate-50 to-white px-3 py-2">
                     <div className="flex items-center justify-between text-sm text-slate-700">
                       <div className="flex items-center gap-2 min-w-0">
                         <span
                           className="h-2.5 w-2.5 rounded-full"
-                          style={{ background: COLORS[index % COLORS.length] }}
+                          style={{ background: barColor }}
                         />
                         <span className="font-semibold truncate">{product.name}</span>
                       </div>
@@ -1013,7 +1037,7 @@ export const DashboardView = ({
                         className="h-full rounded-full"
                         style={{
                           width: `${percent}%`,
-                          background: COLORS[index % COLORS.length],
+                          background: barColor,
                         }}
                       />
                     </div>
