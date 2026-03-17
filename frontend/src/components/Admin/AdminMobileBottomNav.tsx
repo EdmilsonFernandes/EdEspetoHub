@@ -15,6 +15,7 @@ export function AdminMobileBottomNav() {
   const dashboardTab = (location.state as any)?.activeTab || '';
   const [monitorCount, setMonitorCount] = useState(0);
   const [hiddenByOverlay, setHiddenByOverlay] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
   const storeSlug = useMemo(() => {
     const fromAuth = String(auth?.store?.slug || '').trim();
     if (fromAuth) return fromAuth;
@@ -65,6 +66,33 @@ export function AdminMobileBottomNav() {
     };
   }, []);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    let lastY = window.scrollY || 0;
+    let ticking = false;
+
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(() => {
+        const currentY = window.scrollY || 0;
+        const delta = currentY - lastY;
+        if (Math.abs(delta) >= 6) {
+          if (delta > 0 && currentY > 80) {
+            setIsVisible(false);
+          } else if (delta < 0) {
+            setIsVisible(true);
+          }
+          lastY = currentY;
+        }
+        ticking = false;
+      });
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   const openCatalog = () => {
     if (storeSlug) {
       navigate(`/${storeSlug}`);
@@ -109,8 +137,12 @@ export function AdminMobileBottomNav() {
   if (hiddenByOverlay) return null;
 
   return (
-    <nav className="lg:hidden fixed inset-x-0 bottom-0 z-[260] pointer-events-none">
-      <ul className={`pointer-events-auto mx-auto grid ${items.length <= 2 ? 'grid-cols-2' : 'grid-cols-4'} gap-1.5 max-w-none rounded-none border-t border-slate-700/80 bg-slate-900 p-2 pb-[max(env(safe-area-inset-bottom),8px)] shadow-none backdrop-blur-none`}>
+    <nav
+      className={`lg:hidden fixed inset-x-0 bottom-0 z-[260] pointer-events-none transition-transform duration-300 ease-in-out ${
+        isVisible ? 'translate-y-0' : 'translate-y-full'
+      }`}
+    >
+      <ul className={`pointer-events-auto mx-auto grid ${items.length <= 2 ? 'grid-cols-2' : 'grid-cols-4'} gap-1.5 max-w-none rounded-none border-t border-white/10 bg-slate-900/80 p-2 pb-[max(env(safe-area-inset-bottom),8px)] shadow-none backdrop-blur-lg`}>
         {items.map((item) => {
           const Icon = item.icon;
           return (
