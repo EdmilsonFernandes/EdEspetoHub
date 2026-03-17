@@ -66,6 +66,10 @@ export function AdminOrders() {
     media.addListener(onChange);
     return () => media.removeListener(onChange);
   }, []);
+  useEffect(() => {
+    if (!isDesktopLayout || !sidebarCompact) return;
+    setSidebarCompact(false);
+  }, [isDesktopLayout, sidebarCompact]);
 
   const desktopNavItems = useMemo(
     () =>

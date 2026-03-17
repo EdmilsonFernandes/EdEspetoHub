@@ -52,6 +52,10 @@ export function AdminQueue() {
     media.addListener(onChange);
     return () => media.removeListener(onChange);
   }, []);
+  React.useEffect(() => {
+    if (!isDesktopLayout || !sidebarCompact) return;
+    setSidebarCompact(false);
+  }, [isDesktopLayout, sidebarCompact]);
 
   const desktopNavItems = React.useMemo(
     () =>

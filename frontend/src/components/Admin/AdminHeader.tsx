@@ -285,7 +285,7 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
   };
 
   return (
-    <header className="w-full">
+    <header className="relative w-full">
       <div className="hidden md:block rounded-3xl border border-slate-200 bg-white overflow-hidden">
         <div
           className="relative h-44 lg:h-52"
@@ -371,7 +371,7 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
         </div>
       </div>
 
-      <div className="mt-2 rounded-2xl border border-slate-200 bg-white px-3 sm:px-4 py-2.5 flex items-center justify-between gap-2 sm:gap-3">
+      <div className="mt-2 rounded-2xl border border-slate-200 bg-white px-3 sm:px-4 py-2.5 flex items-center justify-between gap-2 sm:gap-3 md:mt-0 md:absolute md:top-4 md:right-4 md:z-[90] md:w-auto md:border-white/20 md:bg-white/10 md:backdrop-blur-md md:rounded-full md:px-3 md:py-2 md:shadow-[0_14px_28px_-18px_rgba(2,6,23,0.75)]">
         <div className="md:hidden flex items-center gap-2 min-w-0">
           <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-900 text-white text-xs font-bold overflow-hidden shrink-0">
             {storeLogo ? (
@@ -386,7 +386,7 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
           </div>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 ml-auto">
+        <div className="flex items-center gap-2 sm:gap-3 lg:gap-3 ml-auto">
           <button
             type="button"
             onClick={() => window.dispatchEvent(new CustomEvent('admin:open-global-nav'))}
@@ -400,7 +400,7 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
             type="button"
             onClick={toggleFocusMode}
             className={`inline-flex h-9 w-9 items-center justify-center rounded-md transition-colors ${
-              isFocusMode ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100'
+              isFocusMode ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100 md:text-white md:hover:bg-white/20'
             }`}
             title="Modo foco"
             aria-label="Modo foco"
@@ -411,7 +411,7 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
           <button
             type="button"
             onClick={() => navigate('/admin/dashboard', { state: { openNotifications: true } })}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-md text-slate-600 hover:bg-slate-100 transition-colors"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-md text-slate-600 hover:bg-slate-100 transition-colors md:text-white md:hover:bg-white/20"
             title="Notificações"
             aria-label="Notificações"
           >
@@ -422,8 +422,7 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
             <button
               type="button"
               onClick={() => setOpenPlanMenu((prev) => !prev)}
-              className="inline-flex items-center gap-1.5 rounded-full text-white text-[11px] font-semibold uppercase tracking-[0.14em] px-3 py-1 shadow-sm"
-              style={{ backgroundColor: primaryColor }}
+              className="inline-flex items-center gap-1.5 rounded-full text-white text-[11px] font-semibold uppercase tracking-[0.14em] px-3 py-1 shadow-sm bg-slate-900 md:bg-white/20 md:border md:border-white/30"
               aria-label="Abrir detalhes da assinatura"
             >
               {planLabel}
@@ -460,18 +459,18 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
             <button
               type="button"
               onClick={() => setOpenUserMenu((prev) => !prev)}
-              className="inline-flex items-center gap-2 rounded-md px-1.5 py-1 hover:bg-slate-100 transition-colors"
+              className="inline-flex items-center gap-2 rounded-md px-1.5 py-1 hover:bg-slate-100 transition-colors md:hover:bg-white/20"
               aria-label="Abrir menu do usuário"
             >
-              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-900 text-white text-xs font-bold overflow-hidden">
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-900 text-white text-xs font-bold overflow-hidden md:border md:border-white/40">
                 {userAvatar ? (
                   <img src={userAvatar} alt={fullUserName} className="h-full w-full object-cover" />
                 ) : (
                   userInitials
                 )}
               </span>
-              <span className="hidden lg:inline text-sm font-medium text-slate-700">{userDisplay}</span>
-              <ChevronDown size={15} className="text-slate-500" />
+              <span className="hidden lg:inline text-sm font-medium text-slate-700 md:text-white">{userDisplay}</span>
+              <ChevronDown size={15} className="text-slate-500 md:text-white/80" />
             </button>
 
             {openUserMenu && (
