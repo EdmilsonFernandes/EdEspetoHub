@@ -170,6 +170,8 @@ export function StorePage() {
   const canUseAdminPrintFlow = hasAdminPrintAccess || isStoreAdmin;
   const [showPrintPrompt, setShowPrintPrompt] = useState(false);
   const [isGeneratingPrint, setIsGeneratingPrint] = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const checkoutLockRef = useRef(false);
 
   const cartPricing = useMemo(() => getCartPricing(cart), [cart]);
   const validCartItems = useMemo(
@@ -941,6 +943,10 @@ export function StorePage() {
   };
 
   const checkout = async (extra?: { cashTendered?: number | null } | null) => {
+    if (checkoutLockRef.current || checkoutLoading) return;
+    checkoutLockRef.current = true;
+    setCheckoutLoading(true);
+    try {
     const isSubscriptionActive =
       storePlanExempt ||
       subscriptionStatus &&
@@ -1253,8 +1259,13 @@ export function StorePage() {
       setLastOrderItems(lastItemsPayload.items);
     }
     setView(isStoreAdmin ? 'menu' : 'success');
+    showToast('Pedido enviado com sucesso.', 'success', { durationMs: 3000 });
     if (isStoreAdmin) {
       showOrderNotice(createdOrder?.id);
+    }
+    } finally {
+      checkoutLockRef.current = false;
+      setCheckoutLoading(false);
     }
   };
 
@@ -1751,6 +1762,7 @@ export function StorePage() {
             onChangePayment={setPaymentMethod}
             onUpdateCart={updateCart}
             onCheckout={checkout}
+            checkoutLoading={checkoutLoading}
             onBack={() => setView('menu')}
           />
         )}

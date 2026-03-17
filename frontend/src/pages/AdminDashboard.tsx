@@ -1577,6 +1577,8 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     }
   }, [location.state, openQueueMonitor]);
   const [savingBranding, setSavingBranding] = useState(false);
+  const [showUnsavedChangesModal, setShowUnsavedChangesModal] = useState(false);
+  const pendingNavigationActionRef = useRef<null | (() => void)>(null);
   const [configPanels, setConfigPanels] = useState({
     branding: true,
     orderTypes: false,
@@ -2273,7 +2275,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         bannerUrl: updated?.settings?.bannerUrl,
         brandName: updated?.name,
       });
-      showToast('Identidade atualizada com sucesso.', 'success');
+      showToast('Identidade atualizada com sucesso.', 'success', { durationMs: 3000 });
     } catch (err) {
       console.error('Erro ao salvar identidade', err);
       setError('Não foi possível salvar a identidade da loja agora.');
@@ -2283,26 +2285,51 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     }
   };
 
+  const isConfigDirty = activeTab === 'config' && hasBrandingChanges;
+  const runOrConfirmDiscard = React.useCallback(
+    (action: () => void) => {
+      if (isConfigDirty) {
+        pendingNavigationActionRef.current = action;
+        setShowUnsavedChangesModal(true);
+        return;
+      }
+      action();
+    },
+    [isConfigDirty]
+  );
+
+  useEffect(() => {
+    if (!isConfigDirty) return;
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [isConfigDirty]);
+
 
   const handleNavSelect = (id: string) => {
-    if (id === 'cardapio') {
-      if (storeSlug) navigate(`/${storeSlug}`);
-      return;
-    }
-    if (id === 'usuarios') {
-      setActiveTab('usuarios' as typeof activeTab);
-      return;
-    }
-    if (id === 'fila') {
-    openQueueMonitor();
-      return;
-    }
-    if (id === 'motoboys' && !canUseMotoboys) {
-      showToast('Disponível no plano Pro. Faça o upgrade para liberar entregadores.', 'info');
-      navigate('/admin/renewal?focus=pro');
-      return;
-    }
-    setActiveTab(id as typeof activeTab);
+    runOrConfirmDiscard(() => {
+      if (id === 'cardapio') {
+        if (storeSlug) navigate(`/${storeSlug}`);
+        return;
+      }
+      if (id === 'usuarios') {
+        setActiveTab('usuarios' as typeof activeTab);
+        return;
+      }
+      if (id === 'fila') {
+        openQueueMonitor();
+        return;
+      }
+      if (id === 'motoboys' && !canUseMotoboys) {
+        showToast('Disponível no plano Pro. Faça o upgrade para liberar entregadores.', 'info');
+        navigate('/admin/renewal?focus=pro');
+        return;
+      }
+      setActiveTab(id as typeof activeTab);
+    });
   };
 
   return (
@@ -2339,6 +2366,21 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         />
 
         <div className="min-w-0 space-y-4 flex-1">
+      {isConfigDirty && (
+        <div className="fixed top-2 left-1/2 z-[12500] -translate-x-1/2 w-[calc(100%-1rem)] max-w-3xl">
+          <div className="rounded-2xl border border-amber-200 bg-amber-50/95 backdrop-blur px-4 py-2.5 shadow-[0_14px_32px_-24px_rgba(180,83,9,0.55)] flex items-center justify-between gap-3">
+            <p className="text-xs sm:text-sm font-semibold text-amber-900">Alterações não salvas detectadas</p>
+            <button
+              type="button"
+              onClick={handleSaveBranding}
+              disabled={savingBranding}
+              className="rounded-xl bg-emerald-600 px-3 py-1.5 text-[11px] sm:text-xs font-bold text-white hover:bg-emerald-700 disabled:opacity-60"
+            >
+              {savingBranding ? 'Salvando...' : 'Salvar agora'}
+            </button>
+          </div>
+        </div>
+      )}
       {activeTab !== 'fila' && (
       <section className="hidden md:flex relative z-[220] items-start justify-between gap-4 rounded-2xl border border-slate-200 bg-white/90 backdrop-blur-sm px-4 py-3 shadow-[0_20px_45px_-36px_rgba(15,23,42,0.5)] overflow-visible">
         <div className="min-w-0">
@@ -2726,7 +2768,9 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                 type="button"
                 onClick={handleSaveBranding}
                 disabled={savingBranding || !hasBrandingChanges}
-                className="rounded-xl bg-brand-gradient px-4 py-2 text-xs font-bold text-white shadow-[0_12px_26px_-18px_rgba(15,23,42,0.7)] hover:opacity-95 disabled:opacity-60"
+                className={`rounded-xl px-4 py-2 text-xs font-bold text-white shadow-[0_12px_26px_-18px_rgba(15,23,42,0.7)] hover:opacity-95 disabled:opacity-60 ${
+                  hasBrandingChanges ? 'bg-emerald-600 hover:bg-emerald-700 animate-pulse' : 'bg-brand-gradient'
+                }`}
               >
                 {savingBranding ? 'Salvando...' : 'Salvar identidade'}
               </button>
@@ -2738,7 +2782,9 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                 type="button"
                 onClick={handleSaveBranding}
                 disabled={savingBranding || !hasBrandingChanges}
-                className="w-full rounded-2xl bg-brand-gradient text-white py-4 text-sm font-semibold shadow-lg hover:opacity-90 disabled:opacity-60"
+                className={`w-full rounded-2xl text-white py-4 text-sm font-semibold shadow-lg hover:opacity-90 disabled:opacity-60 ${
+                  hasBrandingChanges ? 'bg-emerald-600 animate-pulse' : 'bg-brand-gradient'
+                }`}
               >
                 {savingBranding ? 'Salvando...' : hasBrandingChanges ? 'Salvar alterações' : 'Sem alterações pendentes'}
               </button>
@@ -2868,6 +2914,42 @@ export function AdminDashboard({ session: sessionProp }: Props) {
                   </div>
                 ))
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showUnsavedChangesModal && (
+        <div className="fixed inset-0 z-[14000] bg-black/45 backdrop-blur-sm p-4 flex items-center justify-center">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_30px_60px_-28px_rgba(15,23,42,0.55)]">
+            <p className="text-[11px] uppercase tracking-[0.22em] font-bold text-amber-700">Atenção</p>
+            <h3 className="mt-2 text-lg font-black text-slate-900">Você tem alterações não salvas</h3>
+            <p className="mt-2 text-sm text-slate-600">
+              Deseja sair mesmo assim? As mudanças em Configurações serão perdidas.
+            </p>
+            <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowUnsavedChangesModal(false);
+                  pendingNavigationActionRef.current = null;
+                }}
+                className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700"
+              >
+                Continuar editando
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const action = pendingNavigationActionRef.current;
+                  pendingNavigationActionRef.current = null;
+                  setShowUnsavedChangesModal(false);
+                  action?.();
+                }}
+                className="rounded-xl bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-rose-700"
+              >
+                Sair sem salvar
+              </button>
             </div>
           </div>
         </div>

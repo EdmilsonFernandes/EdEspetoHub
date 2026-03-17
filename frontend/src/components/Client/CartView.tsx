@@ -79,6 +79,7 @@ export const CartView = ({
   deliveryCoords = null,
   checkoutDisabled = false,
   checkoutDisabledReason = "",
+  checkoutLoading = false,
   pricingSummary,
   onChangeCustomer,
   onChangePayment,
@@ -115,6 +116,7 @@ export const CartView = ({
   const [hasTriedCheckout, setHasTriedCheckout] = useState(false);
   const [showOptionalPhoneFields, setShowOptionalPhoneFields] = useState(false);
   const previousCartItemsCountRef = useRef<number>(cartItems.length);
+  const cepLookupLockRef = useRef(false);
   const nameInputRef = useRef<HTMLInputElement | null>(null);
   const cepInputRef = useRef<HTMLInputElement | null>(null);
   const premiumInputClass =
@@ -161,7 +163,9 @@ export const CartView = ({
   const isDeliveryAddressValidated = !isDelivery || deliveryCheck?.status === "ok";
   const primaryCtaLabel = isDelivery && !isDeliveryAddressValidated ? "Validar Endereço" : actionLabel;
   const isDeliveryValidationMode = isDelivery && !isDeliveryAddressValidated;
-  const primaryCtaDisabled = isDeliveryValidationMode ? cepLoading : (checkoutDisabled || cashValidation.blocked);
+  const primaryCtaDisabled = isDeliveryValidationMode
+    ? (cepLoading || checkoutLoading)
+    : (checkoutLoading || checkoutDisabled || cashValidation.blocked);
 
   const [selectedDdd, setSelectedDdd] = useState(() => extractPhoneParts(customer.phone || "").ddd);
   const [localPhoneDigits, setLocalPhoneDigits] = useState(() => extractPhoneParts(customer.phone || "").localNumber);
@@ -314,8 +318,10 @@ export const CartView = ({
   };
 
   const handleCepLookup = async () => {
+    if (cepLookupLockRef.current || cepLoading) return;
     const rawCep = (customer.cep || "").replace(/\D/g, "");
     if (rawCep.length !== 8) return;
+    cepLookupLockRef.current = true;
     setCepLoading(true);
     setCepError("");
     try {
@@ -338,6 +344,7 @@ export const CartView = ({
     } catch (error) {
       setCepError("Não foi possível consultar o CEP agora.");
     } finally {
+      cepLookupLockRef.current = false;
       setCepLoading(false);
     }
   };
@@ -743,7 +750,7 @@ export const CartView = ({
                       <button
                         type="button"
                         onClick={handleCepLookup}
-                        disabled={cepLoading}
+                        disabled={cepLoading || checkoutLoading}
                         className="w-full px-3 py-3 rounded-xl bg-slate-100 text-sm text-slate-700 hover:bg-slate-200 transition disabled:opacity-60"
                       >
                         {cepLoading ? "Buscando..." : "Buscar CEP"}
@@ -1180,10 +1187,12 @@ export const CartView = ({
               await handleCepLookup();
               return;
             }
-            onCheckout({
+            await Promise.resolve(
+              onCheckout({
               cashTendered:
                 isCash && cashNeedsChange && cashTenderedValue !== null ? Number(cashTenderedValue) : null,
-            });
+              })
+            );
           }}
           disabled={primaryCtaDisabled}
           className={`w-full font-bold text-lg py-4 rounded-2xl shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 ${
@@ -1194,7 +1203,7 @@ export const CartView = ({
           style={ctaPulse ? { animation: 'btnPop 220ms ease' } : undefined}
         >
           {isPickup ? <Wallet size={20} weight="duotone" /> : <PaperPlaneTilt size={20} weight="duotone" />}
-          {primaryCtaLabel}
+          {checkoutLoading ? "Processando..." : primaryCtaLabel}
         </button>
         {hasTriedCheckout && !isDeliveryValidationMode && (checkoutDisabled || cashValidation.blocked) && !hideOutOfRangeInlineReason && (checkoutDisabledReason || cashValidation.reason) && (
           <p className="mt-2 text-center text-[11px] text-rose-600 font-semibold">
