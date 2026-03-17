@@ -2108,6 +2108,16 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     };
   }, [mobileDrawerOpen]);
 
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    document.body.classList.toggle('admin-mobile-menu-open', Boolean(mobileDrawerOpen));
+    window.dispatchEvent(new CustomEvent('admin:mobile-menu', { detail: { open: Boolean(mobileDrawerOpen) } }));
+    return () => {
+      document.body.classList.remove('admin-mobile-menu-open');
+      window.dispatchEvent(new CustomEvent('admin:mobile-menu', { detail: { open: false } }));
+    };
+  }, [mobileDrawerOpen]);
+
 
   useEffect(() => {
     if (!storeId) return;
@@ -2301,10 +2311,21 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   return (
     <AdminLayout contextLabel="Painel da Loja">
       <div className="lg:hidden sticky top-2 z-[95]">
-        <div className="rounded-2xl border border-slate-200 bg-white/95 backdrop-blur px-3 py-2.5 flex items-center justify-between shadow-[0_16px_34px_-24px_rgba(15,23,42,0.45)]">
-          <div className="min-w-0">
-            <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-[0.2em]">Navegação</p>
-            <p className="text-xs font-semibold text-slate-700 truncate">Acesso rápido do painel</p>
+        <div className="rounded-2xl border border-slate-200 bg-white/95 backdrop-blur px-3 py-2.5 flex items-center justify-between shadow-sm">
+          <div className="inline-flex items-center gap-2 min-w-0">
+            <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-900 text-white text-xs font-black">
+              {String(storeName || 'LO')
+                .split(' ')
+                .filter(Boolean)
+                .slice(0, 2)
+                .map((part) => part[0]?.toUpperCase())
+                .join('')
+                .slice(0, 2) || 'LO'}
+            </span>
+            <div className="min-w-0">
+              <p className="text-xs font-semibold text-slate-700 truncate">{storeName}</p>
+              <p className="text-[11px] text-slate-500 truncate">{tabMeta[activeTab]?.title || 'Painel'}</p>
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -2331,7 +2352,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
               aria-label="Abrir menu"
             >
               <List size={16} weight="duotone" />
-              Abrir
             </button>
           </div>
         </div>

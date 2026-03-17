@@ -14,6 +14,7 @@ export function AdminMobileBottomNav() {
   const path = location.pathname || '';
   const dashboardTab = (location.state as any)?.activeTab || '';
   const [monitorCount, setMonitorCount] = useState(0);
+  const [hiddenByOverlay, setHiddenByOverlay] = useState(false);
   const storeSlug = useMemo(() => {
     const fromAuth = String(auth?.store?.slug || '').trim();
     if (fromAuth) return fromAuth;
@@ -51,6 +52,16 @@ export function AdminMobileBottomNav() {
     return () => {
       active = false;
       window.clearInterval(timer);
+    };
+  }, []);
+
+  useEffect(() => {
+    const onMobileMenu = (event: any) => {
+      setHiddenByOverlay(Boolean(event?.detail?.open));
+    };
+    window.addEventListener('admin:mobile-menu', onMobileMenu as EventListener);
+    return () => {
+      window.removeEventListener('admin:mobile-menu', onMobileMenu as EventListener);
     };
   }, []);
 
@@ -94,6 +105,8 @@ export function AdminMobileBottomNav() {
     },
   ];
   const items = isOperator ? baseItems.filter((item) => item.id === 'monitor' || item.id === 'catalogo') : baseItems;
+
+  if (hiddenByOverlay) return null;
 
   return (
     <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-[260] border-t border-slate-200 bg-white/95 backdrop-blur-sm pb-[max(env(safe-area-inset-bottom),8px)] pt-2 px-2">
