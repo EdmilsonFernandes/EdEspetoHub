@@ -5,7 +5,7 @@ import { GrillQueue } from '../components/Admin/GrillQueue';
 import { AdminHeader } from '../components/Admin/AdminHeader';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { useAuth } from '../contexts/AuthContext';
-import { ChartBar, CreditCard, Package, Gear, Scooter, Star, ChefHat, ShoppingCart, UsersThree } from '@phosphor-icons/react';
+import { ChartBar, CreditCard, Package, Gear, Scooter, Star, CheckSquare, ShoppingCart, UsersThree } from '@phosphor-icons/react';
 import { AdminDesktopSidebar } from '../components/Admin/AdminDesktopSidebar';
 
 export function AdminQueue() {
@@ -62,7 +62,7 @@ export function AdminQueue() {
       (isOperatorUser
         ? [
             { id: 'cardapio', label: 'Catálogo Online', icon: Package },
-            { id: 'fila', label: 'Pedidos ao vivo', icon: ChefHat },
+            { id: 'fila', label: 'Pedidos ao vivo', icon: CheckSquare },
           ]
         : [
             { id: 'resumo', label: 'Resumo', icon: ChartBar },
@@ -73,7 +73,7 @@ export function AdminQueue() {
             { id: 'motoboys', label: 'Entregadores', icon: Scooter, disabled: !canUseMotoboys },
             { id: 'usuarios', label: 'Usuários', icon: UsersThree },
             { id: 'config', label: 'Configurações', icon: Gear },
-            { id: 'fila', label: 'Pedidos ao vivo', icon: ChefHat },
+            { id: 'fila', label: 'Pedidos ao vivo', icon: CheckSquare },
             { id: 'cardapio', label: 'Catálogo Online', icon: Package },
           ]),
     [isOperatorUser, canUseMotoboys]

@@ -1,6 +1,6 @@
 // @ts-nocheck
 import * as React from 'react';
-import { ChartBar, BookOpen, ChefHat, CreditCard, Package, Gear, ShoppingCart, X, Scooter, ForkKnife, Storefront, Truck, CaretRight, Star, Bell, WarningCircle, MagnifyingGlass, UsersThree } from '@phosphor-icons/react';
+import { ChartBar, BookOpen, CheckSquare, CreditCard, Package, Gear, ShoppingCart, X, Scooter, Hash, Storefront, Truck, CaretRight, Star, Bell, WarningCircle, MagnifyingGlass, UsersThree } from '@phosphor-icons/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { createPortal } from 'react-dom';
@@ -172,7 +172,7 @@ const OrdersView = ({ orders, products, storeSlug }) => {
     }
     if (type === 'table') {
       const table = order?.table ? `Mesa ${order.table}` : 'Mesa';
-      return { label: table, pill: 'bg-fuchsia-100 text-fuchsia-800 border-fuchsia-200', icon: <ForkKnife size={14} weight="duotone" /> };
+      return { label: table, pill: 'bg-slate-100 text-slate-700 border-slate-200', icon: <Hash size={14} weight="duotone" /> };
     }
     return { label: formatOrderType(order?.type), pill: 'bg-slate-100 text-slate-700 border-slate-200', icon: null };
   };
@@ -1333,7 +1333,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       (isOperatorUser
         ? [
             { id: 'cardapio', label: 'Catálogo', icon: Package },
-            { id: 'fila', label: 'Pedidos ao vivo', icon: ChefHat },
+            { id: 'fila', label: 'Pedidos ao vivo', icon: CheckSquare },
           ]
         : [
             { id: 'resumo', label: 'Resumo', icon: ChartBar },
@@ -1344,7 +1344,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             { id: 'motoboys', label: 'Entregadores', icon: Scooter, disabled: !canUseMotoboys },
             { id: 'usuarios', label: 'Usuários', icon: UsersThree, standalone: true },
             { id: 'config', label: 'Configurações', icon: Gear },
-            { id: 'fila', label: 'Pedidos ao vivo', icon: ChefHat },
+            { id: 'fila', label: 'Pedidos ao vivo', icon: CheckSquare },
           ]),
     [canUseMotoboys, isOperatorUser]
   );
