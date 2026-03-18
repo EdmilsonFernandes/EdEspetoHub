@@ -17,7 +17,9 @@ import {
   X,
   CurrencyDollar,
   Play,
-  CheckCircle
+  CheckCircle,
+  CaretDown,
+  Check
 } from "@phosphor-icons/react";
 import { orderService } from "../../services/orderService";
 import { storeService } from "../../services/storeService";
@@ -39,6 +41,80 @@ import { useAuth } from "../../contexts/AuthContext";
 import { buildPixPayload } from "../../utils/pixPayload";
 import { printReceiptAsImage } from "../../utils/printReceiptImage";
 import { exportToCsv } from "../../utils/export";
+
+const PremiumDropdown = ({
+  value,
+  onChange,
+  options = [],
+  placeholder = "Selecione...",
+  className = "",
+  menuClassName = "",
+  disabled = false,
+}: any) => {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handleOutside = (event: any) => {
+      if (!rootRef.current?.contains?.(event?.target)) setOpen(false);
+    };
+    const handleEsc = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", handleOutside);
+    document.addEventListener("keydown", handleEsc);
+    return () => {
+      document.removeEventListener("mousedown", handleOutside);
+      document.removeEventListener("keydown", handleEsc);
+    };
+  }, [open]);
+
+  const selectedOption = options.find((opt: any) => String(opt.value) === String(value));
+  const selectedLabel = selectedOption?.label || placeholder;
+
+  return (
+    <div ref={rootRef} className={`relative ${className}`}>
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => setOpen((prev) => !prev)}
+        className={`w-full inline-flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-left text-xs text-slate-700 shadow-sm transition-all ${
+          disabled ? "opacity-50 cursor-not-allowed" : "hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-amber-200"
+        }`}
+      >
+        <span className="truncate">{selectedLabel}</span>
+        <CaretDown size={14} className={`text-slate-400 transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+
+      {open && !disabled && (
+        <div className={`absolute left-0 right-0 top-[calc(100%+6px)] z-[120] max-h-64 overflow-auto rounded-xl border border-slate-200 bg-white p-1 shadow-xl ${menuClassName}`}>
+          {options.map((opt: any) => {
+            const isSelected = String(opt.value) === String(value);
+            return (
+              <button
+                key={String(opt.value)}
+                type="button"
+                onClick={() => {
+                  onChange?.(opt.value);
+                  setOpen(false);
+                }}
+                className={`w-full inline-flex items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-xs transition-colors ${
+                  isSelected
+                    ? "bg-amber-50 text-amber-700 font-semibold"
+                    : "text-slate-700 hover:bg-slate-50"
+                }`}
+              >
+                <span className="truncate">{opt.label}</span>
+                {isSelected ? <Check size={14} className="text-amber-600" /> : null}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
 
 const OrderSummaryCard = ({
   order,
@@ -91,7 +167,7 @@ const OrderSummaryCard = ({
         onClick();
       }
     }}
-    className={`relative w-full rounded-xl border ${isLate ? 'border-red-200' : 'border-slate-100'} ${leftAccent} ${archived ? 'bg-slate-50/90 opacity-80' : 'bg-white'} p-3 sm:p-3 ${showSelector ? 'pl-9' : ''} text-left flex flex-col gap-1 transition-all duration-200 transition-transform hover:border-slate-200 hover:shadow-sm hover:-translate-y-0.5 hover:scale-[1.01] cursor-pointer`}
+    className={`relative w-full rounded-xl border ${isLate ? 'border-red-200' : 'border-slate-100'} ${leftAccent} ${archived ? 'bg-slate-50/90 opacity-80' : 'bg-white'} p-3 sm:p-3 ${showSelector ? 'pl-12' : ''} text-left flex flex-col gap-1 transition-all duration-200 transition-transform hover:border-slate-200 hover:shadow-sm hover:-translate-y-0.5 hover:scale-[1.01] cursor-pointer`}
   >
     {showSelector && (
       <button
@@ -100,13 +176,17 @@ const OrderSummaryCard = ({
           event.stopPropagation();
           onToggleSelect?.();
         }}
-        className={`absolute left-2 top-2 inline-flex h-5 w-5 items-center justify-center rounded border ${
-          selected ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-slate-300 bg-white text-transparent'
+        className={`absolute left-3 top-3 inline-flex h-6 w-6 items-center justify-center rounded-lg border-2 shadow-sm transition-all ${
+          selected
+            ? 'border-emerald-500 bg-emerald-500 text-white animate-[satinPop_180ms_ease-out]'
+            : 'border-slate-300 bg-white text-transparent hover:border-slate-400'
         }`}
         aria-label={selected ? "Desmarcar pedido" : "Selecionar pedido"}
         title={selected ? "Desmarcar pedido" : "Selecionar pedido"}
       >
-        <CheckSquare size={12} weight="bold" />
+        <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M5 13l4 4L19 7" />
+        </svg>
       </button>
     )}
     <div className="flex items-center justify-between gap-2 text-xs">
@@ -172,11 +252,11 @@ const OrderSummaryCard = ({
               event.stopPropagation();
               onQuickStart();
             }}
-            className="inline-flex h-7 w-7 items-center justify-center rounded-md text-amber-600 hover:bg-amber-50 transition-all"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-emerald-300 bg-emerald-50 text-emerald-700 shadow-sm hover:bg-emerald-100 hover:scale-105 transition-all"
             aria-label={`Iniciar atendimento do pedido ${orderDisplayId}`}
             title="Iniciar atendimento"
           >
-            <Play size={14} weight="fill" />
+            <Play size={16} weight="fill" />
           </button>
         )}
         {!archived && showQuickFinalize && typeof onQuickFinalize === 'function' && (
@@ -186,11 +266,11 @@ const OrderSummaryCard = ({
               event.stopPropagation();
               onQuickFinalize();
             }}
-            className="inline-flex h-7 w-7 items-center justify-center rounded-md text-emerald-600 hover:bg-emerald-50 transition-all"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-emerald-300 bg-emerald-600 text-white shadow-sm hover:bg-emerald-700 hover:scale-105 transition-all"
             aria-label={`Finalizar agora o pedido ${orderDisplayId}`}
             title="Finalizar agora"
           >
-            <CheckCircle size={14} weight="fill" />
+            <CheckCircle size={16} weight="fill" />
           </button>
         )}
         {canPrint && (
@@ -1886,6 +1966,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     <div className={`no-print ${tvMode ? "space-y-6 rounded-3xl bg-slate-900/95 p-4 sm:p-6 text-white" : "space-y-1"}`}>
       <style>{`
         @keyframes btnPop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
+        @keyframes satinPop{0%{transform:scale(0.92);filter:saturate(0.9)}60%{transform:scale(1.06);filter:saturate(1.08)}100%{transform:scale(1);filter:saturate(1)}}
         @keyframes drawerIn{0%{transform:translateX(100%)}100%{transform:translateX(0)}}
       `}</style>
       <div className={`${tvMode ? "" : "rounded-2xl border border-slate-200 bg-white/95 backdrop-blur-md px-2 sm:px-3 py-2 sticky top-0 z-30"}`}>
@@ -2358,23 +2439,24 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
 
               {/* ADICIONAR ITEM */}
               <div className="mt-3 flex w-full min-w-0 flex-row gap-2 items-center bg-white/70 border border-slate-200/70 rounded-2xl p-1.5">
-                <select
+                <PremiumDropdown
                   value={selectedProducts[order.id] || ""}
-                  onChange={(e) =>
+                  onChange={(nextValue: string) =>
                     setSelectedProducts((prev) => ({
                       ...prev,
-                      [order.id]: e.target.value,
+                      [order.id]: nextValue,
                     }))
                   }
-                  className="min-w-0 flex-1 border border-gray-200 rounded-lg px-2 py-1.5 text-xs bg-white"
-                >
-                  <option value="">Adicionar item...</option>
-                  {products.map((product) => (
-                    <option key={product.id} value={product.id}>
-                        {product.name} – {formatCurrency(product.price)}
-                    </option>
-                  ))}
-                </select>
+                  options={[
+                    { value: "", label: "Adicionar item..." },
+                    ...products.map((product) => ({
+                      value: product.id,
+                      label: `${product.name} - ${formatCurrency(product.price)}`,
+                    })),
+                  ]}
+                  className="min-w-0 flex-1"
+                  menuClassName="max-h-72"
+                />
 
                 <button
                   onClick={() => handleAddItem(order.id)}
@@ -2431,7 +2513,12 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
 	                  ? Number(confirmModal.deliveryFee)
 	                  : 0;
 	              const itemsSubtotal = Math.max(0, totalValue - (Number.isFinite(deliveryFeeValue) ? deliveryFeeValue : 0));
-                const itemsVolume = (confirmModal.items || []).reduce((sum, item) => sum + Number(item?.qty || 0), 0);
+              const itemsVolume = (confirmModal.items || []).reduce((sum, item) => sum + Number(item?.qty || 0), 0);
+              const isTableMesaDuplicated =
+                Boolean(confirmModal.table) &&
+                new RegExp(`\\bmesa\\s*${String(confirmModal.table)}\\b`, 'i').test(
+                  String(confirmModal.customerName || '')
+                );
               const cashValue = Number((cashConfirmValue || '').toString().replace(',', '.'));
               const cashValid = !isCashPayment || (cashConfirmValue && !Number.isNaN(cashValue) && cashValue >= totalValue);
               const changeValue = isCashPayment && cashValid ? cashValue - totalValue : 0;
@@ -2456,7 +2543,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                 <span>Cliente</span>
                 <span className="font-semibold text-slate-800">{confirmModal.customerName}</span>
               </div>
-              {confirmModal.table && (
+              {confirmModal.table && !isTableMesaDuplicated && (
                 <div className="flex items-center justify-between">
                   <span>Mesa</span>
                   <span className="font-semibold text-slate-800">Mesa {confirmModal.table}</span>
@@ -2932,17 +3019,16 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                 <span>Pagina {completedPage} de {completedTotalPages}</span>
                 <label className="flex items-center gap-2">
                   <span>Por pagina</span>
-                  <select
-                    value={completedPageSize}
-                    onChange={(event) => setCompletedPageSize(Number(event.target.value))}
-                    className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-600 focus:ring-2 focus:ring-brand-primary"
-                  >
-                    {[5, 9, 12, 15].map((size) => (
-                      <option key={size} value={size}>
-                        {size}
-                      </option>
-                    ))}
-                  </select>
+                  <PremiumDropdown
+                    value={String(completedPageSize)}
+                    onChange={(nextValue: string) => setCompletedPageSize(Number(nextValue))}
+                    options={[5, 9, 12, 15].map((size) => ({
+                      value: String(size),
+                      label: String(size),
+                    }))}
+                    className="w-[110px]"
+                    menuClassName="max-h-40"
+                  />
                 </label>
               </div>
               <div className="flex items-center gap-2">
