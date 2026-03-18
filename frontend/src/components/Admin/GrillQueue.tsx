@@ -4,7 +4,6 @@ import { createPortal } from "react-dom";
 import {
   CheckSquare,
   Clock,
-  ChefHat,
   Monitor,
   ArrowsClockwise,
   Plus,
@@ -12,12 +11,11 @@ import {
   Hash,
   Truck,
   Storefront,
-  ForkKnife,
   Printer,
   X,
   CurrencyDollar,
   Play,
-  CheckCircle,
+  Flag,
   CaretDown,
   Check
 } from "@phosphor-icons/react";
@@ -311,7 +309,7 @@ const OrderSummaryCard = ({
         onClick();
       }
     }}
-    className={`relative w-full rounded-xl border ${isLate ? 'border-red-200' : 'border-slate-100'} ${leftAccent} ${archived ? 'bg-slate-50/90 opacity-80' : 'bg-white'} p-3 sm:p-3 ${showSelector ? 'pl-12' : ''} text-left flex flex-col gap-1 transition-all duration-200 transition-transform hover:border-slate-200 hover:shadow-sm hover:-translate-y-0.5 hover:scale-[1.01] cursor-pointer`}
+    className={`relative w-full rounded-xl border ${isLate ? 'border-red-200' : 'border-slate-100'} ${leftAccent} ${archived ? 'bg-slate-50/90 opacity-80' : 'bg-white'} p-3 sm:p-3 text-left flex items-start gap-4 transition-all duration-200 transition-transform hover:border-slate-200 hover:shadow-sm hover:-translate-y-0.5 hover:scale-[1.01] cursor-pointer`}
   >
     {showSelector && (
       <button
@@ -320,7 +318,7 @@ const OrderSummaryCard = ({
           event.stopPropagation();
           onToggleSelect?.();
         }}
-        className={`absolute left-3 top-3 inline-flex h-6 w-6 items-center justify-center rounded-lg border-2 shadow-sm transition-all ${
+        className={`relative z-20 mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border-2 shadow-sm transition-all ${
           selected
             ? 'border-emerald-500 bg-emerald-500 text-white animate-[satinPop_180ms_ease-out]'
             : 'border-slate-300 bg-white text-transparent hover:border-slate-400'
@@ -333,6 +331,7 @@ const OrderSummaryCard = ({
         </svg>
       </button>
     )}
+    <div className="min-w-0 flex-1 space-y-1">
     <div className="flex items-center justify-between gap-2 text-xs">
       <div className="flex items-center gap-1.5 min-w-0">
         <span className="px-2 py-0.5 bg-slate-800 text-white text-[11px] font-bold rounded-md">
@@ -414,7 +413,7 @@ const OrderSummaryCard = ({
             aria-label={`Finalizar agora o pedido ${orderDisplayId}`}
             title="Finalizar agora"
           >
-            <CheckCircle size={16} weight="fill" />
+            <Flag size={16} weight="fill" />
           </button>
         )}
         {canPrint && (
@@ -451,6 +450,7 @@ const OrderSummaryCard = ({
           </button>
         )}
       </div>
+    </div>
     </div>
   </div>
     );
@@ -841,8 +841,8 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       const table = order?.table ? `Mesa ${order.table}` : 'Mesa';
       return {
         label: table,
-        pill: 'bg-fuchsia-100 text-fuchsia-800 border-fuchsia-200',
-        icon: <ForkKnife size={14} weight="duotone" />,
+        pill: 'bg-slate-100 text-slate-700 border-slate-200',
+        icon: <Hash size={14} weight="duotone" />,
       };
     }
     return {
@@ -2246,7 +2246,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                       }`}
                     >
                       <span className="inline-flex items-center gap-1.5 truncate">
-                        {tab.id === 'queue' && <ChefHat size={13} weight="duotone" />}
+                        {tab.id === 'queue' && <CheckSquare size={13} weight="duotone" />}
                         {tab.id === 'completed' && <CurrencyDollar size={13} weight="duotone" />}
                         <span>{tab.label}</span>
                       </span>
@@ -2511,20 +2511,22 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                     Cliente: {order.customerName || order.name || "Cliente"}
                   </h3>
 
-                  <div className="mt-1 flex flex-wrap items-center gap-2">
-                    {(() => {
-                      const meta = orderTypeMeta(order);
-                      return (
-                        <span
-                          className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.18em] ${meta.pill}`}
-                          title={formatOrderType(order.type)}
-                        >
-                          {meta.icon}
-                          <span>{meta.label}</span>
-                        </span>
-                      );
-                    })()}
-                  </div>
+                  {String(order?.type || '').toLowerCase() !== 'table' && (
+                    <div className="mt-1 flex flex-wrap items-center gap-2">
+                      {(() => {
+                        const meta = orderTypeMeta(order);
+                        return (
+                          <span
+                            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.18em] ${meta.pill}`}
+                            title={formatOrderType(order.type)}
+                          >
+                            {meta.icon}
+                            <span>{meta.label}</span>
+                          </span>
+                        );
+                      })()}
+                    </div>
+                  )}
                   {order.phone && (
                     <p className="text-[11px] text-gray-500 break-words">{order.phone}</p>
                   )}
