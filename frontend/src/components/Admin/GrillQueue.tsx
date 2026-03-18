@@ -15,7 +15,9 @@ import {
   ForkKnife,
   Printer,
   X,
-  CurrencyDollar
+  CurrencyDollar,
+  Play,
+  CheckCircle
 } from "@phosphor-icons/react";
 import { orderService } from "../../services/orderService";
 import { storeService } from "../../services/storeService";
@@ -55,6 +57,13 @@ const OrderSummaryCard = ({
   printBusy,
   archived = false,
   onReopen,
+  showSelector = false,
+  selected = false,
+  onToggleSelect,
+  showQuickStart = false,
+  onQuickStart,
+  showQuickFinalize = false,
+  onQuickFinalize,
 }: any) => (
   (() => {
     const isDelivery = String(order?.type || '').toLowerCase() === 'delivery';
@@ -82,8 +91,24 @@ const OrderSummaryCard = ({
         onClick();
       }
     }}
-    className={`w-full rounded-xl border ${isLate ? 'border-red-200' : 'border-slate-100'} ${leftAccent} ${archived ? 'bg-slate-50/90 opacity-80' : 'bg-white'} p-3 sm:p-3 text-left flex flex-col gap-1 transition-all duration-200 transition-transform hover:border-slate-200 hover:shadow-sm hover:-translate-y-0.5 hover:scale-[1.01] cursor-pointer`}
+    className={`relative w-full rounded-xl border ${isLate ? 'border-red-200' : 'border-slate-100'} ${leftAccent} ${archived ? 'bg-slate-50/90 opacity-80' : 'bg-white'} p-3 sm:p-3 ${showSelector ? 'pl-9' : ''} text-left flex flex-col gap-1 transition-all duration-200 transition-transform hover:border-slate-200 hover:shadow-sm hover:-translate-y-0.5 hover:scale-[1.01] cursor-pointer`}
   >
+    {showSelector && (
+      <button
+        type="button"
+        onClick={(event) => {
+          event.stopPropagation();
+          onToggleSelect?.();
+        }}
+        className={`absolute left-2 top-2 inline-flex h-5 w-5 items-center justify-center rounded border ${
+          selected ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-slate-300 bg-white text-transparent'
+        }`}
+        aria-label={selected ? "Desmarcar pedido" : "Selecionar pedido"}
+        title={selected ? "Desmarcar pedido" : "Selecionar pedido"}
+      >
+        <CheckSquare size={12} weight="bold" />
+      </button>
+    )}
     <div className="flex items-center justify-between gap-2 text-xs">
       <div className="flex items-center gap-1.5 min-w-0">
         <span className="px-2 py-0.5 bg-slate-800 text-white text-[11px] font-bold rounded-md">
@@ -140,6 +165,34 @@ const OrderSummaryCard = ({
         <span className="text-[11px] text-slate-500">{itemsCount} {itemsCount === 1 ? 'item' : 'itens'}</span>
       </div>
       <div className="text-right flex items-center gap-1.5 shrink-0">
+        {!archived && showQuickStart && typeof onQuickStart === 'function' && (
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              onQuickStart();
+            }}
+            className="inline-flex h-7 w-7 items-center justify-center rounded-md text-amber-600 hover:bg-amber-50 transition-all"
+            aria-label={`Iniciar atendimento do pedido ${orderDisplayId}`}
+            title="Iniciar atendimento"
+          >
+            <Play size={14} weight="fill" />
+          </button>
+        )}
+        {!archived && showQuickFinalize && typeof onQuickFinalize === 'function' && (
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              onQuickFinalize();
+            }}
+            className="inline-flex h-7 w-7 items-center justify-center rounded-md text-emerald-600 hover:bg-emerald-50 transition-all"
+            aria-label={`Finalizar agora o pedido ${orderDisplayId}`}
+            title="Finalizar agora"
+          >
+            <CheckCircle size={14} weight="fill" />
+          </button>
+        )}
         {canPrint && (
           <button
             type="button"
@@ -307,6 +360,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   const [isGeneratingPrint, setIsGeneratingPrint] = useState(false);
   const [bulkFinishing, setBulkFinishing] = useState(false);
   const [bulkFinalizeModalOpen, setBulkFinalizeModalOpen] = useState(false);
+  const [selectedOrderIds, setSelectedOrderIds] = useState<string[]>([]);
   const [quickFinalizeModal, setQuickFinalizeModal] = useState<{
     open: boolean;
     order: any | null;
@@ -1011,13 +1065,13 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   };
 
   const openFinalizeAllReadyModal = () => {
-    if (bulkFinishing || !bulkFinalizeCandidates.length) return;
+    if (bulkFinishing || !selectedBulkOrders.length) return;
     setBulkFinalizeModalOpen(true);
   };
 
   const handleFinalizeAllReady = async () => {
     if (bulkFinishing) return;
-    const targetOrders = bulkFinalizeCandidates;
+    const targetOrders = selectedBulkOrders;
     if (!targetOrders.length) return;
 
     setBulkFinishing(true);
@@ -1053,6 +1107,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         );
       } else {
         setError('');
+        setSelectedOrderIds([]);
       }
     } catch (error) {
       setQueue(previousQueue);
@@ -1503,10 +1558,16 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     return merged.filter((order) => {
       const id = String(order?.id || '');
       if (!id || seen.has(id)) return false;
+      if (!canQuickFinalizeOrder(order)) return false;
       seen.add(id);
       return true;
     });
   }, [productionQueue]);
+  const selectedBulkOrders = useMemo(() => {
+    if (!selectedOrderIds.length) return [];
+    const selectedSet = new Set(selectedOrderIds.map((id) => String(id)));
+    return bulkFinalizeCandidates.filter((order) => selectedSet.has(String(order?.id || '')));
+  }, [bulkFinalizeCandidates, selectedOrderIds]);
   const selectedOrderRank = useMemo(() => {
     if (!selectedOrder?.id) return 1;
     const idx = filteredProductionQueue.findIndex((order) => order.id === selectedOrder.id);
@@ -1532,8 +1593,15 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   useEffect(() => {
     if (activeTab !== 'queue') {
       closeOrderOverlays();
+      setSelectedOrderIds([]);
     }
   }, [activeTab]);
+
+  useEffect(() => {
+    if (!selectedOrderIds.length) return;
+    const validIds = new Set(bulkFinalizeCandidates.map((order) => String(order?.id || '')));
+    setSelectedOrderIds((prev) => prev.filter((id) => validIds.has(String(id))));
+  }, [bulkFinalizeCandidates, selectedOrderIds.length]);
 
   useEffect(() => {
     if (!selectedOrder) return;
@@ -1679,17 +1747,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
           <ArrowsClockwise size={14} weight="duotone" className="animate-spin" />
           Atualizando pedido...
         </div>
-      )}
-      {canQuickFinalizeOrder(order) && (
-        <button
-          type="button"
-          onClick={() => { pulseCta(order.id + '-quick-finalize'); openQuickFinalizeModal(order); }}
-          disabled={updating === order.id}
-          style={ctaPulseId === order.id + '-quick-finalize' ? { animation: 'btnPop 220ms ease' } : undefined}
-          className="w-full px-3 py-2.5 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-700 text-sm font-bold flex items-center justify-center gap-1 disabled:opacity-60 transition-all hover:-translate-y-0.5 active:scale-95"
-        >
-          <CheckSquare size={16} weight="duotone" /> Finalizar agora
-        </button>
       )}
       {order.status === "pending" && (
         <div className="w-full">
@@ -1871,23 +1928,11 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                   ))}
                   </div>
                 </div>
-                {activeTab === 'queue' && bulkFinalizeCandidates.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={openFinalizeAllReadyModal}
-                    disabled={bulkFinishing || bulkFinalizeCandidates.length === 0}
-                    className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-[11px] sm:text-xs font-bold text-emerald-700 hover:bg-emerald-100 transition disabled:opacity-45 disabled:cursor-not-allowed"
-                    title="Encerrar pedidos rapidamente"
-                  >
-                    <CheckSquare size={13} weight="duotone" />
-                    <span>{bulkFinishing ? 'Encerrando...' : `Encerrar pedidos (${bulkFinalizeCandidates.length})`}</span>
-                  </button>
-                )}
               </div>
 
               {activeTab === 'queue' && (
                 <div className="relative mt-0.5">
-                  <div className="flex flex-nowrap items-center gap-1.5 overflow-x-auto snap-x snap-mandatory pb-1 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
+                  <div className="flex flex-nowrap items-center gap-2 overflow-x-auto snap-x snap-mandatory pb-1.5 pr-2 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
                   {[
                     { id: 'all', label: 'Todos', value: allActiveQueue.length },
                     { id: 'pending', label: 'Pendentes', value: queueMetrics.pending },
@@ -1899,7 +1944,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                       key={kpi.id}
                       type="button"
                       onClick={() => setQueueFilter(kpi.id as any)}
-                    className={`flex snap-start shrink-0 items-center gap-1.5 px-3 py-1 rounded-full text-[10px] sm:text-xs font-medium transition-colors whitespace-nowrap ${
+                    className={`flex snap-start shrink-0 items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] sm:text-xs font-medium transition-colors whitespace-nowrap ${
                         queueFilter === kpi.id
                           ? 'bg-amber-500 text-white'
                           : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -1956,6 +2001,10 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
               const paymentLabel = getPaymentMethodMeta(order.payment).label;
               const totalLabel = formatCurrency(Number(order.total || 0));
               const itemsCount = (order.items || []).reduce((sum, item) => sum + Number(item?.qty || 0), 0);
+              const orderId = String(order.id);
+              const isSelected = selectedOrderIds.includes(orderId);
+              const canQuickStart = String(order?.status || '').toLowerCase() === 'pending';
+              const canQuickFinalize = canQuickFinalizeOrder(order);
 
               return (
                 <OrderSummaryCard
@@ -1974,6 +2023,23 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                   canPrint={hasPrintAccess}
                   onPrint={() => handlePrintOrder(order, index + 1)}
                   archived={isArchived}
+                  showSelector={activeTab === 'queue' && canQuickFinalize}
+                  selected={isSelected}
+                  onToggleSelect={() =>
+                    setSelectedOrderIds((prev) =>
+                      prev.includes(orderId) ? prev.filter((id) => id !== orderId) : [ ...prev, orderId ]
+                    )
+                  }
+                  showQuickStart={canQuickStart}
+                  onQuickStart={() => {
+                    pulseCta(order.id + '-quick-start');
+                    void handleAdvance(order.id, 'preparing');
+                  }}
+                  showQuickFinalize={canQuickFinalize}
+                  onQuickFinalize={() => {
+                    pulseCta(order.id + '-quick-finalize');
+                    openQuickFinalizeModal(order);
+                  }}
                   onClick={() => {
                     setConfirmModal(null);
                     setEditingFinalizedOrder(false);
@@ -1983,6 +2049,24 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
               );
             })}
           </div>
+          {activeTab === 'queue' && selectedBulkOrders.length > 0 && (
+            <div className="fixed inset-x-0 bottom-[76px] sm:bottom-4 z-[120] flex justify-center px-3">
+              <div className="w-full max-w-md rounded-2xl border border-emerald-200 bg-white/95 backdrop-blur shadow-lg px-3 py-2.5 flex items-center justify-between gap-2">
+                <span className="text-xs font-semibold text-slate-600">
+                  {selectedBulkOrders.length} selecionado{selectedBulkOrders.length === 1 ? '' : 's'}
+                </span>
+                <button
+                  type="button"
+                  onClick={openFinalizeAllReadyModal}
+                  disabled={bulkFinishing || selectedBulkOrders.length === 0}
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3 py-2 text-xs font-bold text-white hover:bg-emerald-700 disabled:opacity-60"
+                >
+                  <CheckSquare size={14} weight="duotone" />
+                  {bulkFinishing ? 'Finalizando...' : `Finalizar ${selectedBulkOrders.length} selecionados`}
+                </button>
+              </div>
+            </div>
+          )}
           {filteredProductionQueue.length === 0 && !loading && (
             <div className="col-span-full text-center text-gray-500 py-5 bg-slate-50 rounded-2xl border border-dashed border-slate-300">
               <div className="mx-auto max-w-sm space-y-1">
@@ -2678,7 +2762,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
               <>
                 <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 shadow-sm">
                   <p className="text-[10px] text-slate-500 inline-flex items-center gap-1">
-                    <Clock size={12} weight="duotone" /> Ticket médio
+                    <Clock size={12} weight="duotone" /> Média por venda
                   </p>
                   <p className="text-base font-black text-slate-900 mt-1">
                     {formatCurrency(reportSummary.averageTicket)}
@@ -2984,8 +3068,8 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
               </div>
               <div className="p-4 space-y-3">
                 <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-3 flex items-center justify-between">
-                  <span className="text-sm font-semibold text-emerald-700">Pedidos para encerrar agora</span>
-                  <span className="text-lg font-black text-emerald-800">{bulkFinalizeCandidates.length}</span>
+                  <span className="text-sm font-semibold text-emerald-700">Pedidos selecionados para finalizar</span>
+                  <span className="text-lg font-black text-emerald-800">{selectedBulkOrders.length}</span>
                 </div>
                 <p className="text-xs text-slate-500">
                   Esta ação registra como pago e finalizado. Use quando a cobrança já foi concluída e você quer encerrar rápido sem passar por cada etapa.
@@ -3003,10 +3087,10 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                 <button
                   type="button"
                   onClick={handleFinalizeAllReady}
-                  disabled={bulkFinishing || bulkFinalizeCandidates.length === 0}
+                  disabled={bulkFinishing || selectedBulkOrders.length === 0}
                   className="h-10 rounded-xl bg-emerald-600 px-3 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
                 >
-                  {bulkFinishing ? 'Encerrando...' : `Encerrar ${bulkFinalizeCandidates.length}`}
+                  {bulkFinishing ? 'Encerrando...' : `Finalizar ${selectedBulkOrders.length} selecionados`}
                 </button>
               </div>
             </div>
