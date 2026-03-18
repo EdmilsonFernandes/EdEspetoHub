@@ -9,8 +9,8 @@
 };
 
 const STATUS_LABELS: Record<string, string> = {
-  pending: 'Recebido',
-  preparing: 'Em atendimento',
+  pending: 'Pedido Recebido',
+  preparing: 'Em Preparação',
   ready_for_delivery: 'Pronto para entrega',
   waiting_for_motoboy: 'Aguardando',
   in_delivery: 'Em rota',

@@ -1653,10 +1653,10 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       return { label: "Buscando entregador", className: "bg-amber-50 text-amber-700 border-amber-100" };
     }
     if (orderType === "delivery" && normalizedStatus === "ready_for_delivery") {
-      return { label: "Disponível p/ Coleta", className: "bg-violet-50 text-violet-700 border-violet-100" };
+      return { label: "Disponível para Coleta", className: "bg-violet-50 text-violet-700 border-violet-100" };
     }
     if (normalizedStatus === "preparing") {
-      return { label: "Em preparação", className: "bg-blue-50 text-blue-700 border-blue-100" };
+      return { label: "Em Preparação", className: "bg-blue-50 text-blue-700 border-blue-100" };
     }
     if (normalizedStatus === "ready") {
       const label =
@@ -1689,7 +1689,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         ? [
             { key: "pending", label: "Pedido Recebido" },
             { key: "preparing", label: "Em Preparação" },
-            { key: "ready", label: "Disponível p/ Coleta" },
+            { key: "ready", label: "Disponível para Coleta" },
             { key: "done", label: "Pago" },
           ]
         : orderType === "delivery"
@@ -1936,7 +1936,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                   {[
                     { id: 'all', label: 'Todos', value: allActiveQueue.length },
                     { id: 'pending', label: 'Pendentes', value: queueMetrics.pending },
-                    { id: 'preparing', label: 'Em preparação', value: queueMetrics.preparing },
+                    { id: 'preparing', label: 'Em Preparação', value: queueMetrics.preparing },
                     { id: 'ready', label: 'Prontos', value: queueMetrics.ready },
                     { id: 'late', label: 'Atrasados', value: queueMetrics.late },
                   ].map((kpi) => (

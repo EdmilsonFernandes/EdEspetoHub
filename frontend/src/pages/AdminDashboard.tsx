@@ -254,7 +254,7 @@ const OrdersView = ({ orders, products, storeSlug }) => {
           {[
             { id: 'all', label: 'Todos', count: statusCounts.all },
             { id: 'pending', label: 'Pendentes', count: statusCounts.pending },
-            { id: 'preparing', label: 'Em preparação', count: statusCounts.preparing },
+            { id: 'preparing', label: 'Em Preparação', count: statusCounts.preparing },
             { id: 'ready', label: 'Disponível para Coleta', count: statusCounts.ready },
             { id: 'done', label: 'Finalizados', count: statusCounts.done },
             { id: 'cancelled', label: 'Cancelados', count: statusCounts.cancelled },
