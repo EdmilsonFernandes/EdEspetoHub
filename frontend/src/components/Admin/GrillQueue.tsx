@@ -307,6 +307,15 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   const [isGeneratingPrint, setIsGeneratingPrint] = useState(false);
   const [bulkFinishing, setBulkFinishing] = useState(false);
   const [bulkFinalizeModalOpen, setBulkFinalizeModalOpen] = useState(false);
+  const [quickFinalizeModal, setQuickFinalizeModal] = useState<{
+    open: boolean;
+    order: any | null;
+    loading: boolean;
+  }>({
+    open: false,
+    order: null,
+    loading: false,
+  });
   const [reopenModal, setReopenModal] = useState<{
     open: boolean;
     order: any | null;
@@ -1054,6 +1063,48 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     }
   };
 
+  const canQuickFinalizeOrder = (order: any) => {
+    const normalized = String(order?.status || '').toLowerCase();
+    if (!normalized) return false;
+    if ([ 'done', 'delivered', 'finished', 'cancelled', 'in_delivery' ].includes(normalized)) return false;
+    return true;
+  };
+
+  const openQuickFinalizeModal = (order: any) => {
+    if (!canQuickFinalizeOrder(order) || quickFinalizeModal.loading) return;
+    setQuickFinalizeModal({
+      open: true,
+      order,
+      loading: false,
+    });
+  };
+
+  const closeQuickFinalizeModal = () => {
+    if (quickFinalizeModal.loading) return;
+    setQuickFinalizeModal({
+      open: false,
+      order: null,
+      loading: false,
+    });
+  };
+
+  const handleQuickFinalize = async () => {
+    const order = quickFinalizeModal.order;
+    if (!order?.id || quickFinalizeModal.loading) return;
+    setQuickFinalizeModal((prev) => ({ ...prev, loading: true }));
+    try {
+      const success = await handleAdvance(order.id, 'done');
+      if (success) {
+        setQuickFinalizeModal({ open: false, order: null, loading: false });
+        setSelectedOrder((prev: any) => (prev?.id === order.id ? null : prev));
+      } else {
+        setQuickFinalizeModal((prev) => ({ ...prev, loading: false }));
+      }
+    } catch (error) {
+      setQuickFinalizeModal((prev) => ({ ...prev, loading: false }));
+    }
+  };
+
   const applyItemsChange = async (orderId, updater) => {
     const targetOrder = queue.find((entry) => entry.id === orderId);
     const baseItems = getOrderedItems(orderId, targetOrder?.items || []);
@@ -1629,6 +1680,17 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
           Atualizando pedido...
         </div>
       )}
+      {canQuickFinalizeOrder(order) && (
+        <button
+          type="button"
+          onClick={() => { pulseCta(order.id + '-quick-finalize'); openQuickFinalizeModal(order); }}
+          disabled={updating === order.id}
+          style={ctaPulseId === order.id + '-quick-finalize' ? { animation: 'btnPop 220ms ease' } : undefined}
+          className="w-full px-3 py-2.5 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-700 text-sm font-bold flex items-center justify-center gap-1 disabled:opacity-60 transition-all hover:-translate-y-0.5 active:scale-95"
+        >
+          <CheckSquare size={16} weight="duotone" /> Finalizar agora
+        </button>
+      )}
       {order.status === "pending" && (
         <div className="w-full">
           <div className="mb-2 text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-2.5 py-1">
@@ -1815,10 +1877,10 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                     onClick={openFinalizeAllReadyModal}
                     disabled={bulkFinishing || bulkFinalizeCandidates.length === 0}
                     className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-[11px] sm:text-xs font-bold text-emerald-700 hover:bg-emerald-100 transition disabled:opacity-45 disabled:cursor-not-allowed"
-                    title="Finalizar rapidamente todos os pedidos ativos"
+                    title="Encerrar pedidos rapidamente"
                   >
                     <CheckSquare size={13} weight="duotone" />
-                    <span className="hidden sm:inline">{bulkFinishing ? 'Finalizando...' : `Finalizar tudo (${bulkFinalizeCandidates.length})`}</span>
+                    <span>{bulkFinishing ? 'Encerrando...' : `Encerrar pedidos (${bulkFinalizeCandidates.length})`}</span>
                   </button>
                 )}
               </div>
@@ -2907,7 +2969,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                 <div>
                   <p className="text-sm font-black text-slate-900">Finalização rápida</p>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    Confirme para concluir em lote os pedidos ativos da operação.
+                    Confirme para encerrar todos os pedidos ativos de uma vez.
                   </p>
                 </div>
                 <button
@@ -2922,7 +2984,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
               </div>
               <div className="p-4 space-y-3">
                 <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-3 flex items-center justify-between">
-                  <span className="text-sm font-semibold text-emerald-700">Pedidos para finalizar agora</span>
+                  <span className="text-sm font-semibold text-emerald-700">Pedidos para encerrar agora</span>
                   <span className="text-lg font-black text-emerald-800">{bulkFinalizeCandidates.length}</span>
                 </div>
                 <p className="text-xs text-slate-500">
@@ -2944,7 +3006,57 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                   disabled={bulkFinishing || bulkFinalizeCandidates.length === 0}
                   className="h-10 rounded-xl bg-emerald-600 px-3 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
                 >
-                  {bulkFinishing ? 'Finalizando...' : `Finalizar ${bulkFinalizeCandidates.length}`}
+                  {bulkFinishing ? 'Encerrando...' : `Encerrar ${bulkFinalizeCandidates.length}`}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+      {quickFinalizeModal.open && createPortal(
+        <div className="fixed inset-0 z-[10026]">
+          <div className="absolute inset-0 bg-slate-900/45 backdrop-blur-sm" onClick={closeQuickFinalizeModal} />
+          <div className="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center p-3 sm:p-4">
+            <div className="w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl border border-slate-200 bg-white shadow-2xl overflow-hidden">
+              <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-black text-slate-900">Finalizar pedido agora</p>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Pedido #{formatOrderDisplayId(quickFinalizeModal.order?.id, storeSlug)}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={closeQuickFinalizeModal}
+                  disabled={quickFinalizeModal.loading}
+                  className="h-9 w-9 rounded-full border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+                  aria-label="Fechar finalização rápida do pedido"
+                >
+                  <X size={16} weight="bold" />
+                </button>
+              </div>
+              <div className="p-4 space-y-3">
+                <p className="text-sm text-slate-700">
+                  Isso vai marcar este pedido como <span className="font-bold">pago e finalizado</span> agora, sem passar pelas etapas intermediárias.
+                </p>
+              </div>
+              <div className="px-4 py-3 border-t border-slate-100 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={closeQuickFinalizeModal}
+                  disabled={quickFinalizeModal.loading}
+                  className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={handleQuickFinalize}
+                  disabled={quickFinalizeModal.loading}
+                  className="h-10 rounded-xl bg-emerald-600 px-3 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
+                >
+                  {quickFinalizeModal.loading ? 'Finalizando...' : 'Finalizar pedido'}
                 </button>
               </div>
             </div>
