@@ -82,6 +82,9 @@ const Header = ({
   const isOperatorUser = normalizedRole === "operator" || normalizedRole === "churrasqueiro";
   const isLogged = Boolean(isAuthenticated || isAdminUser || isOperatorUser);
   const [mobileCollapsedStable, setMobileCollapsedStable] = useState(false);
+  const collapseLockUntilRef = React.useRef(0);
+  const collapsedRef = React.useRef(false);
+  const lastYRef = React.useRef(0);
   const storeSlug = branding?.espetoId || "";
   const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
   const storeUrl = storeSlug ? `${baseUrl}/${storeSlug}` : "";
@@ -118,23 +121,46 @@ const Header = ({
     if (!compact) return;
     let frame = 0;
     let ticking = false;
+    let unlockTimer: ReturnType<typeof setTimeout> | null = null;
     const collapseAt = 96;
     const expandAt = 36;
-    let collapsed = false;
-    let lastY = 0;
+    const deltaThreshold = 8;
+
+    collapsedRef.current = false;
+    lastYRef.current = window.scrollY || document.documentElement.scrollTop || 0;
+    collapseLockUntilRef.current = 0;
+
+    const lockTransition = () => {
+      collapseLockUntilRef.current = Date.now() + 420;
+      if (unlockTimer) clearTimeout(unlockTimer);
+      unlockTimer = setTimeout(() => {
+        collapseLockUntilRef.current = 0;
+      }, 430);
+    };
 
     const update = () => {
       const y = window.scrollY || document.documentElement.scrollTop || 0;
-      const goingDown = y > lastY;
-      const goingUp = y < lastY;
+      const now = Date.now();
+      const delta = y - lastYRef.current;
+      if (Math.abs(delta) < deltaThreshold) return;
+      if (now < collapseLockUntilRef.current) {
+        lastYRef.current = y;
+        return;
+      }
+
+      const goingDown = delta > 0;
+      const goingUp = delta < 0;
+      const collapsed = collapsedRef.current;
       if (!collapsed && goingDown && y >= collapseAt) {
-        collapsed = true;
+        collapsedRef.current = true;
+        lockTransition();
         setMobileCollapsedStable(true);
       } else if (collapsed && goingUp && y <= expandAt) {
-        collapsed = false;
+        collapsedRef.current = false;
+        lockTransition();
         setMobileCollapsedStable(false);
       }
-      lastY = y;
+      lastYRef.current = y;
     };
 
     const onScroll = () => {
@@ -152,6 +178,7 @@ const Header = ({
     return () => {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
+      if (unlockTimer) clearTimeout(unlockTimer);
       if (frame) window.cancelAnimationFrame(frame);
     };
   }, [compact]);

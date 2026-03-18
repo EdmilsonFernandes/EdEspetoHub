@@ -95,6 +95,8 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
   const planMenuRef = useRef<HTMLDivElement | null>(null);
   const userMenuRef = useRef<HTMLDivElement | null>(null);
   const mobileCollapsedRef = useRef(false);
+  const collapseLockUntilRef = useRef(0);
+  const lastYRef = useRef(0);
 
   const storeSlug = String(storeProp?.slug || auth?.store?.slug || '');
   const storeName =
@@ -202,31 +204,52 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
   useEffect(() => {
     let frame = 0;
     let ticking = false;
+    let unlockTimer: ReturnType<typeof setTimeout> | null = null;
     const collapseAt = 104;
     const expandAt = 52;
-    let lastY = 0;
+    const deltaThreshold = 8;
+
+    lastYRef.current = window.scrollY || document.documentElement.scrollTop || 0;
+    collapseLockUntilRef.current = 0;
+
+    const lockTransition = () => {
+      collapseLockUntilRef.current = Date.now() + 420;
+      if (unlockTimer) clearTimeout(unlockTimer);
+      unlockTimer = setTimeout(() => {
+        collapseLockUntilRef.current = 0;
+      }, 430);
+    };
 
     const update = () => {
       const isMobile = window.innerWidth < 768;
       if (!isMobile) {
         mobileCollapsedRef.current = false;
+        collapseLockUntilRef.current = 0;
         setMobileCollapsed(false);
         return;
       }
       const y = window.scrollY || document.documentElement.scrollTop || 0;
-      const goingDown = y > lastY;
-      const goingUp = y < lastY;
+      const delta = y - lastYRef.current;
+      if (Math.abs(delta) < deltaThreshold) return;
+      if (Date.now() < collapseLockUntilRef.current) {
+        lastYRef.current = y;
+        return;
+      }
+      const goingDown = delta > 0;
+      const goingUp = delta < 0;
       const collapsed = mobileCollapsedRef.current;
 
       if (!collapsed && goingDown && y >= collapseAt) {
         mobileCollapsedRef.current = true;
+        lockTransition();
         setMobileCollapsed(true);
       } else if (collapsed && goingUp && y <= expandAt) {
         mobileCollapsedRef.current = false;
+        lockTransition();
         setMobileCollapsed(false);
       }
 
-      lastY = y;
+      lastYRef.current = y;
     };
 
     const onScroll = () => {
@@ -244,6 +267,7 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
     return () => {
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onScroll);
+      if (unlockTimer) clearTimeout(unlockTimer);
       if (frame) window.cancelAnimationFrame(frame);
     };
   }, []);
