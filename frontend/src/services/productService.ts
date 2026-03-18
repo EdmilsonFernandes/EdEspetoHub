@@ -85,10 +85,12 @@ export const productService = {
 
     if (product.id)
     {
-      await apiClient.put(path, product);
+      const data = await apiClient.put(path, product);
+      return data ? normalizeProduct(data) : null;
     } else
     {
-      await apiClient.post(basePath, product);
+      const data = await apiClient.post(basePath, product);
+      return data ? normalizeProduct(data) : null;
     }
   },
 

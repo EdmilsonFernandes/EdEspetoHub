@@ -42,6 +42,20 @@ import { buildPixPayload } from "../../utils/pixPayload";
 import { printReceiptAsImage } from "../../utils/printReceiptImage";
 import { exportToCsv } from "../../utils/export";
 
+const normalizeSearchText = (value: any) =>
+  String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+
+const fuzzyIncludes = (text: string, query: string) => {
+  const source = normalizeSearchText(text);
+  const target = normalizeSearchText(query);
+  if (!target) return true;
+  return source.includes(target);
+};
+
 const PremiumDropdown = ({
   value,
   onChange,
@@ -110,6 +124,136 @@ const PremiumDropdown = ({
               </button>
             );
           })}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const ProductQuickPicker = ({
+  products = [],
+  value,
+  onChange,
+  onOpenCatalog,
+  onOpenManual,
+  placeholder = "Adicionar item...",
+  className = "",
+}: any) => {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const rootRef = useRef<any>(null);
+  const inputRef = useRef<any>(null);
+
+  const selectedOption = useMemo(
+    () => (products || []).find((p: any) => String(p.id) === String(value)),
+    [products, value]
+  );
+
+  const filteredOptions = useMemo(() => {
+    const list = Array.isArray(products) ? products : [];
+    if (!query.trim()) return list.slice(0, 40);
+    return list.filter((product: any) =>
+      fuzzyIncludes(product?.name || "", query)
+    );
+  }, [products, query]);
+
+  useEffect(() => {
+    if (!open) return;
+    const handleOutside = (event: any) => {
+      if (!rootRef.current?.contains?.(event?.target)) setOpen(false);
+    };
+    const handleEsc = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", handleOutside);
+    document.addEventListener("keydown", handleEsc);
+    return () => {
+      document.removeEventListener("mousedown", handleOutside);
+      document.removeEventListener("keydown", handleEsc);
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    window.setTimeout(() => inputRef.current?.focus?.(), 0);
+  }, [open]);
+
+  return (
+    <div ref={rootRef} className={`relative ${className}`}>
+      <button
+        type="button"
+        onClick={() => setOpen((prev) => !prev)}
+        className="w-full inline-flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-left text-xs text-slate-700 shadow-sm transition-all hover:border-slate-300 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-amber-200"
+      >
+        <span className="truncate">
+          {selectedOption
+            ? `${selectedOption.name} - ${formatCurrency(selectedOption.price)}`
+            : placeholder}
+        </span>
+        <CaretDown size={14} className={`text-slate-400 transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+
+      {open && (
+        <div className="absolute left-0 right-0 top-[calc(100%+6px)] z-[140] rounded-xl border border-slate-200 bg-white p-2 shadow-xl">
+          <input
+            ref={inputRef}
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Buscar item..."
+            className="mb-2 w-full rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-200"
+          />
+
+          <div className="max-h-64 overflow-auto rounded-lg border border-slate-100">
+            {filteredOptions.length > 0 ? (
+              filteredOptions.map((product: any) => {
+                const isSelected = String(product.id) === String(value);
+                return (
+                  <button
+                    key={String(product.id)}
+                    type="button"
+                    onClick={() => {
+                      onChange?.(product.id);
+                      setOpen(false);
+                    }}
+                    className={`w-full inline-flex items-center justify-between gap-2 px-2.5 py-2 text-left text-xs transition-colors ${
+                      isSelected
+                        ? "bg-amber-50 text-amber-700 font-semibold"
+                        : "text-slate-700 hover:bg-slate-50"
+                    }`}
+                  >
+                    <span className="truncate">{product.name}</span>
+                    <span className="shrink-0 font-semibold">{formatCurrency(product.price)}</span>
+                  </button>
+                );
+              })
+            ) : (
+              <div className="p-3 space-y-2">
+                <p className="text-[11px] text-slate-500">Nenhum item encontrado.</p>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOpen(false);
+                      onOpenCatalog?.();
+                    }}
+                    className="inline-flex items-center rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
+                  >
+                    Visualizar Catálogo Completo
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setOpen(false);
+                      onOpenManual?.(query);
+                    }}
+                    className="inline-flex items-center rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-1.5 text-[11px] font-semibold text-amber-700 hover:bg-amber-100"
+                  >
+                    Adicionar item não cadastrado
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>
@@ -479,6 +623,30 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     queueRank: 1,
     hasPrintedItems: false,
     hasNewItems: false,
+  });
+  const [catalogPickerModal, setCatalogPickerModal] = useState<{
+    open: boolean;
+    orderId: string | null;
+    query: string;
+  }>({
+    open: false,
+    orderId: null,
+    query: "",
+  });
+  const [manualItemModal, setManualItemModal] = useState<{
+    open: boolean;
+    orderId: string | null;
+    name: string;
+    price: string;
+    loading: boolean;
+    error: string;
+  }>({
+    open: false,
+    orderId: null,
+    name: "",
+    price: "",
+    loading: false,
+    error: "",
   });
   const previousIdsRef = useRef<string[]>([]);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -1301,8 +1469,8 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     );
   };
 
-  const handleAddItem = (orderId) => {
-    const productId = selectedProducts[orderId];
+  const handleAddItem = (orderId, forcedProductId?: string) => {
+    const productId = forcedProductId || selectedProducts[orderId];
     const product = products.find((p) => String(p.id) === String(productId));
     if (!product) return;
 
@@ -1320,6 +1488,88 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         },
       ];
     });
+  };
+
+  const openCatalogPicker = (orderId: string, initialQuery = "") => {
+    setCatalogPickerModal({
+      open: true,
+      orderId,
+      query: String(initialQuery || "").trim(),
+    });
+  };
+
+  const openManualItemModal = (orderId: string, initialName = "") => {
+    setManualItemModal({
+      open: true,
+      orderId,
+      name: String(initialName || "").trim(),
+      price: "",
+      loading: false,
+      error: "",
+    });
+  };
+
+  const handleCreateManualItem = async () => {
+    if (!manualItemModal.orderId || manualItemModal.loading) return;
+    const name = String(manualItemModal.name || "").trim();
+    const price = Number(String(manualItemModal.price || "").replace(",", "."));
+
+    if (!name) {
+      setManualItemModal((prev) => ({ ...prev, error: "Informe o nome do item." }));
+      return;
+    }
+    if (!Number.isFinite(price) || price <= 0) {
+      setManualItemModal((prev) => ({ ...prev, error: "Informe um valor válido." }));
+      return;
+    }
+
+    setManualItemModal((prev) => ({ ...prev, loading: true, error: "" }));
+    try {
+      const createdProduct = await productService.save({
+        name,
+        price,
+        category: "Avulsos",
+        description: "Item avulso criado no atendimento",
+        active: true,
+      });
+
+      const nextProduct = createdProduct?.id
+        ? createdProduct
+        : { id: `manual-${Date.now()}`, name, price, category: "Avulsos", active: true };
+
+      if (createdProduct?.id) {
+        setProducts((prev: any[]) => [createdProduct, ...prev.filter((p: any) => String(p.id) !== String(createdProduct.id))]);
+      } else {
+        const latestProducts = await productService.list();
+        setProducts(latestProducts);
+        const match = latestProducts.find((p: any) => normalizeSearchText(p?.name) === normalizeSearchText(name) && Number(p?.price) === price);
+        if (match?.id) {
+          setSelectedProducts((prev: any) => ({ ...prev, [manualItemModal.orderId as string]: match.id }));
+          handleAddItem(manualItemModal.orderId, match.id);
+          setManualItemModal({ open: false, orderId: null, name: "", price: "", loading: false, error: "" });
+          return;
+        }
+      }
+
+      if (!nextProduct?.id || String(nextProduct.id).startsWith("manual-")) {
+        setManualItemModal((prev) => ({
+          ...prev,
+          loading: false,
+          error: "Não foi possível criar o item no catálogo. Tente novamente.",
+        }));
+        return;
+      }
+
+      setSelectedProducts((prev: any) => ({ ...prev, [manualItemModal.orderId as string]: nextProduct.id }));
+      handleAddItem(manualItemModal.orderId, nextProduct.id);
+      setManualItemModal({ open: false, orderId: null, name: "", price: "", loading: false, error: "" });
+    } catch (err: any) {
+      setManualItemModal((prev) => ({
+        ...prev,
+        loading: false,
+        error: String(err?.message || "Falha ao criar item avulso."),
+      }));
+    }
   };
 
   const elapsedTime = useMemo(
@@ -2439,7 +2689,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
 
               {/* ADICIONAR ITEM */}
               <div className="mt-3 flex w-full min-w-0 flex-row gap-2 items-center bg-white/70 border border-slate-200/70 rounded-2xl p-1.5">
-                <PremiumDropdown
+                <ProductQuickPicker
                   value={selectedProducts[order.id] || ""}
                   onChange={(nextValue: string) =>
                     setSelectedProducts((prev) => ({
@@ -2447,15 +2697,10 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                       [order.id]: nextValue,
                     }))
                   }
-                  options={[
-                    { value: "", label: "Adicionar item..." },
-                    ...products.map((product) => ({
-                      value: product.id,
-                      label: `${product.name} - ${formatCurrency(product.price)}`,
-                    })),
-                  ]}
+                  products={products}
+                  onOpenCatalog={() => openCatalogPicker(String(order.id))}
+                  onOpenManual={(query: string) => openManualItemModal(String(order.id), query)}
                   className="min-w-0 flex-1"
-                  menuClassName="max-h-72"
                 />
 
                 <button
@@ -3056,6 +3301,144 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
 
       {error && (
         <div className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg p-3">{error}</div>
+      )}
+
+      {catalogPickerModal.open && createPortal(
+        <div className="fixed inset-0 z-[10030] bg-slate-900/45 backdrop-blur-sm p-3 sm:p-6">
+          <div className="mx-auto h-full w-full max-w-3xl rounded-2xl border border-slate-200 bg-white shadow-2xl flex flex-col overflow-hidden">
+            <div className="shrink-0 px-4 py-3 border-b border-slate-100 flex items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-black text-slate-900">Catálogo completo</p>
+                <p className="text-xs text-slate-500">Selecione um item para incluir no pedido</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setCatalogPickerModal({ open: false, orderId: null, query: "" })}
+                className="h-9 w-9 rounded-full border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+              >
+                <X size={16} weight="bold" />
+              </button>
+            </div>
+            <div className="p-4 border-b border-slate-100">
+              <input
+                value={catalogPickerModal.query}
+                onChange={(event) => setCatalogPickerModal((prev) => ({ ...prev, query: event.target.value }))}
+                placeholder="Buscar no catálogo..."
+                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-200"
+              />
+            </div>
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {Object.entries(
+                (products || [])
+                  .filter((product: any) => fuzzyIncludes(product?.name || "", catalogPickerModal.query))
+                  .reduce((acc: Record<string, any[]>, product: any) => {
+                    const category = String(product?.category || "Sem categoria");
+                    if (!acc[category]) acc[category] = [];
+                    acc[category].push(product);
+                    return acc;
+                  }, {})
+              ).map(([category, list]: any) => (
+                <div key={category} className="space-y-2">
+                  <h4 className="text-xs uppercase tracking-[0.16em] font-bold text-slate-500">{category}</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {list.map((product: any) => (
+                      <button
+                        key={String(product.id)}
+                        type="button"
+                        onClick={() => {
+                          if (!catalogPickerModal.orderId) return;
+                          setSelectedProducts((prev: any) => ({ ...prev, [catalogPickerModal.orderId as string]: product.id }));
+                          handleAddItem(catalogPickerModal.orderId, product.id);
+                          setCatalogPickerModal({ open: false, orderId: null, query: "" });
+                        }}
+                        className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-left hover:bg-slate-50 hover:border-slate-300 transition-colors"
+                      >
+                        <p className="text-sm font-semibold text-slate-800 line-clamp-1">{product.name}</p>
+                        <p className="text-xs font-bold text-amber-700 mt-0.5">{formatCurrency(product.price)}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+              {products.filter((product: any) => fuzzyIncludes(product?.name || "", catalogPickerModal.query)).length === 0 && (
+                <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4 text-center space-y-2">
+                  <p className="text-sm font-semibold text-slate-700">Nenhum item encontrado.</p>
+                  <button
+                    type="button"
+                    onClick={() => openManualItemModal(String(catalogPickerModal.orderId || ""), catalogPickerModal.query)}
+                    className="inline-flex items-center rounded-lg border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700 hover:bg-amber-100"
+                  >
+                    Adicionar item não cadastrado
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {manualItemModal.open && createPortal(
+        <div className="fixed inset-0 z-[10040] bg-slate-900/45 backdrop-blur-sm p-3 sm:p-6">
+          <div className="mx-auto w-full max-w-md rounded-2xl border border-slate-200 bg-white shadow-2xl">
+            <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+              <p className="text-sm font-black text-slate-900">Adicionar item não cadastrado</p>
+              <button
+                type="button"
+                disabled={manualItemModal.loading}
+                onClick={() => setManualItemModal({ open: false, orderId: null, name: "", price: "", loading: false, error: "" })}
+                className="h-9 w-9 rounded-full border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+              >
+                <X size={16} weight="bold" />
+              </button>
+            </div>
+            <div className="p-4 space-y-3">
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">Nome do item</label>
+                <input
+                  value={manualItemModal.name}
+                  onChange={(event) => setManualItemModal((prev) => ({ ...prev, name: event.target.value, error: "" }))}
+                  placeholder="Ex: Sobremesa da casa"
+                  className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-200"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">Valor (R$)</label>
+                <input
+                  value={manualItemModal.price}
+                  onChange={(event) => setManualItemModal((prev) => ({ ...prev, price: event.target.value, error: "" }))}
+                  placeholder="0,00"
+                  inputMode="decimal"
+                  className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-200"
+                />
+              </div>
+              {manualItemModal.error ? (
+                <div className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">
+                  {manualItemModal.error}
+                </div>
+              ) : null}
+              <div className="flex items-center justify-end gap-2 pt-1">
+                <button
+                  type="button"
+                  disabled={manualItemModal.loading}
+                  onClick={() => setManualItemModal({ open: false, orderId: null, name: "", price: "", loading: false, error: "" })}
+                  className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCreateManualItem}
+                  disabled={manualItemModal.loading}
+                  className="rounded-lg border border-amber-300 bg-amber-500 px-3 py-2 text-xs font-bold text-white hover:bg-amber-600 disabled:opacity-60"
+                >
+                  {manualItemModal.loading ? "Salvando..." : "Salvar e incluir"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body
       )}
       {isAdminUser && closeDayModalOpen && createPortal(
         <div className="fixed inset-0 z-[10020]">
