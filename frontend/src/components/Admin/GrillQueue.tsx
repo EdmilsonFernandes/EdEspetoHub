@@ -1648,15 +1648,15 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         deliveryStatus === 'ACCEPTED'
       );
       if (hasAssignedMotoboy) {
-        return { label: "Aguardando retirada", className: "bg-indigo-50 text-indigo-700 border-indigo-100" };
+        return { label: "Disponível para Coleta", className: "bg-indigo-50 text-indigo-700 border-indigo-100" };
       }
       return { label: "Buscando entregador", className: "bg-amber-50 text-amber-700 border-amber-100" };
     }
     if (orderType === "delivery" && normalizedStatus === "ready_for_delivery") {
-      return { label: "Pronto p/ retirada", className: "bg-violet-50 text-violet-700 border-violet-100" };
+      return { label: "Disponível p/ Coleta", className: "bg-violet-50 text-violet-700 border-violet-100" };
     }
     if (normalizedStatus === "preparing") {
-      return { label: "Em atendimento", className: "bg-blue-50 text-blue-700 border-blue-100" };
+      return { label: "Em preparação", className: "bg-blue-50 text-blue-700 border-blue-100" };
     }
     if (normalizedStatus === "ready") {
       const label =
@@ -1687,22 +1687,22 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     const steps =
       orderType === "pickup"
         ? [
-            { key: "pending", label: "Recebido" },
-            { key: "preparing", label: "Em atendimento" },
-            { key: "ready", label: "Pronto p/ retirada" },
+            { key: "pending", label: "Pedido Recebido" },
+            { key: "preparing", label: "Em Preparação" },
+            { key: "ready", label: "Disponível p/ Coleta" },
             { key: "done", label: "Pago" },
           ]
         : orderType === "delivery"
         ? [
-            { key: "pending", label: "Recebido" },
-            { key: "preparing", label: "Em atendimento" },
+            { key: "pending", label: "Pedido Recebido" },
+            { key: "preparing", label: "Em Preparação" },
             { key: "ready", label: "Aguardando entregador" },
             { key: "done", label: "Saiu para entrega" },
           ]
         : [
-            { key: "pending", label: "Recebido" },
-            { key: "preparing", label: "Em atendimento" },
-            { key: "ready", label: "Pronto para servir" },
+            { key: "pending", label: "Pedido Recebido" },
+            { key: "preparing", label: "Em Preparação" },
+            { key: "ready", label: "Pedido Pronto" },
             { key: "done", label: "Finalizado" },
           ];
 
@@ -1809,7 +1809,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       {order.status === "preparing" && order.type !== "pickup" && order.type !== "delivery" && (
         <div className="w-full">
           <div className="mb-2 text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-lg px-2.5 py-1">
-            Pedido pronto para servir.
+            Pedido pronto.
           </div>
           <button
             onClick={() => { pulseCta(order.id + '-ready'); handleAdvance(order.id, "ready"); }}
@@ -1936,7 +1936,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                   {[
                     { id: 'all', label: 'Todos', value: allActiveQueue.length },
                     { id: 'pending', label: 'Pendentes', value: queueMetrics.pending },
-                    { id: 'preparing', label: 'Em atendimento', value: queueMetrics.preparing },
+                    { id: 'preparing', label: 'Em preparação', value: queueMetrics.preparing },
                     { id: 'ready', label: 'Prontos', value: queueMetrics.ready },
                     { id: 'late', label: 'Atrasados', value: queueMetrics.late },
                   ].map((kpi) => (

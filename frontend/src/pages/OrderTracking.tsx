@@ -14,10 +14,10 @@ import { formatSelectedModifiers } from '../utils/productModifiers';
 import { usePollingPaymentStatus } from '../hooks/usePollingPaymentStatus';
 
 const statusLabels: Record<string, string> = {
-  pending: 'Recebido',
-  preparing: 'Em atendimento',
-  ready: 'Pronto para retirada',
-  ready_for_pickup: 'Pronto para retirada',
+  pending: 'Pedido Recebido',
+  preparing: 'Em Preparação',
+  ready: 'Disponível para Coleta',
+  ready_for_pickup: 'Disponível para Coleta',
   ready_for_delivery: 'Pronto para entrega',
   waiting_for_motoboy: 'Aguardando entregador',
   in_delivery: 'Em rota',
@@ -240,8 +240,8 @@ export function OrderTracking() {
     if (isDelivery && normalizedStatus === 'ready') return 'Aguardando entregador';
     // Legacy delivery orders that still use "done".
     if (isDelivery && normalizedStatus === 'done') return 'Entregue';
-    if (order?.type === 'table' && normalizedStatus === 'done') return 'Pronto para servir';
-    if (order?.type === 'pickup' && (normalizedStatus === 'ready' || normalizedStatus === 'ready_for_pickup')) return 'Pronto para retirada';
+    if (order?.type === 'table' && normalizedStatus === 'done') return 'Pedido Pronto';
+    if (order?.type === 'pickup' && (normalizedStatus === 'ready' || normalizedStatus === 'ready_for_pickup')) return 'Disponível para Coleta';
     return statusLabels[normalizedStatus] || statusLabels[status] || status;
   }, [isDelivery, order?.type, status, normalizedStatus, (order as any)?.delivery?.status]);
   const isReady =
@@ -687,8 +687,8 @@ export function OrderTracking() {
   const steps = useMemo(() => {
     if (isDelivery) {
       return [
-        { id: 'pending', label: 'Recebido' },
-        { id: 'preparing', label: 'Em atendimento' },
+        { id: 'pending', label: 'Pedido Recebido' },
+        { id: 'preparing', label: 'Em Preparação' },
         { id: 'ready', label: 'Aguardando entregador' },
         { id: 'in_delivery', label: 'Em rota' },
         { id: 'delivered', label: 'Entregue' },
@@ -696,16 +696,16 @@ export function OrderTracking() {
     }
     if (order?.type === 'pickup') {
       return [
-        { id: 'pending', label: 'Recebido' },
-        { id: 'preparing', label: 'Em atendimento' },
-        { id: 'ready', label: 'Pronto para retirada' },
+        { id: 'pending', label: 'Pedido Recebido' },
+        { id: 'preparing', label: 'Em Preparação' },
+        { id: 'ready', label: 'Disponível para Coleta' },
         { id: 'done', label: 'Pago' },
       ];
     }
     return [
-      { id: 'pending', label: 'Recebido' },
-      { id: 'preparing', label: 'Em atendimento' },
-      { id: 'done', label: order?.type === 'table' ? 'Pronto para servir' : 'Pronto' },
+      { id: 'pending', label: 'Pedido Recebido' },
+      { id: 'preparing', label: 'Em Preparação' },
+      { id: 'done', label: order?.type === 'table' ? 'Pedido Pronto' : 'Pronto' },
     ];
   }, [isDelivery, order?.type]);
   const currentStep = (() => {
@@ -1276,9 +1276,7 @@ export function OrderTracking() {
                   </div>
                   {isReady && !isDelivery && (
                     <div className="rounded-xl border border-green-200 bg-green-50 p-3 text-sm text-green-700">
-                      {order?.type === 'table'
-                        ? 'Seu pedido está pronto. Aguarde o atendimento na sua mesa.'
-                        : 'Seu pedido está pronto! Pode ir retirar. Bom apetite!'}
+                      {'Seu pedido está pronto! Você já pode retirá-lo ou aguardar a entrega/atendimento.'}
                     </div>
                   )}
                   {isReady && (

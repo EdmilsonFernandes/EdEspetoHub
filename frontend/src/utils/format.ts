@@ -50,14 +50,26 @@ export const formatOrderType = (type?: string) => {
 
 export const formatOrderStatus = (status?: string, type?: string) => {
   const normalizedType = (type || '').toString().toLowerCase();
+  const readyLabel =
+    normalizedType === 'delivery'
+      ? 'Aguardando entregador'
+      : normalizedType === 'table'
+        ? 'Pedido pronto'
+        : 'Disponível para Coleta';
+  const doneLabel =
+    normalizedType === 'delivery'
+      ? 'Saiu para entrega'
+      : normalizedType === 'table'
+        ? 'Pedido pronto'
+        : 'Finalizado';
   const map: Record<string, string> = {
-    pending: 'Pendente',
-    preparing: 'Em atendimento',
-    ready: normalizedType === 'delivery' ? 'Aguardando entregador' : 'Aguardando retirada',
+    pending: 'Pedido recebido',
+    preparing: 'Em preparação',
+    ready: readyLabel,
     waiting_for_motoboy: 'Aguardando entregador',
     in_delivery: 'Em rota',
     ready_for_delivery: 'Pronto para entrega',
-    done: normalizedType === 'delivery' ? 'Saiu para entrega' : 'Finalizado',
+    done: doneLabel,
     delivered: 'Entregue',
     finished: 'Finalizado',
     cancelled: 'Cancelado',
