@@ -309,7 +309,7 @@ const OrderSummaryCard = ({
         onClick();
       }
     }}
-    className={`relative w-full rounded-xl border ${isLate ? 'border-red-200' : 'border-slate-100'} ${leftAccent} ${archived ? 'bg-slate-50/90 opacity-80' : 'bg-white'} p-3 sm:p-3 text-left flex items-start gap-4 transition-all duration-200 transition-transform hover:border-slate-200 hover:shadow-sm hover:-translate-y-0.5 hover:scale-[1.01] cursor-pointer`}
+    className={`relative w-full min-h-[132px] rounded-xl border ${isLate ? 'border-red-200' : 'border-slate-100'} ${leftAccent} ${archived ? 'bg-slate-50/90 opacity-80' : 'bg-white'} p-3 sm:p-3 text-left flex items-start gap-4 transition-all duration-200 transition-transform hover:border-slate-200 hover:shadow-sm hover:-translate-y-0.5 hover:scale-[1.01] cursor-pointer`}
   >
     {showSelector && (
       <button
@@ -331,9 +331,9 @@ const OrderSummaryCard = ({
         </svg>
       </button>
     )}
-    <div className="min-w-0 flex-1 space-y-1">
-    <div className="flex flex-wrap items-start gap-2 text-xs">
-      <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
+    <div className="min-w-0 flex-1 space-y-2">
+    <div className="flex items-center justify-between gap-2 text-xs">
+      <div className="flex min-w-0 flex-1 items-center gap-1.5">
         <span className="px-2 py-0.5 bg-slate-800 text-white text-[11px] font-bold rounded-md">
           #{String(queueRank).padStart(2, '0')}
         </span>
@@ -347,9 +347,9 @@ const OrderSummaryCard = ({
           </span>
         )}
         {hasTable && (
-          <span className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-black tracking-wide text-white whitespace-nowrap ${archived ? 'bg-slate-600' : 'bg-amber-500'}`}>
+          <span className={`inline-flex min-w-0 max-w-[140px] sm:max-w-none items-center gap-1 rounded-md px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-[11px] font-black tracking-wide text-white whitespace-nowrap ${archived ? 'bg-slate-600' : 'bg-amber-500'}`}>
             <Hash size={12} weight="bold" />
-            MESA {String(order.table).padStart(2, "0")}
+            <span className="truncate">MESA {String(order.table).padStart(2, "0")}</span>
           </span>
         )}
         {!hasTable && (
@@ -358,9 +358,9 @@ const OrderSummaryCard = ({
           </span>
         )}
       </div>
-      <div className="ml-auto basis-full sm:basis-auto sm:ml-0 shrink-0 flex justify-end">
+      <div className="ml-1 shrink-0 flex justify-end">
         {!archived ? (
-          <span className={`px-2 py-0.5 text-[11px] font-bold font-mono rounded-md whitespace-nowrap border ${isLate ? 'bg-red-500 text-white border-red-500' : 'bg-emerald-100 text-emerald-700 border-emerald-200'}`}>
+          <span className={`px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-[11px] font-bold font-mono rounded-md whitespace-nowrap border ${isLate ? 'bg-red-500 text-white border-red-500' : 'bg-emerald-100 text-emerald-700 border-emerald-200'}`}>
             {elapsedLabel}
           </span>
         ) : (
@@ -375,11 +375,6 @@ const OrderSummaryCard = ({
       <div className="min-w-0 flex-1">
       <h3 className="text-[15px] sm:text-base font-black text-slate-800 line-clamp-1">{order.customerName || order.name || 'Cliente'}</h3>
       </div>
-      <div className="shrink-0 flex items-center gap-1.5">
-        <span className="rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
-          {paymentLabel}
-        </span>
-      </div>
     </div>
 
     <div className="border-t border-slate-100 pt-1 mt-0.5 flex items-center justify-between">
@@ -387,7 +382,10 @@ const OrderSummaryCard = ({
         <span className="text-sm font-bold text-slate-900">{totalLabel}</span>
         <span className="text-[11px] text-slate-500">{itemsCount} {itemsCount === 1 ? 'item' : 'itens'}</span>
       </div>
-      <div className="text-right flex items-center gap-1.5 shrink-0">
+      <div className="text-right flex items-center gap-2 shrink-0">
+        <span className="rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
+          {paymentLabel}
+        </span>
         {!archived && showQuickStart && typeof onQuickStart === 'function' && (
           <button
             type="button"
