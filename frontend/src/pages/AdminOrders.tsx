@@ -7,7 +7,7 @@ import { formatAddress, formatCurrency, formatDateTime, formatOrderDisplayId, fo
 import { getPaymentMethodMeta } from '../utils/paymentAssets';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { formatSelectedModifiers } from '../utils/productModifiers';
-import { ForkKnife, Storefront, Truck, ChartBar, CreditCard, Package, Gear, Scooter, Star, ChefHat, ShoppingCart, UsersThree } from '@phosphor-icons/react';
+import { Hash, Storefront, Truck, ChartBar, CreditCard, Package, Gear, Scooter, Star, ShoppingCart, UsersThree, CheckSquare } from '@phosphor-icons/react';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { useNavigate } from 'react-router-dom';
 import { AdminDesktopSidebar } from '../components/Admin/AdminDesktopSidebar';
@@ -76,7 +76,7 @@ export function AdminOrders() {
       (isOperatorUser
         ? [
             { id: 'cardapio', label: 'Catálogo Online', icon: Package },
-            { id: 'fila', label: 'Pedidos ao vivo', icon: ChefHat },
+            { id: 'fila', label: 'Pedidos ao vivo', icon: CheckSquare },
           ]
         : [
             { id: 'resumo', label: 'Resumo', icon: ChartBar },
@@ -87,7 +87,7 @@ export function AdminOrders() {
             { id: 'motoboys', label: 'Entregadores', icon: Scooter, disabled: !canUseMotoboys },
             { id: 'usuarios', label: 'Usuários', icon: UsersThree },
             { id: 'config', label: 'Configurações', icon: Gear },
-            { id: 'fila', label: 'Pedidos ao vivo', icon: ChefHat },
+            { id: 'fila', label: 'Pedidos ao vivo', icon: CheckSquare },
             { id: 'cardapio', label: 'Catálogo Online', icon: Package },
           ]),
     [isOperatorUser, canUseMotoboys]
@@ -227,7 +227,7 @@ export function AdminOrders() {
     }
     if (type === 'table') {
       const table = order?.table ? `Mesa ${order.table}` : 'Mesa';
-      return { label: table, pill: 'bg-fuchsia-100 text-fuchsia-800 border-fuchsia-200', icon: <ForkKnife size={14} weight="duotone" /> };
+      return { label: table, pill: 'bg-slate-100 text-slate-700 border-slate-200', icon: <Hash size={14} weight="duotone" /> };
     }
     return { label: formatOrderType(order?.type), pill: 'bg-slate-100 text-slate-700 border-slate-200', icon: null };
   };
@@ -596,7 +596,7 @@ export function AdminOrders() {
                                     />
                                   ) : (
                                     <div className="w-full h-full flex items-center justify-center text-[10px] text-slate-400">
-                                      🍖
+                                      🧾
                                     </div>
                                   )}
                                 </div>
