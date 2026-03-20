@@ -340,19 +340,21 @@ const OrderSummaryCard = ({
   onQuickStart,
   showQuickFinalize = false,
   onQuickFinalize,
+  isTimerWarning = false,
 }: any) => (
   (() => {
-    const isDelivery = String(order?.type || '').toLowerCase() === 'delivery';
+    const orderType = String(order?.type || '').toLowerCase();
+    const isDelivery = orderType === 'delivery';
     const leftAccent = isDelivery ? 'border-l-0 sm:border-l-4 sm:border-l-blue-500' : 'border-l-0 sm:border-l-4 sm:border-l-orange-500';
     const locationIdentifier = resolveLocationIdentifier(order);
     const hasLocationIdentifier = Boolean(locationIdentifier);
-    const isPickup = String(order?.type || '').toLowerCase() === 'pickup';
-    const locationBadgeTone = archived ? 'bg-slate-700' : isPickup ? 'bg-orange-500' : 'bg-slate-950';
-    const createdAtLabel = (() => {
-      const base = Number(order?.createdAt || 0);
-      if (!base) return '--:--';
-      return new Date(base).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-    })();
+    const locationBadgeTone = archived
+      ? 'bg-slate-700'
+      : orderType === 'delivery'
+      ? 'bg-sky-600'
+      : orderType === 'pickup'
+      ? 'bg-amber-500'
+      : 'bg-orange-500';
     const closedAtLabel = (() => {
       if (!archived) return '';
       const base = Number(order?.updatedAt || order?.createdAt || 0);
@@ -385,9 +387,20 @@ const OrderSummaryCard = ({
     <div className="min-w-0 flex-1 space-y-2">
     <div className="space-y-4 text-xs">
       <div className="flex items-center justify-between gap-4">
-        <span className="px-2.5 py-1 bg-slate-950 text-white text-sm sm:text-base font-black rounded-lg leading-none tracking-[0.08em]">
-          #{String(queueRank).padStart(2, '0')}
-        </span>
+        <div className="flex min-w-0 items-center gap-4">
+          <span className="px-2.5 py-1 bg-slate-950 text-white text-sm sm:text-base font-black rounded-lg leading-none tracking-[0.08em]">
+            #{String(queueRank).padStart(2, '0')}
+          </span>
+          {hasLocationIdentifier ? (
+            <span className={`inline-flex min-w-0 max-w-full items-center rounded-lg px-3 py-1.5 text-[11px] sm:text-sm font-black tracking-[0.1em] text-white whitespace-nowrap ${locationBadgeTone}`}>
+              <span className="truncate">{locationIdentifier}</span>
+            </span>
+          ) : (
+            <span className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-[10px] font-semibold text-slate-700">
+              {formatOrderType(order?.type)}
+            </span>
+          )}
+        </div>
         {canPrint && (
           <button
             type="button"
@@ -410,20 +423,14 @@ const OrderSummaryCard = ({
       </div>
 
       <div className="flex items-center gap-4">
-        {hasLocationIdentifier ? (
-          <span className={`inline-flex min-w-0 max-w-full items-center rounded-lg px-3 py-1.5 text-[11px] sm:text-sm font-black tracking-[0.1em] text-white whitespace-nowrap ${locationBadgeTone}`}>
-            <span className="truncate">{locationIdentifier}</span>
-          </span>
-        ) : (
-          <span className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-[10px] font-semibold text-slate-700">
-            {formatOrderType(order?.type)}
-          </span>
-        )}
-      </div>
-
-      <div className="flex items-center gap-4">
         {!archived ? (
-          <span className={`px-2 sm:px-2.5 py-1 text-[11px] sm:text-xs font-black font-mono rounded-md whitespace-nowrap border ${isLate ? 'bg-red-500 text-white border-red-500' : 'bg-emerald-100 text-emerald-700 border-emerald-200'}`}>
+          <span className={`px-2 sm:px-2.5 py-1 text-[11px] sm:text-xs font-black font-mono rounded-md whitespace-nowrap border ${
+            isLate
+              ? 'bg-red-500 text-white border-red-500'
+              : isTimerWarning
+              ? 'bg-amber-100 text-amber-800 border-amber-300'
+              : 'bg-emerald-100 text-emerald-700 border-emerald-200'
+          }`}>
             {elapsedLabel}
           </span>
         ) : (
@@ -435,7 +442,7 @@ const OrderSummaryCard = ({
 
       <div className="flex items-center gap-4">
         {!archived ? (
-          <span className={`px-2 py-1 text-[10px] uppercase tracking-wide font-bold rounded-full whitespace-nowrap border ${statusMeta.className}`}>
+          <span className={`px-2 py-1 text-[10px] uppercase tracking-wide font-black rounded-full whitespace-nowrap border ${statusMeta.className}`}>
             {statusMeta.label}
           </span>
         ) : (
@@ -448,7 +455,7 @@ const OrderSummaryCard = ({
 
     <div className="flex items-center justify-between gap-2 min-w-0">
       <div className="min-w-0 flex-1">
-      <h3 className="text-[15px] sm:text-base font-black text-slate-800 line-clamp-1">{order.customerName || order.name || 'Cliente'}</h3>
+      <h3 className="text-base sm:text-lg font-black text-slate-900 line-clamp-1">{order.customerName || order.name || 'Cliente'}</h3>
       </div>
     </div>
 
@@ -2392,6 +2399,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
               const isSelected = selectedOrderIds.includes(orderId);
               const canQuickStart = String(order?.status || '').toLowerCase() === 'pending';
               const canQuickFinalize = canQuickFinalizeOrder(order);
+              const isTimerWarning = !isLate && orderAgeMs > PREP_SLA_MS * 0.6;
 
               return (
                 <OrderSummaryCard
@@ -2423,6 +2431,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                     void handleAdvance(order.id, 'preparing');
                   }}
                   showQuickFinalize={canQuickFinalize}
+                  isTimerWarning={isTimerWarning}
                   onQuickFinalize={() => {
                     pulseCta(order.id + '-quick-finalize');
                     openQuickFinalizeModal(order);
