@@ -141,18 +141,57 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
       .join('') ||
     'AD';
 
-  const planLabel = useMemo(
-    () => planLabelFromName(planDetails?.planName || planDetails?.displayName),
-    [planDetails?.planName, planDetails?.displayName]
+  const effectivePlanName = useMemo(
+    () =>
+      String(
+        planDetails?.planName ||
+          auth?.subscription?.plan?.name ||
+          planDetails?.displayName ||
+          auth?.subscription?.plan?.displayName ||
+          ''
+      ),
+    [
+      planDetails?.planName,
+      planDetails?.displayName,
+      auth?.subscription?.plan?.name,
+      auth?.subscription?.plan?.displayName,
+    ]
   );
+  const planLabel = useMemo(() => planLabelFromName(effectivePlanName), [effectivePlanName]);
   const planValue = useMemo(() => {
-    const amount = Number(planDetails?.latestPaymentAmount || 0);
+    const isVip = Boolean(planDetails?.planExempt || auth?.subscription?.planExempt);
+    if (isVip) return 'Isento';
+
+    const status = String(planDetails?.status || auth?.subscription?.status || '').toUpperCase();
+    const amount = Number(
+      planDetails?.latestPaymentAmount ??
+        auth?.subscription?.latestPaymentAmount ??
+        planDetails?.planPrice ??
+        auth?.subscription?.plan?.price ??
+        0
+    );
     if (Number.isFinite(amount) && amount > 0) {
+      if (status === 'TRIAL') {
+        return `7 dias grátis · R$ ${amount.toFixed(2).replace('.', ',')}/mês`;
+      }
       return `R$ ${amount.toFixed(2).replace('.', ',')}/mês`;
     }
-    return 'R$ 99,90/mês';
-  }, [planDetails?.latestPaymentAmount]);
-  const planDue = useMemo(() => toDisplayDate(planDetails?.endDate), [planDetails?.endDate]);
+    if (status === 'TRIAL') return '7 dias grátis';
+    return '—';
+  }, [
+    planDetails?.planExempt,
+    auth?.subscription?.planExempt,
+    planDetails?.status,
+    auth?.subscription?.status,
+    planDetails?.latestPaymentAmount,
+    auth?.subscription?.latestPaymentAmount,
+    planDetails?.planPrice,
+    auth?.subscription?.plan?.price,
+  ]);
+  const planDue = useMemo(
+    () => toDisplayDate(planDetails?.endDate || auth?.subscription?.endDate),
+    [planDetails?.endDate, auth?.subscription?.endDate]
+  );
 
   useEffect(() => {
     const storeId = auth?.store?.id;
@@ -161,9 +200,12 @@ export function AdminHeader({ onToggleHeader, store: storeProp, user: userProp }
       .getByStore(storeId)
       .then((subscription: any) => {
         setPlanDetails({
+          planExempt: Boolean(subscription?.planExempt),
+          status: subscription?.status || '',
           planName: subscription?.planExempt ? 'vip' : subscription?.plan?.name || '',
           displayName: subscription?.planExempt ? 'Isento de plano' : subscription?.plan?.displayName || '',
           latestPaymentAmount: subscription?.latestPaymentAmount || null,
+          planPrice: subscription?.plan?.price ?? null,
           endDate: subscription?.endDate || null,
         });
       })
