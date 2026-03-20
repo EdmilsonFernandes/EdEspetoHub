@@ -384,15 +384,15 @@ const OrderSummaryCard = ({
         />
       </div>
     )}
-    <div className="min-w-0 flex-1 space-y-2">
-    <div className="space-y-4 text-xs">
+    <div className="min-w-0 flex-1 space-y-3">
+    <div className="space-y-3 text-xs">
       <div className="flex items-center justify-between gap-4">
         <div className="flex min-w-0 items-center gap-4">
-          <span className="px-2.5 py-1 bg-slate-950 text-white text-sm sm:text-base font-black rounded-lg leading-none tracking-[0.08em]">
+          <span className="px-3 py-1 bg-slate-950 text-white text-base sm:text-lg font-black rounded-lg leading-none tracking-[0.08em]">
             #{String(queueRank).padStart(2, '0')}
           </span>
           {hasLocationIdentifier ? (
-            <span className={`inline-flex min-w-0 max-w-full items-center rounded-lg px-3 py-1.5 text-[11px] sm:text-sm font-black tracking-[0.1em] text-white whitespace-nowrap ${locationBadgeTone}`}>
+            <span className={`inline-flex min-w-0 max-w-full items-center rounded-lg px-3 py-1.5 text-xs sm:text-sm font-black tracking-[0.1em] text-white whitespace-nowrap ${locationBadgeTone}`}>
               <span className="truncate">{locationIdentifier}</span>
             </span>
           ) : (
@@ -424,29 +424,26 @@ const OrderSummaryCard = ({
 
       <div className="flex items-center gap-4">
         {!archived ? (
-          <span className={`px-2 sm:px-2.5 py-1 text-[11px] sm:text-xs font-black font-mono rounded-md whitespace-nowrap border ${
+          <span className={`px-2.5 sm:px-3 py-1 text-sm sm:text-base font-black font-mono rounded-md whitespace-nowrap border ${
             isLate
-              ? 'bg-red-500 text-white border-red-500'
+              ? 'bg-red-600 text-white border-red-600'
               : isTimerWarning
-              ? 'bg-amber-100 text-amber-800 border-amber-300'
-              : 'bg-emerald-100 text-emerald-700 border-emerald-200'
+              ? 'bg-amber-500 text-white border-amber-500'
+              : 'bg-emerald-500 text-white border-emerald-500'
           }`}>
             {elapsedLabel}
           </span>
         ) : (
-          <span className="px-2 sm:px-2.5 py-1 text-[11px] font-semibold rounded-md whitespace-nowrap border bg-slate-100 text-slate-700 border-slate-200">
+          <span className="px-2.5 sm:px-3 py-1 text-sm font-semibold rounded-md whitespace-nowrap border bg-slate-100 text-slate-700 border-slate-200">
             {closedAtLabel || '--:--'}
           </span>
         )}
-      </div>
-
-      <div className="flex items-center gap-4">
         {!archived ? (
-          <span className={`px-2 py-1 text-[10px] uppercase tracking-wide font-black rounded-full whitespace-nowrap border ${statusMeta.className}`}>
+          <span className="text-xs sm:text-sm font-black uppercase tracking-[0.08em] text-slate-800">
             {statusMeta.label}
           </span>
         ) : (
-          <span className="px-2 py-1 text-[10px] uppercase tracking-wide font-bold rounded-full whitespace-nowrap border border-slate-200 bg-slate-100 text-slate-600">
+          <span className="text-xs sm:text-sm font-black uppercase tracking-[0.08em] text-slate-600">
             Finalizado
           </span>
         )}
@@ -455,19 +452,16 @@ const OrderSummaryCard = ({
 
     <div className="flex items-center justify-between gap-2 min-w-0">
       <div className="min-w-0 flex-1">
-      <h3 className="text-base sm:text-lg font-black text-slate-900 line-clamp-1">{order.customerName || order.name || 'Cliente'}</h3>
+      <h3 className="text-lg sm:text-xl font-black text-slate-900 line-clamp-1">{order.customerName || order.name || 'Cliente'}</h3>
       </div>
     </div>
 
-    <div className="border-t border-slate-100 pt-2 mt-0.5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="border-t border-slate-100 pt-2 mt-0.5 flex items-center justify-between gap-3">
       <div className="flex items-center gap-1.5">
-        <span className="text-sm font-bold text-slate-900">{totalLabel}</span>
-        <span className="text-[11px] text-slate-500">{itemsCount} {itemsCount === 1 ? 'item' : 'itens'}</span>
+        <span className="text-base font-black text-slate-900">{totalLabel}</span>
+        <span className="text-xs text-slate-500">{itemsCount} {itemsCount === 1 ? 'item' : 'itens'}</span>
       </div>
       <div className="text-right flex flex-wrap items-center justify-end gap-2 shrink-0">
-        <span className="rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
-          {paymentLabel}
-        </span>
         {!archived && showQuickStart && typeof onQuickStart === 'function' && (
           <button
             type="button"
