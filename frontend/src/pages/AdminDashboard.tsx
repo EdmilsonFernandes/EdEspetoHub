@@ -27,6 +27,7 @@ import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAs
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { formatSelectedModifiers } from '../utils/productModifiers';
 import { FormSection } from '../components/common/FormSection';
+import { PremiumSelect } from '../components/common/PremiumSelect';
 import { AdminDesktopSidebar } from '../components/Admin/AdminDesktopSidebar';
 
 const formatPlanCycle = (days: number) => {
@@ -273,16 +274,17 @@ const OrdersView = ({ orders, products, storeSlug }) => {
           ))}
           </div>
           <div className="flex flex-col sm:flex-row gap-2 lg:ml-auto w-full lg:w-auto">
-          <select
+          <PremiumSelect
             value={periodFilter}
-            onChange={(e) => setPeriodFilter(e.target.value)}
-            className="ds-select ds-focus-ring w-full sm:w-36 py-2 text-sm text-slate-600"
-          >
-            <option value="all">Todo período</option>
-            <option value="7">Últimos 7 dias</option>
-            <option value="30">Últimos 30 dias</option>
-            <option value="90">Últimos 90 dias</option>
-          </select>
+            onChange={(nextValue) => setPeriodFilter(nextValue)}
+            className="w-full sm:w-36"
+            options={[
+              { value: 'all', label: 'Todo período' },
+              { value: '7', label: 'Últimos 7 dias' },
+              { value: '30', label: 'Últimos 30 dias' },
+              { value: '90', label: 'Últimos 90 dias' },
+            ]}
+          />
           <input
             type="date"
             value={dateFilter}
@@ -481,17 +483,12 @@ const OrdersView = ({ orders, products, storeSlug }) => {
                 <span>Página {ordersPage} de {ordersTotalPages}</span>
                 <label className="flex items-center gap-2">
                   <span>Por página</span>
-                  <select
-                    value={ordersPageSize}
-                    onChange={(event) => setOrdersPageSize(Number(event.target.value))}
-                    className="ds-select ds-focus-ring py-1 text-xs text-slate-600"
-                  >
-                    {[10, 20, 30].map((size) => (
-                      <option key={size} value={size}>
-                        {size}
-                      </option>
-                    ))}
-                  </select>
+                  <PremiumSelect
+                    value={String(ordersPageSize)}
+                    onChange={(nextValue) => setOrdersPageSize(Number(nextValue))}
+                    className="w-[110px]"
+                    options={[10, 20, 30].map((size) => ({ value: String(size), label: String(size) }))}
+                  />
                 </label>
               </div>
               <div className="flex items-center gap-2">
@@ -848,15 +845,12 @@ const ReviewsView = ({ reviews = [], canUseDeliveryReviewsAndTips = false, onUpg
               Exibindo {rangeStart}-{rangeEnd} de {rows.length} avaliações
             </p>
             <div className="flex items-center gap-2">
-              <select
-                value={pageSize}
-                onChange={(event) => setPageSize(Number(event.target.value))}
-                className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-600"
-              >
-                {[10, 20, 30].map((size) => (
-                  <option key={size} value={size}>{size}/página</option>
-                ))}
-              </select>
+              <PremiumSelect
+                value={String(pageSize)}
+                onChange={(nextValue) => setPageSize(Number(nextValue))}
+                className="w-[128px]"
+                options={[10, 20, 30].map((size) => ({ value: String(size), label: `${size}/página` }))}
+              />
               <button
                 type="button"
                 onClick={() => setPage((prev) => Math.max(1, prev - 1))}
