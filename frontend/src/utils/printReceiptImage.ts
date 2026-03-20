@@ -188,7 +188,18 @@ const buildHtmlReceipt = (payload: PrintReceiptRawBtInput) => {
     .title { text-align: center; font-weight: 800; font-size: 16px; text-transform: uppercase; }
     .subtitle { text-align: center; font-size: 11px; margin-top: 2px; }
     .meta { font-size: 11px; margin: 2px 0; }
-    .location-block { margin: 8px 0; text-align: center; font-size: 21px; font-weight: 900; letter-spacing: 1px; background: #000; color: #fff; padding: 6px 4px; }
+    .location-block {
+      margin: 8px 0;
+      text-align: center;
+      font-size: 21px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      background: #000;
+      color: #fff;
+      padding: 6px 4px;
+      print-color-adjust: exact !important;
+      -webkit-print-color-adjust: exact !important;
+    }
     .items-title { font-size: 11px; font-weight: 700; text-transform: uppercase; }
     .item-row { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; margin: 3px 0; line-height: 1.45; }
     .item-name { flex: 1; padding-right: 6px; font-weight: 800; }
@@ -196,6 +207,14 @@ const buildHtmlReceipt = (payload: PrintReceiptRawBtInput) => {
     .item-note { font-size: 10px; margin-left: 8px; margin-bottom: 3px; line-height: 1.4; }
     .total { display: flex; justify-content: space-between; font-size: 14px; font-weight: 800; margin-top: 6px; }
     .spacer { height: 16px; }
+    @media print {
+      .location-block {
+        background: #000 !important;
+        color: #FFFFFF !important;
+        print-color-adjust: exact !important;
+        -webkit-print-color-adjust: exact !important;
+      }
+    }
   </style>
 </head>
 <body>
