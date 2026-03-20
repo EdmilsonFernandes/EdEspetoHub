@@ -81,6 +81,13 @@ const resolveLocationIdentifier = (order: any) => {
   return "";
 };
 
+const parseMesaIdentifier = (value: any) => {
+  const raw = String(value || "").trim();
+  const match = raw.match(/^MESA\s+(.+)$/i);
+  if (!match) return { isMesa: false, number: "", raw };
+  return { isMesa: true, number: String(match[1] || "").trim(), raw };
+};
+
 const PremiumCheckToggle = ({
   selected = false,
   onToggle,
@@ -346,7 +353,11 @@ const OrderSummaryCard = ({
     const orderType = String(order?.type || '').toLowerCase();
     const locationIdentifier = resolveLocationIdentifier(order);
     const hasLocationIdentifier = Boolean(locationIdentifier);
-    const locationBadgeTone = 'bg-slate-100 text-slate-900 border-slate-200';
+    const mesaMeta = parseMesaIdentifier(locationIdentifier);
+    const isMesaLocation = mesaMeta.isMesa;
+    const locationBadgeTone = isMesaLocation
+      ? 'bg-[#FFF3E0] text-[#E65100] border-[#E65100]'
+      : 'bg-slate-100 text-slate-900 border-slate-200';
     const closedAtLabel = (() => {
       if (!archived) return '';
       const base = Number(order?.updatedAt || order?.createdAt || 0);
@@ -394,8 +405,15 @@ const OrderSummaryCard = ({
             #{String(queueRank).padStart(2, '0')}
           </span>
           {hasLocationIdentifier ? (
-            <span className={`inline-flex min-w-0 max-w-full items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold whitespace-nowrap ${locationBadgeTone}`}>
-              <span className="truncate">{locationIdentifier}</span>
+            <span className={`inline-flex shrink-0 min-w-0 max-w-full items-center rounded-full border px-2.5 py-0.5 whitespace-nowrap ${locationBadgeTone}`}>
+              {isMesaLocation ? (
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="text-[10px] font-semibold tracking-[0.06em]">MESA</span>
+                  <span className="text-[14px] leading-none font-black">{mesaMeta.number}</span>
+                </span>
+              ) : (
+                <span className="truncate text-[11px] font-semibold">{locationIdentifier}</span>
+              )}
             </span>
           ) : (
             <span className="rounded-full border border-slate-200 bg-slate-100 px-2.5 py-0.5 text-[11px] font-semibold text-slate-700">
@@ -2461,7 +2479,21 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
               />
               <div className="fixed right-0 top-0 h-full w-full md:w-[450px] z-[10000] bg-white shadow-2xl flex flex-col animate-[drawerIn_220ms_ease-out]">
                 <div className="shrink-0 flex justify-between items-center px-4 py-3 border-b border-slate-200 bg-white">
-                  <p className="text-sm font-bold text-slate-900">Detalhes do pedido</p>
+                  <p className="text-sm font-bold text-slate-900">
+                    {(() => {
+                      const drawerLocation = resolveLocationIdentifier(selectedOrder || {});
+                      const drawerMesa = parseMesaIdentifier(drawerLocation);
+                      if (!drawerLocation) return 'Detalhes do pedido';
+                      if (!drawerMesa.isMesa) return `Pedido ${drawerLocation}`;
+                      return (
+                        <span className="inline-flex items-center gap-1.5">
+                          <span>Pedido</span>
+                          <span className="text-[10px] font-semibold tracking-[0.08em] text-[#E65100]">MESA</span>
+                          <span className="text-base font-black text-[#E65100] leading-none">{drawerMesa.number}</span>
+                        </span>
+                      );
+                    })()}
+                  </p>
                   <div className="flex items-center gap-2">
                     {selectedOrder && hasPrintAccess && (
                       <>
@@ -2812,11 +2844,27 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
               const cashShortcuts = [20, 50, 100, 200];
               return (
                 <>
+            {(() => {
+              const modalMesa = parseMesaIdentifier(modalLocationIdentifier);
+              const titleContent = !modalLocationIdentifier
+                ? 'Pedido pronto para cobrar'
+                : !modalMesa.isMesa
+                ? `Pedido ${modalLocationIdentifier}`
+                : '';
+              return (
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Confirmar pagamento</p>
                 <h3 className="text-lg font-bold text-slate-900 mt-2">
-                  {modalLocationIdentifier ? `Pedido ${modalLocationIdentifier}` : 'Pedido pronto para cobrar'}
+                  {!modalMesa.isMesa ? (
+                    titleContent
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5">
+                      <span>Pedido</span>
+                      <span className="text-xs font-semibold tracking-[0.08em] text-[#E65100]">MESA</span>
+                      <span className="text-xl font-black text-[#E65100] leading-none">{modalMesa.number}</span>
+                    </span>
+                  )}
                 </h3>
               </div>
               <button
@@ -2827,6 +2875,8 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                 <X size={18} weight="duotone" />
               </button>
             </div>
+              );
+            })()}
             <div className="mt-4 space-y-3 text-sm text-slate-600">
               <div className="flex items-center justify-between">
                 <span>Cliente</span>
