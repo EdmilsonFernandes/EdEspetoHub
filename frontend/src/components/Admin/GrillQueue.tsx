@@ -384,10 +384,44 @@ const OrderSummaryCard = ({
     )}
     <div className="min-w-0 flex-1 space-y-2">
     <div className="space-y-4 text-xs">
-      <div className="flex flex-wrap items-center gap-4">
+      <div className="flex items-center justify-between gap-4">
         <span className="px-2.5 py-1 bg-slate-950 text-white text-sm sm:text-base font-black rounded-lg leading-none tracking-[0.08em]">
           #{String(queueRank).padStart(2, '0')}
         </span>
+        {canPrint && (
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              onPrint();
+            }}
+            disabled={printBusy}
+            className={`inline-flex h-9 w-9 items-center justify-center rounded-lg border transition-all no-print disabled:opacity-60 ${
+              archived
+                ? 'border-slate-300 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-800'
+                : 'border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 hover:text-amber-900'
+            }`}
+            aria-label={`Imprimir pedido ${orderDisplayId}`}
+            title="Imprimir pedido"
+          >
+            <Printer size={16} weight="duotone" />
+          </button>
+        )}
+      </div>
+
+      <div className="flex items-center gap-4">
+        {hasLocationIdentifier ? (
+          <span className={`inline-flex min-w-0 max-w-full items-center rounded-lg px-3 py-1.5 text-[11px] sm:text-sm font-black tracking-[0.1em] text-white whitespace-nowrap ${locationBadgeTone}`}>
+            <span className="truncate">{locationIdentifier}</span>
+          </span>
+        ) : (
+          <span className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-[10px] font-semibold text-slate-700">
+            {formatOrderType(order?.type)}
+          </span>
+        )}
+      </div>
+
+      <div className="flex items-center gap-4">
         {!archived ? (
           <span className={`px-2 sm:px-2.5 py-1 text-[11px] sm:text-xs font-black font-mono rounded-md whitespace-nowrap border ${isLate ? 'bg-red-500 text-white border-red-500' : 'bg-emerald-100 text-emerald-700 border-emerald-200'}`}>
             {elapsedLabel}
@@ -398,12 +432,8 @@ const OrderSummaryCard = ({
           </span>
         )}
       </div>
-      <div className="flex flex-wrap items-center gap-4">
-        {hasLocationIdentifier && (
-          <span className={`inline-flex min-w-0 max-w-full items-center rounded-lg px-3 py-1.5 text-[11px] sm:text-sm font-black tracking-[0.1em] text-white whitespace-nowrap ${locationBadgeTone}`}>
-            <span className="truncate">{locationIdentifier}</span>
-          </span>
-        )}
+
+      <div className="flex items-center gap-4">
         {!archived ? (
           <span className={`px-2 py-1 text-[10px] uppercase tracking-wide font-bold rounded-full whitespace-nowrap border ${statusMeta.className}`}>
             {statusMeta.label}
@@ -411,11 +441,6 @@ const OrderSummaryCard = ({
         ) : (
           <span className="px-2 py-1 text-[10px] uppercase tracking-wide font-bold rounded-full whitespace-nowrap border border-slate-200 bg-slate-100 text-slate-600">
             Finalizado
-          </span>
-        )}
-        {!hasLocationIdentifier && (
-          <span className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-[10px] font-semibold text-slate-700">
-            {formatOrderType(order?.type)}
           </span>
         )}
       </div>
@@ -427,12 +452,12 @@ const OrderSummaryCard = ({
       </div>
     </div>
 
-    <div className="border-t border-slate-100 pt-1 mt-0.5 flex items-center justify-between">
+    <div className="border-t border-slate-100 pt-2 mt-0.5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex items-center gap-1.5">
         <span className="text-sm font-bold text-slate-900">{totalLabel}</span>
         <span className="text-[11px] text-slate-500">{itemsCount} {itemsCount === 1 ? 'item' : 'itens'}</span>
       </div>
-      <div className="text-right flex items-center gap-2 shrink-0">
+      <div className="text-right flex flex-wrap items-center justify-end gap-2 shrink-0">
         <span className="rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
           {paymentLabel}
         </span>
@@ -462,25 +487,6 @@ const OrderSummaryCard = ({
             title="Finalizar agora"
           >
             <Check size={18} weight="bold" />
-          </button>
-        )}
-        {canPrint && (
-          <button
-            type="button"
-            onClick={(event) => {
-              event.stopPropagation();
-              onPrint();
-            }}
-            disabled={printBusy}
-            className={`inline-flex h-7 w-7 items-center justify-center rounded-md border transition-all no-print disabled:opacity-60 ${
-              archived
-                ? 'border-slate-300 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-800'
-                : 'border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 hover:text-amber-900'
-            }`}
-            aria-label={`Imprimir pedido ${orderDisplayId}`}
-            title="Imprimir pedido"
-          >
-            <Printer size={14} weight="duotone" />
           </button>
         )}
         {archived && typeof onReopen === 'function' && (
