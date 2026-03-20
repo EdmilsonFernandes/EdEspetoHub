@@ -344,22 +344,24 @@ const OrderSummaryCard = ({
 }: any) => (
   (() => {
     const orderType = String(order?.type || '').toLowerCase();
-    const isDelivery = orderType === 'delivery';
-    const leftAccent = isDelivery ? 'border-l-0 sm:border-l-4 sm:border-l-blue-500' : 'border-l-0 sm:border-l-4 sm:border-l-orange-500';
     const locationIdentifier = resolveLocationIdentifier(order);
     const hasLocationIdentifier = Boolean(locationIdentifier);
-    const locationBadgeTone = archived
-      ? 'bg-slate-700'
-      : orderType === 'delivery'
-      ? 'bg-sky-600'
-      : orderType === 'pickup'
-      ? 'bg-amber-500'
-      : 'bg-orange-500';
+    const locationBadgeTone = 'bg-slate-100 text-slate-900 border-slate-200';
     const closedAtLabel = (() => {
       if (!archived) return '';
       const base = Number(order?.updatedAt || order?.createdAt || 0);
       if (!base) return '';
       return new Date(base).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    })();
+    const orderItems = Array.isArray(order?.items) ? order.items : [];
+    const itemNames = Array.from(
+      new Set(orderItems.map((item: any) => String(item?.name || '').trim()).filter(Boolean))
+    );
+    const itemsSummary = itemNames.slice(0, 2).join(' • ');
+    const statusToneClass = (() => {
+      const raw = String(order?.status || '').toLowerCase();
+      if (raw === 'ready' || raw === 'done' || raw === 'delivered' || raw === 'finished') return 'text-emerald-600';
+      return 'text-amber-600';
     })();
     return (
   <div
@@ -372,7 +374,7 @@ const OrderSummaryCard = ({
         onClick();
       }
     }}
-    className={`relative w-full min-h-[132px] rounded-xl border ${isLate ? 'border-red-200' : 'border-slate-100'} ${leftAccent} ${archived ? 'bg-slate-50/90 opacity-80' : 'bg-white'} p-4 sm:p-4 text-left flex items-start gap-4 transition-all duration-200 transition-transform hover:border-slate-200 hover:shadow-sm hover:-translate-y-0.5 hover:scale-[1.01] cursor-pointer`}
+    className={`relative w-full min-h-[132px] rounded-lg border border-[#E0E0E0] ${archived ? 'bg-slate-50/90 opacity-80' : 'bg-white'} p-4 text-left flex items-start gap-4 transition-all duration-200 hover:border-slate-300 hover:shadow-sm cursor-pointer`}
   >
     {showSelector && (
       <div className="ml-0.5 mr-3 mt-0.5 shrink-0">
@@ -385,83 +387,63 @@ const OrderSummaryCard = ({
       </div>
     )}
     <div className="min-w-0 flex-1 space-y-3">
-    <div className="space-y-3 text-xs">
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex min-w-0 items-center gap-4">
-          <span className="px-3 py-1 bg-slate-950 text-white text-base sm:text-lg font-black rounded-lg leading-none tracking-[0.08em]">
+    <div className="space-y-2 text-xs">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <span className="text-base sm:text-lg font-black text-slate-800 leading-none">
             #{String(queueRank).padStart(2, '0')}
           </span>
           {hasLocationIdentifier ? (
-            <span className={`inline-flex min-w-0 max-w-full items-center rounded-lg px-3 py-1.5 text-xs sm:text-sm font-black tracking-[0.1em] text-white whitespace-nowrap ${locationBadgeTone}`}>
+            <span className={`inline-flex min-w-0 max-w-full items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold whitespace-nowrap ${locationBadgeTone}`}>
               <span className="truncate">{locationIdentifier}</span>
             </span>
           ) : (
-            <span className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-[10px] font-semibold text-slate-700">
+            <span className="rounded-full border border-slate-200 bg-slate-100 px-2.5 py-0.5 text-[11px] font-semibold text-slate-700">
               {formatOrderType(order?.type)}
             </span>
           )}
         </div>
-        {canPrint && (
-          <button
-            type="button"
-            onClick={(event) => {
-              event.stopPropagation();
-              onPrint();
-            }}
-            disabled={printBusy}
-            className={`inline-flex h-9 w-9 items-center justify-center rounded-lg border transition-all no-print disabled:opacity-60 ${
-              archived
-                ? 'border-slate-300 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-800'
-                : 'border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 hover:text-amber-900'
-            }`}
-            aria-label={`Imprimir pedido ${orderDisplayId}`}
-            title="Imprimir pedido"
-          >
-            <Printer size={16} weight="duotone" />
-          </button>
-        )}
-      </div>
-
-      <div className="flex items-center gap-4">
-        {!archived ? (
-          <span className={`px-2.5 sm:px-3 py-1 text-sm sm:text-base font-black font-mono rounded-md whitespace-nowrap border ${
-            isLate
-              ? 'bg-red-600 text-white border-red-600'
-              : isTimerWarning
-              ? 'bg-amber-500 text-white border-amber-500'
-              : 'bg-emerald-500 text-white border-emerald-500'
-          }`}>
-            {elapsedLabel}
-          </span>
-        ) : (
-          <span className="px-2.5 sm:px-3 py-1 text-sm font-semibold rounded-md whitespace-nowrap border bg-slate-100 text-slate-700 border-slate-200">
-            {closedAtLabel || '--:--'}
-          </span>
-        )}
-        {!archived ? (
-          <span className="text-xs sm:text-sm font-black uppercase tracking-[0.08em] text-slate-800">
-            {statusMeta.label}
-          </span>
-        ) : (
-          <span className="text-xs sm:text-sm font-black uppercase tracking-[0.08em] text-slate-600">
-            Finalizado
-          </span>
-        )}
+        <span className="inline-flex items-center gap-1 text-[11px] text-slate-500 font-medium whitespace-nowrap">
+          <Clock size={12} weight="duotone" className="text-slate-400" />
+          {archived ? (closedAtLabel || '--:--') : elapsedLabel}
+        </span>
       </div>
     </div>
 
     <div className="flex items-center justify-between gap-2 min-w-0">
       <div className="min-w-0 flex-1">
-      <h3 className="text-lg sm:text-xl font-black text-slate-900 line-clamp-1">{order.customerName || order.name || 'Cliente'}</h3>
+      <h3 className="text-[1.1rem] sm:text-xl font-black text-slate-900 line-clamp-1">{order.customerName || order.name || 'Cliente'}</h3>
       </div>
     </div>
 
-    <div className="border-t border-slate-100 pt-2 mt-0.5 flex items-center justify-between gap-3">
-      <div className="flex items-center gap-1.5">
+    <div className="text-[12px] text-slate-500 line-clamp-1">
+      {itemsCount} {itemsCount === 1 ? 'item' : 'itens'}{itemsSummary ? ` • ${itemsSummary}` : ''}
+    </div>
+
+    <div className="border-t border-slate-100 pt-2 mt-0.5 flex items-end justify-between gap-3">
+      <div className="flex items-center gap-2">
         <span className="text-base font-black text-slate-900">{totalLabel}</span>
-        <span className="text-xs text-slate-500">{itemsCount} {itemsCount === 1 ? 'item' : 'itens'}</span>
       </div>
-      <div className="text-right flex flex-wrap items-center justify-end gap-2 shrink-0">
+      <div className="text-right flex flex-col items-end gap-1 shrink-0">
+        <span className={`text-[11px] font-black uppercase tracking-[0.06em] ${statusToneClass}`}>
+          {archived ? 'Finalizado' : statusMeta.label}
+        </span>
+        <div className="flex items-center justify-end gap-2">
+          {canPrint && (
+            <button
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation();
+                onPrint();
+              }}
+              disabled={printBusy}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-600 hover:bg-slate-50 transition-all no-print disabled:opacity-60"
+              aria-label={`Imprimir pedido ${orderDisplayId}`}
+              title="Imprimir pedido"
+            >
+              <Printer size={15} weight="duotone" />
+            </button>
+          )}
         {!archived && showQuickStart && typeof onQuickStart === 'function' && (
           <button
             type="button"
@@ -504,6 +486,7 @@ const OrderSummaryCard = ({
             Reabrir
           </button>
         )}
+        </div>
       </div>
     </div>
     </div>
