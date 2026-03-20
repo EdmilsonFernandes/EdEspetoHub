@@ -15,7 +15,6 @@ import {
   X,
   CurrencyDollar,
   Play,
-  Flag,
   CaretDown,
   Check
 } from "@phosphor-icons/react";
@@ -81,6 +80,37 @@ const resolveLocationIdentifier = (order: any) => {
   }
   return "";
 };
+
+const PremiumCheckToggle = ({
+  selected = false,
+  onToggle,
+  ariaLabel,
+  title,
+}: {
+  selected?: boolean;
+  onToggle?: () => void;
+  ariaLabel?: string;
+  title?: string;
+}) => (
+  <button
+    type="button"
+    onClick={(event) => {
+      event.stopPropagation();
+      onToggle?.();
+    }}
+    className={`relative z-20 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-[10px] border-2 shadow-sm transition-all ${
+      selected
+        ? "border-emerald-500 bg-emerald-500 text-white animate-[satinPop_180ms_ease-out]"
+        : "border-slate-300 bg-white text-transparent hover:border-slate-400 hover:bg-slate-50"
+    }`}
+    aria-label={ariaLabel}
+    title={title}
+  >
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.7" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M5 13l4 4L19 7" />
+    </svg>
+  </button>
+);
 
 const PremiumDropdown = ({
   value,
@@ -340,27 +370,17 @@ const OrderSummaryCard = ({
         onClick();
       }
     }}
-    className={`relative w-full min-h-[132px] rounded-xl border ${isLate ? 'border-red-200' : 'border-slate-100'} ${leftAccent} ${archived ? 'bg-slate-50/90 opacity-80' : 'bg-white'} p-3 sm:p-3 text-left flex items-start gap-4 transition-all duration-200 transition-transform hover:border-slate-200 hover:shadow-sm hover:-translate-y-0.5 hover:scale-[1.01] cursor-pointer`}
+    className={`relative w-full min-h-[132px] rounded-xl border ${isLate ? 'border-red-200' : 'border-slate-100'} ${leftAccent} ${archived ? 'bg-slate-50/90 opacity-80' : 'bg-white'} p-4 sm:p-4 text-left flex items-start gap-4 transition-all duration-200 transition-transform hover:border-slate-200 hover:shadow-sm hover:-translate-y-0.5 hover:scale-[1.01] cursor-pointer`}
   >
     {showSelector && (
-      <button
-        type="button"
-        onClick={(event) => {
-          event.stopPropagation();
-          onToggleSelect?.();
-        }}
-        className={`relative z-20 mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border-2 shadow-sm transition-all ${
-          selected
-            ? 'border-emerald-500 bg-emerald-500 text-white animate-[satinPop_180ms_ease-out]'
-            : 'border-slate-300 bg-white text-transparent hover:border-slate-400'
-        }`}
-        aria-label={selected ? "Desmarcar pedido" : "Selecionar pedido"}
-        title={selected ? "Desmarcar pedido" : "Selecionar pedido"}
-      >
-        <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M5 13l4 4L19 7" />
-        </svg>
-      </button>
+      <div className="ml-0.5 mr-3 mt-0.5 shrink-0">
+        <PremiumCheckToggle
+          selected={selected}
+          onToggle={onToggleSelect}
+          ariaLabel={selected ? "Desmarcar pedido" : "Selecionar pedido"}
+          title={selected ? "Desmarcar pedido" : "Selecionar pedido"}
+        />
+      </div>
     )}
     <div className="min-w-0 flex-1 space-y-2">
     <div className="flex items-center justify-between gap-2 text-xs">
@@ -423,11 +443,11 @@ const OrderSummaryCard = ({
               event.stopPropagation();
               onQuickStart();
             }}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-emerald-300 bg-emerald-50 text-emerald-700 shadow-sm hover:bg-emerald-100 hover:scale-105 transition-all"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-emerald-600 text-white shadow-[0_14px_24px_-14px_rgba(5,150,105,0.9)] ring-2 ring-emerald-100 hover:bg-emerald-700 hover:scale-105 transition-all"
             aria-label={`Iniciar atendimento do pedido ${orderDisplayId}`}
             title="Iniciar atendimento"
           >
-            <Play size={16} weight="fill" />
+            <Play size={18} weight="fill" />
           </button>
         )}
         {!archived && showQuickFinalize && typeof onQuickFinalize === 'function' && (
@@ -437,11 +457,11 @@ const OrderSummaryCard = ({
               event.stopPropagation();
               onQuickFinalize();
             }}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-emerald-300 bg-emerald-600 text-white shadow-sm hover:bg-emerald-700 hover:scale-105 transition-all"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-emerald-700 text-white shadow-[0_14px_24px_-14px_rgba(4,120,87,0.95)] ring-2 ring-emerald-100 hover:bg-emerald-800 hover:scale-105 transition-all"
             aria-label={`Finalizar agora o pedido ${orderDisplayId}`}
             title="Finalizar agora"
           >
-            <Flag size={16} weight="fill" />
+            <Check size={18} weight="bold" />
           </button>
         )}
         {canPrint && (
@@ -2791,13 +2811,9 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
 	                confirmModal.type === 'delivery' && confirmModal.deliveryFee !== null && confirmModal.deliveryFee !== undefined
 	                  ? Number(confirmModal.deliveryFee)
 	                  : 0;
-	              const itemsSubtotal = Math.max(0, totalValue - (Number.isFinite(deliveryFeeValue) ? deliveryFeeValue : 0));
+              const itemsSubtotal = Math.max(0, totalValue - (Number.isFinite(deliveryFeeValue) ? deliveryFeeValue : 0));
               const itemsVolume = (confirmModal.items || []).reduce((sum, item) => sum + Number(item?.qty || 0), 0);
-              const isTableMesaDuplicated =
-                Boolean(confirmModal.table) &&
-                new RegExp(`\\bmesa\\s*${String(confirmModal.table)}\\b`, 'i').test(
-                  String(confirmModal.customerName || '')
-                );
+              const modalLocationIdentifier = resolveLocationIdentifier(confirmModal);
               const cashValue = Number((cashConfirmValue || '').toString().replace(',', '.'));
               const cashValid = !isCashPayment || (cashConfirmValue && !Number.isNaN(cashValue) && cashValue >= totalValue);
               const changeValue = isCashPayment && cashValid ? cashValue - totalValue : 0;
@@ -2807,7 +2823,9 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Confirmar pagamento</p>
-                <h3 className="text-lg font-bold text-slate-900 mt-2">Pedido pronto para cobrar</h3>
+                <h3 className="text-lg font-bold text-slate-900 mt-2">
+                  {modalLocationIdentifier ? `Pedido ${modalLocationIdentifier}` : 'Pedido pronto para cobrar'}
+                </h3>
               </div>
               <button
                 type="button"
@@ -2822,12 +2840,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                 <span>Cliente</span>
                 <span className="font-semibold text-slate-800">{confirmModal.customerName}</span>
               </div>
-              {confirmModal.table && !isTableMesaDuplicated && (
-                <div className="flex items-center justify-between">
-                  <span>Mesa</span>
-                  <span className="font-semibold text-slate-800">Mesa {confirmModal.table}</span>
-                </div>
-              )}
               {confirmModal.phone && (
                 <div className="flex items-center justify-between">
                   <span>Telefone</span>
