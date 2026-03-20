@@ -1346,12 +1346,21 @@ export function StorePage() {
     showToast('Gerando cupom...', 'success');
     try {
       const queueText = payload.queueRank ? `#${String(payload.queueRank).padStart(2, '0')}` : '--';
+      const normalizedType = String(payload.type || '').toLowerCase();
+      const normalizedTable = String(payload.table || '').trim();
+      const locationIdentifier =
+        normalizedType === 'pickup'
+          ? 'RETIRADA'
+          : normalizedType === 'table'
+          ? (normalizedTable ? `MESA ${normalizedTable}` : 'MESA')
+          : '';
       await printReceiptAsImage({
         storeName: payload.storeName || 'SERTANEJO NO ESPETO',
         platformName: 'Já no Caminho',
         queueLabel: queueText,
         orderLabel: `#${payload.orderDisplayId}`,
         customerLabel: payload.customerName,
+        locationLabel: locationIdentifier,
         tableLabel: payload.table ? String(payload.table) : '',
         dateLabel: payload.createdAt,
         items: payload.items.map((item: any) => ({

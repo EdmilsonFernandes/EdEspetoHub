@@ -11,6 +11,7 @@ type PrintReceiptRawBtInput = {
   queueLabel?: string;
   orderLabel: string;
   customerLabel: string;
+  locationLabel?: string;
   tableLabel?: string;
   dateLabel: string;
   items: ReceiptItem[];
@@ -64,6 +65,12 @@ const centerText = (value: string, width = LINE_WIDTH) => {
 
 const separator = (width = LINE_WIDTH) => "-".repeat(width);
 const strongSeparator = (width = LINE_WIDTH) => "=".repeat(width);
+const ESC_POS = {
+  boldOn: "\x1B\x45\x01",
+  boldOff: "\x1B\x45\x00",
+  inverseOn: "\x1D\x42\x01",
+  inverseOff: "\x1D\x42\x00",
+};
 
 const fitLeftRight = (left: string, right: string, width = LINE_WIDTH) => {
   const safeRight = sanitizeText(right);
@@ -83,6 +90,9 @@ const toBase64Utf8 = (value: string) => {
 };
 
 const buildRawBtText = (payload: PrintReceiptRawBtInput) => {
+  const locationLabel = sanitizeText(
+    payload.locationLabel || (payload.tableLabel ? `MESA ${payload.tableLabel}` : "")
+  );
   const itemsLines = payload.items.flatMap((item) => {
     const qty = Math.max(0, Number(item.quantity || 0));
     const name = sanitizeText(item.name || "Item");
@@ -93,7 +103,9 @@ const buildRawBtText = (payload: PrintReceiptRawBtInput) => {
     const nameLines = wrapWords(`${qty}x ${name}`, leftWidth);
     const lines = nameLines.slice(0, -1);
     const lastNameLine = (nameLines[nameLines.length - 1] || "").slice(0, leftWidth);
-    lines.push(`${lastNameLine.padEnd(leftWidth, ".")}${lineTotal.padStart(rightWidth, " ")}`);
+    lines.push(
+      `${ESC_POS.boldOn}${lastNameLine.padEnd(leftWidth, ".")}${lineTotal.padStart(rightWidth, " ")}${ESC_POS.boldOff}`
+    );
     if (note) {
       const noteLines = wrapWords(note, LINE_WIDTH - 4);
       noteLines.forEach((n, index) => {
@@ -101,8 +113,19 @@ const buildRawBtText = (payload: PrintReceiptRawBtInput) => {
       });
     }
     lines.push("");
+    lines.push("");
     return lines;
   });
+
+  const inverseLocationBlock = locationLabel
+    ? [
+        strongSeparator(),
+        ...centerText(locationLabel.toUpperCase())
+          .split("\n")
+          .map((line) => `${ESC_POS.inverseOn}${line}${ESC_POS.inverseOff}`),
+        strongSeparator(),
+      ]
+    : [];
 
   const chunks = [
     strongSeparator(),
@@ -112,22 +135,14 @@ const buildRawBtText = (payload: PrintReceiptRawBtInput) => {
     ...wrapWords(`Fila: ${sanitizeText(payload.queueLabel || "--")}`, LINE_WIDTH),
     ...wrapWords(`Pedido: ${sanitizeText(payload.orderLabel || "--")}`, LINE_WIDTH),
     ...wrapWords(`Cliente: ${sanitizeText(payload.customerLabel || "Cliente")}`, LINE_WIDTH),
-    ...(payload.tableLabel
-      ? [
-          strongSeparator(),
-          centerText("MESA"),
-          centerText(String(sanitizeText(payload.tableLabel)).toUpperCase()),
-          centerText(String(sanitizeText(payload.tableLabel)).toUpperCase()),
-          strongSeparator(),
-        ]
-      : []),
+    ...inverseLocationBlock,
     ...wrapWords(`Data: ${sanitizeText(payload.dateLabel || "")}`, LINE_WIDTH),
     separator(),
-    "ITENS",
+    `${ESC_POS.boldOn}ITENS${ESC_POS.boldOff}`,
     separator(),
     ...itemsLines,
     separator(),
-    fitLeftRight("TOTAL:", sanitizeText(payload.totalLabel || "R$ 0,00")),
+    `${ESC_POS.boldOn}${fitLeftRight("TOTAL:", sanitizeText(payload.totalLabel || "R$ 0,00"))}${ESC_POS.boldOff}`,
     "",
     "",
   ];
@@ -136,6 +151,9 @@ const buildRawBtText = (payload: PrintReceiptRawBtInput) => {
 };
 
 const buildHtmlReceipt = (payload: PrintReceiptRawBtInput) => {
+  const locationLabel = sanitizeText(
+    payload.locationLabel || (payload.tableLabel ? `MESA ${payload.tableLabel}` : "")
+  );
   const itemsHtml = payload.items
     .map((item) => {
       const qty = Math.max(0, Number(item.quantity || 0));
@@ -152,8 +170,8 @@ const buildHtmlReceipt = (payload: PrintReceiptRawBtInput) => {
     })
     .join('');
 
-  const tableHtml = payload.tableLabel
-    ? `<div class="table-block">MESA ${sanitizeText(payload.tableLabel).toUpperCase()}</div>`
+  const tableHtml = locationLabel
+    ? `<div class="location-block">${locationLabel.toUpperCase()}</div>`
     : '';
 
   return `<!DOCTYPE html>
@@ -164,18 +182,18 @@ const buildHtmlReceipt = (payload: PrintReceiptRawBtInput) => {
   <title>Cupom</title>
   <style>
     @page { size: 80mm auto; margin: 0; }
-    html, body { margin: 0; padding: 0; background: #fff; color: #000; font-family: "Courier New", monospace; }
+    html, body { margin: 0; padding: 0; background: #fff; color: #000; font-family: "Consolas", "Courier New", "Liberation Mono", monospace; }
     body { width: 72mm; padding: 2mm; }
     .sep { border-top: 1px dashed #000; margin: 6px 0; }
     .title { text-align: center; font-weight: 800; font-size: 16px; text-transform: uppercase; }
     .subtitle { text-align: center; font-size: 11px; margin-top: 2px; }
     .meta { font-size: 11px; margin: 2px 0; }
-    .table-block { margin: 8px 0; text-align: center; font-size: 24px; font-weight: 900; letter-spacing: 1px; }
+    .location-block { margin: 8px 0; text-align: center; font-size: 21px; font-weight: 900; letter-spacing: 1px; background: #000; color: #fff; padding: 6px 4px; }
     .items-title { font-size: 11px; font-weight: 700; text-transform: uppercase; }
-    .item-row { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; margin: 2px 0; }
-    .item-name { flex: 1; padding-right: 6px; }
-    .item-price { white-space: nowrap; font-weight: 700; }
-    .item-note { font-size: 10px; margin-left: 8px; margin-bottom: 2px; }
+    .item-row { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; margin: 3px 0; line-height: 1.45; }
+    .item-name { flex: 1; padding-right: 6px; font-weight: 800; }
+    .item-price { white-space: nowrap; font-weight: 800; }
+    .item-note { font-size: 10px; margin-left: 8px; margin-bottom: 3px; line-height: 1.4; }
     .total { display: flex; justify-content: space-between; font-size: 14px; font-weight: 800; margin-top: 6px; }
     .spacer { height: 16px; }
   </style>

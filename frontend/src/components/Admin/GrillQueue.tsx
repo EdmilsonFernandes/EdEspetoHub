@@ -54,6 +54,34 @@ const fuzzyIncludes = (text: string, query: string) => {
   return source.includes(target);
 };
 
+const formatTableIdentifier = (value: any) => {
+  const normalized = String(value ?? "").trim();
+  if (!normalized) return "";
+  return /^\d+$/.test(normalized) ? normalized.padStart(2, "0") : normalized.toUpperCase();
+};
+
+const resolveLocationIdentifier = (order: any) => {
+  const explicitIdentifier = String(
+    order?.location_identifier ??
+      order?.locationIdentifier ??
+      order?.location?.identifier ??
+      order?.location?.label ??
+      order?.sector ??
+      order?.setor ??
+      ""
+  ).trim();
+  if (explicitIdentifier) {
+    return explicitIdentifier.toUpperCase();
+  }
+  const type = String(order?.type || "").toLowerCase();
+  if (type === "pickup") return "RETIRADA";
+  if (type === "table") {
+    const formattedTable = formatTableIdentifier(order?.table);
+    return formattedTable ? `MESA ${formattedTable}` : "MESA";
+  }
+  return "";
+};
+
 const PremiumDropdown = ({
   value,
   onChange,
@@ -286,7 +314,10 @@ const OrderSummaryCard = ({
   (() => {
     const isDelivery = String(order?.type || '').toLowerCase() === 'delivery';
     const leftAccent = isDelivery ? 'border-l-0 sm:border-l-4 sm:border-l-blue-500' : 'border-l-0 sm:border-l-4 sm:border-l-orange-500';
-    const hasTable = String(order?.type || '').toLowerCase() === 'table' && order?.table;
+    const locationIdentifier = resolveLocationIdentifier(order);
+    const hasLocationIdentifier = Boolean(locationIdentifier);
+    const isPickup = String(order?.type || '').toLowerCase() === 'pickup';
+    const locationBadgeTone = archived ? 'bg-slate-700' : isPickup ? 'bg-orange-500' : 'bg-slate-950';
     const createdAtLabel = (() => {
       const base = Number(order?.createdAt || 0);
       if (!base) return '--:--';
@@ -334,9 +365,14 @@ const OrderSummaryCard = ({
     <div className="min-w-0 flex-1 space-y-2">
     <div className="flex items-center justify-between gap-2 text-xs">
       <div className="flex min-w-0 flex-1 items-center gap-1.5">
-        <span className="px-2 py-0.5 bg-slate-800 text-white text-[11px] font-bold rounded-md">
+        <span className="px-2.5 py-1 bg-slate-950 text-white text-sm sm:text-base font-black rounded-lg leading-none tracking-[0.08em]">
           #{String(queueRank).padStart(2, '0')}
         </span>
+        {hasLocationIdentifier && (
+          <span className={`inline-flex min-w-0 max-w-[190px] sm:max-w-none items-center rounded-lg px-3 py-1 text-[11px] sm:text-sm font-black tracking-[0.1em] text-white whitespace-nowrap ${locationBadgeTone}`}>
+            <span className="truncate">{locationIdentifier}</span>
+          </span>
+        )}
         {!archived ? (
           <span className={`px-2 py-0.5 text-[10px] uppercase tracking-wide font-bold rounded-full whitespace-nowrap border ${statusMeta.className}`}>
             {statusMeta.label}
@@ -346,13 +382,7 @@ const OrderSummaryCard = ({
             Finalizado
           </span>
         )}
-        {hasTable && (
-          <span className={`inline-flex min-w-0 max-w-[140px] sm:max-w-none items-center gap-1 rounded-md px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-[11px] font-black tracking-wide text-white whitespace-nowrap ${archived ? 'bg-slate-600' : 'bg-amber-500'}`}>
-            <Hash size={12} weight="bold" />
-            <span className="truncate">MESA {String(order.table).padStart(2, "0")}</span>
-          </span>
-        )}
-        {!hasTable && (
+        {!hasLocationIdentifier && (
           <span className="rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-slate-700">
             {formatOrderType(order?.type)}
           </span>
@@ -697,6 +727,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
           : Number(order?.total || 0),
       storeName: String(order?.storeName || auth?.store?.name || 'Sertanejo no Espeto'),
       table: order?.table || '',
+      locationIdentifier: resolveLocationIdentifier(order),
     };
     setIsGeneratingPrint(true);
     setError('Gerando cupom...');
@@ -707,6 +738,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
         queueLabel: `#${String(payload.queueRank || 1).padStart(2, '0')}`,
         orderLabel: `#${payload.orderDisplayId}`,
         customerLabel: payload.order?.customerName || payload.order?.name || 'Cliente',
+        locationLabel: payload.locationIdentifier || '',
         tableLabel: payload.table ? String(payload.table) : '',
         dateLabel: payload.createdAt,
         items: payload.items.map((item: any) => {
@@ -2481,6 +2513,8 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                 : toneKey === "done"
                 ? "border-l-emerald-400 bg-gradient-to-br from-emerald-50/70 via-white to-emerald-50/30"
                 : "border-l-slate-300 bg-gradient-to-br from-slate-50 via-white to-slate-50";
+            const drawerLocationIdentifier = resolveLocationIdentifier(order);
+            const drawerIsPickup = String(order?.type || '').toLowerCase() === 'pickup';
             return (
             <div
               key={order.id}
@@ -2493,7 +2527,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                 <div className="relative flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1 text-[10px] text-slate-500 uppercase font-bold">
                     <Hash size={14} weight="duotone" className="text-slate-400" /> Prioridade
-                    <span className={`ml-1 px-2 py-0.5 rounded-full text-[10px] font-black ${getPriorityTone(selectedOrderRank)}`}>
+                    <span className={`ml-1 px-3 py-1 rounded-lg text-sm font-black leading-none ${getPriorityTone(selectedOrderRank)}`}>
                       #{String(selectedOrderRank).padStart(2, "0")}
                     </span>
                   </div>
@@ -2509,7 +2543,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                     Cliente: {order.customerName || order.name || "Cliente"}
                   </h3>
 
-                  {String(order?.type || '').toLowerCase() !== 'table' && (
+                  {!drawerLocationIdentifier && (
                     <div className="mt-1 flex flex-wrap items-center gap-2">
                       {(() => {
                         const meta = orderTypeMeta(order);
@@ -2564,9 +2598,9 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                 </div>
 
                 <div className="flex flex-row sm:flex-col items-center sm:items-end gap-2">
-                  {order.type === "table" && order.table && (
-                    <div className="px-3 py-1.5 rounded-full bg-slate-900 text-white text-xs font-black tracking-wide shadow-sm">
-                      Mesa {order.table}
+                  {drawerLocationIdentifier && (
+                    <div className={`px-3 py-1.5 rounded-lg text-white text-xs font-black tracking-[0.12em] shadow-sm ${drawerIsPickup ? 'bg-orange-500' : 'bg-slate-950'}`}>
+                      {drawerLocationIdentifier}
                     </div>
                   )}
                   <span
