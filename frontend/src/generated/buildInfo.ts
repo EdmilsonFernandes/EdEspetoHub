@@ -3,14 +3,20 @@
 
 export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
-  "version": "0.1.1",
-  "versionLabel": "v0.1.1",
-  "buildId": "0.1.1-20260321.131120-376c29f",
-  "builtAt": "2026-03-21T13:11:20.429Z",
-  "commitHash": "376c29f61f95e9491f9c7fddade30c4cd834b29a",
-  "shortHash": "376c29f",
+  "version": "0.1.2",
+  "versionLabel": "v0.1.2",
+  "buildId": "0.1.2-20260321.131157-6b5f6f1",
+  "builtAt": "2026-03-21T13:11:57.572Z",
+  "commitHash": "6b5f6f185099f3ffd249da77fde8f705a753cd7e",
+  "shortHash": "6b5f6f1",
   "branch": "main",
   "commits": [
+    {
+      "hash": "6b5f6f185099f3ffd249da77fde8f705a753cd7e",
+      "shortHash": "6b5f6f1",
+      "dateIso": "2026-03-21T10:11:53-03:00",
+      "subject": "fix(print): destaca linha de cliente com fundo branco e borda preta"
+    },
     {
       "hash": "376c29f61f95e9491f9c7fddade30c4cd834b29a",
       "shortHash": "376c29f",
@@ -184,12 +190,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "a365e2b",
       "dateIso": "2026-03-18T09:15:32-03:00",
       "subject": "fix(queue): resolve checkbox overlap, dedupe mesa badge and remove food-specific icons"
-    },
-    {
-      "hash": "07a8119393ced8a296d040748dbc416664ef0677",
-      "shortHash": "07a8119",
-      "dateIso": "2026-03-18T09:04:57-03:00",
-      "subject": "feat(queue): add fuzzy item picker fallback catalog and manual item flow"
     }
   ]
 } as const;
