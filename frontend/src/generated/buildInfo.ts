@@ -3,14 +3,20 @@
 
 export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
-  "version": "0.1.6",
-  "versionLabel": "v0.1.6",
-  "buildId": "0.1.6-20260321.132806-9314529",
-  "builtAt": "2026-03-21T13:28:06.198Z",
-  "commitHash": "9314529ea2d5d5018b1cb356fb71091ad0246695",
-  "shortHash": "9314529",
+  "version": "0.1.7",
+  "versionLabel": "v0.1.7",
+  "buildId": "0.1.7-20260321.132839-0e88117",
+  "builtAt": "2026-03-21T13:28:39.750Z",
+  "commitHash": "0e88117d43f4ad3846ee33f6de33bd13f979cb17",
+  "shortHash": "0e88117",
   "branch": "main",
   "commits": [
+    {
+      "hash": "0e88117d43f4ad3846ee33f6de33bd13f979cb17",
+      "shortHash": "0e88117",
+      "dateIso": "2026-03-21T10:28:35-03:00",
+      "subject": "fix(queue-mobile): compacta botao imprimir para nao quebrar acoes"
+    },
     {
       "hash": "9314529ea2d5d5018b1cb356fb71091ad0246695",
       "shortHash": "9314529",
@@ -184,12 +190,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "8e76d15",
       "dateIso": "2026-03-20T15:33:00-03:00",
       "subject": "fix(queue-mobile): evita sobreposicao do atalho de impressao no card"
-    },
-    {
-      "hash": "6d9d95bfdc1694309b9ba3124854dacbde585a90",
-      "shortHash": "6d9d95b",
-      "dateIso": "2026-03-20T15:21:39-03:00",
-      "subject": "feat(ux): stack de prioridades e dropdown premium no fluxo admin"
     }
   ]
 } as const;
