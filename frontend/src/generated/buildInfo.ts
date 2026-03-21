@@ -3,14 +3,26 @@
 
 export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
-  "version": "0.1.5",
-  "versionLabel": "v0.1.5",
-  "buildId": "0.1.5-20260321.132114-b426863",
-  "builtAt": "2026-03-21T13:21:14.976Z",
-  "commitHash": "b426863d0f0bd513f5185cf263c8fa4938d831c7",
-  "shortHash": "b426863",
+  "version": "0.1.6",
+  "versionLabel": "v0.1.6",
+  "buildId": "0.1.6-20260321.132444-6c4f37f",
+  "builtAt": "2026-03-21T13:24:44.060Z",
+  "commitHash": "6c4f37f490002d37298c8164169697004dd71881",
+  "shortHash": "6c4f37f",
   "branch": "main",
   "commits": [
+    {
+      "hash": "6c4f37f490002d37298c8164169697004dd71881",
+      "shortHash": "6c4f37f",
+      "dateIso": "2026-03-21T10:24:38-03:00",
+      "subject": "docs(readme): atualiza fluxo de deploy, scripts e versionamento"
+    },
+    {
+      "hash": "c41597c3015402b4dd25ba2b3bc9b656dc288e0c",
+      "shortHash": "c41597c",
+      "dateIso": "2026-03-21T10:21:15-03:00",
+      "subject": "chore(release): v0.1.5"
+    },
     {
       "hash": "b426863d0f0bd513f5185cf263c8fa4938d831c7",
       "shortHash": "b426863",
@@ -178,18 +190,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "d0630f0",
       "dateIso": "2026-03-20T15:09:26-03:00",
       "subject": "fix(queue-ux): dedup mesa no modal e reforca controles premium"
-    },
-    {
-      "hash": "8a6c3b1d861410c614cfa96279f2f4a79f34b2c7",
-      "shortHash": "8a6c3b1",
-      "dateIso": "2026-03-20T14:51:22-03:00",
-      "subject": "feat(queue-print): alto contraste para identificador e cupom termico"
-    },
-    {
-      "hash": "d2e7ad03a09402bf7e4265761b69c64e32f25a8b",
-      "shortHash": "d2e7ad0",
-      "dateIso": "2026-03-20T14:34:56-03:00",
-      "subject": "fix(header): usar valor real do plano em vez de fallback 99,90"
     }
   ]
 } as const;
