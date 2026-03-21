@@ -5,12 +5,18 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.8",
   "versionLabel": "v0.1.8",
-  "buildId": "0.1.8-20260321.134613-0aed670",
-  "builtAt": "2026-03-21T13:46:13.006Z",
-  "commitHash": "0aed6708a639104df91fd5d69407f54ac1d2b4fc",
-  "shortHash": "0aed670",
+  "buildId": "0.1.8-20260321.135410-7c7fb62",
+  "builtAt": "2026-03-21T13:54:10.573Z",
+  "commitHash": "7c7fb6283935933e08cdee375044ebd931ac22c1",
+  "shortHash": "7c7fb62",
   "branch": "main",
   "commits": [
+    {
+      "hash": "7c7fb6283935933e08cdee375044ebd931ac22c1",
+      "shortHash": "7c7fb62",
+      "dateIso": "2026-03-21T10:46:45-03:00",
+      "subject": "feat(vendas): detalhar itens vendidos em modal e reforcar update de build"
+    },
     {
       "hash": "0aed6708a639104df91fd5d69407f54ac1d2b4fc",
       "shortHash": "0aed670",
@@ -184,12 +190,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "4209230",
       "dateIso": "2026-03-21T09:20:03-03:00",
       "subject": "fix(checkout): torna telefone opcional para retirada"
-    },
-    {
-      "hash": "75c056135211ab2fe68f3b64ea18a78ca5795797",
-      "shortHash": "75c0561",
-      "dateIso": "2026-03-20T16:42:42-03:00",
-      "subject": "fix(print): força cores no header invertido com print-color-adjust"
     }
   ]
 } as const;

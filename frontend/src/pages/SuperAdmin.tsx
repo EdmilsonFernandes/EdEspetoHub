@@ -1474,48 +1474,52 @@ export function SuperAdmin() {
           </div>
         )}
 
-        <div className="bg-gradient-to-br from-blue-50 via-white to-white border border-blue-100 rounded-2xl p-4 shadow-sm">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <ChartBar size={20} weight="duotone" className="text-blue-700" />
-              <h2 className="text-lg font-bold text-slate-800">Receita por mês</h2>
-            </div>
-            <button
-              onClick={() => toggleSection('charts')}
-              className="px-3 py-1 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 flex items-center gap-1"
-            >
-              <CaretRight weight="bold"
-                size={14}
-                className={`transition-transform ${sectionsOpen.charts ? 'rotate-90' : ''}`}
-              />
-              {sectionsOpen.charts ? 'Ocultar' : 'Mostrar'}
-            </button>
-          </div>
-          {sectionsOpen.charts ? (
-            revenueByMonth.length === 0 ? (
-              <div className="text-sm text-slate-500">Nenhuma receita paga registrada.</div>
-            ) : (
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={revenueByMonth}>
-                    <XAxis dataKey="month" fontSize={12} />
-                    <YAxis fontSize={12} />
-                    <Tooltip formatter={(value) => formatCurrency(value)} />
-                    <Bar dataKey="total" fill="var(--color-primary)" radius={[6, 6, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
+        {activeSection === 'payments' && (
+          <>
+            <div className="bg-gradient-to-br from-blue-50 via-white to-white border border-blue-100 rounded-2xl p-4 shadow-sm">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <ChartBar size={20} weight="duotone" className="text-blue-700" />
+                  <h2 className="text-lg font-bold text-slate-800">Receita por mês</h2>
+                </div>
+                <button
+                  onClick={() => toggleSection('charts')}
+                  className="px-3 py-1 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 flex items-center gap-1"
+                >
+                  <CaretRight weight="bold"
+                    size={14}
+                    className={`transition-transform ${sectionsOpen.charts ? 'rotate-90' : ''}`}
+                  />
+                  {sectionsOpen.charts ? 'Ocultar' : 'Mostrar'}
+                </button>
               </div>
-            )
-          ) : (
-            <div className="text-sm text-slate-500">Grafico oculto.</div>
-          )}
-        </div>
+              {sectionsOpen.charts ? (
+                revenueByMonth.length === 0 ? (
+                  <div className="text-sm text-slate-500">Nenhuma receita paga registrada.</div>
+                ) : (
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={revenueByMonth}>
+                        <XAxis dataKey="month" fontSize={12} />
+                        <YAxis fontSize={12} />
+                        <Tooltip formatter={(value) => formatCurrency(value)} />
+                        <Bar dataKey="total" fill="var(--color-primary)" radius={[6, 6, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                )
+              ) : (
+                <div className="text-sm text-slate-500">Grafico oculto.</div>
+              )}
+            </div>
 
-        <div className="bg-gradient-to-r from-amber-50 via-white to-white border border-amber-100 rounded-2xl p-4 shadow-sm">
-          <p className="text-sm text-amber-900">
-            Receita paga no periodo selecionado: <span className="font-semibold">{formatCurrency(periodTotal)}</span>
-          </p>
-        </div>
+            <div className="bg-gradient-to-r from-amber-50 via-white to-white border border-amber-100 rounded-2xl p-4 shadow-sm">
+              <p className="text-sm text-amber-900">
+                Receita paga no periodo selecionado: <span className="font-semibold">{formatCurrency(periodTotal)}</span>
+              </p>
+            </div>
+          </>
+        )}
 
         <FormSection
           title="Lojas e performance"
