@@ -14,31 +14,70 @@ const safeExecFile = (bin, args) => {
   }
 };
 
+const readExistingBuildInfo = () => {
+  try {
+    const raw = readFileSync(outputPath, 'utf8');
+    const match = raw.match(/export const APP_BUILD_INFO = (\{[\s\S]*\}) as const;/);
+    if (!match?.[1]) return null;
+    return JSON.parse(match[1]);
+  } catch {
+    return null;
+  }
+};
+
+const parseEnvCommits = () => {
+  const raw = String(process.env.BUILD_COMMITS_JSON || '').trim();
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+};
+
 const pkg = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
-const version = String(pkg?.version || '0.0.0');
-const commitHash = safeExecFile('git', ['rev-parse', 'HEAD']);
-const shortHash = safeExecFile('git', ['rev-parse', '--short', 'HEAD']) || 'local';
-const branch = safeExecFile('git', ['rev-parse', '--abbrev-ref', 'HEAD']) || 'unknown';
-const now = new Date();
-const nowIso = now.toISOString();
+const existing = readExistingBuildInfo();
+const version = String(process.env.BUILD_VERSION || pkg?.version || existing?.version || '0.0.0');
+const commitHash =
+  String(process.env.BUILD_GIT_SHA || '').trim() ||
+  safeExecFile('git', ['rev-parse', 'HEAD']) ||
+  String(existing?.commitHash || '');
+const shortHash =
+  String(process.env.BUILD_GIT_SHORT_SHA || '').trim() ||
+  safeExecFile('git', ['rev-parse', '--short', 'HEAD']) ||
+  String(existing?.shortHash || '') ||
+  'local';
+const branch =
+  String(process.env.BUILD_GIT_BRANCH || '').trim() ||
+  safeExecFile('git', ['rev-parse', '--abbrev-ref', 'HEAD']) ||
+  String(existing?.branch || '') ||
+  'unknown';
+const nowIso = String(process.env.BUILD_TIME_ISO || '').trim() || new Date().toISOString();
 const datePart = nowIso.slice(0, 10).replace(/-/g, '');
 const timePart = nowIso.slice(11, 19).replace(/:/g, '');
 const buildId = `${version}-${datePart}.${timePart}-${shortHash}`;
 
 const commitsRaw = safeExecFile('git', ['log', '-n', '30', '--date=iso-strict', '--pretty=format:%H|%h|%cI|%s']);
-const commits = commitsRaw
-  .split('\n')
-  .map((line) => line.trim())
-  .filter(Boolean)
-  .map((line) => {
-    const [hash, short, dateIso, ...subjectParts] = line.split('|');
-    return {
-      hash: hash || '',
-      shortHash: short || '',
-      dateIso: dateIso || '',
-      subject: subjectParts.join('|').trim() || '',
-    };
-  });
+const commitsFromGit = commitsRaw
+  ? commitsRaw
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((line) => {
+        const [hash, short, dateIso, ...subjectParts] = line.split('|');
+        return {
+          hash: hash || '',
+          shortHash: short || '',
+          dateIso: dateIso || '',
+          subject: subjectParts.join('|').trim() || '',
+        };
+      })
+  : [];
+const commits =
+  parseEnvCommits() ||
+  (commitsFromGit.length ? commitsFromGit : Array.isArray(existing?.commits) ? existing.commits : []);
 
 const payload = {
   appName: 'Já no Caminho',

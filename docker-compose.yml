@@ -7,6 +7,13 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        BUILD_VERSION: "${FRONTEND_BUILD_VERSION:-}"
+        BUILD_GIT_SHA: "${FRONTEND_BUILD_GIT_SHA:-}"
+        BUILD_GIT_SHORT_SHA: "${FRONTEND_BUILD_GIT_SHORT_SHA:-}"
+        BUILD_GIT_BRANCH: "${FRONTEND_BUILD_GIT_BRANCH:-}"
+        BUILD_TIME_ISO: "${FRONTEND_BUILD_TIME_ISO:-}"
+        BUILD_COMMITS_JSON: "${FRONTEND_BUILD_COMMITS_JSON:-}"
     ports:
       - "${FRONTEND_PORT:-8080}:80"
     depends_on:

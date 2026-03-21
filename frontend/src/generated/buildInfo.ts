@@ -5,12 +5,18 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.0",
   "versionLabel": "v0.1.0",
-  "buildId": "0.1.0-20260321.123647-654ccbc",
-  "builtAt": "2026-03-21T12:36:47.365Z",
-  "commitHash": "654ccbc4277607fb5f930a4057f29e53d8c23f0b",
-  "shortHash": "654ccbc",
+  "buildId": "0.1.0-20260321.124316-2388c30",
+  "builtAt": "2026-03-21T12:43:16.235Z",
+  "commitHash": "2388c301373ebed4b5da4f7463903179c2155bb7",
+  "shortHash": "2388c30",
   "branch": "main",
   "commits": [
+    {
+      "hash": "2388c301373ebed4b5da4f7463903179c2155bb7",
+      "shortHash": "2388c30",
+      "dateIso": "2026-03-21T09:37:22-03:00",
+      "subject": "feat(versioning): build info automatica e painel de versoes no superadmin"
+    },
     {
       "hash": "654ccbc4277607fb5f930a4057f29e53d8c23f0b",
       "shortHash": "654ccbc",
@@ -184,12 +190,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "a99bd2e",
       "dateIso": "2026-03-17T17:30:04-03:00",
       "subject": "fix(admin-routing): remove legacy layout wrapper causing sidebar/header bleed"
-    },
-    {
-      "hash": "3b72f9774db71013dfc63352b3fab4464c254099",
-      "shortHash": "3b72f97",
-      "dateIso": "2026-03-17T17:15:01-03:00",
-      "subject": "fix(delivery): reflect motoboy acceptance in admin queue status"
     }
   ]
 } as const;
