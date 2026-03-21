@@ -3,14 +3,20 @@
 
 export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
-  "version": "0.1.3",
-  "versionLabel": "v0.1.3",
-  "buildId": "0.1.3-20260321.131506-833450a",
-  "builtAt": "2026-03-21T13:15:06.935Z",
-  "commitHash": "833450a36fb08e853a442ea01ab62a5c0f960f88",
-  "shortHash": "833450a",
+  "version": "0.1.4",
+  "versionLabel": "v0.1.4",
+  "buildId": "0.1.4-20260321.131537-badad4f",
+  "builtAt": "2026-03-21T13:15:37.457Z",
+  "commitHash": "badad4f2f359b01f0a263b92bbd3170e1f95669a",
+  "shortHash": "badad4f",
   "branch": "main",
   "commits": [
+    {
+      "hash": "badad4f2f359b01f0a263b92bbd3170e1f95669a",
+      "shortHash": "badad4f",
+      "dateIso": "2026-03-21T10:15:33-03:00",
+      "subject": "fix(print): unifica destaque de mesa/local em branco com borda preta"
+    },
     {
       "hash": "833450a36fb08e853a442ea01ab62a5c0f960f88",
       "shortHash": "833450a",
@@ -184,12 +190,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "cb8d5ce",
       "dateIso": "2026-03-18T09:50:00-03:00",
       "subject": "fix(queue-card): align payment badge with total and stabilize mesa/timer header"
-    },
-    {
-      "hash": "f9378ae71aa85fcc6f325546227a3866f12e44f9",
-      "shortHash": "f9378ae",
-      "dateIso": "2026-03-18T09:35:48-03:00",
-      "subject": "fix(queue-card): prevent mesa/timer label collision with responsive spacing"
     }
   ]
 } as const;
