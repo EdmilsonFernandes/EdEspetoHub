@@ -1,69 +1,25 @@
-/*
- * Chama no espeto CONFIDENTIAL
- * ------------------
- * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
- *
- * This file, project or its parts can not be copied and/or distributed without
- * the express permission of Chama no espeto.
- *
- * @file: app.ts
- * @Date: 2025-12-17
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
- */
+import { AppBootstrap } from 'api/common/decorator/app.boostrap.decorator';
+import { InitializerService } from 'api/common/service/initialize.service';
+import { DatabaseService } from 'database/data-base.service';
+import { Tokens } from 'ioc/injectiontokens';
+import { Inject, Provide } from 'ioc/ioc';
+import { LoggerService } from 'services/logger/LoggerService';
 
-import 'reflect-metadata';
-import 'dotenv/config';
-import express from 'express';
-import path from 'path';
-import cors from 'cors';
-import swaggerUi from 'swagger-ui-express';
-import { loadSsmEnv } from './config/ssm';
-/**
- * Handles bootstrap.
- *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
- * @date 2025-12-17
- */
-async function bootstrap()
+@Provide(Tokens.App)
+@AppBootstrap()
+export class App
 {
-  await loadSsmEnv();
-  const { AppDataSource } = await import('./config/database');
-  const routes = (await import('./routes')).default;
-  const { env } = await import('./config/env');
-  const { swaggerSpec } = await import('./config/swagger');
-  const { scheduleSubscriptionExpirationJob } = await import('./jobs/subscription-expiration.job');
-  const { runMigrations } = await import('./utils/runMigrations');
-  const { requestLogger } = await import('./middleware/requestLogger');
-  const { accessLogger } = await import('./middleware/accessLogger');
-  const { logger } = await import('./utils/logger');
+  constructor(
+    @Inject(Tokens.Common.Service.InitializerService) private readonly initializer: InitializerService,
+    @Inject(Tokens.Utils.LoggerService) private readonly myLogger: LoggerService,
+    @Inject(Tokens.Common.DataLayer.DatabaseService) private readonly database: DatabaseService
+  )
+  {}
 
-  await AppDataSource.initialize();
-  await runMigrations();
-  const app = express();
-  app.use(requestLogger);
-  app.use(cors());
-  app.use(express.json({ limit: '10mb' }));
-  app.use(accessLogger);
-
-  const uploadsDir = path.join(process.cwd(), 'uploads');
-  app.use('/uploads', express.static(uploadsDir));
-
-  app.get('/', (_, res) => res.json({ status: 'ok', name: 'Churras Sites API' }));
-  app.use('/api/docs', swaggerUi.serve as any, swaggerUi.setup(swaggerSpec) as any);
-  app.get('/api/docs.json', (_, res) => res.json(swaggerSpec));
-
-  app.use('/api', routes);
-
-  scheduleSubscriptionExpirationJob();
-
-  app.listen(env.port, () =>
+  public async bootstrap(): Promise<void>
   {
-    logger.info('API listening', { port: env.port });
-  });
+    this.myLogger.info('Initializing application');
+    await this.database.initialize();
+    await this.initializer.initApi(parseInt(process.env.PORT || '3000', 10), 'ChamaNoEspeto');
+  }
 }
-
-bootstrap().catch((error) =>
-{
-  console.error('Failed to start API', error);
-  process.exit(1);
-});
