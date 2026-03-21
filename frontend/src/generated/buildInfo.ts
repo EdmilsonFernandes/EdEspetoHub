@@ -5,12 +5,18 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.7",
   "versionLabel": "v0.1.7",
-  "buildId": "0.1.7-20260321.132839-0e88117",
-  "builtAt": "2026-03-21T13:28:39.750Z",
-  "commitHash": "0e88117d43f4ad3846ee33f6de33bd13f979cb17",
-  "shortHash": "0e88117",
+  "buildId": "0.1.7-20260321.133055-48a676b",
+  "builtAt": "2026-03-21T13:30:55.062Z",
+  "commitHash": "48a676b2be4234f293bd8339b7efe9f9aa588f94",
+  "shortHash": "48a676b",
   "branch": "main",
   "commits": [
+    {
+      "hash": "48a676b2be4234f293bd8339b7efe9f9aa588f94",
+      "shortHash": "48a676b",
+      "dateIso": "2026-03-21T10:28:39-03:00",
+      "subject": "chore(release): v0.1.7"
+    },
     {
       "hash": "0e88117d43f4ad3846ee33f6de33bd13f979cb17",
       "shortHash": "0e88117",
@@ -184,12 +190,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "345b533",
       "dateIso": "2026-03-20T15:51:00-03:00",
       "subject": "feat(queue-card): hierarquia visual 4 linhas com badges de alto contraste"
-    },
-    {
-      "hash": "8e76d1552d61ac17a9d781331003e32459084e35",
-      "shortHash": "8e76d15",
-      "dateIso": "2026-03-20T15:33:00-03:00",
-      "subject": "fix(queue-mobile): evita sobreposicao do atalho de impressao no card"
     }
   ]
 } as const;

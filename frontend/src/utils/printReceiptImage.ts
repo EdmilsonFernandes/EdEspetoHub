@@ -70,6 +70,8 @@ const ESC_POS = {
   boldOff: "\x1B\x45\x00",
   inverseOn: "\x1D\x42\x01",
   inverseOff: "\x1D\x42\x00",
+  textDoubleHeightOn: "\x1D\x21\x01",
+  textSizeReset: "\x1D\x21\x00",
 };
 
 const fitLeftRight = (left: string, right: string, width = LINE_WIDTH) => {
@@ -131,7 +133,10 @@ const buildRawBtText = (payload: PrintReceiptRawBtInput) => {
     if (!customer) return [];
     const lines = centerText(`CLIENTE: ${customer}`.toUpperCase())
       .split("\n")
-      .map((line) => `${ESC_POS.inverseOn}${line}${ESC_POS.inverseOff}`);
+      .map(
+        (line) =>
+          `${ESC_POS.inverseOn}${ESC_POS.textDoubleHeightOn}${line}${ESC_POS.textSizeReset}${ESC_POS.inverseOff}`
+      );
     return [strongSeparator(), ...lines, strongSeparator()];
   })();
 
@@ -202,7 +207,7 @@ const buildHtmlReceipt = (payload: PrintReceiptRawBtInput) => {
     .customer-block {
       margin: 6px 0;
       text-align: center;
-      font-size: 13px;
+      font-size: 17px;
       font-weight: 900;
       letter-spacing: 0.4px;
       background: #000;
