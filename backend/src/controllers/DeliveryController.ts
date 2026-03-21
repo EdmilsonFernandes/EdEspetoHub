@@ -17,15 +17,40 @@ import { DatabaseService } from '../database/data-base.service';
 
 const log = logger.child({ scope: 'DeliveryController' });
 
-@RouterController(Tokens.Common.Controller.DeliveryController)
+/**
+ * @swagger
+ * tags:
+ *   name: Delivery
+ *   description: Gestão de entregas e motoboys
+ */
+@RouterController(Tokens.Common.Controller.DeliveryController, 'v1')
 export class DeliveryController extends BaseController {
   constructor(
     @Inject(Tokens.Common.Service.DeliveryService) private deliveryService: DeliveryService,
     @Inject(Tokens.Common.DataLayer.DatabaseService) private databaseService: DatabaseService
   ) {
-    super('/delivery');
+    super('/delivery', 'v1');
   }
 
+  /**
+   * @swagger
+   * /delivery/{orderId}/accept:
+   *   post:
+   *     summary: Aceita uma entrega (motoboy)
+   *     tags: [Delivery]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: orderId
+   *         required: true
+   *         schema:
+   *           type: string
+   *           format: uuid
+   *     responses:
+   *       200:
+   *         description: OK
+   */
   @Post('/:orderId/accept')
   @Authorize()
   @SubscriptionActive()

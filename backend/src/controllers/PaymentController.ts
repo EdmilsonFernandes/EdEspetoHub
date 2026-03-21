@@ -19,17 +19,33 @@ import { DatabaseService } from '../database/data-base.service';
 
 const log = logger.child({ scope: 'PaymentController' });
 
-@RouterController(Tokens.Common.Controller.PaymentController)
+/**
+ * @swagger
+ * tags:
+ *   name: Payments
+ *   description: Gestão de pagamentos
+ */
+@RouterController(Tokens.Common.Controller.PaymentController, 'v1')
 export class PaymentController extends BaseController {
   constructor(
     @Inject(Tokens.Common.Service.PaymentService) private paymentService: PaymentService,
     @Inject(Tokens.Common.Service.SubscriptionService) private subscriptionService: SubscriptionService,
-    @Inject(Tokens.Common.DataLayer.PaymentEventDao) private paymentEventDao: PaymentEventDao,
+    @Inject(Tokens.Common.DataLayer.PaymentEventRepository) private paymentEventDao: PaymentEventDao,
     @Inject(Tokens.Common.DataLayer.DatabaseService) private databaseService: DatabaseService
   ) {
-    super('/payments');
+    super('/payments', 'v1');
   }
 
+  /**
+   * @swagger
+   * /payments/confirm:
+   *   post:
+   *     summary: Confirma um pagamento
+   *     tags: [Payments]
+   *     responses:
+   *       200:
+   *         description: OK
+   */
   @Post('/confirm')
   async confirm(req: Request, res: Response) {
     const { paymentId } = req.body;
@@ -52,22 +68,23 @@ export class PaymentController extends BaseController {
     }
   }
 
-  @Post('/webhook/mercadopago')
-  async mercadoPagoWebhook(req: Request, res: Response) {
-    const payload = req.body || {};
-    const paymentId = payload?.data?.id;
-    if (!paymentId) {
-      return this.ok(res, { status: 'ignored' });
-    }
-
-    try {
-      const result = await this.paymentService.confirmMercadoPagoPayment(String(paymentId));
-      return this.ok(res, { status: 'ok', result });
-    } catch (error: any) {
-      return this.fail(res, error, req);
-    }
-  }
-
+  /**
+   * @swagger
+   * /payments/{paymentId}:
+   *   get:
+   *     summary: Busca detalhes de um pagamento
+   *     tags: [Payments]
+   *     parameters:
+   *       - in: path
+   *         name: paymentId
+   *         required: true
+   *         schema:
+   *           type: string
+   *           format: uuid
+   *     responses:
+   *       200:
+   *         description: OK
+   */
   @Get('/:paymentId')
   async getById(req: Request, res: Response) {
     try {
@@ -91,18 +108,8 @@ export class PaymentController extends BaseController {
         storeName: payment.store?.name || null,
         subscriptionId: payment.subscription?.id || null,
         planId: payment.subscription?.plan?.id || null,
-        emailVerified: payment.user?.emailVerified ?? false,
+        emailVerified: (payment as any).user?.emailVerified ?? false,
       });
-    } catch (error: any) {
-      return this.fail(res, error, req);
-    }
-  }
-
-  @Post('/:paymentId/reprocess')
-  async reprocess(req: Request, res: Response) {
-    try {
-      const result = await this.paymentService.reprocessByPaymentId(req.params.paymentId, req.body?.providerId);
-      return this.ok(res, { status: 'ok', result });
     } catch (error: any) {
       return this.fail(res, error, req);
     }

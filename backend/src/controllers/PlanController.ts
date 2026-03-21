@@ -13,14 +13,30 @@ import { Get, RouterController } from '../decorators/controller';
 import { Tokens } from '../ioc/injectiontokens';
 import { Inject } from '../ioc/ioc';
 
-@RouterController(Tokens.Common.Controller.PlanController)
+/**
+ * @swagger
+ * tags:
+ *   name: Plans
+ *   description: Consulta de planos
+ */
+@RouterController(Tokens.Common.Controller.PlanController, 'v1')
 export class PlanController extends BaseController {
   constructor(
     @Inject(Tokens.Common.Service.PlanService) private planService: PlanService
   ) {
-    super('/plans');
+    super('/plans', 'v1');
   }
 
+  /**
+   * @swagger
+   * /plans/public:
+   *   get:
+   *     summary: Lista todos os planos ativos
+   *     tags: [Plans]
+   *     responses:
+   *       200:
+   *         description: Lista de planos
+   */
   @Get('/public')
   async listPublic(req: Request, res: Response) {
     try {

@@ -18,16 +18,32 @@ import { Inject } from '../ioc/ioc';
 
 const log = logger.child({ scope: 'SubscriptionController' });
 
-@RouterController(Tokens.Common.Controller.SubscriptionController)
+/**
+ * @swagger
+ * tags:
+ *   name: Subscriptions
+ *   description: Gestão de assinaturas
+ */
+@RouterController(Tokens.Common.Controller.SubscriptionController, 'v1')
 export class SubscriptionController extends BaseController {
   constructor(
     @Inject(Tokens.Common.Service.SubscriptionService) private subscriptionService: SubscriptionService,
-    @Inject(Tokens.Common.DataLayer.PaymentDao) private paymentDao: PaymentDao,
-    @Inject(Tokens.Common.DataLayer.StoreDao) private storeDao: StoreDao
+    @Inject(Tokens.Common.DataLayer.PaymentRepository) private paymentDao: PaymentDao,
+    @Inject(Tokens.Common.DataLayer.StoreRepository) private storeDao: StoreDao
   ) {
-    super('/subscriptions');
+    super('/subscriptions', 'v1');
   }
 
+  /**
+   * @swagger
+   * /subscriptions:
+   *   post:
+   *     summary: Cria uma nova assinatura
+   *     tags: [Subscriptions]
+   *     responses:
+   *       201:
+   *         description: Criado
+   */
   @Post('/')
   async create(req: Request, res: Response) {
     try {
@@ -38,14 +54,33 @@ export class SubscriptionController extends BaseController {
     }
   }
 
+  /**
+   * @swagger
+   * /subscriptions/store/{storeId}:
+   *   get:
+   *     summary: Obtém a assinatura atual de uma loja
+   *     tags: [Subscriptions]
+   *     parameters:
+   *       - in: path
+   *         name: storeId
+   *         required: true
+   *         schema:
+   *           type: string
+   *           format: uuid
+   *     security:
+   *       - bearerAuth: []
+   *     responses:
+   *       200:
+   *         description: OK
+   */
   @Get('/store/:storeId')
   @Authorize()
   async getByStore(req: Request, res: Response) {
     try {
       const subscription = await this.subscriptionService.getCurrentByStore(req.params.storeId);
       const store = await this.storeDao.getById(req.params.storeId);
-      const planExempt = Boolean(store?.settings?.planExempt);
-      const planExemptLabel = store?.settings?.planExemptLabel || 'Cliente VIP';
+      const planExempt = Boolean((store as any)?.settings?.planExempt);
+      const planExemptLabel = (store as any)?.settings?.planExemptLabel || 'Cliente VIP';
       
       if (!subscription && !planExempt) {
         return this.notFound(res, 'Subscription not found');
@@ -56,7 +91,7 @@ export class SubscriptionController extends BaseController {
         ? {
             id: `vip-${req.params.storeId}`,
             status: 'ACTIVE',
-            startDate: store?.createdAt ?? null,
+            startDate: (store as any)?.createdAt ?? null,
             endDate: null,
             autoRenew: false,
             plan: { id: 'vip', name: 'vip', displayName: planExemptLabel, price: 0, durationDays: null },
@@ -71,32 +106,6 @@ export class SubscriptionController extends BaseController {
         latestPaymentStatus: latestPaidPayment?.status ?? null,
         latestPaymentAmount: latestPaidPayment?.amount ?? null,
       });
-    } catch (error: any) {
-      return this.fail(res, error, req);
-    }
-  }
-
-  @Post('/:id/renew')
-  @Authorize()
-  async renew(req: Request, res: Response) {
-    try {
-      const subscription = await this.subscriptionService.renew(req.params.id, req.body);
-      return this.ok(res, subscription);
-    } catch (error: any) {
-      return this.fail(res, error, req);
-    }
-  }
-
-  @Post('/renewal-payment/:storeId')
-  @Authorize()
-  async createRenewalPayment(req: Request, res: Response) {
-    try {
-      const payment = await this.subscriptionService.createRenewalPayment(
-        req.params.storeId,
-        req.body,
-        req.auth?.storeId
-      );
-      return this.created(res, payment);
     } catch (error: any) {
       return this.fail(res, error, req);
     }

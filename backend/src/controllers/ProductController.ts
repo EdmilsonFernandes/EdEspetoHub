@@ -16,14 +16,46 @@ import { Inject } from '../ioc/ioc';
 
 const log = logger.child({ scope: 'ProductController' });
 
-@RouterController(Tokens.Common.Controller.ProductController)
+/**
+ * @swagger
+ * tags:
+ *   name: Products
+ *   description: Gestão de produtos
+ */
+@RouterController(Tokens.Common.Controller.ProductController, 'v1')
 export class ProductController extends BaseController {
   constructor(
     @Inject(Tokens.Common.Service.ProductService) private productService: ProductService
   ) {
-    super('/products');
+    super('/products', 'v1');
   }
 
+  /**
+   * @swagger
+   * /products/{storeId}:
+   *   post:
+   *     summary: Cria um novo produto
+   *     tags: [Products]
+   *     parameters:
+   *       - in: path
+   *         name: storeId
+   *         required: true
+   *         schema:
+   *           type: string
+   *           format: uuid
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               name: { type: string }
+   *               price: { type: number }
+   *     responses:
+   *       201:
+   *         description: Produto criado
+   */
   @Post('/:storeId')
   async create(req: Request, res: Response) {
     try {
@@ -37,6 +69,23 @@ export class ProductController extends BaseController {
     }
   }
 
+  /**
+   * @swagger
+   * /products/{storeId}:
+   *   get:
+   *     summary: Lista produtos de uma loja
+   *     tags: [Products]
+   *     parameters:
+   *       - in: path
+   *         name: storeId
+   *         required: true
+   *         schema:
+   *           type: string
+   *           format: uuid
+   *     responses:
+   *       200:
+   *         description: OK
+   */
   @Get('/:storeId')
   async list(req: Request, res: Response) {
     try {
@@ -47,6 +96,22 @@ export class ProductController extends BaseController {
     }
   }
 
+  /**
+   * @swagger
+   * /products/slug/{slug}:
+   *   get:
+   *     summary: Lista produtos pelo slug da loja
+   *     tags: [Products]
+   *     parameters:
+   *       - in: path
+   *         name: slug
+   *         required: true
+   *         schema:
+   *           type: string
+   *     responses:
+   *       200:
+   *         description: OK
+   */
   @Get('/slug/:slug')
   async listBySlug(req: Request, res: Response) {
     try {
@@ -57,6 +122,22 @@ export class ProductController extends BaseController {
     }
   }
 
+  /**
+   * @swagger
+   * /products/public/{slug}:
+   *   get:
+   *     summary: Lista produtos públicos de uma loja
+   *     tags: [Products]
+   *     parameters:
+   *       - in: path
+   *         name: slug
+   *         required: true
+   *         schema:
+   *           type: string
+   *     responses:
+   *       200:
+   *         description: OK
+   */
   @Get('/public/:slug')
   async listPublicBySlug(req: Request, res: Response) {
     try {
@@ -67,6 +148,29 @@ export class ProductController extends BaseController {
     }
   }
 
+  /**
+   * @swagger
+   * /products/{storeId}/{productId}:
+   *   put:
+   *     summary: Atualiza um produto
+   *     tags: [Products]
+   *     parameters:
+   *       - in: path
+   *         name: storeId
+   *         required: true
+   *         schema:
+   *           type: string
+   *           format: uuid
+   *       - in: path
+   *         name: productId
+   *         required: true
+   *         schema:
+   *           type: string
+   *           format: uuid
+   *     responses:
+   *       200:
+   *         description: OK
+   */
   @Put('/:storeId/:productId')
   async update(req: Request, res: Response) {
     try {
@@ -82,6 +186,29 @@ export class ProductController extends BaseController {
     }
   }
 
+  /**
+   * @swagger
+   * /products/{storeId}/{productId}:
+   *   delete:
+   *     summary: Remove um produto
+   *     tags: [Products]
+   *     parameters:
+   *       - in: path
+   *         name: storeId
+   *         required: true
+   *         schema:
+   *           type: string
+   *           format: uuid
+   *       - in: path
+   *         name: productId
+   *         required: true
+   *         schema:
+   *           type: string
+   *           format: uuid
+   *     responses:
+   *       204:
+   *         description: Removido
+   */
   @Delete('/:storeId/:productId')
   async remove(req: Request, res: Response) {
     try {
