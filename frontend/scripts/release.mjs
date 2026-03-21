@@ -11,7 +11,7 @@ if (!VALID_BUMPS.has(bump)) {
 }
 
 const cwd = resolve(process.cwd());
-const npmBin = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+const npmBin = 'npm';
 
 const run = (bin, args, options = {}) => {
   return execFileSync(bin, args, {
