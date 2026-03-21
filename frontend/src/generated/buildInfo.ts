@@ -3,14 +3,20 @@
 
 export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
-  "version": "0.1.2",
-  "versionLabel": "v0.1.2",
-  "buildId": "0.1.2-20260321.131229-b7ab5bf",
-  "builtAt": "2026-03-21T13:12:29.437Z",
-  "commitHash": "b7ab5bf94bdaed923961f94be949985bf86cd218",
-  "shortHash": "b7ab5bf",
+  "version": "0.1.3",
+  "versionLabel": "v0.1.3",
+  "buildId": "0.1.3-20260321.131302-4db3ed4",
+  "builtAt": "2026-03-21T13:13:02.687Z",
+  "commitHash": "4db3ed48264578127b51558a62cd795c51f540c5",
+  "shortHash": "4db3ed4",
   "branch": "main",
   "commits": [
+    {
+      "hash": "4db3ed48264578127b51558a62cd795c51f540c5",
+      "shortHash": "4db3ed4",
+      "dateIso": "2026-03-21T10:12:58-03:00",
+      "subject": "fix(print): aplica destaque da linha cliente no RawBT mobile"
+    },
     {
       "hash": "b7ab5bf94bdaed923961f94be949985bf86cd218",
       "shortHash": "b7ab5bf",
@@ -184,12 +190,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "074f919",
       "dateIso": "2026-03-18T09:25:26-03:00",
       "subject": "refactor(admin): neutralize queue iconography across dashboard and layout"
-    },
-    {
-      "hash": "4e5aaa38ec1329e4365bdcdff4dfc98848371ab1",
-      "shortHash": "4e5aaa3",
-      "dateIso": "2026-03-18T09:18:22-03:00",
-      "subject": "refactor(admin-orders): align neutral iconography with queue layout"
     }
   ]
 } as const;
