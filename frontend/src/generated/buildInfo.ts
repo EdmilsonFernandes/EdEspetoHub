@@ -5,12 +5,18 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.1",
   "versionLabel": "v0.1.1",
-  "buildId": "0.1.1-20260321.130751-0206c83",
-  "builtAt": "2026-03-21T13:07:51.713Z",
-  "commitHash": "0206c835ed8f516990e7f251a85eeb8e81ac5c89",
-  "shortHash": "0206c83",
+  "buildId": "0.1.1-20260321.131120-376c29f",
+  "builtAt": "2026-03-21T13:11:20.429Z",
+  "commitHash": "376c29f61f95e9491f9c7fddade30c4cd834b29a",
+  "shortHash": "376c29f",
   "branch": "main",
   "commits": [
+    {
+      "hash": "376c29f61f95e9491f9c7fddade30c4cd834b29a",
+      "shortHash": "376c29f",
+      "dateIso": "2026-03-21T10:07:51-03:00",
+      "subject": "chore(release): v0.1.1"
+    },
     {
       "hash": "0206c835ed8f516990e7f251a85eeb8e81ac5c89",
       "shortHash": "0206c83",
@@ -184,12 +190,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "07a8119",
       "dateIso": "2026-03-18T09:04:57-03:00",
       "subject": "feat(queue): add fuzzy item picker fallback catalog and manual item flow"
-    },
-    {
-      "hash": "23564d7bbe33314f38cdd78280f98560437a85c6",
-      "shortHash": "23564d7",
-      "dateIso": "2026-03-18T08:59:45-03:00",
-      "subject": "feat(queue): premium quick actions, custom dropdowns and mesa dedup in payment modal"
     }
   ]
 } as const;

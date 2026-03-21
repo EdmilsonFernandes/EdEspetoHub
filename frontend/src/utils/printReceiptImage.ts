@@ -173,6 +173,9 @@ const buildHtmlReceipt = (payload: PrintReceiptRawBtInput) => {
   const tableHtml = locationLabel
     ? `<div class="location-block">${locationLabel.toUpperCase()}</div>`
     : '';
+  const customerHtml = `<div class="customer-block">CLIENTE: ${sanitizeText(
+    payload.customerLabel || "Cliente"
+  )}</div>`;
 
   return `<!DOCTYPE html>
 <html>
@@ -188,6 +191,19 @@ const buildHtmlReceipt = (payload: PrintReceiptRawBtInput) => {
     .title { text-align: center; font-weight: 800; font-size: 16px; text-transform: uppercase; }
     .subtitle { text-align: center; font-size: 11px; margin-top: 2px; }
     .meta { font-size: 11px; margin: 2px 0; }
+    .customer-block {
+      margin: 6px 0;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 0.4px;
+      background: #fff;
+      color: #000;
+      border: 2px solid #000;
+      padding: 5px 4px;
+      print-color-adjust: exact !important;
+      -webkit-print-color-adjust: exact !important;
+    }
     .location-block {
       margin: 8px 0;
       text-align: center;
@@ -208,6 +224,13 @@ const buildHtmlReceipt = (payload: PrintReceiptRawBtInput) => {
     .total { display: flex; justify-content: space-between; font-size: 14px; font-weight: 800; margin-top: 6px; }
     .spacer { height: 16px; }
     @media print {
+      .customer-block {
+        background: #fff !important;
+        color: #000 !important;
+        border: 2px solid #000 !important;
+        print-color-adjust: exact !important;
+        -webkit-print-color-adjust: exact !important;
+      }
       .location-block {
         background: #000 !important;
         color: #FFFFFF !important;
@@ -221,10 +244,10 @@ const buildHtmlReceipt = (payload: PrintReceiptRawBtInput) => {
   <div class="title">${sanitizeText(payload.storeName || "MINHA LOJA").toUpperCase()}</div>
   <div class="subtitle">Plataforma: ${sanitizeText(payload.platformName || "Já no Caminho")}</div>
   ${tableHtml}
+  ${customerHtml}
   <div class="sep"></div>
   <div class="meta">Fila: ${sanitizeText(payload.queueLabel || "--")}</div>
   <div class="meta">Pedido: ${sanitizeText(payload.orderLabel || "--")}</div>
-  <div class="meta">Cliente: ${sanitizeText(payload.customerLabel || "Cliente")}</div>
   <div class="meta">Data: ${sanitizeText(payload.dateLabel || "")}</div>
   <div class="sep"></div>
   <div class="items-title">Itens</div>
