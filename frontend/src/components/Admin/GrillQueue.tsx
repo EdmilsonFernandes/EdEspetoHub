@@ -648,6 +648,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   const [reportRange, setReportRange] = useState<'today' | 'yesterday' | 'last7' | 'custom'>('today');
   const [reportFrom, setReportFrom] = useState(() => getNowKeyInSaoPaulo());
   const [reportTo, setReportTo] = useState(() => getNowKeyInSaoPaulo());
+  const [soldItemsModalOpen, setSoldItemsModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
   const [editingFinalizedOrder, setEditingFinalizedOrder] = useState(false);
   const [isGeneratingPrint, setIsGeneratingPrint] = useState(false);
@@ -1741,6 +1742,26 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       cash: totals.cash,
       card: totals.card,
     };
+  }, [reportCompleted]);
+  const soldItemsBreakdown = useMemo(() => {
+    const byName = new Map<string, { name: string; qty: number }>();
+    for (const order of reportCompleted) {
+      const status = String(order?.status || '').toLowerCase();
+      const isRevenueStatus = status === 'done' || status === 'delivered' || status === 'finished';
+      if (!isRevenueStatus) continue;
+
+      const items = Array.isArray(order?.items) ? order.items : [];
+      for (const item of items) {
+        const name = String(item?.name || item?.product?.name || '').trim() || 'Item';
+        const qty = Number(item?.qty ?? item?.quantity ?? 0);
+        if (!(qty > 0)) continue;
+        const current = byName.get(name) || { name, qty: 0 };
+        current.qty += qty;
+        byName.set(name, current);
+      }
+    }
+
+    return Array.from(byName.values()).sort((a, b) => b.qty - a.qty || a.name.localeCompare(b.name, 'pt-BR'));
   }, [reportCompleted]);
   const dailySalesSummary = useMemo(() => {
     const totals = completedToday.reduce(
@@ -3212,6 +3233,13 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                     <CheckSquare size={12} weight="duotone" /> Itens vendidos
                   </p>
                   <p className="text-base font-black text-slate-900 mt-1">{reportSummary.itemsCount}</p>
+                  <button
+                    type="button"
+                    onClick={() => setSoldItemsModalOpen(true)}
+                    className="mt-1 text-[11px] font-semibold text-amber-700 hover:text-amber-800 hover:underline"
+                  >
+                    Ver detalhamento
+                  </button>
                 </div>
                 <div className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 shadow-sm">
                   <p className="text-[10px] text-slate-500 inline-flex items-center gap-1">
@@ -3229,6 +3257,13 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                     <CheckSquare size={12} weight="duotone" /> Itens vendidos
                   </p>
                   <p className="text-base font-black text-slate-900 mt-1">{reportSummary.itemsCount}</p>
+                  <button
+                    type="button"
+                    onClick={() => setSoldItemsModalOpen(true)}
+                    className="mt-1 text-[11px] font-semibold text-amber-700 hover:text-amber-800 hover:underline"
+                  >
+                    Ver detalhamento
+                  </button>
                 </div>
               </>
             )}
@@ -3402,6 +3437,48 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
 
       {error && (
         <div className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg p-3">{error}</div>
+      )}
+      {soldItemsModalOpen && createPortal(
+        <div className="fixed inset-0 z-[10010] bg-slate-900/45 backdrop-blur-sm p-3 sm:p-6">
+          <div className="mx-auto w-full max-w-xl rounded-2xl border border-slate-200 bg-white shadow-2xl overflow-hidden">
+            <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-black text-slate-900">Itens vendidos</p>
+                <p className="text-xs text-slate-500">
+                  Total no período: {reportSummary.itemsCount} {reportSummary.itemsCount === 1 ? 'item' : 'itens'}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSoldItemsModalOpen(false)}
+                className="h-9 w-9 rounded-full border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                aria-label="Fechar detalhamento de itens vendidos"
+              >
+                <X size={16} weight="bold" />
+              </button>
+            </div>
+            <div className="max-h-[65vh] overflow-auto p-4">
+              {soldItemsBreakdown.length === 0 ? (
+                <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4 text-center text-sm text-slate-500">
+                  Sem itens vendidos no período selecionado.
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {soldItemsBreakdown.map((entry) => (
+                    <div
+                      key={entry.name}
+                      className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2"
+                    >
+                      <span className="min-w-0 flex-1 truncate text-sm font-semibold text-slate-800">{entry.name}</span>
+                      <span className="shrink-0 text-sm font-black text-slate-900">{entry.qty}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>,
+        document.body
       )}
 
       {catalogPickerModal.open && createPortal(

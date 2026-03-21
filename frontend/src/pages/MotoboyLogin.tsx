@@ -4,6 +4,7 @@ import { ArrowSquareOut, Eye, EyeSlash, Lightning, LockKey, SignOut, Scooter, Us
 import { authService } from '../services/authService';
 import { useAuth } from '../contexts/AuthContext';
 import { runClientFreshStart } from '../utils/clientFreshStart';
+import { APP_BUILD_INFO } from '../generated/buildInfo';
 
 export function MotoboyLogin() {
   const [form, setForm] = useState({ email: '', password: '' });
@@ -58,7 +59,10 @@ export function MotoboyLogin() {
         return;
       }
       try {
-        await runClientFreshStart({ maxAgeMs: 8 * 60 * 60 * 1000 });
+        await runClientFreshStart({
+          maxAgeMs: 8 * 60 * 60 * 1000,
+          currentBuildId: APP_BUILD_INFO.buildId,
+        });
       } catch {
         // no-op: login must continue even if client cleanup fails
       }

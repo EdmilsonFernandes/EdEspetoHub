@@ -7,6 +7,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { AuthLayout } from '../layouts/AuthLayout';
 import { runClientFreshStart } from '../utils/clientFreshStart';
+import { APP_BUILD_INFO } from '../generated/buildInfo';
 import { ArrowLeft, Eye, EyeSlash, LockKey, User } from '@phosphor-icons/react';
 
 export function AdminLogin() {
@@ -34,7 +35,10 @@ export function AdminLogin() {
       const redirectTab = sessionStorage.getItem('admin:redirectTab');
       const redirectSlug = sessionStorage.getItem('admin:redirectSlug');
       try {
-        await runClientFreshStart({ maxAgeMs: 8 * 60 * 60 * 1000 });
+        await runClientFreshStart({
+          maxAgeMs: 8 * 60 * 60 * 1000,
+          currentBuildId: APP_BUILD_INFO.buildId,
+        });
       } catch {
         // no-op: login must continue even if client cleanup fails
       }

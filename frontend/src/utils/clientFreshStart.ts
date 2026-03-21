@@ -1,8 +1,10 @@
 const LAST_CACHE_CLEAR_AT_KEY = 'clientCache:lastClearAt';
+const LAST_BUILD_ID_KEY = 'clientCache:lastBuildId';
 const EIGHT_HOURS_MS = 8 * 60 * 60 * 1000;
 
 type ClientFreshStartOptions = {
   maxAgeMs?: number;
+  currentBuildId?: string;
 };
 
 const PRESERVED_LOCAL_STORAGE_KEYS = new Set([
@@ -11,6 +13,7 @@ const PRESERVED_LOCAL_STORAGE_KEYS = new Set([
   'jnk_cookie_consent_meta',
   'motoboy:last_email',
   'signupEmail',
+  LAST_BUILD_ID_KEY,
 ]);
 
 const clearNonHttpOnlyCookies = () => {
@@ -69,11 +72,21 @@ const refreshServiceWorkers = async () => {
 export const runClientFreshStart = async (options?: ClientFreshStartOptions) => {
   const maxAgeMs = Number(options?.maxAgeMs || EIGHT_HOURS_MS);
   if (typeof localStorage === 'undefined') return { skipped: true };
+  const currentBuildId = String(options?.currentBuildId || '').trim();
 
   const now = Date.now();
   const lastRaw = Number(localStorage.getItem(LAST_CACHE_CLEAR_AT_KEY) || 0);
-  const shouldSkip = Number.isFinite(lastRaw) && lastRaw > 0 && now - lastRaw < maxAgeMs;
+  const lastBuildId = String(localStorage.getItem(LAST_BUILD_ID_KEY) || '').trim();
+  const isBuildChanged = Boolean(currentBuildId && lastBuildId && currentBuildId !== lastBuildId);
+  const shouldSkip = !isBuildChanged && Number.isFinite(lastRaw) && lastRaw > 0 && now - lastRaw < maxAgeMs;
   if (shouldSkip) {
+    if (currentBuildId && !lastBuildId) {
+      try {
+        localStorage.setItem(LAST_BUILD_ID_KEY, currentBuildId);
+      } catch {
+        // no-op
+      }
+    }
     return { skipped: true, nextInMs: maxAgeMs - (now - lastRaw) };
   }
 
@@ -84,6 +97,7 @@ export const runClientFreshStart = async (options?: ClientFreshStartOptions) => 
 
   try {
     localStorage.setItem(LAST_CACHE_CLEAR_AT_KEY, String(Date.now()));
+    if (currentBuildId) localStorage.setItem(LAST_BUILD_ID_KEY, currentBuildId);
   } catch {
     // no-op
   }

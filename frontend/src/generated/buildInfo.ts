@@ -5,12 +5,30 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.8",
   "versionLabel": "v0.1.8",
-  "buildId": "0.1.8-20260321.133126-b8c73af",
-  "builtAt": "2026-03-21T13:31:26.390Z",
-  "commitHash": "b8c73afb13af1dd46edf8aaa373a39444dbdad0b",
-  "shortHash": "b8c73af",
+  "buildId": "0.1.8-20260321.134613-0aed670",
+  "builtAt": "2026-03-21T13:46:13.006Z",
+  "commitHash": "0aed6708a639104df91fd5d69407f54ac1d2b4fc",
+  "shortHash": "0aed670",
   "branch": "main",
   "commits": [
+    {
+      "hash": "0aed6708a639104df91fd5d69407f54ac1d2b4fc",
+      "shortHash": "0aed670",
+      "dateIso": "2026-03-21T10:39:47-03:00",
+      "subject": "fix(queue): destacar timer em vermelho ao ultrapassar SLA"
+    },
+    {
+      "hash": "e24a0a4693285ca7549ba2b1f2077468c3ea1bfa",
+      "shortHash": "e24a0a4",
+      "dateIso": "2026-03-21T10:37:20-03:00",
+      "subject": "fix(order): reabrir pedido retorna para fila pendente"
+    },
+    {
+      "hash": "4bba9b76faa654a916e5e0474004c52a2ce17677",
+      "shortHash": "4bba9b7",
+      "dateIso": "2026-03-21T10:31:26-03:00",
+      "subject": "chore(release): v0.1.8"
+    },
     {
       "hash": "b8c73afb13af1dd46edf8aaa373a39444dbdad0b",
       "shortHash": "b8c73af",
@@ -172,24 +190,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "75c0561",
       "dateIso": "2026-03-20T16:42:42-03:00",
       "subject": "fix(print): força cores no header invertido com print-color-adjust"
-    },
-    {
-      "hash": "6397bbec3c60d45599c40951fca1c2833010d312",
-      "shortHash": "6397bbe",
-      "dateIso": "2026-03-20T16:16:17-03:00",
-      "subject": "feat(queue): destaca numero da mesa no badge e nos modais"
-    },
-    {
-      "hash": "9aa5c2c251ab817edfbd880c66d2bfc881a5936d",
-      "shortHash": "9aa5c2c",
-      "dateIso": "2026-03-20T16:10:18-03:00",
-      "subject": "refactor(queue-card): aplica layout minimalista estilo lista"
-    },
-    {
-      "hash": "e4e6e52558d88dcd7d01d7130780dcbb92be6543",
-      "shortHash": "e4e6e52",
-      "dateIso": "2026-03-20T16:01:33-03:00",
-      "subject": "refactor(queue-card): reforca hierarquia visual mobile em 4 linhas"
     }
   ]
 } as const;
