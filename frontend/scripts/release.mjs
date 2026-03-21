@@ -30,9 +30,26 @@ const runInherit = (bin, args) => {
   });
 };
 
-const gitStatus = run('git', ['status', '--porcelain']);
-if (gitStatus) {
-  console.error('Repositório com alterações pendentes. Faça commit/stash antes do release.');
+const hasUnstagedTrackedChanges = (() => {
+  try {
+    execFileSync('git', ['diff', '--quiet'], { cwd, stdio: 'ignore' });
+    return false;
+  } catch {
+    return true;
+  }
+})();
+
+const hasStagedChanges = (() => {
+  try {
+    execFileSync('git', ['diff', '--cached', '--quiet'], { cwd, stdio: 'ignore' });
+    return false;
+  } catch {
+    return true;
+  }
+})();
+
+if (hasUnstagedTrackedChanges || hasStagedChanges) {
+  console.error('Repositório com alterações rastreadas pendentes. Faça commit/stash antes do release.');
   process.exit(1);
 }
 
