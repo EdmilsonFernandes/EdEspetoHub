@@ -22,7 +22,7 @@
     "inversify": "^6.0.2",
     "inversify-binding-decorators": "^4.0.0",
     "jsonwebtoken": "^9.0.2",
-    "nodemailer": "^6.9.15",
+    "nodemailer": "^8.0.3",
     "pg": "^8.11.5",
     "qrcode": "^1.5.4",
     "reflect-metadata": "^0.2.2",
