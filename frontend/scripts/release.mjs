@@ -11,7 +11,7 @@ if (!VALID_BUMPS.has(bump)) {
 }
 
 const cwd = resolve(process.cwd());
-const npmBin = 'npm';
+const npmExecPath = process.env.npm_execpath || '';
 
 const run = (bin, args, options = {}) => {
   return execFileSync(bin, args, {
@@ -53,7 +53,11 @@ if (hasUnstagedTrackedChanges || hasStagedChanges) {
   process.exit(1);
 }
 
-runInherit(npmBin, ['version', bump, '--no-git-tag-version']);
+if (npmExecPath) {
+  runInherit(process.execPath, [npmExecPath, 'version', bump, '--no-git-tag-version']);
+} else {
+  runInherit('npm', ['version', bump, '--no-git-tag-version']);
+}
 runInherit('node', ['scripts/generate-build-info.mjs']);
 
 const pkg = JSON.parse(readFileSync(resolve(cwd, 'package.json'), 'utf8'));
