@@ -6,6 +6,7 @@ import { getPersistedBranding } from '../constants';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { AuthLayout } from '../layouts/AuthLayout';
+import { runClientFreshStart } from '../utils/clientFreshStart';
 import { ArrowLeft, Eye, EyeSlash, LockKey, User } from '@phosphor-icons/react';
 
 export function AdminLogin() {
@@ -30,6 +31,15 @@ export function AdminLogin() {
 
     try {
       const session = await authService.adminLogin(loginForm.identifier, loginForm.password);
+      const redirectTab = sessionStorage.getItem('admin:redirectTab');
+      const redirectSlug = sessionStorage.getItem('admin:redirectSlug');
+      try {
+        await runClientFreshStart({ maxAgeMs: 8 * 60 * 60 * 1000 });
+      } catch {
+        // no-op: login must continue even if client cleanup fails
+      }
+      if (redirectTab) sessionStorage.setItem('admin:redirectTab', redirectTab);
+      if (redirectSlug) sessionStorage.setItem('admin:redirectSlug', redirectSlug);
       const sessionData = { token: session.token, user: session.user, store: session.store };
       setAuth(sessionData);
       setBranding({
@@ -38,8 +48,6 @@ export function AdminLogin() {
         logoUrl: session.store?.settings?.logoUrl,
         brandName: session.store?.name,
       });
-      const redirectTab = sessionStorage.getItem('admin:redirectTab');
-      const redirectSlug = sessionStorage.getItem('admin:redirectSlug');
       if (redirectTab && (!redirectSlug || redirectSlug === session.store?.slug)) {
         sessionStorage.removeItem('admin:redirectTab');
         sessionStorage.removeItem('admin:redirectSlug');

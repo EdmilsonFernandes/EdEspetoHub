@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowSquareOut, Eye, EyeSlash, Lightning, LockKey, SignOut, Scooter, User, UserCircle } from '@phosphor-icons/react';
 import { authService } from '../services/authService';
 import { useAuth } from '../contexts/AuthContext';
+import { runClientFreshStart } from '../utils/clientFreshStart';
 
 export function MotoboyLogin() {
   const [form, setForm] = useState({ email: '', password: '' });
@@ -55,6 +56,11 @@ export function MotoboyLogin() {
       if (role !== 'MOTOBOY') {
         setError('Esta conta não é de entregador.');
         return;
+      }
+      try {
+        await runClientFreshStart({ maxAgeMs: 8 * 60 * 60 * 1000 });
+      } catch {
+        // no-op: login must continue even if client cleanup fails
       }
       const sessionData = { token: session.token, user: session.user, store: session.store };
       localStorage.setItem('motoboySession', JSON.stringify(sessionData));
