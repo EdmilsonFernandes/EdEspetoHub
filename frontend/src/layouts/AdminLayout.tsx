@@ -6,6 +6,7 @@ import { AdminMobileBottomNav } from '../components/Admin/AdminMobileBottomNav';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { ChartBar, CheckSquare, CreditCard, Gear, Package, ShoppingCart, SignOut, Scooter, Star, X, UsersThree } from '@phosphor-icons/react';
+import { AppVersionBadge } from '../components/common/AppVersionBadge';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -122,6 +123,11 @@ export function AdminLayout({
           <AdminHeader contextLabel={contextLabel} />
         )}
         {children}
+      </div>
+      <div className="w-full px-3 sm:px-4 lg:px-6 xl:px-8 pb-3">
+        <div className="mx-auto max-w-[1600px] text-center lg:text-right text-[11px] text-slate-500">
+          Desenvolvido por Já no Caminho <AppVersionBadge />
+        </div>
       </div>
       <AdminMobileBottomNav />
       {mobileNavOpen && (

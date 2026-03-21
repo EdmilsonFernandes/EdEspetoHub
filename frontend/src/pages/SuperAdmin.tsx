@@ -36,6 +36,7 @@ import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { AdaptiveAvatar } from '../components/common/AdaptiveAvatar';
 import { PremiumTabs } from '../components/common/PremiumTabs';
 import { FormSection } from '../components/common/FormSection';
+import { APP_BUILD_INFO } from '../generated/buildInfo';
 
 const STORAGE_KEY = 'superAdminToken';
 const STORAGE_USER_KEY = 'superAdminUser';
@@ -167,6 +168,11 @@ const SECTION_META: Record<string, { title: string; description: string; tone: s
     description: 'Validação documental, score facial e decisões da plataforma.',
     tone: 'from-violet-500 to-violet-600 text-white border-violet-500',
   },
+  versions: {
+    title: 'Versões',
+    description: 'Versão atual, build e histórico técnico de mudanças.',
+    tone: 'from-slate-700 to-slate-900 text-white border-slate-700',
+  },
 };
 
 export function SuperAdmin() {
@@ -236,6 +242,11 @@ export function SuperAdmin() {
   const [kycHistoryFaceFilter, setKycHistoryFaceFilter] = useState<'all' | 'alto' | 'medio' | 'baixo' | 'indisponivel'>('all');
   const [kycRecentReviews, setKycRecentReviews] = useState<any[]>([]);
   const [kycRecentReviewsLoading, setKycRecentReviewsLoading] = useState(false);
+  const buildDate = useMemo(() => {
+    const date = new Date(APP_BUILD_INFO.builtAt);
+    if (!Number.isFinite(date.getTime())) return '-';
+    return date.toLocaleString('pt-BR');
+  }, []);
 
   const loadOverview = async (authToken: string) => {
     setLoading(true);
@@ -1084,6 +1095,7 @@ export function SuperAdmin() {
             { id: 'logs', label: 'Logs' },
             { id: 'events', label: 'Eventos' },
             { id: 'kyc', label: 'KYC' },
+            { id: 'versions', label: 'Versões' },
           ]}
           activeId={activeSection}
           onChange={(id) => setActiveSection(id)}
@@ -2543,6 +2555,70 @@ export function SuperAdmin() {
             </>
           ) : (
             <div className="text-sm text-slate-500">KYC oculto.</div>
+          )}
+        </FormSection>
+
+        <FormSection
+          title="Versões e Build"
+          subtitle="Controle de versão do frontend e mudanças incluídas no deploy."
+          variant="neutral"
+          className={`${activeSection !== 'versions' ? 'hidden' : ''}`}
+        >
+          {activeSection === 'versions' && (
+            <div className="space-y-4">
+              <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-3">
+                <div className="rounded-2xl border border-slate-200 bg-white p-3">
+                  <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">Versão</p>
+                  <p className="mt-1 text-base font-black text-slate-900">{APP_BUILD_INFO.versionLabel}</p>
+                </div>
+                <div className="rounded-2xl border border-slate-200 bg-white p-3">
+                  <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">Build ID</p>
+                  <p className="mt-1 text-sm font-bold text-slate-900 break-all">{APP_BUILD_INFO.buildId}</p>
+                </div>
+                <div className="rounded-2xl border border-slate-200 bg-white p-3">
+                  <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">Commit</p>
+                  <p className="mt-1 text-sm font-bold text-slate-900 break-all">{APP_BUILD_INFO.shortHash}</p>
+                  <p className="text-[11px] text-slate-500 mt-1">{APP_BUILD_INFO.branch}</p>
+                </div>
+                <div className="rounded-2xl border border-slate-200 bg-white p-3">
+                  <p className="text-[11px] uppercase tracking-[0.14em] text-slate-500">Gerado em</p>
+                  <p className="mt-1 text-sm font-bold text-slate-900">{buildDate}</p>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
+                <div className="px-4 py-3 border-b border-slate-200 bg-slate-50">
+                  <p className="text-xs font-extrabold text-slate-700">Mudanças incluídas nesta versão</p>
+                  <p className="text-[11px] text-slate-500">Baseado no histórico de commits do build atual.</p>
+                </div>
+                <div className="max-h-[420px] overflow-auto">
+                  {APP_BUILD_INFO.commits.length === 0 ? (
+                    <div className="p-4 text-sm text-slate-500">Sem histórico disponível nesta build.</div>
+                  ) : (
+                    <table className="ds-table min-w-[640px]">
+                      <thead>
+                        <tr>
+                          <th className="text-left">Data</th>
+                          <th className="text-left">Hash</th>
+                          <th className="text-left">Descrição</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {APP_BUILD_INFO.commits.map((commit) => (
+                          <tr key={commit.hash || commit.shortHash}>
+                            <td className="text-xs text-slate-600 whitespace-nowrap">
+                              {commit.dateIso ? new Date(commit.dateIso).toLocaleString('pt-BR') : '-'}
+                            </td>
+                            <td className="text-xs font-bold text-slate-800 whitespace-nowrap">{commit.shortHash || '-'}</td>
+                            <td className="text-sm text-slate-700">{commit.subject || '-'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+              </div>
+            </div>
           )}
         </FormSection>
 

@@ -18,6 +18,7 @@ import { formatCurrency } from "../../utils/format";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
 import { ProductModal } from "../Cart/ProductModal";
 import { GoogleMapView } from "../GoogleMapView";
+import { AppVersionBadge } from "../common/AppVersionBadge";
 
 // =======================================
 // HEADER PREMIUM COM LOGO OFICIAL
@@ -1236,6 +1237,9 @@ export const MenuView = ({
               <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full object-cover" />
             </span>
             Desenvolvido por Já no Caminho
+            <span className="normal-case tracking-normal text-[10px]">
+              <AppVersionBadge />
+            </span>
           </a>
         </div>
         </div>
