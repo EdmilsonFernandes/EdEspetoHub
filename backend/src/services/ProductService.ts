@@ -13,12 +13,16 @@ import { Provide, Inject } from '../ioc/ioc';
 import { Tokens } from '../ioc/injectiontokens';
 import { ProductResponse } from '../models/response/ProductResponse';
 import { Product } from '../entities/Product';
+import { FileUtil } from '../utils/FileUtil';
+import { BusinessUtil } from '../utils/BusinessUtil';
 
 @Provide(Tokens.Common.Service.ProductService)
 export class ProductService {
   constructor(
     @Inject(Tokens.Common.DataLayer.ProductRepository) private productDao: ProductDao,
-    @Inject(Tokens.Common.DataLayer.StoreRepository) private storeDao: StoreDao
+    @Inject(Tokens.Common.DataLayer.StoreRepository) private storeDao: StoreDao,
+    @Inject(Tokens.Utils.FileUtil) private fileUtil: FileUtil,
+    @Inject(Tokens.Utils.BusinessUtil) private businessUtil: BusinessUtil
   ) {}
 
   private mapToResponse(product: Product): ProductResponse {
@@ -41,8 +45,11 @@ export class ProductService {
   }
 
   async create(input: CreateProductDto, authStoreId?: string): Promise<ProductResponse> {
+    const uploadedImage = await this.fileUtil.saveBase64Image(input.imageFile, `product-${input.storeId}`, 'products');
+    
     const product = await this.productDao.create({
       ...input,
+      imageUrl: uploadedImage || input.imageUrl,
       store: { id: input.storeId } as any,
     } as any);
     const saved = await this.productDao.save(product);
@@ -55,18 +62,25 @@ export class ProductService {
   }
 
   async listByStoreSlug(slug: string, authStoreId?: string): Promise<ProductResponse[]> {
-    // Note: findByStoreId is used here as a placeholder for slug-based lookup
     const products = await this.productDao.findByStoreId(slug); 
     return products.map(p => this.mapToResponse(p));
   }
 
   async listActiveByStoreSlug(slug: string): Promise<ProductResponse[]> {
-    return [];
+    const products = await this.productDao.findActiveByStoreId(slug);
+    return products
+      .filter(p => this.businessUtil.isProductAvailableToday(p))
+      .map(p => this.mapToResponse(p));
   }
 
   async update(storeId: string, productId: string, data: Partial<CreateProductDto>, authStoreId?: string): Promise<ProductResponse | null> {
     const product = await this.productDao.getById(productId);
     if (!product) return null;
+    
+    if (data.imageFile) {
+      data.imageUrl = await this.fileUtil.saveBase64Image(data.imageFile, `product-${storeId}`, 'products');
+    }
+
     Object.assign(product, data);
     const saved = await this.productDao.save(product);
     return this.mapToResponse(saved);

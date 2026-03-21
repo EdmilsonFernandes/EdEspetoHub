@@ -1,12 +1,19 @@
 import { NextFunction, Request, Response, Router } from 'express';
 import { Provide, container } from '../ioc/ioc';
+import { Tokens } from '../ioc/injectiontokens';
 import { BaseRouterDefinition } from '../models/base-router.model';
-import { requireAuth, requireRole, UserRole } from '../middleware/authGuard';
+import { UserRole } from '../models/Auth';
+import { AuthGuardMiddleware } from '../middleware/AuthGuardMiddleware';
+import { SubscriptionGuardMiddleware } from '../middleware/SubscriptionGuardMiddleware';
+import { PlanFeatureGuardMiddleware } from '../middleware/PlanFeatureGuardMiddleware';
 
 export const instantiatedControllers: Array<any> = [];
 
-export function RouterController(token: symbol): ClassDecorator {
+export function RouterController(token: symbol, version?: string): ClassDecorator {
   return (target: any): void => {
+    if (version) {
+      target.prototype.version = version;
+    }
     Provide(token)(target);
     instantiatedControllers.push(token);
   };
@@ -53,13 +60,47 @@ export function Delete(path: string = '', ...middlewares: any[]): MethodDecorato
 
 export function Authorize(): MethodDecorator {
   return (target: any, propertyKey: string | symbol): void => {
-    addMiddleware(target, propertyKey as string, requireAuth);
+    const middleware = (req: Request, res: Response, next: NextFunction) => {
+      const authGuard = container.get<AuthGuardMiddleware>(Tokens.Middleware.AuthGuard);
+      return authGuard.requireAuth(req, res, next);
+    };
+    addMiddleware(target, propertyKey as string, middleware);
   };
 }
 
 export function Roles(...roles: UserRole[]): MethodDecorator {
   return (target: any, propertyKey: string | symbol): void => {
-    addMiddleware(target, propertyKey as string, requireRole(...roles));
+    const middleware = (req: Request, res: Response, next: NextFunction) => {
+      const authGuard = container.get<AuthGuardMiddleware>(Tokens.Middleware.AuthGuard);
+      return authGuard.requireRole(...roles)(req, res, next);
+    };
+    addMiddleware(target, propertyKey as string, middleware);
+  };
+}
+
+/**
+ * Decorator to ensure the store has an active subscription.
+ */
+export function SubscriptionActive(): MethodDecorator {
+  return (target: any, propertyKey: string | symbol): void => {
+    const middleware = (req: Request, res: Response, next: NextFunction) => {
+      const guard = container.get<SubscriptionGuardMiddleware>(Tokens.Middleware.SubscriptionGuard);
+      return guard.handle(req, res, next);
+    };
+    addMiddleware(target, propertyKey as string, middleware);
+  };
+}
+
+/**
+ * Decorator to ensure the store has a specific plan feature enabled.
+ */
+export function RequireFeature(feature: string): MethodDecorator {
+  return (target: any, propertyKey: string | symbol): void => {
+    const middleware = (req: Request, res: Response, next: NextFunction) => {
+      const guard = container.get<PlanFeatureGuardMiddleware>(Tokens.Middleware.PlanFeatureGuard);
+      return guard.handle(feature)(req, res, next);
+    };
+    addMiddleware(target, propertyKey as string, middleware);
   };
 }
 
@@ -70,7 +111,6 @@ function addRoute(target: any, path: string, method: HttpMethod, methodName: str
 
   const routes = Reflect.getMetadata('routes', target.constructor) as Array<RouteDefinition>;
 
-  // Merge with middlewares from other decorators (like @Authorize)
   const metaMiddlewares = Reflect.getMetadata('middlewares', target, methodName) || [];
   const finalMiddlewares = [...metaMiddlewares, ...middlewares];
 
@@ -85,26 +125,9 @@ function addRoute(target: any, path: string, method: HttpMethod, methodName: str
 }
 
 function addMiddleware(target: any, methodName: string, middleware: any): void {
-  if (!Reflect.hasMetadata('routes', target.constructor)) {
-    Reflect.defineMetadata('routes', [], target.constructor);
+  if (!Reflect.hasMetadata('middlewares', target, methodName)) {
+    Reflect.defineMetadata('middlewares', [], target, methodName);
   }
-
-  const routes = Reflect.getMetadata('routes', target.constructor) as Array<RouteDefinition>;
-  const route = routes.find(r => r.methodName === methodName);
-
-  if (route) {
-    route.middlewares.unshift(middleware);
-  } else {
-    // If route doesn't exist yet, we might need a way to store it
-    // But usually decorators are applied from bottom to top, 
-    // so @Get would be called after @Authorize if @Authorize is above @Get.
-    // However, MethodDecorators on the same method are executed in order.
-    // Let's ensure we handle both cases or document the order.
-    // A better way is to store middlewares separately and merge them.
-    if (!Reflect.hasMetadata('middlewares', target, methodName)) {
-        Reflect.defineMetadata('middlewares', [], target, methodName);
-    }
-    const middlewares = Reflect.getMetadata('middlewares', target, methodName);
-    middlewares.unshift(middleware);
-  }
+  const middlewares = Reflect.getMetadata('middlewares', target, methodName);
+  middlewares.unshift(middleware);
 }

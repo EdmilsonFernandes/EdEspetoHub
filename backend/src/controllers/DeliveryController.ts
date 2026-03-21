@@ -10,7 +10,7 @@ import { Request, Response } from 'express';
 import { DeliveryService } from '../services/DeliveryService';
 import { logger } from '../utils/logger';
 import { BaseController } from './BaseController';
-import { Post, Get, RouterController, Authorize } from '../decorators/controller';
+import { Post, Get, RouterController, Authorize, SubscriptionActive, RequireFeature } from '../decorators/controller';
 import { Tokens } from '../ioc/injectiontokens';
 import { Inject } from '../ioc/ioc';
 import { DatabaseService } from '../database/data-base.service';
@@ -28,7 +28,9 @@ export class DeliveryController extends BaseController {
 
   @Post('/:orderId/accept')
   @Authorize()
-  async accept(req: Request, res: Response) {
+  @SubscriptionActive()
+  @RequireFeature('delivery')
+  async accept(req: Request, res: Response): Promise<Response> {
     try {
       // Implementation
       return this.ok(res, { status: 'accepted' });

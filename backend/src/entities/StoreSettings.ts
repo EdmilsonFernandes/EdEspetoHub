@@ -13,7 +13,7 @@
 
 import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Store } from './Store';
-import { sanitizeSocialLinks, SocialLink } from '../utils/socialLinks';
+import { SocialLink } from '../utils/BusinessUtil';
 
 @Entity({ name: 'store_settings' })
 /**
@@ -117,7 +117,10 @@ export class StoreSettings
     nullable: true,
     default: () => "'[]'::jsonb",
     transformer: {
-      to: (value?: SocialLink[] | null) => sanitizeSocialLinks(value ?? []),
+      to: (value?: SocialLink[] | null) => {
+        if (!Array.isArray(value)) return [];
+        return value.filter(l => l && typeof l.type === 'string' && typeof l.value === 'string' && l.value.trim() !== '');
+      },
       from: (value: SocialLink[] | null) => (Array.isArray(value) ? value : []),
     },
   })

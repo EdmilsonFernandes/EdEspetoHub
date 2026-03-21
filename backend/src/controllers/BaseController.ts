@@ -9,12 +9,13 @@ import 'reflect-metadata';
 export abstract class BaseController implements BaseRouterDefinition {
   public router: Router;
   public basePath: string;
-  public version: string = 'v1';
+  public version: string;
   public controllerReadOrder: number = 0;
 
-  constructor(basePath: string) {
+  constructor(basePath: string, version: string = 'v1') {
     this.router = Router();
     this.basePath = basePath;
+    this.version = version;
   }
 
   get path(): string {

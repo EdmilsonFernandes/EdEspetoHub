@@ -13,12 +13,12 @@ import { OrderDeliveryDao } from '../database/dao/OrderDeliveryDao';
 import { MotoboyDao } from '../database/dao/MotoboyDao';
 import { logger } from '../utils/logger';
 import { env } from '../config/env';
-import { createOrderAccessToken } from '../utils/orderAccessToken';
 import { BaseController } from './BaseController';
 import { Get, Post, Put, Authorize, RouterController } from '../decorators/controller';
 import { Tokens } from '../ioc/injectiontokens';
 import { Inject } from '../ioc/ioc';
 import { DatabaseService } from '../database/data-base.service';
+import { CryptoUtil } from '../utils/CryptoUtil';
 
 const log = logger.child({ scope: 'OrderController' });
 
@@ -29,20 +29,21 @@ export class OrderController extends BaseController {
     @Inject(Tokens.Common.Service.OrderEtaServiceV2) private orderEtaServiceV2: OrderEtaServiceV2,
     @Inject(Tokens.Common.DataLayer.OrderDeliveryRepository) private orderDeliveryDao: OrderDeliveryDao,
     @Inject(Tokens.Common.DataLayer.MotoboyRepository) private motoboyDao: MotoboyDao,
-    @Inject(Tokens.Common.DataLayer.DatabaseService) private databaseService: DatabaseService
+    @Inject(Tokens.Common.DataLayer.DatabaseService) private databaseService: DatabaseService,
+    @Inject(Tokens.Utils.CryptoUtil) private cryptoUtil: CryptoUtil
   ) {
     super('/orders');
   }
 
   @Post('/:storeId')
-  async create(req: Request, res: Response) {
+  async create(req: Request, res: Response): Promise<Response> {
     try {
       log.info('Order create request', { storeId: req.params.storeId });
       const order = await this.orderService.create({ ...req.body, storeId: req.params.storeId });
       log.info('Order created', { orderId: order?.id, storeId: req.params.storeId });
       return this.created(res, {
         ...order,
-        accessToken: order?.id ? createOrderAccessToken(order.id) : null,
+        accessToken: order?.id ? this.cryptoUtil.createOrderAccessToken(order.id) : null,
       });
     } catch (error: any) {
       log.warn('Order create failed', { storeId: req.params.storeId, error });
@@ -52,7 +53,7 @@ export class OrderController extends BaseController {
 
   @Get('/:storeId')
   @Authorize()
-  async list(req: Request, res: Response) {
+  async list(req: Request, res: Response): Promise<Response> {
     try {
       log.debug('Order list request', { storeId: req.params.storeId });
       const orders = await this.orderService.listByStoreId(req.params.storeId, req.auth?.storeId);
@@ -64,14 +65,14 @@ export class OrderController extends BaseController {
   }
 
   @Post('/slug/:slug')
-  async createBySlug(req: Request, res: Response) {
+  async createBySlug(req: Request, res: Response): Promise<Response> {
     try {
       log.info('Order create by slug request', { slug: req.params.slug });
       const order = await this.orderService.createBySlug({ ...req.body, storeSlug: req.params.slug });
       log.info('Order created by slug', { orderId: order?.id, slug: req.params.slug });
       return this.created(res, {
         ...order,
-        accessToken: order?.id ? createOrderAccessToken(order.id) : null,
+        accessToken: order?.id ? this.cryptoUtil.createOrderAccessToken(order.id) : null,
       });
     } catch (error: any) {
       log.warn('Order create by slug failed', { slug: req.params.slug, error });
@@ -81,7 +82,7 @@ export class OrderController extends BaseController {
 
   @Get('/slug/:slug')
   @Authorize()
-  async listBySlug(req: Request, res: Response) {
+  async listBySlug(req: Request, res: Response): Promise<Response> {
     try {
       log.debug('Order list by slug request', { slug: req.params.slug });
       const orders = await this.orderService.listByStoreSlug(req.params.slug, req.auth?.storeId);
@@ -93,7 +94,7 @@ export class OrderController extends BaseController {
   }
 
   @Get('/slug/:slug/highlights')
-  async listHighlightsBySlug(req: Request, res: Response) {
+  async listHighlightsBySlug(req: Request, res: Response): Promise<Response> {
     try {
       log.debug('Order highlights by slug request', { slug: req.params.slug });
       const items = await this.orderService.listTopItemsBySlug(req.params.slug, 3);
@@ -105,7 +106,7 @@ export class OrderController extends BaseController {
   }
 
   @Get('/slug/:slug/table-status')
-  async listTableStatusBySlug(req: Request, res: Response) {
+  async listTableStatusBySlug(req: Request, res: Response): Promise<Response> {
     try {
       log.debug('Order table status by slug request', { slug: req.params.slug });
       const status = await this.orderService.listTableStatusBySlug(req.params.slug);
@@ -118,7 +119,7 @@ export class OrderController extends BaseController {
 
   @Put('/:orderId/status')
   @Authorize()
-  async updateStatus(req: Request, res: Response) {
+  async updateStatus(req: Request, res: Response): Promise<Response> {
     const { status } = req.body;
     try {
       log.info('Order status update request', { orderId: req.params.orderId, status });
@@ -133,7 +134,7 @@ export class OrderController extends BaseController {
 
   @Put('/:orderId/items')
   @Authorize()
-  async updateItems(req: Request, res: Response) {
+  async updateItems(req: Request, res: Response): Promise<Response> {
     try {
       log.info('Order items update request', { orderId: req.params.orderId });
       const order = await this.orderService.updateItems(req.params.orderId, req.body.items || [], req.auth?.storeId);
@@ -147,7 +148,7 @@ export class OrderController extends BaseController {
 
   @Post('/:orderId/reopen')
   @Authorize()
-  async reopen(req: Request, res: Response) {
+  async reopen(req: Request, res: Response): Promise<Response> {
     try {
       const order = await this.orderService.reopenOrder(
         req.params.orderId,
@@ -171,7 +172,7 @@ export class OrderController extends BaseController {
 
   @Post('/:orderId/mark-as-printed')
   @Authorize()
-  async markItemsAsPrinted(req: Request, res: Response) {
+  async markItemsAsPrinted(req: Request, res: Response): Promise<Response> {
     try {
       const itemIds = Array.isArray(req.body?.itemIds) ? req.body.itemIds : undefined;
       log.info('Order items mark-as-printed request', {
@@ -187,7 +188,7 @@ export class OrderController extends BaseController {
   }
 
   @Get('/public/:orderId')
-  async getPublic(req: Request, res: Response) {
+  async getPublic(req: Request, res: Response): Promise<Response> {
     const { orderId } = req.params;
     try {
       log.debug('Order public get request', { orderId });
@@ -209,15 +210,8 @@ export class OrderController extends BaseController {
         id: order.id,
         status: order.status,
         type: order.type,
-        table: order.table,
         customerName: order.customerName,
-        phone: order.phone,
-        address: order.address,
-        paymentMethod: order.paymentMethod,
-        paymentStatus: order.paymentStatus,
-        cashTendered: order.cashTendered ?? null,
         total: order.total,
-        deliveryFee: order.deliveryFee ?? null,
         delivery: deliveryRow
           ? {
               status: deliveryRow.status,
@@ -244,33 +238,13 @@ export class OrderController extends BaseController {
           name: item.product?.name || 'Produto',
           quantity: item.quantity,
           price: item.price,
-          isPrinted: Boolean((item as any).isPrinted),
           productId: item.product?.id,
           imageUrl: item.product?.imageUrl || null,
-          cookingPoint: item.cookingPoint || null,
-          passSkewer: item.passSkewer || false,
-          selectedModifiers: item.selectedModifiers || [],
         })),
-        store: (order as any).store
-          ? {
-              id: (order as any).store.id,
-              name: (order as any).store.name,
-              slug: (order as any).store.slug,
-              phone: (order as any).store.owner?.phone || null,
-                settings: (order as any).store.settings
-                  ? {
-                      logoUrl: (order as any).store.settings.logoUrl || null,
-                      primaryColor: (order as any).store.settings.primaryColor || null,
-                      secondaryColor: (order as any).store.settings.secondaryColor || null,
-                      pixKey: (order as any).store.settings.pixKey || null,
-                    }
-                  : null,
-            }
-          : null,
       };
 
       if (env.etaV2.enabled) {
-        const eta = await this.orderEtaServiceV2.calculateEta(order);
+        const eta = await this.orderEtaServiceV2.calculateEta(order as any);
         responsePayload.eta = eta;
       }
 
@@ -282,7 +256,7 @@ export class OrderController extends BaseController {
   }
 
   @Get('/tracking/:orderId')
-  async getTrackingV2(req: Request, res: Response) {
+  async getTrackingV2(req: Request, res: Response): Promise<Response> {
     const { orderId } = req.params;
     try {
       log.debug('Order tracking v2 request', { orderId });
@@ -290,14 +264,13 @@ export class OrderController extends BaseController {
       if (!result) return this.notFound(res, 'Order not found');
       const { order, queuePosition, queueSize } = result;
       
-      const eta = await this.orderEtaServiceV2.calculateEta(order);
+      const eta = await this.orderEtaServiceV2.calculateEta(order as any);
 
       return this.ok(res, {
         id: order.id,
         status: order.status,
         type: order.type,
         createdAt: order.createdAt,
-        storeId: (order as any).store?.id || null,
         queuePosition,
         queueSize,
         timeline: [

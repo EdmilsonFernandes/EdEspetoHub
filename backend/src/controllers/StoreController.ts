@@ -5,12 +5,12 @@ import { Tokens } from '../ioc/injectiontokens';
 import { Inject } from '../ioc/ioc';
 import { StoreService } from '../services/StoreService';
 
-@RouterController(Tokens.Common.Controller.StoreController)
+@RouterController(Tokens.Common.Controller.StoreController, 'v1')
 export class StoreController extends BaseController {
   constructor(
     @Inject(Tokens.Common.Service.StoreService) private storeService: StoreService
   ) {
-    super('/stores');
+    super('/stores', 'v1');
   }
 
   @Get('/')

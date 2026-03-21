@@ -1,46 +1,38 @@
 import cors from 'cors';
-import express, { Express, NextFunction, Request, Response } from 'express';
+import express, { Express } from 'express';
 import helmet from 'helmet';
-import * as crypto from 'crypto'; // Módulo nativo do Node.js
 import { LoggerService } from '../../utils/logger';
 import swaggerUi from 'swagger-ui-express';
 import { Tokens } from '../../ioc/injectiontokens';
 import { Inject, Provide } from '../../ioc/ioc';
 import { swaggerDocument } from '../../config/swagger';
-import { requestContextStore } from '../../utils/request-context.store'; // Importe o store criado
+import { RequestLoggerMiddleware } from '../../middleware/RequestLoggerMiddleware';
+import { AccessLoggerMiddleware } from '../../middleware/AccessLoggerMiddleware';
+import { RequestContextMiddleware } from '../../middleware/RequestContextMiddleware';
 
 @Provide(Tokens.Common.Server.HttpConfig)
 export class ServerConfig {
   constructor(
-    @Inject(Tokens.Utils.LoggerService) private readonly myLogger: LoggerService
+    @Inject(Tokens.Utils.LoggerService) private readonly myLogger: LoggerService,
+    @Inject(Tokens.Middleware.RequestLogger) private readonly requestLogger: RequestLoggerMiddleware,
+    @Inject(Tokens.Middleware.AccessLogger) private readonly accessLogger: AccessLoggerMiddleware,
+    @Inject(Tokens.Middleware.RequestContext) private readonly requestContext: RequestContextMiddleware
   ) {}
 
   public async configureMiddleware(app: Express, port: number): Promise<void> {
-
     await this.configureListeningPort(app, port);
     await this.setCors(app);
 
-    app.use(this.contextMiddleware.bind(this));
-
+    app.use(this.requestContext.handle.bind(this.requestContext));
     app.use(helmet());
+    
     await this.bodyConfig(app);
 
-    app.use(this.reqLogger.bind(this));
+    // Apply refactored middlewares
+    app.use(this.requestLogger.handle.bind(this.requestLogger));
+    app.use(this.accessLogger.handle.bind(this.accessLogger));
 
     await this.configDocumentation(app);
-  }
-
-  private contextMiddleware(req: Request, res: Response, next: NextFunction): void {
-    const requestId = (req.headers['x-request-id'] as string) || crypto.randomUUID();
-
-    const store = {
-      requestId,
-      route: req.originalUrl
-    };
-
-    requestContextStore.run(store, () => {
-      next();
-    });
   }
 
   private async bodyConfig(app: Express): Promise<void> {
@@ -78,15 +70,5 @@ export class ServerConfig {
     } catch (e) {
       this.myLogger.error(`Cannot initiate swagger. Error: ${e}`);
     }
-  }
-
-  private async reqLogger(req: Request, _res: Response, next: NextFunction): Promise<void> {
-
-    this.myLogger.debug(`Req: ${req.method} ${req.originalUrl}`);
-
-    if (Object.keys(req.query).length > 0) {
-      this.myLogger.debug(`Req query: ${JSON.stringify(req.query)}`);
-    }
-    next();
   }
 }

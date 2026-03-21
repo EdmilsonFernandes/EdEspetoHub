@@ -16,12 +16,12 @@ import { Inject } from '../ioc/ioc';
 
 const log = logger.child({ scope: 'AuthController' });
 
-@RouterController(Tokens.Common.Controller.AuthController)
+@RouterController(Tokens.Common.Controller.AuthController, 'v1')
 export class AuthController extends BaseController {
   constructor(
     @Inject(Tokens.Common.Service.AuthService) private authService: AuthService
   ) {
-    super('/auth');
+    super('/auth', 'v1');
   }
 
   @Post('/register')

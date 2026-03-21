@@ -6,6 +6,7 @@
  * @file: AuthService.ts
  */
 
+import bcrypt from 'bcryptjs';
 import { Provide, Inject } from '../ioc/ioc';
 import { Tokens } from '../ioc/injectiontokens';
 import { UserDao } from '../database/dao/UserDao';
@@ -18,6 +19,10 @@ import { SettingsService } from './SettingsService';
 import { StoreUserDao } from '../database/dao/StoreUserDao';
 import { UserResponse } from '../models/response/UserResponse';
 import { StoreResponse } from '../models/response/StoreResponse';
+import { ValidationUtil } from '../utils/ValidationUtil';
+import { StringUtil } from '../utils/StringUtil';
+import { FileUtil } from '../utils/FileUtil';
+import { BusinessUtil } from '../utils/BusinessUtil';
 
 export interface AuthResponse {
   user: UserResponse;
@@ -35,7 +40,11 @@ export class AuthService {
     @Inject(Tokens.Common.DataLayer.PaymentRepository) private paymentDao: PaymentDao,
     @Inject(Tokens.Common.Service.SubscriptionService) private subscriptionService: SubscriptionService,
     @Inject(Tokens.Common.Service.SettingsService) private settingsService: SettingsService,
-    @Inject(Tokens.Common.DataLayer.StoreUserRepository) private storeUserDao: StoreUserDao
+    @Inject(Tokens.Common.DataLayer.StoreUserRepository) private storeUserDao: StoreUserDao,
+    @Inject(Tokens.Utils.ValidationUtil) private validationUtil: ValidationUtil,
+    @Inject(Tokens.Utils.StringUtil) private stringUtil: StringUtil,
+    @Inject(Tokens.Utils.FileUtil) private fileUtil: FileUtil,
+    @Inject(Tokens.Utils.BusinessUtil) private businessUtil: BusinessUtil
   ) {}
 
   async login(email: string, password?: string): Promise<AuthResponse> {

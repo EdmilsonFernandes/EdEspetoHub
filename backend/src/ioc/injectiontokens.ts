@@ -3,6 +3,26 @@ export const Tokens = {
     LoggerService: Symbol('LoggerService'),
     LogFormatter: Symbol('LogFormatter'),
     FileTransport: Symbol('FileTransport'),
+    FileUtil: Symbol('FileUtil'),
+    StringUtil: Symbol('StringUtil'),
+    CryptoUtil: Symbol('CryptoUtil'),
+    ValidationUtil: Symbol('ValidationUtil'),
+    BusinessUtil: Symbol('BusinessUtil'),
+  },
+  Jobs: {
+    JobOrchestrator: Symbol('JobOrchestrator'),
+    BaseJob: Symbol('BaseJob'),
+    DeliveryExpirationJob: Symbol('DeliveryExpirationJob'),
+    SubscriptionExpirationJob: Symbol('SubscriptionExpirationJob'),
+    FaceVerifyJob: Symbol('FaceVerifyJob'),
+  },
+  Middleware: {
+    RequestContext: Symbol('RequestContext'),
+    RequestLogger: Symbol('RequestLogger'),
+    AccessLogger: Symbol('AccessLogger'),
+    AuthGuard: Symbol('AuthGuard'),
+    SubscriptionGuard: Symbol('SubscriptionGuard'),
+    PlanFeatureGuard: Symbol('PlanFeatureGuard'),
   },
   Common: {
     Server: {
@@ -32,6 +52,7 @@ export const Tokens = {
       OrderEtaServiceV2: Symbol('OrderEtaServiceV2'),
       ProductService: Symbol('ProductService'),
       StoreUserService: Symbol('StoreUserService'),
+      MigrationService: Symbol('MigrationService'),
     },
     Controller: {
       BaseController: Symbol('BaseController'),
@@ -66,6 +87,7 @@ export const Tokens = {
       PlanRepository: Symbol('PlanRepository'),
       MotoboyRepository: Symbol('MotoboyRepository'),
       OrderDeliveryRepository: Symbol('OrderDeliveryRepository'),
+      DeliveryEventRepository: Symbol('DeliveryEventRepository'),
       OrderReviewRepository: Symbol('OrderReviewRepository'),
       MotoboyStoreRepository: Symbol('MotoboyStoreRepository'),
       OrderEtaEstimateRepository: Symbol('OrderEtaEstimateRepository'),
