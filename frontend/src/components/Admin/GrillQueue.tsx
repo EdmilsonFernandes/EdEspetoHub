@@ -374,6 +374,16 @@ const OrderSummaryCard = ({
       if (raw === 'ready' || raw === 'done' || raw === 'delivered' || raw === 'finished') return 'text-emerald-600';
       return 'text-amber-600';
     })();
+    const timerToneClass = isLate
+      ? 'text-red-600'
+      : isTimerWarning
+        ? 'text-amber-600'
+        : 'text-slate-500';
+    const timerIconToneClass = isLate
+      ? 'text-red-500'
+      : isTimerWarning
+        ? 'text-amber-500'
+        : 'text-slate-400';
     return (
   <div
     role="button"
@@ -421,8 +431,8 @@ const OrderSummaryCard = ({
             </span>
           )}
         </div>
-        <span className="inline-flex items-center gap-1 text-[11px] text-slate-500 font-medium whitespace-nowrap">
-          <Clock size={12} weight="duotone" className="text-slate-400" />
+        <span className={`inline-flex items-center gap-1 text-[11px] font-medium whitespace-nowrap ${timerToneClass}`}>
+          <Clock size={12} weight="duotone" className={timerIconToneClass} />
           {archived ? (closedAtLabel || '--:--') : elapsedLabel}
         </span>
       </div>
