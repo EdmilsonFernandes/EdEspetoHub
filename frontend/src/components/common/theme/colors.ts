@@ -1,23 +1,3 @@
-<<<<<<< HEAD
-/**
- * Color System - Centralized color tokens for the design system
- * Based on the red theme established across the application
- */
-
-export const colors = {
-  // Primary - Red (Main brand color)
-  primary: {
-    50: '#fef2f2',
-    100: '#fee2e2',
-    200: '#fecaca',
-    300: '#fca5a5',
-    400: '#f87171',
-    500: '#ef4444', // Main primary
-    600: '#dc2626', // Hover/active
-    700: '#b91c1c',
-    800: '#991b1b',
-    900: '#7f1d1d',
-=======
 ﻿/**
  * Color System - Centralized color tokens for the design system
  * Based on the Já no Caminho visual identity (blue + green)
@@ -36,7 +16,6 @@ export const colors = {
     700: '#1d4ed8',
     800: '#1e40af',
     900: '#1e3a8a',
->>>>>>> main
   },
 
   // Secondary - Gray (Neutral/supporting)
@@ -53,20 +32,6 @@ export const colors = {
     900: '#111827',
   },
 
-<<<<<<< HEAD
-  // Accent - Amber (For special offers like test plan)
-  accent: {
-    50: '#fffbeb',
-    100: '#fef3c7',
-    200: '#fde68a',
-    300: '#fcd34d',
-    400: '#fbbf24',
-    500: '#f59e0b', // Main accent
-    600: '#d97706', // Hover/active
-    700: '#b45309',
-    800: '#92400e',
-    900: '#78350f',
-=======
   // Accent - Green (For highlights and actions)
   accent: {
     50: '#f0fdf4',
@@ -79,7 +44,6 @@ export const colors = {
     700: '#15803d',
     800: '#166534',
     900: '#14532d',
->>>>>>> main
   },
 
   // Success (Green)
@@ -133,7 +97,4 @@ export const colors = {
 
 export type ColorKey = keyof typeof colors;
 export type ColorShade = keyof typeof colors.primary;
-<<<<<<< HEAD
-=======
 
->>>>>>> main

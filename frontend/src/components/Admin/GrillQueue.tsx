@@ -1,27 +1,14 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useRef, useState } from "react";
-<<<<<<< HEAD
-import {
-  CheckSquare,
-  Clock,
-  ChefHat,
-=======
 import { createPortal } from "react-dom";
 import {
   CheckSquare,
   Clock,
->>>>>>> main
   Monitor,
   ArrowsClockwise,
   Plus,
   Minus,
   Hash,
-<<<<<<< HEAD
-  SpeakerHigh,
-  SpeakerX,
-  DotsThreeVertical,
-  X
-=======
   Truck,
   Storefront,
   Printer,
@@ -30,20 +17,14 @@ import {
   Play,
   CaretDown,
   Check
->>>>>>> main
 } from "@phosphor-icons/react";
 import { orderService } from "../../services/orderService";
 import { storeService } from "../../services/storeService";
 import { productService } from "../../services/productService";
-<<<<<<< HEAD
-import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
-import {
-=======
 import { motoboyAdminService } from "../../services/motoboyAdminService";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
 import {
   formatAddress,
->>>>>>> main
   formatCurrency,
   formatDateTime,
   formatDuration,
@@ -51,14 +32,6 @@ import {
   formatOrderStatus,
   formatOrderType,
 } from "../../utils/format";
-<<<<<<< HEAD
-import { getPaymentMethodMeta } from "../../utils/paymentAssets";
-import { useAuth } from "../../contexts/AuthContext";
-import { buildPixPayload } from "../../utils/pixPayload";
-
-export const GrillQueue = () => {
-  const { auth } = useAuth();
-=======
 import { formatSelectedModifiers, getModifiersSignature } from "../../utils/productModifiers";
 import { getPaymentMethodMeta } from "../../utils/paymentAssets";
 import { useAuth } from "../../contexts/AuthContext";
@@ -617,16 +590,12 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   }, [auth?.store?.settings?.prepAttentionMinutes, prepSlaMinutes]);
   const PREP_SLA_MS = prepSlaMinutes * 60 * 1000;
   const PREP_ATTENTION_MS = prepAttentionMinutes * 60 * 1000;
->>>>>>> main
   const [queue, setQueue] = useState([]);
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState({});
   const [storePixKey, setStorePixKey] = useState('');
-<<<<<<< HEAD
-=======
   const [cashConfirmValue, setCashConfirmValue] = useState('');
->>>>>>> main
   const storeSlug = useMemo(() => {
     if (typeof window === 'undefined') return '';
     const raw = localStorage.getItem('adminSession');
@@ -638,13 +607,9 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       return '';
     }
   }, []);
-<<<<<<< HEAD
-  const [activeTab, setActiveTab] = useState<'queue' | 'completed'>('queue');
-=======
   const [activeTab, setActiveTab] = useState<'queue' | 'inroute' | 'completed'>(
     forcedTab === 'inroute' || forcedTab === 'completed' ? forcedTab : 'queue'
   );
->>>>>>> main
   const [completedPage, setCompletedPage] = useState(1);
   const [completedPageSize, setCompletedPageSize] = useState(9);
   const [currentTime, setCurrentTime] = useState(Date.now());
@@ -652,31 +617,20 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   const [pixCopied, setPixCopied] = useState(false);
   const [error, setError] = useState('');
   const [updating, setUpdating] = useState<string | null>(null);
-<<<<<<< HEAD
-=======
   const [ctaPulseId, setCtaPulseId] = useState<string | null>(null);
   const [newOrderIds, setNewOrderIds] = useState<string[]>([]);
->>>>>>> main
   const [soundEnabled, setSoundEnabled] = useState(() => {
     if (typeof window === "undefined") return true;
     const saved = localStorage.getItem("queueSoundEnabled");
     return saved ? saved === "true" : true;
   });
-<<<<<<< HEAD
-  const [actionsOpen, setActionsOpen] = useState(false);
-=======
   const [activeMotoboysCount, setActiveMotoboysCount] = useState(0);
   const [closeDayModalOpen, setCloseDayModalOpen] = useState(false);
   const [isPrintingDaySummary, setIsPrintingDaySummary] = useState(false);
->>>>>>> main
   const [tvMode, setTvMode] = useState(() => {
     if (typeof window === "undefined") return false;
     return localStorage.getItem("queueTvMode") === "true";
   });
-<<<<<<< HEAD
-  const previousIdsRef = useRef<string[]>([]);
-  const audioContextRef = useRef<AudioContext | null>(null);
-=======
   const [queueFilter, setQueueFilter] = useState<'all' | 'pending' | 'preparing' | 'ready' | 'late' | 'finalized'>('all');
   const [reportRange, setReportRange] = useState<'today' | 'yesterday' | 'last7' | 'custom'>('today');
   const [reportFrom, setReportFrom] = useState(() => getNowKeyInSaoPaulo());
@@ -1011,7 +965,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       </div>
     );
   };
->>>>>>> main
   const itemOrderRef = useRef<Map<string, Map<string, number>>>(new Map());
   useEffect(() => {
     const sessionPixKey = auth?.store?.settings?.pixKey || '';
@@ -1033,8 +986,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     };
     loadPixKey();
   }, [auth?.store?.settings?.pixKey, storeSlug]);
-<<<<<<< HEAD
-=======
 
   useEffect(() => {
     const loadMotoboys = async () => {
@@ -1050,7 +1001,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     };
     loadMotoboys();
   }, [auth?.store?.id]);
->>>>>>> main
   useEffect(() => {
     if (typeof window === "undefined") return;
     localStorage.setItem("queueTvMode", String(tvMode));
@@ -1069,13 +1019,9 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   const formatItemOptions = (item) => {
     const labels = [];
     if (item?.cookingPoint) labels.push(item.cookingPoint);
-<<<<<<< HEAD
-    if (item?.passSkewer) labels.push('passar varinha');
-=======
     if (item?.passSkewer) labels.push('passar farinha');
     const selected = formatSelectedModifiers(item?.selectedModifiers || []);
     if (selected.length) labels.push(`+ ${selected.join(', ')}`);
->>>>>>> main
     return labels.length ? labels.join(' • ') : '';
   };
   const getPriorityTone = (position) => {
@@ -1085,11 +1031,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     return "bg-slate-100 text-slate-700";
   };
   const getItemBaseKey = (item) =>
-<<<<<<< HEAD
-    `${item?.productId || item?.name || ''}-${item?.cookingPoint || ''}-${item?.passSkewer ? '1' : '0'}`;
-=======
     `${item?.productId || item?.name || ''}-${item?.cookingPoint || ''}-${item?.passSkewer ? '1' : '0'}-${getModifiersSignature(item?.selectedModifiers || [])}`;
->>>>>>> main
 
   const resolvePromoMeta = (item: any) => {
     const product = productsById.get(item.productId || item.id);
@@ -1217,18 +1159,12 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       const data = await orderService.fetchQueue();
       const nextIds = (data || []).map((order) => order.id);
       const previousIds = previousIdsRef.current;
-<<<<<<< HEAD
-      const hasNew = nextIds.some((id) => !previousIds.includes(id));
-      if (hasNew) {
-        playNewOrderSound();
-=======
       const incoming = nextIds.filter((id) => !previousIds.includes(id));
       const hasNew = incoming.length > 0;
       if (hasNew) {
         playNewOrderSound();
         setNewOrderIds(incoming);
         window.setTimeout(() => setNewOrderIds([]), 4000);
->>>>>>> main
       }
       previousIdsRef.current = nextIds;
       setQueue(data);
@@ -1300,31 +1236,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     return () => clearInterval(timer);
   }, []);
 
-<<<<<<< HEAD
-  useEffect(() => {
-    const handleClick = (event) => {
-      const target = event.target as HTMLElement;
-      if (!target.closest("[data-queue-actions]")) {
-        setActionsOpen(false);
-      }
-    };
-    document.addEventListener("click", handleClick);
-    return () => document.removeEventListener("click", handleClick);
-  }, []);
-
-  const handleAdvance = async (orderId, status) => {
-    try {
-      setUpdating(orderId);
-      await orderService.updateStatus(orderId, status);
-      setQueue((prev) =>
-        prev.map((order) =>
-          order.id === orderId ? { ...order, status } : order
-        )
-      );
-    } catch (err) {
-      console.error('Erro ao atualizar status', err);
-      setError('Não foi possível atualizar o status agora. Tente novamente.');
-=======
   const handleAdvance = async (orderId, status) => {
     const previousQueue = queue;
     try {
@@ -1360,17 +1271,13 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       setQueue(previousQueue);
       setError('Não foi possível atualizar o status agora. Tente novamente.');
       return false;
->>>>>>> main
     } finally {
       setUpdating(null);
     }
   };
 
   const openPaymentConfirm = (order) => {
-<<<<<<< HEAD
-=======
     setCashConfirmValue('');
->>>>>>> main
     setConfirmModal({
       id: order.id,
       customerName: order.customerName || order.name || 'Cliente',
@@ -1389,10 +1296,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
 
   const handleConfirmPaid = async () => {
     if (!confirmModal?.id) return;
-<<<<<<< HEAD
-    await handleAdvance(confirmModal.id, 'done');
-    setConfirmModal(null);
-=======
     const success = await handleAdvance(confirmModal.id, 'done');
     if (success) {
       setConfirmModal(null);
@@ -1561,7 +1464,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     } catch (error) {
       setQuickFinalizeModal((prev) => ({ ...prev, loading: false }));
     }
->>>>>>> main
   };
 
   const applyItemsChange = async (orderId, updater) => {
@@ -1579,18 +1481,13 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
 
     if (sanitizedItems.length === 0) {
       setQueue((prev) => prev.filter((order) => order.id !== orderId));
-<<<<<<< HEAD
-=======
       setSelectedOrder((prev: any) => (prev?.id === orderId ? null : prev));
->>>>>>> main
     } else {
       setQueue((prev) =>
         prev.map((order) =>
           order.id === orderId ? { ...order, items: sanitizedItems, total: nextTotal } : order
         )
       );
-<<<<<<< HEAD
-=======
       setSelectedOrder((prev: any) =>
         prev?.id === orderId
           ? {
@@ -1600,7 +1497,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
             }
           : prev
       );
->>>>>>> main
     }
 
     try {
@@ -1608,12 +1504,9 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       if (sanitizedItems.length === 0) {
         await orderService.updateStatus(orderId, 'cancelled');
       }
-<<<<<<< HEAD
-=======
       setError('');
       // Sincroniza em background sem atrasar feedback local.
       void loadQueue();
->>>>>>> main
     } catch (err) {
       console.error('Erro ao atualizar itens', err);
       setError('Não foi possível atualizar os itens agora. Atualize a fila.');
@@ -1623,9 +1516,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   const handleQuantityChange = (orderId, itemId, delta) => {
     applyItemsChange(orderId, (items) =>
       items.map((item) =>
-<<<<<<< HEAD
-        item.id === itemId ? { ...item, qty: Math.max(0, item.qty + delta) } : item
-=======
         item.id === itemId
           ? {
               ...item,
@@ -1633,36 +1523,16 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
               isPrinted: delta > 0 ? false : Boolean(item.isPrinted),
             }
           : item
->>>>>>> main
       )
     );
   };
 
-<<<<<<< HEAD
-  const handleAddItem = (orderId) => {
-    const productId = selectedProducts[orderId];
-=======
   const handleAddItem = (orderId, forcedProductId?: string) => {
     const productId = forcedProductId || selectedProducts[orderId];
->>>>>>> main
     const product = products.find((p) => String(p.id) === String(productId));
     if (!product) return;
 
     applyItemsChange(orderId, (items) => {
-<<<<<<< HEAD
-      const existing = items.find((item) => item.id === product.id);
-      if (existing) {
-        return items.map((item) =>
-          item.id === product.id
-            ? { ...item, qty: item.qty + 1 }
-            : item
-        );
-      }
-
-      return [
-        ...items,
-        { id: product.id, productId: product.id, name: product.name, price: product.price, unitPrice: product.price, qty: 1 },
-=======
       return [
         ...items,
         {
@@ -1674,13 +1544,10 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
           qty: 1,
           isPrinted: false,
         },
->>>>>>> main
       ];
     });
   };
 
-<<<<<<< HEAD
-=======
   const openCatalogPicker = (orderId: string, initialQuery = "") => {
     setCatalogPickerModal({
       open: true,
@@ -1763,15 +1630,11 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     }
   };
 
->>>>>>> main
   const elapsedTime = useMemo(
     () =>
       queue.reduce(
         (acc, order) => ({
           ...acc,
-<<<<<<< HEAD
-          [order.id]: formatDuration(order.createdAt ? currentTime - order.createdAt : 0),
-=======
           [order.id]: (() => {
             const status = String(order?.status || '').toLowerCase();
             const isFinal = status === 'done' || status === 'delivered' || status === 'finished';
@@ -1784,43 +1647,12 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
             }
             return formatDuration(Math.max(0, currentTime - createdAt));
           })(),
->>>>>>> main
         }),
         {}
       ),
     [currentTime, queue]
   );
 
-<<<<<<< HEAD
-  const sortedQueue = useMemo(
-    () =>
-      [...queue]
-        .filter((order) => ['pending', 'preparing', 'ready'].includes(order.status))
-        .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0)),
-    [queue]
-  );
-
-  const completedToday = useMemo(() => {
-    const today = new Date();
-    const isSameDay = (value) => {
-      if (!value) return false;
-      const date = new Date(value);
-      return (
-        date.getFullYear() === today.getFullYear() &&
-        date.getMonth() === today.getMonth() &&
-        date.getDate() === today.getDate()
-      );
-    };
-    return [...queue]
-      .filter((order) => order.status === 'done' && isSameDay(order.createdAt))
-      .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-  }, [queue]);
-  const completedTotalPages = Math.max(1, Math.ceil(completedToday.length / completedPageSize));
-  const pagedCompleted = useMemo(() => {
-    const start = (completedPage - 1) * completedPageSize;
-    return completedToday.slice(start, start + completedPageSize);
-  }, [completedToday, completedPage]);
-=======
   const productionQueue = useMemo(() => {
     const statuses = new Set([ 'pending', 'preparing', 'ready' ]);
     return [...queue]
@@ -2133,15 +1965,12 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     if (!selectedOrder?.id) return null;
     return queue.find((order) => order.id === selectedOrder.id) || selectedOrder;
   }, [queue, selectedOrder]);
->>>>>>> main
 
   useEffect(() => {
     if (activeTab === 'completed') {
       setCompletedPage(1);
     }
   }, [activeTab]);
-<<<<<<< HEAD
-=======
 
   useEffect(() => {
     if (forcedTab === 'queue' || forcedTab === 'inroute' || forcedTab === 'completed') {
@@ -2179,7 +2008,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       setSelectedOrder(latest);
     }
   }, [queue, selectedOrder, editingFinalizedOrder]);
->>>>>>> main
   useEffect(() => {
     setCompletedPage(1);
   }, [completedPageSize]);
@@ -2190,37 +2018,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     }
   }, [completedPage, completedTotalPages]);
 
-<<<<<<< HEAD
-  const getStatusStyles = (status) => {
-    if (status === "preparing") {
-      return { label: "Em preparo", className: "bg-amber-100 text-amber-700" };
-    }
-    if (status === "ready") {
-      return { label: "Aguardando retirada", className: "bg-sky-100 text-sky-700" };
-    }
-    return { label: "Aguardando", className: "bg-red-100 text-red-700" };
-  };
-
-  const renderTimeline = (status, orderType) => {
-    const steps =
-      orderType === "pickup"
-        ? [
-            { key: "pending", label: "Recebido" },
-            { key: "preparing", label: "Em preparo" },
-            { key: "ready", label: "Pronto p/ retirada" },
-            { key: "done", label: "Pago" },
-          ]
-        : [
-            { key: "pending", label: "Recebido" },
-            { key: "preparing", label: "Em preparo" },
-            { key: "done", label: "Pronto" },
-          ];
-
-    const isActive = (key) => {
-      if (status === "pending") return key === "pending";
-      if (status === "preparing") return key !== "done" && key !== "ready";
-      if (status === "ready") return key !== "done";
-=======
   const getStatusStyles = (status, orderType, order?: any) => {
     const normalizedStatus = String(status || '').toLowerCase();
     if (normalizedStatus === "done" || normalizedStatus === "delivered" || normalizedStatus === "finished") {
@@ -2301,7 +2098,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       if (normalizedStatus === "pending") return key === "pending";
       if (normalizedStatus === "preparing") return key !== "done" && key !== "ready";
       if (normalizedStatus === "ready") return key !== "done";
->>>>>>> main
       return true;
     };
 
@@ -2311,12 +2107,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
           <div key={step.key} className="flex items-center gap-2">
             <div
               className={`w-2.5 h-2.5 rounded-full ${
-<<<<<<< HEAD
-                isActive(step.key) ? "bg-brand-primary" : "bg-gray-300"
-              }`}
-            />
-            <span className={isActive(step.key) ? "text-gray-700 font-semibold" : ""}>
-=======
                 isActive(step.key)
                   ? timelineStyles[step.key]?.dot || "bg-brand-primary"
                   : "bg-gray-300"
@@ -2329,7 +2119,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                   : ""
               }
             >
->>>>>>> main
               {step.label}
             </span>
             {index < steps.length - 1 && <span className="text-gray-300">•</span>}
@@ -2339,128 +2128,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     );
   };
 
-<<<<<<< HEAD
-  return (
-    <div className={tvMode ? "space-y-6 rounded-3xl bg-slate-900/95 p-4 sm:p-6 text-white" : "space-y-4"}>
-      {/* Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className={`flex flex-wrap items-center gap-2 font-semibold ${tvMode ? "text-white" : "text-gray-700"}`}>
-          <ChefHat className={tvMode ? "text-white" : "text-brand-primary"} weight="duotone" />
-          Fila do Churrasqueiro
-          <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${tvMode ? "bg-white/15 text-white" : "bg-brand-primary/10 text-brand-primary"}`}>
-            {sortedQueue.length} pedidos
-          </span>
-          {tvMode && (
-            <span className="flex items-center gap-2 text-xs font-semibold text-white/70">
-              <Clock size={14} weight="duotone" />
-              {new Date(currentTime).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
-            </span>
-          )}
-        </div>
-        <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2">
-          {!tvMode && (
-            <div className="flex flex-wrap gap-2 order-2 sm:order-none">
-              {[
-                { id: 'queue', label: 'Fila', count: sortedQueue.length },
-                { id: 'completed', label: 'Finalizados hoje', count: completedToday.length },
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => setActiveTab(tab.id as 'queue' | 'completed')}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-all hover:-translate-y-0.5 active:scale-95 ${
-                    activeTab === tab.id
-                      ? 'bg-brand-primary text-white shadow-sm'
-                      : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
-                  }`}
-                >
-                  <span>{tab.label}</span>
-                  <span
-                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                      activeTab === tab.id
-                        ? 'bg-white/20 text-white'
-                        : 'bg-slate-100 text-slate-600'
-                    }`}
-                  >
-                    {tab.count}
-                  </span>
-                </button>
-              ))}
-            </div>
-          )}
-          <div className="relative w-full sm:w-auto" data-queue-actions>
-            <button
-              type="button"
-              onClick={() => {
-                if (tvMode) {
-                  toggleTvMode();
-                  return;
-                }
-                setActionsOpen((prev) => !prev);
-              }}
-              className={`flex items-center justify-between gap-2 text-sm px-3 py-2 rounded-lg w-full sm:w-auto transition-all hover:-translate-y-0.5 active:scale-95 ${
-                tvMode
-                  ? "bg-white/15 text-white border border-white/20"
-                  : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
-              }`}
-            >
-              <span className="flex items-center gap-2">
-                {tvMode ? <Monitor size={16} weight="duotone" /> : <DotsThreeVertical size={16} weight="duotone" />}
-                {tvMode ? "Sair do modo TV" : "Ações rápidas"}
-              </span>
-              {!tvMode && (
-                <span className="text-xs text-gray-400">{soundEnabled ? "Som on" : "Som off"}</span>
-              )}
-            </button>
-            {actionsOpen && !tvMode && (
-              <div className="absolute right-0 mt-2 w-full sm:w-52 rounded-xl border border-gray-200 bg-white shadow-lg overflow-hidden z-20">
-                <button
-                  onClick={() => {
-                    toggleTvMode();
-                    setActionsOpen(false);
-                  }}
-                  className="w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                >
-                  <Monitor size={16} weight="duotone" />
-                  Ativar modo TV
-                </button>
-                <button
-                  onClick={() => {
-                    handleToggleSound();
-                    setActionsOpen(false);
-                  }}
-                  className="w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                >
-                  {soundEnabled ? <SpeakerHigh size={16} weight="duotone" /> : <SpeakerX size={16} weight="duotone" />}
-                  {soundEnabled ? "Som ligado" : "Som desligado"}
-                </button>
-                <button
-                  onClick={() => {
-                    if (!soundEnabled) {
-                      setSoundEnabled(true);
-                    }
-                    ensureAudioContext().then(() => playNewOrderSound()).catch(() => {});
-                    setActionsOpen(false);
-                  }}
-                  className="w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                >
-                  <SpeakerHigh size={16} weight="duotone" />
-                  Testar som
-                </button>
-                <button
-                  onClick={() => {
-                    loadQueue();
-                    setActionsOpen(false);
-                  }}
-                  className="w-full px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                >
-                  <ArrowsClockwise size={16} weight="duotone" />
-                  Atualizar fila
-                </button>
-              </div>
-            )}
-          </div>
-=======
   const renderOrderFooterActions = (order: any) => (
     <div className="w-full flex flex-wrap gap-2 md:justify-end">
       {updating === order.id && (
@@ -2708,38 +2375,10 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
               </button>
             </div>
           )}
->>>>>>> main
         </div>
       </div>
 
       {activeTab === 'queue' && (
-<<<<<<< HEAD
-        <div
-          className={`grid gap-3 xl:gap-4 ${
-            tvMode
-              ? "grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"
-              : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4"
-          }`}
-        >
-          {sortedQueue.map((order, index) => (
-            <div
-              key={order.id}
-              className="relative w-full max-w-full p-2.5 sm:p-3 rounded-2xl border border-slate-200 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.45)] transition hover:-translate-y-0.5 hover:shadow-[0_22px_50px_-30px_rgba(15,23,42,0.55)] overflow-hidden"
-              style={{
-                background:
-                  'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.9) 60%, rgba(226,232,240,0.6) 100%)',
-              }}
-            >
-              <div className="absolute -top-12 -right-12 w-24 h-24 rounded-full bg-brand-primary/10 blur-2xl" />
-              <div className="absolute -bottom-10 -left-10 w-24 h-24 rounded-full bg-brand-secondary/10 blur-2xl" />
-              {/* HEADER DO CARD */}
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2.5">
-                <div className="relative flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1 text-[10px] text-gray-600 uppercase font-bold">
-                    <Hash size={14} weight="duotone" className="text-brand-primary" /> Fila
-                    <span className={`ml-1 px-2.5 py-1 rounded-full text-xs font-black shadow-sm ${getPriorityTone(index + 1)}`}>
-                      {String(index + 1).padStart(2, "0")}
-=======
         <div className="space-y-2 mt-2">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3 px-1 sm:px-0">
             {filteredProductionQueue.map((order, index) => {
@@ -2934,7 +2573,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                     <Hash size={14} weight="duotone" className="text-slate-400" /> Prioridade
                     <span className={`ml-1 px-3 py-1 rounded-lg text-sm font-black leading-none ${getPriorityTone(selectedOrderRank)}`}>
                       #{String(selectedOrderRank).padStart(2, "0")}
->>>>>>> main
                     </span>
                   </div>
 
@@ -2945,19 +2583,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                   Pedido #{formatOrderDisplayId(order.id, storeSlug)}
                 </p>
 
-<<<<<<< HEAD
-                  <h3 className="text-base font-bold text-gray-800 truncate">
-                    Cliente: {order.customerName || order.name || "Cliente"}
-                  </h3>
-
-                  {!(order.type === "table" && order.table) && (
-                    <p className="text-[11px] text-gray-500 uppercase break-words">
-                      {formatOrderType(order.type)}
-                      {order.table && (
-                        <span className="font-semibold text-gray-800"> · Mesa {order.table}</span>
-                      )}
-                    </p>
-=======
                   <h3 className="text-base font-bold text-slate-800 truncate">
                     Cliente: {order.customerName || order.name || "Cliente"}
                   </h3>
@@ -2977,7 +2602,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                         );
                       })()}
                     </div>
->>>>>>> main
                   )}
                   {order.phone && (
                     <p className="text-[11px] text-gray-500 break-words">{order.phone}</p>
@@ -3001,20 +2625,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                       );
                     })()}
                   </p>
-<<<<<<< HEAD
-                </div>
-
-                <div className="flex flex-row sm:flex-col items-center sm:items-end gap-2">
-                  {order.type === "table" && order.table && (
-                    <div className="px-3 py-1.5 rounded-full bg-slate-900 text-white text-xs font-black tracking-wide shadow-sm">
-                      Mesa {order.table}
-                    </div>
-                  )}
-                  <span
-                    className={`px-2 py-0.5 text-[11px] font-bold rounded-full border ${getStatusStyles(order.status).className}`}
-                  >
-                    {getStatusStyles(order.status).label}
-=======
                   {order.payment?.toString().toLowerCase() === 'dinheiro' && order.cashTendered ? (
                     <div className="text-[11px] space-y-0.5">
                       <p className="text-emerald-700 font-semibold">
@@ -3041,7 +2651,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                     className={`px-2 py-0.5 text-[11px] font-bold rounded-full border ${getStatusStyles(order.status, order.type, order).className}`}
                   >
                     {getStatusStyles(order.status, order.type, order).label}
->>>>>>> main
                   </span>
                   <div className="px-2.5 py-0.5 rounded-full bg-brand-primary text-white font-black flex items-center gap-1.5 shadow-sm text-[11px] ring-2 ring-white/40">
                     <Clock size={11} weight="duotone" className="text-white" />
@@ -3049,25 +2658,16 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                       {elapsedTime[order.id] || "0s"}
                     </span>
                   </div>
-<<<<<<< HEAD
-=======
                   {isLate && (
                     <span className="px-2 py-0.5 text-[10px] font-bold rounded-full border bg-rose-100 text-rose-700 border-rose-200 animate-pulse">
                       Prazo estourado
                     </span>
                   )}
->>>>>>> main
                 </div>
               </div>
 
               {/* LISTA DE ITENS */}
               <div className="mt-3 space-y-2">
-<<<<<<< HEAD
-                {getOrderedItems(order.id, order.items || []).map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex justify-between text-xs text-gray-700 items-center gap-3 bg-white/70 border border-slate-200/60 rounded-2xl px-2.5 py-1.5"
-=======
                 {getOrderedItems(order.id, order.items || []).map((item, itemIndex) => (
                   <div
                     key={`${item.id || item.productId || item.name}-${itemIndex}`}
@@ -3076,7 +2676,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                         ? "bg-slate-50 border-slate-200"
                         : "bg-amber-50 border-amber-200"
                     }`}
->>>>>>> main
                   >
                     <div className="flex items-center gap-2.5 min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-shrink-0">
@@ -3101,15 +2700,9 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
 
                       <div className="flex items-center gap-2 min-w-0">
                         <div className="w-9 h-9 rounded-lg overflow-hidden border border-gray-200 bg-gray-100 flex-shrink-0">
-<<<<<<< HEAD
-                          {item.imageUrl || productsById.get(item.productId || item.id)?.imageUrl ? (
-                            <img
-                              src={resolveAssetUrl(item.imageUrl || productsById.get(item.productId || item.id)?.imageUrl)}
-=======
                           {item.imageUrl || item.image_url || productsById.get(item.productId || item.id)?.imageUrl ? (
                             <img
                               src={resolveAssetUrl(item.imageUrl || item.image_url || productsById.get(item.productId || item.id)?.imageUrl)}
->>>>>>> main
                               alt={item.name}
                               className="w-full h-full object-cover"
                             />
@@ -3123,14 +2716,11 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                           <span className="truncate text-[12px]" title={item.name}>
                             {item.name}
                           </span>
-<<<<<<< HEAD
-=======
                           {!item?.isPrinted && (
                             <span className="mt-1 inline-flex w-fit items-center rounded-full border border-amber-300 bg-amber-100 px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-[0.14em] text-amber-800">
                               Novo
                             </span>
                           )}
->>>>>>> main
                           <div className="flex flex-wrap gap-1 mt-1">
                             {item?.cookingPoint && (
                               <span className="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-amber-100 text-amber-800 border border-amber-200">
@@ -3139,11 +2729,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                             )}
                             {item?.passSkewer && (
                               <span className="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-fuchsia-100 text-fuchsia-700 border border-fuchsia-200">
-<<<<<<< HEAD
-                                passar varinha
-                              </span>
-                            )}
-=======
                                 passar farinha
                               </span>
                             )}
@@ -3155,7 +2740,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                                 + {modifierName}
                               </span>
                             ))}
->>>>>>> main
                           </div>
                         </div>
                       </div>
@@ -3182,30 +2766,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
               </div>
 
               {/* ADICIONAR ITEM */}
-<<<<<<< HEAD
-              <div className="mt-3 flex flex-row gap-2 items-center bg-white/70 border border-slate-200/70 rounded-2xl p-1.5">
-                <select
-                  value={selectedProducts[order.id] || ""}
-                  onChange={(e) =>
-                    setSelectedProducts((prev) => ({
-                      ...prev,
-                      [order.id]: e.target.value,
-                    }))
-                  }
-                  className="flex-1 border border-gray-200 rounded-lg px-2 py-1.5 text-xs bg-white"
-                >
-                  <option value="">Adicionar item...</option>
-                  {products.map((product) => (
-                    <option key={product.id} value={product.id}>
-                        {product.name} – {formatCurrency(product.price)}
-                    </option>
-                  ))}
-                </select>
-
-                <button
-                  onClick={() => handleAddItem(order.id)}
-                  className="w-10 h-10 sm:w-auto sm:px-3 sm:py-2 rounded-lg bg-brand-primary text-white text-xs font-bold flex items-center justify-center gap-1 hover:opacity-90 transition-all hover:-translate-y-0.5 active:scale-95"
-=======
               <div className="mt-3 flex w-full min-w-0 flex-row gap-2 items-center bg-white/70 border border-slate-200/70 rounded-2xl p-1.5">
                 <ProductQuickPicker
                   value={selectedProducts[order.id] || ""}
@@ -3224,101 +2784,12 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                 <button
                   onClick={() => handleAddItem(order.id)}
                   className="h-10 w-10 flex-shrink-0 sm:w-auto sm:px-3 sm:py-2 rounded-lg bg-brand-primary text-white text-xs font-bold flex items-center justify-center gap-1 hover:opacity-90 transition-all hover:-translate-y-0.5 active:scale-95"
->>>>>>> main
                 >
                   <Plus size={14} weight="duotone" />
                   <span className="hidden sm:inline">Incluir</span>
                 </button>
               </div>
 
-<<<<<<< HEAD
-              {renderTimeline(order.status, order.type)}
-
-              {/* TOTAL + BOTÕES */}
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mt-3">
-              <div className="inline-flex items-center gap-2 text-[11px] font-semibold text-slate-600">
-                Total
-                <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold">
-                  {formatCurrency(order.total || 0)}
-                </span>
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                {order.status === "pending" && (
-                  <div className="w-full sm:w-auto">
-                    <div className="mb-2 text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-2.5 py-1">
-                      Clique em iniciar preparo para começar.
-                    </div>
-                    <button
-                      onClick={() => handleAdvance(order.id, "preparing")}
-                      disabled={updating === order.id}
-                      className="w-full sm:w-auto px-3 py-2 rounded-lg bg-amber-500 text-white text-xs font-bold flex items-center justify-center gap-1 disabled:opacity-60 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95"
-                    >
-                      <Clock size={16} weight="duotone" /> Iniciar preparo
-                    </button>
-                  </div>
-                )}
-
-                {order.status === "preparing" && order.type !== "pickup" && (
-                  <div className="w-full sm:w-auto">
-                    <div className="mb-2 text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-lg px-2.5 py-1">
-                      Pedido pronto? Clique para finalizar.
-                    </div>
-                    <button
-                      onClick={() => openPaymentConfirm(order)}
-                      disabled={updating === order.id}
-                      className="w-full sm:w-auto px-3 py-2 rounded-lg bg-emerald-600 text-white text-xs font-bold flex items-center justify-center gap-1 disabled:opacity-60 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95"
-                    >
-                      <CheckSquare size={16} weight="duotone" /> Marcar pronto
-                    </button>
-                  </div>
-                )}
-
-                {order.status === "preparing" && order.type === "pickup" && (
-                  <div className="w-full sm:w-auto">
-                    <div className="mb-2 text-[11px] font-semibold text-sky-700 bg-sky-50 border border-sky-100 rounded-lg px-2.5 py-1">
-                      Pedido pronto para retirada.
-                    </div>
-                    <button
-                      onClick={() => handleAdvance(order.id, "ready")}
-                      disabled={updating === order.id}
-                      className="w-full sm:w-auto px-3 py-2 rounded-lg bg-sky-600 text-white text-xs font-bold flex items-center justify-center gap-1 disabled:opacity-60 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95"
-                    >
-                      <CheckSquare size={16} weight="duotone" /> Pronto p/ retirada
-                    </button>
-                  </div>
-                )}
-
-                {order.status === "ready" && (
-                  <div className="w-full sm:w-auto">
-                    <div className="mb-2 text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-lg px-2.5 py-1">
-                      Cliente chegou? Confirme o pagamento.
-                    </div>
-                    <button
-                      onClick={() => openPaymentConfirm(order)}
-                      disabled={updating === order.id}
-                      className="w-full sm:w-auto px-3 py-2 rounded-lg bg-emerald-600 text-white text-xs font-bold flex items-center justify-center gap-1 disabled:opacity-60 shadow-sm transition-all hover:-translate-y-0.5 active:scale-95"
-                    >
-                      <CheckSquare size={16} weight="duotone" /> Confirmar pagamento
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-            </div>
-          ))}
-
-          {sortedQueue.length === 0 && !loading && (
-            <div className="col-span-full text-center text-gray-500 py-12 bg-white rounded-xl border border-dashed">
-              <div className="mx-auto max-w-sm space-y-2">
-                <div className="text-4xl">🔥</div>
-                <p className="text-sm font-semibold text-slate-700">Nenhum pedido aguardando.</p>
-                <p className="text-xs text-slate-500">
-                  Assim que chegar um pedido, ele aparece aqui com prioridade.
-                </p>
-              </div>
-            </div>
-=======
               {tvMode ? renderTimeline(order.status, order.type) : null}
 
               <div className="mt-3">
@@ -3336,35 +2807,22 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
               </div>
             </div>,
             document.body
->>>>>>> main
           )}
         </div>
       )}
 
-<<<<<<< HEAD
-      {confirmModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 px-4">
-=======
       {isPaymentModalOpen && createPortal(
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/50 px-4">
->>>>>>> main
           <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-slate-200">
             {(() => {
               const normalizedPayment = (confirmModal.payment || '').toString().trim().toLowerCase();
               const isPixPayment = normalizedPayment === 'pix';
-<<<<<<< HEAD
-=======
               const isCashPayment = normalizedPayment === 'dinheiro';
->>>>>>> main
               const pixKey = (confirmModal.pixKey || '').toString().trim();
               const pixPayload = pixKey
                 ? buildPixPayload({
                     key: pixKey,
-<<<<<<< HEAD
-                    name: auth?.store?.name || 'Chama no Espeto',
-=======
                     name: auth?.store?.name || 'Já no Caminho',
->>>>>>> main
                     amount: Number(confirmModal.total || 0),
                     txid: confirmModal.id ? `PEDIDO${confirmModal.id.slice(0, 8)}` : 'PEDIDO',
                   })
@@ -3372,18 +2830,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
               const pixQrUrl = pixPayload
                 ? `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(pixPayload)}`
                 : '';
-<<<<<<< HEAD
-              return (
-                <>
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Confirmar pagamento</p>
-                <h3 className="text-lg font-bold text-slate-900 mt-2">Pedido pronto para cobrar</h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setConfirmModal(null)}
-=======
 	              const totalValue = Number(confirmModal.total || 0);
 	              const deliveryFeeValue =
 	                confirmModal.type === 'delivery' && confirmModal.deliveryFee !== null && confirmModal.deliveryFee !== undefined
@@ -3424,31 +2870,18 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
               <button
                 type="button"
                 onClick={closeOrderOverlays}
->>>>>>> main
                 className="text-slate-400 hover:text-slate-600 transition-all hover:-translate-y-0.5 active:scale-95"
               >
                 <X size={18} weight="duotone" />
               </button>
             </div>
-<<<<<<< HEAD
-=======
               );
             })()}
->>>>>>> main
             <div className="mt-4 space-y-3 text-sm text-slate-600">
               <div className="flex items-center justify-between">
                 <span>Cliente</span>
                 <span className="font-semibold text-slate-800">{confirmModal.customerName}</span>
               </div>
-<<<<<<< HEAD
-              {confirmModal.table && (
-                <div className="flex items-center justify-between">
-                  <span>Mesa</span>
-                  <span className="font-semibold text-slate-800">Mesa {confirmModal.table}</span>
-                </div>
-              )}
-=======
->>>>>>> main
               {confirmModal.phone && (
                 <div className="flex items-center justify-between">
                   <span>Telefone</span>
@@ -3461,14 +2894,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                   {getPaymentMethodMeta(confirmModal.payment).label}
                 </span>
               </div>
-<<<<<<< HEAD
-              <div className="flex items-center justify-between">
-                <span>Total</span>
-                <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-sm font-bold">
-                  {formatCurrency(confirmModal.total || 0)}
-                </span>
-              </div>
-=======
 	              <div className="flex items-center justify-between">
 	                <span>Volume</span>
 	                <span className="px-3 py-1 rounded-full bg-white text-slate-700 border border-slate-200 text-sm font-bold">
@@ -3497,7 +2922,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
 	                  {formatCurrency(totalValue)}
 	                </span>
 	              </div>
->>>>>>> main
               {Array.isArray(confirmModal.items) && confirmModal.items.some((item) => resolvePromoMeta(item).promoActive) && (
                 <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
                   Promoção aplicada no pedido.
@@ -3532,11 +2956,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                       }}
                       className="w-full px-4 py-2 rounded-lg border border-slate-200 text-slate-700 text-sm font-semibold hover:bg-slate-100 transition-all hover:-translate-y-0.5 active:scale-95"
                     >
-<<<<<<< HEAD
-                      {pixCopied ? 'Copiado!' : 'Copiar codigo Pix'}
-=======
                       {pixCopied ? 'Copiado!' : 'Copiar código Pix'}
->>>>>>> main
                     </button>
                   </div>
                 ) : (
@@ -3546,12 +2966,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                 )}
               </div>
             )}
-<<<<<<< HEAD
-            <div className="mt-6 flex flex-col sm:flex-row gap-2">
-              <button
-                type="button"
-                onClick={() => setConfirmModal(null)}
-=======
             {isCashPayment && (
               <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700">
                 <div className="flex items-center justify-between">
@@ -3599,7 +3013,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
               <button
                 type="button"
                 onClick={closeOrderOverlays}
->>>>>>> main
                 className="w-full sm:w-auto px-4 py-2 rounded-lg border border-slate-200 text-slate-600 text-sm font-semibold hover:bg-slate-50 transition-all hover:-translate-y-0.5 active:scale-95"
               >
                 Voltar
@@ -3607,11 +3020,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
               <button
                 type="button"
                 onClick={handleConfirmPaid}
-<<<<<<< HEAD
-                className="w-full sm:w-auto px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:opacity-90 transition-all hover:-translate-y-0.5 active:scale-95"
-              >
-                Pagamento recebido
-=======
                 disabled={!cashValid || updating === confirmModal?.id}
                 className="w-full sm:w-auto px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:opacity-90 transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
               >
@@ -3623,15 +3031,12 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                 ) : (
                   'Pagamento recebido'
                 )}
->>>>>>> main
               </button>
             </div>
                 </>
               );
             })()}
           </div>
-<<<<<<< HEAD
-=======
         </div>,
         document.body
       )}
@@ -3698,14 +3103,10 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
               ))}
             </div>
           )}
->>>>>>> main
         </div>
       )}
 
       {activeTab === 'completed' && (
-<<<<<<< HEAD
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 sm:p-6">
-=======
         <div className="bg-slate-50 rounded-2xl border border-slate-200 shadow-sm p-3 sm:p-5">
           <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-3 sm:p-4 shadow-sm">
             <div className="flex flex-wrap items-center gap-2">
@@ -3820,16 +3221,11 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
             )}
           </div>
 
->>>>>>> main
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
             {pagedCompleted.map((order) => (
               <div
                 key={order.id}
-<<<<<<< HEAD
-                className="relative w-full max-w-full rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-slate-100/70 p-4 shadow-sm overflow-hidden"
-=======
                 className="relative w-full max-w-full rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-slate-100/70 p-4 shadow-sm overflow-visible"
->>>>>>> main
               >
                 <div className="absolute -top-10 -right-10 w-20 h-20 rounded-full bg-emerald-400/10 blur-2xl" />
                 <div className="absolute -bottom-10 -left-10 w-20 h-20 rounded-full bg-brand-primary/10 blur-2xl" />
@@ -3840,11 +3236,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                   </p>
                     <p className="text-xs text-slate-400">{formatDateTime(order.createdAt)}</p>
                   </div>
-<<<<<<< HEAD
-                  <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-700 border border-emerald-200">
-                    Pronto
-                  </span>
-=======
                   {(() => {
                     const statusMeta = getStatusStyles(order.status, order.type, order);
                     return (
@@ -3853,25 +3244,12 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                       </span>
                     );
                   })()}
->>>>>>> main
                 </div>
 
                 <div className="text-xs text-slate-600 space-y-1">
                   <p className="font-semibold text-slate-800">
                     {order.customerName || order.name || 'Cliente'}
                   </p>
-<<<<<<< HEAD
-                  <p className="uppercase">
-                    {order.type === "table" && order.table ? (
-                      <span className="font-semibold text-slate-800">Mesa {order.table}</span>
-                    ) : (
-                      <>
-                        {formatOrderType(order.type)}
-                        {order.table && <span className="font-semibold text-slate-800"> · Mesa {order.table}</span>}
-                      </>
-                    )}
-                  </p>
-=======
 	                  {(() => {
 	                    const meta = orderTypeMeta(order);
 	                    return (
@@ -3883,7 +3261,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
 	                      </span>
 	                    );
 	                  })()}
->>>>>>> main
                   {order.phone && <p>{order.phone}</p>}
                   <div className="flex items-center gap-2">
                     {(() => {
@@ -3903,14 +3280,10 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                 <div className="mt-3 space-y-2">
                   {(order.items || []).slice(0, 3).map((item) => (
                     <div key={item.id} className="flex items-center justify-between text-xs text-slate-600">
-<<<<<<< HEAD
-                      <span className="truncate">{item.qty}x {item.name}</span>
-=======
                       <span className="truncate">
                         {item.qty}x {item.name}
                         {formatItemOptions(item) ? ` (${formatItemOptions(item)})` : ''}
                       </span>
->>>>>>> main
                       <span className="font-semibold text-slate-700">
                       {(() => {
                         const promoMeta = resolvePromoMeta(item);
@@ -3938,23 +3311,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                   )}
                 </div>
 
-<<<<<<< HEAD
-                <div className="mt-3 flex items-center justify-between">
-                  <span className="text-sm font-bold text-emerald-700">
-                    {formatCurrency(order.total || 0)}
-                  </span>
-                  <a
-                    href={`/pedido/${order.id}`}
-                    className="text-xs font-semibold text-brand-primary hover:underline"
-                  >
-                    Ver pedido
-                  </a>
-                </div>
-              </div>
-            ))}
-
-            {completedToday.length === 0 && (
-=======
 	                <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
 	                  <div className="w-full">
 	                    {renderMoneyBreakdown(order)}
@@ -3979,7 +3335,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
             ))}
 
             {reportCompleted.length === 0 && (
->>>>>>> main
               <div className="col-span-full text-center text-slate-500 py-8 border border-dashed rounded-xl bg-slate-50">
                 <div className="mx-auto max-w-sm space-y-2">
                   <div className="text-4xl">✅</div>
@@ -3991,29 +3346,12 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
               </div>
             )}
           </div>
-<<<<<<< HEAD
-          {completedToday.length > completedPageSize && (
-=======
           {reportCompleted.length > completedPageSize && (
->>>>>>> main
             <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
               <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
                 <span>Pagina {completedPage} de {completedTotalPages}</span>
                 <label className="flex items-center gap-2">
                   <span>Por pagina</span>
-<<<<<<< HEAD
-                  <select
-                    value={completedPageSize}
-                    onChange={(event) => setCompletedPageSize(Number(event.target.value))}
-                    className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-600 focus:ring-2 focus:ring-brand-primary"
-                  >
-                    {[5, 9, 12, 15].map((size) => (
-                      <option key={size} value={size}>
-                        {size}
-                      </option>
-                    ))}
-                  </select>
-=======
                   <PremiumDropdown
                     value={String(completedPageSize)}
                     onChange={(nextValue: string) => setCompletedPageSize(Number(nextValue))}
@@ -4024,7 +3362,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                     className="w-[110px]"
                     menuClassName="max-h-40"
                   />
->>>>>>> main
                 </label>
               </div>
               <div className="flex items-center gap-2">
@@ -4053,11 +3390,6 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       {error && (
         <div className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg p-3">{error}</div>
       )}
-<<<<<<< HEAD
-    </div>
-  );
-};
-=======
 
       {catalogPickerModal.open && createPortal(
         <div className="fixed inset-0 z-[10030] bg-slate-900/45 backdrop-blur-sm p-3 sm:p-6">
@@ -4524,4 +3856,3 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
 
 
 
->>>>>>> main

@@ -1,20 +1,13 @@
 import { apiClient } from '../config/apiClient';
 
-<<<<<<< HEAD
-=======
 const CACHE_TTL_MS = 30 * 1000;
 const cacheByStore = new Map<string, { data: any; expiresAt: number }>();
 const inflightByStore = new Map<string, Promise<any>>();
 
->>>>>>> main
 export const subscriptionService = {
   async create(payload: any) {
     return apiClient.post('/subscriptions', payload);
   },
-<<<<<<< HEAD
-  async getByStore(storeId: any) {
-    return apiClient.get(`/stores/${storeId}/subscription`);
-=======
   async getByStore(storeId: any, options?: { force?: boolean }) {
     const key = String(storeId || '').trim();
     if (!key) return null;
@@ -42,7 +35,6 @@ export const subscriptionService = {
 
     inflightByStore.set(key, request);
     return request;
->>>>>>> main
   },
   async renew(id: any, payload: any) {
     return apiClient.post(`/subscriptions/${id}/renew`, payload);

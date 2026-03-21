@@ -24,11 +24,8 @@ const METHOD_LABELS: Record<string, string> = {
   credit_card: 'Crédito',
   'credit-card': 'Crédito',
   boleto: 'Boleto',
-<<<<<<< HEAD
-=======
   dinheiro: 'Dinheiro',
   cash: 'Dinheiro',
->>>>>>> main
 };
 
 const METHOD_ICONS: Record<string, string> = {
@@ -39,11 +36,8 @@ const METHOD_ICONS: Record<string, string> = {
   credit: '/uploads/payment/credit-card.webp',
   credit_card: '/uploads/payment/credit-card.webp',
   'credit-card': '/uploads/payment/credit-card.webp',
-<<<<<<< HEAD
-=======
   dinheiro: '/uploads/payment/cash.svg',
   cash: '/uploads/payment/cash.svg',
->>>>>>> main
 };
 
 const PROVIDER_LABELS: Record<string, string> = {

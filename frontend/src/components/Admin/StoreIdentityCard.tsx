@@ -1,10 +1,6 @@
 // @ts-nocheck
 import React from 'react';
-<<<<<<< HEAD
-import { ImageSquare, InstagramLogo, Palette } from '@phosphor-icons/react';
-=======
 import { ImageSquare, Palette } from '@phosphor-icons/react';
->>>>>>> main
 
 export function StoreIdentityCard({ branding, socialLinks = [], whatsappNumber }) {
   const storeLogo = branding?.logoUrl;
@@ -58,11 +54,7 @@ export function StoreIdentityCard({ branding, socialLinks = [], whatsappNumber }
         </div>
         <div className="flex items-center justify-between">
           <span className="flex items-center gap-2">
-<<<<<<< HEAD
-            <InstagramLogo size={14} weight="duotone" className="text-slate-400" />
-=======
             <img src="/insta.avif" alt="Instagram" className="h-4 w-4 rounded-full" />
->>>>>>> main
             Instagram
           </span>
           {instagramHandle ? (
@@ -81,11 +73,7 @@ export function StoreIdentityCard({ branding, socialLinks = [], whatsappNumber }
         {normalizedWhatsapp && (
           <div className="flex items-center justify-between">
             <span className="flex items-center gap-2">
-<<<<<<< HEAD
-              <span className="w-2.5 h-2.5 rounded-full bg-brand-primary" />
-=======
               <img src="/whatspp.jpg" alt="WhatsApp" className="h-4 w-4 rounded-full" />
->>>>>>> main
               WhatsApp
             </span>
             <button

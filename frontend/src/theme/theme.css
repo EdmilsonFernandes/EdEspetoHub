@@ -1,11 +1,6 @@
 :root {
-<<<<<<< HEAD
-  --primary-color: #b91c1c;
-  --secondary-color: #111827;
-=======
   --primary-color: #2f9df7;
   --secondary-color: #5fd35a;
->>>>>>> main
   --text-color: #0f172a;
   --bg-color: #f8fafc;
 }
@@ -13,11 +8,7 @@
 body {
   background: var(--bg-color);
   color: var(--text-color);
-<<<<<<< HEAD
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-=======
   font-family: 'Poppins', 'Segoe UI', sans-serif;
->>>>>>> main
 }
 
 .button {

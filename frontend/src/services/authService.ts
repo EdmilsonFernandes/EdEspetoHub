@@ -8,16 +8,10 @@ export const authService = {
         });
         return response;
     },
-<<<<<<< HEAD
-    async adminLogin(slug: string, password: string) {
-        const response = await apiClient.post("/auth/admin-login", {
-            slug,
-=======
     async adminLogin(identifier: string, password: string) {
         const normalizedIdentifier = String(identifier || "").trim();
         const response = await apiClient.post("/auth/admin-login", {
             identifier: normalizedIdentifier,
->>>>>>> main
             password,
         });
         return response;
@@ -35,19 +29,12 @@ export const authService = {
         });
         return response;
     },
-<<<<<<< HEAD
-    async verifyEmail(token: string) {
-        const response = await apiClient.post("/auth/verify-email", {
-            token,
-        });
-=======
     async verifyEmail(payload: { token: string; email?: string }) {
         const response = await apiClient.post("/auth/verify-email", payload);
         return response;
     },
     async registerMotoboy(payload: any) {
         const response = await apiClient.post("/auth/register", payload);
->>>>>>> main
         return response;
     },
     async resendVerification(email: string) {
@@ -56,8 +43,6 @@ export const authService = {
         });
         return response;
     },
-<<<<<<< HEAD
-=======
     async changePassword(currentPassword: string, newPassword: string) {
         const response = await apiClient.post("/auth/change-password", {
             currentPassword,
@@ -65,5 +50,4 @@ export const authService = {
         });
         return response;
     },
->>>>>>> main
 };

@@ -26,8 +26,6 @@ export const storeService = {
     return toJson(response);
   },
 
-<<<<<<< HEAD
-=======
   async trackPublicVisit(slug: string, payload: any) {
     const response = await apiClient.rawPost(`/public/stores/slug/${slug}/track`, payload);
     return toJson(response);
@@ -38,7 +36,6 @@ export const storeService = {
     return toJson(response);
   },
 
->>>>>>> main
   async updateSettings(slug: any, payload: any) {
     const response = await apiClient.rawPut(`/stores/${slug}/settings`, payload);
     return toJson(response);
@@ -53,8 +50,6 @@ export const storeService = {
     const response = await apiClient.rawPut(`/stores/${storeId}/status`, { open: isOpen });
     return toJson(response);
   },
-<<<<<<< HEAD
-=======
 
   async listUsers(storeId: string) {
     const response = await apiClient.rawGet(`/stores/${storeId}/users`);
@@ -78,5 +73,4 @@ export const storeService = {
     const response = await apiClient.rawDelete(`/stores/${storeId}/users/${userId}`);
     return toJson(response);
   },
->>>>>>> main
 };

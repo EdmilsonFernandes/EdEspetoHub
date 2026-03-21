@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-// @ts-nocheck
-=======
 ﻿// @ts-nocheck
->>>>>>> main
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   ArrowClockwise,
@@ -21,13 +17,10 @@ import {
   CaretLeft,
   CaretRight,
   MagnifyingGlass,
-<<<<<<< HEAD
-=======
   IdentificationCard,
   Camera,
   Car,
   ShieldCheck,
->>>>>>> main
 } from '@phosphor-icons/react';
 import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
 import { superAdminService } from '../services/superAdminService';
@@ -39,13 +32,10 @@ import fireAnimation from '../assets/fire.json';
 import { useToast } from '../contexts/ToastContext';
 import { AuthLayout } from '../layouts/AuthLayout';
 import { AdminLayout } from '../layouts/AdminLayout';
-<<<<<<< HEAD
-=======
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { AdaptiveAvatar } from '../components/common/AdaptiveAvatar';
 import { PremiumTabs } from '../components/common/PremiumTabs';
 import { FormSection } from '../components/common/FormSection';
->>>>>>> main
 
 const STORAGE_KEY = 'superAdminToken';
 const STORAGE_USER_KEY = 'superAdminUser';
@@ -85,10 +75,6 @@ const statusStyle = (status?: string) => {
   return 'bg-slate-100 text-slate-600';
 };
 
-<<<<<<< HEAD
-export function SuperAdmin() {
-  const { showToast } = useToast();
-=======
 const faceTone = (label?: string) => {
   const normalized = String(label || '').toLowerCase();
   if (normalized === 'alto') return 'bg-emerald-100 text-emerald-800 border-emerald-200';
@@ -186,7 +172,6 @@ const SECTION_META: Record<string, { title: string; description: string; tone: s
 export function SuperAdmin() {
   const { showToast } = useToast();
   const platformLogo = '/janocaminho.jpg';
->>>>>>> main
   const [token, setToken] = useState(() => localStorage.getItem(STORAGE_KEY) || '');
   const [superAdminUser, setSuperAdminUser] = useState(() => localStorage.getItem(STORAGE_USER_KEY) || '');
   const [overview, setOverview] = useState(null);
@@ -227,10 +212,7 @@ export function SuperAdmin() {
   const [accessLogMethod, setAccessLogMethod] = useState('all');
   const [accessLogStatus, setAccessLogStatus] = useState('all');
   const [accessLogStore, setAccessLogStore] = useState('all');
-<<<<<<< HEAD
-=======
   const [vipFilter, setVipFilter] = useState('all');
->>>>>>> main
   const [sectionsOpen, setSectionsOpen] = useState({
     charts: true,
     rankings: true,
@@ -238,10 +220,6 @@ export function SuperAdmin() {
     payments: true,
     logs: false,
     events: false,
-<<<<<<< HEAD
-  });
-  const [activeSection, setActiveSection] = useState('executive');
-=======
     kyc: true,
   });
   const [activeSection, setActiveSection] = useState('executive');
@@ -258,7 +236,6 @@ export function SuperAdmin() {
   const [kycHistoryFaceFilter, setKycHistoryFaceFilter] = useState<'all' | 'alto' | 'medio' | 'baixo' | 'indisponivel'>('all');
   const [kycRecentReviews, setKycRecentReviews] = useState<any[]>([]);
   const [kycRecentReviewsLoading, setKycRecentReviewsLoading] = useState(false);
->>>>>>> main
 
   const loadOverview = async (authToken: string) => {
     setLoading(true);
@@ -285,39 +262,11 @@ export function SuperAdmin() {
   };
 
   useEffect(() => {
-<<<<<<< HEAD
-    const sectionIds = [ 'executive', 'rankings', 'stores', 'payments', 'logs', 'events' ];
-    const elements = sectionIds
-      .map((id) => document.getElementById(id))
-      .filter(Boolean) as HTMLElement[];
-    if (!elements.length) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
-        if (visible[0]?.target?.id) {
-          setActiveSection(visible[0].target.id);
-        }
-      },
-      { rootMargin: '-30% 0px -60% 0px', threshold: [ 0.1, 0.4, 0.7 ] }
-    );
-
-    elements.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-=======
->>>>>>> main
     if (token) {
       loadOverview(token);
     }
   }, [token]);
 
-<<<<<<< HEAD
-=======
   const loadKycQueue = async (authToken: string) => {
     setKycLoading(true);
     try {
@@ -512,7 +461,6 @@ export function SuperAdmin() {
     loadKycAudit(token, kycAuditDays);
   }, [kycAuditDays]);
 
->>>>>>> main
   useEffect(() => {
     if (!token || !autoRefresh) return;
     const interval = window.setInterval(() => loadOverview(token), 15000);
@@ -566,10 +514,7 @@ export function SuperAdmin() {
 
   const summary = overview?.summary;
   const stores = overview?.stores || [];
-<<<<<<< HEAD
-=======
   const safeStores = Array.isArray(stores) ? stores : [];
->>>>>>> main
   const payments = overview?.payments || [];
   const paymentEvents = overview?.paymentEvents || [];
   const rankings = overview?.rankings || { byRevenue: [], byOrders: [] };
@@ -596,13 +541,6 @@ export function SuperAdmin() {
 
   const storeNameById = useMemo(() => {
     const map = new Map();
-<<<<<<< HEAD
-    stores.forEach((store: any) => {
-      map.set(store.id, store.name);
-    });
-    return map;
-  }, [stores]);
-=======
     safeStores.forEach((store: any) => {
       map.set(store.id, store.name);
     });
@@ -616,7 +554,6 @@ export function SuperAdmin() {
     });
     return map;
   }, [safeStores]);
->>>>>>> main
 
   const revenueByMonth = useMemo(() => {
     const map = new Map<string, number>();
@@ -741,17 +678,6 @@ export function SuperAdmin() {
       pending: 0,
       open: 0,
       closed: 0,
-<<<<<<< HEAD
-    };
-
-    stores.forEach((store: any) => {
-      if (store.open) counts.open += 1;
-      else counts.closed += 1;
-      const status = store.subscription?.status || 'PENDING';
-      if (status === 'ACTIVE') counts.active += 1;
-      else if (status === 'TRIAL') counts.trial += 1;
-      else if (status === 'EXPIRING') counts.expiring += 1;
-=======
       vip: 0,
     };
 
@@ -765,19 +691,12 @@ export function SuperAdmin() {
         counts.active += 1;
         counts.trial += 1;
       } else if (status === 'EXPIRING') counts.expiring += 1;
->>>>>>> main
       else if (status === 'EXPIRED') counts.expired += 1;
       else if (status === 'SUSPENDED') counts.suspended += 1;
       else counts.pending += 1;
     });
 
     return counts;
-<<<<<<< HEAD
-  }, [stores]);
-
-  const expiringSoon = useMemo(() => {
-    return stores
-=======
   }, [safeStores]);
 
   const filteredStores = useMemo(() => {
@@ -792,7 +711,6 @@ export function SuperAdmin() {
 
   const expiringSoon = useMemo(() => {
     return safeStores
->>>>>>> main
       .map((store: any) => {
         const endDate = store.subscription?.endDate;
         if (!endDate) return null;
@@ -805,40 +723,25 @@ export function SuperAdmin() {
           daysLeft,
           endDate,
           status: store.subscription?.status || 'PENDING',
-<<<<<<< HEAD
-=======
           logoUrl: store.settings?.logoUrl || null,
           open: Boolean(store.open),
           planExempt: Boolean(store.settings?.planExempt),
->>>>>>> main
         };
       })
       .filter(Boolean)
       .sort((a: any, b: any) => a.daysLeft - b.daysLeft)
       .slice(0, 6);
-<<<<<<< HEAD
-  }, [stores]);
-
-  const recentStores = useMemo(() => {
-    const now = Date.now();
-    return stores.filter((store: any) => {
-=======
   }, [safeStores]);
 
   const recentStores = useMemo(() => {
     const now = Date.now();
     return safeStores.filter((store: any) => {
->>>>>>> main
       const createdAt = store.createdAt ? new Date(store.createdAt).getTime() : 0;
       if (!Number.isFinite(createdAt)) return false;
       const diffDays = (now - createdAt) / (1000 * 60 * 60 * 24);
       return diffDays <= 7;
     }).length;
-<<<<<<< HEAD
-  }, [stores]);
-=======
   }, [safeStores]);
->>>>>>> main
 
   const revenuePerActive = useMemo(() => {
     if (!storeHealth.active) return 0;
@@ -900,8 +803,6 @@ export function SuperAdmin() {
     }
   };
 
-<<<<<<< HEAD
-=======
   const handleVipToggle = async (store: any, nextValue: boolean) => {
     if (!token) return;
     try {
@@ -925,7 +826,6 @@ export function SuperAdmin() {
     }
   };
 
->>>>>>> main
   useEffect(() => {
     if (!token) return;
     loadEvents(eventsPage, eventStoreFilter);
@@ -1034,11 +934,6 @@ export function SuperAdmin() {
     return summary?.paidRevenue ? formatCurrency(summary.paidRevenue) : formatCurrency(0);
   }, [summary?.paidRevenue]);
 
-<<<<<<< HEAD
-  const platformLogo = '/logo.svg';
-
-=======
->>>>>>> main
   if (!token) {
     return (
       <AuthLayout>
@@ -1047,11 +942,6 @@ export function SuperAdmin() {
            className="space-y-6"
           >
             <div className="text-center">
-<<<<<<< HEAD
-              <h2 className="text-2xl sm:text-3xl font-black text-gray-800 mb-1">Super Admin</h2>
-              <p className="text-sm text-gray-500">Acesso da plataforma</p>
-              <p className="text-sm text-gray-500">Entre com suas credenciais de super administrador.</p>
-=======
               <div className="mx-auto h-14 w-14 rounded-2xl bg-[linear-gradient(135deg,#ede9fe,#e0e7ff)] border border-violet-200 flex items-center justify-center text-violet-700 shadow-sm">
                 <ShieldCheck size={26} weight="duotone" />
               </div>
@@ -1060,7 +950,6 @@ export function SuperAdmin() {
               </p>
               <h2 className="text-2xl sm:text-3xl font-black text-gray-800 mb-1">Super Admin</h2>
               <p className="text-sm text-gray-500">Acesso da plataforma</p>
->>>>>>> main
             </div>
 
             {sessionExpired && (
@@ -1077,13 +966,8 @@ export function SuperAdmin() {
                   type="text"
                   value={loginForm.email}
                   onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
-<<<<<<< HEAD
-                  className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
-                  placeholder="Digite seu usuário"
-=======
                   className="ds-input h-12 border-slate-200 ds-focus-ring transition-shadow focus:ring-2 focus:ring-violet-500/25 focus:border-violet-300"
                   placeholder="Usuário"
->>>>>>> main
                 />
               </div>
               <div className="space-y-2">
@@ -1093,22 +977,13 @@ export function SuperAdmin() {
                     type={showPassword ? 'text' : 'password'}
                     value={loginForm.password}
                     onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
-<<<<<<< HEAD
-                    className="w-full border border-gray-200 rounded-xl p-3 pr-10 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
-                    placeholder="Sua senha de acesso"
-=======
                     className="ds-input h-12 border-slate-200 ds-focus-ring pr-10 transition-shadow focus:ring-2 focus:ring-violet-500/25 focus:border-violet-300"
                     placeholder="Senha"
->>>>>>> main
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-<<<<<<< HEAD
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-=======
                     className="absolute right-2 top-1/2 -translate-y-1/2 h-9 w-9 rounded-xl border border-slate-200 bg-white/80 flex items-center justify-center text-gray-500 hover:text-gray-700 ds-btn ds-focus-ring"
->>>>>>> main
                     aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
                   >
                     {showPassword ? (
@@ -1129,15 +1004,9 @@ export function SuperAdmin() {
             <button
               type="submit"
               disabled={loading || !loginForm.email || !loginForm.password}
-<<<<<<< HEAD
-              className="w-full text-white py-3 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 bg-brand-gradient hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {loading ? '⏳ Entrando...' : '🔐 Entrar no painel'}
-=======
               className="w-full h-12 ds-btn ds-btn-primary ds-btn-shine ds-focus-ring text-white py-3 rounded-xl font-semibold transition-all shadow-[0_14px_30px_-22px_rgba(15,23,42,0.8)] hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {loading ? 'Entrando...' : 'Acessar administração'}
->>>>>>> main
             </button>
           </form>
       </AuthLayout>
@@ -1151,11 +1020,7 @@ export function SuperAdmin() {
         <div className="absolute right-24 -bottom-20 w-56 h-56 rounded-full bg-emerald-400/10 blur-3xl" />
         <div className="relative flex items-center gap-4">
           <div className="w-12 h-12 rounded-2xl border border-slate-200 bg-white shadow-sm flex items-center justify-center">
-<<<<<<< HEAD
-            <img src={platformLogo} alt="Chama no Espeto" className="w-7 h-7 object-contain" />
-=======
             <img src={platformLogo} alt="Já no Caminho" className="w-7 h-7 object-contain" />
->>>>>>> main
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -1210,85 +1075,6 @@ export function SuperAdmin() {
       </div>
 
       <div className="sticky top-0 z-10 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3 bg-white/90 backdrop-blur border-b border-slate-200">
-<<<<<<< HEAD
-        <div className="flex flex-wrap gap-2 text-xs font-semibold text-slate-700">
-          <a
-            href="#executive"
-            onClick={() => setActiveSection('executive')}
-            className={`px-3 py-1.5 rounded-full border border-slate-200 shadow-sm transition ${
-              activeSection === 'executive'
-                ? 'bg-gradient-to-r from-slate-900 to-slate-700 text-white'
-                : 'bg-white text-slate-700 hover:-translate-y-0.5 hover:shadow-md'
-            }`}
-            aria-current={activeSection === 'executive' ? 'true' : 'false'}
-          >
-            Resumo
-          </a>
-          <a
-            href="#rankings"
-            onClick={() => setActiveSection('rankings')}
-            className={`px-3 py-1.5 rounded-full border border-slate-200 shadow-sm transition ${
-              activeSection === 'rankings'
-                ? 'bg-slate-900 text-white'
-                : 'bg-white text-slate-700 hover:-translate-y-0.5 hover:shadow-md'
-            }`}
-            aria-current={activeSection === 'rankings' ? 'true' : 'false'}
-          >
-            Rankings
-          </a>
-          <a
-            href="#stores"
-            onClick={() => setActiveSection('stores')}
-            className={`px-3 py-1.5 rounded-full border border-slate-200 shadow-sm transition ${
-              activeSection === 'stores'
-                ? 'bg-slate-900 text-white'
-                : 'bg-white text-slate-700 hover:-translate-y-0.5 hover:shadow-md'
-            }`}
-            aria-current={activeSection === 'stores' ? 'true' : 'false'}
-          >
-            Lojas
-          </a>
-          <a
-            href="#payments"
-            onClick={() => setActiveSection('payments')}
-            className={`px-3 py-1.5 rounded-full border border-slate-200 shadow-sm transition ${
-              activeSection === 'payments'
-                ? 'bg-slate-900 text-white'
-                : 'bg-white text-slate-700 hover:-translate-y-0.5 hover:shadow-md'
-            }`}
-            aria-current={activeSection === 'payments' ? 'true' : 'false'}
-          >
-            Pagamentos
-          </a>
-          <a
-            href="#logs"
-            onClick={() => setActiveSection('logs')}
-            className={`px-3 py-1.5 rounded-full border border-slate-200 shadow-sm transition ${
-              activeSection === 'logs'
-                ? 'bg-slate-900 text-white'
-                : 'bg-white text-slate-700 hover:-translate-y-0.5 hover:shadow-md'
-            }`}
-            aria-current={activeSection === 'logs' ? 'true' : 'false'}
-          >
-            Logs
-          </a>
-          <a
-            href="#events"
-            onClick={() => setActiveSection('events')}
-            className={`px-3 py-1.5 rounded-full border border-slate-200 shadow-sm transition ${
-              activeSection === 'events'
-                ? 'bg-slate-900 text-white'
-                : 'bg-white text-slate-700 hover:-translate-y-0.5 hover:shadow-md'
-            }`}
-            aria-current={activeSection === 'events' ? 'true' : 'false'}
-          >
-            Eventos
-          </a>
-        </div>
-      </div>
-
-      {summary && (
-=======
         <PremiumTabs
           items={[
             { id: 'executive', label: 'Resumo' },
@@ -1316,7 +1102,6 @@ export function SuperAdmin() {
       </div>
 
       {summary && activeSection === 'executive' && (
->>>>>>> main
         <div className="grid md:grid-cols-3 gap-3">
           <div className="rounded-2xl p-4 border border-emerald-100 bg-gradient-to-br from-emerald-50 via-white to-white">
             <p className="text-xs uppercase text-emerald-600 font-semibold">Ativação da base</p>
@@ -1338,11 +1123,7 @@ export function SuperAdmin() {
 
         {loading && <div className="text-sm text-slate-500">Carregando...</div>}
 
-<<<<<<< HEAD
-        {summary && (
-=======
         {summary && activeSection === 'executive' && (
->>>>>>> main
           <div id="executive" className="grid lg:grid-cols-[2.1fr,1fr] gap-4">
             <div className="relative overflow-hidden rounded-3xl bg-slate-900 text-white p-6 shadow-lg">
               <div className="absolute -right-20 -top-20 w-64 h-64 rounded-full bg-brand-primary/20 blur-3xl" />
@@ -1382,12 +1163,9 @@ export function SuperAdmin() {
                   <span className="px-3 py-1 rounded-full bg-white/10 border border-white/10">
                     {summary.totalStores} lojas criadas
                   </span>
-<<<<<<< HEAD
-=======
                   <span className="px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-300/40 text-emerald-100">
                     {storeHealth.vip} lojas VIP
                   </span>
->>>>>>> main
                   <span className="px-3 py-1 rounded-full bg-white/10 border border-white/10">
                     {storeHealth.open} abertas · {storeHealth.closed} fechadas
                   </span>
@@ -1426,13 +1204,10 @@ export function SuperAdmin() {
                   <p className="text-xs text-red-700 uppercase">Expiradas</p>
                   <p className="text-xl font-black text-red-700">{storeHealth.expired}</p>
                 </div>
-<<<<<<< HEAD
-=======
                 <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-3">
                   <p className="text-xs text-emerald-700 uppercase">VIP</p>
                   <p className="text-xl font-black text-emerald-700">{storeHealth.vip}</p>
                 </div>
->>>>>>> main
               </div>
               <div className="rounded-2xl border border-slate-200 p-3">
                 <p className="text-xs uppercase text-slate-400">Pagamentos</p>
@@ -1461,18 +1236,6 @@ export function SuperAdmin() {
                 {expiringSoon.length === 0 ? (
                   <p className="text-sm text-slate-500 mt-2">Nenhuma loja em risco imediato.</p>
                 ) : (
-<<<<<<< HEAD
-                  <div className="mt-2 space-y-2">
-                    {expiringSoon.map((store: any) => (
-                      <div key={store.id} className="flex items-center justify-between text-sm">
-                        <div>
-                          <p className="font-semibold text-slate-700">{store.name}</p>
-                          <p className="text-xs text-slate-400">{store.slug}</p>
-                        </div>
-                        <span className="px-2 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">
-                          {store.daysLeft}d
-                        </span>
-=======
                   <div className="mt-2 grid gap-2">
                     {expiringSoon.map((store: any) => (
                       <div
@@ -1518,7 +1281,6 @@ export function SuperAdmin() {
                             vence em {formatDate(store.endDate)}
                           </span>
                         </div>
->>>>>>> main
                       </div>
                     ))}
                   </div>
@@ -1528,11 +1290,7 @@ export function SuperAdmin() {
           </div>
         )}
 
-<<<<<<< HEAD
-        {summary && (
-=======
         {summary && activeSection === 'rankings' && (
->>>>>>> main
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
               <div className="flex items-center justify-between mb-2">
@@ -1550,8 +1308,6 @@ export function SuperAdmin() {
               <p className="text-2xl font-black text-emerald-600">{summary.activeSubscriptions}</p>
               <p className="text-xs text-slate-400 mt-1">Ativação: {activeRate.toFixed(1)}%</p>
             </div>
-<<<<<<< HEAD
-=======
             <div className="bg-white border border-emerald-200 rounded-2xl p-4 shadow-sm">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-xs uppercase text-emerald-600 font-semibold">Lojas VIP</p>
@@ -1560,7 +1316,6 @@ export function SuperAdmin() {
               <p className="text-2xl font-black text-emerald-700">{storeHealth.vip}</p>
               <p className="text-xs text-emerald-600/70 mt-1">Isentas de plano</p>
             </div>
->>>>>>> main
             <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-xs uppercase text-slate-400 font-semibold">Lojas expirando</p>
@@ -1614,13 +1369,8 @@ export function SuperAdmin() {
           </div>
         )}
 
-<<<<<<< HEAD
-        {summary && (
-          <div id="rankings" className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
-=======
         {summary && activeSection === 'rankings' && (
           <div id="rankings" className="bg-gradient-to-br from-emerald-50 via-white to-white border border-emerald-100 rounded-2xl p-4 shadow-sm">
->>>>>>> main
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <TrendUp size={18} weight="duotone" className="text-emerald-600" />
@@ -1639,11 +1389,7 @@ export function SuperAdmin() {
             </div>
             {sectionsOpen.rankings ? (
               <div className="grid lg:grid-cols-2 gap-4 mt-4">
-<<<<<<< HEAD
-                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4">
-=======
                 <div className="bg-gradient-to-br from-emerald-50 via-white to-white border border-emerald-200 rounded-2xl p-4">
->>>>>>> main
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <TrendUp size={18} weight="duotone" className="text-emerald-600" />
@@ -1653,12 +1399,6 @@ export function SuperAdmin() {
                   <div className="space-y-3">
                     {rankings.byRevenue?.length ? (
                       rankings.byRevenue.map((store: any, index: number) => (
-<<<<<<< HEAD
-                        <div key={store.id} className="flex items-center justify-between text-sm">
-                          <div>
-                            <p className="font-semibold text-slate-700">
-                              {index + 1}. {store.name}
-=======
                         <div key={store.id} className="flex items-center justify-between text-sm rounded-xl border border-emerald-100 bg-white px-3 py-2">
                           <div>
                             <p className="font-semibold text-slate-700">
@@ -1668,7 +1408,6 @@ export function SuperAdmin() {
                                   VIP
                                 </span>
                               )}
->>>>>>> main
                             </p>
                             <p className="text-xs text-slate-400">{store.slug}</p>
                           </div>
@@ -1683,29 +1422,16 @@ export function SuperAdmin() {
                     )}
                   </div>
                 </div>
-<<<<<<< HEAD
-                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <ChartBar size={18} weight="duotone" className="text-slate-600" />
-=======
                 <div className="bg-gradient-to-br from-blue-50 via-white to-white border border-blue-200 rounded-2xl p-4">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <ChartBar size={18} weight="duotone" className="text-blue-600" />
->>>>>>> main
                       <h3 className="text-lg font-bold text-slate-800">Top lojas por pedidos</h3>
                     </div>
                   </div>
                   <div className="space-y-3">
                     {rankings.byOrders?.length ? (
                       rankings.byOrders.map((store: any, index: number) => (
-<<<<<<< HEAD
-                        <div key={store.id} className="flex items-center justify-between text-sm">
-                          <div>
-                            <p className="font-semibold text-slate-700">
-                              {index + 1}. {store.name}
-=======
                         <div key={store.id} className="flex items-center justify-between text-sm rounded-xl border border-blue-100 bg-white px-3 py-2">
                           <div>
                             <p className="font-semibold text-slate-700">
@@ -1715,7 +1441,6 @@ export function SuperAdmin() {
                                   VIP
                                 </span>
                               )}
->>>>>>> main
                             </p>
                             <p className="text-xs text-slate-400">{store.slug}</p>
                           </div>
@@ -1737,17 +1462,10 @@ export function SuperAdmin() {
           </div>
         )}
 
-<<<<<<< HEAD
-        <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <ChartBar size={20} weight="duotone" className="text-slate-700" />
-=======
         <div className="bg-gradient-to-br from-blue-50 via-white to-white border border-blue-100 rounded-2xl p-4 shadow-sm">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <ChartBar size={20} weight="duotone" className="text-blue-700" />
->>>>>>> main
               <h2 className="text-lg font-bold text-slate-800">Receita por mês</h2>
             </div>
             <button
@@ -1781,20 +1499,12 @@ export function SuperAdmin() {
           )}
         </div>
 
-<<<<<<< HEAD
-        <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
-          <p className="text-sm text-slate-500">
-=======
         <div className="bg-gradient-to-r from-amber-50 via-white to-white border border-amber-100 rounded-2xl p-4 shadow-sm">
           <p className="text-sm text-amber-900">
->>>>>>> main
             Receita paga no periodo selecionado: <span className="font-semibold">{formatCurrency(periodTotal)}</span>
           </p>
         </div>
 
-<<<<<<< HEAD
-        <div id="stores" className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm overflow-x-auto">
-=======
         <FormSection
           title="Lojas e performance"
           variant="primary"
@@ -1803,7 +1513,6 @@ export function SuperAdmin() {
           }`}
           contentClassName="space-y-3"
         >
->>>>>>> main
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Storefront size={18} weight="duotone" className="text-slate-700" />
@@ -1822,13 +1531,6 @@ export function SuperAdmin() {
           </div>
           {sectionsOpen.stores ? (
             <>
-<<<<<<< HEAD
-              <table className="min-w-full text-sm">
-                <thead className="text-xs uppercase text-slate-400 border-b">
-                  <tr>
-                    <th className="py-2 pr-4 text-left">Loja</th>
-                    <th className="py-2 pr-4 text-left">Plano</th>
-=======
               <div className="flex flex-wrap items-center gap-2 mb-3">
                 <button
                   type="button"
@@ -1870,50 +1572,26 @@ export function SuperAdmin() {
                     <th className="py-2 pr-4 text-left">Loja</th>
                     <th className="py-2 pr-4 text-left">Plano</th>
                     <th className="py-2 pr-4 text-left">VIP</th>
->>>>>>> main
                     <th className="py-2 pr-4 text-left">Status</th>
                     <th className="py-2 pr-4 text-left">Criada</th>
                     <th className="py-2 pr-4 text-left">Expira</th>
                     <th className="py-2 pr-4 text-left">Dias</th>
-<<<<<<< HEAD
-                    <th className="py-2 pr-4 text-left">Pedidos</th>
-                    <th className="py-2 pr-4 text-left">Receita pedidos</th>
-                    <th className="py-2 pr-4 text-left">Mais vendido</th>
-=======
->>>>>>> main
                     <th className="py-2 pr-4 text-left">Pagamento</th>
                     <th className="py-2 text-right">Valor</th>
                   </tr>
                 </thead>
-<<<<<<< HEAD
-                <tbody className="divide-y">
-                  {stores.map((store: any) => {
-                    const planName =
-                      store.subscription?.plan?.displayName ||
-=======
                 <tbody className="divide-y divide-slate-100">
                   {filteredStores.map((store: any) => {
                     const isVip = Boolean(store.settings?.planExempt);
                     const planName =
                       (isVip ? 'Isento de plano' : null) ||
                         store.subscription?.plan?.displayName ||
->>>>>>> main
                       formatPlanName(store.subscription?.plan?.name || '-');
                     const planPrice = store.subscription?.plan?.price || 0;
                     const status = store.subscription?.status || 'PENDING';
                     const endDate = store.subscription?.endDate;
                     const remaining = daysUntil(endDate);
                     const paymentStatus = store.latestPayment?.status || '-';
-<<<<<<< HEAD
-                    const ordersCount = store.orderMetrics?.totalOrders || 0;
-                    const ordersRevenue = store.orderMetrics?.totalRevenue || 0;
-                    const topProduct = store.topProduct?.name || '-';
-                    const topProductQty = store.topProduct?.quantity || 0;
-                    return (
-                      <tr key={store.id}>
-                        <td className="py-3 pr-4">
-                          <div className="font-semibold text-slate-700">{store.name}</div>
-=======
                     return (
                       <tr key={store.id} className="hover:bg-slate-50/70">
                         <td className="py-3 pr-4">
@@ -1925,13 +1603,10 @@ export function SuperAdmin() {
                               </span>
                             )}
                           </div>
->>>>>>> main
                           <div className="text-xs text-slate-400">{store.slug}</div>
                         </td>
                         <td className="py-3 pr-4 capitalize">{planName}</td>
                         <td className="py-3 pr-4">
-<<<<<<< HEAD
-=======
                           <div className="flex flex-col gap-2 min-w-[160px]">
                             <button
                               type="button"
@@ -1947,7 +1622,6 @@ export function SuperAdmin() {
                           </div>
                         </td>
                         <td className="py-3 pr-4">
->>>>>>> main
                           <span className={`px-2 py-1 rounded-full text-xs font-semibold ${statusStyle(status)}`}>
                             {status}
                           </span>
@@ -1955,17 +1629,6 @@ export function SuperAdmin() {
                         <td className="py-3 pr-4">{formatDate(store.createdAt)}</td>
                         <td className="py-3 pr-4">{formatDate(endDate)}</td>
                         <td className="py-3 pr-4">{remaining}</td>
-<<<<<<< HEAD
-                        <td className="py-3 pr-4 font-semibold text-slate-700">{ordersCount}</td>
-                        <td className="py-3 pr-4 text-slate-700">{formatCurrency(ordersRevenue)}</td>
-                        <td className="py-3 pr-4">
-                          <div className="text-slate-700">{topProduct}</div>
-                          {topProductQty ? (
-                            <div className="text-xs text-slate-400">{topProductQty} vendas</div>
-                          ) : null}
-                        </td>
-=======
->>>>>>> main
                         <td className="py-3 pr-4">{paymentStatus}</td>
                         <td className="py-3 text-right font-semibold text-brand-primary">
                           {formatCurrency(planPrice)}
@@ -1975,22 +1638,13 @@ export function SuperAdmin() {
                   })}
                 </tbody>
               </table>
-<<<<<<< HEAD
-              {stores.length === 0 && (
-=======
               {filteredStores.length === 0 && (
->>>>>>> main
                 <div className="text-center text-slate-500 py-8">Nenhuma loja encontrada.</div>
               )}
             </>
           ) : (
             <div className="text-sm text-slate-500">Tabela ocultada.</div>
           )}
-<<<<<<< HEAD
-        </div>
-
-        <div id="payments" className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm overflow-x-auto">
-=======
         </FormSection>
 
         <FormSection
@@ -2001,7 +1655,6 @@ export function SuperAdmin() {
           }`}
           contentClassName="space-y-3"
         >
->>>>>>> main
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <CreditCard size={20} className="text-slate-700" />
@@ -2044,21 +1697,13 @@ export function SuperAdmin() {
                 value={paymentQuery}
                 onChange={(event) => setPaymentQuery(event.target.value)}
                 placeholder="Buscar por loja, email, providerId..."
-<<<<<<< HEAD
-                className="ml-2 bg-transparent outline-none text-sm w-48"
-=======
                 className="ml-2 bg-transparent ds-focus-ring text-sm w-48"
->>>>>>> main
               />
             </div>
             <select
               value={dateRange}
               onChange={(event) => setDateRange(event.target.value)}
-<<<<<<< HEAD
-              className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none flex items-center gap-2"
-=======
               className="px-3 py-2 rounded-lg border border-slate-200 text-sm ds-focus-ring flex items-center gap-2"
->>>>>>> main
             >
               <option value="7">Últimos 7 dias</option>
               <option value="30">Últimos 30 dias</option>
@@ -2070,31 +1715,19 @@ export function SuperAdmin() {
               value={minAmount}
               onChange={(event) => setMinAmount(event.target.value)}
               placeholder="Min R$"
-<<<<<<< HEAD
-              className="w-24 px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none"
-=======
               className="w-24 px-3 py-2 rounded-lg border border-slate-200 text-sm ds-focus-ring"
->>>>>>> main
             />
             <input
               type="number"
               value={maxAmount}
               onChange={(event) => setMaxAmount(event.target.value)}
               placeholder="Max R$"
-<<<<<<< HEAD
-              className="w-24 px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none"
-=======
               className="w-24 px-3 py-2 rounded-lg border border-slate-200 text-sm ds-focus-ring"
->>>>>>> main
             />
             <select
               value={paymentStatusFilter}
               onChange={(event) => setPaymentStatusFilter(event.target.value)}
-<<<<<<< HEAD
-              className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none"
-=======
               className="px-3 py-2 rounded-lg border border-slate-200 text-sm ds-focus-ring"
->>>>>>> main
             >
               <option value="all">Status: Todos</option>
               <option value="PAID">Pago</option>
@@ -2104,11 +1737,7 @@ export function SuperAdmin() {
             <select
               value={paymentMethodFilter}
               onChange={(event) => setPaymentMethodFilter(event.target.value)}
-<<<<<<< HEAD
-              className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none"
-=======
               className="px-3 py-2 rounded-lg border border-slate-200 text-sm ds-focus-ring"
->>>>>>> main
             >
               <option value="all">Metodo: Todos</option>
               <option value="PIX">Pix</option>
@@ -2118,22 +1747,14 @@ export function SuperAdmin() {
             <select
               value={paymentProviderFilter}
               onChange={(event) => setPaymentProviderFilter(event.target.value)}
-<<<<<<< HEAD
-              className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none"
-=======
               className="px-3 py-2 rounded-lg border border-slate-200 text-sm ds-focus-ring"
->>>>>>> main
             >
               <option value="all">Provider: Todos</option>
               <option value="MERCADO_PAGO">Mercado Pago</option>
               <option value="MOCK">Mock</option>
             </select>
           </div>
-<<<<<<< HEAD
-          <table className="min-w-full text-sm">
-=======
           <table className="ds-table">
->>>>>>> main
             <thead className="text-xs uppercase text-slate-400 border-b">
               <tr>
                 <th className="py-2 pr-4 text-left">Data</th>
@@ -2154,9 +1775,6 @@ export function SuperAdmin() {
                     <tr>
                       <td className="py-3 pr-4">{formatDate(payment.createdAt)}</td>
                       <td className="py-3 pr-4">
-<<<<<<< HEAD
-                        <div className="font-semibold text-slate-700">{payment.store?.name || '-'}</div>
-=======
                         <div className="font-semibold text-slate-700 flex items-center gap-2">
                           {payment.store?.name || '-'}
                           {storeVipById.get(payment.store?.id) && (
@@ -2165,7 +1783,6 @@ export function SuperAdmin() {
                             </span>
                           )}
                         </div>
->>>>>>> main
                         <div className="text-xs text-slate-400">{payment.store?.slug || '-'}</div>
                       </td>
                       <td className="py-3 pr-4">
@@ -2276,11 +1893,6 @@ export function SuperAdmin() {
           ) : (
             <div className="text-sm text-slate-500">Tabela de pagamentos oculta.</div>
           )}
-<<<<<<< HEAD
-        </div>
-
-        <div id="logs" className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm overflow-x-auto">
-=======
         </FormSection>
 
         <FormSection
@@ -2291,7 +1903,6 @@ export function SuperAdmin() {
           }`}
           contentClassName="space-y-3"
         >
->>>>>>> main
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Funnel size={18} weight="duotone" className="text-slate-700" />
@@ -2327,21 +1938,13 @@ export function SuperAdmin() {
                 value={accessLogQuery}
                 onChange={(event) => setAccessLogQuery(event.target.value)}
                 placeholder="Buscar rota ou user-agent..."
-<<<<<<< HEAD
-                className="ml-2 bg-transparent outline-none text-sm w-48"
-=======
                 className="ml-2 bg-transparent ds-focus-ring text-sm w-48"
->>>>>>> main
               />
             </div>
             <select
               value={accessLogRole}
               onChange={(event) => setAccessLogRole(event.target.value)}
-<<<<<<< HEAD
-              className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none"
-=======
               className="px-3 py-2 rounded-lg border border-slate-200 text-sm ds-focus-ring"
->>>>>>> main
             >
               <option value="all">Role: Todas</option>
               <option value="SUPER_ADMIN">Super admin</option>
@@ -2351,11 +1954,7 @@ export function SuperAdmin() {
             <select
               value={accessLogMethod}
               onChange={(event) => setAccessLogMethod(event.target.value)}
-<<<<<<< HEAD
-              className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none"
-=======
               className="px-3 py-2 rounded-lg border border-slate-200 text-sm ds-focus-ring"
->>>>>>> main
             >
               <option value="all">Metodo: Todos</option>
               <option value="GET">GET</option>
@@ -2367,11 +1966,7 @@ export function SuperAdmin() {
             <select
               value={accessLogStatus}
               onChange={(event) => setAccessLogStatus(event.target.value)}
-<<<<<<< HEAD
-              className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none"
-=======
               className="px-3 py-2 rounded-lg border border-slate-200 text-sm ds-focus-ring"
->>>>>>> main
             >
               <option value="all">Status: Todos</option>
               <option value="200">200</option>
@@ -2386,11 +1981,7 @@ export function SuperAdmin() {
             <select
               value={accessLogStore}
               onChange={(event) => setAccessLogStore(event.target.value)}
-<<<<<<< HEAD
-              className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none"
-=======
               className="px-3 py-2 rounded-lg border border-slate-200 text-sm ds-focus-ring"
->>>>>>> main
             >
               <option value="all">Loja: Todas</option>
               {stores.map((store: any) => (
@@ -2400,11 +1991,7 @@ export function SuperAdmin() {
               ))}
             </select>
           </div>
-<<<<<<< HEAD
-          <table className="min-w-full text-sm">
-=======
           <table className="ds-table">
->>>>>>> main
             <thead className="text-xs uppercase text-slate-400 border-b">
               <tr>
                 <th className="py-2 pr-4 text-left">Data</th>
@@ -2466,11 +2053,6 @@ export function SuperAdmin() {
           ) : (
             <div className="text-sm text-slate-500">Logs ocultos.</div>
           )}
-<<<<<<< HEAD
-        </div>
-
-        <div id="events" className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm overflow-x-auto">
-=======
         </FormSection>
 
         <FormSection
@@ -2481,7 +2063,6 @@ export function SuperAdmin() {
           }`}
           contentClassName="space-y-3"
         >
->>>>>>> main
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <ArrowClockwise size={20} weight="duotone" className="text-slate-700" />
@@ -2513,11 +2094,7 @@ export function SuperAdmin() {
             <select
               value={eventStoreFilter}
               onChange={(event) => setEventStoreFilter(event.target.value)}
-<<<<<<< HEAD
-              className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none"
-=======
               className="px-3 py-2 rounded-lg border border-slate-200 text-sm ds-focus-ring"
->>>>>>> main
             >
               <option value="all">Todas as lojas</option>
               {stores.map((store: any) => (
@@ -2529,11 +2106,7 @@ export function SuperAdmin() {
             <select
               value={eventStatusFilter}
               onChange={(event) => setEventStatusFilter(event.target.value)}
-<<<<<<< HEAD
-              className="px-3 py-2 rounded-lg border border-slate-200 text-sm outline-none"
-=======
               className="px-3 py-2 rounded-lg border border-slate-200 text-sm ds-focus-ring"
->>>>>>> main
             >
               <option value="all">Status: Todos</option>
               <option value="approved">Aprovado</option>
@@ -2545,11 +2118,7 @@ export function SuperAdmin() {
               <option value="failed">Falhou</option>
             </select>
           </div>
-<<<<<<< HEAD
-          <table className="min-w-full text-sm">
-=======
           <table className="ds-table">
->>>>>>> main
             <thead className="text-xs uppercase text-slate-400 border-b">
               <tr>
                 <th className="py-2 pr-4 text-left">Data</th>
@@ -2626,13 +2195,6 @@ export function SuperAdmin() {
           ) : (
             <div className="text-sm text-slate-500">Eventos ocultos.</div>
           )}
-<<<<<<< HEAD
-        </div>
-
-      {selectedEventPayload && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-3xl p-6 space-y-4">
-=======
         </FormSection>
 
         <FormSection
@@ -2988,7 +2550,6 @@ export function SuperAdmin() {
         <div className="ds-sheet-backdrop">
           <div className="ds-sheet-panel w-full max-w-3xl rounded-t-3xl sm:rounded-3xl p-6 space-y-4">
             <div className="sm:hidden ds-sheet-handle" />
->>>>>>> main
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-bold text-slate-800">Payload do webhook</h3>
               <button
@@ -3004,11 +2565,6 @@ export function SuperAdmin() {
           </div>
         </div>
       )}
-<<<<<<< HEAD
-    </AdminLayout>
-  );
-}
-=======
 
       {kycHistoryOpen && (
         <div className="ds-sheet-backdrop">
@@ -3201,4 +2757,3 @@ export function SuperAdmin() {
   );
 }
 
->>>>>>> main

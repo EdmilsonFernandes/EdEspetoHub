@@ -1,15 +1,9 @@
 // @ts-nocheck
-<<<<<<< HEAD
-import { ChartBar, BookOpen, ChefHat, CreditCard, Package, Gear, ShoppingCart } from '@phosphor-icons/react';
-import { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-=======
 import * as React from 'react';
 import { ChartBar, BookOpen, CheckSquare, CreditCard, Package, Gear, ShoppingCart, X, Scooter, Hash, Storefront, Truck, CaretRight, Star, Bell, WarningCircle, MagnifyingGlass, UsersThree } from '@phosphor-icons/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { createPortal } from 'react-dom';
->>>>>>> main
 import { AdminLayout } from '../layouts/AdminLayout';
 import { BrandingSettings } from '../components/Admin/BrandingSettings';
 import DashboardView from '../components/Admin/DashboardView';
@@ -17,11 +11,8 @@ import { GrillQueue } from '../components/Admin/GrillQueue';
 import { OpeningHoursCard } from '../components/Admin/OpeningHoursCard';
 import { ProductManager } from '../components/Admin/ProductManager';
 import { OrderTypeSettingsCard } from '../components/Admin/OrderTypeSettingsCard';
-<<<<<<< HEAD
-=======
 import { StoreUsersPanel } from '../components/Admin/StoreUsersPanel';
 import { AdminMotoboys } from './AdminMotoboys';
->>>>>>> main
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useToast } from '../contexts/ToastContext';
@@ -30,11 +21,6 @@ import { productService } from '../services/productService';
 import { storeService } from '../services/storeService';
 import { subscriptionService } from '../services/subscriptionService';
 import { paymentService } from '../services/paymentService';
-<<<<<<< HEAD
-import { formatCurrency, formatDateTime, formatOrderDisplayId, formatOrderStatus, formatOrderType } from '../utils/format';
-import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
-import { resolveAssetUrl } from '../utils/resolveAssetUrl';
-=======
 import { motoboyAdminService } from '../services/motoboyAdminService';
 import { formatAddress, formatCurrency, formatDateTime, formatOrderDisplayId, formatOrderStatus, formatOrderType } from '../utils/format';
 import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
@@ -43,7 +29,6 @@ import { formatSelectedModifiers } from '../utils/productModifiers';
 import { FormSection } from '../components/common/FormSection';
 import { PremiumSelect } from '../components/common/PremiumSelect';
 import { AdminDesktopSidebar } from '../components/Admin/AdminDesktopSidebar';
->>>>>>> main
 
 const formatPlanCycle = (days: number) => {
   if (!Number.isFinite(days)) return '—';
@@ -58,11 +43,7 @@ const OrdersView = ({ orders, products, storeSlug }) => {
   const [dateFilter, setDateFilter] = useState('');
   const [periodFilter, setPeriodFilter] = useState('all');
   const [ordersPage, setOrdersPage] = useState(1);
-<<<<<<< HEAD
-  const [ordersPageSize, setOrdersPageSize] = useState(9);
-=======
   const [ordersPageSize, setOrdersPageSize] = useState(10);
->>>>>>> main
   const productsById = useMemo(() => {
     const map = new Map();
     (products || []).forEach((product) => map.set(product.id, product));
@@ -79,8 +60,6 @@ const OrdersView = ({ orders, products, storeSlug }) => {
     return [...(orders || [])].sort((a, b) => resolveTime(b.createdAt) - resolveTime(a.createdAt));
   }, [orders]);
 
-<<<<<<< HEAD
-=======
   const canonicalStatus = (raw: any) => {
     const st = String(raw || '').toLowerCase();
     if (st === 'delivered') return 'done';
@@ -88,7 +67,6 @@ const OrdersView = ({ orders, products, storeSlug }) => {
     return st || 'pending';
   };
 
->>>>>>> main
   const filteredOrders = useMemo(() => {
     const normalized = query.trim().toLowerCase();
     return sortedOrders.filter((order) => {
@@ -102,14 +80,10 @@ const OrdersView = ({ orders, products, storeSlug }) => {
           if (createdAt < cutoff) return false;
         }
       }
-<<<<<<< HEAD
-      if (statusFilter !== 'all' && order.status !== statusFilter) return false;
-=======
       if (statusFilter !== 'all') {
         const st = canonicalStatus(order.status);
         if (st !== String(statusFilter).toLowerCase()) return false;
       }
->>>>>>> main
       if (dateFilter) {
         const date = order.createdAt?.seconds ? new Date(order.createdAt.seconds * 1000) : new Date(order.createdAt);
         if (!Number.isFinite(date.getTime())) return false;
@@ -131,8 +105,6 @@ const OrdersView = ({ orders, products, storeSlug }) => {
   }, [filteredOrders, ordersPage, ordersPageSize]);
   const ordersStart = filteredOrders.length === 0 ? 0 : (ordersPage - 1) * ordersPageSize + 1;
   const ordersEnd = Math.min(filteredOrders.length, ordersPage * ordersPageSize);
-<<<<<<< HEAD
-=======
   const groupedPagedOrders = useMemo(() => {
     const byLabel = new Map<string, any[]>();
     const now = new Date();
@@ -158,7 +130,6 @@ const OrdersView = ({ orders, products, storeSlug }) => {
     }
     return Array.from(byLabel.entries()).map(([label, list]) => ({ label, list }));
   }, [pagedOrders]);
->>>>>>> main
 
   useEffect(() => {
     setOrdersPage(1);
@@ -173,11 +144,7 @@ const OrdersView = ({ orders, products, storeSlug }) => {
   const statusCounts = useMemo(() => {
     return (orders || []).reduce(
       (acc, order) => {
-<<<<<<< HEAD
-        const key = order.status || 'pending';
-=======
         const key = canonicalStatus(order.status);
->>>>>>> main
         acc[key] = (acc[key] || 0) + 1;
         acc.all += 1;
         return acc;
@@ -187,15 +154,6 @@ const OrdersView = ({ orders, products, storeSlug }) => {
   }, [orders]);
 
   const statusStyles = (status) => {
-<<<<<<< HEAD
-    if (status === 'preparing') return 'bg-amber-100 text-amber-800';
-    if (status === 'ready') return 'bg-sky-100 text-sky-700';
-    if (status === 'done') return 'bg-green-100 text-green-800';
-    if (status === 'cancelled') return 'bg-slate-100 text-slate-600';
-    return 'bg-red-100 text-red-700';
-  };
-  const shortId = (value) => formatOrderDisplayId(value, storeSlug);
-=======
     const st = String(status || '').toLowerCase();
     if (st === 'pending') return 'bg-amber-100 text-amber-800';
     if (st === 'preparing') return 'bg-sky-100 text-sky-700';
@@ -281,7 +239,6 @@ const OrdersView = ({ orders, products, storeSlug }) => {
       </div>
     );
   };
->>>>>>> main
 
   return (
     <div className="space-y-4">
@@ -292,15 +249,6 @@ const OrdersView = ({ orders, products, storeSlug }) => {
         </div>
       </div>
 
-<<<<<<< HEAD
-      <div className="flex flex-col lg:flex-row lg:items-center gap-3">
-        <div className="flex flex-wrap gap-2">
-          {[
-            { id: 'all', label: 'Todos', count: statusCounts.all },
-            { id: 'pending', label: 'Pendentes', count: statusCounts.pending },
-            { id: 'preparing', label: 'Em preparo', count: statusCounts.preparing },
-            { id: 'ready', label: 'Aguardando retirada', count: statusCounts.ready },
-=======
       <div className="sticky top-2 z-10 rounded-2xl border border-slate-200 bg-white/95 px-3 py-3 shadow-sm backdrop-blur-sm">
         <div className="flex flex-col lg:flex-row lg:items-center gap-3">
           <div className="inline-flex flex-wrap items-center gap-1 rounded-lg bg-slate-100 p-1">
@@ -309,43 +257,21 @@ const OrdersView = ({ orders, products, storeSlug }) => {
             { id: 'pending', label: 'Pendentes', count: statusCounts.pending },
             { id: 'preparing', label: 'Em Preparação', count: statusCounts.preparing },
             { id: 'ready', label: 'Disponível para Coleta', count: statusCounts.ready },
->>>>>>> main
             { id: 'done', label: 'Finalizados', count: statusCounts.done },
             { id: 'cancelled', label: 'Cancelados', count: statusCounts.cancelled },
           ].map((filter) => (
             <button
               key={filter.id}
               onClick={() => setStatusFilter(filter.id)}
-<<<<<<< HEAD
-              className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all hover:-translate-y-0.5 active:scale-95 ${
-                statusFilter === filter.id
-                  ? 'bg-brand-primary text-white border-brand-primary'
-                  : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
-=======
               className={`ds-btn ds-focus-ring px-3 py-1.5 rounded-md text-xs font-semibold border transition-colors duration-150 ${
                 statusFilter === filter.id
                   ? 'bg-white text-slate-900 border-slate-300 shadow-sm'
                   : 'bg-transparent text-slate-600 border-transparent hover:bg-white/70'
->>>>>>> main
               }`}
             >
               {filter.label} ({filter.count})
             </button>
           ))}
-<<<<<<< HEAD
-        </div>
-        <div className="flex flex-col sm:flex-row gap-2 lg:ml-auto w-full lg:w-auto">
-          <select
-            value={periodFilter}
-            onChange={(e) => setPeriodFilter(e.target.value)}
-            className="w-full sm:w-36 rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-600 focus:ring-2 focus:ring-brand-primary"
-          >
-            <option value="all">Todo período</option>
-            <option value="7">Últimos 7 dias</option>
-            <option value="30">Últimos 30 dias</option>
-            <option value="90">Últimos 90 dias</option>
-          </select>
-=======
           </div>
           <div className="flex flex-col sm:flex-row gap-2 lg:ml-auto w-full lg:w-auto">
           <PremiumSelect
@@ -359,41 +285,26 @@ const OrdersView = ({ orders, products, storeSlug }) => {
               { value: '90', label: 'Últimos 90 dias' },
             ]}
           />
->>>>>>> main
           <input
             type="date"
             value={dateFilter}
             onChange={(e) => setDateFilter(e.target.value)}
-<<<<<<< HEAD
-            className="w-full sm:w-44 rounded-lg border border-slate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-brand-primary"
-=======
             className="ds-input ds-focus-ring w-full sm:w-44 py-2 text-sm"
->>>>>>> main
           />
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-<<<<<<< HEAD
-            placeholder="Buscar cliente, telefone ou pedido (ex: 89035f7b)"
-            className="w-full sm:w-64 rounded-lg border border-slate-200 px-3 py-2 text-sm focus:ring-2 focus:ring-brand-primary"
-          />
-=======
             placeholder="Buscar cliente, telefone ou ID do pedido"
             className="ds-input ds-focus-ring w-full sm:w-64 py-2 text-sm"
           />
           </div>
->>>>>>> main
         </div>
       </div>
 
       {filteredOrders.length === 0 ? (
         <div className="py-12 text-center text-slate-500">
-<<<<<<< HEAD
-          <div className="mx-auto max-w-md rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-6 py-8">
-=======
           <div className="mx-auto max-w-md ds-empty-state px-6 py-8">
->>>>>>> main
             <div className="text-4xl">🧾</div>
             <p className="mt-3 text-sm font-semibold text-slate-700">Nenhum pedido por aqui ainda.</p>
             <p className="text-xs text-slate-500 mt-1">
@@ -403,37 +314,6 @@ const OrdersView = ({ orders, products, storeSlug }) => {
         </div>
       ) : (
         <div className="space-y-4">
-<<<<<<< HEAD
-          {pagedOrders.map((order, index) => (
-            <div
-              key={order.id || `${order.customerName}-${index}`}
-              className="border border-slate-200 rounded-3xl bg-white p-5 shadow-sm space-y-4"
-            >
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div>
-                  <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                    <span className="px-2.5 py-1 rounded-full border border-slate-200 bg-slate-50 font-semibold">
-                      Pedido #{shortId(order.id)}
-                    </span>
-                    <span>{formatDateTime(order.createdAt)}</span>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                    <span>
-                      {formatOrderType(order.type)}
-                      {order.table ? ` · Mesa ${order.table}` : ''}
-                    </span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusStyles(order.status)}`}>
-                    {formatOrderStatus(order.status)}
-                  </span>
-                  <span className="text-sm font-bold text-brand-primary">
-                    {formatCurrency(order.total || 0)}
-                  </span>
-                </div>
-              </div>
-=======
           {groupedPagedOrders.map((group) => (
             <div key={group.label} className="space-y-3">
               <div className="flex items-center gap-2">
@@ -479,7 +359,6 @@ const OrdersView = ({ orders, products, storeSlug }) => {
                     {renderMoneyBreakdown(order)}
 	                </div>
 	              </div>
->>>>>>> main
 
                 <div className="grid sm:grid-cols-3 gap-3 text-sm text-slate-600">
                   <div>
@@ -505,59 +384,6 @@ const OrdersView = ({ orders, products, storeSlug }) => {
                     );
                   })()}
                 </div>
-<<<<<<< HEAD
-                <div>
-                  <p className="text-xs uppercase text-slate-400">Endereço</p>
-                  <p className="font-semibold text-slate-700">{order.address || '-'}</p>
-                </div>
-              </div>
-
-              {(order.items || []).length > 0 && (
-                <div className="border-t border-slate-100 pt-3">
-                  <p className="text-xs uppercase text-slate-400 mb-2">Itens</p>
-                  <div className="grid sm:grid-cols-2 gap-2 text-sm text-slate-700">
-                    {order.items.map((item) => {
-                      const quantity = item.qty ?? item.quantity ?? 1;
-                      const image =
-                        item.imageUrl || productsById.get(item.productId || item.id)?.imageUrl || '';
-                      return (
-                        <div key={item.id || item.name} className="flex items-center justify-between gap-3">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-lg overflow-hidden border border-slate-200 bg-slate-100 flex-shrink-0">
-                              {image ? (
-                                <img
-                                  src={resolveAssetUrl(image)}
-                                  alt={item.name}
-                                  className="w-full h-full object-cover"
-                                />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center text-[10px] text-slate-400">
-                                  🍖
-                                </div>
-                              )}
-                            </div>
-                            <div className="flex flex-col">
-                              <span className="font-semibold">
-                                {quantity}x {item.name}
-                              </span>
-                              <div className="flex flex-wrap gap-1 mt-1">
-                                {item?.cookingPoint && (
-                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800 border border-amber-200">
-                                    {item.cookingPoint}
-                                  </span>
-                                )}
-                                {item?.passSkewer && (
-                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-fuchsia-100 text-fuchsia-700 border border-fuchsia-200">
-                                    passar varinha
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                          <span className="font-semibold">
-                            {formatCurrency((item.unitPrice ?? item.price ?? 0) * quantity)}
-                          </span>
-=======
 	                <div>
 	                  <p className="text-xs uppercase text-slate-400">Endereço</p>
 	                  <p className="font-semibold text-slate-700">{formatAddress(order.address || order.deliveryAddress) || '-'}</p>
@@ -635,21 +461,17 @@ const OrdersView = ({ orders, products, storeSlug }) => {
                               </span>
                             ))}
                           </div>
->>>>>>> main
                         </div>
                       );
                     })}
                   </div>
                 </div>
               )}
-<<<<<<< HEAD
-=======
                     </>
                   );
                 })()}
                 </div>
               ))}
->>>>>>> main
             </div>
           ))}
           {filteredOrders.length > 0 && (
@@ -658,22 +480,6 @@ const OrdersView = ({ orders, products, storeSlug }) => {
                 <span>
                   Exibindo {ordersStart}-{ordersEnd} de {filteredOrders.length}
                 </span>
-<<<<<<< HEAD
-                <span>Pagina {ordersPage} de {ordersTotalPages}</span>
-                <label className="flex items-center gap-2">
-                  <span>Por pagina</span>
-                  <select
-                    value={ordersPageSize}
-                    onChange={(event) => setOrdersPageSize(Number(event.target.value))}
-                    className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-600 focus:ring-2 focus:ring-brand-primary"
-                  >
-                    {[5, 9, 12, 15].map((size) => (
-                      <option key={size} value={size}>
-                        {size}
-                      </option>
-                    ))}
-                  </select>
-=======
                 <span>Página {ordersPage} de {ordersTotalPages}</span>
                 <label className="flex items-center gap-2">
                   <span>Por página</span>
@@ -683,7 +489,6 @@ const OrdersView = ({ orders, products, storeSlug }) => {
                     className="w-[110px]"
                     options={[10, 20, 30].map((size) => ({ value: String(size), label: String(size) }))}
                   />
->>>>>>> main
                 </label>
               </div>
               <div className="flex items-center gap-2">
@@ -712,15 +517,6 @@ const OrdersView = ({ orders, products, storeSlug }) => {
   );
 };
 
-<<<<<<< HEAD
-const PaymentsView = ({ subscription, loading, error, payments }) => {
-  const [showAllHistory, setShowAllHistory] = useState(false);
-  const plan = subscription?.plan;
-  const planLabel = plan?.displayName || plan?.name || 'Plano não identificado';
-  const priceValue = subscription?.latestPaymentAmount ?? plan?.price ?? 0;
-  const methodMeta = getPaymentMethodMeta(subscription?.paymentMethod);
-  const expiresLabel = subscription?.endDate ? formatDateTime(subscription.endDate) : '—';
-=======
 const ReviewsView = ({ reviews = [], canUseDeliveryReviewsAndTips = false, onUpgrade, storeSlug }) => {
   const [query, setQuery] = useState('');
   const [ratingFilter, setRatingFilter] = useState<'all' | '1' | '2' | '3' | '4' | '5'>('all');
@@ -1098,7 +894,6 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
     ? { label: 'Isento de plano', icon: null }
     : getPaymentMethodMeta(subscription?.paymentMethod);
   const expiresLabel = isVip ? 'Sem vencimento' : (subscription?.endDate ? formatDateTime(subscription.endDate) : '—');
->>>>>>> main
   const resolveDaysUntil = (value) => {
     if (!value) return null;
     const end = new Date(value).getTime();
@@ -1106,15 +901,9 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
     const diffDays = Math.ceil((end - Date.now()) / (1000 * 60 * 60 * 24));
     return diffDays;
   };
-<<<<<<< HEAD
-  const expiresInDays = resolveDaysUntil(subscription?.endDate);
-  const expiresHint =
-    typeof expiresInDays === 'number'
-=======
   const expiresInDays = isVip ? null : resolveDaysUntil(subscription?.endDate);
   const expiresHint =
     !isVip && typeof expiresInDays === 'number'
->>>>>>> main
       ? expiresInDays > 1
         ? `em ${expiresInDays} dias`
         : expiresInDays === 1
@@ -1124,18 +913,6 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
         : `expirado há ${Math.abs(expiresInDays)} dia${Math.abs(expiresInDays) === 1 ? '' : 's'}`
       : '';
   const rawStatus = (subscription?.status || '').toUpperCase();
-<<<<<<< HEAD
-  const statusMap: Record<string, { label: string; tone: string }> = {
-    TRIAL: { label: 'Trial ativo (7 dias)', tone: 'bg-emerald-100 text-emerald-700' },
-    ACTIVE: { label: 'Assinatura ativa', tone: 'bg-emerald-100 text-emerald-700' },
-    PENDING: { label: 'Aguardando pagamento', tone: 'bg-amber-100 text-amber-700' },
-    EXPIRED: { label: 'Assinatura expirada', tone: 'bg-rose-100 text-rose-700' },
-    SUSPENDED: { label: 'Assinatura suspensa', tone: 'bg-rose-100 text-rose-700' },
-    CANCELLED: { label: 'Assinatura cancelada', tone: 'bg-slate-100 text-slate-600' },
-  };
-  const statusLabel = statusMap[rawStatus]?.label || subscription?.status || '—';
-  const statusTone = statusMap[rawStatus]?.tone || 'bg-slate-100 text-slate-600';
-=======
   const statusMap: Record<string, { label: string; tone: string; accent: string }> = {
     TRIAL: { label: 'Trial ativo (7 dias)', tone: 'bg-emerald-100 text-emerald-700', accent: 'border-l-emerald-400 bg-white' },
     ACTIVE: { label: 'Assinatura ativa', tone: 'bg-emerald-100 text-emerald-700', accent: 'border-l-emerald-400 bg-white' },
@@ -1147,7 +924,6 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
   const statusLabel = isVip ? 'VIP ativo' : (statusMap[rawStatus]?.label || subscription?.status || '—');
   const statusTone = isVip ? 'bg-emerald-100 text-emerald-700' : (statusMap[rawStatus]?.tone || 'bg-slate-100 text-slate-600');
   const statusAccent = isVip ? 'border-l-emerald-400 bg-white' : (statusMap[rawStatus]?.accent || 'border-l-slate-200 bg-white');
->>>>>>> main
   const paidAtLabel = subscription?.latestPaymentAt ? formatDateTime(subscription.latestPaymentAt) : '—';
   const rawPaymentStatus = (subscription?.latestPaymentStatus || '').toUpperCase();
   const paymentStatusMap: Record<string, string> = {
@@ -1158,13 +934,9 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
     EXPIRED: 'Pagamento expirado',
   };
   const paymentStatus =
-<<<<<<< HEAD
-    rawStatus === 'TRIAL'
-=======
     isVip
       ? 'Isento de cobranca (VIP)'
       : rawStatus === 'TRIAL'
->>>>>>> main
       ? 'Sem cobrança durante o trial'
       : paymentStatusMap[rawPaymentStatus] || subscription?.latestPaymentStatus || '—';
   const historyStatusMap: Record<string, string> = {
@@ -1181,11 +953,6 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
     CANCELLED: 'bg-slate-100 text-slate-600',
     EXPIRED: 'bg-slate-100 text-slate-600',
   };
-<<<<<<< HEAD
-
-  if (loading) {
-    return <div className="py-8 text-sm text-slate-500">Carregando dados de pagamento...</div>;
-=======
   const historyAccentMap: Record<string, string> = {
     PAID: 'border-l-emerald-400 bg-white',
     PENDING: 'border-l-amber-400 bg-white',
@@ -1228,7 +995,6 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
         <div className="ds-skeleton h-16 w-full" />
       </div>
     );
->>>>>>> main
   }
 
   if (error) {
@@ -1236,18 +1002,6 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
   }
 
   if (!subscription) {
-<<<<<<< HEAD
-    return <div className="py-8 text-sm text-slate-500">Nenhuma assinatura encontrada.</div>;
-  }
-
-  return (
-    <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
-      <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_20px_60px_-50px_rgba(15,23,42,0.45)] space-y-6">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Plano atual</p>
-            <h3 className="text-2xl font-bold text-slate-900 mt-2">{planLabel}</h3>
-=======
     return (
       <div className="ds-empty-state py-8 text-center">
         <p className="text-base font-semibold text-slate-800">Nenhuma assinatura encontrada</p>
@@ -1301,21 +1055,12 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
                 </span>
               )}
             </div>
->>>>>>> main
           </div>
           <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusTone}`}>
             {statusLabel}
           </span>
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
-<<<<<<< HEAD
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Valor</p>
-            <p className="text-lg font-semibold text-slate-900 mt-2">{formatCurrency(priceValue)}</p>
-            <p className="text-xs text-slate-500 mt-1">Plano {plan?.billingCycle || 'mensal'}</p>
-          </div>
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-=======
           <div className="rounded-2xl border border-slate-200 border-l-4 border-l-rose-400 bg-slate-50 p-4">
             <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Valor</p>
             <p className="text-lg font-semibold text-slate-900 mt-2">{formatCurrency(priceValue)}</p>
@@ -1324,7 +1069,6 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
             </p>
           </div>
           <div className="rounded-2xl border border-slate-200 border-l-4 border-l-sky-400 bg-slate-50 p-4">
->>>>>>> main
             <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Forma de pagamento</p>
             <p className="text-lg font-semibold text-slate-900 mt-2 inline-flex items-center gap-2">
               {methodMeta.icon && (
@@ -1337,15 +1081,6 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
         </div>
       </div>
 
-<<<<<<< HEAD
-      <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_20px_60px_-50px_rgba(15,23,42,0.35)] space-y-4">
-        <div>
-          <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Ciclo</p>
-          <h3 className="text-lg font-bold text-slate-900 mt-2">Próximo vencimento</h3>
-        </div>
-        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-          <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Expira em</p>
-=======
       <div className="rounded-3xl border border-slate-200 border-l-4 border-l-slate-300 bg-white p-4 sm:p-6 shadow-[0_20px_60px_-50px_rgba(15,23,42,0.35)] space-y-4">
         <div>
           <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Ciclo</p>
@@ -1353,18 +1088,10 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
         </div>
         <div className="rounded-2xl border border-slate-200 border-l-4 border-l-slate-300 bg-white p-4">
           <p className="text-xs uppercase tracking-[0.25em] text-slate-400">{isVip ? 'Vencimento' : 'Expira em'}</p>
->>>>>>> main
           <p className="text-lg font-semibold text-slate-900 mt-2">{expiresLabel}</p>
           {expiresHint && (
             <p className="text-xs font-semibold text-slate-600 mt-1">{expiresHint}</p>
           )}
-<<<<<<< HEAD
-          <p className="text-xs text-slate-500 mt-1">Último pagamento: {paidAtLabel}</p>
-        </div>
-        {Array.isArray(payments) && payments.length > 0 && (
-          <div className="pt-2 border-t border-slate-200">
-            <div className="flex items-center justify-between gap-3">
-=======
           <p className="text-xs text-slate-500 mt-1">
             {isVip ? 'Acesso liberado pelo administrador.' : `Último pagamento: ${paidAtLabel}`}
           </p>
@@ -1410,7 +1137,6 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
         {Array.isArray(payments) && payments.length > 0 && (
           <div ref={historySectionRef} className="scroll-mt-24 pt-2 border-t border-slate-200">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
->>>>>>> main
               <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Histórico de pagamentos</p>
               <label className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600">
                 <input
@@ -1428,24 +1154,15 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
                   showAllHistory ? true : (payment.status || '').toUpperCase() === 'PAID',
                 )
                 .slice(0, 6)
-<<<<<<< HEAD
-                .map((payment) => (
-                  <div key={payment.id} className="flex items-center justify-between text-sm">
-=======
                 .map((payment) => {
                   const normalizedStatus = (payment.status || '').toUpperCase();
                   const rowAccent = historyAccentMap[normalizedStatus] || 'border-l-slate-200 bg-white';
                   return (
                   <div key={payment.id} className={`flex items-center justify-between text-sm rounded-2xl border border-slate-200 border-l-4 px-3 py-2 ${rowAccent}`}>
->>>>>>> main
                   <div>
                     {(() => {
                       const paymentMeta = getPaymentMethodMeta(payment.method);
                       const providerMeta = getPaymentProviderMeta(payment.provider);
-<<<<<<< HEAD
-                      const normalizedStatus = (payment.status || '').toUpperCase();
-=======
->>>>>>> main
                       const statusLabel = historyStatusMap[normalizedStatus] || payment.status || '—';
                       const statusTone = historyToneMap[normalizedStatus] || 'bg-slate-100 text-slate-600';
                       return (
@@ -1487,21 +1204,12 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
                     </p>
                   </div>
                 </div>
-<<<<<<< HEAD
-              ))}
-=======
               )})}
->>>>>>> main
             </div>
             {!showAllHistory &&
               payments.filter((payment) => (payment.status || '').toUpperCase() === 'PAID').length === 0 && (
               <p className="mt-3 text-xs text-slate-500">Nenhum pagamento aprovado ainda.</p>
             )}
-<<<<<<< HEAD
-          </div>
-        )}
-      </div>
-=======
             <div className="mt-3 md:hidden">
               <button
                 type="button"
@@ -1515,7 +1223,6 @@ const PaymentsView = ({ subscription, loading, error, payments }) => {
         )}
       </div>
       </div>
->>>>>>> main
     </div>
   );
 };
@@ -1527,11 +1234,7 @@ interface Props {
 export function AdminDashboard({ session: sessionProp }: Props) {
   const navigate = useNavigate();
   const location = useLocation();
-<<<<<<< HEAD
-  const { auth, hydrated, setAuth } = useAuth();
-=======
   const { auth, setAuth, logout } = useAuth();
->>>>>>> main
   const { branding, setBranding } = useTheme();
   const { showToast } = useToast();
 
@@ -1541,30 +1244,16 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   const [error, setError] = useState('');
   const [subscriptionDetails, setSubscriptionDetails] = useState<any>(null);
   const [paymentsHistory, setPaymentsHistory] = useState<any[]>([]);
-<<<<<<< HEAD
-  const [subscriptionError, setSubscriptionError] = useState('');
-  const [subscriptionLoading, setSubscriptionLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'resumo' | 'pedidos' | 'produtos' | 'config' | 'fila' | 'pagamentos'>(() => {
-    return (location.state as any)?.activeTab || 'resumo';
-=======
   const [linkStats, setLinkStats] = useState<any>(null);
   const [subscriptionError, setSubscriptionError] = useState('');
   const [subscriptionLoading, setSubscriptionLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'resumo' | 'pedidos' | 'avaliacoes' | 'produtos' | 'config' | 'fila' | 'pagamentos' | 'motoboys' | 'usuarios'>(() => {
     return (location.state as any)?.activeTab || 'fila';
->>>>>>> main
   });
   const [menuVisible, setMenuVisible] = useState(() => {
     if (typeof window === 'undefined') return true;
     return localStorage.getItem('adminHeader:visible') !== 'false';
   });
-<<<<<<< HEAD
-
-  const storeId = session?.store?.id;
-  const storeSlug = session?.store?.slug;
-  const storeUrl = storeSlug ? `https://www.chamanoespeto.com.br/${storeSlug}` : '';
-  const storeName = session?.store?.name || 'Chama no Espeto';
-=======
   const [isDesktopLayout, setIsDesktopLayout] = useState(() => {
     if (typeof window === 'undefined') return true;
     return window.matchMedia('(min-width: 1024px)').matches;
@@ -1628,13 +1317,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   const storeUrl = storeSlug ? `https://www.janocaminho.com.br/${storeSlug}` : '';
   const storeName = session?.store?.name || 'Já no Caminho';
   const isOperatorUser = [ 'OPERATOR', 'CHURRASQUEIRO' ].includes(String(session?.user?.role || '').toUpperCase());
->>>>>>> main
   const socialLinks = session?.store?.settings?.socialLinks || [];
   const whatsappNumber = session?.store?.owner?.phone || '';
   const instagramLink = socialLinks.find((link) => link?.type === 'instagram')?.value;
   const instagramHandle = instagramLink ? `@${instagramLink.replace('@', '')}` : '';
-<<<<<<< HEAD
-=======
 
   const desktopTabItems = useMemo(
     () =>
@@ -1769,28 +1455,18 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       setActiveTab('fila');
     }
   }, [activeTab, isOperatorUser]);
->>>>>>> main
   const [brandingDraft, setBrandingDraft] = useState(() => ({
     brandName: session?.store?.name || '',
     logoUrl: resolveAssetUrl(session?.store?.settings?.logoUrl) || '',
     logoFile: '',
-<<<<<<< HEAD
-=======
     bannerUrl: resolveAssetUrl(session?.store?.settings?.bannerUrl) || '',
     bannerFile: '',
     bannerPosition: session?.store?.settings?.bannerPosition === 'top' ? 'top' : 'center',
->>>>>>> main
     description: session?.store?.settings?.description || '',
     primaryColor: session?.store?.settings?.primaryColor || '#b91c1c',
     secondaryColor: session?.store?.settings?.secondaryColor || '#111827',
     pixKey: session?.store?.settings?.pixKey || '',
     contactEmail: session?.store?.settings?.contactEmail || '',
-<<<<<<< HEAD
-    promoMessage: session?.store?.settings?.promoMessage || '',
-    instagram: instagramHandle?.replace('@', '') || '',
-  }));
-  const [savingBranding, setSavingBranding] = useState(false);
-=======
     storePhone: session?.store?.owner?.phone || '',
     promoMessage: session?.store?.settings?.promoMessage || '',
     isOrderingEnabled: session?.store?.settings?.isOrderingEnabled !== false,
@@ -1902,7 +1578,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     orderTypes: false,
     hours: false,
   });
->>>>>>> main
 
   const updateAuthStore = (updates) => {
     if (!auth?.store) return;
@@ -1919,9 +1594,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     });
   };
 
-
-<<<<<<< HEAD
-  /* =========================
+  /**
    * PROTEÇÃO DE ROTA (ADMIN)
    * ========================= */
   useEffect(() => {
@@ -1935,28 +1608,19 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
   }, [hydrated, navigate, session?.store, session?.token, session?.user?.role]);
 
-=======
->>>>>>> main
   useEffect(() => {
     setBrandingDraft({
       brandName: session?.store?.name || '',
       logoUrl: resolveAssetUrl(session?.store?.settings?.logoUrl) || '',
       logoFile: '',
-<<<<<<< HEAD
-=======
       bannerUrl: resolveAssetUrl(session?.store?.settings?.bannerUrl) || '',
       bannerFile: '',
       bannerPosition: session?.store?.settings?.bannerPosition === 'top' ? 'top' : 'center',
->>>>>>> main
       description: session?.store?.settings?.description || '',
       primaryColor: session?.store?.settings?.primaryColor || '#b91c1c',
       secondaryColor: session?.store?.settings?.secondaryColor || '#111827',
       pixKey: session?.store?.settings?.pixKey || '',
       contactEmail: session?.store?.settings?.contactEmail || '',
-<<<<<<< HEAD
-      promoMessage: session?.store?.settings?.promoMessage || '',
-      instagram: instagramHandle?.replace('@', '') || '',
-=======
       storePhone: session?.store?.owner?.phone || '',
       promoMessage: session?.store?.settings?.promoMessage || '',
       isOrderingEnabled: session?.store?.settings?.isOrderingEnabled !== false,
@@ -1966,26 +1630,17 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       deliveryFee: session?.store?.settings?.deliveryFee || '',
       prepBaseMinutes: session?.store?.settings?.prepBaseMinutes || '20',
       prepAttentionMinutes: session?.store?.settings?.prepAttentionMinutes || '15',
->>>>>>> main
     });
   }, [
     session?.store?.name,
     session?.store?.settings?.logoUrl,
-<<<<<<< HEAD
-=======
     session?.store?.settings?.bannerUrl,
     session?.store?.settings?.bannerPosition,
->>>>>>> main
     session?.store?.settings?.description,
     session?.store?.settings?.primaryColor,
     session?.store?.settings?.secondaryColor,
     session?.store?.settings?.pixKey,
     session?.store?.settings?.contactEmail,
-<<<<<<< HEAD
-    session?.store?.settings?.promoMessage,
-    instagramHandle,
-  ]);
-=======
     session?.store?.owner?.phone,
     session?.store?.settings?.promoMessage,
     session?.store?.settings?.isOrderingEnabled,
@@ -2308,7 +1963,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       // Sem bloqueio: fallback local já aplicado.
     }
   };
->>>>>>> main
 
   /* =========================
    * CARREGA PRODUTOS + PEDIDOS
@@ -2336,9 +1990,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       setSubscriptionError('');
       try {
         const data = await subscriptionService.getByStore(storeId);
-<<<<<<< HEAD
-        if (active) setSubscriptionDetails(data);
-=======
         if (active) {
           setSubscriptionDetails(data);
           if (auth?.token && auth?.store) {
@@ -2361,7 +2012,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             });
           }
         }
->>>>>>> main
       } catch (err) {
         if (active) {
           setSubscriptionError(err.message || 'Não foi possível carregar a assinatura agora.');
@@ -2379,8 +2029,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   }, [storeId]);
 
   useEffect(() => {
-<<<<<<< HEAD
-=======
     if (!subscriptionDetails || !auth?.user) return;
     const status = (subscriptionDetails.status || '').toUpperCase();
     const blocked = [ 'EXPIRED', 'SUSPENDED', 'CANCELLED' ];
@@ -2394,7 +2042,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   }, [subscriptionDetails, auth?.user, navigate]);
 
   useEffect(() => {
->>>>>>> main
     const handleToggle = (event) => {
       const next = event?.detail?.visible;
       if (typeof next === 'boolean') {
@@ -2402,11 +2049,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       }
     };
     window.addEventListener('adminHeader:toggle', handleToggle as EventListener);
-<<<<<<< HEAD
-    return () => window.removeEventListener('adminHeader:toggle', handleToggle as EventListener);
-  }, []);
-
-=======
     window.addEventListener('adminHeader:set', handleToggle as EventListener);
     return () => {
       window.removeEventListener('adminHeader:toggle', handleToggle as EventListener);
@@ -2488,7 +2130,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     return () => window.removeEventListener('keydown', handleKey);
   }, [commandOpen]);
 
->>>>>>> main
 
   useEffect(() => {
     if (!storeId) return;
@@ -2507,8 +2148,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     };
   }, [storeId]);
 
-<<<<<<< HEAD
-=======
   useEffect(() => {
     if (!storeId) return;
     let active = true;
@@ -2527,7 +2166,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     };
   }, [storeId]);
 
->>>>>>> main
   /* =========================
    * CLIENTES PARA RELATÓRIO
    * ========================= */
@@ -2548,11 +2186,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
    * RENDER
    * ========================= */
   if (!session?.store) {
-<<<<<<< HEAD
-    return <div style={{ padding: 24 }}>Carregando painel da loja...</div>;
-=======
     return <div className="ds-loading-page">Carregando painel da loja...</div>;
->>>>>>> main
   }
 
   const openingHours = session?.store?.settings?.openingHours || [];
@@ -2574,11 +2208,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     },
     {
       id: 'products',
-<<<<<<< HEAD
-      label: 'Produtos no cardápio',
-=======
       label: 'Produtos na vitrine',
->>>>>>> main
       done: products.length > 0,
       action: 'Cadastrar produtos',
       onClick: () => setActiveTab('produtos'),
@@ -2616,9 +2246,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       const payload = {
         name: brandingDraft.brandName,
         logoFile: brandingDraft.logoFile || undefined,
-<<<<<<< HEAD
-        logoUrl: brandingDraft.logoFile ? undefined : brandingDraft.logoUrl || undefined,
-=======
         logoUrl: brandingDraft.logoFile
           ? undefined
           : brandingDraft.logoUrl === ''
@@ -2631,15 +2258,11 @@ export function AdminDashboard({ session: sessionProp }: Props) {
           ? null
           : brandingDraft.bannerUrl || undefined,
         bannerPosition: brandingDraft.bannerPosition === 'top' ? 'top' : 'center',
->>>>>>> main
         description: brandingDraft.description || undefined,
         primaryColor: brandingDraft.primaryColor,
         secondaryColor: brandingDraft.secondaryColor,
         pixKey: brandingDraft.pixKey?.trim() ?? '',
         contactEmail: brandingDraft.contactEmail?.trim() ?? '',
-<<<<<<< HEAD
-        promoMessage: brandingDraft.promoMessage?.trim() ?? '',
-=======
         storePhone: brandingDraft.storePhone?.trim() ?? '',
         promoMessage: brandingDraft.promoMessage?.trim() ?? '',
         isOrderingEnabled: brandingDraft.isOrderingEnabled !== false,
@@ -2648,7 +2271,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         deliveryFee: brandingDraft.deliveryFee,
         prepBaseMinutes: brandingDraft.prepBaseMinutes,
         prepAttentionMinutes: brandingDraft.prepAttentionMinutes,
->>>>>>> main
         socialLinks: brandingDraft.instagram ? [{ type: 'instagram', value: brandingDraft.instagram }] : [],
       };
       const updated = await storeService.update(storeId, payload);
@@ -2657,16 +2279,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         primaryColor: updated?.settings?.primaryColor,
         secondaryColor: updated?.settings?.secondaryColor,
         logoUrl: updated?.settings?.logoUrl,
-<<<<<<< HEAD
-        brandName: updated?.name,
-      });
-      showToast('Identidade atualizada com sucesso.', 'success');
-=======
         bannerUrl: updated?.settings?.bannerUrl,
         brandName: updated?.name,
       });
       showToast('Identidade atualizada com sucesso.', 'success', { durationMs: 3000 });
->>>>>>> main
     } catch (err) {
       console.error('Erro ao salvar identidade', err);
       setError('Não foi possível salvar a identidade da loja agora.');
@@ -2676,105 +2292,6 @@ export function AdminDashboard({ session: sessionProp }: Props) {
     }
   };
 
-<<<<<<< HEAD
-  return (
-    <AdminLayout contextLabel="Painel da Loja">
-      {menuVisible ? (
-        <div className="flex justify-center">
-          <div className="bg-white rounded-xl border border-slate-200 p-2 shadow-sm flex flex-wrap sm:flex-nowrap justify-center sm:justify-start gap-2 w-full max-w-5xl overflow-visible sm:overflow-x-auto no-scrollbar">
-          {[
-            { id: 'resumo', label: 'Resumo', shortLabel: 'Resumo', icon: ChartBar },
-            { id: 'pedidos', label: 'Pedidos', shortLabel: 'Pedidos', icon: ShoppingCart },
-            { id: 'produtos', label: 'Produtos', shortLabel: 'Produtos', icon: Package },
-            { id: 'pagamentos', label: 'Pagamentos', shortLabel: 'Pag.', icon: CreditCard },
-            { id: 'cardapio', label: 'Cardápio', shortLabel: 'Cardápio', icon: BookOpen },
-            { id: 'config', label: 'Configurações', shortLabel: 'Config', icon: Gear },
-            { id: 'fila', label: 'Fila do churrasqueiro', shortLabel: 'Fila', icon: ChefHat },
-          ].map((tab) => {
-            const Icon = tab.icon;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => {
-                  if (tab.id === 'cardapio') {
-                    if (storeSlug) navigate(`/${storeSlug}`);
-                    return;
-                  }
-                  setActiveTab(tab.id as typeof activeTab);
-                }}
-                className={`cursor-pointer px-3 sm:px-4 py-2 rounded-lg text-[10px] sm:text-sm font-semibold transition-all active:scale-95 hover:-translate-y-0.5 flex flex-col sm:flex-row items-center gap-1 sm:gap-2 text-center min-w-[96px] sm:min-w-0 border ${
-                  activeTab === tab.id
-                    ? 'bg-brand-primary text-white border-brand-primary ring-2 ring-brand-primary/25 shadow-[0_8px_18px_rgba(15,23,42,0.16)]'
-                    : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:text-slate-900 hover:shadow-sm'
-                }`}
-              >
-                <Icon size={16} weight="duotone" />
-                <span className="leading-tight text-center max-w-[90px] sm:max-w-none line-clamp-2">
-                  {tab.label}
-                </span>
-              </button>
-            );
-          })}
-          </div>
-        </div>
-      ) : null}
-
-      {activeTab === 'resumo' && (
-        <DashboardView
-          orders={orders}
-          customers={customers}
-          setupChecklist={setupChecklist}
-          storeUrl={storeUrl}
-          storeName={storeName}
-        />
-      )}
-
-      {activeTab === 'pedidos' && (
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-          <OrdersView orders={orders} products={products} storeSlug={storeSlug} />
-        </div>
-      )}
-
-      {activeTab === 'produtos' && (
-        <ProductManager products={products} onProductsChange={setProducts} />
-      )}
-
-      {activeTab === 'pagamentos' && (
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-          <PaymentsView
-            subscription={subscriptionDetails}
-            loading={subscriptionLoading}
-            error={subscriptionError}
-            payments={paymentsHistory}
-          />
-        </div>
-      )}
-
-      {activeTab === 'config' && (
-        <div className="space-y-4">
-          <BrandingSettings
-            branding={brandingDraft}
-            onChange={setBrandingDraft}
-            storeSlug={storeSlug}
-            onSave={handleSaveBranding}
-            saving={savingBranding}
-          />
-          <OrderTypeSettingsCard />
-          <OpeningHoursCard />
-        </div>
-      )}
-
-      {activeTab === 'fila' && (
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-          <GrillQueue />
-        </div>
-      )}
-
-      {error && <p className="text-red-600 text-sm">{error}</p>}
-    </AdminLayout>
-  );
-}
-=======
   const isConfigDirty = activeTab === 'config' && hasBrandingChanges;
   const runOrConfirmDiscard = React.useCallback(
     (action: () => void) => {
@@ -3536,4 +3053,3 @@ export function AdminDashboard({ session: sessionProp }: Props) {
 
 
 
->>>>>>> main

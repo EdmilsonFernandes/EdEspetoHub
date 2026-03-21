@@ -8,10 +8,7 @@ type Branding = {
   primaryColor?: string;
   secondaryColor?: string;
   logoUrl?: string;
-<<<<<<< HEAD
-=======
   bannerUrl?: string;
->>>>>>> main
   brandName?: string;
 };
 
@@ -42,10 +39,7 @@ const resolveStoredBranding = (): Branding =>
         primaryColor: settings.primaryColor || defaultBranding.primaryColor,
         secondaryColor: settings.secondaryColor || defaultBranding.secondaryColor,
         logoUrl: resolveAssetUrl(settings.logoUrl),
-<<<<<<< HEAD
-=======
         bannerUrl: resolveAssetUrl(settings.bannerUrl),
->>>>>>> main
         brandName: session?.store?.name,
       };
     } catch (error)
@@ -95,22 +89,16 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         nextBranding?.logoUrl === undefined
           ? prev?.logoUrl
           : resolveAssetUrl(nextBranding?.logoUrl);
-<<<<<<< HEAD
-=======
       const resolvedBanner =
         nextBranding?.bannerUrl === undefined
           ? prev?.bannerUrl
           : resolveAssetUrl(nextBranding?.bannerUrl);
->>>>>>> main
       const merged = {
         ...defaultBranding,
         ...prev,
         ...nextBranding,
         logoUrl: resolvedLogo,
-<<<<<<< HEAD
-=======
         bannerUrl: resolvedBanner,
->>>>>>> main
       };
       const prevKey = `${prev?.primaryColor ?? ''}|${prev?.secondaryColor ?? ''}|${prev?.logoUrl ?? ''}|${prev?.brandName ?? ''}`;
       const nextKey = `${merged?.primaryColor ?? ''}|${merged?.secondaryColor ?? ''}|${merged?.logoUrl ?? ''}|${merged?.brandName ?? ''}`;

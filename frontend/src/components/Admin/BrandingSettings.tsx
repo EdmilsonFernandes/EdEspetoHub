@@ -1,30 +1,13 @@
 // @ts-nocheck
-<<<<<<< HEAD
-import React, { useRef, useState } from "react";
-import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
-=======
 import React, { useEffect, useRef, useState } from "react";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
 import { formatPhoneInput } from "../../utils/format";
->>>>>>> main
 
 const primaryPalette = [ '#dc2626', '#ea580c', '#f59e0b', '#16a34a', '#0ea5e9', '#2563eb', '#7c3aed' ];
 const secondaryPalette = [ '#111827', '#1f2937', '#334155', '#0f172a', '#0f766e', '#065f46', '#4b5563' ];
 
 export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving }) => {
   const fileInputRef = useRef(null);
-<<<<<<< HEAD
-  const [sectionsOpen, setSectionsOpen] = useState({
-    identity: true,
-    promo: true,
-    contact: true,
-    colors: true,
-    access: true,
-  });
-  const handleChange = (field, value) => {
-    onChange((prev) => ({ ...prev, [field]: value }));
-  };
-=======
   const bannerInputRef = useRef(null);
   const [storeCepLoading, setStoreCepLoading] = useState(false);
   const [storeCepError, setStoreCepError] = useState("");
@@ -129,7 +112,6 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
       setStoreCepLoading(false);
     }
   };
->>>>>>> main
 
   const previewInitials = branding.brandName
     ?.split(" ")
@@ -139,27 +121,6 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
     .toUpperCase();
 
   const logoPreview = resolveAssetUrl(branding.logoUrl) || branding.logoFile || "";
-<<<<<<< HEAD
-
-  return (
-
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-      <div className="p-4 sm:p-6 border-b bg-gradient-to-r from-white via-white to-red-50/60">
-        <h3 className="text-lg font-bold text-gray-800 mb-1">Identidade visual</h3>
-        <p className="text-sm text-gray-500">Defina a presença digital da sua marca com elegância.</p>
-      </div>
-
-      <div className="p-4 sm:p-6 space-y-6">
-        <div className="rounded-2xl border border-slate-200 bg-white/80">
-          <button
-            type="button"
-            onClick={() => setSectionsOpen((prev) => ({ ...prev, identity: !prev.identity }))}
-            className="w-full flex items-center justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4 text-left"
-          >
-            <div>
-              <p className="text-sm font-semibold text-gray-800">Identidade da Marca</p>
-              <p className="text-xs text-gray-500">Nome, Instagram, descrição e logo da sua marca.</p>
-=======
   const bannerPreview = resolveAssetUrl(branding.bannerUrl) || branding.bannerFile || "";
 
   return (
@@ -185,7 +146,6 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
                 <p className="text-sm font-semibold text-gray-800">Identidade da marca</p>
                 <p className="text-xs text-gray-500">Nome, Instagram, descrição, logo e banner.</p>
               </div>
->>>>>>> main
             </div>
             <span className="text-xs text-gray-500 sm:hidden">{sectionsOpen.identity ? 'Fechar' : 'Abrir'}</span>
           </button>
@@ -198,11 +158,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
             value={branding.brandName}
             onChange={(e) => handleChange("brandName", e.target.value)}
             className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
-<<<<<<< HEAD
-              placeholder="Ex: Chama do Sertao"
-=======
               placeholder="Nome da loja"
->>>>>>> main
             />
           </div>
 
@@ -215,11 +171,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
                 value={branding.instagram}
                 onChange={(e) => handleChange("instagram", e.target.value.replace("@", ""))}
                 className="w-full border border-gray-200 rounded-xl p-3 pl-8 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
-<<<<<<< HEAD
-                placeholder="chamanoespeto"
-=======
                 placeholder="janocaminho"
->>>>>>> main
               />
             </div>
           </div>
@@ -231,11 +183,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
               value={branding.description || ""}
               onChange={(e) => handleChange("description", e.target.value)}
               className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors min-h-[110px]"
-<<<<<<< HEAD
-            placeholder="Ex: Espetos artesanais, cerveja gelada e atendimento rápido."
-=======
             placeholder="Descreva brevemente sua loja e seus diferenciais."
->>>>>>> main
               maxLength={220}
             />
             <div className="flex items-center justify-between text-xs text-gray-500">
@@ -294,20 +242,6 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
             )}
           </div>
         </div>
-<<<<<<< HEAD
-          </div>
-        </div>
-
-        <div className="rounded-2xl border border-slate-200 bg-white/80">
-          <button
-            type="button"
-            onClick={() => setSectionsOpen((prev) => ({ ...prev, promo: !prev.promo }))}
-            className="w-full flex items-center justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4 text-left"
-          >
-            <div>
-              <p className="text-sm font-semibold text-gray-800">Destaque do Dia</p>
-              <p className="text-xs text-gray-500">Uma frase que vende no topo do cardápio.</p>
-=======
         <div className="space-y-3">
           <label className="text-sm font-semibold text-gray-700">Banner da loja</label>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -385,7 +319,6 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
                 <p className="text-sm font-semibold text-gray-800">Destaque do dia</p>
                 <p className="text-xs text-gray-500">Mensagem curta no topo da vitrine.</p>
               </div>
->>>>>>> main
             </div>
             <span className="text-xs text-gray-500 sm:hidden">{sectionsOpen.promo ? 'Fechar' : 'Abrir'}</span>
           </button>
@@ -396,36 +329,17 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
                 value={branding.promoMessage || ""}
                 onChange={(e) => handleChange("promoMessage", e.target.value)}
                 className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors min-h-[90px]"
-<<<<<<< HEAD
-                placeholder="Ex: Combo do dia: 2 espetos + refri por R$ 29,90"
-                maxLength={120}
-              />
-              <div className="flex items-center justify-between text-xs text-gray-500">
-                <span>Aparece no topo do cardápio.</span>
-=======
                 placeholder="Oferta do dia: item + bebida por R$ 29,90"
                 maxLength={120}
               />
               <div className="flex items-center justify-between text-xs text-gray-500">
                 <span>Aparece no topo da vitrine.</span>
->>>>>>> main
                 <span>{(branding.promoMessage || "").length}/120</span>
               </div>
             </div>
           </div>
         </div>
 
-<<<<<<< HEAD
-        <div className="rounded-2xl border border-slate-200 bg-white/80">
-          <button
-            type="button"
-            onClick={() => setSectionsOpen((prev) => ({ ...prev, contact: !prev.contact }))}
-            className="w-full flex items-center justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4 text-left"
-          >
-            <div>
-              <p className="text-sm font-semibold text-gray-800">Canais e Pagamento</p>
-              <p className="text-xs text-gray-500">Contato oficial e recebimento via Pix.</p>
-=======
         <div className="rounded-2xl border border-slate-200 bg-white/80 shadow-[0_10px_24px_-20px_rgba(15,23,42,0.25)]">
           <button
             type="button"
@@ -438,7 +352,6 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
                 <p className="text-sm font-semibold text-gray-800">Canais e pagamento</p>
                 <p className="text-xs text-gray-500">Contato oficial, endereço e chave Pix.</p>
               </div>
->>>>>>> main
             </div>
             <span className="text-xs text-gray-500 sm:hidden">{sectionsOpen.contact ? 'Fechar' : 'Abrir'}</span>
           </button>
@@ -450,11 +363,6 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
                 value={branding.contactEmail || ""}
                 onChange={(e) => handleChange("contactEmail", e.target.value)}
                 className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
-<<<<<<< HEAD
-                placeholder="contato@chamanoespeto.com.br"
-              />
-              <p className="text-xs text-gray-500">Opcional, aparece no cardápio para contato.</p>
-=======
                 placeholder="contato@janocaminho.com.br"
               />
               <p className="text-xs text-gray-500">Opcional, aparece na vitrine para contato.</p>
@@ -565,7 +473,6 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
                 </div>
               </div>
               <p className="text-xs text-gray-500">Usado para mostrar localização e validação de entrega.</p>
->>>>>>> main
             </div>
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700">Chave Pix da loja</label>
@@ -574,28 +481,13 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
                 value={branding.pixKey || ''}
                 onChange={(e) => handleChange("pixKey", e.target.value)}
                 className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
-<<<<<<< HEAD
-                placeholder="Ex: +5511999999999 ou contato@pix.com"
-=======
                 placeholder="+5511999999999 ou contato@pix.com"
->>>>>>> main
               />
               <p className="text-xs text-gray-500">Usada para gerar o QR Code na confirmação de pagamento. Telefone com DDD pode começar com 0 que ajustamos para +55.</p>
             </div>
           </div>
         </div>
 
-<<<<<<< HEAD
-        <div className="rounded-2xl border border-slate-200 bg-white/80">
-          <button
-            type="button"
-            onClick={() => setSectionsOpen((prev) => ({ ...prev, colors: !prev.colors }))}
-            className="w-full flex items-center justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4 text-left"
-          >
-            <div>
-              <p className="text-sm font-semibold text-gray-800">Cores da Identidade</p>
-              <p className="text-xs text-gray-500">Cria o clima visual da sua marca.</p>
-=======
         <div className="rounded-2xl border border-slate-200 bg-white/80 shadow-[0_10px_24px_-20px_rgba(15,23,42,0.25)]">
           <button
             type="button"
@@ -681,7 +573,6 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
                 <p className="text-sm font-semibold text-gray-800">Cores da identidade</p>
                 <p className="text-xs text-gray-500">Define o visual da sua vitrine.</p>
               </div>
->>>>>>> main
             </div>
             <span className="text-xs text-gray-500 sm:hidden">{sectionsOpen.colors ? 'Fechar' : 'Abrir'}</span>
           </button>
@@ -708,11 +599,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
                 />
               ))}
             </div>
-<<<<<<< HEAD
-            <p className="text-xs text-gray-500">A cor principal define os destaques do cardápio.</p>
-=======
             <p className="text-xs text-gray-500">A cor principal define os destaques da vitrine.</p>
->>>>>>> main
           </div>
 
           <div className="space-y-3">
@@ -742,17 +629,6 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
           </div>
         </div>
 
-<<<<<<< HEAD
-        <div className="rounded-2xl border border-slate-200 bg-white/80">
-          <button
-            type="button"
-            onClick={() => setSectionsOpen((prev) => ({ ...prev, access: !prev.access }))}
-            className="w-full flex items-center justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4 text-left"
-          >
-            <div>
-              <p className="text-sm font-semibold text-gray-800">URL da Loja</p>
-              <p className="text-xs text-gray-500">Link público e definitivo do cardápio.</p>
-=======
         <div className="rounded-2xl border border-slate-200 bg-white/80 shadow-[0_10px_24px_-20px_rgba(15,23,42,0.25)]">
           <button
             type="button"
@@ -765,7 +641,6 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
                 <p className="text-sm font-semibold text-gray-800">URL da loja</p>
                 <p className="text-xs text-gray-500">Link público definitivo da vitrine.</p>
               </div>
->>>>>>> main
             </div>
             <span className="text-xs text-gray-500 sm:hidden">{sectionsOpen.access ? 'Fechar' : 'Abrir'}</span>
           </button>
@@ -778,25 +653,6 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
               className="w-full border border-gray-200 rounded-xl p-3 bg-gray-50/80 text-gray-500 cursor-not-allowed"
             />
             <p className="text-xs text-gray-500">Use esse slug para acessar o painel e a vitrine.</p>
-<<<<<<< HEAD
-          </div>
-        </div>
-        {onSave && (
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-            <div className="text-xs text-slate-500">
-              Salve para aplicar todas as mudanças da identidade.
-            </div>
-            <button
-              type="button"
-              onClick={onSave}
-              disabled={saving}
-              className="w-full sm:w-auto px-4 py-2 rounded-lg bg-brand-primary text-white text-xs font-semibold hover:opacity-90 transition-all disabled:opacity-60"
-            >
-              {saving ? "Salvando..." : "Salvar alterações"}
-            </button>
-          </div>
-        )}
-=======
 
             <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3">
               <div className="flex items-center justify-between gap-3">
@@ -823,7 +679,6 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
             </div>
           </div>
         </div>
->>>>>>> main
       </div>
     </div>
   );

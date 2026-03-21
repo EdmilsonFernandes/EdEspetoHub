@@ -1,41 +1,12 @@
 // @ts-nocheck
 import React from 'react';
-<<<<<<< HEAD
-=======
 import { CheckCircle, Lightning, ShieldCheck } from '@phosphor-icons/react';
->>>>>>> main
 
 interface AuthLayoutProps {
   children: React.ReactNode;
 }
 
 export function AuthLayout({ children }: AuthLayoutProps) {
-<<<<<<< HEAD
-  const platformLogo = '/logo.svg';
-
-  return (
-    <div
-      className="min-h-screen bg-brand-secondary-soft flex items-center justify-center p-4 relative"
-      style={{
-        backgroundImage: `url(${platformLogo})`,
-        backgroundSize: '200px',
-        backgroundRepeat: 'repeat',
-        backgroundPosition: 'center',
-        opacity: 0.95,
-      }}
-    >
-      <div
-        className="absolute inset-0 bg-gradient-to-br from-white/90 to-gray-50/90"
-        style={{ backdropFilter: 'blur(2px)' }}
-      />
-      <div className="absolute bottom-0 left-0 right-0 pointer-events-none z-0 h-48 bg-gradient-to-t from-red-100/70 via-orange-100/40 to-transparent" />
-      <div className="max-w-md w-full relative z-10">
-        <div className="absolute -top-24 -right-20 w-56 h-56 bg-brand-primary-soft rounded-full blur-3xl" />
-        <div className="absolute -bottom-24 -left-16 w-56 h-56 bg-brand-secondary-soft rounded-full blur-3xl" />
-        <div className="bg-white/95 backdrop-blur rounded-3xl shadow-2xl border border-white/70 p-6 sm:p-8 space-y-6 relative">
-          {children}
-        </div>
-=======
   return (
     <div className="min-h-screen overflow-x-clip bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.16),_transparent_45%),radial-gradient(circle_at_bottom_right,_rgba(20,184,166,0.12),_transparent_52%),linear-gradient(150deg,#020617,#0b1220_45%,#0f172a)] p-4 sm:p-6">
       <div className="mx-auto max-w-6xl min-h-[calc(100vh-2rem)] sm:min-h-[calc(100vh-3rem)] grid lg:grid-cols-2 rounded-[30px] overflow-hidden border border-sky-200/15 shadow-[0_36px_100px_-56px_rgba(2,132,199,0.55)] bg-slate-950/35 backdrop-blur-sm">
@@ -87,7 +58,6 @@ export function AuthLayout({ children }: AuthLayoutProps) {
             {children}
           </div>
         </section>
->>>>>>> main
       </div>
     </div>
   );

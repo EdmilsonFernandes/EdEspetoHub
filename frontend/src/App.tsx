@@ -1,16 +1,6 @@
 // @ts-nocheck
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-<<<<<<< HEAD
-import { LandingPage, CreateStore, AdminLogin, StorePage, OrdersQueue, AdminDashboard, AdminOrders, AdminQueue, AdminRenewal, AdminDemo, PaymentPage, SuperAdmin, ForgotPassword, ResetPassword, VerifyEmail, TermsOfUse, OrderTracking } from './pages';
-import { ThemeProvider } from './contexts/ThemeContext';
-import { ToastProvider } from './contexts/ToastContext';
-import { AdminRoute } from './components/Admin/AdminRoute';
-import { AdminLayout } from './components/Admin/AdminLayout';
-import { AppErrorBoundary } from './components/common/AppErrorBoundary';
-import './index.css';
-import { PortfolioPage } from './pages/PortfolioPage';
-=======
     import { LandingPage, CreateStore, AdminLogin, StorePage, OrdersQueue, AdminDashboard, AdminOrders, AdminQueue, AdminRenewal, AdminDemo, PaymentPage, SuperAdmin, ForgotPassword, ResetPassword, VerifyEmail, TermsOfUse, OrderTracking, AddressDistance, AdminMotoboys, MotoboyAvailable, MotoboyCurrent, MotoboyHistory, MotoboyProfile, MotoboyDone, MotoboyLogin, MotoboyRegister, MotoboyHome, MotoboyEarnings, ArchitecturePage, InstallAppPage } from './pages';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { ToastProvider } from './contexts/ToastContext';
@@ -21,7 +11,6 @@ import { AppErrorBoundary } from './components/common/AppErrorBoundary';
 import './index.css';
 import { PortfolioPage } from './pages/PortfolioPage';
 import { MotoboyLayout } from './layouts/MotoboyLayout';
->>>>>>> main
 
 function App() {
   return (
@@ -31,11 +20,8 @@ function App() {
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/portfolio" element={<PortfolioPage />} />
-<<<<<<< HEAD
-=======
             <Route path="/arquitetura" element={<ArchitecturePage />} />
             <Route path="/instalar" element={<InstallAppPage />} />
->>>>>>> main
             <Route path="/create" element={<CreateStore />} />
             <Route path="/admin" element={<AdminLogin />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -46,15 +32,8 @@ function App() {
               path="/admin/dashboard"
               element={
                 <AppErrorBoundary>
-<<<<<<< HEAD
-                  <AdminRoute>
-                    <AdminLayout>
-                      <AdminDashboard />
-                    </AdminLayout>
-=======
                   <AdminRoute allowedRoles={['ADMIN']} fallbackTo="/admin/queue">
                     <AdminDashboard />
->>>>>>> main
                   </AdminRoute>
                 </AppErrorBoundary>
               }
@@ -63,15 +42,8 @@ function App() {
               path="/admin/orders"
               element={
                 <AppErrorBoundary>
-<<<<<<< HEAD
-                  <AdminRoute>
-                    <AdminLayout>
-                      <AdminOrders />
-                    </AdminLayout>
-=======
                   <AdminRoute allowedRoles={['ADMIN']}>
                     <AdminOrders />
->>>>>>> main
                   </AdminRoute>
                 </AppErrorBoundary>
               }
@@ -81,10 +53,6 @@ function App() {
               element={
                 <AppErrorBoundary>
                   <AdminRoute>
-<<<<<<< HEAD
-                    <AdminLayout>
-                      <AdminQueue />
-=======
                     <AdminQueue />
                   </AdminRoute>
                 </AppErrorBoundary>
@@ -97,15 +65,12 @@ function App() {
                   <AdminRoute allowedRoles={['ADMIN']}>
                     <AdminLayout contextLabel="Entregadores">
                       <AdminMotoboys />
->>>>>>> main
                     </AdminLayout>
                   </AdminRoute>
                 </AppErrorBoundary>
               }
             />
             <Route
-<<<<<<< HEAD
-=======
               path="/admin/users"
               element={
                 <AppErrorBoundary>
@@ -116,7 +81,6 @@ function App() {
               }
             />
             <Route
->>>>>>> main
               path="/admin/renewal"
               element={
                 <AppErrorBoundary>
@@ -137,18 +101,13 @@ function App() {
             <Route path="/admin/*" element={<Navigate to="/admin" replace />} />
             <Route path="/store/:storeSlug" element={<StorePage />} />
             <Route path="/:storeSlug" element={<StorePage />} />
-<<<<<<< HEAD
-=======
             <Route path="/janocaminho/:storeSlug" element={<StorePage />} />
             <Route path="/janocaminho/:storeSlug/orders" element={<OrdersQueue />} />
->>>>>>> main
             <Route path="/chamanoespeto/:storeSlug" element={<StorePage />} />
             <Route path="/chamanoespeto/:storeSlug/orders" element={<OrdersQueue />} />
             <Route path="/pedido/:orderId" element={<OrderTracking />} />
             <Route path="/payment/:paymentId" element={<PaymentPage />} />
             <Route path="/superadmin" element={<SuperAdmin />} />
-<<<<<<< HEAD
-=======
             <Route path="/maps" element={<AddressDistance />} />
             <Route path="/motoboy/login" element={<MotoboyLogin />} />
             <Route path="/motoboy/register" element={<MotoboyRegister />} />
@@ -172,7 +131,6 @@ function App() {
               <Route path="profile" element={<MotoboyProfile />} />
             </Route>
             <Route path="/motoboy/current" element={<Navigate to="/motoboy/delivery" replace />} />
->>>>>>> main
           </Routes>
         </Router>
       </ToastProvider>

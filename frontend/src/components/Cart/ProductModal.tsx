@@ -1,10 +1,5 @@
 // @ts-nocheck
 
-<<<<<<< HEAD
-import { Plus, X } from "@phosphor-icons/react";
-import { useEffect, useState } from "react";
-import { formatCurrency } from "../../utils/format";
-=======
 import { ForkKnife, Minus, Plus, Sparkle, X } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 import { formatCurrency } from "../../utils/format";
@@ -14,22 +9,10 @@ import {
   normalizeProductModifiers,
   normalizeSelectedModifiers,
 } from "../../utils/productModifiers";
->>>>>>> main
 
 export interface ProductModalProps {
 
     product: any | null;
-<<<<<<< HEAD
-    isOpen: boolean;
-    onClose: () => void;
-    onAddToCart: (product: any, quantity: number, options?: Record<string, any>) => void;
-
- }
-
-export const ProductModal = ({ product, isOpen, onClose, onAddToCart }: ProductModalProps) => {
-  const [cookingPoint, setCookingPoint] = useState("ao ponto");
-  const [passSkewer, setPassSkewer] = useState(false);
-=======
     cart?: Record<string, any>;
     isOpen: boolean;
     onClose: () => void;
@@ -44,14 +27,10 @@ export const ProductModal = ({ product, cart = {}, isOpen, onClose, onAddToCart,
   const [passSkewer, setPassSkewer] = useState(false);
   const [modifierCounts, setModifierCounts] = useState<Record<string, number>>({});
   const [itemQty, setItemQty] = useState(1);
->>>>>>> main
   const promoPrice =
     product?.promoActive && product?.promoPrice && Number(product?.promoPrice) > 0
       ? Number(product.promoPrice)
       : null;
-<<<<<<< HEAD
-
-=======
   const basePrice = promoPrice || Number(product?.price) || 0;
   const availableModifiers = normalizeProductModifiers(product?.modifiers || []).filter((item) => item.active !== false);
   const selectedModifiers = normalizeSelectedModifiers(
@@ -74,14 +53,11 @@ export const ProductModal = ({ product, cart = {}, isOpen, onClose, onAddToCart,
   if (itemQty > 0) {
     subtotalAmount = unitFinalPrice * itemQty;
   }
->>>>>>> main
   const isEspetoCategory = (category: any) => {
   const normalized = (category || "").toString().trim().toLowerCase();
   return normalized.includes("espeto");
 };
   const showEspetoOptions = product ? isEspetoCategory(product.category) : false;
-<<<<<<< HEAD
-=======
   const selectedOptions = selectedModifiers.length > 0
     ? { ...(showEspetoOptions ? { cookingPoint, passSkewer } : {}), selectedModifiers }
     : showEspetoOptions
@@ -98,15 +74,10 @@ export const ProductModal = ({ product, cart = {}, isOpen, onClose, onAddToCart,
     }
     return acc;
   }, 0);
->>>>>>> main
 
   useEffect(() => {
     setCookingPoint("ao ponto");
     setPassSkewer(false);
-<<<<<<< HEAD
-  }, [product?.id]);
-
-=======
     setModifierCounts({});
   }, [product?.id]);
 
@@ -115,7 +86,6 @@ export const ProductModal = ({ product, cart = {}, isOpen, onClose, onAddToCart,
     setItemQty(currentSelectionQty > 0 ? currentSelectionQty : 1);
   }, [isOpen, product?.id, currentSelectionQty]);
 
->>>>>>> main
   const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
@@ -125,21 +95,16 @@ export const ProductModal = ({ product, cart = {}, isOpen, onClose, onAddToCart,
   }, [isOpen]);
 
   const handleClose = () => {
-<<<<<<< HEAD
-=======
     setItemQty(1);
     setModifierCounts({});
     setCookingPoint("ao ponto");
     setPassSkewer(false);
->>>>>>> main
     setIsAnimating(false);
     setTimeout(() => {
       onClose();
     }, 200);
   };
 
-<<<<<<< HEAD
-=======
   const handleCloseImmediate = () => {
     setItemQty(1);
     setModifierCounts({});
@@ -169,7 +134,6 @@ export const ProductModal = ({ product, cart = {}, isOpen, onClose, onAddToCart,
     });
   };
 
->>>>>>> main
   if (!isOpen && !isAnimating) return null;
 
   return (
@@ -188,11 +152,7 @@ export const ProductModal = ({ product, cart = {}, isOpen, onClose, onAddToCart,
         <div className="relative">
           <button
             onClick={handleClose}
-<<<<<<< HEAD
-            className="absolute top-4 right-4 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center shadow-lg z-10"
-=======
             className="absolute top-4 right-4 w-9 h-9 bg-black/35 text-white rounded-full flex items-center justify-center border border-white/30 backdrop-blur-sm shadow-lg z-10 hover:bg-black/45 transition"
->>>>>>> main
           >
             <X size={16} weight="bold" />
           </button>
@@ -205,31 +165,12 @@ export const ProductModal = ({ product, cart = {}, isOpen, onClose, onAddToCart,
               className="w-full h-64 object-cover rounded-t-2xl"
             />
           ) : (
-<<<<<<< HEAD
-            <div className="w-full h-64 bg-gray-100 rounded-t-2xl flex items-center justify-center text-gray-400">
-              Sem imagem
-=======
             <div className="w-full h-64 bg-slate-100 rounded-t-2xl flex items-center justify-center text-slate-300">
               <ForkKnife size={22} weight="duotone" />
->>>>>>> main
             </div>
           )}
         </div>
 
-<<<<<<< HEAD
-        <div className="p-6 space-y-4">
-          <div>
-            <h3 className="text-xl font-bold text-gray-900">{product?.name}</h3>
-            {promoPrice ? (
-              <div className="flex items-center gap-2 mt-1">
-                <span className="text-sm font-semibold text-slate-400 line-through">
-                  {formatCurrency(product?.price)}
-                </span>
-                <span className="text-2xl font-bold text-emerald-600">{formatCurrency(promoPrice)}</span>
-              </div>
-            ) : (
-              <p className="text-2xl font-bold text-brand-primary mt-1">{formatCurrency(product?.price)}</p>
-=======
         <div className="p-6 space-y-4 pb-28">
           <div>
             <h3 className="text-xl font-bold text-gray-900">{product?.name}</h3>
@@ -242,20 +183,10 @@ export const ProductModal = ({ product, cart = {}, isOpen, onClose, onAddToCart,
               </div>
             ) : (
               <p className="text-2xl font-bold text-brand-primary mt-1.5">{formatCurrency(product?.price)}</p>
->>>>>>> main
             )}
           </div>
 
           {product?.desc && (
-<<<<<<< HEAD
-            <div>
-              <h4 className="font-semibold text-gray-700 mb-2">Descrição</h4>
-              <p className="text-gray-600 text-sm leading-relaxed">{product?.desc}</p>
-            </div>
-          )}
-
-          {showEspetoOptions && (
-=======
             <div className="pt-1">
               <h4 className="font-semibold text-gray-700 mb-2">Descrição</h4>
               <p className="text-slate-500 text-sm leading-relaxed">{product?.desc}</p>
@@ -263,7 +194,6 @@ export const ProductModal = ({ product, cart = {}, isOpen, onClose, onAddToCart,
           )}
 
           {!readOnly && showEspetoOptions && (
->>>>>>> main
             <div className="space-y-3">
               <div>
                 <label className="text-sm font-semibold text-gray-700">Ponto da carne</label>
@@ -283,24 +213,6 @@ export const ProductModal = ({ product, cart = {}, isOpen, onClose, onAddToCart,
                   checked={passSkewer}
                   onChange={(event) => setPassSkewer(event.target.checked)}
                 />
-<<<<<<< HEAD
-                Passar varinha
-              </label>
-            </div>
-          )}
-
-          <button
-            onClick={() => {
-              onAddToCart(product, 1, showEspetoOptions ? { cookingPoint, passSkewer } : undefined);
-              handleClose();
-            }}
-            className="w-full bg-brand-primary text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-brand-primary/90 transition"
-          >
-            <Plus size={18} weight="bold" />
-            Adicionar ao pedido
-          </button>
-        </div>
-=======
                 Passar farinha
               </label>
             </div>
@@ -439,12 +351,8 @@ export const ProductModal = ({ product, cart = {}, isOpen, onClose, onAddToCart,
           </div>
         </div>
         )}
->>>>>>> main
       </div>
     </div>
   );
 };
-<<<<<<< HEAD
-=======
 
->>>>>>> main

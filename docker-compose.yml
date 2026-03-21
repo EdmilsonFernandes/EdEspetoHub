@@ -1,12 +1,8 @@
-version: "3.9"
 
 services:
   frontend:
     container_name: chamanoespeto-frontend
-<<<<<<< HEAD
-=======
     image: "${IMAGE_REGISTRY:-ghcr.io}/${IMAGE_NAMESPACE:-edmilsonfernandes}/edespetohub-frontend:${IMAGE_TAG:-main}"
->>>>>>> main
     build:
       context: ./frontend
       dockerfile: Dockerfile
@@ -14,18 +10,12 @@ services:
       - "${FRONTEND_PORT:-8080}:80"
     depends_on:
       - api
-<<<<<<< HEAD
-=======
       - maps
->>>>>>> main
     restart: always
 
   api:
     container_name: chamanoespeto-api
-<<<<<<< HEAD
-=======
     image: "${IMAGE_REGISTRY:-ghcr.io}/${IMAGE_NAMESPACE:-edmilsonfernandes}/edespetohub-api:${IMAGE_TAG:-main}"
->>>>>>> main
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -37,8 +27,6 @@ services:
       - "4000:4000"
     depends_on:
       - postgres
-<<<<<<< HEAD
-=======
       - face-worker
     restart: always
 
@@ -62,22 +50,16 @@ services:
       - ./server/.env.docker
     ports:
       - "5051:5050"
->>>>>>> main
     restart: always
 
   postgres:
     container_name: chamanoespeto-postgres
     image: postgres:16
     environment:
-<<<<<<< HEAD
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: espetinho
-=======
       # Keep DB creds configurable so API+DB don't drift (common source of auth failures).
       # IMPORTANT: Changing POSTGRES_PASSWORD does NOT change an already-initialized volume password.
       POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-postgres}"
       POSTGRES_DB: "${POSTGRES_DB:-espetinho}"
->>>>>>> main
     ports:
       - "5432:5432"
     volumes:
@@ -89,11 +71,7 @@ services:
     container_name: chamanoespeto-pgadmin
     image: dpage/pgadmin4:8.13
     environment:
-<<<<<<< HEAD
-      PGADMIN_DEFAULT_EMAIL: admin@chamanoespeto.com
-=======
       PGADMIN_DEFAULT_EMAIL: admin@janocaminho.com.br
->>>>>>> main
       PGADMIN_DEFAULT_PASSWORD: ChamaNoEspeto20025#!
       PGADMIN_CONFIG_SERVER_MODE: "False"
     ports:
@@ -104,9 +82,6 @@ services:
 
 volumes:
   postgres-data:
-<<<<<<< HEAD
-=======
     # Pin volume name to avoid accidental "new empty DB" when compose project name/path changes.
     # Default matches the common compose-derived name for this repo.
     name: "${POSTGRES_VOLUME_NAME:-edespetohub_postgres-data}"
->>>>>>> main

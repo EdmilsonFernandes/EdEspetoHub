@@ -1,10 +1,3 @@
-<<<<<<< HEAD
-// @ts-nocheck
-import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { paymentService } from '../services/paymentService';
-import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
-=======
 ﻿// @ts-nocheck
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -13,7 +6,6 @@ import { planService } from '../services/planService';
 import { BILLING_OPTIONS, PLAN_TIERS, getPlanName, resolveAnnualPromoTotal, resolveMonthlyEquivalent } from '../constants/planCatalog';
 import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
 import { usePollingPaymentStatus } from '../hooks/usePollingPaymentStatus';
->>>>>>> main
 
 export function PaymentPage() {
   const { paymentId } = useParams();
@@ -22,21 +14,11 @@ export function PaymentPage() {
   const [events, setEvents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-<<<<<<< HEAD
-  const [polling, setPolling] = useState(false);
-=======
->>>>>>> main
   const [eventsPage, setEventsPage] = useState(0);
   const [eventsHasMore, setEventsHasMore] = useState(true);
   const [pixCopied, setPixCopied] = useState(false);
   const [renewMethod, setRenewMethod] = useState('PIX');
   const [renewing, setRenewing] = useState(false);
-<<<<<<< HEAD
-  const EVENTS_PAGE_SIZE = 25;
-  const platformLogo = '/chama-no-espeto.jpeg';
-  const redirectRef = useRef(false);
-
-=======
   const [plans, setPlans] = useState([]);
   const [selectedPlanId, setSelectedPlanId] = useState('');
   const [isAnnual, setIsAnnual] = useState(false);
@@ -70,7 +52,6 @@ export function PaymentPage() {
     [EVENTS_PAGE_SIZE, paymentId]
   );
 
->>>>>>> main
   const handleCopyPix = async (value: string) => {
     if (!value) return;
     try {
@@ -95,42 +76,6 @@ export function PaymentPage() {
   };
 
   useEffect(() => {
-<<<<<<< HEAD
-    let interval: number | undefined;
-
-    const loadPayment = async (silent = false) => {
-      if (!silent) setIsLoading(true);
-      try {
-        const data = await paymentService.getById(paymentId);
-        setPayment(data);
-        const eventData = await paymentService.getEvents(paymentId, EVENTS_PAGE_SIZE, 0);
-        setEvents(eventData || []);
-        setEventsPage(0);
-        setEventsHasMore((eventData || []).length === EVENTS_PAGE_SIZE);
-        if (data?.status === 'PAID' || data?.status === 'FAILED') {
-          setPolling(false);
-        }
-      } catch (err: any) {
-        setError(err.message || 'Não foi possível carregar o pagamento no momento.');
-      } finally {
-        if (!silent) setIsLoading(false);
-      }
-    };
-
-    if (paymentId) {
-      loadPayment();
-      setPolling(true);
-      interval = window.setInterval(() => loadPayment(true), 8000);
-    }
-
-    return () => {
-      if (interval) window.clearInterval(interval);
-    };
-  }, [paymentId]);
-
-  const isPaid = payment?.status === 'PAID';
-  const isFailed = payment?.status === 'FAILED';
-=======
     setError('');
     if (!paymentId) return;
     void loadPayment({ silent: false, withEvents: true });
@@ -165,7 +110,6 @@ export function PaymentPage() {
   const normalizedPaymentStatus = String(payment?.status || '').toUpperCase();
   const isPaid = normalizedPaymentStatus === 'PAID';
   const isFailed = normalizedPaymentStatus === 'FAILED';
->>>>>>> main
   const isExpired = payment?.expiresAt ? new Date(payment.expiresAt) <= new Date() : false;
   const createdAt = payment?.createdAt ? new Date(payment.createdAt) : null;
   const isRecentPayment =
@@ -174,10 +118,7 @@ export function PaymentPage() {
       : false;
   const needsRenew = isFailed || isExpired;
   const isVerified = payment?.emailVerified;
-<<<<<<< HEAD
-=======
   const isPixPending = payment?.method === 'PIX' && normalizedPaymentStatus === 'PENDING';
->>>>>>> main
   const statusLabel = isPaid
     ? 'Pagamento aprovado'
     : isFailed
@@ -190,12 +131,6 @@ export function PaymentPage() {
   const isMock = payment?.provider === 'MOCK';
   const storeSlug = payment?.storeSlug;
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-<<<<<<< HEAD
-  const storeUrl = storeSlug ? `${baseUrl}/chamanoespeto/${storeSlug}` : '';
-  const adminUrl = storeSlug ? `${baseUrl}/admin?slug=${encodeURIComponent(storeSlug)}` : `${baseUrl}/admin`;
-  const methodMeta = getPaymentMethodMeta(payment?.method);
-  const providerMeta = getPaymentProviderMeta(payment?.provider);
-=======
   const storeUrl = storeSlug ? `${baseUrl}/${storeSlug}` : '';
   const adminUrl = storeSlug ? `${baseUrl}/admin?slug=${encodeURIComponent(storeSlug)}` : `${baseUrl}/admin`;
   const methodMeta = getPaymentMethodMeta(payment?.method);
@@ -230,7 +165,6 @@ export function PaymentPage() {
       .find(Boolean);
     if (fallback) setSelectedPlanId(fallback);
   }, [billingKey, plans, plansByName, selectedPlanId, needsRenew]);
->>>>>>> main
 
   useEffect(() => {
     if (!isPaid || !isVerified || redirectRef.current) return;
@@ -243,18 +177,6 @@ export function PaymentPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-<<<<<<< HEAD
-      <header className="bg-white/95 backdrop-blur-sm shadow-sm sticky top-0 z-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 sm:h-20">
-            <button onClick={() => navigate('/')} className="flex items-center gap-3">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl overflow-hidden shadow-lg border border-white bg-white">
-                <img src={platformLogo} alt="Chama no Espeto" className="w-full h-full object-cover" />
-              </div>
-              <div className="hidden sm:block text-left">
-                <p className="text-lg font-bold text-gray-900">Chama no Espeto</p>
-                <p className="text-sm text-gray-500">Pagamento</p>
-=======
       <header className="sticky top-0 z-50 border-b border-white/60 bg-white/80 backdrop-blur-xl shadow-[0_18px_36px_-28px_rgba(15,23,42,0.5)]">
         <div className="h-1 bg-[linear-gradient(90deg,#ef4444,#f97316,#f59e0b)]" />
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -266,16 +188,11 @@ export function PaymentPage() {
               <div className="hidden sm:block text-left leading-tight">
                 <p className="text-lg font-black text-gray-900">Já no Caminho</p>
                 <p className="text-xs text-gray-500 uppercase tracking-[0.25em]">Pagamento</p>
->>>>>>> main
               </div>
             </button>
             <button
               onClick={() => navigate('/create')}
-<<<<<<< HEAD
-              className="px-3 py-2 sm:px-4 text-sm rounded-lg border-2 border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors"
-=======
               className="px-3 py-2 sm:px-4 text-sm rounded-full border border-slate-200 text-gray-700 hover:bg-gray-50 transition-colors"
->>>>>>> main
             >
               Criar outra loja
             </button>
@@ -357,11 +274,7 @@ export function PaymentPage() {
                     )}
                   </div>
                   <p className="text-xs text-emerald-800">
-<<<<<<< HEAD
-                    Use o login e senha cadastrados para entrar no painel. Seu slug ja vai preenchido no login.
-=======
                     Use o login e senha cadastrados para entrar no painel. Seu slug já vai preenchido no login.
->>>>>>> main
                   </p>
                   <p className="text-xs text-emerald-700">Redirecionando em alguns segundos...</p>
                 </div>
@@ -372,11 +285,7 @@ export function PaymentPage() {
                   <p className="text-sm font-semibold text-gray-700 mb-2">Status</p>
                   <p className={`text-lg font-bold ${statusTone}`}>
                     {payment.status}
-<<<<<<< HEAD
-                    {polling && <span className="ml-2 text-xs text-gray-500">(atualizando)</span>}
-=======
                     {isPixPending && pixPolling.isPolling ? <span className="ml-2 text-xs text-gray-500">(atualizando)</span> : null}
->>>>>>> main
                   </p>
 
                   <div className="mt-4 space-y-2 text-sm text-gray-700">
@@ -394,14 +303,11 @@ export function PaymentPage() {
                         {new Date(payment.expiresAt).toLocaleString('pt-BR')}
                       </p>
                     )}
-<<<<<<< HEAD
-=======
                     {isPixPending ? (
                       <p>
                         <span className="font-semibold">Tempo para confirmação:</span> {pixPolling.remainingLabel}
                       </p>
                     ) : null}
->>>>>>> main
                   </div>
                 </div>
 
@@ -412,8 +318,6 @@ export function PaymentPage() {
                     </p>
                   ) : needsRenew ? (
                     <>
-<<<<<<< HEAD
-=======
                       <div className="w-full space-y-3">
                         <div className="flex items-center justify-between w-full gap-2">
                           <p className="text-sm font-semibold text-gray-700">Escolha um plano</p>
@@ -478,7 +382,6 @@ export function PaymentPage() {
                         </p>
                       )}
                     </div>
->>>>>>> main
                       <p className="text-sm font-semibold text-gray-700 text-center">
                         Escolha uma forma para gerar um novo pagamento
                       </p>
@@ -535,12 +438,6 @@ export function PaymentPage() {
                         type="button"
                         onClick={async () => {
                           if (!paymentId) return;
-<<<<<<< HEAD
-                          setRenewing(true);
-                          setError('');
-                          try {
-                            const nextPayment = await paymentService.renew(paymentId, { paymentMethod: renewMethod });
-=======
                           if (!selectedPlanId) {
                             setError('Selecione um plano para continuar.');
                             return;
@@ -552,7 +449,6 @@ export function PaymentPage() {
                               paymentMethod: renewMethod,
                               planId: selectedPlanId,
                             });
->>>>>>> main
                             if (nextPayment?.id) {
                               navigate(`/payment/${nextPayment.id}`);
                             }
@@ -562,21 +458,14 @@ export function PaymentPage() {
                             setRenewing(false);
                           }
                         }}
-<<<<<<< HEAD
-                        className="px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:opacity-90"
-                        disabled={renewing}
-=======
                         className="px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
                         disabled={renewing || !selectedPlanId}
->>>>>>> main
                       >
                         {renewing ? 'Gerando...' : 'Gerar novo pagamento'}
                       </button>
                     </>
                   ) : payment.method === 'PIX' && payment.qrCodeBase64 ? (
                     <>
-<<<<<<< HEAD
-=======
                       <div className="w-full rounded-2xl border border-amber-200 bg-[linear-gradient(135deg,#fff7ed,#ffedd5)] px-4 py-3 shadow-[0_16px_32px_-28px_rgba(234,88,12,0.9)]">
                         <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-amber-700">Tempo limite para pagamento Pix</p>
                         <div className="mt-2 flex items-center justify-between gap-3">
@@ -586,7 +475,6 @@ export function PaymentPage() {
                           </span>
                         </div>
                       </div>
->>>>>>> main
                       <div className="flex items-center gap-2 text-sm text-gray-700">
                         {providerMeta.icon && (
                           <img src={providerMeta.icon} alt={providerMeta.label} className="h-5" />
@@ -602,12 +490,6 @@ export function PaymentPage() {
                             onClick={() => handleCopyPix(payment.qrCodeText)}
                             className="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:opacity-90"
                           >
-<<<<<<< HEAD
-                            {pixCopied ? 'Copiado!' : 'Copiar codigo'}
-                          </button>
-                        </div>
-                      )}
-=======
                             {pixCopied ? 'Copiado!' : 'Copiar código'}
                           </button>
                         </div>
@@ -648,7 +530,6 @@ export function PaymentPage() {
                           {pixPolling.isChecking ? 'Verificando...' : 'Já paguei, verificar agora'}
                         </button>
                       </div>
->>>>>>> main
                       {isMock && (
                         <p className="text-xs text-gray-500 text-center">Pagamento mock para testes - nenhum valor será cobrado.</p>
                       )}
@@ -738,7 +619,4 @@ export function PaymentPage() {
     </div>
   );
 }
-<<<<<<< HEAD
-=======
 
->>>>>>> main

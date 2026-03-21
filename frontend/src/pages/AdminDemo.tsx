@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-// @ts-nocheck
-=======
 ﻿// @ts-nocheck
->>>>>>> main
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -14,10 +10,7 @@ import {
   ArrowCounterClockwise,
 } from '@phosphor-icons/react';
 import { formatCurrency } from '../utils/format';
-<<<<<<< HEAD
-=======
 import { useToast } from '../contexts/ToastContext';
->>>>>>> main
 
 const demoStorageKey = 'adminDemoProducts';
 const initialForm = { name: '', price: '', category: 'espetos', imageUrl: '', imageFile: '', desc: '' };
@@ -40,15 +33,9 @@ const formatCategoryLabel = (value = '') => {
 };
 
 const seedProducts = [
-<<<<<<< HEAD
-  { id: 'demo-1', name: 'Espetinho de Alcatra', price: 12.9, category: 'espetos', imageUrl: '/chama-no-espeto.jpeg' },
-  { id: 'demo-2', name: 'Espetinho de Frango', price: 9.9, category: 'espetos', imageUrl: '/chama-no-espeto.jpeg' },
-  { id: 'demo-3', name: 'Pão de alho especial', price: 7.5, category: 'porcoes', imageUrl: '/chama-no-espeto.jpeg' },
-=======
   { id: 'demo-1', name: 'Combo executivo', price: 12.9, category: 'espetos', imageUrl: '/marketing/menu-list.png' },
   { id: 'demo-2', name: 'Lanche artesanal', price: 9.9, category: 'espetos', imageUrl: '/marketing/menu-list.png' },
   { id: 'demo-3', name: 'Adicional da casa', price: 7.5, category: 'porcoes', imageUrl: '/marketing/menu-list.png' },
->>>>>>> main
 ];
 
 const loadProducts = () => {
@@ -64,10 +51,7 @@ const loadProducts = () => {
 
 export function AdminDemo() {
   const navigate = useNavigate();
-<<<<<<< HEAD
-=======
   const { showToast } = useToast();
->>>>>>> main
   const [products, setProducts] = useState(loadProducts);
   const [editing, setEditing] = useState(null);
   const [formData, setFormData] = useState(initialForm);
@@ -160,21 +144,6 @@ export function AdminDemo() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-<<<<<<< HEAD
-      <header className="bg-white/95 backdrop-blur-sm shadow-sm sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 sm:h-20">
-            <button onClick={() => navigate('/')} className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl overflow-hidden shadow border border-white bg-white">
-                <img src="/chama-no-espeto.jpeg" alt="Chama no Espeto" className="w-full h-full object-cover" />
-              </div>
-              <div className="hidden sm:block text-left">
-                <p className="text-lg font-bold text-gray-900">Admin Demo</p>
-                <p className="text-sm text-gray-500">Simulador de cadastro</p>
-              </div>
-            </button>
-            <div className="flex items-center gap-2">
-=======
       <header className="sticky top-0 z-50 border-b border-white/60 bg-white/80 backdrop-blur-xl shadow-[0_18px_36px_-28px_rgba(15,23,42,0.5)]">
         <div className="h-1 bg-[linear-gradient(90deg,#ef4444,#f97316,#f59e0b)]" />
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -189,17 +158,12 @@ export function AdminDemo() {
               </div>
             </button>
             <div className="flex flex-wrap items-center gap-2">
->>>>>>> main
               <button
                 onClick={() => {
                   sessionStorage.setItem('scrollToDemoFlow', 'true');
                   navigate('/');
                 }}
-<<<<<<< HEAD
-                className="px-3 py-2 text-sm rounded-lg border border-amber-200 text-amber-700 hover:bg-amber-50 flex items-center gap-2"
-=======
                 className="px-3 py-2 text-sm rounded-full border border-amber-200 text-amber-700 hover:bg-amber-50 flex items-center gap-2"
->>>>>>> main
               >
                 Voltar ao guia
               </button>
@@ -208,21 +172,13 @@ export function AdminDemo() {
                   localStorage.removeItem(demoStorageKey);
                   persist(seedProducts);
                 }}
-<<<<<<< HEAD
-                className="px-3 py-2 text-sm rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 flex items-center gap-2"
-=======
                 className="px-3 py-2 text-sm rounded-full border border-gray-200 text-gray-600 hover:bg-gray-50 flex items-center gap-2"
->>>>>>> main
               >
                 <ArrowCounterClockwise size={16} weight="duotone" /> Reset demo
               </button>
               <button
                 onClick={() => navigate('/create')}
-<<<<<<< HEAD
-                className="px-3 py-2 text-sm rounded-lg bg-red-600 text-white font-semibold"
-=======
                 className="px-3 py-2 text-sm rounded-full bg-brand-gradient text-white font-semibold shadow-[0_14px_26px_-20px_rgba(239,68,68,0.8)]"
->>>>>>> main
               >
                 Criar minha loja
               </button>
@@ -250,11 +206,7 @@ export function AdminDemo() {
             />
             <input
               className="p-3 border rounded-lg"
-<<<<<<< HEAD
-              placeholder="Preço (Ex: 10.50)"
-=======
               placeholder="Preço"
->>>>>>> main
               type="number"
               step="0.01"
               value={formData.price}
@@ -395,16 +347,10 @@ export function AdminDemo() {
                     </button>
                     <button
                       onClick={() => {
-<<<<<<< HEAD
-                        if (window.confirm('Excluir produto?')) {
-                          persist(products.filter((item) => item.id !== product.id));
-                        }
-=======
                         showToast(`Excluir "${product.name}"?`, 'warning', {
                           actionLabel: 'Excluir',
                           onAction: () => persist(products.filter((item) => item.id !== product.id)),
                         });
->>>>>>> main
                       }}
                       className="text-red-600 hover:bg-red-50 p-2 rounded"
                     >
@@ -420,7 +366,4 @@ export function AdminDemo() {
     </div>
   );
 }
-<<<<<<< HEAD
-=======
 
->>>>>>> main

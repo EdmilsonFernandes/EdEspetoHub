@@ -11,43 +11,40 @@
 - Mobile: header compacto + botao "Info" com sheet de endereco/WhatsApp/Instagram/horarios.
 - Mapa estatico gratuito (OpenStreetMap) no mobile com cache de coordenadas.
 - Fila do churrasqueiro usa o mesmo header do admin e mantem tema/cores.
-<<<<<<< HEAD
-=======
 - Fila de Producao com visual mais clean (alinhado ao cardapio):
   - menos ruido visual, cards mais neutros e leitura direta.
   - banner de modo foco com toggle de atalhos.
->>>>>>> main
 - Admin:
   - Header unico para todas as telas (Dashboard, Pedidos, Fila).
   - Tela de pedidos limpa (so lista).
-  - Dashboard com receita total/mes/periodo, ticket medio, grafico melhorado e filtro 30/60/90/tudo.
+  - Dashboard with receita total/mes/periodo, ticket medio, grafico melhorado e filtro 30/60/90/tudo.
 - Cadastro:
-  - Agora pede CPF/CNPJ, aceita termos/LGPD e endereco separado com CEP (via ViaCEP).
+  - Agora pede CPF/CNPJ, aceita termos/LGPD e endereco separado with CEP (via ViaCEP).
   - Termos de uso em modal premium (nao perde dados ao abrir).
   - Paleta de cores por escolha visual (sem expor codigo hex).
-  - Preview do logo corrigido com upload.
+  - Preview do logo corrigido with upload.
 - Checkout:
-  - Autocomplete de cliente (3+ letras) com preenchimento automatico do telefone.
+  - Autocomplete de cliente (3+ letras) with preenchimento automatico do telefone.
   - Clientes recentes antes de digitar.
-  - Mesa com selecao rapida (1-12) + campo "outra mesa".
+  - Mesa with selecao rapida (1-12) + campo "outra mesa".
   - Visual "iFood-like" no bloco de dados do pedido.
 - Pedido feito por admin volta para o cardapio (nao envia WhatsApp/tracking).
 - Som na fila:
   - Ligado por padrao, salva preferencia.
   - Botao "Testar som".
 - Mercado Pago:
-  - Integracao com webhook, QR normalizado.
+  - Integracao with webhook, QR normalizado.
   - Idempotency key adicionada.
   - Cai em mock apenas se MP falhar.
 - Email:
-  - SMTP (Gmail com senha de app).
+  - SMTP (Gmail with senha de app).
   - Reset de senha + paginas `ForgotPassword` e `ResetPassword`.
-  - Email de confirmacao mais premium (header com gradiente).
-  - Email de ativacao com logo e links.
+  - Email de confirmacao mais premium (header with gradiente).
+  - Email de ativacao with logo e links.
 - Assinaturas:
   - Avisos por e-mail em D-3, D-1 e D-0.
   - `reminder_stage` evita envio duplicado.
-  - Renovacao no admin com escolha de plano e pagamento.
+  - Renovacao no admin with escolha de plano e pagamento.
   - Admin expirada cai em `/admin/renewal`.
 - Trial:
   - Periodo gratis configuravel via `site_settings` (`trial_days`).
@@ -55,7 +52,7 @@
   - Banner premium no admin mostra dias restantes e CTA de renovacao.
 - SEO:
   - Meta tags dinamicas por loja (OG/Twitter + favicon do cliente).
-  - `sitemap.xml` e `robots.txt` com sitemap.
+  - `sitemap.xml` e `robots.txt` with sitemap.
 - Pagamento:
   - Linha do tempo do usuario mostra apenas status + data.
   - Admin login sem valores predefinidos.
@@ -63,19 +60,19 @@
   - Logos de pagamento (Pix/Cartao/Mercado Pago) em telas publicas e admin.
   - Renovacao gera novo link se pagamento expirou/failed.
 - Landing:
-  - Secao "Produto real" com galeria expandida dos prints.
-  - Modal de visualizacao com atalhos (← →) e botoes para navegar.
+  - Secao "Produto real" with galeria expandida dos prints.
+  - Modal de visualizacao with atalhos (← →) e botoes para navegar.
   - CTA fixo no mobile para conversao.
-  - Simulador de ganhos com ticket medio e pedidos por dia.
+  - Simulador de ganhos with ticket medio e pedidos por dia.
 - Acompanhamento publico:
-  - Pagina `/pedido/:orderId` com timeline, status e fila.
+  - Pagina `/pedido/:orderId` with timeline, status e fila.
   - Branding da loja aplicado (logo, cores, titulo, favicon).
-  - Ultimos 3 pedidos do usuario publico ficam salvos em `localStorage` e habilitam CTA com selecao na vitrine.
+  - Ultimos 3 pedidos do usuario publico ficam salvos em `localStorage` e habilitam CTA with selecao na vitrine.
   - Numero exibido usa prefixo do slug (3 letras) + 8 primeiros chars do ID.
   - Entrega finaliza em "Saiu para entrega" (sem status de motoboy).
   - Tempo total destacado ao finalizar.
 - Checkout (entrega):
-  - Endereco separado com CEP + ViaCEP.
+  - Endereco separado with CEP + ViaCEP.
   - Link de mapa (OpenStreetMap) em vez de iframe.
   - Autocomplete de cliente apenas para admin.
 - Produtos:
@@ -88,13 +85,13 @@
   - Tipos de pedido configuraveis (entrega, retirada, mesa).
 - Vitrine:
   - Banner "Acompanhar pedido" para publico usando `localStorage` (inclui pedidos de mesa).
-  - Botao "Info" abre sheet com endereco, contatos e horarios.
+  - Botao "Info" abre sheet with endereco, contatos e horarios.
   - Bloco "Mais pedidos hoje" (Top 3) no topo do cardapio (carrossel no mobile).
   - Promoção do dia no topo do cardapio + badge nos itens.
-  - Produto com promocao mostra preco riscado e aplica preco promocional no pedido.
+  - Produto with promocao mostra preco riscado e aplica preco promocional no pedido.
   - Botao "Compartilhar cardapio" e dicas "Salvar no celular" (iOS/Android).
   - Botao "Pedir novamente" no acompanhamento do pedido (reaplica itens no carrinho).
-  - Admin: "Cardapio" no resumo com copiar link + gerar PDF.
+  - Admin: "Cardapio" no resumo with copiar link + gerar PDF.
   - Fila: "Modo TV" (tela limpa + relogio + fullscreen).
   - Configuracoes: botao "Salvar alteracoes" visivel para Pix/Email.
 
@@ -136,13 +133,11 @@
 - Som so toca apos interacao do usuario (limitacao do navegador).
 - Mercado Pago exige chave PIX cadastrada (em teste pode bloquear).
 - Admin login bloqueado se pagamento pendente.
-- Email real depende de SMTP valido (Gmail com senha de app).
+- Email real depende de SMTP valido (Gmail with senha de app).
 - Pagamento aprovado atualiza status via webhook Mercado Pago; sem HTTPS nao chega.
 - Postgres pode entrar em loop se o `pg_hba.conf` for corrompido (ex.: linha `EOF` invalida). Workaround: reescrever o arquivo no volume e resetar a senha sem apagar dados.
 - Endpoint publico de metricas: `/api/public/platform/metrics`.
 
-<<<<<<< HEAD
-=======
 ## Fluxo atual (como funciona hoje)
 1. Cliente fecha pedido normalmente no cardapio.
 2. Quando o pedido e finalizado, cliente pode avaliar loja/entregador.
@@ -151,11 +146,10 @@
 5. No acompanhamento do pedido, cliente ve QR/copia-e-cola e status da gorjeta.
 6. Loja recebe esse valor e faz repasse manual para o motoboy.
 7. Motoboy cadastra chave PIX no perfil (`/motoboy/profile`).
-8. Regra de seguranca: chave aceita somente CPF valido; se ja houver CPF no cadastro, precisa bater com o CPF do entregador.
+8. Regra de seguranca: chave aceita somente CPF valido; se ja houver CPF no cadastro, precisa bater with o CPF do entregador.
 9. No Admin > Entregadores, a loja ve a chave PIX do motoboy para repassar.
-10. Fila de Producao (`/admin/queue`) ficou mais clean no estilo do cardapio e com modo foco.
+10. Fila de Producao (`/admin/queue`) ficou mais clean no estilo do cardapio e with modo foco.
 
->>>>>>> main
 ## DNS / Dominio (Registro.br)
 - Ativar modo avancado em "Configurar enderecamento" -> "Modo avancado".
 - Se a tabela mostrar "Dominio em transicao", aguardar alguns minutos e recarregar.
@@ -171,11 +165,11 @@
   - `/uploads/` -> `http://127.0.0.1:4000/uploads/`
 - Nginx precisa de `client_max_body_size 20m` para upload de logo.
 - Certbot configurado para `chamanoespeto.com.br` e `www.chamanoespeto.com.br`.
-- Docker Compose usa `.env.prod` com `FRONTEND_PORT=8080` (front fica atras do Nginx).
+- Docker Compose usa `.env.prod` with `FRONTEND_PORT=8080` (front fica atras do Nginx).
 - Arquivo de exemplo do Nginx: `docs/nginx/chamanoespeto.conf`.
 
 ## Workaround Postgres (pg_hba.conf corrompido)
-Sintoma: container `chamanoespeto-postgres` reiniciando com "invalid connection type \"EOF\"".
+Sintoma: container `chamanoespeto-postgres` reiniciando with "invalid connection type \"EOF\"".
 
 1) Descobrir o volume:
 ```bash

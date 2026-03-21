@@ -1,12 +1,3 @@
-<<<<<<< HEAD
-// @ts-nocheck
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { planService } from '../services/planService';
-import { subscriptionService } from '../services/subscriptionService';
-import { BILLING_OPTIONS, PLAN_TIERS, getPlanName } from '../constants/planCatalog';
-=======
 ﻿// @ts-nocheck
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -15,32 +6,18 @@ import { AdminLayout } from '../layouts/AdminLayout';
 import { planService } from '../services/planService';
 import { subscriptionService } from '../services/subscriptionService';
 import { BILLING_OPTIONS, PLAN_TIERS, getPlanName, resolveAnnualPromoTotal, resolveMonthlyEquivalent } from '../constants/planCatalog';
->>>>>>> main
 import { getPaymentMethodMeta } from '../utils/paymentAssets';
 
 export function AdminRenewal() {
   const navigate = useNavigate();
-<<<<<<< HEAD
-  const { auth, logout } = useAuth();
-  const [plans, setPlans] = useState([]);
-  const [selectedPlanId, setSelectedPlanId] = useState('');
-=======
   const location = useLocation();
   const { auth } = useAuth();
   const [plans, setPlans] = useState([]);
   const [selectedTierKey, setSelectedTierKey] = useState<'basic' | 'pro'>('basic');
->>>>>>> main
   const [paymentMethod, setPaymentMethod] = useState('PIX');
   const [isAnnual, setIsAnnual] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
-<<<<<<< HEAD
-  const openedPaymentLinkRef = useRef('');
-
-  const storeId = auth?.store?.id;
-  const currentStatus = auth?.subscription?.status;
-  const currentEndDate = auth?.subscription?.endDate;
-=======
   const [currentSubscription, setCurrentSubscription] = useState<any>(null);
   const openedPaymentLinkRef = useRef('');
 
@@ -81,38 +58,24 @@ export function AdminRenewal() {
       active = false;
     };
   }, [storeId]);
->>>>>>> main
 
   useEffect(() => {
     const fetchPlans = async () => {
       try {
         const response = await planService.list();
         setPlans(response || []);
-<<<<<<< HEAD
-        const defaultPlan = response?.find((plan) => plan.name === getPlanName('basic', 'monthly'));
-        if (defaultPlan) {
-          setSelectedPlanId(defaultPlan.id);
-        } else if (response?.[0]) {
-          setSelectedPlanId(response[0].id);
-        }
-=======
         const defaultTier =
           preferredTier && allowedTierKeys.includes(preferredTier)
             ? preferredTier
             : (allowedTierKeys.includes(currentTier) ? currentTier : 'basic');
         setSelectedTierKey(defaultTier as 'basic' | 'pro');
->>>>>>> main
       } catch (error) {
         console.error('Não foi possível carregar os planos', error);
       }
     };
 
     fetchPlans();
-<<<<<<< HEAD
-  }, []);
-=======
   }, [allowedTierKeys, currentTier, preferredTier]);
->>>>>>> main
 
   const billingKey = isAnnual ? 'yearly' : 'monthly';
   const billing = BILLING_OPTIONS[billingKey];
@@ -120,22 +83,6 @@ export function AdminRenewal() {
     acc[plan.name] = plan;
     return acc;
   }, {});
-<<<<<<< HEAD
-
-  useEffect(() => {
-    if (!plans.length) return;
-    const currentPlan = plans.find((plan) => plan.id === selectedPlanId);
-    const isCurrentCycle = currentPlan?.name?.endsWith(`_${billingKey}`);
-    if (isCurrentCycle) return;
-    const fallback = PLAN_TIERS
-      .map((tier) => plansByName[getPlanName(tier.key, billingKey)]?.id)
-      .find(Boolean);
-    if (fallback) setSelectedPlanId(fallback);
-  }, [billingKey, plans, plansByName, selectedPlanId]);
-
-  const handleRenew = async () => {
-    if (!storeId) return;
-=======
   const selectedPlan = plansByName[getPlanName(selectedTierKey, billingKey)];
   const selectedPlanId = selectedPlan?.id || '';
   const selectedPlanDisplayValue = useMemo(() => {
@@ -163,7 +110,6 @@ export function AdminRenewal() {
       setError('Selecione um plano para continuar.');
       return;
     }
->>>>>>> main
     setIsSubmitting(true);
     setError('');
     try {
@@ -183,9 +129,6 @@ export function AdminRenewal() {
         navigate(`/payment/${payment.id}`);
       }
     } catch (err) {
-<<<<<<< HEAD
-      setError(err.message || 'Não foi possível gerar a renovação agora.');
-=======
       const waitMinutes = Number(err?.details?.retryAfterMinutes || 0);
       const pendingUrl = err?.details?.paymentUrl;
       if (err?.code === 'SUB-007') {
@@ -200,57 +143,12 @@ export function AdminRenewal() {
       } else {
         setError(err.message || 'Não foi possível gerar a renovação agora.');
       }
->>>>>>> main
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const expiresLabel = currentEndDate ? new Date(currentEndDate).toLocaleDateString('pt-BR') : '—';
-<<<<<<< HEAD
-  const platformLogo = '/chama-no-espeto.jpeg';
-  const handleGoToLogin = () => {
-    logout();
-    navigate('/admin');
-  };
-
-  return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="bg-white/95 backdrop-blur-sm shadow-sm">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 sm:h-20">
-            <button onClick={() => navigate('/')} className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl overflow-hidden shadow border border-white bg-white">
-                <img src={platformLogo} alt="Chama no Espeto" className="w-full h-full object-cover" />
-              </div>
-              <div className="hidden sm:block text-left">
-                <p className="text-lg font-bold text-gray-900">Chama no Espeto</p>
-                <p className="text-sm text-gray-500">Renovação</p>
-              </div>
-            </button>
-            <button
-              onClick={handleGoToLogin}
-              className="px-3 py-2 sm:px-4 text-sm rounded-lg border-2 border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors"
-            >
-              Ir para login
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        <div className="bg-white border border-gray-100 rounded-3xl shadow-xl p-6 sm:p-8 space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Renovar assinatura</h1>
-              <p className="text-gray-500 mt-1">
-                Sua assinatura esta {currentStatus === 'EXPIRED' ? 'expirada' : 'quase expirando'}.
-              </p>
-            </div>
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3">
-              <p className="text-xs text-slate-500">Expiração</p>
-              <p className="text-sm font-semibold text-slate-800">{expiresLabel}</p>
-=======
 
   return (
     <AdminLayout contextLabel="Renovar assinatura">
@@ -280,33 +178,11 @@ export function AdminRenewal() {
             <div className="bg-white border border-slate-200 rounded-2xl px-4 py-3 shadow-[0_14px_26px_-22px_rgba(15,23,42,0.45)]">
               <p className="text-xs text-slate-500">Expiração</p>
               <p className="text-sm font-bold text-slate-800">{expiresLabel}</p>
->>>>>>> main
             </div>
           </div>
 
           {error && <div className="text-sm text-red-600 bg-red-50 border border-red-100 p-3 rounded-xl">{error}</div>}
 
-<<<<<<< HEAD
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-800">Escolha um plano</h3>
-            <div className="flex items-center justify-center gap-4">
-              <span className={`text-sm font-semibold ${!isAnnual ? 'text-gray-900' : 'text-gray-500'}`}>Mensal</span>
-              <button
-                type="button"
-                onClick={() => setIsAnnual(!isAnnual)}
-                className={`relative inline-flex h-8 w-16 items-center rounded-full transition-colors ${isAnnual ? 'bg-red-500' : 'bg-gray-300'}`}
-              >
-                <span className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${isAnnual ? 'translate-x-9' : 'translate-x-1'}`} />
-              </button>
-              <span className={`text-sm font-semibold ${isAnnual ? 'text-gray-900' : 'text-gray-500'}`}>Anual</span>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {PLAN_TIERS.map((tier) => {
-                const planKey = getPlanName(tier.key, billingKey);
-                const plan = plansByName[planKey];
-                const price = plan ? Number(plan.price) : billing.priceByTier[tier.key];
-=======
           <div className="space-y-4 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
             <h3 className="text-lg font-black text-slate-800">Escolha um plano</h3>
             <p className="text-xs text-slate-500">
@@ -352,7 +228,6 @@ export function AdminRenewal() {
                 const showPromo = billingKey === 'yearly' && promo != null && promo > 0 && full !== null && promo < full;
                 const displayPrice = full === null ? null : (billingKey === 'yearly' ? (showPromo ? promo : full) : full);
                 const monthlyEq = billingKey === 'yearly' && displayPrice !== null ? resolveMonthlyEquivalent(displayPrice) : null;
->>>>>>> main
                 const durationLabel = plan
                   ? `${plan.durationDays} dias de acesso`
                   : billingKey === 'yearly'
@@ -364,17 +239,6 @@ export function AdminRenewal() {
                   <button
                     type="button"
                     key={planKey}
-<<<<<<< HEAD
-                    onClick={() => plan?.id && setSelectedPlanId(plan.id)}
-                    disabled={isDisabled}
-                    className={`border rounded-2xl p-4 text-left transition-all relative ${isSelected
-                      ? 'border-red-500 shadow-lg bg-red-50'
-                      : 'border-gray-200 hover:border-red-200'
-                      } ${isDisabled ? 'opacity-60 cursor-not-allowed' : ''}`}
-                  >
-                    {tier.popular && (
-                      <span className="absolute -top-3 right-4 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-=======
                     onClick={() => plan?.id && setSelectedTierKey(tier.key as 'basic' | 'pro')}
                     disabled={isDisabled}
                   className={`border rounded-2xl p-4 text-left transition-all relative ${
@@ -386,7 +250,6 @@ export function AdminRenewal() {
                   >
                     {tier.popular && (
                       <span className="absolute -top-3 right-4 bg-brand-gradient text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm">
->>>>>>> main
                         MAIS POPULAR
                       </span>
                     )}
@@ -395,12 +258,6 @@ export function AdminRenewal() {
                         {billing.savings}
                       </span>
                     )}
-<<<<<<< HEAD
-                    <p className="text-sm uppercase font-semibold text-gray-500">{tier.label}</p>
-                    <p className="text-2xl font-bold text-gray-900">R$ {Number(price).toFixed(2)}</p>
-                    <p className="text-xs text-gray-500">{billing.period}</p>
-                    <p className="text-xs text-gray-500 mt-1">{durationLabel}</p>
-=======
                     <p className="text-sm uppercase font-semibold text-slate-500">{tier.label}</p>
                     {displayPrice === null ? (
                       <div className="mt-1">
@@ -423,17 +280,10 @@ export function AdminRenewal() {
                         <li key={feature}>✓ {feature}</li>
                       ))}
                     </ul>
->>>>>>> main
                   </button>
                 );
               })}
             </div>
-<<<<<<< HEAD
-          </div>
-
-          <div className="space-y-3">
-            <h4 className="text-sm font-semibold text-gray-700">Forma de pagamento</h4>
-=======
             {!selectedPlanId && (
               <p className="text-xs text-red-500 font-semibold">
                 Selecione um plano para continuar.
@@ -457,7 +307,6 @@ export function AdminRenewal() {
               </div>
             </div>
             <h4 className="text-sm font-semibold text-slate-700">Forma de pagamento</h4>
->>>>>>> main
             <div className="flex flex-wrap gap-3">
               <button
                 type="button"
@@ -510,24 +359,14 @@ export function AdminRenewal() {
               type="button"
               onClick={handleRenew}
               disabled={!selectedPlanId || isSubmitting}
-<<<<<<< HEAD
-              className="w-full bg-gradient-to-r from-red-500 to-red-600 text-white py-4 rounded-xl font-semibold hover:from-red-600 hover:to-red-700 disabled:opacity-60 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl"
-=======
               className="w-full bg-brand-gradient text-white py-4 rounded-xl font-semibold hover:opacity-95 disabled:opacity-60 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl"
->>>>>>> main
             >
               {isSubmitting ? 'Gerando pagamento...' : 'Gerar renovação'}
             </button>
           </div>
         </div>
       </main>
-<<<<<<< HEAD
-    </div>
-  );
-}
-=======
     </AdminLayout>
   );
 }
 
->>>>>>> main

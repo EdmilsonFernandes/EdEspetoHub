@@ -1,15 +1,9 @@
-<<<<<<< HEAD
-=======
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800;900&display=swap");
->>>>>>> main
 @import "tailwindcss";
 
 @variant dark (&:where(.dark, .dark *));
 
 @theme {
-<<<<<<< HEAD
-  --color-primary: #dc2626;
-=======
   --color-primary: #2f9df7;
 }
 
@@ -50,7 +44,6 @@ body {
   background: var(--surface-1);
   color: var(--text-strong);
   overflow-x: clip;
->>>>>>> main
 }
 
 /* 🔥 FIRE ANIMATION */
@@ -87,8 +80,6 @@ body {
   }
 }
 
-<<<<<<< HEAD
-=======
 @keyframes motoboyFadeUp {
   from {
     opacity: 0;
@@ -184,7 +175,6 @@ body {
   }
 }
 
->>>>>>> main
 /* Utility classes */
 .animate-flame {
   animation: flame 3s ease-in-out infinite;
@@ -218,9 +208,6 @@ body {
   animation: statusBlink 1.2s ease-in-out infinite;
 }
 
-<<<<<<< HEAD
-@layer utilities {
-=======
 .client-marquee-track {
   animation: clientMarquee 32s linear infinite;
   will-change: transform;
@@ -504,7 +491,6 @@ body {
     box-shadow: 0 24px 46px -34px rgba(15, 23, 42, 0.5);
   }
 
->>>>>>> main
   .bg-brand-primary {
     background-color: var(--color-primary);
   }
@@ -544,9 +530,6 @@ body {
   .bg-brand-secondary-soft {
     background-color: color-mix(in srgb, var(--color-secondary) 12%, white);
   }
-<<<<<<< HEAD
-}
-=======
 
   .ds-page-gradient {
     min-height: 100vh;
@@ -1128,4 +1111,3 @@ body {
       background-position-x: -200%;
     }
   }
->>>>>>> main

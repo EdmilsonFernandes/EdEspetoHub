@@ -52,7 +52,8 @@ export class InitializerService {
         this.myLogger.info(`🔗 Registering Controller: ${controller.path}`);
         app.use(controller.path, controller.router);
 
-        this.myLogger.debug(`Controller '${controller.constructor.name}' successfully configured.`);
+        // Print internal routes for this controller
+        this.printControllerRoutes(controller);
 
       } catch (error: any) {
         this.myLogger.error(`Failed to configure controller for token ${String(token)}: ${error.message || error}`);
@@ -66,5 +67,14 @@ export class InitializerService {
     });
 
     this.myLogger.info('All controllers configured.');
+  }
+
+  private printControllerRoutes(controller: BaseController): void {
+    const routes: any[] = Reflect.getMetadata('routes', controller.constructor) || [];
+    routes.forEach(route => {
+      const { path, method } = route;
+      const fullPath = `${controller.path}${path}`.replace(/\/+/g, '/');
+      console.log(`   [${method.toUpperCase().padEnd(6)}] ${fullPath}`);
+    });
   }
 }

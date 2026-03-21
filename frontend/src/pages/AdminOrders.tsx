@@ -3,14 +3,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { AdminHeader } from '../components/Admin/AdminHeader';
 import { useAuth } from '../contexts/AuthContext';
 import { orderService } from '../services/orderService';
-<<<<<<< HEAD
-import { formatCurrency, formatDateTime, formatOrderDisplayId, formatOrderStatus, formatOrderType } from '../utils/format';
-import { getPaymentMethodMeta } from '../utils/paymentAssets';
-import { resolveAssetUrl } from '../utils/resolveAssetUrl';
-
-export function AdminOrders() {
-  const { auth } = useAuth();
-=======
 import { formatAddress, formatCurrency, formatDateTime, formatOrderDisplayId, formatOrderStatus, formatOrderType } from '../utils/format';
 import { getPaymentMethodMeta } from '../utils/paymentAssets';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
@@ -27,7 +19,6 @@ export function AdminOrders() {
     if (typeof window === 'undefined') return true;
     return window.matchMedia('(min-width: 1024px)').matches;
   });
->>>>>>> main
   const [orders, setOrders] = useState<any[]>([]);
   const [statusFilter, setStatusFilter] = useState('all');
   const [query, setQuery] = useState('');
@@ -39,8 +30,6 @@ export function AdminOrders() {
 
   const storeId = auth?.store?.id;
   const storeSlug = auth?.store?.slug;
-<<<<<<< HEAD
-=======
   const [sidebarCompact, setSidebarCompact] = useState(() => {
     if (typeof window === 'undefined') return false;
     const savedPreference = localStorage.getItem('adminSidebar:compact');
@@ -123,7 +112,6 @@ export function AdminOrders() {
     }
     navigate('/admin/dashboard', { state: { activeTab: id } });
   };
->>>>>>> main
 
   useEffect(() => {
     if (!storeId && !storeSlug) return;
@@ -147,12 +135,6 @@ export function AdminOrders() {
     return [...(orders || [])].sort((a, b) => resolveTime(b.createdAt) - resolveTime(a.createdAt));
   }, [orders]);
 
-<<<<<<< HEAD
-  const filteredOrders = useMemo(() => {
-    const normalized = query.trim().toLowerCase();
-    return sortedOrders.filter((order) => {
-      if (statusFilter !== 'all' && order.status !== statusFilter) return false;
-=======
   const canonicalStatus = (raw: any) => {
     const st = String(raw || '').toLowerCase();
     if (st === 'delivered') return 'done';
@@ -167,7 +149,6 @@ export function AdminOrders() {
         const st = canonicalStatus(order.status);
         if (st !== String(statusFilter).toLowerCase()) return false;
       }
->>>>>>> main
       if (dateFilter) {
         const date = order.createdAt?.seconds ? new Date(order.createdAt.seconds * 1000) : new Date(order.createdAt);
         if (!Number.isFinite(date.getTime())) return false;
@@ -194,38 +175,16 @@ export function AdminOrders() {
   const statusCounts = useMemo(() => {
     return (orders || []).reduce(
       (acc, order) => {
-<<<<<<< HEAD
-        const key = order.status || 'pending';
-=======
         const key = canonicalStatus(order.status);
->>>>>>> main
         acc[key] = (acc[key] || 0) + 1;
         acc.all += 1;
         return acc;
       },
-<<<<<<< HEAD
-      { all: 0, pending: 0, preparing: 0, done: 0, cancelled: 0 }
-=======
       { all: 0, pending: 0, preparing: 0, ready: 0, done: 0, cancelled: 0 }
->>>>>>> main
     );
   }, [orders]);
 
   const statusStyles = (status) => {
-<<<<<<< HEAD
-    if (status === 'preparing') return 'bg-amber-100 text-amber-800';
-    if (status === 'done') return 'bg-green-100 text-green-800';
-    if (status === 'cancelled') return 'bg-slate-100 text-slate-600';
-    return 'bg-red-100 text-red-700';
-  };
-  const formatItemOptions = (item) => {
-    const labels = [];
-    if (item?.cookingPoint) labels.push(item.cookingPoint);
-    if (item?.passSkewer) labels.push('passar varinha');
-    return labels.length ? `(${labels.join(' • ')})` : '';
-  };
-  const shortId = (value) => formatOrderDisplayId(value, storeSlug);
-=======
     const st = String(status || '').toLowerCase();
     if (st === 'pending') return 'bg-amber-100 text-amber-800';
     if (st === 'preparing') return 'bg-sky-100 text-sky-700';
@@ -330,7 +289,6 @@ export function AdminOrders() {
       </div>
     );
   };
->>>>>>> main
 
   const clearFilters = () => {
     setStatusFilter('all');
@@ -345,17 +303,6 @@ export function AdminOrders() {
   }, [viewMode]);
 
   if (!auth?.store) {
-<<<<<<< HEAD
-    return <div style={{ padding: 24 }}>Carregando pedidos...</div>;
-  }
-
-  return (
-    <div className="min-h-screen bg-slate-50" style={{ background: 'linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%)' }}>
-      <div className="mx-auto py-8 px-4 space-y-6">
-        <AdminHeader contextLabel="Pedidos" />
-
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-=======
     return (
       <div className="p-6 space-y-3">
         <div className="ds-skeleton h-20 w-full" />
@@ -394,7 +341,6 @@ export function AdminOrders() {
         <AdminHeader contextLabel="Pedidos" />
 
         <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm relative z-20">
->>>>>>> main
           <div className="flex items-center justify-between gap-3 mb-4">
             <div>
               <h2 className="text-lg font-bold text-slate-800">Lista de pedidos</h2>
@@ -403,23 +349,6 @@ export function AdminOrders() {
           </div>
 
             <div className="flex flex-col lg:flex-row lg:items-center gap-3 mb-4">
-<<<<<<< HEAD
-              <div className="flex flex-wrap gap-2">
-                {[
-                  { id: 'all', label: 'Todos', count: statusCounts.all },
-                  { id: 'pending', label: 'Pendentes', count: statusCounts.pending },
-                { id: 'preparing', label: 'Em preparo', count: statusCounts.preparing },
-                { id: 'done', label: 'Finalizados', count: statusCounts.done },
-                { id: 'cancelled', label: 'Cancelados', count: statusCounts.cancelled },
-              ].map((filter) => (
-                <button
-                  key={filter.id}
-                  onClick={() => setStatusFilter(filter.id)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition ${
-                    statusFilter === filter.id
-                      ? 'bg-brand-primary text-white border-brand-primary'
-                      : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
-=======
               <div className="inline-flex flex-wrap items-center gap-1 rounded-lg bg-slate-100 p-1">
 	                {[
 	                  { id: 'all', label: 'Todos', count: statusCounts.all },
@@ -436,7 +365,6 @@ export function AdminOrders() {
                     statusFilter === filter.id
                       ? 'bg-white text-slate-900 border-slate-300 shadow-sm'
                       : 'bg-transparent text-slate-600 border-transparent hover:bg-white/70'
->>>>>>> main
                   }`}
                 >
                   {filter.label} ({filter.count})
@@ -448,23 +376,14 @@ export function AdminOrders() {
                 type="date"
                 value={dateFilter}
                 onChange={(event) => setDateFilter(event.target.value)}
-<<<<<<< HEAD
-                className="w-full sm:w-44 rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-brand-primary"
-=======
                 className="w-full sm:w-44 ds-select ds-focus-ring py-2 text-sm"
->>>>>>> main
               />
               <input
                 type="text"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-<<<<<<< HEAD
-                placeholder="Buscar cliente, telefone ou pedido (ex: 89035f7b)"
-                className="w-full sm:w-64 rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-brand-primary"
-=======
                 placeholder="Buscar cliente, telefone ou ID do pedido"
                 className="w-full sm:w-64 ds-input ds-focus-ring py-2 text-sm"
->>>>>>> main
               />
               <div className="flex gap-2">
                 <button
@@ -499,18 +418,12 @@ export function AdminOrders() {
 
           {filteredOrders.length === 0 ? (
             <div className="py-12 text-center text-slate-500">
-<<<<<<< HEAD
-              <div className="mx-auto max-w-md rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-6 py-8">
-=======
               <div className="mx-auto max-w-md ds-empty-state rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-6 py-8">
->>>>>>> main
                 <div className="text-4xl">🧾</div>
                 <p className="mt-3 text-sm font-semibold text-slate-700">Nenhum pedido por aqui ainda.</p>
                 <p className="text-xs text-slate-500 mt-1">
                   Assim que entrarem pedidos, eles aparecem aqui com status e detalhes.
                 </p>
-<<<<<<< HEAD
-=======
                 <button
                   type="button"
                   onClick={clearFilters}
@@ -518,57 +431,10 @@ export function AdminOrders() {
                 >
                   Limpar filtros
                 </button>
->>>>>>> main
               </div>
             </div>
           ) : viewMode === 'cards' ? (
             <div className="space-y-4">
-<<<<<<< HEAD
-              {filteredOrders.map((order, index) => (
-                <div
-                  key={order.id || `${order.customerName}-${index}`}
-                  className="border border-slate-200 rounded-2xl bg-white p-5 shadow-sm flex flex-col gap-4"
-                >
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                    <div>
-                      <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                        <span className="px-2.5 py-1 rounded-full border border-slate-200 bg-slate-50 font-semibold">
-                          Pedido #{shortId(order.id)}
-                        </span>
-                        <span>{formatDateTime(order.createdAt)}</span>
-                      </div>
-                      <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                        <span>
-                          {formatOrderType(order.type)}
-                          {order.table ? ` · Mesa ${order.table}` : ''}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusStyles(order.status)}`}>
-                        {formatOrderStatus(order.status)}
-                      </span>
-                      <span className="text-sm font-bold text-brand-primary">
-                        {formatCurrency(order.total || 0)}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="grid sm:grid-cols-3 gap-3 text-sm text-slate-600">
-                    <div>
-                      <p className="text-xs uppercase text-slate-400">Cliente</p>
-                      <p className="font-semibold text-slate-700">{order.customerName || order.name || 'Cliente'}</p>
-                      <p className="text-xs text-slate-500">{order.phone || '-'}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs uppercase text-slate-400">Pagamento</p>
-                      {(() => {
-                        const paymentMeta = getPaymentMethodMeta(order.payment);
-                        return (
-                          <p className="font-semibold text-slate-700 inline-flex items-center gap-2">
-                            {paymentMeta.icon && (
-                              <img
-=======
               <div className="sm:hidden space-y-3">
                 {filteredOrders.map((order, index) => {
                   const paymentMeta = getPaymentMethodMeta(order.payment);
@@ -814,146 +680,12 @@ export function AdminOrders() {
 	                          <span className="inline-flex items-center gap-2">
 	                            {paymentMeta.icon && (
 	                              <img
->>>>>>> main
                                 src={paymentMeta.icon}
                                 alt={paymentMeta.label}
                                 className="h-4 w-4 object-contain"
                               />
                             )}
                             {paymentMeta.label}
-<<<<<<< HEAD
-                          </p>
-                        );
-                      })()}
-                    </div>
-                    <div>
-                      <p className="text-xs uppercase text-slate-400">Endereço</p>
-                      <p className="font-semibold text-slate-700">{order.address || '-'}</p>
-                    </div>
-                  </div>
-
-                  {(order.items || []).length > 0 && (
-                    <div className="border-t border-slate-100 pt-3">
-                      <p className="text-xs uppercase text-slate-400 mb-2">Itens</p>
-                      <div className="grid sm:grid-cols-2 gap-2 text-sm text-slate-700">
-                        {order.items.map((item) => (
-                          <div key={item.id || item.name} className="flex items-center justify-between gap-3">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-lg overflow-hidden border border-slate-200 bg-slate-100 flex-shrink-0">
-                                {item.imageUrl ? (
-                                  <img
-                                    src={resolveAssetUrl(item.imageUrl)}
-                                    alt={item.name}
-                                    className="w-full h-full object-cover"
-                                  />
-                                ) : (
-                                  <div className="w-full h-full flex items-center justify-center text-[10px] text-slate-400">
-                                    🍖
-                                  </div>
-                                )}
-                              </div>
-                              <div className="flex flex-col">
-                                <span className="font-semibold">
-                                  {item.qty}x {item.name}
-                                </span>
-                                <div className="flex flex-wrap gap-1 mt-1">
-                                  {item?.cookingPoint && (
-                                    <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-800 border border-amber-200">
-                                      {item.cookingPoint}
-                                    </span>
-                                  )}
-                                  {item?.passSkewer && (
-                                    <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-fuchsia-100 text-fuchsia-700 border border-fuchsia-200">
-                                      passar varinha
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                            <span className="font-semibold">
-                              {formatCurrency((item.unitPrice ?? item.price ?? 0) * item.qty)}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full text-sm">
-                <thead className="text-left text-xs uppercase text-slate-500">
-                  <tr className="bg-slate-100/80">
-                    <th className="py-3 pr-4 pl-3 rounded-l-xl">Data</th>
-                    <th className="py-3 pr-4">Cliente</th>
-                    <th className="py-3 pr-4 hidden md:table-cell">Tipo</th>
-                    <th className="py-3 pr-4 hidden lg:table-cell">Pagamento</th>
-                    <th className="py-3 pr-4 hidden lg:table-cell">Itens</th>
-                    <th className="py-3 pr-4">Status</th>
-                    <th className="py-3 pr-3 text-right rounded-r-xl">Total</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {filteredOrders.map((order, index) => (
-                    <tr
-                      key={order.id || `${order.customerName}-${index}`}
-                      className="text-slate-700 hover:bg-slate-50/80 transition"
-                    >
-                      <td className="py-3 pr-4 whitespace-nowrap">{formatDateTime(order.createdAt)}</td>
-                      <td className="py-3 pr-4">
-                        <div className="font-semibold">{order.customerName || order.name || 'Cliente'}</div>
-                        <div className="text-xs text-slate-400">{order.phone || '-'}</div>
-                      </td>
-                      <td className="py-3 pr-4 whitespace-nowrap hidden md:table-cell">
-                        {formatOrderType(order.type)}
-                        {order.table ? ` · Mesa ${order.table}` : ''}
-                      </td>
-                      <td className="py-3 pr-4 whitespace-nowrap hidden lg:table-cell">
-                        {(() => {
-                          const paymentMeta = getPaymentMethodMeta(order.payment);
-                          return (
-                            <span className="inline-flex items-center gap-2">
-                              {paymentMeta.icon && (
-                                <img
-                                  src={paymentMeta.icon}
-                                  alt={paymentMeta.label}
-                                  className="h-4 w-4 object-contain"
-                                />
-                              )}
-                              {paymentMeta.label}
-                            </span>
-                          );
-                        })()}
-                      </td>
-                      <td className="py-3 pr-4 text-xs text-slate-600 min-w-[180px] hidden lg:table-cell">
-                        {(order.items || []).length === 0
-                          ? '-'
-                          : order.items
-                              .map((item) => `${item.qty}x ${item.name} ${formatItemOptions(item)}`.trim())
-                              .join(', ')}
-                      </td>
-                      <td className="py-3 pr-4">
-                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${statusStyles(order.status)}`}>
-                          {formatOrderStatus(order.status)}
-                        </span>
-                      </td>
-                      <td className="py-3 text-right font-semibold text-brand-primary">
-                        {formatCurrency(order.total || 0)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-=======
                           </span>
                         </td>
                         <td className="py-3 pr-4 text-xs text-slate-600 min-w-[180px] hidden lg:table-cell">
@@ -986,4 +718,3 @@ export function AdminOrders() {
 }
 
 
->>>>>>> main

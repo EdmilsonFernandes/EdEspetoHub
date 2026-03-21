@@ -1,9 +1,5 @@
 // @ts-nocheck
-<<<<<<< HEAD
-import React, { useMemo, useRef, useState } from 'react';
-=======
 import React, { useEffect, useMemo, useRef, useState } from 'react';
->>>>>>> main
 import {
   Image as ImageIcon,
   PencilSimple,
@@ -14,20 +10,12 @@ import {
   Wine,
   Package,
   DotsThree,
-<<<<<<< HEAD
-  X
-=======
   X,
   WarningCircle
->>>>>>> main
 } from '@phosphor-icons/react';
 import { productService } from '../../services/productService';
 import { formatCurrency } from '../../utils/format';
 import { useToast } from '../../contexts/ToastContext';
-<<<<<<< HEAD
-
-const initialForm = { name: '', price: '', promoPrice: '', promoActive: false, category: 'espetos', imageUrl: '', imageFile: '', description: '', isFeatured: false };
-=======
 import { normalizeProductModifiers } from '../../utils/productModifiers';
 import { resolveAssetUrl } from '../../utils/resolveAssetUrl';
 import {
@@ -68,7 +56,6 @@ const initialForm = {
   availabilityDays: { ...defaultAvailability },
   modifiers: [],
 };
->>>>>>> main
 const defaultCategories = [
   { id: 'espetos', label: 'Espetos', icon: Fire },
   { id: 'bebidas', label: 'Bebidas', icon: Wine },
@@ -76,8 +63,6 @@ const defaultCategories = [
   { id: 'outros', label: 'Outros', icon: DotsThree },
 ];
 
-<<<<<<< HEAD
-=======
 const SEGMENT_CATEGORY_SUGGESTIONS: Record<string, string[]> = {
   restaurante: ['entradas', 'pratos', 'bebidas', 'sobremesas'],
   hamburgueria: ['hamburgueres', 'combos', 'porcoes', 'bebidas'],
@@ -109,7 +94,6 @@ const resolveCategoryAccent = (value = '') =>
 const resolveCategoryDot = (value = '') =>
   categoryDotClasses[normalizeCategory(value)] || 'bg-slate-400';
 
->>>>>>> main
 const normalizeCategory = (value = '') => value.toString().trim().toLowerCase();
 const formatCategoryLabel = (value = '') => {
   const normalized = normalizeCategory(value);
@@ -127,14 +111,6 @@ const getCategoryIcon = (categoryId = '') => {
   return known?.icon || DotsThree;
 };
 
-<<<<<<< HEAD
-export const ProductManager = ({ products, onProductsChange }) => {
-  const { showToast } = useToast();
-  const formRef = useRef<HTMLDivElement | null>(null);
-  const [editing, setEditing] = useState(null);
-  const [inlineEditId, setInlineEditId] = useState<string | null>(null);
-  const [mobileEditOpen, setMobileEditOpen] = useState(false);
-=======
 const dayLabels: Record<string, string> = {
   mon: 'Seg',
   tue: 'Ter',
@@ -336,28 +312,18 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
   const [inlineCategorySelect, setInlineCategorySelect] = useState(initialForm.category);
   const [inlineCustomCategory, setInlineCustomCategory] = useState('');
   const [inlineCategoryPriority, setInlineCategoryPriority] = useState(String(defaultCategoryPriority(initialForm.category)));
->>>>>>> main
   const [inlineForm, setInlineForm] = useState({
     name: '',
     price: '',
     promoPrice: '',
     promoActive: false,
-<<<<<<< HEAD
-=======
     bundlePromoActive: false,
     bundlePromoQty: '',
     bundlePromoPrice: '',
->>>>>>> main
     category: initialForm.category,
     description: '',
     imageUrl: '',
     isFeatured: false,
-<<<<<<< HEAD
-  });
-  const [inlineImageFile, setInlineImageFile] = useState('');
-  const [formData, setFormData] = useState(initialForm);
-  const [imageMode, setImageMode] = useState('url');
-=======
     manageStock: false,
     stockQuantity: '',
     lowStockAlert: '3',
@@ -369,7 +335,6 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
   const [inlineImagePreview, setInlineImagePreview] = useState('');
   const [formData, setFormData] = useState(initialForm);
   const [formCategoryPriority, setFormCategoryPriority] = useState(String(defaultCategoryPriority(initialForm.category)));
->>>>>>> main
   const [imagePreview, setImagePreview] = useState('');
   const [categorySelect, setCategorySelect] = useState(initialForm.category);
   const [customCategory, setCustomCategory] = useState('');
@@ -378,26 +343,6 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [page, setPage] = useState(1);
   const pageSize = 15;
-<<<<<<< HEAD
-
-  const categoryOptions = useMemo(() => {
-    const unique = new Set(defaultCategories.map((entry) => entry.id));
-    (products || []).forEach((product) => {
-      const key = normalizeCategory(product.category);
-      if (key) unique.add(key);
-    });
-    const known = defaultCategories.map((entry) => ({
-      id: entry.id,
-      label: entry.label,
-      icon: entry.icon,
-    }));
-    const extras = Array.from(unique)
-      .filter((entry) => !defaultCategories.find((item) => item.id === entry))
-      .sort()
-      .map((entry) => ({ id: entry, label: formatCategoryLabel(entry), icon: DotsThree }));
-    return [ ...known, ...extras ];
-  }, [products]);
-=======
   const [pendingDeleteIds, setPendingDeleteIds] = useState<string[]>([]);
   const [bulkOpen, setBulkOpen] = useState(false);
   const [bulkText, setBulkText] = useState('');
@@ -477,7 +422,6 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
       if (inlineImagePreview?.startsWith('blob:')) URL.revokeObjectURL(inlineImagePreview);
     };
   }, [imagePreview, inlineImagePreview]);
->>>>>>> main
 
   const categoryTabs = useMemo(() => {
     const counts = new Map();
@@ -510,14 +454,6 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
     return filteredProducts.slice(start, start + pageSize);
   }, [filteredProducts, page]);
 
-<<<<<<< HEAD
-  const resetForm = () => {
-    setEditing(null);
-    setFormData(initialForm);
-    setImageMode('url');
-    setImagePreview('');
-    setCategorySelect(initialForm.category);
-=======
   const bulkParse = useMemo(() => parseBulkProductsInput(bulkText), [bulkText]);
 
   const existingProductKeys = useMemo(() => {
@@ -536,13 +472,10 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
     setImagePreview('');
     setCategorySelect(defaultCategoryId);
     setFormCategoryPriority(String(defaultCategoryPriority(defaultCategoryId)));
->>>>>>> main
     setCustomCategory('');
     setShowCustomInput(false);
   };
 
-<<<<<<< HEAD
-=======
   const resolveCategoryPriorityValue = (value = '') => {
     const key = normalizeCategory(value);
     if (!key) return defaultCategoryPriority(value);
@@ -557,7 +490,6 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
     return defaultCategoryPriority(key);
   };
 
->>>>>>> main
   const refreshProducts = async () => {
     if (!onProductsChange) return;
     try {
@@ -568,8 +500,6 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
     }
   };
 
-<<<<<<< HEAD
-=======
   const loadCategoryPriorities = async () => {
     setCategoryPriorityLoading(true);
     try {
@@ -713,7 +643,6 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
     }
   };
 
->>>>>>> main
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (!formData.name || !formData.price) return;
@@ -725,11 +654,6 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
       price: parseFloat(formData.price),
       promoPrice: formData.promoPrice ? parseFloat(formData.promoPrice) : undefined,
       promoActive: Boolean(formData.promoActive),
-<<<<<<< HEAD
-      imageFile: imageMode === 'upload' ? formData.imageFile : undefined,
-      imageUrl: imageMode === 'url' ? formData.imageUrl : undefined,
-      description: formData.description || undefined,
-=======
       bundlePromoQty: formData.bundlePromoQty ? Number(formData.bundlePromoQty) : undefined,
       bundlePromoPrice: formData.bundlePromoPrice ? parseFloat(formData.bundlePromoPrice) : undefined,
       bundlePromoActive: Boolean(formData.bundlePromoActive),
@@ -741,16 +665,10 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
       lowStockAlert: Math.max(1, Math.floor(Number(formData.lowStockAlert || 3))),
       availabilityDays: buildAvailabilityPayload(formData.availabilityDays),
       modifiers: normalizeProductModifiers(formData.modifiers || []),
->>>>>>> main
     };
 
     try {
       await productService.save(payload);
-<<<<<<< HEAD
-      showToast('Produto adicionado com sucesso.', 'success');
-      resetForm();
-      await refreshProducts();
-=======
       const parsedPriority = Math.max(1, Math.floor(Number(formCategoryPriority || defaultCategoryPriority(formData.category))));
       if (formData.category && Number.isFinite(parsedPriority)) {
         try {
@@ -765,7 +683,6 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
       await loadCategoryPriorities();
       // Fast data entry: jump back to "Nome do Produto" after a successful save.
       setTimeout(() => createNameInputRef.current?.focus(), 50);
->>>>>>> main
     } catch (err) {
       showToast('Não foi possível salvar o produto.', 'error');
     } finally {
@@ -774,10 +691,6 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
   };
 
   const handleEdit = (product) => {
-<<<<<<< HEAD
-    setInlineEditId(product.id);
-    setInlineImageFile('');
-=======
     const normalizedCategory = normalizeCategory(product.category || defaultCategoryId);
     const isKnown = categoryOptions.some((entry) => entry.id === normalizedCategory);
     setInlineCategorySelect(isKnown ? normalizedCategory : '__custom__');
@@ -787,18 +700,11 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
     setInlineImageFile('');
     if (inlineImagePreview?.startsWith('blob:')) URL.revokeObjectURL(inlineImagePreview);
     setInlineImagePreview('');
->>>>>>> main
     setInlineForm({
       name: product.name || '',
       price: product.price != null ? String(product.price) : '',
       promoPrice: product.promoPrice != null ? String(product.promoPrice) : '',
       promoActive: Boolean(product.promoActive),
-<<<<<<< HEAD
-      category: product.category || initialForm.category,
-      description: product.description ?? product.desc ?? '',
-      imageUrl: product.imageUrl || '',
-      isFeatured: Boolean(product.isFeatured),
-=======
       bundlePromoActive: Boolean(product.bundlePromoActive),
       bundlePromoQty: product.bundlePromoQty != null ? String(product.bundlePromoQty) : '',
       bundlePromoPrice: product.bundlePromoPrice != null ? String(product.bundlePromoPrice) : '',
@@ -816,7 +722,6 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
         id: modifier.id || `modifier-${product.id}-${index + 1}`,
         price: String(modifier.price ?? ''),
       })),
->>>>>>> main
     });
   };
 
@@ -842,20 +747,14 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
         price: parseFloat(inlineForm.price),
         promoPrice: inlineForm.promoPrice ? parseFloat(inlineForm.promoPrice) : undefined,
         promoActive: Boolean(inlineForm.promoActive),
-<<<<<<< HEAD
-=======
         bundlePromoQty: inlineForm.bundlePromoQty ? Number(inlineForm.bundlePromoQty) : undefined,
         bundlePromoPrice: inlineForm.bundlePromoPrice ? parseFloat(inlineForm.bundlePromoPrice) : undefined,
         bundlePromoActive: Boolean(inlineForm.bundlePromoActive),
->>>>>>> main
         category: inlineForm.category,
         description: inlineForm.description || undefined,
         imageUrl: inlineImageFile ? undefined : inlineForm.imageUrl || undefined,
         imageFile: inlineImageFile || undefined,
         isFeatured: inlineForm.isFeatured,
-<<<<<<< HEAD
-      });
-=======
         manageStock: Boolean(inlineForm.manageStock),
         stockQuantity: inlineForm.manageStock ? Math.max(0, Math.floor(Number(inlineForm.stockQuantity || 0))) : 0,
         lowStockAlert: Math.max(1, Math.floor(Number(inlineForm.lowStockAlert || 3))),
@@ -871,16 +770,12 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
           console.warn('Falha ao salvar prioridade da categoria na edição', priorityError);
         }
       }
->>>>>>> main
       showToast('Produto atualizado com sucesso.', 'success');
       setInlineEditId(null);
       setInlineImageFile('');
       setMobileEditOpen(false);
       await refreshProducts();
-<<<<<<< HEAD
-=======
       await loadCategoryPriorities();
->>>>>>> main
     } catch (error) {
       showToast('Não foi possível salvar o produto.', 'error');
     } finally {
@@ -891,53 +786,6 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
   const handleInlineCancel = () => {
     setInlineEditId(null);
     setInlineImageFile('');
-<<<<<<< HEAD
-    setMobileEditOpen(false);
-  };
-
-  const handleUpload = (file) => {
-    if (!file) {
-      setFormData((prev) => ({ ...prev, imageFile: '' }));
-      setImagePreview('');
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = reader.result?.toString() || '';
-      setFormData((prev) => ({ ...prev, imageFile: result }));
-      setImagePreview(result);
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const previewPrice =
-    formData.price && !Number.isNaN(Number(formData.price))
-      ? formatCurrency(Number(formData.price))
-      : '—';
-  const previewPromoPrice =
-    formData.promoActive && formData.promoPrice && !Number.isNaN(Number(formData.promoPrice))
-      ? formatCurrency(Number(formData.promoPrice))
-      : '';
-  const previewCategory =
-    categorySelect === '__custom__'
-      ? formatCategoryLabel(formData.category)
-      : formatCategoryLabel(categorySelect || initialForm.category);
-  const previewImage = imagePreview || formData.imageUrl;
-
-  return (
-    <div className="space-y-6">
-      <div ref={formRef} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-        <div className="flex flex-wrap items-start justify-between gap-3 mb-6">
-          <div>
-            <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-              <Plus size={20} weight="duotone" className="text-brand-primary" />
-              Cadastro de produto
-            </h3>
-            <p className="text-xs text-slate-500 mt-1">Cadastre itens do cardápio com foto, preço e categoria.</p>
-          </div>
-          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-brand-primary-soft text-brand-primary">
-=======
     if (inlineImagePreview?.startsWith('blob:')) URL.revokeObjectURL(inlineImagePreview);
     setInlineImagePreview('');
     setMobileEditOpen(false);
@@ -1096,15 +944,10 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
             <p className="mt-1 text-xs text-slate-500">Cadastre itens da vitrine com foto, preço e categoria.</p>
           </div>
           <span className="px-3 py-1 rounded-full text-xs font-semibold border border-brand-primary/25 bg-brand-primary-soft text-brand-primary">
->>>>>>> main
             Novo item
           </span>
         </div>
 
-<<<<<<< HEAD
-        <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-          <form onSubmit={handleSubmit} className="space-y-4">
-=======
         <div className="mb-5 rounded-2xl border border-slate-200 bg-white/90 p-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
@@ -1295,37 +1138,23 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
         <div className="grid gap-6">
           <form onSubmit={handleSubmit} className="space-y-4 w-full">
           <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 sm:p-5">
->>>>>>> main
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">Nome do Produto</label>
               <input
-<<<<<<< HEAD
-                className="p-3 border border-gray-200 rounded-lg w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent"
-                placeholder="Ex: Espeto de Carne"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                required
-=======
                 className="p-3 border border-gray-200 rounded-xl w-full bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
                 placeholder="Nome do produto"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
                 ref={createNameInputRef}
->>>>>>> main
               />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">Preço</label>
               <input
-<<<<<<< HEAD
-                className="p-3 border border-gray-200 rounded-lg w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent"
-                placeholder="Ex: 10.50"
-=======
                 className="p-3 border border-gray-200 rounded-xl w-full bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
                 placeholder="0.00"
->>>>>>> main
                 type="number"
                 step="0.01"
                 value={formData.price}
@@ -1334,24 +1163,15 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
               />
             </div>
           </div>
-<<<<<<< HEAD
-
-=======
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
->>>>>>> main
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">Preço promocional (opcional)</label>
               <input
-<<<<<<< HEAD
-                className="p-3 border border-gray-200 rounded-lg w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent"
-                placeholder="Ex: 8.90"
-=======
                 className="p-3 border border-gray-200 rounded-xl w-full bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
                 placeholder="0.00"
->>>>>>> main
                 type="number"
                 step="0.01"
                 value={formData.promoPrice}
@@ -1380,10 +1200,6 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
               </div>
             </div>
           </div>
-<<<<<<< HEAD
-
-          <div className="space-y-2">
-=======
           <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50/60 p-4">
             <div className="flex items-center justify-between gap-3">
               <div>
@@ -1502,7 +1318,6 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
           </div>
 
             <div className="space-y-2 rounded-2xl border border-slate-200 bg-slate-50/60 p-4 sm:p-5">
->>>>>>> main
             <label className="text-sm font-medium text-gray-700">Categoria</label>
             <div className="flex flex-wrap gap-2">
               {categoryOptions.map((option) => {
@@ -1514,33 +1329,22 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                     type="button"
                     onClick={() => {
                       setCategorySelect(option.id);
-<<<<<<< HEAD
-=======
                       setFormCategoryPriority(String(resolveCategoryPriorityValue(option.id)));
->>>>>>> main
                       setCustomCategory('');
                       setShowCustomInput(false);
                       setFormData({ ...formData, category: option.id });
                     }}
-<<<<<<< HEAD
-                    className={`flex items-center gap-2 px-3 py-2 rounded-lg font-medium text-sm transition-all hover:-translate-y-0.5 active:scale-95 ${
-=======
                   className={`flex items-center gap-2 px-3 py-2 rounded-xl font-medium text-sm transition-all hover:-translate-y-0.5 active:scale-95 ${
->>>>>>> main
                       isSelected
                         ? 'bg-brand-primary text-white shadow-md'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
                     <Icon size={16} weight="duotone" />
-<<<<<<< HEAD
-                    {option.label}
-=======
                     <span>{option.label}</span>
                     <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${isSelected ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-600'}`}>
                       {Number(option.priority ?? 99)}
                     </span>
->>>>>>> main
                   </button>
                 );
               })}
@@ -1550,19 +1354,11 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                   setShowCustomInput(!showCustomInput);
                   if (showCustomInput) {
                     setCustomCategory('');
-<<<<<<< HEAD
-                    setCategorySelect(initialForm.category);
-                    setFormData({ ...formData, category: initialForm.category });
-                  }
-                }}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg font-medium text-sm transition-all hover:-translate-y-0.5 active:scale-95 border-2 ${
-=======
                     setCategorySelect(defaultCategoryId);
                     setFormData({ ...formData, category: defaultCategoryId });
                   }
                 }}
                 className={`flex items-center gap-2 px-3 py-2 rounded-xl font-medium text-sm transition-all hover:-translate-y-0.5 active:scale-95 border-2 ${
->>>>>>> main
                   showCustomInput
                     ? 'border-brand-primary bg-brand-primary-soft text-brand-primary'
                     : 'border-gray-300 border-dashed text-gray-600 hover:border-brand-primary hover:text-brand-primary'
@@ -1574,134 +1370,18 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
             </div>
             {showCustomInput && (
               <input
-<<<<<<< HEAD
-                className="p-3 border border-gray-200 rounded-lg w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent mt-3"
-=======
                 className="mt-3 p-3 border border-gray-200 rounded-xl w-full bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
->>>>>>> main
                 placeholder="Digite o nome da nova categoria"
                 value={customCategory}
                 onChange={(e) => {
                   const value = e.target.value;
                   setCustomCategory(value);
-<<<<<<< HEAD
-=======
                   setFormCategoryPriority(String(defaultCategoryPriority(value)));
->>>>>>> main
                   setFormData({ ...formData, category: normalizeCategory(value) });
                 }}
                 autoFocus
               />
             )}
-<<<<<<< HEAD
-          </div>
-
-          <div className="space-y-3">
-            <label className="text-sm font-medium text-gray-700">Imagem do Produto</label>
-
-            {/* Toggle buttons */}
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => setImageMode('url')}
-                className={`px-4 py-2.5 rounded-lg text-sm font-semibold transition-all hover:-translate-y-0.5 active:scale-95 ${
-                  imageMode === 'url'
-                    ? 'bg-brand-primary text-white shadow-md'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                URL da Imagem
-              </button>
-              <button
-                type="button"
-                onClick={() => setImageMode('upload')}
-                className={`px-4 py-2.5 rounded-lg text-sm font-semibold transition-all hover:-translate-y-0.5 active:scale-95 ${
-                  imageMode === 'upload'
-                    ? 'bg-brand-primary text-white shadow-md'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                Fazer Upload
-              </button>
-            </div>
-
-            {/* URL input */}
-            {imageMode === 'url' && (
-              <div className="space-y-2">
-                <input
-                  className="p-3 border border-gray-200 rounded-lg w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent"
-                  placeholder="https://exemplo.com/imagem.jpg"
-                  value={formData.imageUrl}
-                  onChange={(e) => {
-                    setFormData({ ...formData, imageUrl: e.target.value });
-                    setImagePreview(e.target.value);
-                  }}
-                />
-                {imagePreview && (
-                  <div className="relative rounded-lg overflow-hidden border border-gray-200 bg-gray-50 max-w-48">
-                    <img
-                      src={imagePreview}
-                      alt="Preview"
-                      className="w-full h-48 object-cover"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setImagePreview('');
-                        setFormData({ ...formData, imageUrl: '', imageFile: '' });
-                      }}
-                      className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg transition-all hover:-translate-y-0.5 active:scale-95 shadow-lg"
-                    >
-                      <Trash size={18} weight="duotone" />
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Upload area */}
-            {imageMode === 'upload' && (
-              <div className="space-y-2">
-                {!imagePreview && (
-                  <label className="relative flex flex-col items-center justify-center w-full p-6 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-brand-primary hover:bg-brand-primary/5 transition">
-                    <div className="flex flex-col items-center justify-center">
-                    <ImageIcon size={24} weight="duotone" className="text-gray-400 mb-2" />
-                      <p className="text-sm font-semibold text-gray-700">Arraste uma imagem aqui</p>
-                      <p className="text-xs text-gray-500">ou clique para selecionar</p>
-                    </div>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleUpload(e.target.files?.[0])}
-                      className="hidden"
-                    />
-                  </label>
-                )}
-                {imagePreview && (
-                  <div className="relative rounded-lg overflow-hidden border border-gray-200 bg-gray-50 max-w-48">
-                    <img
-                      src={imagePreview}
-                      alt="Preview"
-                      className="w-48 h-48 object-cover"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setImagePreview('');
-                        setFormData({ ...formData, imageUrl: '', imageFile: '' });
-                      }}
-                      className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg transition-all hover:-translate-y-0.5 active:scale-95 shadow-lg"
-                    >
-                      <Trash size={18} weight="duotone" />
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          <div className="space-y-2">
-=======
             <div className="grid grid-cols-1 sm:grid-cols-[220px_1fr] items-center gap-2 pt-1">
               <label className="text-xs font-semibold text-slate-600 uppercase tracking-[0.15em]">
                 Ordem da categoria
@@ -1783,7 +1463,6 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
           </div>
 
           <div className="space-y-2 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
->>>>>>> main
             <label className="text-sm font-medium text-gray-700">Descrição (opcional)</label>
             <textarea
               className="p-3 border border-gray-200 rounded-lg w-full focus:ring-2 focus:ring-brand-primary focus:border-transparent"
@@ -1793,12 +1472,6 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             />
           </div>
-<<<<<<< HEAD
-          <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
-            <div>
-              <p className="text-sm font-semibold text-slate-800">Promoção do dia</p>
-              <p className="text-xs text-slate-500">Destaque este produto no topo do cardápio.</p>
-=======
           <div className="space-y-3 rounded-2xl border border-dashed border-brand-primary/30 bg-brand-primary-soft/20 p-4 sm:p-5">
             <div className="flex items-center justify-between gap-2">
               <label className="text-sm font-semibold text-slate-800">Adicionais (opcional)</label>
@@ -1907,7 +1580,6 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
             <div>
               <p className="text-sm font-semibold text-slate-800">Promoção do dia</p>
               <p className="text-xs text-slate-500">Destaque este produto no topo da vitrine.</p>
->>>>>>> main
             </div>
             <button
               type="button"
@@ -1925,11 +1597,7 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
           <div className="flex gap-3 pt-2">
             <button
               type="submit"
-<<<<<<< HEAD
-              className="bg-brand-primary text-white px-6 py-3 rounded-lg font-semibold flex-1 flex justify-center items-center gap-2 hover:bg-brand-primary/90 transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-60"
-=======
               className="bg-brand-gradient text-white px-6 py-3 rounded-xl font-semibold flex-1 flex justify-center items-center gap-2 hover:opacity-95 transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-60 shadow-[0_14px_28px_-18px_rgba(59,130,246,0.8)]"
->>>>>>> main
               disabled={saving}
             >
               <FloppyDisk size={18} weight="duotone" />
@@ -1938,99 +1606,13 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
             <button
               type="button"
               onClick={resetForm}
-<<<<<<< HEAD
-              className="bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-all hover:-translate-y-0.5 active:scale-95"
-=======
               className="bg-white border border-slate-200 text-gray-700 px-6 py-3 rounded-xl font-semibold hover:bg-slate-50 transition-all hover:-translate-y-0.5 active:scale-95"
->>>>>>> main
             >
               Limpar
             </button>
           </div>
           </form>
 
-<<<<<<< HEAD
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 space-y-4">
-            <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Pré-visualização</p>
-            <div className="rounded-xl overflow-hidden border border-slate-200 bg-white">
-              {previewImage ? (
-                <img src={previewImage} alt="Prévia do produto" className="w-full h-44 object-cover" />
-              ) : (
-                <div className="h-44 flex flex-col items-center justify-center gap-2 text-xs text-slate-400">
-                  <ImageIcon size={20} weight="duotone" />
-                  Adicione uma foto para destacar o produto
-                </div>
-              )}
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between gap-2">
-                <h4 className="text-base font-semibold text-slate-900 truncate">
-                  {formData.name || 'Nome do produto'}
-                </h4>
-                <div className="flex items-center gap-2">
-                  {previewPromoPrice ? (
-                    <>
-                      <span className="text-xs font-semibold text-slate-400 line-through">
-                        {previewPrice}
-                      </span>
-                      <span className="text-sm font-bold text-emerald-600">{previewPromoPrice}</span>
-                    </>
-                  ) : (
-                    <span className="text-sm font-bold text-brand-primary">{previewPrice}</span>
-                  )}
-                </div>
-              </div>
-              {formData.isFeatured && (
-                <span className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 border border-emerald-200">
-                  Promoção do dia
-                </span>
-              )}
-              <span className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-semibold bg-white border border-slate-200 text-slate-600">
-                {previewCategory || 'Categoria'}
-              </span>
-              <p className="text-xs text-slate-500">
-                {formData.description || 'Adicione uma descrição curta para ajudar o cliente.'}
-              </p>
-            </div>
-            <div className="grid grid-cols-2 gap-2 text-xs text-slate-500">
-              <div className="rounded-lg border border-slate-200 bg-white px-2 py-2">
-                Imagem: {imageMode === 'upload' ? 'Upload' : 'URL'}
-              </div>
-              <div className="rounded-lg border border-slate-200 bg-white px-2 py-2">
-                Status: {saving ? 'Salvando...' : 'Pronto'}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="flex flex-wrap items-center gap-2 px-4 py-3 border-b border-slate-100 bg-slate-50">
-          {categoryTabs.map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => {
-                setCategoryFilter(tab.id);
-                setPage(1);
-              }}
-              className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all hover:-translate-y-0.5 active:scale-95 ${
-                categoryFilter === tab.id
-                  ? 'bg-brand-primary text-white border-brand-primary'
-                  : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
-              }`}
-            >
-              {tab.label} ({tab.count})
-            </button>
-          ))}
-        </div>
-        <div className="sm:hidden space-y-3">
-          {pagedProducts.map((product) => (
-            <div key={product.id} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-              <div className="flex items-start gap-3">
-                {product.imageUrl ? (
-                  <img src={product.imageUrl} className="w-12 h-12 rounded-xl object-cover" alt="" />
-=======
         </div>
       </div>
 
@@ -2065,17 +1647,12 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
               <div className="flex items-start gap-3">
                 {product.imageUrl ? (
                   <img src={resolveAssetUrl(product.imageUrl)} className="w-12 h-12 rounded-xl object-cover" alt="" />
->>>>>>> main
                 ) : (
                   <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
                     <ImageIcon size={16} className="text-gray-400" />
                   </div>
                 )}
                 <div className="flex-1">
-<<<<<<< HEAD
-                  <p className="font-semibold text-gray-900">{product.name}</p>
-                  <p className="text-xs text-gray-500">{formatCategoryLabel(product.category)}</p>
-=======
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="font-semibold text-gray-900">{product.name}</p>
                     {Boolean(product.manageStock) && Number(product.stockQuantity || 0) <= Number(product.lowStockAlert || 3) && (
@@ -2098,7 +1675,6 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                   <div className="mt-1">
                     {renderAvailabilityBadges(product.availabilityDays)}
                   </div>
->>>>>>> main
                   <div className="mt-2">
                     {product.promoActive && product.promoPrice ? (
                       <div className="flex items-center gap-2">
@@ -2112,14 +1688,11 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                     ) : (
                       <span className="text-brand-primary font-bold">{formatCurrency(product.price)}</span>
                     )}
-<<<<<<< HEAD
-=======
                     {product.bundlePromoActive && Number(product.bundlePromoQty) >= 2 && Number(product.bundlePromoPrice) > 0 && (
                       <p className="mt-1 text-[11px] font-semibold text-emerald-700">
                         {product.bundlePromoQty} por {formatCurrency(product.bundlePromoPrice)}
                       </p>
                     )}
->>>>>>> main
                   </div>
                 </div>
                 <div className="flex flex-col gap-2">
@@ -2139,31 +1712,6 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                   </button>
                   <button
                     type="button"
-<<<<<<< HEAD
-                    onClick={() => {
-                      if (!window.confirm('Excluir produto?')) return;
-                      setSaving(true);
-                      productService
-                        .delete(product.id)
-                        .then(async () => {
-                          showToast('Produto removido com sucesso.', 'success');
-                          await refreshProducts();
-                        })
-                        .catch(async (error) => {
-                          const message = (error?.message || '').toString();
-                          if (error?.code === 'PROD-001' || error?.status === 404 || message.includes('Produto')) {
-                            showToast('Produto removido com sucesso.', 'success');
-                            await refreshProducts();
-                            return;
-                          }
-                          showToast('Não foi possível remover o produto.', 'error');
-                        })
-                        .finally(() => setSaving(false));
-                    }}
-                    className="px-3 py-1.5 rounded-lg border border-red-200 text-red-600 text-xs font-semibold"
-                  >
-                    Excluir
-=======
                     onClick={() => handleToggleActive(product)}
                     className={`px-3 py-1.5 rounded-lg border text-xs font-semibold ${
                       product.active === false
@@ -2182,7 +1730,6 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                     className="px-3 py-1.5 rounded-lg border border-red-200 text-red-600 text-xs font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {pendingDeleteIds.includes(product.id) ? 'Agendado...' : 'Excluir'}
->>>>>>> main
                   </button>
                 </div>
               </div>
@@ -2192,24 +1739,6 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
 
         <div className="hidden sm:block overflow-x-auto">
         <table className="w-full text-left min-w-[680px]">
-<<<<<<< HEAD
-          <thead className="bg-gray-50 border-b">
-            <tr>
-              <th className="p-4 font-bold text-gray-600">Foto</th>
-              <th className="p-4 font-bold text-gray-600">Nome</th>
-              <th className="p-4 font-bold text-gray-600">Categoria</th>
-              <th className="p-4 font-bold text-gray-600">Preço</th>
-              <th className="p-4 font-bold text-gray-600 text-right">Ações</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y">
-            {pagedProducts.map((product) => (
-              <React.Fragment key={product.id}>
-              <tr className={`hover:bg-gray-50 ${inlineEditId === product.id ? 'bg-amber-50/60' : ''}`}>
-                <td className="p-4">
-                  {product.imageUrl ? (
-                    <img src={product.imageUrl} className="w-10 h-10 rounded object-cover" alt="" />
-=======
           <thead className="bg-slate-50/90 border-b border-slate-200">
             <tr>
               <th className="p-4 text-[11px] uppercase tracking-[0.18em] font-bold text-slate-500">Foto</th>
@@ -2232,7 +1761,6 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                 <td className="p-4">
                   {product.imageUrl ? (
                     <img src={resolveAssetUrl(product.imageUrl)} className="w-10 h-10 rounded object-cover" alt="" />
->>>>>>> main
                   ) : (
                       <div className="w-10 h-10 bg-gray-200 rounded flex items-center justify-center">
                         <ImageIcon size={16} className="text-gray-400" />
@@ -2241,9 +1769,6 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                   </td>
                   <td className="p-4 font-medium">
                     <div className="flex flex-wrap items-center gap-2">
-<<<<<<< HEAD
-                      <span>{product.name}</span>
-=======
                       <span className={`inline-flex h-2 w-2 rounded-full ${resolveCategoryDot(product.category)}`} />
                       <span>{product.name}</span>
                       {Boolean(product.manageStock) && Number(product.stockQuantity || 0) <= Number(product.lowStockAlert || 3) && (
@@ -2252,7 +1777,6 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                           {Math.max(0, Number(product.stockQuantity || 0))}
                         </span>
                       )}
->>>>>>> main
                       {product.isFeatured && (
                         <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-700 border border-emerald-200">
                           Promo do dia
@@ -2278,13 +1802,6 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                         <span className="text-emerald-600 font-bold">
                           {formatCurrency(product.promoPrice)}
                         </span>
-<<<<<<< HEAD
-                      </div>
-                    ) : (
-                      <span className="text-brand-primary font-bold">{formatCurrency(product.price)}</span>
-                    )}
-                  </td>
-=======
                         {product.bundlePromoActive && Number(product.bundlePromoQty) >= 2 && Number(product.bundlePromoPrice) > 0 && (
                           <span
                             className="text-[10px] font-semibold text-emerald-700 cursor-help"
@@ -2322,7 +1839,6 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                   <td className="p-4">
                     {renderAvailabilityBadges(product.availabilityDays)}
                   </td>
->>>>>>> main
                   <td className="p-4 text-right space-x-2">
                     <button
                       onClick={() => handleEditMobile(product)}
@@ -2338,29 +1854,6 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                       R$
                     </button>
                     <button
-<<<<<<< HEAD
-                      onClick={() => {
-                        if (!window.confirm('Excluir produto?')) return;
-                        setSaving(true);
-                        productService
-                          .delete(product.id)
-                          .then(async () => {
-                            showToast('Produto removido com sucesso.', 'success');
-                            await refreshProducts();
-                          })
-                          .catch(async (error) => {
-                            const message = (error?.message || '').toString();
-                            if (error?.code === 'PROD-001' || error?.status === 404 || message.includes('Produto')) {
-                              showToast('Produto removido com sucesso.', 'success');
-                              await refreshProducts();
-                              return;
-                            }
-                            showToast('Não foi possível remover o produto.', 'error');
-                          })
-                          .finally(() => setSaving(false));
-                      }}
-                      className="text-red-600 hover:bg-red-50 p-2 rounded transition-all hover:-translate-y-0.5 active:scale-95"
-=======
                       onClick={() => handleToggleActive(product)}
                       className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:-translate-y-0.5 active:scale-95 ${
                         product.active === false
@@ -2377,7 +1870,6 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                       }}
                       disabled={pendingDeleteIds.includes(product.id)}
                       className="text-red-600 hover:bg-red-50 p-2 rounded transition-all hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:translate-y-0 disabled:active:scale-100"
->>>>>>> main
                     >
                   <Trash size={18} weight="duotone" />
                     </button>
@@ -2418,16 +1910,6 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
       {mobileEditOpen && (
         <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
           <div
-<<<<<<< HEAD
-            className="absolute inset-0 bg-black/40"
-            onClick={handleInlineCancel}
-          />
-          <div className="relative w-full max-h-[90vh] overflow-y-auto rounded-t-3xl bg-white p-5 shadow-2xl sm:max-w-2xl sm:rounded-3xl sm:p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Editar produto</p>
-                <p className="text-lg font-semibold text-gray-900">{inlineForm.name || 'Produto'}</p>
-=======
             className="absolute inset-0 bg-slate-950/55 backdrop-blur-[2px]"
             onClick={handleInlineCancel}
           />
@@ -2436,49 +1918,29 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
               <div>
                 <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500">Editar produto</p>
                 <p className="text-lg font-black text-slate-900">{inlineForm.name || 'Produto'}</p>
->>>>>>> main
               </div>
               <button
                 type="button"
                 onClick={handleInlineCancel}
-<<<<<<< HEAD
-                className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center"
-=======
                 className="w-9 h-9 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-600 hover:bg-slate-50"
->>>>>>> main
               >
                 <X size={18} />
               </button>
             </div>
             <div className="space-y-4">
-<<<<<<< HEAD
-              <div>
-                <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">Nome</label>
-                <input
-                  className="w-full p-3 border border-gray-200 rounded-xl text-sm mt-2"
-=======
               <div className="rounded-2xl border border-slate-200 bg-white p-3.5">
                 <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">Nome</label>
                 <input
                   className="w-full p-3 border border-gray-200 rounded-xl text-sm mt-2 bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
->>>>>>> main
                   value={inlineForm.name}
                   onChange={(e) => setInlineForm((prev) => ({ ...prev, name: e.target.value }))}
                 />
               </div>
-<<<<<<< HEAD
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">Preço</label>
-                <input
-                  className="w-full p-3 border border-gray-200 rounded-xl text-sm mt-2"
-=======
               <div className="grid grid-cols-2 gap-3 rounded-2xl border border-slate-200 bg-white p-3.5">
                 <div className="min-w-0">
                   <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">Preço</label>
                 <input
                   className="w-full p-3 border border-gray-200 rounded-xl text-sm mt-2 bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
->>>>>>> main
                   type="number"
                   step="0.01"
                   value={inlineForm.price}
@@ -2486,17 +1948,10 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                   onChange={(e) => setInlineForm((prev) => ({ ...prev, price: e.target.value }))}
                 />
                 </div>
-<<<<<<< HEAD
-                <div>
-                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">Promo</label>
-                <input
-                  className="w-full p-3 border border-gray-200 rounded-xl text-sm mt-2"
-=======
                 <div className="min-w-0">
                   <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">Promo</label>
                 <input
                   className="w-full p-3 border border-gray-200 rounded-xl text-sm mt-2 bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
->>>>>>> main
                   type="number"
                   step="0.01"
                   value={inlineForm.promoPrice}
@@ -2505,20 +1960,6 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                 />
                 </div>
               </div>
-<<<<<<< HEAD
-              <div>
-                <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">Categoria</label>
-                <input
-                  className="w-full p-3 border border-gray-200 rounded-xl text-sm mt-2"
-                  value={inlineForm.category}
-                  onChange={(e) => setInlineForm((prev) => ({ ...prev, category: e.target.value }))}
-                />
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">Descrição</label>
-                <textarea
-                  className="w-full p-3 border border-gray-200 rounded-xl text-sm mt-2 min-h-[100px]"
-=======
               <div className="rounded-2xl border border-slate-200 bg-white p-3.5">
                 <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">Categoria</label>
                 <select
@@ -2578,14 +2019,10 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                 <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">Descrição</label>
                 <textarea
                   className="w-full p-3 border border-gray-200 rounded-xl text-sm mt-2 min-h-[100px] bg-white focus:ring-2 focus:ring-brand-primary focus:border-transparent"
->>>>>>> main
                   value={inlineForm.description}
                   onChange={(e) => setInlineForm((prev) => ({ ...prev, description: e.target.value }))}
                 />
               </div>
-<<<<<<< HEAD
-              <div className="grid grid-cols-2 gap-3">
-=======
               <div className="rounded-2xl border border-dashed border-brand-primary/30 bg-brand-primary-soft/20 p-3.5">
                 <div className="flex items-center justify-between gap-2">
                   <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">Adicionais</label>
@@ -2688,7 +2125,6 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                 </p>
               </div>
               <div className="grid grid-cols-2 gap-3 rounded-2xl border border-slate-200 bg-white p-3.5">
->>>>>>> main
                 <button
                   type="button"
                   onClick={() => setInlineForm((prev) => ({ ...prev, promoActive: !prev.promoActive }))}
@@ -2712,54 +2148,6 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                   {inlineForm.isFeatured ? 'Destaque ativo' : 'Ativar destaque'}
                 </button>
               </div>
-<<<<<<< HEAD
-              <div>
-                <label className="text-xs font-semibold text-slate-500 uppercase tracking-[0.2em]">Imagem (URL)</label>
-                <input
-                  className="w-full p-3 border border-gray-200 rounded-xl text-sm mt-2"
-                  placeholder="https://..."
-                  value={inlineForm.imageUrl}
-                  onChange={(e) => setInlineForm((prev) => ({ ...prev, imageUrl: e.target.value }))}
-                />
-                <div className="mt-3 flex items-center justify-between">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-                      if (file.size > 3 * 1024 * 1024) {
-                        showToast('Imagem acima de 3MB. Reduza e tente novamente.', 'error');
-                        e.target.value = '';
-                        return;
-                      }
-                      const reader = new FileReader();
-                      reader.onload = () => {
-                        const result = reader.result?.toString() || '';
-                        setInlineImageFile(result);
-                        setInlineForm((prev) => ({ ...prev, imageUrl: '' }));
-                      };
-                      reader.readAsDataURL(file);
-                    }}
-                    className="text-xs"
-                  />
-                  {inlineImageFile && (
-                    <button
-                      type="button"
-                      onClick={() => setInlineImageFile('')}
-                      className="text-xs font-semibold text-red-600 hover:underline"
-                    >
-                      Limpar
-                    </button>
-                  )}
-                </div>
-                <div className="mt-3 rounded-xl border border-gray-200 overflow-hidden bg-gray-50 h-32 flex items-center justify-center">
-                  {inlineImageFile || inlineForm.imageUrl ? (
-                    <img
-                      src={inlineImageFile || inlineForm.imageUrl}
-                      alt="Preview"
-                      className="w-full h-full object-contain"
-=======
               <div className="rounded-2xl border border-slate-200 bg-white p-3.5 space-y-3">
                 <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
                   <div>
@@ -2850,20 +2238,10 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                       src={inlineImagePreview || resolveAssetUrl(inlineForm.imageUrl)}
                       alt="Preview"
                       className="w-full h-full object-cover"
->>>>>>> main
                     />
                   ) : (
                     <span className="text-xs text-gray-400">Sem imagem</span>
                   )}
-<<<<<<< HEAD
-                </div>
-              </div>
-              <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={handleInlineCancel}
-                  className="flex-1 py-3 rounded-xl border border-gray-200 text-sm font-semibold text-slate-600"
-=======
                   {(inlineImagePreview || inlineImageFile || inlineForm.imageUrl) && (
                     <button
                       type="button"
@@ -2889,7 +2267,6 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                   type="button"
                   onClick={handleInlineCancel}
                   className="flex-1 py-3 rounded-xl border border-gray-200 bg-white text-sm font-semibold text-slate-600 hover:bg-slate-50"
->>>>>>> main
                 >
                   Cancelar
                 </button>
@@ -2897,12 +2274,6 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                   type="button"
                   onClick={handleInlineSave}
                   disabled={saving}
-<<<<<<< HEAD
-                  className="flex-1 py-3 rounded-xl bg-brand-primary text-white text-sm font-semibold"
-                >
-                  Salvar
-                </button>
-=======
                   className="flex-1 py-3 rounded-xl bg-brand-gradient text-white text-sm font-semibold shadow-[0_12px_24px_-16px_rgba(59,130,246,0.85)] hover:opacity-95 disabled:opacity-60"
                 >
                   Salvar
@@ -2966,7 +2337,6 @@ export const ProductManager = ({ products, onProductsChange, storeSegment = 'out
                     </p>
                   );
                 })()}
->>>>>>> main
               </div>
             </div>
           </div>

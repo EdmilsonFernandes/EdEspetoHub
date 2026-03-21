@@ -1,29 +1,16 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-<<<<<<< HEAD
-import { ShoppingCart, PaperPlaneTilt } from '@phosphor-icons/react';
-=======
 import { ShoppingCart, PaperPlaneTilt, Clock, MapPinLine, InstagramLogo, ArrowLeft } from '@phosphor-icons/react';
->>>>>>> main
 import { productService } from '../services/productService';
 import { orderService } from '../services/orderService';
 import { customerService } from '../services/customerService';
 import { storeService } from '../services/storeService';
-<<<<<<< HEAD
-=======
 import { mapsService } from '../services/mapsService';
->>>>>>> main
 import { MenuView } from '../components/Client/MenuView';
 import { CartView } from '../components/Client/CartView';
 import { SuccessView } from '../components/Client/SuccessView';
 import { useToast } from '../contexts/ToastContext';
-<<<<<<< HEAD
-import { formatCurrency, formatOrderDisplayId, formatPaymentMethod, formatPhoneInput } from '../utils/format';
-import { resolveAssetUrl } from '../utils/resolveAssetUrl';
-import { getPersistedBranding, brandingStorageKey, defaultBranding, initialCustomer, defaultPaymentMethod, DEFAULT_AREA_CODE, WHATSAPP_NUMBER, PIX_KEY } from '../constants';
-import { formatOpeningHoursSummary, isStoreOpenNow, normalizeOpeningHours } from '../utils/storeHours';
-=======
 import { formatCurrency, formatOrderDisplayId, formatOrderType, formatPaymentMethod } from '../utils/format';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { getPersistedBranding, brandingStorageKey, defaultBranding, initialCustomer, defaultPaymentMethod, WHATSAPP_NUMBER, PIX_KEY } from '../constants';
@@ -38,7 +25,6 @@ import { getCartPricing } from '../utils/orderPricing';
 import { printReceiptAsImage } from '../utils/printReceiptImage';
 
 const WEEKDAY_LABELS = [ 'Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado' ];
->>>>>>> main
 
 export function StorePage() {
   const { storeSlug } = useParams();
@@ -57,37 +43,15 @@ export function StorePage() {
   const [storePhone, setStorePhone] = useState('');
   const [storeAddress, setStoreAddress] = useState('');
   const [storeDescription, setStoreDescription] = useState('');
-<<<<<<< HEAD
-  const [storeEmail, setStoreEmail] = useState('');
-  const [storePixKey, setStorePixKey] = useState('');
-=======
   const [storeName, setStoreName] = useState('');
   const [storeSegment, setStoreSegment] = useState('outros');
   const [storePixKey, setStorePixKey] = useState('');
   const [deliveryRadiusKm, setDeliveryRadiusKm] = useState('');
   const [deliveryFee, setDeliveryFee] = useState('');
->>>>>>> main
   const [promoMessage, setPromoMessage] = useState('');
   const [openingHours, setOpeningHours] = useState([]);
   const [orderTypes, setOrderTypes] = useState([ 'delivery', 'pickup', 'table' ]);
   const [storeSubscription, setStoreSubscription] = useState(null);
-<<<<<<< HEAD
-  const [topProducts, setTopProducts] = useState([]);
-  const [reorderApplied, setReorderApplied] = useState(false);
-  const autoTrackRef = useRef(false);
-  const [lastPublicOrderId, setLastPublicOrderId] = useState('');
-  const [recentPublicOrders, setRecentPublicOrders] = useState([]);
-  const [isMobile, setIsMobile] = useState(false);
-  const [showInfoSheet, setShowInfoSheet] = useState(false);
-  const [orderNotice, setOrderNotice] = useState(null);
-  const [tableNotice, setTableNotice] = useState(null);
-  const [copiedAddress, setCopiedAddress] = useState(false);
-  const [copiedPhone, setCopiedPhone] = useState(false);
-  const [mapCoords, setMapCoords] = useState(null);
-  const [mapLoading, setMapLoading] = useState(false);
-  const [mapFailed, setMapFailed] = useState(false);
-  const [mapAttempted, setMapAttempted] = useState(false);
-=======
   const [storePlanExempt, setStorePlanExempt] = useState(false);
   const [storeReviewSummary, setStoreReviewSummary] = useState<any | null>(null);
   const [storeOrderingEnabled, setStoreOrderingEnabled] = useState(true);
@@ -108,26 +72,20 @@ export function StorePage() {
   const [deliveryCoords, setDeliveryCoords] = useState(null);
   const [manualDeliveryCoords, setManualDeliveryCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [deliveryCheck, setDeliveryCheck] = useState({ status: 'idle', distanceKm: null, durationMin: null });
->>>>>>> main
   const customersStorageKey = useMemo(
     () => `customers:${storeSlug || defaultBranding.espetoId}`,
     [storeSlug]
   );
-<<<<<<< HEAD
-=======
   const checkoutCustomerStorageKey = useMemo(
     () => `checkoutCustomer:${storeSlug || defaultBranding.espetoId}`,
     [storeSlug]
   );
->>>>>>> main
   const resolvedWhatsApp = useMemo(() => {
     const raw = storePhone || WHATSAPP_NUMBER;
     const digits = (raw || '').toString().replace(/\D/g, '');
     if (!digits) return '';
     return digits.startsWith('55') ? digits : `55${digits}`;
   }, [storePhone]);
-<<<<<<< HEAD
-=======
 
   const getNumeric = (value) => {
     if (value === null || value === undefined) return null;
@@ -156,7 +114,6 @@ export function StorePage() {
     return 6371 * cVal;
   };
 
->>>>>>> main
   const storeUrl =
     storeSlug && typeof window !== 'undefined'
       ? `${window.location.origin}/${storeSlug}`
@@ -170,9 +127,6 @@ export function StorePage() {
     if (!intervals.length) return '';
     return intervals.map((interval) => `${interval.start}–${interval.end}`).join(' • ');
   }, [openingHours]);
-<<<<<<< HEAD
-  const weeklyHours = useMemo(() => formatOpeningHoursSummary(openingHours), [openingHours]);
-=======
   const weeklyHoursRows = useMemo(() => {
     const normalized = normalizeOpeningHours(openingHours);
     const today = new Date().getDay();
@@ -203,7 +157,6 @@ export function StorePage() {
     const fallbackBrand = String(branding?.brandName || '').trim();
     return fallbackBrand || 'Loja';
   }, [storeName, storeSlug, branding?.brandName]);
->>>>>>> main
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
   const isDemo = storeSlug === 'demo' || storeSlug === 'test-store';
@@ -212,10 +165,6 @@ export function StorePage() {
     Boolean(user?.store?.slug) &&
     Boolean(storeSlug) &&
     user.store.slug === storeSlug;
-<<<<<<< HEAD
-
-  const cartTotal = useMemo(() => Object.values(cart).reduce((acc, item) => acc + item.price * item.qty, 0), [cart]);
-=======
   const normalizedRole = String(user?.role || '').toLowerCase();
   const hasAdminPrintAccess = normalizedRole === 'admin';
   const canUseAdminPrintFlow = hasAdminPrintAccess || isStoreAdmin;
@@ -264,22 +213,16 @@ export function StorePage() {
     () => cartItemsTotal + deliveryFeeValue,
     [cartItemsTotal, deliveryFeeValue]
   );
->>>>>>> main
   const instagramHandle = useMemo(() => (branding.instagram ? `@${branding.instagram.replace('@', '')}` : ''), [branding.instagram]);
   const subscriptionStatus = storeSubscription?.status;
   const isSubscriptionKnown = storeSubscription !== null && storeSubscription !== undefined;
   const isSubscriptionActive =
-<<<<<<< HEAD
-=======
     storePlanExempt ||
->>>>>>> main
     !isSubscriptionKnown ||
     (subscriptionStatus &&
       ![ 'PENDING', 'CANCELLED', 'SUSPENDED', 'EXPIRED' ].includes(subscriptionStatus));
   const showInactiveState = view === 'menu' && isSubscriptionKnown && !isSubscriptionActive;
   const showClosedState = view === 'menu' && isSubscriptionActive && !storeOpenNow;
-<<<<<<< HEAD
-=======
   const deliveryValidation = useMemo(() => {
     if (customer.type !== 'delivery' || !deliveryRadiusValue) {
       if (customer.type === 'delivery' && !String(customer.number || '').trim()) {
@@ -307,7 +250,6 @@ export function StorePage() {
     }
     return { blocked: false, reason: '' };
   }, [customer.number, customer.type, deliveryCheck.status, deliveryRadiusValue, storeCoords]);
->>>>>>> main
 
   const resolveItemPrice = (item) => {
     const promoPrice = item?.promoPrice != null ? Number(item.promoPrice) : null;
@@ -319,15 +261,9 @@ export function StorePage() {
 
   const applyStoreMeta = (store: any) => {
     if (!store) return;
-<<<<<<< HEAD
-    const name = store.name || store.slug || 'Chama no Espeto';
-    const description = `Cardápio online e pedidos da loja ${name}.`;
-    const logo = resolveAssetUrl(store.settings?.logoUrl) || '/chama-no-espeto.jpeg';
-=======
     const name = store.name || store.slug || 'Já no Caminho';
     const description = `Vitrine online e pedidos da loja ${name}.`;
     const logo = resolveAssetUrl(store.settings?.logoUrl) || '/janocaminho.jpg';
->>>>>>> main
     const url = typeof window !== 'undefined' ? window.location.href : '';
 
     const upsertMeta = (key: string, value: string, attr: 'name' | 'property' = 'name') => {
@@ -341,11 +277,7 @@ export function StorePage() {
       tag.setAttribute('content', value);
     };
 
-<<<<<<< HEAD
-    document.title = `${name} | Chama no Espeto`;
-=======
     document.title = `${name} | Já no Caminho`;
->>>>>>> main
     upsertMeta('description', description, 'name');
     upsertMeta('og:title', name, 'property');
     upsertMeta('og:description', description, 'property');
@@ -362,8 +294,6 @@ export function StorePage() {
     document.head.appendChild(favicon);
   };
 
-<<<<<<< HEAD
-=======
   const normalizeRecentPublicEntries = (entries: any[]) => {
     const now = Date.now();
     const unique = new Set<string>();
@@ -385,7 +315,6 @@ export function StorePage() {
     return normalized.slice(0, 3);
   };
 
->>>>>>> main
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const media = window.matchMedia('(max-width: 640px)');
@@ -408,8 +337,6 @@ export function StorePage() {
   }, []);
 
   useEffect(() => {
-<<<<<<< HEAD
-=======
     if (storeOrderingEnabled || user?.token) return;
     setCart({});
     if (view === 'cart' || view === 'success') {
@@ -418,7 +345,6 @@ export function StorePage() {
   }, [storeOrderingEnabled, user?.token, view]);
 
   useEffect(() => {
->>>>>>> main
     const savedSession = localStorage.getItem('adminSession');
     if (savedSession) {
       const parsedSession = JSON.parse(savedSession);
@@ -433,8 +359,6 @@ export function StorePage() {
         console.error('Falha ao carregar clientes salvos', error);
       }
     }
-<<<<<<< HEAD
-=======
     const savedCheckoutCustomer = localStorage.getItem(checkoutCustomerStorageKey);
     if (savedCheckoutCustomer) {
       try {
@@ -452,7 +376,6 @@ export function StorePage() {
         console.error('Falha ao carregar dados salvos do checkout', error);
       }
     }
->>>>>>> main
 
     if (!storeSlug) {
       console.warn('No store slug provided');
@@ -478,30 +401,13 @@ export function StorePage() {
             espetoId: data.slug || prev.espetoId,
             brandName: data.name || prev.brandName,
             logoUrl: resolveAssetUrl(data.settings?.logoUrl) || prev.logoUrl,
-<<<<<<< HEAD
-=======
             bannerUrl: resolveAssetUrl(data.settings?.bannerUrl) || prev.bannerUrl,
->>>>>>> main
             primaryColor: data.settings?.primaryColor || prev.primaryColor,
             accentColor: data.settings?.secondaryColor || prev.accentColor,
             instagram: instagramLink || prev.instagram,
           }));
           const normalizedHours = normalizeOpeningHours(data.settings?.openingHours || []);
           setOpeningHours(normalizedHours);
-<<<<<<< HEAD
-          const allowedTypes = Array.isArray(data.settings?.orderTypes) && data.settings.orderTypes.length > 0
-            ? data.settings.orderTypes
-            : [ 'delivery', 'pickup', 'table' ];
-          setOrderTypes(allowedTypes);
-          setStorePhone(data.owner?.phone || '');
-          setStoreAddress(data.owner?.address || '');
-          setStoreDescription(data.settings?.description || '');
-          setStoreEmail(data.settings?.contactEmail || '');
-          setPromoMessage(data.settings?.promoMessage || '');
-          setStorePixKey(data.settings?.pixKey || '');
-          setStoreOpenNow(isStoreOpenNow(normalizedHours));
-          setStoreSubscription(data.subscription || null);
-=======
           const baseTypes = Array.isArray(data.settings?.orderTypes) && data.settings.orderTypes.length > 0
             ? data.settings.orderTypes
             : [ 'delivery', 'pickup', 'table' ];
@@ -524,7 +430,6 @@ export function StorePage() {
           setStorePlanExempt(Boolean(data.settings?.planExempt || data.subscription?.planExempt));
           setStoreOrderingEnabled(data.settings?.isOrderingEnabled !== false);
           setStoreReviewSummary(data.reviewSummary || null);
->>>>>>> main
           applyStoreMeta(data);
         }
       } catch (error) {
@@ -554,45 +459,13 @@ export function StorePage() {
 
     loadStore(false);
     loadProducts();
-<<<<<<< HEAD
-=======
     let cancelledRecentLoad = false;
->>>>>>> main
     if (storeSlug) {
       orderService.fetchHighlightsBySlug(storeSlug)
         .then((items) => setTopProducts(items || []))
         .catch(() => setTopProducts([]));
     }
     if (storeSlug) {
-<<<<<<< HEAD
-      try {
-        const raw = localStorage.getItem(`lastOrder:${storeSlug}`);
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          const shouldShow = parsed?.id;
-          setLastPublicOrderId(shouldShow ? parsed.id : '');
-        } else {
-          setLastPublicOrderId('');
-        }
-      } catch {
-        setLastPublicOrderId('');
-      }
-
-      try {
-        const rawList = localStorage.getItem(`lastOrders:${storeSlug}`);
-        if (rawList) {
-          const parsedList = JSON.parse(rawList);
-          if (Array.isArray(parsedList)) {
-            setRecentPublicOrders(parsedList.slice(0, 3));
-          } else {
-            setRecentPublicOrders([]);
-          }
-        } else {
-          setRecentPublicOrders([]);
-        }
-      } catch {
-        setRecentPublicOrders([]);
-=======
       const hydrateRecentPublicOrders = async () => {
         let lastEntry: any = null;
         let listEntries: any[] = [];
@@ -669,7 +542,6 @@ export function StorePage() {
         }
       } catch {
         setLastOrderItems([]);
->>>>>>> main
       }
     }
 
@@ -682,10 +554,6 @@ export function StorePage() {
     document.addEventListener('visibilitychange', handleVisibility);
 
     return () => {
-<<<<<<< HEAD
-      document.removeEventListener('visibilitychange', handleVisibility);
-    };
-=======
       cancelledRecentLoad = true;
       document.removeEventListener('visibilitychange', handleVisibility);
     };
@@ -760,7 +628,6 @@ export function StorePage() {
       utm_campaign: params.get('utm_campaign') || '',
     };
     storeService.trackPublicVisit(storeSlug, payload).catch(() => {});
->>>>>>> main
   }, [storeSlug]);
 
   useEffect(() => {
@@ -779,15 +646,6 @@ export function StorePage() {
         if (!product) return;
         const cookingPoint = item.cookingPoint || '';
         const passSkewer = Boolean(item.passSkewer);
-<<<<<<< HEAD
-        const key = `${product.id}:${cookingPoint}:${passSkewer ? '1' : '0'}`;
-        nextCart[key] = {
-          ...product,
-          key,
-          qty: Number(item.quantity || item.qty || 1),
-          cookingPoint,
-          passSkewer,
-=======
         const selectedModifiers = normalizeSelectedModifiers(item.selectedModifiers || [], product.modifiers || []);
         const modifiersSignature = getModifiersSignature(selectedModifiers);
         const key = `${product.id}:${cookingPoint}:${passSkewer ? '1' : '0'}:${modifiersSignature}`;
@@ -801,7 +659,6 @@ export function StorePage() {
           cookingPoint,
           passSkewer,
           selectedModifiers,
->>>>>>> main
         };
       });
       if (Object.keys(nextCart).length) {
@@ -816,16 +673,6 @@ export function StorePage() {
   }, [products, storeSlug, reorderApplied]);
 
   useEffect(() => {
-<<<<<<< HEAD
-    if (!orderTypes.length) return;
-    if (!orderTypes.includes(customer.type)) {
-      setCustomer((prev) => ({ ...prev, type: orderTypes[0] }));
-    }
-  }, [orderTypes, customer.type]);
-
-  useEffect(() => {
-=======
->>>>>>> main
     const storageKey = brandingStorageKey(branding.espetoId);
     localStorage.setItem(storageKey, JSON.stringify(branding));
     document.documentElement.style.setProperty('--primary-color', branding.primaryColor || defaultBranding.primaryColor);
@@ -839,19 +686,9 @@ export function StorePage() {
       autoTrackRef.current = false;
       return;
     }
-<<<<<<< HEAD
-    if (autoTrackRef.current) return;
-    autoTrackRef.current = true;
-    const timeout = window.setTimeout(() => {
-      navigate(`/pedido/${lastOrder.id}`);
-    }, 1500);
-    return () => window.clearTimeout(timeout);
-  }, [view, lastOrder?.id, navigate]);
-=======
     // Mantém o usuário na tela de sucesso para evitar confusão com múltiplas abas/janelas.
     autoTrackRef.current = true;
   }, [view, lastOrder?.id]);
->>>>>>> main
 
   useEffect(() => {
     if (user?.token) {
@@ -860,13 +697,7 @@ export function StorePage() {
   }, [user?.token]);
 
   useEffect(() => {
-<<<<<<< HEAD
-    setMapCoords(null);
-    setMapFailed(false);
-    setMapAttempted(false);
-=======
     setStoreCoords(null);
->>>>>>> main
   }, [storeAddress]);
 
   useEffect(() => {
@@ -875,13 +706,8 @@ export function StorePage() {
     if (!cached) return;
     try {
       const parsed = JSON.parse(cached);
-<<<<<<< HEAD
-      if (parsed?.lat && parsed?.lon) {
-        setMapCoords(parsed);
-=======
       if (parsed?.lat && (parsed?.lng || parsed?.lon)) {
         setStoreCoords({ lat: Number(parsed.lat), lng: Number(parsed.lng ?? parsed.lon) });
->>>>>>> main
       }
     } catch (error) {
       console.error('Falha ao ler cache do mapa', error);
@@ -889,41 +715,6 @@ export function StorePage() {
   }, [storeSlug]);
 
   useEffect(() => {
-<<<<<<< HEAD
-    if (!showInfoSheet || !storeAddress || mapCoords || mapLoading || mapFailed || mapAttempted) return;
-    const controller = new AbortController();
-    const loadCoords = async () => {
-      setMapAttempted(true);
-      setMapLoading(true);
-      try {
-        const response = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(storeAddress)}`,
-          { signal: controller.signal }
-        );
-        if (!response.ok) return;
-        const data = await response.json();
-        if (Array.isArray(data) && data[0]?.lat && data[0]?.lon) {
-          const next = { lat: data[0].lat, lon: data[0].lon };
-          setMapCoords(next);
-          if (storeSlug) {
-            localStorage.setItem(`store:coords:${storeSlug}`, JSON.stringify(next));
-          }
-        } else {
-          setMapFailed(true);
-        }
-      } catch (error) {
-        if (error?.name !== 'AbortError') {
-          console.error('Falha ao carregar mapa', error);
-          setMapFailed(true);
-        }
-      } finally {
-        setMapLoading(false);
-      }
-    };
-    loadCoords();
-    return () => controller.abort();
-  }, [showInfoSheet, storeAddress, mapCoords, mapLoading, mapFailed, storeSlug]);
-=======
     if (!storeAddress || storeCoords || !storeSlug) return;
     let attempts = 0;
     const loadCoords = async () => {
@@ -1070,20 +861,15 @@ export function StorePage() {
       { enableHighAccuracy: true, timeout: 12000, maximumAge: 30000 }
     );
   };
->>>>>>> main
 
   const updateCart = (item, qty, options) => {
     const cookingPoint = options?.cookingPoint ?? item?.cookingPoint;
     const passSkewer = Boolean(options?.passSkewer ?? item?.passSkewer);
-<<<<<<< HEAD
-    const cartKey = `${item.id}:${cookingPoint || ''}:${passSkewer ? '1' : '0'}`;
-=======
     const selectedModifiers = normalizeSelectedModifiers(
       options?.selectedModifiers ?? item?.selectedModifiers ?? [],
       item?.modifiers || []
     );
     const cartKey = `${item.id}:${cookingPoint || ''}:${passSkewer ? '1' : '0'}:${getModifiersSignature(selectedModifiers)}`;
->>>>>>> main
     setCart((previous) => {
       const currentQty = previous[cartKey]?.qty || 0;
       const nextQty = currentQty + qty;
@@ -1092,11 +878,7 @@ export function StorePage() {
         delete copy[cartKey];
         return copy;
       }
-<<<<<<< HEAD
-      const unitPrice = resolveItemPrice(item);
-=======
       const unitPrice = resolveItemPrice(item) + getModifiersTotal(selectedModifiers);
->>>>>>> main
       return {
         ...previous,
         [cartKey]: {
@@ -1107,13 +889,10 @@ export function StorePage() {
           qty: nextQty,
           cookingPoint,
           passSkewer,
-<<<<<<< HEAD
-=======
           selectedModifiers,
           bundlePromoActive: Boolean(item?.bundlePromoActive),
           bundlePromoQty: item?.bundlePromoQty ?? null,
           bundlePromoPrice: item?.bundlePromoPrice ?? null,
->>>>>>> main
         },
       };
     });
@@ -1122,13 +901,9 @@ export function StorePage() {
   const formatItemOptions = (item) => {
     const labels = [];
     if (item?.cookingPoint) labels.push(item.cookingPoint);
-<<<<<<< HEAD
-    if (item?.passSkewer) labels.push('passar varinha');
-=======
     if (item?.passSkewer) labels.push('passar farinha');
     const selected = formatSelectedModifiers(item?.selectedModifiers || []);
     if (selected.length) labels.push(`+ ${selected.join(', ')}`);
->>>>>>> main
     return labels.length ? `(${labels.join(' • ')})` : '';
   };
 
@@ -1139,13 +914,7 @@ export function StorePage() {
     );
 
     const phoneFromMatch = !nextCustomer.phone && matchedCustomer?.phone ? matchedCustomer.phone : nextCustomer.phone;
-<<<<<<< HEAD
-    const formattedPhone = formatPhoneInput(phoneFromMatch, DEFAULT_AREA_CODE);
-
-    const updatedCustomer = { ...nextCustomer, phone: formattedPhone };
-=======
     const updatedCustomer = { ...nextCustomer, phone: phoneFromMatch || '' };
->>>>>>> main
     if (!user?.token && nextCustomer.type === 'table') {
       setLastPublicOrderId('');
       if (storeSlug) {
@@ -1173,23 +942,6 @@ export function StorePage() {
     window.setTimeout(() => setTableNotice(null), 4000);
   };
 
-<<<<<<< HEAD
-  const checkout = async () => {
-    const isSubscriptionActive =
-      subscriptionStatus &&
-      ![ 'PENDING', 'CANCELLED', 'SUSPENDED', 'EXPIRED' ].includes(subscriptionStatus);
-    if (!isSubscriptionActive) {
-      alert('Loja com assinatura inativa. Tente novamente mais tarde.');
-      return;
-    }
-    if (!storeOpenNow) {
-      alert('Loja fechada no momento. Tente novamente durante o horario de atendimento.');
-      return;
-    }
-    const requiresPhone = customer.type !== 'table';
-    if (!customer.name || (requiresPhone && !customer.phone)) {
-      alert(requiresPhone ? 'Preencha Nome e Telefone' : 'Preencha o Nome');
-=======
   const checkout = async (extra?: { cashTendered?: number | null } | null) => {
     if (checkoutLockRef.current || checkoutLoading) return;
     checkoutLockRef.current = true;
@@ -1220,32 +972,19 @@ export function StorePage() {
     const requiresPhone = !(customer.type === 'table' && canUseAdminPrintFlow);
     if (!effectiveCustomerName || (requiresPhone && !customer.phone)) {
       showToast(requiresPhone ? 'Preencha nome e telefone para continuar.' : 'Preencha seu nome para continuar.', 'warning');
->>>>>>> main
       return;
     }
 
     if (customer.type === 'delivery' && !customer.address) {
-<<<<<<< HEAD
-      alert('Informe o endereço completo para entrega.');
-=======
       showToast('Informe o endereço completo para entrega.', 'warning');
       return;
     }
     if (customer.type === 'delivery' && !String(customer.number || '').trim()) {
       showToast('Informe o número da casa para entrega.', 'warning');
->>>>>>> main
       return;
     }
 
     if (customer.type === 'table' && !customer.table) {
-<<<<<<< HEAD
-      alert('Informe o número da mesa.');
-      return;
-    }
-
-    const isPickup = customer.type === 'pickup';
-    const payment = paymentMethod;
-=======
       showToast('Informe o número da mesa.', 'warning');
       return;
     }
@@ -1269,22 +1008,12 @@ export function StorePage() {
       payment === 'dinheiro' && extra?.cashTendered !== undefined && extra?.cashTendered !== null
         ? Number(extra.cashTendered)
         : null;
->>>>>>> main
 
     const sanitizedPhone = customer.phone.replace(/\D/g, '');
     const sanitizedPhoneKey = sanitizedPhone.length >= 10 ? `+55${sanitizedPhone}` : '';
     const pixKey = storePixKey || PIX_KEY || sanitizedPhoneKey;
 
     const order = {
-<<<<<<< HEAD
-      customerName: customer.name,
-      phone: customer.phone,
-      address: customer.address,
-      table: customer.table,
-      type: customer.type,
-      paymentMethod: payment,
-      items: Object.values(cart).map((item) => ({
-=======
       customerName: effectiveCustomerName,
       phone: customer.phone,
       address: deliveryAddress || customer.address,
@@ -1294,26 +1023,16 @@ export function StorePage() {
       deliveryFee: customer.type === 'delivery' && deliveryFeeValue > 0 ? deliveryFeeValue : undefined,
       cashTendered: cashTendered !== null ? cashTendered : undefined,
       items: validCartItems.map((item: any) => ({
->>>>>>> main
         productId: item.id,
         quantity: item.qty,
         cookingPoint: item.cookingPoint,
         passSkewer: item.passSkewer,
-<<<<<<< HEAD
-=======
         selectedModifiers: item.selectedModifiers || [],
         isPrinted: Boolean(canUseAdminPrintFlow),
->>>>>>> main
       })),
     };
 
     if (!storeSlug) {
-<<<<<<< HEAD
-      alert('Loja não especificada.');
-      return;
-    }
-
-=======
       showToast('Loja não especificada.', 'error');
       return;
     }
@@ -1332,7 +1051,6 @@ export function StorePage() {
       };
     });
 
->>>>>>> main
     if (isDemo) {
       const demoId = `demo-${Date.now()}`;
       setCart({});
@@ -1345,9 +1063,6 @@ export function StorePage() {
         phone: sanitizedPhoneKey || customer.phone,
         pixKey,
         table: customer.table,
-<<<<<<< HEAD
-      });
-=======
         customerName: effectiveCustomerName,
         address: deliveryAddress || customer.address,
         total: orderTotal,
@@ -1369,7 +1084,6 @@ export function StorePage() {
           return [ ...prev, normalized ];
         });
       }
->>>>>>> main
       localStorage.setItem(
         `lastOrder:${storeSlug}`,
         JSON.stringify({ id: demoId, createdAt: Date.now(), type: customer.type })
@@ -1381,35 +1095,22 @@ export function StorePage() {
           status: 'pending',
           type: customer.type,
           table: customer.table,
-<<<<<<< HEAD
-          customerName: customer.name,
-          paymentMethod: payment,
-          items: Object.values(cart).map((item) => ({
-=======
           customerName: effectiveCustomerName,
           paymentMethod: payment,
           cashTendered: cashTendered !== null ? cashTendered : null,
           items: validCartItems.map((item: any) => ({
->>>>>>> main
             id: item.id,
             name: item.name,
             quantity: item.qty,
             price: item.price * item.qty,
             cookingPoint: item.cookingPoint,
             passSkewer: item.passSkewer,
-<<<<<<< HEAD
-          })),
-          phone: customer.phone,
-          total: cartTotal,
-          store: { name: 'Chama no Espeto Demo', slug: storeSlug },
-=======
             selectedModifiers: item.selectedModifiers || [],
           })),
           phone: customer.phone,
           deliveryFee: customer.type === 'delivery' && deliveryFeeValue > 0 ? deliveryFeeValue : null,
           total: orderTotal,
           store: { name: 'Já no Caminho Demo', slug: storeSlug },
->>>>>>> main
           createdAt: Date.now(),
         })
       );
@@ -1424,52 +1125,6 @@ export function StorePage() {
     try {
       createdOrder = await orderService.createBySlug(order, storeSlug);
     } catch (error) {
-<<<<<<< HEAD
-      if (error?.code === 'ORDER-003') {
-        showTableNotice(error.message || 'Mesa já está ocupada. Finalize o pedido atual antes de criar outro.');
-        return;
-      }
-      showErrorNotice(error?.message || 'Não foi possível enviar o pedido agora.');
-      return;
-    }
-    const nextCustomers = [
-      { name: customer.name, phone: customer.phone, table: customer.table },
-      ...customers.filter((entry) => entry.name !== customer.name),
-    ].slice(0, 50);
-    setCustomers(nextCustomers);
-    localStorage.setItem(customersStorageKey, JSON.stringify(nextCustomers));
-    customerService.fetchAll().then(setCustomers).catch(() => {});
-
-    const shouldNotifyOwner = !isStoreAdmin && (customer.type === 'pickup' || customer.type === 'table');
-    if (shouldNotifyOwner) {
-    const itemsList = Object.values(cart)
-      .map((item) => `▪ ${item.qty}x ${item.name} ${formatItemOptions(item)}`.trim())
-      .join('\n');
-    const customerLabel = customer.phone
-      ? `👤 *${customer.name}* (${customer.phone})`
-      : `👤 *${customer.name}*`;
-
-    const messageLines = [
-      `*NOVO PEDIDO - ${branding?.brandName || 'Chama no Espeto'}*`,
-      storeSlug ? `🏷️ *Loja:* ${storeSlug}` : '',
-      storeAddress ? `📍 *Endereço da loja:* ${storeAddress}` : '',
-      '------------------',
-      customerLabel,
-      `🛒 *Tipo:* ${customer.type}`,
-      customer.table ? `🪑 *Mesa:* ${customer.table}` : '',
-      payment ? `💳 Pagamento: ${formatPaymentMethod(payment)}` : '',
-        customer.address ? `📍 End: ${customer.address}` : '',
-        '------------------',
-        itemsList,
-        '------------------',
-        `💰 *TOTAL: ${formatCurrency(cartTotal)}*`,
-        payment === 'pix' && pixKey ? `💳 Pagamento via PIX: ${pixKey}` : '',
-        payment === 'pix'
-          ? PIX_KEY
-            ? `💳 Pagamento via PIX: ${PIX_KEY}`
-            : '💳 Gerar Pix para retirada na loja'
-          : ''
-=======
       const backendMessage =
         error?.details?.message ||
         error?.error?.details?.message ||
@@ -1531,54 +1186,18 @@ export function StorePage() {
         `💰 *Total: ${formatCurrency(orderTotal)}*`,
         payment === 'pix' && pixKey ? `🔑 Pix da loja: ${pixKey}` : '',
         trackingLink ? `🔎 Acompanhar pedido: ${trackingLink}` : '',
->>>>>>> main
       ].filter(Boolean);
 
       const encodedMessage = encodeURIComponent(messageLines.join('\n'));
       const targetNumber = resolvedWhatsApp || WHATSAPP_NUMBER;
       window.open(`https://wa.me/${targetNumber}?text=${encodedMessage}`, '_blank');
     }
-<<<<<<< HEAD
-
-    const trackingLink =
-      typeof window !== 'undefined' && createdOrder?.id
-        ? `${window.location.origin}/pedido/${createdOrder.id}`
-        : '';
-    const customerItemsList = Object.values(cart)
-      .map((item) => `- ${item.qty}x ${item.name} ${formatItemOptions(item)}`.trim())
-      .join('\n');
-    const customerMessageLines = [
-      `Pedido #${formatOrderDisplayId(createdOrder?.id, storeSlug)} - ${branding?.brandName || 'Chama no Espeto'}`,
-      customerItemsList ? `Itens:\n${customerItemsList}` : '',
-      `Total: ${formatCurrency(cartTotal)}`,
-      trackingLink ? `Acompanhar: ${trackingLink}` : '',
-    ]
-      .filter(Boolean)
-      .join('\n');
-    const customerNumber =
-      sanitizedPhone.length >= 10
-        ? sanitizedPhone.startsWith('55')
-          ? sanitizedPhone
-          : `55${sanitizedPhone}`
-        : '';
-    if (customerNumber && !isStoreAdmin) {
-      window.open(
-        `https://wa.me/${customerNumber}?text=${encodeURIComponent(customerMessageLines)}`,
-        '_blank'
-      );
-    }
-=======
     // Evita abrir uma segunda janela do WhatsApp automaticamente.
     // O acompanhamento fica no botão da tela de sucesso e no histórico recente.
->>>>>>> main
 
     setCart({});
     setCustomer(initialCustomer);
     setPaymentMethod(defaultPaymentMethod);
-<<<<<<< HEAD
-
-=======
->>>>>>> main
     setLastOrder({
       id: createdOrder?.id,
       type: customer.type,
@@ -1586,12 +1205,6 @@ export function StorePage() {
       phone: sanitizedPhoneKey || customer.phone,
       pixKey,
       table: customer.table,
-<<<<<<< HEAD
-    });
-    if (createdOrder?.id && !user?.token) {
-      const entry = { id: createdOrder.id, createdAt: Date.now(), type: customer.type };
-      localStorage.setItem(`lastOrder:${storeSlug}`, JSON.stringify(entry));
-=======
       customerName: effectiveCustomerName,
       address: deliveryAddress || customer.address,
       total: orderTotal,
@@ -1620,7 +1233,6 @@ export function StorePage() {
       if (entry.accessToken) {
         localStorage.setItem(`orderAccess:${entry.id}`, entry.accessToken);
       }
->>>>>>> main
       setLastPublicOrderId(createdOrder.id);
       try {
         const rawList = localStorage.getItem(`lastOrders:${storeSlug}`);
@@ -1632,13 +1244,6 @@ export function StorePage() {
       } catch {
         setRecentPublicOrders([entry]);
       }
-<<<<<<< HEAD
-    }
-    setView(isStoreAdmin ? 'menu' : 'success');
-    if (isStoreAdmin) {
-      showOrderNotice(createdOrder?.id);
-    }
-=======
       const lastItemsPayload = {
         savedAt: Date.now(),
         items: validCartItems.map((item: any) => ({
@@ -1662,7 +1267,6 @@ export function StorePage() {
       checkoutLockRef.current = false;
       setCheckoutLoading(false);
     }
->>>>>>> main
   };
 
   const requireAdminSession = () => {
@@ -1670,9 +1274,6 @@ export function StorePage() {
       navigate(storeSlug ? `/admin?slug=${encodeURIComponent(storeSlug)}` : '/admin');
       return;
     }
-<<<<<<< HEAD
-    navigate(storeSlug ? `/admin/dashboard` : '/admin', { state: { activeTab: 'fila' } });
-=======
     navigate('/admin/queue');
   };
   const handleStoreSessionLogout = () => {
@@ -1685,7 +1286,6 @@ export function StorePage() {
       return;
     }
     navigate('/', { replace: true });
->>>>>>> main
   };
   const goToDemoGuide = () => {
     if (typeof window !== 'undefined') {
@@ -1709,8 +1309,6 @@ export function StorePage() {
     navigate('/admin');
   };
 
-<<<<<<< HEAD
-=======
   const printLastOrderReceipt = async () => {
     if (!canUseAdminPrintFlow) return;
     if (!lastOrder?.id) return;
@@ -1787,7 +1385,6 @@ export function StorePage() {
     }
   }, [canUseAdminPrintFlow]);
 
->>>>>>> main
   // Loading state
   if (isLoading) {
     return (
@@ -1806,20 +1403,12 @@ export function StorePage() {
   const hasContent = products.length > 0 || !loadError;
 
   return (
-<<<<<<< HEAD
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 font-sans pb-28 sm:pb-24">
-=======
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 font-sans pb-28 sm:pb-24 overflow-x-hidden no-x-scroll">
->>>>>>> main
       {isDemo && view === 'menu' && (
         <div className="bg-amber-50 border-b border-amber-200">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm text-amber-900">
             <span>
-<<<<<<< HEAD
-              Demo do cardápio ativa. Veja o fluxo completo para entender como funciona.
-=======
               Demo da vitrine ativa. Veja o fluxo completo para entender como funciona.
->>>>>>> main
             </span>
             <div className="flex items-center gap-2">
               <button
@@ -1853,14 +1442,11 @@ export function StorePage() {
           <div className="flex-1 leading-tight min-w-0">
             <h1 className="text-base sm:text-lg font-bold text-gray-900 truncate">{branding?.brandName || 'Seu Espeto'}</h1>
             <p className="text-xs text-gray-500 truncate">{branding?.tagline}</p>
-<<<<<<< HEAD
-=======
             {Number(storeReviewSummary?.totalReviews || 0) > 0 && (
               <p className="text-[11px] text-amber-700 font-semibold mt-0.5">
                 {Number(storeReviewSummary?.avgStoreRating || 0).toFixed(1)} ★ ({Number(storeReviewSummary?.totalReviews || 0)} avaliações)
               </p>
             )}
->>>>>>> main
           </div>
           <button
             onClick={() => setView('menu')}
@@ -1872,11 +1458,7 @@ export function StorePage() {
       )}
 
       <main className="mx-auto px-0 sm:px-4 md:px-6 lg:px-8 py-0 sm:py-6">
-<<<<<<< HEAD
-        {orderNotice && (
-=======
         {orderNotice && !showPrintPrompt && (
->>>>>>> main
           <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-4">
             <div className="flex flex-wrap items-center gap-3 bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-2xl border border-white/10">
               <div className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
@@ -1886,20 +1468,6 @@ export function StorePage() {
                   #{formatOrderDisplayId(orderNotice.id, storeSlug)}
                 </span>
               </div>
-<<<<<<< HEAD
-              <button
-                type="button"
-                onClick={() => {
-                  if (!orderNotice?.id) return;
-                  const link = `${window.location.origin}/pedido/${orderNotice.id}`;
-                  navigator.clipboard.writeText(link);
-                  showToast('Link do pedido copiado.', 'success');
-                }}
-                className="ml-auto px-3 py-1.5 rounded-full text-[11px] font-semibold bg-white/10 hover:bg-white/20 border border-white/10"
-              >
-                Copiar link
-              </button>
-=======
               {!hasAdminPrintAccess && (
                 <button
                   type="button"
@@ -1914,7 +1482,6 @@ export function StorePage() {
                   Copiar link
                 </button>
               )}
->>>>>>> main
             </div>
           </div>
         )}
@@ -1964,56 +1531,6 @@ export function StorePage() {
           </div>
         )}
         {showClosedState && (
-<<<<<<< HEAD
-          <div className="min-h-[70vh] flex items-center justify-center">
-            <div className="w-full max-w-4xl px-4">
-              <div className="relative overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-[0_30px_80px_-50px_rgba(15,23,42,0.65)]">
-                <div className="absolute inset-x-0 top-0 h-2 bg-gradient-to-r from-amber-400 via-orange-500 to-red-500" />
-                <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] p-6 sm:p-8">
-                  <div className="space-y-6">
-                    <div className="flex items-center gap-4">
-                      <div className="w-16 h-16 rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-white">
-                        <img
-                          src={branding?.logoUrl || '/chama-no-espeto.jpeg'}
-                          alt={branding?.brandName || 'Chama no Espeto'}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div>
-                        <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Atendimento</p>
-                        <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">
-                          {branding?.brandName || 'Loja fechada agora'}
-                        </h2>
-                      </div>
-                    </div>
-                    <div className="inline-flex items-center gap-2 rounded-full bg-amber-100 px-4 py-2 text-xs font-semibold text-amber-800">
-                      🕒 Loja fechada no momento
-                    </div>
-                    <p className="text-slate-600">
-                      O atendimento esta fechado. Volte no proximo horario de funcionamento.
-                    </p>
-                    {todayHoursLabel && (
-                      <p className="text-sm text-slate-500">Horario de hoje: {todayHoursLabel}</p>
-                    )}
-                    {storeDescription && (
-                      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
-                        <p className="text-xs uppercase tracking-[0.25em] text-slate-400 mb-2">Sobre a loja</p>
-                        <p>{storeDescription}</p>
-                      </div>
-                    )}
-                    <div className="flex flex-col sm:flex-row gap-3">
-                      <button
-                        onClick={() => navigate('/')}
-                        className="px-6 py-3 rounded-xl border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50 transition-all"
-                      >
-                        Voltar ao inicio
-                      </button>
-                    </div>
-                  </div>
-                  <div className="rounded-3xl border border-slate-200 bg-white/80 p-5 space-y-4">
-                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600 space-y-2">
-                      <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Contato</p>
-=======
           <div className="min-h-[72vh] bg-[#f7f7f7]">
             <div className="w-full max-w-5xl mx-auto px-4 py-6 sm:py-8">
               <div className="grid gap-4 md:grid-cols-2 md:items-start">
@@ -2068,46 +1585,18 @@ export function StorePage() {
                   <div className="rounded-3xl bg-white p-5 shadow-[0_10px_28px_-22px_rgba(15,23,42,0.45)]">
                     <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400">Contato e endereço</p>
                     <div className="mt-3 space-y-3">
->>>>>>> main
                       {instagramHandle && (
                         <a
                           href={`https://instagram.com/${instagramHandle.replace('@', '')}`}
                           target="_blank"
                           rel="noreferrer"
-<<<<<<< HEAD
-                          className="flex items-center justify-between gap-2 text-sm font-semibold text-[#0a66c2]"
-                        >
-                          <span>Instagram</span>
-=======
                           className="flex items-start gap-2 text-sm font-semibold text-[#0a66c2] hover:underline break-all"
                         >
                           <InstagramLogo size={18} weight="fill" className="mt-0.5 shrink-0" />
->>>>>>> main
                           <span>{instagramHandle}</span>
                         </a>
                       )}
                       {storeAddress && (
-<<<<<<< HEAD
-                        <div className="text-sm text-slate-500">
-                          <p className="font-semibold text-slate-700">Endereço</p>
-                          <p>{storeAddress}</p>
-                        </div>
-                      )}
-                    </div>
-                    {weeklyHours.length > 0 && (
-                      <div className="rounded-2xl border border-slate-200 bg-white p-4 text-xs text-slate-600">
-                        <p className="text-xs font-semibold text-slate-700 mb-2">Horarios da semana</p>
-                        <div className="grid sm:grid-cols-2 gap-2">
-                          {weeklyHours.map((line) => (
-                            <p key={line}>{line}</p>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    <div className="text-xs text-slate-400 text-center">
-                      <span className="font-semibold text-slate-500">Chama no Espeto</span> • plataforma de pedidos online
-                    </div>
-=======
                         <div className="flex items-start gap-2 text-sm text-[#666666] break-words">
                           <MapPinLine size={18} weight="bold" className="mt-0.5 shrink-0 text-slate-500" />
                           <span>{storeAddress}</span>
@@ -2150,7 +1639,6 @@ export function StorePage() {
                       </span>
                       Desenvolvido por Já no Caminho
                     </a>
->>>>>>> main
                   </div>
                 </div>
               </div>
@@ -2165,11 +1653,7 @@ export function StorePage() {
               </div>
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Loja ainda não configurada</h2>
               <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md">
-<<<<<<< HEAD
-                Falta cadastrar os produtos para o cardápio aparecer. Se você é o responsável pela loja, clique abaixo para configurar.
-=======
                 Falta cadastrar os produtos para a vitrine aparecer. Se você é o responsável pela loja, clique abaixo para configurar.
->>>>>>> main
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <button
@@ -2189,27 +1673,16 @@ export function StorePage() {
           </div>
         ) : !showInactiveState && !showClosedState && view === 'menu' && products.length > 0 && (
           <div className="space-y-4">
-<<<<<<< HEAD
-            {!user?.token && recentPublicOrders.length > 0 && (
-              <div className="mx-3 sm:mx-6 rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div className="space-y-1">
-                  <span className="font-semibold">Acompanhar pedidos recentes</span>
-=======
               {!user?.token && recentPublicOrders.length > 0 && (
               <div className="mx-3 sm:mx-6 rounded-3xl premium-card-glass px-4 py-4 text-sm text-emerald-900 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div className="space-y-2">
                   <span className="text-[11px] uppercase tracking-[0.3em] text-emerald-700 font-extrabold">
                     Acompanhar pedidos recentes
                   </span>
->>>>>>> main
                   <div className="flex flex-wrap gap-2">
                     {recentPublicOrders.map((entry) => (
                       <button
                         key={entry.id}
-<<<<<<< HEAD
-                        onClick={() => navigate(`/pedido/${entry.id}`)}
-                        className="px-2.5 py-1 rounded-full bg-white text-emerald-700 text-[11px] font-semibold border border-emerald-200 hover:bg-emerald-100"
-=======
                         onClick={() =>
                           navigate(
                             entry.accessToken
@@ -2218,21 +1691,12 @@ export function StorePage() {
                           )
                         }
                         className="btn-press px-3 py-1.5 rounded-full bg-white/70 text-emerald-900 text-[11px] font-extrabold border border-emerald-200 hover:bg-emerald-100/70"
->>>>>>> main
                       >
                         #{formatOrderDisplayId(entry.id, storeSlug)}
                       </button>
                     ))}
                   </div>
                 </div>
-<<<<<<< HEAD
-                <button
-                  onClick={() => navigate(`/pedido/${recentPublicOrders[0].id}`)}
-                  className="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:opacity-90"
-                >
-                  Acompanhar agora
-                </button>
-=======
                 <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() =>
@@ -2247,7 +1711,6 @@ export function StorePage() {
                     Acompanhar agora
                   </button>
                 </div>
->>>>>>> main
               </div>
             )}
             <MenuView
@@ -2255,26 +1718,11 @@ export function StorePage() {
               topProducts={topProducts}
               cart={cart}
               branding={branding}
-<<<<<<< HEAD
-=======
               segment={storeSegment}
->>>>>>> main
               instagramHandle={instagramHandle}
               onUpdateCart={updateCart}
               onProceed={() => setView('cart')}
               onOpenQueue={isStoreAdmin ? requireAdminSession : undefined}
-<<<<<<< HEAD
-              onOpenAdmin={isStoreAdmin ? () => navigate('/admin/dashboard') : undefined}
-              isOpenNow={storeOpenNow}
-              whatsappNumber={storePhone}
-              contactEmail={storeEmail}
-              promoMessage={promoMessage}
-              storeUrl={storeUrl}
-              todayHoursLabel={todayHoursLabel}
-              storeAddress={storeAddress}
-              compactHeader={isMobile}
-              onOpenInfo={() => setShowInfoSheet(true)}
-=======
               onOpenAdmin={isStoreAdmin && normalizedRole === 'admin' ? () => navigate('/admin/dashboard') : undefined}
               onLogout={isStoreAdmin ? handleStoreSessionLogout : undefined}
               userRole={normalizedRole}
@@ -2288,7 +1736,6 @@ export function StorePage() {
               compactHeader={isMobile}
               staffView={Boolean(canUseAdminPrintFlow)}
               isOrderingEnabled={storeOrderingEnabled || Boolean(user?.token)}
->>>>>>> main
             />
           </div>
         )}
@@ -2300,11 +1747,6 @@ export function StorePage() {
             paymentMethod={paymentMethod}
             allowedOrderTypes={orderTypes}
             allowCustomerAutocomplete={Boolean(user?.token)}
-<<<<<<< HEAD
-            onChangeCustomer={handleCustomerChange}
-            onChangePayment={setPaymentMethod}
-            onCheckout={checkout}
-=======
             tablePhoneOptional={canUseAdminPrintFlow}
             occupiedTables={occupiedTables}
             deliveryRadiusKm={deliveryRadiusValue}
@@ -2330,7 +1772,6 @@ export function StorePage() {
             onUpdateCart={updateCart}
             onCheckout={checkout}
             checkoutLoading={checkoutLoading}
->>>>>>> main
             onBack={() => setView('menu')}
           />
         )}
@@ -2343,13 +1784,6 @@ export function StorePage() {
               phone={lastOrder?.phone}
               table={lastOrder?.table}
               orderId={lastOrder?.id}
-<<<<<<< HEAD
-              onTrackOrder={() => {
-                if (lastOrder?.id) {
-                  navigate(`/pedido/${lastOrder.id}`);
-                }
-              }}
-=======
               onPrintReceipt={canUseAdminPrintFlow ? printLastOrderReceipt : undefined}
               onTrackOrder={
                 canUseAdminPrintFlow
@@ -2360,32 +1794,12 @@ export function StorePage() {
                       }
                     }
               }
->>>>>>> main
               onNewOrder={() => setView('menu')}
             />
           </div>
         )}
       </main>
 
-<<<<<<< HEAD
-      {view === 'menu' && Object.keys(cart).length > 0 && (
-        <div className="fixed bottom-4 left-4 right-4 z-40 sm:max-w-md sm:left-auto sm:right-6">
-          <button
-            onClick={() => setView('cart')}
-            className="w-full bg-brand-gradient text-white p-3 sm:p-4 rounded-xl sm:rounded-2xl shadow-2xl flex justify-between items-center transform hover:scale-[1.02] transition-all text-sm sm:text-base"
-          >
-            <div className="flex items-center gap-2 sm:gap-3">
-              <span
-                className="px-2.5 sm:px-3 py-1 rounded-lg sm:rounded-xl text-xs sm:text-sm font-bold text-white shadow-lg"
-                style={{ backgroundColor: branding.primaryColor }}
-              >
-                {Object.values(cart).reduce((acc, item) => acc + item.qty, 0)}
-              </span>
-              <span className="font-bold truncate">Ver pedido</span>
-            </div>
-            <span className="font-bold text-base sm:text-lg ml-2 flex-shrink-0">{formatCurrency(cartTotal)}</span>
-          </button>
-=======
       {showPrintPrompt && (
         <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center px-4">
           <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-2xl border border-slate-200">
@@ -2415,7 +1829,6 @@ export function StorePage() {
               </button>
             </div>
           </div>
->>>>>>> main
         </div>
       )}
 
@@ -2429,174 +1842,6 @@ export function StorePage() {
         </div>
       )}
 
-<<<<<<< HEAD
-      {showInfoSheet && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-900/40 backdrop-blur-sm">
-          <div className="w-full sm:max-w-lg bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl border border-slate-200 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-              <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Info da loja</p>
-                <h3 className="text-lg font-bold text-slate-900">{branding?.brandName || 'Chama no Espeto'}</h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowInfoSheet(false)}
-                className="px-3 py-1.5 rounded-full text-xs font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50"
-              >
-                Fechar
-              </button>
-            </div>
-            <div className="p-5 space-y-4">
-              {storeAddress && (
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 space-y-3">
-                  <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Endereço</p>
-                  <p className="text-sm font-semibold text-slate-800">{storeAddress}</p>
-                  <div className="flex flex-wrap gap-2">
-                    <a
-                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(storeAddress)}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="px-3 py-2 rounded-full text-xs font-semibold border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 transition"
-                    >
-                      Abrir no Google Maps
-                    </a>
-                    <a
-                      href={`https://waze.com/ul?q=${encodeURIComponent(storeAddress)}&navigate=yes`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="px-3 py-2 rounded-full text-xs font-semibold border border-brand-primary text-brand-primary bg-brand-primary-soft hover:opacity-90 transition"
-                    >
-                      Abrir no Waze
-                    </a>
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        if (!storeAddress) return;
-                        try {
-                          await navigator.clipboard.writeText(storeAddress);
-                          setCopiedAddress(true);
-                          window.setTimeout(() => setCopiedAddress(false), 2000);
-                        } catch (error) {
-                          console.error('Falha ao copiar endereco', error);
-                        }
-                      }}
-                      className="px-3 py-2 rounded-full text-xs font-semibold border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 transition"
-                    >
-                      {copiedAddress ? 'Endereço copiado' : 'Copiar endereco'}
-                    </button>
-                  </div>
-                  <div className="rounded-xl overflow-hidden border border-slate-200 bg-white sm:hidden">
-                    {mapCoords ? (
-                      <img
-                        src={`https://staticmap.openstreetmap.de/staticmap.php?center=${mapCoords.lat},${mapCoords.lon}&zoom=16&size=600x300&markers=${mapCoords.lat},${mapCoords.lon},red-pushpin`}
-                        alt="Mapa da loja"
-                        className="w-full h-40 object-cover"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="h-40 flex flex-col items-center justify-center gap-2 text-xs text-slate-500">
-                        <span>
-                          {mapLoading ? 'Carregando mapa...' : 'Mapa indisponível'}
-                        </span>
-                        <a
-                          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(storeAddress)}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="px-3 py-1.5 rounded-full text-[11px] font-semibold border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 transition"
-                        >
-                          Abrir mapa
-                        </a>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {resolvedWhatsApp && (
-                <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-3">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.25em] text-slate-400">WhatsApp</p>
-                    <p className="text-sm font-semibold text-slate-800">{formatPhoneInput(storePhone)}</p>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <a
-                      href={`https://wa.me/${resolvedWhatsApp}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="px-3 py-2 rounded-full text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 transition"
-                    >
-                      Conversar
-                    </a>
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        if (!storePhone) return;
-                        try {
-                          await navigator.clipboard.writeText(storePhone);
-                          setCopiedPhone(true);
-                          window.setTimeout(() => setCopiedPhone(false), 2000);
-                        } catch (error) {
-                          console.error('Falha ao copiar telefone', error);
-                        }
-                      }}
-                      className="px-3 py-2 rounded-full text-xs font-semibold border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 transition"
-                    >
-                      {copiedPhone ? 'Telefone copiado' : 'Copiar telefone'}
-                    </button>
-                  </div>
-                </div>
-              )}
-              {storeEmail && (
-                <div className="rounded-2xl border border-slate-200 bg-white p-4 space-y-3">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Email</p>
-                    <p className="text-sm font-semibold text-slate-800">{storeEmail}</p>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <a
-                      href={`mailto:${storeEmail}`}
-                      className="px-3 py-2 rounded-full text-xs font-semibold border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 transition"
-                    >
-                      Enviar email
-                    </a>
-                  </div>
-                </div>
-              )}
-
-              {instagramHandle && (
-                <a
-                  href={`https://instagram.com/${instagramHandle.replace('@', '')}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="rounded-2xl border border-slate-200 bg-white p-4 flex items-center justify-between text-slate-700 hover:bg-slate-50 transition"
-                >
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Instagram</p>
-                    <p className="text-sm font-semibold">{instagramHandle}</p>
-                  </div>
-                  <span className="text-xs font-semibold text-brand-primary">Visitar</span>
-                </a>
-              )}
-
-              {weeklyHours?.length > 0 && (
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 space-y-2">
-                  <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Horarios</p>
-                  <p className="text-sm font-semibold text-slate-800">{todayHoursLabel || 'Confira abaixo'}</p>
-                  <div className="text-xs text-slate-500 space-y-1">
-                    {weeklyHours.map((line) => (
-                      <p key={line}>{line}</p>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-=======
     </div>
   );
 }
@@ -2611,4 +1856,3 @@ export function StorePage() {
     return planName.includes('pro') || planName.includes('vip');
   };
 
->>>>>>> main

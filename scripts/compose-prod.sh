@@ -56,10 +56,6 @@ apply_env SMTP_PASS "$SMTP_PASS"
 apply_env SMTP_SECURE "$SMTP_SECURE"
 apply_env EMAIL_FROM "$EMAIL_FROM"
 
-<<<<<<< HEAD
-unset FRONTEND_PORT
-docker compose --env-file "$ENV_FILE" up --build -d
-=======
 # Database (optional, but helps keep Docker+SSM aligned and prevents auth drift)
 apply_env PGHOST "$PGHOST"
 apply_env PGPORT "$PGPORT"
@@ -79,4 +75,3 @@ if ! docker volume inspect "$POSTGRES_VOLUME_NAME" >/dev/null 2>&1; then
 fi
 
 docker compose -f "$ROOT_DIR/docker-compose.yml" -f "$ROOT_DIR/docker-compose.prod.yml" --env-file "$ENV_FILE" up --build -d
->>>>>>> main

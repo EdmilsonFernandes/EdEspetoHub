@@ -1,8 +1,5 @@
-<<<<<<< HEAD
-=======
 import { forceLogoutAndRedirect, isSessionAuthError } from '../utils/sessionRedirect';
 
->>>>>>> main
 const resolveBaseUrl = () => {
   return import.meta.env.VITE_API_BASE_URL || '/api';
 };
@@ -14,12 +11,6 @@ const buildUrl = (path: string) => {
   return `${API_BASE_URL}${normalized}`;
 };
 
-<<<<<<< HEAD
-const handleResponse = async (response: Response) => {
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(text || response.statusText);
-=======
 const handleResponse = async (response: Response, canAutoLogout = true) => {
   if (!response.ok) {
     const contentType = response.headers.get('content-type') || '';
@@ -41,7 +32,6 @@ const handleResponse = async (response: Response, canAutoLogout = true) => {
     }
 
     throw error;
->>>>>>> main
   }
   return response.json();
 };
@@ -111,8 +101,6 @@ export const superAdminService = {
     });
     return handleResponse(response);
   },
-<<<<<<< HEAD
-=======
   async updatePlanExempt(token: string, storeId: string, payload: { planExempt: boolean; planExemptLabel?: string }) {
     const response = await fetch(buildUrl(`/admin/stores/${storeId}/plan-exempt`), {
       method: 'PATCH',
@@ -170,5 +158,4 @@ export const superAdminService = {
     });
     return handleResponse(response);
   },
->>>>>>> main
 };
