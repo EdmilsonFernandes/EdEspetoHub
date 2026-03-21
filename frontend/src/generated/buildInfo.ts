@@ -3,14 +3,20 @@
 
 export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
-  "version": "0.1.4",
-  "versionLabel": "v0.1.4",
-  "buildId": "0.1.4-20260321.132044-28059d7",
-  "builtAt": "2026-03-21T13:20:44.126Z",
-  "commitHash": "28059d74a63b165c4d60da559fa78e287c3f8ad2",
-  "shortHash": "28059d7",
+  "version": "0.1.5",
+  "versionLabel": "v0.1.5",
+  "buildId": "0.1.5-20260321.132114-b426863",
+  "builtAt": "2026-03-21T13:21:14.976Z",
+  "commitHash": "b426863d0f0bd513f5185cf263c8fa4938d831c7",
+  "shortHash": "b426863",
   "branch": "main",
   "commits": [
+    {
+      "hash": "b426863d0f0bd513f5185cf263c8fa4938d831c7",
+      "shortHash": "b426863",
+      "dateIso": "2026-03-21T10:21:10-03:00",
+      "subject": "fix(print): aplica modo inverso para cliente e mesa/local em chrome e rawbt"
+    },
     {
       "hash": "28059d74a63b165c4d60da559fa78e287c3f8ad2",
       "shortHash": "28059d7",
@@ -184,12 +190,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "d2e7ad0",
       "dateIso": "2026-03-20T14:34:56-03:00",
       "subject": "fix(header): usar valor real do plano em vez de fallback 99,90"
-    },
-    {
-      "hash": "076f5dc5dd9613908d68f9d5c59dc8866ac31bb3",
-      "shortHash": "076f5dc",
-      "dateIso": "2026-03-18T18:58:29-03:00",
-      "subject": "fix(admin-nav): padroniza Produtos vs Catalogo no mobile e sidebar"
     }
   ]
 } as const;
