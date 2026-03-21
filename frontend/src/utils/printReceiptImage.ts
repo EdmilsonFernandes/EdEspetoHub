@@ -122,7 +122,7 @@ const buildRawBtText = (payload: PrintReceiptRawBtInput) => {
         strongSeparator(),
         ...centerText(locationLabel.toUpperCase())
           .split("\n")
-          .map((line) => `${ESC_POS.boldOn}${line}${ESC_POS.boldOff}`),
+          .map((line) => `${ESC_POS.inverseOn}${line}${ESC_POS.inverseOff}`),
         strongSeparator(),
       ]
     : [];
@@ -131,7 +131,7 @@ const buildRawBtText = (payload: PrintReceiptRawBtInput) => {
     if (!customer) return [];
     const lines = centerText(`CLIENTE: ${customer}`.toUpperCase())
       .split("\n")
-      .map((line) => `${ESC_POS.boldOn}${line}${ESC_POS.boldOff}`);
+      .map((line) => `${ESC_POS.inverseOn}${line}${ESC_POS.inverseOff}`);
     return [strongSeparator(), ...lines, strongSeparator()];
   })();
 
@@ -205,8 +205,8 @@ const buildHtmlReceipt = (payload: PrintReceiptRawBtInput) => {
       font-size: 13px;
       font-weight: 900;
       letter-spacing: 0.4px;
-      background: #fff;
-      color: #000;
+      background: #000;
+      color: #fff;
       border: 2px solid #000;
       padding: 5px 4px;
       print-color-adjust: exact !important;
@@ -218,8 +218,8 @@ const buildHtmlReceipt = (payload: PrintReceiptRawBtInput) => {
       font-size: 21px;
       font-weight: 900;
       letter-spacing: 1px;
-      background: #fff;
-      color: #000;
+      background: #000;
+      color: #fff;
       border: 2px solid #000;
       padding: 6px 4px;
       print-color-adjust: exact !important;
@@ -234,15 +234,15 @@ const buildHtmlReceipt = (payload: PrintReceiptRawBtInput) => {
     .spacer { height: 16px; }
     @media print {
       .customer-block {
-        background: #fff !important;
-        color: #000 !important;
+        background: #000 !important;
+        color: #fff !important;
         border: 2px solid #000 !important;
         print-color-adjust: exact !important;
         -webkit-print-color-adjust: exact !important;
       }
       .location-block {
-        background: #fff !important;
-        color: #000 !important;
+        background: #000 !important;
+        color: #fff !important;
         border: 2px solid #000 !important;
         print-color-adjust: exact !important;
         -webkit-print-color-adjust: exact !important;

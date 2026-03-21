@@ -5,12 +5,18 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.4",
   "versionLabel": "v0.1.4",
-  "buildId": "0.1.4-20260321.131537-badad4f",
-  "builtAt": "2026-03-21T13:15:37.457Z",
-  "commitHash": "badad4f2f359b01f0a263b92bbd3170e1f95669a",
-  "shortHash": "badad4f",
+  "buildId": "0.1.4-20260321.132044-28059d7",
+  "builtAt": "2026-03-21T13:20:44.126Z",
+  "commitHash": "28059d74a63b165c4d60da559fa78e287c3f8ad2",
+  "shortHash": "28059d7",
   "branch": "main",
   "commits": [
+    {
+      "hash": "28059d74a63b165c4d60da559fa78e287c3f8ad2",
+      "shortHash": "28059d7",
+      "dateIso": "2026-03-21T10:15:37-03:00",
+      "subject": "chore(release): v0.1.4"
+    },
     {
       "hash": "badad4f2f359b01f0a263b92bbd3170e1f95669a",
       "shortHash": "badad4f",
@@ -184,12 +190,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "076f5dc",
       "dateIso": "2026-03-18T18:58:29-03:00",
       "subject": "fix(admin-nav): padroniza Produtos vs Catalogo no mobile e sidebar"
-    },
-    {
-      "hash": "cb8d5ce15932ae827330f18aa7645a523aef53fc",
-      "shortHash": "cb8d5ce",
-      "dateIso": "2026-03-18T09:50:00-03:00",
-      "subject": "fix(queue-card): align payment badge with total and stabilize mesa/timer header"
     }
   ]
 } as const;
