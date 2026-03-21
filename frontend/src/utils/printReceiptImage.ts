@@ -126,6 +126,14 @@ const buildRawBtText = (payload: PrintReceiptRawBtInput) => {
         strongSeparator(),
       ]
     : [];
+  const customerBlock = (() => {
+    const customer = sanitizeText(payload.customerLabel || "Cliente");
+    if (!customer) return [];
+    const lines = centerText(`CLIENTE: ${customer}`.toUpperCase())
+      .split("\n")
+      .map((line) => `${ESC_POS.boldOn}${line}${ESC_POS.boldOff}`);
+    return [strongSeparator(), ...lines, strongSeparator()];
+  })();
 
   const chunks = [
     strongSeparator(),
@@ -134,8 +142,8 @@ const buildRawBtText = (payload: PrintReceiptRawBtInput) => {
     strongSeparator(),
     ...wrapWords(`Fila: ${sanitizeText(payload.queueLabel || "--")}`, LINE_WIDTH),
     ...wrapWords(`Pedido: ${sanitizeText(payload.orderLabel || "--")}`, LINE_WIDTH),
-    ...wrapWords(`Cliente: ${sanitizeText(payload.customerLabel || "Cliente")}`, LINE_WIDTH),
     ...inverseLocationBlock,
+    ...customerBlock,
     ...wrapWords(`Data: ${sanitizeText(payload.dateLabel || "")}`, LINE_WIDTH),
     separator(),
     `${ESC_POS.boldOn}ITENS${ESC_POS.boldOff}`,

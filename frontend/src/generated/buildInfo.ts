@@ -5,12 +5,18 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.2",
   "versionLabel": "v0.1.2",
-  "buildId": "0.1.2-20260321.131157-6b5f6f1",
-  "builtAt": "2026-03-21T13:11:57.572Z",
-  "commitHash": "6b5f6f185099f3ffd249da77fde8f705a753cd7e",
-  "shortHash": "6b5f6f1",
+  "buildId": "0.1.2-20260321.131229-b7ab5bf",
+  "builtAt": "2026-03-21T13:12:29.437Z",
+  "commitHash": "b7ab5bf94bdaed923961f94be949985bf86cd218",
+  "shortHash": "b7ab5bf",
   "branch": "main",
   "commits": [
+    {
+      "hash": "b7ab5bf94bdaed923961f94be949985bf86cd218",
+      "shortHash": "b7ab5bf",
+      "dateIso": "2026-03-21T10:11:57-03:00",
+      "subject": "chore(release): v0.1.2"
+    },
     {
       "hash": "6b5f6f185099f3ffd249da77fde8f705a753cd7e",
       "shortHash": "6b5f6f1",
@@ -184,12 +190,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "4e5aaa3",
       "dateIso": "2026-03-18T09:18:22-03:00",
       "subject": "refactor(admin-orders): align neutral iconography with queue layout"
-    },
-    {
-      "hash": "a365e2bc9b2911f70eb647670487235a0e6e2fb9",
-      "shortHash": "a365e2b",
-      "dateIso": "2026-03-18T09:15:32-03:00",
-      "subject": "fix(queue): resolve checkbox overlap, dedupe mesa badge and remove food-specific icons"
     }
   ]
 } as const;
