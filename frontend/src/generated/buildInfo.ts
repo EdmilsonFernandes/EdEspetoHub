@@ -5,12 +5,18 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.6",
   "versionLabel": "v0.1.6",
-  "buildId": "0.1.6-20260321.132444-6c4f37f",
-  "builtAt": "2026-03-21T13:24:44.060Z",
-  "commitHash": "6c4f37f490002d37298c8164169697004dd71881",
-  "shortHash": "6c4f37f",
+  "buildId": "0.1.6-20260321.132806-9314529",
+  "builtAt": "2026-03-21T13:28:06.198Z",
+  "commitHash": "9314529ea2d5d5018b1cb356fb71091ad0246695",
+  "shortHash": "9314529",
   "branch": "main",
   "commits": [
+    {
+      "hash": "9314529ea2d5d5018b1cb356fb71091ad0246695",
+      "shortHash": "9314529",
+      "dateIso": "2026-03-21T10:24:44-03:00",
+      "subject": "chore(release): v0.1.6"
+    },
     {
       "hash": "6c4f37f490002d37298c8164169697004dd71881",
       "shortHash": "6c4f37f",
@@ -184,12 +190,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "6d9d95b",
       "dateIso": "2026-03-20T15:21:39-03:00",
       "subject": "feat(ux): stack de prioridades e dropdown premium no fluxo admin"
-    },
-    {
-      "hash": "d0630f0d98e3385c9404e7a92a38be39a7ec244d",
-      "shortHash": "d0630f0",
-      "dateIso": "2026-03-20T15:09:26-03:00",
-      "subject": "fix(queue-ux): dedup mesa no modal e reforca controles premium"
     }
   ]
 } as const;
