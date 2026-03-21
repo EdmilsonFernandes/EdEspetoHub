@@ -93,12 +93,12 @@ export function OrderCard({ order, compact, actions, showCourierEarnings = false
         </div>
       </div>
 
-      <div className="rounded-2xl border border-slate-100 bg-white p-4 sm:p-5">
-        <div className="flex items-start justify-between gap-4">
+      <div className="rounded-2xl border border-slate-100 bg-white p-4 sm:p-5 overflow-x-hidden">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4 min-w-0">
           <div className="min-w-0">
             <p className="text-xs text-slate-500">Cliente</p>
             <p className="text-base font-bold text-slate-900 break-words">{customerName}</p>
-            {phone && <p className="text-xs text-slate-600 mt-1">{phone}</p>}
+            {phone && <p className="text-xs text-slate-600 mt-1 break-all">{phone}</p>}
             {compact && compactItemsLabel && (
               <p className="text-xs text-slate-600 mt-2 break-words">{compactItemsLabel}</p>
             )}
@@ -113,9 +113,9 @@ export function OrderCard({ order, compact, actions, showCourierEarnings = false
               </div>
             )}
           </div>
-          <div className="text-right min-w-0 max-w-[220px]">
+          <div className="min-w-0 w-full sm:w-auto sm:max-w-[220px] text-left sm:text-right">
             <p className="text-[10px] uppercase tracking-[0.14em] text-slate-500 mb-1">Valores</p>
-            <div className="flex flex-wrap justify-end gap-1.5">
+            <div className="flex flex-wrap justify-start sm:justify-end gap-1.5">
               <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
                 Pedido: <strong className="ml-1 text-slate-900 tracking-tight">{formatCurrency(order?.total || 0)}</strong>
               </span>
