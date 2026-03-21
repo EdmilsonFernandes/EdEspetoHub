@@ -3,14 +3,38 @@
 
 export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
-  "version": "0.1.0",
-  "versionLabel": "v0.1.0",
-  "buildId": "0.1.0-20260321.130613-289f2e9",
-  "builtAt": "2026-03-21T13:06:13.172Z",
-  "commitHash": "289f2e925e6257cb7443b5e254ba8b934e1a0855",
-  "shortHash": "289f2e9",
+  "version": "0.1.1",
+  "versionLabel": "v0.1.1",
+  "buildId": "0.1.1-20260321.130751-0206c83",
+  "builtAt": "2026-03-21T13:07:51.713Z",
+  "commitHash": "0206c835ed8f516990e7f251a85eeb8e81ac5c89",
+  "shortHash": "0206c83",
   "branch": "main",
   "commits": [
+    {
+      "hash": "0206c835ed8f516990e7f251a85eeb8e81ac5c89",
+      "shortHash": "0206c83",
+      "dateIso": "2026-03-21T10:07:43-03:00",
+      "subject": "fix(release): usa npm_execpath para compatibilidade cross-platform"
+    },
+    {
+      "hash": "9d5c6393b09d73f04d6d5effe00c7931d0748b98",
+      "shortHash": "9d5c639",
+      "dateIso": "2026-03-21T10:07:25-03:00",
+      "subject": "fix(release): usa npm portavel no script de versionamento"
+    },
+    {
+      "hash": "e989257162bb8c9a720cbdb43432aa0b655c5200",
+      "shortHash": "e989257",
+      "dateIso": "2026-03-21T10:07:07-03:00",
+      "subject": "fix(release): ignora arquivos nao rastreados no pre-check"
+    },
+    {
+      "hash": "c8591c45c2c17a146dd93cfa178f969ba15e5aae",
+      "shortHash": "c8591c4",
+      "dateIso": "2026-03-21T10:06:44-03:00",
+      "subject": "fix(queue): torna botao de impressao visivel no card da fila"
+    },
     {
       "hash": "289f2e925e6257cb7443b5e254ba8b934e1a0855",
       "shortHash": "289f2e9",
@@ -166,30 +190,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "23564d7",
       "dateIso": "2026-03-18T08:59:45-03:00",
       "subject": "feat(queue): premium quick actions, custom dropdowns and mesa dedup in payment modal"
-    },
-    {
-      "hash": "38062317a04296f8178bf929ae3b30f0eca1a3b8",
-      "shortHash": "3806231",
-      "dateIso": "2026-03-18T08:54:03-03:00",
-      "subject": "chore(ui): finalize neutral order labels consistency across admin/client/motoboy"
-    },
-    {
-      "hash": "66eca6108855f5c1ac89a802f4097e79f20f82d5",
-      "shortHash": "66eca61",
-      "dateIso": "2026-03-18T08:50:00-03:00",
-      "subject": "refactor(ui): neutralize order status labels for white-label retail"
-    },
-    {
-      "hash": "198ba884008372f74d867030e68ab51d7d468429",
-      "shortHash": "198ba88",
-      "dateIso": "2026-03-18T08:40:50-03:00",
-      "subject": "feat(queue): add bulk selection bar and compact quick actions on cards"
-    },
-    {
-      "hash": "f2645812602a5c72bc7269632aedc54bd31332dc",
-      "shortHash": "f264581",
-      "dateIso": "2026-03-18T08:08:49-03:00",
-      "subject": "feat(queue): add clear bulk close label and per-order quick finalize action"
     }
   ]
 } as const;
