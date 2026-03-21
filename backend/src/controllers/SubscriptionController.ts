@@ -28,8 +28,8 @@ const log = logger.child({ scope: 'SubscriptionController' });
 export class SubscriptionController extends BaseController {
   constructor(
     @Inject(Tokens.Common.Service.SubscriptionService) private subscriptionService: SubscriptionService,
-    @Inject(Tokens.Common.DataLayer.PaymentRepository) private paymentDao: PaymentDao,
-    @Inject(Tokens.Common.DataLayer.StoreRepository) private storeDao: StoreDao
+    @Inject(Tokens.Common.DataLayer.PaymentDao) private paymentDao: PaymentDao,
+    @Inject(Tokens.Common.DataLayer.StoreDao) private storeDao: StoreDao
   ) {
     super('/subscriptions', 'v1');
   }

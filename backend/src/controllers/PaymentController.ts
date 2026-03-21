@@ -30,7 +30,7 @@ export class PaymentController extends BaseController {
   constructor(
     @Inject(Tokens.Common.Service.PaymentService) private paymentService: PaymentService,
     @Inject(Tokens.Common.Service.SubscriptionService) private subscriptionService: SubscriptionService,
-    @Inject(Tokens.Common.DataLayer.PaymentEventRepository) private paymentEventDao: PaymentEventDao,
+    @Inject(Tokens.Common.DataLayer.PaymentEventDao) private paymentEventDao: PaymentEventDao,
     @Inject(Tokens.Common.DataLayer.DatabaseService) private databaseService: DatabaseService
   ) {
     super('/payments', 'v1');
