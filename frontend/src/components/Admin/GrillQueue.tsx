@@ -455,11 +455,14 @@ const OrderSummaryCard = ({
                 onPrint();
               }}
               disabled={printBusy}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-600 hover:bg-slate-50 transition-all no-print disabled:opacity-60"
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-3 text-amber-700 shadow-sm hover:bg-amber-100 hover:text-amber-900 transition-all no-print disabled:opacity-60 disabled:hover:bg-amber-50"
               aria-label={`Imprimir pedido ${orderDisplayId}`}
               title="Imprimir pedido"
             >
               <Printer size={15} weight="duotone" />
+              <span className="text-[11px] font-extrabold uppercase tracking-[0.06em]">
+                {printBusy ? "Gerando..." : "Imprimir"}
+              </span>
             </button>
           )}
         {!archived && showQuickStart && typeof onQuickStart === 'function' && (

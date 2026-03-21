@@ -5,12 +5,30 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.0",
   "versionLabel": "v0.1.0",
-  "buildId": "0.1.0-20260321.124316-2388c30",
-  "builtAt": "2026-03-21T12:43:16.235Z",
-  "commitHash": "2388c301373ebed4b5da4f7463903179c2155bb7",
-  "shortHash": "2388c30",
+  "buildId": "0.1.0-20260321.130613-289f2e9",
+  "builtAt": "2026-03-21T13:06:13.172Z",
+  "commitHash": "289f2e925e6257cb7443b5e254ba8b934e1a0855",
+  "shortHash": "289f2e9",
   "branch": "main",
   "commits": [
+    {
+      "hash": "289f2e925e6257cb7443b5e254ba8b934e1a0855",
+      "shortHash": "289f2e9",
+      "dateIso": "2026-03-21T09:54:49-03:00",
+      "subject": "chore(ops): adiciona limpeza segura de disco para ec2"
+    },
+    {
+      "hash": "4b68aad8038d8f37df9b5c3a8923bf4c21e8a098",
+      "shortHash": "4b68aad",
+      "dateIso": "2026-03-21T09:50:53-03:00",
+      "subject": "chore(deploy): adiciona scripts diretos para frontend e api na ec2"
+    },
+    {
+      "hash": "bb8988370e13fc29c9db6c0f8a1e150d52cd6b75",
+      "shortHash": "bb89883",
+      "dateIso": "2026-03-21T09:43:47-03:00",
+      "subject": "feat(release): semver automatico e metadata de build para deploy em producao"
+    },
     {
       "hash": "2388c301373ebed4b5da4f7463903179c2155bb7",
       "shortHash": "2388c30",
@@ -172,24 +190,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "f264581",
       "dateIso": "2026-03-18T08:08:49-03:00",
       "subject": "feat(queue): add clear bulk close label and per-order quick finalize action"
-    },
-    {
-      "hash": "caaa28bbe71ef44e814b3eea322185d44e4b96c3",
-      "shortHash": "caaa28b",
-      "dateIso": "2026-03-17T22:03:33-03:00",
-      "subject": "fix(ui): prevent mobile banner flicker on scroll in admin and catalog"
-    },
-    {
-      "hash": "a0f15f70abb7602588c46f695e004ea3d4b6cbb0",
-      "shortHash": "a0f15f7",
-      "dateIso": "2026-03-17T17:53:53-03:00",
-      "subject": "feat(stock): add optional inventory control with atomic checkout decrement"
-    },
-    {
-      "hash": "a99bd2e750ea2c728a47c9f12c9689821591e21c",
-      "shortHash": "a99bd2e",
-      "dateIso": "2026-03-17T17:30:04-03:00",
-      "subject": "fix(admin-routing): remove legacy layout wrapper causing sidebar/header bleed"
     }
   ]
 } as const;
