@@ -13,11 +13,26 @@
 
 import { Request, Response } from 'express';
 import { OrderService } from '../services/OrderService';
+<<<<<<< HEAD
 import { logger } from '../utils/logger';
 import { AppError } from '../errors/AppError';
 import { respondWithError } from '../errors/respondWithError';
 
 const orderService = new OrderService();
+=======
+import { OrderEtaServiceV2 } from '../services/OrderEtaServiceV2';
+import { AppDataSource } from '../config/database';
+import { Motoboy } from '../entities/Motoboy';
+import { OrderDelivery } from '../entities/OrderDelivery';
+import { logger } from '../utils/logger';
+import { AppError } from '../errors/AppError';
+import { respondWithError } from '../errors/respondWithError';
+import { env } from '../config/env';
+import { createOrderAccessToken } from '../utils/orderAccessToken';
+
+const orderService = new OrderService();
+const orderEtaServiceV2 = new OrderEtaServiceV2();
+>>>>>>> main
 const log = logger.child({ scope: 'OrderController' });
 /**
  * Provides OrderController functionality.
@@ -37,7 +52,14 @@ export class OrderController {
       log.info('Order create request', { storeId: req.params.storeId });
       const order = await orderService.create({ ...req.body, storeId: req.params.storeId });
       log.info('Order created', { orderId: order?.id, storeId: req.params.storeId });
+<<<<<<< HEAD
       return res.status(201).json(order);
+=======
+      return res.status(201).json({
+        ...order,
+        accessToken: order?.id ? createOrderAccessToken(order.id) : null,
+      });
+>>>>>>> main
     } catch (error: any) {
       log.warn('Order create failed', { storeId: req.params.storeId, error });
       return respondWithError(req, res, error, 400);
@@ -78,7 +100,14 @@ export class OrderController {
       log.info('Order create by slug request', { slug: req.params.slug });
       const order = await orderService.createBySlug({ ...req.body, storeSlug: req.params.slug });
       log.info('Order created by slug', { orderId: order?.id, slug: req.params.slug });
+<<<<<<< HEAD
       return res.status(201).json(order);
+=======
+      return res.status(201).json({
+        ...order,
+        accessToken: order?.id ? createOrderAccessToken(order.id) : null,
+      });
+>>>>>>> main
     } catch (error: any) {
       log.warn('Order create by slug failed', { slug: req.params.slug, error });
       return respondWithError(req, res, error, 400);
@@ -125,6 +154,26 @@ export class OrderController {
     }
   }
 
+<<<<<<< HEAD
+=======
+  /**
+   * Lists public table occupancy by slug.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-03-12
+   */
+  static async listTableStatusBySlug(req: Request, res: Response) {
+    try {
+      log.debug('Order table status by slug request', { slug: req.params.slug });
+      const status = await orderService.listTableStatusBySlug(req.params.slug);
+      return res.json(status);
+    } catch (error: any) {
+      log.warn('Order table status by slug failed', { slug: req.params.slug, error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+>>>>>>> main
 
 
 
@@ -168,6 +217,46 @@ export class OrderController {
     }
   }
 
+<<<<<<< HEAD
+=======
+  static async reopen(req: Request, res: Response) {
+    try {
+      const order = await orderService.reopenOrder(
+        req.params.orderId,
+        {
+          reason: req.body?.reason,
+          adminIdentifier: req.body?.adminIdentifier,
+          adminPassword: req.body?.adminPassword,
+        },
+        {
+          storeId: req.auth?.storeId,
+          role: req.auth?.role,
+          sub: req.auth?.sub,
+        }
+      );
+      return res.json(order);
+    } catch (error: any) {
+      log.warn('Order reopen failed', { orderId: req.params.orderId, error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  static async markItemsAsPrinted(req: Request, res: Response) {
+    try {
+      const itemIds = Array.isArray(req.body?.itemIds) ? req.body.itemIds : undefined;
+      log.info('Order items mark-as-printed request', {
+        orderId: req.params.orderId,
+        itemIdsCount: Array.isArray(itemIds) ? itemIds.length : 0,
+      });
+      const result = await orderService.markItemsAsPrinted(req.params.orderId, itemIds, req.auth?.storeId);
+      return res.json(result);
+    } catch (error: any) {
+      log.warn('Order items mark-as-printed failed', { orderId: req.params.orderId, error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+>>>>>>> main
 
 
 
@@ -184,8 +273,27 @@ export class OrderController {
       const result = await orderService.getPublicById(orderId);
       if (!result) return respondWithError(req, res, new AppError('ORDER-001', 404), 404);
       const { order, queuePosition, queueSize } = result;
+<<<<<<< HEAD
 
       return res.json({
+=======
+      const deliveryRow =
+        order?.type === 'delivery'
+          ? await AppDataSource.getRepository(OrderDelivery).findOne({ where: { orderId: order.id } as any })
+          : null;
+      const motoboy =
+        deliveryRow?.motoboyId
+          ? await AppDataSource.getRepository(Motoboy).findOne({
+              where: { id: deliveryRow.motoboyId } as any,
+              relations: [ 'user' ],
+            })
+          : null;
+      const correlationId = typeof req.headers[ 'x-correlation-id' ] === 'string'
+        ? req.headers[ 'x-correlation-id' ]
+        : undefined;
+
+      const responsePayload: any = {
+>>>>>>> main
         id: order.id,
         status: order.status,
         type: order.type,
@@ -194,7 +302,32 @@ export class OrderController {
         phone: order.phone,
         address: order.address,
         paymentMethod: order.paymentMethod,
+<<<<<<< HEAD
         total: order.total,
+=======
+        paymentStatus: order.paymentStatus,
+        cashTendered: order.cashTendered ?? null,
+        total: order.total,
+        deliveryFee: order.deliveryFee ?? null,
+        delivery: deliveryRow
+          ? {
+              status: deliveryRow.status,
+              motoboyId: deliveryRow.motoboyId ?? null,
+              motoboy: motoboy?.user
+                ? {
+                    id: motoboy.id,
+                    name: motoboy.user.fullName,
+                    firstName: String(motoboy.user.fullName || '').trim().split(' ')[0] || null,
+                    profileImageUrl: motoboy.user.profileImageUrl || null,
+                  }
+                : null,
+              acceptedAt: deliveryRow.acceptedAt ?? null,
+              pickedUpAt: deliveryRow.pickedUpAt ?? null,
+              inTransitAt: deliveryRow.inTransitAt ?? null,
+              deliveredAt: deliveryRow.deliveredAt ?? null,
+            }
+          : null,
+>>>>>>> main
         createdAt: order.createdAt,
         queuePosition,
         queueSize,
@@ -203,10 +336,18 @@ export class OrderController {
           name: item.product?.name || 'Produto',
           quantity: item.quantity,
           price: item.price,
+<<<<<<< HEAD
+=======
+          isPrinted: Boolean((item as any).isPrinted),
+>>>>>>> main
           productId: item.product?.id,
           imageUrl: item.product?.imageUrl || null,
           cookingPoint: item.cookingPoint || null,
           passSkewer: item.passSkewer || false,
+<<<<<<< HEAD
+=======
+          selectedModifiers: item.selectedModifiers || [],
+>>>>>>> main
         })),
         store: order.store
           ? {
@@ -224,10 +365,97 @@ export class OrderController {
                   : null,
             }
           : null,
+<<<<<<< HEAD
       });
+=======
+      };
+
+      if (env.etaV2.enabled) {
+        const eta = await orderEtaServiceV2.calculateForOrder(order, queuePosition, correlationId);
+        responsePayload.eta = {
+          totalMinutes: eta.totalMinutes,
+          windowMin: eta.windowMin,
+          windowMax: eta.windowMax,
+          breakdown: {
+            prepMinutes: eta.prepMinutes,
+            queueMinutes: eta.queueMinutes,
+            travelMinutes: eta.travelMinutes,
+            bufferMinutes: eta.bufferMinutes,
+          },
+          travel: {
+            distanceKm: eta.distanceKm,
+            travelMinutes: eta.travelMinutes,
+          },
+          confidence: eta.confidence,
+          algoVersion: eta.algoVersion,
+        };
+      }
+
+      return res.json(responsePayload);
+>>>>>>> main
     } catch (error: any) {
       log.warn('Order public get failed', { orderId, error });
       return respondWithError(req, res, error, 400);
     }
   }
+<<<<<<< HEAD
+=======
+
+
+
+
+  /**
+   * Gets order tracking (V2).
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-28
+   */
+  static async getTrackingV2(req: Request, res: Response) {
+    const { orderId } = req.params;
+    try {
+      log.debug('Order tracking v2 request', { orderId });
+      const result = await orderService.getPublicById(orderId);
+      if (!result) return respondWithError(req, res, new AppError('ORDER-001', 404), 404);
+      const { order, queuePosition, queueSize } = result;
+      const correlationId = typeof req.headers[ 'x-correlation-id' ] === 'string'
+        ? req.headers[ 'x-correlation-id' ]
+        : undefined;
+      const eta = await orderEtaServiceV2.calculateForOrder(order, queuePosition, correlationId);
+
+      return res.json({
+        id: order.id,
+        status: order.status,
+        type: order.type,
+        createdAt: order.createdAt,
+        storeId: order.store?.id || null,
+        queuePosition,
+        queueSize,
+        timeline: [
+          {
+            status: order.status,
+            at: order.createdAt,
+          },
+        ],
+        eta: {
+          totalMinutes: eta.totalMinutes,
+          windowMin: eta.windowMin,
+          windowMax: eta.windowMax,
+          prepMinutes: eta.prepMinutes,
+          queueMinutes: eta.queueMinutes,
+          travelMinutes: eta.travelMinutes,
+          bufferMinutes: eta.bufferMinutes,
+          confidence: eta.confidence,
+          algoVersion: eta.algoVersion,
+        },
+        travel: {
+          distanceKm: eta.distanceKm,
+          travelMinutes: eta.travelMinutes,
+        },
+      });
+    } catch (error: any) {
+      log.warn('Order tracking v2 failed', { orderId, error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+>>>>>>> main
 }

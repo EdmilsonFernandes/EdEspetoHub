@@ -11,11 +11,26 @@
  * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  */
 
+<<<<<<< HEAD
+=======
+export interface SelectedModifierInput {
+  id?: string;
+  name?: string;
+  price?: number;
+  quantity?: number;
+}
+
+>>>>>>> main
 export interface CreateOrderItemInput {
   productId: string;
   quantity: number;
   cookingPoint?: string;
   passSkewer?: boolean;
+<<<<<<< HEAD
+=======
+  selectedModifiers?: SelectedModifierInput[];
+  isPrinted?: boolean;
+>>>>>>> main
 }
 
 export interface CreateOrderDto {
@@ -25,6 +40,15 @@ export interface CreateOrderDto {
   table?: string;
   type: string;
   paymentMethod?: string;
+<<<<<<< HEAD
   items: CreateOrderItemInput[];
   storeId: string;
 }
+=======
+  paymentStatus?: string;
+  cashTendered?: number;
+  deliveryFee?: number;
+  items: CreateOrderItemInput[];
+  storeId: string;
+}
+>>>>>>> main

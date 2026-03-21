@@ -59,6 +59,10 @@ build/
 !.env.prod.secrets.example
 !backend/.env.example
 !backend/.env.docker.example
+<<<<<<< HEAD
+=======
+!server/.env.docker.example
+>>>>>>> main
 
 # ========================
 # IDE / OS

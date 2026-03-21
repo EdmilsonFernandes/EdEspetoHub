@@ -12,11 +12,24 @@
   "AUTH-009": "Invalid CPF or CNPJ.",
   "AUTH-010": "CPF/CNPJ already registered.",
   "AUTH-011": "Email already registered.",
+<<<<<<< HEAD
   "AUTH-012": "Accept the terms and privacy policy.",
   "AUTH-013": "Select a plan to continue.",
   "AUTH-014": "Invalid payment method.",
   "AUTH-020": "SUPER_ADMIN not found in database.",
   "AUTH-021": "Invalid credentials.",
+=======
+  "AUTH-015": "This email is already linked to a store. Use another email for the delivery account.",
+  "BILL-001": "Delivery fees pending. Please pay to continue.",
+  "AUTH-012": "Accept the terms and privacy policy.",
+  "AUTH-013": "Select a plan to continue.",
+  "AUTH-014": "Invalid payment method.",
+  "AUTH-016": "Phone number already registered.",
+  "AUTH-017": "Invalid phone number.",
+  "AUTH-020": "SUPER_ADMIN not found in database.",
+  "AUTH-021": "Invalid credentials.",
+  "AUTH-022": "User has no linked store.",
+>>>>>>> main
   "AUTH-S001": "If the email exists, we will send instructions.",
   "AUTH-S002": "If the email exists, we will send instructions.",
   "AUTH-S003": "Password updated successfully.",
@@ -30,6 +43,10 @@
   "SUB-004": "Plan unavailable for subscription.",
   "SUB-005": "Subscription suspended. Contact support.",
   "SUB-006": "Payment attempts limit reached. Try again later.",
+<<<<<<< HEAD
+=======
+  "SUB-007": "There is already a pending payment for this store. Wait for it to expire before trying again.",
+>>>>>>> main
   "PAY-001": "Payment not found.",
   "PAY-002": "Payment failed.",
   "PAY-003": "Mercado Pago not configured.",
@@ -44,5 +61,36 @@
   "PROD-002": "Invalid product for this store.",
   "ORDER-001": "Order not found.",
   "ORDER-002": "Order type not allowed for this store.",
+<<<<<<< HEAD
   "ORDER-003": "Table is already occupied. Finish the current order before creating a new one."
+=======
+  "ORDER-003": "Table is already occupied. Finish the current order before creating a new one.",
+  "ORDER-004": "Invalid order status transition.",
+  "DELIV-001": "You already have an active delivery. Finish it before accepting another one.",
+  "DELIV-002": "Invalid delivery status transition.",
+  "DELIV-003": "This order is not a delivery order.",
+  "DELIV-004": "Order is not available for delivery.",
+  "DELIV-005": "Delivery expired. Please pick another one.",
+  "DELIV-006": "Delivery was already accepted by another courier.",
+  "DELIV-007": "Delivery not found.",
+  "DELIV-008": "Cannot cancel after pickup.",
+  "MOTO-010": "This order is not a delivery order.",
+  "MOTO-011": "Order is not available for delivery.",
+  "MOTO-012": "Courier is not linked to this store.",
+  "MOTO-013": "Delivery was already accepted by another courier.",
+  "MOTO-014": "You are not allowed to update this order.",
+  "MOTO-015": "Invalid order status for this operation.",
+  "MOTO-016": "Cannot finish this order.",
+  "MOTO-026": "Verification attempt limit reached. Wait 24 hours to re-upload your selfie.",
+  "MOTO-027": "Please select your vehicle type to continue.",
+  "MOTO-028": "Invalid plate. Use ABC1234 or ABC1D23 format.",
+  "MOTO-029": "Please fill your full address (city, state and address).",
+  "MOTO-030": "Please upload the required documents to request store links.",
+  "MOTO-031": "Courier KYC is still under platform review. Wait for approval to complete the store link.",
+  "MOTO-032": "For motorcycles, CNH category must include the letter A.",
+  "MOTO-033": "PIX key must be a valid CPF from the courier.",
+  "MOTO-034": "PIX key must match the courier CPF registered in the profile.",
+  "REVIEW-003": "This order has no tip available for payout.",
+  "REVIEW-004": "The tip has not been paid by the customer yet."
+>>>>>>> main
 }

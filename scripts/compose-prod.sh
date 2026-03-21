@@ -56,5 +56,27 @@ apply_env SMTP_PASS "$SMTP_PASS"
 apply_env SMTP_SECURE "$SMTP_SECURE"
 apply_env EMAIL_FROM "$EMAIL_FROM"
 
+<<<<<<< HEAD
 unset FRONTEND_PORT
 docker compose --env-file "$ENV_FILE" up --build -d
+=======
+# Database (optional, but helps keep Docker+SSM aligned and prevents auth drift)
+apply_env PGHOST "$PGHOST"
+apply_env PGPORT "$PGPORT"
+apply_env PGUSER "$PGUSER"
+apply_env PGPASSWORD "$PGPASSWORD"
+apply_env PGDATABASE "$PGDATABASE"
+apply_env JWT_SECRET "$JWT_SECRET"
+
+unset FRONTEND_PORT
+
+# Prod safety: make Postgres volume external so `docker compose down -v` cannot delete it.
+# We create the volume if missing (safe), but we never remove it here.
+: "${POSTGRES_VOLUME_NAME:=edespetohub_postgres-data}"
+if ! docker volume inspect "$POSTGRES_VOLUME_NAME" >/dev/null 2>&1; then
+  echo "Creating Postgres volume: $POSTGRES_VOLUME_NAME"
+  docker volume create "$POSTGRES_VOLUME_NAME" >/dev/null
+fi
+
+docker compose -f "$ROOT_DIR/docker-compose.yml" -f "$ROOT_DIR/docker-compose.prod.yml" --env-file "$ENV_FILE" up --build -d
+>>>>>>> main

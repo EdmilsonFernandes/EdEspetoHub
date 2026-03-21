@@ -63,6 +63,19 @@ export class StoreRepository {
   }
 
   /**
+<<<<<<< HEAD
+=======
+   * Handles find by slug with owner.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-03-16
+   */
+  findBySlugWithOwner(slug: string) {
+    return this.repository.findOne({ where: { slug }, relations: ['settings', 'owner'] });
+  }
+
+  /**
+>>>>>>> main
    * Handles find by id.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
@@ -73,6 +86,19 @@ export class StoreRepository {
   }
 
   /**
+<<<<<<< HEAD
+=======
+   * Handles find by id with owner.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-29
+   */
+  findByIdWithOwner(identifier: string) {
+    return this.repository.findOne({ where: { id: identifier }, relations: ['settings', 'owner'] });
+  }
+
+  /**
+>>>>>>> main
    * Handles find by owner id.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
@@ -111,4 +137,26 @@ export class StoreRepository {
   countAll() {
     return this.repository.count();
   }
+<<<<<<< HEAD
+=======
+
+  /**
+   * Counts stores considered active for public metrics:
+   * - VIP / plan-exempt stores
+   * - stores with subscription in active statuses
+   */
+  countActiveForPublicMetrics() {
+    return this.repository
+      .createQueryBuilder('store')
+      .leftJoin('store.settings', 'settings')
+      .leftJoin('store.subscriptions', 'subscription')
+      .where('COALESCE(settings.planExempt, false) = true')
+      .orWhere('subscription.status IN (:...statuses)', {
+        statuses: ['ACTIVE', 'EXPIRING', 'TRIAL'],
+      })
+      .select('COUNT(DISTINCT store.id)', 'count')
+      .getRawOne()
+      .then((row: any) => Number(row?.count || 0));
+  }
+>>>>>>> main
 }

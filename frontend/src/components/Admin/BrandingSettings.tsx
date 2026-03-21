@@ -1,12 +1,19 @@
 // @ts-nocheck
+<<<<<<< HEAD
 import React, { useRef, useState } from "react";
 import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
+=======
+import React, { useEffect, useRef, useState } from "react";
+import { resolveAssetUrl } from "../../utils/resolveAssetUrl";
+import { formatPhoneInput } from "../../utils/format";
+>>>>>>> main
 
 const primaryPalette = [ '#dc2626', '#ea580c', '#f59e0b', '#16a34a', '#0ea5e9', '#2563eb', '#7c3aed' ];
 const secondaryPalette = [ '#111827', '#1f2937', '#334155', '#0f172a', '#0f766e', '#065f46', '#4b5563' ];
 
 export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving }) => {
   const fileInputRef = useRef(null);
+<<<<<<< HEAD
   const [sectionsOpen, setSectionsOpen] = useState({
     identity: true,
     promo: true,
@@ -17,6 +24,112 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
   const handleChange = (field, value) => {
     onChange((prev) => ({ ...prev, [field]: value }));
   };
+=======
+  const bannerInputRef = useRef(null);
+  const [storeCepLoading, setStoreCepLoading] = useState(false);
+  const [storeCepError, setStoreCepError] = useState("");
+  const [sectionsOpen, setSectionsOpen] = useState({
+    identity: true,
+    promo: false,
+    contact: false,
+    delivery: false,
+    colors: false,
+    access: false,
+  });
+  const normalizeCep = (input = "") => {
+    const digits = input.toString().replace(/\D/g, "").slice(0, 8);
+    if (digits.length <= 5) return digits;
+    return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+  };
+  const parseAddress = (value = "") => {
+    const raw = value.toString();
+    const parts = raw.split("|").map((part) => part.trim()).filter(Boolean);
+    const cepPart = parts.find((part) => /cep/i.test(part));
+    const cepRaw = cepPart ? cepPart.replace(/cep/i, "").replace(/[:\-]/g, "").trim() : "";
+    const cep = cepRaw ? normalizeCep(cepRaw) : "";
+    // Keep CEP out of the "street" slot. If CEP is the only filled part, don't leak it into street/number.
+    const nonCepParts = parts.filter((part) => !/cep/i.test(part));
+    const streetPart = nonCepParts[0] || "";
+    const streetMatch = streetPart.match(/^(.*?)(?:,\s*([^,]+))?$/);
+    const street = (streetMatch?.[1] || "").trim();
+    const number = (streetMatch?.[2] || "").trim();
+    const neighborhood = nonCepParts[1] || "";
+    const cityState = nonCepParts[2] || "";
+    const cityStateMatch = cityState.match(/^(.*?)(?:\s*-\s*([A-Za-z]{2}))?$/);
+    const city = (cityStateMatch?.[1] || "").trim();
+    const state = (cityStateMatch?.[2] || "").trim();
+    return {
+      cep,
+      street,
+      number,
+      neighborhood,
+      complement: nonCepParts[3] || "",
+      city,
+      state,
+    };
+  };
+  const [addressForm, setAddressForm] = useState(() => parseAddress(branding.address || ""));
+
+  useEffect(() => {
+    setAddressForm(parseAddress(branding.address || ""));
+  }, [branding.address]);
+  const handleChange = (field, value) => {
+    onChange((prev) => ({ ...prev, [field]: value }));
+  };
+  const handleAddressChange = (field, value) => {
+    setAddressForm((prev) => {
+      const next = { ...prev, [field]: field === "cep" ? normalizeCep(value) : value };
+      const parts = [
+        next.street && `${next.street}${next.number ? `, ${next.number}` : ""}`,
+        next.neighborhood,
+        next.city && next.state ? `${next.city} - ${next.state}` : next.city,
+        next.complement,
+        next.cep && `CEP ${next.cep}`,
+      ].filter(Boolean);
+      handleChange("address", parts.join(" | "));
+      return next;
+    });
+  };
+
+  const handleStoreCepLookup = async (cepValue?: string, forceOverwrite = false) => {
+    const rawCep = (cepValue ?? addressForm.cep ?? "").toString().replace(/\D/g, "");
+    if (rawCep.length !== 8) return;
+    setStoreCepLoading(true);
+    setStoreCepError("");
+    try {
+      const response = await fetch(`https://viacep.com.br/ws/${rawCep}/json/`);
+      const data = await response.json();
+      if (data?.erro) {
+        setStoreCepError("CEP não encontrado.");
+        return;
+      }
+      setAddressForm((prev) => {
+        const next = {
+          ...prev,
+          cep: normalizeCep(rawCep),
+          street: forceOverwrite ? (data.logradouro || "") : (prev.street || data.logradouro || ""),
+          neighborhood: forceOverwrite ? (data.bairro || "") : (prev.neighborhood || data.bairro || ""),
+          city: forceOverwrite ? (data.localidade || "") : (prev.city || data.localidade || ""),
+          state: forceOverwrite ? (data.uf || "") : (prev.state || data.uf || ""),
+          complement: forceOverwrite ? (data.complemento || "") : (prev.complement || data.complemento || ""),
+        };
+        const parts = [
+          next.street && `${next.street}${next.number ? `, ${next.number}` : ""}`,
+          next.neighborhood,
+          next.city && next.state ? `${next.city} - ${next.state}` : next.city,
+          next.complement,
+          next.cep && `CEP ${next.cep}`,
+        ].filter(Boolean);
+        handleChange("address", parts.join(" | "));
+        return next;
+      });
+    } catch (error) {
+      setStoreCepError("Não foi possível consultar o CEP agora.");
+    } finally {
+      setStoreCepLoading(false);
+    }
+  };
+>>>>>>> main
 
   const previewInitials = branding.brandName
     ?.split(" ")
@@ -26,6 +139,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
     .toUpperCase();
 
   const logoPreview = resolveAssetUrl(branding.logoUrl) || branding.logoFile || "";
+<<<<<<< HEAD
 
   return (
 
@@ -45,6 +159,33 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
             <div>
               <p className="text-sm font-semibold text-gray-800">Identidade da Marca</p>
               <p className="text-xs text-gray-500">Nome, Instagram, descrição e logo da sua marca.</p>
+=======
+  const bannerPreview = resolveAssetUrl(branding.bannerUrl) || branding.bannerFile || "";
+
+  return (
+
+    <div className="bg-white/95 rounded-2xl shadow-[0_16px_36px_-28px_rgba(15,23,42,0.35)] border border-slate-200 overflow-hidden">
+      <div className="p-4 sm:p-5 border-b border-slate-100 bg-gradient-to-r from-white via-white to-slate-50/70 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h3 className="text-lg font-bold text-gray-800 mb-1">Identidade visual</h3>
+          <p className="text-sm text-gray-500">Defina a presença digital da sua marca com elegância.</p>
+        </div>
+      </div>
+
+      <div className="p-4 sm:p-5 space-y-5">
+        <div className="rounded-2xl border border-slate-200 bg-white/80 shadow-[0_10px_24px_-20px_rgba(15,23,42,0.25)]">
+          <button
+            type="button"
+            onClick={() => setSectionsOpen((prev) => ({ ...prev, identity: !prev.identity }))}
+            className="w-full flex items-start justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4 text-left hover:bg-slate-50/70 transition"
+          >
+            <div className="flex items-start gap-2">
+              <span className="h-2.5 w-2.5 rounded-full bg-rose-500" />
+              <div>
+                <p className="text-sm font-semibold text-gray-800">Identidade da marca</p>
+                <p className="text-xs text-gray-500">Nome, Instagram, descrição, logo e banner.</p>
+              </div>
+>>>>>>> main
             </div>
             <span className="text-xs text-gray-500 sm:hidden">{sectionsOpen.identity ? 'Fechar' : 'Abrir'}</span>
           </button>
@@ -57,7 +198,11 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
             value={branding.brandName}
             onChange={(e) => handleChange("brandName", e.target.value)}
             className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
+<<<<<<< HEAD
               placeholder="Ex: Chama do Sertao"
+=======
+              placeholder="Nome da loja"
+>>>>>>> main
             />
           </div>
 
@@ -70,7 +215,11 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
                 value={branding.instagram}
                 onChange={(e) => handleChange("instagram", e.target.value.replace("@", ""))}
                 className="w-full border border-gray-200 rounded-xl p-3 pl-8 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
+<<<<<<< HEAD
                 placeholder="chamanoespeto"
+=======
+                placeholder="janocaminho"
+>>>>>>> main
               />
             </div>
           </div>
@@ -82,7 +231,11 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
               value={branding.description || ""}
               onChange={(e) => handleChange("description", e.target.value)}
               className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors min-h-[110px]"
+<<<<<<< HEAD
             placeholder="Ex: Espetos artesanais, cerveja gelada e atendimento rápido."
+=======
+            placeholder="Descreva brevemente sua loja e seus diferenciais."
+>>>>>>> main
               maxLength={220}
             />
             <div className="flex items-center justify-between text-xs text-gray-500">
@@ -141,6 +294,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
             )}
           </div>
         </div>
+<<<<<<< HEAD
           </div>
         </div>
 
@@ -153,6 +307,85 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
             <div>
               <p className="text-sm font-semibold text-gray-800">Destaque do Dia</p>
               <p className="text-xs text-gray-500">Uma frase que vende no topo do cardápio.</p>
+=======
+        <div className="space-y-3">
+          <label className="text-sm font-semibold text-gray-700">Banner da loja</label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-gray-500">Posição do banner no painel</label>
+              <select
+                value={branding.bannerPosition || "center"}
+                onChange={(e) => handleChange("bannerPosition", e.target.value)}
+                className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
+              >
+                <option value="center">Centro (recomendado)</option>
+                <option value="top">Topo</option>
+              </select>
+            </div>
+          </div>
+          <div className="flex flex-col gap-3">
+            <label className="w-full cursor-pointer">
+              <div className="border-2 border-dashed border-gray-300 rounded-2xl p-4 hover:border-brand-primary transition-colors text-center bg-white/70">
+                <p className="text-sm text-gray-600 mb-1">Envie o banner da loja</p>
+                <p className="text-xs text-gray-500">PNG ou JPG até 5MB</p>
+              </div>
+              <input
+                ref={bannerInputRef}
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  const reader = new FileReader();
+                  reader.onload = () => {
+                    handleChange("bannerFile", reader.result);
+                    handleChange("bannerUrl", reader.result);
+                  };
+                  reader.readAsDataURL(file);
+                }}
+                className="hidden"
+              />
+            </label>
+            <div className="w-full rounded-2xl overflow-hidden border border-gray-200 bg-gray-100 min-h-[140px] relative group">
+              {bannerPreview ? (
+                <img src={bannerPreview} alt="Banner da loja" className="w-full h-[180px] object-cover" />
+              ) : (
+                <div className="h-[180px] flex items-center justify-center text-xs text-gray-500">
+                  Sem banner configurado
+                </div>
+              )}
+              {bannerPreview ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleChange("bannerFile", "");
+                    handleChange("bannerUrl", "");
+                    if (bannerInputRef.current) bannerInputRef.current.value = "";
+                  }}
+                  className="absolute inset-0 bg-black/45 text-white text-xs opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center hover:-translate-y-0.5 active:scale-95"
+                >
+                  Remover banner
+                </button>
+              ) : null}
+            </div>
+          </div>
+        </div>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 bg-white/80 shadow-[0_10px_24px_-20px_rgba(15,23,42,0.25)]">
+          <button
+            type="button"
+            onClick={() => setSectionsOpen((prev) => ({ ...prev, promo: !prev.promo }))}
+            className="w-full flex items-start justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4 text-left hover:bg-slate-50/70 transition"
+          >
+            <div className="flex items-start gap-2">
+              <span className="h-2.5 w-2.5 rounded-full bg-amber-500" />
+              <div>
+                <p className="text-sm font-semibold text-gray-800">Destaque do dia</p>
+                <p className="text-xs text-gray-500">Mensagem curta no topo da vitrine.</p>
+              </div>
+>>>>>>> main
             </div>
             <span className="text-xs text-gray-500 sm:hidden">{sectionsOpen.promo ? 'Fechar' : 'Abrir'}</span>
           </button>
@@ -163,17 +396,26 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
                 value={branding.promoMessage || ""}
                 onChange={(e) => handleChange("promoMessage", e.target.value)}
                 className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors min-h-[90px]"
+<<<<<<< HEAD
                 placeholder="Ex: Combo do dia: 2 espetos + refri por R$ 29,90"
                 maxLength={120}
               />
               <div className="flex items-center justify-between text-xs text-gray-500">
                 <span>Aparece no topo do cardápio.</span>
+=======
+                placeholder="Oferta do dia: item + bebida por R$ 29,90"
+                maxLength={120}
+              />
+              <div className="flex items-center justify-between text-xs text-gray-500">
+                <span>Aparece no topo da vitrine.</span>
+>>>>>>> main
                 <span>{(branding.promoMessage || "").length}/120</span>
               </div>
             </div>
           </div>
         </div>
 
+<<<<<<< HEAD
         <div className="rounded-2xl border border-slate-200 bg-white/80">
           <button
             type="button"
@@ -183,6 +425,20 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
             <div>
               <p className="text-sm font-semibold text-gray-800">Canais e Pagamento</p>
               <p className="text-xs text-gray-500">Contato oficial e recebimento via Pix.</p>
+=======
+        <div className="rounded-2xl border border-slate-200 bg-white/80 shadow-[0_10px_24px_-20px_rgba(15,23,42,0.25)]">
+          <button
+            type="button"
+            onClick={() => setSectionsOpen((prev) => ({ ...prev, contact: !prev.contact }))}
+            className="w-full flex items-start justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4 text-left hover:bg-slate-50/70 transition"
+          >
+            <div className="flex items-start gap-2">
+              <span className="h-2.5 w-2.5 rounded-full bg-sky-500" />
+              <div>
+                <p className="text-sm font-semibold text-gray-800">Canais e pagamento</p>
+                <p className="text-xs text-gray-500">Contato oficial, endereço e chave Pix.</p>
+              </div>
+>>>>>>> main
             </div>
             <span className="text-xs text-gray-500 sm:hidden">{sectionsOpen.contact ? 'Fechar' : 'Abrir'}</span>
           </button>
@@ -194,9 +450,122 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
                 value={branding.contactEmail || ""}
                 onChange={(e) => handleChange("contactEmail", e.target.value)}
                 className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
+<<<<<<< HEAD
                 placeholder="contato@chamanoespeto.com.br"
               />
               <p className="text-xs text-gray-500">Opcional, aparece no cardápio para contato.</p>
+=======
+                placeholder="contato@janocaminho.com.br"
+              />
+              <p className="text-xs text-gray-500">Opcional, aparece na vitrine para contato.</p>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700">Telefone da loja</label>
+              <input
+                type="text"
+                value={branding.storePhone || ""}
+                onChange={(e) => handleChange("storePhone", formatPhoneInput(e.target.value))}
+                className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
+                placeholder="(11) 99999-9999"
+              />
+              <p className="text-xs text-gray-500">Usado no contato oficial e WhatsApp da loja.</p>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700">Endereço da loja</label>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="sm:col-span-1">
+                  <label className="text-xs font-semibold text-gray-500">CEP</label>
+                  <input
+                    type="text"
+                    value={addressForm.cep || ""}
+                    onChange={(e) => handleAddressChange("cep", e.target.value)}
+                    onBlur={(e) => handleStoreCepLookup(e.target.value, false)}
+                    disabled={storeCepLoading}
+                    className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
+                    placeholder="00000-000"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleStoreCepLookup(addressForm.cep, true)}
+                    disabled={storeCepLoading}
+                    className="mt-2 w-full px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {storeCepLoading ? "Buscando..." : "Buscar CEP"}
+                  </button>
+                  {storeCepError && (
+                    <p className="mt-1 text-xs text-rose-600">{storeCepError}</p>
+                  )}
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="text-xs font-semibold text-gray-500">Rua / Avenida</label>
+                  <input
+                    type="text"
+                    value={addressForm.street || ""}
+                    onChange={(e) => handleAddressChange("street", e.target.value)}
+                    disabled={storeCepLoading}
+                    className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
+                    placeholder="Rua, avenida"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-semibold text-gray-500">Número</label>
+                  <input
+                    type="text"
+                    value={addressForm.number || ""}
+                    onChange={(e) => handleAddressChange("number", e.target.value)}
+                    className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
+                    placeholder="Número"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-gray-500">Bairro</label>
+                  <input
+                    type="text"
+                    value={addressForm.neighborhood || ""}
+                    onChange={(e) => handleAddressChange("neighborhood", e.target.value)}
+                    className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
+                    placeholder="Bairro"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-semibold text-gray-500">Complemento</label>
+                  <input
+                    type="text"
+                    value={addressForm.complement || ""}
+                    onChange={(e) => handleAddressChange("complement", e.target.value)}
+                    className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
+                    placeholder="Apto, bloco, referência"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-semibold text-gray-500">Cidade</label>
+                    <input
+                      type="text"
+                      value={addressForm.city || ""}
+                      onChange={(e) => handleAddressChange("city", e.target.value)}
+                      className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
+                      placeholder="Cidade"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-gray-500">UF</label>
+                    <input
+                      type="text"
+                      value={addressForm.state || ""}
+                      onChange={(e) => handleAddressChange("state", e.target.value)}
+                      className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
+                      placeholder="UF"
+                    />
+                  </div>
+                </div>
+              </div>
+              <p className="text-xs text-gray-500">Usado para mostrar localização e validação de entrega.</p>
+>>>>>>> main
             </div>
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700">Chave Pix da loja</label>
@@ -205,13 +574,18 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
                 value={branding.pixKey || ''}
                 onChange={(e) => handleChange("pixKey", e.target.value)}
                 className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
+<<<<<<< HEAD
                 placeholder="Ex: +5511999999999 ou contato@pix.com"
+=======
+                placeholder="+5511999999999 ou contato@pix.com"
+>>>>>>> main
               />
               <p className="text-xs text-gray-500">Usada para gerar o QR Code na confirmação de pagamento. Telefone com DDD pode começar com 0 que ajustamos para +55.</p>
             </div>
           </div>
         </div>
 
+<<<<<<< HEAD
         <div className="rounded-2xl border border-slate-200 bg-white/80">
           <button
             type="button"
@@ -221,6 +595,93 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
             <div>
               <p className="text-sm font-semibold text-gray-800">Cores da Identidade</p>
               <p className="text-xs text-gray-500">Cria o clima visual da sua marca.</p>
+=======
+        <div className="rounded-2xl border border-slate-200 bg-white/80 shadow-[0_10px_24px_-20px_rgba(15,23,42,0.25)]">
+          <button
+            type="button"
+            onClick={() => setSectionsOpen((prev) => ({ ...prev, delivery: !prev.delivery }))}
+            className="w-full flex items-start justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4 text-left hover:bg-slate-50/70 transition"
+          >
+            <div className="flex items-start gap-2">
+              <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
+              <div>
+                <p className="text-sm font-semibold text-gray-800">Entrega por raio</p>
+                <p className="text-xs text-gray-500">Defina alcance e valor de frete.</p>
+              </div>
+            </div>
+            <span className="text-xs text-gray-500 sm:hidden">{sectionsOpen.delivery ? 'Fechar' : 'Abrir'}</span>
+          </button>
+          <div className={`${sectionsOpen.delivery ? 'block' : 'hidden'} sm:block px-4 pb-4 sm:px-5 sm:pb-5 space-y-5`}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700">Raio de entrega (km)</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  value={branding.deliveryRadiusKm ?? ''}
+                  onChange={(e) => handleChange("deliveryRadiusKm", e.target.value)}
+                  className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
+                  placeholder="20"
+                />
+                <p className="text-xs text-gray-500">Deixe vazio para aceitar entregas sem limite.</p>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700">Frete fixo (R$)</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  value={branding.deliveryFee ?? ''}
+                  onChange={(e) => handleChange("deliveryFee", e.target.value)}
+                  className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
+                  placeholder="5,00"
+                />
+                <p className="text-xs text-gray-500">Mostrado no checkout quando o cliente escolhe entrega.</p>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700">SLA de preparo (min)</label>
+                <input
+                  type="number"
+                  step="1"
+                  min="5"
+                  value={branding.prepBaseMinutes ?? ''}
+                  onChange={(e) => handleChange("prepBaseMinutes", e.target.value)}
+                  className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
+                  placeholder="20"
+                />
+                <p className="text-xs text-gray-500">Usado na fila para indicar atraso e atenção dos pedidos.</p>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700">SLA atenção (min)</label>
+                <input
+                  type="number"
+                  step="1"
+                  min="1"
+                  value={branding.prepAttentionMinutes ?? ''}
+                  onChange={(e) => handleChange("prepAttentionMinutes", e.target.value)}
+                  className="w-full border border-gray-200 rounded-xl p-3 bg-white/80 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
+                  placeholder="15"
+                />
+                <p className="text-xs text-gray-500">Quando passar desse tempo, o pedido fica em atenção.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 bg-white/80 shadow-[0_10px_24px_-20px_rgba(15,23,42,0.25)]">
+          <button
+            type="button"
+            onClick={() => setSectionsOpen((prev) => ({ ...prev, colors: !prev.colors }))}
+            className="w-full flex items-start justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4 text-left hover:bg-slate-50/70 transition"
+          >
+            <div className="flex items-start gap-2">
+              <span className="h-2.5 w-2.5 rounded-full bg-violet-500" />
+              <div>
+                <p className="text-sm font-semibold text-gray-800">Cores da identidade</p>
+                <p className="text-xs text-gray-500">Define o visual da sua vitrine.</p>
+              </div>
+>>>>>>> main
             </div>
             <span className="text-xs text-gray-500 sm:hidden">{sectionsOpen.colors ? 'Fechar' : 'Abrir'}</span>
           </button>
@@ -247,7 +708,11 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
                 />
               ))}
             </div>
+<<<<<<< HEAD
             <p className="text-xs text-gray-500">A cor principal define os destaques do cardápio.</p>
+=======
+            <p className="text-xs text-gray-500">A cor principal define os destaques da vitrine.</p>
+>>>>>>> main
           </div>
 
           <div className="space-y-3">
@@ -277,6 +742,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
           </div>
         </div>
 
+<<<<<<< HEAD
         <div className="rounded-2xl border border-slate-200 bg-white/80">
           <button
             type="button"
@@ -286,6 +752,20 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
             <div>
               <p className="text-sm font-semibold text-gray-800">URL da Loja</p>
               <p className="text-xs text-gray-500">Link público e definitivo do cardápio.</p>
+=======
+        <div className="rounded-2xl border border-slate-200 bg-white/80 shadow-[0_10px_24px_-20px_rgba(15,23,42,0.25)]">
+          <button
+            type="button"
+            onClick={() => setSectionsOpen((prev) => ({ ...prev, access: !prev.access }))}
+            className="w-full flex items-start justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4 text-left hover:bg-slate-50/70 transition"
+          >
+            <div className="flex items-start gap-2">
+              <span className="h-2.5 w-2.5 rounded-full bg-slate-500" />
+              <div>
+                <p className="text-sm font-semibold text-gray-800">URL da loja</p>
+                <p className="text-xs text-gray-500">Link público definitivo da vitrine.</p>
+              </div>
+>>>>>>> main
             </div>
             <span className="text-xs text-gray-500 sm:hidden">{sectionsOpen.access ? 'Fechar' : 'Abrir'}</span>
           </button>
@@ -298,6 +778,7 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
               className="w-full border border-gray-200 rounded-xl p-3 bg-gray-50/80 text-gray-500 cursor-not-allowed"
             />
             <p className="text-xs text-gray-500">Use esse slug para acessar o painel e a vitrine.</p>
+<<<<<<< HEAD
           </div>
         </div>
         {onSave && (
@@ -315,6 +796,34 @@ export const BrandingSettings = ({ branding, onChange, storeSlug, onSave, saving
             </button>
           </div>
         )}
+=======
+
+            <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold text-slate-800">Aceitar pedidos online</p>
+                  <p className="text-xs text-slate-500">Desative para usar a vitrine apenas como cardápio.</p>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={branding.isOrderingEnabled !== false}
+                  onClick={() => handleChange("isOrderingEnabled", !(branding.isOrderingEnabled !== false))}
+                  className={`relative inline-flex h-7 w-12 items-center rounded-full transition ${
+                    branding.isOrderingEnabled !== false ? 'bg-emerald-500' : 'bg-slate-300'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-5 w-5 transform rounded-full bg-white transition ${
+                      branding.isOrderingEnabled !== false ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+>>>>>>> main
       </div>
     </div>
   );

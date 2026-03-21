@@ -1,6 +1,12 @@
+<<<<<<< HEAD
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from "react";
 import { Package, CurrencyDollar, CheckCircle, CircleDashed } from "@phosphor-icons/react";
+=======
+﻿// @ts-nocheck
+import React, { useEffect, useMemo, useState } from "react";
+import { Package, CurrencyDollar, CheckCircle, CircleDashed, LinkSimple, CalendarBlank, TrendUp, CaretDown } from "@phosphor-icons/react";
+>>>>>>> main
 import {
   BarChart,
   Bar,
@@ -10,26 +16,162 @@ import {
   Tooltip as RechartsTooltip,
   ResponsiveContainer,
 } from "recharts";
+<<<<<<< HEAD
 import { formatCurrency } from "../../utils/format";
 import { exportToCsv } from "../../utils/export";
 
 const COLORS = ["var(--color-primary)", "var(--color-secondary)", "#10b981", "#3b82f6"];
+=======
+import { formatCurrency, formatPhoneInput } from "../../utils/format";
+import { APP_TIMEZONE } from "../../utils/format";
+import { exportToCsv } from "../../utils/export";
+
+const TOP_PRODUCT_BAR_COLORS = ["#1d4ed8", "#2563eb", "#3b82f6", "#60a5fa", "#93c5fd"];
+>>>>>>> main
 
 export const DashboardView = ({
   orders = [],
   customers = [],
   setupChecklist = [],
   storeUrl = "",
+<<<<<<< HEAD
   storeName = "Chama no Espeto",
 }) => {
   const [periodDays, setPeriodDays] = useState("30");
   const [qrCopied, setQrCopied] = useState(false);
+=======
+  storeName = "Já no Caminho",
+  storeLogo = "",
+  storeDescription = "",
+  linkStats = null,
+}) => {
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.matchMedia("(max-width: 767px)").matches;
+  });
+  const [qrCopied, setQrCopied] = useState(false);
+  const [showUtm, setShowUtm] = useState(false);
+  const [showChecklistDetails, setShowChecklistDetails] = useState(false);
+  const [showChecklistCard, setShowChecklistCard] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return !window.matchMedia("(max-width: 767px)").matches;
+  });
+  const [showQrCard, setShowQrCard] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return !window.matchMedia("(max-width: 767px)").matches;
+  });
+  const utmStorageKey = useMemo(() => (storeUrl ? `utm:store:${storeUrl}` : "utm:store"), [storeUrl]);
+  const [utmSource, setUtmSource] = useState("instagram");
+  const [utmMedium, setUtmMedium] = useState("bio");
+  const [utmCampaign, setUtmCampaign] = useState("organico");
+  const [periodDays, setPeriodDays] = useState("30");
+>>>>>>> main
   const nowDate = new Date();
   const currentMonthKey = `${nowDate.getFullYear()}-${String(nowDate.getMonth() + 1).padStart(2, "0")}`;
   const [selectedMonth, setSelectedMonth] = useState(currentMonthKey);
   const [topSort, setTopSort] = useState("qty");
   const [customerQuery, setCustomerQuery] = useState("");
+<<<<<<< HEAD
   const periodLabel = periodDays === "all" ? "Todo período" : `${periodDays} dias`;
+=======
+  const [editingCustomerKey, setEditingCustomerKey] = useState(null);
+  const [editingName, setEditingName] = useState("");
+  const [editingPhone, setEditingPhone] = useState("");
+  const [hiddenCustomers, setHiddenCustomers] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("customer-hidden") || "{}");
+    } catch {
+      return {};
+    }
+  });
+  const [customerOverrides, setCustomerOverrides] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("customer-overrides") || "{}");
+    } catch {
+      return {};
+    }
+  });
+  const periodLabel = periodDays === "all" ? "Todo período" : `${periodDays} dias`;
+  const checklistDoneCount = setupChecklist.filter((item) => item.done).length;
+  const checklistPendingCount = Math.max(0, setupChecklist.length - checklistDoneCount);
+  const checklistProgress = setupChecklist.length === 0 ? 0 : Math.round((checklistDoneCount / setupChecklist.length) * 100);
+  const linkStatsLabel = linkStats?.days ? `${linkStats.days} dias` : "7 dias";
+  const linkStatsTotal = linkStats?.total ?? 0;
+  const linkStatsSource = linkStats?.topSource || "direto";
+  const linkStatsTop = Array.isArray(linkStats?.sources)
+    ? linkStats.sources.slice(0, 3)
+    : [];
+  const normalizeCustomerKey = (customer) =>
+    `${(customer?.name || "").toString().trim().toLowerCase()}|${(customer?.phone || "").toString().trim().toLowerCase()}`;
+  const applyOverride = (customer) => {
+    const key = normalizeCustomerKey(customer);
+    const override = customerOverrides[key];
+    return {
+      ...customer,
+      __key: key,
+      name: override?.name ?? customer.name,
+      phone: override?.phone ?? customer.phone,
+    };
+  };
+  const utmUrl = useMemo(() => {
+    if (!storeUrl) return "";
+    const params = new URLSearchParams();
+    if (utmSource) params.set("utm_source", utmSource);
+    if (utmMedium) params.set("utm_medium", utmMedium);
+    if (utmCampaign) params.set("utm_campaign", utmCampaign);
+    const query = params.toString();
+    return query ? `${storeUrl}?${query}` : storeUrl;
+  }, [storeUrl, utmSource, utmMedium, utmCampaign]);
+
+  useEffect(() => {
+    if (!setupChecklist.length) return;
+    setShowChecklistDetails(checklistPendingCount > 0);
+  }, [setupChecklist.length, checklistPendingCount]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const media = window.matchMedia("(max-width: 767px)");
+    const update = () => {
+      const mobile = media.matches;
+      setIsMobile(mobile);
+      if (!mobile) {
+        setShowChecklistCard(true);
+        setShowQrCard(true);
+      }
+    };
+    update();
+    if (media.addEventListener) {
+      media.addEventListener("change", update);
+      return () => media.removeEventListener("change", update);
+    }
+    media.addListener(update);
+    return () => media.removeListener(update);
+  }, []);
+
+  useEffect(() => {
+    if (!storeUrl) return;
+    const cached = localStorage.getItem(utmStorageKey);
+    if (!cached) return;
+    try {
+      const parsed = JSON.parse(cached);
+      if (parsed?.utmSource) setUtmSource(parsed.utmSource);
+      if (parsed?.utmMedium) setUtmMedium(parsed.utmMedium);
+      if (parsed?.utmCampaign) setUtmCampaign(parsed.utmCampaign);
+    } catch {
+      // ignore storage errors
+    }
+  }, [storeUrl, utmStorageKey]);
+
+  useEffect(() => {
+    if (!storeUrl) return;
+    const payload = {
+      utmSource,
+      utmMedium,
+      utmCampaign,
+    };
+    localStorage.setItem(utmStorageKey, JSON.stringify(payload));
+  }, [utmSource, utmMedium, utmCampaign, storeUrl, utmStorageKey]);
+>>>>>>> main
 
   const formatMonthLabel = (key) => {
     if (!key) return "";
@@ -43,7 +185,16 @@ export const DashboardView = ({
     if (!raw) return null;
     const date = raw instanceof Date ? raw : new Date(raw);
     if (Number.isNaN(date.getTime())) return null;
+<<<<<<< HEAD
     return date.toISOString().slice(0, 10);
+=======
+    return new Intl.DateTimeFormat('en-CA', {
+      timeZone: APP_TIMEZONE,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).format(date);
+>>>>>>> main
   };
 
   const resolveDateLabel = (key) => {
@@ -74,7 +225,15 @@ export const DashboardView = ({
     orders.forEach((order) => {
       const ts = resolveTimestamp(order);
       if (!ts) return;
+<<<<<<< HEAD
       const key = new Date(ts).toISOString().slice(0, 7);
+=======
+      const key = new Intl.DateTimeFormat('en-CA', {
+        timeZone: APP_TIMEZONE,
+        year: 'numeric',
+        month: '2-digit',
+      }).format(new Date(ts));
+>>>>>>> main
       set.add(key);
     });
     const sorted = Array.from(set).sort((a, b) => (a > b ? -1 : 1));
@@ -191,12 +350,24 @@ export const DashboardView = ({
 
   const filteredCustomers = useMemo(() => {
     const normalized = customerQuery.trim().toLowerCase();
+<<<<<<< HEAD
     if (!normalized) return customers;
     return customers.filter((customer) => {
       const haystack = [customer.name, customer.phone].filter(Boolean).join(" ").toLowerCase();
       return haystack.includes(normalized);
     });
   }, [customers, customerQuery]);
+=======
+    const visible = customers
+      .map(applyOverride)
+      .filter((customer) => !hiddenCustomers[customer.__key]);
+    if (!normalized) return visible;
+    return visible.filter((customer) => {
+      const haystack = [customer.name, customer.phone].filter(Boolean).join(" ").toLowerCase();
+      return haystack.includes(normalized);
+    });
+  }, [customers, customerQuery, hiddenCustomers, customerOverrides]);
+>>>>>>> main
 
   const sortedCustomers = useMemo(() => {
     return [...filteredCustomers].sort((a, b) =>
@@ -210,7 +381,11 @@ export const DashboardView = ({
       { key: "telefone", label: "Telefone" },
     ];
 
+<<<<<<< HEAD
     const rows = customers.map((c) => ({
+=======
+    const rows = sortedCustomers.map((c) => ({
+>>>>>>> main
       nome: c.name,
       telefone: c.phone,
     }));
@@ -218,6 +393,37 @@ export const DashboardView = ({
     exportToCsv("clientes", headers, rows);
   };
 
+<<<<<<< HEAD
+=======
+  const startEditCustomer = (customer) => {
+    const key = customer?.__key || normalizeCustomerKey(customer);
+    setEditingCustomerKey(key);
+    setEditingName(customer.name || "");
+    setEditingPhone(customer.phone || "");
+  };
+
+  const saveCustomerEdit = () => {
+    if (!editingCustomerKey) return;
+    const next = {
+      ...customerOverrides,
+      [editingCustomerKey]: {
+        name: editingName.trim(),
+        phone: editingPhone.trim(),
+      },
+    };
+    setCustomerOverrides(next);
+    localStorage.setItem("customer-overrides", JSON.stringify(next));
+    setEditingCustomerKey(null);
+  };
+
+  const hideCustomer = (customer) => {
+    const key = customer?.__key || normalizeCustomerKey(customer);
+    const next = { ...hiddenCustomers, [key]: true };
+    setHiddenCustomers(next);
+    localStorage.setItem("customer-hidden", JSON.stringify(next));
+  };
+
+>>>>>>> main
   const handlePrintQr = () => {
     if (!storeUrl || typeof window === "undefined") return;
     const printWindow = window.open("", "_blank", "width=700,height=900");
@@ -229,7 +435,11 @@ export const DashboardView = ({
       <html lang="pt-BR">
         <head>
           <meta charset="utf-8" />
+<<<<<<< HEAD
           <title>QR do Cardápio - ${safeStoreName}</title>
+=======
+          <title>QR da Vitrine - ${safeStoreName}</title>
+>>>>>>> main
           <style>
             body { margin: 0; font-family: Arial, sans-serif; background: #f8fafc; color: #0f172a; }
             .page { padding: 40px 24px; display: flex; flex-direction: column; align-items: center; gap: 16px; }
@@ -243,9 +453,15 @@ export const DashboardView = ({
         <body>
           <div class="page">
             <div class="card">
+<<<<<<< HEAD
               <div class="title">Cardápio ${safeStoreName}</div>
               <div class="subtitle">Aponte a câmera para fazer seu pedido</div>
               <img class="qr" src="${qrUrl}" alt="QR Code do cardápio" />
+=======
+              <div class="title">Vitrine ${safeStoreName}</div>
+              <div class="subtitle">Aponte a câmera para fazer seu pedido</div>
+              <img class="qr" src="${qrUrl}" alt="QR Code da vitrine" />
+>>>>>>> main
               <div class="link">${storeUrl}</div>
             </div>
           </div>
@@ -261,10 +477,55 @@ export const DashboardView = ({
     printWindow.document.close();
   };
 
+<<<<<<< HEAD
+=======
+  const metricCards = [
+    {
+      id: "total",
+      label: "Receita total",
+      value: formatCurrency(stats.totalSales),
+      helper: firstOrderLabel,
+      icon: CurrencyDollar,
+      tone: "ds-metric-card-neutral",
+      iconTone: "text-slate-700 bg-slate-100 border-slate-200",
+    },
+    {
+      id: "month",
+      label: "Receita do mês",
+      value: formatCurrency(stats.monthRevenue),
+      helper: formatMonthLabel(selectedMonth),
+      icon: CalendarBlank,
+      tone: "ds-metric-card-success",
+      iconTone: "text-emerald-700 bg-emerald-100 border-emerald-200",
+      monthSelector: true,
+    },
+    {
+      id: "period",
+      label: "Receita do período",
+      value: formatCurrency(stats.periodRevenue),
+      helper: `Período: ${periodLabel}`,
+      icon: TrendUp,
+      tone: "ds-metric-card-warning",
+      iconTone: "text-amber-700 bg-amber-100 border-amber-200",
+    },
+    {
+      id: "orders",
+      label: "Pedidos realizados",
+      value: String(stats.totalOrders),
+      helper: `Ticket médio: ${formatCurrency(stats.avgTicket)}`,
+      icon: Package,
+      tone: "ds-metric-card-neutral",
+      iconTone: "text-brand-primary bg-brand-primary-soft border-brand-primary/20",
+    },
+  ];
+
+
+>>>>>>> main
   return (
     <div className="space-y-6 animate-in fade-in">
       {setupChecklist.length > 0 && (
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+<<<<<<< HEAD
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Checklist de ativação</p>
@@ -276,19 +537,64 @@ export const DashboardView = ({
             <div className="flex flex-col items-end gap-2">
               <div className="text-xs text-slate-500">
                 {setupChecklist.filter((item) => item.done).length} de {setupChecklist.length} completos
+=======
+          <div className="md:hidden mb-4 flex items-center justify-between">
+            <p className="text-xs uppercase tracking-[0.25em] font-bold text-slate-500">Checklist</p>
+            <button
+              type="button"
+              onClick={() => setShowChecklistCard((prev) => !prev)}
+              className="inline-flex items-center gap-1 rounded-full border border-slate-200 px-3 py-1 text-[11px] font-semibold text-slate-600"
+            >
+              {showChecklistCard ? 'Ocultar' : 'Mostrar'}
+              <CaretDown size={12} className={`transition-transform ${showChecklistCard ? 'rotate-180' : ''}`} />
+            </button>
+          </div>
+          {(showChecklistCard || !isMobile) && (
+          <>
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded-2xl bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center">
+                {storeLogo ? (
+                  <img src={storeLogo} alt={storeName} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-xl font-black text-slate-500">🍢</span>
+                )}
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Checklist de ativação</p>
+                <h3 className="text-xl font-black text-slate-900 mt-1">{storeName}</h3>
+                <p className="text-sm text-slate-500 mt-1">
+                  {storeDescription || "Complete os passos abaixo para ativar a melhor experiência para seus clientes."}
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-col items-start lg:items-end gap-3">
+              <div className="flex flex-wrap items-center gap-2 text-xs">
+                <span className="px-2.5 py-1 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700 font-semibold">
+                  {checklistDoneCount} concluído(s)
+                </span>
+                <span className={`px-2.5 py-1 rounded-full border font-semibold ${checklistPendingCount > 0 ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-slate-200 bg-slate-50 text-slate-600'}`}>
+                  {checklistPendingCount} pendente(s)
+                </span>
+>>>>>>> main
               </div>
               {storeUrl && (
                 <a
                   href={storeUrl}
                   target="_blank"
                   rel="noreferrer"
+<<<<<<< HEAD
                   className="px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+=======
+                  className="px-4 py-2 rounded-xl bg-brand-primary text-white text-xs font-semibold shadow-sm hover:opacity-90"
+>>>>>>> main
                 >
                   Ver minha loja
                 </a>
               )}
             </div>
           </div>
+<<<<<<< HEAD
           <div className="mt-4 h-2 rounded-full bg-slate-100 overflow-hidden">
             <div
               className="h-full bg-brand-primary"
@@ -329,10 +635,66 @@ export const DashboardView = ({
               </div>
             ))}
           </div>
+=======
+          <div className="mt-5 h-2.5 rounded-full bg-slate-100 overflow-hidden">
+            <div
+              className="h-full bg-brand-primary"
+              style={{ width: `${checklistProgress}%` }}
+            />
+          </div>
+          <div className="mt-4">
+            <button
+              type="button"
+              onClick={() => setShowChecklistDetails((prev) => !prev)}
+              className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+            >
+              {showChecklistDetails ? 'Ocultar checklist' : 'Ver checklist'}
+              <CaretDown size={14} className={`transition-transform ${showChecklistDetails ? 'rotate-180' : ''}`} />
+            </button>
+            {showChecklistDetails && (
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                {setupChecklist.map((item) => (
+                  <div
+                    key={item.id}
+                    className={`flex items-center justify-between gap-3 rounded-xl border px-3 py-2 ${
+                      item.done ? "border-emerald-200 bg-emerald-50/50" : "border-amber-200 bg-amber-50/40"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                      {item.done ? (
+                        <CheckCircle size={16} weight="duotone" className="text-emerald-600" />
+                      ) : (
+                        <CircleDashed size={16} weight="duotone" className="text-amber-600" />
+                      )}
+                      <span>{item.label}</span>
+                    </div>
+                    {!item.done && item.onClick && (
+                      <button
+                        type="button"
+                        onClick={item.onClick}
+                        className="px-2.5 py-1 rounded-full text-[11px] font-semibold text-brand-primary border border-brand-primary/40 hover:bg-brand-primary/10"
+                      >
+                        {item.action || "Configurar"}
+                      </button>
+                    )}
+                    {item.done && (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold border border-emerald-200 bg-emerald-100 text-emerald-700">
+                        OK
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          </>
+          )}
+>>>>>>> main
         </div>
       )}
       {storeUrl && (
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+<<<<<<< HEAD
           <div className="flex flex-col md:flex-row md:items-center gap-4">
             <div className="flex-1 space-y-2">
               <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Cardápio</p>
@@ -460,12 +822,307 @@ export const DashboardView = ({
             </div>
           </div>
         </div>
+=======
+          <div className="md:hidden mb-4 flex items-center justify-between">
+            <p className="text-xs uppercase tracking-[0.25em] font-bold text-slate-500">QR Vitrine</p>
+            <button
+              type="button"
+              onClick={() => setShowQrCard((prev) => !prev)}
+              className="inline-flex items-center gap-1 rounded-full border border-slate-200 px-3 py-1 text-[11px] font-semibold text-slate-600"
+            >
+              {showQrCard ? 'Ocultar' : 'Mostrar'}
+              <CaretDown size={12} className={`transition-transform ${showQrCard ? 'rotate-180' : ''}`} />
+            </button>
+          </div>
+          {(showQrCard || !isMobile) && (
+          <>
+          <div className="flex flex-col lg:flex-row lg:items-center gap-5">
+            <div className="flex-1 space-y-2">
+              <p className="text-xs uppercase tracking-[0.35em] text-slate-400">QR da vitrine</p>
+              <h3 className="text-xl font-black text-slate-900">Imprima e coloque nas mesas</h3>
+              <p className="text-sm text-slate-500">
+                O cliente aponta a câmera, abre a vitrine e faz o pedido em segundos.
+              </p>
+              <div className="mt-4 text-xs text-slate-500">
+                Imprima e coloque nas mesas ou copie o link da vitrine.
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="w-24 h-24 rounded-2xl border border-slate-200 bg-slate-50 flex items-center justify-center overflow-hidden">
+                <img
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(storeUrl)}`}
+                  alt="QR da vitrine"
+                  className="w-full h-full object-contain"
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(storeUrl);
+                    setQrCopied(true);
+                    setTimeout(() => setQrCopied(false), 1500);
+                  }}
+                  className="px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                >
+                  {qrCopied ? "Link copiado!" : "Copiar link"}
+                </button>
+                <button
+                  type="button"
+                  onClick={handlePrintQr}
+                  className="px-3 py-2 rounded-lg bg-brand-primary text-white text-xs font-semibold hover:opacity-90"
+                >
+                  Gerar PDF
+                </button>
+              </div>
+            </div>
+          </div>
+          </>
+          )}
+        </div>
+      )}
+      {/* ---------- CARDS RESUMO ---------- */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        {metricCards.map((card) => {
+          const Icon = card.icon;
+          return (
+            <div key={card.id} className={`ds-metric-card ${card.tone} p-5`}>
+              <div className="relative">
+                <div className="min-w-0 pr-16 lg:pr-14">
+                  <p className="text-[10px] uppercase tracking-[0.24em] text-slate-500 font-bold">{card.label}</p>
+                  <h3 className="mt-1 whitespace-nowrap leading-tight font-black tracking-tight text-slate-900 text-[clamp(1.22rem,1.65vw,1.7rem)] lg:text-[clamp(1.15rem,1.25vw,1.52rem)]">
+                    {card.value}
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-1">{card.helper}</p>
+                </div>
+                <span className={`absolute top-0.5 right-0.5 h-9 w-9 lg:h-8 lg:w-8 rounded-xl border flex items-center justify-center shrink-0 ${card.iconTone}`}>
+                  <Icon size={16} weight="duotone" />
+                </span>
+              </div>
+              {card.monthSelector && (
+                <div className="mt-3">
+                  <label className="text-[10px] uppercase tracking-[0.2em] text-slate-400">Mês selecionado</label>
+                  <select
+                    value={selectedMonth}
+                    onChange={(e) => setSelectedMonth(e.target.value)}
+                    className="ds-select ds-focus-ring mt-1 w-full py-1.5 text-xs text-slate-700"
+                  >
+                    {availableMonths.map((monthKey) => (
+                      <option key={monthKey} value={monthKey}>
+                        {formatMonthLabel(monthKey)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="grid lg:grid-cols-[1.25fr_0.75fr] gap-6">
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Divulgação</p>
+              <h3 className="text-xl font-black text-slate-900 mt-2">Link com UTM pronto</h3>
+              <p className="text-sm text-slate-500 mt-1">
+                Use para medir Instagram, WhatsApp e anúncios.
+              </p>
+            </div>
+            <div className="hidden sm:flex items-center gap-2 rounded-full bg-slate-50 border border-slate-200 px-3 py-1 text-xs text-slate-500">
+              UTM automático
+            </div>
+          </div>
+          <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="text-sm font-semibold text-slate-700">Resumo rápido</p>
+              <button
+                type="button"
+                onClick={() => setShowUtm((prev) => !prev)}
+                className="px-3 py-1.5 rounded-full border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+              >
+                {showUtm ? 'Ocultar detalhes' : 'Configurar UTM'}
+              </button>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <button
+                type="button"
+                onClick={() => copyUtm()}
+                className="px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                {qrCopied ? 'Link copiado!' : 'Copiar link'}
+              </button>
+              <button
+                type="button"
+                onClick={() => window.open(utmUrl || storeUrl, '_blank')}
+                className="px-3 py-2 rounded-lg bg-brand-primary text-white text-xs font-semibold hover:opacity-90"
+              >
+                Abrir link
+              </button>
+            </div>
+            {showUtm && (
+              <>
+                <div className="grid gap-3 xl:grid-cols-[1.2fr_0.9fr_0.9fr_0.9fr] items-end">
+                  <div>
+                    <p className="text-[11px] uppercase tracking-wide text-slate-400">Campanha</p>
+                    <input
+                      type="text"
+                      value={utmCampaign}
+                      onChange={(event) => setUtmCampaign(event.target.value)}
+                      placeholder="janocaminho"
+                      className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:ring-2 focus:ring-brand-primary"
+                    />
+                  </div>
+                  <div>
+                    <p className="text-[11px] uppercase tracking-wide text-slate-400">Canal</p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {['instagram', 'whatsapp', 'google', 'outros'].map((option) => (
+                        <button
+                          key={option}
+                          type="button"
+                          onClick={() => setUtmSource(option)}
+                          className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition ${
+                            utmSource === option
+                              ? 'bg-brand-primary text-white border-brand-primary'
+                              : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
+                          }`}
+                        >
+                          {option}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-[11px] uppercase tracking-wide text-slate-400">Formato</p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {['bio', 'link', 'anuncio', 'promo'].map((option) => (
+                        <button
+                          key={option}
+                          type="button"
+                          onClick={() => setUtmMedium(option)}
+                          className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition ${
+                            utmMedium === option
+                              ? 'bg-brand-secondary text-white border-brand-secondary'
+                              : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
+                          }`}
+                        >
+                          {option}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <button
+                      type="button"
+                      onClick={() => copyUtm()}
+                      className="px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                    >
+                      {qrCopied ? 'Link copiado!' : 'Copiar link'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => window.open(utmUrl || storeUrl, '_blank')}
+                      className="px-3 py-2 rounded-lg bg-brand-primary text-white text-xs font-semibold hover:opacity-90"
+                    >
+                      Abrir link
+                    </button>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { label: 'Instagram', utmSource: 'instagram', utmMedium: 'bio' },
+                    { label: 'WhatsApp', utmSource: 'whatsapp', utmMedium: 'status' },
+                    { label: 'Facebook', utmSource: 'facebook', utmMedium: 'feed' },
+                    { label: 'Google Ads', utmSource: 'google', utmMedium: 'cpc' },
+                    { label: 'TikTok', utmSource: 'tiktok', utmMedium: 'video' },
+                  ].map((preset) => (
+                    <button
+                      key={preset.label}
+                      type="button"
+                      onClick={() => copyUtm({ utmSource: preset.utmSource, utmMedium: preset.utmMedium })}
+                      className="px-3 py-1.5 rounded-full text-[11px] font-semibold border border-slate-200 text-slate-600 hover:bg-slate-100"
+                    >
+                      {preset.label}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+            <p className="text-[11px] uppercase tracking-[0.3em] text-slate-400">Última campanha</p>
+            <div className="mt-3 space-y-2 text-xs text-slate-600">
+              <div className="flex items-center justify-between">
+                <span>Canal</span>
+                <span className="font-semibold text-slate-800">{utmSource || '—'}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span>Formato</span>
+                <span className="font-semibold text-slate-800">{utmMedium || '—'}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span>Campanha</span>
+                <span className="font-semibold text-slate-800">{utmCampaign || '—'}</span>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => copyUtm()}
+              className="mt-3 w-full px-3 py-2 rounded-lg border border-slate-200 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
+            >
+              {qrCopied ? 'Link copiado!' : 'Copiar link UTM'}
+            </button>
+            <p className="mt-2 text-[10px] text-slate-400 break-all">
+              {utmUrl || storeUrl}
+            </p>
+          </div>
+
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-gray-500 text-sm font-bold uppercase">
+                  Acessos no link
+                </p>
+              <h3 className="text-3xl font-black text-brand-primary">
+                {linkStatsTotal}
+              </h3>
+              <p className="text-xs text-gray-500 mt-1">
+                {linkStatsLabel} · Origem: {linkStatsSource}
+              </p>
+              {linkStatsTop.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {linkStatsTop.map((entry) => (
+                    <span
+                      key={entry.source}
+                      className="px-2 py-1 rounded-full bg-slate-100 text-[11px] font-semibold text-slate-600"
+                    >
+                      {entry.source} · {entry.total}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="p-3 bg-brand-primary-soft rounded-lg text-brand-primary">
+              <LinkSimple weight="duotone" />
+            </div>
+          </div>
+        </div>
+        </div>
+>>>>>>> main
       </div>
 
       {/* ---------- GRÁFICOS ---------- */}
       <div className="grid md:grid-cols-2 gap-6">
         {/* Faturamento por dia */}
+<<<<<<< HEAD
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 h-80 overflow-hidden flex flex-col">
+=======
+        <div className={`bg-white p-6 rounded-2xl shadow-sm border border-slate-200 ${isMobile ? 'h-48' : 'h-80'} overflow-hidden flex flex-col`}>
+>>>>>>> main
           <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
             <h4 className="font-bold text-gray-700">Vendas por dia</h4>
             <div className="flex flex-wrap gap-2">
@@ -503,6 +1160,7 @@ export const DashboardView = ({
               <BarChart data={stats.chartData} barSize={24}>
                 <defs>
                   <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
+<<<<<<< HEAD
                     <stop offset="0%" stopColor="var(--color-primary)" stopOpacity={0.9} />
                     <stop offset="100%" stopColor="var(--color-secondary)" stopOpacity={0.7} />
                   </linearGradient>
@@ -515,6 +1173,42 @@ export const DashboardView = ({
                   labelFormatter={(label) => `Dia ${label}`}
                 />
                 <Bar dataKey="total" fill="url(#salesGradient)" radius={[6, 6, 0, 0]} />
+=======
+                    <stop offset="0%" stopColor="#2563eb" stopOpacity={0.96} />
+                    <stop offset="70%" stopColor="#3b82f6" stopOpacity={0.72} />
+                    <stop offset="100%" stopColor="#60a5fa" stopOpacity={0.14} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" vertical={false} />
+                <XAxis
+                  dataKey="label"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 11, fontWeight: 500, fill: "#64748b" }}
+                  interval="preserveStartEnd"
+                />
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 11, fontWeight: 400, fill: "#64748b" }}
+                  tickFormatter={(value) => `R$ ${value}`}
+                />
+                <RechartsTooltip
+                  formatter={(value) => formatCurrency(value)}
+                  labelFormatter={(label) => `Dia ${label}`}
+                  contentStyle={{
+                    borderRadius: "14px",
+                    border: "1px solid #dbeafe",
+                    boxShadow: "0 18px 34px -24px rgba(15,23,42,0.55)",
+                    backgroundColor: "#ffffff",
+                    color: "#0f172a",
+                  }}
+                  labelStyle={{ color: "#475569", fontWeight: 500, marginBottom: 6 }}
+                  itemStyle={{ color: "#1d4ed8", fontWeight: 700 }}
+                  cursor={{ fill: "rgba(37,99,235,0.06)" }}
+                />
+                <Bar dataKey="total" fill="url(#salesGradient)" radius={[8, 8, 0, 0]} />
+>>>>>>> main
               </BarChart>
               </ResponsiveContainer>
             </div>
@@ -522,7 +1216,11 @@ export const DashboardView = ({
         </div>
 
         {/* Top produtos */}
+<<<<<<< HEAD
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 h-80 overflow-hidden">
+=======
+        <div className={`bg-white p-6 rounded-2xl shadow-sm border border-slate-200 border-l-4 border-l-indigo-400 ${isMobile ? 'h-48' : 'h-80'} overflow-hidden`}>
+>>>>>>> main
           <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
             <h4 className="font-bold text-gray-700">
               Top 5 Produtos Mais Vendidos
@@ -557,15 +1255,66 @@ export const DashboardView = ({
                 <p className="text-xs text-slate-400">Quando vender, o ranking aparece aqui.</p>
               </div>
             </div>
+<<<<<<< HEAD
+=======
+          ) : isMobile ? (
+            <div className="flex gap-3 overflow-x-auto pb-1 [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [&::-webkit-scrollbar]:hidden">
+              {sortedTopProducts.map((product, index) => {
+                const maxQty = sortedTopProducts[0]?.qty || 1;
+                const percent = Math.max(8, Math.round((product.qty / maxQty) * 100));
+                const barColor = TOP_PRODUCT_BAR_COLORS[index] || TOP_PRODUCT_BAR_COLORS[TOP_PRODUCT_BAR_COLORS.length - 1];
+                return (
+                  <div
+                    key={`${product.name}-${index}`}
+                    className="min-w-[210px] rounded-xl border border-slate-200 bg-gradient-to-r from-white via-slate-50 to-white px-3 py-2"
+                  >
+                    <div className="flex items-center justify-between text-sm text-slate-700">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span
+                          className="h-2.5 w-2.5 rounded-full"
+                          style={{ background: barColor }}
+                        />
+                        <span className="font-semibold truncate">{product.name}</span>
+                      </div>
+                      <span className="text-xs text-slate-500">{product.qty}x</span>
+                    </div>
+                    <div className="mt-2 h-2 rounded-full bg-slate-100 overflow-hidden">
+                      <div
+                        className="h-full rounded-full"
+                        style={{
+                          width: `${percent}%`,
+                          background: barColor,
+                        }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+>>>>>>> main
           ) : (
             <div className="space-y-3">
               {sortedTopProducts.map((product, index) => {
                 const maxQty = sortedTopProducts[0]?.qty || 1;
                 const percent = Math.max(8, Math.round((product.qty / maxQty) * 100));
+<<<<<<< HEAD
                 return (
                   <div key={`${product.name}-${index}`} className="space-y-1">
                     <div className="flex items-center justify-between text-sm text-slate-700">
                       <span className="font-semibold truncate">{product.name}</span>
+=======
+                const barColor = TOP_PRODUCT_BAR_COLORS[index] || TOP_PRODUCT_BAR_COLORS[TOP_PRODUCT_BAR_COLORS.length - 1];
+                return (
+                  <div key={`${product.name}-${index}`} className="space-y-1 rounded-xl border border-slate-200 bg-gradient-to-r from-white via-slate-50 to-white px-3 py-2">
+                    <div className="flex items-center justify-between text-sm text-slate-700">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span
+                          className="h-2.5 w-2.5 rounded-full"
+                          style={{ background: barColor }}
+                        />
+                        <span className="font-semibold truncate">{product.name}</span>
+                      </div>
+>>>>>>> main
                       <span className="text-xs text-slate-500">{product.qty}x</span>
                     </div>
                     <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
@@ -573,7 +1322,11 @@ export const DashboardView = ({
                         className="h-full rounded-full"
                         style={{
                           width: `${percent}%`,
+<<<<<<< HEAD
                           background: COLORS[index % COLORS.length],
+=======
+                          background: barColor,
+>>>>>>> main
                         }}
                       />
                     </div>
@@ -612,6 +1365,7 @@ export const DashboardView = ({
           </div>
         </div>
 
+<<<<<<< HEAD
         <div className="max-h-80 overflow-y-auto pr-1">
           <div className="grid gap-3 sm:grid-cols-2">
             {sortedCustomers.map((customer) => {
@@ -642,6 +1396,105 @@ export const DashboardView = ({
               );
             })}
           </div>
+=======
+        <div className="max-h-80 overflow-y-auto pr-1 space-y-3">
+          {sortedCustomers.map((customer) => {
+            const initials = String(customer.name || 'CL')
+              .split(' ')
+              .filter(Boolean)
+              .slice(0, 2)
+              .map((part) => part[0]?.toUpperCase())
+              .join('');
+            const accentTone = customer.phone
+              ? 'border-l-emerald-400 bg-gradient-to-r from-emerald-50/70 to-white'
+              : 'border-l-slate-300 bg-gradient-to-r from-slate-50 to-white';
+            const customerKey = customer.__key || normalizeCustomerKey(customer);
+            const isEditing = editingCustomerKey === customerKey;
+            return (
+              <div
+                key={customer.id || customer.name}
+                className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-2xl border border-slate-200 border-l-4 px-4 py-3 shadow-sm ${accentTone}`}
+              >
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <div className="w-11 h-11 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center text-sm font-bold text-slate-700">
+                    {initials || 'CL'}
+                  </div>
+                  <div className="min-w-0">
+                    {isEditing ? (
+                      <div className="space-y-2">
+                        <input
+                          value={editingName}
+                          onChange={(event) => setEditingName(event.target.value)}
+                          placeholder="Nome do cliente"
+                          className="w-full rounded-lg border border-slate-200 px-2 py-1 text-xs focus:ring-2 focus:ring-brand-primary"
+                        />
+                        <input
+                          value={editingPhone}
+                          onChange={(event) => setEditingPhone(formatPhoneInput(event.target.value))}
+                          placeholder="Telefone"
+                          className="w-full rounded-lg border border-slate-200 px-2 py-1 text-xs focus:ring-2 focus:ring-brand-primary"
+                        />
+                      </div>
+                    ) : (
+                      <>
+                        <p className="text-sm font-semibold text-slate-800 truncate">{customer.name}</p>
+                        <p className="text-xs text-slate-500">
+                          {customer.phone ? 'Contato cadastrado' : 'Sem telefone'}
+                        </p>
+                      </>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {isEditing ? (
+                    <>
+                      <button
+                        type="button"
+                        onClick={saveCustomerEdit}
+                        className="px-3 py-1.5 rounded-full text-[11px] font-semibold bg-brand-primary text-white"
+                      >
+                        Salvar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setEditingCustomerKey(null)}
+                        className="px-3 py-1.5 rounded-full text-[11px] font-semibold border border-slate-200 text-slate-500"
+                      >
+                        Cancelar
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <span
+                        className={`px-3 py-1 rounded-full text-[11px] font-semibold border ${
+                          customer.phone
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                            : 'bg-slate-50 text-slate-500 border-slate-200'
+                        }`}
+                      >
+                        {customer.phone || 'Sem telefone'}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => startEditCustomer(customer)}
+                        className="px-3 py-1 rounded-full text-[11px] font-semibold border border-slate-200 text-slate-600 hover:bg-slate-50"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => hideCustomer(customer)}
+                        className="px-3 py-1 rounded-full text-[11px] font-semibold border border-rose-200 text-rose-600 hover:bg-rose-50"
+                      >
+                        Excluir
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+>>>>>>> main
 
           {sortedCustomers.length === 0 && (
             <div className="text-center text-gray-400 py-6 text-sm">
@@ -659,3 +1512,22 @@ export const DashboardView = ({
 };
 
 export default DashboardView;
+<<<<<<< HEAD
+=======
+  const copyUtm = async (overrides = {}) => {
+    if (!storeUrl) return;
+    const params = new URLSearchParams();
+    const source = overrides.utmSource ?? utmSource;
+    const medium = overrides.utmMedium ?? utmMedium;
+    const campaign = overrides.utmCampaign ?? utmCampaign;
+    if (source) params.set("utm_source", source);
+    if (medium) params.set("utm_medium", medium);
+    if (campaign) params.set("utm_campaign", campaign);
+    const query = params.toString();
+    const url = query ? `${storeUrl}?${query}` : storeUrl;
+    await navigator.clipboard.writeText(url);
+    setQrCopied(true);
+    setTimeout(() => setQrCopied(false), 1500);
+  };
+
+>>>>>>> main

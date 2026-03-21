@@ -38,6 +38,18 @@ export class Product {
   @Column({ name: 'promo_active', default: false })
   promoActive!: boolean;
 
+<<<<<<< HEAD
+=======
+  @Column({ name: 'bundle_promo_qty', type: 'int', nullable: true })
+  bundlePromoQty?: number | null;
+
+  @Column('decimal', { precision: 10, scale: 2, name: 'bundle_promo_price', nullable: true })
+  bundlePromoPrice?: number | null;
+
+  @Column({ name: 'bundle_promo_active', default: false })
+  bundlePromoActive!: boolean;
+
+>>>>>>> main
   @Column({ nullable: true })
   category?: string;
 
@@ -50,9 +62,30 @@ export class Product {
   @Column({ name: 'is_featured', default: false })
   isFeatured!: boolean;
 
+<<<<<<< HEAD
   @Column({ default: true })
   active!: boolean;
 
+=======
+  @Column({ name: 'manage_stock', default: false })
+  manageStock!: boolean;
+
+  @Column({ name: 'stock_quantity', type: 'int', default: 0 })
+  stockQuantity!: number;
+
+  @Column({ name: 'low_stock_alert', type: 'int', default: 3 })
+  lowStockAlert!: number;
+
+  @Column({ default: true })
+  active!: boolean;
+
+  @Column({ name: 'availability_days', type: 'jsonb', nullable: true })
+  availabilityDays?: Record<string, boolean> | null;
+
+  @Column({ type: 'jsonb', nullable: true })
+  modifiers?: Array<{ id: string; name: string; price: number; active?: boolean }> | null;
+
+>>>>>>> main
   @ManyToOne(() => Store, (store) => store.products, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'store_id' })
   store!: Store;

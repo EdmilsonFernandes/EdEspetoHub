@@ -9,7 +9,10 @@
     "emitDecoratorMetadata": true,
     "strict": true,
     "skipLibCheck": true,
+<<<<<<< HEAD
     "strictPropertyInitialization": false,
+=======
+>>>>>>> main
     "resolveJsonModule": true
   },
   "include": ["src/**/*"],

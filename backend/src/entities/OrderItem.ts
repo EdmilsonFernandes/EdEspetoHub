@@ -38,6 +38,15 @@ export class OrderItem {
   @Column({ name: 'pass_skewer', type: 'boolean', default: false })
   passSkewer?: boolean;
 
+<<<<<<< HEAD
+=======
+  @Column({ name: 'selected_modifiers', type: 'jsonb', nullable: true })
+  selectedModifiers?: Array<{ id: string; name: string; price: number; quantity?: number }> | null;
+
+  @Column({ name: 'is_printed', type: 'boolean', default: false })
+  isPrinted?: boolean;
+
+>>>>>>> main
   @ManyToOne(() => Product, (product) => product.orderItems, { eager: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'product_id' })
   product!: Product;
@@ -45,4 +54,8 @@ export class OrderItem {
   @ManyToOne(() => Order, (order) => order.items, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'order_id' })
   order!: Order;
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> main

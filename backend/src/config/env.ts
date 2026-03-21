@@ -8,7 +8,11 @@
  *
  * @file: env.ts
  * @Date: 2025-12-17
+<<<<<<< HEAD
  * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+=======
+ * @author: Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
+>>>>>>> main
  */
 
 import dotenv from 'dotenv';
@@ -48,7 +52,11 @@ export const env = {
     debug: process.env.MP_DEBUG === 'true',
   },
   email: {
+<<<<<<< HEAD
     from: process.env.EMAIL_FROM || 'Chama no Espeto <no-reply@chamanoespeto.com>',
+=======
+    from: process.env.EMAIL_FROM || 'Jano Caminho <no-reply@janocaminho.com.br>',
+>>>>>>> main
     smtpHost: process.env.SMTP_HOST || '',
     smtpPort: process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : 587,
     smtpUser: process.env.SMTP_USER || '',
@@ -63,4 +71,28 @@ export const env = {
     password: process.env.PGPASSWORD || 'postgres',
     database: process.env.PGDATABASE || 'espetinho',
   },
+<<<<<<< HEAD
 };
+=======
+  etaV2: {
+    enabled: process.env.ENABLE_ORDER_ETA_V2 !== 'false',
+    mapsBaseUrl: process.env.MAPS_BASE_URL || 'http://maps:5050/api/maps',
+    defaultPrepMinutes: process.env.DEFAULT_PREP_MINUTES ? Number(process.env.DEFAULT_PREP_MINUTES) : 15,
+    defaultPrepPerItemMinutes: process.env.DEFAULT_PREP_PER_ITEM_MINUTES
+      ? Number(process.env.DEFAULT_PREP_PER_ITEM_MINUTES)
+      : 2,
+    defaultQueueMinutesPerOrder: process.env.DEFAULT_QUEUE_MINUTES_PER_ORDER
+      ? Number(process.env.DEFAULT_QUEUE_MINUTES_PER_ORDER)
+      : 5,
+    defaultQueueBufferMinutes: process.env.DEFAULT_QUEUE_BUFFER_MINUTES
+      ? Number(process.env.DEFAULT_QUEUE_BUFFER_MINUTES)
+      : 0,
+    defaultEtaBufferMinutes: process.env.DEFAULT_ETA_BUFFER_MINUTES
+      ? Number(process.env.DEFAULT_ETA_BUFFER_MINUTES)
+      : 3,
+  },
+  whatsapp: {
+    notifyUrl: process.env.WHATSAPP_NOTIFY_URL || '',
+  },
+};
+>>>>>>> main

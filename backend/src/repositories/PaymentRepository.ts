@@ -75,6 +75,16 @@ export class PaymentRepository {
     });
   }
 
+<<<<<<< HEAD
+=======
+  findLatestPaidByStoreId(storeId: string) {
+    return this.repository.findOne({
+      where: { store: { id: storeId }, status: 'PAID' },
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+>>>>>>> main
   /**
    * Handles find latest pending by store id.
    *
@@ -159,4 +169,8 @@ export class PaymentRepository {
       relations: ['subscription', 'subscription.plan', 'store', 'user'],
     });
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> main

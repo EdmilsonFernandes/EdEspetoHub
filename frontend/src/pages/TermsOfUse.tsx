@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // @ts-nocheck
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -5,6 +6,36 @@ import { useNavigate } from 'react-router-dom';
 export function TermsOfUse() {
   const navigate = useNavigate();
   const platformLogo = '/chama-no-espeto.jpeg';
+=======
+﻿import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { apiClient } from '../config/apiClient';
+
+export function TermsOfUse() {
+  const navigate = useNavigate();
+  const platformLogo = '/janocaminho.jpg';
+  const [termsContent, setTermsContent] = useState('');
+  const [lgpdContent, setLgpdContent] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const [terms, lgpd] = await Promise.all([
+          apiClient.get('/legal/terms'),
+          apiClient.get('/legal/lgpd'),
+        ]);
+        setTermsContent(terms?.content || '');
+        setLgpdContent(lgpd?.content || '');
+      } catch {
+        // ignore
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
+>>>>>>> main
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -12,10 +43,17 @@ export function TermsOfUse() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <button onClick={() => navigate('/')} className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl overflow-hidden border border-slate-200 shadow-sm">
+<<<<<<< HEAD
               <img src={platformLogo} alt="Chama no Espeto" className="w-full h-full object-cover" />
             </div>
             <div className="text-left">
               <p className="text-base font-bold text-slate-900">Chama no Espeto</p>
+=======
+              <img src={platformLogo} alt="Já no Caminho" className="w-full h-full object-cover" />
+            </div>
+            <div className="text-left">
+              <p className="text-base font-bold text-slate-900">Já no Caminho</p>
+>>>>>>> main
               <p className="text-xs text-slate-500">Termos e Privacidade</p>
             </div>
           </button>
@@ -37,6 +75,7 @@ export function TermsOfUse() {
             </p>
           </div>
 
+<<<<<<< HEAD
           <section className="space-y-3 text-sm text-slate-600">
             <h2 className="text-base font-semibold text-slate-900">1. Plataforma e finalidade</h2>
             <p>
@@ -94,8 +133,38 @@ export function TermsOfUse() {
               terceiros. Contas que descumprirem estes termos podem ser suspensas.
             </p>
           </section>
+=======
+          {loading ? (
+            <p className="text-sm text-slate-500">Carregando termos...</p>
+          ) : termsContent ? (
+            <div
+              className="prose prose-slate max-w-none text-sm"
+              dangerouslySetInnerHTML={{ __html: termsContent }}
+            />
+          ) : (
+            <p className="text-sm text-slate-500">Termos indisponíveis no momento.</p>
+          )}
+
+          <div className="border-t border-slate-200 pt-6">
+            <h2 id="lgpd" className="text-base font-semibold text-slate-900 mb-3">LGPD</h2>
+            {loading ? (
+              <p className="text-sm text-slate-500">Carregando política de dados...</p>
+            ) : lgpdContent ? (
+              <div
+                className="prose prose-slate max-w-none text-sm"
+                dangerouslySetInnerHTML={{ __html: lgpdContent }}
+              />
+            ) : (
+              <p className="text-sm text-slate-500">Política LGPD indisponível no momento.</p>
+            )}
+          </div>
+>>>>>>> main
         </div>
       </main>
     </div>
   );
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> main

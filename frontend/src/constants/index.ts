@@ -1,20 +1,37 @@
+<<<<<<< HEAD
 // @ts-nocheck
 import { formatPhoneInput } from '../utils/format';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 
 export const DEFAULT_AREA_CODE = '12';
 export const initialCustomer = { name: '', phone: formatPhoneInput('', DEFAULT_AREA_CODE), address: '', table: '', type: 'table' };
+=======
+﻿// @ts-nocheck
+import { resolveAssetUrl } from '../utils/resolveAssetUrl';
+
+export const initialCustomer = { name: '', phone: '', address: '', table: '', type: 'table' };
+>>>>>>> main
 export const defaultPaymentMethod = 'debito';
 export const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || '5512996797210';
 export const PIX_KEY = import.meta.env.VITE_PIX_KEY || '';
 
 export const defaultBranding = {
+<<<<<<< HEAD
   brandName: 'Chama no Espeto',
   espetoId: import.meta.env.VITE_DEFAULT_STORE || 'espetinhodatony',
   logoUrl: '/logo.svg',
   primaryColor: '#b91c1c',
   accentColor: '#111827',
   tagline: 'Crie seu site de pedidos de churrasco em minutos',
+=======
+  brandName: 'Já no Caminho',
+  espetoId: import.meta.env.VITE_DEFAULT_STORE || 'espetinhodatony',
+  logoUrl: '/janocaminho.jpg',
+  bannerUrl: '',
+  primaryColor: '#2f9df7',
+  accentColor: '#5fd35a',
+  tagline: 'Crie seu site de pedidos online em minutos',
+>>>>>>> main
   instagram: '',
 };
 
@@ -30,9 +47,17 @@ export const getPersistedBranding = (ownerId: string = defaultBranding.espetoId)
     espetoId: ownerId,
     ...parsed,
     logoUrl: resolveAssetUrl(parsed.logoUrl || defaultBranding.logoUrl),
+<<<<<<< HEAD
+=======
+    bannerUrl: resolveAssetUrl(parsed.bannerUrl || defaultBranding.bannerUrl),
+>>>>>>> main
   };
   } catch (error) {
     console.error('Erro ao carregar branding salvo', error);
     return { ...defaultBranding, espetoId: ownerId };
   }
 };
+<<<<<<< HEAD
+=======
+
+>>>>>>> main

@@ -106,7 +106,11 @@ export class OrderRepository
   {
     return this.repository.findOne({
       where: { id: orderId },
+<<<<<<< HEAD
       relations: [ 'store', 'store.owner', 'items', 'items.product' ],
+=======
+      relations: [ 'store', 'store.settings', 'store.owner', 'items', 'items.product' ],
+>>>>>>> main
     });
   }
 
@@ -166,6 +170,32 @@ export class OrderRepository
       .getCount();
   }
 
+<<<<<<< HEAD
+=======
+  /**
+   * Finds active occupied tables for a store.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-03-12
+   */
+  async findActiveTablesByStore(storeId: string, statuses: string[])
+  {
+    const rows = await this.repository
+      .createQueryBuilder('o')
+      .select('DISTINCT o.table_number', 'table')
+      .where('o.store_id = :storeId', { storeId })
+      .andWhere('o.status IN (:...statuses)', { statuses })
+      .andWhere('o.table_number IS NOT NULL')
+      .andWhere("TRIM(o.table_number) <> ''")
+      .orderBy('o.table_number', 'ASC')
+      .getRawMany<{ table: string }>();
+
+    return rows
+      .map((entry) => String(entry?.table || '').trim())
+      .filter(Boolean);
+  }
+
+>>>>>>> main
 
 
 
@@ -222,6 +252,53 @@ export class OrderRepository
       .getRawMany();
   }
 
+<<<<<<< HEAD
+=======
+  async findTopItemsByStoreToday(storeId: string, limit = 3, tz = process.env.APP_TZ || 'America/Sao_Paulo')
+  {
+    return AppDataSource.getRepository(OrderItem)
+      .createQueryBuilder('oi')
+      .innerJoin('oi.order', 'o')
+      .innerJoin('oi.product', 'p')
+      .select('p.id', 'productId')
+      .addSelect('p.name', 'name')
+      .addSelect('p.image_url', 'imageUrl')
+      .addSelect('p.price', 'price')
+      .addSelect('SUM(oi.quantity)', 'qty')
+      .addSelect('SUM(oi.price)', 'total')
+      .where('o.store_id = :storeId', { storeId })
+      .andWhere("o.created_at >= (date_trunc('day', now() AT TIME ZONE :tz) AT TIME ZONE :tz)", { tz })
+      .andWhere("o.created_at < ((date_trunc('day', now() AT TIME ZONE :tz) + interval '1 day') AT TIME ZONE :tz)", { tz })
+      .andWhere('o.status != :cancelled', { cancelled: 'cancelled' })
+      .groupBy('p.id')
+      .addGroupBy('p.name')
+      .addGroupBy('p.image_url')
+      .addGroupBy('p.price')
+      .orderBy('qty', 'DESC')
+      .limit(limit)
+      .getRawMany();
+  }
+
+  async markItemsAsPrinted(orderId: string, itemIds?: string[]) {
+    const normalizedIds = Array.isArray(itemIds)
+      ? itemIds.map((id) => String(id || '').trim()).filter(Boolean)
+      : [];
+    const query = AppDataSource.getRepository(OrderItem)
+      .createQueryBuilder()
+      .update(OrderItem)
+      .set({ isPrinted: true })
+      .where('order_id = :orderId', { orderId })
+      .andWhere('is_printed = false');
+
+    if (normalizedIds.length > 0) {
+      query.andWhere('id IN (:...itemIds)', { itemIds: normalizedIds });
+    }
+
+    const result = await query.execute();
+    return Number(result?.affected || 0);
+  }
+
+>>>>>>> main
 
 
 

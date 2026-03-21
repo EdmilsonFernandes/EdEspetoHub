@@ -1,0 +1,50 @@
+﻿COMANDO DE CADASTRO EM LOTE: CARDAPIO BELA VISTA
+
+CATEGORIA: REFEICOES
+File de Tilapia (Meia) | R$ 63.00 | Desc: Arroz, feijao, batata frita, farofa e file de tilapia.
+File de Tilapia (Inteira) | R$ 105.00 | Desc: Arroz, feijao, batata frita, farofa e file de tilapia.
+Moqueca de Tilapia (Meia) | R$ 77.00 | Desc: Arroz, batata frita, maionese e moqueca.
+Moqueca de Tilapia (Inteira) | R$ 129.00 | Desc: Arroz, batata frita, maionese e moqueca.
+File de Tilapia a Parmegiana (Meia) | R$ 77.00 | Desc: Arroz, batata frita e file de tilapia a parmegiana.
+File de Tilapia a Parmegiana (Inteira) | R$ 129.00 | Desc: Arroz, batata frita e file de tilapia a parmegiana.
+Costelinha de Porco (Meia) | R$ 63.00 | Desc: Arroz, virado de feijao, torresmo, couve e costelinha de porco.
+Costelinha de Porco (Inteira) | R$ 105.00 | Desc: Arroz, virado de feijao, torresmo, couve e costelinha de porco.
+Carne de Porco na Lata (Meia) | R$ 63.00 | Desc: Arroz, virado de feijao, torresmo, couve e carne de porco acebolada.
+Carne de Porco na Lata (Inteira) | R$ 105.00 | Desc: Arroz, virado de feijao, torresmo, couve e carne de porco acebolada.
+Alcatra a Parmegiana (Meia) | R$ 77.00 | Desc: Arroz, batata frita, maionese e alcatra a parmegiana.
+Alcatra a Parmegiana (Inteira) | R$ 129.00 | Desc: Arroz, batata frita, maionese e alcatra a parmegiana.
+Bife Acebolado (Meia) | R$ 63.00 | Desc: Arroz, feijao, batata frita, farofa e alcatra acebolada.
+Bife Acebolado (Inteira) | R$ 105.00 | Desc: Arroz, feijao, batata frita, farofa e alcatra acebolada.
+File de Frango (Meia) | R$ 63.00 | Desc: Arroz, feijao, batata frita, farofa e file de frango acebolado.
+File de Frango (Inteira) | R$ 105.00 | Desc: Arroz, feijao, batata frita, farofa e file de frango acebolado.
+Frango Caipira Tradicional (Meia) | R$ 117.00 | Desc: Arroz, feijao, polenta frita, farofa e frango caipira.
+Frango Caipira Tradicional (Inteira) | R$ 195.00 | Desc: Arroz, feijao, polenta frita, farofa e frango caipira.
+Frango Caipira com Milho (Meia) | R$ 123.00 | Desc: Arroz, feijao, polenta frita e frango caipira com milho.
+Frango Caipira com Milho (Inteira) | R$ 205.00 | Desc: Arroz, feijao, polenta frita e frango caipira com milho.
+Frango Caipira com Palmito (Meia) | R$ 127.00 | Desc: Arroz, feijao, polenta frita e frango caipira com palmito.
+Frango Caipira com Palmito (Inteira) | R$ 212.00 | Desc: Arroz, feijao, polenta frita e frango caipira com palmito.
+Embalagem Viagem | R$ 2.50
+
+CATEGORIA: PORCOES
+File de Tilapia 600g (Meia: R$ 41.00 | Inteira: R$ 68.00)
+Lambari (Meia: R$ 41.00 | Inteira: R$ 68.00)
+Frango a Passarinho 900g (Meia: R$ 38.00 | Inteira: R$ 63.00)
+Batata Frita (Meia: R$ 23.00 | Inteira: R$ 39.00)
+Batata Frita c/ Queijo 500g (Meia: R$ 30.00 | Inteira: R$ 49.00)
+Torresmo 500g (Meia: R$ 36.00 | Inteira: R$ 60.00)
+Polenta Frita 500g (Meia: R$ 23.00 | Inteira: R$ 39.00)
+Mandioca Frita 500g (Meia: R$ 23.00 | Inteira: R$ 39.00)
+Calabresa 600g (Meia: R$ 30.00 | Inteira: R$ 51.00)
+Carne de Porco na Lata 600g (Meia: R$ 41.00 | Inteira: R$ 68.00)
+Arroz ou Feijao (Meia: R$ 16.00 | Inteira: R$ 27.00)
+Salada Especial (Meia: R$ 35.00 | Inteira: R$ 58.00)
+Maionese (Meia: R$ 26.00 | Inteira: R$ 44.00)
+
+CATEGORIA: BEBIDAS
+Coca Cola 1L (R$ 14.00), Refrigerante Lata (R$ 8.00), Refrigerante 600ml (R$ 12.00), Suco Polpa 470ml (R$ 15.00), Limonada Suica Jarra (R$ 35.00), Agua Garrafinha (R$ 4.00), Agua com Gas (R$ 5.00), H2O Sabores (R$ 10.00)
+Caipirinha Pinga (R$ 22.00), Caipirinha de Vodka (R$ 25.00), Caipirissima Smirnoff (R$ 28.00)
+Acai (R$ 18.00), Adicionais Acai (R$ 5.00)
+
+CATEGORIA: CERVEJAS E DESTILADOS
+Heineken 600ml (R$ 22.00), Original/Imperio 600ml (R$ 18.00), Skol/Brahma 600ml (R$ 15.00), Heineken LN (R$ 12.00), Skol/Brahma Lata (R$ 8.00)
+Smirnoff Vodka (R$ 18.00), Campari (R$ 15.00), Whisky Passport (R$ 18.00), Vinho Taca (R$ 15.00), Vinho Jarra 1L (R$ 37.00), Energetico (R$ 15.00)

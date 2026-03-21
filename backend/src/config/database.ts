@@ -19,7 +19,22 @@ import { Store } from '../entities/Store';
 import { StoreSettings } from '../entities/StoreSettings';
 import { Product } from '../entities/Product';
 import { Order } from '../entities/Order';
+<<<<<<< HEAD
 import { OrderItem } from '../entities/OrderItem';
+=======
+import { OrderReview } from '../entities/OrderReview';
+import { OrderItem } from '../entities/OrderItem';
+import { OrderEtaEstimate } from '../entities/OrderEtaEstimate';
+import { Motoboy } from '../entities/Motoboy';
+import { MotoboyStore } from '../entities/MotoboyStore';
+import { OrderDelivery } from '../entities/OrderDelivery';
+import { DeliveryEvent } from '../entities/DeliveryEvent';
+import { MotoboyDocument } from '../entities/MotoboyDocument';
+import { MotoboyStoreRequest } from '../entities/MotoboyStoreRequest';
+import { MotoboyAuditLog } from '../entities/MotoboyAuditLog';
+import { DeliveryBillingCycle } from '../entities/DeliveryBillingCycle';
+import { DeliveryBillingCharge } from '../entities/DeliveryBillingCharge';
+>>>>>>> main
 import { Plan } from '../entities/Plan';
 import { Subscription } from '../entities/Subscription';
 import { Payment } from '../entities/Payment';
@@ -29,6 +44,11 @@ import { EmailVerification } from '../entities/EmailVerification';
 import { SiteSetting } from '../entities/SiteSetting';
 import { PlatformAdmin } from '../entities/PlatformAdmin';
 import { AccessLog } from '../entities/AccessLog';
+<<<<<<< HEAD
+=======
+import { StoreLinkHit } from '../entities/StoreLinkHit';
+import { StoreUser } from '../entities/StoreUser';
+>>>>>>> main
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -38,8 +58,16 @@ export const AppDataSource = new DataSource({
   password: env.database.password,
   database: env.database.database,
   synchronize: false,
+<<<<<<< HEAD
   entities: [ User, Store, StoreSettings, Product, Order, OrderItem, Plan, Subscription, Payment, PaymentEvent, PasswordReset, EmailVerification, SiteSetting, PlatformAdmin, AccessLog ],
   migrations: [],
   logging: [ 'error' ]
   //logging: [ 'error', 'query' ]
 });
+=======
+  entities: [ User, Store, StoreSettings, Product, Order, OrderReview, OrderItem, OrderEtaEstimate, Motoboy, MotoboyStore, OrderDelivery, DeliveryEvent, MotoboyDocument, MotoboyStoreRequest, MotoboyAuditLog, DeliveryBillingCycle, DeliveryBillingCharge, Plan, Subscription, Payment, PaymentEvent, PasswordReset, EmailVerification, SiteSetting, PlatformAdmin, AccessLog, StoreLinkHit, StoreUser ],
+  migrations: [],
+  logging: [ 'error' ]
+  //logging: [ 'error', 'query' ]
+});
+>>>>>>> main

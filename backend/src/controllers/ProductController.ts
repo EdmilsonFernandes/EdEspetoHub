@@ -142,7 +142,11 @@ export class ProductController {
         return res.json(demoProducts);
       }
       log.debug('Product public list request', { slug: req.params.slug });
+<<<<<<< HEAD
       const products = await productService.listByStoreSlug(req.params.slug);
+=======
+      const products = await productService.listActiveByStoreSlug(req.params.slug);
+>>>>>>> main
       return res.json(products);
     } catch (error: any) {
       log.warn('Product public list failed', { slug: req.params.slug, error });
@@ -196,4 +200,42 @@ export class ProductController {
       return respondWithError(req, res, error, 400);
     }
   }
+<<<<<<< HEAD
 }
+=======
+
+  static async listCategories(req: Request, res: Response) {
+    try {
+      const categories = await productService.listCategoriesByStoreId(req.params.storeId, req.auth?.storeId);
+      return res.json(categories);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  static async listPublicCategoriesBySlug(req: Request, res: Response) {
+    try {
+      const categories = await productService.listCategoriesByStoreSlug(req.params.slug);
+      return res.json(categories);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+  static async setCategoryPriority(req: Request, res: Response) {
+    try {
+      const payload = await productService.setCategoryPriority(
+        req.params.storeId,
+        {
+          name: req.body?.name,
+          priority: req.body?.priority,
+        },
+        req.auth?.storeId
+      );
+      return res.json(payload);
+    } catch (error: any) {
+      return respondWithError(req, res, error, 400);
+    }
+  }
+}
+>>>>>>> main

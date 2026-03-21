@@ -20,8 +20,20 @@ import { OrderRepository } from '../repositories/OrderRepository';
 import { AppDataSource } from '../config/database';
 import { SubscriptionRepository } from '../repositories/SubscriptionRepository';
 import { AccessLogRepository } from '../repositories/AccessLogRepository';
+<<<<<<< HEAD
 import { logger } from '../utils/logger';
 import { respondWithError } from '../errors/respondWithError';
+=======
+import { env } from '../config/env';
+import { logger } from '../utils/logger';
+import { respondWithError } from '../errors/respondWithError';
+import { AppError } from '../errors/AppError';
+import { StoreSettings } from '../entities/StoreSettings';
+import { SettingsService } from '../services/SettingsService';
+import { Plan } from '../entities/Plan';
+import { Subscription } from '../entities/Subscription';
+import { Store } from '../entities/Store';
+>>>>>>> main
 
 const storeRepository = new StoreRepository();
 const subscriptionService = new SubscriptionService();
@@ -30,6 +42,10 @@ const paymentEventRepository = new PaymentEventRepository();
 const orderRepository = new OrderRepository();
 const subscriptionRepository = new SubscriptionRepository();
 const accessLogRepository = new AccessLogRepository();
+<<<<<<< HEAD
+=======
+const settingsService = new SettingsService();
+>>>>>>> main
 const log = logger.child({ scope: 'PlatformAdminController' });
 /**
  * Provides PlatformAdminController functionality.
@@ -39,6 +55,34 @@ const log = logger.child({ scope: 'PlatformAdminController' });
  */
 export class PlatformAdminController {
   /**
+<<<<<<< HEAD
+=======
+   * Builds VIP subscription payload.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-28
+   */
+  private static buildVipSubscription(store: any) {
+    const label = store?.settings?.planExemptLabel || 'Cliente VIP';
+    return {
+      id: `vip-${store?.id || 'store'}`,
+      status: 'ACTIVE',
+      startDate: store?.createdAt || null,
+      endDate: null,
+      autoRenew: false,
+      plan: {
+        id: 'vip',
+        name: 'vip',
+        displayName: label,
+        price: 0,
+        durationDays: null,
+      },
+      planExempt: true,
+      planExemptLabel: label,
+    };
+  }
+  /**
+>>>>>>> main
    * Lists stores.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
@@ -52,9 +96,18 @@ export class PlatformAdminController {
         stores.map(async (store) => {
           const subscription = await subscriptionService.getCurrentByStore(store.id);
           const latestPayment = await paymentRepository.findLatestByStoreId(store.id);
+<<<<<<< HEAD
           return {
             ...store,
             subscription,
+=======
+          const vipSubscription = store.settings?.planExempt
+            ? PlatformAdminController.buildVipSubscription(store)
+            : null;
+          return {
+            ...store,
+            subscription: vipSubscription || subscription,
+>>>>>>> main
             latestPayment,
           };
         })
@@ -83,7 +136,14 @@ export class PlatformAdminController {
         stores.map(async (store) => {
           const subscription = await subscriptionService.getCurrentByStore(store.id);
           const latestPayment = await paymentRepository.findLatestByStoreId(store.id);
+<<<<<<< HEAD
           return { ...store, subscription, latestPayment };
+=======
+          const vipSubscription = store.settings?.planExempt
+            ? PlatformAdminController.buildVipSubscription(store)
+            : null;
+          return { ...store, subscription: vipSubscription || subscription, latestPayment };
+>>>>>>> main
         })
       );
 
@@ -144,6 +204,10 @@ export class PlatformAdminController {
           id: store.id,
           name: store.name,
           slug: store.slug,
+<<<<<<< HEAD
+=======
+          isVip: Boolean(store.settings?.planExempt),
+>>>>>>> main
           totalOrders,
           totalRevenue,
           avgTicket,
@@ -161,7 +225,14 @@ export class PlatformAdminController {
       const summary = enriched.reduce(
         (acc, store) => {
           const subscription = store.subscription;
+<<<<<<< HEAD
           if (subscription?.status === 'ACTIVE') acc.activeSubscriptions += 1;
+=======
+          // "Ativa" na visão operacional inclui ACTIVE e TRIAL.
+          if (subscription?.status === 'ACTIVE' || subscription?.status === 'TRIAL') {
+            acc.activeSubscriptions += 1;
+          }
+>>>>>>> main
           if (subscription?.status === 'EXPIRING') acc.expiringSubscriptions += 1;
           if (subscription?.status === 'EXPIRED') acc.expiredSubscriptions += 1;
           const planName = subscription?.plan?.name || '';
@@ -275,6 +346,116 @@ export class PlatformAdminController {
     }
   }
 
+<<<<<<< HEAD
+=======
+  /**
+   * Updates VIP plan exemption.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-28
+   */
+  static async updatePlanExempt(req: Request, res: Response) {
+    const storeId = req.params.storeId;
+    const planExempt = Boolean(req.body?.planExempt);
+    const label = req.body?.planExemptLabel?.toString().trim();
+
+    try {
+      log.info('Admin plan exempt update request', { storeId, planExempt });
+      const result = await AppDataSource.transaction(async (manager) => {
+        const storeRepo = manager.getRepository(Store);
+        const storeSettingsRepo = manager.getRepository(StoreSettings);
+        const planRepo = manager.getRepository(Plan);
+        const subscriptionRepo = manager.getRepository(Subscription);
+
+        const store = await storeRepo.findOne({ where: { id: storeId }, relations: ['settings'] });
+        if (!store) {
+          throw new AppError('STORE-001', 404);
+        }
+
+        if (!store.settings) {
+          store.settings = storeSettingsRepo.create({ store } as Partial<StoreSettings>);
+        } else if (!(store.settings as any).store) {
+          // Ensure relation is set when settings exists but wasn't hydrated with the store relation.
+          (store.settings as any).store = store;
+        }
+
+        store.settings.planExempt = planExempt;
+        store.settings.planExemptLabel = planExempt ? (label || 'Cliente VIP') : null;
+
+        if (planExempt) {
+          store.open = true;
+        }
+
+        await storeSettingsRepo.save(store.settings);
+        await storeRepo.save(store);
+
+        // If VIP was removed, ensure the store gets a trial subscription (7 days default) if it has no active plan.
+        let subscription = planExempt
+          ? null
+          : await subscriptionRepo.findOne({
+              where: { store: { id: store.id } } as any,
+              order: { endDate: 'DESC' } as any,
+              relations: ['store', 'store.settings', 'plan'],
+            });
+        const now = new Date();
+        const hasValidPlan =
+          !!subscription &&
+          new Date(subscription.endDate).getTime() >= now.getTime() &&
+          subscription.status !== 'PENDING' &&
+          subscription.status !== 'EXPIRED' &&
+          subscription.status !== 'CANCELLED';
+
+        if (!planExempt && !hasValidPlan) {
+          let plan = await planRepo.findOne({ where: { name: 'basic_monthly', enabled: true } as any });
+          if (!plan) {
+            plan = await planRepo.findOne({ where: { enabled: true } as any, order: { price: 'ASC' } as any });
+          }
+          if (!plan) {
+            throw new AppError('SUB-003', 400);
+          }
+
+          const trialDays = await settingsService.getNumber('trial_days', env.trialDays);
+          const trialEnd = new Date(now);
+          trialEnd.setDate(trialEnd.getDate() + trialDays);
+
+          const created = subscriptionRepo.create({
+            store,
+            plan,
+            startDate: now,
+            endDate: trialEnd,
+            status: 'TRIAL',
+            autoRenew: false,
+            paymentMethod: 'PIX',
+          } as any);
+          await subscriptionRepo.save(created);
+          subscription = created as any;
+          store.open = true;
+          await storeRepo.save(store);
+        }
+
+        const finalSub = planExempt ? null : subscription;
+        const finalHasValidPlan = planExempt
+          ? true
+          : subscriptionService.isActiveSubscription(finalSub as any);
+        return { store, subscription: finalSub, hasValidPlan: finalHasValidPlan };
+      });
+
+      return res.json({
+        storeId: result.store.id,
+        planExempt: result.store.settings.planExempt,
+        planExemptLabel: result.store.settings.planExemptLabel,
+        hasValidPlan: result.hasValidPlan,
+        shouldOpenRenewal: !planExempt && !result.hasValidPlan,
+        lastPlanId: result.subscription?.plan?.id || null,
+        lastPlanName: result.subscription?.plan?.name || null,
+      });
+    } catch (error: any) {
+      log.warn('Admin plan exempt update failed', { storeId, error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+>>>>>>> main
 
 
 
@@ -345,4 +526,95 @@ export class PlatformAdminController {
       return respondWithError(req, res, error, 400);
     }
   }
+<<<<<<< HEAD
 }
+=======
+
+  /**
+   * Audits queue consistency for delivery statuses and can optionally repair.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
+   * @date 2026-02-27
+   */
+  static async queueHealth(req: Request, res: Response) {
+    const repair =
+      String(req.query?.repair || '').toLowerCase() === '1' ||
+      String(req.query?.repair || '').toLowerCase() === 'true';
+    const storeSlug = String(req.query?.storeSlug || '').trim();
+    const storeId = String(req.query?.storeId || '').trim();
+
+    try {
+      const params: any[] = [];
+      const where: string[] = [
+        "o.type = 'delivery'",
+        "o.status = 'in_delivery'",
+        "od.status = 'DELIVERED'",
+      ];
+
+      if (storeId) {
+        params.push(storeId);
+        where.push(`o.store_id = $${params.length}`);
+      }
+      if (storeSlug) {
+        params.push(storeSlug);
+        where.push(`s.slug = $${params.length}`);
+      }
+
+      const baseWhere = where.join(' AND ');
+
+      const rows = await AppDataSource.query(
+        `
+          SELECT o.id AS "orderId",
+                 o.status AS "orderStatus",
+                 od.status AS "deliveryStatus",
+                 o.updated_at AS "orderUpdatedAt",
+                 od.delivered_at AS "deliveredAt",
+                 s.id AS "storeId",
+                 s.slug AS "storeSlug",
+                 s.name AS "storeName"
+            FROM orders o
+            JOIN order_deliveries od ON od.order_id = o.id
+            JOIN stores s ON s.id = o.store_id
+           WHERE ${baseWhere}
+           ORDER BY o.updated_at DESC
+           LIMIT 500
+        `,
+        params
+      );
+
+      let repaired = 0;
+      if (repair && rows.length > 0) {
+        repaired = await AppDataSource.transaction(async (manager) => {
+          const result = await manager.query(
+            `
+              UPDATE orders o
+                 SET status = 'delivered'
+                FROM order_deliveries od, stores s
+               WHERE o.id = od.order_id
+                 AND s.id = o.store_id
+                 AND ${baseWhere}
+            `,
+            params
+          );
+          return Number((result && (result.rowCount ?? result.affectedRows)) || 0);
+        });
+      }
+
+      return res.json({
+        ok: true,
+        totalIssues: rows.length,
+        repaired,
+        filters: {
+          storeId: storeId || null,
+          storeSlug: storeSlug || null,
+          repair,
+        },
+        issues: rows,
+      });
+    } catch (error: any) {
+      log.warn('Admin queue health failed', { storeId, storeSlug, repair, error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+}
+>>>>>>> main

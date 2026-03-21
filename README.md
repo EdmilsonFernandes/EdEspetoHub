@@ -42,26 +42,27 @@ docker compose up --build
 ```
 
 Serviços locais:
+
 - Front-end: `http://localhost:8080`
 - API: `http://localhost:4000` (Swagger em `/api/docs`)
 
 ## Rodar local sem Docker
 
-1) **Instalar dependências**
+1. **Instalar dependências**
 
 ```bash
 cd backend && npm install
 cd ../frontend && npm install
 ```
 
-2) **Banco local**
+2. **Banco local**
 
 ```bash
 createdb espetinho
 psql -h localhost -U postgres -d espetinho -f backend/schema.sql
 ```
 
-3) **Configurar envs**
+3. **Configurar envs**
 
 ```bash
 cp backend/.env.example backend/.env
@@ -71,14 +72,16 @@ Edite `backend/.env` e ajuste `PG*`, `PORT` e `JWT_SECRET`.
 Opcional: `LOG_LEVEL=debug|info|warn|error`, `LOG_TO_FILE=true` e `LOG_DIR=logs` para controlar logs e salvar em arquivo.
 
 Opcional (producao): usar AWS SSM Parameter Store (SecureString) com um JSON unico. Configure:
+
 - `SSM_PARAMETER_NAME` (ex: `/chamanoespeto/prod`)
 - `AWS_REGION` (ex: `us-east-1`)
 - `SSM_OVERRIDE=true` para sobrescrever variaveis locais
-Opcional (dev local): se o SSM vier com `PGHOST=postgres`, defina `SSM_LOCAL_DB_HOST=localhost` para sobrescrever apenas no host (fora do Docker).
-Opcional (debug): `SSM_LOG_KEYS=true` para logar quais chaves foram aplicadas (somente nomes).
-Opcional (debug): `SSM_LOG_OVERRIDES=false` para ocultar overrides locais (padrao loga).
+  Opcional (dev local): se o SSM vier com `PGHOST=postgres`, defina `SSM_LOCAL_DB_HOST=localhost` para sobrescrever apenas no host (fora do Docker).
+  Opcional (debug): `SSM_LOG_KEYS=true` para logar quais chaves foram aplicadas (somente nomes).
+  Opcional (debug): `SSM_LOG_OVERRIDES=false` para ocultar overrides locais (padrao loga).
 
 Exemplo de JSON no SSM:
+
 ```
 
 Verificacao rapida:
@@ -110,7 +113,7 @@ Crie `frontend/.env`:
 VITE_API_BASE_URL=http://localhost:4000/api
 ```
 
-4) **Subir**
+4. **Subir**
 
 ```bash
 cd backend && npm run dev
@@ -118,6 +121,7 @@ cd ../frontend && npm run dev
 ```
 
 Serviços locais:
+
 - Front-end: `http://localhost:3000`
 - API: `http://localhost:4000`
 
@@ -129,41 +133,48 @@ curl http://localhost:4000/api/plans
 
 ## Fluxo de criacao de conta (resumo)
 
-1) Front envia `POST /api/auth/register` com dados do usuario (CPF/CNPJ), endereco com CEP e aceite de termos/LGPD.
-2) API cria usuario (email nao verificado), gera slug unico, cria loja `open=false`.
-3) Envia e-mail de confirmacao e redireciona para `/verify-email`.
-4) Ao confirmar, o pagamento e criado e fica disponivel em `/payment/:id`.
-5) E-mail de pagamento pendente e enviado com o link/QR.
-5) Quando o MP aprova, o webhook confirma o pagamento, ativa a assinatura e abre a loja.
-6) E-mail de ativacao e enviado com links do admin e da vitrine.
+1. Front envia `POST /api/auth/register` com dados do usuario (CPF/CNPJ), endereco com CEP e aceite de termos/LGPD.
+2. API cria usuario (email nao verificado), gera slug unico, cria loja `open=false`.
+3. Envia e-mail de confirmacao e redireciona para `/verify-email`.
+4. Ao confirmar, o pagamento e criado e fica disponivel em `/payment/:id`.
+5. E-mail de pagamento pendente e enviado com o link/QR.
+6. Quando o MP aprova, o webhook confirma o pagamento, ativa a assinatura e abre a loja.
+7. E-mail de ativacao e enviado com links do admin e da vitrine.
 
 Cadastro (UX):
+
 - Termos/LGPD aparecem em modal no `/create` e bloqueiam o envio se nao forem aceitos.
 - CEP consulta ViaCEP para preencher endereco.
 
 Assinaturas:
+
 - Job diario marca expiracao e envia avisos em D-3, D-1 e D-0.
 - Renovacao ocorre pelo painel `/admin/renewal` com escolha de plano.
 - Pagamentos expirados/failed geram novo link ao renovar.
 
 SEO basico:
+
 - `robots.txt` aponta para o sitemap.
 - `sitemap.xml` com rotas publicas basicas (home, create, terms).
 
 Trial:
+
 - Periodo gratis configuravel via `site_settings` (`trial_days`).
 - Loja ativa apos confirmacao de e-mail, sem cobrar durante o trial.
 
 Vitrine (mobile):
+
 - Header compacto com botao "Info" da loja.
 - Sheet com endereco, WhatsApp, Instagram e horarios.
 - Mapa estatico gratuito via OpenStreetMap.
 
 Configurações (admin):
+
 - Identidade visual da loja (logo, descrição, cores).
 - Canais de pagamento (chave Pix) e e-mail de contato da loja.
 
 Demo:
+
 - Vitrine demo em `/chamanoespeto/demo`.
 - Admin demo em `/admin/demo` com dados locais.
 
@@ -211,60 +222,66 @@ flowchart TD
 ```
 
 Arquivos BPMN (layout legivel por lanes):
+
 - `docs/bpmn/chama-no-espeto-signup.bpmn`
 - `docs/bpmn/chama-no-espeto-orders.bpmn`
 
 ## Checklist de QA (fluxos principais)
 
 Cadastro e planos:
+
 - Criar conta com e-mail válido, confirmar e-mail, entrar no admin.
 - Trial de 7 dias: não gera pagamento; expirando bloqueia loja e exige renovação.
 - Renovar assinatura: só mostra planos pagos; gerar Pix/Cartão/Boleto conforme plano.
 - Pagamento expirado/failed: gera novo pagamento (não reutiliza link vencido).
 
 Vitrine / pedido:
+
 - Buscar item por nome, filtrar por categoria e adicionar no carrinho.
 - Produto com promoção: exibe original riscado + promo em verde (cardápio e carrinho).
 - Mesa ocupada: impedir novo pedido e mostrar aviso.
 - Pedido enviado: abre acompanhamento e salva últimos 3 pedidos no `localStorage`.
 
 Acompanhamento:
+
 - Status em linha única (Recebido/Em preparo/Pronto/Pago).
 - Exibe QR Pix apenas para cliente (cópia disponível).
 - Voltar leva para a loja do slug correto.
 
 Fila do churrasqueiro:
+
 - Cards compactos, ordem de fila e tempo corrido.
 - Promoção: mostrar preço original riscado + promo em verde.
 - “Iniciar preparo” antes de “Marcar pronto”.
 - Finalizados hoje com paginação e contagem.
 
 Configurações:
+
 - Atualizar logo/descrição/cores e validar persistência.
 - Alterar chave Pix e e-mail de contato (limpar campo deve salvar vazio).
 
 ## Deploy no EC2 (resumo rapido)
 
-1) Configurar `.env.prod` com a porta do front:
+1. Configurar `.env.prod` com a porta do front:
 
 ```bash
 FRONTEND_PORT=8080
 ```
 
-2) Preparar segredos (recomendado):
+2. Preparar segredos (recomendado):
 
 ```bash
 cp .env.prod.secrets.example .env.prod.secrets
 # edite os valores reais
 ```
 
-3) Subir usando o script (preserva envs):
+3. Subir usando o script (preserva envs):
 
 ```bash
 sh scripts/compose-prod.sh
 ```
 
-4) Verificacao rapida:
+4. Verificacao rapida:
 
 ```bash
 docker ps
@@ -272,7 +289,7 @@ docker exec -it chamanoespeto-api env | grep -E '^(MP_|SMTP_|EMAIL_FROM|APP_BASE
 curl -s https://www.chamanoespeto.com.br/api/docs.json | head -n 1
 ```
 
-5) Teste de e-mail (reset de senha):
+5. Teste de e-mail (reset de senha):
 
 ```bash
 curl -X POST https://www.chamanoespeto.com.br/api/auth/forgot-password \
@@ -280,7 +297,7 @@ curl -X POST https://www.chamanoespeto.com.br/api/auth/forgot-password \
   -d '{"email":"seu-email@gmail.com"}'
 ```
 
-6) Webhook MP (checagem rapida):
+6. Webhook MP (checagem rapida):
 
 ```bash
 docker logs chamanoespeto-api --tail 200 | grep -i "mercadopago\\|webhook"
@@ -295,7 +312,7 @@ Requer `jq` instalado e o token de confirmacao copiado do e-mail.
 sh scripts/test-flow.sh
 ```
 
-3) Nginx como reverse proxy:
+3. Nginx como reverse proxy:
 
 - Use `docs/nginx/chamanoespeto.conf`
 - `/` -> `http://127.0.0.1:8080`
@@ -303,13 +320,13 @@ sh scripts/test-flow.sh
 - `/uploads/` -> `http://127.0.0.1:4000/uploads/`
 - `client_max_body_size 20m`
 
-4) HTTPS:
+4. HTTPS:
 
 ```bash
 sudo certbot --nginx -d chamanoespeto.com.br -d www.chamanoespeto.com.br
 ```
 
-5) Mercado Pago (producao):
+5. Mercado Pago (producao):
 
 - Configure em `backend/.env.docker`:
   - `MP_ACCESS_TOKEN`
@@ -318,7 +335,7 @@ sudo certbot --nginx -d chamanoespeto.com.br -d www.chamanoespeto.com.br
   - `MP_WEBHOOK_URL=https://www.chamanoespeto.com.br/api/webhooks/mercadopago`
 - O webhook exige HTTPS valido.
 
-6) SMTP (exemplo Zoho):
+6. SMTP (exemplo Zoho):
 
 ```
 SMTP_HOST=smtp.zoho.com
@@ -332,6 +349,7 @@ EMAIL_FROM=Chama no Espeto <contato@chamanoespeto.com.br>
 Se configurar assinatura secreta no painel, defina `MP_WEBHOOK_SECRET` na API.
 
 ### O que é ngrok (explicação rápida)
+
 ngrok cria um túnel público temporário para seu servidor local. Isso permite que o Mercado Pago envie o webhook para sua máquina local durante testes. Sempre que você reiniciar o ngrok, a URL pública muda (a menos que use um plano pago com URL fixa).
 
 ## Execução local (sem Docker)
@@ -354,18 +372,18 @@ cd frontend && npm run dev
 
 1. Crie um banco chamado `espetinho` e aplique o schema inicial (opcional, a API também cria tabelas on-demand):
 
-    ```bash
-    psql -h localhost -U postgres -d espetinho -f backend/schema.sql
-    ```
+   ```bash
+   psql -h localhost -U postgres -d espetinho -f backend/schema.sql
+   ```
 
 2. Variáveis de conexão usadas pelo `pg` (padrões: `postgres` / `postgres`):
 
-    ```bash
-    export PGHOST=localhost
-    export PGUSER=postgres
-    export PGPASSWORD=postgres
-    export PGDATABASE=espetinho
-    ```
+   ```bash
+   export PGHOST=localhost
+   export PGUSER=postgres
+   export PGPASSWORD=postgres
+   export PGDATABASE=espetinho
+   ```
 
 ### 2. API (pasta `backend/`)
 
@@ -405,6 +423,7 @@ VITE_API_BASE_URL=http://localhost:4000/api
 ```
 
 SSM local (setup rapido):
+
 - Veja `docs/ssm-local.md`
 
 Com a API em execução, a loja fica acessível em:
@@ -492,39 +511,39 @@ Para um banco vazio, continue usando o `backend/schema.sql` (já contém a colun
 
 - **Front-end** (usa `frontend/Dockerfile` com nginx):
 
-    ```bash
-    cd frontend
-    docker build -t espetinho-app .
-    docker run --rm -p 80:80 espetinho-app
-    ```
+  ```bash
+  cd frontend
+  docker build -t espetinho-app .
+  docker run --rm -p 80:80 espetinho-app
+  ```
 
 - **API** (usa `backend/Dockerfile`):
 
-    ```bash
-    cd backend
-    docker build -t espetinho-api .
-    docker run --rm -p 4000:4000 \
-      -e PGHOST=<host> -e PGUSER=<usuario> -e PGPASSWORD=<senha> -e PGDATABASE=<db> \
-      espetinho-api
-    ```
+  ```bash
+  cd backend
+  docker build -t espetinho-api .
+  docker run --rm -p 4000:4000 \
+    -e PGHOST=<host> -e PGUSER=<usuario> -e PGPASSWORD=<senha> -e PGDATABASE=<db> \
+    espetinho-api
+  ```
 
 - **PostgreSQL + schema**
 
-    ```bash
-    docker run --name espetinho-db -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=espetinho -p 5432:5432 -d postgres:16
-    docker exec -i espetinho-db psql -U postgres -d espetinho < backend/schema.sql
-    ```
+  ```bash
+  docker run --name espetinho-db -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=espetinho -p 5432:5432 -d postgres:16
+  docker exec -i espetinho-db psql -U postgres -d espetinho < backend/schema.sql
+  ```
 
 - **pgAdmin**
 
-    ```bash
-    docker build -f Dockerfile.pgadmin -t espetinho-pgadmin .
-    docker run --rm -p 5050:80 \
-      -e PGADMIN_DEFAULT_EMAIL=admindatony@datony.com \
-      -e PGADMIN_DEFAULT_PASSWORD=Datony20025#! \
-      -v pgadmin-data:/var/lib/pgadmin \
-      espetinho-pgadmin
-    ```
+  ```bash
+  docker build -f Dockerfile.pgadmin -t espetinho-pgadmin .
+  docker run --rm -p 5050:80 \
+    -e PGADMIN_DEFAULT_EMAIL=admindatony@datony.com \
+    -e PGADMIN_DEFAULT_PASSWORD=Datony20025#! \
+    -v pgadmin-data:/var/lib/pgadmin \
+    espetinho-pgadmin
+  ```
 
 ## BPMN do fluxo da aplicação
 
@@ -538,7 +557,7 @@ Um diagrama BPMN resumindo o fluxo do "Chama no espeto" está disponível em `do
 
 - Ao publicar em produção (ex.: EC2), exponha apenas as portas necessárias e substitua credenciais padrão.
 - O diretório `.vscode/` traz recomendações de formatação (2 espaços, LF, remoção de espaços em branco e nova linha final), aplicadas automaticamente se o Prettier estiver instalado.
-Vitrine e painel com Docker:
+  Vitrine e painel com Docker:
 
 - Vitrine (cliente): `http://localhost:8080/<slug>` (ex: `http://localhost:8080/lojadoedmilson`)
 - Admin pedidos: `http://localhost:8080/admin/orders`

@@ -62,6 +62,22 @@ export class UserRepository {
     return this.repository.findOne({ where: { email }, relations: ['stores', 'stores.settings'] });
   }
 
+<<<<<<< HEAD
+=======
+  findByLoginIdentifier(identifier: string) {
+    const normalized = String(identifier || '').trim().toLowerCase();
+    if (!normalized) return Promise.resolve(null);
+    return this.repository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.stores', 'store')
+      .leftJoinAndSelect('store.settings', 'storeSettings')
+      .where('LOWER(user.email) = :identifier', { identifier: normalized })
+      .orWhere('LOWER(user.fullName) = :identifier', { identifier: normalized })
+      .orderBy('user.createdAt', 'DESC')
+      .getOne();
+  }
+
+>>>>>>> main
   /**
    * Handles find by id.
    *
@@ -71,4 +87,8 @@ export class UserRepository {
   findById(id: string) {
     return this.repository.findOne({ where: { id }, relations: ['stores', 'stores.settings'] });
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> main

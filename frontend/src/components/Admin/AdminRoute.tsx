@@ -1,4 +1,5 @@
 // @ts-nocheck
+<<<<<<< HEAD
 import React, { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -11,6 +12,26 @@ export function AdminRoute({ children }: { children: React.ReactNode }) {
     console.count('AdminRoute render effect');
   }, [hydrated, auth]);
 
+=======
+import React from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+
+type AdminAllowedRole = 'ADMIN' | 'OPERATOR' | 'CHURRASQUEIRO';
+
+export function AdminRoute({
+  children,
+  allowedRoles,
+  fallbackTo = '/admin/queue',
+}: {
+  children: React.ReactNode;
+  allowedRoles?: AdminAllowedRole[];
+  fallbackTo?: string;
+}) {
+  const { auth, hydrated } = useAuth();
+  const location = useLocation();
+
+>>>>>>> main
   if (!hydrated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-700">
@@ -19,9 +40,21 @@ export function AdminRoute({ children }: { children: React.ReactNode }) {
     );
   }
 
+<<<<<<< HEAD
   if (!auth?.token || auth?.user?.role !== 'ADMIN' || !auth?.store) {
     return <Navigate to="/admin" replace />;
   }
+=======
+  const role = String(auth?.user?.role || '').toUpperCase() as AdminAllowedRole;
+  const hasSession = Boolean(auth?.token && auth?.store);
+  const hasAdminContext = role === 'ADMIN' || role === 'OPERATOR' || role === 'CHURRASQUEIRO';
+  if (!hasSession || !hasAdminContext) {
+    return <Navigate to="/admin" replace />;
+  }
+  if (Array.isArray(allowedRoles) && allowedRoles.length > 0 && !allowedRoles.includes(role)) {
+    return <Navigate to={fallbackTo} replace state={{ accessDenied: true }} />;
+  }
+>>>>>>> main
 
   const subscriptionStatus = auth?.subscription?.status;
   if (subscriptionStatus === 'EXPIRED' && location.pathname !== '/admin/renewal') {

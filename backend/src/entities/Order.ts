@@ -19,6 +19,10 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+<<<<<<< HEAD
+=======
+  UpdateDateColumn,
+>>>>>>> main
 } from 'typeorm';
 import { Store } from './Store';
 import { OrderItem } from './OrderItem';
@@ -55,6 +59,18 @@ export class Order {
   @Column({ name: 'payment_method', nullable: true })
   paymentMethod?: string;
 
+<<<<<<< HEAD
+=======
+  @Column({ name: 'payment_status', default: 'PENDING' })
+  paymentStatus!: string;
+
+  @Column('decimal', { name: 'cash_tendered', precision: 10, scale: 2, nullable: true })
+  cashTendered?: number | null;
+
+  @Column('decimal', { name: 'delivery_fee', precision: 10, scale: 2, nullable: true })
+  deliveryFee?: number | null;
+
+>>>>>>> main
   @Column('decimal', { precision: 10, scale: 2 })
   total!: number;
 
@@ -67,4 +83,11 @@ export class Order {
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
+<<<<<<< HEAD
 }
+=======
+
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt!: Date;
+}
+>>>>>>> main

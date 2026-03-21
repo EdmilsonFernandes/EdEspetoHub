@@ -3,13 +3,175 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { storeService } from '../services/storeService';
 import { planService } from '../services/planService';
+<<<<<<< HEAD
 import { BILLING_OPTIONS, PLAN_TIERS, getPlanName } from '../constants/planCatalog';
 import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
+=======
+import { BILLING_OPTIONS, PLAN_TIERS, getPlanName, resolveAnnualPromoTotal, resolveMonthlyEquivalent } from '../constants/planCatalog';
+import { getPaymentMethodMeta, getPaymentProviderMeta } from '../utils/paymentAssets';
+import { formatPhoneInput } from '../utils/format';
+import { FormSection } from '../components/common/FormSection';
+import { Buildings, CopySimple, GlobeHemisphereWest, RocketLaunch } from '@phosphor-icons/react';
+
+const BRAZIL_DDDS = [
+  '11', '12', '13', '14', '15', '16', '17', '18', '19',
+  '21', '22', '24', '27', '28',
+  '31', '32', '33', '34', '35', '37', '38',
+  '41', '42', '43', '44', '45', '46', '47', '48', '49',
+  '51', '53', '54', '55',
+  '61', '62', '63', '64', '65', '66', '67', '68', '69',
+  '71', '73', '74', '75', '77', '79',
+  '81', '82', '83', '84', '85', '86', '87', '88', '89',
+  '91', '92', '93', '94', '95', '96', '97', '98', '99',
+];
+
+const BRAZIL_STATES = [
+  { value: 'AC', label: 'Acre' },
+  { value: 'AL', label: 'Alagoas' },
+  { value: 'AP', label: 'Amapá' },
+  { value: 'AM', label: 'Amazonas' },
+  { value: 'BA', label: 'Bahia' },
+  { value: 'CE', label: 'Ceará' },
+  { value: 'DF', label: 'Distrito Federal' },
+  { value: 'ES', label: 'Espírito Santo' },
+  { value: 'GO', label: 'Goiás' },
+  { value: 'MA', label: 'Maranhão' },
+  { value: 'MT', label: 'Mato Grosso' },
+  { value: 'MS', label: 'Mato Grosso do Sul' },
+  { value: 'MG', label: 'Minas Gerais' },
+  { value: 'PA', label: 'Pará' },
+  { value: 'PB', label: 'Paraíba' },
+  { value: 'PR', label: 'Paraná' },
+  { value: 'PE', label: 'Pernambuco' },
+  { value: 'PI', label: 'Piauí' },
+  { value: 'RJ', label: 'Rio de Janeiro' },
+  { value: 'RN', label: 'Rio Grande do Norte' },
+  { value: 'RS', label: 'Rio Grande do Sul' },
+  { value: 'RO', label: 'Rondônia' },
+  { value: 'RR', label: 'Roraima' },
+  { value: 'SC', label: 'Santa Catarina' },
+  { value: 'SP', label: 'São Paulo' },
+  { value: 'SE', label: 'Sergipe' },
+  { value: 'TO', label: 'Tocantins' },
+];
+
+const cityCacheKey = (uf: string) => `ibge:cities:${String(uf || '').toUpperCase()}`;
+
+const STORE_SEGMENTS = [
+  { value: 'restaurante', label: 'Restaurante' },
+  { value: 'hamburgueria', label: 'Hamburgueria' },
+  { value: 'lanchonete', label: 'Lanchonete' },
+  { value: 'pizzaria', label: 'Pizzaria' },
+  { value: 'adega', label: 'Adega' },
+  { value: 'mercado', label: 'Mercado' },
+  { value: 'hortifruti', label: 'Hortifruti' },
+  { value: 'farmacia', label: 'Farmácia / Drogaria' },
+  { value: 'confeitaria', label: 'Confeitaria' },
+  { value: 'outros', label: 'Outros' },
+];
+
+const STORE_SEGMENT_PRESETS: Record<string, { primaryColor: string; secondaryColor: string; description: string; orderTypes: string[]; categories: string[] }> = {
+  restaurante: {
+    primaryColor: '#f97316',
+    secondaryColor: '#0f172a',
+    description: 'Pratos frescos e atendimento rápido com pedido online.',
+    orderTypes: ['delivery', 'pickup', 'table'],
+    categories: ['Entradas', 'Pratos', 'Bebidas', 'Sobremesas'],
+  },
+  hamburgueria: {
+    primaryColor: '#ef4444',
+    secondaryColor: '#111827',
+    description: 'Hambúrgueres artesanais e combos para delivery, retirada e mesa.',
+    orderTypes: ['delivery', 'pickup', 'table'],
+    categories: ['Hambúrgueres', 'Combos', 'Porções', 'Bebidas'],
+  },
+  lanchonete: {
+    primaryColor: '#f59e0b',
+    secondaryColor: '#1f2937',
+    description: 'Lanches, salgados e bebidas com operação simples no dia a dia.',
+    orderTypes: ['delivery', 'pickup', 'table'],
+    categories: ['Lanches', 'Salgados', 'Sucos', 'Bebidas'],
+  },
+  pizzaria: {
+    primaryColor: '#dc2626',
+    secondaryColor: '#111827',
+    description: 'Pizzas e porções com vitrine online e fila organizada.',
+    orderTypes: ['delivery', 'pickup', 'table'],
+    categories: ['Pizzas', 'Broto', 'Bordas', 'Bebidas'],
+  },
+  adega: {
+    primaryColor: '#7c3aed',
+    secondaryColor: '#0f172a',
+    description: 'Bebidas geladas e conveniência com pedidos rápidos.',
+    orderTypes: ['delivery', 'pickup'],
+    categories: ['Cervejas', 'Destilados', 'Vinhos', 'Gelo'],
+  },
+  mercado: {
+    primaryColor: '#2563eb',
+    secondaryColor: '#0f172a',
+    description: 'Mercado digital com produtos por categoria e checkout rápido.',
+    orderTypes: ['delivery', 'pickup'],
+    categories: ['Mercearia', 'Higiene', 'Bebidas', 'Limpeza'],
+  },
+  hortifruti: {
+    primaryColor: '#16a34a',
+    secondaryColor: '#14532d',
+    description: 'Frutas, verduras e legumes frescos com pedido online.',
+    orderTypes: ['delivery', 'pickup'],
+    categories: ['Frutas', 'Verduras', 'Legumes', 'Promoções'],
+  },
+  farmacia: {
+    primaryColor: '#0ea5e9',
+    secondaryColor: '#0f172a',
+    description: 'Medicamentos e conveniência com atendimento rápido e seguro.',
+    orderTypes: ['delivery', 'pickup'],
+    categories: ['Medicamentos', 'Higiene', 'Beleza', 'Infantil'],
+  },
+  confeitaria: {
+    primaryColor: '#ec4899',
+    secondaryColor: '#1f2937',
+    description: 'Doces e sobremesas com vitrine digital encantadora.',
+    orderTypes: ['delivery', 'pickup', 'table'],
+    categories: ['Bolos', 'Doces', 'Tortas', 'Bebidas'],
+  },
+  outros: {
+    primaryColor: '#2f9df7',
+    secondaryColor: '#5fd35a',
+    description: 'Loja online com pedidos organizados e experiência moderna.',
+    orderTypes: ['delivery', 'pickup', 'table'],
+    categories: ['Destaques', 'Mais vendidos', 'Promoções', 'Novidades'],
+  },
+};
+
+const extractPhoneParts = (value = '') => {
+  const raw = String(value || '').trim();
+  const digits = raw.replace(/\D/g, '');
+  const hasPrefix = /^\(\d{2}\)/.test(raw);
+  const ddd = hasPrefix ? digits.slice(0, 2) : '';
+  const hasValidDdd = BRAZIL_DDDS.includes(ddd);
+  return {
+    ddd: hasValidDdd ? ddd : '',
+    localNumber: hasValidDdd ? digits.slice(2, 11) : digits.slice(0, 9),
+  };
+};
+
+const formatLocalPhoneNumber = (value = '') => {
+  const digits = value.replace(/\D/g, '').slice(0, 9);
+  if (digits.length <= 4) return digits;
+  if (digits.length <= 8) return `${digits.slice(0, 4)}-${digits.slice(4)}`;
+  return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+};
+>>>>>>> main
 
 export function CreateStore() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const planIdFromUrl = searchParams.get('planId');
+<<<<<<< HEAD
+=======
+  const planFromUrl = String(searchParams.get('plan') || '').toLowerCase();
+  const billingFromUrl = String(searchParams.get('billing') || '').toLowerCase();
+>>>>>>> main
   const [storeError, setStoreError] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
   const [plans, setPlans] = useState([]);
@@ -23,22 +185,47 @@ export function CreateStore() {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [lgpdAccepted, setLgpdAccepted] = useState(false);
   const [pixCopied, setPixCopied] = useState(false);
+<<<<<<< HEAD
+=======
+  const [slugCopied, setSlugCopied] = useState(false);
+>>>>>>> main
   const [showTerms, setShowTerms] = useState(false);
   const [showValidationModal, setShowValidationModal] = useState(false);
   const [validationMessage, setValidationMessage] = useState('');
   const [logoPreviewUrl, setLogoPreviewUrl] = useState('');
+<<<<<<< HEAD
   const [showPassword, setShowPassword] = useState(false);
+=======
+  const [bannerPreviewUrl, setBannerPreviewUrl] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [currentStep, setCurrentStep] = useState(1);
+  const [cepAutofilled, setCepAutofilled] = useState(false);
+  const [cityOptions, setCityOptions] = useState<string[]>([]);
+  const [isLoadingCities, setIsLoadingCities] = useState(false);
+  const [cityLookupError, setCityLookupError] = useState('');
+>>>>>>> main
   const [fieldErrors, setFieldErrors] = useState({
     email: '',
     document: '',
     storeName: '',
   });
+<<<<<<< HEAD
   const platformLogo = '/logo.svg';
+=======
+  const platformLogo = '/janocaminho.jpg';
+>>>>>>> main
   const primaryPalette = [ '#dc2626', '#ea580c', '#f59e0b', '#16a34a', '#0ea5e9', '#2563eb', '#7c3aed' ];
   const secondaryPalette = [ '#111827', '#1f2937', '#334155', '#0f172a', '#0f766e', '#065f46', '#4b5563' ];
   const termsRef = useRef<HTMLDivElement | null>(null);
   const termsCheckboxRef = useRef<HTMLInputElement | null>(null);
   const logoObjectUrlRef = useRef('');
+<<<<<<< HEAD
+=======
+  const bannerObjectUrlRef = useRef('');
+  const personalSectionRef = useRef<HTMLDivElement | null>(null);
+  const addressSectionRef = useRef<HTMLDivElement | null>(null);
+  const storeSectionRef = useRef<HTMLDivElement | null>(null);
+>>>>>>> main
   const [registerForm, setRegisterForm] = useState({
     fullName: '',
     email: '',
@@ -54,11 +241,21 @@ export function CreateStore() {
     city: '',
     state: '',
     storeName: '',
+<<<<<<< HEAD
     storeDescription: '',
     pixKey: '',
     logoFile: '',
     primaryColor: '#b91c1c',
     secondaryColor: '#111827',
+=======
+    segment: 'outros',
+    storeDescription: '',
+    pixKey: '',
+    logoFile: '',
+    bannerFile: '',
+    primaryColor: '#2f9df7',
+    secondaryColor: '#5fd35a',
+>>>>>>> main
     socialLinks: [
       {
         type: 'instagram',
@@ -66,6 +263,11 @@ export function CreateStore() {
       },
     ],
   });
+<<<<<<< HEAD
+=======
+  const storePhoneParts = extractPhoneParts(registerForm.phone || '');
+  const selectedSegmentPreset = STORE_SEGMENT_PRESETS[registerForm.segment] || STORE_SEGMENT_PRESETS.outros;
+>>>>>>> main
 
   const convertFileToBase64 = (file: File) =>
     new Promise<string>((resolve, reject) =>
@@ -122,14 +324,76 @@ export function CreateStore() {
     }
   };
 
+<<<<<<< HEAD
+=======
+  const handleBannerUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    try {
+      if (bannerObjectUrlRef.current) {
+        URL.revokeObjectURL(bannerObjectUrlRef.current);
+      }
+      const nextPreview = URL.createObjectURL(file);
+      bannerObjectUrlRef.current = nextPreview;
+      setBannerPreviewUrl(nextPreview);
+      const base64 = await convertFileToBase64(file);
+      setRegisterForm((prev) => ({ ...prev, bannerFile: base64 }));
+    } catch (error) {
+      console.error('Falha ao processar banner', error);
+      setBannerPreviewUrl('');
+      setStoreError('Não foi possível carregar o banner enviado agora.');
+    }
+  };
+
+  const handleCopyStoreUrl = async () => {
+    const value = `https://www.janocaminho.com.br/${storeSlugPreview || 'sua-loja'}`;
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(value);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = value;
+        textarea.setAttribute('readonly', '');
+        textarea.style.position = 'absolute';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
+      setSlugCopied(true);
+      window.setTimeout(() => setSlugCopied(false), 1800);
+    } catch (error) {
+      console.error('Falha ao copiar URL da loja', error);
+    }
+  };
+
+>>>>>>> main
   useEffect(() => {
     return () => {
       if (logoObjectUrlRef.current) {
         URL.revokeObjectURL(logoObjectUrlRef.current);
       }
+<<<<<<< HEAD
     };
   }, []);
 
+=======
+      if (bannerObjectUrlRef.current) {
+        URL.revokeObjectURL(bannerObjectUrlRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (registerForm.storeDescription) return;
+    setRegisterForm((prev) => ({
+      ...prev,
+      storeDescription: STORE_SEGMENT_PRESETS[prev.segment || 'outros']?.description || '',
+    }));
+  }, [registerForm.storeDescription, registerForm.segment]);
+
+>>>>>>> main
   const updateSocialLink = (index: number, key: 'type' | 'value', value: string) =>
   {
     setRegisterForm((prev) => {
@@ -166,8 +430,19 @@ export function CreateStore() {
     return parts.join(' | ');
   };
 
+<<<<<<< HEAD
   const handleCepLookup = async () => {
     const rawCep = registerForm.cep.replace(/\D/g, '');
+=======
+  const normalizeCep = (input = '') => {
+    const digits = input.toString().replace(/\D/g, '').slice(0, 8);
+    if (digits.length <= 5) return digits;
+    return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+  };
+
+  const handleCepLookup = async (cepValue?: string) => {
+    const rawCep = (cepValue ?? registerForm.cep).replace(/\D/g, '');
+>>>>>>> main
     if (rawCep.length !== 8) return;
     setIsCepLoading(true);
     setCepError('');
@@ -180,12 +455,23 @@ export function CreateStore() {
       }
       setRegisterForm((prev) => ({
         ...prev,
+<<<<<<< HEAD
         street: prev.street || data.logradouro || '',
         neighborhood: prev.neighborhood || data.bairro || '',
         city: prev.city || data.localidade || '',
         state: prev.state || data.uf || '',
         complement: prev.complement || data.complemento || '',
       }));
+=======
+        cep: normalizeCep(rawCep),
+        street: data.logradouro || '',
+        neighborhood: data.bairro || '',
+        city: data.localidade || '',
+        state: String(data.uf || '').toUpperCase(),
+        complement: data.complemento || '',
+      }));
+      setCepAutofilled(true);
+>>>>>>> main
     } catch (error) {
       setCepError('Não foi possível consultar o CEP agora.');
     } finally {
@@ -193,6 +479,48 @@ export function CreateStore() {
     }
   };
 
+<<<<<<< HEAD
+=======
+  const loadCitiesByState = async (ufValue: string) => {
+    const uf = String(ufValue || '').toUpperCase();
+    if (!uf || uf.length !== 2) {
+      setCityOptions([]);
+      return;
+    }
+    setIsLoadingCities(true);
+    setCityLookupError('');
+    try {
+      const cacheKey = cityCacheKey(uf);
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length) {
+          setCityOptions(parsed);
+          setIsLoadingCities(false);
+          return;
+        }
+      }
+      const response = await fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${uf}/municipios`);
+      if (!response.ok) throw new Error('Falha ao carregar cidades.');
+      const data = await response.json();
+      const cities = Array.isArray(data)
+        ? data
+            .map((entry: any) => String(entry?.nome || '').trim())
+            .filter(Boolean)
+            .sort((a: string, b: string) => a.localeCompare(b, 'pt-BR'))
+        : [];
+      setCityOptions(cities);
+      localStorage.setItem(cacheKey, JSON.stringify(cities));
+    } catch (error) {
+      console.error('Falha ao carregar cidades por UF', error);
+      setCityOptions([]);
+      setCityLookupError('Não foi possível carregar as cidades. Você pode preencher manualmente.');
+    } finally {
+      setIsLoadingCities(false);
+    }
+  };
+
+>>>>>>> main
   useEffect(() => {
     const fetchPlans = async () => {
       try {
@@ -205,6 +533,26 @@ export function CreateStore() {
           return;
         }
 
+<<<<<<< HEAD
+=======
+        // Friendly landing params: /create?plan=trial|basic|pro&billing=monthly|yearly
+        if (planFromUrl === 'trial') {
+          setSelectedPlanId('test-plan-7days');
+          return;
+        }
+
+        if ((planFromUrl === 'basic' || planFromUrl === 'pro') && Array.isArray(response) && response.length) {
+          const resolvedBilling = billingFromUrl === 'yearly' ? 'yearly' : 'monthly';
+          const planName = getPlanName(planFromUrl, resolvedBilling);
+          const matchedPlan = response.find((plan) => plan.name === planName);
+          if (matchedPlan?.id) {
+            setSelectedPlanId(matchedPlan.id);
+            setIsAnnual(resolvedBilling === 'yearly');
+            return;
+          }
+        }
+
+>>>>>>> main
         // If the test plan is already selected (default), keep it
         // Otherwise set a default paid plan
         setSelectedPlanId((current) => {
@@ -225,7 +573,21 @@ export function CreateStore() {
     };
 
     fetchPlans();
+<<<<<<< HEAD
   }, [planIdFromUrl]);
+=======
+  }, [planIdFromUrl, planFromUrl, billingFromUrl]);
+
+  useEffect(() => {
+    const uf = String(registerForm.state || '').toUpperCase();
+    if (!uf || uf.length !== 2) {
+      setCityOptions([]);
+      return;
+    }
+    setCityLookupError('');
+    loadCitiesByState(uf);
+  }, [registerForm.state]);
+>>>>>>> main
 
   const billingKey = isAnnual ? 'yearly' : 'monthly';
   const billing = BILLING_OPTIONS[billingKey];
@@ -234,6 +596,16 @@ export function CreateStore() {
     return acc;
   }, {});
 
+<<<<<<< HEAD
+=======
+  const resolveEffectivePlanId = () => {
+    if (selectedPlanId !== 'test-plan-7days') return selectedPlanId;
+    const preferred = plansByName[getPlanName('basic', billingKey)]?.id;
+    const fallback = plans?.[0]?.id;
+    return preferred || fallback || selectedPlanId;
+  };
+
+>>>>>>> main
   useEffect(() => {
     // Don't modify test plan selection
     if (selectedPlanId === 'test-plan-7days') return;
@@ -266,7 +638,11 @@ export function CreateStore() {
     try {
       if (!termsAccepted || !lgpdAccepted) {
         setStoreError('');
+<<<<<<< HEAD
         setValidationMessage('Para continuar, aceite os termos de uso e a politica de privacidade.');
+=======
+        setValidationMessage('Para continuar, aceite os termos de uso e a política de privacidade.');
+>>>>>>> main
         setShowValidationModal(true);
         if (termsRef.current) {
           termsRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -277,6 +653,15 @@ export function CreateStore() {
         return;
       }
       setIsRegistering(true);
+<<<<<<< HEAD
+=======
+      const effectivePlanId = resolveEffectivePlanId();
+      if (effectivePlanId === 'test-plan-7days') {
+        setStoreError('Não foi possível identificar um plano válido. Atualize a página e tente novamente.');
+        return;
+      }
+
+>>>>>>> main
       const payload = {
         user: {
           fullName: registerForm.fullName,
@@ -289,6 +674,7 @@ export function CreateStore() {
         },
         store: {
           name: registerForm.storeName,
+<<<<<<< HEAD
           description: registerForm.storeDescription,
           pixKey: registerForm.pixKey,
           logoFile: registerForm.logoFile,
@@ -297,6 +683,22 @@ export function CreateStore() {
           socialLinks: registerForm.socialLinks.filter((link) => link.value),
         },
         planId: selectedPlanId,
+=======
+          segment: registerForm.segment,
+          description: registerForm.storeDescription,
+          address: formatAddress(),
+          city: registerForm.city,
+          state: registerForm.state,
+          pixKey: registerForm.pixKey,
+          logoFile: registerForm.logoFile,
+          bannerFile: registerForm.bannerFile,
+          primaryColor: registerForm.primaryColor,
+          secondaryColor: registerForm.secondaryColor,
+          socialLinks: registerForm.socialLinks.filter((link) => link.value),
+          orderTypes: selectedSegmentPreset.orderTypes,
+        },
+        planId: effectivePlanId,
+>>>>>>> main
         paymentMethod,
         termsAccepted,
         lgpdAccepted,
@@ -393,6 +795,7 @@ export function CreateStore() {
   };
 
   const storeSlugPreview = slugify(registerForm.storeName || '');
+<<<<<<< HEAD
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -406,12 +809,213 @@ export function CreateStore() {
               <div className="hidden sm:block">
                 <p className="text-lg font-bold text-gray-900">Chama no Espeto</p>
                 <p className="text-sm text-gray-500 text-left">Criar nova loja</p>
+=======
+  const handleStoreSegmentChange = (segment: string) => {
+    const safeSegment = STORE_SEGMENT_PRESETS[segment] ? segment : 'outros';
+    const preset = STORE_SEGMENT_PRESETS[safeSegment];
+    setRegisterForm((prev) => ({
+      ...prev,
+      segment: safeSegment,
+      primaryColor: preset.primaryColor,
+      secondaryColor: preset.secondaryColor,
+      storeDescription:
+        !prev.storeDescription || prev.storeDescription.length < 12
+          ? preset.description
+          : prev.storeDescription,
+    }));
+  };
+
+  const handleCreateStorePhoneLocalChange = (value: string) => {
+    const localDigits = value.replace(/\D/g, '').slice(0, 9);
+    const resolvedDdd = storePhoneParts.ddd;
+    const formatted = localDigits
+      ? resolvedDdd
+        ? formatPhoneInput(localDigits, resolvedDdd)
+        : formatPhoneInput(localDigits)
+      : '';
+    setRegisterForm((prev) => ({ ...prev, phone: formatted }));
+  };
+
+  const handleCreateStorePhoneDddChange = (ddd: string) => {
+    const safeDdd = BRAZIL_DDDS.includes(ddd) ? ddd : '';
+    const localDigits = storePhoneParts.localNumber;
+    const formatted = localDigits
+      ? safeDdd
+        ? formatPhoneInput(localDigits, safeDdd)
+        : formatPhoneInput(localDigits)
+      : safeDdd
+      ? formatPhoneInput('', safeDdd)
+      : '';
+    setRegisterForm((prev) => ({ ...prev, phone: formatted }));
+  };
+
+  const steps = [
+    { id: 1, title: 'Dados pessoais', done: Boolean(registerForm.fullName && registerForm.email && registerForm.phone) },
+    { id: 2, title: 'Endereço', done: Boolean(registerForm.cep && registerForm.city && registerForm.state && registerForm.street && registerForm.number) },
+    { id: 3, title: 'Loja', done: Boolean(registerForm.storeName && registerForm.segment) },
+  ];
+
+  const canAdvanceFromStep = (stepId: number) => {
+    if (stepId === 1) {
+      return Boolean(
+        registerForm.fullName &&
+          registerForm.email &&
+          registerForm.phone &&
+          registerForm.document &&
+          registerForm.password
+      );
+    }
+    if (stepId === 2) {
+      return Boolean(
+        registerForm.cep &&
+          registerForm.city &&
+          registerForm.state &&
+          registerForm.street &&
+          registerForm.number &&
+          registerForm.neighborhood
+      );
+    }
+    return true;
+  };
+
+  const getStepValidationMessage = (stepId: number) => {
+    if (stepId === 1) return 'Preencha os dados pessoais obrigatórios para continuar.';
+    if (stepId === 2) return 'Preencha o endereço completo para continuar.';
+    return 'Confira os dados obrigatórios antes de continuar.';
+  };
+
+  const scrollToStep = (stepId: number) => {
+    if (stepId > currentStep && !canAdvanceFromStep(currentStep)) {
+      setValidationMessage(getStepValidationMessage(currentStep));
+      setShowValidationModal(true);
+      return;
+    }
+    const target =
+      stepId === 1 ? personalSectionRef.current : stepId === 2 ? addressSectionRef.current : storeSectionRef.current;
+    if (!target) return;
+    setCurrentStep(stepId);
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const handleNextStep = () => {
+    if (!canAdvanceFromStep(currentStep)) {
+      setValidationMessage(getStepValidationMessage(currentStep));
+      setShowValidationModal(true);
+      return;
+    }
+    scrollToStep(currentStep + 1);
+  };
+
+  const previewDisplayName = registerForm.storeName.trim() || 'Sua Loja';
+  const previewSlug = storeSlugPreview || 'sua-loja';
+  const previewLogoSrc = logoPreviewUrl || registerForm.logoFile || '';
+  const previewLocation = [registerForm.city, registerForm.state].filter(Boolean).join(' • ') || 'Cidade • UF';
+  const previewBannerStyle = bannerPreviewUrl
+    ? {
+        backgroundImage: `url(${bannerPreviewUrl})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }
+    : {
+        backgroundImage: `linear-gradient(120deg, ${registerForm.primaryColor || '#2f9df7'}, ${registerForm.secondaryColor || '#5fd35a'})`,
+      };
+
+  const previewPanel = (
+    <div className="ds-card-elevated rounded-2xl p-4 space-y-4">
+      <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-600">
+        <GlobeHemisphereWest size={12} weight="duotone" />
+        Pré-visualização
+      </div>
+      <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+        <p className="text-xs text-slate-500 mb-1">Seu site ficará em</p>
+        <div className="flex items-center gap-2">
+          <p className="text-xs font-semibold text-slate-900 break-all flex-1">janocaminho.com.br/{storeSlugPreview || 'sua-loja'}</p>
+          <button
+            type="button"
+            onClick={handleCopyStoreUrl}
+            className="h-7 w-7 rounded-lg border border-slate-200 bg-white text-slate-600 hover:text-slate-900 flex items-center justify-center"
+            aria-label="Copiar URL da loja"
+          >
+            <CopySimple size={14} weight="bold" />
+          </button>
+        </div>
+        {slugCopied && <p className="mt-1 text-[11px] font-semibold text-emerald-600">URL copiada</p>}
+      </div>
+      <div className="space-y-2 text-xs text-slate-600">
+        <p className="inline-flex items-start gap-2">
+          <RocketLaunch className="mt-0.5" size={13} weight="duotone" />
+          Publique sua loja em minutos com link pronto para divulgar.
+        </p>
+        <p className="inline-flex items-start gap-2">
+          <Buildings className="mt-0.5" size={13} weight="duotone" />
+          Painel com vitrine, pedidos e operação no mesmo fluxo.
+        </p>
+        <p className="inline-flex items-start gap-2">
+          <GlobeHemisphereWest className="mt-0.5" size={13} weight="duotone" />
+          Experiência mobile-first para loja e cliente final.
+        </p>
+      </div>
+      <div className="rounded-xl border border-slate-200 bg-white p-3">
+        <p className="text-[11px] font-semibold text-slate-500 mb-2">Como ficará sua loja</p>
+        <div className="overflow-hidden rounded-xl border border-slate-100 bg-slate-50 shadow-[0_12px_28px_-20px_rgba(15,23,42,0.45)]">
+          <div className="relative h-20" style={previewBannerStyle}>
+            <div className="absolute inset-0 bg-black/18" />
+          </div>
+          <div className="relative px-3 pb-3 pt-8">
+            <div className="absolute -top-7 left-3 h-14 w-14 rounded-full border-2 border-white bg-white shadow-md overflow-hidden">
+              {previewLogoSrc ? (
+                <img src={previewLogoSrc} alt={previewDisplayName} className="h-full w-full object-cover" />
+              ) : (
+                <div
+                  className="h-full w-full"
+                  style={{
+                    backgroundImage: `linear-gradient(120deg, ${registerForm.primaryColor || '#2f9df7'}, ${registerForm.secondaryColor || '#5fd35a'})`,
+                  }}
+                />
+              )}
+            </div>
+            <p className="text-[12px] font-black text-slate-800 truncate">{previewDisplayName}</p>
+            <p className="text-[10px] text-slate-500 truncate">{previewLocation}</p>
+            <p className="text-[10px] text-slate-500 truncate">janocaminho.com.br/{previewSlug}</p>
+          </div>
+          <div className="px-3 pb-3">
+            <button
+              type="button"
+              className="mt-1 h-7 w-full rounded-md text-white text-[11px] font-semibold"
+              style={{ backgroundColor: registerForm.primaryColor || '#2f9df7' }}
+            >
+            Ver vitrine
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-[linear-gradient(165deg,#eef6ff_0%,#f8fafc_45%,#ecfeff_100%)]">
+      <header className="sticky top-0 z-50 border-b border-white/60 bg-white/80 backdrop-blur-xl shadow-[0_18px_36px_-28px_rgba(15,23,42,0.5)]">
+        <div className="h-1 bg-[linear-gradient(90deg,#ef4444,#f97316,#f59e0b)]" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between py-3 sm:py-4">
+            <button onClick={() => navigate('/')} className="flex items-center gap-3">
+              <div className="h-11 w-11 rounded-2xl overflow-hidden bg-white shadow-[0_14px_26px_-18px_rgba(239,68,68,0.7)] ring-1 ring-red-200 flex items-center justify-center">
+                <img src={platformLogo} alt="Já no Caminho" className="h-full w-full object-cover" />
+              </div>
+              <div className="hidden sm:block leading-tight">
+                <p className="text-lg font-black text-gray-900">Já no Caminho</p>
+                <p className="text-xs text-gray-500 uppercase tracking-[0.25em] text-left">Criar nova loja</p>
+>>>>>>> main
               </div>
             </button>
 
             <button
               onClick={() => navigate('/')}
+<<<<<<< HEAD
               className="px-3 py-2 sm:px-4 text-sm rounded-lg border-2 border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors"
+=======
+              className="px-3 py-2 sm:px-4 text-sm rounded-full border border-slate-200 text-gray-700 hover:bg-gray-50 transition-colors"
+>>>>>>> main
             >
               Voltar
             </button>
@@ -419,6 +1023,7 @@ export function CreateStore() {
         </div>
       </header>
 
+<<<<<<< HEAD
       <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         <div className="bg-white border border-gray-100 rounded-3xl shadow-xl p-6 sm:p-8">
           <div className="mb-8 text-center">
@@ -427,6 +1032,52 @@ export function CreateStore() {
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Criar minha loja</h1>
             <p className="text-gray-500">Preencha os dados para gerar seu site automaticamente.</p>
+=======
+      <main className="max-w-3xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <div className="min-w-0 rounded-2xl border border-slate-100 bg-white p-6 md:p-10 shadow-sm">
+          <div className="mb-5 flex flex-col items-center text-center gap-3 sm:gap-2">
+            <div className="inline-flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.24em] text-slate-600">
+              <Buildings size={12} weight="duotone" />
+              Criar nova loja
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-black text-gray-900 leading-tight">Criar minha loja</h1>
+            <p className="text-sm sm:text-base text-slate-600">Em 3 etapas você publica seu link e começa a vender.</p>
+          </div>
+
+          <div className="sticky top-[72px] sm:top-[84px] z-20 mb-6 rounded-2xl border border-slate-200 bg-white/95 p-3 sm:p-4 backdrop-blur">
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <p className="text-xs uppercase tracking-[0.22em] font-semibold text-slate-500">Onboarding</p>
+              <span className="text-[11px] text-slate-500 font-semibold">Etapa {currentStep} de 3</span>
+            </div>
+            <div className="flex items-center justify-between w-full relative mb-2">
+              <div className="absolute top-1/2 left-0 w-full h-[2px] bg-slate-100 -z-10 -translate-y-1/2" />
+              {steps.map((step) => (
+                <button
+                  type="button"
+                  key={step.id}
+                  onClick={() => scrollToStep(step.id)}
+                  className="flex flex-col items-center gap-2 bg-white px-2 py-1 transition-all"
+                >
+                  <span
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${
+                      currentStep === step.id || step.done
+                        ? 'bg-slate-900 text-white'
+                        : 'bg-slate-100 text-slate-400'
+                    }`}
+                  >
+                    {step.id}
+                  </span>
+                  <span
+                    className={`text-[11px] uppercase tracking-wider font-bold ${
+                      currentStep === step.id ? 'text-slate-800' : 'text-slate-400'
+                    }`}
+                  >
+                    {step.id === 1 ? 'Dados' : step.id === 2 ? 'Endereço' : 'Loja'}
+                  </span>
+                </button>
+              ))}
+            </div>
+>>>>>>> main
           </div>
 
           {storeError && (
@@ -435,22 +1086,41 @@ export function CreateStore() {
             </div>
           )}
 
+<<<<<<< HEAD
           <form className="space-y-6" onSubmit={handleCreateStore}>
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-gray-800 mb-4">Informações pessoais</h3>
               <div className="space-y-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+=======
+          <form className="space-y-6 pb-24 md:pb-0 [&_label]:text-xs [&_label]:font-bold [&_label]:text-slate-500 [&_label]:uppercase [&_label]:tracking-wider" onSubmit={handleCreateStore}>
+            <div ref={personalSectionRef} className="scroll-mt-36" onFocusCapture={() => setCurrentStep(1)}>
+            <FormSection
+              title="Informações pessoais"
+              subtitle="Dados do responsável pela operação da loja."
+              variant="primary"
+              contentClassName="space-y-4"
+            >
+>>>>>>> main
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-gray-700">Nome completo</label>
                   <input
                     required
                     value={registerForm.fullName}
                     onChange={(e) => setRegisterForm((prev) => ({ ...prev, fullName: e.target.value }))}
+<<<<<<< HEAD
                     className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
+=======
+                    className="ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all"
+>>>>>>> main
                     placeholder="Seu nome completo"
                   />
                 </div>
 
+<<<<<<< HEAD
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+=======
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+>>>>>>> main
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-gray-700">Email</label>
                     <input
@@ -465,19 +1135,28 @@ export function CreateStore() {
                         }
                       }}
                       onBlur={() => updateFieldError('email', validateEmail(registerForm.email))}
+<<<<<<< HEAD
                       className={`w-full border rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors ${
+=======
+                      className={`ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all ${
+>>>>>>> main
                         fieldErrors.email ? 'border-red-400' : 'border-gray-200'
                       }`}
                       placeholder="seu@email.com"
                     />
                     {fieldErrors.email ? (
+<<<<<<< HEAD
                       <p className="text-xs text-red-600">{fieldErrors.email}</p>
+=======
+                      <p className="ds-field-error">{fieldErrors.email}</p>
+>>>>>>> main
                     ) : (
                     <p className="text-xs text-gray-500">Cada e-mail pode ter apenas uma conta.</p>
                     )}
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-gray-700">Telefone</label>
+<<<<<<< HEAD
                     <input
                       value={registerForm.phone}
                       onChange={(e) => setRegisterForm((prev) => ({ ...prev, phone: e.target.value }))}
@@ -491,6 +1170,38 @@ export function CreateStore() {
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-gray-700">Documento</label>
                     <div className="flex gap-2">
+=======
+                    <div className="grid grid-cols-1 sm:grid-cols-[120px_1fr] gap-2 min-w-0">
+                      <select
+                        value={storePhoneParts.ddd || ''}
+                        onChange={(e) => handleCreateStorePhoneDddChange(e.target.value)}
+                        className="ds-select ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all w-full min-w-0 text-sm font-semibold"
+                      >
+                        <option value="" disabled>
+                          DDD
+                        </option>
+                        {BRAZIL_DDDS.map((ddd) => (
+                          <option key={ddd} value={ddd}>
+                            {ddd}
+                          </option>
+                        ))}
+                      </select>
+                      <input
+                        value={formatLocalPhoneNumber(storePhoneParts.localNumber)}
+                        onChange={(e) => handleCreateStorePhoneLocalChange(e.target.value)}
+                        placeholder={storePhoneParts.ddd ? '99999-9999' : 'Selecione o DDD'}
+                        disabled={!storePhoneParts.ddd}
+                        className="ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all w-full min-w-0 disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700">Documento</label>
+                    <div className="grid grid-cols-[92px_1fr] gap-2 min-w-0">
+>>>>>>> main
                       <select
                         value={registerForm.documentType}
                         onChange={(e) => {
@@ -500,7 +1211,11 @@ export function CreateStore() {
                             updateFieldError('document', validateDocument(registerForm.document, nextType));
                           }
                         }}
+<<<<<<< HEAD
                         className="border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500"
+=======
+                        className="ds-select ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all min-w-0 text-sm"
+>>>>>>> main
                       >
                         <option value="CPF">CPF</option>
                         <option value="CNPJ">CNPJ</option>
@@ -516,14 +1231,22 @@ export function CreateStore() {
                           }
                         }}
                         onBlur={() => updateFieldError('document', validateDocument(registerForm.document, registerForm.documentType))}
+<<<<<<< HEAD
                         className={`flex-1 border rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors ${
+=======
+                        className={`ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all min-w-0 ${
+>>>>>>> main
                           fieldErrors.document ? 'border-red-400' : 'border-gray-200'
                         }`}
                         placeholder={registerForm.documentType === 'CNPJ' ? '00.000.000/0000-00' : '000.000.000-00'}
                       />
                     </div>
                     {fieldErrors.document && (
+<<<<<<< HEAD
                       <p className="text-xs text-red-600">{fieldErrors.document}</p>
+=======
+                      <p className="ds-field-error">{fieldErrors.document}</p>
+>>>>>>> main
                     )}
                   </div>
                   <div className="space-y-2">
@@ -534,7 +1257,11 @@ export function CreateStore() {
                         type={showPassword ? 'text' : 'password'}
                         value={registerForm.password}
                         onChange={(e) => setRegisterForm((prev) => ({ ...prev, password: e.target.value }))}
+<<<<<<< HEAD
                         className="w-full border border-gray-200 rounded-xl p-3 pr-10 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
+=======
+                        className="ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all w-full pr-10"
+>>>>>>> main
                         placeholder="Mínimo 6 caracteres"
                       />
                       <button
@@ -557,23 +1284,43 @@ export function CreateStore() {
                   </div>
                 </div>
 
+<<<<<<< HEAD
                 <div className="pt-4 border-t border-gray-200">
                   <h4 className="text-sm font-semibold text-gray-700 mb-3">Endereço</h4>
                   <div className="space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                       <div className="sm:col-span-2 space-y-2">
+=======
+                <div ref={addressSectionRef} className="pt-4 border-t border-gray-200 scroll-mt-36" onFocusCapture={() => setCurrentStep(2)}>
+                  <h4 className="text-sm font-semibold text-gray-700">Endereço</h4>
+                  <p className="text-xs text-slate-500 mb-3">Onde sua loja opera e recebe pedidos.</p>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 min-w-0">
+                      <div className="space-y-2 min-w-0">
+>>>>>>> main
                         <label className="text-sm font-semibold text-gray-700">CEP</label>
                         <input
                           required
                           value={registerForm.cep}
+<<<<<<< HEAD
                           onChange={(e) => setRegisterForm((prev) => ({ ...prev, cep: e.target.value }))}
                           onBlur={handleCepLookup}
                           disabled={isCepLoading}
                           className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
+=======
+                          onChange={(e) => {
+                            setCepAutofilled(false);
+                            setRegisterForm((prev) => ({ ...prev, cep: normalizeCep(e.target.value) }));
+                          }}
+                          onBlur={(e) => handleCepLookup(e.target.value)}
+                          disabled={isCepLoading}
+                          className="ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all min-w-0 disabled:bg-gray-100 disabled:cursor-not-allowed"
+>>>>>>> main
                           placeholder="00000-000"
                         />
                         <button
                           type="button"
+<<<<<<< HEAD
                           onClick={handleCepLookup}
                           disabled={isCepLoading}
                           className="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
@@ -608,10 +1355,91 @@ export function CreateStore() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
+=======
+                          onClick={() => handleCepLookup(registerForm.cep)}
+                          disabled={isCepLoading}
+                          className="w-full ds-btn ds-btn-secondary ds-focus-ring px-3 py-2 text-sm text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2"
+                        >
+                          {isCepLoading ? (
+                            <>
+                              <span className="h-4 w-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
+                              Buscando...
+                            </>
+                          ) : (
+                            'Buscar CEP'
+                          )}
+                        </button>
+                        {cepError && <p className="ds-field-error">{cepError}</p>}
+                      </div>
+                      <div className="space-y-2 min-w-0">
+                        <label className="text-sm font-semibold text-gray-700">UF</label>
+                        <select
+                          required
+                          value={registerForm.state}
+                          onChange={(e) =>
+                            setRegisterForm((prev) => ({
+                              ...prev,
+                              state: String(e.target.value || '').toUpperCase(),
+                              city: '',
+                            }))
+                          }
+                          disabled={isCepLoading}
+                          className="ds-select ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all min-w-0 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                        >
+                          <option value="">Selecione</option>
+                          {BRAZIL_STATES.map((uf) => (
+                            <option key={uf.value} value={uf.value}>
+                              {uf.value} · {uf.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="space-y-2 min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <label className="text-sm font-semibold text-gray-700">Cidade</label>
+                          {cepAutofilled && (
+                            <span className="text-[10px] font-semibold rounded-full px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200">
+                              Preenchido via CEP
+                            </span>
+                          )}
+                        </div>
+                        <input
+                          required
+                          list={registerForm.state ? `cities-${registerForm.state}` : undefined}
+                          value={registerForm.city}
+                          onChange={(e) => {
+                            setCepAutofilled(false);
+                            setRegisterForm((prev) => ({ ...prev, city: e.target.value }));
+                          }}
+                          disabled={isCepLoading}
+                          className="ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all min-w-0 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          placeholder={isLoadingCities ? 'Carregando cidades...' : 'Digite ou selecione a cidade'}
+                        />
+                        {registerForm.state && cityOptions.length > 0 && (
+                          <datalist id={`cities-${registerForm.state}`}>
+                            {cityOptions.map((city) => (
+                              <option key={city} value={city} />
+                            ))}
+                          </datalist>
+                        )}
+                        {isLoadingCities && (
+                          <p className="text-xs text-slate-500 inline-flex items-center gap-1.5">
+                            <span className="h-3.5 w-3.5 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
+                            Carregando cidades...
+                          </p>
+                        )}
+                        {cityLookupError && <p className="text-xs text-amber-700">{cityLookupError}</p>}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-w-0">
+                      <div className="space-y-2 min-w-0">
+>>>>>>> main
                         <label className="text-sm font-semibold text-gray-700">Rua / Avenida</label>
                         <input
                           required
                           value={registerForm.street}
+<<<<<<< HEAD
                           onChange={(e) => setRegisterForm((prev) => ({ ...prev, street: e.target.value }))}
                           disabled={isCepLoading}
                           className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
@@ -619,49 +1447,100 @@ export function CreateStore() {
                         />
                       </div>
                       <div className="space-y-2">
+=======
+                          onChange={(e) => {
+                            setCepAutofilled(false);
+                            setRegisterForm((prev) => ({ ...prev, street: e.target.value }));
+                          }}
+                          disabled={isCepLoading}
+                          className="ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all min-w-0 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          placeholder="Nome da rua"
+                        />
+                      </div>
+                      <div className="space-y-2 min-w-0">
+>>>>>>> main
                         <label className="text-sm font-semibold text-gray-700">Bairro</label>
                         <input
                           required
                           value={registerForm.neighborhood}
+<<<<<<< HEAD
                           onChange={(e) => setRegisterForm((prev) => ({ ...prev, neighborhood: e.target.value }))}
                           disabled={isCepLoading}
                           className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
+=======
+                          onChange={(e) => {
+                            setCepAutofilled(false);
+                            setRegisterForm((prev) => ({ ...prev, neighborhood: e.target.value }));
+                          }}
+                          disabled={isCepLoading}
+                          className="ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all min-w-0 disabled:bg-gray-100 disabled:cursor-not-allowed"
+>>>>>>> main
                           placeholder="Bairro"
                         />
                       </div>
                     </div>
 
+<<<<<<< HEAD
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-2">
+=======
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-w-0">
+                      <div className="space-y-2 min-w-0">
+>>>>>>> main
                         <label className="text-sm font-semibold text-gray-700">Número</label>
                         <input
                           required
                           value={registerForm.number}
                           onChange={(e) => setRegisterForm((prev) => ({ ...prev, number: e.target.value }))}
                           disabled={isCepLoading}
+<<<<<<< HEAD
                           className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
                           placeholder="123"
                         />
                       </div>
                       <div className="space-y-2">
+=======
+                          className="ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all min-w-0 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                          placeholder="123"
+                        />
+                      </div>
+                      <div className="space-y-2 min-w-0">
+>>>>>>> main
                         <label className="text-sm font-semibold text-gray-700">Complemento</label>
                         <input
                           value={registerForm.complement}
                           onChange={(e) => setRegisterForm((prev) => ({ ...prev, complement: e.target.value }))}
                           disabled={isCepLoading}
+<<<<<<< HEAD
                           className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
+=======
+                          className="ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all min-w-0 disabled:bg-gray-100 disabled:cursor-not-allowed"
+>>>>>>> main
                           placeholder="Apto, sala, bloco (opcional)"
                         />
                       </div>
                     </div>
                   </div>
                 </div>
+<<<<<<< HEAD
               </div>
             </div>
 
             <div className="pt-6 border-t border-gray-100">
               <h3 className="text-lg font-semibold text-gray-800 mb-4">Configurações da loja</h3>
               <div className="space-y-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+=======
+            </FormSection>
+            </div>
+
+            <div ref={storeSectionRef} className="pt-6 border-t border-gray-100 scroll-mt-36" onFocusCapture={() => setCurrentStep(3)}>
+              <FormSection
+                title="Configurações da loja"
+                subtitle="Defina identidade, segmento e canais de contato."
+                variant="warning"
+                contentClassName="space-y-4"
+              >
+>>>>>>> main
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-700">Nome da loja</label>
               <input
@@ -675,6 +1554,7 @@ export function CreateStore() {
                   }
                 }}
                 onBlur={() => updateFieldError('storeName', validateStoreName(registerForm.storeName))}
+<<<<<<< HEAD
                 className={`w-full border rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors ${
                   fieldErrors.storeName ? 'border-red-400' : 'border-gray-200'
                 }`}
@@ -688,6 +1568,32 @@ export function CreateStore() {
               </div>
               <p className="text-xs text-gray-500">
                 Se ja existir uma loja com esse nome, o sistema adiciona um sufixo (ex.: {storeSlugPreview || 'sua-loja'}-2).
+=======
+                className={`ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all ${
+                  fieldErrors.storeName ? 'border-red-400' : 'border-gray-200'
+                }`}
+                placeholder="Nome da sua loja"
+              />
+              {fieldErrors.storeName && (
+                <p className="ds-field-error">{fieldErrors.storeName}</p>
+              )}
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs text-gray-500">URL da loja:</span>
+                <span className="inline-flex max-w-full items-center rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700">
+                  www.janocaminho.com.br/{storeSlugPreview || 'sua-loja'}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleCopyStoreUrl}
+                  className="h-7 w-7 rounded-lg border border-slate-200 bg-white text-slate-600 hover:text-slate-900 flex items-center justify-center"
+                  aria-label="Copiar URL da loja"
+                >
+                  <CopySimple size={14} weight="bold" />
+                </button>
+              </div>
+              <p className="text-xs text-gray-500">
+                Se já existir uma loja com esse nome, o sistema adiciona um sufixo (ex.: {storeSlugPreview || 'sua-loja'}-2).
+>>>>>>> main
               </p>
             </div>
 
@@ -696,7 +1602,11 @@ export function CreateStore() {
               <textarea
                 value={registerForm.storeDescription}
                 onChange={(e) => setRegisterForm((prev) => ({ ...prev, storeDescription: e.target.value }))}
+<<<<<<< HEAD
                 className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors min-h-[110px]"
+=======
+                className="ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all min-h-[110px]"
+>>>>>>> main
                 placeholder="Conte em poucas palavras o que torna sua loja especial."
                 maxLength={220}
               />
@@ -707,6 +1617,33 @@ export function CreateStore() {
             </div>
 
             <div className="space-y-2">
+<<<<<<< HEAD
+=======
+              <label className="text-sm font-semibold text-gray-700">Ramo da loja</label>
+              <select
+                value={registerForm.segment}
+                onChange={(e) => handleStoreSegmentChange(e.target.value)}
+                className="ds-select ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all"
+              >
+                {STORE_SEGMENTS.map((segment) => (
+                  <option key={segment.value} value={segment.value}>
+                    {segment.label}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-gray-500">
+                Aplicamos presets de cores, descrição e tipo de pedido para acelerar o setup.
+              </p>
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Sugestões de categorias</p>
+                <p className="mt-1 text-xs text-slate-700">
+                  {selectedSegmentPreset.categories.join(' • ')}
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+>>>>>>> main
               <div className="flex items-center justify-between">
                 <label className="text-sm font-semibold text-gray-700">Chave Pix da loja</label>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700 border border-amber-200">
@@ -716,8 +1653,13 @@ export function CreateStore() {
               <input
                 value={registerForm.pixKey}
                 onChange={(e) => setRegisterForm((prev) => ({ ...prev, pixKey: e.target.value }))}
+<<<<<<< HEAD
                 className="w-full border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
                 placeholder="Ex: 012999999999 ou email@pix.com"
+=======
+                className="ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all"
+                placeholder="012999999999 ou email@pix.com"
+>>>>>>> main
               />
               <p className="text-xs text-gray-500">Telefone com DDD pode começar com 0 que ajustamos para +55.</p>
             </div>
@@ -752,6 +1694,27 @@ export function CreateStore() {
               </div>
             </div>
 
+<<<<<<< HEAD
+=======
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700 block">Banner da loja (opcional)</label>
+              <div className="flex items-start gap-4">
+                <label className="flex-1 cursor-pointer">
+                  <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 hover:border-red-400 transition-colors text-center">
+                    <p className="text-sm text-gray-600 mb-1">Clique para enviar</p>
+                    <p className="text-xs text-gray-500">Imagem horizontal para destaque da vitrine</p>
+                  </div>
+                  <input type="file" accept="image/*" onChange={handleBannerUpload} className="hidden" />
+                </label>
+                {bannerPreviewUrl && (
+                  <div className="w-28 h-20 rounded-xl overflow-hidden border-2 border-gray-200 flex-shrink-0">
+                    <img src={bannerPreviewUrl} alt="Pré-visualização do banner" className="w-full h-full object-cover" />
+                  </div>
+                )}
+              </div>
+            </div>
+
+>>>>>>> main
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-gray-700 block">Cor principal</label>
@@ -767,7 +1730,11 @@ export function CreateStore() {
                       key={color}
                       type="button"
                       onClick={() => setRegisterForm((prev) => ({ ...prev, primaryColor: color }))}
+<<<<<<< HEAD
                       className={`w-8 h-8 rounded-full border-2 transition-all ${registerForm.primaryColor === color ? 'border-gray-900 scale-110' : 'border-gray-200 hover:scale-105'}`}
+=======
+                      className={`w-8 h-8 rounded-full border-2 transition-all ${registerForm.primaryColor === color ? 'border-gray-900 scale-110 ring-2 ring-offset-2 ring-slate-400' : 'border-gray-200 hover:scale-105'}`}
+>>>>>>> main
                       style={{ backgroundColor: color }}
                       aria-label={`Selecionar cor ${color}`}
                     />
@@ -790,7 +1757,11 @@ export function CreateStore() {
                       key={color}
                       type="button"
                       onClick={() => setRegisterForm((prev) => ({ ...prev, secondaryColor: color }))}
+<<<<<<< HEAD
                       className={`w-8 h-8 rounded-full border-2 transition-all ${registerForm.secondaryColor === color ? 'border-gray-900 scale-110' : 'border-gray-200 hover:scale-105'}`}
+=======
+                      className={`w-8 h-8 rounded-full border-2 transition-all ${registerForm.secondaryColor === color ? 'border-gray-900 scale-110 ring-2 ring-offset-2 ring-slate-400' : 'border-gray-200 hover:scale-105'}`}
+>>>>>>> main
                       style={{ backgroundColor: color }}
                       aria-label={`Selecionar cor ${color}`}
                     />
@@ -808,7 +1779,11 @@ export function CreateStore() {
                           <select
                             value={link.type}
                             onChange={(e) => updateSocialLink(index, 'type', e.target.value)}
+<<<<<<< HEAD
                             className="border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500"
+=======
+                            className="ds-select ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all min-w-[132px] text-sm"
+>>>>>>> main
                           >
                             <option value="instagram">Instagram</option>
                             <option value="facebook">Facebook</option>
@@ -817,7 +1792,11 @@ export function CreateStore() {
                           <input
                             value={link.value}
                             onChange={(e) => updateSocialLink(index, 'value', e.target.value)}
+<<<<<<< HEAD
                             className="flex-1 border border-gray-200 rounded-xl p-3 focus:ring-2 focus:ring-red-500 focus:border-red-500 focus:outline-none transition-colors"
+=======
+                            className="ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all min-w-0 flex-1"
+>>>>>>> main
                             placeholder="@usuário ou URL"
                           />
                           {registerForm.socialLinks.length > 1 && (
@@ -841,6 +1820,7 @@ export function CreateStore() {
                     </div>
                     <p className="text-xs text-gray-500">Informe apenas as redes que quiser destacar.</p>
                   </div>
+<<<<<<< HEAD
               </div>
             </div>
 
@@ -855,6 +1835,23 @@ export function CreateStore() {
                 Comece pelo teste gratuito e escolha o plano ideal depois.
               </p>
               <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm space-y-6">
+=======
+              </FormSection>
+            </div>
+
+            <div className="pt-6 border-t border-gray-100">
+              <FormSection
+                title="Selecione um plano"
+                subtitle="Comece pelo teste gratuito e escolha o plano ideal depois."
+                variant="success"
+                contentClassName="space-y-6"
+                actions={
+                  <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
+                    7 dias grátis
+                  </span>
+                }
+              >
+>>>>>>> main
               <div className="flex items-center justify-center gap-4 mb-6">
                 <span className={`text-sm font-semibold ${!isAnnual ? 'text-gray-900' : 'text-gray-500'}`}>
                   Mensal
@@ -877,6 +1874,7 @@ export function CreateStore() {
                 ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
                 : 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500'
                 }`}>
+<<<<<<< HEAD
                 Economize até 25%
               </span>
               </div>
@@ -899,12 +1897,47 @@ export function CreateStore() {
                     <li>✓ Loja ativa por 7 dias</li>
                     <li>✓ Acesso ao painel completo</li>
                     <li>✓ Pode renovar quando quiser</li>
+=======
+                Economize 15%
+              </span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedPlanId('test-plan-7days')}
+                    className={`border-2 rounded-2xl p-4 text-left transition-all relative cursor-pointer ${selectedPlanId === 'test-plan-7days'
+                    ? 'border-2 border-slate-900 shadow-md bg-white'
+                    : 'border border-slate-200 opacity-80 hover:opacity-100'
+                  }`}
+                >
+                  <span className="absolute -top-3 left-4 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm">
+                    7 DIAS GRATIS
+                  </span>
+                  <p className="text-sm uppercase font-semibold text-amber-700">Trial completo</p>
+                  <p className="text-2xl font-bold text-gray-900">Sem cartão</p>
+                  <p className="text-xs text-gray-500">No trial você usa todos os recursos do plano Pro por 7 dias.</p>
+                  <ul className="mt-3 text-xs text-gray-600 space-y-1">
+                    <li>✓ Loja ativa por 7 dias</li>
+                    <li>✓ Recursos Pro liberados</li>
+                    <li>✓ Escolha o plano depois</li>
+>>>>>>> main
                   </ul>
                 </button>
                 {PLAN_TIERS.map((tier) => {
                   const planKey = getPlanName(tier.key, billingKey);
                   const plan = plansByName[planKey];
+<<<<<<< HEAD
                   const price = plan ? Number(plan.price) : billing.priceByTier[tier.key];
+=======
+                  const full = plan ? Number(plan.price) : billing.priceByTier[tier.key];
+                  const promoFromApi = plan?.promoPrice != null ? Number(plan.promoPrice) : null;
+                  const promo = billingKey === 'yearly'
+                    ? (promoFromApi != null && promoFromApi > 0 && promoFromApi < full ? promoFromApi : resolveAnnualPromoTotal(full))
+                    : promoFromApi;
+                  const showPromo = billingKey === 'yearly' && promo != null && promo > 0 && promo < full;
+                  const displayPrice = billingKey === 'yearly' ? (showPromo ? promo : full) : full;
+                  const monthlyEq = billingKey === 'yearly' ? resolveMonthlyEquivalent(displayPrice) : null;
+>>>>>>> main
                   const durationLabel = plan
                     ? `${plan.durationDays} dias de acesso`
                     : billingKey === 'yearly'
@@ -918,6 +1951,7 @@ export function CreateStore() {
                     key={planKey}
                     onClick={() => plan?.id && setSelectedPlanId(plan.id)}
                     disabled={isDisabled}
+<<<<<<< HEAD
                     className={`cursor-pointer border rounded-2xl p-4 text-left transition-all relative ${isSelected
                       ? 'border-red-500 shadow-lg bg-red-50'
                       : 'border-gray-200 hover:border-red-200'
@@ -926,6 +1960,25 @@ export function CreateStore() {
                     <p className="text-sm uppercase font-semibold text-gray-500">{tier.label}</p>
                     <p className="text-2xl font-bold text-gray-900">R$ {Number(price).toFixed(2)}</p>
                     <p className="text-xs text-gray-500">{billing.period}</p>
+=======
+                    className={`cursor-pointer rounded-2xl p-4 text-left transition-all relative ${isSelected
+                      ? 'border-2 border-slate-900 shadow-md bg-white'
+                      : 'border border-slate-200 opacity-80 hover:opacity-100'
+                      } ${isDisabled ? 'opacity-60 cursor-not-allowed' : ''}`}
+                  >
+                    <p className="text-sm uppercase font-semibold text-gray-500">{tier.label}</p>
+                    {showPromo ? (
+                      <div className="mt-1">
+                        <p className="text-xs text-gray-400 line-through">R$ {Number(full).toFixed(2)}</p>
+                        <p className="text-2xl font-bold text-gray-900">R$ {Number(displayPrice).toFixed(2)}</p>
+                      </div>
+                    ) : (
+                      <p className="text-2xl font-bold text-gray-900">R$ {Number(displayPrice).toFixed(2)}</p>
+                    )}
+                    <p className="text-xs text-gray-500">
+                      {billingKey === 'yearly' ? `${billing.period} (R$ ${Number(monthlyEq || 0).toFixed(2)}/mês)` : billing.period}
+                    </p>
+>>>>>>> main
                     <p className="text-xs text-gray-500 mt-1">{durationLabel}</p>
                     <ul className="mt-3 text-xs text-gray-600 space-y-1">
                       {tier.features.map((feature) => (
@@ -933,7 +1986,11 @@ export function CreateStore() {
                       ))}
                     </ul>
                     {tier.popular && (
+<<<<<<< HEAD
                       <span className="absolute -top-3 left-13 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+=======
+                      <span className="absolute -top-3 left-4 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm">
+>>>>>>> main
                         MAIS POPULAR
                       </span>
                     )}
@@ -942,6 +1999,12 @@ export function CreateStore() {
                 })}
                 {!plans.length && <p className="text-sm text-gray-500">Carregando planos disponíveis...</p>}
               </div>
+<<<<<<< HEAD
+=======
+              <p className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-xl px-3 py-2">
+                Durante o trial, sua loja fica com recursos Pro liberados. Após o período, você pode manter no Basic ou trocar para Pro.
+              </p>
+>>>>>>> main
 
               {selectedPlanId !== 'test-plan-7days' && (
                 <div className="mt-6">
@@ -952,7 +2015,11 @@ export function CreateStore() {
                       onClick={() => setPaymentMethod('PIX')}
                       className={`rounded-2xl px-4 py-3 text-left transition-all border active:scale-[0.98] ${
                         paymentMethod === 'PIX'
+<<<<<<< HEAD
                           ? 'border-brand-primary bg-gradient-to-br from-brand-primary/15 via-white to-white text-brand-primary shadow-lg ring-2 ring-brand-primary/30'
+=======
+                          ? 'border-2 border-slate-900 bg-white text-slate-900 shadow-md'
+>>>>>>> main
                           : 'border-gray-200 text-gray-600 bg-white/80 hover:border-brand-primary/40 hover:shadow-sm'
                       }`}
                     >
@@ -970,7 +2037,11 @@ export function CreateStore() {
                       onClick={() => setPaymentMethod('CREDIT_CARD')}
                       className={`rounded-2xl px-4 py-3 text-left transition-all border active:scale-[0.98] ${
                         paymentMethod === 'CREDIT_CARD'
+<<<<<<< HEAD
                           ? 'border-brand-primary bg-gradient-to-br from-brand-primary/15 via-white to-white text-brand-primary shadow-lg ring-2 ring-brand-primary/30'
+=======
+                          ? 'border-2 border-slate-900 bg-white text-slate-900 shadow-md'
+>>>>>>> main
                           : 'border-gray-200 text-gray-600 bg-white/80 hover:border-brand-primary/40 hover:shadow-sm'
                       }`}
                     >
@@ -988,7 +2059,11 @@ export function CreateStore() {
                       onClick={() => setPaymentMethod('BOLETO')}
                       className={`rounded-2xl px-4 py-3 text-left transition-all border active:scale-[0.98] ${
                         paymentMethod === 'BOLETO'
+<<<<<<< HEAD
                           ? 'border-brand-primary bg-gradient-to-br from-brand-primary/15 via-white to-white text-brand-primary shadow-lg ring-2 ring-brand-primary/30'
+=======
+                          ? 'border-2 border-slate-900 bg-white text-slate-900 shadow-md'
+>>>>>>> main
                           : 'border-gray-200 text-gray-600 bg-white/80 hover:border-brand-primary/40 hover:shadow-sm'
                       }`}
                     >
@@ -997,7 +2072,11 @@ export function CreateStore() {
                   </div>
                 </div>
               )}
+<<<<<<< HEAD
               </div>
+=======
+              </FormSection>
+>>>>>>> main
             </div>
 
             <div ref={termsRef} className="pt-6 border-t border-gray-100 space-y-3">
@@ -1033,15 +2112,22 @@ export function CreateStore() {
                   <button
                     type="button"
                     onClick={() => setShowTerms(true)}
+<<<<<<< HEAD
                     className="text-red-500 font-semibold hover:underline"
                   >
                     politica de privacidade
+=======
+                  className="text-red-500 font-semibold hover:underline"
+                >
+                    política de privacidade
+>>>>>>> main
                   </button>
                   .
                 </span>
               </label>
             </div>
 
+<<<<<<< HEAD
             <button
               type="submit"
               disabled={isRegistering}
@@ -1056,6 +2142,50 @@ export function CreateStore() {
                 '🚀 Criar minha loja agora'
               )}
             </button>
+=======
+            <div className="fixed bottom-0 left-0 w-full z-50 rounded-none border-t border-slate-200 bg-white/90 backdrop-blur-md p-4 shadow-[0_-10px_26px_-20px_rgba(15,23,42,0.45)] md:static md:rounded-2xl md:border md:border-slate-200/90 md:p-3 md:shadow-[0_24px_46px_-30px_rgba(15,23,42,0.55)]">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
+                <div className="text-[11px] text-slate-500">
+                  Etapa atual <span className="font-semibold text-slate-700">{currentStep} de 3</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => scrollToStep(Math.max(1, currentStep - 1))}
+                    disabled={currentStep === 1}
+                    className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Voltar
+                  </button>
+                  {currentStep < 3 ? (
+                    <button
+                      type="button"
+                      onClick={handleNextStep}
+                      disabled={!canAdvanceFromStep(currentStep)}
+                      className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white hover:bg-slate-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Próximo
+                    </button>
+                  ) : (
+                    <button
+                      type="submit"
+                      disabled={isRegistering}
+                      className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white hover:bg-slate-800 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                      {isRegistering ? (
+                        <span className="inline-flex items-center justify-center gap-2">
+                          <span className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          Criando loja...
+                        </span>
+                      ) : (
+                        'Criar minha loja'
+                      )}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+>>>>>>> main
 
             {paymentResult && (
               <div className="mt-6 bg-green-50 border border-green-100 rounded-2xl p-4 space-y-2">
@@ -1101,7 +2231,11 @@ export function CreateStore() {
                           onClick={() => handleCopyPix(paymentResult.payment.qrCodeText)}
                           className="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:opacity-90"
                         >
+<<<<<<< HEAD
                           {pixCopied ? 'Copiado!' : 'Copiar codigo'}
+=======
+                          {pixCopied ? 'Copiado!' : 'Copiar código'}
+>>>>>>> main
                         </button>
                       </div>
                     )}
@@ -1141,11 +2275,19 @@ export function CreateStore() {
             <div className="px-6 py-5 border-b border-slate-200 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
+<<<<<<< HEAD
                   <img src={platformLogo} alt="Chama no Espeto" className="w-full h-full object-cover" />
                 </div>
                 <div>
                   <p className="text-lg font-bold text-slate-900">Termos de uso</p>
                   <p className="text-xs text-slate-500">LGPD e politica de privacidade</p>
+=======
+                  <img src={platformLogo} alt="Já no Caminho" className="w-full h-full object-cover" />
+                </div>
+                <div>
+                  <p className="text-lg font-bold text-slate-900">Termos de uso</p>
+                  <p className="text-xs text-slate-500">LGPD e política de privacidade</p>
+>>>>>>> main
                 </div>
               </div>
               <button
@@ -1160,7 +2302,11 @@ export function CreateStore() {
               <section className="space-y-2">
                 <h3 className="text-base font-semibold text-slate-900">1. Plataforma e finalidade</h3>
                 <p>
+<<<<<<< HEAD
                   A plataforma Chama no Espeto fornece ferramentas para criar, publicar e gerir lojas digitais.
+=======
+                  A plataforma Já no Caminho fornece ferramentas para criar, publicar e gerir lojas digitais.
+>>>>>>> main
                   O usuário é responsável pelo conteúdo, preços, ofertas e atendimento.
                 </p>
               </section>
@@ -1175,20 +2321,32 @@ export function CreateStore() {
                 <h3 className="text-base font-semibold text-slate-900">3. Pagamentos e acesso</h3>
                 <p>
                   A ativação completa depende da confirmação do pagamento do plano escolhido. Boletos podem
+<<<<<<< HEAD
                   levar ate 3 dias uteis para compensar.
+=======
+                  levar até 3 dias úteis para compensar.
+>>>>>>> main
                 </p>
               </section>
               <section className="space-y-2">
                 <h3 className="text-base font-semibold text-slate-900">4. LGPD e privacidade</h3>
                 <p>
                   Os dados pessoais são tratados para cadastro, autenticação, cobrança e suporte, conforme a
+<<<<<<< HEAD
                   LGPD. O usuário pode solicitar atualização ou exclusão quando aplicavel.
+=======
+                  LGPD. O usuário pode solicitar atualização ou exclusão quando aplicável.
+>>>>>>> main
                 </p>
               </section>
               <section className="space-y-2">
                 <h3 className="text-base font-semibold text-slate-900">5. Uso adequado</h3>
                 <p>
+<<<<<<< HEAD
                   E proibido utilizar a plataforma para fins ilegais ou fraudulentos. Contas em desacordo
+=======
+                  É proibido utilizar a plataforma para fins ilegais ou fraudulentos. Contas em desacordo
+>>>>>>> main
                   podem ser suspensas.
                 </p>
               </section>
@@ -1218,7 +2376,11 @@ export function CreateStore() {
               </div>
             </div>
             <div className="px-5 py-4 text-sm text-slate-600">
+<<<<<<< HEAD
               {validationMessage || 'Confira os campos obrigatorios antes de continuar.'}
+=======
+              {validationMessage || 'Confira os campos obrigatórios antes de continuar.'}
+>>>>>>> main
             </div>
             <div className="px-5 py-4 border-t border-slate-200 bg-slate-50 flex justify-end">
               <button
@@ -1235,3 +2397,8 @@ export function CreateStore() {
     </div>
   );
 }
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> main

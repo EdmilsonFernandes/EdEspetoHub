@@ -123,6 +123,26 @@ export class ProductRepository
 
 
   /**
+<<<<<<< HEAD
+=======
+   * Finds active by store id.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-23
+   */
+  findActiveByStoreId(storeId: string)
+  {
+    return this.repository.find({
+      where: { store: { id: storeId }, active: true },
+      order: { createdAt: 'DESC' as any },
+    });
+  }
+
+
+
+
+  /**
+>>>>>>> main
    * Executes find by id logic.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)

@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+=======
+import { forceLogoutAndRedirect, isSessionAuthError } from '../utils/sessionRedirect';
+
+>>>>>>> main
 const resolveBaseUrl = () => {
   return import.meta.env.VITE_API_BASE_URL || '/api';
 };
@@ -9,10 +14,34 @@ const buildUrl = (path: string) => {
   return `${API_BASE_URL}${normalized}`;
 };
 
+<<<<<<< HEAD
 const handleResponse = async (response: Response) => {
   if (!response.ok) {
     const text = await response.text();
     throw new Error(text || response.statusText);
+=======
+const handleResponse = async (response: Response, canAutoLogout = true) => {
+  if (!response.ok) {
+    const contentType = response.headers.get('content-type') || '';
+    let payload: any = null;
+    if (contentType.includes('application/json')) {
+      payload = await response.json().catch(() => null);
+    } else {
+      const text = await response.text().catch(() => '');
+      payload = text ? { message: text } : null;
+    }
+    const message = payload?.message || response.statusText || 'Falha na requisição';
+    const error: any = new Error(message);
+    error.status = response.status;
+    if (payload?.code) error.code = payload.code;
+    if (payload?.details) error.details = payload.details;
+
+    if (canAutoLogout && isSessionAuthError(response.status, message, payload?.code || '')) {
+      forceLogoutAndRedirect('superadmin');
+    }
+
+    throw error;
+>>>>>>> main
   }
   return response.json();
 };
@@ -82,4 +111,64 @@ export const superAdminService = {
     });
     return handleResponse(response);
   },
+<<<<<<< HEAD
+=======
+  async updatePlanExempt(token: string, storeId: string, payload: { planExempt: boolean; planExemptLabel?: string }) {
+    const response = await fetch(buildUrl(`/admin/stores/${storeId}/plan-exempt`), {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+    return handleResponse(response, false);
+  },
+
+  async fetchMotoboyKycPending(token: string) {
+    const response = await fetch(buildUrl('/admin/motoboys/kyc/pending'), {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return handleResponse(response);
+  },
+
+  async fetchMotoboyKycAudit(token: string, days = 30) {
+    const response = await fetch(buildUrl(`/admin/motoboys/kyc/audit?days=${days}`), {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return handleResponse(response);
+  },
+
+  async fetchMotoboyKycReviews(token: string, limit = 30) {
+    const response = await fetch(buildUrl(`/admin/motoboys/kyc/reviews?limit=${limit}`), {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return handleResponse(response);
+  },
+
+  async fetchMotoboyDocuments(token: string, motoboyId: string) {
+    const response = await fetch(buildUrl(`/admin/motoboys/${motoboyId}/documents`), {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return handleResponse(response);
+  },
+
+  async approveMotoboyDocument(token: string, motoboyId: string, documentId: string) {
+    const response = await fetch(buildUrl(`/admin/motoboys/${motoboyId}/documents/${documentId}/approve`), {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({}),
+    });
+    return handleResponse(response);
+  },
+
+  async rejectMotoboyDocument(token: string, motoboyId: string, documentId: string, reason?: string | null) {
+    const response = await fetch(buildUrl(`/admin/motoboys/${motoboyId}/documents/${documentId}/reject`), {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reason: reason || null }),
+    });
+    return handleResponse(response);
+  },
+>>>>>>> main
 };

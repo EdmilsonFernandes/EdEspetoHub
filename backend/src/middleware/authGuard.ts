@@ -31,7 +31,11 @@ import { env } from '../config/env';
 import { AppError } from '../errors/AppError';
 import { respondWithError } from '../errors/respondWithError';
 
+<<<<<<< HEAD
 export type UserRole = 'ADMIN' | 'CHURRASQUEIRO' | 'SUPER_ADMIN';
+=======
+export type UserRole = 'ADMIN' | 'OPERATOR' | 'CHURRASQUEIRO' | 'SUPER_ADMIN' | 'MOTOBOY' | 'STORE_OWNER';
+>>>>>>> main
 
 type JwtPayload = {
   sub: string;        // userId
@@ -85,11 +89,26 @@ export const requireRole = (...roles: UserRole[]) =>
 {
   return (req: Request, res: Response, next: NextFunction) =>
   {
+<<<<<<< HEAD
     const role = req.auth?.role;
     if (!role || !roles.includes(role))
+=======
+    const normalizeRole = (value?: UserRole) => {
+      if (!value) return '';
+      if (value === 'CHURRASQUEIRO') return 'OPERATOR';
+      return value;
+    };
+    const role = normalizeRole(req.auth?.role);
+    const allowed = roles.map(normalizeRole);
+    if (!role || !allowed.includes(role))
+>>>>>>> main
     {
       return respondWithError(req, res, new AppError('AUTH-003', 403), 403);
     }
     return next();
   };
+<<<<<<< HEAD
 };
+=======
+};
+>>>>>>> main

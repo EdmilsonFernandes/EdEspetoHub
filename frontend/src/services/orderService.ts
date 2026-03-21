@@ -1,4 +1,8 @@
 import { apiClient } from "../config/apiClient";
+<<<<<<< HEAD
+=======
+import { normalizeProductModifiers } from "../utils/productModifiers";
+>>>>>>> main
 
 const isUuid = (value: string) =>
   /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(value);
@@ -16,7 +20,19 @@ const normalizeOrder = (order: any) => ({
     : order.created_at
     ? new Date(order.created_at).getTime()
     : order.createdAt,
+<<<<<<< HEAD
   payment: order.payment ?? order.paymentMethod ?? order.payment_method,
+=======
+  updatedAt: order.updatedAt
+    ? new Date(order.updatedAt).getTime()
+    : order.updated_at
+    ? new Date(order.updated_at).getTime()
+    : order.updatedAt || null,
+  payment: order.payment ?? order.paymentMethod ?? order.payment_method,
+  cashTendered: order.cashTendered ?? order.cash_tendered ?? null,
+  deliveryFee: order.deliveryFee ?? order.delivery_fee ?? null,
+  paymentStatus: order.paymentStatus ?? order.payment_status ?? 'PENDING',
+>>>>>>> main
   type: order.type ?? order.order_type,
   items: (order.items || []).map((item: any) => {
     const quantity = item.qty ?? item.quantity ?? 0;
@@ -43,8 +59,15 @@ const normalizeOrder = (order: any) => ({
       id: item.id ?? item.item_id ?? item.orderItemId,
       qty: quantity,
       name: item.name ?? item.product?.name,
+<<<<<<< HEAD
       cookingPoint: item.cookingPoint ?? item.cooking_point,
       passSkewer: item.passSkewer ?? item.pass_skewer ?? false,
+=======
+      isPrinted: Boolean(item.isPrinted ?? item.is_printed ?? false),
+      cookingPoint: item.cookingPoint ?? item.cooking_point,
+      passSkewer: item.passSkewer ?? item.pass_skewer ?? false,
+      selectedModifiers: normalizeProductModifiers(item.selectedModifiers ?? item.selected_modifiers ?? []),
+>>>>>>> main
       promoActive,
       promoPrice,
       originalPrice,
@@ -56,6 +79,7 @@ const normalizeOrder = (order: any) => ({
 });
 
 const handleSessionError = (error: any) => {
+<<<<<<< HEAD
   const message = (error?.message || '').toString();
   if (!message) return;
   if (
@@ -64,6 +88,17 @@ const handleSessionError = (error: any) => {
     message.includes('Loja não encontrada') ||
     message.includes('Sem permissão')
   ) {
+=======
+  const status = Number(error?.status || 0);
+  const code = String(error?.code || '').toUpperCase();
+  const message = String(error?.message || '').toLowerCase();
+  const shouldInvalidate =
+    status === 401 ||
+    [ 'AUTH-001', 'AUTH-002', 'AUTH-007' ].includes(code) ||
+    message.includes('token inválido') ||
+    message.includes('jwt');
+  if (shouldInvalidate) {
+>>>>>>> main
     localStorage.removeItem('adminSession');
     if (typeof window !== 'undefined') {
       window.location.href = '/admin';
@@ -110,6 +145,17 @@ export const orderService = {
     }
     return apiClient.get(`/public/stores/slug/${storeSlug}/highlights`);
   },
+<<<<<<< HEAD
+=======
+  async fetchTableStatusBySlug(storeSlug: string)
+  {
+    if (!storeSlug)
+    {
+      return Promise.reject(new Error("Loja inválida"));
+    }
+    return apiClient.get(`/public/stores/slug/${storeSlug}/tables/status`);
+  },
+>>>>>>> main
   async save(orderData: any, storeId?: string)
   {
     const targetStore = resolveStoreIdentifier(storeId);
@@ -227,14 +273,86 @@ export const orderService = {
     const normalizedItems = (items || []).map((item: any) => ({
       productId: item.productId ?? item.product?.id ?? item.id,
       quantity: Number(item.qty ?? item.quantity ?? 0),
+<<<<<<< HEAD
       cookingPoint: item.cookingPoint,
       passSkewer: item.passSkewer,
+=======
+      isPrinted: Boolean(item.isPrinted),
+      cookingPoint: item.cookingPoint,
+      passSkewer: item.passSkewer,
+      selectedModifiers: item.selectedModifiers,
+>>>>>>> main
     }));
     await apiClient.patch(`/orders/${id}`, { items: normalizedItems, total });
   },
 
+<<<<<<< HEAD
+=======
+  async reopenOrder(
+    id: string,
+    payload?: { reason?: string; adminIdentifier?: string; adminPassword?: string }
+  ) {
+    return apiClient.patch(`/orders/${id}/reopen`, payload || {});
+  },
+
+  async markItemsPrinted(id: string, itemIds?: string[]) {
+    const normalized = Array.isArray(itemIds)
+      ? itemIds.map((itemId) => String(itemId || '').trim()).filter(Boolean)
+      : [];
+    return apiClient.patch(`/orders/${id}/mark-as-printed`, { itemIds: normalized });
+  },
+
+>>>>>>> main
   async getPublicById(orderId: string)
   {
     return apiClient.get(`/orders/${orderId}/public`);
   },
+<<<<<<< HEAD
+=======
+
+  async getTrackingV2(orderId: string) {
+    return apiClient.get(`/v2/orders/${orderId}/tracking`);
+  },
+
+  async getReviewByOrder(orderId: string, accessToken?: string) {
+    return apiClient.get(`/orders/${orderId}/review`, {
+      headers: accessToken ? { 'X-Order-Access-Token': accessToken } : {},
+    });
+  },
+
+  async submitReviewByOrder(orderId: string, payload: any, accessToken?: string) {
+    return apiClient.post(`/orders/${orderId}/review`, payload, {
+      headers: accessToken ? { 'X-Order-Access-Token': accessToken } : {},
+    });
+  },
+
+  async listReviewsByStore(storeId: string, limit = 100) {
+    return apiClient.get(`/stores/${storeId}/reviews?limit=${limit}`);
+  },
+
+  async getReviewSummaryByStore(storeId: string) {
+    return apiClient.get(`/stores/${storeId}/reviews/summary`);
+  },
+
+  async listTipPayoutsByStore(storeId: string, limit = 300) {
+    return apiClient.get(`/stores/${storeId}/reviews/tip-payouts?limit=${limit}`);
+  },
+
+  async markTipPayoutByStore(
+    storeId: string,
+    reviewId: string,
+    payload: {
+      payoutStatus?: 'PENDING' | 'PAID';
+      payoutProofFile?: string | null;
+      payoutProofUrl?: string | null;
+      payoutNotes?: string | null;
+    }
+  ) {
+    return apiClient.patch(`/stores/${storeId}/reviews/${reviewId}/tip-payout`, payload);
+  },
+
+  async listTipPayoutsForMotoboy(limit = 300) {
+    return apiClient.get(`/motoboy/reviews/tip-payouts?limit=${limit}`);
+  },
+>>>>>>> main
 };

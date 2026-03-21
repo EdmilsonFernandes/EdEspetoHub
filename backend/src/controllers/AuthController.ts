@@ -43,7 +43,11 @@ export class AuthController
         storeName: req.body?.storeName || req.body?.store?.name,
         planId: req.body?.planId,
       });
+<<<<<<< HEAD
       const result = await authService.register(req.body);
+=======
+      const result = await authService.register(req.body, { ipAddress: req.ip });
+>>>>>>> main
       log.info('Register success', { userId: result.user?.id, storeId: result.store?.id });
       return res.status(201).json(result);
     } catch (error: any)
@@ -89,6 +93,7 @@ export class AuthController
    */
   static async adminLogin(req: Request, res: Response)
   {
+<<<<<<< HEAD
     const { slug, password } = req.body;
 
     try
@@ -100,6 +105,20 @@ export class AuthController
     } catch (error: any)
     {
       log.warn('Admin login failed', { slug, error });
+=======
+    const password = req.body?.password;
+    const identifier = String(req.body?.identifier || req.body?.slug || req.body?.email || '').trim();
+
+    try
+    {
+      log.info('Admin login request', { identifier });
+      const result = await authService.adminLogin(identifier, password);
+      log.info('Admin login success', { storeId: result.store?.id, identifier });
+      return res.json(result);
+    } catch (error: any)
+    {
+      log.warn('Admin login failed', { identifier, error });
+>>>>>>> main
       return respondWithError(req, res, error, 401);
     }
   }
@@ -192,11 +211,20 @@ export class AuthController
    */
   static async verifyEmail(req: Request, res: Response)
   {
+<<<<<<< HEAD
     const { token } = req.body || {};
     try
     {
       log.info('Verify email request');
       const result = await authService.verifyEmail(token);
+=======
+    const token = String(req.body?.token || req.query?.token || '');
+    const email = String(req.body?.email || req.query?.email || '').trim();
+    try
+    {
+      log.info('Verify email request');
+      const result = await authService.verifyEmail({ token, email });
+>>>>>>> main
       log.info('Verify email success', { redirectUrl: result.redirectUrl });
       const { code, ...data } = result;
       return respondWithSuccess(req, res, code, data);
@@ -222,7 +250,11 @@ export class AuthController
     try
     {
       log.info('Resend verification request', { email });
+<<<<<<< HEAD
       const result = await authService.resendVerificationEmail(email);
+=======
+      const result = await authService.resendVerificationEmail(email, { ipAddress: req.ip });
+>>>>>>> main
       log.info('Resend verification dispatched', { email });
       const { code, ...data } = result;
       return respondWithSuccess(req, res, code, data);
@@ -232,4 +264,22 @@ export class AuthController
       return respondWithError(req, res, error, 400);
     }
   }
+<<<<<<< HEAD
 }
+=======
+
+  static async changePassword(req: Request, res: Response) {
+    const currentPassword = String(req.body?.currentPassword || '');
+    const newPassword = String(req.body?.newPassword || '');
+    try {
+      log.info('Change password request', { userId: req.auth?.sub });
+      const result = await authService.changePassword(req.auth?.sub || '', currentPassword, newPassword);
+      const { code, ...data } = result;
+      return respondWithSuccess(req, res, code, data);
+    } catch (error: any) {
+      log.warn('Change password failed', { userId: req.auth?.sub, error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+}
+>>>>>>> main

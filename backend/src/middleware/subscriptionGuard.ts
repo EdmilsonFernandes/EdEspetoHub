@@ -17,8 +17,17 @@ import { env } from '../config/env';
 import { SubscriptionService } from '../services/SubscriptionService';
 import { AppError } from '../errors/AppError';
 import { respondWithError } from '../errors/respondWithError';
+<<<<<<< HEAD
 
 const subscriptionService = new SubscriptionService();
+=======
+import { StoreRepository } from '../repositories/StoreRepository';
+import { DeliveryBillingService } from '../services/DeliveryBillingService';
+
+const subscriptionService = new SubscriptionService();
+const storeRepository = new StoreRepository();
+const deliveryBillingService = new DeliveryBillingService();
+>>>>>>> main
 
 const GRACE_HOURS = 24;
 const GRACE_MS = GRACE_HOURS * 60 * 60 * 1000;
@@ -75,7 +84,11 @@ export const requireActiveSubscription = async (
   const role = getRoleFromAuthHeader(req);
 
   // ✅ ADMIN / CHURRASQUEIRO nunca bloqueia
+<<<<<<< HEAD
   if (role === 'ADMIN' || role === 'CHURRASQUEIRO')
+=======
+  if (role === 'ADMIN' || role === 'CHURRASQUEIRO' || role === 'OPERATOR')
+>>>>>>> main
   {
     return next();
   }
@@ -88,6 +101,40 @@ export const requireActiveSubscription = async (
 
   try
   {
+<<<<<<< HEAD
+=======
+    const store = storeId
+      ? await storeRepository.findById(storeId)
+      : await storeRepository.findBySlug(slug!);
+
+    const storeIdentifier = store?.id || storeId;
+    const isPublicRequest = !role;
+    const requestedOrderType = String(
+      req.body?.type || req.body?.orderType || req.body?.customer?.type || ''
+    )
+      .trim()
+      .toLowerCase();
+    const isOrderCreationRoute = /\/orders(?:\/|$)/i.test(String(req.path || ''));
+    const mustCheckDeliveryBilling = !isOrderCreationRoute || requestedOrderType === 'delivery';
+
+    if (storeIdentifier && mustCheckDeliveryBilling && !isPublicRequest) {
+      const blockedByDelivery = await deliveryBillingService.isStoreBlocked(storeIdentifier);
+      if (blockedByDelivery) {
+        return respondWithError(
+          req,
+          res,
+          new AppError('BILL-001', 403),
+          403
+        );
+      }
+    }
+
+    if (store?.settings?.planExempt)
+    {
+      return next();
+    }
+
+>>>>>>> main
     const subscription = storeId
       ? await subscriptionService.getCurrentByStore(storeId)
       : await subscriptionService.getCurrentByStoreSlug(slug!);
@@ -128,4 +175,8 @@ export const requireActiveSubscription = async (
   {
     return respondWithError(req, res, error, 500);
   }
+<<<<<<< HEAD
 };
+=======
+};
+>>>>>>> main

@@ -5,6 +5,10 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { resolveAssetUrl } from '../../utils/resolveAssetUrl';
 import { subscriptionService } from '../../services/subscriptionService';
+<<<<<<< HEAD
+=======
+import { AdminMobileBottomNav } from './AdminMobileBottomNav';
+>>>>>>> main
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
   const { auth, hydrated, setAuth } = useAuth();
@@ -18,9 +22,16 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
 
     const settings = auth?.store?.settings || {};
     const logoUrl = resolveAssetUrl(settings.logoUrl);
+<<<<<<< HEAD
     const name = auth?.store?.name;
 
     const key = `${auth?.store?.id ?? ''}|${settings.primaryColor ?? ''}|${settings.secondaryColor ?? ''}|${logoUrl ?? ''}|${name ?? ''}`;
+=======
+    const bannerUrl = resolveAssetUrl(settings.bannerUrl);
+    const name = auth?.store?.name;
+
+    const key = `${auth?.store?.id ?? ''}|${settings.primaryColor ?? ''}|${settings.secondaryColor ?? ''}|${logoUrl ?? ''}|${bannerUrl ?? ''}|${name ?? ''}`;
+>>>>>>> main
     if (!auth?.store?.id) return;
     if (brandingKeyRef.current === key) return;
     brandingKeyRef.current = key;
@@ -29,6 +40,10 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       primaryColor: settings.primaryColor,
       secondaryColor: settings.secondaryColor,
       logoUrl,
+<<<<<<< HEAD
+=======
+      bannerUrl,
+>>>>>>> main
       brandName: name,
     });
   }, [
@@ -36,6 +51,10 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     auth?.store?.id,
     auth?.store?.name,
     auth?.store?.settings?.logoUrl,
+<<<<<<< HEAD
+=======
+    auth?.store?.settings?.bannerUrl,
+>>>>>>> main
     auth?.store?.settings?.primaryColor,
     auth?.store?.settings?.secondaryColor,
     setBranding,
@@ -71,8 +90,19 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     return Math.ceil((end - now) / (1000 * 60 * 60 * 24));
   }, [subscription?.endDate]);
 
+<<<<<<< HEAD
   const isTrial = subscription?.status === 'TRIAL';
   const showRenewBanner =
+=======
+  // Fallback to store settings because session subscription can be stale right after VIP toggle.
+  const isVip =
+    Boolean(subscription?.planExempt) ||
+    Boolean(auth?.store?.settings?.planExempt) ||
+    subscription?.plan?.name === 'vip';
+  const isTrial = !isVip && subscription?.status === 'TRIAL';
+  const showRenewBanner =
+    !isVip &&
+>>>>>>> main
     !isTrial &&
     (subscription?.status === 'EXPIRING' ||
       (typeof daysLeft === 'number' && daysLeft <= 3 && daysLeft >= 0));
@@ -127,7 +157,12 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       )}
+<<<<<<< HEAD
       {children}
+=======
+      <div className="pb-24 lg:pb-0">{children}</div>
+      <AdminMobileBottomNav />
+>>>>>>> main
     </>
   );
 }

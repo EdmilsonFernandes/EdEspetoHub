@@ -18,10 +18,19 @@ import { slugify } from '../utils/slugify';
 import { SubscriptionService } from './SubscriptionService';
 import { Store } from '../entities/Store';
 import { User } from '../entities/User';
+<<<<<<< HEAD
+=======
+import { StoreLinkHit } from '../entities/StoreLinkHit';
+>>>>>>> main
 import { EntityManager } from 'typeorm';
 import { saveBase64Image } from '../utils/imageStorage';
 import { sanitizeSocialLinks } from '../utils/socialLinks';
 import { AppError } from '../errors/AppError';
+<<<<<<< HEAD
+=======
+import { getStoreSegmentPreset, sanitizeStoreSegment } from '../utils/storeSegment';
+import { resolvePlanFeatures } from '../config/planFeatures';
+>>>>>>> main
 /**
  * Provides StoreService functionality.
  *
@@ -32,6 +41,19 @@ export class StoreService
 {
   private subscriptionService = new SubscriptionService();
   private storeRepository = AppDataSource.getRepository(Store);
+<<<<<<< HEAD
+=======
+  private parseNumber(value?: any): number | null | undefined
+  {
+    if (value === undefined) return undefined;
+    if (value === null) return null;
+    const raw = value.toString().trim();
+    if (!raw) return null;
+    const parsed = Number(raw.replace(',', '.'));
+    if (Number.isNaN(parsed)) return null;
+    return parsed;
+  }
+>>>>>>> main
   private normalizePixKey(value?: string)
   {
     if (!value) return undefined;
@@ -52,6 +74,12 @@ export class StoreService
     if (digits.length > 11) return `+${digits}`;
     return trimmed;
   }
+<<<<<<< HEAD
+=======
+  private normalizeBannerPosition(value?: string | null): 'center' | 'top' {
+    return String(value || '').toLowerCase() === 'top' ? 'top' : 'center';
+  }
+>>>>>>> main
 
   /* =========================
    * CREATE STORE
@@ -83,14 +111,30 @@ export class StoreService
       );
 
       const logoUrl = await saveBase64Image(input.logoFile, `store-${input.ownerId}`);
+<<<<<<< HEAD
 
       const socialLinks = sanitizeSocialLinks(input.socialLinks);
+=======
+      const bannerUrl = await saveBase64Image(input.bannerFile, `store-banner-${input.ownerId}`);
+      const trimmedBannerUrl = input.bannerUrl?.toString().trim();
+
+      const socialLinks = sanitizeSocialLinks(input.socialLinks);
+      const deliveryRadiusKm = this.parseNumber(input.deliveryRadiusKm);
+      const deliveryFee = this.parseNumber(input.deliveryFee);
+      const trimmedAddress = input.address?.toString().trim();
+      const trimmedCity = input.city?.toString().trim();
+      const trimmedState = input.state?.toString().trim().toUpperCase();
+      const segment = sanitizeStoreSegment(input.segment);
+      const segmentPreset = getStoreSegmentPreset(segment);
+      const bannerPosition = this.normalizeBannerPosition(input.bannerPosition);
+>>>>>>> main
 
       // 3️⃣ Settings
       const normalizedPix = this.normalizePixKey(input.pixKey);
       const trimmedEmail = input.contactEmail?.toString().trim();
       const settings = manager.create(StoreSettings, {
         logoUrl: logoUrl || input.logoUrl,
+<<<<<<< HEAD
         description: input.description,
         primaryColor: input.primaryColor,
         secondaryColor: input.secondaryColor,
@@ -100,6 +144,26 @@ export class StoreService
         socialLinks,
         openingHours: input.openingHours ?? [],
         orderTypes: input.orderTypes ?? [ 'delivery', 'pickup', 'table' ],
+=======
+        bannerUrl: bannerUrl || trimmedBannerUrl || null,
+        bannerPosition,
+        description: input.description,
+        address: trimmedAddress || owner.address || null,
+        city: trimmedCity || null,
+        state: trimmedState || null,
+        primaryColor: input.primaryColor || segmentPreset.primaryColor,
+        secondaryColor: input.secondaryColor || segmentPreset.secondaryColor,
+        pixKey: normalizedPix ?? null,
+        contactEmail: trimmedEmail || null,
+        promoMessage: input.promoMessage?.toString().trim() || null,
+        isOrderingEnabled: input.isOrderingEnabled !== false,
+        segment,
+        deliveryRadiusKm: deliveryRadiusKm ?? null,
+        deliveryFee: deliveryFee ?? null,
+        socialLinks,
+        openingHours: input.openingHours ?? [],
+        orderTypes: input.orderTypes ?? segmentPreset.orderTypes,
+>>>>>>> main
       });
 
       // 4️⃣ Store
@@ -110,6 +174,14 @@ export class StoreService
         settings,
       });
 
+<<<<<<< HEAD
+=======
+      if (trimmedAddress && owner.address !== trimmedAddress) {
+        owner.address = trimmedAddress;
+        await userRepo.save(owner);
+      }
+
+>>>>>>> main
       return storeRepo.save(store);
     });
   }
@@ -141,7 +213,11 @@ export class StoreService
 
       const store = await storeRepo.findOne({
         where: { id: storeId },
+<<<<<<< HEAD
         relations: [ 'settings' ],
+=======
+        relations: [ 'settings', 'owner' ],
+>>>>>>> main
       });
 
       if (!store)
@@ -162,19 +238,50 @@ export class StoreService
         store.settings = manager.create(StoreSettings);
       }
 
+<<<<<<< HEAD
       const uploadedLogo = await saveBase64Image(data.logoFile, `store-${store.id}`);
+=======
+      const nextSegment = data.segment !== undefined
+        ? sanitizeStoreSegment(data.segment)
+        : sanitizeStoreSegment(store.settings.segment);
+      const segmentPreset = getStoreSegmentPreset(nextSegment);
+
+      const uploadedLogo = await saveBase64Image(data.logoFile, `store-${store.id}`);
+      const uploadedBanner = await saveBase64Image(data.bannerFile, `store-banner-${store.id}`);
+>>>>>>> main
 
       store.settings.logoUrl =
         uploadedLogo ?? data.logoUrl ?? store.settings.logoUrl;
 
+<<<<<<< HEAD
+=======
+      if (data.bannerFile !== undefined || data.bannerUrl !== undefined) {
+        const trimmedBannerUrl = data.bannerUrl?.toString().trim();
+        store.settings.bannerUrl = uploadedBanner ?? trimmedBannerUrl ?? null;
+      }
+      if (data.bannerPosition !== undefined)
+      {
+        store.settings.bannerPosition = this.normalizeBannerPosition(data.bannerPosition);
+      }
+
+>>>>>>> main
       store.settings.description =
         data.description ?? store.settings.description;
 
       store.settings.primaryColor =
+<<<<<<< HEAD
         data.primaryColor ?? store.settings.primaryColor;
 
       store.settings.secondaryColor =
         data.secondaryColor ?? store.settings.secondaryColor;
+=======
+        data.primaryColor ?? store.settings.primaryColor ?? segmentPreset.primaryColor;
+
+      store.settings.secondaryColor =
+        data.secondaryColor ?? store.settings.secondaryColor ?? segmentPreset.secondaryColor;
+
+      store.settings.segment = nextSegment;
+>>>>>>> main
 
       if (data.pixKey !== undefined)
       {
@@ -191,6 +298,31 @@ export class StoreService
         const trimmedMessage = data.promoMessage?.toString().trim();
         store.settings.promoMessage = trimmedMessage || null;
       }
+<<<<<<< HEAD
+=======
+      if (data.isOrderingEnabled !== undefined)
+      {
+        store.settings.isOrderingEnabled = Boolean(data.isOrderingEnabled);
+      }
+      if (data.deliveryRadiusKm !== undefined)
+      {
+        store.settings.deliveryRadiusKm = this.parseNumber(data.deliveryRadiusKm) ?? null;
+      }
+      if (data.deliveryFee !== undefined)
+      {
+        store.settings.deliveryFee = this.parseNumber(data.deliveryFee) ?? null;
+      }
+      if (data.prepBaseMinutes !== undefined)
+      {
+        const parsed = Number(data.prepBaseMinutes);
+        store.settings.prepBaseMinutes = Number.isFinite(parsed) ? Math.max(5, Math.round(parsed)) : null;
+      }
+      if (data.prepAttentionMinutes !== undefined)
+      {
+        const parsed = Number(data.prepAttentionMinutes);
+        store.settings.prepAttentionMinutes = Number.isFinite(parsed) ? Math.max(1, Math.round(parsed)) : null;
+      }
+>>>>>>> main
 
       if (data.socialLinks)
       {
@@ -204,7 +336,51 @@ export class StoreService
 
       if (data.orderTypes)
       {
+<<<<<<< HEAD
         store.settings.orderTypes = data.orderTypes;
+=======
+        const subscription = await this.subscriptionService.getCurrentByStore(store.id);
+        const features = resolvePlanFeatures({
+          planName: subscription?.plan?.name,
+          planExempt: Boolean(store.settings?.planExempt),
+          subscriptionStatus: subscription?.status,
+        });
+        const nextTypes = Array.isArray(data.orderTypes) ? data.orderTypes : [];
+        if (!features.deliveryMode && nextTypes.includes('delivery')) {
+          throw new AppError('AUTH-003', 403, { requiredFeature: 'deliveryMode' });
+        }
+        store.settings.orderTypes = nextTypes;
+      } else if (!Array.isArray(store.settings.orderTypes) || !store.settings.orderTypes.length) {
+        store.settings.orderTypes = segmentPreset.orderTypes;
+      }
+
+      let ownerNeedsSave = false;
+      if (store.owner && data.storePhone !== undefined) {
+        const trimmedPhone = data.storePhone?.toString().trim();
+        store.owner.phone = trimmedPhone || undefined;
+        ownerNeedsSave = true;
+      }
+      if (data.address !== undefined && store.owner)
+      {
+        const trimmedAddress = data.address?.toString().trim();
+        store.settings.address = trimmedAddress || null;
+        store.owner.address = trimmedAddress || undefined;
+        ownerNeedsSave = true;
+      }
+      if (ownerNeedsSave && store.owner) {
+        const userRepo = manager.getRepository(User);
+        await userRepo.save(store.owner);
+      }
+      if (data.city !== undefined)
+      {
+        const trimmedCity = data.city?.toString().trim();
+        store.settings.city = trimmedCity || null;
+      }
+      if (data.state !== undefined)
+      {
+        const trimmedState = data.state?.toString().trim().toUpperCase();
+        store.settings.state = trimmedState || null;
+>>>>>>> main
       }
 
       return storeRepo.save(store);
@@ -288,4 +464,58 @@ export class StoreService
 
     return candidate;
   }
+<<<<<<< HEAD
+=======
+
+  /**
+   * Tracks store link hit.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-22
+   */
+  async trackLinkHit(storeId: string, payload: { source?: string; medium?: string; campaign?: string; referrer?: string })
+  {
+    const repo = AppDataSource.getRepository(StoreLinkHit);
+    const entry = repo.create({
+      storeId,
+      utmSource: payload.source || null,
+      utmMedium: payload.medium || null,
+      utmCampaign: payload.campaign || null,
+      referrer: payload.referrer || null,
+    });
+    await repo.save(entry);
+    return entry;
+  }
+
+  /**
+   * Gets link stats.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-22
+   */
+  async getLinkStats(storeId: string, days: number)
+  {
+    const safeDays = Math.max(1, Math.min(90, Number(days) || 7));
+    const rows = await AppDataSource.query(
+      `
+      SELECT
+        COALESCE(NULLIF(utm_source, ''), 'direto') AS source,
+        COUNT(*)::int AS total
+      FROM store_link_hits
+      WHERE store_id = $1
+        AND created_at >= NOW() - $2::interval
+      GROUP BY source
+      ORDER BY total DESC
+      `,
+      [ storeId, `${safeDays} days` ]
+    );
+    const total = rows.reduce((sum: number, row: any) => sum + Number(row.total || 0), 0);
+    return {
+      total,
+      days: safeDays,
+      sources: rows,
+      topSource: rows[0]?.source || 'direto',
+    };
+  }
+>>>>>>> main
 }

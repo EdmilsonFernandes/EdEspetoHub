@@ -26,6 +26,19 @@ export const storeService = {
     return toJson(response);
   },
 
+<<<<<<< HEAD
+=======
+  async trackPublicVisit(slug: string, payload: any) {
+    const response = await apiClient.rawPost(`/public/stores/slug/${slug}/track`, payload);
+    return toJson(response);
+  },
+
+  async getLinkStats(storeId: string, days = 7) {
+    const response = await apiClient.rawGet(`/stores/${storeId}/link-stats?days=${days}`);
+    return toJson(response);
+  },
+
+>>>>>>> main
   async updateSettings(slug: any, payload: any) {
     const response = await apiClient.rawPut(`/stores/${slug}/settings`, payload);
     return toJson(response);
@@ -40,4 +53,30 @@ export const storeService = {
     const response = await apiClient.rawPut(`/stores/${storeId}/status`, { open: isOpen });
     return toJson(response);
   },
+<<<<<<< HEAD
+=======
+
+  async listUsers(storeId: string) {
+    const response = await apiClient.rawGet(`/stores/${storeId}/users`);
+    return toJson(response);
+  },
+
+  async createUser(
+    storeId: string,
+    payload: { fullName: string; email: string; password: string; phone?: string; role: 'ADMIN' | 'OPERATOR' }
+  ) {
+    const response = await apiClient.rawPost(`/stores/${storeId}/users`, payload);
+    return toJson(response);
+  },
+
+  async updateUserPassword(storeId: string, userId: string, payload: { newPassword: string }) {
+    const response = await apiClient.rawPatch(`/stores/${storeId}/users/${userId}/password`, payload);
+    return toJson(response);
+  },
+
+  async deleteUser(storeId: string, userId: string) {
+    const response = await apiClient.rawDelete(`/stores/${storeId}/users/${userId}`);
+    return toJson(response);
+  },
+>>>>>>> main
 };

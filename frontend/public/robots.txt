@@ -4,4 +4,8 @@ Allow: /
 Disallow: /admin/
 Disallow: /api/
 
+<<<<<<< HEAD
 Sitemap: https://www.chamanoespeto.com.br/sitemap.xml
+=======
+Sitemap: https://www.janocaminho.com.br/sitemap.xml
+>>>>>>> main

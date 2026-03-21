@@ -1,6 +1,10 @@
 // @ts-nocheck
 import React from "react";
+<<<<<<< HEAD
 import { CheckCircle, QrCode, ArrowLeft, CreditCard } from "@phosphor-icons/react";
+=======
+import { CheckCircle, QrCode, ArrowLeft, CreditCard, Printer } from "@phosphor-icons/react";
+>>>>>>> main
 import { formatPaymentMethod } from "../../utils/format";
 import { getPaymentMethodMeta } from "../../utils/paymentAssets";
 
@@ -81,12 +85,21 @@ const PaymentBadge = ({ paymentMethod }) => {
   const method = (paymentMethod || "").toLowerCase();
   const isPix = method === "pix";
   const isDebit = method === "debito";
+<<<<<<< HEAD
+=======
+  const isCash = method === "dinheiro";
+>>>>>>> main
   const label = formatPaymentMethod(paymentMethod);
   const methodMeta = getPaymentMethodMeta(paymentMethod);
   const tone = isPix
     ? "bg-emerald-50 text-emerald-700 border-emerald-200"
     : isDebit
     ? "bg-sky-50 text-sky-700 border-sky-200"
+<<<<<<< HEAD
+=======
+    : isCash
+    ? "bg-amber-50 text-amber-700 border-amber-200"
+>>>>>>> main
     : "bg-indigo-50 text-indigo-700 border-indigo-200";
 
   return (
@@ -111,6 +124,10 @@ export const SuccessView = ({
   table,
   orderId,
   onTrackOrder,
+<<<<<<< HEAD
+=======
+  onPrintReceipt,
+>>>>>>> main
 }) => {
   return (
     <div className="flex flex-col items-center justify-center min-h-[80vh] text-center px-6 animate-in zoom-in">
@@ -139,7 +156,19 @@ export const SuccessView = ({
       />
 
       <div className="flex flex-col sm:flex-row gap-3">
+<<<<<<< HEAD
         {orderId && (
+=======
+        {orderId && onPrintReceipt && (
+          <button
+            onClick={onPrintReceipt}
+            className="flex items-center justify-center gap-2 text-amber-800 bg-amber-50 border border-amber-200 font-bold px-6 py-3 rounded-xl transition-colors hover:bg-amber-100"
+          >
+            <Printer size={18} weight="duotone" /> Imprimir comprovante
+          </button>
+        )}
+        {orderId && onTrackOrder && (
+>>>>>>> main
           <button
             onClick={onTrackOrder}
             className="flex items-center justify-center gap-2 text-white bg-emerald-600 font-bold px-6 py-3 rounded-xl transition-colors hover:opacity-90"

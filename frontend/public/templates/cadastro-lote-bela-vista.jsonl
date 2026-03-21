@@ -1,0 +1,73 @@
+﻿{"name":"File de Tilapia (Meia)","price":63,"category":"refeicoes","description":"Arroz, feijao, batata frita, farofa e file de tilapia."}
+{"name":"File de Tilapia (Inteira)","price":105,"category":"refeicoes","description":"Arroz, feijao, batata frita, farofa e file de tilapia."}
+{"name":"Moqueca de Tilapia (Meia)","price":77,"category":"refeicoes","description":"Arroz, batata frita, maionese e moqueca."}
+{"name":"Moqueca de Tilapia (Inteira)","price":129,"category":"refeicoes","description":"Arroz, batata frita, maionese e moqueca."}
+{"name":"File de Tilapia a Parmegiana (Meia)","price":77,"category":"refeicoes","description":"Arroz, batata frita e file de tilapia a parmegiana."}
+{"name":"File de Tilapia a Parmegiana (Inteira)","price":129,"category":"refeicoes","description":"Arroz, batata frita e file de tilapia a parmegiana."}
+{"name":"Costelinha de Porco (Meia)","price":63,"category":"refeicoes","description":"Arroz, virado de feijao, torresmo, couve e costelinha de porco."}
+{"name":"Costelinha de Porco (Inteira)","price":105,"category":"refeicoes","description":"Arroz, virado de feijao, torresmo, couve e costelinha de porco."}
+{"name":"Carne de Porco na Lata (Meia)","price":63,"category":"refeicoes","description":"Arroz, virado de feijao, torresmo, couve e carne de porco acebolada."}
+{"name":"Carne de Porco na Lata (Inteira)","price":105,"category":"refeicoes","description":"Arroz, virado de feijao, torresmo, couve e carne de porco acebolada."}
+{"name":"Alcatra a Parmegiana (Meia)","price":77,"category":"refeicoes","description":"Arroz, batata frita, maionese e alcatra a parmegiana."}
+{"name":"Alcatra a Parmegiana (Inteira)","price":129,"category":"refeicoes","description":"Arroz, batata frita, maionese e alcatra a parmegiana."}
+{"name":"Bife Acebolado (Meia)","price":63,"category":"refeicoes","description":"Arroz, feijao, batata frita, farofa e alcatra acebolada."}
+{"name":"Bife Acebolado (Inteira)","price":105,"category":"refeicoes","description":"Arroz, feijao, batata frita, farofa e alcatra acebolada."}
+{"name":"File de Frango (Meia)","price":63,"category":"refeicoes","description":"Arroz, feijao, batata frita, farofa e file de frango acebolado."}
+{"name":"File de Frango (Inteira)","price":105,"category":"refeicoes","description":"Arroz, feijao, batata frita, farofa e file de frango acebolado."}
+{"name":"Frango Caipira Tradicional (Meia)","price":117,"category":"refeicoes","description":"Arroz, feijao, polenta frita, farofa e frango caipira."}
+{"name":"Frango Caipira Tradicional (Inteira)","price":195,"category":"refeicoes","description":"Arroz, feijao, polenta frita, farofa e frango caipira."}
+{"name":"Frango Caipira com Milho (Meia)","price":123,"category":"refeicoes","description":"Arroz, feijao, polenta frita e frango caipira com milho."}
+{"name":"Frango Caipira com Milho (Inteira)","price":205,"category":"refeicoes","description":"Arroz, feijao, polenta frita e frango caipira com milho."}
+{"name":"Frango Caipira com Palmito (Meia)","price":127,"category":"refeicoes","description":"Arroz, feijao, polenta frita e frango caipira com palmito."}
+{"name":"Frango Caipira com Palmito (Inteira)","price":212,"category":"refeicoes","description":"Arroz, feijao, polenta frita e frango caipira com palmito."}
+{"name":"Embalagem Viagem","price":250,"category":"refeicoes"}
+{"name":"File de Tilapia 600g (Meia)","price":41,"category":"porcoes"}
+{"name":"File de Tilapia 600g (Inteira)","price":68,"category":"porcoes"}
+{"name":"Lambari (Meia)","price":41,"category":"porcoes"}
+{"name":"Lambari (Inteira)","price":68,"category":"porcoes"}
+{"name":"Frango a Passarinho 900g (Meia)","price":38,"category":"porcoes"}
+{"name":"Frango a Passarinho 900g (Inteira)","price":63,"category":"porcoes"}
+{"name":"Batata Frita (Meia)","price":23,"category":"porcoes"}
+{"name":"Batata Frita (Inteira)","price":39,"category":"porcoes"}
+{"name":"Batata Frita c/ Queijo 500g (Meia)","price":30,"category":"porcoes"}
+{"name":"Batata Frita c/ Queijo 500g (Inteira)","price":49,"category":"porcoes"}
+{"name":"Torresmo 500g (Meia)","price":36,"category":"porcoes"}
+{"name":"Torresmo 500g (Inteira)","price":60,"category":"porcoes"}
+{"name":"Polenta Frita 500g (Meia)","price":23,"category":"porcoes"}
+{"name":"Polenta Frita 500g (Inteira)","price":39,"category":"porcoes"}
+{"name":"Mandioca Frita 500g (Meia)","price":23,"category":"porcoes"}
+{"name":"Mandioca Frita 500g (Inteira)","price":39,"category":"porcoes"}
+{"name":"Calabresa 600g (Meia)","price":30,"category":"porcoes"}
+{"name":"Calabresa 600g (Inteira)","price":51,"category":"porcoes"}
+{"name":"Carne de Porco na Lata 600g (Meia)","price":41,"category":"porcoes"}
+{"name":"Carne de Porco na Lata 600g (Inteira)","price":68,"category":"porcoes"}
+{"name":"Arroz ou Feijao (Meia)","price":16,"category":"porcoes"}
+{"name":"Arroz ou Feijao (Inteira)","price":27,"category":"porcoes"}
+{"name":"Salada Especial (Meia)","price":35,"category":"porcoes"}
+{"name":"Salada Especial (Inteira)","price":58,"category":"porcoes"}
+{"name":"Maionese (Meia)","price":26,"category":"porcoes"}
+{"name":"Maionese (Inteira)","price":44,"category":"porcoes"}
+{"name":"Coca Cola 1L","price":14,"category":"bebidas"}
+{"name":"Refrigerante Lata","price":8,"category":"bebidas"}
+{"name":"Refrigerante 600ml","price":12,"category":"bebidas"}
+{"name":"Suco Polpa 470ml","price":15,"category":"bebidas"}
+{"name":"Limonada Suica Jarra","price":35,"category":"bebidas"}
+{"name":"Agua Garrafinha","price":400,"category":"bebidas"}
+{"name":"Agua com Gas","price":500,"category":"bebidas"}
+{"name":"H2O Sabores","price":10,"category":"bebidas"}
+{"name":"Caipirinha Pinga","price":22,"category":"bebidas"}
+{"name":"Caipirinha de Vodka","price":25,"category":"bebidas"}
+{"name":"Caipirissima Smirnoff","price":28,"category":"bebidas"}
+{"name":"Acai","price":18,"category":"bebidas"}
+{"name":"Adicionais Acai","price":500,"category":"bebidas"}
+{"name":"Heineken 600ml","price":22,"category":"cervejas-e-destilados"}
+{"name":"Original/Imperio 600ml","price":18,"category":"cervejas-e-destilados"}
+{"name":"Skol/Brahma 600ml","price":15,"category":"cervejas-e-destilados"}
+{"name":"Heineken LN","price":12,"category":"cervejas-e-destilados"}
+{"name":"Skol/Brahma Lata","price":8,"category":"cervejas-e-destilados"}
+{"name":"Smirnoff Vodka","price":18,"category":"cervejas-e-destilados"}
+{"name":"Campari","price":15,"category":"cervejas-e-destilados"}
+{"name":"Whisky Passport","price":18,"category":"cervejas-e-destilados"}
+{"name":"Vinho Taca","price":15,"category":"cervejas-e-destilados"}
+{"name":"Vinho Jarra 1L","price":37,"category":"cervejas-e-destilados"}
+{"name":"Energetico","price":15,"category":"cervejas-e-destilados"}

@@ -30,9 +30,30 @@ export class StoreSettings
   @Column({ name: 'logo_url', type: 'text', nullable: true })
   logoUrl?: string | null;
 
+<<<<<<< HEAD
   @Column({ name: 'description', type: 'text', nullable: true })
   description?: string | null;
 
+=======
+  @Column({ name: 'banner_url', type: 'text', nullable: true })
+  bannerUrl?: string | null;
+
+  @Column({ name: 'banner_position', type: 'varchar', nullable: true, default: 'center' })
+  bannerPosition?: string | null;
+
+  @Column({ name: 'description', type: 'text', nullable: true })
+  description?: string | null;
+
+  @Column({ name: 'address', type: 'text', nullable: true })
+  address?: string | null;
+
+  @Column({ name: 'city', type: 'text', nullable: true })
+  city?: string | null;
+
+  @Column({ name: 'state', type: 'text', nullable: true })
+  state?: string | null;
+
+>>>>>>> main
   @Column({ name: 'primary_color', default: '#b91c1c' })
   primaryColor!: string;
 
@@ -48,6 +69,57 @@ export class StoreSettings
   @Column({ name: 'promo_message', type: 'text', nullable: true })
   promoMessage?: string | null;
 
+<<<<<<< HEAD
+=======
+  @Column({ name: 'is_ordering_enabled', type: 'boolean', default: true })
+  isOrderingEnabled!: boolean;
+
+  @Column({ name: 'segment', type: 'varchar', nullable: true, default: 'outros' })
+  segment?: string | null;
+
+  @Column({
+    name: 'category_priorities',
+    type: 'jsonb',
+    nullable: true,
+    default: () => "'{}'::jsonb",
+    transformer: {
+      to: (value?: Record<string, number> | null) => (value && typeof value === 'object' ? value : {}),
+      from: (value: Record<string, number> | null) => (value && typeof value === 'object' ? value : {}),
+    },
+  })
+  categoryPriorities?: Record<string, number> | null;
+
+  @Column({ name: 'prep_base_minutes', type: 'int', nullable: true })
+  prepBaseMinutes?: number | null;
+
+  @Column({ name: 'prep_per_item_minutes', type: 'int', nullable: true })
+  prepPerItemMinutes?: number | null;
+
+  @Column({ name: 'prep_attention_minutes', type: 'int', nullable: true })
+  prepAttentionMinutes?: number | null;
+
+  @Column({ name: 'queue_capacity_per_hour', type: 'int', nullable: true })
+  queueCapacityPerHour?: number | null;
+
+  @Column({ name: 'queue_buffer_minutes', type: 'int', nullable: true })
+  queueBufferMinutes?: number | null;
+
+  @Column({ name: 'eta_buffer_minutes', type: 'int', nullable: true })
+  etaBufferMinutes?: number | null;
+
+  @Column({ name: 'plan_exempt', type: 'boolean', default: false })
+  planExempt!: boolean;
+
+  @Column({ name: 'plan_exempt_label', type: 'text', nullable: true })
+  planExemptLabel?: string | null;
+
+  @Column('decimal', { name: 'delivery_radius_km', precision: 10, scale: 2, nullable: true })
+  deliveryRadiusKm?: number | null;
+
+  @Column('decimal', { name: 'delivery_fee', precision: 10, scale: 2, nullable: true })
+  deliveryFee?: number | null;
+
+>>>>>>> main
   @Column({
     name: 'social_links',
     type: 'jsonb',

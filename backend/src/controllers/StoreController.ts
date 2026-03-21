@@ -14,12 +14,24 @@
 import { Request, Response } from 'express';
 import { StoreService } from '../services/StoreService';
 import { SubscriptionService } from '../services/SubscriptionService';
+<<<<<<< HEAD
 import { logger } from '../utils/logger';
 import { AppError } from '../errors/AppError';
 import { respondWithError } from '../errors/respondWithError';
 
 const storeService = new StoreService();
 const subscriptionService = new SubscriptionService();
+=======
+import { OrderReviewService } from '../services/OrderReviewService';
+import { logger } from '../utils/logger';
+import { AppError } from '../errors/AppError';
+import { respondWithError } from '../errors/respondWithError';
+import { resolvePlanFeatures } from '../config/planFeatures';
+
+const storeService = new StoreService();
+const subscriptionService = new SubscriptionService();
+const orderReviewService = new OrderReviewService();
+>>>>>>> main
 const DEMO_SLUGS = new Set([ 'demo', 'test-store' ]);
 const log = logger.child({ scope: 'StoreController' });
 /**
@@ -33,16 +45,31 @@ const buildDemoStore = (slug: string) => {
   const endDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
   return {
     id: 'demo-store',
+<<<<<<< HEAD
     name: 'Chama no Espeto Demo',
+=======
+    name: 'Jano Caminho Demo',
+>>>>>>> main
     slug,
     open: true,
     createdAt: now,
     settings: {
       logoUrl: '/chama-no-espeto.jpeg',
+<<<<<<< HEAD
       description: 'Loja demo de espetos com combos especiais e atendimento rápido.',
       primaryColor: '#dc2626',
       secondaryColor: '#111827',
       socialLinks: [ { type: 'instagram', value: 'chamanoespeto' } ],
+=======
+      bannerUrl: null,
+      description: 'Loja demo de espetos com combos especiais e atendimento rápido.',
+      primaryColor: '#dc2626',
+      secondaryColor: '#111827',
+      segment: 'restaurante',
+      socialLinks: [ { type: 'instagram', value: 'janocaminho' } ],
+      city: 'São Paulo',
+      state: 'SP',
+>>>>>>> main
       openingHours: [
         { day: 1, enabled: true, intervals: [ { start: '10:00', end: '22:00' } ] },
         { day: 2, enabled: true, intervals: [ { start: '10:00', end: '22:00' } ] },
@@ -53,11 +80,19 @@ const buildDemoStore = (slug: string) => {
         { day: 0, enabled: true, intervals: [ { start: '10:00', end: '21:00' } ] },
       ],
       orderTypes: [ 'delivery', 'pickup', 'table' ],
+<<<<<<< HEAD
+=======
+      isOrderingEnabled: true,
+>>>>>>> main
     },
     owner: {
       id: 'demo-owner',
       fullName: 'Loja Demo',
+<<<<<<< HEAD
       email: 'demo@chamanoespeto.com.br',
+=======
+      email: 'demo@janocaminho.com.br',
+>>>>>>> main
       phone: '(11) 99999-0000',
       address: 'Rua Demo 123, Centro - Sao Paulo/SP',
     },
@@ -65,6 +100,15 @@ const buildDemoStore = (slug: string) => {
       status: 'ACTIVE',
       endDate,
     },
+<<<<<<< HEAD
+=======
+    reviewSummary: {
+      totalReviews: 0,
+      avgStoreRating: 0,
+      totalDeliveryReviews: 0,
+      avgDeliveryRating: 0,
+    },
+>>>>>>> main
     openNow: true,
   };
 };
@@ -75,6 +119,21 @@ const buildDemoStore = (slug: string) => {
  * @date 2025-12-17
  */
 export class StoreController {
+<<<<<<< HEAD
+=======
+  private static sanitizeOrderTypesByPlan(orderTypes: unknown, params: { planName?: string | null; planExempt?: boolean; subscriptionStatus?: string | null }) {
+    const incoming = Array.isArray(orderTypes) ? orderTypes : [ 'delivery', 'pickup', 'table' ];
+    const features = resolvePlanFeatures({
+      planName: params.planName,
+      planExempt: params.planExempt,
+      subscriptionStatus: params.subscriptionStatus,
+    });
+    const sanitized = features.deliveryMode
+      ? incoming
+      : incoming.filter((type) => String(type || '').toLowerCase() !== 'delivery');
+    return sanitized.length ? sanitized : [ 'pickup', 'table' ];
+  }
+>>>>>>> main
   /**
    * Executes is store open now logic.
    *
@@ -138,18 +197,40 @@ export class StoreController {
       const entries = await Promise.all(
         stores.map(async (store) => {
           const subscription = await subscriptionService.getCurrentByStore(store.id);
+<<<<<<< HEAD
           const isActive = subscriptionService.isActiveSubscription(subscription);
+=======
+          const isVip = Boolean(store?.settings?.planExempt);
+          const isActive = isVip || subscriptionService.isActiveSubscription(subscription);
+>>>>>>> main
           if (!isActive) return null;
           return {
             id: store.id,
             name: store.name,
             slug: store.slug,
+<<<<<<< HEAD
             settings: store.settings
               ? {
                   logoUrl: store.settings.logoUrl || null,
                   description: store.settings.description || null,
                   primaryColor: store.settings.primaryColor || null,
                   secondaryColor: store.settings.secondaryColor || null,
+=======
+            open: store.open,
+            openNow: StoreController.isStoreOpenNow(store),
+            reviewSummary: await orderReviewService.publicSummaryByStoreId(store.id),
+            settings: store.settings
+              ? {
+                  logoUrl: store.settings.logoUrl || null,
+                  bannerUrl: store.settings.bannerUrl || null,
+                  description: store.settings.description || null,
+                  address: store.settings.address || null,
+                  primaryColor: store.settings.primaryColor || null,
+                  secondaryColor: store.settings.secondaryColor || null,
+                  segment: store.settings.segment || 'outros',
+                  city: store.settings.city || null,
+                  state: store.settings.state || null,
+>>>>>>> main
                 }
               : null,
           };
@@ -179,13 +260,29 @@ export class StoreController {
       const store = await storeService.getBySlug(req.params.slug);
       if (!store) return respondWithError(req, res, new AppError('STORE-001', 404), 404);
       const subscription = await subscriptionService.getCurrentByStore(store.id);
+<<<<<<< HEAD
+=======
+      const orderTypes = StoreController.sanitizeOrderTypesByPlan(store.settings?.orderTypes, {
+        planName: subscription?.plan?.name,
+        planExempt: Boolean(store.settings?.planExempt),
+        subscriptionStatus: subscription?.status || null,
+      });
+>>>>>>> main
       const sanitizedStore = {
         id: store.id,
         name: store.name,
         slug: store.slug,
         open: store.open,
         createdAt: store.createdAt,
+<<<<<<< HEAD
         settings: store.settings,
+=======
+        reviewSummary: await orderReviewService.publicSummaryByStoreId(store.id),
+        settings: {
+          ...(store.settings || {}),
+          orderTypes,
+        },
+>>>>>>> main
         owner: store.owner
           ? {
             id: store.owner.id,
@@ -208,6 +305,74 @@ export class StoreController {
 
 
   /**
+<<<<<<< HEAD
+=======
+   * Tracks store link hit.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-22
+   */
+  static async trackLink(req: Request, res: Response)
+  {
+    try
+    {
+      if (DEMO_SLUGS.has(req.params.slug))
+      {
+        return res.json({ success: true });
+      }
+      const store = await storeService.getBySlug(req.params.slug);
+      if (!store)
+      {
+        return res.json({ success: false });
+      }
+      const source = (req.body?.utm_source || req.query?.utm_source || '').toString().trim();
+      const medium = (req.body?.utm_medium || req.query?.utm_medium || '').toString().trim();
+      const campaign = (req.body?.utm_campaign || req.query?.utm_campaign || '').toString().trim();
+      const referrer = (req.headers.referer || req.headers.referrer || '').toString();
+      await storeService.trackLinkHit(store.id, {
+        source,
+        medium,
+        campaign,
+        referrer,
+      });
+      return res.json({ success: true });
+    }
+    catch (error: any)
+    {
+      log.warn('Store link track failed', { slug: req.params.slug, error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+
+
+  /**
+   * Gets store link stats.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @date 2026-01-22
+   */
+  static async getLinkStats(req: Request, res: Response)
+  {
+    try
+    {
+      const storeId = req.params.storeId;
+      if (!storeId) throw new AppError('STORE-001', 404);
+      const days = Number(req.query?.days || 7);
+      const stats = await storeService.getLinkStats(storeId, days);
+      return res.json(stats);
+    }
+    catch (error: any)
+    {
+      log.warn('Store link stats failed', { storeId: req.params.storeId, error });
+      return respondWithError(req, res, error, 400);
+    }
+  }
+
+
+
+  /**
+>>>>>>> main
    * Executes update logic.
    *
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
@@ -245,4 +410,8 @@ export class StoreController {
       return respondWithError(req, res, error, 400);
     }
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> main

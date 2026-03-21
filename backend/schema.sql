@@ -19,6 +19,11 @@ CREATE TABLE IF NOT EXISTS users (
   document TEXT,
   document_type TEXT,
   address TEXT,
+<<<<<<< HEAD
+=======
+  profile_image_url TEXT,
+  user_role TEXT NOT NULL DEFAULT 'STORE_OWNER',
+>>>>>>> main
   terms_accepted_at TIMESTAMPTZ,
   lgpd_accepted_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -43,11 +48,27 @@ CREATE TABLE IF NOT EXISTS store_settings (
   store_id UUID NOT NULL UNIQUE REFERENCES stores(id) ON DELETE CASCADE,
   logo_url TEXT,
   description TEXT,
+<<<<<<< HEAD
+=======
+  address TEXT,
+>>>>>>> main
   primary_color TEXT NOT NULL DEFAULT '#b91c1c',
   secondary_color TEXT,
   pix_key TEXT,
   contact_email TEXT,
   promo_message TEXT,
+<<<<<<< HEAD
+=======
+  prep_base_minutes INT,
+  prep_per_item_minutes INT,
+  queue_capacity_per_hour INT,
+  queue_buffer_minutes INT,
+  eta_buffer_minutes INT,
+  plan_exempt BOOLEAN NOT NULL DEFAULT FALSE,
+  plan_exempt_label TEXT,
+  delivery_radius_km NUMERIC(10,2),
+  delivery_fee NUMERIC(10,2),
+>>>>>>> main
   social_links JSONB DEFAULT '[]',
   opening_hours JSONB DEFAULT '[]'
 );
@@ -61,11 +82,37 @@ ADD COLUMN IF NOT EXISTS order_types JSONB DEFAULT '["delivery","pickup","table"
 ALTER TABLE store_settings
 ADD COLUMN IF NOT EXISTS description TEXT;
 ALTER TABLE store_settings
+<<<<<<< HEAD
+=======
+ADD COLUMN IF NOT EXISTS address TEXT;
+ALTER TABLE store_settings
+>>>>>>> main
 ADD COLUMN IF NOT EXISTS pix_key TEXT;
 ALTER TABLE store_settings
 ADD COLUMN IF NOT EXISTS contact_email TEXT;
 ALTER TABLE store_settings
 ADD COLUMN IF NOT EXISTS promo_message TEXT;
+<<<<<<< HEAD
+=======
+ALTER TABLE store_settings
+ADD COLUMN IF NOT EXISTS prep_base_minutes INT;
+ALTER TABLE store_settings
+ADD COLUMN IF NOT EXISTS prep_per_item_minutes INT;
+ALTER TABLE store_settings
+ADD COLUMN IF NOT EXISTS queue_capacity_per_hour INT;
+ALTER TABLE store_settings
+ADD COLUMN IF NOT EXISTS queue_buffer_minutes INT;
+ALTER TABLE store_settings
+ADD COLUMN IF NOT EXISTS eta_buffer_minutes INT;
+ALTER TABLE store_settings
+ADD COLUMN IF NOT EXISTS plan_exempt BOOLEAN DEFAULT FALSE;
+ALTER TABLE store_settings
+ADD COLUMN IF NOT EXISTS plan_exempt_label TEXT;
+ALTER TABLE store_settings
+ADD COLUMN IF NOT EXISTS delivery_radius_km NUMERIC(10,2);
+ALTER TABLE store_settings
+ADD COLUMN IF NOT EXISTS delivery_fee NUMERIC(10,2);
+>>>>>>> main
 
 CREATE TABLE IF NOT EXISTS products (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -78,10 +125,32 @@ CREATE TABLE IF NOT EXISTS products (
   description TEXT,
   image_url TEXT,
   is_featured BOOLEAN NOT NULL DEFAULT FALSE,
+<<<<<<< HEAD
   active BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+=======
+  manage_stock BOOLEAN NOT NULL DEFAULT FALSE,
+  stock_quantity INT NOT NULL DEFAULT 0,
+  low_stock_alert INT NOT NULL DEFAULT 3,
+  active BOOLEAN NOT NULL DEFAULT TRUE,
+  availability_days JSONB,
+  modifiers JSONB,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS store_users (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  role TEXT NOT NULL,
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (store_id, user_id)
+);
+
+>>>>>>> main
 CREATE TABLE IF NOT EXISTS orders (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
@@ -92,12 +161,27 @@ CREATE TABLE IF NOT EXISTS orders (
   type TEXT NOT NULL DEFAULT 'delivery',
   status TEXT NOT NULL DEFAULT 'pending',
   payment_method TEXT,
+<<<<<<< HEAD
+=======
+  payment_status TEXT NOT NULL DEFAULT 'PENDING',
+  cash_tendered NUMERIC(10,2),
+  delivery_fee NUMERIC(10,2),
+>>>>>>> main
   total NUMERIC(10,2) NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 ALTER TABLE orders
 ADD COLUMN IF NOT EXISTS table_number TEXT;
+<<<<<<< HEAD
+=======
+ALTER TABLE orders
+ADD COLUMN IF NOT EXISTS cash_tendered NUMERIC(10,2);
+ALTER TABLE orders
+ADD COLUMN IF NOT EXISTS delivery_fee NUMERIC(10,2);
+ALTER TABLE orders
+ADD COLUMN IF NOT EXISTS payment_status TEXT NOT NULL DEFAULT 'PENDING';
+>>>>>>> main
 
 CREATE TABLE IF NOT EXISTS order_items (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -106,22 +190,53 @@ CREATE TABLE IF NOT EXISTS order_items (
   quantity INTEGER NOT NULL,
   price NUMERIC(10,2) NOT NULL,
   cooking_point TEXT,
+<<<<<<< HEAD
   pass_skewer BOOLEAN NOT NULL DEFAULT FALSE
+=======
+  pass_skewer BOOLEAN NOT NULL DEFAULT FALSE,
+  selected_modifiers JSONB,
+  is_printed BOOLEAN NOT NULL DEFAULT FALSE
+>>>>>>> main
 );
 
 ALTER TABLE products
 ADD COLUMN IF NOT EXISTS description TEXT;
 ALTER TABLE products
+<<<<<<< HEAD
+=======
+ADD COLUMN IF NOT EXISTS active BOOLEAN NOT NULL DEFAULT TRUE;
+ALTER TABLE products
+>>>>>>> main
 ADD COLUMN IF NOT EXISTS is_featured BOOLEAN NOT NULL DEFAULT FALSE;
 ALTER TABLE products
 ADD COLUMN IF NOT EXISTS promo_price NUMERIC(10,2);
 ALTER TABLE products
 ADD COLUMN IF NOT EXISTS promo_active BOOLEAN NOT NULL DEFAULT FALSE;
+<<<<<<< HEAD
+=======
+ALTER TABLE products
+ADD COLUMN IF NOT EXISTS availability_days JSONB;
+ALTER TABLE products
+ADD COLUMN IF NOT EXISTS modifiers JSONB;
+ALTER TABLE products
+ADD COLUMN IF NOT EXISTS manage_stock BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE products
+ADD COLUMN IF NOT EXISTS stock_quantity INT NOT NULL DEFAULT 0;
+ALTER TABLE products
+ADD COLUMN IF NOT EXISTS low_stock_alert INT NOT NULL DEFAULT 3;
+>>>>>>> main
 
 ALTER TABLE order_items
 ADD COLUMN IF NOT EXISTS cooking_point TEXT;
 ALTER TABLE order_items
 ADD COLUMN IF NOT EXISTS pass_skewer BOOLEAN NOT NULL DEFAULT FALSE;
+<<<<<<< HEAD
+=======
+ALTER TABLE order_items
+ADD COLUMN IF NOT EXISTS selected_modifiers JSONB;
+ALTER TABLE order_items
+ADD COLUMN IF NOT EXISTS is_printed BOOLEAN NOT NULL DEFAULT FALSE;
+>>>>>>> main
 
 -- Índices multi-loja
 CREATE INDEX IF NOT EXISTS idx_products_store ON products(store_id);
@@ -139,6 +254,221 @@ CREATE TABLE IF NOT EXISTS plans (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+<<<<<<< HEAD
+=======
+INSERT INTO plans (name, display_name, price, promo_price, duration_days, enabled)
+VALUES
+  ('basic_monthly', 'Basic Mensal', 49.90, NULL, 30, true),
+  ('pro_monthly', 'Pro Mensal', 79.90, NULL, 30, true),
+  -- No anual: valor cheio = mensal * 12, promo_price = 15% de desconto.
+  ('basic_yearly', 'Basic Anual', 598.80, 509.98, 365, true),
+  ('pro_yearly', 'Pro Anual', 958.80, 815.98, 365, true)
+ON CONFLICT (name) DO NOTHING;
+
+CREATE TABLE IF NOT EXISTS order_eta_estimates (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+  store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+  algo_version TEXT NOT NULL,
+  prep_minutes INT NOT NULL,
+  queue_minutes INT NOT NULL,
+  travel_minutes INT,
+  buffer_minutes INT NOT NULL,
+  total_minutes INT NOT NULL,
+  window_min INT NOT NULL,
+  window_max INT NOT NULL,
+  distance_km NUMERIC(10,2),
+  confidence TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_order_eta_estimates_order_id
+  ON order_eta_estimates(order_id);
+CREATE INDEX IF NOT EXISTS idx_order_eta_estimates_store_id
+  ON order_eta_estimates(store_id);
+
+CREATE TABLE IF NOT EXISTS motoboys (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+  status TEXT NOT NULL DEFAULT 'PENDING_VERIFICATION',
+  created_by_user_id UUID REFERENCES users(id),
+  approved_by_user_id UUID REFERENCES users(id),
+  approved_at TIMESTAMPTZ,
+  vehicle_type TEXT,
+  vehicle_plate TEXT,
+  vehicle_model TEXT,
+  vehicle_color TEXT,
+  cnh_number TEXT,
+  cnh_category TEXT,
+  cnh_expires_at DATE,
+  city TEXT,
+  state TEXT,
+  address TEXT,
+  pix_key TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS order_reviews (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_id UUID NOT NULL UNIQUE REFERENCES orders(id) ON DELETE CASCADE,
+  store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+  motoboy_id UUID REFERENCES motoboys(id) ON DELETE SET NULL,
+  customer_name TEXT,
+  customer_phone TEXT,
+  store_rating INT NOT NULL CHECK (store_rating BETWEEN 1 AND 5),
+  delivery_rating INT CHECK (delivery_rating BETWEEN 1 AND 5),
+  comment TEXT,
+  store_tags JSONB NOT NULL DEFAULT '[]'::jsonb,
+  delivery_tags JSONB NOT NULL DEFAULT '[]'::jsonb,
+  tip_amount NUMERIC(10,2) NOT NULL DEFAULT 0,
+  tip_status TEXT NOT NULL DEFAULT 'NONE',
+  tip_provider TEXT,
+  tip_provider_id TEXT,
+  tip_payment_link TEXT,
+  tip_qr_code_base64 TEXT,
+  tip_qr_code_text TEXT,
+  tip_expires_at TIMESTAMPTZ,
+  tip_paid_at TIMESTAMPTZ,
+  tip_payout_status TEXT NOT NULL DEFAULT 'PENDING',
+  tip_payout_at TIMESTAMPTZ,
+  tip_payout_proof_url TEXT,
+  tip_payout_notes TEXT,
+  tip_payout_by_user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_order_reviews_store_id ON order_reviews(store_id);
+CREATE INDEX IF NOT EXISTS idx_order_reviews_motoboy_id ON order_reviews(motoboy_id);
+CREATE INDEX IF NOT EXISTS idx_order_reviews_created_at ON order_reviews(created_at DESC);
+
+CREATE TABLE IF NOT EXISTS motoboy_stores (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  motoboy_id UUID NOT NULL REFERENCES motoboys(id) ON DELETE CASCADE,
+  store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+  active BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE(motoboy_id, store_id)
+);
+
+CREATE TABLE IF NOT EXISTS order_deliveries (
+  order_id UUID PRIMARY KEY REFERENCES orders(id) ON DELETE CASCADE,
+  motoboy_id UUID REFERENCES motoboys(id) ON DELETE RESTRICT,
+  status TEXT NOT NULL DEFAULT 'AVAILABLE',
+  freight_value NUMERIC(10,2),
+  assigned_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  accepted_at TIMESTAMPTZ,
+  picked_up_at TIMESTAMPTZ,
+  in_transit_at TIMESTAMPTZ,
+  delivered_at TIMESTAMPTZ,
+  canceled_at TIMESTAMPTZ,
+  canceled_reason TEXT,
+  expires_at TIMESTAMPTZ,
+  payment_confirmed_at TIMESTAMPTZ,
+  payment_confirmed_by_motoboy_id UUID REFERENCES motoboys(id) ON DELETE RESTRICT
+);
+
+CREATE TABLE IF NOT EXISTS delivery_events (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  delivery_id UUID NOT NULL REFERENCES order_deliveries(order_id) ON DELETE CASCADE,
+  actor_type TEXT NOT NULL,
+  actor_id UUID,
+  from_status TEXT,
+  to_status TEXT NOT NULL,
+  metadata JSONB,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_delivery_events_delivery_id ON delivery_events(delivery_id);
+CREATE INDEX IF NOT EXISTS idx_delivery_events_created_at ON delivery_events(created_at DESC);
+
+-- One active delivery per motoboy at a time.
+CREATE UNIQUE INDEX IF NOT EXISTS uq_active_delivery_per_motoboy
+ON order_deliveries(motoboy_id)
+WHERE motoboy_id IS NOT NULL AND status IN ('ACCEPTED','PICKED_UP','IN_TRANSIT');
+
+CREATE TABLE IF NOT EXISTS motoboy_documents (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  motoboy_id UUID NOT NULL REFERENCES motoboys(id) ON DELETE CASCADE,
+  doc_type TEXT NOT NULL,
+  file_key TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'PENDING',
+  uploaded_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  reviewed_by_user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  reviewed_at TIMESTAMPTZ
+);
+
+CREATE TABLE IF NOT EXISTS motoboy_store_requests (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  motoboy_id UUID NOT NULL REFERENCES motoboys(id) ON DELETE CASCADE,
+  store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+  status TEXT NOT NULL DEFAULT 'PENDING',
+  decided_by_user_id UUID REFERENCES users(id),
+  reason TEXT,
+  decided_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE(motoboy_id, store_id)
+);
+
+CREATE TABLE IF NOT EXISTS motoboy_audit_logs (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  store_id UUID REFERENCES stores(id) ON DELETE SET NULL,
+  motoboy_id UUID REFERENCES motoboys(id) ON DELETE SET NULL,
+  action TEXT NOT NULL,
+  performed_by_user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  metadata JSONB,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_motoboy_audit_logs_store_id ON motoboy_audit_logs(store_id);
+CREATE INDEX IF NOT EXISTS idx_motoboy_audit_logs_motoboy_id ON motoboy_audit_logs(motoboy_id);
+
+CREATE TABLE IF NOT EXISTS delivery_billing_cycles (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+  status TEXT NOT NULL DEFAULT 'OPEN',
+  start_date TIMESTAMPTZ NOT NULL,
+  end_date TIMESTAMPTZ NOT NULL,
+  delivery_count INT NOT NULL DEFAULT 0,
+  subtotal NUMERIC(10,2) NOT NULL DEFAULT 0,
+  penalty_amount NUMERIC(10,2) NOT NULL DEFAULT 0,
+  total_due NUMERIC(10,2) NOT NULL DEFAULT 0,
+  fee_rate NUMERIC(6,4) NOT NULL DEFAULT 0.03,
+  min_fee NUMERIC(10,2) NOT NULL DEFAULT 0.50,
+  cycle_days INT NOT NULL DEFAULT 30,
+  penalty_daily_rate NUMERIC(6,4) NOT NULL DEFAULT 0.04,
+  penalty_cap_rate NUMERIC(6,4) NOT NULL DEFAULT 1.0,
+  payment_method TEXT NOT NULL DEFAULT 'PIX',
+  payment_status TEXT NOT NULL DEFAULT 'PENDING',
+  provider TEXT,
+  provider_id TEXT,
+  payment_link TEXT,
+  qr_code_base64 TEXT,
+  qr_code_text TEXT,
+  expires_at TIMESTAMPTZ,
+  closed_at TIMESTAMPTZ,
+  paid_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_delivery_billing_cycles_store ON delivery_billing_cycles(store_id);
+CREATE INDEX IF NOT EXISTS idx_delivery_billing_cycles_status ON delivery_billing_cycles(status);
+
+CREATE TABLE IF NOT EXISTS delivery_billing_charges (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  cycle_id UUID NOT NULL REFERENCES delivery_billing_cycles(id) ON DELETE CASCADE,
+  order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+  delivery_fee NUMERIC(10,2) NOT NULL DEFAULT 0,
+  charge_amount NUMERIC(10,2) NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE(order_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_delivery_billing_charges_cycle ON delivery_billing_charges(cycle_id);
+
+>>>>>>> main
 CREATE TABLE IF NOT EXISTS subscriptions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
@@ -246,6 +576,19 @@ CREATE TABLE IF NOT EXISTS access_logs (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+<<<<<<< HEAD
+=======
+CREATE TABLE IF NOT EXISTS store_link_hits (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+  utm_source TEXT,
+  utm_medium TEXT,
+  utm_campaign TEXT,
+  referrer TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+>>>>>>> main
 CREATE INDEX IF NOT EXISTS idx_access_logs_created_at ON access_logs(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_access_logs_role ON access_logs(role);
 CREATE INDEX IF NOT EXISTS idx_access_logs_store_id ON access_logs(store_id);

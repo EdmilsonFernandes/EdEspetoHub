@@ -8,7 +8,11 @@
  *
  * @file: AuthService.ts
  * @Date: 2025-12-17
+<<<<<<< HEAD
  * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+=======
+ * @author: Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
+>>>>>>> main
  */
 
 import bcrypt from 'bcryptjs';
@@ -38,10 +42,20 @@ import { normalizeDocument, validateDocument } from '../utils/documents';
 import { logger } from '../utils/logger';
 import { AppError } from '../errors/AppError';
 import { PlatformAdmin } from '../entities/PlatformAdmin';
+<<<<<<< HEAD
 /**
  * Provides AuthService functionality.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+=======
+import { getStoreSegmentPreset, sanitizeStoreSegment } from '../utils/storeSegment';
+import { resolvePlanFeatures, resolvePlanTier } from '../config/planFeatures';
+import { StoreUserRepository } from '../repositories/StoreUserRepository';
+/**
+ * Provides AuthService functionality.
+ *
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
+>>>>>>> main
  * @date 2025-12-17
  */
 export class AuthService
@@ -54,11 +68,139 @@ export class AuthService
   private paymentRepository = new PaymentRepository();
   private subscriptionService = new SubscriptionService();
   private settingsService = new SettingsService();
+<<<<<<< HEAD
+=======
+  private storeUserRepository = new StoreUserRepository();
+
+  private normalizePhone(value?: string | null) {
+    return String(value || '').replace(/\D/g, '');
+  }
+
+  private async comparePasswordWithLegacy(rawPassword: string, user?: User | null) {
+    if (!user?.password) return false;
+    const stored = String(user.password);
+    const isBcryptHash =
+      stored.startsWith('$2a$') || stored.startsWith('$2b$') || stored.startsWith('$2y$');
+
+    if (isBcryptHash) {
+      return bcrypt.compare(rawPassword, stored);
+    }
+
+    // Legacy fallbacks for old/imported accounts.
+    const plainMatch = stored === rawPassword;
+    const md5Match =
+      /^[a-f0-9]{32}$/i.test(stored) &&
+      crypto.createHash('md5').update(rawPassword, 'utf8').digest('hex').toLowerCase() === stored.toLowerCase();
+    const sha1Match =
+      /^[a-f0-9]{40}$/i.test(stored) &&
+      crypto.createHash('sha1').update(rawPassword, 'utf8').digest('hex').toLowerCase() === stored.toLowerCase();
+
+    if (!plainMatch && !md5Match && !sha1Match) return false;
+
+    // Auto-migrate legacy password to bcrypt on successful login.
+    user.password = await bcrypt.hash(rawPassword, 10);
+    await this.userRepository.save(user);
+    return true;
+  }
+
+  private maskEmail(email: string) {
+    const [local = '', domain = ''] = String(email || '').split('@');
+    if (!local || !domain) return '';
+    const head = local.slice(0, 2);
+    const maskedLocal = `${head}${'*'.repeat(Math.max(local.length - head.length, 1))}`;
+    return `${maskedLocal}@${domain}`;
+  }
+
+  private getClientIp(ipAddress?: string | null) {
+    const raw = String(ipAddress || '').trim();
+    if (!raw) return null;
+    if (raw.includes(',')) return raw.split(',')[0].trim();
+    return raw;
+  }
+
+  private async isVerificationResendAllowed(userId: string, ipAddress?: string | null) {
+    const cooldownSeconds = 60;
+    const now = Date.now();
+    const oneHourAgo = new Date(now - 60 * 60 * 1000);
+    const cooldownThreshold = new Date(now - cooldownSeconds * 1000);
+    const safeIp = this.getClientIp(ipAddress);
+
+    const recentByUser = await AppDataSource.query(
+      `
+      SELECT created_at
+      FROM email_verifications
+      WHERE user_id = $1
+        AND created_at > $2
+      ORDER BY created_at DESC
+      `,
+      [userId, oneHourAgo]
+    );
+
+    if (Array.isArray(recentByUser) && recentByUser.length >= 5) {
+      return { allowed: false, cooldownSeconds };
+    }
+
+    if (safeIp) {
+      const recentByIp = await AppDataSource.query(
+        `
+        SELECT count(*)::int AS count
+        FROM email_verifications
+        WHERE request_ip = $1
+          AND created_at > $2
+        `,
+        [safeIp, oneHourAgo]
+      );
+      const totalByIp = Number(recentByIp?.[0]?.count || 0);
+      if (totalByIp >= 20) {
+        return { allowed: false, cooldownSeconds };
+      }
+    }
+
+    const cooldownRows = await AppDataSource.query(
+      `
+      SELECT created_at
+      FROM email_verifications
+      WHERE user_id = $1
+        AND created_at > $2
+      ORDER BY created_at DESC
+      LIMIT 1
+      `,
+      [userId, cooldownThreshold]
+    );
+
+    if (Array.isArray(cooldownRows) && cooldownRows.length > 0) {
+      return { allowed: false, cooldownSeconds };
+    }
+
+    return { allowed: true, cooldownSeconds };
+  }
+
+  private async ensurePhoneIsAvailable(manager: any, phone?: string | null) {
+    const digits = this.normalizePhone(phone);
+    if (!digits) return;
+    const rows = await manager.query(
+      `
+      SELECT id
+      FROM users
+      WHERE regexp_replace(COALESCE(phone, ''), '\\D', '', 'g') = $1
+      LIMIT 1
+      `,
+      [digits]
+    );
+    if (Array.isArray(rows) && rows.length > 0) {
+      throw new AppError('AUTH-016', 409);
+    }
+  }
+>>>>>>> main
 
   /**
    * Executes super admin login logic.
    *
+<<<<<<< HEAD
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+=======
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
+>>>>>>> main
    * @date 2025-12-17
    */
   async superAdminLogin(username: string, password: string)
@@ -98,10 +240,17 @@ export class AuthService
   /**
    * Executes register logic.
    *
+<<<<<<< HEAD
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
    */
   async register(input: any)
+=======
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
+   * @date 2025-12-17
+   */
+  async register(input: any, meta?: { ipAddress?: string | null })
+>>>>>>> main
   {
     this.log.info('Register start', {
       email: input?.email || input?.user?.email,
@@ -109,6 +258,10 @@ export class AuthService
       planId: input?.planId,
       paymentMethod: input?.paymentMethod,
     });
+<<<<<<< HEAD
+=======
+    const accountType = (input?.accountType || input?.user?.accountType || 'STORE_OWNER').toString().toUpperCase();
+>>>>>>> main
     const userPayload = input.user ?? {
       fullName: input.fullName,
       email: input.email,
@@ -123,12 +276,120 @@ export class AuthService
       .trim()
       .toLowerCase();
 
+<<<<<<< HEAD
+=======
+    if (!input.termsAccepted || !input.lgpdAccepted)
+    {
+      throw new AppError('AUTH-012', 400);
+    }
+
+    if (accountType === 'MOTOBOY')
+    {
+      if (!userPayload.fullName || !userPayload.email || !userPayload.password)
+      {
+        throw new AppError('AUTH-008', 400);
+      }
+      const normalizedPhone = this.normalizePhone(userPayload.phone);
+      if (normalizedPhone.length < 10) {
+        throw new AppError('AUTH-017', 400);
+      }
+
+      const result = await AppDataSource.transaction(async (manager) =>
+      {
+        const userRepo = manager.getRepository(User);
+
+        const exists = await userRepo.findOne({ where: { email: normalizedEmail }, relations: [ 'stores' ] });
+        if (exists)
+        {
+          const isStoreOwner = Array.isArray((exists as any).stores) && (exists as any).stores.length > 0;
+          if (isStoreOwner || (exists.userRole && exists.userRole !== 'MOTOBOY'))
+          {
+            throw new AppError('AUTH-015', 409);
+          }
+          throw new AppError('AUTH-011', 409);
+        }
+
+        // Require CPF for motoboy accounts as well (business compliance).
+        const normalizedDocument = normalizeDocument(userPayload.document);
+        if (!normalizedDocument || !validateDocument(normalizedDocument, userPayload.documentType || 'CPF'))
+        {
+          throw new AppError('AUTH-009', 400);
+        }
+
+        const existingDocument = await userRepo.findOne({ where: { document: normalizedDocument } });
+        if (existingDocument)
+        {
+          throw new AppError('AUTH-010', 409);
+        }
+
+        await this.ensurePhoneIsAvailable(manager, userPayload.phone);
+        const profileImageUrl = userPayload.profileImageFile
+          ? await saveBase64Image(userPayload.profileImageFile, `motoboy-${normalizedPhone}`, 'motoboys')
+          : null;
+
+        const hashed = await bcrypt.hash(userPayload.password, 10);
+        const user = userRepo.create({
+          fullName: userPayload.fullName,
+          email: normalizedEmail,
+          password: hashed,
+          phone: userPayload.phone,
+          address: userPayload.address,
+          document: normalizedDocument,
+          documentType: (userPayload.documentType || 'CPF').toUpperCase(),
+          termsAcceptedAt: new Date(),
+          lgpdAcceptedAt: new Date(),
+          userRole: 'MOTOBOY',
+          profileImageUrl: profileImageUrl || undefined,
+        });
+        await userRepo.save(user);
+
+        return { user };
+      });
+
+      await this.sendMotoboyVerificationEmail(result.user, meta?.ipAddress);
+      this.log.info('Register motoboy success', { userId: result.user.id });
+
+      const token = jwt.sign(
+        { sub: result.user.id, role: 'MOTOBOY' },
+        env.jwtSecret,
+        { expiresIn: '12h' }
+      );
+
+      return {
+        success: true,
+        user: { id: result.user.id },
+        store: null,
+        storeStatus: null,
+        subscriptionStatus: null,
+        trialExpiresAt: null,
+        payment: null,
+        token,
+        redirectUrl: `/verify-email`,
+        next: 'VERIFY_EMAIL',
+        emailMasked: this.maskEmail(result.user.email),
+        email: result.user.email,
+      };
+    }
+
+>>>>>>> main
     const storePayload = input.store ?? {
       name: input.storeName,
       logoUrl: input.logoUrl,
       logoFile: input.logoFile,
+<<<<<<< HEAD
       primaryColor: input.primaryColor,
       secondaryColor: input.secondaryColor,
+=======
+      bannerUrl: (input as any).bannerUrl,
+      bannerFile: (input as any).bannerFile,
+      segment: input.segment,
+      city: input.city,
+      state: input.state,
+      address: input.address,
+      primaryColor: input.primaryColor,
+      secondaryColor: input.secondaryColor,
+      description: input.description,
+>>>>>>> main
       socialLinks: input.socialLinks,
     };
 
@@ -143,11 +404,14 @@ export class AuthService
       throw new AppError('AUTH-013', 400);
     }
 
+<<<<<<< HEAD
     if (!input.termsAccepted || !input.lgpdAccepted)
     {
       throw new AppError('AUTH-012', 400);
     }
 
+=======
+>>>>>>> main
     if (!userPayload.document || !userPayload.documentType)
     {
       throw new AppError('AUTH-009', 400);
@@ -162,7 +426,11 @@ export class AuthService
     /**
      * Handles result.
      *
+<<<<<<< HEAD
      * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+=======
+     * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
+>>>>>>> main
      * @date 2025-12-17
      */
     const result = await AppDataSource.transaction(async (manager) =>
@@ -183,6 +451,10 @@ export class AuthService
       {
         throw new AppError('AUTH-010', 409);
       }
+<<<<<<< HEAD
+=======
+      await this.ensurePhoneIsAvailable(manager, userPayload.phone);
+>>>>>>> main
 
       const hashed = await bcrypt.hash(userPayload.password, 10);
 
@@ -196,6 +468,10 @@ export class AuthService
         documentType: userPayload.documentType,
         termsAcceptedAt: new Date(),
         lgpdAcceptedAt: new Date(),
+<<<<<<< HEAD
+=======
+        userRole: 'STORE_OWNER',
+>>>>>>> main
       });
       await userRepo.save(user);
 
@@ -208,6 +484,7 @@ export class AuthService
       }
 
       const logoUrl = await saveBase64Image(storePayload.logoFile, `store-${user.id}`);
+<<<<<<< HEAD
 
       const settings = manager.create(StoreSettings, {
         logoUrl: logoUrl || storePayload.logoUrl,
@@ -217,6 +494,29 @@ export class AuthService
         socialLinks: sanitizeSocialLinks(storePayload.socialLinks),
         openingHours: storePayload.openingHours ?? [],
         orderTypes: storePayload.orderTypes ?? [ 'delivery', 'pickup', 'table' ],
+=======
+      const bannerUrl = await saveBase64Image(storePayload.bannerFile, `store-banner-${user.id}`);
+      const segment = sanitizeStoreSegment(storePayload.segment);
+      const segmentPreset = getStoreSegmentPreset(segment);
+      const trimmedCity = storePayload.city?.toString().trim();
+      const trimmedState = storePayload.state?.toString().trim().toUpperCase();
+      const trimmedAddress = storePayload.address?.toString().trim() || userPayload.address?.toString().trim();
+
+      const settings = manager.create(StoreSettings, {
+        logoUrl: logoUrl || storePayload.logoUrl,
+        bannerUrl: bannerUrl || storePayload.bannerUrl || null,
+        description: storePayload.description || segmentPreset.description,
+        address: trimmedAddress || null,
+        city: trimmedCity || null,
+        state: trimmedState || null,
+        primaryColor: storePayload.primaryColor || segmentPreset.primaryColor,
+        secondaryColor: storePayload.secondaryColor || segmentPreset.secondaryColor,
+        isOrderingEnabled: storePayload.isOrderingEnabled !== false,
+        segment,
+        socialLinks: sanitizeSocialLinks(storePayload.socialLinks),
+        openingHours: storePayload.openingHours ?? [],
+        orderTypes: storePayload.orderTypes ?? segmentPreset.orderTypes,
+>>>>>>> main
       });
 
       const store = storeRepo.create({
@@ -228,7 +528,27 @@ export class AuthService
       });
       await storeRepo.save(store);
 
+<<<<<<< HEAD
       const plan = await planRepo.findOne({ where: { id: input.planId } });
+=======
+      let resolvedPlanId = input.planId;
+      if (resolvedPlanId === 'test-plan-7days') {
+        const preferred = await planRepo.findOne({ where: { name: 'basic_monthly', enabled: true } });
+        if (preferred) {
+          resolvedPlanId = preferred.id;
+        } else {
+          const fallback = await planRepo.findOne({
+            where: { enabled: true },
+            order: { price: 'ASC' },
+          });
+          resolvedPlanId = fallback?.id;
+        }
+      }
+
+      const plan = resolvedPlanId
+        ? await planRepo.findOne({ where: { id: resolvedPlanId } })
+        : null;
+>>>>>>> main
       if (!plan || !plan.enabled)
       {
         throw new AppError('SUB-003', 400);
@@ -251,7 +571,11 @@ export class AuthService
       return { user, store, subscription };
     });
 
+<<<<<<< HEAD
     await this.sendVerificationEmail(result.user);
+=======
+    await this.sendVerificationEmail(result.user, meta?.ipAddress);
+>>>>>>> main
     await this.notifySignup(result.user, result.store);
     this.log.info('Register success', { userId: result.user.id, storeId: result.store.id });
 
@@ -274,6 +598,12 @@ export class AuthService
       payment: null,
       token,
       redirectUrl: `/verify-email`,
+<<<<<<< HEAD
+=======
+      next: 'VERIFY_EMAIL',
+      emailMasked: this.maskEmail(result.user.email),
+      email: result.user.email,
+>>>>>>> main
     };
   }
 
@@ -283,7 +613,11 @@ export class AuthService
   /**
    * Executes login logic.
    *
+<<<<<<< HEAD
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+=======
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
+>>>>>>> main
    * @date 2025-12-17
    */
   async login(email: string, password: string)
@@ -293,7 +627,18 @@ export class AuthService
 
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) throw new AppError('AUTH-004', 401);
+<<<<<<< HEAD
     if (!user.emailVerified) throw new AppError('AUTH-005', 401);
+=======
+    if (!user.emailVerified) {
+      throw new AppError('AUTH-005', 401, {
+        next: 'VERIFY_EMAIL',
+        email: user.email,
+        emailMasked: this.maskEmail(user.email),
+        resendCooldownSec: 60,
+      });
+    }
+>>>>>>> main
 
     const firstStore = user.stores?.[ 0 ];
     const token = this.generateToken(user.id, firstStore?.id);
@@ -304,6 +649,10 @@ export class AuthService
       email: user.email,
       phone: user.phone,
       address: user.address,
+<<<<<<< HEAD
+=======
+      role: user.userRole || 'STORE_OWNER',
+>>>>>>> main
     };
 
     const sanitizedStore = firstStore
@@ -317,9 +666,16 @@ export class AuthService
       }
       : undefined;
 
+<<<<<<< HEAD
     if (sanitizedStore) {
       const currentSubscription = await this.subscriptionService.getCurrentByStore(firstStore.id);
       const isActive = this.subscriptionService.isActiveSubscription(currentSubscription);
+=======
+    let currentSubscription: any = null;
+    if (sanitizedStore) {
+      currentSubscription = await this.subscriptionService.getCurrentByStore(firstStore.id);
+      const isActive = Boolean(firstStore?.settings?.planExempt) || this.subscriptionService.isActiveSubscription(currentSubscription);
+>>>>>>> main
       if (!isActive) {
         await this.throwPendingPayment(firstStore.id);
       }
@@ -328,8 +684,35 @@ export class AuthService
         await this.storeRepository.save(firstStore);
       }
     }
+<<<<<<< HEAD
 
     return { user: sanitizedUser, store: sanitizedStore, token };
+=======
+    const planExempt = Boolean(firstStore?.settings?.planExempt);
+    const planTier = resolvePlanTier(currentSubscription?.plan?.name, planExempt);
+    const features = resolvePlanFeatures({
+      planName: currentSubscription?.plan?.name,
+      planExempt,
+      subscriptionStatus: currentSubscription?.status,
+    });
+
+    return {
+      user: sanitizedUser,
+      store: sanitizedStore,
+      token,
+      subscription: currentSubscription
+        ? {
+            id: currentSubscription.id,
+            status: currentSubscription.status,
+            plan: currentSubscription.plan,
+            endDate: currentSubscription.endDate,
+            planExempt,
+          }
+        : null,
+      planTier,
+      features,
+    };
+>>>>>>> main
   }
 
 
@@ -338,6 +721,7 @@ export class AuthService
   /**
    * Executes admin login logic.
    *
+<<<<<<< HEAD
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
    */
@@ -352,6 +736,88 @@ export class AuthService
     if (!owner.emailVerified) throw new AppError('AUTH-005', 401);
     const currentSubscription = await this.subscriptionService.getCurrentByStore(store.id);
     const isActive = this.subscriptionService.isActiveSubscription(currentSubscription);
+=======
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
+   * @date 2025-12-17
+   */
+  async adminLogin(identifier: string, password: string)
+  {
+    const normalizedIdentifier = String(identifier || '').trim().toLowerCase();
+    if (!normalizedIdentifier) throw new AppError('GEN-002', 400);
+
+    let store: any = null;
+    let loginUser: any = null;
+    let loginRole: 'ADMIN' | 'OPERATOR' = 'ADMIN';
+    const candidate = await this.userRepository.findByLoginIdentifier(normalizedIdentifier);
+    if (candidate) {
+      const valid = await this.comparePasswordWithLegacy(password, candidate);
+      if (valid) {
+        loginUser = candidate;
+
+        const ownedStore = await this.storeRepository.findByOwnerId(candidate.id);
+        if (ownedStore) {
+          store = ownedStore;
+          loginRole = 'ADMIN';
+        } else {
+          const memberships = await this.storeUserRepository.findActiveByUserId(candidate.id);
+          const membership = memberships?.[0];
+          if (!membership?.store?.id) {
+            throw new AppError('AUTH-022', 403);
+          }
+          store = membership.store;
+          loginRole = String(membership.role || 'OPERATOR').toUpperCase() === 'ADMIN' ? 'ADMIN' : 'OPERATOR';
+        }
+      }
+      // If identifier matched a user but password did not match, fallback to slug flow below.
+      // This avoids false AUTH-004 when identifier is also a valid store slug.
+    }
+
+    if (!store || !loginUser) {
+      // Backward compatibility for old flow using store slug.
+      store = await this.storeRepository.findBySlugWithOwner(normalizedIdentifier);
+      if (!store) throw new AppError('AUTH-004', 401);
+      const ownerUser = store.owner;
+      const ownerValid = ownerUser ? await this.comparePasswordWithLegacy(password, ownerUser) : false;
+
+      if (ownerValid) {
+        loginUser = ownerUser;
+        loginRole = 'ADMIN';
+      } else {
+        // Compatibilidade: slug + senha de usuário vinculado à loja (operador/admin).
+        const memberships = await this.storeUserRepository.listByStoreId(store.id);
+        let matchedMembership: any = null;
+        for (const membership of memberships || []) {
+          const memberUser = membership?.user;
+          if (!memberUser?.password) continue;
+          const valid = await this.comparePasswordWithLegacy(password, memberUser);
+          if (!valid) continue;
+          matchedMembership = membership;
+          break;
+        }
+        if (!matchedMembership?.user) {
+          throw new AppError('AUTH-004', 401);
+        }
+        loginUser = matchedMembership.user;
+        loginRole =
+          String(matchedMembership.role || 'OPERATOR').toUpperCase() === 'ADMIN'
+            ? 'ADMIN'
+            : 'OPERATOR';
+      }
+    }
+
+    if (!store || !loginUser) throw new AppError('STORE-001', 404);
+
+    if (!loginUser.emailVerified) {
+      throw new AppError('AUTH-005', 401, {
+        next: 'VERIFY_EMAIL',
+        email: loginUser.email,
+        emailMasked: this.maskEmail(loginUser.email),
+        resendCooldownSec: 60,
+      });
+    }
+    const currentSubscription = await this.subscriptionService.getCurrentByStore(store.id);
+    const isActive = Boolean(store?.settings?.planExempt) || this.subscriptionService.isActiveSubscription(currentSubscription);
+>>>>>>> main
     if (!isActive) {
       await this.throwPendingPayment(store.id);
     }
@@ -361,18 +827,31 @@ export class AuthService
     }
 
     const token = jwt.sign(
+<<<<<<< HEAD
       { sub: owner.id, storeId: store.id, role: 'ADMIN' },
+=======
+      { sub: loginUser.id, storeId: store.id, role: loginRole },
+>>>>>>> main
       env.jwtSecret,
       { expiresIn: '7d' }
     );
 
     const sanitizedOwner = {
+<<<<<<< HEAD
       id: owner.id,
       fullName: owner.fullName,
       email: owner.email,
       phone: owner.phone,
       address: owner.address,
       role: 'ADMIN',
+=======
+      id: loginUser.id,
+      fullName: loginUser.fullName,
+      email: loginUser.email,
+      phone: loginUser.phone,
+      address: loginUser.address,
+      role: loginRole,
+>>>>>>> main
     };
 
     const sanitizedStore = {
@@ -383,11 +862,26 @@ export class AuthService
       createdAt: store.createdAt,
       settings: store.settings,
       owner: {
+<<<<<<< HEAD
         id: owner.id,
         fullName: owner.fullName,
         phone: owner.phone,
       },
     };
+=======
+        id: store.owner?.id,
+        fullName: store.owner?.fullName,
+        phone: store.owner?.phone,
+      },
+    };
+    const planExempt = Boolean(store?.settings?.planExempt);
+    const planTier = resolvePlanTier(currentSubscription?.plan?.name, planExempt);
+    const features = resolvePlanFeatures({
+      planName: currentSubscription?.plan?.name,
+      planExempt,
+      subscriptionStatus: currentSubscription?.status,
+    });
+>>>>>>> main
 
     return {
       token,
@@ -399,8 +893,16 @@ export class AuthService
             status: currentSubscription.status,
             plan: currentSubscription.plan,
             endDate: currentSubscription.endDate,
+<<<<<<< HEAD
           }
         : null,
+=======
+            planExempt,
+          }
+        : null,
+      planTier,
+      features,
+>>>>>>> main
     };
   }
 
@@ -410,7 +912,11 @@ export class AuthService
   /**
    * Executes request password reset logic.
    *
+<<<<<<< HEAD
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+=======
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
+>>>>>>> main
    * @date 2025-12-17
    */
   async requestPasswordReset(email: string)
@@ -451,15 +957,23 @@ export class AuthService
   /**
    * Handles resend verification email.
    *
+<<<<<<< HEAD
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
    */
   async resendVerificationEmail(email: string) {
+=======
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
+   * @date 2025-12-17
+   */
+  async resendVerificationEmail(email: string, meta?: { ipAddress?: string | null }) {
+>>>>>>> main
     const normalizedEmail = email?.trim().toLowerCase();
     if (!normalizedEmail) throw new AppError('AUTH-006', 400);
 
     const user = await this.userRepository.findByEmail(normalizedEmail);
     if (!user) {
+<<<<<<< HEAD
       return { code: 'AUTH-S002' };
     }
     if (user.emailVerified) {
@@ -468,6 +982,30 @@ export class AuthService
 
     await this.sendVerificationEmail(user);
     return { code: 'AUTH-S002' };
+=======
+      return { code: 'AUTH-S002', next: 'VERIFY_EMAIL', cooldownSec: 60 };
+    }
+    if (user.emailVerified) {
+      return { code: 'AUTH-S002', next: 'VERIFY_EMAIL', cooldownSec: 60 };
+    }
+
+    const rate = await this.isVerificationResendAllowed(user.id, meta?.ipAddress);
+    if (!rate.allowed) {
+      return { code: 'AUTH-S002', next: 'VERIFY_EMAIL', cooldownSec: rate.cooldownSeconds };
+    }
+
+    if (user.userRole === 'MOTOBOY') {
+      await this.sendMotoboyVerificationEmail(user, meta?.ipAddress);
+    } else {
+      await this.sendVerificationEmail(user, meta?.ipAddress);
+    }
+    return {
+      code: 'AUTH-S002',
+      next: 'VERIFY_EMAIL',
+      cooldownSec: 60,
+      emailMasked: this.maskEmail(user.email),
+    };
+>>>>>>> main
   }
 
 
@@ -476,7 +1014,11 @@ export class AuthService
   /**
    * Executes reset password logic.
    *
+<<<<<<< HEAD
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+=======
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
+>>>>>>> main
    * @date 2025-12-17
    */
   async resetPassword(token: string, newPassword: string)
@@ -505,6 +1047,7 @@ export class AuthService
     return { code: 'AUTH-S003' };
   }
 
+<<<<<<< HEAD
   /**
    * Handles verify email.
    *
@@ -519,6 +1062,51 @@ export class AuthService
       where: { tokenHash },
       relations: ['user'],
     });
+=======
+  async changePassword(userId: string, currentPassword: string, newPassword: string) {
+    const normalizedUserId = String(userId || '').trim();
+    if (!normalizedUserId) throw new AppError('AUTH-001', 401);
+    if (!currentPassword) throw new AppError('AUTH-006', 400);
+    if (!newPassword || newPassword.length < 6) throw new AppError('AUTH-008', 400);
+
+    const user = await this.userRepository.findById(normalizedUserId);
+    if (!user) throw new AppError('AUTH-004', 401);
+
+    const matches = await bcrypt.compare(currentPassword, user.password);
+    if (!matches) throw new AppError('AUTH-004', 401);
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    await this.userRepository.save(user as any);
+    return { code: 'AUTH-S005' };
+  }
+
+  /**
+   * Handles verify email.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
+   * @date 2025-12-17
+   */
+  async verifyEmail(input: { token: string; email?: string }) {
+    const token = String(input?.token || '');
+    const normalizedEmail = input?.email?.trim().toLowerCase();
+    if (!token) throw new AppError('AUTH-007', 400);
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    const verificationRepo = AppDataSource.getRepository(EmailVerification);
+    let verification = null as EmailVerification | null;
+    if (normalizedEmail) {
+      verification = await verificationRepo
+        .createQueryBuilder('verification')
+        .leftJoinAndSelect('verification.user', 'user')
+        .where('verification.token_hash = :tokenHash', { tokenHash })
+        .andWhere('LOWER(user.email) = :email', { email: normalizedEmail })
+        .getOne();
+    } else {
+      verification = await verificationRepo.findOne({
+        where: { tokenHash },
+        relations: ['user'],
+      });
+    }
+>>>>>>> main
 
     let verifiedUser = verification?.user;
 
@@ -529,6 +1117,12 @@ export class AuthService
         const userRepo = AppDataSource.getRepository(User);
         const user = await userRepo.findOne({ where: { id: decoded.sub } });
         if (!user) throw new AppError('AUTH-007', 400);
+<<<<<<< HEAD
+=======
+        if (normalizedEmail && user.email.toLowerCase() !== normalizedEmail) {
+          throw new AppError('AUTH-007', 400);
+        }
+>>>>>>> main
         verifiedUser = user;
       } catch {
         throw new AppError('AUTH-007', 400);
@@ -616,7 +1210,11 @@ export class AuthService
   /**
    * Generates token.
    *
+<<<<<<< HEAD
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+=======
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
+>>>>>>> main
    * @date 2025-12-17
    */
   private generateToken(userId: string, storeId?: string)
@@ -630,7 +1228,11 @@ export class AuthService
   /**
    * Executes add days logic.
    *
+<<<<<<< HEAD
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+=======
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
+>>>>>>> main
    * @date 2025-12-17
    */
   private addDays(date: Date, days: number)
@@ -646,11 +1248,22 @@ export class AuthService
   /**
    * Executes throw pending payment logic.
    *
+<<<<<<< HEAD
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+=======
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
+>>>>>>> main
    * @date 2025-12-17
    */
   private async throwPendingPayment(storeId: string)
   {
+<<<<<<< HEAD
+=======
+    const store = await this.storeRepository.findById(storeId);
+    if (store?.settings?.planExempt) {
+      return;
+    }
+>>>>>>> main
     const payment = await this.paymentRepository.findLatestByStoreId(storeId);
     throw new AppError('PAY-010', 402, {
       paymentUrl: payment?.id ? `${env.appUrl}/payment/${payment.id}` : null,
@@ -664,10 +1277,17 @@ export class AuthService
   /**
    * Sends verification email.
    *
+<<<<<<< HEAD
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
    */
   private async sendVerificationEmail(user: User) {
+=======
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
+   * @date 2025-12-17
+   */
+  private async sendVerificationEmail(user: User, ipAddress?: string | null) {
+>>>>>>> main
     const token = jwt.sign(
       {
         sub: user.id,
@@ -680,6 +1300,14 @@ export class AuthService
     const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
     const verificationRepo = AppDataSource.getRepository(EmailVerification);
+<<<<<<< HEAD
+=======
+    const maxCountRows = await AppDataSource.query(
+      `SELECT COALESCE(MAX(resend_count), 0) AS max_count FROM email_verifications WHERE user_id = $1`,
+      [user.id]
+    );
+    const nextResendCount = Number(maxCountRows?.[0]?.max_count || 0) + 1;
+>>>>>>> main
 
     await verificationRepo
       .createQueryBuilder()
@@ -693,11 +1321,68 @@ export class AuthService
         user,
         tokenHash,
         expiresAt,
+<<<<<<< HEAD
+=======
+        requestIp: this.getClientIp(ipAddress),
+        resendCount: nextResendCount,
+        lastSentAt: new Date(),
+>>>>>>> main
       })
     );
 
     const link = `${env.appUrl}/verify-email?token=${encodeURIComponent(token)}`;
+<<<<<<< HEAD
     await this.emailService.sendEmailVerification(user.email, link);
+=======
+    await this.emailService.sendEmailVerification(user.email, link, token);
+  }
+
+  /**
+   * Sends motoboy verification email.
+   *
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
+   * @date 2026-01-29
+   */
+  private async sendMotoboyVerificationEmail(user: User, ipAddress?: string | null) {
+    const token = jwt.sign(
+      {
+        sub: user.id,
+        type: 'email-verify',
+        jti: crypto.randomBytes(16).toString('hex'),
+      },
+      env.jwtSecret,
+      { expiresIn: '24h' }
+    );
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const verificationRepo = AppDataSource.getRepository(EmailVerification);
+    const maxCountRows = await AppDataSource.query(
+      `SELECT COALESCE(MAX(resend_count), 0) AS max_count FROM email_verifications WHERE user_id = $1`,
+      [user.id]
+    );
+    const nextResendCount = Number(maxCountRows?.[0]?.max_count || 0) + 1;
+
+    await verificationRepo
+      .createQueryBuilder()
+      .update()
+      .set({ usedAt: new Date() })
+      .where('user_id = :userId AND used_at IS NULL', { userId: user.id })
+      .execute();
+
+    await verificationRepo.save(
+      verificationRepo.create({
+        user,
+        tokenHash,
+        expiresAt,
+        requestIp: this.getClientIp(ipAddress),
+        resendCount: nextResendCount,
+        lastSentAt: new Date(),
+      })
+    );
+
+    const link = `${env.appUrl}/verify-email?token=${encodeURIComponent(token)}`;
+    await this.emailService.sendMotoboyVerification(user.email, link, token);
+>>>>>>> main
   }
 
 
@@ -706,7 +1391,11 @@ export class AuthService
   /**
    * Executes notify signup logic.
    *
+<<<<<<< HEAD
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+=======
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
+>>>>>>> main
    * @date 2025-12-17
    */
   private async notifySignup(user: User, store: Store) {
@@ -732,7 +1421,11 @@ export class AuthService
   /**
    * Sends payment email.
    *
+<<<<<<< HEAD
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+=======
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
+>>>>>>> main
    * @date 2025-12-17
    */
   private sendPaymentEmail(email: string, payment: any)
@@ -746,7 +1439,11 @@ export class AuthService
         : payment.method === 'BOLETO'
         ? 'Boleto'
         : 'Cartão de crédito';
+<<<<<<< HEAD
     const subject = 'Pagamento pendente - Chama no Espeto';
+=======
+    const subject = 'Pagamento pendente - Jano Caminho';
+>>>>>>> main
     const text = [
       'Recebemos seu cadastro e o pagamento esta pendente.',
       `Forma: ${methodLabel}`,
@@ -768,7 +1465,11 @@ export class AuthService
       <div style="font-family: Arial, sans-serif; background: #f1f5f9; padding: 32px;">
         <div style="max-width: 540px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 18px; overflow: hidden;">
           <div style="padding: 24px; background: linear-gradient(135deg, #dc2626 0%, #f97316 100%);">
+<<<<<<< HEAD
             <img src="${logoUrl}" alt="Chama no Espeto" style="width: 96px; height: 96px; border-radius: 16px; border: 2px solid rgba(255,255,255,0.5);" />
+=======
+            <img src="${logoUrl}" alt="Jano Caminho" style="width: 96px; height: 96px; border-radius: 16px; border: 2px solid rgba(255,255,255,0.5);" />
+>>>>>>> main
             <p style="margin: 12px 0 0; color: #ffffff; font-size: 18px; font-weight: 700;">Pagamento pendente</p>
             <p style="margin: 4px 0 0; color: rgba(255,255,255,0.9); font-size: 13px;">Finalize para liberar sua loja</p>
           </div>
@@ -795,7 +1496,11 @@ export class AuthService
   /**
    * Generates unique slug.
    *
+<<<<<<< HEAD
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+=======
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
+>>>>>>> main
    * @date 2025-12-17
    */
   private async generateUniqueSlug(name: string)
@@ -811,4 +1516,8 @@ export class AuthService
 
     return candidate;
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> main

@@ -12,11 +12,24 @@
   "AUTH-009": "CPF ou CNPJ inválido.",
   "AUTH-010": "CPF/CNPJ já cadastrado.",
   "AUTH-011": "E-mail já cadastrado.",
+<<<<<<< HEAD
   "AUTH-012": "Aceite os termos de uso e política de privacidade.",
   "AUTH-013": "Selecione um plano para continuar.",
   "AUTH-014": "Método de pagamento inválido.",
   "AUTH-020": "SUPER_ADMIN não configurado no banco.",
   "AUTH-021": "Credenciais inválidas.",
+=======
+  "AUTH-015": "Este e-mail já está vinculado a uma loja. Use outro e-mail para o entregador.",
+  "BILL-001": "Pendência de entrega não paga. Regularize para continuar.",
+  "AUTH-012": "Aceite os termos de uso e política de privacidade.",
+  "AUTH-013": "Selecione um plano para continuar.",
+  "AUTH-014": "Método de pagamento inválido.",
+  "AUTH-016": "Telefone já cadastrado.",
+  "AUTH-017": "Telefone inválido.",
+  "AUTH-020": "SUPER_ADMIN não configurado no banco.",
+  "AUTH-021": "Credenciais inválidas.",
+  "AUTH-022": "Usuário sem loja vinculada.",
+>>>>>>> main
   "AUTH-S001": "Se o e-mail existir, enviaremos instruções.",
   "AUTH-S002": "Se o e-mail existir, enviaremos instruções.",
   "AUTH-S003": "Senha atualizada com sucesso.",
@@ -30,6 +43,10 @@
   "SUB-004": "Plano indisponível para assinatura.",
   "SUB-005": "Assinatura suspensa. Entre em contato com o suporte.",
   "SUB-006": "Limite de tentativas de pagamento atingido. Tente novamente mais tarde.",
+<<<<<<< HEAD
+=======
+  "SUB-007": "Já existe um pagamento pendente para esta loja. Aguarde expirar para tentar novamente.",
+>>>>>>> main
   "PAY-001": "Pagamento não encontrado.",
   "PAY-002": "Pagamento falhou.",
   "PAY-003": "Mercado Pago não configurado.",
@@ -44,5 +61,36 @@
   "PROD-002": "Produto inválido para esta loja.",
   "ORDER-001": "Pedido não encontrado.",
   "ORDER-002": "Tipo de pedido não permitido para esta loja.",
+<<<<<<< HEAD
   "ORDER-003": "Mesa já está ocupada. Finalize o pedido atual antes de criar outro."
+=======
+  "ORDER-003": "Mesa já está ocupada. Finalize o pedido atual antes de criar outro.",
+  "ORDER-004": "Transição de status inválida para este pedido.",
+  "DELIV-001": "Você já possui uma entrega ativa. Finalize a entrega atual antes de aceitar outra.",
+  "DELIV-002": "Transição inválida do status da entrega.",
+  "DELIV-003": "Este pedido não é de entrega.",
+  "DELIV-004": "Pedido não está disponível para entrega.",
+  "DELIV-005": "Entrega expirada. Volte para a fila e escolha outra.",
+  "DELIV-006": "Entrega já foi aceita por outro entregador.",
+  "DELIV-007": "Entrega não encontrada.",
+  "DELIV-008": "Não é possível cancelar após a retirada.",
+  "MOTO-010": "Este pedido não é de entrega.",
+  "MOTO-011": "Pedido não está disponível para entrega.",
+  "MOTO-012": "Entregador não está vinculado a esta loja.",
+  "MOTO-013": "Entrega já foi aceita por outro entregador.",
+  "MOTO-014": "Você não tem permissão para atualizar este pedido.",
+  "MOTO-015": "Status do pedido inválido para esta operação.",
+  "MOTO-016": "Não é possível finalizar este pedido.",
+  "MOTO-026": "Limite de tentativas de validação atingido. Aguarde 24 horas para reenviar a selfie.",
+  "MOTO-027": "Informe o tipo de veículo (moto, carro, etc.) para continuar.",
+  "MOTO-028": "Placa inválida. Use o formato ABC1234 ou ABC1D23.",
+  "MOTO-029": "Informe seu endereço completo (cidade, UF e endereço).",
+  "MOTO-030": "Envie os documentos obrigatórios para solicitar vínculo com lojas.",
+  "MOTO-031": "KYC do entregador ainda está em análise pela plataforma. Aguarde aprovação para concluir o vínculo.",
+  "MOTO-032": "Para moto, a categoria da CNH deve incluir a letra A.",
+  "MOTO-033": "A chave PIX deve ser um CPF válido do entregador.",
+  "MOTO-034": "A chave PIX precisa ser o mesmo CPF cadastrado no perfil do entregador.",
+  "REVIEW-003": "Este pedido não possui gorjeta para repasse.",
+  "REVIEW-004": "A gorjeta ainda não foi paga pelo cliente."
+>>>>>>> main
 }
