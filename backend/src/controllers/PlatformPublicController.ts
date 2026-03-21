@@ -18,9 +18,9 @@ import { Inject } from '../ioc/ioc';
 @RouterController(Tokens.Common.Controller.PlatformPublicController)
 export class PlatformPublicController extends BaseController {
   constructor(
-    @Inject(Tokens.Common.DataLayer.StoreRepository) private storeDao: StoreDao,
-    @Inject(Tokens.Common.DataLayer.SubscriptionRepository) private subscriptionDao: SubscriptionDao,
-    @Inject(Tokens.Common.DataLayer.OrderRepository) private orderDao: OrderDao
+    @Inject(Tokens.Common.DataLayer.StoreDao) private storeDao: StoreDao,
+    @Inject(Tokens.Common.DataLayer.SubscriptionDao) private subscriptionDao: SubscriptionDao,
+    @Inject(Tokens.Common.DataLayer.OrderDao) private orderDao: OrderDao
   ) {
     super('/platform/public');
   }

@@ -5,7 +5,7 @@ import { Tokens } from '../../ioc/injectiontokens';
 import { GenericDao } from './generic.dao';
 import { In } from 'typeorm';
 
-@Provide(Tokens.Common.DataLayer.SubscriptionRepository)
+@Provide(Tokens.Common.DataLayer.SubscriptionDao)
 export class SubscriptionDao extends GenericDao<SubscriptionDto, Subscription> {
   constructor() {
     super(SubscriptionDto);

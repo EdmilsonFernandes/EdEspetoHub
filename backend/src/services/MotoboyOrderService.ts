@@ -18,9 +18,9 @@ import { DatabaseService } from '../database/data-base.service';
 @Provide(Tokens.Common.Service.MotoboyOrderService)
 export class MotoboyOrderService {
   constructor(
-    @Inject(Tokens.Common.DataLayer.OrderRepository) private orderDao: OrderDao,
-    @Inject(Tokens.Common.DataLayer.OrderDeliveryRepository) private orderDeliveryDao: OrderDeliveryDao,
-    @Inject(Tokens.Common.DataLayer.MotoboyStoreRepository) private motoboyStoreDao: MotoboyStoreDao,
+    @Inject(Tokens.Common.DataLayer.OrderDao) private orderDao: OrderDao,
+    @Inject(Tokens.Common.DataLayer.OrderDeliveryDao) private orderDeliveryDao: OrderDeliveryDao,
+    @Inject(Tokens.Common.DataLayer.MotoboyStoreDao) private motoboyStoreDao: MotoboyStoreDao,
     @Inject(Tokens.Common.Service.DeliveryBillingService) private deliveryBillingService: DeliveryBillingService,
     @Inject(Tokens.Common.DataLayer.DatabaseService) private databaseService: DatabaseService
   ) {}

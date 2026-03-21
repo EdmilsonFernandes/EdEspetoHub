@@ -11,7 +11,7 @@ export class DeliveryExpirationJob extends BaseJob {
 
   constructor(
     @Inject(Tokens.Utils.LoggerService) protected readonly logger: LoggerService,
-    @Inject(Tokens.Common.DataLayer.OrderDeliveryRepository) private readonly orderDeliveryDao: OrderDeliveryDao
+    @Inject(Tokens.Common.DataLayer.OrderDeliveryDao) private readonly orderDeliveryDao: OrderDeliveryDao
   ) {
     super();
   }

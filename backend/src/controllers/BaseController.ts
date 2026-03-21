@@ -2,6 +2,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { BaseRouterDefinition } from '../models/base-router.model';
 import { Tokens } from '../ioc/injectiontokens';
 import { Provide } from '../ioc/ioc';
+import { unmanaged } from 'inversify';
 import { respondWithError } from '../errors/respondWithError';
 import 'reflect-metadata';
 
@@ -12,7 +13,10 @@ export abstract class BaseController implements BaseRouterDefinition {
   public version: string;
   public controllerReadOrder: number = 0;
 
-  constructor(basePath: string, version: string = 'v1') {
+  constructor(
+    @unmanaged() basePath: string, 
+    @unmanaged() version: string = 'v1'
+  ) {
     this.router = Router();
     this.basePath = basePath;
     this.version = version;

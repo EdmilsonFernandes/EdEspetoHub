@@ -4,7 +4,7 @@ import { UserDto } from '../../models/dtos/UserDto';
 import { Tokens } from '../../ioc/injectiontokens';
 import { GenericDao } from './generic.dao';
 
-@Provide(Tokens.Common.DataLayer.UserRepository) // Keeping token same for now to avoid massive service changes
+@Provide(Tokens.Common.DataLayer.UserDao) // Keeping token same for now to avoid massive service changes
 export class UserDao extends GenericDao<UserDto, User> {
   constructor() {
     super(UserDto);

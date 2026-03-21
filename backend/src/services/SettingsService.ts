@@ -13,7 +13,7 @@ import { Tokens } from '../ioc/injectiontokens';
 @Provide(Tokens.Common.Service.SettingsService)
 export class SettingsService {
   constructor(
-    @Inject(Tokens.Common.DataLayer.SiteSettingRepository) private siteSettingDao: SiteSettingDao
+    @Inject(Tokens.Common.DataLayer.SiteSettingDao) private siteSettingDao: SiteSettingDao
   ) {}
 
   async getValue(key: string) {

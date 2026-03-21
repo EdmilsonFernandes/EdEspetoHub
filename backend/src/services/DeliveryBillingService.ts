@@ -21,10 +21,10 @@ import { DatabaseService } from '../database/data-base.service';
 export class DeliveryBillingService {
   constructor(
     @Inject(Tokens.Common.Service.SettingsService) private settingsService: SettingsService,
-    @Inject(Tokens.Common.DataLayer.StoreRepository) private storeDao: StoreDao,
+    @Inject(Tokens.Common.DataLayer.StoreDao) private storeDao: StoreDao,
     @Inject(Tokens.Common.Service.MercadoPagoService) private mpService: MercadoPagoService,
-    @Inject(Tokens.Common.DataLayer.DeliveryBillingCycleRepository) private cycleDao: DeliveryBillingCycleDao,
-    @Inject(Tokens.Common.DataLayer.DeliveryBillingChargeRepository) private chargeDao: DeliveryBillingChargeDao,
+    @Inject(Tokens.Common.DataLayer.DeliveryBillingCycleDao) private cycleDao: DeliveryBillingCycleDao,
+    @Inject(Tokens.Common.DataLayer.DeliveryBillingChargeDao) private chargeDao: DeliveryBillingChargeDao,
     @Inject(Tokens.Common.DataLayer.DatabaseService) private databaseService: DatabaseService
   ) {}
 

@@ -4,7 +4,7 @@ import { OrderReviewDto } from '../../models/dtos/OrderReviewDto';
 import { Tokens } from '../../ioc/injectiontokens';
 import { GenericDao } from './generic.dao';
 
-@Provide(Tokens.Common.DataLayer.OrderReviewRepository)
+@Provide(Tokens.Common.DataLayer.OrderReviewDao)
 export class OrderReviewDao extends GenericDao<OrderReviewDto, OrderReview> {
   constructor() {
     super(OrderReviewDto);

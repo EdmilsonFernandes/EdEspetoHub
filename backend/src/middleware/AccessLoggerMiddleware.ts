@@ -6,7 +6,7 @@ import { AccessLogDao } from '../database/dao/AccessLogDao';
 @Provide(Tokens.Middleware.AccessLogger)
 export class AccessLoggerMiddleware {
   constructor(
-    @Inject(Tokens.Common.DataLayer.AccessLogRepository) private readonly accessLogDao: AccessLogDao
+    @Inject(Tokens.Common.DataLayer.AccessLogDao) private readonly accessLogDao: AccessLogDao
   ) {}
 
   public handle(req: Request, res: Response, next: NextFunction): void {

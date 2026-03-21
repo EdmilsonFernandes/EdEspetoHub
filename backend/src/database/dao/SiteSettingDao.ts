@@ -4,7 +4,7 @@ import { SiteSettingDto } from '../../models/dtos/SiteSettingDto';
 import { Tokens } from '../../ioc/injectiontokens';
 import { GenericDao } from './generic.dao';
 
-@Provide(Tokens.Common.DataLayer.SiteSettingRepository)
+@Provide(Tokens.Common.DataLayer.SiteSettingDao)
 export class SiteSettingDao extends GenericDao<SiteSettingDto, SiteSetting> {
   constructor() {
     super(SiteSettingDto);

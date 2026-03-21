@@ -4,7 +4,7 @@ import { PaymentDto } from '../../models/dtos/PaymentDto';
 import { Tokens } from '../../ioc/injectiontokens';
 import { GenericDao } from './generic.dao';
 
-@Provide(Tokens.Common.DataLayer.PaymentRepository)
+@Provide(Tokens.Common.DataLayer.PaymentDao)
 export class PaymentDao extends GenericDao<PaymentDto, Payment> {
   constructor() {
     super(PaymentDto);

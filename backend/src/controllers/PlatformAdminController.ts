@@ -27,13 +27,13 @@ const log = logger.child({ scope: 'PlatformAdminController' });
 @RouterController(Tokens.Common.Controller.PlatformAdminController)
 export class PlatformAdminController extends BaseController {
   constructor(
-    @Inject(Tokens.Common.DataLayer.StoreRepository) private storeDao: StoreDao,
+    @Inject(Tokens.Common.DataLayer.StoreDao) private storeDao: StoreDao,
     @Inject(Tokens.Common.Service.SubscriptionService) private subscriptionService: SubscriptionService,
-    @Inject(Tokens.Common.DataLayer.PaymentRepository) private paymentDao: PaymentDao,
-    @Inject(Tokens.Common.DataLayer.PaymentEventRepository) private paymentEventDao: PaymentEventDao,
-    @Inject(Tokens.Common.DataLayer.OrderRepository) private orderDao: OrderDao,
-    @Inject(Tokens.Common.DataLayer.SubscriptionRepository) private subscriptionDao: SubscriptionDao,
-    @Inject(Tokens.Common.DataLayer.AccessLogRepository) private accessLogDao: AccessLogDao,
+    @Inject(Tokens.Common.DataLayer.PaymentDao) private paymentDao: PaymentDao,
+    @Inject(Tokens.Common.DataLayer.PaymentEventDao) private paymentEventDao: PaymentEventDao,
+    @Inject(Tokens.Common.DataLayer.OrderDao) private orderDao: OrderDao,
+    @Inject(Tokens.Common.DataLayer.SubscriptionDao) private subscriptionDao: SubscriptionDao,
+    @Inject(Tokens.Common.DataLayer.AccessLogDao) private accessLogDao: AccessLogDao,
     @Inject(Tokens.Common.Service.SettingsService) private settingsService: SettingsService,
     @Inject(Tokens.Common.DataLayer.DatabaseService) private databaseService: DatabaseService
   ) {

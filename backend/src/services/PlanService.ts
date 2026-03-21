@@ -13,7 +13,7 @@ import { Tokens } from '../ioc/injectiontokens';
 @Provide(Tokens.Common.Service.PlanService)
 export class PlanService {
   constructor(
-    @Inject(Tokens.Common.DataLayer.PlanRepository) private planDao: PlanDao
+    @Inject(Tokens.Common.DataLayer.PlanDao) private planDao: PlanDao
   ) {}
 
   async listPublic() {

@@ -81,7 +81,7 @@ export class MigrationService {
         INSERT INTO platform_admins (username, password_hash)
         SELECT 'chamanoespetoadmin', crypt('chamanoespeto2026#!', gen_salt('bf'))
         WHERE NOT EXISTS (
-          SELECT 1 FROM platform_admins WHERE username = 'chamanoespeto'
+          SELECT 1 FROM platform_admins WHERE username = 'chamanoespetoadmin'
         );
       `);
       

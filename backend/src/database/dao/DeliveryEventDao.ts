@@ -4,7 +4,7 @@ import { DeliveryEventDto } from '../../models/dtos/DeliveryEventDto';
 import { Tokens } from '../../ioc/injectiontokens';
 import { GenericDao } from './generic.dao';
 
-@Provide(Tokens.Common.DataLayer.DeliveryEventRepository)
+@Provide(Tokens.Common.DataLayer.DeliveryEventDao)
 export class DeliveryEventDao extends GenericDao<DeliveryEventDto, DeliveryEvent> {
   constructor() {
     super(DeliveryEventDto);

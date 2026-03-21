@@ -4,7 +4,7 @@ import { AccessLogDto } from '../../models/dtos/AccessLogDto';
 import { Tokens } from '../../ioc/injectiontokens';
 import { GenericDao } from './generic.dao';
 
-@Provide(Tokens.Common.DataLayer.AccessLogRepository)
+@Provide(Tokens.Common.DataLayer.AccessLogDao)
 export class AccessLogDao extends GenericDao<AccessLogDto, AccessLog> {
   constructor() {
     super(AccessLogDto);

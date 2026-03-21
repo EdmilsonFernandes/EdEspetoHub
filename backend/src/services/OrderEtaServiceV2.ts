@@ -18,7 +18,7 @@ export class OrderEtaServiceV2 {
   private log = logger.child({ scope: 'OrderEtaServiceV2' });
 
   constructor(
-    @Inject(Tokens.Common.DataLayer.OrderEtaEstimateRepository) private etaDao: OrderEtaEstimateDao,
+    @Inject(Tokens.Common.DataLayer.OrderEtaEstimateDao) private etaDao: OrderEtaEstimateDao,
     @Inject(Tokens.Common.DataLayer.DatabaseService) private databaseService: DatabaseService
   ) {}
 

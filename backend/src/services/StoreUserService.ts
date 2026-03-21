@@ -17,9 +17,9 @@ import { Tokens } from '../ioc/injectiontokens';
 @Provide(Tokens.Common.Service.StoreUserService)
 export class StoreUserService {
   constructor(
-    @Inject(Tokens.Common.DataLayer.StoreRepository) private storeDao: StoreDao,
-    @Inject(Tokens.Common.DataLayer.StoreUserRepository) private storeUserDao: StoreUserDao,
-    @Inject(Tokens.Common.DataLayer.UserRepository) private userDao: UserDao
+    @Inject(Tokens.Common.DataLayer.StoreDao) private storeDao: StoreDao,
+    @Inject(Tokens.Common.DataLayer.StoreUserDao) private storeUserDao: StoreUserDao,
+    @Inject(Tokens.Common.DataLayer.UserDao) private userDao: UserDao
   ) {}
 
   async listByStore(storeId: string, authStoreId?: string) {

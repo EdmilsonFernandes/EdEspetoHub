@@ -20,10 +20,10 @@ import { DatabaseService } from '../database/data-base.service';
 @Provide(Tokens.Common.Service.SubscriptionService)
 export class SubscriptionService {
   constructor(
-    @Inject(Tokens.Common.DataLayer.PlanRepository) private planDao: PlanDao,
-    @Inject(Tokens.Common.DataLayer.StoreRepository) private storeDao: StoreDao,
-    @Inject(Tokens.Common.DataLayer.SubscriptionRepository) private subscriptionDao: SubscriptionDao,
-    @Inject(Tokens.Common.DataLayer.PaymentRepository) private paymentDao: PaymentDao,
+    @Inject(Tokens.Common.DataLayer.PlanDao) private planDao: PlanDao,
+    @Inject(Tokens.Common.DataLayer.StoreDao) private storeDao: StoreDao,
+    @Inject(Tokens.Common.DataLayer.SubscriptionDao) private subscriptionDao: SubscriptionDao,
+    @Inject(Tokens.Common.DataLayer.PaymentDao) private paymentDao: PaymentDao,
     @Inject(Tokens.Common.Service.EmailService) private emailService: EmailService,
     @Inject(Tokens.Common.Service.PaymentService) private paymentService: PaymentService,
     @Inject(Tokens.Common.Service.MercadoPagoService) private mercadoPago: MercadoPagoService,

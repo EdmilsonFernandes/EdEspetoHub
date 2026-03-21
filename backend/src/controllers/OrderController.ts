@@ -27,8 +27,8 @@ export class OrderController extends BaseController {
   constructor(
     @Inject(Tokens.Common.Service.OrderService) private orderService: OrderService,
     @Inject(Tokens.Common.Service.OrderEtaServiceV2) private orderEtaServiceV2: OrderEtaServiceV2,
-    @Inject(Tokens.Common.DataLayer.OrderDeliveryRepository) private orderDeliveryDao: OrderDeliveryDao,
-    @Inject(Tokens.Common.DataLayer.MotoboyRepository) private motoboyDao: MotoboyDao,
+    @Inject(Tokens.Common.DataLayer.OrderDeliveryDao) private orderDeliveryDao: OrderDeliveryDao,
+    @Inject(Tokens.Common.DataLayer.MotoboyDao) private motoboyDao: MotoboyDao,
     @Inject(Tokens.Common.DataLayer.DatabaseService) private databaseService: DatabaseService,
     @Inject(Tokens.Utils.CryptoUtil) private cryptoUtil: CryptoUtil
   ) {

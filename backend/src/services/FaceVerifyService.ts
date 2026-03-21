@@ -19,8 +19,8 @@ export class FaceVerifyService {
   private log = logger.child({ scope: 'FaceVerifyService' });
 
   constructor(
-    @Inject(Tokens.Common.DataLayer.MotoboyRepository) private motoboyDao: MotoboyDao,
-    @Inject(Tokens.Common.DataLayer.MotoboyDocumentRepository) private motoboyDocumentDao: MotoboyDocumentDao,
+    @Inject(Tokens.Common.DataLayer.MotoboyDao) private motoboyDao: MotoboyDao,
+    @Inject(Tokens.Common.DataLayer.MotoboyDocumentDao) private motoboyDocumentDao: MotoboyDocumentDao,
     @Inject(Tokens.Common.DataLayer.DatabaseService) private databaseService: DatabaseService
   ) {}
 

@@ -20,7 +20,7 @@ import { DatabaseService } from '../database/data-base.service';
 export class PaymentService {
   constructor(
     @Inject(Tokens.Common.Service.MercadoPagoService) private mercadoPago: MercadoPagoService,
-    @Inject(Tokens.Common.DataLayer.PaymentEventRepository) private paymentEventDao: PaymentEventDao,
+    @Inject(Tokens.Common.DataLayer.PaymentEventDao) private paymentEventDao: PaymentEventDao,
     @Inject(Tokens.Common.Service.EmailService) private emailService: EmailService,
     @Inject(Tokens.Common.Service.DeliveryBillingService) private deliveryBillingService: DeliveryBillingService,
     @Inject(Tokens.Common.Service.OrderReviewService) private orderReviewService: OrderReviewService,

@@ -9,8 +9,8 @@ import { AppError } from '../errors/AppError';
 @Provide(Tokens.Middleware.SubscriptionGuard)
 export class SubscriptionGuardMiddleware {
   constructor(
-    @Inject(Tokens.Common.DataLayer.SubscriptionRepository) private readonly subscriptionDao: SubscriptionDao,
-    @Inject(Tokens.Common.DataLayer.StoreRepository) private readonly storeDao: StoreDao
+    @Inject(Tokens.Common.DataLayer.SubscriptionDao) private readonly subscriptionDao: SubscriptionDao,
+    @Inject(Tokens.Common.DataLayer.StoreDao) private readonly storeDao: StoreDao
   ) {}
 
   public async handle(req: Request, res: Response, next: NextFunction): Promise<void> {

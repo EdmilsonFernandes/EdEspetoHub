@@ -19,8 +19,8 @@ import { BusinessUtil } from '../utils/BusinessUtil';
 @Provide(Tokens.Common.Service.ProductService)
 export class ProductService {
   constructor(
-    @Inject(Tokens.Common.DataLayer.ProductRepository) private productDao: ProductDao,
-    @Inject(Tokens.Common.DataLayer.StoreRepository) private storeDao: StoreDao,
+    @Inject(Tokens.Common.DataLayer.ProductDao) private productDao: ProductDao,
+    @Inject(Tokens.Common.DataLayer.StoreDao) private storeDao: StoreDao,
     @Inject(Tokens.Utils.FileUtil) private fileUtil: FileUtil,
     @Inject(Tokens.Utils.BusinessUtil) private businessUtil: BusinessUtil
   ) {}

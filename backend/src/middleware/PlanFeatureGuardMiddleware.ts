@@ -10,7 +10,7 @@ import { resolvePlanFeatures, PlanFeatureKey } from '../config/planFeatures';
 @Provide(Tokens.Middleware.PlanFeatureGuard)
 export class PlanFeatureGuardMiddleware {
   constructor(
-    @Inject(Tokens.Common.DataLayer.StoreRepository) private readonly storeDao: StoreDao,
+    @Inject(Tokens.Common.DataLayer.StoreDao) private readonly storeDao: StoreDao,
     @Inject(Tokens.Common.Service.SubscriptionService) private readonly subscriptionService: SubscriptionService
   ) {}
 

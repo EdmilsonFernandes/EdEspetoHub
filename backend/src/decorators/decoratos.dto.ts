@@ -2,11 +2,15 @@ import 'reflect-metadata';
 
 export type EntityType<T> = { new(): T };
 const DTO_PROPERTIES = 'dto:properties';
+const DTO_ENTITY = 'dto:entity';
 
 export function DtosEntity<T, C extends { new(...args: any[]): T }>(entityClass: C)
 {
   return function <O extends { new(...args: any[]): {} }>(target: O)
   {
+    // Store the entity class on the target constructor
+    Reflect.defineMetadata(DTO_ENTITY, entityClass, target);
+
     return class extends target
     {
       public get entity$()
@@ -61,15 +65,30 @@ export class GenericDto<O, T>
     return entity as unknown as O;
   }
 
-  public static getEntityFromDto<T>(dto: { new(): any }): EntityType<T>
+  public static getEntityFromDto<T>(dto: { new(...args: any[]): any }): EntityType<T>
   {
-    const dtoInstance = new dto();
-
-    if (!dtoInstance.entity$)
-    {
-      throw new ReferenceError('This is not a valid DTO!');
+    // Try to get metadata from the constructor directly (class decorators might wrap it)
+    let entityClass = Reflect.getMetadata(DTO_ENTITY, dto);
+    
+    // If not found, try the prototype (to handle cases where the class was extended by the decorator)
+    if (!entityClass && (dto as any).prototype) {
+        entityClass = Reflect.getMetadata(DTO_ENTITY, Object.getPrototypeOf(dto));
     }
 
-    return dtoInstance.entity$.entity;
+    if (!entityClass)
+    {
+      // Fallback: Try to instantiate once to see if it's using the old getter pattern
+      try {
+          const instance = new dto();
+          if (instance.entity$) {
+              return instance.entity$.entity;
+          }
+      } catch (e) {
+          // Ignore instantiation errors
+      }
+      throw new ReferenceError(`Class ${dto.name} is not a valid DTO! Missing @DtosEntity decorator.`);
+    }
+
+    return entityClass;
   }
 }

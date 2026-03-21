@@ -19,11 +19,8 @@ CREATE TABLE IF NOT EXISTS users (
   document TEXT,
   document_type TEXT,
   address TEXT,
-<<<<<<< HEAD
-=======
   profile_image_url TEXT,
   user_role TEXT NOT NULL DEFAULT 'STORE_OWNER',
->>>>>>> main
   terms_accepted_at TIMESTAMPTZ,
   lgpd_accepted_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -48,17 +45,12 @@ CREATE TABLE IF NOT EXISTS store_settings (
   store_id UUID NOT NULL UNIQUE REFERENCES stores(id) ON DELETE CASCADE,
   logo_url TEXT,
   description TEXT,
-<<<<<<< HEAD
-=======
   address TEXT,
->>>>>>> main
   primary_color TEXT NOT NULL DEFAULT '#b91c1c',
   secondary_color TEXT,
   pix_key TEXT,
   contact_email TEXT,
   promo_message TEXT,
-<<<<<<< HEAD
-=======
   prep_base_minutes INT,
   prep_per_item_minutes INT,
   queue_capacity_per_hour INT,
@@ -68,51 +60,10 @@ CREATE TABLE IF NOT EXISTS store_settings (
   plan_exempt_label TEXT,
   delivery_radius_km NUMERIC(10,2),
   delivery_fee NUMERIC(10,2),
->>>>>>> main
   social_links JSONB DEFAULT '[]',
-  opening_hours JSONB DEFAULT '[]'
+  opening_hours JSONB DEFAULT '[]',
+  order_types JSONB DEFAULT '["delivery","pickup","table"]'
 );
-
-ALTER TABLE store_settings
-ADD COLUMN IF NOT EXISTS social_links JSONB DEFAULT '[]';
-ALTER TABLE store_settings
-ADD COLUMN IF NOT EXISTS opening_hours JSONB DEFAULT '[]';
-ALTER TABLE store_settings
-ADD COLUMN IF NOT EXISTS order_types JSONB DEFAULT '["delivery","pickup","table"]';
-ALTER TABLE store_settings
-ADD COLUMN IF NOT EXISTS description TEXT;
-ALTER TABLE store_settings
-<<<<<<< HEAD
-=======
-ADD COLUMN IF NOT EXISTS address TEXT;
-ALTER TABLE store_settings
->>>>>>> main
-ADD COLUMN IF NOT EXISTS pix_key TEXT;
-ALTER TABLE store_settings
-ADD COLUMN IF NOT EXISTS contact_email TEXT;
-ALTER TABLE store_settings
-ADD COLUMN IF NOT EXISTS promo_message TEXT;
-<<<<<<< HEAD
-=======
-ALTER TABLE store_settings
-ADD COLUMN IF NOT EXISTS prep_base_minutes INT;
-ALTER TABLE store_settings
-ADD COLUMN IF NOT EXISTS prep_per_item_minutes INT;
-ALTER TABLE store_settings
-ADD COLUMN IF NOT EXISTS queue_capacity_per_hour INT;
-ALTER TABLE store_settings
-ADD COLUMN IF NOT EXISTS queue_buffer_minutes INT;
-ALTER TABLE store_settings
-ADD COLUMN IF NOT EXISTS eta_buffer_minutes INT;
-ALTER TABLE store_settings
-ADD COLUMN IF NOT EXISTS plan_exempt BOOLEAN DEFAULT FALSE;
-ALTER TABLE store_settings
-ADD COLUMN IF NOT EXISTS plan_exempt_label TEXT;
-ALTER TABLE store_settings
-ADD COLUMN IF NOT EXISTS delivery_radius_km NUMERIC(10,2);
-ALTER TABLE store_settings
-ADD COLUMN IF NOT EXISTS delivery_fee NUMERIC(10,2);
->>>>>>> main
 
 CREATE TABLE IF NOT EXISTS products (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -125,12 +76,6 @@ CREATE TABLE IF NOT EXISTS products (
   description TEXT,
   image_url TEXT,
   is_featured BOOLEAN NOT NULL DEFAULT FALSE,
-<<<<<<< HEAD
-  active BOOLEAN NOT NULL DEFAULT TRUE,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-=======
   manage_stock BOOLEAN NOT NULL DEFAULT FALSE,
   stock_quantity INT NOT NULL DEFAULT 0,
   low_stock_alert INT NOT NULL DEFAULT 3,
@@ -150,7 +95,6 @@ CREATE TABLE IF NOT EXISTS store_users (
   UNIQUE (store_id, user_id)
 );
 
->>>>>>> main
 CREATE TABLE IF NOT EXISTS orders (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
@@ -161,27 +105,12 @@ CREATE TABLE IF NOT EXISTS orders (
   type TEXT NOT NULL DEFAULT 'delivery',
   status TEXT NOT NULL DEFAULT 'pending',
   payment_method TEXT,
-<<<<<<< HEAD
-=======
   payment_status TEXT NOT NULL DEFAULT 'PENDING',
   cash_tendered NUMERIC(10,2),
   delivery_fee NUMERIC(10,2),
->>>>>>> main
   total NUMERIC(10,2) NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-
-ALTER TABLE orders
-ADD COLUMN IF NOT EXISTS table_number TEXT;
-<<<<<<< HEAD
-=======
-ALTER TABLE orders
-ADD COLUMN IF NOT EXISTS cash_tendered NUMERIC(10,2);
-ALTER TABLE orders
-ADD COLUMN IF NOT EXISTS delivery_fee NUMERIC(10,2);
-ALTER TABLE orders
-ADD COLUMN IF NOT EXISTS payment_status TEXT NOT NULL DEFAULT 'PENDING';
->>>>>>> main
 
 CREATE TABLE IF NOT EXISTS order_items (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -190,53 +119,10 @@ CREATE TABLE IF NOT EXISTS order_items (
   quantity INTEGER NOT NULL,
   price NUMERIC(10,2) NOT NULL,
   cooking_point TEXT,
-<<<<<<< HEAD
-  pass_skewer BOOLEAN NOT NULL DEFAULT FALSE
-=======
   pass_skewer BOOLEAN NOT NULL DEFAULT FALSE,
   selected_modifiers JSONB,
   is_printed BOOLEAN NOT NULL DEFAULT FALSE
->>>>>>> main
 );
-
-ALTER TABLE products
-ADD COLUMN IF NOT EXISTS description TEXT;
-ALTER TABLE products
-<<<<<<< HEAD
-=======
-ADD COLUMN IF NOT EXISTS active BOOLEAN NOT NULL DEFAULT TRUE;
-ALTER TABLE products
->>>>>>> main
-ADD COLUMN IF NOT EXISTS is_featured BOOLEAN NOT NULL DEFAULT FALSE;
-ALTER TABLE products
-ADD COLUMN IF NOT EXISTS promo_price NUMERIC(10,2);
-ALTER TABLE products
-ADD COLUMN IF NOT EXISTS promo_active BOOLEAN NOT NULL DEFAULT FALSE;
-<<<<<<< HEAD
-=======
-ALTER TABLE products
-ADD COLUMN IF NOT EXISTS availability_days JSONB;
-ALTER TABLE products
-ADD COLUMN IF NOT EXISTS modifiers JSONB;
-ALTER TABLE products
-ADD COLUMN IF NOT EXISTS manage_stock BOOLEAN NOT NULL DEFAULT FALSE;
-ALTER TABLE products
-ADD COLUMN IF NOT EXISTS stock_quantity INT NOT NULL DEFAULT 0;
-ALTER TABLE products
-ADD COLUMN IF NOT EXISTS low_stock_alert INT NOT NULL DEFAULT 3;
->>>>>>> main
-
-ALTER TABLE order_items
-ADD COLUMN IF NOT EXISTS cooking_point TEXT;
-ALTER TABLE order_items
-ADD COLUMN IF NOT EXISTS pass_skewer BOOLEAN NOT NULL DEFAULT FALSE;
-<<<<<<< HEAD
-=======
-ALTER TABLE order_items
-ADD COLUMN IF NOT EXISTS selected_modifiers JSONB;
-ALTER TABLE order_items
-ADD COLUMN IF NOT EXISTS is_printed BOOLEAN NOT NULL DEFAULT FALSE;
->>>>>>> main
 
 -- Índices multi-loja
 CREATE INDEX IF NOT EXISTS idx_products_store ON products(store_id);
@@ -254,13 +140,10 @@ CREATE TABLE IF NOT EXISTS plans (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-<<<<<<< HEAD
-=======
 INSERT INTO plans (name, display_name, price, promo_price, duration_days, enabled)
 VALUES
   ('basic_monthly', 'Basic Mensal', 49.90, NULL, 30, true),
   ('pro_monthly', 'Pro Mensal', 79.90, NULL, 30, true),
-  -- No anual: valor cheio = mensal * 12, promo_price = 15% de desconto.
   ('basic_yearly', 'Basic Anual', 598.80, 509.98, 365, true),
   ('pro_yearly', 'Pro Anual', 958.80, 815.98, 365, true)
 ON CONFLICT (name) DO NOTHING;
@@ -468,7 +351,6 @@ CREATE TABLE IF NOT EXISTS delivery_billing_charges (
 
 CREATE INDEX IF NOT EXISTS idx_delivery_billing_charges_cycle ON delivery_billing_charges(cycle_id);
 
->>>>>>> main
 CREATE TABLE IF NOT EXISTS subscriptions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
@@ -509,13 +391,6 @@ CREATE TABLE IF NOT EXISTS payments (
   expires_at TIMESTAMPTZ NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-
-ALTER TABLE payments
-ADD COLUMN IF NOT EXISTS provider TEXT DEFAULT 'MOCK';
-ALTER TABLE payments
-ADD COLUMN IF NOT EXISTS provider_id TEXT;
-ALTER TABLE payments
-ADD COLUMN IF NOT EXISTS qr_code_text TEXT;
 
 CREATE TABLE IF NOT EXISTS payment_events (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -576,8 +451,6 @@ CREATE TABLE IF NOT EXISTS access_logs (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-<<<<<<< HEAD
-=======
 CREATE TABLE IF NOT EXISTS store_link_hits (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
@@ -588,7 +461,6 @@ CREATE TABLE IF NOT EXISTS store_link_hits (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
->>>>>>> main
 CREATE INDEX IF NOT EXISTS idx_access_logs_created_at ON access_logs(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_access_logs_role ON access_logs(role);
 CREATE INDEX IF NOT EXISTS idx_access_logs_store_id ON access_logs(store_id);

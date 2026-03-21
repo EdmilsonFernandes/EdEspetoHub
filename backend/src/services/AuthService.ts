@@ -33,14 +33,14 @@ export interface AuthResponse {
 @Provide(Tokens.Common.Service.AuthService)
 export class AuthService {
   constructor(
-    @Inject(Tokens.Common.DataLayer.UserRepository) private userDao: UserDao,
-    @Inject(Tokens.Common.DataLayer.StoreRepository) private storeDao: StoreDao,
+    @Inject(Tokens.Common.DataLayer.UserDao) private userDao: UserDao,
+    @Inject(Tokens.Common.DataLayer.StoreDao) private storeDao: StoreDao,
     @Inject(Tokens.Common.Service.PaymentService) private paymentService: PaymentService,
     @Inject(Tokens.Common.Service.EmailService) private emailService: EmailService,
-    @Inject(Tokens.Common.DataLayer.PaymentRepository) private paymentDao: PaymentDao,
+    @Inject(Tokens.Common.DataLayer.PaymentDao) private paymentDao: PaymentDao,
     @Inject(Tokens.Common.Service.SubscriptionService) private subscriptionService: SubscriptionService,
     @Inject(Tokens.Common.Service.SettingsService) private settingsService: SettingsService,
-    @Inject(Tokens.Common.DataLayer.StoreUserRepository) private storeUserDao: StoreUserDao,
+    @Inject(Tokens.Common.DataLayer.StoreUserDao) private storeUserDao: StoreUserDao,
     @Inject(Tokens.Utils.ValidationUtil) private validationUtil: ValidationUtil,
     @Inject(Tokens.Utils.StringUtil) private stringUtil: StringUtil,
     @Inject(Tokens.Utils.FileUtil) private fileUtil: FileUtil,

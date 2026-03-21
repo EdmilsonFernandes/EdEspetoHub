@@ -25,11 +25,11 @@ import { OrderResponse } from '../models/response/OrderResponse';
 @Provide(Tokens.Common.Service.OrderService)
 export class OrderService {
   constructor(
-    @Inject(Tokens.Common.DataLayer.OrderRepository) private orderDao: OrderDao,
-    @Inject(Tokens.Common.DataLayer.StoreRepository) private storeDao: StoreDao,
-    @Inject(Tokens.Common.DataLayer.ProductRepository) private productDao: ProductDao,
-    @Inject(Tokens.Common.DataLayer.UserRepository) private userDao: UserDao,
-    @Inject(Tokens.Common.DataLayer.StoreUserRepository) private storeUserDao: StoreUserDao,
+    @Inject(Tokens.Common.DataLayer.OrderDao) private orderDao: OrderDao,
+    @Inject(Tokens.Common.DataLayer.StoreDao) private storeDao: StoreDao,
+    @Inject(Tokens.Common.DataLayer.ProductDao) private productDao: ProductDao,
+    @Inject(Tokens.Common.DataLayer.UserDao) private userDao: UserDao,
+    @Inject(Tokens.Common.DataLayer.StoreUserDao) private storeUserDao: StoreUserDao,
     @Inject(Tokens.Common.DataLayer.DatabaseService) private databaseService: DatabaseService,
     @Inject(Tokens.Common.Service.DeliveryBillingService) private deliveryBillingService: DeliveryBillingService,
     @Inject(Tokens.Common.Service.DeliveryService) private deliveryService: DeliveryService,

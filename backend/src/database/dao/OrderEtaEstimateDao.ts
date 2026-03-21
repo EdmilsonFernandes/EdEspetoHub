@@ -4,7 +4,7 @@ import { OrderEtaEstimateDto } from '../../models/dtos/OrderEtaEstimateDto';
 import { Tokens } from '../../ioc/injectiontokens';
 import { GenericDao } from './generic.dao';
 
-@Provide(Tokens.Common.DataLayer.OrderEtaEstimateRepository)
+@Provide(Tokens.Common.DataLayer.OrderEtaEstimateDao)
 export class OrderEtaEstimateDao extends GenericDao<OrderEtaEstimateDto, OrderEtaEstimate> {
   constructor() {
     super(OrderEtaEstimateDto);

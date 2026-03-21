@@ -4,7 +4,7 @@ import { PlanDto } from '../../models/dtos/PlanDto';
 import { Tokens } from '../../ioc/injectiontokens';
 import { GenericDao } from './generic.dao';
 
-@Provide(Tokens.Common.DataLayer.PlanRepository)
+@Provide(Tokens.Common.DataLayer.PlanDao)
 export class PlanDao extends GenericDao<PlanDto, Plan> {
   constructor() {
     super(PlanDto);

@@ -4,7 +4,7 @@ import { DeliveryBillingChargeDto } from '../../models/dtos/DeliveryBillingCharg
 import { Tokens } from '../../ioc/injectiontokens';
 import { GenericDao } from './generic.dao';
 
-@Provide(Tokens.Common.DataLayer.DeliveryBillingChargeRepository)
+@Provide(Tokens.Common.DataLayer.DeliveryBillingChargeDao)
 export class DeliveryBillingChargeDao extends GenericDao<DeliveryBillingChargeDto, DeliveryBillingCharge> {
   constructor() {
     super(DeliveryBillingChargeDto);

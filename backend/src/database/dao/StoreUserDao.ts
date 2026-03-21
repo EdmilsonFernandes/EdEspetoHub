@@ -4,7 +4,7 @@ import { StoreUserDto } from '../../models/dtos/StoreUserDto';
 import { Tokens } from '../../ioc/injectiontokens';
 import { GenericDao } from './generic.dao';
 
-@Provide(Tokens.Common.DataLayer.StoreUserRepository)
+@Provide(Tokens.Common.DataLayer.StoreUserDao)
 export class StoreUserDao extends GenericDao<StoreUserDto, StoreUser> {
   constructor() {
     super(StoreUserDto);

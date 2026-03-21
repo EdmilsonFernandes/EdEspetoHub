@@ -17,7 +17,7 @@ import { DatabaseService } from '../data-base.service';
 import { GenericDao } from './generic.dao';
 import { OrderDeliveryDto } from '../../models/dtos/OrderDeliveryDto';
 
-@Provide(Tokens.Common.DataLayer.OrderDeliveryRepository)
+@Provide(Tokens.Common.DataLayer.OrderDeliveryDao)
 export class OrderDeliveryDao extends GenericDao<OrderDeliveryDto, OrderDelivery> {
   constructor() {
     super(OrderDeliveryDto);

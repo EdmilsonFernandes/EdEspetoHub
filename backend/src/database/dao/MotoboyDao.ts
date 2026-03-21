@@ -4,7 +4,7 @@ import { MotoboyDto } from '../../models/dtos/MotoboyDto';
 import { Tokens } from '../../ioc/injectiontokens';
 import { GenericDao } from './generic.dao';
 
-@Provide(Tokens.Common.DataLayer.MotoboyRepository)
+@Provide(Tokens.Common.DataLayer.MotoboyDao)
 export class MotoboyDao extends GenericDao<MotoboyDto, Motoboy> {
   constructor() {
     super(MotoboyDto);
