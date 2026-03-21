@@ -24,7 +24,7 @@ O projeto traz quatro experiências principais:
 - `face-worker/`: worker Python (FastAPI + DeepFace) para verificação assistida de selfie vs CNH.
 - `docker-compose.yml`: sobe frontend, API, PostgreSQL e pgAdmin já apontando para as pastas certas.
 - `docker-compose.prod.yml`: override de produção (principalmente segurança do volume do Postgres).
-- `scripts/`: utilitários de deploy/backup (`compose-prod.sh`, `pg-backup-rotate.sh`).
+- `scripts/`: utilitários de deploy/backup/limpeza (`deploy-frontend.sh`, `deploy-api.sh`, `clean-safe.sh`, `compose-prod.sh`, `pg-backup-rotate.sh`).
 
 ## Padrao de documentacao (backend)
 
@@ -43,7 +43,7 @@ O projeto traz quatro experiências principais:
 
 Requisitos mínimos para desenvolvimento local:
 
-- Node.js 18+ e npm/yarn
+- Node.js 20+ e npm/yarn
 - PostgreSQL 16+ (local) ou Docker
 - Docker + Docker Compose (opcional, recomendado)
 
@@ -547,30 +547,43 @@ Configurações:
 
 ## Deploy no EC2 (resumo rapido)
 
-1) Configurar `.env.prod` com a porta do front:
+Fluxo recomendado de deploy:
 
 ```bash
-FRONTEND_PORT=8080
+git pull
+./scripts/deploy-frontend.sh
+./scripts/deploy-api.sh
 ```
 
-Postgres (recomendado em producao):
+O script `deploy-frontend.sh` atualiza automaticamente no `.env.prod`:
+- `FRONTEND_BUILD_VERSION`
+- `FRONTEND_BUILD_GIT_SHA`
+- `FRONTEND_BUILD_GIT_SHORT_SHA`
+- `FRONTEND_BUILD_GIT_BRANCH`
+- `FRONTEND_BUILD_TIME_ISO`
+
+Isso garante que o rodapé/console de versões mostrem exatamente a build em produção.
+
+Postgres (producao):
 - Defina `POSTGRES_VOLUME_NAME` em `.env.prod` para fixar o volume e evitar "sumir o banco" ao mudar pasta/projeto.
 - O deploy via `scripts/compose-prod.sh` usa `docker-compose.prod.yml` e trata o volume do Postgres como **external** (nao e removido por `docker compose down -v`).
 
-2) Preparar segredos (recomendado):
+Limpeza segura de disco (quando der ENOSPC):
+
+```bash
+./scripts/clean-safe.sh
+# opcional (também limpa logs do systemd):
+./scripts/clean-safe.sh --with-logs
+```
+
+Preparar segredos (opcional/recomendado):
 
 ```bash
 cp .env.prod.secrets.example .env.prod.secrets
 # edite os valores reais
 ```
 
-3) Subir usando o script (preserva envs):
-
-```bash
-sh scripts/compose-prod.sh
-```
-
-Backup (recomendado):
+Backup:
 ```bash
 sh scripts/pg-backup.sh
 ```
@@ -609,6 +622,31 @@ curl -X POST https://www.chamanoespeto.com.br/api/auth/forgot-password \
 docker logs chamanoespeto-api --tail 200 | grep -i "mercadopago\\|webhook"
 ```
 
+## Versionamento e Release
+
+Padrão adotado no projeto: **SemVer** (`MAJOR.MINOR.PATCH`).
+
+- `patch`: correções sem quebra (ex: `1.2.3` -> `1.2.4`)
+- `minor`: recurso novo compatível (ex: `1.2.3` -> `1.3.0`)
+- `major`: mudança com quebra (ex: `1.2.3` -> `2.0.0`)
+
+Comandos:
+
+```bash
+npm --prefix frontend run release:patch
+npm --prefix frontend run release:minor
+npm --prefix frontend run release:major
+```
+
+Cada release:
+- incrementa `frontend/package.json`
+- regenera `src/generated/buildInfo.ts`
+- cria commit `chore(release): vX.Y.Z`
+- cria tag git `vX.Y.Z`
+- faz push + push das tags
+
+Em todo deploy comum, o `buildId` também muda (timestamp + hash), mesmo sem mudar `vX.Y.Z`.
+
 ## Teste de fluxo (manual assistido)
 
 O script `scripts/test-flow.sh` cria usuario, confirma e-mail e valida login admin.
@@ -618,7 +656,7 @@ Requer `jq` instalado e o token de confirmacao copiado do e-mail.
 sh scripts/test-flow.sh
 ```
 
-3) Nginx como reverse proxy:
+Nginx como reverse proxy:
 
 - Use `docs/nginx/chamanoespeto.conf`
 - `/` -> `http://127.0.0.1:8080`
@@ -626,13 +664,13 @@ sh scripts/test-flow.sh
 - `/uploads/` -> `http://127.0.0.1:4000/uploads/`
 - `client_max_body_size 20m`
 
-4) HTTPS:
+HTTPS:
 
 ```bash
 sudo certbot --nginx -d chamanoespeto.com.br -d www.chamanoespeto.com.br
 ```
 
-5) Mercado Pago (producao):
+Mercado Pago (producao):
 
 - Configure em `backend/.env.docker`:
   - `MP_ACCESS_TOKEN`
@@ -938,6 +976,19 @@ Execução produção (pull-only, sem build):
 
 ```bash
 sh scripts/compose-prod-pull.sh
+```
+
+Deploy direto por serviço (EC2):
+
+```bash
+./scripts/deploy-frontend.sh
+./scripts/deploy-api.sh
+```
+
+Limpeza segura de disco:
+
+```bash
+./scripts/clean-safe.sh
 ```
 
 Credenciais padrão do pgAdmin (pode sobrescrever via variáveis de ambiente ao subir): `admindatony@datony.com` / `Datony20025#!`.
