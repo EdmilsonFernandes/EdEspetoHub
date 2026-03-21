@@ -49,12 +49,9 @@ export class User {
   @Column({ nullable: true })
   address?: string;
 
-<<<<<<< HEAD
-=======
   @Column({ name: 'profile_image_url', nullable: true })
   profileImageUrl?: string;
 
->>>>>>> main
   @Column({ name: 'terms_accepted_at', type: 'timestamptz', nullable: true })
   termsAcceptedAt?: Date;
 
@@ -64,15 +61,9 @@ export class User {
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 
-<<<<<<< HEAD
-  @OneToMany(() => Store, (store) => store.owner)
-  stores!: Store[];
-}
-=======
   @Column({ name: 'user_role', default: 'STORE_OWNER' })
   userRole!: string;
 
   @OneToMany(() => Store, (store) => store.owner)
   stores!: Store[];
 }
->>>>>>> main

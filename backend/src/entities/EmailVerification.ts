@@ -38,11 +38,6 @@ export class EmailVerification {
   @Column({ name: 'used_at', type: 'timestamptz', nullable: true })
   usedAt?: Date | null;
 
-<<<<<<< HEAD
-  @CreateDateColumn({ name: 'created_at' })
-  createdAt!: Date;
-}
-=======
   @Column({ name: 'request_ip', type: 'text', nullable: true })
   requestIp?: string | null;
 
@@ -55,4 +50,3 @@ export class EmailVerification {
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 }
->>>>>>> main

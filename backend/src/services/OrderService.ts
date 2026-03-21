@@ -8,7 +8,7 @@
  *
  * @file: OrderService.ts
  * @Date: 2025-12-17
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author: Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  */
 
 import { CreateOrderDto, CreateOrderItemInput } from '../dto/CreateOrderDto';
@@ -19,8 +19,6 @@ import { ProductRepository } from '../repositories/ProductRepository';
 import { StoreRepository } from '../repositories/StoreRepository';
 import { AppDataSource } from '../config/database';
 import { AppError } from '../errors/AppError';
-<<<<<<< HEAD
-=======
 import { DeliveryBillingService } from './DeliveryBillingService';
 import { deliveryService } from './DeliveryService';
 import { SubscriptionService } from './SubscriptionService';
@@ -30,11 +28,10 @@ import { StoreUserRepository } from '../repositories/StoreUserRepository';
 import bcrypt from 'bcryptjs';
 import { EntityManager } from 'typeorm';
 import { Product } from '../entities/Product';
->>>>>>> main
 /**
  * Provides OrderService functionality.
  *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+ * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
  * @date 2025-12-17
  */
 export class OrderService
@@ -42,8 +39,6 @@ export class OrderService
   private orderRepository = new OrderRepository();
   private storeRepository = new StoreRepository();
   private productRepository = new ProductRepository();
-<<<<<<< HEAD
-=======
   private deliveryBillingService = new DeliveryBillingService();
   private subscriptionService = new SubscriptionService();
   private userRepository = new UserRepository();
@@ -184,12 +179,11 @@ export class OrderService
       };
     });
   }
->>>>>>> main
 
   /**
    * Resolves the price used for an item.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-22
    */
   private resolveItemPrice(product: Awaited<ReturnType<ProductRepository[ 'findById' ]>>)
@@ -204,8 +198,6 @@ export class OrderService
     return Number((product as any).price) || 0;
   }
 
-<<<<<<< HEAD
-=======
   private resolveBundleDiscount(
     product: Awaited<ReturnType<ProductRepository[ 'findById' ]>>,
     quantity: number
@@ -283,11 +275,10 @@ export class OrderService
     return { items: resolved, unitExtra: Number(unitExtra.toFixed(2)) };
   }
 
->>>>>>> main
   /**
    * Ensures store access.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   private ensureStoreAccess(store: Awaited<ReturnType<StoreRepository[ 'findById' ]>>, authStoreId?: string)
@@ -305,23 +296,17 @@ export class OrderService
   /**
    * Executes create logic.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async create(input: CreateOrderDto)
   {
     const store = await this.storeRepository.findById(input.storeId);
     if (!store) throw new AppError('STORE-001', 404);
-<<<<<<< HEAD
-
-    const order = await this.buildOrder(input, store);
-    return this.orderRepository.save(order);
-=======
     return AppDataSource.transaction(async (manager) => {
       const order = await this.buildOrder(input, store, manager);
       return manager.getRepository(Order).save(order);
     });
->>>>>>> main
   }
 
 
@@ -330,23 +315,17 @@ export class OrderService
   /**
    * Creates by slug.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async createBySlug(input: Omit<CreateOrderDto, 'storeId'> & { storeSlug: string })
   {
     const store = await this.storeRepository.findBySlug(input.storeSlug);
     if (!store) throw new AppError('STORE-001', 404);
-<<<<<<< HEAD
-
-    const order = await this.buildOrder(input, store);
-    return this.orderRepository.save(order);
-=======
     return AppDataSource.transaction(async (manager) => {
       const order = await this.buildOrder(input, store, manager);
       return manager.getRepository(Order).save(order);
     });
->>>>>>> main
   }
 
 
@@ -355,20 +334,16 @@ export class OrderService
   /**
    * Lists by store id.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async listByStoreId(storeId: string, authStoreId?: string)
   {
     const store = await this.storeRepository.findById(storeId);
     this.ensureStoreAccess(store, authStoreId);
-<<<<<<< HEAD
-    return this.orderRepository.findByStoreId(store!.id);
-=======
     await this.reconcileDeliveredOrdersByStore(store!.id);
     const orders = await this.orderRepository.findByStoreId(store!.id);
     return this.attachDeliverySnapshot(orders as any[]);
->>>>>>> main
   }
 
 
@@ -377,20 +352,16 @@ export class OrderService
   /**
    * Lists by store slug.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async listByStoreSlug(slug: string, authStoreId?: string)
   {
     const store = await this.storeRepository.findBySlug(slug);
     this.ensureStoreAccess(store, authStoreId);
-<<<<<<< HEAD
-    return this.orderRepository.findByStoreId(store!.id);
-=======
     await this.reconcileDeliveredOrdersByStore(store!.id);
     const orders = await this.orderRepository.findByStoreId(store!.id);
     return this.attachDeliverySnapshot(orders as any[]);
->>>>>>> main
   }
 
 
@@ -399,20 +370,14 @@ export class OrderService
   /**
    * Lists top items for today.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-01-21
    */
   async listTopItemsBySlug(slug: string, limit = 3)
   {
     const store = await this.storeRepository.findBySlug(slug);
     if (!store) throw new AppError('STORE-001', 404);
-<<<<<<< HEAD
-    const since = new Date();
-    since.setHours(0, 0, 0, 0);
-    const rows = await this.orderRepository.findTopItemsByStoreSince(store.id, since, limit);
-=======
     const rows = await this.orderRepository.findTopItemsByStoreToday(store.id, limit, this.tz);
->>>>>>> main
     return rows.map((row) => ({
       productId: row.productId,
       name: row.name,
@@ -423,12 +388,10 @@ export class OrderService
     }));
   }
 
-<<<<<<< HEAD
-=======
   /**
    * Lists public table occupancy status by store slug.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2026-03-12
    */
   async listTableStatusBySlug(slug: string)
@@ -443,14 +406,13 @@ export class OrderService
     };
   }
 
->>>>>>> main
 
 
 
   /**
    * Updates status.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async updateStatus(orderId: string, status: string, authStoreId?: string)
@@ -459,10 +421,6 @@ export class OrderService
     if (!order) throw new AppError('ORDER-001', 404);
     this.ensureStoreAccess(order.store, authStoreId);
 
-<<<<<<< HEAD
-    order.status = status;
-    return this.orderRepository.save(order);
-=======
     const deliveryStatuses = new Set([
       'ready_for_delivery',
       'waiting_for_motoboy',
@@ -542,7 +500,6 @@ export class OrderService
 
     // Authorized for edit: keep final status and return current order.
     return order;
->>>>>>> main
   }
 
 
@@ -551,7 +508,7 @@ export class OrderService
   /**
    * Updates items.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async updateItems(orderId: string, items: CreateOrderItemInput[], authStoreId?: string)
@@ -585,11 +542,6 @@ export class OrderService
       orderItem.order = order;
       orderItem.quantity = item.quantity;
       const unitPrice = this.resolveItemPrice(product);
-<<<<<<< HEAD
-      orderItem.price = unitPrice * item.quantity;
-      orderItem.cookingPoint = item.cookingPoint;
-      orderItem.passSkewer = Boolean(item.passSkewer);
-=======
       const selectedModifiers = this.resolveSelectedModifiers(product, (item as any).selectedModifiers);
       orderItem.selectedModifiers = selectedModifiers.items.length ? selectedModifiers.items : null;
       const grossLine = (unitPrice + selectedModifiers.unitExtra) * item.quantity;
@@ -598,15 +550,10 @@ export class OrderService
       orderItem.cookingPoint = item.cookingPoint;
       orderItem.passSkewer = Boolean(item.passSkewer);
       orderItem.isPrinted = Boolean((item as any).isPrinted);
->>>>>>> main
       nextItems.push(orderItem);
       total += orderItem.price;
     }
 
-<<<<<<< HEAD
-    order.items = nextItems;
-    order.total = total;
-=======
     const deliveryFee = order.deliveryFee ? Number(order.deliveryFee) : 0;
     const deliveryFeeValue = Number.isNaN(deliveryFee) ? 0 : deliveryFee;
 
@@ -621,13 +568,10 @@ export class OrderService
     if (latestStatus) {
       order.status = latestStatus;
     }
->>>>>>> main
 
     return this.orderRepository.save(order);
   }
 
-<<<<<<< HEAD
-=======
   async markItemsAsPrinted(orderId: string, itemIds: string[] | undefined, authStoreId?: string) {
     const order = await this.orderRepository.findById(orderId);
     if (!order) throw new AppError('ORDER-001', 404);
@@ -637,22 +581,18 @@ export class OrderService
     return { orderId: order.id, updated: affected };
   }
 
->>>>>>> main
 
 
 
   /**
    * Gets public by id.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async getPublicById(orderId: string)
   {
-<<<<<<< HEAD
-=======
     await this.reconcileDeliveredOrderById(orderId);
->>>>>>> main
     const order = await this.orderRepository.findById(orderId);
     if (!order) return null;
     const queueStatuses = [ 'pending', 'preparing', 'ready' ];
@@ -678,36 +618,9 @@ export class OrderService
   /**
    * Builds order.
    *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
+   * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
-<<<<<<< HEAD
-  private async buildOrder(input: Omit<CreateOrderDto, 'storeId'>, store: Awaited<ReturnType<StoreRepository[ 'findById' ]>>)
-  {
-    const allowedTypes = Array.isArray(store?.settings?.orderTypes) && store.settings.orderTypes.length > 0
-      ? store.settings.orderTypes
-      : [ 'delivery', 'pickup', 'table' ];
-    if (!allowedTypes.includes(input.type)) {
-      throw new AppError('ORDER-002', 400);
-    }
-    if (input.type === 'table' && input.table) {
-      const activeStatuses = [ 'pending', 'preparing' ];
-      const activeCount = await this.orderRepository.countActiveByTable(
-        store!.id,
-        input.table,
-        activeStatuses
-      );
-      if (activeCount > 0) {
-        throw new AppError('ORDER-003', 409, { table: input.table });
-      }
-    }
-    const items: OrderItem[] = [];
-    let total = 0;
-
-    for (const item of input.items)
-    {
-      const product = await this.productRepository.findById(item.productId);
-=======
   private async buildOrder(
     input: Omit<CreateOrderDto, 'storeId'>,
     store: Awaited<ReturnType<StoreRepository['findById']>>,
@@ -746,14 +659,11 @@ export class OrderService
       const product = manager
         ? await manager.getRepository(Product).findOne({ where: { id: item.productId }, relations: [ 'store' ] })
         : await this.productRepository.findById(item.productId);
->>>>>>> main
       if (!product || product.store.id !== store!.id)
       {
         throw new AppError('PROD-002', 400);
       }
 
-<<<<<<< HEAD
-=======
       if (!Number.isFinite(Number(item.quantity)) || Number(item.quantity) <= 0) {
         throw new AppError('ORDER-005', 400, { message: 'Item com quantidade inválida.' });
       }
@@ -778,16 +688,10 @@ export class OrderService
         }
       }
 
->>>>>>> main
       const orderItem = new OrderItem();
       orderItem.product = product;
       orderItem.quantity = item.quantity;
       const unitPrice = this.resolveItemPrice(product);
-<<<<<<< HEAD
-      orderItem.price = unitPrice * item.quantity;
-      orderItem.cookingPoint = item.cookingPoint;
-      orderItem.passSkewer = Boolean(item.passSkewer);
-=======
       const selectedModifiers = this.resolveSelectedModifiers(product, (item as any).selectedModifiers);
       orderItem.selectedModifiers = selectedModifiers.items.length ? selectedModifiers.items : null;
       const grossLine = (unitPrice + selectedModifiers.unitExtra) * item.quantity;
@@ -796,13 +700,10 @@ export class OrderService
       orderItem.cookingPoint = item.cookingPoint;
       orderItem.passSkewer = Boolean(item.passSkewer);
       orderItem.isPrinted = Boolean(item.isPrinted);
->>>>>>> main
       items.push(orderItem);
       total += orderItem.price;
     }
 
-<<<<<<< HEAD
-=======
     const cashTendered =
       input.paymentMethod === 'dinheiro' && input.cashTendered !== undefined && input.cashTendered !== null
         ? Number(input.cashTendered)
@@ -817,7 +718,6 @@ export class OrderService
       ? Number(deliveryFee)
       : 0;
 
->>>>>>> main
     return this.orderRepository.create({
       customerName: input.customerName,
       phone: input.phone,
@@ -825,16 +725,11 @@ export class OrderService
       table: input.table,
       type: input.type,
       paymentMethod: input.paymentMethod,
-<<<<<<< HEAD
-      items,
-      total,
-=======
       paymentStatus,
       cashTendered,
       deliveryFee: deliveryFeeValue || null,
       items,
       total: total + deliveryFeeValue,
->>>>>>> main
       store: store!,
     } as Order);
   }

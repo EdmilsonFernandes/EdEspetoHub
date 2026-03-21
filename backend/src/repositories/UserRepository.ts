@@ -14,12 +14,15 @@
 import { Repository } from 'typeorm';
 import { AppDataSource } from '../config/database';
 import { User } from '../entities/User';
+import { Provide } from '../ioc/ioc';
+import { Tokens } from '../ioc/injectiontokens';
 /**
  * Provides UserRepository functionality.
  *
  * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  * @date 2025-12-17
  */
+@Provide(Tokens.Common.DataLayer.UserRepository)
 export class UserRepository {
   private repository: Repository<User>;
   /**
@@ -62,8 +65,6 @@ export class UserRepository {
     return this.repository.findOne({ where: { email }, relations: ['stores', 'stores.settings'] });
   }
 
-<<<<<<< HEAD
-=======
   findByLoginIdentifier(identifier: string) {
     const normalized = String(identifier || '').trim().toLowerCase();
     if (!normalized) return Promise.resolve(null);
@@ -77,7 +78,6 @@ export class UserRepository {
       .getOne();
   }
 
->>>>>>> main
   /**
    * Handles find by id.
    *
@@ -87,8 +87,4 @@ export class UserRepository {
   findById(id: string) {
     return this.repository.findOne({ where: { id }, relations: ['stores', 'stores.settings'] });
   }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> main

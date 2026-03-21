@@ -16,15 +16,10 @@ import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from 'typeor
 export type PlanName =
   | 'basic_monthly'
   | 'pro_monthly'
-<<<<<<< HEAD
   | 'premium_monthly'
   | 'basic_yearly'
   | 'pro_yearly'
   | 'premium_yearly'
-=======
-  | 'basic_yearly'
-  | 'pro_yearly'
->>>>>>> main
   | 'monthly'
   | 'yearly'
   | string;
@@ -60,8 +55,4 @@ export class Plan {
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> main

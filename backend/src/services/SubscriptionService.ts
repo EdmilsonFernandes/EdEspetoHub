@@ -41,10 +41,7 @@ export class SubscriptionService {
   private paymentRepository = new PaymentRepository();
   private mercadoPago = new MercadoPagoService();
   private log = logger.child({ scope: 'SubscriptionService' });
-<<<<<<< HEAD
-=======
   private readonly pendingCooldownMs = 30 * 60 * 1000;
->>>>>>> main
   /**
    * Creates data.
    *
@@ -92,11 +89,7 @@ export class SubscriptionService {
    * @date 2025-12-17
    */
   async getCurrentByStore(storeId: string) {
-<<<<<<< HEAD
-    const subscription = await this.subscriptionRepository.findLatestByStoreId(storeId);
-=======
     const subscription = await this.subscriptionRepository.findCurrentByStoreId(storeId);
->>>>>>> main
     if (!subscription) return null;
 
     const status = this.resolveStatus(subscription);
@@ -105,12 +98,8 @@ export class SubscriptionService {
       await this.subscriptionRepository.save(subscription);
     }
 
-<<<<<<< HEAD
-    const isActive = this.isSubscriptionActive(subscription);
-=======
     const isVip = Boolean(subscription.store?.settings?.planExempt);
     const isActive = isVip || this.isSubscriptionActive(subscription);
->>>>>>> main
 
     if (isActive && subscription.store && !subscription.store.open) {
       subscription.store.open = true;
@@ -192,26 +181,6 @@ export class SubscriptionService {
 
     const now = new Date();
     const paymentMethod = (input.paymentMethod || 'PIX') as PaymentMethod;
-<<<<<<< HEAD
-    const existingPending = await this.paymentRepository.findLatestPendingByStoreId(storeId);
-    if (existingPending) {
-      const sameMethod = existingPending.method === paymentMethod;
-      const stillValid = await this.isPaymentStillValid(existingPending);
-      if (sameMethod && stillValid) {
-        return existingPending;
-      }
-      existingPending.status = 'FAILED';
-      await this.paymentRepository.save(existingPending);
-    }
-
-    const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const recentCount = await this.paymentRepository.countRecentByStoreId(storeId, since);
-    if (recentCount >= 3) {
-      throw new AppError('SUB-006', 429);
-    }
-
-=======
->>>>>>> main
     const plan = input.planId
       ? await this.planRepository.findById(input.planId)
       : null;
@@ -219,8 +188,6 @@ export class SubscriptionService {
       plan || (await this.planRepository.findAll()).find((p) => p.id === input.planId);
     if (!resolvedPlan || !resolvedPlan.enabled) throw new AppError('SUB-003', 400);
 
-<<<<<<< HEAD
-=======
     const existingPending = await this.paymentRepository.findLatestPendingByStoreId(storeId);
     if (existingPending) {
       const createdAt = existingPending.createdAt ? new Date(existingPending.createdAt) : now;
@@ -245,7 +212,6 @@ export class SubscriptionService {
       await this.paymentRepository.save(existingPending);
     }
 
->>>>>>> main
     return AppDataSource.transaction(async (manager) => {
       const subscriptionRepo = manager.getRepository(Subscription);
       const subscription = subscriptionRepo.create({
@@ -278,12 +244,6 @@ export class SubscriptionService {
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2025-12-17
    */
-<<<<<<< HEAD
-  private async isPaymentStillValid(payment: any) {
-    const now = new Date();
-    if (payment.status !== 'PENDING') return false;
-    if (!payment.expiresAt || payment.expiresAt <= now) return false;
-=======
   private async isPaymentStillValid(payment: any, blockUntil?: Date) {
     const now = new Date();
     if (payment.status !== 'PENDING') return false;
@@ -292,7 +252,6 @@ export class SubscriptionService {
       const expiresAt = new Date(payment.expiresAt);
       if (!Number.isNaN(expiresAt.getTime()) && expiresAt <= now) return false;
     }
->>>>>>> main
     if (
       payment.provider === 'MERCADO_PAGO' &&
       payment.method === 'PIX' &&
@@ -327,10 +286,7 @@ export class SubscriptionService {
     const pendingCutoff = new Date(Date.now() - env.pendingSignupTtlDays * 24 * 60 * 60 * 1000);
 
     for (const sub of subscriptions) {
-<<<<<<< HEAD
-=======
       const isVip = Boolean(sub.store?.settings?.planExempt);
->>>>>>> main
       const endDate = new Date(sub.endDate);
       const now = new Date();
       const diffMs = endDate.getTime() - now.getTime();
@@ -346,8 +302,6 @@ export class SubscriptionService {
         continue;
       }
 
-<<<<<<< HEAD
-=======
       // VIP stores are exempt from expiration and reminder lifecycle.
       if (isVip) {
         if (sub.status !== 'ACTIVE') {
@@ -361,7 +315,6 @@ export class SubscriptionService {
         continue;
       }
 
->>>>>>> main
       const status = this.resolveStatus(sub);
       if (status !== sub.status) {
         sub.status = status;
@@ -465,10 +418,7 @@ export class SubscriptionService {
     if (subscription.status === 'PENDING') return 'PENDING';
     if (subscription.status === 'SUSPENDED') return 'SUSPENDED';
     if (subscription.status === 'CANCELLED') return 'CANCELLED';
-<<<<<<< HEAD
-=======
     if (subscription.store?.settings?.planExempt) return 'ACTIVE';
->>>>>>> main
 
     const now = new Date();
     const endDate = new Date(subscription.endDate);
@@ -505,8 +455,4 @@ export class SubscriptionService {
       subscription.status !== 'CANCELLED'
     );
   }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> main

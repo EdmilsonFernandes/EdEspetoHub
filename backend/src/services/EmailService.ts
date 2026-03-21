@@ -14,10 +14,7 @@
 import nodemailer from 'nodemailer';
 import { env } from '../config/env';
 import { logger } from '../utils/logger';
-<<<<<<< HEAD
-=======
 import { SettingsService } from './SettingsService';
->>>>>>> main
 
 type EmailPayload = {
   to: string;
@@ -34,10 +31,7 @@ type EmailPayload = {
 export class EmailService {
   private transporter?: nodemailer.Transporter;
   private log = logger.child({ scope: 'EmailService' });
-<<<<<<< HEAD
-=======
   private settingsService = new SettingsService();
->>>>>>> main
   /**
    * Gets logo url.
    *
@@ -46,11 +40,7 @@ export class EmailService {
    */
   private getLogoUrl() {
     const base = env.appUrl?.replace(/\/$/, '') || 'http://localhost:3000';
-<<<<<<< HEAD
-    return `${base}/chama-no-espeto.jpeg`;
-=======
     return `${base}/janocaminho.jpg`;
->>>>>>> main
   }
 
   /**
@@ -96,8 +86,6 @@ export class EmailService {
     });
   }
 
-<<<<<<< HEAD
-=======
   private async getTemplateValue(key: string, fallback: string) {
     try {
       const value = await this.settingsService.getValue(key);
@@ -121,7 +109,6 @@ export class EmailService {
     return template.replace(/\{\{(\w+)\}\}/g, (_, key) => vars[key] ?? '');
   }
 
->>>>>>> main
   /**
    * Sends password reset.
    *
@@ -129,22 +116,6 @@ export class EmailService {
    * @date 2026-01-06
    */
   async sendPasswordReset(email: string, link: string) {
-<<<<<<< HEAD
-    const subject = 'Redefinir senha - Chama no Espeto';
-    const text = `Recebemos seu pedido para redefinir a senha.\n\nAbra este link para continuar: ${link}\n\nSe não foi você, ignore este e-mail.`;
-    const logoUrl = this.getLogoUrl();
-    const html = `
-      <div style="font-family: Arial, sans-serif; background: #f8fafc; padding: 24px;">
-        <div style="max-width: 520px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px;">
-          <img src="${logoUrl}" alt="Chama no Espeto" style="width: 120px; height: auto; margin-bottom: 16px;" />
-          <h2 style="margin: 0 0 8px; color: #0f172a;">Redefinir senha</h2>
-          <p style="margin: 0 0 16px; color: #475569;">Recebemos seu pedido para redefinir a senha.</p>
-          <a href="${link}" style="display: inline-block; padding: 10px 16px; background: #dc2626; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600;">Redefinir senha</a>
-          <p style="margin: 16px 0 0; color: #64748b; font-size: 12px;">Se não foi você, ignore este e-mail.</p>
-        </div>
-      </div>
-    `;
-=======
     const logoUrl = this.getLogoUrl();
     const subject = await this.getTemplateValue('email_templates.password_reset.subject', 'Redefinir senha - Jano Caminho');
     const textTemplate = await this.getTemplateValue(
@@ -167,7 +138,6 @@ export class EmailService {
     );
     const text = this.renderTemplate(textTemplate, { LINK: link });
     const html = this.renderTemplate(htmlTemplate, { LINK: link, LOGO_URL: logoUrl });
->>>>>>> main
     await this.send({ to: email, subject, text, html });
   }
 
@@ -177,17 +147,6 @@ export class EmailService {
    * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
    * @date 2026-01-06
    */
-<<<<<<< HEAD
-  async sendEmailVerification(email: string, link: string) {
-    const subject = 'Verifique seu e-mail - Chama no Espeto';
-    const text = `Para ativar sua conta, confirme seu e-mail neste link: ${link}\n\nSe não foi você, ignore este e-mail.`;
-    const logoUrl = this.getLogoUrl();
-    const html = `
-      <div style="font-family: Arial, sans-serif; background: #f1f5f9; padding: 32px;">
-        <div style="max-width: 560px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 18px; overflow: hidden;">
-          <div style="padding: 24px; background: linear-gradient(135deg, #dc2626 0%, #f97316 100%);">
-            <img src="${logoUrl}" alt="Chama no Espeto" style="width: 96px; height: 96px; border-radius: 16px; border: 2px solid rgba(255,255,255,0.5);" />
-=======
   async sendEmailVerification(email: string, link: string, token: string) {
     const logoUrl = this.getLogoUrl();
     const subject = await this.getTemplateValue('email_templates.store_verification.subject', 'Verifique seu e-mail - Jano Caminho');
@@ -202,26 +161,18 @@ export class EmailService {
         <div style="max-width: 560px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 18px; overflow: hidden;">
           <div style="padding: 24px; background: linear-gradient(135deg, #dc2626 0%, #f97316 100%);">
             <img src="{{LOGO_URL}}" alt="Jano Caminho" style="width: 96px; height: 96px; border-radius: 16px; border: 2px solid rgba(255,255,255,0.5);" />
->>>>>>> main
             <p style="margin: 12px 0 0; color: #ffffff; font-size: 18px; font-weight: 700;">Confirme seu e-mail</p>
             <p style="margin: 4px 0 0; color: rgba(255,255,255,0.9); font-size: 13px;">Ative sua conta para liberar sua loja</p>
           </div>
           <div style="padding: 24px;">
             <p style="margin: 0 0 16px; color: #475569;">Clique no botao abaixo para ativar sua conta e continuar o pagamento.</p>
-<<<<<<< HEAD
-            <a href="${link}" style="display: inline-block; padding: 12px 18px; background: #dc2626; color: #ffffff; text-decoration: none; border-radius: 10px; font-weight: 700;">Confirmar e-mail</a>
-=======
             <a href="{{LINK}}" style="display: inline-block; padding: 12px 18px; background: #dc2626; color: #ffffff; text-decoration: none; border-radius: 10px; font-weight: 700;">Confirmar e-mail</a>
             <p style="margin: 16px 0 4px; color: #0f172a; font-size: 12px; font-weight: 700;">Código de ativação</p>
             <div style="font-family: monospace; font-size: 12px; line-height: 1.4; color: #0f172a; word-break: break-all; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 10px; padding: 10px;">{{TOKEN}}</div>
->>>>>>> main
             <p style="margin: 16px 0 0; color: #64748b; font-size: 12px;">Se não foi você, ignore este e-mail.</p>
           </div>
         </div>
       </div>
-<<<<<<< HEAD
-    `;
-=======
     `
     );
     const text = this.renderTemplate(textTemplate, { LINK: link, TOKEN: token });
@@ -269,7 +220,6 @@ export class EmailService {
     );
     const text = this.renderTemplate(textTemplate, { LINK: link, TOKEN: token, LOGIN_URL: loginUrl });
     const html = this.renderTemplate(htmlTemplate, { LINK: link, TOKEN: token, LOGIN_URL: loginUrl, LOGO_URL: logoUrl });
->>>>>>> main
     await this.send({ to: email, subject, text, html });
   }
 
@@ -281,26 +231,6 @@ export class EmailService {
    */
   async sendActivationEmail(email: string, slug: string) {
     const adminUrl = `${env.appUrl}/admin`;
-<<<<<<< HEAD
-    const storeUrl = `${env.appUrl}/chamanoespeto/${slug}`;
-    const subject = 'Sua loja está ativa - Chama no Espeto';
-    const text = `Pagamento aprovado!\n\nAcesse o painel em: ${adminUrl}\nSlug da loja: ${slug}\nVitrine: ${storeUrl}\n\nUse a senha criada no cadastro para entrar.`;
-    const logoUrl = this.getLogoUrl();
-    const html = `
-      <div style="font-family: Arial, sans-serif; background: #f8fafc; padding: 24px;">
-        <div style="max-width: 520px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px;">
-          <img src="${logoUrl}" alt="Chama no Espeto" style="width: 120px; height: auto; margin-bottom: 16px;" />
-          <h2 style="margin: 0 0 8px; color: #0f172a;">Pagamento aprovado</h2>
-          <p style="margin: 0 0 16px; color: #475569;">Sua loja está ativa e pronta para uso.</p>
-          <div style="margin-bottom: 12px; color: #0f172a;">
-            <strong>Slug da loja:</strong> ${slug}
-          </div>
-          <div style="margin-bottom: 12px;">
-            <a href="${adminUrl}" style="color: #dc2626; font-weight: 600; text-decoration: none;">Acessar painel</a>
-          </div>
-          <div style="margin-bottom: 16px;">
-            <a href="${storeUrl}" style="color: #dc2626; font-weight: 600; text-decoration: none;">Ver vitrine</a>
-=======
     const storeUrl = `${env.appUrl}/${slug}`;
     const logoUrl = this.getLogoUrl();
     const subject = await this.getTemplateValue('email_templates.activation.subject', 'Sua loja está ativa - Jano Caminho');
@@ -324,19 +254,14 @@ export class EmailService {
           </div>
           <div style="margin-bottom: 16px;">
             <a href="{{STORE_URL}}" style="color: #dc2626; font-weight: 600; text-decoration: none;">Ver vitrine</a>
->>>>>>> main
           </div>
           <p style="margin: 0; color: #64748b; font-size: 12px;">Use a senha criada no cadastro para entrar.</p>
         </div>
       </div>
-<<<<<<< HEAD
-    `;
-=======
     `
     );
     const text = this.renderTemplate(textTemplate, { ADMIN_URL: adminUrl, STORE_URL: storeUrl, SLUG: slug });
     const html = this.renderTemplate(htmlTemplate, { ADMIN_URL: adminUrl, STORE_URL: storeUrl, SLUG: slug, LOGO_URL: logoUrl });
->>>>>>> main
     await this.send({ to: email, subject, text, html });
   }
 
@@ -348,24 +273,6 @@ export class EmailService {
    */
   async sendSubscriptionReminder(email: string, storeName: string, slug: string, daysLeft: number) {
     const adminUrl = `${env.appUrl}/admin`;
-<<<<<<< HEAD
-    const storeUrl = `${env.appUrl}/chamanoespeto/${slug}`;
-    const subject =
-      daysLeft <= 0
-        ? 'Sua assinatura expira hoje - Chama no Espeto'
-        : `Sua assinatura expira em ${daysLeft} dia${daysLeft === 1 ? '' : 's'} - Chama no Espeto`;
-    const text = [
-      `Olá! A assinatura da loja ${storeName} expira em ${daysLeft <= 0 ? 'hoje' : `${daysLeft} dia(s)`}.`,
-      'Acesse o painel para renovar e evitar interrupção no atendimento.',
-      adminUrl,
-    ].join('\n');
-    const logoUrl = this.getLogoUrl();
-    const html = `
-      <div style="font-family: Arial, sans-serif; background: #f1f5f9; padding: 32px;">
-        <div style="max-width: 560px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 18px; overflow: hidden;">
-          <div style="padding: 24px; background: linear-gradient(135deg, #dc2626 0%, #f97316 100%);">
-            <img src="${logoUrl}" alt="Chama no Espeto" style="width: 96px; height: 96px; border-radius: 16px; border: 2px solid rgba(255,255,255,0.5);" />
-=======
     const storeUrl = `${env.appUrl}/${slug}`;
     const logoUrl = this.getLogoUrl();
     const subject = await this.getTemplateValue(
@@ -385,23 +292,10 @@ export class EmailService {
         <div style="max-width: 560px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 18px; overflow: hidden;">
           <div style="padding: 24px; background: linear-gradient(135deg, #dc2626 0%, #f97316 100%);">
             <img src="{{LOGO_URL}}" alt="Jano Caminho" style="width: 96px; height: 96px; border-radius: 16px; border: 2px solid rgba(255,255,255,0.5);" />
->>>>>>> main
             <p style="margin: 12px 0 0; color: #ffffff; font-size: 18px; font-weight: 700;">Assinatura prestes a expirar</p>
             <p style="margin: 4px 0 0; color: rgba(255,255,255,0.9); font-size: 13px;">Evite interrupções no atendimento</p>
           </div>
           <div style="padding: 24px;">
-<<<<<<< HEAD
-            <p style="margin: 0 0 8px; color: #475569;">Loja: <strong>${storeName}</strong></p>
-            <p style="margin: 0 0 16px; color: #475569;">
-              ${daysLeft <= 0 ? 'Sua assinatura expira hoje. Renove agora para manter a loja ativa.' : `Faltam ${daysLeft} dia${daysLeft === 1 ? '' : 's'} para sua assinatura expirar.`}
-            </p>
-            <a href="${adminUrl}" style="display: inline-block; padding: 12px 18px; background: #dc2626; color: #ffffff; text-decoration: none; border-radius: 10px; font-weight: 700;">Renovar assinatura</a>
-            <p style="margin: 16px 0 0; color: #64748b; font-size: 12px;">Vitrine: ${storeUrl}</p>
-          </div>
-        </div>
-      </div>
-    `;
-=======
             <p style="margin: 0 0 8px; color: #475569;">Loja: <strong>{{STORE_NAME}}</strong></p>
             <p style="margin: 0 0 16px; color: #475569;">
               {{MESSAGE}}
@@ -429,7 +323,6 @@ export class EmailService {
       LOGO_URL: logoUrl,
       MESSAGE: message,
     });
->>>>>>> main
     await this.send({ to: email, subject, text, html });
   }
 
@@ -448,11 +341,7 @@ export class EmailService {
     createdAt: Date;
   }) {
     if (!payload.emails.length) return;
-<<<<<<< HEAD
-    const subject = 'Novo cadastro - Chama no Espeto';
-=======
     const subject = 'Novo cadastro - Jano Caminho';
->>>>>>> main
     const text = [
       'Novo cadastro recebido.',
       `Loja: ${payload.storeName}`,
@@ -478,8 +367,4 @@ export class EmailService {
       payload.emails.map((email) => this.send({ to: email, subject, text, html }))
     );
   }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> main

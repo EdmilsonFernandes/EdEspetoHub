@@ -8,11 +8,7 @@
  *
  * @file: PaymentService.ts
  * @Date: 2025-12-17
-<<<<<<< HEAD
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-=======
  * @author: Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
->>>>>>> main
  */
 
 import { EntityManager } from 'typeorm';
@@ -29,39 +25,25 @@ import { PaymentEventRepository } from '../repositories/PaymentEventRepository';
 import { EmailService } from './EmailService';
 import { logger } from '../utils/logger';
 import { AppError } from '../errors/AppError';
-<<<<<<< HEAD
-/**
- * Provides PaymentService functionality.
- *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-=======
 import { DeliveryBillingService } from './DeliveryBillingService';
 import { OrderReviewService } from './OrderReviewService';
 /**
  * Provides PaymentService functionality.
  *
  * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
->>>>>>> main
  * @date 2025-12-17
  */
 export class PaymentService {
   private mercadoPago = new MercadoPagoService();
   private paymentEventRepository = new PaymentEventRepository();
   private emailService = new EmailService();
-<<<<<<< HEAD
-=======
   private deliveryBillingService = new DeliveryBillingService();
   private orderReviewService = new OrderReviewService();
->>>>>>> main
   private log = logger.child({ scope: 'PaymentService' });
   /**
    * Handles normalize qr code.
    *
-<<<<<<< HEAD
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-=======
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
->>>>>>> main
    * @date 2025-12-17
    */
   private normalizeQrCode(qrCode?: string | null) {
@@ -70,8 +52,6 @@ export class PaymentService {
     return `data:image/png;base64,${qrCode}`;
   }
 
-<<<<<<< HEAD
-=======
   private resolvePlanChargeAmount(plan: Plan) {
     const fullPrice = Number((plan as any)?.price) || 0;
     const promoPrice = Number((plan as any)?.promoPrice) || 0;
@@ -81,17 +61,13 @@ export class PaymentService {
     return fullPrice;
   }
 
->>>>>>> main
+
 
 
   /**
    * Sends activation email.
    *
-<<<<<<< HEAD
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-=======
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
->>>>>>> main
    * @date 2025-12-17
    */
   private async sendActivationEmail(email: string, slug: string) {
@@ -104,11 +80,7 @@ export class PaymentService {
   /**
    * Creates payment.
    *
-<<<<<<< HEAD
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-=======
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
->>>>>>> main
    * @date 2025-12-17
    */
   async createPayment(
@@ -125,34 +97,22 @@ export class PaymentService {
     const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
     const mockLinkBase =
       data.method === 'BOLETO'
-<<<<<<< HEAD
-        ? 'https://pay.chamanoespeto.com/boleto'
-        : 'https://pay.chamanoespeto.com/checkout';
-=======
         ? 'https://pay.janocaminho.com/boleto'
         : 'https://pay.janocaminho.com/checkout';
->>>>>>> main
     const paymentLink =
       data.method === 'CREDIT_CARD' || data.method === 'BOLETO'
         ? `${mockLinkBase}/${data.subscription.id}`
         : null;
 
-<<<<<<< HEAD
-=======
     const chargeAmount = this.resolvePlanChargeAmount(data.plan);
 
->>>>>>> main
     let payment = paymentRepo.create({
       user: data.user,
       store: data.store,
       subscription: data.subscription,
       method: data.method,
       status: 'PENDING',
-<<<<<<< HEAD
-      amount: Number(data.plan.price),
-=======
       amount: chargeAmount,
->>>>>>> main
       expiresAt,
       qrCodeBase64: null,
       qrCodeText: null,
@@ -160,10 +120,6 @@ export class PaymentService {
       provider: 'MOCK',
     } as Payment);
 
-<<<<<<< HEAD
-    const chargeAmount = Number(data.plan.price);
-=======
->>>>>>> main
     payment.amount = chargeAmount;
 
     payment = await paymentRepo.save(payment);
@@ -228,11 +184,7 @@ export class PaymentService {
   /**
    * Handles confirm payment.
    *
-<<<<<<< HEAD
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-=======
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
->>>>>>> main
    * @date 2025-12-17
    */
   async confirmPayment(paymentId: string) {
@@ -294,11 +246,7 @@ export class PaymentService {
   /**
    * Handles confirm mercado pago payment.
    *
-<<<<<<< HEAD
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-=======
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
->>>>>>> main
    * @date 2025-12-17
    */
   async confirmMercadoPagoPayment(mercadoPagoPaymentId: string) {
@@ -318,11 +266,7 @@ export class PaymentService {
   /**
    * Handles reprocess by payment id.
    *
-<<<<<<< HEAD
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-=======
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
->>>>>>> main
    * @date 2025-12-17
    */
   async reprocessByPaymentId(paymentId: string, providerId?: string) {
@@ -356,11 +300,7 @@ export class PaymentService {
   /**
    * Updates payment status.
    *
-<<<<<<< HEAD
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-=======
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
->>>>>>> main
    * @date 2025-12-17
    */
   private async updatePaymentStatus(paymentId: string, providerStatus?: string) {
@@ -382,18 +322,12 @@ export class PaymentService {
   /**
    * Executes apply mercado pago status logic.
    *
-<<<<<<< HEAD
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-=======
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
->>>>>>> main
    * @date 2025-12-17
    */
   private async applyMercadoPagoStatus(mpPayment: any) {
     if (mpPayment.external_reference) {
       const paymentId = String(mpPayment.external_reference);
-<<<<<<< HEAD
-=======
       if (paymentId.startsWith('delivery_cycle:')) {
         const cycleId = paymentId.replace('delivery_cycle:', '');
         if (mpPayment.status === 'approved') {
@@ -412,7 +346,6 @@ export class PaymentService {
         }
         return { status: mpPayment.status };
       }
->>>>>>> main
       await this.paymentEventRepository.save(
         this.paymentEventRepository.create({
           payment: { id: paymentId } as any,
@@ -470,11 +403,7 @@ export class PaymentService {
   /**
    * Adds days.
    *
-<<<<<<< HEAD
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-=======
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
->>>>>>> main
    * @date 2025-12-17
    */
   private addDays(date: Date, days: number) {
@@ -486,11 +415,7 @@ export class PaymentService {
   /**
    * Handles find by id.
    *
-<<<<<<< HEAD
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-=======
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
->>>>>>> main
    * @date 2025-12-17
    */
   async findById(paymentId: string) {
@@ -500,8 +425,4 @@ export class PaymentService {
       relations: ['store', 'user', 'subscription', 'subscription.plan'],
     });
   }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> main

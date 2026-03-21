@@ -8,16 +8,14 @@
  *
  * @file: AuthService.ts
  * @Date: 2025-12-17
-<<<<<<< HEAD
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-=======
  * @author: Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
->>>>>>> main
  */
 
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
+import { Provide, Inject } from '../ioc/ioc';
+import { Tokens } from '../ioc/injectiontokens';
 import { UserRepository } from '../repositories/UserRepository';
 import { StoreRepository } from '../repositories/StoreRepository';
 import { env } from '../config/env';
@@ -42,12 +40,6 @@ import { normalizeDocument, validateDocument } from '../utils/documents';
 import { logger } from '../utils/logger';
 import { AppError } from '../errors/AppError';
 import { PlatformAdmin } from '../entities/PlatformAdmin';
-<<<<<<< HEAD
-/**
- * Provides AuthService functionality.
- *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-=======
 import { getStoreSegmentPreset, sanitizeStoreSegment } from '../utils/storeSegment';
 import { resolvePlanFeatures, resolvePlanTier } from '../config/planFeatures';
 import { StoreUserRepository } from '../repositories/StoreUserRepository';
@@ -55,22 +47,36 @@ import { StoreUserRepository } from '../repositories/StoreUserRepository';
  * Provides AuthService functionality.
  *
  * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
->>>>>>> main
  * @date 2025-12-17
  */
+@Provide(Tokens.Common.Service.AuthService)
 export class AuthService
 {
+  @Inject(Tokens.Common.DataLayer.UserRepository)
+  private userRepository: UserRepository;
+
+  @Inject(Tokens.Common.DataLayer.StoreRepository)
+  private storeRepository: StoreRepository;
+
+  @Inject(Tokens.Common.Service.PaymentService)
+  private paymentService: PaymentService;
+
+  @Inject(Tokens.Common.Service.EmailService)
+  private emailService: EmailService;
+
+  @Inject(Tokens.Common.DataLayer.PaymentRepository)
+  private paymentRepository: PaymentRepository;
+
+  @Inject(Tokens.Common.Service.SubscriptionService)
+  private subscriptionService: SubscriptionService;
+
+  @Inject(Tokens.Common.Service.SettingsService)
+  private settingsService: SettingsService;
+
+  @Inject(Tokens.Common.DataLayer.StoreUserRepository)
+  private storeUserRepository: StoreUserRepository;
+
   private log = logger.child({ scope: 'AuthService' });
-  private userRepository = new UserRepository();
-  private storeRepository = new StoreRepository();
-  private paymentService = new PaymentService();
-  private emailService = new EmailService();
-  private paymentRepository = new PaymentRepository();
-  private subscriptionService = new SubscriptionService();
-  private settingsService = new SettingsService();
-<<<<<<< HEAD
-=======
-  private storeUserRepository = new StoreUserRepository();
 
   private normalizePhone(value?: string | null) {
     return String(value || '').replace(/\D/g, '');
@@ -191,16 +197,11 @@ export class AuthService
       throw new AppError('AUTH-016', 409);
     }
   }
->>>>>>> main
 
   /**
    * Executes super admin login logic.
    *
-<<<<<<< HEAD
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-=======
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
->>>>>>> main
    * @date 2025-12-17
    */
   async superAdminLogin(username: string, password: string)
@@ -240,17 +241,10 @@ export class AuthService
   /**
    * Executes register logic.
    *
-<<<<<<< HEAD
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2025-12-17
-   */
-  async register(input: any)
-=======
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async register(input: any, meta?: { ipAddress?: string | null })
->>>>>>> main
   {
     this.log.info('Register start', {
       email: input?.email || input?.user?.email,
@@ -258,10 +252,7 @@ export class AuthService
       planId: input?.planId,
       paymentMethod: input?.paymentMethod,
     });
-<<<<<<< HEAD
-=======
     const accountType = (input?.accountType || input?.user?.accountType || 'STORE_OWNER').toString().toUpperCase();
->>>>>>> main
     const userPayload = input.user ?? {
       fullName: input.fullName,
       email: input.email,
@@ -276,8 +267,6 @@ export class AuthService
       .trim()
       .toLowerCase();
 
-<<<<<<< HEAD
-=======
     if (!input.termsAccepted || !input.lgpdAccepted)
     {
       throw new AppError('AUTH-012', 400);
@@ -371,15 +360,10 @@ export class AuthService
       };
     }
 
->>>>>>> main
     const storePayload = input.store ?? {
       name: input.storeName,
       logoUrl: input.logoUrl,
       logoFile: input.logoFile,
-<<<<<<< HEAD
-      primaryColor: input.primaryColor,
-      secondaryColor: input.secondaryColor,
-=======
       bannerUrl: (input as any).bannerUrl,
       bannerFile: (input as any).bannerFile,
       segment: input.segment,
@@ -389,7 +373,6 @@ export class AuthService
       primaryColor: input.primaryColor,
       secondaryColor: input.secondaryColor,
       description: input.description,
->>>>>>> main
       socialLinks: input.socialLinks,
     };
 
@@ -404,14 +387,6 @@ export class AuthService
       throw new AppError('AUTH-013', 400);
     }
 
-<<<<<<< HEAD
-    if (!input.termsAccepted || !input.lgpdAccepted)
-    {
-      throw new AppError('AUTH-012', 400);
-    }
-
-=======
->>>>>>> main
     if (!userPayload.document || !userPayload.documentType)
     {
       throw new AppError('AUTH-009', 400);
@@ -426,11 +401,7 @@ export class AuthService
     /**
      * Handles result.
      *
-<<<<<<< HEAD
-     * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-=======
      * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
->>>>>>> main
      * @date 2025-12-17
      */
     const result = await AppDataSource.transaction(async (manager) =>
@@ -451,10 +422,7 @@ export class AuthService
       {
         throw new AppError('AUTH-010', 409);
       }
-<<<<<<< HEAD
-=======
       await this.ensurePhoneIsAvailable(manager, userPayload.phone);
->>>>>>> main
 
       const hashed = await bcrypt.hash(userPayload.password, 10);
 
@@ -468,10 +436,7 @@ export class AuthService
         documentType: userPayload.documentType,
         termsAcceptedAt: new Date(),
         lgpdAcceptedAt: new Date(),
-<<<<<<< HEAD
-=======
         userRole: 'STORE_OWNER',
->>>>>>> main
       });
       await userRepo.save(user);
 
@@ -484,17 +449,6 @@ export class AuthService
       }
 
       const logoUrl = await saveBase64Image(storePayload.logoFile, `store-${user.id}`);
-<<<<<<< HEAD
-
-      const settings = manager.create(StoreSettings, {
-        logoUrl: logoUrl || storePayload.logoUrl,
-        description: storePayload.description,
-        primaryColor: storePayload.primaryColor,
-        secondaryColor: storePayload.secondaryColor,
-        socialLinks: sanitizeSocialLinks(storePayload.socialLinks),
-        openingHours: storePayload.openingHours ?? [],
-        orderTypes: storePayload.orderTypes ?? [ 'delivery', 'pickup', 'table' ],
-=======
       const bannerUrl = await saveBase64Image(storePayload.bannerFile, `store-banner-${user.id}`);
       const segment = sanitizeStoreSegment(storePayload.segment);
       const segmentPreset = getStoreSegmentPreset(segment);
@@ -516,7 +470,6 @@ export class AuthService
         socialLinks: sanitizeSocialLinks(storePayload.socialLinks),
         openingHours: storePayload.openingHours ?? [],
         orderTypes: storePayload.orderTypes ?? segmentPreset.orderTypes,
->>>>>>> main
       });
 
       const store = storeRepo.create({
@@ -528,9 +481,6 @@ export class AuthService
       });
       await storeRepo.save(store);
 
-<<<<<<< HEAD
-      const plan = await planRepo.findOne({ where: { id: input.planId } });
-=======
       let resolvedPlanId = input.planId;
       if (resolvedPlanId === 'test-plan-7days') {
         const preferred = await planRepo.findOne({ where: { name: 'basic_monthly', enabled: true } });
@@ -548,7 +498,6 @@ export class AuthService
       const plan = resolvedPlanId
         ? await planRepo.findOne({ where: { id: resolvedPlanId } })
         : null;
->>>>>>> main
       if (!plan || !plan.enabled)
       {
         throw new AppError('SUB-003', 400);
@@ -571,11 +520,7 @@ export class AuthService
       return { user, store, subscription };
     });
 
-<<<<<<< HEAD
-    await this.sendVerificationEmail(result.user);
-=======
     await this.sendVerificationEmail(result.user, meta?.ipAddress);
->>>>>>> main
     await this.notifySignup(result.user, result.store);
     this.log.info('Register success', { userId: result.user.id, storeId: result.store.id });
 
@@ -598,12 +543,9 @@ export class AuthService
       payment: null,
       token,
       redirectUrl: `/verify-email`,
-<<<<<<< HEAD
-=======
       next: 'VERIFY_EMAIL',
       emailMasked: this.maskEmail(result.user.email),
       email: result.user.email,
->>>>>>> main
     };
   }
 
@@ -613,11 +555,7 @@ export class AuthService
   /**
    * Executes login logic.
    *
-<<<<<<< HEAD
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-=======
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
->>>>>>> main
    * @date 2025-12-17
    */
   async login(email: string, password: string)
@@ -627,9 +565,6 @@ export class AuthService
 
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) throw new AppError('AUTH-004', 401);
-<<<<<<< HEAD
-    if (!user.emailVerified) throw new AppError('AUTH-005', 401);
-=======
     if (!user.emailVerified) {
       throw new AppError('AUTH-005', 401, {
         next: 'VERIFY_EMAIL',
@@ -638,7 +573,6 @@ export class AuthService
         resendCooldownSec: 60,
       });
     }
->>>>>>> main
 
     const firstStore = user.stores?.[ 0 ];
     const token = this.generateToken(user.id, firstStore?.id);
@@ -649,10 +583,7 @@ export class AuthService
       email: user.email,
       phone: user.phone,
       address: user.address,
-<<<<<<< HEAD
-=======
       role: user.userRole || 'STORE_OWNER',
->>>>>>> main
     };
 
     const sanitizedStore = firstStore
@@ -666,16 +597,10 @@ export class AuthService
       }
       : undefined;
 
-<<<<<<< HEAD
-    if (sanitizedStore) {
-      const currentSubscription = await this.subscriptionService.getCurrentByStore(firstStore.id);
-      const isActive = this.subscriptionService.isActiveSubscription(currentSubscription);
-=======
     let currentSubscription: any = null;
     if (sanitizedStore) {
       currentSubscription = await this.subscriptionService.getCurrentByStore(firstStore.id);
       const isActive = Boolean(firstStore?.settings?.planExempt) || this.subscriptionService.isActiveSubscription(currentSubscription);
->>>>>>> main
       if (!isActive) {
         await this.throwPendingPayment(firstStore.id);
       }
@@ -684,10 +609,6 @@ export class AuthService
         await this.storeRepository.save(firstStore);
       }
     }
-<<<<<<< HEAD
-
-    return { user: sanitizedUser, store: sanitizedStore, token };
-=======
     const planExempt = Boolean(firstStore?.settings?.planExempt);
     const planTier = resolvePlanTier(currentSubscription?.plan?.name, planExempt);
     const features = resolvePlanFeatures({
@@ -712,7 +633,6 @@ export class AuthService
       planTier,
       features,
     };
->>>>>>> main
   }
 
 
@@ -721,22 +641,6 @@ export class AuthService
   /**
    * Executes admin login logic.
    *
-<<<<<<< HEAD
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2025-12-17
-   */
-  async adminLogin(slug: string, password: string)
-  {
-    const store = await this.storeRepository.findBySlug(slug);
-    if (!store) throw new AppError('STORE-001', 404);
-
-    const owner = store.owner;
-    const valid = await bcrypt.compare(password, owner.password);
-    if (!valid) throw new AppError('AUTH-004', 401);
-    if (!owner.emailVerified) throw new AppError('AUTH-005', 401);
-    const currentSubscription = await this.subscriptionService.getCurrentByStore(store.id);
-    const isActive = this.subscriptionService.isActiveSubscription(currentSubscription);
-=======
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
@@ -817,7 +721,6 @@ export class AuthService
     }
     const currentSubscription = await this.subscriptionService.getCurrentByStore(store.id);
     const isActive = Boolean(store?.settings?.planExempt) || this.subscriptionService.isActiveSubscription(currentSubscription);
->>>>>>> main
     if (!isActive) {
       await this.throwPendingPayment(store.id);
     }
@@ -827,31 +730,18 @@ export class AuthService
     }
 
     const token = jwt.sign(
-<<<<<<< HEAD
-      { sub: owner.id, storeId: store.id, role: 'ADMIN' },
-=======
       { sub: loginUser.id, storeId: store.id, role: loginRole },
->>>>>>> main
       env.jwtSecret,
       { expiresIn: '7d' }
     );
 
     const sanitizedOwner = {
-<<<<<<< HEAD
-      id: owner.id,
-      fullName: owner.fullName,
-      email: owner.email,
-      phone: owner.phone,
-      address: owner.address,
-      role: 'ADMIN',
-=======
       id: loginUser.id,
       fullName: loginUser.fullName,
       email: loginUser.email,
       phone: loginUser.phone,
       address: loginUser.address,
       role: loginRole,
->>>>>>> main
     };
 
     const sanitizedStore = {
@@ -862,13 +752,6 @@ export class AuthService
       createdAt: store.createdAt,
       settings: store.settings,
       owner: {
-<<<<<<< HEAD
-        id: owner.id,
-        fullName: owner.fullName,
-        phone: owner.phone,
-      },
-    };
-=======
         id: store.owner?.id,
         fullName: store.owner?.fullName,
         phone: store.owner?.phone,
@@ -881,7 +764,6 @@ export class AuthService
       planExempt,
       subscriptionStatus: currentSubscription?.status,
     });
->>>>>>> main
 
     return {
       token,
@@ -893,16 +775,11 @@ export class AuthService
             status: currentSubscription.status,
             plan: currentSubscription.plan,
             endDate: currentSubscription.endDate,
-<<<<<<< HEAD
-          }
-        : null,
-=======
             planExempt,
           }
         : null,
       planTier,
       features,
->>>>>>> main
     };
   }
 
@@ -912,11 +789,7 @@ export class AuthService
   /**
    * Executes request password reset logic.
    *
-<<<<<<< HEAD
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-=======
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
->>>>>>> main
    * @date 2025-12-17
    */
   async requestPasswordReset(email: string)
@@ -957,32 +830,15 @@ export class AuthService
   /**
    * Handles resend verification email.
    *
-<<<<<<< HEAD
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2025-12-17
-   */
-  async resendVerificationEmail(email: string) {
-=======
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   async resendVerificationEmail(email: string, meta?: { ipAddress?: string | null }) {
->>>>>>> main
     const normalizedEmail = email?.trim().toLowerCase();
     if (!normalizedEmail) throw new AppError('AUTH-006', 400);
 
     const user = await this.userRepository.findByEmail(normalizedEmail);
     if (!user) {
-<<<<<<< HEAD
-      return { code: 'AUTH-S002' };
-    }
-    if (user.emailVerified) {
-      return { code: 'AUTH-S005' };
-    }
-
-    await this.sendVerificationEmail(user);
-    return { code: 'AUTH-S002' };
-=======
       return { code: 'AUTH-S002', next: 'VERIFY_EMAIL', cooldownSec: 60 };
     }
     if (user.emailVerified) {
@@ -1005,7 +861,6 @@ export class AuthService
       cooldownSec: 60,
       emailMasked: this.maskEmail(user.email),
     };
->>>>>>> main
   }
 
 
@@ -1014,11 +869,7 @@ export class AuthService
   /**
    * Executes reset password logic.
    *
-<<<<<<< HEAD
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-=======
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
->>>>>>> main
    * @date 2025-12-17
    */
   async resetPassword(token: string, newPassword: string)
@@ -1047,22 +898,6 @@ export class AuthService
     return { code: 'AUTH-S003' };
   }
 
-<<<<<<< HEAD
-  /**
-   * Handles verify email.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2025-12-17
-   */
-  async verifyEmail(token: string) {
-    if (!token) throw new AppError('AUTH-007', 400);
-    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
-    const verificationRepo = AppDataSource.getRepository(EmailVerification);
-    let verification = await verificationRepo.findOne({
-      where: { tokenHash },
-      relations: ['user'],
-    });
-=======
   async changePassword(userId: string, currentPassword: string, newPassword: string) {
     const normalizedUserId = String(userId || '').trim();
     if (!normalizedUserId) throw new AppError('AUTH-001', 401);
@@ -1106,7 +941,6 @@ export class AuthService
         relations: ['user'],
       });
     }
->>>>>>> main
 
     let verifiedUser = verification?.user;
 
@@ -1117,12 +951,9 @@ export class AuthService
         const userRepo = AppDataSource.getRepository(User);
         const user = await userRepo.findOne({ where: { id: decoded.sub } });
         if (!user) throw new AppError('AUTH-007', 400);
-<<<<<<< HEAD
-=======
         if (normalizedEmail && user.email.toLowerCase() !== normalizedEmail) {
           throw new AppError('AUTH-007', 400);
         }
->>>>>>> main
         verifiedUser = user;
       } catch {
         throw new AppError('AUTH-007', 400);
@@ -1210,11 +1041,7 @@ export class AuthService
   /**
    * Generates token.
    *
-<<<<<<< HEAD
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-=======
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
->>>>>>> main
    * @date 2025-12-17
    */
   private generateToken(userId: string, storeId?: string)
@@ -1228,11 +1055,7 @@ export class AuthService
   /**
    * Executes add days logic.
    *
-<<<<<<< HEAD
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-=======
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
->>>>>>> main
    * @date 2025-12-17
    */
   private addDays(date: Date, days: number)
@@ -1248,22 +1071,15 @@ export class AuthService
   /**
    * Executes throw pending payment logic.
    *
-<<<<<<< HEAD
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-=======
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
->>>>>>> main
    * @date 2025-12-17
    */
   private async throwPendingPayment(storeId: string)
   {
-<<<<<<< HEAD
-=======
     const store = await this.storeRepository.findById(storeId);
     if (store?.settings?.planExempt) {
       return;
     }
->>>>>>> main
     const payment = await this.paymentRepository.findLatestByStoreId(storeId);
     throw new AppError('PAY-010', 402, {
       paymentUrl: payment?.id ? `${env.appUrl}/payment/${payment.id}` : null,
@@ -1277,17 +1093,10 @@ export class AuthService
   /**
    * Sends verification email.
    *
-<<<<<<< HEAD
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2025-12-17
-   */
-  private async sendVerificationEmail(user: User) {
-=======
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
    * @date 2025-12-17
    */
   private async sendVerificationEmail(user: User, ipAddress?: string | null) {
->>>>>>> main
     const token = jwt.sign(
       {
         sub: user.id,
@@ -1300,14 +1109,11 @@ export class AuthService
     const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
     const verificationRepo = AppDataSource.getRepository(EmailVerification);
-<<<<<<< HEAD
-=======
     const maxCountRows = await AppDataSource.query(
       `SELECT COALESCE(MAX(resend_count), 0) AS max_count FROM email_verifications WHERE user_id = $1`,
       [user.id]
     );
     const nextResendCount = Number(maxCountRows?.[0]?.max_count || 0) + 1;
->>>>>>> main
 
     await verificationRepo
       .createQueryBuilder()
@@ -1321,19 +1127,13 @@ export class AuthService
         user,
         tokenHash,
         expiresAt,
-<<<<<<< HEAD
-=======
         requestIp: this.getClientIp(ipAddress),
         resendCount: nextResendCount,
         lastSentAt: new Date(),
->>>>>>> main
       })
     );
 
     const link = `${env.appUrl}/verify-email?token=${encodeURIComponent(token)}`;
-<<<<<<< HEAD
-    await this.emailService.sendEmailVerification(user.email, link);
-=======
     await this.emailService.sendEmailVerification(user.email, link, token);
   }
 
@@ -1382,7 +1182,6 @@ export class AuthService
 
     const link = `${env.appUrl}/verify-email?token=${encodeURIComponent(token)}`;
     await this.emailService.sendMotoboyVerification(user.email, link, token);
->>>>>>> main
   }
 
 
@@ -1391,11 +1190,7 @@ export class AuthService
   /**
    * Executes notify signup logic.
    *
-<<<<<<< HEAD
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-=======
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
->>>>>>> main
    * @date 2025-12-17
    */
   private async notifySignup(user: User, store: Store) {
@@ -1421,11 +1216,7 @@ export class AuthService
   /**
    * Sends payment email.
    *
-<<<<<<< HEAD
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-=======
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
->>>>>>> main
    * @date 2025-12-17
    */
   private sendPaymentEmail(email: string, payment: any)
@@ -1439,11 +1230,7 @@ export class AuthService
         : payment.method === 'BOLETO'
         ? 'Boleto'
         : 'Cartão de crédito';
-<<<<<<< HEAD
-    const subject = 'Pagamento pendente - Chama no Espeto';
-=======
     const subject = 'Pagamento pendente - Jano Caminho';
->>>>>>> main
     const text = [
       'Recebemos seu cadastro e o pagamento esta pendente.',
       `Forma: ${methodLabel}`,
@@ -1465,16 +1252,12 @@ export class AuthService
       <div style="font-family: Arial, sans-serif; background: #f1f5f9; padding: 32px;">
         <div style="max-width: 540px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 18px; overflow: hidden;">
           <div style="padding: 24px; background: linear-gradient(135deg, #dc2626 0%, #f97316 100%);">
-<<<<<<< HEAD
-            <img src="${logoUrl}" alt="Chama no Espeto" style="width: 96px; height: 96px; border-radius: 16px; border: 2px solid rgba(255,255,255,0.5);" />
-=======
             <img src="${logoUrl}" alt="Jano Caminho" style="width: 96px; height: 96px; border-radius: 16px; border: 2px solid rgba(255,255,255,0.5);" />
->>>>>>> main
             <p style="margin: 12px 0 0; color: #ffffff; font-size: 18px; font-weight: 700;">Pagamento pendente</p>
             <p style="margin: 4px 0 0; color: rgba(255,255,255,0.9); font-size: 13px;">Finalize para liberar sua loja</p>
           </div>
           <div style="padding: 24px;">
-            <p style="margin: 0 0 16px; color: #475569;">Recebemos seu cadastro. Assim que o pagamento for confirmado, sua loja sera liberada automaticamente.</p>
+            <p style="margin: 0 0 16px; color: #475569;">Recebemos seu cadastro. Assim que o pagamento for confirmed, sua loja sera liberada automaticamente.</p>
             <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px; margin-bottom: 16px;">
               <p style="margin: 0 0 6px; color: #0f172a; font-size: 14px;"><strong>Forma:</strong> ${methodLabel}</p>
               <p style="margin: 0; color: #0f172a; font-size: 14px;"><strong>Valor:</strong> R$ ${Number(payment.amount || 0).toFixed(2)}</p>
@@ -1496,11 +1279,7 @@ export class AuthService
   /**
    * Generates unique slug.
    *
-<<<<<<< HEAD
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-=======
    * @author Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
->>>>>>> main
    * @date 2025-12-17
    */
   private async generateUniqueSlug(name: string)
@@ -1516,8 +1295,4 @@ export class AuthService
 
     return candidate;
   }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> main

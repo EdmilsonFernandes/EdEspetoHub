@@ -8,11 +8,7 @@
  *
  * @file: index.ts
  * @Date: 2025-12-17
-<<<<<<< HEAD
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-=======
  * @author: Edmilson Lopes (edmilson.lopes@janocaminho.com.br)
->>>>>>> main
  */
 
 import { Router } from 'express';
@@ -20,20 +16,12 @@ import { AuthController } from '../controllers/AuthController';
 import { StoreController } from '../controllers/StoreController';
 import { ProductController } from '../controllers/ProductController';
 import { OrderController } from '../controllers/OrderController';
-<<<<<<< HEAD
-=======
 import { OrderReviewController } from '../controllers/OrderReviewController';
->>>>>>> main
 import { PlanController } from '../controllers/PlanController';
 import { SubscriptionController } from '../controllers/SubscriptionController';
 import { PlatformAdminController } from '../controllers/PlatformAdminController';
 import { PlatformPublicController } from '../controllers/PlatformPublicController';
 import { PaymentController } from '../controllers/PaymentController';
-<<<<<<< HEAD
-
-import { requireAuth, requireRole } from '../middleware/authGuard';
-import { requireActiveSubscription } from '../middleware/subscriptionGuard';
-=======
 import { MotoboyController } from '../controllers/MotoboyController';
 import { MotoboyKycController } from '../controllers/MotoboyKycController';
 import { DeliveryController } from '../controllers/DeliveryController';
@@ -44,29 +32,21 @@ import { StoreUserController } from '../controllers/StoreUserController';
 import { requireAuth, requireRole } from '../middleware/authGuard';
 import { requireActiveSubscription } from '../middleware/subscriptionGuard';
 import { requirePlanFeature } from '../middleware/planFeatureGuard';
->>>>>>> main
 
 const routes = Router();
 
 // Auth
 routes.post('/auth/register', AuthController.register);
-<<<<<<< HEAD
-=======
 routes.post('/auth/signup', AuthController.register);
->>>>>>> main
 routes.post('/auth/login', AuthController.login);
 routes.post('/auth/admin-login', AuthController.adminLogin);
 routes.post('/auth/super-login', AuthController.superAdminLogin);
 routes.post('/auth/forgot-password', AuthController.forgotPassword);
 routes.post('/auth/reset-password', AuthController.resetPassword);
 routes.post('/auth/verify-email', AuthController.verifyEmail);
-<<<<<<< HEAD
-routes.post('/auth/resend-verification', AuthController.resendVerification);
-=======
 routes.get('/auth/verify-email', AuthController.verifyEmail);
 routes.post('/auth/resend-verification', AuthController.resendVerification);
 routes.post('/auth/change-password', requireAuth, AuthController.changePassword);
->>>>>>> main
 
 // Plans / payments
 routes.get('/plans', PlanController.list);
@@ -85,20 +65,13 @@ routes.post('/payments/:paymentId/renew', PaymentController.renewFromPayment);
 // Platform admin (se for painel de plataforma mesmo, proteja)
 routes.get('/admin/overview', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.overview);
 routes.get('/admin/stores', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.listStores);
-<<<<<<< HEAD
+routes.get('/admin/queue-health', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.queueHealth);
 routes.get('/admin/payment-events', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.listPaymentEvents);
 routes.get('/admin/access-logs', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.listAccessLogs);
 routes.post('/admin/payments/:paymentId/reprocess', requireAuth, requireRole('SUPER_ADMIN'), PaymentController.reprocess);
 routes.patch('/admin/stores/:storeId/suspend', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.suspendStore);
 routes.patch('/admin/stores/:storeId/reactivate', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.reactivateStore);
-=======
-routes.get('/admin/queue-health', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.queueHealth);
-routes.get('/admin/payment-events', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.listPaymentEvents);
-routes.get('/admin/access-logs', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.listAccessLogs);
- routes.post('/admin/payments/:paymentId/reprocess', requireAuth, requireRole('SUPER_ADMIN'), PaymentController.reprocess);
- routes.patch('/admin/stores/:storeId/suspend', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.suspendStore);
- routes.patch('/admin/stores/:storeId/reactivate', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.reactivateStore);
- routes.patch('/admin/stores/:storeId/plan-exempt', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.updatePlanExempt);
+routes.patch('/admin/stores/:storeId/plan-exempt', requireAuth, requireRole('SUPER_ADMIN'), PlatformAdminController.updatePlanExempt);
 
 // Platform KYC (motoboy documents) - SUPER_ADMIN only
 routes.get('/admin/motoboys/kyc/audit', requireAuth, requireRole('SUPER_ADMIN'), MotoboyKycController.auditSummary);
@@ -117,18 +90,10 @@ routes.post(
   requireRole('SUPER_ADMIN'),
   MotoboyKycController.rejectDocument
 );
->>>>>>> main
 
 // Store public
 routes.get('/public/platform/metrics', PlatformPublicController.metrics);
 routes.get('/public/stores', StoreController.listPortfolio);
-<<<<<<< HEAD
-routes.get('/stores/slug/:slug', StoreController.getBySlug);
-routes.get('/chamanoespeto/:slug', StoreController.getBySlug);
-routes.get('/stores/slug/:slug/products', ProductController.listPublicBySlug);
-routes.get('/public/stores/slug/:slug/products', ProductController.listPublicBySlug);
-routes.get('/public/stores/slug/:slug/highlights', OrderController.listHighlightsBySlug);
-=======
 routes.post('/public/stores/slug/:slug/track', StoreController.trackLink);
 routes.get('/stores/slug/:slug', StoreController.getBySlug);
 routes.get('/chamanoespeto/:slug', StoreController.getBySlug);
@@ -139,19 +104,10 @@ routes.get('/stores/slug/:slug/categories', ProductController.listPublicCategori
 routes.get('/public/stores/slug/:slug/categories', ProductController.listPublicCategoriesBySlug);
 routes.get('/public/stores/slug/:slug/highlights', OrderController.listHighlightsBySlug);
 routes.get('/public/stores/slug/:slug/tables/status', OrderController.listTableStatusBySlug);
->>>>>>> main
 
 // Store admin
 routes.put('/stores/:storeId', requireAuth, requireRole('ADMIN'), StoreController.update);
 routes.put('/stores/:storeId/status', requireAuth, requireRole('ADMIN'), StoreController.updateStatus);
-<<<<<<< HEAD
-
-// Products admin (cadastro não depende de assinatura)
-routes.post('/stores/:storeId/products', requireAuth, requireRole('ADMIN'), ProductController.create);
-routes.get('/stores/:storeId/products', requireAuth, requireRole('ADMIN'), ProductController.list);
-routes.put('/stores/:storeId/products/:productId', requireAuth, requireRole('ADMIN'), ProductController.update);
-routes.delete('/stores/:storeId/products/:productId', requireAuth, requireRole('ADMIN'), ProductController.remove);
-=======
 routes.get('/stores/:storeId/link-stats', requireAuth, requireRole('ADMIN'), StoreController.getLinkStats);
 routes.get('/stores/:storeId/users', requireAuth, requireRole('ADMIN'), StoreUserController.list);
 routes.post('/stores/:storeId/users', requireAuth, requireRole('ADMIN'), StoreUserController.create);
@@ -165,20 +121,12 @@ routes.put('/stores/:storeId/products/:productId', requireAuth, requireRole('ADM
 routes.delete('/stores/:storeId/products/:productId', requireAuth, requireRole('ADMIN'), ProductController.remove);
 routes.get('/stores/:storeId/categories', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), ProductController.listCategories);
 routes.patch('/stores/:storeId/categories/priority', requireAuth, requireRole('ADMIN'), ProductController.setCategoryPriority);
->>>>>>> main
 
 // Orders - cliente cria (aqui sim assinatura com carência)
 routes.post('/stores/:storeId/orders', requireActiveSubscription, OrderController.create);
 routes.post('/stores/slug/:slug/orders', requireActiveSubscription, OrderController.createBySlug);
 
 // Orders - staff vê fila/histórico (churrasqueiro + admin)
-<<<<<<< HEAD
-routes.get('/stores/:storeId/orders', requireAuth, requireRole('ADMIN', 'CHURRASQUEIRO'), OrderController.list);
-routes.get('/stores/slug/:slug/orders', requireAuth, requireRole('ADMIN', 'CHURRASQUEIRO'), OrderController.listBySlug);
-routes.patch('/orders/:orderId/status', requireAuth, requireRole('ADMIN', 'CHURRASQUEIRO'), OrderController.updateStatus);
-routes.patch('/orders/:orderId', requireAuth, requireRole('ADMIN', 'CHURRASQUEIRO'), OrderController.updateItems);
-routes.get('/orders/:orderId/public', OrderController.getPublic);
-=======
 routes.get('/stores/:storeId/orders', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), OrderController.list);
 routes.get('/stores/slug/:slug/orders', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), OrderController.listBySlug);
 routes.patch('/orders/:orderId/status', requireAuth, requireRole('ADMIN', 'OPERATOR', 'CHURRASQUEIRO'), OrderController.updateStatus);
@@ -267,6 +215,5 @@ routes.post('/stores/:storeId/delivery-billing/pay', requireAuth, requireRole('A
   requirePlanFeature('motoboyManagement'),
   MotoboyController.requestDocumentReupload
  );
->>>>>>> main
 
 export default routes;

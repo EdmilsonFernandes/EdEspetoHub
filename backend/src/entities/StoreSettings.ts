@@ -30,11 +30,6 @@ export class StoreSettings
   @Column({ name: 'logo_url', type: 'text', nullable: true })
   logoUrl?: string | null;
 
-<<<<<<< HEAD
-  @Column({ name: 'description', type: 'text', nullable: true })
-  description?: string | null;
-
-=======
   @Column({ name: 'banner_url', type: 'text', nullable: true })
   bannerUrl?: string | null;
 
@@ -53,7 +48,6 @@ export class StoreSettings
   @Column({ name: 'state', type: 'text', nullable: true })
   state?: string | null;
 
->>>>>>> main
   @Column({ name: 'primary_color', default: '#b91c1c' })
   primaryColor!: string;
 
@@ -69,8 +63,6 @@ export class StoreSettings
   @Column({ name: 'promo_message', type: 'text', nullable: true })
   promoMessage?: string | null;
 
-<<<<<<< HEAD
-=======
   @Column({ name: 'is_ordering_enabled', type: 'boolean', default: true })
   isOrderingEnabled!: boolean;
 
@@ -119,7 +111,6 @@ export class StoreSettings
   @Column('decimal', { name: 'delivery_fee', precision: 10, scale: 2, nullable: true })
   deliveryFee?: number | null;
 
->>>>>>> main
   @Column({
     name: 'social_links',
     type: 'jsonb',

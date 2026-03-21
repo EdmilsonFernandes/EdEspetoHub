@@ -1,54 +1,14 @@
-/*
- * Chama no espeto CONFIDENTIAL
- * ------------------
- * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
- *
- * This file, project or its parts can not be copied and/or distributed without
- * the express permission of Chama no espeto.
- *
- * @file: database.ts
- * @Date: 2025-12-17
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
- */
-
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
 import { env } from './env';
-import { User } from '../entities/User';
-import { Store } from '../entities/Store';
-import { StoreSettings } from '../entities/StoreSettings';
-import { Product } from '../entities/Product';
-import { Order } from '../entities/Order';
-<<<<<<< HEAD
-import { OrderItem } from '../entities/OrderItem';
-=======
-import { OrderReview } from '../entities/OrderReview';
-import { OrderItem } from '../entities/OrderItem';
-import { OrderEtaEstimate } from '../entities/OrderEtaEstimate';
-import { Motoboy } from '../entities/Motoboy';
-import { MotoboyStore } from '../entities/MotoboyStore';
-import { OrderDelivery } from '../entities/OrderDelivery';
-import { DeliveryEvent } from '../entities/DeliveryEvent';
-import { MotoboyDocument } from '../entities/MotoboyDocument';
-import { MotoboyStoreRequest } from '../entities/MotoboyStoreRequest';
-import { MotoboyAuditLog } from '../entities/MotoboyAuditLog';
-import { DeliveryBillingCycle } from '../entities/DeliveryBillingCycle';
-import { DeliveryBillingCharge } from '../entities/DeliveryBillingCharge';
->>>>>>> main
-import { Plan } from '../entities/Plan';
-import { Subscription } from '../entities/Subscription';
-import { Payment } from '../entities/Payment';
-import { PaymentEvent } from '../entities/PaymentEvent';
-import { PasswordReset } from '../entities/PasswordReset';
-import { EmailVerification } from '../entities/EmailVerification';
-import { SiteSetting } from '../entities/SiteSetting';
-import { PlatformAdmin } from '../entities/PlatformAdmin';
-import { AccessLog } from '../entities/AccessLog';
-<<<<<<< HEAD
-=======
-import { StoreLinkHit } from '../entities/StoreLinkHit';
-import { StoreUser } from '../entities/StoreUser';
->>>>>>> main
+import path from 'path';
+
+// Detect if we are running in development (ts) or production (dist/js)
+const isTs = !__dirname.includes('dist');
+const extension = isTs ? 'ts' : 'js';
+
+// Base directory for entities
+const entitiesPath = path.join(__dirname, '..', 'entities', '**', `*.${extension}`);
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -58,16 +18,7 @@ export const AppDataSource = new DataSource({
   password: env.database.password,
   database: env.database.database,
   synchronize: false,
-<<<<<<< HEAD
-  entities: [ User, Store, StoreSettings, Product, Order, OrderItem, Plan, Subscription, Payment, PaymentEvent, PasswordReset, EmailVerification, SiteSetting, PlatformAdmin, AccessLog ],
+  entities: [ entitiesPath ],
   migrations: [],
   logging: [ 'error' ]
-  //logging: [ 'error', 'query' ]
 });
-=======
-  entities: [ User, Store, StoreSettings, Product, Order, OrderReview, OrderItem, OrderEtaEstimate, Motoboy, MotoboyStore, OrderDelivery, DeliveryEvent, MotoboyDocument, MotoboyStoreRequest, MotoboyAuditLog, DeliveryBillingCycle, DeliveryBillingCharge, Plan, Subscription, Payment, PaymentEvent, PasswordReset, EmailVerification, SiteSetting, PlatformAdmin, AccessLog, StoreLinkHit, StoreUser ],
-  migrations: [],
-  logging: [ 'error' ]
-  //logging: [ 'error', 'query' ]
-});
->>>>>>> main

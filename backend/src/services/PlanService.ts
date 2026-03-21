@@ -14,17 +14,6 @@
 import { PlanRepository } from '../repositories/PlanRepository';
 import { Plan, PlanName } from '../entities/Plan';
 
-<<<<<<< HEAD
-const DEFAULT_PLANS: Array<Pick<Plan, 'name' | 'displayName' | 'price' | 'durationDays' | 'enabled'>> = [
-  { name: 'basic_monthly', displayName: 'Plano Basico Mensal', price: 39.9, durationDays: 30, enabled: true },
-  { name: 'pro_monthly', displayName: 'Plano Pro Mensal', price: 79.9, durationDays: 30, enabled: true },
-  { name: 'premium_monthly', displayName: 'Plano Premium Mensal', price: 149.9, durationDays: 30, enabled: true },
-  { name: 'basic_yearly', displayName: 'Plano Basico Anual', price: 359.1, durationDays: 365, enabled: true },
-  { name: 'pro_yearly', displayName: 'Plano Pro Anual', price: 719.1, durationDays: 365, enabled: true },
-  { name: 'premium_yearly', displayName: 'Plano Premium Anual', price: 1349.1, durationDays: 365, enabled: true },
-];
-
-=======
 const BASIC_MONTHLY_DEFAULT = 49.9;
 const PRO_MONTHLY_DEFAULT = 79.9;
 const YEARLY_DISCOUNT = 0.15;
@@ -41,7 +30,6 @@ const MONTHLY_SEEDS: Array<Pick<Plan, 'name' | 'displayName' | 'price' | 'promoP
 
 const DISABLED_PLANS: PlanName[] = ['premium_monthly', 'premium_yearly'];
 
->>>>>>> main
 const LEGACY_PLANS: PlanName[] = ['monthly', 'yearly'];
 /**
  * Provides PlanService functionality.
@@ -51,15 +39,12 @@ const LEGACY_PLANS: PlanName[] = ['monthly', 'yearly'];
  */
 export class PlanService {
   private planRepository = new PlanRepository();
-<<<<<<< HEAD
-=======
 
   private resolveMonthlyPrice(byName: Map<string, Plan>, planName: 'basic_monthly' | 'pro_monthly', fallback: number) {
     const existing = byName.get(planName);
     const value = Number((existing as any)?.price);
     return Number.isFinite(value) && value > 0 ? value : fallback;
   }
->>>>>>> main
   /**
    * Lists enabled.
    *
@@ -87,18 +72,12 @@ export class PlanService {
      */
     const byName = new Map(existing.map((plan) => [plan.name, plan]));
 
-<<<<<<< HEAD
-    for (const seed of DEFAULT_PLANS) {
-=======
     // 1) Guarantee monthly plans exist, but NEVER overwrite monthly DB prices.
     for (const seed of MONTHLY_SEEDS) {
->>>>>>> main
       const planExists = byName.get(seed.name);
       if (!planExists) {
         const plan = this.planRepository.create(seed as Plan);
         await this.planRepository.save(plan);
-<<<<<<< HEAD
-=======
         byName.set(seed.name, plan);
       } else {
         const needsMetaUpdate =
@@ -175,14 +154,9 @@ export class PlanService {
       if (existingPlan && existingPlan.enabled) {
         existingPlan.enabled = false;
         await this.planRepository.save(existingPlan);
->>>>>>> main
       }
     }
 
     return this.planRepository.findEnabled();
   }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> main

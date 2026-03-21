@@ -38,8 +38,6 @@ export class Product {
   @Column({ name: 'promo_active', default: false })
   promoActive!: boolean;
 
-<<<<<<< HEAD
-=======
   @Column({ name: 'bundle_promo_qty', type: 'int', nullable: true })
   bundlePromoQty?: number | null;
 
@@ -49,7 +47,6 @@ export class Product {
   @Column({ name: 'bundle_promo_active', default: false })
   bundlePromoActive!: boolean;
 
->>>>>>> main
   @Column({ nullable: true })
   category?: string;
 
@@ -62,11 +59,6 @@ export class Product {
   @Column({ name: 'is_featured', default: false })
   isFeatured!: boolean;
 
-<<<<<<< HEAD
-  @Column({ default: true })
-  active!: boolean;
-
-=======
   @Column({ name: 'manage_stock', default: false })
   manageStock!: boolean;
 
@@ -85,7 +77,6 @@ export class Product {
   @Column({ type: 'jsonb', nullable: true })
   modifiers?: Array<{ id: string; name: string; price: number; active?: boolean }> | null;
 
->>>>>>> main
   @ManyToOne(() => Store, (store) => store.products, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'store_id' })
   store!: Store;

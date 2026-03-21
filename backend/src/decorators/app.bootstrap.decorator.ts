@@ -1,4 +1,4 @@
-import '../../../ioc/ioc.loader';
+import '../ioc/ioc.loader';
 
 import { container } from '../ioc/ioc';
 

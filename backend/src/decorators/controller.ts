@@ -1,87 +1,110 @@
-import { NextFunction, Request, Response } from 'express';
-import { Provide } from '../ioc/ioc';
-import jwt from 'jsonwebtoken';
-// import { UserRole } from '@shared/enums';
-// import { messages } from 'utils/messages';
+import { NextFunction, Request, Response, Router } from 'express';
+import { Provide, container } from '../ioc/ioc';
 import { BaseRouterDefinition } from '../models/base-router.model';
+import { requireAuth, requireRole, UserRole } from '../middleware/authGuard';
 
-export const controllerTokensToInstantiate: Array<symbol> = [];
-export const instantiatedControllers: Array<BaseRouterDefinition> = [];
+export const instantiatedControllers: Array<any> = [];
 
-export function RouterController(token: symbol): ClassDecorator
-{
-  return <T>(target: T): void =>
-  {
+export function RouterController(token: symbol): ClassDecorator {
+  return (target: any): void => {
     Provide(token)(target);
-    controllerTokensToInstantiate.push(token);
+    instantiatedControllers.push(token);
   };
 }
 
-// /**
-//  * Decorator para autorizar o acesso com base nas roles do usuário.
-//  */
-// export function Authorized(...roles: UserRole[])
-// {
-//   return function (target: any, propertyKey: string, descriptor: PropertyDescriptor)
-//   {
-//     const originalMethod = descriptor.value;
+export enum HttpMethod {
+  GET = 'get',
+  POST = 'post',
+  PUT = 'put',
+  DELETE = 'delete',
+  PATCH = 'patch',
+}
 
-//     descriptor.value = function (req: Request, res: Response, next: NextFunction)
-//     {
-//       // 🔹 Forçando a tipagem correta de req.user
-//       const user = (req as Request & { user?: Express.UserJwtPayload }).user;
+interface RouteDefinition {
+  path: string;
+  method: HttpMethod;
+  methodName: string;
+  middlewares: any[];
+}
 
-//       if (!user || !roles.includes(user.role))
-//       {
-//         throw new Error('Forbidden: Insufficient privileges');
-//       }
+export function Get(path: string = '', ...middlewares: any[]): MethodDecorator {
+  return (target: any, propertyKey: string | symbol): void => {
+    addRoute(target, path, HttpMethod.GET, propertyKey as string, middlewares);
+  };
+}
 
-//       try
-//       {
-//         return originalMethod.apply(this, arguments);
-//       } catch (error)
-//       {
-//         next(error);
-//       }
-//     };
+export function Post(path: string = '', ...middlewares: any[]): MethodDecorator {
+  return (target: any, propertyKey: string | symbol): void => {
+    addRoute(target, path, HttpMethod.POST, propertyKey as string, middlewares);
+  };
+}
 
-//     return descriptor;
-//   };
-// }
+export function Put(path: string = '', ...middlewares: any[]): MethodDecorator {
+  return (target: any, propertyKey: string | symbol): void => {
+    addRoute(target, path, HttpMethod.PUT, propertyKey as string, middlewares);
+  };
+}
 
-// /**
-//  * Verifica autenticação e adiciona o usuário ao req.
-//  */
-// export function isAuth()
-// {
-//   return function (target: any, propertyKey: string, descriptor: PropertyDescriptor)
-//   {
-//     const originalMethod = descriptor.value;
+export function Delete(path: string = '', ...middlewares: any[]): MethodDecorator {
+  return (target: any, propertyKey: string | symbol): void => {
+    addRoute(target, path, HttpMethod.DELETE, propertyKey as string, middlewares);
+  };
+}
 
-//     descriptor.value = function (req: Request, res: Response, next: NextFunction)
-//     {
-//       const authHeader = req.headers.authorization;
+export function Authorize(): MethodDecorator {
+  return (target: any, propertyKey: string | symbol): void => {
+    addMiddleware(target, propertyKey as string, requireAuth);
+  };
+}
 
-//       if (!authHeader)
-//       {
-//         throw new Error(messages.TOKEN_NOT_PROVIDED);
-//       }
+export function Roles(...roles: UserRole[]): MethodDecorator {
+  return (target: any, propertyKey: string | symbol): void => {
+    addMiddleware(target, propertyKey as string, requireRole(...roles));
+  };
+}
 
-//       const [ , token ] = authHeader.split(' ');
+function addRoute(target: any, path: string, method: HttpMethod, methodName: string, middlewares: any[]): void {
+  if (!Reflect.hasMetadata('routes', target.constructor)) {
+    Reflect.defineMetadata('routes', [], target.constructor);
+  }
 
-//       try
-//       {
-//         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
-//         (req as Request & { user?: Express.UserJwtPayload }).user =
-//           decoded as Express.UserJwtPayload;
+  const routes = Reflect.getMetadata('routes', target.constructor) as Array<RouteDefinition>;
 
-//         return originalMethod.apply(this, arguments);
-//       } catch (err)
-//       {
-//         throw new Error(messages.INVALID_TOKEN);
-//       }
-//     };
+  // Merge with middlewares from other decorators (like @Authorize)
+  const metaMiddlewares = Reflect.getMetadata('middlewares', target, methodName) || [];
+  const finalMiddlewares = [...metaMiddlewares, ...middlewares];
 
-//     return descriptor;
-//   };
-// }
+  routes.push({
+    path,
+    method,
+    methodName,
+    middlewares: finalMiddlewares,
+  });
+
+  Reflect.defineMetadata('routes', routes, target.constructor);
+}
+
+function addMiddleware(target: any, methodName: string, middleware: any): void {
+  if (!Reflect.hasMetadata('routes', target.constructor)) {
+    Reflect.defineMetadata('routes', [], target.constructor);
+  }
+
+  const routes = Reflect.getMetadata('routes', target.constructor) as Array<RouteDefinition>;
+  const route = routes.find(r => r.methodName === methodName);
+
+  if (route) {
+    route.middlewares.unshift(middleware);
+  } else {
+    // If route doesn't exist yet, we might need a way to store it
+    // But usually decorators are applied from bottom to top, 
+    // so @Get would be called after @Authorize if @Authorize is above @Get.
+    // However, MethodDecorators on the same method are executed in order.
+    // Let's ensure we handle both cases or document the order.
+    // A better way is to store middlewares separately and merge them.
+    if (!Reflect.hasMetadata('middlewares', target, methodName)) {
+        Reflect.defineMetadata('middlewares', [], target, methodName);
+    }
+    const middlewares = Reflect.getMetadata('middlewares', target, methodName);
+    middlewares.unshift(middleware);
+  }
+}

@@ -15,10 +15,7 @@ import { CreateProductDto } from '../dto/CreateProductDto';
 import { ProductRepository } from '../repositories/ProductRepository';
 import { StoreRepository } from '../repositories/StoreRepository';
 import { saveBase64Image } from '../utils/imageStorage';
-<<<<<<< HEAD
-=======
 import { isProductAvailableToday, normalizeAvailabilityDays } from '../utils/productAvailability';
->>>>>>> main
 import { AppError } from '../errors/AppError';
 /**
  * Provides ProductService functionality.
@@ -30,8 +27,6 @@ export class ProductService
 {
   private productRepository = new ProductRepository();
   private storeRepository = new StoreRepository();
-<<<<<<< HEAD
-=======
   private normalizeCategoryKey(value: unknown)
   {
     return String(value || '')
@@ -175,7 +170,6 @@ export class ProductService
 
     return { qty, price, active: true };
   }
->>>>>>> main
 
   /**
    * Ensures store access.
@@ -216,8 +210,6 @@ export class ProductService
       ? Number(input.promoPrice)
       : null;
     const promoActive = Boolean(input.promoActive) && !!promoPrice && promoPrice > 0;
-<<<<<<< HEAD
-=======
     const saleBasePrice = promoActive ? Number(promoPrice) : Number(input.price);
     const bundlePromo = this.resolveBundlePromo(input, saleBasePrice);
     const availabilityDays = normalizeAvailabilityDays(input.availabilityDays);
@@ -227,32 +219,25 @@ export class ProductService
     const stockQuantity = Number.isFinite(stockQuantityRaw) ? Math.max(0, Math.floor(stockQuantityRaw)) : 0;
     const lowStockAlertRaw = Number((input as any).lowStockAlert ?? 3);
     const lowStockAlert = Number.isFinite(lowStockAlertRaw) ? Math.max(1, Math.floor(lowStockAlertRaw)) : 3;
->>>>>>> main
 
     const product = this.productRepository.create({
       name: input.name,
       price: input.price,
       promoPrice,
       promoActive,
-<<<<<<< HEAD
-=======
       bundlePromoQty: bundlePromo.qty,
       bundlePromoPrice: bundlePromo.price,
       bundlePromoActive: bundlePromo.active,
->>>>>>> main
       category: input.category,
       description: (input as any).description ?? (input as any).desc,
       imageUrl: uploadedImage || input.imageUrl,
       isFeatured: Boolean(input.isFeatured),
-<<<<<<< HEAD
-=======
       manageStock,
       stockQuantity: manageStock ? stockQuantity : 0,
       lowStockAlert,
       active: input.active === false ? false : true,
       availabilityDays,
       modifiers,
->>>>>>> main
       store: safeStore,
     });
 
@@ -272,12 +257,8 @@ export class ProductService
   {
     const store = await this.storeRepository.findById(storeId);
     this.ensureStoreAccess(store, authStoreId);
-<<<<<<< HEAD
-    return this.productRepository.findByStoreId(store!.id);
-=======
     const products = await this.productRepository.findByStoreId(store!.id);
     return this.attachCategoryPriority(store, products as any[]);
->>>>>>> main
   }
 
 
@@ -293,9 +274,6 @@ export class ProductService
   {
     const store = await this.storeRepository.findBySlug(slug);
     this.ensureStoreAccess(store, authStoreId);
-<<<<<<< HEAD
-    return this.productRepository.findByStoreId(store!.id);
-=======
     const products = await this.productRepository.findByStoreId(store!.id);
     return this.attachCategoryPriority(store, products as any[]);
   }
@@ -397,7 +375,6 @@ export class ProductService
       name: this.formatCategoryLabel(name),
       priority: parsedPriority,
     };
->>>>>>> main
   }
 
 
@@ -433,8 +410,6 @@ export class ProductService
     if (typeof data.isFeatured === 'boolean') {
       product.isFeatured = data.isFeatured;
     }
-<<<<<<< HEAD
-=======
     if (typeof data.active === 'boolean') {
       product.active = data.active;
     }
@@ -462,15 +437,12 @@ export class ProductService
     if ((data as any).modifiers !== undefined) {
       product.modifiers = this.normalizeModifiers((data as any).modifiers);
     }
->>>>>>> main
     if (promoPrice !== undefined) {
       product.promoPrice = promoPrice && promoPrice > 0 ? promoPrice : null;
     }
     if (typeof data.promoActive === 'boolean') {
       product.promoActive = data.promoActive && !!product.promoPrice;
     }
-<<<<<<< HEAD
-=======
     const saleBasePrice = product.promoActive && product.promoPrice
       ? Number(product.promoPrice)
       : Number(product.price);
@@ -482,7 +454,6 @@ export class ProductService
     product.bundlePromoQty = bundlePromo.qty;
     product.bundlePromoPrice = bundlePromo.price;
     product.bundlePromoActive = bundlePromo.active;
->>>>>>> main
 
     return this.productRepository.save(product);
   }
