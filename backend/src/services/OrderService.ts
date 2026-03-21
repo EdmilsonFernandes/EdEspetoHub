@@ -498,8 +498,9 @@ export class OrderService
       }
     }
 
-    // Authorized for edit: keep final status and return current order.
-    return order;
+    // Reopen finalized order back to the operational queue.
+    order.status = 'pending';
+    return this.orderRepository.save(order);
   }
 
 
