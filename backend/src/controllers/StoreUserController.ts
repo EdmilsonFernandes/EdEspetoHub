@@ -1,67 +1,34 @@
+/*
+ * Chama no espeto CONFIDENTIAL
+ * ------------------
+ * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
+ *
+ * @file: StoreUserController.ts
+ */
+
 import { Request, Response } from 'express';
-import { respondWithError } from '../errors/respondWithError';
 import { StoreUserService } from '../services/StoreUserService';
-import { logger } from '../utils/logger';
+import { BaseController } from './BaseController';
+import { Get, Post, Put, Delete, RouterController, Authorize } from '../decorators/controller';
+import { Tokens } from '../ioc/injectiontokens';
+import { Inject } from '../ioc/ioc';
 
-const service = new StoreUserService();
-const log = logger.child({ scope: 'StoreUserController' });
-
-export class StoreUserController {
-  static async list(req: Request, res: Response) {
-    try {
-      const list = await service.listByStore(req.params.storeId, req.auth?.storeId);
-      return res.json(list);
-    } catch (error: any) {
-      log.warn('Store users list failed', { storeId: req.params.storeId, error });
-      return respondWithError(req, res, error, 400);
-    }
+@RouterController(Tokens.Common.Controller.StoreUserController)
+export class StoreUserController extends BaseController {
+  constructor(
+    @Inject(Tokens.Common.Service.StoreUserService) private storeUserService: StoreUserService
+  ) {
+    super('/store-users');
   }
 
-  static async create(req: Request, res: Response) {
+  @Get('/:storeId')
+  @Authorize()
+  async listByStore(req: Request, res: Response) {
     try {
-      const created = await service.createForStore(req.params.storeId, req.body || {}, req.auth?.storeId);
-      return res.status(201).json(created);
+      const users = await this.storeUserService.listByStore(req.params.storeId, req.auth?.storeId);
+      return this.ok(res, users);
     } catch (error: any) {
-      log.warn('Store users create failed', { storeId: req.params.storeId, error });
-      return respondWithError(req, res, error, 400);
-    }
-  }
-
-  static async updatePassword(req: Request, res: Response) {
-    try {
-      const result = await service.updatePasswordForStoreUser(
-        req.params.storeId,
-        req.params.userId,
-        req.body || {},
-        req.auth?.storeId
-      );
-      return res.json(result);
-    } catch (error: any) {
-      log.warn('Store user password update failed', {
-        storeId: req.params.storeId,
-        userId: req.params.userId,
-        error,
-      });
-      return respondWithError(req, res, error, 400);
-    }
-  }
-
-  static async remove(req: Request, res: Response) {
-    try {
-      const result = await service.removeForStore(
-        req.params.storeId,
-        req.params.userId,
-        req.auth?.storeId,
-        req.auth?.sub
-      );
-      return res.json(result);
-    } catch (error: any) {
-      log.warn('Store user remove failed', {
-        storeId: req.params.storeId,
-        userId: req.params.userId,
-        error,
-      });
-      return respondWithError(req, res, error, 400);
+      return this.fail(res, error, req);
     }
   }
 }

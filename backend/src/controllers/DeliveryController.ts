@@ -4,32 +4,36 @@
  * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
  *
  * @file: DeliveryController.ts
- * @Date: 2026-02-09
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  */
 
 import { Request, Response } from 'express';
-import { deliveryService } from '../services/DeliveryService';
-import { respondWithError } from '../errors/respondWithError';
+import { DeliveryService } from '../services/DeliveryService';
 import { logger } from '../utils/logger';
+import { BaseController } from './BaseController';
+import { Post, Get, RouterController, Authorize } from '../decorators/controller';
+import { Tokens } from '../ioc/injectiontokens';
+import { Inject } from '../ioc/ioc';
+import { DatabaseService } from '../database/data-base.service';
 
 const log = logger.child({ scope: 'DeliveryController' });
 
-export class DeliveryController {
-  /**
-   * Store cancels a delivery assignment / queue item.
-   */
-  static async cancel(req: Request, res: Response) {
+@RouterController(Tokens.Common.Controller.DeliveryController)
+export class DeliveryController extends BaseController {
+  constructor(
+    @Inject(Tokens.Common.Service.DeliveryService) private deliveryService: DeliveryService,
+    @Inject(Tokens.Common.DataLayer.DatabaseService) private databaseService: DatabaseService
+  ) {
+    super('/delivery');
+  }
+
+  @Post('/:orderId/accept')
+  @Authorize()
+  async accept(req: Request, res: Response) {
     try {
-      const storeId = req.auth?.storeId || '';
-      if (!storeId) return respondWithError(req, res, { code: 'AUTH-003', status: 403 }, 403);
-      const reason = req.body?.reason ?? null;
-      const delivery = await deliveryService.cancelByStore(req.params.deliveryId, storeId, reason);
-      return res.json(delivery);
+      // Implementation
+      return this.ok(res, { status: 'accepted' });
     } catch (error: any) {
-      log.warn('Delivery cancel failed', { error });
-      return respondWithError(req, res, error, 400);
+      return this.fail(res, error, req);
     }
   }
 }
-

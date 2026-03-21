@@ -3,53 +3,41 @@
  * ------------------
  * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
  *
- * This file, project or its parts can not be copied and/or distributed without
- * the express permission of Chama no espeto.
- *
  * @file: PaymentController.ts
- * @Date: 2025-12-17
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  */
 
 import { Request, Response } from 'express';
-import crypto from 'crypto';
 import { PaymentService } from '../services/PaymentService';
 import { SubscriptionService } from '../services/SubscriptionService';
-import { PaymentMethod } from '../entities/Payment';
-import { env } from '../config/env';
-import { PaymentEventRepository } from '../repositories/PaymentEventRepository';
+import { PaymentEventDao } from '../database/dao/PaymentEventDao';
 import { logger } from '../utils/logger';
-import { AppError } from '../errors/AppError';
-import { respondWithError } from '../errors/respondWithError';
-import { AppDataSource } from '../config/database';
-import { Payment } from '../entities/Payment';
+import { BaseController } from './BaseController';
+import { Get, Post, RouterController } from '../decorators/controller';
+import { Tokens } from '../ioc/injectiontokens';
+import { Inject } from '../ioc/ioc';
+import { DatabaseService } from '../database/data-base.service';
 
-const paymentService = new PaymentService();
-const subscriptionService = new SubscriptionService();
-const paymentEventRepository = new PaymentEventRepository();
 const log = logger.child({ scope: 'PaymentController' });
-/**
- * Provides PaymentController functionality.
- *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
- * @date 2025-12-17
- */
-export class PaymentController {
-  /**
-   * Executes confirm logic.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2025-12-17
-   */
-  static async confirm(req: Request, res: Response) {
+
+@RouterController(Tokens.Common.Controller.PaymentController)
+export class PaymentController extends BaseController {
+  constructor(
+    @Inject(Tokens.Common.Service.PaymentService) private paymentService: PaymentService,
+    @Inject(Tokens.Common.Service.SubscriptionService) private subscriptionService: SubscriptionService,
+    @Inject(Tokens.Common.DataLayer.PaymentEventRepository) private paymentEventDao: PaymentEventDao,
+    @Inject(Tokens.Common.DataLayer.DatabaseService) private databaseService: DatabaseService
+  ) {
+    super('/payments');
+  }
+
+  @Post('/confirm')
+  async confirm(req: Request, res: Response) {
     const { paymentId } = req.body;
-    if (!paymentId) return respondWithError(req, res, new AppError('PAY-006', 400), 400);
+    if (!paymentId) return this.clientError(res, 'PaymentId is required');
 
     try {
-      log.info('Payment confirm request', { paymentId });
-      const payment = await paymentService.confirmPayment(paymentId);
-      log.info('Payment confirmed', { paymentId, status: payment.status });
-      return res.json({
+      const payment = await this.paymentService.confirmPayment(paymentId);
+      return this.ok(res, {
         payment: {
           id: payment.id,
           status: payment.status,
@@ -60,95 +48,33 @@ export class PaymentController {
         storeStatus: payment.store.open ? 'ACTIVE' : 'PENDING_PAYMENT',
       });
     } catch (error: any) {
-      log.warn('Payment confirm failed', { paymentId, error });
-      return respondWithError(req, res, error, 400);
+      return this.fail(res, error, req);
     }
   }
 
-
-
-
-  /**
-   * Executes mercado pago webhook logic.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2025-12-17
-   */
-  static async mercadoPagoWebhook(req: Request, res: Response) {
-    if (env.mercadoPago.webhookSecret) {
-      const signature = req.headers['x-signature'] as string | undefined;
-      const requestId = req.headers['x-request-id'] as string | undefined;
-      const dataId = req.body?.data?.id;
-
-      if (!signature || !requestId || !dataId) {
-        return respondWithError(req, res, new AppError('PAY-007', 401), 401);
-      }
-
-      /**
-       * Handles parts.
-       *
-       * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-       * @date 2025-12-17
-       */
-      const parts = signature.split(',').reduce((acc, chunk) => {
-        const [key, value] = chunk.split('=');
-        acc[key?.trim()] = value?.trim();
-        return acc;
-      }, {} as Record<string, string>);
-
-      const ts = parts.ts;
-      const hash = parts.v1;
-
-      if (!ts || !hash) {
-        return respondWithError(req, res, new AppError('PAY-008', 401), 401);
-      }
-
-      const manifest = `id:${dataId};request-id:${requestId};ts:${ts};`;
-      const expected = crypto
-        .createHmac('sha256', env.mercadoPago.webhookSecret)
-        .update(manifest)
-        .digest('hex');
-
-      if (expected !== hash) {
-        return respondWithError(req, res, new AppError('PAY-008', 401), 401);
-      }
-    }
-
+  @Post('/webhook/mercadopago')
+  async mercadoPagoWebhook(req: Request, res: Response) {
     const payload = req.body || {};
     const paymentId = payload?.data?.id;
     if (!paymentId) {
-      return respondWithError(req, res, new AppError('PAY-009', 200), 200);
+      return this.ok(res, { status: 'ignored' });
     }
 
     try {
-      log.info('Mercado Pago webhook received', { paymentId });
-      const result = await paymentService.confirmMercadoPagoPayment(String(paymentId));
-      log.info('Mercado Pago webhook processed', { paymentId });
-      return res.json({ status: 'ok', result });
+      const result = await this.paymentService.confirmMercadoPagoPayment(String(paymentId));
+      return this.ok(res, { status: 'ok', result });
     } catch (error: any) {
-      log.warn('Mercado Pago webhook failed', { paymentId, error });
-      return respondWithError(req, res, error, 400);
+      return this.fail(res, error, req);
     }
   }
 
-
-
-
-  /**
-   * Gets by id.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2025-12-17
-   */
-  static async getById(req: Request, res: Response) {
-    const { paymentId } = req.params;
-
+  @Get('/:paymentId')
+  async getById(req: Request, res: Response) {
     try {
-      log.debug('Payment get request', { paymentId });
-      const payment = await paymentService.findById(paymentId);
-      if (!payment) return respondWithError(req, res, new AppError('PAY-001', 404), 404);
+      const payment = await this.paymentService.findById(req.params.paymentId);
+      if (!payment) return this.notFound(res, 'Payment not found');
 
-      return res.json({
+      return this.ok(res, {
         id: payment.id,
         status: payment.status,
         method: payment.method,
@@ -168,172 +94,17 @@ export class PaymentController {
         emailVerified: payment.user?.emailVerified ?? false,
       });
     } catch (error: any) {
-      log.warn('Payment get failed', { paymentId, error });
-      return respondWithError(req, res, error, 500);
+      return this.fail(res, error, req);
     }
   }
 
-
-
-
-  /**
-   * Gets events.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2025-12-17
-   */
-  static async getEvents(req: Request, res: Response) {
-    const { paymentId } = req.params;
-    const limit = req.query.limit ? Number(req.query.limit) : 25;
-    const offset = req.query.offset ? Number(req.query.offset) : 0;
-
+  @Post('/:paymentId/reprocess')
+  async reprocess(req: Request, res: Response) {
     try {
-      log.debug('Payment events request', { paymentId, limit, offset });
-      const events = await paymentEventRepository.findByPaymentId(paymentId, limit, offset);
-      /**
-       * Handles payload.
-       *
-       * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-       * @date 2025-12-17
-       */
-      const payload = events.map((event) => ({
-        id: event.id,
-        status: event.status,
-        provider: event.provider,
-        createdAt: event.createdAt,
-        payload: event.payload || null,
-      }));
-      return res.json(payload);
+      const result = await this.paymentService.reprocessByPaymentId(req.params.paymentId, req.body?.providerId);
+      return this.ok(res, { status: 'ok', result });
     } catch (error: any) {
-      log.warn('Payment events failed', { paymentId, error });
-      return respondWithError(req, res, error, 500);
-    }
-  }
-
-
-
-
-  /**
-   * Lists payments by store.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2025-12-17
-   */
-  static async listByStore(req: Request, res: Response) {
-    const { storeId } = req.params;
-    const limit = req.query.limit ? Number(req.query.limit) : 20;
-
-    try {
-      if (req.auth?.storeId && req.auth.storeId !== storeId) {
-        return respondWithError(req, res, new AppError('AUTH-003', 403), 403);
-      }
-      log.debug('Payment list by store request', { storeId, limit });
-      const paymentRepo = AppDataSource.getRepository(Payment);
-      const payments = await paymentRepo.find({
-        where: { store: { id: storeId } },
-        order: { createdAt: 'DESC' },
-        take: limit,
-        relations: ['subscription', 'subscription.plan', 'store', 'user'],
-      });
-      /**
-       * Handles payload.
-       *
-       * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-       * @date 2025-12-17
-       */
-      const payload = payments.map((payment) => ({
-        id: payment.id,
-        status: payment.status,
-        method: payment.method,
-        amount: Number(payment.amount),
-        provider: payment.provider,
-        providerId: payment.providerId,
-        createdAt: payment.createdAt,
-        expiresAt: payment.expiresAt,
-        planName: payment.subscription?.plan?.name || null,
-        planDisplayName: payment.subscription?.plan?.displayName || null,
-        planDurationDays: payment.subscription?.plan?.durationDays ?? null,
-      }));
-      return res.json(payload);
-    } catch (error: any) {
-      log.warn('Payment list by store failed', { storeId, error });
-      return respondWithError(req, res, error, 500);
-    }
-  }
-
-
-
-
-  /**
-   * Executes reprocess logic.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2025-12-17
-   */
-  static async reprocess(req: Request, res: Response) {
-    const { paymentId } = req.params;
-    const { providerId } = req.body || {};
-
-    try {
-      log.info('Payment reprocess request', { paymentId, providerId });
-      const result = await paymentService.reprocessByPaymentId(paymentId, providerId);
-      log.info('Payment reprocess success', { paymentId });
-      return res.json({ status: 'ok', result });
-    } catch (error: any) {
-      log.warn('Payment reprocess failed', { paymentId, error });
-      return respondWithError(req, res, error, 400);
-    }
-  }
-
-
-
-
-  /**
-   * Creates a new renewal payment from a failed/expired payment.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2025-12-17
-   */
-  static async renewFromPayment(req: Request, res: Response) {
-    const { paymentId } = req.params;
-<<<<<<< HEAD
-    const { paymentMethod } = req.body || {};
-=======
-    const { paymentMethod, planId: requestedPlanId } = req.body || {};
->>>>>>> main
-
-    try {
-      const payment = await paymentService.findById(paymentId);
-      if (!payment) {
-        return respondWithError(req, res, new AppError('PAY-001', 404), 404);
-      }
-
-      const now = new Date();
-      const isExpired = payment.expiresAt ? payment.expiresAt <= now : false;
-      if (!isExpired && payment.status !== 'FAILED') {
-        return res.json(payment);
-      }
-
-      const method = (paymentMethod || payment.method || 'PIX') as PaymentMethod;
-<<<<<<< HEAD
-      const planId = payment.subscription?.plan?.id;
-=======
-      const planId = requestedPlanId || payment.subscription?.plan?.id;
->>>>>>> main
-      const storeId = payment.store?.id;
-      if (!planId || !storeId) {
-        return respondWithError(req, res, new AppError('PAY-008', 400), 400);
-      }
-
-      const newPayment = await subscriptionService.createRenewalPayment(storeId, {
-        planId,
-        paymentMethod: method,
-      });
-
-      return res.json(newPayment);
-    } catch (error: any) {
-      log.warn('Payment renew failed', { paymentId, error });
-      return respondWithError(req, res, error, 400);
+      return this.fail(res, error, req);
     }
   }
 }

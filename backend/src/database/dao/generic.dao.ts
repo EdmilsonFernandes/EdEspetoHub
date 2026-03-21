@@ -6,7 +6,6 @@ import {
   DeepPartial,
   FindOneOptions,
   FindOptionsWhere,
-  InsertResult,
   ObjectId,
   ObjectLiteral,
   QueryRunner,
@@ -14,18 +13,22 @@ import {
 } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { DatabaseService } from '../data-base.service';
+import { GenericDto } from '../../decorators/decoratos.dto';
 
 @Provide(Tokens.Common.DataLayer.GenericDao)
-export abstract class GenericDao<E extends ObjectLiteral> {
-  protected myRepository!: Repository<E>;
+export abstract class GenericDao<D extends ObjectLiteral, E extends ObjectLiteral> {
+  protected myRepository: Repository<E>;
 
   @Inject(Tokens.Common.DataLayer.DatabaseService)
   protected databaseService: DatabaseService;
 
-  constructor(@unmanaged() protected entity: { new (): E }) {
-    if (!entity) {
-      throw new Error('No entity found in constructor');
+  protected entityClass: { new (): E };
+
+  constructor(@unmanaged() protected dtoClass: { new (): D }) {
+    if (!dtoClass) {
+      throw new Error('No DTO found in constructor');
     }
+    this.entityClass = GenericDto.getEntityFromDto<E>(dtoClass);
   }
 
   public async readAll(): Promise<E[]> {
@@ -64,12 +67,21 @@ export abstract class GenericDao<E extends ObjectLiteral> {
 
   public async getRepository(): Promise<Repository<E>> {
     if (!this.myRepository) {
-      this.myRepository = this.databaseService.dataSource.getRepository<E>(this.entity);
+      this.myRepository = this.databaseService.dataSource.getRepository<E>(this.entityClass);
     }
     return this.myRepository;
   }
 
   public async getQueryRunner(): Promise<QueryRunner> {
     return this.databaseService.dataSource.createQueryRunner();
+  }
+
+  public async create(data: DeepPartial<E>): Promise<E> {
+    const repository = await this.getRepository();
+    return repository.create(data);
+  }
+
+  protected createDto(): D {
+    return new this.dtoClass();
   }
 }

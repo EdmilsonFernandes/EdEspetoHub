@@ -18,6 +18,7 @@
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "glob": "^10.3.10",
+    "helmet": "^7.1.0",
     "inversify": "^6.0.2",
     "inversify-binding-decorators": "^4.0.0",
     "jsonwebtoken": "^9.0.2",

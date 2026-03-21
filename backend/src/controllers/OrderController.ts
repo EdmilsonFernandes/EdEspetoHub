@@ -3,225 +3,153 @@
  * ------------------
  * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
  *
- * This file, project or its parts can not be copied and/or distributed without
- * the express permission of Chama no espeto.
- *
  * @file: OrderController.ts
- * @Date: 2025-12-17
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  */
 
 import { Request, Response } from 'express';
 import { OrderService } from '../services/OrderService';
-<<<<<<< HEAD
-import { logger } from '../utils/logger';
-import { AppError } from '../errors/AppError';
-import { respondWithError } from '../errors/respondWithError';
-
-const orderService = new OrderService();
-=======
 import { OrderEtaServiceV2 } from '../services/OrderEtaServiceV2';
-import { AppDataSource } from '../config/database';
-import { Motoboy } from '../entities/Motoboy';
-import { OrderDelivery } from '../entities/OrderDelivery';
+import { OrderDeliveryDao } from '../database/dao/OrderDeliveryDao';
+import { MotoboyDao } from '../database/dao/MotoboyDao';
 import { logger } from '../utils/logger';
-import { AppError } from '../errors/AppError';
-import { respondWithError } from '../errors/respondWithError';
 import { env } from '../config/env';
 import { createOrderAccessToken } from '../utils/orderAccessToken';
+import { BaseController } from './BaseController';
+import { Get, Post, Put, Authorize, RouterController } from '../decorators/controller';
+import { Tokens } from '../ioc/injectiontokens';
+import { Inject } from '../ioc/ioc';
+import { DatabaseService } from '../database/data-base.service';
 
-const orderService = new OrderService();
-const orderEtaServiceV2 = new OrderEtaServiceV2();
->>>>>>> main
 const log = logger.child({ scope: 'OrderController' });
-/**
- * Provides OrderController functionality.
- *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
- * @date 2025-12-17
- */
-export class OrderController {
-  /**
-   * Executes create logic.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2025-12-17
-   */
-  static async create(req: Request, res: Response) {
+
+@RouterController(Tokens.Common.Controller.OrderController)
+export class OrderController extends BaseController {
+  constructor(
+    @Inject(Tokens.Common.Service.OrderService) private orderService: OrderService,
+    @Inject(Tokens.Common.Service.OrderEtaServiceV2) private orderEtaServiceV2: OrderEtaServiceV2,
+    @Inject(Tokens.Common.DataLayer.OrderDeliveryRepository) private orderDeliveryDao: OrderDeliveryDao,
+    @Inject(Tokens.Common.DataLayer.MotoboyRepository) private motoboyDao: MotoboyDao,
+    @Inject(Tokens.Common.DataLayer.DatabaseService) private databaseService: DatabaseService
+  ) {
+    super('/orders');
+  }
+
+  @Post('/:storeId')
+  async create(req: Request, res: Response) {
     try {
       log.info('Order create request', { storeId: req.params.storeId });
-      const order = await orderService.create({ ...req.body, storeId: req.params.storeId });
+      const order = await this.orderService.create({ ...req.body, storeId: req.params.storeId });
       log.info('Order created', { orderId: order?.id, storeId: req.params.storeId });
-<<<<<<< HEAD
-      return res.status(201).json(order);
-=======
-      return res.status(201).json({
+      return this.created(res, {
         ...order,
         accessToken: order?.id ? createOrderAccessToken(order.id) : null,
       });
->>>>>>> main
     } catch (error: any) {
       log.warn('Order create failed', { storeId: req.params.storeId, error });
-      return respondWithError(req, res, error, 400);
+      return this.fail(res, error, req);
     }
   }
 
-
-
-
-  /**
-   * Executes list logic.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2025-12-17
-   */
-  static async list(req: Request, res: Response) {
+  @Get('/:storeId')
+  @Authorize()
+  async list(req: Request, res: Response) {
     try {
       log.debug('Order list request', { storeId: req.params.storeId });
-      const orders = await orderService.listByStoreId(req.params.storeId, req.auth?.storeId);
-      return res.json(orders);
+      const orders = await this.orderService.listByStoreId(req.params.storeId, req.auth?.storeId);
+      return this.ok(res, orders);
     } catch (error: any) {
       log.warn('Order list failed', { storeId: req.params.storeId, error });
-      return respondWithError(req, res, error, 400);
+      return this.fail(res, error, req);
     }
   }
 
-
-
-
-  /**
-   * Creates by slug.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2025-12-17
-   */
-  static async createBySlug(req: Request, res: Response) {
+  @Post('/slug/:slug')
+  async createBySlug(req: Request, res: Response) {
     try {
       log.info('Order create by slug request', { slug: req.params.slug });
-      const order = await orderService.createBySlug({ ...req.body, storeSlug: req.params.slug });
+      const order = await this.orderService.createBySlug({ ...req.body, storeSlug: req.params.slug });
       log.info('Order created by slug', { orderId: order?.id, slug: req.params.slug });
-<<<<<<< HEAD
-      return res.status(201).json(order);
-=======
-      return res.status(201).json({
+      return this.created(res, {
         ...order,
         accessToken: order?.id ? createOrderAccessToken(order.id) : null,
       });
->>>>>>> main
     } catch (error: any) {
       log.warn('Order create by slug failed', { slug: req.params.slug, error });
-      return respondWithError(req, res, error, 400);
+      return this.fail(res, error, req);
     }
   }
 
-
-
-
-  /**
-   * Lists by slug.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2025-12-17
-   */
-  static async listBySlug(req: Request, res: Response) {
+  @Get('/slug/:slug')
+  @Authorize()
+  async listBySlug(req: Request, res: Response) {
     try {
       log.debug('Order list by slug request', { slug: req.params.slug });
-      const orders = await orderService.listByStoreSlug(req.params.slug, req.auth?.storeId);
-      return res.json(orders);
+      const orders = await this.orderService.listByStoreSlug(req.params.slug, req.auth?.storeId);
+      return this.ok(res, orders);
     } catch (error: any) {
       log.warn('Order list by slug failed', { slug: req.params.slug, error });
-      return respondWithError(req, res, error, 400);
+      return this.fail(res, error, req);
     }
   }
 
-
-
-
-  /**
-   * Lists highlights by slug.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2026-01-21
-   */
-  static async listHighlightsBySlug(req: Request, res: Response) {
+  @Get('/slug/:slug/highlights')
+  async listHighlightsBySlug(req: Request, res: Response) {
     try {
       log.debug('Order highlights by slug request', { slug: req.params.slug });
-      const items = await orderService.listTopItemsBySlug(req.params.slug, 3);
-      return res.json(items);
+      const items = await this.orderService.listTopItemsBySlug(req.params.slug, 3);
+      return this.ok(res, items);
     } catch (error: any) {
       log.warn('Order highlights by slug failed', { slug: req.params.slug, error });
-      return respondWithError(req, res, error, 400);
+      return this.fail(res, error, req);
     }
   }
 
-<<<<<<< HEAD
-=======
-  /**
-   * Lists public table occupancy by slug.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2026-03-12
-   */
-  static async listTableStatusBySlug(req: Request, res: Response) {
+  @Get('/slug/:slug/table-status')
+  async listTableStatusBySlug(req: Request, res: Response) {
     try {
       log.debug('Order table status by slug request', { slug: req.params.slug });
-      const status = await orderService.listTableStatusBySlug(req.params.slug);
-      return res.json(status);
+      const status = await this.orderService.listTableStatusBySlug(req.params.slug);
+      return this.ok(res, status);
     } catch (error: any) {
       log.warn('Order table status by slug failed', { slug: req.params.slug, error });
-      return respondWithError(req, res, error, 400);
+      return this.fail(res, error, req);
     }
   }
 
->>>>>>> main
-
-
-
-  /**
-   * Updates status.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2025-12-17
-   */
-  static async updateStatus(req: Request, res: Response) {
+  @Put('/:orderId/status')
+  @Authorize()
+  async updateStatus(req: Request, res: Response) {
     const { status } = req.body;
     try {
       log.info('Order status update request', { orderId: req.params.orderId, status });
-      const order = await orderService.updateStatus(req.params.orderId, status, req.auth?.storeId);
+      const order = await this.orderService.updateStatus(req.params.orderId, status, req.auth?.storeId);
       log.info('Order status updated', { orderId: req.params.orderId, status });
-      return res.json(order);
+      return this.ok(res, order);
     } catch (error: any) {
       log.warn('Order status update failed', { orderId: req.params.orderId, error });
-      return respondWithError(req, res, error, 400);
+      return this.fail(res, error, req);
     }
   }
 
-
-
-
-  /**
-   * Updates items.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2025-12-17
-   */
-  static async updateItems(req: Request, res: Response) {
+  @Put('/:orderId/items')
+  @Authorize()
+  async updateItems(req: Request, res: Response) {
     try {
       log.info('Order items update request', { orderId: req.params.orderId });
-      const order = await orderService.updateItems(req.params.orderId, req.body.items || [], req.auth?.storeId);
+      const order = await this.orderService.updateItems(req.params.orderId, req.body.items || [], req.auth?.storeId);
       log.info('Order items updated', { orderId: req.params.orderId, total: order?.total });
-      return res.json({ id: order.id, total: order.total });
+      return this.ok(res, { id: order.id, total: order.total });
     } catch (error: any) {
       log.warn('Order items update failed', { orderId: req.params.orderId, error });
-      return respondWithError(req, res, error, 400);
+      return this.fail(res, error, req);
     }
   }
 
-<<<<<<< HEAD
-=======
-  static async reopen(req: Request, res: Response) {
+  @Post('/:orderId/reopen')
+  @Authorize()
+  async reopen(req: Request, res: Response) {
     try {
-      const order = await orderService.reopenOrder(
+      const order = await this.orderService.reopenOrder(
         req.params.orderId,
         {
           reason: req.body?.reason,
@@ -234,66 +162,50 @@ export class OrderController {
           sub: req.auth?.sub,
         }
       );
-      return res.json(order);
+      return this.ok(res, order);
     } catch (error: any) {
       log.warn('Order reopen failed', { orderId: req.params.orderId, error });
-      return respondWithError(req, res, error, 400);
+      return this.fail(res, error, req);
     }
   }
 
-  static async markItemsAsPrinted(req: Request, res: Response) {
+  @Post('/:orderId/mark-as-printed')
+  @Authorize()
+  async markItemsAsPrinted(req: Request, res: Response) {
     try {
       const itemIds = Array.isArray(req.body?.itemIds) ? req.body.itemIds : undefined;
       log.info('Order items mark-as-printed request', {
         orderId: req.params.orderId,
         itemIdsCount: Array.isArray(itemIds) ? itemIds.length : 0,
       });
-      const result = await orderService.markItemsAsPrinted(req.params.orderId, itemIds, req.auth?.storeId);
-      return res.json(result);
+      const result = await this.orderService.markItemsAsPrinted(req.params.orderId, itemIds, req.auth?.storeId);
+      return this.ok(res, result);
     } catch (error: any) {
       log.warn('Order items mark-as-printed failed', { orderId: req.params.orderId, error });
-      return respondWithError(req, res, error, 400);
+      return this.fail(res, error, req);
     }
   }
 
->>>>>>> main
-
-
-
-  /**
-   * Gets public.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2025-12-17
-   */
-  static async getPublic(req: Request, res: Response) {
+  @Get('/public/:orderId')
+  async getPublic(req: Request, res: Response) {
     const { orderId } = req.params;
     try {
       log.debug('Order public get request', { orderId });
-      const result = await orderService.getPublicById(orderId);
-      if (!result) return respondWithError(req, res, new AppError('ORDER-001', 404), 404);
+      const result = await this.orderService.getPublicById(orderId);
+      if (!result) return this.notFound(res, 'Order not found');
       const { order, queuePosition, queueSize } = result;
-<<<<<<< HEAD
-
-      return res.json({
-=======
+      
       const deliveryRow =
         order?.type === 'delivery'
-          ? await AppDataSource.getRepository(OrderDelivery).findOne({ where: { orderId: order.id } as any })
+          ? await this.orderDeliveryDao.findByOrderId(order.id)
           : null;
+      
       const motoboy =
         deliveryRow?.motoboyId
-          ? await AppDataSource.getRepository(Motoboy).findOne({
-              where: { id: deliveryRow.motoboyId } as any,
-              relations: [ 'user' ],
-            })
+          ? await this.motoboyDao.getById(deliveryRow.motoboyId)
           : null;
-      const correlationId = typeof req.headers[ 'x-correlation-id' ] === 'string'
-        ? req.headers[ 'x-correlation-id' ]
-        : undefined;
-
+      
       const responsePayload: any = {
->>>>>>> main
         id: order.id,
         status: order.status,
         type: order.type,
@@ -302,9 +214,6 @@ export class OrderController {
         phone: order.phone,
         address: order.address,
         paymentMethod: order.paymentMethod,
-<<<<<<< HEAD
-        total: order.total,
-=======
         paymentStatus: order.paymentStatus,
         cashTendered: order.cashTendered ?? null,
         total: order.total,
@@ -313,12 +222,12 @@ export class OrderController {
           ? {
               status: deliveryRow.status,
               motoboyId: deliveryRow.motoboyId ?? null,
-              motoboy: motoboy?.user
+              motoboy: (motoboy as any)?.user
                 ? {
-                    id: motoboy.id,
-                    name: motoboy.user.fullName,
-                    firstName: String(motoboy.user.fullName || '').trim().split(' ')[0] || null,
-                    profileImageUrl: motoboy.user.profileImageUrl || null,
+                    id: motoboy?.id,
+                    name: (motoboy as any).user.fullName,
+                    firstName: String((motoboy as any).user.fullName || '').trim().split(' ')[0] || null,
+                    profileImageUrl: (motoboy as any).user.profileImageUrl || null,
                   }
                 : null,
               acceptedAt: deliveryRow.acceptedAt ?? null,
@@ -327,7 +236,6 @@ export class OrderController {
               deliveredAt: deliveryRow.deliveredAt ?? null,
             }
           : null,
->>>>>>> main
         createdAt: order.createdAt,
         queuePosition,
         queueSize,
@@ -336,98 +244,60 @@ export class OrderController {
           name: item.product?.name || 'Produto',
           quantity: item.quantity,
           price: item.price,
-<<<<<<< HEAD
-=======
           isPrinted: Boolean((item as any).isPrinted),
->>>>>>> main
           productId: item.product?.id,
           imageUrl: item.product?.imageUrl || null,
           cookingPoint: item.cookingPoint || null,
           passSkewer: item.passSkewer || false,
-<<<<<<< HEAD
-=======
           selectedModifiers: item.selectedModifiers || [],
->>>>>>> main
         })),
-        store: order.store
+        store: (order as any).store
           ? {
-              id: order.store.id,
-              name: order.store.name,
-              slug: order.store.slug,
-              phone: order.store.owner?.phone || null,
-                settings: order.store.settings
+              id: (order as any).store.id,
+              name: (order as any).store.name,
+              slug: (order as any).store.slug,
+              phone: (order as any).store.owner?.phone || null,
+                settings: (order as any).store.settings
                   ? {
-                      logoUrl: order.store.settings.logoUrl || null,
-                      primaryColor: order.store.settings.primaryColor || null,
-                      secondaryColor: order.store.settings.secondaryColor || null,
-                      pixKey: order.store.settings.pixKey || null,
+                      logoUrl: (order as any).store.settings.logoUrl || null,
+                      primaryColor: (order as any).store.settings.primaryColor || null,
+                      secondaryColor: (order as any).store.settings.secondaryColor || null,
+                      pixKey: (order as any).store.settings.pixKey || null,
                     }
                   : null,
             }
           : null,
-<<<<<<< HEAD
-      });
-=======
       };
 
       if (env.etaV2.enabled) {
-        const eta = await orderEtaServiceV2.calculateForOrder(order, queuePosition, correlationId);
-        responsePayload.eta = {
-          totalMinutes: eta.totalMinutes,
-          windowMin: eta.windowMin,
-          windowMax: eta.windowMax,
-          breakdown: {
-            prepMinutes: eta.prepMinutes,
-            queueMinutes: eta.queueMinutes,
-            travelMinutes: eta.travelMinutes,
-            bufferMinutes: eta.bufferMinutes,
-          },
-          travel: {
-            distanceKm: eta.distanceKm,
-            travelMinutes: eta.travelMinutes,
-          },
-          confidence: eta.confidence,
-          algoVersion: eta.algoVersion,
-        };
+        const eta = await this.orderEtaServiceV2.calculateEta(order);
+        responsePayload.eta = eta;
       }
 
-      return res.json(responsePayload);
->>>>>>> main
+      return this.ok(res, responsePayload);
     } catch (error: any) {
       log.warn('Order public get failed', { orderId, error });
-      return respondWithError(req, res, error, 400);
+      return this.fail(res, error, req);
     }
   }
-<<<<<<< HEAD
-=======
 
-
-
-
-  /**
-   * Gets order tracking (V2).
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2026-01-28
-   */
-  static async getTrackingV2(req: Request, res: Response) {
+  @Get('/tracking/:orderId')
+  async getTrackingV2(req: Request, res: Response) {
     const { orderId } = req.params;
     try {
       log.debug('Order tracking v2 request', { orderId });
-      const result = await orderService.getPublicById(orderId);
-      if (!result) return respondWithError(req, res, new AppError('ORDER-001', 404), 404);
+      const result = await this.orderService.getPublicById(orderId);
+      if (!result) return this.notFound(res, 'Order not found');
       const { order, queuePosition, queueSize } = result;
-      const correlationId = typeof req.headers[ 'x-correlation-id' ] === 'string'
-        ? req.headers[ 'x-correlation-id' ]
-        : undefined;
-      const eta = await orderEtaServiceV2.calculateForOrder(order, queuePosition, correlationId);
+      
+      const eta = await this.orderEtaServiceV2.calculateEta(order);
 
-      return res.json({
+      return this.ok(res, {
         id: order.id,
         status: order.status,
         type: order.type,
         createdAt: order.createdAt,
-        storeId: order.store?.id || null,
+        storeId: (order as any).store?.id || null,
         queuePosition,
         queueSize,
         timeline: [
@@ -436,26 +306,11 @@ export class OrderController {
             at: order.createdAt,
           },
         ],
-        eta: {
-          totalMinutes: eta.totalMinutes,
-          windowMin: eta.windowMin,
-          windowMax: eta.windowMax,
-          prepMinutes: eta.prepMinutes,
-          queueMinutes: eta.queueMinutes,
-          travelMinutes: eta.travelMinutes,
-          bufferMinutes: eta.bufferMinutes,
-          confidence: eta.confidence,
-          algoVersion: eta.algoVersion,
-        },
-        travel: {
-          distanceKm: eta.distanceKm,
-          travelMinutes: eta.travelMinutes,
-        },
+        eta,
       });
     } catch (error: any) {
       log.warn('Order tracking v2 failed', { orderId, error });
-      return respondWithError(req, res, error, 400);
+      return this.fail(res, error, req);
     }
   }
->>>>>>> main
 }

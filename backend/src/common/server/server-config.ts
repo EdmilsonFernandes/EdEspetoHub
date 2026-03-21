@@ -6,7 +6,7 @@ import { LoggerService } from '../../utils/logger';
 import swaggerUi from 'swagger-ui-express';
 import { Tokens } from '../../ioc/injectiontokens';
 import { Inject, Provide } from '../../ioc/ioc';
-import { swaggerDocument } from '../../../swagger';
+import { swaggerDocument } from '../../config/swagger';
 import { requestContextStore } from '../../utils/request-context.store'; // Importe o store criado
 
 @Provide(Tokens.Common.Server.HttpConfig)

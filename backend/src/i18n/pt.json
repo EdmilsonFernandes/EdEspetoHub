@@ -12,13 +12,6 @@
   "AUTH-009": "CPF ou CNPJ inválido.",
   "AUTH-010": "CPF/CNPJ já cadastrado.",
   "AUTH-011": "E-mail já cadastrado.",
-<<<<<<< HEAD
-  "AUTH-012": "Aceite os termos de uso e política de privacidade.",
-  "AUTH-013": "Selecione um plano para continuar.",
-  "AUTH-014": "Método de pagamento inválido.",
-  "AUTH-020": "SUPER_ADMIN não configurado no banco.",
-  "AUTH-021": "Credenciais inválidas.",
-=======
   "AUTH-015": "Este e-mail já está vinculado a uma loja. Use outro e-mail para o entregador.",
   "BILL-001": "Pendência de entrega não paga. Regularize para continuar.",
   "AUTH-012": "Aceite os termos de uso e política de privacidade.",
@@ -29,7 +22,6 @@
   "AUTH-020": "SUPER_ADMIN não configurado no banco.",
   "AUTH-021": "Credenciais inválidas.",
   "AUTH-022": "Usuário sem loja vinculada.",
->>>>>>> main
   "AUTH-S001": "Se o e-mail existir, enviaremos instruções.",
   "AUTH-S002": "Se o e-mail existir, enviaremos instruções.",
   "AUTH-S003": "Senha atualizada com sucesso.",
@@ -43,10 +35,7 @@
   "SUB-004": "Plano indisponível para assinatura.",
   "SUB-005": "Assinatura suspensa. Entre em contato com o suporte.",
   "SUB-006": "Limite de tentativas de pagamento atingido. Tente novamente mais tarde.",
-<<<<<<< HEAD
-=======
   "SUB-007": "Já existe um pagamento pendente para esta loja. Aguarde expirar para tentar novamente.",
->>>>>>> main
   "PAY-001": "Pagamento não encontrado.",
   "PAY-002": "Pagamento falhou.",
   "PAY-003": "Mercado Pago não configurado.",
@@ -61,9 +50,6 @@
   "PROD-002": "Produto inválido para esta loja.",
   "ORDER-001": "Pedido não encontrado.",
   "ORDER-002": "Tipo de pedido não permitido para esta loja.",
-<<<<<<< HEAD
-  "ORDER-003": "Mesa já está ocupada. Finalize o pedido atual antes de criar outro."
-=======
   "ORDER-003": "Mesa já está ocupada. Finalize o pedido atual antes de criar outro.",
   "ORDER-004": "Transição de status inválida para este pedido.",
   "DELIV-001": "Você já possui uma entrega ativa. Finalize a entrega atual antes de aceitar outra.",
@@ -92,5 +78,4 @@
   "MOTO-034": "A chave PIX precisa ser o mesmo CPF cadastrado no perfil do entregador.",
   "REVIEW-003": "Este pedido não possui gorjeta para repasse.",
   "REVIEW-004": "A gorjeta ainda não foi paga pelo cliente."
->>>>>>> main
 }

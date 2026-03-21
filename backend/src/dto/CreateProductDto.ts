@@ -11,40 +11,24 @@
  * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  */
 
-<<<<<<< HEAD
-=======
-export interface ProductModifierOptionDto {
-  id?: string;
-  name: string;
-  price: number;
-  active?: boolean;
-}
-
->>>>>>> main
 export interface CreateProductDto {
   name: string;
   price: number;
-  promoPrice?: number;
+  promoPrice?: number | null;
   promoActive?: boolean;
-<<<<<<< HEAD
-=======
-  bundlePromoQty?: number;
-  bundlePromoPrice?: number;
+  bundlePromoQty?: number | null;
+  bundlePromoPrice?: number | null;
   bundlePromoActive?: boolean;
->>>>>>> main
   category?: string;
   description?: string;
   imageUrl?: string;
   imageFile?: string | null;
   isFeatured?: boolean;
-<<<<<<< HEAD
-=======
+  active?: boolean;
+  availabilityDays?: string[] | null;
   manageStock?: boolean;
   stockQuantity?: number;
   lowStockAlert?: number;
-  active?: boolean;
-  availabilityDays?: Record<string, boolean> | null;
-  modifiers?: ProductModifierOptionDto[] | null;
->>>>>>> main
+  modifiers?: any[] | null;
   storeId: string;
 }

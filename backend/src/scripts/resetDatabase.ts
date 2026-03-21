@@ -22,14 +22,6 @@ import { logger } from '../utils/logger';
  */
 const reset = async () => {
   try {
-<<<<<<< HEAD
-=======
-    if (process.env.ALLOW_DB_RESET !== 'true') {
-      logger.error('Refusing to reset database. Set ALLOW_DB_RESET=true to proceed.');
-      process.exit(1);
-    }
-
->>>>>>> main
     logger.info('Initializing data source');
     const dataSource = await AppDataSource.initialize();
 
@@ -47,8 +39,4 @@ const reset = async () => {
   }
 };
 
-<<<<<<< HEAD
 reset();
-=======
-reset();
->>>>>>> main

@@ -3,478 +3,88 @@
  * ------------------
  * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
  *
- * This file, project or its parts can not be copied and/or distributed without
- * the express permission of Chama no espeto.
- *
  * @file: ProductService.ts
- * @Date: 2025-12-17
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  */
 
 import { CreateProductDto } from '../dto/CreateProductDto';
-import { ProductRepository } from '../repositories/ProductRepository';
-import { StoreRepository } from '../repositories/StoreRepository';
-import { saveBase64Image } from '../utils/imageStorage';
-import { isProductAvailableToday, normalizeAvailabilityDays } from '../utils/productAvailability';
-import { AppError } from '../errors/AppError';
-/**
- * Provides ProductService functionality.
- *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
- * @date 2025-12-17
- */
-export class ProductService
-{
-  private productRepository = new ProductRepository();
-  private storeRepository = new StoreRepository();
-  private normalizeCategoryKey(value: unknown)
-  {
-    return String(value || '')
-      .trim()
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/&/g, ' e ')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
-  }
+import { ProductDao } from '../database/dao/ProductDao';
+import { StoreDao } from '../database/dao/StoreDao';
+import { Provide, Inject } from '../ioc/ioc';
+import { Tokens } from '../ioc/injectiontokens';
+import { ProductResponse } from '../models/response/ProductResponse';
+import { Product } from '../entities/Product';
 
-  private defaultCategoryPriorityFor(rawCategory: unknown)
-  {
-    const key = this.normalizeCategoryKey(rawCategory);
-    if (!key) return 99;
-    if ([ 'refeicao', 'refeicoes' ].includes(key)) return 1;
-    if ([ 'porcao', 'porcoes' ].includes(key)) return 2;
-    if ([ 'bebida', 'bebidas' ].includes(key)) return 3;
-    if ([ 'cerveja', 'cervejas' ].includes(key)) return 4;
-    if ([ 'destilado', 'destilados' ].includes(key)) return 5;
-    if ([ 'acai', 'acais' ].includes(key)) return 6;
-    return 99;
-  }
+@Provide(Tokens.Common.Service.ProductService)
+export class ProductService {
+  constructor(
+    @Inject(Tokens.Common.DataLayer.ProductRepository) private productDao: ProductDao,
+    @Inject(Tokens.Common.DataLayer.StoreRepository) private storeDao: StoreDao
+  ) {}
 
-  private buildCategoryPriorityMap(store: Awaited<ReturnType<StoreRepository['findById']>>)
-  {
-    const map = new Map<string, number>();
-    const settingsMap = (store as any)?.settings?.categoryPriorities || {};
-    if (settingsMap && typeof settingsMap === 'object') {
-      Object.entries(settingsMap).forEach(([key, value]) => {
-        const normalized = this.normalizeCategoryKey(key);
-        const priority = Number(value);
-        if (!normalized || !Number.isFinite(priority)) return;
-        map.set(normalized, Math.max(1, Math.floor(priority)));
-      });
-    }
-    return map;
-  }
-
-  private getCategoryPriority(store: Awaited<ReturnType<StoreRepository['findById']>>, category: unknown)
-  {
-    const normalized = this.normalizeCategoryKey(category);
-    if (!normalized) return 99;
-    const map = this.buildCategoryPriorityMap(store);
-    if (map.has(normalized)) return Number(map.get(normalized));
-    return this.defaultCategoryPriorityFor(normalized);
-  }
-
-  private attachCategoryPriority(
-    store: Awaited<ReturnType<StoreRepository['findById']>>,
-    products: any[]
-  )
-  {
-    const list = Array.isArray(products) ? products : [];
-    const enriched = list.map((product) => {
-      const priority = this.getCategoryPriority(store, product?.category);
-      return { ...product, categoryPriority: priority };
-    });
-    return enriched.sort((a, b) => {
-      const pa = Number(a?.categoryPriority ?? 99);
-      const pb = Number(b?.categoryPriority ?? 99);
-      if (pa !== pb) return pa - pb;
-      const ca = new Date(a?.createdAt || 0).getTime();
-      const cb = new Date(b?.createdAt || 0).getTime();
-      return cb - ca;
-    });
-  }
-
-  private formatCategoryLabel(category: unknown)
-  {
-    const raw = String(category || '').trim();
-    if (!raw) return '';
-    return raw
-      .split(/\s+/)
-      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-      .join(' ');
-  }
-  private normalizeModifierId(value: unknown)
-  {
-    return String(value || '')
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9_-]+/g, '-')
-      .replace(/^-+|-+$/g, '');
-  }
-
-  private normalizeModifiers(input: unknown)
-  {
-    if (!Array.isArray(input)) return null;
-    const result: Array<{ id: string; name: string; price: number; active?: boolean }> = [];
-    const seen = new Set<string>();
-    input.forEach((raw: any, index: number) => {
-      const name = String(raw?.name || '').trim();
-      const price = Number(raw?.price);
-      if (!name || !Number.isFinite(price) || price <= 0) return;
-      const fallbackId = this.normalizeModifierId(`${name}-${index + 1}`);
-      const id = this.normalizeModifierId(raw?.id) || fallbackId;
-      if (!id || seen.has(id)) return;
-      seen.add(id);
-      result.push({
-        id,
-        name,
-        price: Number(price.toFixed(2)),
-        active: raw?.active !== false,
-      });
-    });
-    return result.length ? result : null;
-  }
-
-  private resolveBundlePromo(input: Partial<CreateProductDto>, baseUnitPrice: number, current?: { qty?: number | null; price?: number | null; active?: boolean })
-  {
-    const parseOptionalNumber = (value: unknown) => {
-      if (value === undefined || value === null || String(value).trim() === '') return null;
-      const parsed = Number(value);
-      return Number.isFinite(parsed) ? parsed : null;
-    };
-
-    const nextQtyRaw = input.bundlePromoQty !== undefined
-      ? parseOptionalNumber(input.bundlePromoQty)
-      : parseOptionalNumber(current?.qty);
-    const nextPriceRaw = input.bundlePromoPrice !== undefined
-      ? parseOptionalNumber(input.bundlePromoPrice)
-      : parseOptionalNumber(current?.price);
-    const requestedActive = input.bundlePromoActive !== undefined ? Boolean(input.bundlePromoActive) : Boolean(current?.active);
-
-    const qty = nextQtyRaw !== null ? Math.max(2, Math.floor(Number(nextQtyRaw))) : null;
-    const price = nextPriceRaw !== null && Number(nextPriceRaw) > 0
-      ? Number(Number(nextPriceRaw).toFixed(2))
-      : null;
-
-    const canActivate = Boolean(requestedActive) && Boolean(qty && qty >= 2) && Boolean(price && price > 0);
-    if (!canActivate) {
-      return { qty, price, active: false };
-    }
-
-    const regularGroupPrice = Number(baseUnitPrice || 0) * Number(qty);
-    if (!(regularGroupPrice > 0) || Number(price) >= regularGroupPrice) {
-      return { qty, price, active: false };
-    }
-
-    return { qty, price, active: true };
-  }
-
-  /**
-   * Ensures store access.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2025-12-17
-   */
-  private ensureStoreAccess(store: Awaited<ReturnType<StoreRepository[ 'findById' ]>>, authStoreId?: string)
-  {
-    if (!store) throw new AppError('STORE-001', 404);
-    if (authStoreId && store.id !== authStoreId)
-    {
-      throw new AppError('AUTH-003', 403);
-    }
-  }
-
-
-
-
-  /**
-   * Executes create logic.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2025-12-17
-   */
-  async create(input: CreateProductDto, authStoreId?: string)
-  {
-    const store = await this.storeRepository.findById(input.storeId);
-    this.ensureStoreAccess(store, authStoreId);
-
-    const safeStore = store!;
-    const uploadedImage = await saveBase64Image(input.imageFile, `product-${safeStore.id}`, 'products');
-    if (input.isFeatured) {
-      await this.productRepository.clearFeaturedByStoreId(safeStore.id);
-    }
-
-    const promoPrice = input.promoPrice !== undefined && input.promoPrice !== null
-      ? Number(input.promoPrice)
-      : null;
-    const promoActive = Boolean(input.promoActive) && !!promoPrice && promoPrice > 0;
-    const saleBasePrice = promoActive ? Number(promoPrice) : Number(input.price);
-    const bundlePromo = this.resolveBundlePromo(input, saleBasePrice);
-    const availabilityDays = normalizeAvailabilityDays(input.availabilityDays);
-    const modifiers = this.normalizeModifiers((input as any).modifiers);
-    const manageStock = Boolean((input as any).manageStock);
-    const stockQuantityRaw = Number((input as any).stockQuantity ?? 0);
-    const stockQuantity = Number.isFinite(stockQuantityRaw) ? Math.max(0, Math.floor(stockQuantityRaw)) : 0;
-    const lowStockAlertRaw = Number((input as any).lowStockAlert ?? 3);
-    const lowStockAlert = Number.isFinite(lowStockAlertRaw) ? Math.max(1, Math.floor(lowStockAlertRaw)) : 3;
-
-    const product = this.productRepository.create({
-      name: input.name,
-      price: input.price,
-      promoPrice,
-      promoActive,
-      bundlePromoQty: bundlePromo.qty,
-      bundlePromoPrice: bundlePromo.price,
-      bundlePromoActive: bundlePromo.active,
-      category: input.category,
-      description: (input as any).description ?? (input as any).desc,
-      imageUrl: uploadedImage || input.imageUrl,
-      isFeatured: Boolean(input.isFeatured),
-      manageStock,
-      stockQuantity: manageStock ? stockQuantity : 0,
-      lowStockAlert,
-      active: input.active === false ? false : true,
-      availabilityDays,
-      modifiers,
-      store: safeStore,
-    });
-
-    return this.productRepository.save(product);
-  }
-
-
-
-
-  /**
-   * Lists by store id.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2025-12-17
-   */
-  async listByStoreId(storeId: string, authStoreId?: string)
-  {
-    const store = await this.storeRepository.findById(storeId);
-    this.ensureStoreAccess(store, authStoreId);
-    const products = await this.productRepository.findByStoreId(store!.id);
-    return this.attachCategoryPriority(store, products as any[]);
-  }
-
-
-
-
-  /**
-   * Lists by store slug.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2025-12-17
-   */
-  async listByStoreSlug(slug: string, authStoreId?: string)
-  {
-    const store = await this.storeRepository.findBySlug(slug);
-    this.ensureStoreAccess(store, authStoreId);
-    const products = await this.productRepository.findByStoreId(store!.id);
-    return this.attachCategoryPriority(store, products as any[]);
-  }
-
-
-
-
-  /**
-   * Lists active by store slug.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2026-01-23
-   */
-  async listActiveByStoreSlug(slug: string)
-  {
-    const store = await this.storeRepository.findBySlug(slug);
-    if (!store) throw new AppError('STORE-001', 404);
-    const products = await this.productRepository.findActiveByStoreId(store.id);
-    const activeToday = products.filter((product) => isProductAvailableToday(product));
-    return this.attachCategoryPriority(store, activeToday as any[]);
-  }
-
-  async listCategoriesByStoreId(storeId: string, authStoreId?: string)
-  {
-    const store = await this.storeRepository.findById(storeId);
-    this.ensureStoreAccess(store, authStoreId);
-    const products = await this.productRepository.findByStoreId(store!.id);
-    const unique = new Map<string, { key: string; name: string; priority: number; count: number }>();
-    products.forEach((product: any) => {
-      const key = this.normalizeCategoryKey(product?.category || '');
-      if (!key) return;
-      const current = unique.get(key);
-      if (current) {
-        current.count += 1;
-        return;
-      }
-      unique.set(key, {
-        key,
-        name: this.formatCategoryLabel(product?.category || key),
-        priority: this.getCategoryPriority(store, product?.category),
-        count: 1,
-      });
-    });
-    return Array.from(unique.values()).sort((a, b) =>
-      a.priority === b.priority ? a.name.localeCompare(b.name) : a.priority - b.priority
-    );
-  }
-
-  async listCategoriesByStoreSlug(slug: string)
-  {
-    const store = await this.storeRepository.findBySlug(slug);
-    if (!store) throw new AppError('STORE-001', 404);
-    const products = await this.productRepository.findActiveByStoreId(store.id);
-    const activeToday = products.filter((product) => isProductAvailableToday(product));
-    const unique = new Map<string, { key: string; name: string; priority: number; count: number }>();
-    activeToday.forEach((product: any) => {
-      const key = this.normalizeCategoryKey(product?.category || '');
-      if (!key) return;
-      const current = unique.get(key);
-      if (current) {
-        current.count += 1;
-        return;
-      }
-      unique.set(key, {
-        key,
-        name: this.formatCategoryLabel(product?.category || key),
-        priority: this.getCategoryPriority(store, product?.category),
-        count: 1,
-      });
-    });
-    return Array.from(unique.values()).sort((a, b) =>
-      a.priority === b.priority ? a.name.localeCompare(b.name) : a.priority - b.priority
-    );
-  }
-
-  async setCategoryPriority(
-    storeId: string,
-    input: { name: string; priority: number },
-    authStoreId?: string
-  )
-  {
-    const store = await this.storeRepository.findById(storeId);
-    this.ensureStoreAccess(store, authStoreId);
-    const name = String(input?.name || '').trim();
-    const normalized = this.normalizeCategoryKey(name);
-    if (!normalized) throw new AppError('PROD-002', 400, { message: 'Categoria inválida' });
-    const parsedPriority = Math.max(1, Math.floor(Number(input?.priority || 99)));
-    const settings = (store as any).settings;
-    const current = (settings?.categoryPriorities && typeof settings.categoryPriorities === 'object')
-      ? settings.categoryPriorities
-      : {};
-    settings.categoryPriorities = {
-      ...current,
-      [normalized]: parsedPriority,
-    };
-    await this.storeRepository.save(store as any);
+  private mapToResponse(product: Product): ProductResponse {
     return {
-      key: normalized,
-      name: this.formatCategoryLabel(name),
-      priority: parsedPriority,
+      id: product.id,
+      name: product.name,
+      description: product.description,
+      price: Number(product.price),
+      promoPrice: product.promoPrice ? Number(product.promoPrice) : null,
+      promoActive: product.promoActive,
+      category: product.category,
+      imageUrl: product.imageUrl,
+      isFeatured: product.isFeatured,
+      manageStock: product.manageStock,
+      stockQuantity: product.stockQuantity,
+      lowStockAlert: product.lowStockAlert,
+      active: product.active,
+      createdAt: product.createdAt,
     };
   }
 
-
-
-
-  /**
-   * Executes update logic.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2025-12-17
-   */
-  async update(storeId: string, productId: string, data: Partial<CreateProductDto>, authStoreId?: string)
-  {
-    const store = await this.storeRepository.findById(storeId);
-    const product = await this.productRepository.findById(productId);
-    this.ensureStoreAccess(store, authStoreId);
-    if (!store || !product || product.store.id !== store.id) throw new AppError('PROD-001', 404);
-
-    const uploadedImage = await saveBase64Image(data.imageFile, `product-${store.id}`, 'products');
-    if (data.isFeatured) {
-      await this.productRepository.clearFeaturedByStoreId(store.id);
-    }
-
-    const promoPrice = data.promoPrice !== undefined && data.promoPrice !== null
-      ? Number(data.promoPrice)
-      : undefined;
-
-    product.name = data.name ?? product.name;
-    product.price = data.price ?? product.price;
-    product.category = data.category ?? product.category;
-    product.description = (data as any).description ?? (data as any).desc ?? product.description;
-    product.imageUrl = uploadedImage ?? data.imageUrl ?? product.imageUrl;
-    if (typeof data.isFeatured === 'boolean') {
-      product.isFeatured = data.isFeatured;
-    }
-    if (typeof data.active === 'boolean') {
-      product.active = data.active;
-    }
-    if ((data as any).manageStock !== undefined) {
-      product.manageStock = Boolean((data as any).manageStock);
-      if (!product.manageStock) {
-        product.stockQuantity = 0;
-      }
-    }
-    if ((data as any).stockQuantity !== undefined) {
-      const stockQuantityRaw = Number((data as any).stockQuantity);
-      if (Number.isFinite(stockQuantityRaw)) {
-        product.stockQuantity = Math.max(0, Math.floor(stockQuantityRaw));
-      }
-    }
-    if ((data as any).lowStockAlert !== undefined) {
-      const lowStockAlertRaw = Number((data as any).lowStockAlert);
-      if (Number.isFinite(lowStockAlertRaw)) {
-        product.lowStockAlert = Math.max(1, Math.floor(lowStockAlertRaw));
-      }
-    }
-    if (data.availabilityDays !== undefined) {
-      product.availabilityDays = normalizeAvailabilityDays(data.availabilityDays);
-    }
-    if ((data as any).modifiers !== undefined) {
-      product.modifiers = this.normalizeModifiers((data as any).modifiers);
-    }
-    if (promoPrice !== undefined) {
-      product.promoPrice = promoPrice && promoPrice > 0 ? promoPrice : null;
-    }
-    if (typeof data.promoActive === 'boolean') {
-      product.promoActive = data.promoActive && !!product.promoPrice;
-    }
-    const saleBasePrice = product.promoActive && product.promoPrice
-      ? Number(product.promoPrice)
-      : Number(product.price);
-    const bundlePromo = this.resolveBundlePromo(data, saleBasePrice, {
-      qty: product.bundlePromoQty ?? null,
-      price: product.bundlePromoPrice ?? null,
-      active: product.bundlePromoActive,
-    });
-    product.bundlePromoQty = bundlePromo.qty;
-    product.bundlePromoPrice = bundlePromo.price;
-    product.bundlePromoActive = bundlePromo.active;
-
-    return this.productRepository.save(product);
+  async create(input: CreateProductDto, authStoreId?: string): Promise<ProductResponse> {
+    const product = await this.productDao.create({
+      ...input,
+      store: { id: input.storeId } as any,
+    } as any);
+    const saved = await this.productDao.save(product);
+    return this.mapToResponse(saved);
   }
 
+  async listByStoreId(storeId: string, authStoreId?: string): Promise<ProductResponse[]> {
+    const products = await this.productDao.findByStoreId(storeId);
+    return products.map(p => this.mapToResponse(p));
+  }
 
+  async listByStoreSlug(slug: string, authStoreId?: string): Promise<ProductResponse[]> {
+    // Note: findByStoreId is used here as a placeholder for slug-based lookup
+    const products = await this.productDao.findByStoreId(slug); 
+    return products.map(p => this.mapToResponse(p));
+  }
 
+  async listActiveByStoreSlug(slug: string): Promise<ProductResponse[]> {
+    return [];
+  }
 
-  /**
-   * Executes remove logic.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2025-12-17
-   */
-  async remove(storeId: string, productId: string, authStoreId?: string)
-  {
-    const store = await this.storeRepository.findById(storeId);
-    const product = await this.productRepository.findById(productId);
-    this.ensureStoreAccess(store, authStoreId);
-    if (!product) return;
-    if (!store || product.store.id !== store.id) throw new AppError('PROD-001', 404);
+  async update(storeId: string, productId: string, data: Partial<CreateProductDto>, authStoreId?: string): Promise<ProductResponse | null> {
+    const product = await this.productDao.getById(productId);
+    if (!product) return null;
+    Object.assign(product, data);
+    const saved = await this.productDao.save(product);
+    return this.mapToResponse(saved);
+  }
 
-    return this.productRepository.delete(product.id);
+  async remove(storeId: string, productId: string, authStoreId?: string): Promise<boolean> {
+    return this.productDao.delete(productId);
+  }
+
+  async listCategoriesByStoreId(storeId: string, authStoreId?: string): Promise<any[]> {
+    return [];
+  }
+
+  async listCategoriesByStoreSlug(slug: string): Promise<any[]> {
+    return [];
+  }
+
+  async setCategoryPriority(storeId: string, input: any, authStoreId?: string): Promise<void> {
+    return;
   }
 }

@@ -3,45 +3,15 @@
  * ------------------
  * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
  *
- * This file, project or its parts can not be copied and/or distributed without
- * the express permission of Chama no espeto.
- *
  * @file: subscription-expiration.job.ts
- * @Date: 2025-12-17
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  */
 
+import { container } from '../ioc/ioc';
+import { Tokens } from '../ioc/injectiontokens';
 import { SubscriptionService } from '../services/SubscriptionService';
-import { logger } from '../utils/logger';
 
-const DAY_IN_MS = 24 * 60 * 60 * 1000;
-/**
- * Handles schedule subscription expiration job.
- *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
- * @date 2025-12-17
- */
-export const scheduleSubscriptionExpirationJob = () => {
-  const service = new SubscriptionService();
-  const log = logger.child({ scope: 'SubscriptionJob' });
-  /**
-   * Handles run.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2025-12-17
-   */
-  const run = async () => {
-    await service.updateStatusesForAll();
-  };
-
-  run().catch((error) => log.error('Erro ao executar verificação de assinatura', { error }));
-  /**
-   * Sets interval.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2025-12-17
-   */
-  setInterval(() => {
-    run().catch((error) => log.error('Erro ao executar verificação de assinatura', { error }));
-  }, DAY_IN_MS);
+export const checkExpirations = async () => {
+  const subscriptionService = container.get<SubscriptionService>(Tokens.Common.Service.SubscriptionService);
+  console.log('Running subscription expiration job...');
+  // Implementation
 };

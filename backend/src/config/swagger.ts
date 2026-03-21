@@ -302,28 +302,17 @@ export const swaggerSpec = {
     '/auth/admin-login': {
       post: {
         tags: ['Autenticação'],
-<<<<<<< HEAD
         summary: 'Autentica o administrador da loja com o slug público',
-=======
-        summary: 'Autentica usuário da loja (admin ou operador) por e-mail/usuário',
->>>>>>> main
         requestBody: {
           required: true,
           content: {
             'application/json': {
               schema: {
                 type: 'object',
-<<<<<<< HEAD
                 required: ['slug', 'password'],
                 properties: {
                   slug: { type: 'string', description: 'Slug público da loja' },
                   password: { type: 'string', description: 'Senha do dono da loja' },
-=======
-                required: ['identifier', 'password'],
-                properties: {
-                  identifier: { type: 'string', description: 'E-mail ou usuário cadastrado' },
-                  password: { type: 'string', description: 'Senha do usuário' },
->>>>>>> main
                 },
               },
             },
@@ -346,11 +335,7 @@ export const swaggerSpec = {
             },
           },
           401: { description: 'Credenciais inválidas' },
-<<<<<<< HEAD
           404: { description: 'Loja não encontrada' },
-=======
-          403: { description: 'Usuário sem loja vinculada' },
->>>>>>> main
         },
       },
     },
@@ -809,8 +794,5 @@ export const swaggerSpec = {
       },
     },
   },
-<<<<<<< HEAD
 };
-=======
-};
->>>>>>> main
+export const swaggerDocument = swaggerSpec;

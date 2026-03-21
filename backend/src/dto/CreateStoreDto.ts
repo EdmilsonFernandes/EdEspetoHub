@@ -17,32 +17,12 @@ export interface CreateStoreDto {
   slug?: string;
   logoUrl?: string;
   logoFile?: string | null;
-<<<<<<< HEAD
-=======
-  bannerUrl?: string;
-  bannerFile?: string | null;
-  bannerPosition?: 'center' | 'top';
->>>>>>> main
   description?: string;
   primaryColor: string;
   secondaryColor?: string;
   pixKey?: string;
   contactEmail?: string;
-<<<<<<< HEAD
   promoMessage?: string;
-=======
-  storePhone?: string;
-  promoMessage?: string;
-  isOrderingEnabled?: boolean;
-  segment?: string;
-  deliveryRadiusKm?: number;
-  deliveryFee?: number;
-  prepBaseMinutes?: number;
-  prepAttentionMinutes?: number;
-  address?: string;
-  city?: string;
-  state?: string;
->>>>>>> main
   socialLinks?: { type: string; value: string }[];
   openingHours?: any[];
   orderTypes?: string[];

@@ -12,13 +12,6 @@
   "AUTH-009": "Invalid CPF or CNPJ.",
   "AUTH-010": "CPF/CNPJ already registered.",
   "AUTH-011": "Email already registered.",
-<<<<<<< HEAD
-  "AUTH-012": "Accept the terms and privacy policy.",
-  "AUTH-013": "Select a plan to continue.",
-  "AUTH-014": "Invalid payment method.",
-  "AUTH-020": "SUPER_ADMIN not found in database.",
-  "AUTH-021": "Invalid credentials.",
-=======
   "AUTH-015": "This email is already linked to a store. Use another email for the delivery account.",
   "BILL-001": "Delivery fees pending. Please pay to continue.",
   "AUTH-012": "Accept the terms and privacy policy.",
@@ -29,7 +22,6 @@
   "AUTH-020": "SUPER_ADMIN not found in database.",
   "AUTH-021": "Invalid credentials.",
   "AUTH-022": "User has no linked store.",
->>>>>>> main
   "AUTH-S001": "If the email exists, we will send instructions.",
   "AUTH-S002": "If the email exists, we will send instructions.",
   "AUTH-S003": "Password updated successfully.",
@@ -43,10 +35,7 @@
   "SUB-004": "Plan unavailable for subscription.",
   "SUB-005": "Subscription suspended. Contact support.",
   "SUB-006": "Payment attempts limit reached. Try again later.",
-<<<<<<< HEAD
-=======
   "SUB-007": "There is already a pending payment for this store. Wait for it to expire before trying again.",
->>>>>>> main
   "PAY-001": "Payment not found.",
   "PAY-002": "Payment failed.",
   "PAY-003": "Mercado Pago not configured.",
@@ -61,9 +50,6 @@
   "PROD-002": "Invalid product for this store.",
   "ORDER-001": "Order not found.",
   "ORDER-002": "Order type not allowed for this store.",
-<<<<<<< HEAD
-  "ORDER-003": "Table is already occupied. Finish the current order before creating a new one."
-=======
   "ORDER-003": "Table is already occupied. Finish the current order before creating a new one.",
   "ORDER-004": "Invalid order status transition.",
   "DELIV-001": "You already have an active delivery. Finish it before accepting another one.",
@@ -92,5 +78,4 @@
   "MOTO-034": "PIX key must match the courier CPF registered in the profile.",
   "REVIEW-003": "This order has no tip available for payout.",
   "REVIEW-004": "The tip has not been paid by the customer yet."
->>>>>>> main
 }

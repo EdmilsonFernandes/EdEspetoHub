@@ -4,70 +4,40 @@
  * Copyright (C) 2025 Chama no espeto - All Rights Reserved.
  *
  * @file: LegalController.ts
- * @Date: 2026-01-29
- * @author: Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
  */
 
 import { Request, Response } from 'express';
 import { SettingsService } from '../services/SettingsService';
-import { respondWithError } from '../errors/respondWithError';
+import { BaseController } from './BaseController';
+import { Get, RouterController } from '../decorators/controller';
+import { Tokens } from '../ioc/injectiontokens';
+import { Inject } from '../ioc/ioc';
 
-const settingsService = new SettingsService();
+@RouterController(Tokens.Common.Controller.LegalController)
+export class LegalController extends BaseController {
+  constructor(
+    @Inject(Tokens.Common.Service.SettingsService) private settingsService: SettingsService
+  ) {
+    super('/legal');
+  }
 
-/**
- * Provides LegalController functionality.
- *
- * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
- * @date 2026-01-29
- */
-export class LegalController {
-  /**
-   * Gets terms content.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2026-01-29
-   */
-  static async getTerms(req: Request, res: Response) {
+  @Get('/terms')
+  async getTerms(req: Request, res: Response) {
     try {
-      const content = await settingsService.getValue('legal.terms');
-      return res.json({ content: content || '' });
-    } catch (error) {
-      return respondWithError(req, res, error, 400);
+      const terms = await this.settingsService.getValue('legal.terms');
+      return this.ok(res, { content: terms });
+    } catch (error: any) {
+      return this.fail(res, error, req);
     }
   }
 
-  /**
-   * Gets LGPD content.
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2026-01-29
-   */
-  static async getLgpd(req: Request, res: Response) {
+  @Get('/privacy')
+  async getPrivacy(req: Request, res: Response) {
     try {
-      const content = await settingsService.getValue('legal.lgpd');
-      return res.json({ content: content || '' });
-    } catch (error) {
-      return respondWithError(req, res, error, 400);
-    }
-  }
-
-  /**
-   * Sets a site setting (admin only).
-   *
-   * @author Edmilson Lopes (edmilson.lopes@chamanoespeto.com.br)
-   * @date 2026-01-29
-   */
-  static async setSetting(req: Request, res: Response) {
-    try {
-      const key = String(req.body?.key || '').trim();
-      const value = String(req.body?.value || '');
-      if (!key) {
-        return res.status(400).json({ message: 'Chave inválida.' });
-      }
-      const setting = await settingsService.setValue(key, value);
-      return res.json(setting);
-    } catch (error) {
-      return respondWithError(req, res, error, 400);
+      const privacy = await this.settingsService.getValue('legal.privacy');
+      return this.ok(res, { content: privacy });
+    } catch (error: any) {
+      return this.fail(res, error, req);
     }
   }
 }

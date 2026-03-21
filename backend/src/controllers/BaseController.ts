@@ -1,10 +1,11 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { BaseRouterDefinition } from '../models/base-router.model';
-import { injectable } from 'inversify';
+import { Tokens } from '../ioc/injectiontokens';
+import { Provide } from '../ioc/ioc';
 import { respondWithError } from '../errors/respondWithError';
 import 'reflect-metadata';
 
-@injectable()
+@Provide(Tokens.Common.Controller.BaseController)
 export abstract class BaseController implements BaseRouterDefinition {
   public router: Router;
   public basePath: string;

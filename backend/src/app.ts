@@ -1,11 +1,11 @@
 import 'reflect-metadata';
 import './ioc/ioc.loader';
 import { AppBootstrap } from './decorators/app.bootstrap.decorator';
-import { InitializerService } from './api/common/service/initialize.service';
+import { InitializerService } from './common/services/initialize.service';
 import { DatabaseService } from './database/data-base.service';
 import { Tokens } from './ioc/injectiontokens';
 import { Inject, Provide } from './ioc/ioc';
-import { LoggerService } from './services/logger/LoggerService';
+import { LoggerService } from './utils/logger';
 
 @Provide(Tokens.Common.App)
 @AppBootstrap()

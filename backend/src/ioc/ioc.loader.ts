@@ -15,7 +15,6 @@ const patterns = [
   path.join(baseDir, 'services', '**', `*.${extension}`),
   path.join(baseDir, 'database', 'dao', '**', `*.${extension}`),
   path.join(baseDir, 'controllers', '**', `*.${extension}`),
-  path.join(baseDir, 'repositories', '**', `*.${extension}`),
   path.join(baseDir, 'middleware', '**', `*.${extension}`),
   path.join(baseDir, 'utils', '**', `*.${extension}`),
   path.join(baseDir, 'api', '**', `*.${extension}`),
