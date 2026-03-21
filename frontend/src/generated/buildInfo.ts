@@ -3,14 +3,20 @@
 
 export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
-  "version": "0.1.7",
-  "versionLabel": "v0.1.7",
-  "buildId": "0.1.7-20260321.133055-48a676b",
-  "builtAt": "2026-03-21T13:30:55.062Z",
-  "commitHash": "48a676b2be4234f293bd8339b7efe9f9aa588f94",
-  "shortHash": "48a676b",
+  "version": "0.1.8",
+  "versionLabel": "v0.1.8",
+  "buildId": "0.1.8-20260321.133126-b8c73af",
+  "builtAt": "2026-03-21T13:31:26.390Z",
+  "commitHash": "b8c73afb13af1dd46edf8aaa373a39444dbdad0b",
+  "shortHash": "b8c73af",
   "branch": "main",
   "commits": [
+    {
+      "hash": "b8c73afb13af1dd46edf8aaa373a39444dbdad0b",
+      "shortHash": "b8c73af",
+      "dateIso": "2026-03-21T10:31:21-03:00",
+      "subject": "fix(print): aumenta destaque visual da linha cliente no chrome e rawbt"
+    },
     {
       "hash": "48a676b2be4234f293bd8339b7efe9f9aa588f94",
       "shortHash": "48a676b",
@@ -184,12 +190,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "e4e6e52",
       "dateIso": "2026-03-20T16:01:33-03:00",
       "subject": "refactor(queue-card): reforca hierarquia visual mobile em 4 linhas"
-    },
-    {
-      "hash": "345b53353b288c97c08363f1584ec86a5e96d0eb",
-      "shortHash": "345b533",
-      "dateIso": "2026-03-20T15:51:00-03:00",
-      "subject": "feat(queue-card): hierarquia visual 4 linhas com badges de alto contraste"
     }
   ]
 } as const;
