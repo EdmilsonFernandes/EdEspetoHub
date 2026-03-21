@@ -5,12 +5,18 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.3",
   "versionLabel": "v0.1.3",
-  "buildId": "0.1.3-20260321.131302-4db3ed4",
-  "builtAt": "2026-03-21T13:13:02.687Z",
-  "commitHash": "4db3ed48264578127b51558a62cd795c51f540c5",
-  "shortHash": "4db3ed4",
+  "buildId": "0.1.3-20260321.131506-833450a",
+  "builtAt": "2026-03-21T13:15:06.935Z",
+  "commitHash": "833450a36fb08e853a442ea01ab62a5c0f960f88",
+  "shortHash": "833450a",
   "branch": "main",
   "commits": [
+    {
+      "hash": "833450a36fb08e853a442ea01ab62a5c0f960f88",
+      "shortHash": "833450a",
+      "dateIso": "2026-03-21T10:13:02-03:00",
+      "subject": "chore(release): v0.1.3"
+    },
     {
       "hash": "4db3ed48264578127b51558a62cd795c51f540c5",
       "shortHash": "4db3ed4",
@@ -184,12 +190,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "f9378ae",
       "dateIso": "2026-03-18T09:35:48-03:00",
       "subject": "fix(queue-card): prevent mesa/timer label collision with responsive spacing"
-    },
-    {
-      "hash": "074f91938df48e0e9779e20081f0b3752b36ae7d",
-      "shortHash": "074f919",
-      "dateIso": "2026-03-18T09:25:26-03:00",
-      "subject": "refactor(admin): neutralize queue iconography across dashboard and layout"
     }
   ]
 } as const;

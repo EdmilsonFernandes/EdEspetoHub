@@ -117,12 +117,12 @@ const buildRawBtText = (payload: PrintReceiptRawBtInput) => {
     return lines;
   });
 
-  const inverseLocationBlock = locationLabel
+  const locationBlock = locationLabel
     ? [
         strongSeparator(),
         ...centerText(locationLabel.toUpperCase())
           .split("\n")
-          .map((line) => `${ESC_POS.inverseOn}${line}${ESC_POS.inverseOff}`),
+          .map((line) => `${ESC_POS.boldOn}${line}${ESC_POS.boldOff}`),
         strongSeparator(),
       ]
     : [];
@@ -142,7 +142,7 @@ const buildRawBtText = (payload: PrintReceiptRawBtInput) => {
     strongSeparator(),
     ...wrapWords(`Fila: ${sanitizeText(payload.queueLabel || "--")}`, LINE_WIDTH),
     ...wrapWords(`Pedido: ${sanitizeText(payload.orderLabel || "--")}`, LINE_WIDTH),
-    ...inverseLocationBlock,
+    ...locationBlock,
     ...customerBlock,
     ...wrapWords(`Data: ${sanitizeText(payload.dateLabel || "")}`, LINE_WIDTH),
     separator(),
@@ -218,8 +218,9 @@ const buildHtmlReceipt = (payload: PrintReceiptRawBtInput) => {
       font-size: 21px;
       font-weight: 900;
       letter-spacing: 1px;
-      background: #000;
-      color: #fff;
+      background: #fff;
+      color: #000;
+      border: 2px solid #000;
       padding: 6px 4px;
       print-color-adjust: exact !important;
       -webkit-print-color-adjust: exact !important;
@@ -240,8 +241,9 @@ const buildHtmlReceipt = (payload: PrintReceiptRawBtInput) => {
         -webkit-print-color-adjust: exact !important;
       }
       .location-block {
-        background: #000 !important;
-        color: #FFFFFF !important;
+        background: #fff !important;
+        color: #000 !important;
+        border: 2px solid #000 !important;
         print-color-adjust: exact !important;
         -webkit-print-color-adjust: exact !important;
       }
