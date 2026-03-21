@@ -127,7 +127,7 @@ export const CartView = ({
     : [ "delivery", "pickup", "table" ];
   const isPickup = customer.type === "pickup";
   const isDelivery = customer.type === "delivery";
-  const isTableOptionalPhoneMode = customer.type === "table" && tablePhoneOptional;
+  const isOptionalPhoneMode = customer.type === "table" || customer.type === "pickup";
   const isPix = paymentMethod === "pix";
   const isCredit = paymentMethod === "credito";
   const isDebit = paymentMethod === "debito";
@@ -171,12 +171,12 @@ export const CartView = ({
   const [localPhoneDigits, setLocalPhoneDigits] = useState(() => extractPhoneParts(customer.phone || "").localNumber);
 
   useEffect(() => {
-    if (isTableOptionalPhoneMode) {
+    if (isOptionalPhoneMode) {
       setShowOptionalPhoneFields(false);
       return;
     }
     setShowOptionalPhoneFields(true);
-  }, [isTableOptionalPhoneMode]);
+  }, [isOptionalPhoneMode]);
 
   useEffect(() => {
     const previousCount = previousCartItemsCountRef.current;
@@ -568,7 +568,7 @@ export const CartView = ({
           </div>
 
           {/* WhatsApp */}
-          {!isTableOptionalPhoneMode && (
+          {!isOptionalPhoneMode && (
             <div className="rounded-2xl border border-slate-100 p-3 sm:p-4 bg-white">
               <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                 WhatsApp <span className="text-rose-500 font-extrabold">Obrigatório</span>
@@ -607,7 +607,7 @@ export const CartView = ({
             </div>
           )}
 
-          {isTableOptionalPhoneMode && !showOptionalPhoneFields && (
+          {isOptionalPhoneMode && !showOptionalPhoneFields && (
             <div className="rounded-2xl border border-slate-100 p-3 sm:p-4 bg-white">
               <button
                 type="button"
@@ -620,7 +620,7 @@ export const CartView = ({
             </div>
           )}
 
-          {isTableOptionalPhoneMode && showOptionalPhoneFields && (
+          {isOptionalPhoneMode && showOptionalPhoneFields && (
             <div className="rounded-2xl border border-slate-100 p-3 sm:p-4 bg-white">
               <div className="flex items-center justify-between gap-2">
                 <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
@@ -666,7 +666,7 @@ export const CartView = ({
                 </div>
               </div>
               <p className="mt-1 text-[11px] text-gray-400">
-                Para pedidos na mesa, o telefone pode ficar em branco.
+                Para pedidos na mesa ou retirada, o telefone pode ficar em branco.
               </p>
             </div>
           )}

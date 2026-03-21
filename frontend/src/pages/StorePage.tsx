@@ -969,7 +969,7 @@ export function StorePage() {
       return;
     }
 
-    const requiresPhone = !(customer.type === 'table' && canUseAdminPrintFlow);
+    const requiresPhone = customer.type === 'delivery';
     if (!effectiveCustomerName || (requiresPhone && !customer.phone)) {
       showToast(requiresPhone ? 'Preencha nome e telefone para continuar.' : 'Preencha seu nome para continuar.', 'warning');
       return;
