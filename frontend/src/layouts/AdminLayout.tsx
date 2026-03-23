@@ -126,7 +126,7 @@ export function AdminLayout({
       </div>
       <div className="w-full px-3 sm:px-4 lg:px-6 xl:px-8 pb-3">
         <div className="mx-auto max-w-[1600px] text-center lg:text-right text-[11px] text-slate-500">
-          Desenvolvido por Já no Caminho <AppVersionBadge />
+          Desenvolvido por Já no Caminho <AppVersionBadge prefix=" | " />
         </div>
       </div>
       <AdminMobileBottomNav />

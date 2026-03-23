@@ -1238,7 +1238,7 @@ export const MenuView = ({
             </span>
             Desenvolvido por Já no Caminho
             <span className="normal-case tracking-normal text-[10px]">
-              <AppVersionBadge />
+              <AppVersionBadge prefix=" | " />
             </span>
           </a>
         </div>

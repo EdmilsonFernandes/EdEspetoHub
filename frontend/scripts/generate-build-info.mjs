@@ -56,10 +56,15 @@ const branch =
 const nowIso = String(process.env.BUILD_TIME_ISO || '').trim() || new Date().toISOString();
 const datePart = nowIso.slice(0, 10).replace(/-/g, '');
 const timePart = nowIso.slice(11, 19).replace(/:/g, '');
-const versionBase = String(pkg?.version || existing?.version || '0.0.0');
-const computedVersion = `${versionBase}+${datePart}.${timePart}.${shortHash}`;
-const version = String(process.env.BUILD_VERSION || '').trim() || computedVersion;
-const buildId = `${version}-${datePart}.${timePart}-${shortHash}`;
+const envBuildVersion = String(process.env.BUILD_VERSION || '').trim();
+const normalizeSemver = (value) => String(value || '').trim().replace(/^v/i, '').split('+')[0].trim();
+const versionBase = normalizeSemver(pkg?.version || existing?.version || '0.0.0') || '0.0.0';
+const version = normalizeSemver(envBuildVersion) || versionBase;
+const buildMeta = envBuildVersion.includes('+')
+  ? envBuildVersion.split('+').slice(1).join('+')
+  : `${datePart}.${timePart}.${shortHash}`;
+const versionInternal = `${version}+${buildMeta}`;
+const buildId = `${versionInternal}-${datePart}.${timePart}-${shortHash}`;
 
 const commitsRaw = safeExecFile('git', ['log', '-n', '30', '--date=iso-strict', '--pretty=format:%H|%h|%cI|%s']);
 const commitsFromGit = commitsRaw
@@ -84,7 +89,8 @@ const commits =
 const payload = {
   appName: 'Já no Caminho',
   version,
-  versionLabel: `v${version}`,
+  versionLabel: `v${version.split('+')[0]}`,
+  versionInternal,
   buildId,
   builtAt: nowIso,
   commitHash: commitHash || '',

@@ -3,14 +3,21 @@
 
 export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
-  "version": "0.1.8+20260323.185530.abef6dc",
-  "versionLabel": "v0.1.8+20260323.185530.abef6dc",
-  "buildId": "0.1.8+20260323.185530.abef6dc-20260323.185530-abef6dc",
-  "builtAt": "2026-03-23T18:55:30.471Z",
-  "commitHash": "abef6dc980b9db68bcdc605e1bef6ecdbc687450",
-  "shortHash": "abef6dc",
+  "version": "0.1.9",
+  "versionLabel": "v0.1.9",
+  "versionInternal": "0.1.9+20260323.190259.9bbf264",
+  "buildId": "0.1.9+20260323.190259.9bbf264-20260323.190259-9bbf264",
+  "builtAt": "2026-03-23T19:02:59.602Z",
+  "commitHash": "9bbf264588e1616938d336ce99fd2c637cf63490",
+  "shortHash": "9bbf264",
   "branch": "main",
   "commits": [
+    {
+      "hash": "9bbf264588e1616938d336ce99fd2c637cf63490",
+      "shortHash": "9bbf264",
+      "dateIso": "2026-03-23T15:55:57-03:00",
+      "subject": "feat(auth-ui): harmoniza login com identidade visual principal"
+    },
     {
       "hash": "abef6dc980b9db68bcdc605e1bef6ecdbc687450",
       "shortHash": "abef6dc",
@@ -184,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "4b68aad",
       "dateIso": "2026-03-21T09:50:53-03:00",
       "subject": "chore(deploy): adiciona scripts diretos para frontend e api na ec2"
-    },
-    {
-      "hash": "bb8988370e13fc29c9db6c0f8a1e150d52cd6b75",
-      "shortHash": "bb89883",
-      "dateIso": "2026-03-21T09:43:47-03:00",
-      "subject": "feat(release): semver automatico e metadata de build para deploy em producao"
     }
   ]
 } as const;
