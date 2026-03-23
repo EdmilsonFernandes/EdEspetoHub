@@ -8,7 +8,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { AuthLayout } from '../layouts/AuthLayout';
 import { runClientFreshStart } from '../utils/clientFreshStart';
 import { APP_BUILD_INFO } from '../generated/buildInfo';
-import { ArrowLeft, Check, Eye, EyeSlash, WarningCircle } from '@phosphor-icons/react';
+import { ArrowLeft, Check, Eye, EyeSlash, LockKey, ShieldCheck, WarningCircle, WhatsappLogo } from '@phosphor-icons/react';
 
 export function AdminLogin() {
   const navigate = useNavigate();
@@ -173,7 +173,10 @@ export function AdminLogin() {
             <img src="/janocaminho.jpg" alt="Já no Caminho" className="mx-auto h-14 w-auto rounded-xl shadow-lg border border-slate-200" />
           </button>
           <p className="text-[12px] font-bold uppercase tracking-[0.25em] text-slate-400">Acesso da plataforma</p>
-          <h2 className="text-[2rem] sm:text-[2.2rem] font-black text-slate-800 tracking-[-0.03em]">Login Admin</h2>
+          <div className="flex items-center justify-center gap-3">
+            <LockKey size={32} weight="duotone" className="text-[#0d4f66]" />
+            <h2 className="text-[2rem] sm:text-[2.2rem] font-black text-slate-800 tracking-[-0.03em]">Login Admin</h2>
+          </div>
           {superAdminUnlocked ? (
             <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 rounded-full border border-emerald-100">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -264,6 +267,11 @@ export function AdminLogin() {
             </div>
           ) : null}
 
+          <div className="flex items-center justify-center gap-2 py-1 px-3 rounded-xl bg-slate-50 border border-slate-100/50">
+            <ShieldCheck size={16} weight="fill" className="text-emerald-500" />
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Ambiente Seguro & Criptografado</span>
+          </div>
+
           <div className="flex items-center justify-between gap-4 pt-1">
             <label className="flex items-center gap-2.5 cursor-pointer group">
               <div className="relative">
@@ -316,6 +324,15 @@ export function AdminLogin() {
             </button>
           </div>
         </form>
+
+        <button
+          type="button"
+          onClick={() => window.open('https://wa.me/5512991234567', '_blank')}
+          className="w-full flex items-center justify-center gap-2 text-xs font-bold text-slate-400 hover:text-[#0d4f66] transition-colors py-2 group"
+        >
+          <WhatsappLogo size={18} weight="duotone" className="group-hover:animate-bounce" />
+          Precisa de ajuda? Fale conosco
+        </button>
       </div>
     </AuthLayout>
   );

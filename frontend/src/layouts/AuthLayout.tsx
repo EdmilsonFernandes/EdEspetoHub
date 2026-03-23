@@ -1,6 +1,7 @@
 // @ts-nocheck
 import React from 'react';
 import { AppVersionBadge } from '../components/common/AppVersionBadge';
+import { ChartLineUp, DeviceMobile, ShieldCheckered } from '@phosphor-icons/react';
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -11,9 +12,9 @@ export function AuthLayout({ children }: AuthLayoutProps) {
     <div className="min-h-screen overflow-x-clip bg-[#f8fafc] px-4 py-6 sm:py-10 relative">
       {/* Background Orbs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-sky-400/10 blur-[120px]" />
-        <div className="absolute top-[20%] -right-[5%] w-[35%] h-[35%] rounded-full bg-indigo-400/10 blur-[100px]" />
-        <div className="absolute -bottom-[5%] left-[20%] w-[30%] h-[30%] rounded-full bg-emerald-400/5 blur-[80px]" />
+        <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-sky-400/10 blur-[120px] animate-[orbFloat_18s_infinite_linear]" />
+        <div className="absolute top-[20%] -right-[5%] w-[35%] h-[35%] rounded-full bg-indigo-400/10 blur-[100px] animate-[orbFloat_22s_infinite_linear_reverse]" />
+        <div className="absolute -bottom-[5%] left-[20%] w-[30%] h-[30%] rounded-full bg-emerald-400/5 blur-[80px] animate-[orbFloat_25s_infinite_linear]" />
       </div>
 
       <div className="mx-auto w-full max-w-7xl min-h-[calc(100vh-3rem)] grid lg:grid-cols-[1.06fr_minmax(520px,1fr)] gap-7 items-stretch relative z-10">
@@ -42,15 +43,15 @@ export function AuthLayout({ children }: AuthLayoutProps) {
 
           <div className="space-y-4 relative z-10">
             {[
-              "Painel administrativo de alta performance",
-              "Operação mobile sem ruído visual",
-              "Segurança com acesso segmentado"
-            ].map((text, i) => (
-              <p key={i} className="flex items-center gap-3 text-sm font-semibold text-sky-100/90 group/item">
-                <span className="flex-shrink-0 h-5 w-5 rounded-lg bg-sky-400/20 border border-sky-400/30 flex items-center justify-center group-hover/item:bg-sky-400/30 transition-colors">
-                  <div className="h-1.5 w-1.5 rounded-full bg-cyan-300 shadow-[0_0_8px_rgba(103,232,249,0.8)]" />
+              { text: "Painel administrativo de alta performance", icon: ChartLineUp },
+              { text: "Operação mobile sem ruído visual", icon: DeviceMobile },
+              { text: "Segurança com acesso segmentado", icon: ShieldCheckered }
+            ].map((item, i) => (
+              <p key={i} className="flex items-center gap-3 text-sm font-semibold text-sky-100/90 group/item animate-in fade-in slide-in-from-left-4 duration-700 fill-mode-both" style={{ animationDelay: `${(i + 1) * 150}ms` }}>
+                <span className="flex-shrink-0 h-8 w-8 rounded-xl bg-sky-400/20 border border-sky-400/30 flex items-center justify-center group-hover/item:bg-sky-400/30 transition-all group-hover/item:scale-110">
+                  <item.icon size={18} weight="duotone" className="text-cyan-300 shadow-[0_0_8px_rgba(103,232,249,0.8)]" />
                 </span>
-                {text}
+                {item.text}
               </p>
             ))}
           </div>

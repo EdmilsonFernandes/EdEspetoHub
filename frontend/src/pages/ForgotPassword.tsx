@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
 import { AuthLayout } from '../layouts/AuthLayout';
 
-import { ArrowLeft, EnvelopeSimple, WarningCircle } from '@phosphor-icons/react';
+import { ArrowLeft, EnvelopeSimple, ShieldCheck, WarningCircle } from '@phosphor-icons/react';
 
 export function ForgotPassword() {
   const navigate = useNavigate();
@@ -54,6 +54,11 @@ export function ForgotPassword() {
               <span>{error}</span>
             </div>
           )}
+
+          <div className="flex items-center justify-center gap-2 py-1 px-3 rounded-xl bg-slate-50 border border-slate-100/50">
+            <ShieldCheck size={16} weight="fill" className="text-emerald-500" />
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Ambiente Seguro & Criptografado</span>
+          </div>
 
           <div className="floating-field">
             <input
