@@ -61,7 +61,7 @@ export class OrderService
       [storeId]
     );
 
-    // Auto-close stale operational orders (older than 6h) to avoid stuck queue.
+    // Auto-close stale operational orders (no updates for 6h) to avoid stuck queue.
     await AppDataSource.query(
       `
         UPDATE orders o
@@ -72,7 +72,7 @@ export class OrderService
                END
          WHERE o.store_id = $1
            AND o.status IN ('pending', 'preparing', 'ready', 'ready_for_delivery', 'waiting_for_motoboy')
-           AND o.created_at <= (NOW() - INTERVAL '6 hours')
+           AND COALESCE(o.updated_at, o.created_at) <= (NOW() - INTERVAL '6 hours')
       `,
       [storeId]
     );
