@@ -154,6 +154,22 @@ body {
   66% { transform: translate(-10px, 10px) scale(0.95); opacity: 0.7; }
 }
 
+@keyframes textGradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 5px rgba(34, 211, 238, 0.2); }
+  50% { box-shadow: 0 0 20px rgba(34, 211, 238, 0.4); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
 @keyframes loginCardEnter {
   from {
     opacity: 0;
@@ -813,6 +829,49 @@ body {
     background: rgb(239 246 255);
     border-color: rgb(191 219 254);
     color: rgb(30 64 175);
+  }
+
+  .premium-border-gradient {
+    position: relative;
+    border: 1px solid transparent;
+    background-clip: padding-box;
+  }
+
+  .premium-border-gradient::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    z-index: -1;
+    border-radius: inherit;
+    background: linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.05));
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    -webkit-mask-composite: xor;
+  }
+
+  .premium-glass {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .text-glow-sky {
+    text-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+  }
+
+  .animate-text-gradient {
+    background-size: 200% auto;
+    animation: textGradient 4s linear infinite;
+  }
+
+  .animate-glow-pulse {
+    animation: glowPulse 2s infinite;
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
   }
 
   .ds-admin-bg {

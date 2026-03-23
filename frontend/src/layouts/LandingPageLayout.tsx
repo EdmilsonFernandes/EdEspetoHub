@@ -184,105 +184,50 @@ export function LandingPageLayout({ children }: LandingPageLayoutProps) {
       className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(47,157,247,0.14),_transparent_48%),radial-gradient(circle_at_bottom_right,_rgba(95,211,90,0.16),_transparent_45%)] bg-gray-50 dark:bg-slate-950"
       style={{ fontFamily: 'Inter, Geist, system-ui, -apple-system, Segoe UI, sans-serif' }}
     >
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-[linear-gradient(120deg,rgba(5,11,22,0.9),rgba(17,24,39,0.9))] backdrop-blur-xl shadow-[0_20px_40px_-30px_rgba(0,0,0,0.75)]">
-        <div className="h-1 bg-[linear-gradient(90deg,#2f9df7,#18b3f9,#5fd35a)]" />
+      <header className="sticky top-0 z-50 border-b border-white/5 bg-slate-950/80 backdrop-blur-2xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-3 sm:py-4">
-            <a href="https://www.janocaminho.com.br" className="flex items-center gap-3 min-w-0">
-              <div className="h-11 w-11 sm:hidden rounded-2xl bg-slate-900 shadow-[0_14px_28px_-18px_rgba(47,157,247,0.7)] ring-1 ring-sky-200/70 overflow-hidden shrink-0">
-                <img
-                  src="/janocaminho.jpg"
-                  alt="Já no Caminho"
-                  className="h-full w-full object-cover object-[12%_center]"
-                  draggable={false}
-                />
+          <div className="flex items-center justify-between h-20">
+            <a href="https://www.janocaminho.com.br" className="flex items-center gap-3 group">
+              <div className="h-10 w-10 rounded-xl bg-white/10 p-0.5 border border-white/10 group-hover:scale-105 transition-transform overflow-hidden shrink-0">
+                <img src="/janocaminho.jpg" alt="Já no Caminho" className="h-full w-full object-cover rounded-lg" />
               </div>
-              <div className="hidden sm:block h-12 w-36 rounded-2xl bg-slate-900 shadow-[0_14px_28px_-18px_rgba(47,157,247,0.7)] ring-1 ring-sky-200/70 overflow-hidden shrink-0">
-                <img
-                  src="/janocaminho.jpg"
-                  alt="Já no Caminho"
-                  className="h-full w-full object-cover object-center"
-                  draggable={false}
-                />
-              </div>
-              <div className="leading-tight min-w-0">
-                <p className="text-base sm:text-xl font-black text-white truncate">Já no Caminho</p>
-                <p className="hidden sm:block text-xs text-slate-300">Pedidos e gestão em um só lugar</p>
+              <div className="leading-tight">
+                <p className="text-lg font-black text-white tracking-tight">Já no Caminho</p>
+                <p className="text-[10px] font-bold text-sky-400 uppercase tracking-widest">SaaS Plataform</p>
               </div>
             </a>
-            <div className="sm:hidden flex items-center gap-2">
+
+            <nav className="hidden lg:flex items-center gap-8">
+              {navLinks.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={item.onClick}
+                  className="text-sm font-bold text-slate-400 hover:text-white transition-colors uppercase tracking-widest"
+                >
+                  {item.label}
+                </button>
+              ))}
+            </nav>
+
+            <div className="flex items-center gap-4">
               <button
-                onClick={toggleTheme}
-                className="cursor-pointer p-2 rounded-full border border-white/20 text-slate-100 hover:bg-white/10 transition-colors"
-                aria-label="Toggle theme"
+                onClick={() => navigate('/admin')}
+                className="hidden sm:inline-flex text-xs font-black text-slate-400 hover:text-white uppercase tracking-widest transition-colors"
               >
-                {theme === 'light' ? <Moon size={18} weight="duotone" /> : <Sun size={18} weight="duotone" />}
+                Login Admin
+              </button>
+              <button
+                onClick={() => navigate('/create?plan=trial')}
+                className="inline-flex px-6 py-2.5 text-xs font-black rounded-xl bg-white text-slate-950 hover:bg-sky-50 transition-all active:scale-95 uppercase tracking-widest"
+              >
+                Começar agora
               </button>
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(true)}
-                className="inline-flex items-center justify-center p-2 rounded-full border border-white/20 text-slate-100 hover:bg-white/10 transition-colors"
-                aria-label="Abrir menu"
+                className="lg:hidden h-10 w-10 inline-flex items-center justify-center rounded-xl border border-white/10 text-white"
               >
-                <List size={18} weight="bold" />
-              </button>
-            </div>
-
-            <nav className="hidden lg:flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-2.5 py-1.5 shadow-sm">
-              {navLinks.map((item) => {
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={item.onClick}
-                    className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold text-slate-100 hover:bg-white/10 transition"
-                  >
-                    {item.label}
-                  </button>
-                );
-              })}
-            </nav>
-
-            <div className="hidden sm:flex items-center gap-2 sm:gap-3 flex-wrap justify-end">
-              {!auth && (
-                <button
-                  onClick={() => navigate('/create?plan=trial')}
-                  className="inline-flex px-4 py-2 text-sm rounded-full bg-brand-gradient text-white font-black shadow-[0_16px_30px_-20px_rgba(239,68,68,0.9)] hover:opacity-95 active:scale-[0.99] transition"
-                >
-                  Criar loja
-                </button>
-              )}
-              <button
-                onClick={() => navigate('/admin')}
-                className="inline-flex px-3 py-2 sm:px-4 text-sm rounded-full border border-white/20 text-slate-100 hover:bg-white/10 transition-all"
-              >
-                Admin loja
-              </button>
-              <button
-                onClick={() => navigate('/motoboy/login')}
-                className="inline-flex items-center gap-2 px-3 py-2 sm:px-4 text-sm rounded-full border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-200 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 transition-all"
-              >
-                <Truck size={16} weight="duotone" />
-                Entrar entregador
-              </button>
-              {auth && (
-                <button
-                  onClick={() => {
-                    logout();
-                    navigate('/');
-                  }}
-                  className="inline-flex items-center gap-2 px-3 py-2 sm:px-4 text-sm rounded-full border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-950/50 transition-all"
-                >
-                  <SignOut size={16} weight="bold" />
-                  <span className="hidden sm:inline">Sair</span>
-                </button>
-              )}
-              <button
-                onClick={toggleTheme}
-                className="cursor-pointer p-2 rounded-full border border-white/20 text-slate-100 hover:bg-white/10 transition-colors"
-                aria-label="Toggle theme"
-              >
-                {theme === 'light' ? <Moon size={18} weight="duotone" /> : <Sun size={18} weight="duotone" />}
+                <List size={20} weight="bold" />
               </button>
             </div>
           </div>
