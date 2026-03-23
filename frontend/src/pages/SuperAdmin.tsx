@@ -958,8 +958,8 @@ export function SuperAdmin() {
           <div className="auth-segment">
             <button type="button" onClick={() => window.location.assign('/admin')} className="auth-segment-btn">Loja</button>
             <button type="button" onClick={() => window.location.assign('/motoboy/login')} className="auth-segment-btn">Entregador</button>
-            <button type="button" className="auth-segment-btn active">Super Admin</button>
           </div>
+          <p className="text-center text-[11px] font-semibold text-slate-500">Acesso Super Admin restrito</p>
 
           <form onSubmit={handleLogin} className="login-card-premium p-5 sm:p-6 space-y-3">
             <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-600">

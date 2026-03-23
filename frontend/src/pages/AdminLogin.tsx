@@ -23,6 +23,28 @@ export function AdminLogin() {
   const [verifyPrompt, setVerifyPrompt] = useState<{ email?: string; emailMasked?: string } | null>(null);
   const [resendLoading, setResendLoading] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
+  const [logoTapCount, setLogoTapCount] = useState(0);
+  const [superAdminUnlocked, setSuperAdminUnlocked] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return localStorage.getItem('auth:superadmin-unlocked') === 'true';
+  });
+
+  const handleLogoTap = () => {
+    if (superAdminUnlocked) return;
+    setLogoTapCount((prev) => {
+      const next = prev + 1;
+      if (next >= 10) {
+        setSuperAdminUnlocked(true);
+        try {
+          localStorage.setItem('auth:superadmin-unlocked', 'true');
+        } catch {
+          // no-op
+        }
+        return 0;
+      }
+      return next;
+    });
+  };
 
   const handleLogin = async event => {
     event?.preventDefault();
@@ -143,15 +165,22 @@ export function AdminLogin() {
     <AuthLayout>
       <div className="space-y-4 login-page-enter">
         <div className="text-center space-y-2">
-          <img src="/janocaminho.jpg" alt="Já no Caminho" className="mx-auto h-12 w-auto rounded-lg" />
+          <button type="button" onClick={handleLogoTap} className="mx-auto block">
+            <img src="/janocaminho.jpg" alt="Já no Caminho" className="mx-auto h-12 w-auto rounded-lg" />
+          </button>
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">Acesso da plataforma</p>
           <h2 className="text-2xl sm:text-3xl font-black text-slate-800">Login Admin Loja</h2>
+          {superAdminUnlocked ? (
+            <p className="text-[11px] font-semibold text-emerald-700">Modo Super Admin liberado neste dispositivo</p>
+          ) : null}
         </div>
 
         <div className="auth-segment">
           <button type="button" className="auth-segment-btn active">Loja</button>
           <button type="button" onClick={() => navigate('/motoboy/login')} className="auth-segment-btn">Entregador</button>
-          <button type="button" onClick={() => navigate('/superadmin')} className="auth-segment-btn">Super Admin</button>
+          {superAdminUnlocked ? (
+            <button type="button" onClick={() => navigate('/superadmin')} className="auth-segment-btn">Super Admin</button>
+          ) : null}
         </div>
 
         <form onSubmit={handleLogin} className="login-card-premium p-5 sm:p-6 space-y-4">

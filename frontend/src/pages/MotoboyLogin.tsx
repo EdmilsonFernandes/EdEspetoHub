@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowSquareOut, Eye, EyeSlash, SignOut, Scooter, UserCircle, WarningCircle } from '@phosphor-icons/react';
 import { authService } from '../services/authService';
@@ -15,6 +15,11 @@ export function MotoboyLogin() {
   const [verifyPrompt, setVerifyPrompt] = useState<{ email?: string; emailMasked?: string } | null>(null);
   const [resendLoading, setResendLoading] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
+  const logoTapCountRef = useRef(0);
+  const [superAdminUnlocked, setSuperAdminUnlocked] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return localStorage.getItem('auth:superadmin-unlocked') === 'true';
+  });
   const { setAuth } = useAuth();
   const navigate = useNavigate();
   const [persistedSession, setPersistedSession] = useState(() => {
@@ -124,21 +129,42 @@ export function MotoboyLogin() {
     setPersistedSession(null);
   };
 
+  const handleLogoTap = () => {
+    if (superAdminUnlocked) return;
+    logoTapCountRef.current += 1;
+    if (logoTapCountRef.current >= 10) {
+      setSuperAdminUnlocked(true);
+      logoTapCountRef.current = 0;
+      try {
+        localStorage.setItem('auth:superadmin-unlocked', 'true');
+      } catch {
+        // no-op
+      }
+    }
+  };
+
   return (
     <AuthLayout>
       <div className="space-y-4 login-page-enter">
         <div className="text-center space-y-2">
-          <img src="/janocaminho.jpg" alt="Já no Caminho" className="mx-auto h-12 w-auto rounded-lg" />
+          <button type="button" onClick={handleLogoTap} className="mx-auto block">
+            <img src="/janocaminho.jpg" alt="Já no Caminho" className="mx-auto h-12 w-auto rounded-lg" />
+          </button>
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">Acesso da plataforma</p>
           <h2 className="text-2xl sm:text-3xl font-black text-slate-800">
             {alreadyLoggedIn ? 'Sessão ativa do entregador' : 'Login Entregador'}
           </h2>
+          {superAdminUnlocked ? (
+            <p className="text-[11px] font-semibold text-emerald-700">Modo Super Admin liberado neste dispositivo</p>
+          ) : null}
         </div>
 
         <div className="auth-segment">
           <button type="button" onClick={() => navigate('/admin')} className="auth-segment-btn">Loja</button>
           <button type="button" className="auth-segment-btn active">Entregador</button>
-          <button type="button" onClick={() => navigate('/superadmin')} className="auth-segment-btn">Super Admin</button>
+          {superAdminUnlocked ? (
+            <button type="button" onClick={() => navigate('/superadmin')} className="auth-segment-btn">Super Admin</button>
+          ) : null}
         </div>
 
         <div className="login-card-premium p-5 sm:p-6 space-y-4">
@@ -156,7 +182,7 @@ export function MotoboyLogin() {
               <button
                 type="button"
                 onClick={() => navigate('/motoboy/home')}
-                className="w-full h-12 rounded-[10px] border-0 bg-[#ea580c] text-white font-black hover:brightness-105"
+                className="w-full h-12 rounded-xl border-0 bg-[var(--color-primary)] text-white font-black hover:brightness-105"
               >
                 <span className="inline-flex items-center gap-2">
                   <ArrowSquareOut size={18} weight="duotone" />

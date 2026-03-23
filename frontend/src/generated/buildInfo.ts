@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260323.190504.02880da",
-  "buildId": "0.1.9+20260323.190504.02880da-20260323.190504-02880da",
-  "builtAt": "2026-03-23T19:05:04.545Z",
-  "commitHash": "02880dacf5c9db757231cf7cde4bfc972cd9ac67",
-  "shortHash": "02880da",
+  "versionInternal": "0.1.9+20260323.190850.b2a518c",
+  "buildId": "0.1.9+20260323.190850.b2a518c-20260323.190850-b2a518c",
+  "builtAt": "2026-03-23T19:08:50.787Z",
+  "commitHash": "b2a518c74248484183691056c742a7966b6dab19",
+  "shortHash": "b2a518c",
   "branch": "main",
   "commits": [
+    {
+      "hash": "b2a518c74248484183691056c742a7966b6dab19",
+      "shortHash": "b2a518c",
+      "dateIso": "2026-03-23T16:05:41-03:00",
+      "subject": "fix(vendas): neutraliza barra de progresso no modal de itens vendidos"
+    },
     {
       "hash": "02880dacf5c9db757231cf7cde4bfc972cd9ac67",
       "shortHash": "02880da",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "c8591c4",
       "dateIso": "2026-03-21T10:06:44-03:00",
       "subject": "fix(queue): torna botao de impressao visivel no card da fila"
-    },
-    {
-      "hash": "289f2e925e6257cb7443b5e254ba8b934e1a0855",
-      "shortHash": "289f2e9",
-      "dateIso": "2026-03-21T09:54:49-03:00",
-      "subject": "chore(ops): adiciona limpeza segura de disco para ec2"
     }
   ]
 } as const;
