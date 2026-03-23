@@ -66,7 +66,14 @@ const STORE_SEGMENTS = [
   { value: 'outros', label: 'Outros' },
 ];
 
-const SOCIAL_NETWORK_OPTIONS = ['instagram', 'facebook', 'twitter', 'tiktok', 'youtube', 'linkedin'];
+const SOCIAL_NETWORK_OPTIONS = [
+  { type: 'instagram', label: 'Instagram', placeholder: '@usuario ou URL do perfil' },
+  { type: 'facebook', label: 'Facebook', placeholder: 'URL da página no Facebook' },
+  { type: 'twitter', label: 'Twitter/X', placeholder: '@usuario ou URL do perfil' },
+  { type: 'tiktok', label: 'TikTok', placeholder: '@usuario ou URL do perfil' },
+  { type: 'youtube', label: 'YouTube', placeholder: 'URL do canal' },
+  { type: 'linkedin', label: 'LinkedIn', placeholder: 'URL do perfil/empresa' },
+];
 
 const STORE_SEGMENT_PRESETS: Record<string, { primaryColor: string; secondaryColor: string; description: string; orderTypes: string[]; categories: string[] }> = {
   restaurante: {
@@ -361,32 +368,50 @@ export function CreateStore() {
     }));
   }, [registerForm.storeDescription, registerForm.segment]);
 
-  const updateSocialLink = (index: number, key: 'type' | 'value', value: string) =>
-  {
+  const socialLinksMap = React.useMemo(
+    () =>
+      new Map(
+        (registerForm.socialLinks || []).map((link) => [
+          normalizeSocialNetworkType(link?.type),
+          String(link?.value || ''),
+        ]),
+      ),
+    [registerForm.socialLinks],
+  );
+
+  const isSocialSelected = (type: string) => socialLinksMap.has(normalizeSocialNetworkType(type));
+  const getSocialValue = (type: string) => socialLinksMap.get(normalizeSocialNetworkType(type)) || '';
+
+  const toggleSocialLink = (type: string, selected: boolean) => {
+    const normalizedType = normalizeSocialNetworkType(type);
     setRegisterForm((prev) => {
-      const links = [ ...prev.socialLinks ];
-      links[ index ] = {
-        ...links[ index ],
-        [ key ]: key === 'type' ? normalizeSocialNetworkType(value) : value,
+      const current = Array.isArray(prev.socialLinks) ? prev.socialLinks : [];
+      const alreadyExists = current.some((link) => normalizeSocialNetworkType(link.type) === normalizedType);
+      if (selected) {
+        if (alreadyExists) return prev;
+        return {
+          ...prev,
+          socialLinks: [...current, { type: normalizedType, value: '' }],
+        };
+      }
+      return {
+        ...prev,
+        socialLinks: current.filter((link) => normalizeSocialNetworkType(link.type) !== normalizedType),
       };
-      return { ...prev, socialLinks: links };
     });
   };
 
-  const addSocialLink = () =>
-  {
-    setRegisterForm((prev) => ({
-      ...prev,
-      socialLinks: [ ...prev.socialLinks, { type: 'instagram', value: '' } ],
-    }));
-  };
-
-  const removeSocialLink = (index: number) =>
-  {
-    setRegisterForm((prev) => ({
-      ...prev,
-      socialLinks: prev.socialLinks.filter((_, i) => i !== index),
-    }));
+  const updateSocialValue = (type: string, value: string) => {
+    const normalizedType = normalizeSocialNetworkType(type);
+    setRegisterForm((prev) => {
+      const current = Array.isArray(prev.socialLinks) ? prev.socialLinks : [];
+      const next = current.map((link) =>
+        normalizeSocialNetworkType(link.type) === normalizedType
+          ? { ...link, value }
+          : link,
+      );
+      return { ...prev, socialLinks: next };
+    });
   };
 
   const formatAddress = () => {
@@ -1483,49 +1508,35 @@ export function CreateStore() {
             </div>
 
             <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-700">Redes sociais</label>
-                    <div className="space-y-3">
-                      {registerForm.socialLinks.map((link, index) => (
-                        <div key={index} className="flex gap-3 items-center">
-                          <input
-                            list={`social-network-options-${index}`}
-                            value={link.type}
-                            onChange={(e) => updateSocialLink(index, 'type', e.target.value)}
-                            className="ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all min-w-[132px] text-sm"
-                            placeholder="Rede (ex: instagram)"
-                          />
-                          <datalist id={`social-network-options-${index}`}>
-                            {SOCIAL_NETWORK_OPTIONS.map((option) => (
-                              <option key={option} value={option} />
-                            ))}
-                          </datalist>
-                          <input
-                            value={link.value}
-                            onChange={(e) => updateSocialLink(index, 'value', e.target.value)}
-                            className="ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all min-w-0 flex-1"
-                            placeholder="@usuário ou URL"
-                          />
-                          {registerForm.socialLinks.length > 1 && (
-                            <button
-                              type="button"
-                              onClick={() => removeSocialLink(index)}
-                              className="text-sm text-red-600 hover:text-red-700"
-                            >
-                              Remover
-                            </button>
-                          )}
-                        </div>
-                      ))}
-                      <button
-                        type="button"
-                        onClick={addSocialLink}
-                        className="text-sm text-red-600 hover:text-red-700 font-semibold"
-                      >
-                        + Adicionar rede
-                      </button>
+              <label className="text-sm font-semibold text-gray-700">Redes sociais</label>
+              <div className="space-y-2">
+                {SOCIAL_NETWORK_OPTIONS.map((network) => {
+                  const checked = isSocialSelected(network.type);
+                  return (
+                    <div key={network.type} className="rounded-xl border border-slate-200 bg-white px-3 py-2">
+                      <label className="flex items-center gap-3 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={(e) => toggleSocialLink(network.type, e.target.checked)}
+                          className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900"
+                        />
+                        <span className="text-sm font-semibold text-slate-700">{network.label}</span>
+                      </label>
+                      {checked && (
+                        <input
+                          value={getSocialValue(network.type)}
+                          onChange={(e) => updateSocialValue(network.type, e.target.value)}
+                          className="mt-2 ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all w-full"
+                          placeholder={network.placeholder}
+                        />
+                      )}
                     </div>
-                    <p className="text-xs text-gray-500">Informe apenas as redes que quiser destacar.</p>
-                  </div>
+                  );
+                })}
+              </div>
+              <p className="text-xs text-gray-500">Marque a rede e preencha apenas as que quiser exibir.</p>
+            </div>
               </FormSection>
             </div>
 
