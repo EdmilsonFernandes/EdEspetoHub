@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowSquareOut, Eye, EyeSlash, LockKey, SignOut, Scooter, User, UserCircle, WarningCircle } from '@phosphor-icons/react';
+import { ArrowSquareOut, Eye, EyeSlash, SignOut, Scooter, UserCircle, WarningCircle } from '@phosphor-icons/react';
 import { authService } from '../services/authService';
 import { useAuth } from '../contexts/AuthContext';
 import { runClientFreshStart } from '../utils/clientFreshStart';
@@ -204,18 +204,15 @@ export function MotoboyLogin() {
               )}
 
               <div className="floating-field">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 z-10">
-                  <User size={17} weight="duotone" />
-                </span>
                 <input
                   id="motoboy-email"
                   type="email"
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  className="floating-input with-icon"
+                  className="floating-input"
                   placeholder=" "
                 />
-                <label htmlFor="motoboy-email" className="floating-label with-icon">E-mail</label>
+                <label htmlFor="motoboy-email" className="floating-label">E-mail</label>
               </div>
 
               {error ? (
@@ -226,18 +223,15 @@ export function MotoboyLogin() {
               ) : null}
 
               <div className="floating-field">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 z-10">
-                  <LockKey size={17} weight="duotone" />
-                </span>
                 <input
                   id="motoboy-password"
                   type={showPassword ? 'text' : 'password'}
                   value={form.password}
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
-                  className="floating-input with-icon"
+                  className="floating-input"
                   placeholder=" "
                 />
-                <label htmlFor="motoboy-password" className="floating-label with-icon">Senha</label>
+                <label htmlFor="motoboy-password" className="floating-label">Senha</label>
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
@@ -251,7 +245,7 @@ export function MotoboyLogin() {
               <button
                 type="submit"
                 disabled={!formValid || loading}
-                className="w-full h-12 rounded-[10px] border-0 bg-[#ea580c] text-white font-black shadow-[0_16px_28px_-18px_rgba(234,88,12,0.85)] hover:brightness-105 active:scale-[0.99] transition disabled:opacity-60"
+                className="w-full h-12 rounded-xl border-0 bg-[var(--color-primary)] text-white font-black shadow-[0_16px_28px_-18px_rgba(47,157,247,0.85)] hover:brightness-105 active:scale-[0.99] transition disabled:opacity-60"
               >
                 <span className="inline-flex items-center gap-2">
                   <Scooter size={18} weight="duotone" />

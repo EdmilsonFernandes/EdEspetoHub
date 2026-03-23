@@ -8,7 +8,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { AuthLayout } from '../layouts/AuthLayout';
 import { runClientFreshStart } from '../utils/clientFreshStart';
 import { APP_BUILD_INFO } from '../generated/buildInfo';
-import { ArrowLeft, Eye, EyeSlash, LockKey, User, WarningCircle } from '@phosphor-icons/react';
+import { ArrowLeft, Eye, EyeSlash, WarningCircle } from '@phosphor-icons/react';
 
 export function AdminLogin() {
   const navigate = useNavigate();
@@ -183,19 +183,16 @@ export function AdminLogin() {
           )}
 
           <div className="floating-field">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 z-10">
-              <User size={17} weight="duotone" />
-            </span>
             <input
               id="admin-identifier"
               type="text"
               value={loginForm.identifier}
               onChange={e => setLoginForm(prev => ({ ...prev, identifier: e.target.value }))}
-              className="floating-input with-icon"
+              className="floating-input"
               placeholder=" "
               autoCapitalize="none"
             />
-            <label htmlFor="admin-identifier" className="floating-label with-icon">Usuário ou e-mail</label>
+            <label htmlFor="admin-identifier" className="floating-label">Usuário ou e-mail</label>
           </div>
           {loginError ? (
             <div className="flex items-center gap-1.5 text-xs text-rose-600 -mt-2">
@@ -215,18 +212,15 @@ export function AdminLogin() {
           )}
 
           <div className="floating-field">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 z-10">
-              <LockKey size={17} weight="duotone" />
-            </span>
             <input
               id="admin-password"
               type={showPassword ? 'text' : 'password'}
               value={loginForm.password}
               onChange={e => setLoginForm(prev => ({ ...prev, password: e.target.value }))}
-              className="floating-input with-icon"
+              className="floating-input"
               placeholder=" "
             />
-            <label htmlFor="admin-password" className="floating-label with-icon">Senha</label>
+            <label htmlFor="admin-password" className="floating-label">Senha</label>
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
@@ -247,7 +241,7 @@ export function AdminLogin() {
 
           <button
             type="submit"
-            className="w-full h-12 rounded-[10px] border-0 bg-[#ea580c] text-white font-black shadow-[0_16px_28px_-18px_rgba(234,88,12,0.85)] hover:brightness-105 active:scale-[0.99] transition"
+            className="w-full h-12 rounded-xl border-0 bg-[var(--color-primary)] text-white font-black shadow-[0_16px_28px_-18px_rgba(47,157,247,0.85)] hover:brightness-105 active:scale-[0.99] transition"
           >
             Acessar painel
           </button>
