@@ -3,18 +3,12 @@ import {
   CheckCircle,
   Cube,
   Handshake,
-  Package,
-  Pill,
   Rocket,
-  ShoppingCart,
   Storefront,
-  Truck,
-  Wine,
   X,
   TrendUp,
   ShieldCheck,
   Desktop,
-  DeviceMobile,
 } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 import { LandingPageLayout } from '../layouts/LandingPageLayout';
@@ -136,13 +130,6 @@ export function LandingPage() {
   }, []);
 
   const ctaPrimaryHref = 'https://wa.me/5512997822784';
-  const trustBadges = [
-    'Cloud-native na AWS',
-    'Operação em tempo real',
-    'Segurança e rastreabilidade',
-    'Mobile-first para equipes',
-    'Impressão automática de pedidos',
-  ];
   const proofVisuals = [
     {
       title: 'Gestão Estratégica',
