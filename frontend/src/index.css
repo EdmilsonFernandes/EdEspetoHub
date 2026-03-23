@@ -410,6 +410,24 @@ body {
     overflow-x: clip;
   }
 
+  .minimal-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+  }
+
+  .minimal-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .minimal-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .minimal-scrollbar::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 999px;
+  }
+
   .motoboy-bg {
     background:
       radial-gradient(1200px 600px at 10% -10%, rgba(239, 68, 68, 0.22), transparent 60%),

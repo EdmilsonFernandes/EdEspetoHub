@@ -3440,41 +3440,74 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
       )}
       {soldItemsModalOpen && createPortal(
         <div className="fixed inset-0 z-[10010] bg-slate-900/45 backdrop-blur-sm p-3 sm:p-6">
-          <div className="mx-auto w-full max-w-xl rounded-2xl border border-slate-200 bg-white shadow-2xl overflow-hidden">
-            <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between gap-3">
-              <div>
+          <div className="mx-auto w-full max-w-2xl rounded-2xl border border-slate-200 bg-white shadow-2xl overflow-hidden pb-16 sm:pb-0">
+            <div className="px-4 py-3 border-b border-slate-200 flex items-center justify-between gap-3">
+              <div className="space-y-0.5">
                 <p className="text-sm font-black text-slate-900">Itens vendidos</p>
                 <p className="text-xs text-slate-500">
-                  Total no período: {reportSummary.itemsCount} {reportSummary.itemsCount === 1 ? 'item' : 'itens'}
+                  Total no período: <span className="font-bold text-slate-700">{reportSummary.itemsCount}</span> {reportSummary.itemsCount === 1 ? 'item' : 'itens'}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setSoldItemsModalOpen(false)}
-                className="h-9 w-9 rounded-full border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-                aria-label="Fechar detalhamento de itens vendidos"
+                className="hidden sm:inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                aria-label="Fechar relatório de itens vendidos"
+                title="Fechar"
               >
                 <X size={16} weight="bold" />
               </button>
             </div>
-            <div className="max-h-[65vh] overflow-auto p-4">
+            <div className="max-h-[70vh] overflow-y-auto p-4 minimal-scrollbar space-y-2">
               {soldItemsBreakdown.length === 0 ? (
                 <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4 text-center text-sm text-slate-500">
                   Sem itens vendidos no período selecionado.
                 </div>
               ) : (
                 <div className="space-y-2">
-                  {soldItemsBreakdown.map((entry) => (
+                  {soldItemsBreakdown.map((entry, index) => {
+                    const rank = index + 1;
+                    const topQty = Number(soldItemsBreakdown?.[0]?.qty || 0);
+                    const entryQty = Number(entry?.qty || 0);
+                    const progressPct = topQty > 0 ? Math.max(4, Math.round((entryQty / topQty) * 100)) : 0;
+                    const rankToneClass =
+                      rank <= 4
+                        ? 'bg-[#2E7D32] text-white border-[#2E7D32]'
+                        : rank <= 8
+                          ? 'bg-white text-[#E65100] border-[#E65100]'
+                          : 'bg-slate-100 text-slate-500 border-slate-200';
+                    return (
                     <div
                       key={entry.name}
-                      className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2"
+                      className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2.5"
                     >
-                      <span className="min-w-0 flex-1 truncate text-sm font-semibold text-slate-800">{entry.name}</span>
-                      <span className="shrink-0 text-sm font-black text-slate-900">{entry.qty}</span>
+                      <span className={`inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-[11px] font-black ${rankToneClass}`}>
+                        {rank}
+                      </span>
+                      <div className="min-w-0 flex-1 space-y-1.5">
+                        <p className="truncate text-sm font-bold text-slate-900">{entry.name}</p>
+                        <div className="h-1 w-full overflow-hidden rounded bg-slate-100">
+                          <div
+                            className="h-full rounded bg-[#E0E0E0] transition-all duration-300"
+                            style={{ width: `${progressPct}%` }}
+                          />
+                        </div>
+                      </div>
+                      <span className="shrink-0 text-[1.1rem] font-black text-slate-900">{entry.qty}</span>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
+            </div>
+            <div className="sm:hidden fixed inset-x-3 bottom-3 z-[10011]">
+              <button
+                type="button"
+                onClick={() => setSoldItemsModalOpen(false)}
+                className="h-12 w-full rounded-xl bg-[#ea580c] text-white text-sm font-black uppercase tracking-[0.04em] shadow-[0_20px_32px_-22px_rgba(234,88,12,0.95)]"
+              >
+                Fechar relatório
+              </button>
             </div>
           </div>
         </div>,

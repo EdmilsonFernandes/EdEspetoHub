@@ -3,14 +3,20 @@
 
 export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
-  "version": "0.1.8+20260323.184557.e93dbc3",
-  "versionLabel": "v0.1.8+20260323.184557.e93dbc3",
-  "buildId": "0.1.8+20260323.184557.e93dbc3-20260323.184557-e93dbc3",
-  "builtAt": "2026-03-23T18:45:57.041Z",
-  "commitHash": "e93dbc3ffac0e4f5de83401d23f9fc38529b2593",
-  "shortHash": "e93dbc3",
+  "version": "0.1.8+20260323.184901.de0bcea",
+  "versionLabel": "v0.1.8+20260323.184901.de0bcea",
+  "buildId": "0.1.8+20260323.184901.de0bcea-20260323.184901-de0bcea",
+  "builtAt": "2026-03-23T18:49:01.287Z",
+  "commitHash": "de0bcea3a939e87d49c9b5cbcd8a0a3ef27742a9",
+  "shortHash": "de0bcea",
   "branch": "main",
   "commits": [
+    {
+      "hash": "de0bcea3a939e87d49c9b5cbcd8a0a3ef27742a9",
+      "shortHash": "de0bcea",
+      "dateIso": "2026-03-23T15:46:24-03:00",
+      "subject": "feat(versioning): gerar versao unica a cada build e deploy frontend"
+    },
     {
       "hash": "e93dbc3ffac0e4f5de83401d23f9fc38529b2593",
       "shortHash": "e93dbc3",
@@ -184,12 +190,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "2388c30",
       "dateIso": "2026-03-21T09:37:22-03:00",
       "subject": "feat(versioning): build info automatica e painel de versoes no superadmin"
-    },
-    {
-      "hash": "654ccbc4277607fb5f930a4057f29e53d8c23f0b",
-      "shortHash": "654ccbc",
-      "dateIso": "2026-03-21T09:29:18-03:00",
-      "subject": "fix(motoboy): evita corte no card de entrega ativa no mobile"
     }
   ]
 } as const;
