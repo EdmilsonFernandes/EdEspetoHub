@@ -281,7 +281,7 @@ export function MotoboyLogin() {
                 </div>
               ) : null}
 
-              <div className="pt-1">
+              <div className="flex items-center justify-between gap-4 pt-1">
                 <label className="flex items-center gap-2.5 cursor-pointer group">
                   <div className="relative">
                     <input
@@ -304,6 +304,14 @@ export function MotoboyLogin() {
                   </div>
                   <span className="text-xs font-bold text-slate-500 group-hover:text-slate-700 transition-colors uppercase tracking-wider">Lembrar acesso</span>
                 </label>
+
+                <button
+                  type="button"
+                  onClick={() => navigate('/forgot-password')}
+                  className="text-xs font-bold text-[#0d4f66] hover:text-[#0b3f52] hover:underline uppercase tracking-wider"
+                >
+                  Recuperar senha
+                </button>
               </div>
 
               <div className="space-y-3 pt-2">

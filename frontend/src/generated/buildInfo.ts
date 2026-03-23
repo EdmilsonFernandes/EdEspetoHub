@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260323.194937.568236d",
-  "buildId": "0.1.9+20260323.194937.568236d-20260323.194937-568236d",
-  "builtAt": "2026-03-23T19:49:37.781Z",
-  "commitHash": "568236d1309e462550596d6c76d7607516927c53",
-  "shortHash": "568236d",
+  "versionInternal": "0.1.9+20260323.195645.485d93f",
+  "buildId": "0.1.9+20260323.195645.485d93f-20260323.195645-485d93f",
+  "builtAt": "2026-03-23T19:56:45.794Z",
+  "commitHash": "485d93f9d47aa883d702bfffb72667a856236cc6",
+  "shortHash": "485d93f",
   "branch": "main",
   "commits": [
+    {
+      "hash": "485d93f9d47aa883d702bfffb72667a856236cc6",
+      "shortHash": "485d93f",
+      "dateIso": "2026-03-23T16:51:12-03:00",
+      "subject": "feat(ui): premium auth layout mesh gradient and refined login experience"
+    },
     {
       "hash": "568236d1309e462550596d6c76d7607516927c53",
       "shortHash": "568236d",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "376c29f",
       "dateIso": "2026-03-21T10:07:51-03:00",
       "subject": "chore(release): v0.1.1"
-    },
-    {
-      "hash": "0206c835ed8f516990e7f251a85eeb8e81ac5c89",
-      "shortHash": "0206c83",
-      "dateIso": "2026-03-21T10:07:43-03:00",
-      "subject": "fix(release): usa npm_execpath para compatibilidade cross-platform"
     }
   ]
 } as const;

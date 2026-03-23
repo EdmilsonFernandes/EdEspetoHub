@@ -4,6 +4,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { authService } from '../services/authService';
 import { AuthLayout } from '../layouts/AuthLayout';
 
+import { ArrowLeft, Check, Eye, EyeSlash, LockSimple, WarningCircle } from '@phosphor-icons/react';
+
 export function ResetPassword() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
@@ -38,6 +40,7 @@ export function ResetPassword() {
       setMessage(result?.message || 'Senha atualizada com sucesso.');
       setPassword('');
       setConfirm('');
+      setTimeout(() => navigate('/admin'), 3000);
     } catch (err) {
       setError(err?.message || 'Não foi possível atualizar a senha agora.');
     } finally {
@@ -47,107 +50,109 @@ export function ResetPassword() {
 
   return (
     <AuthLayout>
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="text-center">
-          <h2 className="text-2xl sm:text-3xl font-black text-gray-800 mb-1">Redefinir senha</h2>
-          <p className="text-sm text-gray-500">Digite a nova senha para sua conta.</p>
+      <div className="space-y-4 ds-login-card-enter w-full">
+        <div className="text-center space-y-2.5">
+          <div className="mx-auto w-16 h-16 bg-sky-50 rounded-2xl flex items-center justify-center text-[#0d4f66] shadow-sm border border-sky-100">
+            <LockSimple size={32} weight="duotone" />
+          </div>
+          <p className="text-[12px] font-bold uppercase tracking-[0.25em] text-slate-400">Segurança da Conta</p>
+          <h2 className="text-[2rem] sm:text-[2.2rem] font-black text-slate-800 tracking-[-0.03em]">Nova senha</h2>
+          <p className="text-sm font-medium text-slate-500 max-w-[280px] mx-auto leading-relaxed">
+            Crie uma senha forte e segura para proteger seu acesso.
+          </p>
         </div>
 
-        {!token && (
-          <div className="text-sm text-red-700 bg-red-50 border border-red-200 p-4 rounded-xl">
-            Token inválido ou ausente.
-          </div>
-        )}
-        {message && (
-          <div className="text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 p-4 rounded-xl">{message}</div>
-        )}
-        {error && (
-          <div className="text-sm text-red-700 bg-red-50 border border-red-200 p-4 rounded-xl">{error}</div>
-        )}
+        <form onSubmit={handleSubmit} className="ds-card-elevated p-6 sm:p-8 space-y-5 bg-white/80 backdrop-blur-xl border-white/40">
+          {!token && (
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-rose-50 text-[13px] font-semibold text-rose-600 border border-rose-100">
+              <WarningCircle size={16} weight="fill" />
+              <span>Token de recuperação inválido ou ausente.</span>
+            </div>
+          )}
+          
+          {message && (
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50/50 p-4 text-emerald-900 text-[13px] font-semibold leading-relaxed animate-shake">
+              <div className="flex items-center gap-2 mb-1">
+                <Check size={18} weight="bold" className="text-emerald-500" />
+                <span>Sucesso!</span>
+              </div>
+              {message} Redirecionando...
+            </div>
+          )}
 
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-gray-700">Nova senha</label>
-            <div className="relative">
+          {error && (
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-rose-50 text-[13px] font-semibold text-rose-600 border border-rose-100 animate-shake">
+              <WarningCircle size={16} weight="fill" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          <div className="space-y-4">
+            <div className="floating-field">
               <input
+                id="new-password"
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full border border-gray-200 rounded-xl p-3 pr-10 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
-                placeholder="Mínimo 6 caracteres"
-                disabled={!token}
+                className="floating-input"
+                placeholder=" "
+                disabled={!token || !!message}
                 required
               />
+              <label htmlFor="new-password" className="floating-label">Nova senha secreta</label>
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                className="absolute right-3 top-1/2 -translate-y-1/2 h-10 w-10 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
+                disabled={!token || !!message}
               >
-                {showPassword ? (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                  </svg>
-                ) : (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                )}
+                {showPassword ? <EyeSlash size={20} weight="duotone" /> : <Eye size={20} weight="duotone" />}
               </button>
             </div>
-          </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-gray-700">Confirmar senha</label>
-            <div className="relative">
+            <div className="floating-field">
               <input
+                id="confirm-password"
                 type={showConfirm ? 'text' : 'password'}
                 value={confirm}
                 onChange={(e) => setConfirm(e.target.value)}
-                className="w-full border border-gray-200 rounded-xl p-3 pr-10 focus:ring-2 focus:ring-brand-primary focus:border-brand-primary focus:outline-none transition-colors"
-                placeholder="Digite a senha novamente"
-                disabled={!token}
+                className="floating-input"
+                placeholder=" "
+                disabled={!token || !!message}
                 required
               />
+              <label htmlFor="confirm-password" className="floating-label">Confirme a nova senha</label>
               <button
                 type="button"
                 onClick={() => setShowConfirm(!showConfirm)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                aria-label={showConfirm ? 'Ocultar senha' : 'Mostrar senha'}
+                className="absolute right-3 top-1/2 -translate-y-1/2 h-10 w-10 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
+                disabled={!token || !!message}
               >
-                {showConfirm ? (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                  </svg>
-                ) : (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                )}
+                {showConfirm ? <EyeSlash size={20} weight="duotone" /> : <Eye size={20} weight="duotone" />}
               </button>
             </div>
           </div>
-        </div>
 
-        <div className="space-y-3">
-          <button
-            type="submit"
-            disabled={loading || !token || !password || !confirm}
-            className="w-full text-white py-3 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 bg-brand-gradient hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            {loading ? '⏳ Salvando...' : '🔐 Atualizar senha'}
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate('/admin')}
-            className="w-full border-2 border-gray-200 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-50 transition-colors"
-          >
-            Voltar ao login
-          </button>
-        </div>
-      </form>
+          <div className="space-y-3 pt-2">
+            <button
+              type="submit"
+              disabled={loading || !token || !password || !confirm || !!message}
+              className="ds-btn-shine w-full h-14 rounded-2xl bg-[#0d4f66] text-white text-base font-black shadow-[0_20px_40px_-16px_rgba(13,79,102,0.45)] hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center gap-2 group disabled:opacity-60"
+            >
+              {loading ? 'Atualizando...' : 'Confirmar Nova Senha'}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigate('/admin')}
+              className="w-full h-12 rounded-xl border border-slate-200 bg-white text-slate-600 font-bold hover:bg-slate-50 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+            >
+              <ArrowLeft size={18} weight="duotone" />
+              Cancelar e voltar
+            </button>
+          </div>
+        </form>
+      </div>
     </AuthLayout>
   );
 }
