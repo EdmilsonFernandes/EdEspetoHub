@@ -3,14 +3,20 @@
 
 export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
-  "version": "0.1.8",
-  "versionLabel": "v0.1.8",
-  "buildId": "0.1.8-20260323.184035-3324a6a",
-  "builtAt": "2026-03-23T18:40:35.206Z",
-  "commitHash": "3324a6ad63eaf282cbf225b6d5d6a64573fadcd1",
-  "shortHash": "3324a6a",
+  "version": "0.1.8+20260323.184557.e93dbc3",
+  "versionLabel": "v0.1.8+20260323.184557.e93dbc3",
+  "buildId": "0.1.8+20260323.184557.e93dbc3-20260323.184557-e93dbc3",
+  "builtAt": "2026-03-23T18:45:57.041Z",
+  "commitHash": "e93dbc3ffac0e4f5de83401d23f9fc38529b2593",
+  "shortHash": "e93dbc3",
   "branch": "main",
   "commits": [
+    {
+      "hash": "e93dbc3ffac0e4f5de83401d23f9fc38529b2593",
+      "shortHash": "e93dbc3",
+      "dateIso": "2026-03-23T15:42:18-03:00",
+      "subject": "feat(auth-ui): redesign premium de login admin motoboy e superadmin"
+    },
     {
       "hash": "3324a6ad63eaf282cbf225b6d5d6a64573fadcd1",
       "shortHash": "3324a6a",
@@ -184,12 +190,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "654ccbc",
       "dateIso": "2026-03-21T09:29:18-03:00",
       "subject": "fix(motoboy): evita corte no card de entrega ativa no mobile"
-    },
-    {
-      "hash": "4ce260e2883d8874cf68cac9e35ca85ce1a15958",
-      "shortHash": "4ce260e",
-      "dateIso": "2026-03-21T09:27:01-03:00",
-      "subject": "fix(motoboy): evita overflow do card da fila no mobile"
     }
   ]
 } as const;

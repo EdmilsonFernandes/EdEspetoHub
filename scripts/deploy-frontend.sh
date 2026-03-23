@@ -19,11 +19,14 @@ if ! command -v docker >/dev/null 2>&1; then
   exit 1
 fi
 
-VERSION="$(awk -F'"' '/"version"/{print $4; exit}' "$ROOT_DIR/frontend/package.json")"
+VERSION_BASE="$(awk -F'"' '/"version"/{print $4; exit}' "$ROOT_DIR/frontend/package.json")"
 GIT_SHA="$(git -C "$ROOT_DIR" rev-parse HEAD)"
 GIT_SHORT_SHA="$(git -C "$ROOT_DIR" rev-parse --short HEAD)"
 GIT_BRANCH="$(git -C "$ROOT_DIR" rev-parse --abbrev-ref HEAD)"
 BUILD_TIME="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+BUILD_STAMP="$(date -u +"%Y%m%d.%H%M%S")"
+# Always publish a unique frontend version per deploy/build.
+VERSION="${VERSION_BASE}+${BUILD_STAMP}.${GIT_SHORT_SHA}"
 
 tmp_file="$(mktemp)"
 awk '

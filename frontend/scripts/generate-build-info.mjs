@@ -39,7 +39,6 @@ const parseEnvCommits = () => {
 
 const pkg = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
 const existing = readExistingBuildInfo();
-const version = String(process.env.BUILD_VERSION || pkg?.version || existing?.version || '0.0.0');
 const commitHash =
   String(process.env.BUILD_GIT_SHA || '').trim() ||
   safeExecFile('git', ['rev-parse', 'HEAD']) ||
@@ -57,6 +56,9 @@ const branch =
 const nowIso = String(process.env.BUILD_TIME_ISO || '').trim() || new Date().toISOString();
 const datePart = nowIso.slice(0, 10).replace(/-/g, '');
 const timePart = nowIso.slice(11, 19).replace(/:/g, '');
+const versionBase = String(pkg?.version || existing?.version || '0.0.0');
+const computedVersion = `${versionBase}+${datePart}.${timePart}.${shortHash}`;
+const version = String(process.env.BUILD_VERSION || '').trim() || computedVersion;
 const buildId = `${version}-${datePart}.${timePart}-${shortHash}`;
 
 const commitsRaw = safeExecFile('git', ['log', '-n', '30', '--date=iso-strict', '--pretty=format:%H|%h|%cI|%s']);
