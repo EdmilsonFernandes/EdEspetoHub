@@ -16,6 +16,7 @@ import {
   Eye,
   CaretLeft,
   CaretRight,
+  Check,
   MagnifyingGlass,
   IdentificationCard,
   Camera,
@@ -186,6 +187,10 @@ export function SuperAdmin() {
   const [error, setError] = useState('');
   const [sessionExpired, setSessionExpired] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberDevice, setRememberDevice] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    return localStorage.getItem('auth:remember-superadmin') !== 'false';
+  });
   const [paymentQuery, setPaymentQuery] = useState(() => readFilters().paymentQuery || '');
   const [paymentStatusFilter, setPaymentStatusFilter] = useState(() => readFilters().paymentStatusFilter || 'all');
   const [paymentMethodFilter, setPaymentMethodFilter] = useState(() => readFilters().paymentMethodFilter || 'all');
@@ -1004,6 +1009,28 @@ export function SuperAdmin() {
                 {showPassword ? <Eye size={18} weight="duotone" /> : <Eye size={18} weight="duotone" />}
               </button>
             </div>
+
+            <label className="premium-check-wrap">
+              <button
+                type="button"
+                onClick={() => {
+                  setRememberDevice((prev) => {
+                    const next = !prev;
+                    try {
+                      localStorage.setItem('auth:remember-superadmin', String(next));
+                    } catch {
+                      // no-op
+                    }
+                    return next;
+                  });
+                }}
+                className={`premium-check-btn ${rememberDevice ? 'checked' : ''}`}
+                aria-label={rememberDevice ? 'Desativar lembrar acesso' : 'Ativar lembrar acesso'}
+              >
+                <Check size={14} weight="bold" />
+              </button>
+              <span className="text-xs font-semibold text-slate-600">Lembrar acesso neste dispositivo</span>
+            </label>
 
             {error && (
               <div className="flex items-center gap-1.5 text-xs text-rose-600">

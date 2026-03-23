@@ -8,7 +8,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { AuthLayout } from '../layouts/AuthLayout';
 import { runClientFreshStart } from '../utils/clientFreshStart';
 import { APP_BUILD_INFO } from '../generated/buildInfo';
-import { ArrowLeft, Eye, EyeSlash, WarningCircle } from '@phosphor-icons/react';
+import { ArrowLeft, Check, Eye, EyeSlash, WarningCircle } from '@phosphor-icons/react';
 
 export function AdminLogin() {
   const navigate = useNavigate();
@@ -23,6 +23,10 @@ export function AdminLogin() {
   const [verifyPrompt, setVerifyPrompt] = useState<{ email?: string; emailMasked?: string } | null>(null);
   const [resendLoading, setResendLoading] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
+  const [rememberDevice, setRememberDevice] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    return localStorage.getItem('auth:remember-admin') !== 'false';
+  });
   const [logoTapCount, setLogoTapCount] = useState(0);
   const [superAdminUnlocked, setSuperAdminUnlocked] = useState(() => {
     if (typeof window === 'undefined') return false;
@@ -259,6 +263,28 @@ export function AdminLogin() {
               {showPassword ? <EyeSlash size={18} weight="duotone" /> : <Eye size={18} weight="duotone" />}
             </button>
           </div>
+
+          <label className="premium-check-wrap">
+            <button
+              type="button"
+              onClick={() => {
+                setRememberDevice((prev) => {
+                  const next = !prev;
+                  try {
+                    localStorage.setItem('auth:remember-admin', String(next));
+                  } catch {
+                    // no-op
+                  }
+                  return next;
+                });
+              }}
+              className={`premium-check-btn ${rememberDevice ? 'checked' : ''}`}
+              aria-label={rememberDevice ? 'Desativar lembrar acesso' : 'Ativar lembrar acesso'}
+            >
+              <Check size={14} weight="bold" />
+            </button>
+            <span className="text-xs font-semibold text-slate-600">Lembrar acesso neste dispositivo</span>
+          </label>
 
           <button
             type="button"

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowSquareOut, Eye, EyeSlash, SignOut, Scooter, UserCircle, WarningCircle } from '@phosphor-icons/react';
+import { ArrowSquareOut, Check, Eye, EyeSlash, SignOut, Scooter, UserCircle, WarningCircle } from '@phosphor-icons/react';
 import { authService } from '../services/authService';
 import { useAuth } from '../contexts/AuthContext';
 import { runClientFreshStart } from '../utils/clientFreshStart';
@@ -15,6 +15,10 @@ export function MotoboyLogin() {
   const [verifyPrompt, setVerifyPrompt] = useState<{ email?: string; emailMasked?: string } | null>(null);
   const [resendLoading, setResendLoading] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
+  const [rememberDevice, setRememberDevice] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    return localStorage.getItem('auth:remember-motoboy') !== 'false';
+  });
   const logoTapCountRef = useRef(0);
   const [superAdminUnlocked, setSuperAdminUnlocked] = useState(() => {
     if (typeof window === 'undefined') return false;
@@ -267,6 +271,28 @@ export function MotoboyLogin() {
                   {showPassword ? <EyeSlash size={18} weight="duotone" /> : <Eye size={18} weight="duotone" />}
                 </button>
               </div>
+
+              <label className="premium-check-wrap">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRememberDevice((prev) => {
+                      const next = !prev;
+                      try {
+                        localStorage.setItem('auth:remember-motoboy', String(next));
+                      } catch {
+                        // no-op
+                      }
+                      return next;
+                    });
+                  }}
+                  className={`premium-check-btn ${rememberDevice ? 'checked' : ''}`}
+                  aria-label={rememberDevice ? 'Desativar lembrar acesso' : 'Ativar lembrar acesso'}
+                >
+                  <Check size={14} weight="bold" />
+                </button>
+                <span className="text-xs font-semibold text-slate-600">Lembrar acesso neste dispositivo</span>
+              </label>
 
               <button
                 type="submit"

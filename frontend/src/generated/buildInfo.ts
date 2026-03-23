@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260323.190850.b2a518c",
-  "buildId": "0.1.9+20260323.190850.b2a518c-20260323.190850-b2a518c",
-  "builtAt": "2026-03-23T19:08:50.787Z",
-  "commitHash": "b2a518c74248484183691056c742a7966b6dab19",
-  "shortHash": "b2a518c",
+  "versionInternal": "0.1.9+20260323.193232.ae5af4e",
+  "buildId": "0.1.9+20260323.193232.ae5af4e-20260323.193232-ae5af4e",
+  "builtAt": "2026-03-23T19:32:32.834Z",
+  "commitHash": "ae5af4e3ca8b0dd61bf8d92f4a0c69edfec8746c",
+  "shortHash": "ae5af4e",
   "branch": "main",
   "commits": [
+    {
+      "hash": "ae5af4e3ca8b0dd61bf8d92f4a0c69edfec8746c",
+      "shortHash": "ae5af4e",
+      "dateIso": "2026-03-23T16:09:25-03:00",
+      "subject": "feat(login): unifica UX premium e oculta superadmin com easter egg"
+    },
     {
       "hash": "b2a518c74248484183691056c742a7966b6dab19",
       "shortHash": "b2a518c",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "e989257",
       "dateIso": "2026-03-21T10:07:07-03:00",
       "subject": "fix(release): ignora arquivos nao rastreados no pre-check"
-    },
-    {
-      "hash": "c8591c45c2c17a146dd93cfa178f969ba15e5aae",
-      "shortHash": "c8591c4",
-      "dateIso": "2026-03-21T10:06:44-03:00",
-      "subject": "fix(queue): torna botao de impressao visivel no card da fila"
     }
   ]
 } as const;

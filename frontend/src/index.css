@@ -408,6 +408,39 @@ body {
     font-weight: 700;
   }
 
+  .premium-check-wrap {
+    position: relative;
+    z-index: 20;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+  }
+
+  .premium-check-btn {
+    height: 24px;
+    width: 24px;
+    border-radius: 9px;
+    border: 2px solid #cbd5e1;
+    background: #ffffff;
+    color: transparent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 150ms ease;
+  }
+
+  .premium-check-btn:hover {
+    border-color: #94a3b8;
+    background: #f8fafc;
+  }
+
+  .premium-check-btn.checked {
+    border-color: var(--color-primary);
+    background: var(--color-primary);
+    color: #ffffff;
+    box-shadow: 0 10px 20px -16px color-mix(in srgb, var(--color-primary) 90%, transparent);
+  }
+
   .no-x-scroll {
     overflow-x: clip;
   }
