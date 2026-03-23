@@ -167,152 +167,157 @@ export function AdminLogin() {
 
   return (
     <AuthLayout>
-      <div className="space-y-4 login-page-enter">
+      <div className="space-y-4 ds-login-card-enter w-full">
         <div className="text-center space-y-2.5">
-          <button type="button" onClick={handleLogoTap} className="mx-auto block">
-            <img src="/janocaminho.jpg" alt="Já no Caminho" className="mx-auto h-14 w-auto rounded-xl" />
+          <button type="button" onClick={handleLogoTap} className="mx-auto block hover:scale-105 transition-transform active:scale-95">
+            <img src="/janocaminho.jpg" alt="Já no Caminho" className="mx-auto h-14 w-auto rounded-xl shadow-lg border border-slate-200" />
           </button>
-          <p className="text-[12px] font-bold uppercase tracking-[0.22em] text-slate-500">Acesso da plataforma</p>
-          <h2 className="text-[2rem] sm:text-[2.2rem] font-black text-slate-800 tracking-[-0.02em]">Login Admin Loja</h2>
+          <p className="text-[12px] font-bold uppercase tracking-[0.25em] text-slate-400">Acesso da plataforma</p>
+          <h2 className="text-[2rem] sm:text-[2.2rem] font-black text-slate-800 tracking-[-0.03em]">Login Admin</h2>
           {superAdminUnlocked ? (
-            <p className="text-[11px] font-semibold text-emerald-700">Modo Super Admin liberado neste dispositivo</p>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 rounded-full border border-emerald-100">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <p className="text-[11px] font-bold text-emerald-700 uppercase tracking-wider">Modo Super Admin</p>
+            </div>
           ) : null}
         </div>
 
         <div className="auth-segment">
-          <button type="button" className="auth-segment-btn active">Loja</button>
+          <button type="button" className="auth-segment-btn active">Operacional</button>
           <button type="button" onClick={() => navigate('/motoboy/login')} className="auth-segment-btn">Entregador</button>
           {superAdminUnlocked ? (
-            <button type="button" onClick={() => navigate('/superadmin')} className="auth-segment-btn">Super Admin</button>
+            <button type="button" onClick={() => navigate('/superadmin')} className="auth-segment-btn">Master</button>
           ) : null}
         </div>
 
-        <form onSubmit={handleLogin} className="login-card-premium p-6 sm:p-7 space-y-4">
+        <form onSubmit={handleLogin} className="ds-card-elevated p-6 sm:p-8 space-y-5 bg-white/80 backdrop-blur-xl border-white/40">
           {verifyPrompt && (
-            <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-amber-900 text-xs space-y-2">
-              <p className="font-semibold">
+            <div className="rounded-2xl border border-amber-200 bg-amber-50/50 p-4 text-amber-900 text-xs space-y-3 backdrop-blur-sm">
+              <div className="flex items-center gap-2">
+                <WarningCircle size={18} weight="fill" className="text-amber-500" />
+                <p className="font-bold text-[13px]">Ativação Pendente</p>
+              </div>
+              <p className="font-medium text-amber-800/80 leading-relaxed">
                 {verifyPrompt.emailMasked
-                  ? `Ative o e-mail ${verifyPrompt.emailMasked} para entrar.`
-                  : 'Ative seu e-mail para entrar.'}
+                  ? `Enviamos um código para ${verifyPrompt.emailMasked}. Verifique sua caixa de entrada.`
+                  : 'Sua conta ainda não foi ativada. Verifique seu e-mail.'}
               </p>
-              <div className="flex flex-col sm:flex-row gap-2">
+              <div className="flex flex-col sm:flex-row gap-2 pt-1">
                 <button
                   type="button"
                   onClick={handleResendVerification}
                   disabled={resendLoading || resendCooldown > 0 || !verifyPrompt.email}
-                  className="rounded-lg bg-amber-500 px-3 py-2 text-white font-bold disabled:opacity-60"
+                  className="flex-1 rounded-xl bg-amber-500 px-3 py-2.5 text-white font-bold disabled:opacity-50 transition-all hover:bg-amber-600 shadow-sm active:scale-95"
                 >
                   {resendLoading ? 'Reenviando...' : resendCooldown > 0 ? `Reenviar em ${resendCooldown}s` : 'Reenviar código'}
                 </button>
                 <button
                   type="button"
                   onClick={() => navigate('/verify-email', { state: { email: verifyPrompt.email } })}
-                  className="rounded-lg border border-amber-300 bg-white px-3 py-2 text-amber-700 font-bold"
+                  className="flex-1 rounded-xl border border-amber-200 bg-white px-3 py-2.5 text-amber-700 font-bold hover:bg-amber-50 transition-colors active:scale-95"
                 >
-                  Já tenho o código
+                  Digitar código
                 </button>
               </div>
             </div>
           )}
 
-          <div className="floating-field">
-            <input
-              id="admin-identifier"
-              type="text"
-              value={loginForm.identifier}
-              onChange={e => setLoginForm(prev => ({ ...prev, identifier: e.target.value }))}
-              className="floating-input"
-              placeholder=" "
-              autoCapitalize="none"
-            />
-            <label htmlFor="admin-identifier" className="floating-label">Usuário ou e-mail</label>
+          <div className="space-y-4">
+            <div className="floating-field">
+              <input
+                id="admin-identifier"
+                type="text"
+                value={loginForm.identifier}
+                onChange={e => setLoginForm(prev => ({ ...prev, identifier: e.target.value }))}
+                className="floating-input"
+                placeholder=" "
+                autoCapitalize="none"
+              />
+              <label htmlFor="admin-identifier" className="floating-label">E-mail ou usuário</label>
+            </div>
+
+            <div className="floating-field">
+              <input
+                id="admin-password"
+                type={showPassword ? 'text' : 'password'}
+                value={loginForm.password}
+                onChange={e => setLoginForm(prev => ({ ...prev, password: e.target.value }))}
+                className="floating-input"
+                placeholder=" "
+              />
+              <label htmlFor="admin-password" className="floating-label">Sua senha secreta</label>
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 h-10 w-10 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
+                aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+              >
+                {showPassword ? <EyeSlash size={20} weight="duotone" /> : <Eye size={20} weight="duotone" />}
+              </button>
+            </div>
           </div>
+
           {loginError ? (
-            <div className="flex items-center gap-1.5 text-xs text-rose-600 -mt-2">
-              <WarningCircle size={14} weight="fill" />
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-rose-50 text-[13px] font-semibold text-rose-600 border border-rose-100 animate-shake">
+              <WarningCircle size={16} weight="fill" />
               <span>{loginError}</span>
             </div>
           ) : null}
-          {pendingPayment?.paymentUrl && (
-            <a href={pendingPayment.paymentUrl} className="inline-flex text-xs font-semibold text-amber-700 hover:underline">
-              Ir para pagamento pendente
-            </a>
-          )}
-          {!pendingPayment?.paymentUrl && pendingPayment?.paymentLink && (
-            <a href={pendingPayment.paymentLink} target="_blank" rel="noreferrer" className="inline-flex text-xs font-semibold text-amber-700 hover:underline">
-              Ir para pagamento pendente
-            </a>
-          )}
 
-          <div className="floating-field">
-            <input
-              id="admin-password"
-              type={showPassword ? 'text' : 'password'}
-              value={loginForm.password}
-              onChange={e => setLoginForm(prev => ({ ...prev, password: e.target.value }))}
-              className="floating-input"
-              placeholder=" "
-            />
-            <label htmlFor="admin-password" className="floating-label">Senha</label>
+          <div className="flex items-center justify-between gap-4 pt-1">
+            <label className="flex items-center gap-2.5 cursor-pointer group">
+              <div className="relative">
+                <input
+                  type="checkbox"
+                  checked={rememberDevice}
+                  onChange={() => {
+                    setRememberDevice((prev) => {
+                      const next = !prev;
+                      try {
+                        localStorage.setItem('auth:remember-admin', String(next));
+                      } catch { /* no-op */ }
+                      return next;
+                    });
+                  }}
+                  className="sr-only"
+                />
+                <div className={`h-5 w-5 rounded-md border-2 transition-all flex items-center justify-center ${rememberDevice ? 'bg-[#0d4f66] border-[#0d4f66]' : 'border-slate-300 group-hover:border-slate-400 bg-white'}`}>
+                  {rememberDevice && <Check size={12} weight="bold" className="text-white" />}
+                </div>
+              </div>
+              <span className="text-xs font-bold text-slate-500 group-hover:text-slate-700 transition-colors uppercase tracking-wider">Lembrar acesso</span>
+            </label>
+
             <button
               type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-2 top-1/2 -translate-y-1/2 h-9 w-9 rounded-lg text-slate-500 hover:text-slate-700"
-              aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+              onClick={() => navigate('/forgot-password')}
+              className="text-xs font-bold text-[#0d4f66] hover:text-[#0b3f52] hover:underline uppercase tracking-wider"
             >
-              {showPassword ? <EyeSlash size={18} weight="duotone" /> : <Eye size={18} weight="duotone" />}
+              Recuperar senha
             </button>
           </div>
 
-          <label className="premium-check-wrap">
+          <div className="space-y-3 pt-2">
+            <button
+              type="submit"
+              className="ds-btn-shine w-full h-14 rounded-2xl bg-[#0d4f66] text-white text-base font-black shadow-[0_20px_40px_-16px_rgba(13,79,102,0.45)] hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center gap-2 group"
+            >
+              Acessar Painel
+              <ArrowLeft size={20} weight="bold" className="rotate-180 group-hover:translate-x-1 transition-transform" />
+            </button>
+
             <button
               type="button"
-              onClick={() => {
-                setRememberDevice((prev) => {
-                  const next = !prev;
-                  try {
-                    localStorage.setItem('auth:remember-admin', String(next));
-                  } catch {
-                    // no-op
-                  }
-                  return next;
-                });
-              }}
-              className={`premium-check-btn ${rememberDevice ? 'checked' : ''}`}
-              aria-label={rememberDevice ? 'Desativar lembrar acesso' : 'Ativar lembrar acesso'}
+              onClick={() => navigate('/')}
+              className="w-full h-12 rounded-xl border border-slate-200 bg-white text-slate-600 font-bold hover:bg-slate-50 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
             >
-              <Check size={14} weight="bold" />
-            </button>
-            <span className="text-sm font-semibold text-slate-600">Lembrar acesso neste dispositivo</span>
-          </label>
-
-          <button
-            type="button"
-            onClick={() => navigate('/forgot-password')}
-            className="text-xs font-semibold text-amber-700 hover:underline"
-          >
-            Esqueci minha senha
-          </button>
-
-          <button
-            type="submit"
-            className="w-full h-12 rounded-xl border-0 bg-[#0d4f66] text-white font-black shadow-[0_16px_28px_-18px_rgba(13,79,102,0.85)] hover:brightness-105 active:scale-[0.99] transition"
-          >
-            Acessar painel
-          </button>
-
-          <button
-            type="button"
-            onClick={() => navigate('/')}
-            className="w-full h-11 rounded-[10px] border border-slate-200 bg-white text-slate-700 font-semibold hover:bg-slate-50"
-          >
-            <span className="inline-flex items-center justify-center gap-2">
-              <ArrowLeft size={17} weight="duotone" />
+              <ArrowLeft size={18} weight="duotone" />
               Voltar ao início
-            </span>
-          </button>
+            </button>
+          </div>
         </form>
       </div>
     </AuthLayout>
   );
+
 }

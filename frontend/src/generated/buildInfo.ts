@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260323.193910.ac83913",
-  "buildId": "0.1.9+20260323.193910.ac83913-20260323.193910-ac83913",
-  "builtAt": "2026-03-23T19:39:10.785Z",
-  "commitHash": "ac83913e3ff2c6fa44dba82dd4f5efd9095de9bf",
-  "shortHash": "ac83913",
+  "versionInternal": "0.1.9+20260323.194937.568236d",
+  "buildId": "0.1.9+20260323.194937.568236d-20260323.194937-568236d",
+  "builtAt": "2026-03-23T19:49:37.781Z",
+  "commitHash": "568236d1309e462550596d6c76d7607516927c53",
+  "shortHash": "568236d",
   "branch": "main",
   "commits": [
+    {
+      "hash": "568236d1309e462550596d6c76d7607516927c53",
+      "shortHash": "568236d",
+      "dateIso": "2026-03-23T16:39:43-03:00",
+      "subject": "refactor(login): reescala visual premium e melhora hierarquia web/mobile"
+    },
     {
       "hash": "ac83913e3ff2c6fa44dba82dd4f5efd9095de9bf",
       "shortHash": "ac83913",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "0206c83",
       "dateIso": "2026-03-21T10:07:43-03:00",
       "subject": "fix(release): usa npm_execpath para compatibilidade cross-platform"
-    },
-    {
-      "hash": "9d5c6393b09d73f04d6d5effe00c7931d0748b98",
-      "shortHash": "9d5c639",
-      "dateIso": "2026-03-21T10:07:25-03:00",
-      "subject": "fix(release): usa npm portavel no script de versionamento"
     }
   ]
 } as const;

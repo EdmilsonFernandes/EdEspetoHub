@@ -149,176 +149,188 @@ export function MotoboyLogin() {
 
   return (
     <AuthLayout>
-      <div className="space-y-4 login-page-enter">
+      <div className="space-y-4 ds-login-card-enter w-full">
         <div className="text-center space-y-2.5">
-          <button type="button" onClick={handleLogoTap} className="mx-auto block">
-            <img src="/janocaminho.jpg" alt="Já no Caminho" className="mx-auto h-14 w-auto rounded-xl" />
+          <button type="button" onClick={handleLogoTap} className="mx-auto block hover:scale-105 transition-transform active:scale-95">
+            <img src="/janocaminho.jpg" alt="Já no Caminho" className="mx-auto h-14 w-auto rounded-xl shadow-lg border border-slate-200" />
           </button>
-          <p className="text-[12px] font-bold uppercase tracking-[0.22em] text-slate-500">Acesso da plataforma</p>
-          <h2 className="text-[2rem] sm:text-[2.2rem] font-black text-slate-800 tracking-[-0.02em]">
-            {alreadyLoggedIn ? 'Sessão ativa do entregador' : 'Login Entregador'}
+          <p className="text-[12px] font-bold uppercase tracking-[0.25em] text-slate-400">Acesso da plataforma</p>
+          <h2 className="text-[2rem] sm:text-[2.2rem] font-black text-slate-800 tracking-[-0.03em]">
+            {alreadyLoggedIn ? 'Sessão Ativa' : 'Login Entregador'}
           </h2>
           {superAdminUnlocked ? (
-            <p className="text-[11px] font-semibold text-emerald-700">Modo Super Admin liberado neste dispositivo</p>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 rounded-full border border-emerald-100">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <p className="text-[11px] font-bold text-emerald-700 uppercase tracking-wider">Modo Super Admin</p>
+            </div>
           ) : null}
         </div>
 
         <div className="auth-segment">
-          <button type="button" onClick={() => navigate('/admin')} className="auth-segment-btn">Loja</button>
+          <button type="button" onClick={() => navigate('/admin')} className="auth-segment-btn">Operacional</button>
           <button type="button" className="auth-segment-btn active">Entregador</button>
           {superAdminUnlocked ? (
-            <button type="button" onClick={() => navigate('/superadmin')} className="auth-segment-btn">Super Admin</button>
+            <button type="button" onClick={() => navigate('/superadmin')} className="auth-segment-btn">Master</button>
           ) : null}
         </div>
 
-        <div className="login-card-premium p-6 sm:p-7 space-y-4">
+        <div className="ds-card-elevated p-6 sm:p-8 space-y-5 bg-white/80 backdrop-blur-xl border-white/40">
           {alreadyLoggedIn ? (
-            <div className="space-y-3">
-              <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-600">
-                  <UserCircle size={20} weight="duotone" />
+            <div className="space-y-4">
+              <div className="rounded-2xl border border-slate-100 bg-slate-50/50 p-4 flex items-center gap-4 backdrop-blur-sm">
+                <div className="h-12 w-12 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-[#0d4f66] shadow-sm">
+                  <UserCircle size={24} weight="duotone" />
                 </div>
                 <div className="min-w-0">
-                  <div className="text-sm font-black text-slate-900 break-words">{sessionName || 'Entregador'}</div>
-                  <div className="text-xs text-slate-600 break-all">{sessionEmail}</div>
+                  <div className="text-base font-black text-slate-900 truncate">{sessionName || 'Entregador'}</div>
+                  <div className="text-xs font-semibold text-slate-500 truncate">{sessionEmail}</div>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() => navigate('/motoboy/home')}
-                className="w-full h-12 rounded-xl border-0 bg-[#0d4f66] text-white font-black hover:brightness-105"
-              >
-                <span className="inline-flex items-center gap-2">
-                  <ArrowSquareOut size={18} weight="duotone" />
-                  Ir para painel
-                </span>
-              </button>
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="w-full h-11 rounded-[10px] border border-slate-200 bg-white text-slate-700 font-semibold hover:bg-slate-50"
-              >
-                <span className="inline-flex items-center gap-2">
-                  <SignOut size={17} weight="duotone" />
-                  Trocar conta
-                </span>
-              </button>
+              
+              <div className="space-y-3">
+                <button
+                  type="button"
+                  onClick={() => navigate('/motoboy/home')}
+                  className="ds-btn-shine w-full h-14 rounded-2xl bg-[#0d4f66] text-white text-base font-black shadow-[0_20px_40px_-16px_rgba(13,79,102,0.45)] hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                >
+                  <ArrowSquareOut size={20} weight="bold" />
+                  Ir para o Painel
+                </button>
+                
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="w-full h-12 rounded-xl border border-slate-200 bg-white text-slate-600 font-bold hover:bg-slate-50 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                >
+                  <SignOut size={18} weight="duotone" />
+                  Trocar de Conta
+                </button>
+              </div>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-3">
+            <form onSubmit={handleSubmit} className="space-y-5">
               {verifyPrompt && (
-                <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-amber-900 text-xs space-y-2">
-                  <p className="font-semibold">
+                <div className="rounded-2xl border border-amber-200 bg-amber-50/50 p-4 text-amber-900 text-xs space-y-3 backdrop-blur-sm">
+                  <div className="flex items-center gap-2">
+                    <WarningCircle size={18} weight="fill" className="text-amber-500" />
+                    <p className="font-bold text-[13px]">Ativação Pendente</p>
+                  </div>
+                  <p className="font-medium text-amber-800/80 leading-relaxed">
                     {verifyPrompt.emailMasked
-                      ? `Ative o e-mail ${verifyPrompt.emailMasked} para entrar.`
-                      : 'Ative seu e-mail para entrar.'}
+                      ? `Enviamos um código para ${verifyPrompt.emailMasked}. Verifique sua caixa de entrada.`
+                      : 'Sua conta ainda não foi ativada. Verifique seu e-mail.'}
                   </p>
-                  <div className="flex flex-col sm:flex-row gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2 pt-1">
                     <button
                       type="button"
                       onClick={handleResendVerification}
                       disabled={resendLoading || resendCooldown > 0 || !verifyPrompt.email}
-                      className="rounded-lg bg-amber-500 px-3 py-2 text-white font-bold disabled:opacity-60"
+                      className="flex-1 rounded-xl bg-amber-500 px-3 py-2.5 text-white font-bold disabled:opacity-50 transition-all hover:bg-amber-600 shadow-sm active:scale-95"
                     >
                       {resendLoading ? 'Reenviando...' : resendCooldown > 0 ? `Reenviar em ${resendCooldown}s` : 'Reenviar código'}
                     </button>
                     <button
                       type="button"
                       onClick={() => navigate('/verify-email', { state: { email: verifyPrompt.email } })}
-                      className="rounded-lg border border-amber-300 bg-white px-3 py-2 text-amber-700 font-bold"
+                      className="flex-1 rounded-xl border border-amber-200 bg-white px-3 py-2.5 text-amber-700 font-bold hover:bg-amber-50 transition-colors active:scale-95"
                     >
-                      Já tenho o código
+                      Digitar código
                     </button>
                   </div>
                 </div>
               )}
 
-              <div className="floating-field">
-                <input
-                  id="motoboy-email"
-                  type="email"
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  className="floating-input"
-                  placeholder=" "
-                />
-                <label htmlFor="motoboy-email" className="floating-label">E-mail</label>
+              <div className="space-y-4">
+                <div className="floating-field">
+                  <input
+                    id="motoboy-email"
+                    type="email"
+                    value={form.email}
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                    className="floating-input"
+                    placeholder=" "
+                  />
+                  <label htmlFor="motoboy-email" className="floating-label">Seu e-mail</label>
+                </div>
+
+                <div className="floating-field">
+                  <input
+                    id="motoboy-password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={form.password}
+                    onChange={(e) => setForm({ ...form, password: e.target.value })}
+                    className="floating-input"
+                    placeholder=" "
+                  />
+                  <label htmlFor="motoboy-password" className="floating-label">Sua senha secreta</label>
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 h-10 w-10 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
+                    aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                  >
+                    {showPassword ? <EyeSlash size={20} weight="duotone" /> : <Eye size={20} weight="duotone" />}
+                  </button>
+                </div>
               </div>
 
               {error ? (
-                <div className="flex items-center gap-1.5 text-xs text-rose-600 -mt-2">
-                  <WarningCircle size={14} weight="fill" />
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-rose-50 text-[13px] font-semibold text-rose-600 border border-rose-100 animate-shake">
+                  <WarningCircle size={16} weight="fill" />
                   <span>{error}</span>
                 </div>
               ) : null}
 
-              <div className="floating-field">
-                <input
-                  id="motoboy-password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={form.password}
-                  onChange={(e) => setForm({ ...form, password: e.target.value })}
-                  className="floating-input"
-                  placeholder=" "
-                />
-                <label htmlFor="motoboy-password" className="floating-label">Senha</label>
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 h-9 w-9 rounded-lg text-slate-500 hover:text-slate-700"
-                  aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
-                >
-                  {showPassword ? <EyeSlash size={18} weight="duotone" /> : <Eye size={18} weight="duotone" />}
-                </button>
+              <div className="pt-1">
+                <label className="flex items-center gap-2.5 cursor-pointer group">
+                  <div className="relative">
+                    <input
+                      type="checkbox"
+                      checked={rememberDevice}
+                      onChange={() => {
+                        setRememberDevice((prev) => {
+                          const next = !prev;
+                          try {
+                            localStorage.setItem('auth:remember-motoboy', String(next));
+                          } catch { /* no-op */ }
+                          return next;
+                        });
+                      }}
+                      className="sr-only"
+                    />
+                    <div className={`h-5 w-5 rounded-md border-2 transition-all flex items-center justify-center ${rememberDevice ? 'bg-[#0d4f66] border-[#0d4f66]' : 'border-slate-300 group-hover:border-slate-400 bg-white'}`}>
+                      {rememberDevice && <Check size={12} weight="bold" className="text-white" />}
+                    </div>
+                  </div>
+                  <span className="text-xs font-bold text-slate-500 group-hover:text-slate-700 transition-colors uppercase tracking-wider">Lembrar acesso</span>
+                </label>
               </div>
 
-              <label className="premium-check-wrap">
+              <div className="space-y-3 pt-2">
+                <button
+                  type="submit"
+                  disabled={!formValid || loading}
+                  className="ds-btn-shine w-full h-14 rounded-2xl bg-[#0d4f66] text-white text-base font-black shadow-[0_20px_40px_-16px_rgba(13,79,102,0.45)] hover:brightness-105 active:scale-[0.98] transition-all flex items-center justify-center gap-2 group disabled:opacity-60"
+                >
+                  <Scooter size={22} weight="duotone" className="group-hover:translate-x-1 transition-transform" />
+                  {loading ? 'Entrando...' : 'Acessar Painel'}
+                </button>
+
                 <button
                   type="button"
-                  onClick={() => {
-                    setRememberDevice((prev) => {
-                      const next = !prev;
-                      try {
-                        localStorage.setItem('auth:remember-motoboy', String(next));
-                      } catch {
-                        // no-op
-                      }
-                      return next;
-                    });
-                  }}
-                  className={`premium-check-btn ${rememberDevice ? 'checked' : ''}`}
-                  aria-label={rememberDevice ? 'Desativar lembrar acesso' : 'Ativar lembrar acesso'}
+                  onClick={() => navigate('/motoboy/register')}
+                  className="w-full h-12 rounded-xl border border-slate-200 bg-white text-slate-600 font-bold hover:bg-slate-50 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                 >
-                  <Check size={14} weight="bold" />
+                  Criar conta de entregador
                 </button>
-                <span className="text-sm font-semibold text-slate-600">Lembrar acesso neste dispositivo</span>
-              </label>
-
-              <button
-                type="submit"
-                disabled={!formValid || loading}
-                className="w-full h-12 rounded-xl border-0 bg-[#0d4f66] text-white font-black shadow-[0_16px_28px_-18px_rgba(13,79,102,0.85)] hover:brightness-105 active:scale-[0.99] transition disabled:opacity-60"
-              >
-                <span className="inline-flex items-center gap-2">
-                  <Scooter size={18} weight="duotone" />
-                  {loading ? 'Entrando...' : 'Entrar'}
-                </span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => navigate('/motoboy/register')}
-                className="w-full h-11 rounded-[10px] border border-slate-200 bg-white text-slate-700 font-semibold hover:bg-slate-50"
-              >
-                Criar conta de entregador
-              </button>
+              </div>
             </form>
           )}
 
           <button
             type="button"
             onClick={() => navigate('/')}
-            className="w-full text-center text-xs font-semibold text-slate-500 hover:text-slate-700"
+            className="w-full text-center text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors uppercase tracking-widest pt-2"
           >
             Voltar para o site
           </button>
@@ -326,4 +338,5 @@ export function MotoboyLogin() {
       </div>
     </AuthLayout>
   );
+
 }
