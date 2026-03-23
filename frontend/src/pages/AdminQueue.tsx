@@ -2,7 +2,6 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { GrillQueue } from '../components/Admin/GrillQueue';
-import { AdminHeader } from '../components/Admin/AdminHeader';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { useAuth } from '../contexts/AuthContext';
 import { ChartBar, CreditCard, Package, Gear, Scooter, Star, CheckSquare, ShoppingCart, UsersThree } from '@phosphor-icons/react';
@@ -115,7 +114,7 @@ export function AdminQueue() {
   }
 
   return (
-    <AdminLayout contextLabel="Central de Pedidos" showHeader={false} fluid>
+    <AdminLayout contextLabel="Central de Pedidos" fluid>
       <div
         className={`w-full space-y-4 lg:space-y-0 lg:grid lg:items-start lg:gap-0 ${
           sidebarCompact ? 'lg:grid-cols-[80px_minmax(0,1fr)]' : 'lg:grid-cols-[260px_minmax(0,1fr)]'
@@ -140,7 +139,6 @@ export function AdminQueue() {
           }}
         />
         <div className="min-w-0 flex-1 space-y-4">
-        <AdminHeader />
         <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm overflow-x-hidden relative z-20">
           <GrillQueue forcedTab={forcedTab as 'queue' | 'inroute' | 'completed'} />
         </div>

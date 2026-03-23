@@ -1248,7 +1248,9 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   const [subscriptionError, setSubscriptionError] = useState('');
   const [subscriptionLoading, setSubscriptionLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'resumo' | 'pedidos' | 'avaliacoes' | 'produtos' | 'config' | 'fila' | 'pagamentos' | 'motoboys' | 'usuarios'>(() => {
-    return (location.state as any)?.activeTab || 'fila';
+    const requestedTab = String((location.state as any)?.activeTab || '').trim();
+    if (requestedTab === 'pedidos') return 'fila';
+    return (requestedTab as any) || 'fila';
   });
   const [menuVisible, setMenuVisible] = useState(() => {
     if (typeof window === 'undefined') return true;
@@ -1382,6 +1384,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
           run: () => {
             if (item.id === 'cardapio') {
               if (storeSlug) navigate(`/${storeSlug}`);
+              return;
+            }
+            if (item.id === 'pedidos') {
+              navigate('/admin/orders');
               return;
             }
             if (item.id === 'usuarios') {
@@ -1560,16 +1566,20 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   useEffect(() => {
     const nextTab = String((location.state as any)?.activeTab || '').trim();
     if (!nextTab) return;
+    if (nextTab === 'pedidos') {
+      navigate('/admin/orders', { replace: true });
+      return;
+    }
     if (nextTab === 'fila') {
       openQueueMonitor({ replace: true });
       return;
     }
-    const allowedTabs = new Set(['resumo', 'pedidos', 'avaliacoes', 'produtos', 'config', 'pagamentos', 'motoboys', 'usuarios']);
+    const allowedTabs = new Set(['resumo', 'avaliacoes', 'produtos', 'config', 'pagamentos', 'motoboys', 'usuarios']);
     if (!allowedTabs.has(nextTab)) return;
     if (nextTab !== activeTab) {
       setActiveTab(nextTab as typeof activeTab);
     }
-  }, [location.state, openQueueMonitor]);
+  }, [location.state, openQueueMonitor, navigate, activeTab]);
   const [savingBranding, setSavingBranding] = useState(false);
   const [showUnsavedChangesModal, setShowUnsavedChangesModal] = useState(false);
   const pendingNavigationActionRef = useRef<null | (() => void)>(null);
@@ -2315,6 +2325,10 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       }
       if (id === 'fila') {
         openQueueMonitor();
+        return;
+      }
+      if (id === 'pedidos') {
+        navigate('/admin/orders');
         return;
       }
       if (id === 'motoboys' && !canUseMotoboys) {
