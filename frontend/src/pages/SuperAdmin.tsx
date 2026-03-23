@@ -948,78 +948,79 @@ export function SuperAdmin() {
   if (!token) {
     return (
       <AuthLayout>
-          <form
-            onSubmit={handleLogin}
-           className="space-y-6"
-          >
-            <div className="text-center">
-              <div className="mx-auto h-14 w-14 rounded-2xl bg-[linear-gradient(135deg,#ede9fe,#e0e7ff)] border border-violet-200 flex items-center justify-center text-violet-700 shadow-sm">
-                <ShieldCheck size={26} weight="duotone" />
-              </div>
-              <p className="mt-3 inline-flex rounded-full border border-violet-200 bg-violet-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-violet-700">
-                Administração da Plataforma
-              </p>
-              <h2 className="text-2xl sm:text-3xl font-black text-gray-800 mb-1">Super Admin</h2>
-              <p className="text-sm text-gray-500">Acesso da plataforma</p>
+        <div className="space-y-4 login-page-enter">
+          <div className="text-center space-y-2">
+            <img src="/janocaminho.jpg" alt="Já no Caminho" className="mx-auto h-12 w-auto rounded-lg" />
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">Acesso da plataforma</p>
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-800">Login Super Admin</h2>
+          </div>
+
+          <div className="auth-segment">
+            <button type="button" onClick={() => window.location.assign('/admin')} className="auth-segment-btn">Loja</button>
+            <button type="button" onClick={() => window.location.assign('/motoboy/login')} className="auth-segment-btn">Entregador</button>
+            <button type="button" className="auth-segment-btn active">Super Admin</button>
+          </div>
+
+          <form onSubmit={handleLogin} className="login-card-premium p-5 sm:p-6 space-y-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-600">
+              <ShieldCheck size={14} weight="duotone" />
+              Administração da plataforma
             </div>
 
             {sessionExpired && (
-              <div className="flex items-center gap-3 text-sm text-slate-700 bg-amber-50 border border-amber-200 p-4 rounded-xl">
-                <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
-                Sessao expirada. Entre novamente.
+              <div className="flex items-center gap-2 text-xs text-amber-800 bg-amber-50 border border-amber-200 px-3 py-2.5 rounded-xl">
+                <WarningCircle size={14} weight="fill" />
+                Sessão expirada. Entre novamente.
               </div>
             )}
 
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">Usuário</label>
-                <input
-                  type="text"
-                  value={loginForm.email}
-                  onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
-                  className="ds-input h-12 border-slate-200 ds-focus-ring transition-shadow focus:ring-2 focus:ring-violet-500/25 focus:border-violet-300"
-                  placeholder="Usuário"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700">Senha</label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={loginForm.password}
-                    onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
-                    className="ds-input h-12 border-slate-200 ds-focus-ring pr-10 transition-shadow focus:ring-2 focus:ring-violet-500/25 focus:border-violet-300"
-                    placeholder="Senha"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 h-9 w-9 rounded-xl border border-slate-200 bg-white/80 flex items-center justify-center text-gray-500 hover:text-gray-700 ds-btn ds-focus-ring"
-                    aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
-                  >
-                    {showPassword ? (
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                      </svg>
-                    ) : (
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
-                    )}
-                  </button>
-                </div>
-              </div>
+            <div className="floating-field">
+              <input
+                id="superadmin-user"
+                type="text"
+                value={loginForm.email}
+                onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
+                className="floating-input"
+                placeholder=" "
+              />
+              <label htmlFor="superadmin-user" className="floating-label">Usuário</label>
             </div>
+            <div className="floating-field">
+              <input
+                id="superadmin-password"
+                type={showPassword ? 'text' : 'password'}
+                value={loginForm.password}
+                onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
+                className="floating-input"
+                placeholder=" "
+              />
+              <label htmlFor="superadmin-password" className="floating-label">Senha</label>
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 h-9 w-9 rounded-lg text-slate-500 hover:text-slate-700"
+                aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+              >
+                {showPassword ? <Eye size={18} weight="duotone" /> : <Eye size={18} weight="duotone" />}
+              </button>
+            </div>
+
+            {error && (
+              <div className="flex items-center gap-1.5 text-xs text-rose-600">
+                <WarningCircle size={14} weight="fill" />
+                <span>{error}</span>
+              </div>
+            )}
 
             <button
               type="submit"
               disabled={loading || !loginForm.email || !loginForm.password}
-              className="w-full h-12 ds-btn ds-btn-primary ds-btn-shine ds-focus-ring text-white py-3 rounded-xl font-semibold transition-all shadow-[0_14px_30px_-22px_rgba(15,23,42,0.8)] hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full h-12 rounded-[10px] border-0 bg-[#ea580c] text-white font-black shadow-[0_16px_28px_-18px_rgba(234,88,12,0.85)] hover:brightness-105 active:scale-[0.99] transition disabled:opacity-60"
             >
               {loading ? 'Entrando...' : 'Acessar administração'}
             </button>
           </form>
+        </div>
       </AuthLayout>
     );
   }

@@ -5,12 +5,24 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.8",
   "versionLabel": "v0.1.8",
-  "buildId": "0.1.8-20260321.135410-7c7fb62",
-  "builtAt": "2026-03-21T13:54:10.573Z",
-  "commitHash": "7c7fb6283935933e08cdee375044ebd931ac22c1",
-  "shortHash": "7c7fb62",
+  "buildId": "0.1.8-20260323.184035-3324a6a",
+  "builtAt": "2026-03-23T18:40:35.206Z",
+  "commitHash": "3324a6ad63eaf282cbf225b6d5d6a64573fadcd1",
+  "shortHash": "3324a6a",
   "branch": "main",
   "commits": [
+    {
+      "hash": "3324a6ad63eaf282cbf225b6d5d6a64573fadcd1",
+      "shortHash": "3324a6a",
+      "dateIso": "2026-03-23T14:02:04-03:00",
+      "subject": "fix(order): evitar auto-fechamento imediato de pedido reaberto"
+    },
+    {
+      "hash": "15d9a6a6acd655abe9cd1019053d48c5cc4a0cf9",
+      "shortHash": "15d9a6a",
+      "dateIso": "2026-03-21T10:54:40-03:00",
+      "subject": "fix(superadmin): exibir receita mensal apenas na aba pagamentos"
+    },
     {
       "hash": "7c7fb6283935933e08cdee375044ebd931ac22c1",
       "shortHash": "7c7fb62",
@@ -178,18 +190,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "4ce260e",
       "dateIso": "2026-03-21T09:27:01-03:00",
       "subject": "fix(motoboy): evita overflow do card da fila no mobile"
-    },
-    {
-      "hash": "df7ae4817033dc2303d9cf6b0d1d41bc6682bce7",
-      "shortHash": "df7ae48",
-      "dateIso": "2026-03-21T09:23:26-03:00",
-      "subject": "feat(auth): limpeza controlada de cache no login (8h)"
-    },
-    {
-      "hash": "4209230091c06109bcad018d540d2e45121021c2",
-      "shortHash": "4209230",
-      "dateIso": "2026-03-21T09:20:03-03:00",
-      "subject": "fix(checkout): torna telefone opcional para retirada"
     }
   ]
 } as const;

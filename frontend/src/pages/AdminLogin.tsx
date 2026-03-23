@@ -8,7 +8,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { AuthLayout } from '../layouts/AuthLayout';
 import { runClientFreshStart } from '../utils/clientFreshStart';
 import { APP_BUILD_INFO } from '../generated/buildInfo';
-import { ArrowLeft, Eye, EyeSlash, LockKey, User } from '@phosphor-icons/react';
+import { ArrowLeft, Eye, EyeSlash, LockKey, User, WarningCircle } from '@phosphor-icons/react';
 
 export function AdminLogin() {
   const navigate = useNavigate();
@@ -141,133 +141,129 @@ export function AdminLogin() {
 
   return (
     <AuthLayout>
-      <form onSubmit={handleLogin} className="space-y-6">
-        <div className="text-center">
-          <img src="/janocaminho.jpg" alt="Já no Caminho" className="mx-auto h-16 sm:h-20 w-auto object-contain rounded-xl drop-shadow-[0_14px_30px_rgba(34,211,238,0.35)]" />
-          <h2 className="mt-4 text-2xl sm:text-3xl font-black text-slate-100 mb-1 tracking-tight">Painel de Administração da Loja</h2>
-          <p className="text-sm text-slate-300/90">Acesse sua operação com segurança</p>
+      <div className="space-y-4 login-page-enter">
+        <div className="text-center space-y-2">
+          <img src="/janocaminho.jpg" alt="Já no Caminho" className="mx-auto h-12 w-auto rounded-lg" />
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">Acesso da plataforma</p>
+          <h2 className="text-2xl sm:text-3xl font-black text-slate-800">Login Admin Loja</h2>
         </div>
 
-        {loginError && (
-          <div className="rounded-2xl border border-rose-400/35 bg-rose-500/10 px-4 py-3 space-y-3 text-rose-100 text-sm">
-            <p className="font-semibold">{loginError}</p>
-            {pendingPayment?.paymentUrl && (
-              <a
-                href={pendingPayment.paymentUrl}
-                className="inline-flex items-center justify-center rounded-xl bg-white text-slate-900 px-4 py-2 text-xs font-semibold"
-              >
-                Acessar pagamento
-              </a>
-            )}
-            {!pendingPayment?.paymentUrl && pendingPayment?.paymentLink && (
-              <a
-                href={pendingPayment.paymentLink}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center justify-center rounded-xl bg-white text-slate-900 px-4 py-2 text-xs font-semibold"
-              >
-                Acessar pagamento
-              </a>
-            )}
-          </div>
-        )}
+        <div className="auth-segment">
+          <button type="button" className="auth-segment-btn active">Loja</button>
+          <button type="button" onClick={() => navigate('/motoboy/login')} className="auth-segment-btn">Entregador</button>
+          <button type="button" onClick={() => navigate('/superadmin')} className="auth-segment-btn">Super Admin</button>
+        </div>
 
-        {verifyPrompt && (
-          <div className="rounded-2xl border border-amber-300/30 bg-amber-500/10 px-4 py-3 space-y-3 text-amber-100 text-sm">
-            <p className="font-semibold">Sua conta ainda não foi ativada.</p>
-            <p>
-              {verifyPrompt.emailMasked
-                ? `Ative o e-mail ${verifyPrompt.emailMasked} para entrar no painel.`
-                : 'Ative seu e-mail para entrar no painel.'}
-            </p>
-            <div className="flex flex-col sm:flex-row gap-2">
-              <button
-                type="button"
-                onClick={handleResendVerification}
-                disabled={resendLoading || resendCooldown > 0 || !verifyPrompt.email}
-                className="rounded-xl bg-[linear-gradient(120deg,#22d3ee,#0ea5e9)] text-slate-950 font-semibold text-xs px-3 py-2.5 disabled:opacity-60"
-              >
-                {resendLoading ? 'Reenviando...' : resendCooldown > 0 ? `Reenviar em ${resendCooldown}s` : 'Reenviar código de ativação'}
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate('/verify-email', { state: { email: verifyPrompt.email } })}
-                className="rounded-xl border border-amber-200/45 bg-slate-900/40 px-3 py-2.5 text-amber-100 font-semibold text-xs hover:bg-amber-200/10 transition"
-              >
-                Já tenho o código
-              </button>
+        <form onSubmit={handleLogin} className="login-card-premium p-5 sm:p-6 space-y-4">
+          {verifyPrompt && (
+            <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-amber-900 text-xs space-y-2">
+              <p className="font-semibold">
+                {verifyPrompt.emailMasked
+                  ? `Ative o e-mail ${verifyPrompt.emailMasked} para entrar.`
+                  : 'Ative seu e-mail para entrar.'}
+              </p>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <button
+                  type="button"
+                  onClick={handleResendVerification}
+                  disabled={resendLoading || resendCooldown > 0 || !verifyPrompt.email}
+                  className="rounded-lg bg-amber-500 px-3 py-2 text-white font-bold disabled:opacity-60"
+                >
+                  {resendLoading ? 'Reenviando...' : resendCooldown > 0 ? `Reenviar em ${resendCooldown}s` : 'Reenviar código'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigate('/verify-email', { state: { email: verifyPrompt.email } })}
+                  className="rounded-lg border border-amber-300 bg-white px-3 py-2 text-amber-700 font-bold"
+                >
+                  Já tenho o código
+                </button>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-slate-200">E-mail ou usuário</label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
-                <User size={18} weight="duotone" />
-              </span>
-              <input
-                type="text"
-                value={loginForm.identifier}
-                onChange={e => setLoginForm(prev => ({ ...prev, identifier: e.target.value }))}
-                className="h-12 w-full rounded-2xl border border-slate-300/20 bg-slate-950/45 text-slate-100 placeholder:text-slate-400/80 pl-10 pr-4 transition-shadow outline-none focus:ring-2 focus:ring-cyan-300/40 focus:border-cyan-300/50"
-                placeholder="seu@email.com ou usuário"
-                autoCapitalize="none"
-              />
-            </div>
+          <div className="floating-field">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 z-10">
+              <User size={17} weight="duotone" />
+            </span>
+            <input
+              id="admin-identifier"
+              type="text"
+              value={loginForm.identifier}
+              onChange={e => setLoginForm(prev => ({ ...prev, identifier: e.target.value }))}
+              className="floating-input with-icon"
+              placeholder=" "
+              autoCapitalize="none"
+            />
+            <label htmlFor="admin-identifier" className="floating-label with-icon">Usuário ou e-mail</label>
           </div>
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-slate-200">Senha</label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
-                <LockKey size={18} weight="duotone" />
-              </span>
-              <input
-                type={showPassword ? 'text' : 'password'}
-                value={loginForm.password}
-                onChange={e => setLoginForm(prev => ({ ...prev, password: e.target.value }))}
-                className="h-12 w-full rounded-2xl border border-slate-300/20 bg-slate-950/45 text-slate-100 placeholder:text-slate-400/80 pl-10 pr-12 transition-shadow outline-none focus:ring-2 focus:ring-cyan-300/40 focus:border-cyan-300/50"
-                placeholder="Digite sua senha"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 h-9 w-9 rounded-xl border border-slate-300/25 bg-slate-900/60 flex items-center justify-center text-slate-300 hover:text-slate-100"
-                aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
-              >
-                {showPassword ? <EyeSlash size={18} weight="duotone" /> : <Eye size={18} weight="duotone" />}
-              </button>
+          {loginError ? (
+            <div className="flex items-center gap-1.5 text-xs text-rose-600 -mt-2">
+              <WarningCircle size={14} weight="fill" />
+              <span>{loginError}</span>
             </div>
+          ) : null}
+          {pendingPayment?.paymentUrl && (
+            <a href={pendingPayment.paymentUrl} className="inline-flex text-xs font-semibold text-amber-700 hover:underline">
+              Ir para pagamento pendente
+            </a>
+          )}
+          {!pendingPayment?.paymentUrl && pendingPayment?.paymentLink && (
+            <a href={pendingPayment.paymentLink} target="_blank" rel="noreferrer" className="inline-flex text-xs font-semibold text-amber-700 hover:underline">
+              Ir para pagamento pendente
+            </a>
+          )}
+
+          <div className="floating-field">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 z-10">
+              <LockKey size={17} weight="duotone" />
+            </span>
+            <input
+              id="admin-password"
+              type={showPassword ? 'text' : 'password'}
+              value={loginForm.password}
+              onChange={e => setLoginForm(prev => ({ ...prev, password: e.target.value }))}
+              className="floating-input with-icon"
+              placeholder=" "
+            />
+            <label htmlFor="admin-password" className="floating-label with-icon">Senha</label>
             <button
               type="button"
-              onClick={() => navigate('/forgot-password')}
-              className="text-xs font-semibold text-cyan-300 underline hover:no-underline cursor-pointer"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-2 top-1/2 -translate-y-1/2 h-9 w-9 rounded-lg text-slate-500 hover:text-slate-700"
+              aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
             >
-              Esqueci minha senha
+              {showPassword ? <EyeSlash size={18} weight="duotone" /> : <Eye size={18} weight="duotone" />}
             </button>
           </div>
-        </div>
 
-        <div className="space-y-3">
-            <button
-              type="submit"
-              className="w-full h-12 rounded-2xl bg-[linear-gradient(120deg,#22d3ee,#0284c7)] text-slate-950 py-3 font-black tracking-[0.01em] shadow-[0_16px_36px_-22px_rgba(6,182,212,0.85)] hover:brightness-110 active:scale-[0.995] transition"
-            >
-              Acessar painel
-            </button>
+          <button
+            type="button"
+            onClick={() => navigate('/forgot-password')}
+            className="text-xs font-semibold text-amber-700 hover:underline"
+          >
+            Esqueci minha senha
+          </button>
+
+          <button
+            type="submit"
+            className="w-full h-12 rounded-[10px] border-0 bg-[#ea580c] text-white font-black shadow-[0_16px_28px_-18px_rgba(234,88,12,0.85)] hover:brightness-105 active:scale-[0.99] transition"
+          >
+            Acessar painel
+          </button>
+
           <button
             type="button"
             onClick={() => navigate('/')}
-            className="w-full rounded-2xl border border-slate-300/25 bg-slate-900/50 text-slate-100 py-3 font-semibold hover:bg-slate-900/70 transition"
+            className="w-full h-11 rounded-[10px] border border-slate-200 bg-white text-slate-700 font-semibold hover:bg-slate-50"
           >
             <span className="inline-flex items-center justify-center gap-2">
-              <ArrowLeft size={18} weight="duotone" />
+              <ArrowLeft size={17} weight="duotone" />
               Voltar ao início
             </span>
           </button>
-        </div>
-      </form>
+        </form>
+      </div>
     </AuthLayout>
   );
 }
