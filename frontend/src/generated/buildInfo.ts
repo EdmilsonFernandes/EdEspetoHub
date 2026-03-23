@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260323.190259.9bbf264",
-  "buildId": "0.1.9+20260323.190259.9bbf264-20260323.190259-9bbf264",
-  "builtAt": "2026-03-23T19:02:59.602Z",
-  "commitHash": "9bbf264588e1616938d336ce99fd2c637cf63490",
-  "shortHash": "9bbf264",
+  "versionInternal": "0.1.9+20260323.190504.02880da",
+  "buildId": "0.1.9+20260323.190504.02880da-20260323.190504-02880da",
+  "builtAt": "2026-03-23T19:05:04.545Z",
+  "commitHash": "02880dacf5c9db757231cf7cde4bfc972cd9ac67",
+  "shortHash": "02880da",
   "branch": "main",
   "commits": [
+    {
+      "hash": "02880dacf5c9db757231cf7cde4bfc972cd9ac67",
+      "shortHash": "02880da",
+      "dateIso": "2026-03-23T16:03:53-03:00",
+      "subject": "feat(versioning): patch semantico automatico e exibicao limpa da versao"
+    },
     {
       "hash": "9bbf264588e1616938d336ce99fd2c637cf63490",
       "shortHash": "9bbf264",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "289f2e9",
       "dateIso": "2026-03-21T09:54:49-03:00",
       "subject": "chore(ops): adiciona limpeza segura de disco para ec2"
-    },
-    {
-      "hash": "4b68aad8038d8f37df9b5c3a8923bf4c21e8a098",
-      "shortHash": "4b68aad",
-      "dateIso": "2026-03-21T09:50:53-03:00",
-      "subject": "chore(deploy): adiciona scripts diretos para frontend e api na ec2"
     }
   ]
 } as const;

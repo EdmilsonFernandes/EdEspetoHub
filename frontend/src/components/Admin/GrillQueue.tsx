@@ -3484,11 +3484,11 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
                       <span className={`inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-[11px] font-black ${rankToneClass}`}>
                         {rank}
                       </span>
-                      <div className="min-w-0 flex-1 space-y-1.5">
+                      <div className="min-w-0 flex-1 space-y-2">
                         <p className="truncate text-sm font-bold text-slate-900">{entry.name}</p>
-                        <div className="h-1 w-full overflow-hidden rounded bg-slate-100">
+                        <div className="h-1 w-full overflow-hidden rounded-[4px] bg-[#EEEEEE]">
                           <div
-                            className="h-full rounded bg-[#E0E0E0] transition-all duration-300"
+                            className="h-full rounded-[4px] bg-[#2F9DF7] transition-all duration-300"
                             style={{ width: `${progressPct}%` }}
                           />
                         </div>
