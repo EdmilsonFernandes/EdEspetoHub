@@ -168,12 +168,12 @@ export function AdminLogin() {
   return (
     <AuthLayout>
       <div className="space-y-4 login-page-enter">
-        <div className="text-center space-y-2">
+        <div className="text-center space-y-2.5">
           <button type="button" onClick={handleLogoTap} className="mx-auto block">
-            <img src="/janocaminho.jpg" alt="Já no Caminho" className="mx-auto h-12 w-auto rounded-lg" />
+            <img src="/janocaminho.jpg" alt="Já no Caminho" className="mx-auto h-14 w-auto rounded-xl" />
           </button>
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">Acesso da plataforma</p>
-          <h2 className="text-2xl sm:text-3xl font-black text-slate-800">Login Admin Loja</h2>
+          <p className="text-[12px] font-bold uppercase tracking-[0.22em] text-slate-500">Acesso da plataforma</p>
+          <h2 className="text-[2rem] sm:text-[2.2rem] font-black text-slate-800 tracking-[-0.02em]">Login Admin Loja</h2>
           {superAdminUnlocked ? (
             <p className="text-[11px] font-semibold text-emerald-700">Modo Super Admin liberado neste dispositivo</p>
           ) : null}
@@ -187,7 +187,7 @@ export function AdminLogin() {
           ) : null}
         </div>
 
-        <form onSubmit={handleLogin} className="login-card-premium p-5 sm:p-6 space-y-4">
+        <form onSubmit={handleLogin} className="login-card-premium p-6 sm:p-7 space-y-4">
           {verifyPrompt && (
             <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-amber-900 text-xs space-y-2">
               <p className="font-semibold">
@@ -283,7 +283,7 @@ export function AdminLogin() {
             >
               <Check size={14} weight="bold" />
             </button>
-            <span className="text-xs font-semibold text-slate-600">Lembrar acesso neste dispositivo</span>
+            <span className="text-sm font-semibold text-slate-600">Lembrar acesso neste dispositivo</span>
           </label>
 
           <button
@@ -296,7 +296,7 @@ export function AdminLogin() {
 
           <button
             type="submit"
-            className="w-full h-12 rounded-xl border-0 bg-[var(--color-primary)] text-white font-black shadow-[0_16px_28px_-18px_rgba(47,157,247,0.85)] hover:brightness-105 active:scale-[0.99] transition"
+            className="w-full h-12 rounded-xl border-0 bg-[#0d4f66] text-white font-black shadow-[0_16px_28px_-18px_rgba(13,79,102,0.85)] hover:brightness-105 active:scale-[0.99] transition"
           >
             Acessar painel
           </button>

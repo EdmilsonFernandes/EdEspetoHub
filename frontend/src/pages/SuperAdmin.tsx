@@ -954,10 +954,10 @@ export function SuperAdmin() {
     return (
       <AuthLayout>
         <div className="space-y-4 login-page-enter">
-          <div className="text-center space-y-2">
-            <img src="/janocaminho.jpg" alt="Já no Caminho" className="mx-auto h-12 w-auto rounded-lg" />
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">Acesso da plataforma</p>
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-800">Login Super Admin</h2>
+          <div className="text-center space-y-2.5">
+            <img src="/janocaminho.jpg" alt="Já no Caminho" className="mx-auto h-14 w-auto rounded-xl" />
+            <p className="text-[12px] font-bold uppercase tracking-[0.22em] text-slate-500">Acesso da plataforma</p>
+            <h2 className="text-[2rem] sm:text-[2.2rem] font-black text-slate-800 tracking-[-0.02em]">Login Super Admin</h2>
           </div>
 
           <div className="auth-segment">
@@ -966,7 +966,7 @@ export function SuperAdmin() {
           </div>
           <p className="text-center text-[11px] font-semibold text-slate-500">Acesso Super Admin restrito</p>
 
-          <form onSubmit={handleLogin} className="login-card-premium p-5 sm:p-6 space-y-3">
+          <form onSubmit={handleLogin} className="login-card-premium p-6 sm:p-7 space-y-3">
             <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-600">
               <ShieldCheck size={14} weight="duotone" />
               Administração da plataforma
@@ -1029,7 +1029,7 @@ export function SuperAdmin() {
               >
                 <Check size={14} weight="bold" />
               </button>
-              <span className="text-xs font-semibold text-slate-600">Lembrar acesso neste dispositivo</span>
+              <span className="text-sm font-semibold text-slate-600">Lembrar acesso neste dispositivo</span>
             </label>
 
             {error && (
@@ -1042,7 +1042,7 @@ export function SuperAdmin() {
             <button
               type="submit"
               disabled={loading || !loginForm.email || !loginForm.password}
-              className="w-full h-12 rounded-xl border-0 bg-[var(--color-primary)] text-white font-black shadow-[0_16px_28px_-18px_rgba(47,157,247,0.85)] hover:brightness-105 active:scale-[0.99] transition disabled:opacity-60"
+              className="w-full h-12 rounded-xl border-0 bg-[#0d4f66] text-white font-black shadow-[0_16px_28px_-18px_rgba(13,79,102,0.85)] hover:brightness-105 active:scale-[0.99] transition disabled:opacity-60"
             >
               {loading ? 'Entrando...' : 'Acessar administração'}
             </button>

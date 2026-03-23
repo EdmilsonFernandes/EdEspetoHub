@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260323.193232.ae5af4e",
-  "buildId": "0.1.9+20260323.193232.ae5af4e-20260323.193232-ae5af4e",
-  "builtAt": "2026-03-23T19:32:32.834Z",
-  "commitHash": "ae5af4e3ca8b0dd61bf8d92f4a0c69edfec8746c",
-  "shortHash": "ae5af4e",
+  "versionInternal": "0.1.9+20260323.193910.ac83913",
+  "buildId": "0.1.9+20260323.193910.ac83913-20260323.193910-ac83913",
+  "builtAt": "2026-03-23T19:39:10.785Z",
+  "commitHash": "ac83913e3ff2c6fa44dba82dd4f5efd9095de9bf",
+  "shortHash": "ac83913",
   "branch": "main",
   "commits": [
+    {
+      "hash": "ac83913e3ff2c6fa44dba82dd4f5efd9095de9bf",
+      "shortHash": "ac83913",
+      "dateIso": "2026-03-23T16:33:01-03:00",
+      "subject": "feat(login): refina split web e adiciona checkbox premium nos acessos"
+    },
     {
       "hash": "ae5af4e3ca8b0dd61bf8d92f4a0c69edfec8746c",
       "shortHash": "ae5af4e",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "9d5c639",
       "dateIso": "2026-03-21T10:07:25-03:00",
       "subject": "fix(release): usa npm portavel no script de versionamento"
-    },
-    {
-      "hash": "e989257162bb8c9a720cbdb43432aa0b655c5200",
-      "shortHash": "e989257",
-      "dateIso": "2026-03-21T10:07:07-03:00",
-      "subject": "fix(release): ignora arquivos nao rastreados no pre-check"
     }
   ]
 } as const;
