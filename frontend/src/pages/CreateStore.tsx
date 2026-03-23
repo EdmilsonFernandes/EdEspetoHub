@@ -66,6 +66,8 @@ const STORE_SEGMENTS = [
   { value: 'outros', label: 'Outros' },
 ];
 
+const SOCIAL_NETWORK_OPTIONS = ['instagram', 'facebook', 'twitter', 'tiktok', 'youtube', 'linkedin'];
+
 const STORE_SEGMENT_PRESETS: Record<string, { primaryColor: string; secondaryColor: string; description: string; orderTypes: string[]; categories: string[] }> = {
   restaurante: {
     primaryColor: '#f97316',
@@ -236,6 +238,13 @@ export function CreateStore() {
   const storePhoneParts = extractPhoneParts(registerForm.phone || '');
   const selectedSegmentPreset = STORE_SEGMENT_PRESETS[registerForm.segment] || STORE_SEGMENT_PRESETS.outros;
 
+  const normalizeSocialNetworkType = (value = '') =>
+    value
+      .toString()
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, '');
+
   const convertFileToBase64 = (file: File) =>
     new Promise<string>((resolve, reject) =>
     {
@@ -356,7 +365,10 @@ export function CreateStore() {
   {
     setRegisterForm((prev) => {
       const links = [ ...prev.socialLinks ];
-      links[ index ] = { ...links[ index ], [ key ]: value };
+      links[ index ] = {
+        ...links[ index ],
+        [ key ]: key === 'type' ? normalizeSocialNetworkType(value) : value,
+      };
       return { ...prev, socialLinks: links };
     });
   };
@@ -608,7 +620,12 @@ export function CreateStore() {
           bannerFile: registerForm.bannerFile,
           primaryColor: registerForm.primaryColor,
           secondaryColor: registerForm.secondaryColor,
-          socialLinks: registerForm.socialLinks.filter((link) => link.value),
+          socialLinks: registerForm.socialLinks
+            .map((link) => ({
+              type: normalizeSocialNetworkType(link.type) || 'instagram',
+              value: String(link.value || '').trim(),
+            }))
+            .filter((link) => link.value),
           orderTypes: selectedSegmentPreset.orderTypes,
         },
         planId: effectivePlanId,
@@ -1470,15 +1487,18 @@ export function CreateStore() {
                     <div className="space-y-3">
                       {registerForm.socialLinks.map((link, index) => (
                         <div key={index} className="flex gap-3 items-center">
-                          <select
+                          <input
+                            list={`social-network-options-${index}`}
                             value={link.type}
                             onChange={(e) => updateSocialLink(index, 'type', e.target.value)}
-                            className="ds-select ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all min-w-[132px] text-sm"
-                          >
-                            <option value="instagram">Instagram</option>
-                            <option value="facebook">Facebook</option>
-                            <option value="twitter">Twitter (X)</option>
-                          </select>
+                            className="ds-input ds-focus-ring rounded-xl border-0 bg-slate-100 text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900 focus:bg-white transition-all min-w-[132px] text-sm"
+                            placeholder="Rede (ex: instagram)"
+                          />
+                          <datalist id={`social-network-options-${index}`}>
+                            {SOCIAL_NETWORK_OPTIONS.map((option) => (
+                              <option key={option} value={option} />
+                            ))}
+                          </datalist>
                           <input
                             value={link.value}
                             onChange={(e) => updateSocialLink(index, 'value', e.target.value)}
