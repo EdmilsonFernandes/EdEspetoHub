@@ -124,7 +124,7 @@ const buildRawBtText = (payload: PrintReceiptRawBtInput) => {
         strongSeparator(),
         ...centerText(locationLabel.toUpperCase())
           .split("\n")
-          .map((line) => `${ESC_POS.inverseOn}${line}${ESC_POS.inverseOff}`),
+          .map((line) => `${ESC_POS.boldOn}${line}${ESC_POS.boldOff}`),
         strongSeparator(),
       ]
     : [];
@@ -135,7 +135,7 @@ const buildRawBtText = (payload: PrintReceiptRawBtInput) => {
       .split("\n")
       .map(
         (line) =>
-          `${ESC_POS.inverseOn}${ESC_POS.textDoubleHeightOn}${line}${ESC_POS.textSizeReset}${ESC_POS.inverseOff}`
+          `${ESC_POS.boldOn}${ESC_POS.textDoubleHeightOn}${line}${ESC_POS.textSizeReset}${ESC_POS.boldOff}`
       );
     return [strongSeparator(), ...lines, strongSeparator()];
   })();
