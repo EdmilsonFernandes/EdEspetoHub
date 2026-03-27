@@ -590,6 +590,10 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   const isAdminUser = String(auth?.user?.role || '').toUpperCase() === 'ADMIN';
   const isOperatorUser = String(auth?.user?.role || '').toUpperCase() === 'OPERATOR' || String(auth?.user?.role || '').toUpperCase() === 'CHURRASQUEIRO';
   const storeNameForPrint = String(auth?.store?.name || auth?.store?.settings?.name || 'Minha Loja').trim();
+  const storeIdentifier = useMemo(
+    () => String(auth?.store?.id || auth?.store?.slug || '').trim(),
+    [auth?.store?.id, auth?.store?.slug]
+  );
   const prepSlaMinutes = useMemo(() => {
     const raw = Number(auth?.store?.settings?.prepBaseMinutes ?? 20);
     if (!Number.isFinite(raw)) return 20;
@@ -1170,7 +1174,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     setError('');
 
     try {
-      const data = await orderService.fetchQueue();
+      const data = await orderService.fetchQueue(storeIdentifier || undefined);
       const nextIds = (data || []).map((order) => order.id);
       const previousIds = previousIdsRef.current;
       const incoming = nextIds.filter((id) => !previousIds.includes(id));
@@ -1192,39 +1196,15 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
 
   useEffect(() => {
     loadQueue();
-    let interval: number | undefined;
-    const startPolling = () => {
-      if (interval) return;
-      interval = window.setInterval(loadQueue, 5000);
-    };
-    const stopPolling = () => {
-      if (!interval) return;
-      clearInterval(interval);
-      interval = undefined;
-    };
-    const handleVisibility = () => {
-      if (typeof document === 'undefined') return;
-      if (document.visibilityState === 'visible') {
-        startPolling();
-      } else {
-        stopPolling();
-      }
-    };
-    startPolling();
-    if (typeof document !== 'undefined') {
-      document.addEventListener('visibilitychange', handleVisibility);
-    }
+    const interval = window.setInterval(loadQueue, 5000);
 
     const unsubProducts = productService.subscribe(setProducts);
 
     return () => {
-      stopPolling();
-      if (typeof document !== 'undefined') {
-        document.removeEventListener('visibilitychange', handleVisibility);
-      }
+      clearInterval(interval);
       unsubProducts();
     };
-  }, []);
+  }, [storeIdentifier]);
 
   useEffect(() => {
     localStorage.setItem("queueSoundEnabled", String(soundEnabled));
