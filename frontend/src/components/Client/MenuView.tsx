@@ -64,6 +64,30 @@ const categoryDotTone = (key = "") => {
   return "bg-violet-500";
 };
 
+const CatalogQueueSwitch = ({ onOpenQueue }: { onOpenQueue?: () => void }) => {
+  if (!onOpenQueue) return null;
+  return (
+    <div className="relative rounded-[22px] p-[2px] bg-[linear-gradient(145deg,#c9ced6_0%,#717884_34%,#1f252d_68%,#8e97a3_100%)] shadow-[0_18px_40px_-28px_rgba(15,23,42,0.55)]">
+      <div className="relative flex items-center gap-2 rounded-[20px] border border-white/10 bg-[linear-gradient(160deg,#2e3640_0%,#1d232b_50%,#171c22_100%)] px-2.5 py-2.5">
+        <div className="absolute inset-0 rounded-[20px] bg-[repeating-linear-gradient(120deg,rgba(255,255,255,0.035)_0px,rgba(255,255,255,0.035)_2px,transparent_2px,transparent_7px)] pointer-events-none" />
+        <button
+          type="button"
+          className="relative z-10 min-w-[132px] sm:min-w-[150px] px-6 py-3 rounded-[16px] text-sm sm:text-[15px] font-semibold text-white tracking-[0.01em] bg-[linear-gradient(155deg,rgba(11,16,22,0.86)_0%,rgba(31,40,50,0.9)_60%,rgba(14,20,28,0.9)_100%)] border border-white/20 shadow-[inset_0_1px_0_rgba(255,255,255,0.2),inset_0_0_18px_rgba(249,115,22,0.22),0_12px_22px_-14px_rgba(2,6,23,0.95)]"
+        >
+          Catálogo
+        </button>
+        <button
+          type="button"
+          onClick={onOpenQueue}
+          className="relative z-10 min-w-[132px] sm:min-w-[150px] px-6 py-3 rounded-[16px] text-sm sm:text-[15px] font-semibold tracking-[0.01em] text-slate-300 [text-shadow:0_1px_0_rgba(255,255,255,0.15)] hover:text-slate-200 transition-colors"
+        >
+          Pedidos
+        </button>
+      </div>
+    </div>
+  );
+};
+
 const Header = ({
   branding,
   segment,
@@ -302,23 +326,7 @@ const Header = ({
 
             {isLogged && (
               <div className="mt-3 sm:mt-0 sm:absolute sm:right-6 sm:bottom-4 flex flex-row items-center justify-center sm:justify-end gap-2">
-              {onOpenQueue && (
-                <div className="flex items-center rounded-full border border-slate-200 bg-slate-50 p-0.5">
-                  <button
-                    type="button"
-                    className="px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-900 text-white shadow-sm"
-                  >
-                    Catálogo
-                  </button>
-                  <button
-                    type="button"
-                    onClick={onOpenQueue}
-                    className="px-3 py-1.5 rounded-full text-xs font-semibold text-slate-600 hover:text-slate-800"
-                  >
-                    Pedidos
-                  </button>
-                </div>
-              )}
+              <CatalogQueueSwitch onOpenQueue={onOpenQueue} />
               {isAdminUser && onOpenAdmin && (
                 <button
                   onClick={onOpenAdmin}
@@ -344,20 +352,7 @@ const Header = ({
           {compact && !mobileCollapsedStable && isLogged && (
             <div className="sm:hidden relative px-3 pb-2">
               <div className="flex flex-row items-center justify-end gap-2">
-                {onOpenQueue && (
-                  <div className="flex items-center rounded-full border border-slate-200 bg-slate-50 p-0.5">
-                    <button type="button" className="px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-900 text-white shadow-sm">
-                      Catálogo
-                    </button>
-                    <button
-                      type="button"
-                      onClick={onOpenQueue}
-                      className="px-3 py-1.5 rounded-full text-xs font-semibold text-slate-600 hover:text-slate-800"
-                    >
-                      Pedidos
-                    </button>
-                  </div>
-                )}
+                <CatalogQueueSwitch onOpenQueue={onOpenQueue} />
                 {isAdminUser && onOpenAdmin && (
                   <button
                     onClick={onOpenAdmin}
