@@ -1946,7 +1946,7 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
     const activeStatuses = new Set([ 'pending', 'preparing', 'ready', 'ready_for_delivery', 'waiting_for_motoboy' ]);
     return [...queue]
       .filter((order) => activeStatuses.has(String(order?.status || '').toLowerCase()))
-      .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+      .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
   }, [queue]);
   const filteredProductionQueue = useMemo(() => {
     if (queueFilter === 'all') return allActiveQueue;
