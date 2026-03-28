@@ -1170,11 +1170,15 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   };
 
   const loadQueue = async () => {
+    if (!storeIdentifier) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     setError('');
 
     try {
-      const data = await orderService.fetchQueue(storeIdentifier || undefined);
+      const data = await orderService.fetchQueue(storeIdentifier);
       const nextIds = (data || []).map((order) => order.id);
       const previousIds = previousIdsRef.current;
       const incoming = nextIds.filter((id) => !previousIds.includes(id));
@@ -1195,13 +1199,21 @@ export const GrillQueue = ({ forcedTab = 'queue' }: { forcedTab?: 'queue' | 'inr
   };
 
   useEffect(() => {
+    if (!storeIdentifier) return;
     loadQueue();
-    const interval = window.setInterval(loadQueue, 5000);
+    const interval = window.setInterval(loadQueue, 3000);
+    const handleFocusRefresh = () => {
+      void loadQueue();
+    };
+    window.addEventListener('focus', handleFocusRefresh);
+    window.addEventListener('pageshow', handleFocusRefresh);
 
     const unsubProducts = productService.subscribe(setProducts);
 
     return () => {
       clearInterval(interval);
+      window.removeEventListener('focus', handleFocusRefresh);
+      window.removeEventListener('pageshow', handleFocusRefresh);
       unsubProducts();
     };
   }, [storeIdentifier]);
