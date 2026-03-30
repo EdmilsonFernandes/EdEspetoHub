@@ -49,7 +49,7 @@ const resolveMovementOrigin = (movement: any) => {
   const actorRole = String(movement?.actorRole || '').trim().toUpperCase();
   if (actorName) {
     const roleLabel =
-      actorRole === 'ADMIN'
+      actorRole === 'ADMIN' || actorRole === 'STORE_OWNER'
         ? 'Admin'
         : actorRole === 'OPERATOR' || actorRole === 'CHURRASQUEIRO'
         ? 'Operador'
@@ -399,13 +399,20 @@ export const InventoryManager = ({ onProductsChange }: { onProductsChange?: (ite
                 <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-slate-600">
                   <span className={`rounded-full border px-2 py-0.5 font-semibold ${meta.className}`}>{meta.label}</span>
                   {movement?.orderId ? (
-                    <button
-                      type="button"
-                      onClick={() => navigate(`/admin/orders?orderId=${encodeURIComponent(String(movement.orderId || ''))}`)}
-                      className="rounded-full border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-indigo-700 font-semibold hover:bg-indigo-100 transition"
-                    >
-                      Pedido #{shortOrderId(movement.orderId)}
-                    </button>
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => navigate(`/admin/orders?orderId=${encodeURIComponent(String(movement.orderId || ''))}`)}
+                        className="rounded-full border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-indigo-700 font-semibold hover:bg-indigo-100 transition"
+                      >
+                        Pedido #{shortOrderId(movement.orderId)}
+                      </button>
+                      {movement?.orderCustomerName ? (
+                        <span className="rounded-full border border-slate-200 bg-white px-2 py-0.5">
+                          Cliente: {String(movement.orderCustomerName)}
+                        </span>
+                      ) : null}
+                    </>
                   ) : null}
                   <span className="rounded-full border border-slate-200 bg-white px-2 py-0.5">Origem: {origin}</span>
                   <span>Qtd: {movement.quantity}</span>

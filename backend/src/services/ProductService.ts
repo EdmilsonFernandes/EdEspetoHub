@@ -778,6 +778,11 @@ export class ProductService
           im.product_id AS "productId",
           im.order_id AS "orderId",
           p.name AS "productName",
+          o.status AS "orderStatus",
+          o.type AS "orderType",
+          o.payment_method AS "orderPaymentMethod",
+          o.customer_name AS "orderCustomerName",
+          o.total AS "orderTotal",
           im.movement_type AS "movementType",
           im.quantity,
           im.before_quantity AS "beforeQuantity",
@@ -789,6 +794,7 @@ export class ProductService
           im.created_at AS "createdAt"
         FROM inventory_movements im
         INNER JOIN products p ON p.id = im.product_id
+        LEFT JOIN orders o ON o.id = im.order_id
         LEFT JOIN users u ON u.id = im.actor_user_id
         WHERE im.store_id = $1
           AND ($2::uuid IS NULL OR im.product_id = $2::uuid)
