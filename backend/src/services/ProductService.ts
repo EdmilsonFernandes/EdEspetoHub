@@ -779,9 +779,12 @@ export class ProductService
           im.after_quantity AS "afterQuantity",
           im.reason,
           im.actor_user_id AS "actorUserId",
+          u.full_name AS "actorName",
+          u.user_role AS "actorRole",
           im.created_at AS "createdAt"
         FROM inventory_movements im
         INNER JOIN products p ON p.id = im.product_id
+        LEFT JOIN users u ON u.id = im.actor_user_id
         WHERE im.store_id = $1
           AND ($2::uuid IS NULL OR im.product_id = $2::uuid)
         ORDER BY im.created_at DESC

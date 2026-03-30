@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
-import { ArrowsClockwise, WarningCircle, Package, TrendDown, TrendUp } from '@phosphor-icons/react';
+import { ArrowsClockwise, WarningCircle, Package, TrendDown, TrendUp, Info } from '@phosphor-icons/react';
 import { productService } from '../../services/productService';
 import { useToast } from '../../contexts/ToastContext';
 
@@ -42,6 +42,24 @@ const resolveMovementMeta = (type: unknown) => {
   };
 };
 
+const resolveMovementOrigin = (movement: any) => {
+  const type = String(movement?.movementType || '').trim();
+  const actorName = String(movement?.actorName || '').trim();
+  const actorRole = String(movement?.actorRole || '').trim().toUpperCase();
+  if (actorName) {
+    const roleLabel =
+      actorRole === 'ADMIN'
+        ? 'Admin'
+        : actorRole === 'OPERATOR' || actorRole === 'CHURRASQUEIRO'
+        ? 'Operador'
+        : 'Usuário';
+    return `${roleLabel}: ${actorName}`;
+  }
+  if (type === 'sale') return 'Cliente (venda/pedido)';
+  if (type.includes('order_')) return 'Sistema (pedido)';
+  return 'Sistema';
+};
+
 export const InventoryManager = ({ onProductsChange }: { onProductsChange?: (items: any[]) => void }) => {
   const { showToast } = useToast();
   const [items, setItems] = useState<InventoryItem[]>([]);
@@ -57,6 +75,7 @@ export const InventoryManager = ({ onProductsChange }: { onProductsChange?: (ite
     quantity: string;
     reason: string;
   }>(null);
+  const [showAdjustHelp, setShowAdjustHelp] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const load = async () => {
@@ -176,11 +195,13 @@ export const InventoryManager = ({ onProductsChange }: { onProductsChange?: (ite
 
       showToast('Estoque atualizado com sucesso.', 'success');
       setAdjustModal(null);
+      setShowAdjustHelp(false);
       // Revalida em background para manter consistência.
       void load();
     } catch (error: any) {
       showToast(error?.message || 'Não foi possível ajustar o estoque.', 'error');
       setAdjustModal(null);
+      setShowAdjustHelp(false);
     } finally {
       setSubmitting(false);
     }
@@ -313,14 +334,15 @@ export const InventoryManager = ({ onProductsChange }: { onProductsChange?: (ite
                     <td className="py-2 text-right">
                       <button
                         type="button"
-                        onClick={() =>
+                        onClick={() => {
+                          setShowAdjustHelp(false);
                           setAdjustModal({
                             item,
                             mode: 'in',
                             quantity: '1',
                             reason: '',
-                          })
-                        }
+                          });
+                        }}
                         className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
                       >
                         Ajustar
@@ -352,6 +374,7 @@ export const InventoryManager = ({ onProductsChange }: { onProductsChange?: (ite
           ) : (
             movements.map((movement) => {
               const meta = resolveMovementMeta(movement.movementType);
+              const origin = resolveMovementOrigin(movement);
               return (
                 <div key={movement.id} className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2">
                 <div className="flex items-center justify-between gap-2">
@@ -360,6 +383,7 @@ export const InventoryManager = ({ onProductsChange }: { onProductsChange?: (ite
                 </div>
                 <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-slate-600">
                   <span className={`rounded-full border px-2 py-0.5 font-semibold ${meta.className}`}>{meta.label}</span>
+                  <span className="rounded-full border border-slate-200 bg-white px-2 py-0.5">Origem: {origin}</span>
                   <span>Qtd: {movement.quantity}</span>
                   <span>{movement.beforeQuantity} → {movement.afterQuantity}</span>
                   {movement.reason ? <span className="text-slate-500">• {movement.reason}</span> : null}
@@ -372,10 +396,29 @@ export const InventoryManager = ({ onProductsChange }: { onProductsChange?: (ite
       </section>
 
       {adjustModal && (
-        <div className="fixed inset-0 z-[12000] bg-black/45 backdrop-blur-sm p-4 flex items-center justify-center" onClick={() => setAdjustModal(null)}>
+        <div className="fixed inset-0 z-[12000] bg-black/45 backdrop-blur-sm p-4 flex items-center justify-center" onClick={() => { setAdjustModal(null); setShowAdjustHelp(false); }}>
           <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-4 shadow-xl" onClick={(event) => event.stopPropagation()}>
-            <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500 font-bold">Ajuste de estoque</p>
-            <h4 className="text-lg font-black text-slate-900 mt-1">{adjustModal.item.name}</h4>
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500 font-bold">Ajuste de estoque</p>
+                <h4 className="text-lg font-black text-slate-900 mt-1">{adjustModal.item.name}</h4>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAdjustHelp((prev) => !prev)}
+                className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1 text-[11px] font-semibold text-slate-600 hover:bg-slate-50"
+              >
+                <Info size={12} />
+                Como funciona
+              </button>
+            </div>
+            {showAdjustHelp && (
+              <div className="mt-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-[11px] text-blue-800 space-y-1">
+                <p><strong>Entrada (+):</strong> soma ao estoque atual.</p>
+                <p><strong>Saída (-):</strong> reduz do estoque atual.</p>
+                <p><strong>Definir total (=):</strong> substitui pelo valor final exato.</p>
+              </div>
+            )}
             <div className="mt-3 grid grid-cols-3 gap-2">
               {(['in', 'out', 'set'] as const).map((mode) => (
                 <button
@@ -425,7 +468,7 @@ export const InventoryManager = ({ onProductsChange }: { onProductsChange?: (ite
             <div className="mt-4 flex gap-2">
               <button
                 type="button"
-                onClick={() => setAdjustModal(null)}
+                onClick={() => { setAdjustModal(null); setShowAdjustHelp(false); }}
                 className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700"
               >
                 Cancelar
