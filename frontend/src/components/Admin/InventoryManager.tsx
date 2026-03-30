@@ -29,6 +29,7 @@ export const InventoryManager = ({ onProductsChange }: { onProductsChange?: (ite
   const [movements, setMovements] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [statusFilter, setStatusFilter] = useState<'all' | 'out' | 'low' | 'ok' | 'not_managed'>('all');
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [query, setQuery] = useState('');
   const [adjustModal, setAdjustModal] = useState<null | {
     item: InventoryItem;
@@ -60,11 +61,23 @@ export const InventoryManager = ({ onProductsChange }: { onProductsChange?: (ite
     void load();
   }, [statusFilter]);
 
+  const categories = useMemo(() => {
+    const unique = new Set<string>();
+    (items || []).forEach((item) => {
+      const category = String(item?.category || '').trim();
+      if (category) unique.add(category);
+    });
+    return Array.from(unique.values()).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+  }, [items]);
+
   const filteredItems = useMemo(() => {
     const normalized = String(query || '').trim().toLowerCase();
-    if (!normalized) return items;
-    return items.filter((item) => `${item?.name || ''} ${item?.category || ''}`.toLowerCase().includes(normalized));
-  }, [items, query]);
+    return items.filter((item) => {
+      if (categoryFilter !== 'all' && String(item?.category || '') !== categoryFilter) return false;
+      if (!normalized) return true;
+      return `${item?.name || ''} ${item?.category || ''}`.toLowerCase().includes(normalized);
+    });
+  }, [items, query, categoryFilter]);
 
   const handleAdjust = async () => {
     if (!adjustModal) return;
@@ -75,18 +88,76 @@ export const InventoryManager = ({ onProductsChange }: { onProductsChange?: (ite
     }
     try {
       setSubmitting(true);
-      await productService.adjustStock(adjustModal.item.id, {
+      const previous = items.find((item) => item.id === adjustModal.item.id);
+      const updated = await productService.adjustStock(adjustModal.item.id, {
         mode: adjustModal.mode,
         quantity,
         reason: adjustModal.reason || undefined,
       });
-      showToast('Estoque atualizado com sucesso.', 'success');
+
+      // Atualização otimista imediata na tabela de estoque.
+      setItems((prev) =>
+        prev.map((item) =>
+          item.id === adjusted.id
+            ? {
+                ...item,
+                manageStock: Boolean(updated.manageStock),
+                stockQuantity: Number(updated.stockQuantity ?? item.stockQuantity ?? 0),
+                lowStockAlert: Number(updated.lowStockAlert ?? item.lowStockAlert ?? 3),
+                inventoryStatus: (updated.inventoryStatus || item.inventoryStatus) as any,
+              }
+            : item
+        )
+      );
+
+      // Atualiza a lista de produtos do dashboard sem buscar tudo de novo.
       if (onProductsChange) {
-        const freshProducts = await productService.list();
-        onProductsChange(freshProducts);
+        (onProductsChange as any)((prevProducts: any[]) =>
+          (Array.isArray(prevProducts) ? prevProducts : []).map((product: any) =>
+            String(product?.id || '') === String(updated.id || '')
+              ? {
+                  ...product,
+                  manageStock: Boolean(updated.manageStock),
+                  stockQuantity: Number(updated.stockQuantity ?? product?.stockQuantity ?? 0),
+                  lowStockAlert: Number(updated.lowStockAlert ?? product?.lowStockAlert ?? 3),
+                }
+              : product
+          )
+        );
       }
+
+      // Movimento recente otimista para feedback instantâneo.
+      if (previous) {
+        const beforeQuantity = Math.max(0, Number(previous.stockQuantity || 0));
+        const afterQuantity = Math.max(0, Number(updated.stockQuantity || 0));
+        const modeLabel =
+          adjustModal.mode === 'in'
+            ? 'manual_in'
+            : adjustModal.mode === 'out'
+            ? 'manual_out'
+            : afterQuantity >= beforeQuantity
+            ? 'manual_set_increase'
+            : 'manual_set_decrease';
+        setMovements((prev) => [
+          {
+            id: `tmp-${Date.now()}`,
+            productId: updated.id,
+            productName: updated.name || previous.name,
+            movementType: modeLabel,
+            quantity: Math.abs(afterQuantity - beforeQuantity),
+            beforeQuantity,
+            afterQuantity,
+            reason: adjustModal.reason || null,
+            createdAt: new Date().toISOString(),
+          },
+          ...(Array.isArray(prev) ? prev : []),
+        ].slice(0, 30));
+      }
+
+      showToast('Estoque atualizado com sucesso.', 'success');
       setAdjustModal(null);
-      await load();
+      // Revalida em background para manter consistência.
+      void load();
     } catch (error: any) {
       showToast(error?.message || 'Não foi possível ajustar o estoque.', 'error');
     } finally {
@@ -155,6 +226,33 @@ export const InventoryManager = ({ onProductsChange }: { onProductsChange?: (ite
                 : status === 'low'
                 ? 'Baixo estoque'
                 : 'OK'}
+            </button>
+          ))}
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setCategoryFilter('all')}
+            className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
+              categoryFilter === 'all'
+                ? 'border-slate-300 bg-slate-900 text-white'
+                : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+            }`}
+          >
+            Todas categorias
+          </button>
+          {categories.map((category) => (
+            <button
+              key={category}
+              type="button"
+              onClick={() => setCategoryFilter(category)}
+              className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
+                categoryFilter === category
+                  ? 'border-slate-300 bg-slate-900 text-white'
+                  : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+              }`}
+            >
+              {category}
             </button>
           ))}
         </div>
@@ -271,12 +369,19 @@ export const InventoryManager = ({ onProductsChange }: { onProductsChange?: (ite
                   ) : mode === 'out' ? (
                     <span className="inline-flex items-center gap-1"><TrendDown size={12} /> Saída</span>
                   ) : (
-                    'Definir'
+                    'Definir total'
                   )}
                 </button>
               ))}
             </div>
             <div className="mt-3 space-y-2">
+              <p className="text-[11px] text-slate-500">
+                {adjustModal.mode === 'in'
+                  ? 'Entrada: soma ao estoque atual.'
+                  : adjustModal.mode === 'out'
+                  ? 'Saída: reduz do estoque atual.'
+                  : 'Definir total: substitui o estoque pelo valor informado.'}
+              </p>
               <input
                 type="number"
                 min="0"
@@ -316,4 +421,3 @@ export const InventoryManager = ({ onProductsChange }: { onProductsChange?: (ite
     </div>
   );
 };
-
