@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { ArrowsClockwise, WarningCircle, Package, TrendDown, TrendUp, Info } from '@phosphor-icons/react';
 import { productService } from '../../services/productService';
 import { useToast } from '../../contexts/ToastContext';
+import { useNavigate } from 'react-router-dom';
 
 type InventoryItem = {
   id: string;
@@ -67,6 +68,7 @@ const shortOrderId = (value: unknown) => {
 };
 
 export const InventoryManager = ({ onProductsChange }: { onProductsChange?: (items: any[]) => void }) => {
+  const navigate = useNavigate();
   const { showToast } = useToast();
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [alerts, setAlerts] = useState<any>(null);
@@ -390,9 +392,13 @@ export const InventoryManager = ({ onProductsChange }: { onProductsChange?: (ite
                 <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-slate-600">
                   <span className={`rounded-full border px-2 py-0.5 font-semibold ${meta.className}`}>{meta.label}</span>
                   {movement?.orderId ? (
-                    <span className="rounded-full border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-indigo-700 font-semibold">
+                    <button
+                      type="button"
+                      onClick={() => navigate(`/admin/orders?orderId=${encodeURIComponent(String(movement.orderId || ''))}`)}
+                      className="rounded-full border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-indigo-700 font-semibold hover:bg-indigo-100 transition"
+                    >
                       Pedido #{shortOrderId(movement.orderId)}
-                    </span>
+                    </button>
                   ) : null}
                   <span className="rounded-full border border-slate-200 bg-white px-2 py-0.5">Origem: {origin}</span>
                   <span>Qtd: {movement.quantity}</span>

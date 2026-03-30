@@ -9,12 +9,13 @@ import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { formatSelectedModifiers } from '../utils/productModifiers';
 import { Hash, Storefront, Truck, ChartBar, CreditCard, Package, Gear, Scooter, Star, ShoppingCart, UsersThree, CheckSquare } from '@phosphor-icons/react';
 import { AdminLayout } from '../layouts/AdminLayout';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { AdminDesktopSidebar } from '../components/Admin/AdminDesktopSidebar';
 
 export function AdminOrders() {
   const { auth, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isDesktopLayout, setIsDesktopLayout] = useState(() => {
     if (typeof window === 'undefined') return true;
     return window.matchMedia('(min-width: 1024px)').matches;
@@ -124,6 +125,15 @@ export function AdminOrders() {
       unsubscribeOrders?.();
     };
   }, [storeId, storeSlug]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search || '');
+    const orderId = String(params.get('orderId') || '').trim();
+    if (!orderId) return;
+    setStatusFilter('all');
+    setDateFilter('');
+    setQuery(orderId);
+  }, [location.search]);
 
   const sortedOrders = useMemo(() => {
     const resolveTime = (value) => {
