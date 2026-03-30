@@ -200,13 +200,25 @@ export const productService = {
     const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
     const maxAttempts = 3;
     for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 12000);
       try {
-        const data = await apiClient.patch(`/stores/${targetStore}/products/${productId}/stock`, payload);
+        const data = await apiClient.patch(
+          `/stores/${targetStore}/products/${productId}/stock`,
+          payload,
+          { signal: controller.signal }
+        );
         return normalizeProduct(data);
       } catch (error: any) {
+        const isAbort = String(error?.name || '').toLowerCase() === 'aborterror';
+        if (isAbort) {
+          throw new Error('A operação demorou demais. Tente novamente.');
+        }
         const status = Number(error?.status || 0);
         if (status !== 409 || attempt >= maxAttempts) throw error;
         await wait(140 * attempt);
+      } finally {
+        clearTimeout(timeout);
       }
     }
     throw new Error('Não foi possível ajustar o estoque agora.');

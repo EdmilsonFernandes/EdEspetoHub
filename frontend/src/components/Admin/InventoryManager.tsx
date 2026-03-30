@@ -160,6 +160,7 @@ export const InventoryManager = ({ onProductsChange }: { onProductsChange?: (ite
       void load();
     } catch (error: any) {
       showToast(error?.message || 'Não foi possível ajustar o estoque.', 'error');
+      setAdjustModal(null);
     } finally {
       setSubmitting(false);
     }
