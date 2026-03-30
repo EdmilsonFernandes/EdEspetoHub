@@ -608,7 +608,10 @@ export class ProductService
       throw new AppError('PROD-002', 400, { message: 'Quantidade inválida.' });
     }
 
-    return AppDataSource.transaction(async (manager) => {
+    try {
+      return await AppDataSource.transaction(async (manager) => {
+      await manager.query(`SET LOCAL lock_timeout = '3s'`);
+      await manager.query(`SET LOCAL statement_timeout = '12s'`);
       const rows = await manager.query(
         `
           SELECT id, name, store_id, manage_stock, stock_quantity, low_stock_alert, category, active, image_url
@@ -694,6 +697,15 @@ export class ProductService
         }),
       };
     });
+    } catch (error: any) {
+      const code = String(error?.code || '').toUpperCase();
+      if (code === '55P03' || code === '57014') {
+        throw new AppError('PROD-002', 409, {
+          message: 'Produto em atualização no momento. Tente novamente em alguns segundos.',
+        });
+      }
+      throw error;
+    }
   }
 
   async listInventoryMovementsByStoreId(
