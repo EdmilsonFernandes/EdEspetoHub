@@ -897,7 +897,7 @@ export class OrderService
           orderId: orderRefId || null,
           delta: qty,
           movementType: 'sale',
-          reason: `Pedido ${String(orderRefId || '').slice(0, 8)} (${String(input.type || 'order')})`,
+          reason: `Pedido ${String(orderRefId || '')} (${String(input.type || 'order')})`,
         });
       }
 

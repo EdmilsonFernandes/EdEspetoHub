@@ -56,8 +56,8 @@ const resolveMovementOrigin = (movement: any) => {
         : 'Usuário';
     return `${roleLabel}: ${actorName}`;
   }
-  if (type === 'sale') return 'Cliente (venda/pedido)';
-  if (type.includes('order_')) return 'Sistema (pedido)';
+  if (type === 'sale') return 'Canal cliente';
+  if (type.includes('order_')) return 'Automação de pedidos';
   return 'Sistema';
 };
 
@@ -65,6 +65,12 @@ const shortOrderId = (value: unknown) => {
   const id = String(value || '').trim();
   if (!id) return '';
   return id.slice(0, 8).toUpperCase();
+};
+
+const parseOrderIdFromReason = (value: unknown) => {
+  const text = String(value || '');
+  const match = text.match(/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/i);
+  return match?.[0] || '';
 };
 
 export const InventoryManager = ({ onProductsChange }: { onProductsChange?: (items: any[]) => void }) => {
@@ -390,34 +396,47 @@ export const InventoryManager = ({ onProductsChange }: { onProductsChange?: (ite
             movements.map((movement) => {
               const meta = resolveMovementMeta(movement.movementType);
               const origin = resolveMovementOrigin(movement);
+              const effectiveOrderId = String(movement?.orderId || parseOrderIdFromReason(movement?.reason) || '').trim();
               return (
-                <div key={movement.id} className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="text-xs font-semibold text-slate-800">{movement.productName || 'Produto'}</p>
+                <div key={movement.id} className="rounded-xl border border-slate-200 bg-white px-3 py-3 shadow-[0_6px_16px_-14px_rgba(15,23,42,0.45)]">
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <p className="text-sm font-bold text-slate-900">{movement.productName || 'Produto'}</p>
                   <span className="text-[11px] text-slate-500">{new Date(movement.createdAt).toLocaleString('pt-BR')}</span>
                 </div>
-                <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-slate-600">
+                <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-slate-600">
                   <span className={`rounded-full border px-2 py-0.5 font-semibold ${meta.className}`}>{meta.label}</span>
-                  {movement?.orderId ? (
-                    <>
-                      <button
-                        type="button"
-                        onClick={() => navigate(`/admin/orders?orderId=${encodeURIComponent(String(movement.orderId || ''))}`)}
-                        className="rounded-full border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-indigo-700 font-semibold hover:bg-indigo-100 transition"
-                      >
-                        Pedido #{shortOrderId(movement.orderId)}
-                      </button>
-                      {movement?.orderCustomerName ? (
-                        <span className="rounded-full border border-slate-200 bg-white px-2 py-0.5">
-                          Cliente: {String(movement.orderCustomerName)}
-                        </span>
-                      ) : null}
-                    </>
+                  {effectiveOrderId ? (
+                    <button
+                      type="button"
+                      onClick={() => navigate(`/admin/orders?orderId=${encodeURIComponent(effectiveOrderId)}`)}
+                      className="rounded-full border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-indigo-700 font-semibold hover:bg-indigo-100 transition"
+                    >
+                      Pedido #{shortOrderId(effectiveOrderId)}
+                    </button>
+                  ) : null}
+                  {movement?.orderCustomerName ? (
+                    <span className="rounded-full border border-slate-200 bg-white px-2 py-0.5">
+                      Cliente: {String(movement.orderCustomerName)}
+                    </span>
                   ) : null}
                   <span className="rounded-full border border-slate-200 bg-white px-2 py-0.5">Origem: {origin}</span>
-                  <span>Qtd: {movement.quantity}</span>
-                  <span>{movement.beforeQuantity} → {movement.afterQuantity}</span>
-                  {movement.reason ? <span className="text-slate-500">• {movement.reason}</span> : null}
+                </div>
+                <div className="mt-2 grid grid-cols-2 gap-2 text-[11px] text-slate-600">
+                  <span className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1">Qtd: <strong>{movement.quantity}</strong></span>
+                  <span className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1"><strong>{movement.beforeQuantity}</strong> → <strong>{movement.afterQuantity}</strong></span>
+                </div>
+                <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
+                  {movement.reason ? <span>Obs: {movement.reason}</span> : null}
+                  {effectiveOrderId ? (
+                    <a
+                      href={`/pedido/${effectiveOrderId}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-indigo-700 hover:text-indigo-800 font-semibold underline"
+                    >
+                      Abrir pedido público
+                    </a>
+                  ) : null}
                 </div>
                 </div>
               );
