@@ -18,6 +18,7 @@ import { saveBase64Image } from '../utils/imageStorage';
 import { isProductAvailableToday, normalizeAvailabilityDays } from '../utils/productAvailability';
 import { AppError } from '../errors/AppError';
 import { AppDataSource } from '../config/database';
+import { EntityManager } from 'typeorm';
 /**
  * Provides ProductService functionality.
  *
@@ -228,6 +229,44 @@ export class ProductService
       );
     } catch (error) {
       console.error('[inventory] failed to append movement', error);
+    }
+  }
+
+  private async appendInventoryMovementTx(
+    manager: EntityManager,
+    payload: {
+      storeId: string;
+      productId: string;
+      movementType: string;
+      quantity: number;
+      beforeQuantity: number;
+      afterQuantity: number;
+      reason?: string | null;
+      actorUserId?: string | null;
+    }
+  ) {
+    try {
+      await manager.query(
+        `
+          INSERT INTO inventory_movements
+            (store_id, product_id, movement_type, quantity, before_quantity, after_quantity, reason, actor_user_id)
+          VALUES
+            ($1, $2, $3, $4, $5, $6, $7, $8)
+        `,
+        [
+          payload.storeId,
+          payload.productId,
+          payload.movementType,
+          payload.quantity,
+          payload.beforeQuantity,
+          payload.afterQuantity,
+          payload.reason || null,
+          payload.actorUserId || null,
+        ]
+      );
+    } catch (error) {
+      console.error('[inventory] failed to append movement (tx)', error);
+      throw error;
     }
   }
 
@@ -668,7 +707,7 @@ export class ProductService
           ? 'manual_in'
           : 'manual_out';
       if (nextManageStock && movementQty > 0) {
-        await this.appendInventoryMovement({
+        await this.appendInventoryMovementTx(manager, {
           storeId: store!.id,
           productId: product.id,
           movementType,
