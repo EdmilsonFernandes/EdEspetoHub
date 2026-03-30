@@ -33,7 +33,9 @@ export class InventoryMovement {
   @Column({ name: 'actor_user_id', type: 'uuid', nullable: true })
   actorUserId?: string | null;
 
+  @Column({ name: 'order_id', type: 'uuid', nullable: true })
+  orderId?: string | null;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 }
-

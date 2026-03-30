@@ -60,6 +60,12 @@ const resolveMovementOrigin = (movement: any) => {
   return 'Sistema';
 };
 
+const shortOrderId = (value: unknown) => {
+  const id = String(value || '').trim();
+  if (!id) return '';
+  return id.slice(0, 8).toUpperCase();
+};
+
 export const InventoryManager = ({ onProductsChange }: { onProductsChange?: (items: any[]) => void }) => {
   const { showToast } = useToast();
   const [items, setItems] = useState<InventoryItem[]>([]);
@@ -383,6 +389,11 @@ export const InventoryManager = ({ onProductsChange }: { onProductsChange?: (ite
                 </div>
                 <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-slate-600">
                   <span className={`rounded-full border px-2 py-0.5 font-semibold ${meta.className}`}>{meta.label}</span>
+                  {movement?.orderId ? (
+                    <span className="rounded-full border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-indigo-700 font-semibold">
+                      Pedido #{shortOrderId(movement.orderId)}
+                    </span>
+                  ) : null}
                   <span className="rounded-full border border-slate-200 bg-white px-2 py-0.5">Origem: {origin}</span>
                   <span>Qtd: {movement.quantity}</span>
                   <span>{movement.beforeQuantity} → {movement.afterQuantity}</span>

@@ -26,6 +26,7 @@ import { resolvePlanFeatures } from '../config/planFeatures';
 import { UserRepository } from '../repositories/UserRepository';
 import { StoreUserRepository } from '../repositories/StoreUserRepository';
 import bcrypt from 'bcryptjs';
+import { randomUUID } from 'crypto';
 import { EntityManager } from 'typeorm';
 import { Product } from '../entities/Product';
 /**
@@ -295,6 +296,7 @@ export class OrderService
     payload: {
       storeId: string;
       productId: string;
+      orderId?: string | null;
       movementType: string;
       quantity: number;
       beforeQuantity: number;
@@ -307,13 +309,14 @@ export class OrderService
       await manager.query(
         `
           INSERT INTO inventory_movements
-            (store_id, product_id, movement_type, quantity, before_quantity, after_quantity, reason, actor_user_id)
+            (store_id, product_id, order_id, movement_type, quantity, before_quantity, after_quantity, reason, actor_user_id)
           VALUES
-            ($1, $2, $3, $4, $5, $6, $7, $8)
+            ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         `,
         [
           payload.storeId,
           payload.productId,
+          payload.orderId || null,
           payload.movementType,
           payload.quantity,
           payload.beforeQuantity,
@@ -332,6 +335,7 @@ export class OrderService
     payload: {
       storeId: string;
       productId: string;
+      orderId?: string | null;
       delta: number; // positive consumes stock, negative restores stock
       movementType: string;
       reason?: string | null;
@@ -381,6 +385,7 @@ export class OrderService
     await this.appendInventoryMovementTx(manager, {
       storeId: payload.storeId,
       productId: payload.productId,
+      orderId: payload.orderId || null,
       movementType: payload.movementType,
       quantity: Math.abs(delta),
       beforeQuantity,
@@ -404,7 +409,7 @@ export class OrderService
     const store = await this.storeRepository.findById(input.storeId);
     if (!store) throw new AppError('STORE-001', 404);
     return AppDataSource.transaction(async (manager) => {
-      const order = await this.buildOrder(input, store, manager);
+      const order = await this.buildOrder(input, store, manager, randomUUID());
       return manager.getRepository(Order).save(order);
     });
   }
@@ -423,7 +428,7 @@ export class OrderService
     const store = await this.storeRepository.findBySlug(input.storeSlug);
     if (!store) throw new AppError('STORE-001', 404);
     return AppDataSource.transaction(async (manager) => {
-      const order = await this.buildOrder(input, store, manager);
+      const order = await this.buildOrder(input, store, manager, randomUUID());
       return manager.getRepository(Order).save(order);
     });
   }
@@ -574,6 +579,7 @@ export class OrderService
           await this.adjustManagedStockTx(manager, {
             storeId: lockedOrder.store.id,
             productId,
+            orderId: lockedOrder.id,
             delta: -qty,
             movementType: 'order_cancel_restock',
             reason: `Reposição automática por cancelamento do pedido ${lockedOrder.id}`,
@@ -713,6 +719,7 @@ export class OrderService
           await this.adjustManagedStockTx(manager, {
             storeId: order.store.id,
             productId,
+            orderId: order.id,
             delta,
             movementType: 'order_items_adjust_consume',
             reason: `Ajuste de itens do pedido ${order.id} (+${delta})`,
@@ -721,6 +728,7 @@ export class OrderService
           await this.adjustManagedStockTx(manager, {
             storeId: order.store.id,
             productId,
+            orderId: order.id,
             delta,
             movementType: 'order_items_adjust_restock',
             reason: `Ajuste de itens do pedido ${order.id} (${delta})`,
@@ -805,7 +813,8 @@ export class OrderService
   private async buildOrder(
     input: Omit<CreateOrderDto, 'storeId'>,
     store: Awaited<ReturnType<StoreRepository['findById']>>,
-    manager?: EntityManager
+    manager?: EntityManager,
+    orderRefId?: string
   )
   {
     const subscription = store?.id ? await this.subscriptionService.getCurrentByStore(store.id) : null;
@@ -855,9 +864,10 @@ export class OrderService
         await this.adjustManagedStockTx(txManager as EntityManager, {
           storeId: store!.id,
           productId: product.id,
+          orderId: orderRefId || null,
           delta: qty,
           movementType: 'sale',
-          reason: `Pedido em criação (${String(input.type || 'order')})`,
+          reason: `Pedido ${String(orderRefId || '').slice(0, 8)} (${String(input.type || 'order')})`,
         });
       }
 
@@ -892,6 +902,7 @@ export class OrderService
       : 0;
 
     return this.orderRepository.create({
+      id: orderRefId as any,
       customerName: input.customerName,
       phone: input.phone,
       address: input.address,

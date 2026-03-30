@@ -387,6 +387,7 @@ export async function runMigrations() {
       id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
       store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
       product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+      order_id UUID REFERENCES orders(id) ON DELETE SET NULL,
       movement_type TEXT NOT NULL,
       quantity INT NOT NULL,
       before_quantity INT NOT NULL,
@@ -397,12 +398,20 @@ export async function runMigrations() {
     );
   `);
   await AppDataSource.query(`
+    ALTER TABLE IF EXISTS inventory_movements
+    ADD COLUMN IF NOT EXISTS order_id UUID REFERENCES orders(id) ON DELETE SET NULL;
+  `);
+  await AppDataSource.query(`
     CREATE INDEX IF NOT EXISTS idx_inventory_movements_store_created
     ON inventory_movements(store_id, created_at DESC);
   `);
   await AppDataSource.query(`
     CREATE INDEX IF NOT EXISTS idx_inventory_movements_product_created
     ON inventory_movements(product_id, created_at DESC);
+  `);
+  await AppDataSource.query(`
+    CREATE INDEX IF NOT EXISTS idx_inventory_movements_order
+    ON inventory_movements(order_id);
   `);
   await AppDataSource.query(`
     ALTER TABLE IF EXISTS plans

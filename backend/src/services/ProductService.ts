@@ -201,6 +201,7 @@ export class ProductService
   private async appendInventoryMovement(payload: {
     storeId: string;
     productId: string;
+    orderId?: string | null;
     movementType: string;
     quantity: number;
     beforeQuantity: number;
@@ -212,13 +213,14 @@ export class ProductService
       await AppDataSource.query(
         `
           INSERT INTO inventory_movements
-            (store_id, product_id, movement_type, quantity, before_quantity, after_quantity, reason, actor_user_id)
+            (store_id, product_id, order_id, movement_type, quantity, before_quantity, after_quantity, reason, actor_user_id)
           VALUES
-            ($1, $2, $3, $4, $5, $6, $7, $8)
+            ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         `,
         [
           payload.storeId,
           payload.productId,
+          payload.orderId || null,
           payload.movementType,
           payload.quantity,
           payload.beforeQuantity,
@@ -237,6 +239,7 @@ export class ProductService
     payload: {
       storeId: string;
       productId: string;
+      orderId?: string | null;
       movementType: string;
       quantity: number;
       beforeQuantity: number;
@@ -249,13 +252,14 @@ export class ProductService
       await manager.query(
         `
           INSERT INTO inventory_movements
-            (store_id, product_id, movement_type, quantity, before_quantity, after_quantity, reason, actor_user_id)
+            (store_id, product_id, order_id, movement_type, quantity, before_quantity, after_quantity, reason, actor_user_id)
           VALUES
-            ($1, $2, $3, $4, $5, $6, $7, $8)
+            ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         `,
         [
           payload.storeId,
           payload.productId,
+          payload.orderId || null,
           payload.movementType,
           payload.quantity,
           payload.beforeQuantity,
@@ -772,6 +776,7 @@ export class ProductService
         SELECT
           im.id,
           im.product_id AS "productId",
+          im.order_id AS "orderId",
           p.name AS "productName",
           im.movement_type AS "movementType",
           im.quantity,
