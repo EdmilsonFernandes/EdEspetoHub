@@ -280,19 +280,19 @@ export function AdminOrders() {
   const renderMoneyBreakdown = (order: any, compact = false) => {
     const money = getOrderMoney(order);
     return (
-      <div className={compact ? 'w-full rounded-2xl border border-slate-200 bg-white p-2.5' : 'w-full sm:w-auto'}>
-        <div className="grid grid-cols-3 gap-1.5 text-[10px] sm:text-[11px] font-semibold">
-          <span className="flex flex-col rounded-xl border border-slate-200 bg-slate-50 px-2 py-1.5">
+      <div className={compact ? 'w-full rounded-2xl border border-slate-200 bg-white p-2.5' : 'mt-2 w-full sm:mt-0 sm:w-auto'}>
+        <div className="flex flex-wrap gap-1.5 text-[10px] sm:text-[11px] font-semibold sm:flex-nowrap sm:justify-end">
+          <span className="flex flex-col whitespace-nowrap rounded-xl border border-slate-200 bg-slate-50 px-2 py-1.5">
             <span className="text-slate-500">Volume</span>
             <span className="text-slate-800">
               {money.itemCount} item{money.itemCount === 1 ? '' : 's'}
             </span>
           </span>
-          <span className="flex flex-col rounded-xl border border-slate-200 bg-white px-2 py-1.5">
+          <span className="flex flex-col whitespace-nowrap rounded-xl border border-slate-200 bg-white px-2 py-1.5">
             <span className="text-slate-500">Frete</span>
             <span className="text-slate-800">{money.fee > 0 ? formatCurrency(money.fee) : '—'}</span>
           </span>
-          <span className="flex flex-col rounded-xl border border-brand-primary/20 bg-brand-primary-soft px-2 py-1.5">
+          <span className="flex flex-col whitespace-nowrap rounded-xl border border-brand-primary/20 bg-brand-primary-soft px-2 py-1.5">
             <span className="text-slate-500">Total</span>
             <span className="text-brand-primary font-extrabold">{formatCurrency(money.total)}</span>
           </span>
@@ -545,7 +545,7 @@ export function AdminOrders() {
                           })()}
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:flex-nowrap sm:justify-end">
                         <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusStyles(order.status)}`}>
                           {formatOrderStatus(order.status, order.type)}
                         </span>

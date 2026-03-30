@@ -5,13 +5,25 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260330.153813.bb038dd",
-  "buildId": "0.1.9+20260330.153813.bb038dd-20260330.153813-bb038dd",
-  "builtAt": "2026-03-30T15:38:13.180Z",
-  "commitHash": "bb038ddab1ffa70dd37ba2eb68fb62aed517219b",
-  "shortHash": "bb038dd",
+  "versionInternal": "0.1.9+20260330.191744.4234d44",
+  "buildId": "0.1.9+20260330.191744.4234d44-20260330.191744-4234d44",
+  "builtAt": "2026-03-30T19:17:44.447Z",
+  "commitHash": "4234d4479af8a079363532140bc7be3bf961e4cb",
+  "shortHash": "4234d44",
   "branch": "main",
   "commits": [
+    {
+      "hash": "4234d4479af8a079363532140bc7be3bf961e4cb",
+      "shortHash": "4234d44",
+      "dateIso": "2026-03-30T12:40:16-03:00",
+      "subject": "docs(notes): atualiza contexto operacional e entregas recentes"
+    },
+    {
+      "hash": "b6ae0a31006f6b17584eef1a47c6e1c2b2f1b204",
+      "shortHash": "b6ae0a3",
+      "dateIso": "2026-03-30T12:39:04-03:00",
+      "subject": "feat(inventory): show current and projected stock in adjust modal"
+    },
     {
       "hash": "bb038ddab1ffa70dd37ba2eb68fb62aed517219b",
       "shortHash": "bb038dd",
@@ -179,18 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "714e70b",
       "dateIso": "2026-03-27T17:07:57-03:00",
       "subject": "fix(queue): força store atual e polling contínuo para estabilidade no Android"
-    },
-    {
-      "hash": "e26ad18407cb1228ad3aedb67b72ec17c87a41ae",
-      "shortHash": "e26ad18",
-      "dateIso": "2026-03-24T10:13:20-03:00",
-      "subject": "fix(print): reforca mesa/local no RawBT com bold e tamanho maior"
-    },
-    {
-      "hash": "26a9b37b594defd525bbf6a380f963f032bba4e0",
-      "shortHash": "26a9b37",
-      "dateIso": "2026-03-24T10:05:16-03:00",
-      "subject": "fix(print): fallback RawBT para destaque sem modo inverso"
     }
   ]
 } as const;
