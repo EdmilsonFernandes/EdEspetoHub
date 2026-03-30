@@ -1578,11 +1578,14 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       return;
     }
     const allowedTabs = new Set(['resumo', 'avaliacoes', 'produtos', 'estoque', 'config', 'pagamentos', 'motoboys', 'usuarios']);
-    if (!allowedTabs.has(nextTab)) return;
-    if (nextTab !== activeTab) {
-      setActiveTab(nextTab as typeof activeTab);
+    if (!allowedTabs.has(nextTab)) {
+      navigate('/admin/dashboard', { replace: true, state: {} });
+      return;
     }
-  }, [location.state, openQueueMonitor, navigate, activeTab]);
+    setActiveTab(nextTab as typeof activeTab);
+    // Consome o estado de navegação para evitar "reaplicar" aba e causar pisca ao trocar de menu.
+    navigate('/admin/dashboard', { replace: true, state: {} });
+  }, [location.state, openQueueMonitor, navigate]);
   const [savingBranding, setSavingBranding] = useState(false);
   const [showUnsavedChangesModal, setShowUnsavedChangesModal] = useState(false);
   const pendingNavigationActionRef = useRef<null | (() => void)>(null);
