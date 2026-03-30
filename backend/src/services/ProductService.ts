@@ -248,7 +248,9 @@ export class ProductService
       actorUserId?: string | null;
     }
   ) {
+    const savepoint = 'sp_inventory_movement';
     try {
+      await manager.query(`SAVEPOINT ${savepoint}`);
       await manager.query(
         `
           INSERT INTO inventory_movements
@@ -268,9 +270,35 @@ export class ProductService
           payload.actorUserId || null,
         ]
       );
+      await manager.query(`RELEASE SAVEPOINT ${savepoint}`);
     } catch (error) {
-      console.error('[inventory] failed to append movement (tx)', error);
-      throw error;
+      try {
+        await manager.query(`ROLLBACK TO SAVEPOINT ${savepoint}`);
+        await manager.query(
+          `
+            INSERT INTO inventory_movements
+              (store_id, product_id, movement_type, quantity, before_quantity, after_quantity, reason, actor_user_id)
+            VALUES
+              ($1, $2, $3, $4, $5, $6, $7, $8)
+          `,
+          [
+            payload.storeId,
+            payload.productId,
+            payload.movementType,
+            payload.quantity,
+            payload.beforeQuantity,
+            payload.afterQuantity,
+            payload.reason || null,
+            payload.actorUserId || null,
+          ]
+        );
+      } catch (fallbackError) {
+        console.error('[inventory] failed to append movement (tx)', fallbackError);
+      } finally {
+        try {
+          await manager.query(`RELEASE SAVEPOINT ${savepoint}`);
+        } catch {}
+      }
     }
   }
 
