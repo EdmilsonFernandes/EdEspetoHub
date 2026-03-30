@@ -98,7 +98,7 @@ export const InventoryManager = ({ onProductsChange }: { onProductsChange?: (ite
       // Atualização otimista imediata na tabela de estoque.
       setItems((prev) =>
         prev.map((item) =>
-          item.id === adjusted.id
+          item.id === updated.id
             ? {
                 ...item,
                 manageStock: Boolean(updated.manageStock),
