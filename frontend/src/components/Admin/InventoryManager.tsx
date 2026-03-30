@@ -22,6 +22,26 @@ const statusMeta: Record<string, { label: string; className: string }> = {
   not_managed: { label: 'Sem controle', className: 'bg-slate-50 text-slate-600 border-slate-200' },
 };
 
+const movementMeta: Record<string, { label: string; className: string }> = {
+  manual_in: { label: 'Entrada manual', className: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+  manual_out: { label: 'Saída manual', className: 'bg-rose-50 text-rose-700 border-rose-200' },
+  manual_set_increase: { label: 'Ajuste de inventário (aumentou)', className: 'bg-blue-50 text-blue-700 border-blue-200' },
+  manual_set_decrease: { label: 'Ajuste de inventário (reduziu)', className: 'bg-amber-50 text-amber-700 border-amber-200' },
+  sale: { label: 'Venda', className: 'bg-violet-50 text-violet-700 border-violet-200' },
+  order_cancel_restock: { label: 'Reposição por cancelamento', className: 'bg-sky-50 text-sky-700 border-sky-200' },
+  order_items_adjust_consume: { label: 'Ajuste de pedido (consumo)', className: 'bg-orange-50 text-orange-700 border-orange-200' },
+  order_items_adjust_restock: { label: 'Ajuste de pedido (reposição)', className: 'bg-teal-50 text-teal-700 border-teal-200' },
+};
+
+const resolveMovementMeta = (type: unknown) => {
+  const key = String(type || '').trim();
+  if (movementMeta[key]) return movementMeta[key];
+  return {
+    label: key ? key.replace(/_/g, ' ') : 'Movimentação',
+    className: 'bg-slate-50 text-slate-700 border-slate-200',
+  };
+};
+
 export const InventoryManager = ({ onProductsChange }: { onProductsChange?: (items: any[]) => void }) => {
   const { showToast } = useToast();
   const [items, setItems] = useState<InventoryItem[]>([]);
@@ -330,20 +350,23 @@ export const InventoryManager = ({ onProductsChange }: { onProductsChange?: (ite
           {movements.length === 0 ? (
             <p className="text-sm text-slate-500">Sem movimentações recentes.</p>
           ) : (
-            movements.map((movement) => (
-              <div key={movement.id} className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2">
+            movements.map((movement) => {
+              const meta = resolveMovementMeta(movement.movementType);
+              return (
+                <div key={movement.id} className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2">
                 <div className="flex items-center justify-between gap-2">
                   <p className="text-xs font-semibold text-slate-800">{movement.productName || 'Produto'}</p>
                   <span className="text-[11px] text-slate-500">{new Date(movement.createdAt).toLocaleString('pt-BR')}</span>
                 </div>
                 <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-slate-600">
-                  <span className="rounded-full border border-slate-200 bg-white px-2 py-0.5">{movement.movementType}</span>
+                  <span className={`rounded-full border px-2 py-0.5 font-semibold ${meta.className}`}>{meta.label}</span>
                   <span>Qtd: {movement.quantity}</span>
                   <span>{movement.beforeQuantity} → {movement.afterQuantity}</span>
                   {movement.reason ? <span className="text-slate-500">• {movement.reason}</span> : null}
                 </div>
-              </div>
-            ))
+                </div>
+              );
+            })
           )}
         </div>
       </section>
