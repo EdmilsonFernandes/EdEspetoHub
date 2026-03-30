@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260330.152443.1af4a3b",
-  "buildId": "0.1.9+20260330.152443.1af4a3b-20260330.152443-1af4a3b",
-  "builtAt": "2026-03-30T15:24:43.359Z",
-  "commitHash": "1af4a3b2ef7f392d5e44d5ac61ffbd5f5daef67f",
-  "shortHash": "1af4a3b",
+  "versionInternal": "0.1.9+20260330.153317.f3cd21a",
+  "buildId": "0.1.9+20260330.153317.f3cd21a-20260330.153317-f3cd21a",
+  "builtAt": "2026-03-30T15:33:17.104Z",
+  "commitHash": "f3cd21af7ee127f1e4f0c8c55c00e7a113561532",
+  "shortHash": "f3cd21a",
   "branch": "main",
   "commits": [
+    {
+      "hash": "f3cd21af7ee127f1e4f0c8c55c00e7a113561532",
+      "shortHash": "f3cd21a",
+      "dateIso": "2026-03-30T12:26:23-03:00",
+      "subject": "feat(ui): add sidebar version badge and stock-limit feedback"
+    },
     {
       "hash": "1af4a3b2ef7f392d5e44d5ac61ffbd5f5daef67f",
       "shortHash": "1af4a3b",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "a27fa94",
       "dateIso": "2026-03-23T18:30:12-03:00",
       "subject": "fix(create-store): redes sociais com checkbox e campo por rede"
-    },
-    {
-      "hash": "142f84bb05b6ac8bd0e378b7640655a82586a3d0",
-      "shortHash": "142f84b",
-      "dateIso": "2026-03-23T18:23:46-03:00",
-      "subject": "fix(create-store): permite digitar tipo de rede social"
     }
   ]
 } as const;

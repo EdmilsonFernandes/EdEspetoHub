@@ -259,6 +259,30 @@ export function StorePage() {
     return Number(item?.price) || 0;
   };
 
+  const reconcileLocalStockAfterCheckout = (orderedItems: any[] = []) => {
+    if (!Array.isArray(orderedItems) || orderedItems.length === 0) return;
+    const byProduct = orderedItems.reduce((acc: Record<string, number>, entry: any) => {
+      const productId = String(entry?.id || entry?.productId || '').trim();
+      const qty = Math.max(0, Number(entry?.qty ?? entry?.quantity ?? 0));
+      if (!productId || qty <= 0) return acc;
+      acc[productId] = (acc[productId] || 0) + qty;
+      return acc;
+    }, {});
+    if (!Object.keys(byProduct).length) return;
+
+    setProducts((prev: any[]) =>
+      (Array.isArray(prev) ? prev : []).map((product: any) => {
+        const productId = String(product?.id || '').trim();
+        const orderedQty = byProduct[productId] || 0;
+        if (!orderedQty) return product;
+        if (!Boolean(product?.manageStock)) return product;
+        const currentStock = Math.max(0, Number(product?.stockQuantity ?? 0));
+        const nextStock = Math.max(0, currentStock - orderedQty);
+        return { ...product, stockQuantity: nextStock };
+      })
+    );
+  };
+
   const applyStoreMeta = (store: any) => {
     if (!store) return;
     const name = store.name || store.slug || 'Já no Caminho';
@@ -1084,6 +1108,7 @@ export function StorePage() {
 
     if (isDemo) {
       const demoId = `demo-${Date.now()}`;
+      reconcileLocalStockAfterCheckout(validCartItems);
       setCart({});
       setCustomer(initialCustomer);
       setPaymentMethod(defaultPaymentMethod);
@@ -1225,6 +1250,17 @@ export function StorePage() {
     }
     // Evita abrir uma segunda janela do WhatsApp automaticamente.
     // O acompanhamento fica no botão da tela de sucesso e no histórico recente.
+
+    reconcileLocalStockAfterCheckout(validCartItems);
+
+    if (storeSlug) {
+      productService
+        .listPublicBySlug(storeSlug)
+        .then((freshProducts) => {
+          if (Array.isArray(freshProducts)) setProducts(freshProducts);
+        })
+        .catch(() => {});
+    }
 
     setCart({});
     setCustomer(initialCustomer);
