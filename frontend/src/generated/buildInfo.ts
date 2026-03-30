@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260330.153317.f3cd21a",
-  "buildId": "0.1.9+20260330.153317.f3cd21a-20260330.153317-f3cd21a",
-  "builtAt": "2026-03-30T15:33:17.104Z",
-  "commitHash": "f3cd21af7ee127f1e4f0c8c55c00e7a113561532",
-  "shortHash": "f3cd21a",
+  "versionInternal": "0.1.9+20260330.153813.bb038dd",
+  "buildId": "0.1.9+20260330.153813.bb038dd-20260330.153813-bb038dd",
+  "builtAt": "2026-03-30T15:38:13.180Z",
+  "commitHash": "bb038ddab1ffa70dd37ba2eb68fb62aed517219b",
+  "shortHash": "bb038dd",
   "branch": "main",
   "commits": [
+    {
+      "hash": "bb038ddab1ffa70dd37ba2eb68fb62aed517219b",
+      "shortHash": "bb038dd",
+      "dateIso": "2026-03-30T12:34:04-03:00",
+      "subject": "fix(store): refresh local stock state after checkout without page reload"
+    },
     {
       "hash": "f3cd21af7ee127f1e4f0c8c55c00e7a113561532",
       "shortHash": "f3cd21a",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "26a9b37",
       "dateIso": "2026-03-24T10:05:16-03:00",
       "subject": "fix(print): fallback RawBT para destaque sem modo inverso"
-    },
-    {
-      "hash": "a27fa94e37b9eac15c1d8c5b05298657d1b9dd1e",
-      "shortHash": "a27fa94",
-      "dateIso": "2026-03-23T18:30:12-03:00",
-      "subject": "fix(create-store): redes sociais com checkbox e campo por rede"
     }
   ]
 } as const;
