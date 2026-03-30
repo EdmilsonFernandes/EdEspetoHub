@@ -201,3 +201,82 @@ docker restart chamanoespeto-api
   - `MP_WEBHOOK_URL=https://www.chamanoespeto.com.br/api/webhooks/mercadopago`
 - Webhook exige HTTPS valido.
 - Painel MP: eventos de Pagamentos ativados.
+
+## RESUME - 2026-03-23
+
+### Correcoes aplicadas hoje (ultimas)
+- Admin: corrigida inconsistencia de navegacao entre `/admin/dashboard` e `/admin/orders`.
+  - `Pedidos` agora abre rota dedicada `/admin/orders` de forma consistente.
+  - Fluxo antigo por aba interna foi ajustado para evitar perder modo cards/tabela.
+- Admin Queue: header padronizado para nao "sumir" em transicoes (catalogo -> pedidos/fila).
+- Create Store (redes sociais): refatorado para UX robusta.
+  - Removido comportamento que travava/confundia no campo de nome da rede.
+  - Novo fluxo por checkbox de rede (Instagram, Facebook, Twitter/X, TikTok, YouTube, LinkedIn).
+  - Campo de usuario/URL aparece somente quando a rede esta marcada.
+  - Payload saneado para enviar apenas redes selecionadas e com valor.
+
+### Commits do dia relacionados
+- `6e5ef47` - `fix(admin): unifica navegacao de pedidos e padroniza header da fila`
+- `142f84b` - `fix(create-store): permite digitar tipo de rede social`
+- `a27fa94` - `fix(create-store): redes sociais com checkbox e campo por rede`
+
+### Status
+- Todos os ajustes acima foram commitados e enviados para `origin/main`.
+
+## RESUME - 2026-03-30
+
+### Navegação Admin (arquitetura + UX)
+- Sidebar refatorada para arquitetura hierárquica (accordion/submenus) em desktop e mobile drawer.
+  - Agrupamentos: Principal, Vendas, Catálogo, Financeiro, Gestão, Sistema.
+  - Mantida compatibilidade de rotas (sem quebra de links existentes).
+- Polimento visual premium do menu:
+  - contraste refinado (dark slate/navy),
+  - estado ativo mais limpo (fundo sutil + borda esquerda),
+  - hierarquia de tipografia pai/filho,
+  - linha-guia de submenus.
+- Drawer mobile ajustado para estilo lista limpa (menos “pílulas”), com melhor respiro e legibilidade.
+- Botão hambúrguer mobile reforçado para melhor descoberta.
+
+### Nomenclatura de Vendas (clareza operacional)
+- Renomeações aplicadas na UI de navegação:
+  - `Pedidos ao vivo` -> `Gestor de Pedidos`
+  - `Pedidos` -> `Histórico de Pedidos`
+- Ícone de histórico trocado de carrinho para ícone de lista/histórico (`ClipboardText`), sem alterar rotas.
+
+### Estoque (estabilidade + usabilidade)
+- Fluxo de ajuste de estoque reforçado:
+  - entrada/saída/definir total com feedback imediato,
+  - filtros e usabilidade de movimentações melhorados,
+  - origem e contexto de movimentação amigáveis.
+- Movimentações enriquecidas:
+  - link para pedido (`/admin/orders?orderId=...`) quando aplicável,
+  - exibição de cliente e origem normalizada (Admin/Operador/Sistema/Canal cliente).
+- No modal de ajuste de estoque:
+  - exibição de `Estoque atual`,
+  - cálculo de `Resultado previsto` antes de salvar.
+
+### Vitrine/Checkout (consistência sem refresh)
+- Correção de estoque “stale” após finalizar pedido:
+  - reconciliação otimista local (baixa imediata no front),
+  - revalidação em background (`listPublicBySlug`) para consistência final,
+  - elimina necessidade de refresh manual após venda do último item.
+- Limite de estoque no carrinho:
+  - tentativa de exceder estoque agora mostra aviso (toast) claro,
+  - incremento bloqueado sem falha silenciosa.
+
+### Rodapé de versão (contexto de build)
+- Exibição de versão adicionada também no menu lateral/admin:
+  - desktop sidebar,
+  - drawer mobile.
+- Mantido padrão: `Desenvolvido por Já no Caminho | vX.Y.Z`.
+
+### Commits principais do ciclo recente
+- `ee90ef0` - feat: reorganizar navegação em grupos com submenus no desktop e mobile
+- `1af4a3b` - refactor(admin-nav): polish sidebar and mobile drawer visual hierarchy
+- `f3cd21a` - feat(ui): add sidebar version badge and stock-limit feedback
+- `bb038dd` - fix(store): refresh local stock state after checkout without page reload
+- `b6ae0a3` - feat(inventory): show current and projected stock in adjust modal
+
+### Status
+- Ajustes críticos de navegação + estoque concluídos e em `origin/main`.
+- `NOTES.md` atualizado para servir como referência de contexto nas próximas sessões.
