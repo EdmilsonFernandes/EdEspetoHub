@@ -82,6 +82,8 @@ export const InventoryManager = ({ onProductsChange }: { onProductsChange?: (ite
     mode: 'in' | 'out' | 'set';
     quantity: string;
     reason: string;
+    manageStock: boolean;
+    lowStockAlert: string;
   }>(null);
   const [showAdjustHelp, setShowAdjustHelp] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -136,10 +138,13 @@ export const InventoryManager = ({ onProductsChange }: { onProductsChange?: (ite
     try {
       setSubmitting(true);
       const previous = items.find((item) => item.id === adjustModal.item.id);
+      const lowStockAlert = Math.max(1, Math.floor(Number(adjustModal.lowStockAlert || 3)));
       const updated = await productService.adjustStock(adjustModal.item.id, {
         mode: adjustModal.mode,
         quantity,
         reason: adjustModal.reason || undefined,
+        manageStock: Boolean(adjustModal.manageStock),
+        lowStockAlert,
       });
 
       // Atualização otimista imediata na tabela de estoque.
@@ -346,9 +351,11 @@ export const InventoryManager = ({ onProductsChange }: { onProductsChange?: (ite
                           setShowAdjustHelp(false);
                           setAdjustModal({
                             item,
-                            mode: 'in',
+                            mode: item?.manageStock ? 'in' : 'set',
                             quantity: '1',
                             reason: '',
+                            manageStock: Boolean(item?.manageStock),
+                            lowStockAlert: String(Math.max(1, Number(item?.lowStockAlert || 3))),
                           });
                         }}
                         className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
@@ -441,6 +448,7 @@ export const InventoryManager = ({ onProductsChange }: { onProductsChange?: (ite
                 <button
                   key={mode}
                   type="button"
+                  disabled={!adjustModal.manageStock}
                   onClick={() => setAdjustModal((prev) => (prev ? { ...prev, mode } : prev))}
                   className={`rounded-lg border px-3 py-2 text-xs font-semibold ${
                     adjustModal.mode === mode
@@ -459,6 +467,40 @@ export const InventoryManager = ({ onProductsChange }: { onProductsChange?: (ite
               ))}
             </div>
             <div className="mt-3 space-y-2">
+              <label className="inline-flex items-center gap-2 text-[12px] font-semibold text-slate-700">
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 rounded border-slate-300"
+                  checked={Boolean(adjustModal.manageStock)}
+                  onChange={(event) =>
+                    setAdjustModal((prev) =>
+                      prev
+                        ? {
+                            ...prev,
+                            manageStock: event.target.checked,
+                            mode: event.target.checked ? prev.mode : 'set',
+                            quantity: event.target.checked ? prev.quantity : '0',
+                          }
+                        : prev
+                    )
+                  }
+                />
+                Controlar estoque deste produto
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div>
+                  <label className="text-[11px] text-slate-500">Alerta baixo</label>
+                  <input
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={adjustModal.lowStockAlert}
+                    onChange={(event) => setAdjustModal((prev) => (prev ? { ...prev, lowStockAlert: event.target.value } : prev))}
+                    className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                    placeholder="3"
+                  />
+                </div>
+              </div>
               <p className="text-[11px] text-slate-500">
                 {adjustModal.mode === 'in'
                   ? 'Entrada: soma ao estoque atual.'
@@ -472,7 +514,8 @@ export const InventoryManager = ({ onProductsChange }: { onProductsChange?: (ite
                 step="1"
                 value={adjustModal.quantity}
                 onChange={(event) => setAdjustModal((prev) => (prev ? { ...prev, quantity: event.target.value } : prev))}
-                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                disabled={!adjustModal.manageStock}
+                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm disabled:bg-slate-100 disabled:text-slate-500"
                 placeholder="Quantidade"
               />
               <input
