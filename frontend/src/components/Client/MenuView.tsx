@@ -1101,7 +1101,14 @@ export const MenuView = ({
                     {(() => {
                       const handleIncrement = (event: React.MouseEvent) => {
                         event.stopPropagation();
-                        if (!canIncrease) return;
+                        if (!canIncrease) {
+                          if (isEspetoCategory(item.category)) {
+                            onUpdateCart(item, 1, { cookingPoint: "ao ponto", passSkewer: false });
+                            return;
+                          }
+                          onUpdateCart(item, 1);
+                          return;
+                        }
                         pulseQty(String(item.id));
                         if (isEspetoCategory(item.category)) {
                           onUpdateCart(item, 1, { cookingPoint: "ao ponto", passSkewer: false });
@@ -1195,7 +1202,7 @@ export const MenuView = ({
                             <button
                               type="button"
                               onClick={handleIncrement}
-                              disabled={!canIncrease}
+                              disabled={stockState.soldOut}
                               className="h-7 w-7 rounded-full bg-slate-900 text-white hover:bg-slate-800 transition flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed"
                               aria-label={`Adicionar uma unidade de ${item.name}`}
                             >

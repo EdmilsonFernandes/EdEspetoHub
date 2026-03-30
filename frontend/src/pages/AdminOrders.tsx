@@ -7,7 +7,7 @@ import { formatAddress, formatCurrency, formatDateTime, formatOrderDisplayId, fo
 import { getPaymentMethodMeta } from '../utils/paymentAssets';
 import { resolveAssetUrl } from '../utils/resolveAssetUrl';
 import { formatSelectedModifiers } from '../utils/productModifiers';
-import { Hash, Storefront, Truck, ChartBar, CreditCard, Package, Gear, Scooter, Star, ShoppingCart, UsersThree, CheckSquare } from '@phosphor-icons/react';
+import { Hash, Storefront, Truck, ChartBar, ClipboardText, CreditCard, Package, Gear, Scooter, Star, UsersThree, CheckSquare } from '@phosphor-icons/react';
 import { AdminLayout } from '../layouts/AdminLayout';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AdminDesktopSidebar } from '../components/Admin/AdminDesktopSidebar';
@@ -77,11 +77,11 @@ export function AdminOrders() {
       (isOperatorUser
         ? [
             { id: 'cardapio', label: 'Catálogo Online', icon: Package },
-            { id: 'fila', label: 'Pedidos ao vivo', icon: CheckSquare },
+            { id: 'fila', label: 'Gestor de Pedidos', icon: CheckSquare },
           ]
         : [
             { id: 'resumo', label: 'Resumo', icon: ChartBar },
-            { id: 'pedidos', label: 'Pedidos', icon: ShoppingCart },
+            { id: 'pedidos', label: 'Histórico de Pedidos', icon: ClipboardText },
             { id: 'avaliacoes', label: 'Avaliações', icon: Star },
             { id: 'produtos', label: 'Produtos', icon: Package },
             { id: 'estoque', label: 'Estoque', icon: Package },
@@ -89,7 +89,7 @@ export function AdminOrders() {
             { id: 'motoboys', label: 'Entregadores', icon: Scooter, disabled: !canUseMotoboys },
             { id: 'usuarios', label: 'Usuários', icon: UsersThree },
             { id: 'config', label: 'Configurações', icon: Gear },
-            { id: 'fila', label: 'Pedidos ao vivo', icon: CheckSquare },
+            { id: 'fila', label: 'Gestor de Pedidos', icon: CheckSquare },
             { id: 'cardapio', label: 'Catálogo Online', icon: Package },
           ]),
     [isOperatorUser, canUseMotoboys]

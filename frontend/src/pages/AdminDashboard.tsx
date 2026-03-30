@@ -1,6 +1,6 @@
 // @ts-nocheck
 import * as React from 'react';
-import { ChartBar, BookOpen, CheckSquare, CreditCard, Package, Gear, ShoppingCart, X, Scooter, Hash, Storefront, Truck, CaretRight, Star, Bell, WarningCircle, MagnifyingGlass, UsersThree } from '@phosphor-icons/react';
+import { ChartBar, BookOpen, CheckSquare, ClipboardText, CreditCard, Package, Gear, X, Scooter, Hash, Storefront, Truck, CaretRight, Star, Bell, WarningCircle, MagnifyingGlass, UsersThree } from '@phosphor-icons/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { createPortal } from 'react-dom';
@@ -1330,11 +1330,11 @@ export function AdminDashboard({ session: sessionProp }: Props) {
       (isOperatorUser
         ? [
             { id: 'cardapio', label: 'Catálogo', icon: Package },
-            { id: 'fila', label: 'Pedidos ao vivo', icon: CheckSquare },
+            { id: 'fila', label: 'Gestor de Pedidos', icon: CheckSquare },
           ]
         : [
             { id: 'resumo', label: 'Resumo', icon: ChartBar },
-            { id: 'pedidos', label: 'Pedidos', icon: ShoppingCart },
+            { id: 'pedidos', label: 'Histórico de Pedidos', icon: ClipboardText },
             { id: 'avaliacoes', label: 'Avaliações', icon: Star },
             { id: 'produtos', label: 'Produtos', icon: Package },
             { id: 'estoque', label: 'Estoque', icon: Package },
@@ -1342,7 +1342,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
             { id: 'motoboys', label: 'Entregadores', icon: Scooter, disabled: !canUseMotoboys },
             { id: 'usuarios', label: 'Usuários', icon: UsersThree, standalone: true },
             { id: 'config', label: 'Configurações', icon: Gear },
-            { id: 'fila', label: 'Pedidos ao vivo', icon: CheckSquare },
+            { id: 'fila', label: 'Gestor de Pedidos', icon: CheckSquare },
           ]),
     [canUseMotoboys, isOperatorUser]
   );
@@ -1356,13 +1356,13 @@ export function AdminDashboard({ session: sessionProp }: Props) {
   const tabMeta = useMemo(
     () => ({
       resumo: { title: 'Resumo executivo', subtitle: 'Visão consolidada da operação, receita e qualidade da loja.' },
-      pedidos: { title: 'Pedidos', subtitle: 'Acompanhe status, filtros e histórico dos pedidos em tempo real.' },
+      pedidos: { title: 'Histórico de Pedidos', subtitle: 'Acompanhe status, filtros e histórico dos pedidos em tempo real.' },
       avaliacoes: { title: 'Avaliações', subtitle: 'Notas e comentários dos clientes por pedido.' },
       produtos: { title: 'Produtos', subtitle: 'Gerencie catálogo, preço, disponibilidade e destaque da vitrine.' },
       estoque: { title: 'Estoque', subtitle: 'Monitore níveis, alertas e movimentações dos produtos.' },
       pagamentos: { title: 'Pagamentos', subtitle: 'Controle assinatura, ciclo e eventos de cobrança da loja.' },
       config: { title: 'Configurações', subtitle: 'Ajuste identidade, canais, tipos de pedido e horários da operação.' },
-      fila: { title: 'Pedidos ao vivo', subtitle: 'Acompanhe pedidos em andamento e a fila da loja em tempo real.' },
+      fila: { title: 'Gestor de Pedidos', subtitle: 'Acompanhe pedidos em andamento e a fila da loja em tempo real.' },
       motoboys: { title: 'Entregadores', subtitle: 'Vínculos, documentos, solicitações e status de entrega.' },
       usuarios: { title: 'Usuários', subtitle: 'Cadastre e gerencie acessos de admin e operador da loja.' },
     }),
@@ -1406,7 +1406,7 @@ export function AdminDashboard({ session: sessionProp }: Props) {
         })),
       {
         id: 'go-menu',
-        label: 'Pedidos ao vivo',
+        label: 'Gestor de Pedidos',
         description: 'Abre a fila de pedidos em tempo real.',
         run: () => openQueueMonitor(),
       },

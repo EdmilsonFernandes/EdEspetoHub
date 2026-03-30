@@ -5,13 +5,19 @@ export const APP_BUILD_INFO = {
   "appName": "Já no Caminho",
   "version": "0.1.9",
   "versionLabel": "v0.1.9",
-  "versionInternal": "0.1.9+20260330.151025.ee90ef0",
-  "buildId": "0.1.9+20260330.151025.ee90ef0-20260330.151025-ee90ef0",
-  "builtAt": "2026-03-30T15:10:25.072Z",
-  "commitHash": "ee90ef014d2a52feb3469872ae56d914d38e428e",
-  "shortHash": "ee90ef0",
+  "versionInternal": "0.1.9+20260330.152443.1af4a3b",
+  "buildId": "0.1.9+20260330.152443.1af4a3b-20260330.152443-1af4a3b",
+  "builtAt": "2026-03-30T15:24:43.359Z",
+  "commitHash": "1af4a3b2ef7f392d5e44d5ac61ffbd5f5daef67f",
+  "shortHash": "1af4a3b",
   "branch": "main",
   "commits": [
+    {
+      "hash": "1af4a3b2ef7f392d5e44d5ac61ffbd5f5daef67f",
+      "shortHash": "1af4a3b",
+      "dateIso": "2026-03-30T12:11:36-03:00",
+      "subject": "refactor(admin-nav): polish sidebar and mobile drawer visual hierarchy"
+    },
     {
       "hash": "ee90ef014d2a52feb3469872ae56d914d38e428e",
       "shortHash": "ee90ef0",
@@ -185,12 +191,6 @@ export const APP_BUILD_INFO = {
       "shortHash": "142f84b",
       "dateIso": "2026-03-23T18:23:46-03:00",
       "subject": "fix(create-store): permite digitar tipo de rede social"
-    },
-    {
-      "hash": "6e5ef4742a31ed7ce75677ded7a73e33a9a9380d",
-      "shortHash": "6e5ef47",
-      "dateIso": "2026-03-23T18:23:43-03:00",
-      "subject": "fix(admin): unifica navegação de pedidos e padroniza header da fila"
     }
   ]
 } as const;

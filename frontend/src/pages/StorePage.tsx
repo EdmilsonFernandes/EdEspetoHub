@@ -871,8 +871,39 @@ export function StorePage() {
     );
     const cartKey = `${item.id}:${cookingPoint || ''}:${passSkewer ? '1' : '0'}:${getModifiersSignature(selectedModifiers)}`;
     setCart((previous) => {
+      const manageStock = Boolean(item?.manageStock);
+      const stockQuantityRaw = Number(item?.stockQuantity ?? 0);
+      const stockQuantity = Number.isFinite(stockQuantityRaw) ? Math.max(0, Math.floor(stockQuantityRaw)) : 0;
+      const totalForProduct = Object.values(previous || {}).reduce((acc: number, entry: any) => {
+        if (!entry || String(entry?.id) !== String(item?.id)) return acc;
+        return acc + Math.max(0, Number(entry?.qty || 0));
+      }, 0);
+      let safeQty = Number(qty || 0);
+
+      if (manageStock && safeQty > 0) {
+        if (totalForProduct >= stockQuantity) {
+          showToast(
+            stockQuantity > 0
+              ? `Só temos ${stockQuantity} unidade${stockQuantity === 1 ? '' : 's'} disponível${stockQuantity === 1 ? '' : 'is'} deste produto.`
+              : 'Produto esgotado no momento.',
+            'warning'
+          );
+          return previous;
+        }
+        if (totalForProduct + safeQty > stockQuantity) {
+          safeQty = Math.max(0, stockQuantity - totalForProduct);
+          showToast(
+            `Limite de estoque atingido. Máximo disponível: ${stockQuantity} unidade${stockQuantity === 1 ? '' : 's'}.`,
+            'warning'
+          );
+          if (safeQty <= 0) {
+            return previous;
+          }
+        }
+      }
+
       const currentQty = previous[cartKey]?.qty || 0;
-      const nextQty = currentQty + qty;
+      const nextQty = currentQty + safeQty;
       if (nextQty <= 0) {
         const copy = { ...previous };
         delete copy[cartKey];

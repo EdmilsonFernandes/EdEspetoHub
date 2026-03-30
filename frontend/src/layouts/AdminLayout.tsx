@@ -5,7 +5,7 @@ import { AdminHeader } from '../components/Admin/AdminHeader';
 import { AdminMobileBottomNav } from '../components/Admin/AdminMobileBottomNav';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { CaretDown, ChartBar, CheckSquare, CreditCard, Gear, Package, ShoppingCart, SignOut, Scooter, Star, X, UsersThree } from '@phosphor-icons/react';
+import { CaretDown, ChartBar, CheckSquare, ClipboardText, CreditCard, Gear, Package, ShoppingCart, SignOut, Scooter, Star, X, UsersThree } from '@phosphor-icons/react';
 import { AppVersionBadge } from '../components/common/AppVersionBadge';
 
 interface AdminLayoutProps {
@@ -44,13 +44,13 @@ export function AdminLayout({
     () =>
       (isOperatorUser
         ? [
-            { id: 'fila', label: 'Pedidos ao vivo', icon: CheckSquare },
+            { id: 'fila', label: 'Gestor de Pedidos', icon: CheckSquare },
             { id: 'cardapio', label: 'Catálogo', icon: Package },
           ]
         : [
             { id: 'resumo', label: 'Resumo', icon: ChartBar },
-            { id: 'fila', label: 'Pedidos ao vivo', icon: CheckSquare },
-            { id: 'vendas', label: 'Vendas', icon: ShoppingCart },
+            { id: 'fila', label: 'Gestor de Pedidos', icon: CheckSquare },
+            { id: 'vendas', label: 'Histórico de Pedidos', icon: ClipboardText },
             { id: 'produtos', label: 'Produtos', icon: Package },
             { id: 'estoque', label: 'Estoque', icon: Package },
             { id: 'cardapio', label: 'Catálogo', icon: ShoppingCart },
@@ -285,6 +285,9 @@ export function AdminLayout({
               <SignOut size={16} weight="bold" />
               Sair
             </button>
+            <div className="mt-2 text-center text-[10px] text-slate-500">
+              Desenvolvido por Já no Caminho <AppVersionBadge prefix=" | " />
+            </div>
           </aside>
         </div>
       )}
